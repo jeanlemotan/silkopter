@@ -471,7 +471,7 @@ auto create_stream_from_type(stream::Type type) -> std::shared_ptr<stream::gs::S
         case stream::gs::Force::TYPE:                    return std::make_shared<stream::gs::Force>();
 //        case stream::gs::ENU_Force::TYPE:                return std::make_shared<stream::gs::ENU_Force>();
 //        case stream::gs::ECEF_Force::TYPE:               return std::make_shared<stream::gs::ECEF_Force>();
-        case stream::gs::Frame::TYPE:                    return std::make_shared<stream::gs::Frame>();
+        case stream::gs::UAV_Frame::TYPE:                return std::make_shared<stream::gs::UAV_Frame>();
         case stream::gs::GPS_Info::TYPE:                 return std::make_shared<stream::gs::GPS_Info>();
         case stream::gs::Linear_Acceleration::TYPE:      return std::make_shared<stream::gs::Linear_Acceleration>();
 //        case stream::gs::ENU_Linear_Acceleration::TYPE:  return std::make_shared<stream::gs::ENU_Linear_Acceleration>();
@@ -845,7 +845,8 @@ void Comms::handle_stream_data()
         !unpack_stream_samples<gs::Float>(m_telemetry_channel, sample_count, *stream) &&
         !unpack_stream_samples<gs::Bool>(m_telemetry_channel, sample_count, *stream) &&
         !unpack_stream_samples<gs::Force>(m_telemetry_channel, sample_count, *stream) &&
-        !unpack_stream_samples<gs::Frame>(m_telemetry_channel, sample_count, *stream) &&
+        !unpack_stream_samples<gs::UAV_Frame>(m_telemetry_channel, sample_count, *stream) &&
+        !unpack_stream_samples<gs::Gimbal_Frame>(m_telemetry_channel, sample_count, *stream) &&
         !unpack_stream_samples<gs::GPS_Info>(m_telemetry_channel, sample_count, *stream) &&
         !unpack_stream_samples<gs::Linear_Acceleration>(m_telemetry_channel, sample_count, *stream) &&
         !unpack_stream_samples<gs::ECEF_Position>(m_telemetry_channel, sample_count, *stream) &&

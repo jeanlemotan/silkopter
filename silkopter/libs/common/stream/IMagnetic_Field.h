@@ -7,7 +7,7 @@ namespace silk
 namespace stream
 {
 
-class IMagnetic_Field : public ISpatial_Stream<Type::MAGNETIC_FIELD, Space::LOCAL>
+class IMagnetic_Field : public ISpatial_Stream<Type::MAGNETIC_FIELD, Space::UAV>
 {
 public:
     typedef std::true_type can_be_filtered_t;

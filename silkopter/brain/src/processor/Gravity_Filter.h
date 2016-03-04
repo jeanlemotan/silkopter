@@ -52,7 +52,7 @@ private:
     std::shared_ptr<sz::Gravity_Filter::Init_Params> m_init_params;
     std::shared_ptr<sz::Gravity_Filter::Config> m_config;
 
-    Sample_Accumulator<stream::IFrame, stream::IAcceleration> m_accumulator;
+    Sample_Accumulator<stream::IUAV_Frame, stream::IAcceleration> m_accumulator;
 
     typedef Basic_Output_Stream<stream::ILinear_Acceleration> Output_Stream;
     mutable std::shared_ptr<Output_Stream> m_output_stream;

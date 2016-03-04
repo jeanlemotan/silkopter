@@ -7,7 +7,7 @@ namespace silk
 namespace stream
 {
 
-class ILinear_Acceleration : public ISpatial_Stream<Type::LINEAR_ACCELERATION, Space::LOCAL>
+class ILinear_Acceleration : public ISpatial_Stream<Type::LINEAR_ACCELERATION, Space::UAV>
 {
 public:
     typedef std::true_type can_be_filtered_t;

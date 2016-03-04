@@ -7,7 +7,7 @@ namespace silk
 namespace stream
 {
 
-class IForce : public ISpatial_Stream<Type::FORCE, Space::LOCAL>
+class IForce : public ISpatial_Stream<Type::FORCE, Space::UAV>
 {
 public:
     typedef std::true_type can_be_filtered_t;

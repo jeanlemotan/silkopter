@@ -70,7 +70,7 @@ private:
     Sample_Accumulator<stream::IMulti_Commands> m_commands_accumulator;
 
     Sample_Accumulator<
-        stream::IFrame,
+        stream::IUAV_Frame,
         stream::IECEF_Position,
         stream::IECEF_Velocity,
         stream::IECEF_Linear_Acceleration,
@@ -102,14 +102,14 @@ private:
 
         Data<stream::IMulti_Commands::Sample> local_commands;
         Data<stream::IMulti_Commands::Sample> remote_commands;
-        Data<stream::IFrame::Sample> frame;
+        Data<stream::IUAV_Frame::Sample> frame;
         Data<stream::IECEF_Position::Sample> position;
         Data<stream::IECEF_Velocity::Sample> velocity;
         Data<stream::IECEF_Linear_Acceleration::Sample> linear_acceleration;
         Data<stream::IProximity::Sample> proximity;
     } m_inputs;
 
-    void refresh_inputs(stream::IFrame::Sample const& frame,
+    void refresh_inputs(stream::IUAV_Frame::Sample const& frame,
                         stream::IECEF_Position::Sample const& position,
                         stream::IECEF_Velocity::Sample const& velocity,
                         stream::IECEF_Linear_Acceleration::Sample const& linear_acceleration,

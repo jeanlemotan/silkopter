@@ -76,7 +76,7 @@ auto Multi_Brain::get_inputs() const -> std::vector<Input>
     std::vector<Input> inputs =
     {{
          { stream::IMulti_Commands::TYPE,    m_init_params->commands_rate, "Commands", m_commands_accumulator.get_stream_path(0) },
-         { stream::IFrame::TYPE,             m_init_params->rate, "Frame", m_sensor_accumulator.get_stream_path(0) },
+         { stream::IUAV_Frame::TYPE,         m_init_params->rate, "UAV Frame", m_sensor_accumulator.get_stream_path(0) },
          { stream::IECEF_Position::TYPE,     m_init_params->rate, "Position (ecef)", m_sensor_accumulator.get_stream_path(1) },
          { stream::IECEF_Velocity::TYPE,     m_init_params->rate, "Velocity (ecef)", m_sensor_accumulator.get_stream_path(2) },
          { stream::IECEF_Linear_Acceleration::TYPE, m_init_params->rate, "Linear Acceleration (ecef)", m_sensor_accumulator.get_stream_path(3) },
@@ -298,8 +298,8 @@ void Multi_Brain::state_mode_armed_apply_commands(const stream::IMulti_Commands:
             m_horizontal_position_data.dsp.process(output);
 
             //compute the front/right in enu space
-            math::vec3f front_vector = math::rotate(m_inputs.frame.sample.value, physics::constants::local_front_vector);
-            math::vec3f right_vector = math::rotate(m_inputs.frame.sample.value, physics::constants::local_right_vector);
+            math::vec3f front_vector = math::rotate(m_inputs.frame.sample.value, physics::constants::uav_front_vector);
+            math::vec3f right_vector = math::rotate(m_inputs.frame.sample.value, physics::constants::uav_right_vector);
 
             //figure out how the delta displacement maps over the axis
             float dx = math::dot(math::vec3f(output, 0.f), right_vector);
@@ -475,7 +475,7 @@ void Multi_Brain::acquire_home_position()
     }
 }
 
-void Multi_Brain::refresh_inputs(stream::IFrame::Sample const& frame,
+void Multi_Brain::refresh_inputs(stream::IUAV_Frame::Sample const& frame,
                                 stream::IECEF_Position::Sample const& position,
                                 stream::IECEF_Velocity::Sample const& velocity,
                                 stream::IECEF_Linear_Acceleration::Sample const& linear_acceleration,
@@ -551,7 +551,7 @@ void Multi_Brain::process()
     stream::IMulti_Commands::apply(func, m_inputs.remote_commands.previous_sample.value, m_inputs.remote_commands.sample.value, m_inputs.local_commands.sample.value);
     m_inputs.remote_commands.previous_sample.value = m_inputs.remote_commands.sample.value;
 
-    m_sensor_accumulator.process([this](stream::IFrame::Sample const& i_frame,
+    m_sensor_accumulator.process([this](stream::IUAV_Frame::Sample const& i_frame,
                                       stream::IECEF_Position::Sample const& i_position,
                                       stream::IECEF_Velocity::Sample const& i_velocity,
                                       stream::IECEF_Linear_Acceleration::Sample const& i_linear_acceleration,
@@ -588,7 +588,7 @@ void Multi_Brain::process()
 void Multi_Brain::set_input_stream_path(size_t idx, q::Path const& path)
 {
 //    { stream::IMulti_Commands::TYPE,       m_init_params->input_rate, "Input", m_input_accumulator.get_stream_path(0) },
-//    { stream::IFrame::TYPE,             m_init_params->rate, "Frame", m_sensor_accumulator.get_stream_path(0) },
+//    { stream::IUAV_Frame::TYPE,             m_init_params->rate, "Frame", m_sensor_accumulator.get_stream_path(0) },
 //    { stream::IECEF_Position::TYPE,     m_init_params->rate, "Position (ecef)", m_sensor_accumulator.get_stream_path(1) },
 //    { stream::IECEF_Velocity::TYPE,     m_init_params->rate, "Velocity (ecef)", m_sensor_accumulator.get_stream_path(2) },
 //    { stream::IECEF_Linear_Acceleration::TYPE, m_init_params->rate, "Linear Acceleration (ecef)", m_sensor_accumulator.get_stream_path(3) },

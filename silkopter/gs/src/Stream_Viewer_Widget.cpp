@@ -394,14 +394,33 @@ void Stream_Viewer_Widget::create_viewer()
             viewer->process();
         });
     }
-    else if (type == IFrame::TYPE)
+    else if (type == IUAV_Frame::TYPE)
     {
-        auto viewer = new Numeric_Viewer("Frame", stream->rate, this);
+        auto viewer = new Numeric_Viewer("UAV Frame", stream->rate, this);
         viewer->add_graph("X", "", QColor(0xe74c3c));
         viewer->add_graph("Y", "", QColor(0x2ecc71));
         viewer->add_graph("Z", "", QColor(0x3498db));
         layout()->addWidget(viewer);
-        m_connection = std::static_pointer_cast<gs::Frame>(stream)->samples_available_signal.connect([this, viewer](gs::Frame::Samples const& samples)
+        m_connection = std::static_pointer_cast<gs::UAV_Frame>(stream)->samples_available_signal.connect([this, viewer](gs::UAV_Frame::Samples const& samples)
+        {
+            std::array<double, 3> data;
+            for (auto const& s: samples)
+            {
+                math::mat3f mat = s.value.get_as_mat3();
+                data = { math::dot(mat.get_axis_x(), math::vec3f(1, 0, 0)), math::dot(mat.get_axis_y(), math::vec3f(0, 1, 0)), math::dot(mat.get_axis_z(), math::vec3f(0, 0, 1)) };
+                viewer->add_samples(data.data(), s.is_healthy);
+            }
+            viewer->process();
+        });
+    }
+    else if (type == IGimbal_Frame::TYPE)
+    {
+        auto viewer = new Numeric_Viewer("Gimbal Frame", stream->rate, this);
+        viewer->add_graph("X", "", QColor(0xe74c3c));
+        viewer->add_graph("Y", "", QColor(0x2ecc71));
+        viewer->add_graph("Z", "", QColor(0x3498db));
+        layout()->addWidget(viewer);
+        m_connection = std::static_pointer_cast<gs::Gimbal_Frame>(stream)->samples_available_signal.connect([this, viewer](gs::Gimbal_Frame::Samples const& samples)
         {
             std::array<double, 3> data;
             for (auto const& s: samples)

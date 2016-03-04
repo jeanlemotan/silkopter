@@ -12,7 +12,8 @@ enum class Space : uint8_t
     LLA,
     ECEF,
     ENU,
-    LOCAL
+    UAV,
+    GIMBAL
 };
 
 #define GET_AS_STRING(str, details_str) q::util::format2<std::string>(str "{}", (details) ? (" " details_str) : "")
@@ -24,7 +25,8 @@ inline auto get_as_string(Space s, bool details) -> std::string
     case Space::LLA: return GET_AS_STRING("LLA", "(Latitude Longitude Altitude)");
     case Space::ECEF: return GET_AS_STRING("ECEF", "(Earth Centered Earth Fixed)");
     case Space::ENU: return GET_AS_STRING("ENU", "(East North Up)");
-    case Space::LOCAL: return GET_AS_STRING("Local", "(UAV Local Frame)");
+    case Space::UAV: return GET_AS_STRING("UAV", "(UAV Frame)");
+    case Space::GIMBAL: return GET_AS_STRING("GIMBAL", "(Gimbal Frame)");
     default: QASSERT(false); return "Unknown";
     }
 }

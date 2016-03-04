@@ -251,8 +251,8 @@ void Multi_HUD_Widget::process_horizontal_position()
     float dts = q::Seconds(m_dt).count();
 
     //compute the front/right in enu space
-    math::vec2f front_vector = math::normalized(math::vec2f(math::rotate(m_uav.local_to_enu_quat, physics::constants::local_front_vector)));
-    math::vec2f right_vector = math::normalized(math::vec2f(math::rotate(m_uav.local_to_enu_quat, physics::constants::local_right_vector)));
+    math::vec2f front_vector = math::normalized(math::vec2f(math::rotate(m_uav.local_to_enu_quat, physics::constants::uav_front_vector)));
+    math::vec2f right_vector = math::normalized(math::vec2f(math::rotate(m_uav.local_to_enu_quat, physics::constants::uav_right_vector)));
 
     math::vec2f v = m_commands.horizontal.position.get();
     if (m_gamepad)

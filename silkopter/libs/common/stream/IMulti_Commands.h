@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Stream_Base.h"
+#include "IFrame.h"
 
 namespace silk
 {
@@ -113,6 +114,22 @@ public:
         Input_Value<float> angle;       //radians
     };
 
+    struct Gimbal
+    {
+        enum class Reference_Frame : uint8_t
+        {
+            GIMBAL,
+            UAV,
+        };
+        Input_Value<Reference_Frame> reference_frame = Reference_Frame::UAV;
+        Input_Value<math::quatf> target_frame;
+    };
+
+    struct Camera
+    {
+//        Input_Value<float> shutter_speed; //ms
+    };
+
     //the reference frame for the user controls
     enum class Reference_Frame : uint8_t
     {
@@ -140,6 +157,7 @@ public:
         Vertical vertical;
         Horizontal horizontal;
         Yaw yaw;
+        Gimbal gimbal;
 
         Input_Value<Mode> mode = Mode::IDLE;
         Input_Value<Reference_Frame> reference_frame = Reference_Frame::LOCAL;
@@ -171,7 +189,8 @@ public:
                 && functor("yaw.mode", values.yaw.mode...)
                 && functor("yaw.angle_rate", values.yaw.angle_rate...)
                 && functor("yaw.angle", values.yaw.angle...)
-                && functor("yaw.mode", values.mode...)
+                && functor("gimbal.reference_frame", values.gimbal.reference_frame...)
+                && functor("gimbal.target_frame", values.gimbal.target_frame...)
                 && functor("reference_frame", values.reference_frame...)
                 && functor("assists.stay_in_battery_range", values.assists.stay_in_battery_range...)
                 && functor("assists.stay_in_perimeter", values.assists.stay_in_perimeter...)

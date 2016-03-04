@@ -7,7 +7,7 @@ namespace silk
 namespace stream
 {
 
-class ITorque : public ISpatial_Stream<Type::TORQUE, Space::LOCAL>
+class ITorque : public ISpatial_Stream<Type::TORQUE, Space::UAV>
 {
 public:
     typedef std::true_type can_be_filtered_t;

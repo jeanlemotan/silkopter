@@ -7,7 +7,7 @@ namespace silk
 namespace stream
 {
 
-class IDistance : public ISpatial_Stream<Type::DISTANCE, Space::LOCAL>
+class IDistance : public ISpatial_Stream<Type::DISTANCE, Space::UAV>
 {
 public:
     typedef std::true_type can_be_filtered_t;

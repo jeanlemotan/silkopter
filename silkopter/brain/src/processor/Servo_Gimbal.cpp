@@ -62,8 +62,8 @@ auto Servo_Gimbal::get_inputs() const -> std::vector<Input>
 {
     std::vector<Input> inputs =
     {{
-        { stream::IFrame::TYPE, m_init_params->rate, "Frame", m_accumulator.get_stream_path(0) },
-        //{ stream::IFrame::TYPE, m_init_params->rate, "Target", m_accumulator.get_stream_path(1) }
+        { stream::IUAV_Frame::TYPE, m_init_params->rate, "UAV Frame", m_accumulator.get_stream_path(0) },
+        { stream::IMulti_Commands::TYPE, m_init_params->rate, "Commands", m_accumulator.get_stream_path(1) }
     }};
     return inputs;
 }
@@ -86,15 +86,27 @@ void Servo_Gimbal::process()
     m_y_output_stream->clear();
     m_z_output_stream->clear();
 
-    m_accumulator.process([this](stream::IFrame::Sample const& i_sample)
+    m_accumulator.process([this](stream::IUAV_Frame::Sample const& i_sample, stream::IMulti_Commands::Sample const& i_commands)
     {
-        auto rotation = i_sample.value;
-
-        math::vec3f rotation_euler;
-        rotation.get_as_euler_xyz(rotation_euler.x, rotation_euler.y, rotation_euler.z);
-
-        if (i_sample.is_healthy)
+        if (i_sample.is_healthy && i_commands.is_healthy)
         {
+            math::quatf rotation;
+
+
+            if (i_commands.value.gimbal.reference_frame.get() == stream::IMulti_Commands::Gimbal::Reference_Frame::GIMBAL)
+            {
+                rotation = i_commands.value.gimbal.target_frame.get();
+            }
+            else
+            {
+                math::quatf const& target_rotation = i_commands.value.gimbal.target_frame.get();
+                rotation = math::inverse(i_sample.value) * target_rotation;
+            }
+
+
+            math::vec3f rotation_euler;
+            rotation.get_as_euler_xyz(rotation_euler.x, rotation_euler.y, rotation_euler.z);
+
             {
                 auto const& config = m_config->x_pwm;
 

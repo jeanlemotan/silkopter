@@ -62,7 +62,7 @@ private:
     math::vec3f m_noisy_right_w;
     math::vec3f m_noisy_up_w;
 
-    typedef Basic_Output_Stream<stream::IFrame> Output_Stream;
+    typedef Basic_Output_Stream<stream::IUAV_Frame> Output_Stream;
     mutable std::shared_ptr<Output_Stream> m_output_stream;
 };
 

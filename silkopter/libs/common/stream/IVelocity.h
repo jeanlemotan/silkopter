@@ -7,7 +7,7 @@ namespace silk
 namespace stream
 {
 
-class IVelocity : public ISpatial_Stream<Type::VELOCITY, Space::LOCAL>
+class IVelocity : public ISpatial_Stream<Type::VELOCITY, Space::UAV>
 {
 public:
     typedef std::true_type can_be_filtered_t;
