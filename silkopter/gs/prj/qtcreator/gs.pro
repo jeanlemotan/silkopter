@@ -9,6 +9,10 @@ QT       += core gui opengl network widgets
 TARGET = gs
 TEMPLATE = app
 
+#TARGET = gs
+#target.path = /home/jean/fpv/gs
+#INSTALLS = target
+
 CONFIG += c++11
 
 INCLUDEPATH += ../../src
