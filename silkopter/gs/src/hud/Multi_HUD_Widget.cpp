@@ -125,15 +125,21 @@ void Multi_HUD_Widget::process_vertical_thrust()
 
 void Multi_HUD_Widget::process_vertical_altitude()
 {
+    float dts = q::Seconds(m_dt).count();
     float v = m_commands.vertical.altitude.get();
 
     if (m_gamepad)
     {
-        v += m_gamepad->get_stick_data(qinput::Gamepad::Stick::LEFT).value.y * 5.f;
+        float stick = m_gamepad->get_stick_data(qinput::Gamepad::Stick::LEFT).value.y;
+
+        constexpr float expo = 3.f;
+        stick = math::sgn(stick) * std::pow(stick, expo); //some expo
+
+        v += stick * dts;
     }
 
     const qinput::Keyboard& kb = m_input_mgr.get_keyboard();
-    float kb_value = kb.is_key_pressed(qinput::Key_Code::SHIFT) ? 3.f : 1.f;
+    float kb_value = (kb.is_key_pressed(qinput::Key_Code::SHIFT) ? 3.f : 1.f) * dts;
     v += kb.is_key_pressed('=') ? kb_value : 0;
     v -= kb.is_key_pressed('-') ? kb_value : 0;
 
@@ -224,7 +230,7 @@ void Multi_HUD_Widget::process_horizontal_angle()
         v = m_gamepad->get_stick_data(qinput::Gamepad::Stick::RIGHT).value;
         v.set(-v.y, v.x); //vertical stick rotates along X axis, horizontal stick along Y axis
 
-        constexpr float expo = 2.f;
+        constexpr float expo = 3.f;
         v = math::sgn(v) * math::vec2f(std::pow(v.x, expo), std::pow(v.y, expo)); //some expo
 
         v *= math::vec2f(math::anglef::pi / 4.f);
@@ -242,6 +248,8 @@ void Multi_HUD_Widget::process_horizontal_angle()
 
 void Multi_HUD_Widget::process_horizontal_position()
 {
+    float dts = q::Seconds(m_dt).count();
+
     //compute the front/right in enu space
     math::vec2f front_vector = math::normalized(math::vec2f(math::rotate(m_uav.local_to_enu_quat, physics::constants::local_front_vector)));
     math::vec2f right_vector = math::normalized(math::vec2f(math::rotate(m_uav.local_to_enu_quat, physics::constants::local_right_vector)));
@@ -250,8 +258,12 @@ void Multi_HUD_Widget::process_horizontal_position()
     if (m_gamepad)
     {
         math::vec2f stick = m_gamepad->get_stick_data(qinput::Gamepad::Stick::RIGHT).value;
-        v += right_vector * (stick.x * 5.f);
-        v += front_vector * (stick.y * 5.f);
+
+        constexpr float expo = 3.f;
+        stick = math::sgn(stick) * math::vec2f(std::pow(stick.x, expo), std::pow(stick.y, expo)); //some expo
+
+        v += right_vector * (stick.x * dts);
+        v += front_vector * (stick.y * dts);
     }
 
     const qinput::Keyboard& kb = m_input_mgr.get_keyboard();
@@ -338,6 +350,8 @@ void Multi_HUD_Widget::process_yaw_angle_rate()
 
 void Multi_HUD_Widget::process_yaw_angle()
 {
+    float dts = q::Seconds(m_dt).count();
+
     float v = m_commands.yaw.angle.get();
     if (m_gamepad)
     {
@@ -345,8 +359,8 @@ void Multi_HUD_Widget::process_yaw_angle()
         gv += m_gamepad->get_axis_data(qinput::Gamepad::Axis::LEFT_TRIGGER).value; //left rotates counter-clockwise (so positive angle)
         gv -= m_gamepad->get_axis_data(qinput::Gamepad::Axis::RIGHT_TRIGGER).value;//right rotates clockwise (so negative angle)
 
-        constexpr float expo = 2.f;
-        gv = math::sgn(gv) * std::pow(gv, expo); //some expo
+        constexpr float expo = 4.f;
+        gv = math::sgn(gv) * std::pow(gv, expo) * dts; //some expo
 
         v += gv * math::anglef::pi2;
     }
@@ -485,6 +499,10 @@ void Multi_HUD_Widget::sync_commands()
 void Multi_HUD_Widget::process()
 {
     QLOG_TOPIC("command");
+
+    auto now = q::Clock::now();
+    m_dt = now - m_last_tp;
+    m_last_tp = now;
 
     {
         auto const& samples = m_comms.get_video_samples();

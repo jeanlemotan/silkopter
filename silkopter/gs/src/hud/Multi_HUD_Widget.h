@@ -22,6 +22,9 @@ private:
 
     qinput::Gamepad_cptr m_gamepad;
 
+    q::Clock::time_point m_last_tp = q::Clock::now();
+    q::Clock::duration m_dt;
+
     silk::stream::IMulti_Commands::Value m_commands;
     silk::stream::IMulti_State::Value m_prev_state;
     silk::stream::IMulti_State::Value m_state;
