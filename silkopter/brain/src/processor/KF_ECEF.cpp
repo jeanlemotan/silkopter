@@ -297,8 +297,7 @@ auto KF_ECEF::set_config(rapidjson::Value const& json) -> bool
 
     m_kf_x.R << gps_pos_acu,    0,              0,
                 0,              gps_vel_acu,    0,
-                0,              0,              acc_acu,
-                0,              0,              0;
+                0,              0,              acc_acu;
 
     m_kf_y.R = m_kf_x.R;
     m_kf_z.R = m_kf_x.R;
