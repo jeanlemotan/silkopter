@@ -313,6 +313,7 @@ auto Raspicam::set_config(rapidjson::Value const& json) -> bool
         stop_recording();
     }
 
+#if defined RASPBERRY_PI
     m_config->shutter_speed = math::clamp(m_config->shutter_speed, 0.f, 1000.f / m_init_params->fps);
     raspicamcontrol_set_shutter_speed(m_impl->camera.get(), static_cast<uint32_t>(m_config->shutter_speed * 1000.f));
 
@@ -336,6 +337,7 @@ auto Raspicam::set_config(rapidjson::Value const& json) -> bool
     m_config->awb_mode = math::clamp(m_config->awb_mode, 0u, 8u);
     raspicamcontrol_set_awb_mode(m_impl->camera.get(), static_cast<MMAL_PARAM_AWBMODE_T>(static_cast<uint32_t>(MMAL_PARAM_AWBMODE_AUTO) + m_config->awb_mode));
     //raspicamcontrol_set_awb_gains(m_impl->camera.get(), m_config->awb_rb_gains.x, m_config->awb_rb_gains.y);
+#endif
 
     return true;
 }
