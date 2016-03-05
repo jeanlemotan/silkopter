@@ -52,6 +52,11 @@ auto Multi_Brain::init() -> bool
         QLOGE("Bad rate: {}Hz", m_init_params->rate);
         return false;
     }
+    if (!m_battery.init(m_init_params->rate))
+    {
+        QLOGE("Cannot initialize the battery");
+        return false;
+    }
     m_state_output_stream->set_rate(m_init_params->state_rate);
     m_rate_output_stream->set_rate(m_init_params->rate);
     m_thrust_output_stream->set_rate(m_init_params->rate);
@@ -81,7 +86,8 @@ auto Multi_Brain::get_inputs() const -> std::vector<Input>
          { stream::IECEF_Velocity::TYPE,     m_init_params->rate, "Velocity (ecef)", m_sensor_accumulator.get_stream_path(2) },
          { stream::IECEF_Linear_Acceleration::TYPE, m_init_params->rate, "Linear Acceleration (ecef)", m_sensor_accumulator.get_stream_path(3) },
          { stream::IProximity::TYPE,         m_init_params->rate, "Proximity", m_sensor_accumulator.get_stream_path(4) },
-         //        { stream::IBattery_State::TYPE,     m_init_params->rate, "Battery State", m_accumulator.get_stream_path(2) },
+         { stream::IVoltage::TYPE,           m_init_params->rate, "Voltage", m_sensor_accumulator.get_stream_path(5) },
+         { stream::ICurrent::TYPE,           m_init_params->rate, "Current", m_sensor_accumulator.get_stream_path(6) },
      }};
     return inputs;
 }
@@ -435,6 +441,8 @@ void Multi_Brain::process_state()
         process_state_mode_armed();
     }
 
+
+
     //increment version of overriden commands
     //Increment_Version func;
     //stream::IMulti_Commands::apply(func, m_inputs.local_commands.previous_sample.value, m_inputs.local_commands.sample.value);
@@ -555,8 +563,12 @@ void Multi_Brain::process()
                                       stream::IECEF_Position::Sample const& i_position,
                                       stream::IECEF_Velocity::Sample const& i_velocity,
                                       stream::IECEF_Linear_Acceleration::Sample const& i_linear_acceleration,
-                                      stream::IProximity::Sample const& i_proximity)
+                                      stream::IProximity::Sample const& i_proximity,
+                                      stream::IVoltage::Sample const& i_voltage,
+                                      stream::ICurrent::Sample const& i_current)
     {
+        m_battery_state_sample = m_battery.process(i_voltage, i_current);
+
         refresh_inputs(i_frame, i_position, i_velocity, i_linear_acceleration, i_proximity);
         process_state();
     });
@@ -573,6 +585,7 @@ void Multi_Brain::process()
         state.home_position.value = m_home.position;
         state.home_position.is_healthy = m_home.is_acquired;
         state.frame = m_inputs.frame.sample;
+        state.battery_state = m_battery_state_sample;
 
         state.commands = m_inputs.local_commands.sample.value;
 
@@ -587,18 +600,11 @@ void Multi_Brain::process()
 
 void Multi_Brain::set_input_stream_path(size_t idx, q::Path const& path)
 {
-//    { stream::IMulti_Commands::TYPE,       m_init_params->input_rate, "Input", m_input_accumulator.get_stream_path(0) },
-//    { stream::IUAV_Frame::TYPE,             m_init_params->rate, "Frame", m_sensor_accumulator.get_stream_path(0) },
-//    { stream::IECEF_Position::TYPE,     m_init_params->rate, "Position (ecef)", m_sensor_accumulator.get_stream_path(1) },
-//    { stream::IECEF_Velocity::TYPE,     m_init_params->rate, "Velocity (ecef)", m_sensor_accumulator.get_stream_path(2) },
-//    { stream::IECEF_Linear_Acceleration::TYPE, m_init_params->rate, "Linear Acceleration (ecef)", m_sensor_accumulator.get_stream_path(3) },
-//    { stream::IProximity::TYPE,         m_init_params->rate, "Proximity", m_sensor_accumulator.get_stream_path(4) },
-
     if (idx == 0)
     {
         m_commands_accumulator.set_stream_path(0, path, m_init_params->commands_rate, m_hal);
     }
-    else if (idx >= 1 && idx <= 5)
+    else if (idx >= 1 && idx <= 7)
     {
         m_sensor_accumulator.set_stream_path(idx - 1, path, m_init_params->rate, m_hal);
     }
@@ -768,9 +774,41 @@ auto Multi_Brain::get_init_params() const -> rapidjson::Document
     return std::move(json);
 }
 
-auto Multi_Brain::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document
+auto Multi_Brain::send_message(rapidjson::Value const& json) -> rapidjson::Document
 {
-    return rapidjson::Document();
+    rapidjson::Document response;
+
+    auto* messagej = jsonutil::find_value(json, std::string("message"));
+    if (!messagej && messagej->IsString())
+    {
+        jsonutil::add_value(response, std::string("error"), rapidjson::Value("Message not found"), response.GetAllocator());
+        return std::move(response);
+    }
+
+    std::string message = messagej->GetString();
+    if (message == "reset battery")
+    {
+        m_battery.reset();
+    }
+    else if (message == "battery capacity")
+    {
+        auto* capacityj = jsonutil::find_value(json, std::string("capacity"));
+        if (!capacityj || capacityj->IsNumber())
+        {
+            jsonutil::add_value(response, std::string("error"), rapidjson::Value("Capacity not found"), response.GetAllocator());
+            return std::move(response);
+        }
+
+        LiPo_Battery::Config config;
+        config.full_charge = capacityj->GetDouble();
+        m_battery.set_config(config);
+    }
+    else
+    {
+        jsonutil::add_value(response, std::string("error"), rapidjson::Value("Unknown command"), response.GetAllocator());
+    }
+
+    return std::move(response);
 }
 
 }

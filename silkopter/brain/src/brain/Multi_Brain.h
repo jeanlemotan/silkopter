@@ -19,6 +19,7 @@
 #include "HAL.h"
 #include "utils/PID.h"
 #include "utils/Butterworth.h"
+#include "LiPo_Battery.h"
 
 #include "Sample_Accumulator.h"
 #include "Basic_Output_Stream.h"
@@ -67,6 +68,8 @@ private:
     std::shared_ptr<sz::Multi_Brain::Init_Params> m_init_params;
     std::shared_ptr<sz::Multi_Brain::Config> m_config;
 
+    LiPo_Battery m_battery;
+
     Sample_Accumulator<stream::IMulti_Commands> m_commands_accumulator;
 
     Sample_Accumulator<
@@ -74,10 +77,9 @@ private:
         stream::IECEF_Position,
         stream::IECEF_Velocity,
         stream::IECEF_Linear_Acceleration,
-        stream::IProximity
-//        stream::IBattery_State,
-//        stream::IECEF_Linear_Acceleration,
-//        stream::IECEF_Velocity,
+        stream::IProximity,
+        stream::IVoltage,
+        stream::ICurrent
         > m_sensor_accumulator;
 
     typedef Basic_Output_Stream<stream::IMulti_State> State_Output_Stream;
@@ -139,6 +141,8 @@ private:
 
     math::vec3f m_enu_position;
     math::vec3f m_enu_velocity;
+
+    stream::IBattery_State::Sample m_battery_state_sample;
 
     typedef util::PID<float, float, float> PID;
     typedef util::PID<float, math::vec2f, math::vec2f> PID2;

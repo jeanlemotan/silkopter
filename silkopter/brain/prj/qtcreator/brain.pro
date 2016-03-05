@@ -105,7 +105,6 @@ SOURCES += \
     ../../src/source/UBLOX.cpp \
     ../../src/processor/ADC_Ammeter.cpp \
     ../../src/processor/ADC_Voltmeter.cpp \
-    ../../src/processor/LiPo_Battery.cpp \
     ../../src/processor/Comp_AHRS.cpp \
     ../../src/processor/Gravity_Filter.cpp \
     ../../src/source/EHealth.cpp \
@@ -141,7 +140,8 @@ SOURCES += \
     ../../src/source/AVRADC.cpp \
     ../../src/processor/Pressure_Velocity.cpp \
     ../../src/processor/ENU_Frame_System.cpp \
-    ../../src/source/RaspiCamControl.cpp
+    ../../src/source/RaspiCamControl.cpp \
+    ../../src/brain/LiPo_Battery.cpp
 
 HEADERS += \
     ../../src/BrainStdAfx.h \
@@ -170,7 +170,6 @@ HEADERS += \
     ../../src/source/UBLOX.h \
     ../../src/processor/ADC_Voltmeter.h \
     ../../src/processor/ADC_Ammeter.h \
-    ../../src/processor/LiPo_Battery.h \
     ../../src/processor/EKF_AHRS.h \
     ../../src/processor/Comp_AHRS.h \
     ../../../libs/utils/Butterworth.h \
@@ -290,7 +289,8 @@ HEADERS += \
     ../../src/combiner/Combiner.h \
     ../../src/processor/Pressure_Velocity.h \
     ../../src/processor/ENU_Frame_System.h \
-    ../../src/source/RaspiCamControl.h
+    ../../src/source/RaspiCamControl.h \
+    ../../src/brain/LiPo_Battery.h
 
 DISTFILES +=
 

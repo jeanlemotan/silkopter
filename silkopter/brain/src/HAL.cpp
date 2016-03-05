@@ -31,7 +31,6 @@
 
 #include "processor/ADC_Voltmeter.h"
 #include "processor/ADC_Ammeter.h"
-#include "processor/LiPo_Battery.h"
 #include "processor/Gravity_Filter.h"
 #include "processor/Comp_AHRS.h"
 #include "processor/Comp_ECEF.h"
@@ -691,7 +690,6 @@ auto HAL::init(Comms& comms) -> bool
     m_node_factory.register_node<Comp_ECEF>("Comp ECEF", *this);
     m_node_factory.register_node<KF_ECEF>("EKF ECEF", *this);
     m_node_factory.register_node<Gravity_Filter>("Gravity Filter", *this);
-    m_node_factory.register_node<LiPo_Battery>("LiPo Battery", *this);
     m_node_factory.register_node<Throttle_To_PWM>("Throttle To PWM", *this);
     m_node_factory.register_node<Proximity>("Proximity", *this);
     m_node_factory.register_node<Pressure_Velocity>("Pressure Velocity", *this);
