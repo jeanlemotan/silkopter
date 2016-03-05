@@ -150,7 +150,6 @@ public:
     ///////////////////////////////
     /// Data
 
-
     struct Value
     {
         Toggles toggles;
@@ -166,7 +165,7 @@ public:
 
     typedef stream::Sample<Value>     Sample;
 
-    virtual ~IMulti_Commands() {}
+    virtual ~IMulti_Commands() = default;
 
     virtual auto get_samples() const -> std::vector<Sample> const& = 0;
 

@@ -91,6 +91,8 @@ private:
     void render_modes();
     void render_horizon();
     void render_altitude();
+    void render_battery();
+    void render_home_info();
     void render_video();
 };
 

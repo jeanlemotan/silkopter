@@ -716,6 +716,8 @@ void Multi_HUD_Widget::render_hud()
     render_modes();
     render_horizon();
     render_altitude();
+    render_battery();
+    render_home_info();
 }
 
 void Multi_HUD_Widget::render_modes()
@@ -724,7 +726,7 @@ void Multi_HUD_Widget::render_modes()
     m_context.painter.set_post_clip_transform(math::trans3df());
 
     m_context.painter.set_material(m_context.materials.font);
-    m_border_text_style.height = 20;
+    m_border_text_style.height = 18;
     m_context.texter.set_style(m_border_text_style);
 
     std::string str;
@@ -751,7 +753,6 @@ void Multi_HUD_Widget::render_modes()
         str = q::util::format<std::string>("V ALT:#55FF55{,1}#FFFFFFm |", m_commands.vertical.altitude.get());
         break;
     }
-    str = q::util::format<std::string>("{} ALT:#55FF55{,1}#FFFFFFm | SPD:#55FF55{,2}#FFFFFFm/s | ACC:#55FF55{,1}#FFFFFFm/s² | THR:#55FF55{,1}#FFFFFFN", str, m_uav.enu_position.z, m_uav.enu_velocity.z, m_uav.enu_acceleration.z, m_state.thrust.value );
     m_context.texter.draw_string(m_context.painter, str, math::vec2f(0, 50));
 
     float h_speed = math::length(math::vec2f(m_uav.enu_velocity.x, m_uav.enu_velocity.y));
@@ -771,8 +772,7 @@ void Multi_HUD_Widget::render_modes()
         str = q::util::format<std::string>("H POS:#55FF55{,1}#FFFFFFm |", math::vec2f(math::vec2d(m_state.position.value)));
         break;
     }
-    str = q::util::format<std::string>("{} SPD:#55FF55{,2}#FFFFFFm/s", str, h_speed);
-    m_context.texter.draw_string(m_context.painter, str, math::vec2f(0, 80));
+    m_context.texter.draw_string(m_context.painter, str, math::vec2f(0, 70));
 
     switch (m_commands.yaw.mode.get())
     {
@@ -783,7 +783,7 @@ void Multi_HUD_Widget::render_modes()
         str = q::util::format<std::string>("Y ANG:#55FF55{,1}#FFFFFF°", math::degrees(m_commands.yaw.angle.get()));
         break;
     }
-    m_context.texter.draw_string(m_context.painter, str, math::vec2f(0, 110));
+    m_context.texter.draw_string(m_context.painter, str, math::vec2f(0, 90));
 
     m_context.painter.pop_post_clip_transform();
 }
@@ -802,7 +802,7 @@ void Multi_HUD_Widget::render_horizon()
 
     const float k_length = 0.3f;
     const float k_big_length = 0.5f;
-    const float k_huge_length = 1.3f;
+    const float k_huge_length = 0.7f;
     const float k_distance_from_camera = 5.f;
     const float k_step = math::radians(5.f);
     const size_t k_line_count = math::radians(360.f) / k_step;
@@ -835,14 +835,39 @@ void Multi_HUD_Widget::render_horizon()
         p1 = m_uav.enu_position + math::rotate(rot, math::vec3f(k_huge_length + 0.2f, k_distance_from_camera, 0));
         p2 = m_uav.enu_position + math::rotate(rot, math::vec3f(k_huge_length, k_distance_from_camera, 0));
         m_context.painter.draw_line(q::draw::Vertex(p1, color), q::draw::Vertex(p2, color));
+    }
 
-        math::vec2f out;
-        m_camera.project(out, p1);
+    //draw center screen fixed line
+    {
+        auto mat = m_context.materials.primitive_2d;
+        mat.get_render_state(0).set_depth_test(true);
+        mat.get_render_state(0).set_depth_write(false);
+        mat.get_render_state(0).set_culling(false);
+        mat.get_render_state(0).set_blend_formula(q::video::Render_State::Blend_Formula::Preset::ALPHA);
+        m_context.painter.set_material(mat);
+
+        m_context.painter.push_post_clip_transform(math::trans3df::identity);
+
+        math::quatf rot;
+        rot.set_from_euler_zyx(0, 0, -roll);
+        math::trans3df trans(math::vec3f(width() / 2.f, height() / 2.f, 0.f), rot.get_as_mat3(), math::vec3f::one);
+        m_context.painter.set_post_clip_transform(trans);
+
+        uint32_t color = 0xFFFFFFAA;
+        constexpr float line_half_length = 180.f;
+
+        m_context.painter.draw_line(q::draw::Vertex(math::vec2f(-line_half_length, 0), color), q::draw::Vertex(math::vec2f(line_half_length, 0), color));
 
         m_context.painter.set_material(m_context.materials.font);
         m_border_text_style.height = 14;
         m_context.texter.set_style(m_border_text_style);
-        m_context.texter.draw_string(m_context.painter, q::util::format<std::string>("{.1}°", math::degrees(pitch)).c_str(), out);
+        m_context.texter.draw_string(m_context.painter, q::util::format<std::string>("P #77FF77{}#FFFFFF° | R #77FF77{}#FFFFFF°",
+                                                                                     static_cast<int>(math::degrees(pitch)),
+                                                                                     static_cast<int>(math::degrees(roll))),
+                                     math::vec2f(line_half_length, -3),
+                                     q::text::Anchors(q::text::Anchor::RIGHT, q::text::Anchor::BASELINE));
+
+        m_context.painter.pop_post_clip_transform();
     }
 }
 
@@ -870,7 +895,7 @@ void Multi_HUD_Widget::render_altitude()
 
     uint32_t color = 0x88FFFFFF;
 
-    float x = width() / 2.f + 200.f;
+    float x = width() - 150.f;
     float center_y = height() / 2.f;
     for (size_t s = 0; s < section_count; s++)
     {
@@ -912,9 +937,46 @@ void Multi_HUD_Widget::render_altitude()
         }
     }
 
-//    m_context.painter.set_material(m_context.materials.font);
-//    m_border_text_style.height = 20;
-//    m_context.texter.set_style(m_border_text_style);
-//    m_context.texter.draw_string(m_context.painter, q::util::format<std::string>("ALT: {.1}m", m_uav.enu_position.z).c_str(), math::vec2f(0, 150));
+    m_border_text_style.height = 14;
+    m_context.texter.set_style(m_border_text_style);
+    m_context.painter.set_material(m_context.materials.font);
+    m_context.texter.draw_string(m_context.painter,
+                                 q::util::format<std::string>("ALT #55FF55{.1}#FFFFFFm", m_uav.enu_position.z),
+                                 math::vec2f(width() - 120, height() / 2 + 30),
+                                 q::text::Anchors(q::text::Anchor::LEFT, q::text::Anchor::BASELINE));
+    m_context.texter.draw_string(m_context.painter,
+                                 q::util::format<std::string>("SPD #55FF55{.1}#FFFFFFm/s", m_uav.enu_velocity.z),
+                                 math::vec2f(width() - 120, height() / 2 + 44),
+                                 q::text::Anchors(q::text::Anchor::LEFT, q::text::Anchor::BASELINE));
 }
 
+void Multi_HUD_Widget::render_battery()
+{
+    m_border_text_style.height = 18;
+    m_context.texter.set_style(m_border_text_style);
+    m_context.painter.set_material(m_context.materials.font);
+    m_context.texter.draw_string(m_context.painter,
+                                 q::util::format<std::string>("#55FF55{.1}#FFFFFFA #55FF55{.1}#FFFFFFV #55FF55{.1}#FFFFFFAh #55FF55{}#FFFFFF%",
+                                                              m_state.battery_state.value.average_current,
+                                                              m_state.battery_state.value.average_voltage,
+                                                              m_state.battery_state.value.charge_used,
+                                                              static_cast<size_t>(m_state.battery_state.value.capacity_left * 100)),
+                                 math::vec2f(width() - 20, 20),
+                                 q::text::Anchors(q::text::Anchor::RIGHT, q::text::Anchor::BASELINE));
+}
+
+void Multi_HUD_Widget::render_home_info()
+{
+
+//    m_border_text_style.height = 18;
+//    m_context.texter.set_style(m_border_text_style);
+//    m_context.painter.set_material(m_context.materials.font);
+//    m_context.texter.draw_string(m_context.painter,
+//                                 q::util::format<std::string>("#55FF55{.1}#FFFFFFA #55FF55{.1}#FFFFFFV #55FF55{.1}#FFFFFFAh #55FF55{}#FFFFFF%",
+//                                                              m_state.battery_state.value.average_current,
+//                                                              m_state.battery_state.value.average_voltage,
+//                                                              m_state.battery_state.value.charge_used,
+//                                                              static_cast<size_t>(m_state.battery_state.value.capacity_left * 100)),
+//                                 math::vec2f(width() - 20, 20),
+//                                 q::text::Anchors(q::text::Anchor::RIGHT, q::text::Anchor::BASELINE));
+}
