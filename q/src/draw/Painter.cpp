@@ -870,15 +870,15 @@ void Painter::fill_quad(Vertex const& v0, Vertex const& v1, Vertex const& v2, Ve
 		*(math::vec2f*)ptr = v0.tex_coord; ptr += 8;
 		*(uint32_t*)ptr = math::color::swap_rb(v0.color); ptr += 4;
 
-		*(math::vec3f*)ptr = math::transform(m_combined_transform, v0.position); ptr += 12;
+        *(math::vec3f*)ptr = math::transform(m_combined_transform, v1.position); ptr += 12;
 		*(math::vec2f*)ptr = v1.tex_coord; ptr += 8;
 		*(uint32_t*)ptr = math::color::swap_rb(v1.color); ptr += 4;
 
-		*(math::vec3f*)ptr = math::transform(m_combined_transform, v0.position); ptr += 12;
+        *(math::vec3f*)ptr = math::transform(m_combined_transform, v2.position); ptr += 12;
 		*(math::vec2f*)ptr = v2.tex_coord; ptr += 8;
 		*(uint32_t*)ptr = math::color::swap_rb(v2.color); ptr += 4;
 
-		*(math::vec3f*)ptr = math::transform(m_combined_transform, v0.position); ptr += 12;
+        *(math::vec3f*)ptr = math::transform(m_combined_transform, v3.position); ptr += 12;
 		*(math::vec2f*)ptr = v3.tex_coord; ptr += 8;
 		*(uint32_t*)ptr = math::color::swap_rb(v3.color); ptr += 4;
 	}
