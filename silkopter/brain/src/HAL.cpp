@@ -370,7 +370,7 @@ void write_gnu_plot(std::string const& name, std::vector<T> const& samples)
 
     for(size_t i = 0; i < samples.size(); i++)
     {
-        auto l = q::util::format2<std::string>("{} {.8}\n", i, samples[i]);
+        auto l = q::util::format<std::string>("{} {.8}\n", i, samples[i]);
         fs.write((uint8_t const*)l.c_str(), l.size());
     }
 }
@@ -413,7 +413,7 @@ auto HAL::create_node(
         auto outputs = node->get_outputs();
         for (auto const& x: outputs)
         {
-            std::string stream_name = q::util::format2<std::string>("{}/{}", name, x.name);
+            std::string stream_name = q::util::format<std::string>("{}/{}", name, x.name);
             if (!m_streams.add(stream_name, std::string(), x.stream))
             {
                 QLOGE("Cannot add stream '{}'", stream_name);
@@ -984,13 +984,13 @@ void HAL::generate_settings_file()
 //        jsonutil::clone_value(json, node->get_init_params(), json.GetAllocator());
 //        auto* valj = jsonutil::get_or_add_value(json, q::Path("dev"), rapidjson::Type::kStringType, json.GetAllocator());
 //        QASSERT(valj);
-//        valj->SetString(q::util::format2<std::string>("/dev/spidev0.{}", i), json.GetAllocator());
+//        valj->SetString(q::util::format<std::string>("/dev/spidev0.{}", i), json.GetAllocator());
 //        valj = jsonutil::get_or_add_value(json, q::Path("speed"), rapidjson::Type::kNumberType, json.GetAllocator());
 //        QASSERT(valj);
 //        valj->SetInt(1000000);
 //        if (node->init(json))
 //        {
-//            auto res = m_buses.add(q::util::format2<std::string>("spi{}", i), "SPI Linux", node);
+//            auto res = m_buses.add(q::util::format<std::string>("spi{}", i), "SPI Linux", node);
 //            QASSERT(res);
 //        }
 //    }
@@ -1008,7 +1008,7 @@ void HAL::generate_settings_file()
         valj->SetInt(1000000);
         if (node->init(json))
         {
-            auto res = m_buses.add(q::util::format2<std::string>("spi{}", i), "SPI BCM", node);
+            auto res = m_buses.add(q::util::format<std::string>("spi{}", i), "SPI BCM", node);
             QASSERT(res);
         }
     }

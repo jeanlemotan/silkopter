@@ -195,7 +195,7 @@ static auto prettify_name(std::string const& name) -> std::string
 static auto get_icon(std::string const& node_icon_name, silk::node::gs::Node_Def& node_def) -> QIcon
 {
     auto name = prettify_name(node_def.name);
-    QString icon_name(q::util::format2<std::string>(":/icons/{}.png", name).c_str());
+    QString icon_name(q::util::format<std::string>(":/icons/{}.png", name).c_str());
     if (QFile::exists(icon_name))
     {
         return QIcon(icon_name);
@@ -207,7 +207,7 @@ static auto get_icon(std::string const& node_icon_name, silk::node::gs::Node_Def
     for (auto const& t: tokens)
     {
         name += t;
-        icon_name = q::util::format2<std::string>(":/icons/{}.png", name).c_str();
+        icon_name = q::util::format<std::string>(":/icons/{}.png", name).c_str();
         if (QFile::exists(icon_name))
         {
             return QIcon(icon_name);
@@ -399,7 +399,7 @@ void HAL_Window::block_context_menu(QGraphicsSceneMouseEvent* event, QNEBlock* b
             }
         }
 
-        QAction* action = menu.addAction(QIcon(":/icons/remove.png"), q::util::format2<std::string>("Remove {}", block->id().toLatin1().data()).c_str());
+        QAction* action = menu.addAction(QIcon(":/icons/remove.png"), q::util::format<std::string>("Remove {}", block->id().toLatin1().data()).c_str());
         connect(action, &QAction::triggered, [this, node](bool)
         {
             try_remove_node(node);
@@ -592,7 +592,7 @@ std::string HAL_Window::compute_unique_name(std::string const& name) const
 
 void HAL_Window::open_stream_viewer(std::string const& stream_name)
 {
-    QDockWidget* dock = new QDockWidget(q::util::format2<std::string>("Stream: {}", stream_name).c_str(), this);
+    QDockWidget* dock = new QDockWidget(q::util::format<std::string>("Stream: {}", stream_name).c_str(), this);
     QFont font;
     font.setPointSize(8);
     dock->setFont(font);
@@ -662,11 +662,11 @@ void HAL_Window::refresh_node(silk::node::gs::Node& node)
         QASSERT(ui_input.port);
         if (i.rate > 0)
         {
-            ui_input.port->setName(q::util::format2<std::string>("{} {}Hz", i.name, i.rate).c_str());
+            ui_input.port->setName(q::util::format<std::string>("{} {}Hz", i.name, i.rate).c_str());
         }
         else
         {
-            ui_input.port->setName(q::util::format2<std::string>("{}", i.name).c_str());
+            ui_input.port->setName(q::util::format<std::string>("{}", i.name).c_str());
         }
         ui_input.port->setPortType(static_cast<int>(i.type));
         ui_input.port->setPortRate(i.rate);
@@ -704,7 +704,7 @@ void HAL_Window::refresh_node(silk::node::gs::Node& node)
     {
         auto& ui_output = data.ui_outputs[o.name];
         QASSERT(ui_output.port);
-        ui_output.port->setName(q::util::format2<std::string>("{} {}Hz", o.name, o.rate).c_str());
+        ui_output.port->setName(q::util::format<std::string>("{} {}Hz", o.name, o.rate).c_str());
         ui_output.port->setPortType(static_cast<int>(o.type));
         ui_output.port->setPortRate(o.rate);
     }
@@ -850,7 +850,7 @@ void HAL_Window::try_remove_node(silk::node::gs::Node_ptr node)
 {
     std::string nodeName = node->name;
 
-    auto answer = QMessageBox::question(this, "Question", q::util::format2<std::string>("Are you sure you want to remove node {}", node->name).c_str());
+    auto answer = QMessageBox::question(this, "Question", q::util::format<std::string>("Are you sure you want to remove node {}", node->name).c_str());
     if (answer == QMessageBox::Yes)
     {
         m_hal.remove_node(node);

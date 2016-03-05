@@ -146,7 +146,7 @@ auto Multi_Simulator::get_inputs() const -> std::vector<Input>
     {
         inputs[i].type = stream::IThrottle::TYPE;
         inputs[i].rate = m_init_params->throttle_rate;
-        inputs[i].name = q::util::format2<std::string>("Throttle/[{}]", i);
+        inputs[i].name = q::util::format<std::string>("Throttle/[{}]", i);
         inputs[i].stream_path = m_input_throttle_stream_paths[i];
     }
     return inputs;

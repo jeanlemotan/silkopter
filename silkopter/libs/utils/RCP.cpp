@@ -737,7 +737,7 @@ auto RCP::compute_next_transit_datagram(Socket_Handle socket_handle) -> bool
             {
                 if (add_datagram_to_send_buffer(socket_data, datagram))
                 {
-                    //                dbg += q::util::format2<std::string>("{}:{}:{}:{}", datagram->params.importance, datagram->sent_count, pheader.id, pheader.fragment_idx);
+                    //                dbg += q::util::format<std::string>("{}:{}:{}:{}", datagram->params.importance, datagram->sent_count, pheader.id, pheader.fragment_idx);
                     //                dbg += "#,";
 
                     merged++;
@@ -1037,7 +1037,7 @@ void RCP::process_incoming_data(uint8_t* data_ptr, size_t data_size)
                 case Type::TYPE_CONNECT_RES: QLOGW("Ignoring connection response while connected."); break;
                 default: QASSERT(0); break;
                 }
-                //dbg += q::util::format2<std::string>("d{},", (int)header.type);
+                //dbg += q::util::format<std::string>("d{},", (int)header.type);
             }
         }
 

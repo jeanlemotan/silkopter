@@ -77,7 +77,7 @@ void Magnetic_Field_Calibration_Wizard::prepare_step()
         ui.setupUi(m_content);
         if (m_initial_calibration.points.size() > 0)
         {
-            ui.info->setText(q::util::format2<std::string>("There are currently {} calibration points.\n"
+            ui.info->setText(q::util::format<std::string>("There are currently {} calibration points.\n"
                                                            "Do you want to clear these points or keep them?", m_initial_calibration.points.size()).c_str());
             auto* clear = ui.buttonBox->addButton("Clear", QDialogButtonBox::ResetRole);
             QObject::connect(clear, &QPushButton::released, [this]() { advance(); });
@@ -102,7 +102,7 @@ void Magnetic_Field_Calibration_Wizard::prepare_step()
 
         Ui::Magnetic_Field_Calibration_Wizard_Instructions ui;
         ui.setupUi(m_content);
-        ui.instructions->setText(q::util::format2<std::string>(
+        ui.instructions->setText(q::util::format<std::string>(
                                     "Please rotate the UAV along all its axis for {} seconds.\n"
                                     "\n"
                                     "Ready?", DATA_COLLECTION_DURATION).c_str());
@@ -129,15 +129,15 @@ void Magnetic_Field_Calibration_Wizard::prepare_step()
         m_connection = m_stream->samples_available_signal.connect([this, info, progress, bias, scale](silk::stream::gs::Magnetic_Field::Samples const& samples)
         {
             on_samples_received(samples);
-            info->setText(q::util::format2<std::string>("Collected {} samples...", m_samples.size()).c_str());
+            info->setText(q::util::format<std::string>("Collected {} samples...", m_samples.size()).c_str());
             size_t needed_samples = std::chrono::seconds(DATA_COLLECTION_DURATION).count() * m_output.rate;
             progress->setValue(float(m_samples.size() * 100.f) / float(needed_samples));
-            bias->setText(q::util::format2<std::string>("{}", m_box.get_center()).c_str());
+            bias->setText(q::util::format<std::string>("{}", m_box.get_center()).c_str());
 
             auto extent = math::max(m_box.get_extent(), math::vec3f(1.f));
             float avg = (extent.x + extent.y + extent.z) / 3.f;
 
-            scale->setText(q::util::format2<std::string>("{}", avg / extent).c_str());
+            scale->setText(q::util::format<std::string>("{}", avg / extent).c_str());
 
             if (m_samples.size() >= needed_samples)
             {
@@ -161,8 +161,8 @@ void Magnetic_Field_Calibration_Wizard::prepare_step()
 
         ui.info->setText("Done!\n"
                          "The new Bias & Scale are:");
-        ui.bias->setText(q::util::format2<std::string>("{}", bias).c_str());
-        ui.scale->setText(q::util::format2<std::string>("{}", scale).c_str());
+        ui.bias->setText(q::util::format<std::string>("{}", bias).c_str());
+        ui.scale->setText(q::util::format<std::string>("{}", scale).c_str());
 
         sz::calibration::Magnetic_Field point;
         point.temperature = 0;

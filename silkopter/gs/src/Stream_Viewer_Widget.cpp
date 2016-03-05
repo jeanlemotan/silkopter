@@ -45,7 +45,7 @@ void Stream_Viewer_Widget::set_stream_name(std::string const& stream_name)
     auto stream = m_hal.get_streams().find_by_name(stream_name);
     if (!stream)
     {
-        label->setText(q::util::format2<std::string>("Cannot find Stream {}", stream_name).c_str());
+        label->setText(q::util::format<std::string>("Cannot find Stream {}", stream_name).c_str());
         return;
     }
 
@@ -70,7 +70,7 @@ void Stream_Viewer_Widget::create_viewer()
     {
         auto label = new QLabel(this);
         layout()->addWidget(label);
-        label->setText(q::util::format2<std::string>("Cannot find Stream {}", m_stream_name).c_str());
+        label->setText(q::util::format<std::string>("Cannot find Stream {}", m_stream_name).c_str());
         return;
     }
 

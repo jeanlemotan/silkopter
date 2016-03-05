@@ -429,13 +429,13 @@ auto PCA9685::get_config() const -> rapidjson::Document
     {
         if (m_pwm_channels[i].config->servo_signal)
         {
-            jsonutil::remove_value(json, q::Path(q::util::format2<q::String>("Channel {}/Min PWM", i + 1)));
-            jsonutil::remove_value(json, q::Path(q::util::format2<q::String>("Channel {}/Max PWM", i + 1)));
+            jsonutil::remove_value(json, q::Path(q::util::format<q::String>("Channel {}/Min PWM", i + 1)));
+            jsonutil::remove_value(json, q::Path(q::util::format<q::String>("Channel {}/Max PWM", i + 1)));
         }
         else
         {
-            jsonutil::remove_value(json, q::Path(q::util::format2<q::String>("Channel {}/Min Servo (ms)", i + 1)));
-            jsonutil::remove_value(json, q::Path(q::util::format2<q::String>("Channel {}/Max Servo (ms)", i + 1)));
+            jsonutil::remove_value(json, q::Path(q::util::format<q::String>("Channel {}/Min Servo (ms)", i + 1)));
+            jsonutil::remove_value(json, q::Path(q::util::format<q::String>("Channel {}/Max Servo (ms)", i + 1)));
         }
     }
 

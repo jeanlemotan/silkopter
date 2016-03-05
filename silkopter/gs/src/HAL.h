@@ -369,6 +369,10 @@ void Registry<Base>::remove(std::shared_ptr<Base> node)
 template<class Base>
 void Registry<Base>::remove_all()
 {
+    for (auto& node: m_nodes)
+    {
+        item_will_be_removed_signal.execute(node);
+    }
     m_nodes.clear();
 }
 

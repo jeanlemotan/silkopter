@@ -70,7 +70,7 @@ auto Throttle_To_PWM::get_inputs() const -> std::vector<Input>
     std::vector<Input> inputs(m_init_params->channels);
     for (size_t i = 0; i < m_init_params->channels; i++)
     {
-        inputs[i] = { stream::IThrottle::TYPE, m_init_params->rate, q::util::format2<std::string>("Throttle {}", i), m_accumulators[i].get_stream_path(0) };
+        inputs[i] = { stream::IThrottle::TYPE, m_init_params->rate, q::util::format<std::string>("Throttle {}", i), m_accumulators[i].get_stream_path(0) };
     }
     return inputs;
 }
@@ -79,7 +79,7 @@ auto Throttle_To_PWM::get_outputs() const -> std::vector<Output>
     std::vector<Output> outputs(m_init_params->channels);
     for (size_t i = 0; i < m_init_params->channels; i++)
     {
-        outputs[i] = { q::util::format2<std::string>("PWM {}", i), m_output_streams[i] };
+        outputs[i] = { q::util::format<std::string>("PWM {}", i), m_output_streams[i] };
     }
     return outputs;
 }

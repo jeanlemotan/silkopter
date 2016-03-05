@@ -35,7 +35,7 @@ void JSON_Model::Tree_Item::build(Tree_Item* parent, size_t row, std::string con
             {
                 auto* c = new Tree_Item(m_model);
                 m_children.push_back(std::unique_ptr<Tree_Item>(c));
-                c->build(this, m_children.size() - 1, q::util::format2<std::string>("[{}]", i), &(*json)[i]);
+                c->build(this, m_children.size() - 1, q::util::format<std::string>("[{}]", i), &(*json)[i]);
             }
         }
     }

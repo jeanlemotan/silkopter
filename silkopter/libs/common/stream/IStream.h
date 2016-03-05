@@ -16,7 +16,7 @@ enum class Space : uint8_t
     GIMBAL
 };
 
-#define GET_AS_STRING(str, details_str) q::util::format2<std::string>(str "{}", (details) ? (" " details_str) : "")
+#define GET_AS_STRING(str, details_str) q::util::format<std::string>(str "{}", (details) ? (" " details_str) : "")
 
 inline auto get_as_string(Space s, bool details) -> std::string
 {

@@ -502,7 +502,7 @@ void Input_Mgr::enumerate_gamepads() const
             return;
         }
 
-        auto name = q::util::format2<std::string>("/dev/input/js{}", i);
+        auto name = q::util::format<std::string>("/dev/input/js{}", i);
         int fd = open(name.c_str(), O_RDONLY | O_NONBLOCK);
         if (fd == -1)
         {

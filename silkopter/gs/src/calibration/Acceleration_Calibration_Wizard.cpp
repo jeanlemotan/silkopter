@@ -82,7 +82,7 @@ void Acceleration_Calibration_Wizard::prepare_step()
 
         Ui::Acceleration_Calibration_Wizard_Intro ui;
         ui.setupUi(m_content);
-        ui.description->setText(q::util::format2<std::string>(
+        ui.description->setText(q::util::format<std::string>(
                                     "This wizard will calibrate the acceleration stream of node {}.\n"
                                     "It will ask you to hold the UAV still in various positions and will take about 1 minute.\n"
                                     "\n"
@@ -100,7 +100,7 @@ void Acceleration_Calibration_Wizard::prepare_step()
         ui.setupUi(m_content);
         if (m_initial_calibration.points.size() > 0)
         {
-            ui.info->setText(q::util::format2<std::string>("There are currently {} calibration points.\n"
+            ui.info->setText(q::util::format<std::string>("There are currently {} calibration points.\n"
                                                            "Do you want to clear these points or keep them?", m_initial_calibration.points.size()).c_str());
             auto* clear = ui.buttonBox->addButton("Clear", QDialogButtonBox::ResetRole);
             QObject::connect(clear, &QPushButton::released, [this]() { advance(); });
@@ -135,7 +135,7 @@ void Acceleration_Calibration_Wizard::prepare_step()
 
         Ui::Acceleration_Calibration_Wizard_Instructions ui;
         ui.setupUi(m_content);
-        ui.instructions->setText(q::util::format2<std::string>(
+        ui.instructions->setText(q::util::format<std::string>(
                                     "Please place the UAV {} for {} seconds.\n"
                                     "\n"
                                     "Done?", direction[m_collect_data_step], DATA_COLLECTION_DURATION).c_str());
@@ -160,7 +160,7 @@ void Acceleration_Calibration_Wizard::prepare_step()
         m_connection = m_stream->samples_available_signal.connect([this, info, progress](silk::stream::gs::Acceleration::Samples const& samples)
         {
             on_samples_received(samples);
-            info->setText(q::util::format2<std::string>("Collected {} samples...", m_samples.size()).c_str());
+            info->setText(q::util::format<std::string>("Collected {} samples...", m_samples.size()).c_str());
             size_t needed_samples = std::chrono::seconds(DATA_COLLECTION_DURATION).count() * m_output.rate;
             progress->setValue(float(m_samples.size() * 100.f) / float(needed_samples));
             if (m_samples.size() >= needed_samples)
@@ -185,8 +185,8 @@ void Acceleration_Calibration_Wizard::prepare_step()
 
         ui.info->setText("Done!\n"
                          "The new Bias & Scale are:");
-        ui.bias->setText(q::util::format2<std::string>("{}", bias).c_str());
-        ui.scale->setText(q::util::format2<std::string>("{}", scale).c_str());
+        ui.bias->setText(q::util::format<std::string>("{}", bias).c_str());
+        ui.scale->setText(q::util::format<std::string>("{}", scale).c_str());
 
         sz::calibration::Acceleration point;
         point.temperature = 0;

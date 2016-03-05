@@ -525,6 +525,7 @@ void Multi_HUD_Widget::process()
 
     m_uav.enu_position = math::vec3f(math::transform(m_uav.ecef_to_enu_transform, m_state.position.value));
     m_uav.enu_velocity = math::vec3f(math::rotate(m_uav.ecef_to_enu_transform, math::vec3d(m_state.velocity.value)));
+    m_uav.enu_acceleration = math::vec3f(math::rotate(m_uav.ecef_to_enu_transform, math::vec3d(m_state.linear_acceleration.value)));
     m_uav.local_to_enu_quat = m_state.frame.value;
 
 
@@ -730,51 +731,56 @@ void Multi_HUD_Widget::render_modes()
     switch (m_commands.mode.get())
     {
     case silk::stream::IMulti_Commands::Mode::IDLE:
-        str = q::util::format2<std::string>("M:Idle");
+        str = q::util::format<std::string>("#55FF55IDLE");
         break;
     case silk::stream::IMulti_Commands::Mode::ARMED:
-        str = q::util::format2<std::string>("M:Armed");
+        str = q::util::format<std::string>("#FF5555ARMED");
         break;
     }
     m_context.texter.draw_string(m_context.painter, str, math::vec2f(0, 20));
 
-    float v_speed = m_uav.enu_velocity.z;
     switch (m_commands.vertical.mode.get())
     {
     case silk::stream::IMulti_Commands::Vertical::Mode::THRUST_RATE:
-        str = q::util::format2<std::string>("V:Rate:{.1}N/s | ALT:{.1}m | SPD:{.2}m/s", m_commands.vertical.thrust_rate.get(), m_uav.enu_position.z, v_speed);
+        str = q::util::format<std::string>("V RAT:#55FF55{,1}#FFFFFFN/s |", m_commands.vertical.thrust_rate.get());
         break;
     case silk::stream::IMulti_Commands::Vertical::Mode::THRUST:
-        str = q::util::format2<std::string>("V:Thrust:{.1}N | ALT:{.1}m | SPD:{.2}m/s", m_commands.vertical.thrust.get(), m_uav.enu_position.z, v_speed);
+        str = q::util::format<std::string>("V THR:#55FF55{,1}#FFFFFFN |", m_commands.vertical.thrust.get());
         break;
     case silk::stream::IMulti_Commands::Vertical::Mode::ALTITUDE:
-        str = q::util::format2<std::string>("V:Altitude:{.1}m | ALT:{.1}m | SPD:{.2}m/s", m_commands.vertical.altitude.get(), m_uav.enu_position.z, v_speed);
+        str = q::util::format<std::string>("V ALT:#55FF55{,1}#FFFFFFm |", m_commands.vertical.altitude.get());
         break;
     }
+    str = q::util::format<std::string>("{} ALT:#55FF55{,1}#FFFFFFm | SPD:#55FF55{,2}#FFFFFFm/s | ACC:#55FF55{,1}#FFFFFFm/s² | THR:#55FF55{,1}#FFFFFFN", str, m_uav.enu_position.z, m_uav.enu_velocity.z, m_uav.enu_acceleration.z, m_state.thrust.value );
     m_context.texter.draw_string(m_context.painter, str, math::vec2f(0, 50));
 
     float h_speed = math::length(math::vec2f(m_uav.enu_velocity.x, m_uav.enu_velocity.y));
     switch (m_commands.horizontal.mode.get())
     {
     case silk::stream::IMulti_Commands::Horizontal::Mode::ANGLE_RATE:
-        str = q::util::format2<std::string>("H:Rate:{.1}°/s | SPD:{.2}m/s", m_commands.horizontal.angle_rate.get(), h_speed);
+        str = q::util::format<std::string>("H RAT:#55FF55{,1}#FFFFFF°/s |", m_commands.horizontal.angle_rate.get());
         break;
     case silk::stream::IMulti_Commands::Horizontal::Mode::ANGLE:
-        str = q::util::format2<std::string>("H:Angle:{.1}° | SPD:{.2}m/s", math::degrees(m_commands.horizontal.angle.get()), h_speed);
+        {
+            float fx, fy, fz;
+            m_state.frame.value.get_as_euler_zxy(fx, fy, fz);
+            str = q::util::format<std::string>("H ANG:#55FF55{,1}#FFFFFF° |", math::degrees(math::vec2f(fx, fy)));
+        }
         break;
     case silk::stream::IMulti_Commands::Horizontal::Mode::POSITION:
-        str = q::util::format2<std::string>("H:Position:{.1}m | SPD:{.2}m/s", m_commands.horizontal.position.get(), h_speed);
+        str = q::util::format<std::string>("H POS:#55FF55{,1}#FFFFFFm |", math::vec2f(math::vec2d(m_state.position.value)));
         break;
     }
+    str = q::util::format<std::string>("{} SPD:#55FF55{,2}#FFFFFFm/s", str, h_speed);
     m_context.texter.draw_string(m_context.painter, str, math::vec2f(0, 80));
 
     switch (m_commands.yaw.mode.get())
     {
     case silk::stream::IMulti_Commands::Yaw::Mode::ANGLE_RATE:
-        str = q::util::format2<std::string>("Y:Rate:{.1}°/s", m_commands.yaw.angle_rate.get());
+        str = q::util::format<std::string>("Y RAT:#55FF55{,1}#FFFFFF°/s", m_commands.yaw.angle_rate.get());
         break;
     case silk::stream::IMulti_Commands::Yaw::Mode::ANGLE:
-        str = q::util::format2<std::string>("Y:Angle:{.1}°", math::degrees(m_commands.yaw.angle.get()));
+        str = q::util::format<std::string>("Y ANG:#55FF55{,1}#FFFFFF°", math::degrees(m_commands.yaw.angle.get()));
         break;
     }
     m_context.texter.draw_string(m_context.painter, str, math::vec2f(0, 110));
@@ -786,7 +792,6 @@ void Multi_HUD_Widget::render_horizon()
 {
     float yaw, pitch, roll;
     m_state.frame.value.get_as_euler_zxy(pitch, roll, yaw);
-
 
     auto mat = m_context.materials.primitive;
     mat.get_render_state(0).set_depth_test(true);
@@ -837,25 +842,79 @@ void Multi_HUD_Widget::render_horizon()
         m_context.painter.set_material(m_context.materials.font);
         m_border_text_style.height = 14;
         m_context.texter.set_style(m_border_text_style);
-        m_context.texter.draw_string(m_context.painter, q::util::format2<std::string>("{.1}°", math::degrees(pitch)).c_str(), out);
+        m_context.texter.draw_string(m_context.painter, q::util::format<std::string>("{.1}°", math::degrees(pitch)).c_str(), out);
     }
 }
 
 void Multi_HUD_Widget::render_altitude()
 {
-    //auto enu_position = math::transform(m_ecef_to_enu_trans, m_state.ecef_position.value);
+    auto mat = m_context.materials.primitive_2d;
+    mat.get_render_state(0).set_depth_test(true);
+    mat.get_render_state(0).set_depth_write(false);
+    mat.get_render_state(0).set_culling(false);
+    mat.get_render_state(0).set_blend_formula(q::video::Render_State::Blend_Formula::Preset::ALPHA);
+    m_context.painter.set_material(mat);
 
+    m_context.painter.set_material(m_context.materials.font);
+    m_border_text_style.height = 12;
+    m_context.texter.set_style(m_border_text_style);
 
-//    auto mat = m_context.materials.font;
-//    mat.get_render_state(0).set_depth_test(true);
-//    mat.get_render_state(0).set_depth_write(false);
-//    mat.get_render_state(0).set_culling(false);
-//    mat.get_render_state(0).set_blend_formula(q::video::Render_State::Blend_Formula::Preset::ALPHA);
-//    m_context.painter.set_material(mat);
+    float section_height_pixels = height() / 10.f;
+    constexpr float section_value = 10.f;
+    constexpr size_t tick_count = 10;
+    float tick_height_pixels = section_height_pixels / float(tick_count);
+    float tick_value = section_value / float(tick_count);
+    constexpr size_t section_count = 4;
+    constexpr float section_line_length = 30.f;
+    constexpr float tick_line_length = 12.f;
+
+    uint32_t color = 0x88FFFFFF;
+
+    float x = width() / 2.f + 200.f;
+    float center_y = height() / 2.f;
+    for (size_t s = 0; s < section_count; s++)
+    {
+        for (size_t t = 0; t < tick_count; t++)
+        {
+            float y = center_y + s * section_height_pixels + t * tick_height_pixels;
+            float value = m_uav.enu_position.z - s * section_value - t * tick_value;
+            if (value >= 0)
+            {
+                m_context.painter.set_material(mat);
+                m_context.painter.draw_line(q::draw::Vertex(math::vec2f(x, y), color), q::draw::Vertex(math::vec2f(x + tick_line_length, y), color));
+            }
+
+            y = center_y - s * section_height_pixels - t * tick_height_pixels;
+            m_context.painter.set_material(mat);
+            m_context.painter.draw_line(q::draw::Vertex(math::vec2f(x, y), color), q::draw::Vertex(math::vec2f(x + tick_line_length, y), color));
+        }
+
+        //lower altitudes
+        float y = center_y + s * section_height_pixels;
+        float value = m_uav.enu_position.z - s * section_value;
+        if (value >= 0)
+        {
+            m_context.painter.set_material(mat);
+            m_context.painter.draw_line(q::draw::Vertex(math::vec2f(x, y), color), q::draw::Vertex(math::vec2f(x + section_line_length, y), color));
+            m_context.painter.set_material(m_context.materials.font);
+            m_context.texter.draw_string(m_context.painter, q::util::format<std::string>("#77FF77{.1}m", value), math::vec2f(x + section_line_length + 4, y));
+        }
+
+        //higher altitudes
+        if (s != 0)
+        {
+            y = center_y - s * section_height_pixels;
+            value = m_uav.enu_position.z + s * section_value;
+            m_context.painter.set_material(mat);
+            m_context.painter.draw_line(q::draw::Vertex(math::vec2f(x, y), color), q::draw::Vertex(math::vec2f(x + section_line_length, y), color));
+            m_context.painter.set_material(m_context.materials.font);
+            m_context.texter.draw_string(m_context.painter, q::util::format<std::string>("#77FF77{.1}m", value), math::vec2f(x + section_line_length + 4, y));
+        }
+    }
 
 //    m_context.painter.set_material(m_context.materials.font);
 //    m_border_text_style.height = 20;
 //    m_context.texter.set_style(m_border_text_style);
-//    m_context.texter.draw_string(m_context.painter, q::util::format2<std::string>("ALT: {.1}m", m_uav.enu_position.z).c_str(), math::vec2f(0, 150));
+//    m_context.texter.draw_string(m_context.painter, q::util::format<std::string>("ALT: {.1}m", m_uav.enu_position.z).c_str(), math::vec2f(0, 150));
 }
 

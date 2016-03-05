@@ -43,7 +43,7 @@ auto PIGPIO::get_inputs() const -> std::vector<Input>
     std::vector<Input> inputs;
     for (PWM_Channel const& channel: m_pwm_channels)
     {
-        inputs.push_back({stream::IPWM::TYPE, channel.rate, q::util::format2<std::string>("GPIO {}", channel.gpio), channel.stream_path});
+        inputs.push_back({stream::IPWM::TYPE, channel.rate, q::util::format<std::string>("GPIO {}", channel.gpio), channel.stream_path});
     }
     return inputs;
 }
@@ -319,18 +319,18 @@ auto PIGPIO::get_config() const -> rapidjson::Document
         {
             if (it->is_servo)
             {
-                jsonutil::remove_value(json, q::Path(q::util::format2<q::String>("GPIO {}/Min PWM", i)));
-                jsonutil::remove_value(json, q::Path(q::util::format2<q::String>("GPIO {}/Max PWM", i)));
+                jsonutil::remove_value(json, q::Path(q::util::format<q::String>("GPIO {}/Min PWM", i)));
+                jsonutil::remove_value(json, q::Path(q::util::format<q::String>("GPIO {}/Max PWM", i)));
             }
             else
             {
-                jsonutil::remove_value(json, q::Path(q::util::format2<q::String>("GPIO {}/Min Servo (ms)", i)));
-                jsonutil::remove_value(json, q::Path(q::util::format2<q::String>("GPIO {}/Max Servo (ms)", i)));
+                jsonutil::remove_value(json, q::Path(q::util::format<q::String>("GPIO {}/Min Servo (ms)", i)));
+                jsonutil::remove_value(json, q::Path(q::util::format<q::String>("GPIO {}/Max Servo (ms)", i)));
             }
         }
         else
         {
-            jsonutil::remove_value(json, q::Path(q::util::format2<q::String>("GPIO {}", i)));
+            jsonutil::remove_value(json, q::Path(q::util::format<q::String>("GPIO {}", i)));
         }
     }
 

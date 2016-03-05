@@ -25,7 +25,7 @@ GS::GS(QWidget *parent)
 
 	show();
 
-    m_input_mgr.reset(new qinput::Input_Mgr(q::util::format2<q::String>("{}", uint64_t(winId()))));
+    m_input_mgr.reset(new qinput::Input_Mgr(q::util::format<q::String>("{}", uint64_t(winId()))));
 
     //m_comm_channel.connect(boost::asio::ip::address::from_string("127.0.0.1"), 52524);
 
@@ -109,7 +109,8 @@ void GS::init_graphics()
     m_context.materials.font.get_render_state(0).set_culling(false);
     m_context.materials.font.get_render_state(0).set_blend_formula(q::video::Render_State::Blend_Formula::Preset::ALPHA);
 
-    m_context.font = q::System::inst().get_factory().load<q::text::Font>(q::Path("fonts/DroidSans.ttf"));
+//    m_context.font = q::System::inst().get_factory().load<q::text::Font>(q::Path("fonts/DroidSans.ttf"));
+    m_context.font = q::System::inst().get_factory().load<q::text::Font>(q::Path("fonts/ConsolaMono.ttf"));
     QASSERT(m_context.font);
 }
 
@@ -203,7 +204,7 @@ void GS::set_remote_address(std::string const& address)
     QSettings settings;
     settings.setValue("address", address.c_str());
 
-//    m_ui.statusBar->showMessage(q::util::format2<std::string>("Connecting to {}", address).c_str(), 2000);
+//    m_ui.statusBar->showMessage(q::util::format<std::string>("Connecting to {}", address).c_str(), 2000);
 }
 
 void GS::process()

@@ -77,7 +77,7 @@ void Angular_Velocity_Calibration_Wizard::prepare_step()
         ui.setupUi(m_content);
         if (m_initial_calibration.points.size() > 0)
         {
-            ui.info->setText(q::util::format2<std::string>("There are currently {} calibration points.\n"
+            ui.info->setText(q::util::format<std::string>("There are currently {} calibration points.\n"
                                                            "Do you want to clear these points or keep them?", m_initial_calibration.points.size()).c_str());
             auto* clear = ui.buttonBox->addButton("Clear", QDialogButtonBox::ResetRole);
             QObject::connect(clear, &QPushButton::released, [this]() { advance(); });
@@ -105,7 +105,7 @@ void Angular_Velocity_Calibration_Wizard::prepare_step()
 
         Ui::Angular_Velocity_Calibration_Wizard_Instructions ui;
         ui.setupUi(m_content);
-        ui.instructions->setText(q::util::format2<std::string>(
+        ui.instructions->setText(q::util::format<std::string>(
                                     "Please keep the UAV perfectly still for {} seconds.\n"
                                     "\n"
                                     "Ready?", DATA_COLLECTION_DURATION).c_str());
@@ -136,7 +136,7 @@ void Angular_Velocity_Calibration_Wizard::prepare_step()
         m_connection = m_stream->samples_available_signal.connect([this, info, progress](silk::stream::gs::Angular_Velocity::Samples const& samples)
         {
             on_samples_received(samples);
-            info->setText(q::util::format2<std::string>("Collected {} samples...", m_samples.size()).c_str());
+            info->setText(q::util::format<std::string>("Collected {} samples...", m_samples.size()).c_str());
             size_t needed_samples = std::chrono::seconds(DATA_COLLECTION_DURATION).count() * m_output.rate;
             progress->setValue(float(m_samples.size() * 100.f) / float(needed_samples));
             if (m_samples.size() >= needed_samples)
@@ -158,7 +158,7 @@ void Angular_Velocity_Calibration_Wizard::prepare_step()
 
         ui.info->setText("Done!\n"
                          "The new Bias is:");
-        ui.bias->setText(q::util::format2<std::string>("{}", bias).c_str());
+        ui.bias->setText(q::util::format<std::string>("{}", bias).c_str());
 
         sz::calibration::Angular_Velocity point;
         point.temperature = 0;

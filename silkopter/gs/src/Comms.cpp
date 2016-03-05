@@ -19,7 +19,7 @@ Comms::Comms(HAL& hal)
     : m_hal(hal)
     , m_setup_channel(SETUP_CHANNEL)
     , m_pilot_channel(PILOT_CHANNEL)
-    , m_video_channel(PILOT_CHANNEL)
+    , m_video_channel(VIDEO_CHANNEL)
     , m_telemetry_channel(TELEMETRY_CHANNEL)
 {
 }
@@ -186,6 +186,7 @@ auto Comms::get_setup_channel() -> Setup_Channel&
 
 void Comms::reset()
 {
+    m_hal.m_node_defs.remove_all();
     m_hal.m_nodes.remove_all();
     m_hal.m_streams.remove_all();
 }
@@ -425,6 +426,8 @@ void Comms::handle_multi_config()
 
 void Comms::handle_enumerate_node_defs()
 {
+    m_hal.m_node_defs.remove_all();
+
     uint32_t node_count = 0;
     if (!m_setup_channel.begin_unpack() ||
         !m_setup_channel.unpack_param(node_count))
