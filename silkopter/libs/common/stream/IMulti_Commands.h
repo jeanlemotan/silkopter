@@ -191,6 +191,7 @@ public:
                 && functor("yaw.angle", values.yaw.angle...)
                 && functor("gimbal.reference_frame", values.gimbal.reference_frame...)
                 && functor("gimbal.target_frame", values.gimbal.target_frame...)
+                && functor("mode", values.mode...)
                 && functor("reference_frame", values.reference_frame...)
                 && functor("assists.stay_in_battery_range", values.assists.stay_in_battery_range...)
                 && functor("assists.stay_in_perimeter", values.assists.stay_in_perimeter...)
