@@ -12,11 +12,12 @@ namespace formatting
 {
 	struct Placeholder
 	{
-		Placeholder() : alignment(0), precision(0), base_case(0), base(10), filler(' ') {}
+        Placeholder() : alignment(0), precision(0), fixed_precision(0), base_case(0), base(10), filler(' ') {}
 		int8_t alignment;
 		int8_t precision;
-		uint8_t base_case : 1; //lower == 0 / upper case == 1
-		uint8_t base : 7;
+        uint8_t fixed_precision : 1;
+        uint8_t base_case : 1; //lower == 0 / upper case == 1
+        uint8_t base : 6;
 		char filler;
 	};
 
@@ -445,7 +446,7 @@ namespace formatting
 		v = floor(frac * detail::s_pow_10[precision] + 0.5f);
 		if (v > 0.0f)
 		{
-			//	3.	42 + 100000 = 100042
+            //	3.	42 + 100000 = 100042
 			v += detail::s_pow_10[precision];
 			do
 			{
@@ -485,8 +486,8 @@ namespace formatting
 			ph2.alignment = 0;
 			format_string(dst, ph2, whole_parts[whole_parts_count - 1]);
 
-			//next parts are 9 digits each
-			ph2.alignment = 9;
+            //next parts are 6 digits each
+            ph2.alignment = 6;
 			for (int8_t i = whole_parts_count - 2; i >= 0; i--)
 			{
 				format_string(dst, ph2, whole_parts[i]);
@@ -497,35 +498,49 @@ namespace formatting
 			format_string(dst, ph, is_negative ? "-0" : "0");
 		}
 
-		if (frac_parts_count > 0)
+        FString<16> frac_buf;
+        if (frac_parts_count > 0)
 		{
-			FString<16> buf;
 			//auto decimal_point_off = dst.size();
 			//parseToString(dst, off, Placeholder(), '.');
 
 			//first part - no alignment needed
 			ph2.alignment = 0;
-			format_string(buf, ph2, frac_parts[frac_parts_count - 1]);
+            format_string(frac_buf, ph2, frac_parts[frac_parts_count - 1]);
 
-			//middle part - alignment is 9
-			ph2.alignment = 9;
+            //middle part - alignment is 6
+            ph2.alignment = 6;
 			for (int8_t i = frac_parts_count - 2; i >= 1; i--)
 			{
-				format_string(buf, ph2, frac_parts[i]);
+                format_string(frac_buf, ph2, frac_parts[i]);
 			}
 
 			if (frac_parts_count > 1)
 			{
 				//the last part might be cut as we remove zeroes from it
 				ph2.alignment = last_frac_part_alignment;
-				format_string(buf, ph2, frac_parts[0]);
+                format_string(frac_buf, ph2, frac_parts[0]);
 			}
 
-			//overwrite the 1 from the frac part with the decimal point
-			buf[0] = '.';
+            //overwrite the 1 from the frac part with the decimal point
+            frac_buf[0] = '.';
+        }
+        else
+        {
+            frac_buf = ".";
+        }
 
-			dst.append(buf.data(), buf.data() + buf.size());
-		}
+        //add decimal zeros until the fixed precision is done
+        while (ph.fixed_precision && frac_buf.size() < ph.precision + 1) //+1 for he decimal dot
+        {
+            frac_buf.append('0');
+        }
+
+        //if we have frac data, append it to the buffer
+        if (frac_buf.size() > 1)
+        {
+            dst.append(frac_buf.data(), frac_buf.data() + frac_buf.size());
+        }
 	}
 
 	template<class Dst_Adapter, class Placeholder, class P0, class P1>
@@ -707,7 +722,17 @@ namespace formatting
 			ph.base = 16;
 			ch = fmt_adapter.get_and_advance();
 		}
-		else if (ch == '.')
+        else if (ch == 'a')
+        {
+            ch = fmt_adapter.get_and_advance();
+            if (ch < '0' || ch > '9')
+            {
+                return false;
+            }
+            ph.alignment = ch - '0';
+            ch = fmt_adapter.get_and_advance();
+        }
+        else if (ch == '.')
 		{
 			ch = fmt_adapter.get_and_advance();
 			if (ch < '0' || ch > '9')
@@ -717,7 +742,18 @@ namespace formatting
 			ph.precision = ch - '0';
 			ch = fmt_adapter.get_and_advance();
 		}
-		return (ch == '}');
+        else if (ch == ',')
+        {
+            ch = fmt_adapter.get_and_advance();
+            if (ch < '0' || ch > '9')
+            {
+                return false;
+            }
+            ph.precision = ch - '0';
+            ph.fixed_precision = 1;
+            ch = fmt_adapter.get_and_advance();
+        }
+        return (ch == '}');
 	}
 
 	template<class Dst_Adapter, class Format_String_Adapter>
@@ -785,7 +821,7 @@ Dst& format_emplace(Dst& dst, Format_String const& fmt, Params&&... params) // r
 }
 
 template<class Dst, class Format_String, typename... Params>
-Dst format2(Format_String const& fmt, Params&&... params) // recursive variadic function
+Dst format(Format_String const& fmt, Params&&... params) // recursive variadic function
 {
 	Dst dst;
 	util::formatting::Dst_Adapter<Dst> dst_adapter(dst);
