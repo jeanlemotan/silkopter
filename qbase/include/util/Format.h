@@ -531,7 +531,7 @@ namespace formatting
         }
 
         //add decimal zeros until the fixed precision is done
-        while (ph.fixed_precision && frac_buf.size() < ph.precision + 1) //+1 for he decimal dot
+        while (ph.fixed_precision && frac_buf.size() < static_cast<size_t>(ph.precision + 1)) //+1 for he decimal dot
         {
             frac_buf.append('0');
         }
