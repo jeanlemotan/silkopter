@@ -20,7 +20,7 @@ public:
 
     struct Config
     {
-        float full_charge = 1;//Ah
+        float full_charge = 3;//Ah
 
     };
 
