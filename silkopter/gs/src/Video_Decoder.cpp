@@ -125,7 +125,7 @@ auto Video_Decoder::decode_frame(silk::stream::gs::Video::Value const& frame, ma
                                                     frame_w, frame_h,
                                                     m_ffmpeg.context->pix_fmt,
                                                     size.x, size.y,
-                                                    format == Format::BGRA ? PIX_FMT_RGB32 : PIX_FMT_BGR32, //inverted for some reason
+                                                    format == Format::BGRA ? AV_PIX_FMT_RGB32 : AV_PIX_FMT_BGR32, //inverted for some reason
                                                     SWS_FAST_BILINEAR, nullptr, nullptr, nullptr);
 
         if (m_ffmpeg.sws_context)
