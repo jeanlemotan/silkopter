@@ -55,7 +55,10 @@ private:
     std::shared_ptr<sz::Servo_Gimbal::Init_Params> m_init_params;
     std::shared_ptr<sz::Servo_Gimbal::Config> m_config;
 
-    Sample_Accumulator<stream::IUAV_Frame, stream::IMulti_Commands> m_accumulator;
+    Sample_Accumulator<stream::IUAV_Frame> m_frame_accumulator;
+    Sample_Accumulator<stream::IMulti_Commands> m_commands_accumulator;
+
+    stream::IMulti_Commands::Sample m_commands_sample;
 
     std::vector<stream::IUAV_Frame::Sample> m_frame_samples;
     std::vector<stream::IUAV_Frame::Sample> m_target_frame_samples;

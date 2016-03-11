@@ -29,8 +29,9 @@
 
 namespace sz { namespace Servo_Gimbal { struct Init_Params {
  uint32_t rate;
+uint32_t commands_rate;
 
-explicit Init_Params():rate(0) {  }
+explicit Init_Params():rate(0), commands_rate(0) {  }
 
 
  
@@ -47,7 +48,9 @@ private:
     int state;
     int depth;
 
-    SAXEventHandler< uint32_t > handler_0;bool has_rate;
+    SAXEventHandler< uint32_t > handler_0;
+SAXEventHandler< uint32_t > handler_1;bool has_rate;
+bool has_commands_rate;
 
     bool check_depth(const char* type)
     {
@@ -63,6 +66,8 @@ private:
         switch (state) {
             case 0:
     return "rate";
+case 1:
+    return "commands_rate";
         default:
             break;
         }
@@ -90,6 +95,7 @@ private:
     void reset_flags()
     {
         has_rate = false;
+has_commands_rate = false;
     }
 
 public:
@@ -97,6 +103,7 @@ public:
         : state(-1)
         , depth(0)
         , handler_0(&obj->rate)
+, handler_1(&obj->commands_rate)
     {
         reset_flags();
     }
@@ -110,6 +117,9 @@ public:
 
         case 0:
     return checked_event_forwarding(handler_0.Null());
+
+case 1:
+    return checked_event_forwarding(handler_1.Null());
 
         default:
             break;
@@ -127,6 +137,9 @@ public:
         case 0:
     return checked_event_forwarding(handler_0.Bool(b));
 
+case 1:
+    return checked_event_forwarding(handler_1.Bool(b));
+
         default:
             break;
         }
@@ -142,6 +155,9 @@ public:
 
         case 0:
     return checked_event_forwarding(handler_0.Int(i));
+
+case 1:
+    return checked_event_forwarding(handler_1.Int(i));
 
         default:
             break;
@@ -159,6 +175,9 @@ public:
         case 0:
     return checked_event_forwarding(handler_0.Uint(i));
 
+case 1:
+    return checked_event_forwarding(handler_1.Uint(i));
+
         default:
             break;
         }
@@ -174,6 +193,9 @@ public:
 
         case 0:
     return checked_event_forwarding(handler_0.Int64(i));
+
+case 1:
+    return checked_event_forwarding(handler_1.Int64(i));
 
         default:
             break;
@@ -191,6 +213,9 @@ public:
         case 0:
     return checked_event_forwarding(handler_0.Uint64(i));
 
+case 1:
+    return checked_event_forwarding(handler_1.Uint64(i));
+
         default:
             break;
         }
@@ -206,6 +231,9 @@ public:
 
         case 0:
     return checked_event_forwarding(handler_0.Double(d));
+
+case 1:
+    return checked_event_forwarding(handler_1.Double(d));
 
         default:
             break;
@@ -223,6 +251,9 @@ public:
         case 0:
     return checked_event_forwarding(handler_0.String(str, length, copy));
 
+case 1:
+    return checked_event_forwarding(handler_1.String(str, length, copy));
+
         default:
             break;
         }
@@ -239,6 +270,8 @@ public:
             }
             else if (utility::string_equal(str, length, "\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 9))
 						 { state=0; has_rate = true; }
+else if (utility::string_equal(str, length, "\x43\x6f\x6d\x6d\x61\x6e\x64\x73\x20\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 18))
+						 { state=1; has_commands_rate = true; }
             else {
                 state = -1;
                 return true;
@@ -249,6 +282,9 @@ public:
 
             case 0:
     return checked_event_forwarding(handler_0.Key(str, length, copy));
+
+case 1:
+    return checked_event_forwarding(handler_1.Key(str, length, copy));
 
             default:
                 break;
@@ -267,6 +303,9 @@ public:
         case 0:
     return checked_event_forwarding(handler_0.StartArray());
 
+case 1:
+    return checked_event_forwarding(handler_1.StartArray());
+
         default:
             break;
         }
@@ -283,6 +322,9 @@ public:
         case 0:
     return checked_event_forwarding(handler_0.EndArray(length));
 
+case 1:
+    return checked_event_forwarding(handler_1.EndArray(length));
+
         default:
             break;
         }
@@ -298,6 +340,9 @@ public:
 
             case 0:
     return checked_event_forwarding(handler_0.StartObject());
+
+case 1:
+    return checked_event_forwarding(handler_1.StartObject());
 
             default:
                 break;
@@ -316,11 +361,15 @@ public:
             case 0:
     return checked_event_forwarding(handler_0.EndObject(length));
 
+case 1:
+    return checked_event_forwarding(handler_1.EndObject(length));
+
             default:
                 break;
             }
         } else {
             if (!has_rate) set_missing_required("rate");
+if (!has_commands_rate) set_missing_required("commands_rate");
         }
         return the_error.empty();
     }
@@ -341,6 +390,8 @@ public:
 
         case 0:
      handler_0.ReapError(errs); break;
+case 1:
+     handler_1.ReapError(errs); break;
 
         default:
             break;
@@ -356,6 +407,7 @@ public:
         the_error.reset();
         reset_flags();
         handler_0.PrepareForReuse();
+handler_1.PrepareForReuse();
 
     }
 };
@@ -368,8 +420,9 @@ struct Serializer< Writer257ededf43beca45e514ae35e310a145a92619b350442eca4b1c41c
         w.StartObject();
 
         w.Key("\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 9, false); Serializer< Writer257ededf43beca45e514ae35e310a145a92619b350442eca4b1c41c494ffc12e, uint32_t >()(w, value.rate);
+w.Key("\x43\x6f\x6d\x6d\x61\x6e\x64\x73\x20\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 18, false); Serializer< Writer257ededf43beca45e514ae35e310a145a92619b350442eca4b1c41c494ffc12e, uint32_t >()(w, value.commands_rate);
 
-        w.EndObject(1);
+        w.EndObject(2);
     }
 
 };

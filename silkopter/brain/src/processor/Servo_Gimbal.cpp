@@ -40,7 +40,7 @@ auto Servo_Gimbal::init() -> bool
 {
     if (m_init_params->rate == 0)
     {
-        QLOGE("Bad rate: {}Hz", m_init_params->rate);
+        QLOGE("Bad frame rate: {}Hz", m_init_params->rate);
         return false;
     }
 
@@ -62,8 +62,8 @@ auto Servo_Gimbal::get_inputs() const -> std::vector<Input>
 {
     std::vector<Input> inputs =
     {{
-        { stream::IUAV_Frame::TYPE, m_init_params->rate, "UAV Frame", m_accumulator.get_stream_path(0) },
-        { stream::IMulti_Commands::TYPE, m_init_params->rate, "Commands", m_accumulator.get_stream_path(1) }
+        { stream::IUAV_Frame::TYPE, m_init_params->rate, "UAV Frame", m_frame_accumulator.get_stream_path(0) },
+        { stream::IMulti_Commands::TYPE, m_init_params->commands_rate, "Commands", m_commands_accumulator.get_stream_path(0) }
     }};
     return inputs;
 }
@@ -86,20 +86,25 @@ void Servo_Gimbal::process()
     m_y_output_stream->clear();
     m_z_output_stream->clear();
 
-    m_accumulator.process([this](stream::IUAV_Frame::Sample const& i_sample, stream::IMulti_Commands::Sample const& i_commands)
+    m_commands_accumulator.process([this](stream::IMulti_Commands::Sample const& i_commands)
     {
-        if (i_sample.is_healthy && i_commands.is_healthy)
+        m_commands_sample = i_commands;
+    });
+
+    m_frame_accumulator.process([this](stream::IUAV_Frame::Sample const& i_sample)
+    {
+        if (i_sample.is_healthy && m_commands_sample.is_healthy)
         {
             math::quatf rotation;
 
 
-            if (i_commands.value.gimbal.reference_frame.get() == stream::IMulti_Commands::Gimbal::Reference_Frame::GIMBAL)
+            if (m_commands_sample.value.gimbal.reference_frame.get() == stream::IMulti_Commands::Gimbal::Reference_Frame::GIMBAL)
             {
-                rotation = i_commands.value.gimbal.target_frame.get();
+                rotation = m_commands_sample.value.gimbal.target_frame.get();
             }
             else
             {
-                math::quatf const& target_rotation = i_commands.value.gimbal.target_frame.get();
+                math::quatf const& target_rotation = m_commands_sample.value.gimbal.target_frame.get();
                 rotation = math::inverse(i_sample.value) * target_rotation;
             }
 
@@ -139,7 +144,7 @@ void Servo_Gimbal::process()
         {
             m_x_output_stream->push_last_sample(false);
             m_y_output_stream->push_last_sample(false);
-            m_y_output_stream->push_last_sample(false);
+            m_z_output_stream->push_last_sample(false);
         }
     });
 
@@ -147,7 +152,14 @@ void Servo_Gimbal::process()
 
 void Servo_Gimbal::set_input_stream_path(size_t idx, q::Path const& path)
 {
-    m_accumulator.set_stream_path(idx, path, m_init_params->rate, m_hal);
+    if (idx == 0)
+    {
+        m_frame_accumulator.set_stream_path(0, path, m_init_params->rate, m_hal);
+    }
+    else if (idx == 1)
+    {
+        m_commands_accumulator.set_stream_path(0, path, m_init_params->commands_rate, m_hal);
+    }
 }
 
 auto Servo_Gimbal::set_config(rapidjson::Value const& json) -> bool
