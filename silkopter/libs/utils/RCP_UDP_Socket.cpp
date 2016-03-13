@@ -1,5 +1,7 @@
 #include "RCP_UDP_Socket.h"
 
+#if !defined RASPBERRY_PI
+
 namespace util
 {
 
@@ -218,3 +220,5 @@ auto RCP_UDP_Socket::process() -> Result
 
 
 }
+
+#endif

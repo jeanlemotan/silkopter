@@ -2,6 +2,7 @@
 #include "HAL.h"
 #include "Comms.h"
 
+#if !defined RASPBERRY_PI
 extern "C"
 {
 #include <libavutil/opt.h>
@@ -13,11 +14,13 @@ extern "C"
 #include <libavformat/avformat.h>
 #include <libswscale/swscale.h>
 }
+#endif
 
 bool Video_Decoder::s_codecs_registered = false;
 
 Video_Decoder::Video_Decoder()
 {
+#if !defined RASPBERRY_PI
     if (!s_codecs_registered)
     {
         av_register_all();
@@ -84,10 +87,12 @@ Video_Decoder::Video_Decoder()
     m_ffmpeg.rgb.reset(new AVPicture);
     m_ffmpeg.rgb->linesize[0] = 0;
     m_ffmpeg.rgb->data[0] = nullptr;
+#endif
 }
 
 Video_Decoder::~Video_Decoder()
 {
+#if !defined RASPBERRY_PI
     m_ffmpeg.rgb.reset();
     sws_freeContext(m_ffmpeg.sws_context);
     m_ffmpeg.sws_context = nullptr;
@@ -96,11 +101,13 @@ Video_Decoder::~Video_Decoder()
     av_frame_free(&m_ffmpeg.frame_yuv);
     avcodec_close(m_ffmpeg.context);
     avcodec_free_context(&m_ffmpeg.context);
+#endif
 }
 
 
 auto Video_Decoder::decode_frame(silk::stream::gs::Video::Value const& frame, math::vec2u32 const& size, std::vector<uint8_t>& data, Format format) -> bool
 {
+#if !defined RASPBERRY_PI
     AVPacket packet;
     av_init_packet(&packet);
 
@@ -149,5 +156,8 @@ auto Video_Decoder::decode_frame(silk::stream::gs::Video::Value const& frame, ma
         }
     }
     return false;
+#else
+    return false;
+#endif
 }
 

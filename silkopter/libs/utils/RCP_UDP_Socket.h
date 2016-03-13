@@ -1,10 +1,13 @@
 #pragma once
 
+#if !defined RASPBERRY_PI
+
 #include "RCP.h"
 #include <boost/asio.hpp>
 
 namespace util
 {
+
 
 class RCP_UDP_Socket : public RCP_Socket
 {
@@ -61,4 +64,7 @@ private:
     uint16_t m_receive_port = 0;
 };
 
+
 }
+
+#endif
