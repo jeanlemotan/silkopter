@@ -2,3 +2,4 @@
 *.qinput
 /Makefile
 /.obj/
+*.rpi
