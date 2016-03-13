@@ -3,6 +3,9 @@
 #if defined Q_LINUX
 #   define GL_FUN(x) x
 #   define GL_FUN2(interf, x) x
+#elif defined Q_RASPBERRY_PI
+#   define GL_FUN(x) x
+#   define GL_FUN2(interf, x) x
 #else
 #   define GL_FUN(x) this->m_funcs->_##x
 #   define GL_FUN2(interf, x) interf->m_funcs->_##x

@@ -1161,6 +1161,8 @@ void Interface::iglRenderbufferStorageMultisample(iGLenum target, iGLsizei sampl
 	}
 	glRenderbufferStorageMultisampleAPPLE(target, samples, internalformat, width, height);
 	iassertNoError();
+#elif defined Q_RASPBERRY_PI
+    QASSERT(0); //not implemented yet
 #else
     GL_FUN2(interf, glRenderbufferStorageMultisample(target, samples, internalformat, width, height));
     iassertNoError();
@@ -1178,6 +1180,8 @@ void Interface::iglBlitFramebuffer(iGLint srcX0, iGLint srcY0, iGLint srcX1, iGL
 	// a bug in in ipad3 driver seems to discard other attachments sometimes  (more precisely, the color attachment), so this code is disabled by now
 	//GLenum attachments[] = { GL_DEPTH_ATTACHMENT, GL_STENCIL_ATTACHMENT };
 	//glDiscardFramebufferEXT(GL_READ_FRAMEBUFFER_APPLE, 2, attachments);
+#elif defined Q_RASPBERRY_PI
+    QASSERT(0); //not implemented yet
 #else
     GL_FUN2(interf, glBlitFramebuffer(srcX0, srcY0, srcX1, srcY1, dstX0, dstY0, dstX1, dstY1, mask, filter));
 #endif
@@ -1666,6 +1670,8 @@ iGLvoid* Interface::iglMapBuffer(iGLenum target, iGLenum access)
 	interf->flush();
 #if defined(Q_IOS)
     auto ret = ::glMapBufferOES(target, access);
+#elif defined(Q_RASPBERRY_PI)
+    auto ret = ::glMapBufferOES(target, access);
 #else
     auto ret = GL_FUN2(interf, glMapBuffer(target, access));
 #endif
@@ -1679,6 +1685,8 @@ iGLboolean Interface::iglUnmapBuffer(iGLenum target)
 	interf->flush();
 
 #if defined(Q_IOS)
+    iGLboolean b = ::glUnmapBufferOES(target);
+#elif defined(Q_RASPBERRY_PI)
     iGLboolean b = ::glUnmapBufferOES(target);
 #else
     iGLboolean b = GL_FUN2(interf, glUnmapBuffer(target));
@@ -1697,9 +1705,10 @@ void Interface::iglBindVertexArray(iGLuint array)
 	if (state.bindVertexArray != array)
 	{
 		state.bindVertexArray = array;
-		GL_FUN2(interf, glBindVertexArray(array));
 #if defined(Q_IOS)
         glBindVertexArrayOES(array);
+#elif defined(Q_RASPBERRY_PI)
+        QASSERT(0); //not implemented yet
 #else
         GL_FUN2(interf, glBindVertexArray(array));
 #endif
@@ -1712,6 +1721,8 @@ void Interface::iglDeleteVertexArrays(iGLsizei n, const iGLuint* arrays)
 	interf->flush();
 #if defined(Q_IOS)
     glDeleteVertexArraysOES(n, arrays);
+#elif defined(Q_RASPBERRY_PI)
+    QASSERT(0); //not implemented yet
 #else
     GL_FUN2(interf, glDeleteVertexArrays(n, arrays));
 #endif
@@ -1723,8 +1734,10 @@ void Interface::iglGenVertexArrays(iGLsizei n, iGLuint* arrays)
 	interf->flush();
 #if defined(Q_IOS)
     glGenVertexArraysOES(n, arrays);
+#elif defined(Q_RASPBERRY_PI)
+    QASSERT(0); //not implemented yet
 #else
-    GL_FUN2(interf, glGenVertexArrays(n, arrays));
+    glGenVertexArraysOES(n, arrays);
 #endif
 	iassertNoError();
 }
@@ -1734,6 +1747,9 @@ iGLboolean Interface::iglIsVertexArray(iGLuint array)
 	interf->flush();
 #if defined(Q_IOS)
     iGLboolean res = glIsVertexArrayOES(array);
+#elif defined(Q_RASPBERRY_PI)
+    iGLboolean res = iGL_FALSE;
+    QASSERT(0); //not implemented yet
 #else
     iGLboolean res = GL_FUN2(interf, glIsVertexArray(array));
 #endif
@@ -1748,6 +1764,8 @@ void Interface::iglGenQueries(iGLsizei n, iGLuint* ids)
 	interf->flush();
 #if defined(Q_IOS)
     QASSERT(0); //not implemented yet
+#elif defined(Q_RASPBERRY_PI)
+    QASSERT(0); //not implemented yet
 #else
     GL_FUN2(interf, glGenQueries(n, ids));
 #endif
@@ -1759,6 +1777,8 @@ void Interface::iglDeleteQueries(iGLsizei n, const iGLuint* ids)
 	interf->flush();
 #if defined(Q_IOS)
     QASSERT(0); //not implemented
+#elif defined(Q_RASPBERRY_PI)
+    QASSERT(0); //not implemented
 #else
     GL_FUN2(interf, glDeleteQueries(n, ids));
 #endif
@@ -1769,6 +1789,9 @@ iGLboolean Interface::iglIsQuery(iGLuint id)
 	auto interf = get_interface();
 	interf->flush();
 #if defined(Q_IOS)
+    iGLboolean res = iGL_FALSE;
+    QASSERT(0); //not implemented
+#elif defined(Q_RASPBERRY_PI)
     iGLboolean res = iGL_FALSE;
     QASSERT(0); //not implemented
 #else
@@ -1783,6 +1806,8 @@ void Interface::iglBeginQuery(iGLenum target, iGLuint id)
 	interf->flush();
 #if defined(Q_IOS)
     QASSERT(0); //not implemented
+#elif defined(Q_RASPBERRY_PI)
+    QASSERT(0); //not implemented
 #else
     GL_FUN2(interf, glBeginQuery(target, id));
 #endif
@@ -1793,6 +1818,8 @@ void Interface::iglEndQuery(iGLenum target)
 	auto interf = get_interface();
 	interf->flush();
 #if defined(Q_IOS)
+    QASSERT(0); //not implemented
+#elif defined(Q_RASPBERRY_PI)
     QASSERT(0); //not implemented
 #else
     GL_FUN2(interf, glEndQuery(target));
@@ -1805,6 +1832,8 @@ void Interface::iglGetQueryiv(iGLenum target, iGLenum pname, iGLint* params)
 	interf->flush();
 #if defined(Q_IOS)
     QASSERT(0); //not implemented
+#elif defined(Q_RASPBERRY_PI)
+    QASSERT(0); //not implemented
 #else
     GL_FUN2(interf, glGetQueryiv(target, pname, params));
 #endif
@@ -1816,6 +1845,8 @@ void Interface::iglGetQueryObjectiv(iGLuint id, iGLenum pname, iGLint* params)
 	interf->flush();
 #if defined(Q_IOS)
     QASSERT(0); //not implemented
+#elif defined(Q_RASPBERRY_PI)
+    QASSERT(0); //not implemented
 #else
     GL_FUN2(interf, glGetQueryObjectiv(id, pname, params));
 #endif
@@ -1826,6 +1857,8 @@ void Interface::iglGetQueryObjectuiv(iGLuint id, iGLenum pname, iGLuint* params)
 	auto interf = get_interface();
 	interf->flush();
 #if defined(Q_IOS)
+    QASSERT(0); //not implemented
+#elif defined(Q_RASPBERRY_PI)
     QASSERT(0); //not implemented
 #else
     GL_FUN2(interf, glGetQueryObjectuiv(id, pname, params));
@@ -1839,6 +1872,8 @@ void Interface::iglTexStorage2D(iGLenum target, iGLsizei levels, iGLenum interna
 	interf->flush();
 #if defined(Q_IOS)
     glTexStorage2DEXT(target, levels, internalformat, width, height);
+#elif defined(Q_RASPBERRY_PI)
+    QASSERT(0); //not implemented
 #else
     GL_FUN2(interf, glTexStorage2D(target, levels, internalformat, width, height));
 #endif

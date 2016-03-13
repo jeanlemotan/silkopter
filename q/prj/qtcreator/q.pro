@@ -8,7 +8,9 @@ INCLUDEPATH += ../../../qbase/include
 INCLUDEPATH += ../../../qdata/include
 INCLUDEPATH += ../../../qmath/include
 INCLUDEPATH += /usr/include/freetype2
-INCLUDEPATH += /opt/vc/include
+
+QMAKE_CXXFLAGS += -isystem =/opt/vc/include -isystem =/opt/vc/include/interface/vcos/pthreads -isystem =/opt/vc/include/interface/vmcs_host/linux
+
 
 PRECOMPILED_HEADER = ../../include/QStdAfx.h
 CONFIG *= precompile_header
@@ -19,6 +21,7 @@ QMAKE_CFLAGS += -Wno-unused-variable
 rpi {
     DEFINES+=RASPBERRY_PI
     QMAKE_MAKEFILE = "Makefile.rpi"
+    MAKEFILE = "Makefile.rpi"
     CONFIG(debug, debug|release) {
         DEST_FOLDER = rpi/debug
     }

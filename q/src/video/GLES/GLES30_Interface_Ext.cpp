@@ -69,6 +69,8 @@ iGLboolean gles30IsVertexArray(iGLuint array)
 }
 #endif
 
+#if !defined Q_RASPBERRY_PI
+
 void Interface::iglDrawBuffers(iGLsizei n, const iGLenum* bufs)
 {
 	QASSERT(n > 0 && n <= 4);
@@ -113,6 +115,7 @@ iGLvoid Interface::iglFlushMappedBufferRange(iGLenum target, iGLintptr offset, i
 	iassertNoError();
 }
 
+#endif
 
 }
 }
