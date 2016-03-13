@@ -21,6 +21,7 @@ QMAKE_CFLAGS += -Wno-unused-variable
 rpi {
     DEFINES+=RASPBERRY_PI
     QMAKE_MAKEFILE = "Makefile.rpi"
+    MAKEFILE = "Makefile.rpi"
     CONFIG(debug, debug|release) {
         DEST_FOLDER = rpi/debug
     }
