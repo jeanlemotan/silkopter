@@ -11,6 +11,10 @@
 #	include "video/GLES/std_glext.h"
 #	pragma comment(lib, "OpenGL32.lib")
 #	pragma comment(lib, "GLu32.lib")
+#elif defined (Q_RASPBERRY_PI)
+#   define GL_GLEXT_PROTOTYPES
+#   include <GLES2/gl2.h>
+#   include <GLES2/gl2ext.h>
 #elif defined(Q_LINUX)
 #	define GL_GLEXT_PROTOTYPES
 #	include <GL/gl.h>

@@ -12,11 +12,27 @@ VERSION = 0.9.7.8
 
 DEFINES += QMAPCONTROL_LIBRARY
 
-CONFIG(debug, debug|release) {
-    DEST_FOLDER = pc/debug
+rpi {
+    DEFINES+=RASPBERRY_PI
+    QMAKE_MAKEFILE = "Makefile.rpi"
+    CONFIG(debug, debug|release) {
+        DEST_FOLDER = rpi/debug
+    }
+    CONFIG(release, debug|release) {
+        DEST_FOLDER = rpi/release
+        DEFINES += NDEBUG
+    }
 } else {
-    DEST_FOLDER = pc/release
+    QMAKE_MAKEFILE = "Makefile"
+    CONFIG(debug, debug|release) {
+        DEST_FOLDER = pc/debug
+    }
+    CONFIG(release, debug|release) {
+        DEST_FOLDER = pc/release
+        DEFINES += NDEBUG
+    }
 }
+
 
 OBJECTS_DIR = ./.obj/$${DEST_FOLDER}
 MOC_DIR = ./.moc/$${DEST_FOLDER}

@@ -14,7 +14,7 @@ using namespace logging;
 void Console_Logger::log(Level level, const std::string& message)
 {
 	(void)level;
-#if defined(Q_WINDOWS) || defined(Q_IOS) || defined(Q_LINUX)
+#if defined(Q_WINDOWS) || defined(Q_IOS) || defined(Q_POSIX_API)
 
 	puts(message.c_str());
 	fflush(stdout);

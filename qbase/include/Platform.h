@@ -11,6 +11,9 @@
 #elif defined(__APPLE__) || defined(MACOSX)
 #	define Q_IOS
 #	define Q_POSIX_API
+#elif defined(RASPBERRY_PI)
+#	define Q_RASPBERRY_PI
+#	define Q_POSIX_API
 #elif defined (__linux)
 #	define Q_LINUX
 #	define Q_POSIX_API

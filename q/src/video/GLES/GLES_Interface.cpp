@@ -18,6 +18,10 @@
 #	include <GL/gl.h>
 #	include <GL/glu.h>
 #	include "video/GLES/std_glext.h"
+#elif defined(Q_RASPBERRY_PI)
+#	define GL_GLEXT_PROTOTYPES
+#	include <GLES2/gl2.h>
+#	include <GLES2/gl2ext.h>
 #elif defined(Q_LINUX)
 #	define GL_GLEXT_PROTOTYPES
 #	include <GL/gl.h>
@@ -60,7 +64,7 @@ iGLboolean gles30IsVertexArray(iGLuint array);
 	__declspec(thread) TL_Interface* tl_interface;
 #elif defined Q_ANDROID
 	__thread TL_Interface* tl_interface;
-#elif defined Q_LINUX
+#elif defined Q_POSIX_API
 	__thread TL_Interface* tl_interface;
 #else
 #	error define for your platform

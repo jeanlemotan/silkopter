@@ -38,10 +38,24 @@ PRECOMPILED_HEADER = ../../src/stdafx.h
 CONFIG *= precompile_header
 
 ROOT_LIBS_PATH = ../../../..
-CONFIG(debug, debug|release) {
-    DEST_FOLDER = pc/debug
+
+rpi {
+    DEFINES+=RASPBERRY_PI
+    CONFIG(debug, debug|release) {
+        DEST_FOLDER = rpi/debug
+    }
+    CONFIG(release, debug|release) {
+        DEST_FOLDER = rpi/release
+        DEFINES += NDEBUG
+    }
 } else {
-    DEST_FOLDER = pc/release
+    CONFIG(debug, debug|release) {
+        DEST_FOLDER = pc/debug
+    }
+    CONFIG(release, debug|release) {
+        DEST_FOLDER = pc/release
+        DEFINES += NDEBUG
+    }
 }
 
 LIBS += -L$${ROOT_LIBS_PATH}/q/lib/$${DEST_FOLDER} -lq
