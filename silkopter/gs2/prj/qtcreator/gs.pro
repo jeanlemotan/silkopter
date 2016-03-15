@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui quick qml
+QT       += core quick qml
 
 TARGET = gs
 TEMPLATE = app
@@ -154,7 +154,8 @@ HEADERS += \
     ../../../libs/utils/Coordinates.h \
     ../../../libs/utils/radiotap/ieee80211_radiotap.h \
     ../../../libs/utils/radiotap/radiotap.h \
-    ../../../libs/common/node/ICombiner.h
+    ../../../libs/common/node/ICombiner.h \
+    ../../src/Main.h
 
 SOURCES += \
     ../../src/main.cpp \
@@ -166,7 +167,8 @@ SOURCES += \
     ../../../libs/utils/Coordinates.cpp \
     ../../../libs/utils/RCP.cpp \
     ../../../libs/utils/RCP_RFMON_Socket.cpp \
-    ../../../libs/utils/radiotap/radiotap.cpp
+    ../../../libs/utils/radiotap/radiotap.cpp \
+    ../../src/Main.cpp
 
 DISTFILES += \
     ../../src/node.png \

@@ -1,10 +1,13 @@
 import QtQuick 2.0
 import QtQuick.Controls 1.4
+import QtQuick.Controls.Styles 1.4
 
 Rectangle {
     id: page
     width: 320; height: 480
     color: "#ecf0f1"
+
+    signal sig_start()
 
     Text {
         id: title
@@ -15,30 +18,31 @@ Rectangle {
         font.pointSize: 42; font.bold: true
     }
 
-    Rectangle  {
-        id: start
+    ToolButton  {
+        id: startButton
         anchors.horizontalCenter: parent.horizontalCenter
         y: title.y + 100
-        width: startText.width + 16
-        height: startText.height + 8
-        color: "#34495e"
+        //width: startText.width + 16
+        //height: startText.height + 8
+        iconSource: "qrc:/icons/ui/fly.png"
 
-        Text {
-            text: "Start"
-            id: startText
-            anchors.verticalCenter: parent.verticalCenter
-            anchors.horizontalCenter: parent.horizontalCenter
-            font.pointSize: 22; font.bold: true
+        style: ButtonStyle {
+            background: Rectangle {
+                color: "#C5EFF7"
+                radius: 8
 
-            SequentialAnimation on color {
-                loops: Animation.Infinite
-                ColorAnimation { from: "#ecf0f1"; to: "#7f8c8d"; duration: 500 }
-                ColorAnimation { from: "#7f8c8d"; to: "#ecf0f1"; duration: 500 }
+                SequentialAnimation on color {
+                    loops: Animation.Infinite
+                    ColorAnimation { from: "#C5EFF7"; to: "#22A7F0"; duration: 500 }
+                    ColorAnimation { from: "#22A7F0"; to: "#C5EFF7"; duration: 500 }
+                }
             }
         }
-        MouseArea {
-            anchors.fill: parent
-            onClicked: parent.color = "#FF00FF"
+
+
+        onClicked: {
+            parent.color = "#FF00FF";
+            page.sig_start()
         }
     }
 }

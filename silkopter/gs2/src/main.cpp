@@ -1,5 +1,5 @@
 #include <QGuiApplication>
-#include <QQuickView>
+#include "Main.h"
 
 //boost::asio::io_service s_async_io_service(4);
 
@@ -28,12 +28,7 @@ int main(int argc, char *argv[])
 
     a.setQuitOnLastWindowClosed(true);
 
-    // Using QQuickView
-    QQuickView view;
-    view.setResizeMode(QQuickView::SizeRootObjectToView);
-    view.setSource(QUrl("qrc:/forms/main.qml"));
-    view.show();
-    //QObject *object = view.rootObject();
+    Main main;
 
     auto res = a.exec();
 

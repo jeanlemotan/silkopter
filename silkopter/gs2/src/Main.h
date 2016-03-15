@@ -1,17 +1,20 @@
-#ifndef SPLASH_H
-#define SPLASH_H
+#pragma once
 
+#include <QQuickView>
 #include <QQuickItem>
 
-class Splash : public QObject
+class Main : public QObject
 {
     Q_OBJECT
 public:
-    explicit Splash(QObject *parent = 0);
+    explicit Main(QObject *parent = 0);
 
 signals:
 
-public slots:
-};
+private slots:
+    void showSplash();
+    void showMM();
 
-#endif // SPLASH_H
+private:
+    QQuickView m_view;
+};

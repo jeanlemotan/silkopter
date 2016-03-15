@@ -1,51 +1,56 @@
 <RCC>
     <qresource prefix="/">
-        <file>icons/Acceleration.png</file>
-        <file>icons/Angular Velocity.png</file>
-        <file>icons/Battery State.png</file>
-        <file>icons/Cardinal Points.png</file>
-        <file>icons/Current.png</file>
-        <file>icons/Distance.png</file>
-        <file>icons/Linear Acceleration.png</file>
-        <file>icons/Location.png</file>
-        <file>icons/LPF.png</file>
-        <file>icons/Magnetic Field.png</file>
-        <file>icons/Node.png</file>
-        <file>icons/Pilot.png</file>
-        <file>icons/Pressure.png</file>
-        <file>icons/Processor.png</file>
-        <file>icons/Frame.png</file>
-        <file>icons/Resampler.png</file>
-        <file>icons/Sink.png</file>
-        <file>icons/Source.png</file>
-        <file>icons/Temperature.png</file>
-        <file>icons/Voltage.png</file>
-        <file>icons/remove.png</file>
-        <file>icons/view.png</file>
-        <file>icons/graph.png</file>
-        <file>icons/Combiner.png</file>
-        <file>icons/fft.png</file>
-        <file>icons/ADC.png</file>
-        <file>icons/Controller.png</file>
-        <file>icons/PWM.png</file>
-        <file>icons/Transformer.png</file>
-        <file>icons/Commands.png</file>
-        <file>icons/Force.png</file>
-        <file>icons/Torque.png</file>
-        <file>icons/Velocity.png</file>
-        <file>icons/Generator.png</file>
-        <file>icons/nodes.png</file>
-        <file>icons/reconnect.png</file>
-        <file>icons/search.png</file>
-        <file>icons/simulator.png</file>
+        <file>icons/streams/Acceleration.png</file>
+        <file>icons/streams/Angular Velocity.png</file>
+        <file>icons/streams/Battery State.png</file>
+        <file>icons/streams/Cardinal Points.png</file>
+        <file>icons/streams/Current.png</file>
+        <file>icons/streams/Distance.png</file>
+        <file>icons/streams/Linear Acceleration.png</file>
+        <file>icons/streams/Location.png</file>
+        <file>icons/streams/Magnetic Field.png</file>
+        <file>icons/streams/Pressure.png</file>
+        <file>icons/streams/Frame.png</file>
+        <file>icons/streams/Temperature.png</file>
+        <file>icons/streams/Voltage.png</file>
+        <file>icons/streams/ADC.png</file>
+        <file>icons/streams/PWM.png</file>
+        <file>icons/streams/Commands.png</file>
+        <file>icons/streams/Force.png</file>
+        <file>icons/streams/Torque.png</file>
+        <file>icons/streams/Velocity.png</file>
+        <file>icons/nodes/LPF.png</file>
+        <file>icons/nodes/Node.png</file>
+        <file>icons/nodes/Pilot.png</file>
+        <file>icons/nodes/Processor.png</file>
+        <file>icons/nodes/Resampler.png</file>
+        <file>icons/nodes/Sink.png</file>
+        <file>icons/nodes/Source.png</file>
+        <file>icons/nodes/Controller.png</file>
+        <file>icons/nodes/Combiner.png</file>
+        <file>icons/nodes/Transformer.png</file>
+        <file>icons/nodes/Generator.png</file>
+        <file>icons/ui/back.png</file>
+        <file>icons/ui/calibrate.png</file>
+        <file>icons/ui/fft.png</file>
+        <file>icons/ui/fly.png</file>
+        <file>icons/ui/graph.png</file>
+        <file>icons/ui/gravity.png</file>
+        <file>icons/ui/ground.png</file>
+        <file>icons/ui/minus.png</file>
+        <file>icons/ui/new.png</file>
+        <file>icons/ui/nodes.png</file>
+        <file>icons/ui/plus.png</file>
+        <file>icons/ui/propeller.png</file>
+        <file>icons/ui/reconnect.png</file>
+        <file>icons/ui/search.png</file>
+        <file>icons/ui/setup.png</file>
+        <file>icons/ui/simulator.png</file>
+        <file>icons/ui/stop.png</file>
+        <file>icons/ui/upload.png</file>
+        <file>icons/ui/view.png</file>
         <file>images/logo.png</file>
-        <file>icons/stop.png</file>
-        <file>icons/gravity.png</file>
-        <file>icons/ground.png</file>
-        <file>icons/add_motor.png</file>
-        <file>icons/new.png</file>
-        <file>icons/upload.png</file>
-        <file>icons/calibrate.png</file>
-        <file>forms/main.qml</file>
+        <file>forms/splash.qml</file>
+        <file>forms/mm.qml</file>
     </qresource>
 </RCC>
