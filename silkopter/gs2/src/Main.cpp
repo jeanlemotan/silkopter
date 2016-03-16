@@ -1,10 +1,22 @@
 #include "Main.h"
 
-Main::Main(QObject *parent) : QObject(parent)
+#include <QQmlEngine>
+#include <QQmlContext>
+
+
+
+Main::Main(QObject *parent)
+    : QObject(parent)
+    , m_hal(m_comms)
+    , m_comms(m_hal)
+    , m_comms_proxy(m_comms)
 {
     // Using QQuickView
     m_view.setResizeMode(QQuickView::SizeRootObjectToView);
     m_view.show();
+
+
+    m_view.engine()->rootContext()->setContextProperty("s_comms", &m_comms_proxy);
 
     showSplash();
 }

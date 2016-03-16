@@ -29,6 +29,7 @@ Rectangle {
         MenuButton
         {
             id: flyButton
+            enabled: s_comms.isConnected
             text: "HUD"
             icon: "qrc:/icons/ui/fly.png"
             color: "#bdc3c7"
@@ -42,6 +43,7 @@ Rectangle {
         MenuButton
         {
             id: setupButton
+            enabled: s_comms.isConnected
             text: "Setup"
             icon: "qrc:/icons/ui/setup.png"
             color: "#bdc3c7"

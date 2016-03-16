@@ -8,6 +8,7 @@ Rectangle {
 
     Text {
         anchors.centerIn: root
-        text: "Info..."
+        color: "#ecf0f1"
+        text: "Connected: " + (s_comms.isConnected  ? (s_comms.interface + ":" + s_comms.interfaceId) : "No")
     }
 }

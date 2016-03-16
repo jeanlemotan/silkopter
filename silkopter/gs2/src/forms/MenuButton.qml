@@ -9,6 +9,7 @@ ToolButton
 
     id: root
     Image {
+        opacity: root.enabled ? 1 : 0.5
         source: root.icon
         height: parent.height
         anchors.left: parent.left
@@ -19,6 +20,7 @@ ToolButton
     style: ButtonStyle {
         background: Rectangle {
             color: root.color
+            opacity: root.enabled ? 1 : 0.5
             radius: 8
         }
     }

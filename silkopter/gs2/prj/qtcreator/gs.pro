@@ -155,7 +155,8 @@ HEADERS += \
     ../../../libs/utils/radiotap/ieee80211_radiotap.h \
     ../../../libs/utils/radiotap/radiotap.h \
     ../../../libs/common/node/ICombiner.h \
-    ../../src/Main.h
+    ../../src/Main.h \
+    ../../src/CommsQMLProxy.h
 
 SOURCES += \
     ../../src/main.cpp \
@@ -168,7 +169,8 @@ SOURCES += \
     ../../../libs/utils/RCP.cpp \
     ../../../libs/utils/RCP_RFMON_Socket.cpp \
     ../../../libs/utils/radiotap/radiotap.cpp \
-    ../../src/Main.cpp
+    ../../src/Main.cpp \
+    ../../src/CommsQMLProxy.cpp
 
 DISTFILES += \
     ../../src/node.png \
