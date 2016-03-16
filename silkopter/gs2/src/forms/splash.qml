@@ -3,15 +3,15 @@ import QtQuick.Controls 1.4
 import QtQuick.Controls.Styles 1.4
 
 Rectangle {
-    id: page
-    width: 320; height: 480
-    color: "#ecf0f1"
+    id: root
+    width: 800; height: 600
+    color: "#2c3e50"
 
-    signal sig_start()
+    signal startPressed()
 
     Text {
         id: title
-        color: "#2980b9"
+        color: "#ecf0f1"
         text: "Silkopter"
         anchors.verticalCenter: parent.verticalCenter
         anchors.horizontalCenter: parent.horizontalCenter
@@ -33,16 +33,12 @@ Rectangle {
 
                 SequentialAnimation on color {
                     loops: Animation.Infinite
-                    ColorAnimation { from: "#C5EFF7"; to: "#22A7F0"; duration: 500 }
-                    ColorAnimation { from: "#22A7F0"; to: "#C5EFF7"; duration: 500 }
+                    ColorAnimation { from: "#3498db"; to: "#7f8c8d"; duration: 500 }
+                    ColorAnimation { from: "#7f8c8d"; to: "#3498db"; duration: 500 }
                 }
             }
         }
 
-
-        onClicked: {
-            parent.color = "#FF00FF";
-            page.sig_start()
-        }
+        onClicked: root.startPressed()
     }
 }

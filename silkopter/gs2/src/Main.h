@@ -14,6 +14,8 @@ signals:
 private slots:
     void showSplash();
     void showMM();
+    void showSetup();
+    void showMultiConfig();
 
 private:
     QQuickView m_view;

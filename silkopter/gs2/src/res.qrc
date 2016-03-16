@@ -52,5 +52,11 @@
         <file>images/logo.png</file>
         <file>forms/splash.qml</file>
         <file>forms/mm.qml</file>
+        <file>forms/TopBar.qml</file>
+        <file>forms/setup.qml</file>
+        <file>forms/MenuButton.qml</file>
+        <file>forms/MultiConfig.qml</file>
+        <file>forms/SideBar.qml</file>
+        <file>forms/UAVInfo.qml</file>
     </qresource>
 </RCC>
