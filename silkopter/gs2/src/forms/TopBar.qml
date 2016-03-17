@@ -20,7 +20,7 @@ Rectangle  {
         text: title
         x: 8
         anchors.verticalCenter: parent.verticalCenter
-        font.pointSize: 30; font.bold: true
+        font.pointSize: 20; font.bold: true
     }
 
     Rectangle {

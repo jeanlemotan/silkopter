@@ -21,6 +21,7 @@ private slots:
     void showMM();
     void showSetup();
     void showMultiConfig();
+    void showComms();
 
 private:
     QQuickView m_view;

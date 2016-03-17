@@ -7,33 +7,55 @@ class CommsQMLProxy : public QObject
 {
     Q_OBJECT
 public:
-    Q_ENUMS(ConnectionType);
-
     enum class ConnectionType
     {
         NONE,
         RF_MON,
         UDP
     };
+    Q_ENUMS(ConnectionType);
 
-    Q_PROPERTY(bool isConnected READ isConnected NOTIFY connectionChanged)
+    enum class ConnectionStatus
+    {
+        NOT_CONNECTED,
+        CONNECTING,
+        CONNECTED,
+        FAILED
+    };
+    Q_ENUMS(ConnectionStatus);
+
+    Q_PROPERTY(bool isConnected READ isConnected NOTIFY connectionStatusChanged)
+    Q_PROPERTY(ConnectionStatus connectionStatus READ getConnectionStatus NOTIFY connectionStatusChanged)
     Q_PROPERTY(ConnectionType connectionType READ getConnectionType)
-    Q_PROPERTY(QString interface READ getInterface)
-    Q_PROPERTY(uint8_t interfaceId READ getInterfaceId)
+    Q_PROPERTY(QList<QString> rfmonInterfaces READ getRFMONInterfaces)
+    Q_PROPERTY(uint8_t rfmonEndpointId READ getRFMONEndpointId)
+    Q_PROPERTY(QList<QString> enumerateRFMONInterfaces READ enumerateRFMONInterfaces)
 
     explicit CommsQMLProxy(silk::Comms& comms, QObject *parent = 0);
 
     bool isConnected() const;
+    ConnectionStatus getConnectionStatus() const;
+
     ConnectionType getConnectionType() const;
-    QString getInterface() const;
-    uint8_t getInterfaceId() const;
+    QList<QString> getRFMONInterfaces() const;
+    uint8_t getRFMONEndpointId() const;
+
+    QList<QString> enumerateRFMONInterfaces() const;
+
+//    Q_INVOKABLE void connectUDP(uint16_t txPort, uint16_t rxPort);
+//    Q_INVOKABLE void connectRFMON(uint8_t endpointId);
+
 
 signals:
-    void connectionChanged();
+    void connectionStatusChanged(ConnectionStatus);
 
 public slots:
 
 private:
     silk::Comms& m_comms;
+    ConnectionType m_connectionType = ConnectionType::NONE;
+    ConnectionStatus m_connectionStatus = ConnectionStatus::NOT_CONNECTED;
+    uint8_t m_rfmonEndpointId = 0;
+    QList<QString> m_rfmonInterfaces;
 };
 

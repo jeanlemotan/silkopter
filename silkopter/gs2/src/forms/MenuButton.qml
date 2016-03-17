@@ -11,9 +11,10 @@ ToolButton
     Image {
         opacity: root.enabled ? 1 : 0.5
         source: root.icon
-        height: parent.height
+        anchors.top: parent.top
+        anchors.bottom: parent.bottom
         anchors.left: parent.left
-        anchors.margins: 4
+        anchors.margins: 8
         fillMode: Image.PreserveAspectFit
     }
 

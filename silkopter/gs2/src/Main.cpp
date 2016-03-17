@@ -34,6 +34,7 @@ void Main::showMM()
     QObject* item = m_view.rootObject();
     item->connect(item, SIGNAL(backPressed()), this, SLOT(showSplash()), Qt::QueuedConnection);
     item->connect(item, SIGNAL(setupPressed()), this, SLOT(showSetup()), Qt::QueuedConnection);
+    item->connect(item, SIGNAL(commsPressed()), this, SLOT(showComms()), Qt::QueuedConnection);
 }
 
 void Main::showSetup()
@@ -48,4 +49,10 @@ void Main::showMultiConfig()
     m_view.setSource(QUrl("qrc:/forms/MultiConfig.qml"));
     QObject* item = m_view.rootObject();
     item->connect(item, SIGNAL(backPressed()), this, SLOT(showSetup()), Qt::QueuedConnection);
+}
+void Main::showComms()
+{
+    m_view.setSource(QUrl("qrc:/forms/Comms.qml"));
+    QObject* item = m_view.rootObject();
+    item->connect(item, SIGNAL(backPressed()), this, SLOT(showMM()), Qt::QueuedConnection);
 }

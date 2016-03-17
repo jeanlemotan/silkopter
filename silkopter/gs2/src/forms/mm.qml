@@ -11,6 +11,7 @@ Rectangle {
     signal backPressed()
     signal setupPressed()
     signal hudPressed()
+    signal commsPressed()
 
     TopBar {
         id: topBar
@@ -38,7 +39,7 @@ Rectangle {
             anchors.top: parent.top
             anchors.left: parent.left
             anchors.right: parent.right
-            height: 60
+            height: 50
         }
         MenuButton
         {
@@ -52,7 +53,20 @@ Rectangle {
             anchors.top: flyButton.bottom
             anchors.left: parent.left
             anchors.right: parent.right
-            height: 60
+            height: 50
+        }
+        MenuButton
+        {
+            id: commsButton
+            text: "Comms"
+            icon: "qrc:/icons/ui/wifi.png"
+            color: "#bdc3c7"
+            onClicked: root.commsPressed()
+            anchors.margins: 10
+            anchors.top: setupButton.bottom
+            anchors.left: parent.left
+            anchors.right: parent.right
+            height: 50
         }
     }
 

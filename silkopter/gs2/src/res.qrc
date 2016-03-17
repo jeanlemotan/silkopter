@@ -49,6 +49,11 @@
         <file>icons/ui/stop.png</file>
         <file>icons/ui/upload.png</file>
         <file>icons/ui/view.png</file>
+        <file>icons/ui/controller.png</file>
+        <file>icons/ui/downlink.png</file>
+        <file>icons/ui/lora.png</file>
+        <file>icons/ui/uplink.png</file>
+        <file>icons/ui/wifi.png</file>
         <file>images/logo.png</file>
         <file>forms/splash.qml</file>
         <file>forms/mm.qml</file>
@@ -58,5 +63,8 @@
         <file>forms/MultiConfig.qml</file>
         <file>forms/SideBar.qml</file>
         <file>forms/UAVInfo.qml</file>
+        <file>forms/Comms.qml</file>
+        <file>icons/ui/connected.png</file>
+        <file>icons/ui/disconnected.png</file>
     </qresource>
 </RCC>

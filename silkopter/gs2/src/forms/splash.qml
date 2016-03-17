@@ -4,7 +4,7 @@ import QtQuick.Controls.Styles 1.4
 
 Rectangle {
     id: root
-    width: 800; height: 600
+    width: 800; height: 480
     color: "#2c3e50"
 
     signal startPressed()
