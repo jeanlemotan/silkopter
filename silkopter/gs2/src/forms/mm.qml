@@ -1,6 +1,7 @@
 import QtQuick 2.0
 import QtQuick.Controls 1.4
 import QtQuick.Controls.Styles 1.4
+import com.silk.comms 1.0
 
 
 Rectangle {
@@ -18,6 +19,33 @@ Rectangle {
         width: parent.width
         title: "Silkopter"
         onBackPressed: root.backPressed()
+
+        TrayButton {
+            function getConnectionIcon() {
+                if (s_comms.connectionStatus === Comms.CONNECTED) return "qrc:/icons/ui/connected.png";
+                if (s_comms.connectionStatus === Comms.NOT_CONNECTED) return "qrc:/icons/ui/disconnected.png";
+                return ""
+            }
+
+            id: connectionButton
+            icon: getConnectionIcon()
+            color: "#bdc3c7"
+            onClicked: {
+                //root.connectPressed()
+            }
+            anchors.margins: 4
+            anchors.top: parent.top
+            anchors.bottom: parent.bottom
+            anchors.right: parent.trayArea.right
+            width: height
+
+            BusyIndicator {
+                visible: s_comms.connectionStatus === Comms.CONNECTING
+                anchors.fill: parent
+                anchors.margins: 2
+                running: true
+            }
+        }
     }
 
     SideBar {
@@ -51,19 +79,6 @@ Rectangle {
             onClicked: root.setupPressed()
             anchors.margins: 10
             anchors.top: flyButton.bottom
-            anchors.left: parent.left
-            anchors.right: parent.right
-            height: 50
-        }
-        MenuButton
-        {
-            id: commsButton
-            text: "Comms"
-            icon: "qrc:/icons/ui/wifi.png"
-            color: "#bdc3c7"
-            onClicked: root.commsPressed()
-            anchors.margins: 10
-            anchors.top: setupButton.bottom
             anchors.left: parent.left
             anchors.right: parent.right
             height: 50

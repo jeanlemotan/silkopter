@@ -9,13 +9,14 @@ Main::Main(QObject *parent)
     : QObject(parent)
     , m_hal(m_comms)
     , m_comms(m_hal)
-    , m_comms_proxy(m_comms)
 {
     // Using QQuickView
     m_view.setResizeMode(QQuickView::SizeRootObjectToView);
     m_view.show();
 
+    m_comms_proxy.init(m_comms);
 
+    qmlRegisterType<CommsQMLProxy>("com.silk.comms", 1, 0, "Comms");
     m_view.engine()->rootContext()->setContextProperty("s_comms", &m_comms_proxy);
 
     showSplash();

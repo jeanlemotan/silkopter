@@ -66,5 +66,6 @@
         <file>forms/Comms.qml</file>
         <file>icons/ui/connected.png</file>
         <file>icons/ui/disconnected.png</file>
+        <file>forms/TrayButton.qml</file>
     </qresource>
 </RCC>

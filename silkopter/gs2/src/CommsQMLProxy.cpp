@@ -1,16 +1,20 @@
 #include "CommsQMLProxy.h"
 #include "utils/RCP_RFMON_Socket.h"
 
-CommsQMLProxy::CommsQMLProxy(silk::Comms& comms, QObject *parent)
+CommsQMLProxy::CommsQMLProxy(QObject *parent)
     : QObject(parent)
-    , m_comms(comms)
 {
 
 }
 
+void CommsQMLProxy::init(silk::Comms& comms)
+{
+    m_comms = &comms;
+}
+
 bool CommsQMLProxy::isConnected() const
 {
-    return m_comms.is_connected();
+    return m_comms->is_connected();
 }
 
 CommsQMLProxy::ConnectionStatus CommsQMLProxy::getConnectionStatus() const

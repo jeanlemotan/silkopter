@@ -10,6 +10,7 @@ Rectangle {
 
     signal backPressed()
     signal multiConfigPressed()
+    signal commsConfigPressed()
 
     TopBar {
         id: topBar
@@ -18,18 +19,48 @@ Rectangle {
         onBackPressed: root.backPressed()
     }
 
-    MenuButton
-    {
-        id: multiConfigButton
-        text: "Multi Config"
-        icon: "qrc:/icons/ui/quad.png"
-        color: "#bdc3c7"
-        onClicked: root.multiConfigPressed()
-        anchors.horizontalCenter: parent.horizontalCenter
+    SideBar {
+        id: sideBar
+        x: 0
         anchors.top: topBar.bottom
-        anchors.topMargin: 100
-        height: 60
+        anchors.bottom: root.bottom
         width: 200
+
+        MenuButton
+        {
+            id: multiConfigButton
+            text: "Multi Config"
+            icon: "qrc:/icons/ui/quad.png"
+            color: "#bdc3c7"
+            onClicked: root.multiConfigPressed()
+            anchors.margins: 10
+            anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.right: parent.right
+            height: 50
+        }
+        MenuButton
+        {
+            id: commsConfigButton
+            text: "Comms Config"
+            icon: "qrc:/icons/ui/wifi.png"
+            color: "#bdc3c7"
+            onClicked: root.commsConfigPressed()
+            anchors.margins: 10
+            anchors.top: flyButton.bottom
+            anchors.left: parent.left
+            anchors.right: parent.right
+            height: 50
+        }
+    }
+
+    UAVInfo {
+        id: uavInfo
+        anchors.margins: 20
+        anchors.top: topBar.bottom
+        anchors.left: sideBar.right
+        anchors.right: root.right
+        anchors.bottom: root.bottom
     }
 
 }

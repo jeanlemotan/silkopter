@@ -9,7 +9,7 @@ class CommsQMLProxy : public QObject
 public:
     enum class ConnectionType
     {
-        NONE,
+        NONE = 0,
         RF_MON,
         UDP
     };
@@ -17,7 +17,7 @@ public:
 
     enum class ConnectionStatus
     {
-        NOT_CONNECTED,
+        NOT_CONNECTED = 0,
         CONNECTING,
         CONNECTED,
         FAILED
@@ -31,7 +31,8 @@ public:
     Q_PROPERTY(uint8_t rfmonEndpointId READ getRFMONEndpointId)
     Q_PROPERTY(QList<QString> enumerateRFMONInterfaces READ enumerateRFMONInterfaces)
 
-    explicit CommsQMLProxy(silk::Comms& comms, QObject *parent = 0);
+    explicit CommsQMLProxy(QObject *parent = 0);
+    void init(silk::Comms& comms);
 
     bool isConnected() const;
     ConnectionStatus getConnectionStatus() const;
@@ -52,7 +53,7 @@ signals:
 public slots:
 
 private:
-    silk::Comms& m_comms;
+    silk::Comms* m_comms = nullptr;
     ConnectionType m_connectionType = ConnectionType::NONE;
     ConnectionStatus m_connectionStatus = ConnectionStatus::NOT_CONNECTED;
     uint8_t m_rfmonEndpointId = 0;

@@ -31,25 +31,15 @@ Rectangle  {
         anchors.rightMargin: 10
     }
 
-    ToolButton {
+    TrayButton {
         id: backButton
-        x: parent.width - width - 8;
-        anchors.verticalCenter: parent.verticalCenter
-        height: parent.height - 16
+        color: "#bdc3c7"
+        anchors.top: parent.top
+        anchors.bottom: parent.bottom
+        anchors.right: parent.right
+        anchors.margins: 4
         width: height
-        Image {
-            source: "qrc:/icons/ui/back.png"
-            anchors.fill: parent
-            anchors.margins: 4
-            fillMode: Image.PreserveAspectFit
-        }
-
-        style: ButtonStyle {
-            background: Rectangle {
-                color: "#bdc3c7"
-                radius: 4
-            }
-        }
+        icon: "qrc:/icons/ui/back.png"
         onClicked: root.backPressed()
     }
 }
