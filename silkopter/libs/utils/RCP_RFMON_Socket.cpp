@@ -67,6 +67,43 @@ struct RCP_RFMON_Socket::Impl
 
 //////////////////////////////////////////////
 
+std::vector<std::string> RCP_RFMON_Socket::enumerate_interfaces()
+{
+    std::vector<std::string> res;
+
+    char error_buf[PCAP_ERRBUF_SIZE];
+    pcap_if_t* head = nullptr;
+    if (pcap_findalldevs(&head, error_buf) == -1)
+    {
+        QLOGE("Error enumerating rfmon interfaces: {}", error_buf);
+        return {};
+    }
+
+    pcap_if_t* crt = head;
+    while (crt)
+    {
+        if (crt->flags & PCAP_IF_LOOPBACK)
+        {
+            QLOGI("Skipping {} because it's a loppback interface", crt->name);
+        }
+        else if ((crt->flags & PCAP_IF_UP) == 0)
+        {
+            QLOGI("Skipping {} because it's down", crt->name);
+        }
+        else
+        {
+            res.push_back(crt->name);
+        }
+        crt = crt->next;
+    }
+
+    pcap_freealldevs(head);
+
+    return res;
+}
+
+//////////////////////////////////////////////
+
 RCP_RFMON_Socket::RCP_RFMON_Socket(std::string const& interface, uint8_t id)
     : m_interface(interface)
     , m_id(id)

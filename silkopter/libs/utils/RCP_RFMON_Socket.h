@@ -1,6 +1,8 @@
 #pragma once
 
 #include "RCP.h"
+#include <vector>
+#include <string>
 
 namespace util
 {
@@ -21,6 +23,8 @@ public:
 
     auto lock() -> bool override;
     void unlock() override;
+
+    static std::vector<std::string> enumerate_interfaces();
 
 private:
 
