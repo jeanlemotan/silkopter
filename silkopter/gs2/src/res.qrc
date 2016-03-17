@@ -30,30 +30,6 @@
         <file>icons/nodes/Combiner.png</file>
         <file>icons/nodes/Transformer.png</file>
         <file>icons/nodes/Generator.png</file>
-        <file>icons/ui/back.png</file>
-        <file>icons/ui/calibrate.png</file>
-        <file>icons/ui/fft.png</file>
-        <file>icons/ui/fly.png</file>
-        <file>icons/ui/graph.png</file>
-        <file>icons/ui/gravity.png</file>
-        <file>icons/ui/ground.png</file>
-        <file>icons/ui/minus.png</file>
-        <file>icons/ui/new.png</file>
-        <file>icons/ui/nodes.png</file>
-        <file>icons/ui/plus.png</file>
-        <file>icons/ui/propeller.png</file>
-        <file>icons/ui/reconnect.png</file>
-        <file>icons/ui/search.png</file>
-        <file>icons/ui/setup.png</file>
-        <file>icons/ui/simulator.png</file>
-        <file>icons/ui/stop.png</file>
-        <file>icons/ui/upload.png</file>
-        <file>icons/ui/view.png</file>
-        <file>icons/ui/controller.png</file>
-        <file>icons/ui/downlink.png</file>
-        <file>icons/ui/lora.png</file>
-        <file>icons/ui/uplink.png</file>
-        <file>icons/ui/wifi.png</file>
         <file>images/logo.png</file>
         <file>forms/splash.qml</file>
         <file>forms/mm.qml</file>
@@ -64,8 +40,46 @@
         <file>forms/SideBar.qml</file>
         <file>forms/UAVInfo.qml</file>
         <file>forms/Comms.qml</file>
-        <file>icons/ui/connected.png</file>
-        <file>icons/ui/disconnected.png</file>
         <file>forms/TrayButton.qml</file>
+        <file>icons/ui/back.png</file>
+        <file>icons/ui/battery.png</file>
+        <file>icons/ui/calibrate.png</file>
+        <file>icons/ui/connected.png</file>
+        <file>icons/ui/controller.png</file>
+        <file>icons/ui/disconnected.png</file>
+        <file>icons/ui/downlink.png</file>
+        <file>icons/ui/fft.png</file>
+        <file>icons/ui/fly.png</file>
+        <file>icons/ui/graph.png</file>
+        <file>icons/ui/gravity.png</file>
+        <file>icons/ui/ground.png</file>
+        <file>icons/ui/hud.png</file>
+        <file>icons/ui/lora.png</file>
+        <file>icons/ui/minus.png</file>
+        <file>icons/ui/multicopter-land.png</file>
+        <file>icons/ui/multicopter-signal.png</file>
+        <file>icons/ui/multicopter-take_off.png</file>
+        <file>icons/ui/new.png</file>
+        <file>icons/ui/nodes.png</file>
+        <file>icons/ui/plus.png</file>
+        <file>icons/ui/propeller.png</file>
+        <file>icons/ui/proximity.png</file>
+        <file>icons/ui/rc.png</file>
+        <file>icons/ui/reconnect.png</file>
+        <file>icons/ui/uav-rover.png</file>
+        <file>icons/ui/search.png</file>
+        <file>icons/ui/setup.png</file>
+        <file>icons/ui/simulator.png</file>
+        <file>icons/ui/stop.png</file>
+        <file>icons/ui/uav-boat.png</file>
+        <file>icons/ui/uav-copter.png</file>
+        <file>icons/ui/uav-multicopter.png</file>
+        <file>icons/ui/uav-plane.png</file>
+        <file>icons/ui/uplink.png</file>
+        <file>icons/ui/upload.png</file>
+        <file>icons/ui/view.png</file>
+        <file>icons/ui/waypoints.png</file>
+        <file>icons/ui/waypoints-destination.png</file>
+        <file>icons/ui/wifi.png</file>
     </qresource>
 </RCC>

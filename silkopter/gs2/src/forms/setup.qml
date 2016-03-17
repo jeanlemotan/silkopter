@@ -9,8 +9,11 @@ Rectangle {
     color: "#2c3e50"
 
     signal backPressed()
-    signal multiConfigPressed()
-    signal commsConfigPressed()
+    signal multicopterPressed()
+    signal roverPressed()
+    signal planePressed()
+    signal boatPressed()
+    signal commsPressed()
 
     TopBar {
         id: topBar
@@ -28,11 +31,11 @@ Rectangle {
 
         MenuButton
         {
-            id: multiConfigButton
-            text: "Multi Config"
-            icon: "qrc:/icons/ui/quad.png"
+            id: multicopterButton
+            text: "Multicopter"
+            icon: "qrc:/icons/ui/uav-multicopter.png"
             color: "#bdc3c7"
-            onClicked: root.multiConfigPressed()
+            onClicked: root.multicopterPressed()
             anchors.margins: 10
             anchors.top: parent.top
             anchors.left: parent.left
@@ -41,13 +44,52 @@ Rectangle {
         }
         MenuButton
         {
-            id: commsConfigButton
-            text: "Comms Config"
+            id: roverButton
+            text: "Rover"
+            icon: "qrc:/icons/ui/uav-rover.png"
+            color: "#bdc3c7"
+            onClicked: root.roverPressed()
+            anchors.margins: 10
+            anchors.top: multicopterButton.bottom
+            anchors.left: parent.left
+            anchors.right: parent.right
+            height: 50
+        }
+        MenuButton
+        {
+            id: planeButton
+            text: "Plane"
+            icon: "qrc:/icons/ui/uav-plane.png"
+            color: "#bdc3c7"
+            onClicked: root.planePressed()
+            anchors.margins: 10
+            anchors.top: roverButton.bottom
+            anchors.left: parent.left
+            anchors.right: parent.right
+            height: 50
+        }
+        MenuButton
+        {
+            id: boatButton
+            text: "Boat"
+            icon: "qrc:/icons/ui/uav-boat.png"
+            color: "#bdc3c7"
+            onClicked: root.boatPressed()
+            anchors.margins: 10
+            anchors.top: planeButton.bottom
+            anchors.left: parent.left
+            anchors.right: parent.right
+            height: 50
+        }
+        MenuButton
+        {
+            id: commsButton
+            text: "Comms"
             icon: "qrc:/icons/ui/wifi.png"
             color: "#bdc3c7"
-            onClicked: root.commsConfigPressed()
+            onClicked: root.commsPressed()
             anchors.margins: 10
-            anchors.top: flyButton.bottom
+            anchors.top: boatButton.bottom
             anchors.left: parent.left
             anchors.right: parent.right
             height: 50

@@ -58,5 +58,6 @@ private:
     ConnectionStatus m_connectionStatus = ConnectionStatus::NOT_CONNECTED;
     uint8_t m_rfmonEndpointId = 0;
     QList<QString> m_rfmonInterfaces;
+    mutable QList<QString> m_enumeratedRFMONInterfaces;
 };
 

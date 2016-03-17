@@ -39,11 +39,13 @@ uint8_t CommsQMLProxy::getRFMONEndpointId() const
 
 QList<QString> CommsQMLProxy::enumerateRFMONInterfaces() const
 {
-    QList<QString> res;
-    std::vector<std::string> interfaces = util::RCP_RFMON_Socket::enumerate_interfaces();
-    for (std::string const& i: interfaces)
+    if (m_enumeratedRFMONInterfaces.empty())
     {
-        res.append(QString(i.c_str()));
+        std::vector<std::string> interfaces = util::RCP_RFMON_Socket::enumerate_interfaces();
+        for (std::string const& i: interfaces)
+        {
+            m_enumeratedRFMONInterfaces.append(QString(i.c_str()));
+        }
     }
-    return res;
+    return m_enumeratedRFMONInterfaces;
 }

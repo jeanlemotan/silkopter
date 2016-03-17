@@ -57,10 +57,10 @@ Rectangle {
 
         MenuButton
         {
-            id: flyButton
+            id: hudButton
             enabled: s_comms.isConnected
             text: "HUD"
-            icon: "qrc:/icons/ui/fly.png"
+            icon: "qrc:/icons/ui/hud.png"
             color: "#bdc3c7"
             onClicked: root.hudPressed()
             anchors.margins: 10
@@ -72,13 +72,12 @@ Rectangle {
         MenuButton
         {
             id: setupButton
-            enabled: s_comms.isConnected
             text: "Setup"
             icon: "qrc:/icons/ui/setup.png"
             color: "#bdc3c7"
             onClicked: root.setupPressed()
             anchors.margins: 10
-            anchors.top: flyButton.bottom
+            anchors.top: hudButton.bottom
             anchors.left: parent.left
             anchors.right: parent.right
             height: 50
