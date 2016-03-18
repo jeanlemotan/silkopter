@@ -156,7 +156,8 @@ HEADERS += \
     ../../../libs/utils/radiotap/radiotap.h \
     ../../../libs/common/node/ICombiner.h \
     ../../src/Main.h \
-    ../../src/CommsQMLProxy.h
+    ../../src/CommsQMLProxy.h \
+    ../../src/OSQMLProxy.h
 
 SOURCES += \
     ../../src/main.cpp \
@@ -170,7 +171,8 @@ SOURCES += \
     ../../../libs/utils/RCP_RFMON_Socket.cpp \
     ../../../libs/utils/radiotap/radiotap.cpp \
     ../../src/Main.cpp \
-    ../../src/CommsQMLProxy.cpp
+    ../../src/CommsQMLProxy.cpp \
+    ../../src/OSQMLProxy.cpp
 
 DISTFILES += \
     ../../src/node.png \

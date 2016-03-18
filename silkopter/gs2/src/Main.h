@@ -2,10 +2,12 @@
 
 #include <QQuickView>
 #include <QQuickItem>
+#include <functional>
 
 #include "HAL.h"
 #include "Comms.h"
 #include "CommsQMLProxy.h"
+#include "OSQMLProxy.h"
 
 
 class Main : public QObject
@@ -17,11 +19,13 @@ public:
 signals:
 
 private slots:
+    void poweroffSystem();
+    void back();
     void showSplash();
     void showMM();
     void showSetup();
-    void showMultiConfig();
-    void showComms();
+    void showMulticopterSetup();
+    void showCommsSetup();
 
 private:
     QQuickView m_view;
@@ -30,4 +34,7 @@ private:
     silk::Comms m_comms;
 
     CommsQMLProxy m_comms_proxy;
+    OSQMLProxy m_os_proxy;
+
+    std::vector<std::function<void()>> m_stack;
 };

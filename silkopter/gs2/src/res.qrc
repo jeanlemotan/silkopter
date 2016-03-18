@@ -31,15 +31,15 @@
         <file>icons/nodes/Transformer.png</file>
         <file>icons/nodes/Generator.png</file>
         <file>images/logo.png</file>
-        <file>forms/splash.qml</file>
-        <file>forms/mm.qml</file>
+        <file>forms/Splash.qml</file>
+        <file>forms/MM.qml</file>
         <file>forms/TopBar.qml</file>
-        <file>forms/setup.qml</file>
+        <file>forms/Setup.qml</file>
         <file>forms/MenuButton.qml</file>
-        <file>forms/MultiConfig.qml</file>
+        <file>forms/MulticopterSetup.qml</file>
         <file>forms/SideBar.qml</file>
         <file>forms/UAVInfo.qml</file>
-        <file>forms/Comms.qml</file>
+        <file>forms/CommsSetup.qml</file>
         <file>forms/TrayButton.qml</file>
         <file>icons/ui/back.png</file>
         <file>icons/ui/battery.png</file>
