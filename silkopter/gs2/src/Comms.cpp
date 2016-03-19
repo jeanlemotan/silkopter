@@ -15,13 +15,17 @@ constexpr uint8_t PILOT_CHANNEL = 15;
 constexpr uint8_t VIDEO_CHANNEL = 16;
 constexpr uint8_t TELEMETRY_CHANNEL = 20;
 
-Comms::Comms(HAL& hal)
-    : m_hal(hal)
-    , m_setup_channel(SETUP_CHANNEL)
+Comms::Comms()
+    : m_setup_channel(SETUP_CHANNEL)
     , m_pilot_channel(PILOT_CHANNEL)
     , m_video_channel(VIDEO_CHANNEL)
     , m_telemetry_channel(TELEMETRY_CHANNEL)
 {
+}
+
+void Comms::init(HAL& hal)
+{
+    m_hal = &hal;
 }
 
 //auto Comms::start_udp(boost::asio::ip::address const& address, uint16_t send_port, uint16_t receive_port) -> bool
@@ -186,9 +190,9 @@ auto Comms::get_setup_channel() -> Setup_Channel&
 
 void Comms::reset()
 {
-    m_hal.m_node_defs.remove_all();
-    m_hal.m_nodes.remove_all();
-    m_hal.m_streams.remove_all();
+    m_hal->m_node_defs.remove_all();
+    m_hal->m_nodes.remove_all();
+    m_hal->m_streams.remove_all();
 }
 
 void Comms::request_data()
@@ -205,7 +209,7 @@ void Comms::request_data()
 
 void Comms::request_all_node_configs()
 {
-    auto nodes = m_hal.get_nodes().get_all();
+    auto nodes = m_hal->get_nodes().get_all();
     for (auto const& n: nodes)
     {
         m_setup_channel.pack_all(comms::Setup_Message::NODE_CONFIG, n->name);
@@ -338,7 +342,7 @@ auto Comms::unpack_node_data(Comms::Setup_Channel& channel, node::gs::Node& node
     {
         for (auto& os: node.outputs)
         {
-            auto stream = m_hal.m_streams.find_by_name(node.name + "/" + os.name);
+            auto stream = m_hal->m_streams.find_by_name(node.name + "/" + os.name);
             os.stream = stream;
         }
     }
@@ -378,7 +382,7 @@ void Comms::handle_clock()
     uint64_t us;
     if (m_setup_channel.unpack_all(us))
     {
-        m_hal.m_remote_clock.set_epoch(Manual_Clock::time_point(std::chrono::microseconds(us)));
+        m_hal->m_remote_clock.set_epoch(Manual_Clock::time_point(std::chrono::microseconds(us)));
     }
     else
     {
@@ -416,9 +420,9 @@ void Comms::handle_multi_config()
             QLOGE("Req Id: {} - Cannot deserialize multi config: {}", ss.str());
             return;
         }
-        m_hal.m_configs.multi = config;
+        m_hal->m_configs.multi = config;
     }
-    m_hal.multi_config_refreshed_signal.execute();
+    m_hal->multi_config_refreshed_signal.execute();
 
     m_setup_channel.end_unpack();
 }
@@ -426,7 +430,7 @@ void Comms::handle_multi_config()
 
 void Comms::handle_enumerate_node_defs()
 {
-    m_hal.m_node_defs.remove_all();
+    m_hal->m_node_defs.remove_all();
 
     uint32_t node_count = 0;
     if (!m_setup_channel.begin_unpack() ||
@@ -447,7 +451,7 @@ void Comms::handle_enumerate_node_defs()
             return;
         }
         QLOGI("\tNode: {}", def->name);
-        m_hal.m_node_defs.add(std::move(def));
+        m_hal->m_node_defs.add(std::move(def));
     }
 
     m_setup_channel.end_unpack();
@@ -519,7 +523,7 @@ auto Comms::publish_outputs(node::gs::Node_ptr node) -> bool
         stream->node = node;
         stream->name = node->name + "/" + os.name;
         stream->rate = os.rate;
-        m_hal.m_streams.add(stream);
+        m_hal->m_streams.add(stream);
     }
     return true;
 }
@@ -528,8 +532,8 @@ auto Comms::unpublish_outputs(node::gs::Node_ptr node) -> bool
 {
     for (auto& os: node->outputs)
     {
-        auto stream = m_hal.m_streams.find_by_name(node->name + "/" + os.name);
-        m_hal.m_streams.remove(stream);
+        auto stream = m_hal->m_streams.find_by_name(node->name + "/" + os.name);
+        m_hal->m_streams.remove(stream);
     }
     return true;
 }
@@ -549,7 +553,7 @@ auto Comms::link_inputs(node::gs::Node_ptr node) -> bool
             return false;
         }
         std::string stream_name = i.stream_path.get_as<std::string>();
-        auto stream = m_hal.m_streams.find_by_name(stream_name);
+        auto stream = m_hal->m_streams.find_by_name(stream_name);
         if (!stream)
         {
             QLOGE("Cannot find input stream '{}', node '{}'", i.stream_path, node->name);
@@ -607,7 +611,7 @@ void Comms::handle_enumerate_nodes()
     //the order doesn't matter as nodes only depend on streams, not other nodes.
     for (auto& n: nodes)
     {
-        m_hal.m_nodes.add(n);
+        m_hal->m_nodes.add(n);
     }
 
     //emit the changed signal so the UI can link nodes together
@@ -630,7 +634,7 @@ void Comms::handle_node_message()
         return;
     }
 
-    auto node = m_hal.get_nodes().find_by_name(name);
+    auto node = m_hal->get_nodes().find_by_name(name);
     if (!node)
     {
         QLOGE("Cannot find node '{}'", name);
@@ -660,7 +664,7 @@ void Comms::handle_node_config()
         return;
     }
 
-    auto node = m_hal.get_nodes().find_by_name(name);
+    auto node = m_hal->get_nodes().find_by_name(name);
     if (!node)
     {
         QLOGE("Cannot find node '{}'", name);
@@ -683,7 +687,7 @@ void Comms::handle_get_node_data()
         return;
     }
 
-    auto node = m_hal.get_nodes().find_by_name(name);
+    auto node = m_hal->get_nodes().find_by_name(name);
     if (!node)
     {
         QLOGE("Cannot find node '{}'", name);
@@ -711,7 +715,7 @@ void Comms::handle_node_input_stream_path()
         return;
     }
 
-    auto node = m_hal.get_nodes().find_by_name(name);
+    auto node = m_hal->get_nodes().find_by_name(name);
     if (!node)
     {
         QLOGE("Cannot find node '{}'", name);
@@ -755,7 +759,7 @@ void Comms::handle_add_node()
     publish_outputs(node);
     link_inputs(node);
 
-    m_hal.m_nodes.add(node);
+    m_hal->m_nodes.add(node);
     node->changed_signal.execute();
 }
 
@@ -770,7 +774,7 @@ void Comms::handle_remove_node()
         return;
     }
 
-    auto node = m_hal.get_nodes().find_by_name(name);
+    auto node = m_hal->get_nodes().find_by_name(name);
     if (!node)
     {
         QLOGE("Cannot find node '{}'", name);
@@ -778,7 +782,7 @@ void Comms::handle_remove_node()
     }
 
     unpublish_outputs(node);
-    m_hal.m_nodes.remove(node);
+    m_hal->m_nodes.remove(node);
 
     request_all_node_configs();
 }
@@ -830,7 +834,7 @@ void Comms::handle_stream_data()
         QLOGE("Failed to unpack stream telemetry");
         return;
     }
-    auto stream = m_hal.get_streams().find_by_name(stream_name);
+    auto stream = m_hal->get_streams().find_by_name(stream_name);
     if (!stream)
     {
         QLOGW("Cannot find stream '{}'", stream_name);
@@ -884,7 +888,7 @@ void Comms::handle_stream_data()
 //        QLOGE("Failed to unpack video stream");
 //        return;
 //    }
-//    auto _stream = m_hal.get_streams().find_by_name(stream_name);
+//    auto _stream = m_hal->get_streams().find_by_name(stream_name);
 //    if (!_stream || _stream->get_type() != stream::gs::Video::TYPE)
 //    {
 //        QLOGW("Cannot find stream '{}'", stream_name);

@@ -8,9 +8,6 @@ Rectangle {
     width: 800; height: 480
     color: "#2c3e50"
 
-    signal startPressed()
-    signal poweroffPressed()
-
     Text {
         id: title
         color: "#ecf0f1"
@@ -20,28 +17,39 @@ Rectangle {
         font.pointSize: 42; font.bold: true
     }
 
-    MenuButton  {
+    ToolButton
+    {
         id: startButton
+        anchors.top: title.bottom
+        anchors.topMargin: 40
         anchors.horizontalCenter: parent.horizontalCenter
-        y: title.y + 100
         width: 100
         height: width
-        icon: "qrc:/icons/ui/fly.png"
-
-        SequentialAnimation on color {
-            loops: Animation.Infinite
-            ColorAnimation { from: "#3498db"; to: "#7f8c8d"; duration: 500 }
-            ColorAnimation { from: "#7f8c8d"; to: "#3498db"; duration: 500 }
+        Image {
+            source: "qrc:/icons/ui/fly.png"
+            anchors.centerIn: parent
+            anchors.margins: 8
+            fillMode: Image.PreserveAspectFit
         }
 
-        onClicked: root.startPressed()
+        style: ButtonStyle {
+            background: Rectangle {
+                radius: 8
+                SequentialAnimation on color {
+                    loops: Animation.Infinite
+                    ColorAnimation { from: "#6C7A89"; to: "#D35400"; duration: 500 }
+                    ColorAnimation { from: "#D35400"; to: "#6C7A89"; duration: 500 }
+                }
+            }
+        }
+        onClicked: s_menus.push("MM.qml")
     }
 
     Dialog {
         id: poweroffDialog
         visible: false
         title: "Shutdown"
-        onYes: root.poweroffPressed()
+        onYes: s_os.poweroffSystem()
         standardButtons: StandardButton.Yes | StandardButton.No
         width: 400
         height: 100
@@ -62,7 +70,7 @@ Rectangle {
         height: width
         icon: "qrc:/icons/ui/reconnect.png"
         anchors.margins: 8
-        color: "#C5EFF7"
+        //color: "#C5EFF7"
 
         onClicked: poweroffDialog.open()
     }

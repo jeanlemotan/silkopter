@@ -8,15 +8,11 @@ Rectangle {
     width: 800; height: 600
     color: "#2c3e50"
 
-    signal backPressed()
-    signal setupPressed()
-    signal hudPressed()
-
     TopBar {
         id: topBar
         width: parent.width
         title: "Multi Config"
-        onBackPressed: root.backPressed()
+        onBackPressed: s_menus.pop()
     }
 
     MenuButton
@@ -24,7 +20,7 @@ Rectangle {
         id: quadxButton
         text: "Quad X"
         icon: "qrc:/icons/ui/quadx.png"
-        color: "#bdc3c7"
+        //color: "#bdc3c7"
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: topBar.bottom
         anchors.topMargin: 100
@@ -37,7 +33,7 @@ Rectangle {
         id: quadplusButton
         text: "Quad X"
         icon: "qrc:/icons/ui/quadx.png"
-        color: "#bdc3c7"
+        //color: "#bdc3c7"
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: topBar.bottom
         anchors.topMargin: 100

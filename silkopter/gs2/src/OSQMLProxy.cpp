@@ -1,7 +1,6 @@
 #include "OSQMLProxy.h"
 #include <QSettings>
-#include "utils/RCP_RFMON_Socket.h"
-
+#include <QProcess>
 
 OSQMLProxy::OSQMLProxy(QObject *parent)
     : QObject(parent)
@@ -16,6 +15,14 @@ OSQMLProxy::OSQMLProxy(QObject *parent)
     }
 }
 
+void OSQMLProxy::poweroffSystem()
+{
+#ifdef RASPBERRY_PI
+    QProcess process;
+    process.startDetached("shutdown -P now");
+#endif
+}
+
 float OSQMLProxy::getBrightness() const
 {
     return m_brightness;
@@ -28,12 +35,14 @@ void OSQMLProxy::setBrightness(float v)
     {
         m_brightness = v;
 
+#ifdef RASPBERRY_PI
         q::data::File_Sink fs(q::Path("/sys/class/backlight/rpi_backlight/brightness"));
         if (fs.is_open())
         {
             std::string val = q::util::format<std::string>("{}\n", static_cast<int>(m_brightness * 255.f));
             fs.write(reinterpret_cast<const uint8_t*>(val.data()), val.size());
         }
+#endif
 
         emit brightnessChanged(m_brightness);
     }

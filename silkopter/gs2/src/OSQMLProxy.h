@@ -13,6 +13,7 @@ public:
     float getBrightness() const;
     void setBrightness(float v);
 
+    Q_INVOKABLE void poweroffSystem();
 
 signals:
     void brightnessChanged(float);

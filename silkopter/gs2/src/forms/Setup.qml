@@ -9,18 +9,11 @@ Rectangle {
     width: 320; height: 480
     color: "#2c3e50"
 
-    signal backPressed()
-    signal multicopterSetupPressed()
-    signal roverSetupPressed()
-    signal planeSetupPressed()
-    signal boatSetupPressed()
-    signal commsSetupPressed()
-
     TopBar {
         id: topBar
         width: parent.width
         title: "Setup"
-        onBackPressed: root.backPressed()
+        onBackPressed: s_menus.pop()
     }
 
     SideBar {
@@ -34,8 +27,8 @@ Rectangle {
             id: multicopterSetupButton
             text: "Multicopter"
             icon: "qrc:/icons/ui/uav-multicopter.png"
-            color: "#bdc3c7"
-            onClicked: root.multicopterSetupPressed()
+            //color: "#bdc3c7"
+            onClicked: s_menus.push("MulticopterSetup.qml")
             anchors.margins: 10
             anchors.top: parent.top
             anchors.left: parent.left
@@ -46,8 +39,8 @@ Rectangle {
             id: roverSetupButton
             text: "Rover"
             icon: "qrc:/icons/ui/uav-rover.png"
-            color: "#bdc3c7"
-            onClicked: root.roverSetupPressed()
+            //color: "#bdc3c7"
+            onClicked: s_menus.push("RoverSetup.qml")
             anchors.margins: 10
             anchors.top: multicopterSetupButton.bottom
             anchors.left: parent.left
@@ -58,8 +51,8 @@ Rectangle {
             id: planeSetupButton
             text: "Plane"
             icon: "qrc:/icons/ui/uav-plane.png"
-            color: "#bdc3c7"
-            onClicked: root.planeSetupPressed()
+            //color: "#bdc3c7"
+            onClicked: s_menus.push("PlaneSetup.qml")
             anchors.margins: 10
             anchors.top: roverSetupButton.bottom
             anchors.left: parent.left
@@ -70,8 +63,8 @@ Rectangle {
             id: boatSetupButton
             text: "Boat"
             icon: "qrc:/icons/ui/uav-boat.png"
-            color: "#bdc3c7"
-            onClicked: root.boatSetupPressed()
+            //color: "#bdc3c7"
+            onClicked: s_menus.push("BoatSetup.qml")
             anchors.margins: 10
             anchors.top: planeSetupButton.bottom
             anchors.left: parent.left
@@ -82,8 +75,8 @@ Rectangle {
             id: commsSetupButton
             text: "Comms"
             icon: "qrc:/icons/ui/wifi.png"
-            color: "#bdc3c7"
-            onClicked: root.commsSetupPressed()
+            //color: "#bdc3c7"
+            onClicked: s_menus.push("CommsSetup.qml")
             anchors.margins: 10
             anchors.top: boatSetupButton.bottom
             anchors.left: parent.left
@@ -106,7 +99,7 @@ Rectangle {
             anchors.left: parent.left
             height: 30
             width: 150
-            color: "#bdc3c7"
+            color: "#ECF0F1"
             text: "Brightness:"
         }
         Settings {

@@ -15,7 +15,9 @@ class Comms : q::util::Noncopyable
 {
     friend class HAL;
 public:
-    Comms(HAL& hal);
+    Comms();
+
+    void init(HAL& hal);
 
     //auto start_udp(boost::asio::ip::address const& address, uint16_t send_port, uint16_t receive_port) -> bool;
     auto start_rfmon(std::string const& interface, uint8_t id) -> bool;
@@ -42,7 +44,7 @@ public:
     void send_multi_commands_value(stream::IMulti_Commands::Value const& value);
 
 private:
-    HAL& m_hal;
+    HAL* m_hal = nullptr;
 
     void configure_channels();
 

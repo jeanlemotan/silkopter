@@ -33,7 +33,7 @@ Rectangle  {
 
     TrayButton {
         id: backButton
-        color: "#bdc3c7"
+        //color: "#bdc3c7"
         anchors.top: parent.top
         anchors.bottom: parent.bottom
         anchors.right: parent.right

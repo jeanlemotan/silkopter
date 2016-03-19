@@ -12,40 +12,47 @@ void CommsQMLProxy::init(silk::Comms& comms)
     m_comms = &comms;
 }
 
-bool CommsQMLProxy::isConnected() const
-{
-    return m_comms->is_connected();
-}
-
 CommsQMLProxy::ConnectionStatus CommsQMLProxy::getConnectionStatus() const
 {
-    return isConnected() ? ConnectionStatus::CONNECTED : ConnectionStatus::NOT_CONNECTED;
+    return m_comms->is_connected() ? ConnectionStatus::CONNECTED : ConnectionStatus::DISCONNECTED;
 }
 
 CommsQMLProxy::ConnectionType CommsQMLProxy::getConnectionType() const
 {
-    return isConnected() ? ConnectionType::RF_MON : ConnectionType::NONE;
+    return m_connectionType;
 }
-
-QList<QString> CommsQMLProxy::getRFMONInterfaces() const
+void CommsQMLProxy::setConnectionType(ConnectionType type)
 {
-    return m_rfmonInterfaces;
-}
-
-uint8_t CommsQMLProxy::getRFMONEndpointId() const
-{
-    return m_rfmonEndpointId;
-}
-
-QList<QString> CommsQMLProxy::enumerateRFMONInterfaces() const
-{
-    if (m_enumeratedRFMONInterfaces.empty())
+    if (m_connectionType != type)
     {
-        std::vector<std::string> interfaces = util::RCP_RFMON_Socket::enumerate_interfaces();
-        for (std::string const& i: interfaces)
-        {
-            m_enumeratedRFMONInterfaces.append(QString(i.c_str()));
-        }
+        disconnect();
+        m_connectionType = type;
+        emit connectionTypeChanged(m_connectionType);
     }
-    return m_enumeratedRFMONInterfaces;
 }
+
+void CommsQMLProxy::connect()
+{
+    disconnect();
+
+    if (m_connectionType == ConnectionType::UDP)
+    {
+        //m_comms->
+    }
+    else if (m_connectionType == ConnectionType::RFMON)
+    {
+        m_comms->start_rfmon("wlan0", 5);
+    }
+
+    emit connectionStatusChanged(getConnectionStatus());
+}
+void CommsQMLProxy::disconnect()
+{
+    if (getConnectionStatus() != ConnectionStatus::DISCONNECTED)
+    {
+        m_comms->disconnect();
+        emit connectionStatusChanged(ConnectionStatus::DISCONNECTED);
+    }
+}
+
+

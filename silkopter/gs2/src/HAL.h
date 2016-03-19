@@ -265,8 +265,10 @@ class HAL : q::util::Noncopyable
 {
     friend class Comms;
 public:
-    HAL(Comms& comms);
+    HAL();
     ~HAL();
+
+    void init(Comms& comms);
 
     auto get_multi_config() const   -> boost::optional<config::Multi>;
     void set_multi_config(config::Multi const& config);
@@ -296,7 +298,7 @@ public:
 
 protected:
     Manual_Clock m_remote_clock;
-    Comms& m_comms;
+    Comms* m_comms = nullptr;
 
     struct Configs
     {

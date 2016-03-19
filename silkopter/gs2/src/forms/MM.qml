@@ -9,29 +9,26 @@ Rectangle {
     width: 800; height: 600
     color: "#2c3e50"
 
-    signal backPressed()
-    signal setupPressed()
-    signal hudPressed()
-    signal commsPressed()
-
     TopBar {
         id: topBar
         width: parent.width
         title: "Silkopter"
-        onBackPressed: root.backPressed()
+        onBackPressed: s_menus.pop()
 
         TrayButton {
             function getConnectionIcon() {
                 if (s_comms.connectionStatus === Comms.CONNECTED) return "qrc:/icons/ui/connected.png";
-                if (s_comms.connectionStatus === Comms.NOT_CONNECTED) return "qrc:/icons/ui/disconnected.png";
+                if (s_comms.connectionStatus === Comms.DISCONNECTED) return "qrc:/icons/ui/disconnected.png";
                 return ""
             }
 
             id: connectionButton
             icon: getConnectionIcon()
-            color: "#bdc3c7"
+            //color: "#bdc3c7"
+            enabled: s_comms.connectionType != Comms.NONE
             onClicked: {
-                //root.connectPressed()
+                if (s_comms.connectionStatus === Comms.DISCONNECTED) s_comms.connect();
+                else s_comms.disconnect();
             }
             anchors.margins: 4
             anchors.top: parent.top
@@ -58,11 +55,11 @@ Rectangle {
         MenuButton
         {
             id: hudButton
-            enabled: s_comms.isConnected
+            enabled: s_comms.connectionStatus == Comms.CONNECTED
             text: "HUD"
             icon: "qrc:/icons/ui/hud.png"
-            color: "#bdc3c7"
-            onClicked: root.hudPressed()
+            //color: "#bdc3c7"
+            onClicked: s_menus.push("HUD.qml")
             anchors.margins: 10
             anchors.top: parent.top
             anchors.left: parent.left
@@ -74,8 +71,8 @@ Rectangle {
             id: setupButton
             text: "Setup"
             icon: "qrc:/icons/ui/setup.png"
-            color: "#bdc3c7"
-            onClicked: root.setupPressed()
+            //color: "#bdc3c7"
+            onClicked: s_menus.push("Setup.qml")
             anchors.margins: 10
             anchors.top: hudButton.bottom
             anchors.left: parent.left

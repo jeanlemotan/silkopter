@@ -18,14 +18,18 @@ namespace silk
 
 ///////////////////////////////////////////////////////////////
 
-HAL::HAL(Comms& comms)
-    : m_comms(comms)
+HAL::HAL()
 {
     QLOG_TOPIC("hal");
 }
 
 HAL::~HAL()
 {
+}
+
+void HAL::init(Comms& comms)
+{
+    m_comms = &comms;
 }
 
 auto HAL::get_remote_clock() const -> Manual_Clock const&
@@ -56,7 +60,7 @@ void HAL::set_multi_config(config::Multi const& config)
     configj.SetObject();
     autojsoncxx::to_document(config, configj);
 
-    auto& channel = m_comms.get_setup_channel();
+    auto& channel = m_comms->get_setup_channel();
     channel.begin_pack(comms::Setup_Message::MULTI_CONFIG);
     channel.pack_param(configj);
     channel.end_pack();
@@ -66,7 +70,7 @@ void HAL::add_node(std::string const& def_name,
                      std::string const& name,
                      rapidjson::Document const& init_params)
 {
-    auto& channel = m_comms.get_setup_channel();
+    auto& channel = m_comms->get_setup_channel();
     channel.begin_pack(comms::Setup_Message::ADD_NODE);
     channel.pack_param(def_name);
     channel.pack_param(name);
@@ -76,7 +80,7 @@ void HAL::add_node(std::string const& def_name,
 
 void HAL::remove_node(node::gs::Node_ptr node)
 {
-    auto& channel = m_comms.get_setup_channel();
+    auto& channel = m_comms->get_setup_channel();
     channel.begin_pack(comms::Setup_Message::REMOVE_NODE);
     channel.pack_param(node->name);
     channel.end_pack();
@@ -93,7 +97,7 @@ void HAL::set_node_input_stream_path(node::gs::Node_ptr node, std::string const&
 
     uint32_t input_idx = static_cast<uint32_t>(std::distance(node->inputs.begin(), it));
 
-    auto& channel = m_comms.get_setup_channel();
+    auto& channel = m_comms->get_setup_channel();
     channel.begin_pack(comms::Setup_Message::NODE_INPUT_STREAM_PATH);
     channel.pack_param(node->name);
     channel.pack_param(input_idx);
@@ -103,7 +107,7 @@ void HAL::set_node_input_stream_path(node::gs::Node_ptr node, std::string const&
 
 void HAL::set_node_config(node::gs::Node_ptr node, rapidjson::Document const& config)
 {
-    auto& channel = m_comms.get_setup_channel();
+    auto& channel = m_comms->get_setup_channel();
     channel.begin_pack(comms::Setup_Message::NODE_CONFIG);
     channel.pack_param(node->name);
     channel.pack_param(config);
@@ -112,7 +116,7 @@ void HAL::set_node_config(node::gs::Node_ptr node, rapidjson::Document const& co
 
 void HAL::send_node_message(node::gs::Node_ptr node, rapidjson::Document const& json)
 {
-    auto& channel = m_comms.get_setup_channel();
+    auto& channel = m_comms->get_setup_channel();
     channel.begin_pack(comms::Setup_Message::NODE_MESSAGE);
     channel.pack_param(node->name);
     channel.pack_param(json);
@@ -142,7 +146,7 @@ void HAL::set_stream_telemetry_active(std::string const& stream_name, bool activ
         return;
     }
 
-    auto& channel = m_comms.get_setup_channel();
+    auto& channel = m_comms->get_setup_channel();
     channel.begin_pack(comms::Setup_Message::STREAM_TELEMETRY_ACTIVE);
     channel.pack_param(stream_name);
     channel.pack_param(new_active);
