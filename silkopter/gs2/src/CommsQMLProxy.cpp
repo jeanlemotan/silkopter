@@ -41,7 +41,7 @@ void CommsQMLProxy::connect()
     }
     else if (m_connectionType == ConnectionType::RFMON)
     {
-        m_comms->start_rfmon("wlan0", 5);
+        m_comms->start_rfmon("wlan1", 5);
     }
 
     emit connectionStatusChanged(getConnectionStatus());

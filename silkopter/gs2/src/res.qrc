@@ -31,16 +31,16 @@
         <file>icons/nodes/Transformer.png</file>
         <file>icons/nodes/Generator.png</file>
         <file>images/logo.png</file>
-        <file>forms/Splash.qml</file>
-        <file>forms/MM.qml</file>
-        <file>forms/TopBar.qml</file>
-        <file>forms/Setup.qml</file>
-        <file>forms/MenuButton.qml</file>
-        <file>forms/MulticopterSetup.qml</file>
-        <file>forms/SideBar.qml</file>
-        <file>forms/UAVInfo.qml</file>
-        <file>forms/CommsSetup.qml</file>
-        <file>forms/TrayButton.qml</file>
+        <file>qml/Splash.qml</file>
+        <file>qml/MM.qml</file>
+        <file>qml/TopBar.qml</file>
+        <file>qml/Setup.qml</file>
+        <file>qml/MenuButton.qml</file>
+        <file>qml/MulticopterSetup.qml</file>
+        <file>qml/SideBar.qml</file>
+        <file>qml/UAVInfo.qml</file>
+        <file>qml/CommsSetup.qml</file>
+        <file>qml/TrayButton.qml</file>
         <file>icons/ui/back.png</file>
         <file>icons/ui/battery.png</file>
         <file>icons/ui/calibrate.png</file>

@@ -557,13 +557,11 @@ auto RCP_RFMON_Socket::start() -> bool
         param.sched_priority = sched_get_priority_max(policy);
         if (pthread_setschedparam(m_tx_thread.native_handle(), policy, &param) != 0)
         {
-            perror("tx_thread sched_setscheduler");
-            return false;
+            perror("Cannot set TX thread priority - using normal");
         }
         if (pthread_setschedparam(m_rx_thread.native_handle(), policy, &param) != 0)
         {
-            perror("rx_thread sched_setscheduler");
-            return false;
+            perror("Cannot set RX thread priority - using normal");
         }
     }
 #endif
