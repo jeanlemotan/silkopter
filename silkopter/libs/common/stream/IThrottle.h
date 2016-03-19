@@ -7,7 +7,7 @@ namespace silk
 namespace stream
 {
 
-class IThrottle : public IScalar_Stream<Type::THROTTLE>
+class IThrottle : public IScalar_Stream<Semantic::THROTTLE>
 {
 public:
     typedef std::true_type can_be_filtered_t;
@@ -16,7 +16,6 @@ public:
     typedef stream::Sample<Value>   Sample;
     virtual auto get_samples() const -> std::vector<Sample> const& = 0;
 };
-DECLARE_CLASS_PTR(IThrottle);
 
 
 }

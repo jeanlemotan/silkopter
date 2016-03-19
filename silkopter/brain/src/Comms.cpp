@@ -26,8 +26,8 @@
 #include "common/stream/ITorque.h"
 #include "common/stream/IVoltage.h"
 #include "common/stream/IProximity.h"
-#include "common/stream/IMulti_State.h"
-#include "common/stream/IMulti_Commands.h"
+#include "common/stream/IMultirotor_State.h"
+#include "common/stream/IMultirotor_Commands.h"
 
 #include "common/node/IBrain.h"
 
@@ -40,7 +40,7 @@
 
 #include "sz_math.hpp"
 //#include "sz_Comms_Source.hpp"
-#include "sz_Multi_Config.hpp"
+#include "sz_Multirotor_Config.hpp"
 
 using namespace silk;
 using namespace boost::asio;
@@ -296,8 +296,8 @@ void Comms::gather_telemetry_data()
                 gather_telemetry_stream<stream::IVelocity>(ts, *stream) ||
                 gather_telemetry_stream<stream::IThrottle>(ts, *stream) ||
                 gather_telemetry_stream<stream::ITorque>(ts, *stream) ||
-                gather_telemetry_stream<stream::IMulti_Commands>(ts, *stream) ||
-                gather_telemetry_stream<stream::IMulti_State>(ts, *stream) ||
+                gather_telemetry_stream<stream::IMultirotor_Commands>(ts, *stream) ||
+                gather_telemetry_stream<stream::IMultirotor_State>(ts, *stream) ||
                 gather_telemetry_stream<stream::IProximity>(ts, *stream) ||
                 gather_telemetry_stream<stream::IVideo>(ts, *stream))
             {
@@ -305,7 +305,7 @@ void Comms::gather_telemetry_data()
             }
             else
             {
-                QLOGE("Unrecognized stream type: {} / {}", ts.stream_name, static_cast<int>(stream->get_type()));
+                QLOGE("Unrecognized stream type: {} / {}:{}", ts.stream_name, static_cast<int>(stream->get_type().get_semantic()), static_cast<int>(stream->get_type().get_space()));
             }
         }
     }
@@ -441,7 +441,7 @@ void Comms::handle_clock()
 
     channel.begin_unpack();
 
-    QLOGI("Req multi config");
+    QLOGI("Req multirotor config");
 
     int64_t time_t_data = 0;
     if (channel.unpack_param(time_t_data))
@@ -468,39 +468,45 @@ void Comms::handle_clock()
     channel.pack_all(comms::Setup_Message::CLOCK, tp);
 }
 
-void Comms::handle_multi_config()
+void Comms::handle_uav_config()
 {
     auto& channel = m_channels->setup;
     channel.begin_unpack();
 
-    QLOGI("Req multi config");
+    QLOGI("Req multirotor config");
 
+    UAV_Config::Type type;
     rapidjson::Document configj;
-    if (channel.unpack_param(configj))
+    if (channel.unpack_param(type) && channel.unpack_param(configj))
     {
-        config::Multi config;
-        autojsoncxx::error::ErrorStack result;
-        if (!autojsoncxx::from_value(config, configj, result))
+        std::shared_ptr<UAV_Config> config;
+        if (type == Multirotor_Config::TYPE)
         {
-            std::ostringstream ss;
-            ss << result;
-            QLOGE("Req Id: {} - Cannot deserialize multi config: {}", ss.str());
-            return;
+            config = std::make_shared<Multirotor_Config>();
+            autojsoncxx::error::ErrorStack result;
+            if (!autojsoncxx::from_value(static_cast<Multirotor_Config&>(*config), configj, result))
+            {
+                std::ostringstream ss;
+                ss << result;
+                QLOGE("Req Id: {} - Cannot deserialize multirotor config: {}", ss.str());
+                return;
+            }
         }
-        if (m_hal.set_multi_config(config))
+        if (m_hal.set_uav_config(config))
         {
             m_hal.save_settings();
         }
     }
 
-    channel.begin_pack(comms::Setup_Message::MULTI_CONFIG);
+    channel.begin_pack(comms::Setup_Message::UAV_CONFIG);
 
-    auto config = m_hal.get_multi_config();
+    std::shared_ptr<const Multirotor_Config> config = m_hal.get_specialized_uav_config<Multirotor_Config>();
     if (config)
     {
         channel.pack_param(true);
         configj.SetObject();
         autojsoncxx::to_document(*config, configj);
+        channel.pack_param(config->get_type());
         channel.pack_param(configj);
     }
     else
@@ -529,8 +535,8 @@ void Comms::handle_enumerate_node_defs()
     for (auto const& n: nodes)
     {
         channel.pack_param(n.name);
-        channel.pack_param(n.node->get_type());
-        pack_node_def_data(channel, *n.node);
+        channel.pack_param(n.ptr->get_type());
+        pack_node_def_data(channel, *n.ptr);
     }
 
     channel.end_pack();
@@ -553,7 +559,7 @@ void Comms::handle_enumerate_nodes()
     for (auto const& n: nodes)
     {
         channel.pack_param(n.name);
-        pack_node_data(channel, *n.node);
+        pack_node_data(channel, *n.ptr);
     }
 
     channel.end_pack();
@@ -658,10 +664,10 @@ void Comms::handle_node_input_stream_path()
 
     channel.begin_unpack();
     std::string name;
-    uint32_t input_idx = 0;
+    std::string input_name;
     std::string path;
     if (!channel.unpack_param(name) ||
-        !channel.unpack_param(input_idx) ||
+        !channel.unpack_param(input_name) ||
         !channel.unpack_param(path))
     {
         QLOGE("Error in unpacking input stream path request");
@@ -676,7 +682,16 @@ void Comms::handle_node_input_stream_path()
         return;
     }
 
-    node->set_input_stream_path(input_idx, q::Path(path));
+    std::vector<node::INode::Input> inputs = node->get_inputs();
+    for (size_t idx = 0; idx < inputs.size(); idx++)
+    {
+        const node::INode::Input& input = inputs[idx];
+        if (input.name == input_name)
+        {
+            node->set_input_stream_path(idx, q::Path(path));
+            break;
+        }
+    }
 
     m_hal.save_settings();
 
@@ -740,7 +755,7 @@ void Comms::handle_remove_node()
         return;
     }
 
-    m_hal.get_nodes().remove(node);
+    m_hal.remove_node(node);
     m_hal.save_settings();
 
     //reply
@@ -826,13 +841,13 @@ void Comms::handle_hal_telemetry_active()
     channel.end_pack();
 }
 
-auto Comms::get_multi_commands_values() const -> std::vector<stream::IMulti_Commands::Value> const&
+auto Comms::get_multirotor_commands_values() const -> std::vector<stream::IMultirotor_Commands::Value> const&
 {
-    return m_multi_commands_values;
+    return m_multirotor_commands_values;
 }
-void Comms::add_multi_state_sample(stream::IMulti_State::Sample const& sample)
+void Comms::add_multirotor_state_sample(stream::IMultirotor_State::Sample const& sample)
 {
-    m_channels->pilot.pack_all(silk::comms::Pilot_Message::MULTI_STATE, sample);
+    m_channels->pilot.pack_all(silk::comms::Pilot_Message::MULTIROTOR_STATE, sample);
     m_channels->pilot.send(*m_rcp);
 }
 void Comms::add_video_sample(stream::IVideo::Sample const& sample)
@@ -841,18 +856,18 @@ void Comms::add_video_sample(stream::IVideo::Sample const& sample)
     m_channels->video.send(*m_rcp);
 }
 
-void Comms::handle_multi_commands()
+void Comms::handle_multirotor_commands()
 {
     auto& channel = m_channels->pilot;
 
-    stream::IMulti_Commands::Value value;
+    stream::IMultirotor_Commands::Value value;
     if (!channel.unpack_all(value))
     {
-        QLOGE("Error in unpacking multi commands");
+        QLOGE("Error in unpacking multirotor commands");
         return;
     }
 
-    m_multi_commands_values.push_back(value);
+    m_multirotor_commands_values.push_back(value);
 }
 
 void Comms::process()
@@ -862,13 +877,13 @@ void Comms::process()
         return;
     }
 
-    m_multi_commands_values.clear();
+    m_multirotor_commands_values.clear();
 
     while (auto msg = m_channels->pilot.get_next_message(*m_rcp))
     {
         switch (msg.get())
         {
-        case comms::Pilot_Message::MULTI_COMMANDS: handle_multi_commands(); break;
+        case comms::Pilot_Message::MULTIROTOR_COMMANDS: handle_multirotor_commands(); break;
 
         default: QLOGE("Received unrecognised pilot message: {}", static_cast<int>(msg.get())); break;
         }
@@ -881,7 +896,7 @@ void Comms::process()
         {
         case comms::Setup_Message::CLOCK: handle_clock(); break;
 
-        case comms::Setup_Message::MULTI_CONFIG: handle_multi_config(); break;
+        case comms::Setup_Message::UAV_CONFIG: handle_uav_config(); break;
 
         case comms::Setup_Message::ENUMERATE_NODE_DEFS: handle_enumerate_node_defs(); break;
         case comms::Setup_Message::ENUMERATE_NODES: handle_enumerate_nodes(); break;

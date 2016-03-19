@@ -4,7 +4,7 @@
 #include "common/stream/IFrame.h"
 #include "common/stream/IFloat.h"
 #include "common/stream/IPWM.h"
-#include "common/stream/IMulti_Commands.h"
+#include "common/stream/IMultirotor_Commands.h"
 #include "HAL.h"
 
 #include "Sample_Accumulator.h"
@@ -56,9 +56,9 @@ private:
     std::shared_ptr<sz::Servo_Gimbal::Config> m_config;
 
     Sample_Accumulator<stream::IUAV_Frame> m_frame_accumulator;
-    Sample_Accumulator<stream::IMulti_Commands> m_commands_accumulator;
+    Sample_Accumulator<stream::IMultirotor_Commands> m_commands_accumulator;
 
-    stream::IMulti_Commands::Sample m_commands_sample;
+    stream::IMultirotor_Commands::Sample m_commands_sample;
 
     std::vector<stream::IUAV_Frame::Sample> m_frame_samples;
     std::vector<stream::IUAV_Frame::Sample> m_target_frame_samples;

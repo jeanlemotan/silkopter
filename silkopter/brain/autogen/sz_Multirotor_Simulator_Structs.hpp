@@ -27,20 +27,22 @@
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-//struct Motor;
+//struct Motor_State;
 
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::silk::config::Multi::Motor > {
+class SAXEventHandler< ::silk::node::IMultirotor_Simulator::Motor_State > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
     int depth;
 
-    SAXEventHandler< math::vec3f > handler_0;
-SAXEventHandler< bool > handler_1;bool has_position;
-bool has_clockwise;
+    SAXEventHandler< float > handler_0;
+SAXEventHandler< float > handler_1;
+SAXEventHandler< float > handler_2;bool has_drag_factor;
+bool has_throttle;
+bool has_thrust;
 
     bool check_depth(const char* type)
     {
@@ -55,9 +57,11 @@ bool has_clockwise;
     {
         switch (state) {
             case 0:
-    return "position";
+    return "drag_factor";
 case 1:
-    return "clockwise";
+    return "throttle";
+case 2:
+    return "thrust";
         default:
             break;
         }
@@ -84,16 +88,18 @@ case 1:
 
     void reset_flags()
     {
-        has_position = false;
-has_clockwise = false;
+        has_drag_factor = false;
+has_throttle = false;
+has_thrust = false;
     }
 
 public:
-    explicit SAXEventHandler( ::silk::config::Multi::Motor * obj)
+    explicit SAXEventHandler( ::silk::node::IMultirotor_Simulator::Motor_State * obj)
         : state(-1)
         , depth(0)
-        , handler_0(&obj->position)
-, handler_1(&obj->clockwise)
+        , handler_0(&obj->drag_factor)
+, handler_1(&obj->throttle)
+, handler_2(&obj->thrust)
     {
         reset_flags();
     }
@@ -110,6 +116,9 @@ public:
 
 case 1:
     return checked_event_forwarding(handler_1.Null());
+
+case 2:
+    return checked_event_forwarding(handler_2.Null());
 
         default:
             break;
@@ -130,6 +139,9 @@ case 1:
 case 1:
     return checked_event_forwarding(handler_1.Bool(b));
 
+case 2:
+    return checked_event_forwarding(handler_2.Bool(b));
+
         default:
             break;
         }
@@ -148,6 +160,9 @@ case 1:
 
 case 1:
     return checked_event_forwarding(handler_1.Int(i));
+
+case 2:
+    return checked_event_forwarding(handler_2.Int(i));
 
         default:
             break;
@@ -168,6 +183,9 @@ case 1:
 case 1:
     return checked_event_forwarding(handler_1.Uint(i));
 
+case 2:
+    return checked_event_forwarding(handler_2.Uint(i));
+
         default:
             break;
         }
@@ -186,6 +204,9 @@ case 1:
 
 case 1:
     return checked_event_forwarding(handler_1.Int64(i));
+
+case 2:
+    return checked_event_forwarding(handler_2.Int64(i));
 
         default:
             break;
@@ -206,6 +227,9 @@ case 1:
 case 1:
     return checked_event_forwarding(handler_1.Uint64(i));
 
+case 2:
+    return checked_event_forwarding(handler_2.Uint64(i));
+
         default:
             break;
         }
@@ -224,6 +248,9 @@ case 1:
 
 case 1:
     return checked_event_forwarding(handler_1.Double(d));
+
+case 2:
+    return checked_event_forwarding(handler_2.Double(d));
 
         default:
             break;
@@ -244,6 +271,9 @@ case 1:
 case 1:
     return checked_event_forwarding(handler_1.String(str, length, copy));
 
+case 2:
+    return checked_event_forwarding(handler_2.String(str, length, copy));
+
         default:
             break;
         }
@@ -258,10 +288,12 @@ case 1:
         if (depth == 1) {
             if (0) {
             }
-            else if (utility::string_equal(str, length, "\x50\x6f\x73\x69\x74\x69\x6f\x6e", 8))
-						 { state=0; has_position = true; }
-else if (utility::string_equal(str, length, "\x43\x6c\x6f\x63\x6b\x77\x69\x73\x65", 9))
-						 { state=1; has_clockwise = true; }
+            else if (utility::string_equal(str, length, "\x44\x72\x61\x67\x20\x46\x61\x63\x74\x6f\x72\x20\x28\x30\x2d\x31\x29", 17))
+						 { state=0; has_drag_factor = true; }
+else if (utility::string_equal(str, length, "\x54\x68\x72\x6f\x74\x74\x6c\x65\x20\x28\x30\x2d\x31\x29", 14))
+						 { state=1; has_throttle = true; }
+else if (utility::string_equal(str, length, "\x54\x68\x72\x75\x73\x74\x20\x28\x4e\x29", 10))
+						 { state=2; has_thrust = true; }
             else {
                 state = -1;
                 return true;
@@ -275,6 +307,9 @@ else if (utility::string_equal(str, length, "\x43\x6c\x6f\x63\x6b\x77\x69\x73\x6
 
 case 1:
     return checked_event_forwarding(handler_1.Key(str, length, copy));
+
+case 2:
+    return checked_event_forwarding(handler_2.Key(str, length, copy));
 
             default:
                 break;
@@ -296,6 +331,9 @@ case 1:
 case 1:
     return checked_event_forwarding(handler_1.StartArray());
 
+case 2:
+    return checked_event_forwarding(handler_2.StartArray());
+
         default:
             break;
         }
@@ -315,6 +353,9 @@ case 1:
 case 1:
     return checked_event_forwarding(handler_1.EndArray(length));
 
+case 2:
+    return checked_event_forwarding(handler_2.EndArray(length));
+
         default:
             break;
         }
@@ -333,6 +374,9 @@ case 1:
 
 case 1:
     return checked_event_forwarding(handler_1.StartObject());
+
+case 2:
+    return checked_event_forwarding(handler_2.StartObject());
 
             default:
                 break;
@@ -354,12 +398,16 @@ case 1:
 case 1:
     return checked_event_forwarding(handler_1.EndObject(length));
 
+case 2:
+    return checked_event_forwarding(handler_2.EndObject(length));
+
             default:
                 break;
             }
         } else {
-            if (!has_position) set_missing_required("position");
-if (!has_clockwise) set_missing_required("clockwise");
+            if (!has_drag_factor) set_missing_required("drag_factor");
+if (!has_throttle) set_missing_required("throttle");
+if (!has_thrust) set_missing_required("thrust");
         }
         return the_error.empty();
     }
@@ -382,6 +430,8 @@ if (!has_clockwise) set_missing_required("clockwise");
      handler_0.ReapError(errs); break;
 case 1:
      handler_1.ReapError(errs); break;
+case 2:
+     handler_2.ReapError(errs); break;
 
         default:
             break;
@@ -398,21 +448,23 @@ case 1:
         reset_flags();
         handler_0.PrepareForReuse();
 handler_1.PrepareForReuse();
+handler_2.PrepareForReuse();
 
     }
 };
 
-template < class Writer538b274f76b1700356c4f6eea1d3b65d5ff3214a2c54783039bbfeca6493a2e0 >
-struct Serializer< Writer538b274f76b1700356c4f6eea1d3b65d5ff3214a2c54783039bbfeca6493a2e0, ::silk::config::Multi::Motor > {
+template < class Writer48ef64f309e4664f822b5435670f9c64113597b4b791a03f24708659675ba0e4 >
+struct Serializer< Writer48ef64f309e4664f822b5435670f9c64113597b4b791a03f24708659675ba0e4, ::silk::node::IMultirotor_Simulator::Motor_State > {
 
-    void operator()( Writer538b274f76b1700356c4f6eea1d3b65d5ff3214a2c54783039bbfeca6493a2e0& w, const ::silk::config::Multi::Motor& value) const
+    void operator()( Writer48ef64f309e4664f822b5435670f9c64113597b4b791a03f24708659675ba0e4& w, const ::silk::node::IMultirotor_Simulator::Motor_State& value) const
     {
         w.StartObject();
 
-        w.Key("\x50\x6f\x73\x69\x74\x69\x6f\x6e", 8, false); Serializer< Writer538b274f76b1700356c4f6eea1d3b65d5ff3214a2c54783039bbfeca6493a2e0, math::vec3f >()(w, value.position);
-w.Key("\x43\x6c\x6f\x63\x6b\x77\x69\x73\x65", 9, false); Serializer< Writer538b274f76b1700356c4f6eea1d3b65d5ff3214a2c54783039bbfeca6493a2e0, bool >()(w, value.clockwise);
+        w.Key("\x44\x72\x61\x67\x20\x46\x61\x63\x74\x6f\x72\x20\x28\x30\x2d\x31\x29", 17, false); Serializer< Writer48ef64f309e4664f822b5435670f9c64113597b4b791a03f24708659675ba0e4, float >()(w, value.drag_factor);
+w.Key("\x54\x68\x72\x6f\x74\x74\x6c\x65\x20\x28\x30\x2d\x31\x29", 14, false); Serializer< Writer48ef64f309e4664f822b5435670f9c64113597b4b791a03f24708659675ba0e4, float >()(w, value.throttle);
+w.Key("\x54\x68\x72\x75\x73\x74\x20\x28\x4e\x29", 10, false); Serializer< Writer48ef64f309e4664f822b5435670f9c64113597b4b791a03f24708659675ba0e4, float >()(w, value.thrust);
 
-        w.EndObject(2);
+        w.EndObject(3);
     }
 
 };
@@ -446,33 +498,29 @@ w.Key("\x43\x6c\x6f\x63\x6b\x77\x69\x73\x65", 9, false); Serializer< Writer538b2
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-//struct Multi;
+//struct UAV_State;
 
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::silk::config::Multi > {
+class SAXEventHandler< ::silk::node::IMultirotor_Simulator::UAV_State > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
     int depth;
 
-    SAXEventHandler< std::string > handler_0;
-SAXEventHandler< float > handler_1;
-SAXEventHandler< float > handler_2;
-SAXEventHandler< float > handler_3;
-SAXEventHandler< float > handler_4;
-SAXEventHandler< float > handler_5;
-SAXEventHandler< float > handler_6;
-SAXEventHandler< float > handler_7;
-SAXEventHandler< std::vector<silk::config::Multi::Motor> > handler_8;bool has_name;
-bool has_mass;
-bool has_height;
-bool has_radius;
-bool has_motor_thrust;
-bool has_motor_z_torque;
-bool has_motor_acceleration;
-bool has_motor_deceleration;
+    SAXEventHandler< math::vec3f > handler_0;
+SAXEventHandler< math::vec3f > handler_1;
+SAXEventHandler< math::vec3f > handler_2;
+SAXEventHandler< math::vec3f > handler_3;
+SAXEventHandler< math::quatf > handler_4;
+SAXEventHandler< math::vec3f > handler_5;
+SAXEventHandler< std::vector<silk::node::IMultirotor_Simulator::Motor_State> > handler_6;bool has_enu_position;
+bool has_enu_velocity;
+bool has_enu_linear_acceleration;
+bool has_acceleration;
+bool has_local_to_enu_rotation;
+bool has_angular_velocity;
 bool has_motors;
 
     bool check_depth(const char* type)
@@ -488,22 +536,18 @@ bool has_motors;
     {
         switch (state) {
             case 0:
-    return "name";
+    return "enu_position";
 case 1:
-    return "mass";
+    return "enu_velocity";
 case 2:
-    return "height";
+    return "enu_linear_acceleration";
 case 3:
-    return "radius";
+    return "acceleration";
 case 4:
-    return "motor_thrust";
+    return "local_to_enu_rotation";
 case 5:
-    return "motor_z_torque";
+    return "angular_velocity";
 case 6:
-    return "motor_acceleration";
-case 7:
-    return "motor_deceleration";
-case 8:
     return "motors";
         default:
             break;
@@ -531,30 +575,26 @@ case 8:
 
     void reset_flags()
     {
-        has_name = false;
-has_mass = false;
-has_height = false;
-has_radius = false;
-has_motor_thrust = false;
-has_motor_z_torque = false;
-has_motor_acceleration = false;
-has_motor_deceleration = false;
+        has_enu_position = false;
+has_enu_velocity = false;
+has_enu_linear_acceleration = false;
+has_acceleration = false;
+has_local_to_enu_rotation = false;
+has_angular_velocity = false;
 has_motors = false;
     }
 
 public:
-    explicit SAXEventHandler( ::silk::config::Multi * obj)
+    explicit SAXEventHandler( ::silk::node::IMultirotor_Simulator::UAV_State * obj)
         : state(-1)
         , depth(0)
-        , handler_0(&obj->name)
-, handler_1(&obj->mass)
-, handler_2(&obj->height)
-, handler_3(&obj->radius)
-, handler_4(&obj->motor_thrust)
-, handler_5(&obj->motor_z_torque)
-, handler_6(&obj->motor_acceleration)
-, handler_7(&obj->motor_deceleration)
-, handler_8(&obj->motors)
+        , handler_0(&obj->enu_position)
+, handler_1(&obj->enu_velocity)
+, handler_2(&obj->enu_linear_acceleration)
+, handler_3(&obj->acceleration)
+, handler_4(&obj->local_to_enu_rotation)
+, handler_5(&obj->angular_velocity)
+, handler_6(&obj->motors)
     {
         reset_flags();
     }
@@ -586,12 +626,6 @@ case 5:
 
 case 6:
     return checked_event_forwarding(handler_6.Null());
-
-case 7:
-    return checked_event_forwarding(handler_7.Null());
-
-case 8:
-    return checked_event_forwarding(handler_8.Null());
 
         default:
             break;
@@ -627,12 +661,6 @@ case 5:
 case 6:
     return checked_event_forwarding(handler_6.Bool(b));
 
-case 7:
-    return checked_event_forwarding(handler_7.Bool(b));
-
-case 8:
-    return checked_event_forwarding(handler_8.Bool(b));
-
         default:
             break;
         }
@@ -666,12 +694,6 @@ case 5:
 
 case 6:
     return checked_event_forwarding(handler_6.Int(i));
-
-case 7:
-    return checked_event_forwarding(handler_7.Int(i));
-
-case 8:
-    return checked_event_forwarding(handler_8.Int(i));
 
         default:
             break;
@@ -707,12 +729,6 @@ case 5:
 case 6:
     return checked_event_forwarding(handler_6.Uint(i));
 
-case 7:
-    return checked_event_forwarding(handler_7.Uint(i));
-
-case 8:
-    return checked_event_forwarding(handler_8.Uint(i));
-
         default:
             break;
         }
@@ -746,12 +762,6 @@ case 5:
 
 case 6:
     return checked_event_forwarding(handler_6.Int64(i));
-
-case 7:
-    return checked_event_forwarding(handler_7.Int64(i));
-
-case 8:
-    return checked_event_forwarding(handler_8.Int64(i));
 
         default:
             break;
@@ -787,12 +797,6 @@ case 5:
 case 6:
     return checked_event_forwarding(handler_6.Uint64(i));
 
-case 7:
-    return checked_event_forwarding(handler_7.Uint64(i));
-
-case 8:
-    return checked_event_forwarding(handler_8.Uint64(i));
-
         default:
             break;
         }
@@ -826,12 +830,6 @@ case 5:
 
 case 6:
     return checked_event_forwarding(handler_6.Double(d));
-
-case 7:
-    return checked_event_forwarding(handler_7.Double(d));
-
-case 8:
-    return checked_event_forwarding(handler_8.Double(d));
 
         default:
             break;
@@ -867,12 +865,6 @@ case 5:
 case 6:
     return checked_event_forwarding(handler_6.String(str, length, copy));
 
-case 7:
-    return checked_event_forwarding(handler_7.String(str, length, copy));
-
-case 8:
-    return checked_event_forwarding(handler_8.String(str, length, copy));
-
         default:
             break;
         }
@@ -887,24 +879,20 @@ case 8:
         if (depth == 1) {
             if (0) {
             }
-            else if (utility::string_equal(str, length, "\x4e\x61\x6d\x65", 4))
-						 { state=0; has_name = true; }
-else if (utility::string_equal(str, length, "\x4d\x61\x73\x73\x20\x28\x4b\x67\x29", 9))
-						 { state=1; has_mass = true; }
-else if (utility::string_equal(str, length, "\x48\x65\x69\x67\x68\x74\x20\x28\x6d\x29", 10))
-						 { state=2; has_height = true; }
-else if (utility::string_equal(str, length, "\x52\x61\x64\x69\x75\x73\x20\x28\x6d\x29", 10))
-						 { state=3; has_radius = true; }
-else if (utility::string_equal(str, length, "\x4d\x6f\x74\x6f\x72\x20\x54\x68\x72\x75\x73\x74\x20\x40\x20\x31\x30\x30\x25\x20\x28\x4e\x29", 23))
-						 { state=4; has_motor_thrust = true; }
-else if (utility::string_equal(str, length, "\x4d\x6f\x74\x6f\x72\x20\x5a\x20\x54\x6f\x72\x71\x75\x65\x20\x40\x20\x31\x30\x30\x25\x20\x28\x4e\x6d\x29", 26))
-						 { state=5; has_motor_z_torque = true; }
-else if (utility::string_equal(str, length, "\x4d\x6f\x74\x6f\x72\x20\x41\x63\x63\x65\x6c\x65\x72\x61\x74\x69\x6f\x6e\x20\x28\x73\x29", 22))
-						 { state=6; has_motor_acceleration = true; }
-else if (utility::string_equal(str, length, "\x4d\x6f\x74\x6f\x72\x20\x44\x65\x63\x65\x6c\x65\x72\x61\x74\x69\x6f\x6e\x20\x28\x73\x29", 22))
-						 { state=7; has_motor_deceleration = true; }
+            else if (utility::string_equal(str, length, "\x50\x6f\x73\x69\x74\x69\x6f\x6e\x20\x28\x45\x4e\x55\x29", 14))
+						 { state=0; has_enu_position = true; }
+else if (utility::string_equal(str, length, "\x56\x65\x6c\x6f\x63\x69\x74\x79\x20\x28\x45\x4e\x55\x29", 14))
+						 { state=1; has_enu_velocity = true; }
+else if (utility::string_equal(str, length, "\x4c\x69\x6e\x65\x61\x72\x20\x41\x63\x63\x65\x6c\x65\x72\x61\x74\x69\x6f\x6e\x20\x28\x45\x4e\x55\x29", 25))
+						 { state=2; has_enu_linear_acceleration = true; }
+else if (utility::string_equal(str, length, "\x41\x63\x63\x65\x6c\x65\x72\x61\x74\x69\x6f\x6e", 12))
+						 { state=3; has_acceleration = true; }
+else if (utility::string_equal(str, length, "\x52\x6f\x74\x61\x74\x69\x6f\x6e\x20\x28\x4c\x6f\x63\x61\x6c\x2d\x3e\x45\x4e\x55\x29", 21))
+						 { state=4; has_local_to_enu_rotation = true; }
+else if (utility::string_equal(str, length, "\x41\x6e\x67\x75\x6c\x61\x72\x20\x56\x65\x6c\x6f\x63\x69\x74\x79", 16))
+						 { state=5; has_angular_velocity = true; }
 else if (utility::string_equal(str, length, "\x4d\x6f\x74\x6f\x72\x73", 6))
-						 { state=8; has_motors = true; }
+						 { state=6; has_motors = true; }
             else {
                 state = -1;
                 return true;
@@ -933,12 +921,6 @@ case 5:
 
 case 6:
     return checked_event_forwarding(handler_6.Key(str, length, copy));
-
-case 7:
-    return checked_event_forwarding(handler_7.Key(str, length, copy));
-
-case 8:
-    return checked_event_forwarding(handler_8.Key(str, length, copy));
 
             default:
                 break;
@@ -975,12 +957,6 @@ case 5:
 case 6:
     return checked_event_forwarding(handler_6.StartArray());
 
-case 7:
-    return checked_event_forwarding(handler_7.StartArray());
-
-case 8:
-    return checked_event_forwarding(handler_8.StartArray());
-
         default:
             break;
         }
@@ -1015,12 +991,6 @@ case 5:
 case 6:
     return checked_event_forwarding(handler_6.EndArray(length));
 
-case 7:
-    return checked_event_forwarding(handler_7.EndArray(length));
-
-case 8:
-    return checked_event_forwarding(handler_8.EndArray(length));
-
         default:
             break;
         }
@@ -1054,12 +1024,6 @@ case 5:
 
 case 6:
     return checked_event_forwarding(handler_6.StartObject());
-
-case 7:
-    return checked_event_forwarding(handler_7.StartObject());
-
-case 8:
-    return checked_event_forwarding(handler_8.StartObject());
 
             default:
                 break;
@@ -1096,24 +1060,16 @@ case 5:
 case 6:
     return checked_event_forwarding(handler_6.EndObject(length));
 
-case 7:
-    return checked_event_forwarding(handler_7.EndObject(length));
-
-case 8:
-    return checked_event_forwarding(handler_8.EndObject(length));
-
             default:
                 break;
             }
         } else {
-            if (!has_name) set_missing_required("name");
-if (!has_mass) set_missing_required("mass");
-if (!has_height) set_missing_required("height");
-if (!has_radius) set_missing_required("radius");
-if (!has_motor_thrust) set_missing_required("motor_thrust");
-if (!has_motor_z_torque) set_missing_required("motor_z_torque");
-if (!has_motor_acceleration) set_missing_required("motor_acceleration");
-if (!has_motor_deceleration) set_missing_required("motor_deceleration");
+            if (!has_enu_position) set_missing_required("enu_position");
+if (!has_enu_velocity) set_missing_required("enu_velocity");
+if (!has_enu_linear_acceleration) set_missing_required("enu_linear_acceleration");
+if (!has_acceleration) set_missing_required("acceleration");
+if (!has_local_to_enu_rotation) set_missing_required("local_to_enu_rotation");
+if (!has_angular_velocity) set_missing_required("angular_velocity");
 if (!has_motors) set_missing_required("motors");
         }
         return the_error.empty();
@@ -1147,10 +1103,6 @@ case 5:
      handler_5.ReapError(errs); break;
 case 6:
      handler_6.ReapError(errs); break;
-case 7:
-     handler_7.ReapError(errs); break;
-case 8:
-     handler_8.ReapError(errs); break;
 
         default:
             break;
@@ -1172,30 +1124,26 @@ handler_3.PrepareForReuse();
 handler_4.PrepareForReuse();
 handler_5.PrepareForReuse();
 handler_6.PrepareForReuse();
-handler_7.PrepareForReuse();
-handler_8.PrepareForReuse();
 
     }
 };
 
-template < class Writere0fc10ae43b444565803daece3031f5b66e245697452a7e6c119402d648195bf >
-struct Serializer< Writere0fc10ae43b444565803daece3031f5b66e245697452a7e6c119402d648195bf, ::silk::config::Multi > {
+template < class Writer4ad500b245e3f66a02b421a1ee0fa1cdea0a7053f591af449203839be529e6b2 >
+struct Serializer< Writer4ad500b245e3f66a02b421a1ee0fa1cdea0a7053f591af449203839be529e6b2, ::silk::node::IMultirotor_Simulator::UAV_State > {
 
-    void operator()( Writere0fc10ae43b444565803daece3031f5b66e245697452a7e6c119402d648195bf& w, const ::silk::config::Multi& value) const
+    void operator()( Writer4ad500b245e3f66a02b421a1ee0fa1cdea0a7053f591af449203839be529e6b2& w, const ::silk::node::IMultirotor_Simulator::UAV_State& value) const
     {
         w.StartObject();
 
-        w.Key("\x4e\x61\x6d\x65", 4, false); Serializer< Writere0fc10ae43b444565803daece3031f5b66e245697452a7e6c119402d648195bf, std::string >()(w, value.name);
-w.Key("\x4d\x61\x73\x73\x20\x28\x4b\x67\x29", 9, false); Serializer< Writere0fc10ae43b444565803daece3031f5b66e245697452a7e6c119402d648195bf, float >()(w, value.mass);
-w.Key("\x48\x65\x69\x67\x68\x74\x20\x28\x6d\x29", 10, false); Serializer< Writere0fc10ae43b444565803daece3031f5b66e245697452a7e6c119402d648195bf, float >()(w, value.height);
-w.Key("\x52\x61\x64\x69\x75\x73\x20\x28\x6d\x29", 10, false); Serializer< Writere0fc10ae43b444565803daece3031f5b66e245697452a7e6c119402d648195bf, float >()(w, value.radius);
-w.Key("\x4d\x6f\x74\x6f\x72\x20\x54\x68\x72\x75\x73\x74\x20\x40\x20\x31\x30\x30\x25\x20\x28\x4e\x29", 23, false); Serializer< Writere0fc10ae43b444565803daece3031f5b66e245697452a7e6c119402d648195bf, float >()(w, value.motor_thrust);
-w.Key("\x4d\x6f\x74\x6f\x72\x20\x5a\x20\x54\x6f\x72\x71\x75\x65\x20\x40\x20\x31\x30\x30\x25\x20\x28\x4e\x6d\x29", 26, false); Serializer< Writere0fc10ae43b444565803daece3031f5b66e245697452a7e6c119402d648195bf, float >()(w, value.motor_z_torque);
-w.Key("\x4d\x6f\x74\x6f\x72\x20\x41\x63\x63\x65\x6c\x65\x72\x61\x74\x69\x6f\x6e\x20\x28\x73\x29", 22, false); Serializer< Writere0fc10ae43b444565803daece3031f5b66e245697452a7e6c119402d648195bf, float >()(w, value.motor_acceleration);
-w.Key("\x4d\x6f\x74\x6f\x72\x20\x44\x65\x63\x65\x6c\x65\x72\x61\x74\x69\x6f\x6e\x20\x28\x73\x29", 22, false); Serializer< Writere0fc10ae43b444565803daece3031f5b66e245697452a7e6c119402d648195bf, float >()(w, value.motor_deceleration);
-w.Key("\x4d\x6f\x74\x6f\x72\x73", 6, false); Serializer< Writere0fc10ae43b444565803daece3031f5b66e245697452a7e6c119402d648195bf, std::vector<silk::config::Multi::Motor> >()(w, value.motors);
+        w.Key("\x50\x6f\x73\x69\x74\x69\x6f\x6e\x20\x28\x45\x4e\x55\x29", 14, false); Serializer< Writer4ad500b245e3f66a02b421a1ee0fa1cdea0a7053f591af449203839be529e6b2, math::vec3f >()(w, value.enu_position);
+w.Key("\x56\x65\x6c\x6f\x63\x69\x74\x79\x20\x28\x45\x4e\x55\x29", 14, false); Serializer< Writer4ad500b245e3f66a02b421a1ee0fa1cdea0a7053f591af449203839be529e6b2, math::vec3f >()(w, value.enu_velocity);
+w.Key("\x4c\x69\x6e\x65\x61\x72\x20\x41\x63\x63\x65\x6c\x65\x72\x61\x74\x69\x6f\x6e\x20\x28\x45\x4e\x55\x29", 25, false); Serializer< Writer4ad500b245e3f66a02b421a1ee0fa1cdea0a7053f591af449203839be529e6b2, math::vec3f >()(w, value.enu_linear_acceleration);
+w.Key("\x41\x63\x63\x65\x6c\x65\x72\x61\x74\x69\x6f\x6e", 12, false); Serializer< Writer4ad500b245e3f66a02b421a1ee0fa1cdea0a7053f591af449203839be529e6b2, math::vec3f >()(w, value.acceleration);
+w.Key("\x52\x6f\x74\x61\x74\x69\x6f\x6e\x20\x28\x4c\x6f\x63\x61\x6c\x2d\x3e\x45\x4e\x55\x29", 21, false); Serializer< Writer4ad500b245e3f66a02b421a1ee0fa1cdea0a7053f591af449203839be529e6b2, math::quatf >()(w, value.local_to_enu_rotation);
+w.Key("\x41\x6e\x67\x75\x6c\x61\x72\x20\x56\x65\x6c\x6f\x63\x69\x74\x79", 16, false); Serializer< Writer4ad500b245e3f66a02b421a1ee0fa1cdea0a7053f591af449203839be529e6b2, math::vec3f >()(w, value.angular_velocity);
+w.Key("\x4d\x6f\x74\x6f\x72\x73", 6, false); Serializer< Writer4ad500b245e3f66a02b421a1ee0fa1cdea0a7053f591af449203839be529e6b2, std::vector<silk::node::IMultirotor_Simulator::Motor_State> >()(w, value.motors);
 
-        w.EndObject(9);
+        w.EndObject(7);
     }
 
 };

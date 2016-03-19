@@ -109,8 +109,8 @@ SOURCES += \
     ../../src/processor/Gravity_Filter.cpp \
     ../../src/source/EHealth.cpp \
     ../../src/controller/Rate_Controller.cpp \
-    ../../src/simulator/Multi_Simulation.cpp \
-    ../../src/simulator/Multi_Simulator.cpp \
+    ../../src/simulator/Multirotor_Simulation.cpp \
+    ../../src/simulator/Multirotor_Simulator.cpp \
     ../../src/processor/Servo_Gimbal.cpp \
     ../../src/processor/Motor_Mixer.cpp \
     ../../src/source/ADS1115.cpp \
@@ -122,8 +122,7 @@ SOURCES += \
     ../../../libs/lz4/lz4.c \
     ../../src/source/OpenCV_Capture.cpp \
     ../../src/source/SRF01.cpp \
-    ../../src/brain/Multi_Brain.cpp \
-    ../../src/pilot/Multi_Pilot.cpp \
+    ../../src/brain/Multirotor_Brain.cpp \
     ../../src/source/MaxSonar.cpp \
     ../../src/processor/Throttle_To_PWM.cpp \
     ../../../libs/utils/Coordinates.cpp \
@@ -141,7 +140,8 @@ SOURCES += \
     ../../src/processor/Pressure_Velocity.cpp \
     ../../src/processor/ENU_Frame_System.cpp \
     ../../src/source/RaspiCamControl.cpp \
-    ../../src/brain/LiPo_Battery.cpp
+    ../../src/brain/LiPo_Battery.cpp \
+    ../../src/pilot/Multirotor_Pilot.cpp
 
 HEADERS += \
     ../../src/BrainStdAfx.h \
@@ -193,11 +193,9 @@ HEADERS += \
     ../../src/resampler/Resampler.h \
     ../../src/transformer/Transformer.h \
     ../../src/transformer/Transformer_Inv.h \
-    ../../src/simulator/Multi_Simulation.h \
-    ../../src/simulator/Multi_Simulator.h \
+    ../../src/simulator/Multirotor_Simulation.h \
+    ../../src/simulator/Multirotor_Simulator.h \
     ../../../libs/common/node/IConfig.h \
-    ../../../libs/common/node/IMulti_Simulator.h \
-    ../../../libs/common/config/Multi.h \
     ../../src/processor/Servo_Gimbal.h \
     ../../src/processor/Motor_Mixer.h \
     ../../../../autojsoncxx/rapidjson/include/rapidjson/allocators.h \
@@ -229,9 +227,8 @@ HEADERS += \
     ../../src/source/OpenCV_Capture.h \
     ../../../libs/utils/Serialization.h \
     ../../src/source/SRF01.h \
-    ../../src/brain/Multi_Brain.h \
+    ../../src/brain/Multirotor_Brain.h \
     ../../../libs/common/node/IBrain.h \
-    ../../src/pilot/Multi_Pilot.h \
     ../../../libs/common/node/IPilot.h \
     ../../src/source/MaxSonar.h \
     ../../src/processor/Throttle_To_PWM.h \
@@ -249,7 +246,7 @@ HEADERS += \
     ../../../libs/common/stream/IGPS_Info.h \
     ../../../libs/common/stream/ILinear_Acceleration.h \
     ../../../libs/common/stream/IMagnetic_Field.h \
-    ../../../libs/common/stream/IMulti_State.h \
+    ../../../libs/common/stream/IMultirotor_State.h \
     ../../../libs/common/stream/IPosition.h \
     ../../../libs/common/stream/IPressure.h \
     ../../../libs/common/stream/IProximity.h \
@@ -279,7 +276,7 @@ HEADERS += \
     ../../src/processor/KF_ECEF.h \
     ../../src/hw/bcm2835.h \
     ../../src/processor/Proximity.h \
-    ../../../libs/common/stream/IMulti_Commands.h \
+    ../../../libs/common/stream/IMultirotor_Commands.h \
     ../../src/hw/pigpio.h \
     ../../src/bus/I2C_BCM.h \
     ../../src/bus/SPI_BCM.h \
@@ -290,7 +287,11 @@ HEADERS += \
     ../../src/processor/Pressure_Velocity.h \
     ../../src/processor/ENU_Frame_System.h \
     ../../src/source/RaspiCamControl.h \
-    ../../src/brain/LiPo_Battery.h
+    ../../src/brain/LiPo_Battery.h \
+    ../../../libs/common/config/Multirotor_Config.h \
+    ../../../libs/common/config/UAV_Config.h \
+    ../../src/pilot/Multirotor_Pilot.h \
+    ../../../libs/common/node/IMultirotor_Simulator.h
 
 DISTFILES +=
 

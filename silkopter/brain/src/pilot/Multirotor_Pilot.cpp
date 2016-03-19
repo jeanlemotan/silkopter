@@ -1,41 +1,41 @@
 #include "BrainStdAfx.h"
-#include "Multi_Pilot.h"
+#include "Multirotor_Pilot.h"
 
 #include "sz_math.hpp"
-#include "sz_Multi_Pilot.hpp"
+#include "sz_Multirotor_Pilot.hpp"
 
 namespace silk
 {
 namespace node
 {
 
-Multi_Pilot::Multi_Pilot(HAL& hal, Comms& comms)
+Multirotor_Pilot::Multirotor_Pilot(HAL& hal, Comms& comms)
     : m_hal(hal)
     , m_comms(comms)
-    , m_init_params(new sz::Multi_Pilot::Init_Params())
-    , m_config(new sz::Multi_Pilot::Config())
+    , m_init_params(new sz::Multirotor_Pilot::Init_Params())
+    , m_config(new sz::Multirotor_Pilot::Config())
 {
     m_output_stream = std::make_shared<Output_Stream>();
 }
 
-auto Multi_Pilot::init(rapidjson::Value const& init_params) -> bool
+auto Multirotor_Pilot::init(rapidjson::Value const& init_params) -> bool
 {
-    QLOG_TOPIC("Multi_Pilot::init");
+    QLOG_TOPIC("Multirotor_Pilot::init");
 
-    sz::Multi_Pilot::Init_Params sz;
+    sz::Multirotor_Pilot::Init_Params sz;
     autojsoncxx::error::ErrorStack result;
     if (!autojsoncxx::from_value(sz, init_params, result))
     {
         std::ostringstream ss;
         ss << result;
-        QLOGE("Cannot deserialize Multi_Pilot data: {}", ss.str());
+        QLOGE("Cannot deserialize Multirotor_Pilot data: {}", ss.str());
         return false;
     }
     *m_init_params = sz;
     return init();
 }
 
-auto Multi_Pilot::init() -> bool
+auto Multirotor_Pilot::init() -> bool
 {
     if (m_init_params->commands_rate == 0)
     {
@@ -56,22 +56,22 @@ auto Multi_Pilot::init() -> bool
     return true;
 }
 
-auto Multi_Pilot::start(q::Clock::time_point tp) -> bool
+auto Multirotor_Pilot::start(q::Clock::time_point tp) -> bool
 {
     m_output_stream->set_tp(tp);
     return true;
 }
 
-auto Multi_Pilot::get_inputs() const -> std::vector<Input>
+auto Multirotor_Pilot::get_inputs() const -> std::vector<Input>
 {
     std::vector<Input> inputs =
     {{
-        { stream::IMulti_State::TYPE,  m_init_params->state_rate, "State", m_state_accumulator.get_stream_path(0) },
+        { stream::IMultirotor_State::TYPE,  m_init_params->state_rate, "State", m_state_accumulator.get_stream_path(0) },
         { stream::IVideo::TYPE,        m_init_params->video_rate, "Video", m_video_accumulator.get_stream_path(0) },
     }};
     return inputs;
 }
-auto Multi_Pilot::get_outputs() const -> std::vector<Output>
+auto Multirotor_Pilot::get_outputs() const -> std::vector<Output>
 {
     std::vector<Output> outputs =
     {{
@@ -82,19 +82,19 @@ auto Multi_Pilot::get_outputs() const -> std::vector<Output>
 
 static constexpr std::chrono::milliseconds COMMANDS_HEALTHY_TIMEOUT(200);
 
-void Multi_Pilot::process()
+void Multirotor_Pilot::process()
 {
-    QLOG_TOPIC("Multi_Pilot::process");
+    QLOG_TOPIC("Multirotor_Pilot::process");
 
     m_output_stream->clear();
 
     //process commandss
     {
-        auto const& commands_values = m_comms.get_multi_commands_values();
+        auto const& commands_values = m_comms.get_multirotor_commands_values();
 
         auto now = q::Clock::now();
 
-        stream::IMulti_Commands::Value& commands_value = m_last_commands_value;
+        stream::IMultirotor_Commands::Value& commands_value = m_last_commands_value;
         if (!commands_values.empty())
         {
             commands_value = commands_values.back();
@@ -112,9 +112,9 @@ void Multi_Pilot::process()
 
 
     //write back the state
-    m_state_accumulator.process([this](stream::IMulti_State::Sample const& i_state)
+    m_state_accumulator.process([this](stream::IMultirotor_State::Sample const& i_state)
     {
-        m_comms.add_multi_state_sample(i_state);
+        m_comms.add_multirotor_state_sample(i_state);
     });
     //write back the video
     m_video_accumulator.process([this](stream::IVideo::Sample const& i_video)
@@ -123,7 +123,7 @@ void Multi_Pilot::process()
     });
 }
 
-void Multi_Pilot::set_input_stream_path(size_t idx, q::Path const& path)
+void Multirotor_Pilot::set_input_stream_path(size_t idx, q::Path const& path)
 {
     if (idx == 0)
     {
@@ -135,17 +135,17 @@ void Multi_Pilot::set_input_stream_path(size_t idx, q::Path const& path)
     }
 }
 
-auto Multi_Pilot::set_config(rapidjson::Value const& json) -> bool
+auto Multirotor_Pilot::set_config(rapidjson::Value const& json) -> bool
 {
-    QLOG_TOPIC("Multi_Pilot::set_config");
+    QLOG_TOPIC("Multirotor_Pilot::set_config");
 
-    sz::Multi_Pilot::Config sz;
+    sz::Multirotor_Pilot::Config sz;
     autojsoncxx::error::ErrorStack result;
     if (!autojsoncxx::from_value(sz, json, result))
     {
         std::ostringstream ss;
         ss << result;
-        QLOGE("Cannot deserialize Multi_Pilot config data: {}", ss.str());
+        QLOGE("Cannot deserialize Multirotor_Pilot config data: {}", ss.str());
         return false;
     }
 
@@ -153,21 +153,21 @@ auto Multi_Pilot::set_config(rapidjson::Value const& json) -> bool
 
     return true;
 }
-auto Multi_Pilot::get_config() const -> rapidjson::Document
+auto Multirotor_Pilot::get_config() const -> rapidjson::Document
 {
     rapidjson::Document json;
     autojsoncxx::to_document(*m_config, json);
     return std::move(json);
 }
 
-auto Multi_Pilot::get_init_params() const -> rapidjson::Document
+auto Multirotor_Pilot::get_init_params() const -> rapidjson::Document
 {
     rapidjson::Document json;
     autojsoncxx::to_document(*m_init_params, json);
     return std::move(json);
 }
 
-auto Multi_Pilot::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document
+auto Multirotor_Pilot::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document
 {
     return rapidjson::Document();
 }

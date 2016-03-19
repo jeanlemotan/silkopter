@@ -7,7 +7,7 @@ namespace silk
 namespace stream
 {
 
-class ITorque : public ISpatial_Stream<Type::TORQUE, Space::UAV>
+class ITorque : public ISpatial_Stream<Semantic::TORQUE, Space::UAV>
 {
 public:
     typedef std::true_type can_be_filtered_t;
@@ -16,9 +16,8 @@ public:
     typedef stream::Sample<Value>     Sample;
     virtual auto get_samples() const -> std::vector<Sample> const& = 0;
 };
-DECLARE_CLASS_PTR(ITorque);
 
-class IENU_Torque : public ISpatial_Stream<Type::TORQUE, Space::ENU>
+class IENU_Torque : public ISpatial_Stream<Semantic::TORQUE, Space::ENU>
 {
 public:
     typedef std::true_type can_be_filtered_t;
@@ -27,9 +26,8 @@ public:
     typedef stream::Sample<Value>     Sample;
     virtual auto get_samples() const -> std::vector<Sample> const& = 0;
 };
-DECLARE_CLASS_PTR(IENU_Torque);
 
-class IECEF_Torque : public ISpatial_Stream<Type::TORQUE, Space::ECEF>
+class IECEF_Torque : public ISpatial_Stream<Semantic::TORQUE, Space::ECEF>
 {
 public:
     typedef std::true_type can_be_filtered_t;
@@ -38,7 +36,6 @@ public:
     typedef stream::Sample<Value>     Sample;
     virtual auto get_samples() const -> std::vector<Sample> const& = 0;
 };
-DECLARE_CLASS_PTR(IECEF_Torque);
 
 }
 }

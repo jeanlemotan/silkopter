@@ -22,7 +22,6 @@ public:
 
     virtual void send_break() = 0;
 };
-DECLARE_CLASS_PTR(IUART);
 
 
 }

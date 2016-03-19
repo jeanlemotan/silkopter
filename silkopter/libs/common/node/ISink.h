@@ -13,7 +13,6 @@ public:
     //sinks don't have any outputs
     virtual auto get_outputs() const -> std::vector<Output> final { return std::vector<Output>(); }
 };
-DECLARE_CLASS_PTR(ISink);
 
 
 }

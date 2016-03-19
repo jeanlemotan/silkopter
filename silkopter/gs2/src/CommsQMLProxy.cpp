@@ -37,7 +37,7 @@ void CommsQMLProxy::connect()
 
     if (m_connectionType == ConnectionType::UDP)
     {
-        //m_comms->
+        m_comms->start_udp(boost::asio::ip::address::from_string("127.0.0.1"), 8001, 8000);
     }
     else if (m_connectionType == ConnectionType::RFMON)
     {

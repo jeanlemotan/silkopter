@@ -27,7 +27,7 @@
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-namespace sz { namespace Multi_Brain { struct Init_Params {
+namespace sz { namespace Multirotor_Brain { struct Init_Params {
  uint32_t rate;
 uint32_t commands_rate;
 uint32_t state_rate;
@@ -43,7 +43,7 @@ explicit Init_Params():rate(100), commands_rate(20), state_rate(30) {  }
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::sz::Multi_Brain::Init_Params > {
+class SAXEventHandler< ::sz::Multirotor_Brain::Init_Params > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
@@ -105,7 +105,7 @@ has_state_rate = false;
     }
 
 public:
-    explicit SAXEventHandler( ::sz::Multi_Brain::Init_Params * obj)
+    explicit SAXEventHandler( ::sz::Multirotor_Brain::Init_Params * obj)
         : state(-1)
         , depth(0)
         , handler_0(&obj->rate)
@@ -464,16 +464,16 @@ handler_2.PrepareForReuse();
     }
 };
 
-template < class Writerd7766a60560ef0efb6da6668683da7095ccd44743948e54ea8ff4198cb46cb9c >
-struct Serializer< Writerd7766a60560ef0efb6da6668683da7095ccd44743948e54ea8ff4198cb46cb9c, ::sz::Multi_Brain::Init_Params > {
+template < class Writerb7bcacdaa5f7b31e778c703a1223fb57c987a0d33d79e8b37fa6994d50072be5 >
+struct Serializer< Writerb7bcacdaa5f7b31e778c703a1223fb57c987a0d33d79e8b37fa6994d50072be5, ::sz::Multirotor_Brain::Init_Params > {
 
-    void operator()( Writerd7766a60560ef0efb6da6668683da7095ccd44743948e54ea8ff4198cb46cb9c& w, const ::sz::Multi_Brain::Init_Params& value) const
+    void operator()( Writerb7bcacdaa5f7b31e778c703a1223fb57c987a0d33d79e8b37fa6994d50072be5& w, const ::sz::Multirotor_Brain::Init_Params& value) const
     {
         w.StartObject();
 
-        w.Key("\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 9, false); Serializer< Writerd7766a60560ef0efb6da6668683da7095ccd44743948e54ea8ff4198cb46cb9c, uint32_t >()(w, value.rate);
-w.Key("\x43\x6f\x6d\x6d\x61\x6e\x64\x73\x20\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 18, false); Serializer< Writerd7766a60560ef0efb6da6668683da7095ccd44743948e54ea8ff4198cb46cb9c, uint32_t >()(w, value.commands_rate);
-w.Key("\x53\x74\x61\x74\x65\x20\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 15, false); Serializer< Writerd7766a60560ef0efb6da6668683da7095ccd44743948e54ea8ff4198cb46cb9c, uint32_t >()(w, value.state_rate);
+        w.Key("\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 9, false); Serializer< Writerb7bcacdaa5f7b31e778c703a1223fb57c987a0d33d79e8b37fa6994d50072be5, uint32_t >()(w, value.rate);
+w.Key("\x43\x6f\x6d\x6d\x61\x6e\x64\x73\x20\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 18, false); Serializer< Writerb7bcacdaa5f7b31e778c703a1223fb57c987a0d33d79e8b37fa6994d50072be5, uint32_t >()(w, value.commands_rate);
+w.Key("\x53\x74\x61\x74\x65\x20\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 15, false); Serializer< Writerb7bcacdaa5f7b31e778c703a1223fb57c987a0d33d79e8b37fa6994d50072be5, uint32_t >()(w, value.state_rate);
 
         w.EndObject(3);
     }
@@ -509,7 +509,7 @@ w.Key("\x53\x74\x61\x74\x65\x20\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 15, false)
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-namespace sz { namespace Multi_Brain { struct Horizontal_Angle {
+namespace sz { namespace Multirotor_Brain { struct Horizontal_Angle {
  float max_speed_deg;
 bool combined_pids;
 sz::PID pids;
@@ -527,7 +527,7 @@ explicit Horizontal_Angle():max_speed_deg(180), combined_pids(true), pids(), x_p
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::sz::Multi_Brain::Horizontal_Angle > {
+class SAXEventHandler< ::sz::Multirotor_Brain::Horizontal_Angle > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
@@ -596,7 +596,7 @@ has_combined_pids = false;
     }
 
 public:
-    explicit SAXEventHandler( ::sz::Multi_Brain::Horizontal_Angle * obj)
+    explicit SAXEventHandler( ::sz::Multirotor_Brain::Horizontal_Angle * obj)
         : state(-1)
         , depth(0)
         , handler_0(&obj->max_speed_deg)
@@ -1044,18 +1044,18 @@ handler_4.PrepareForReuse();
     }
 };
 
-template < class Writer156820147a455f68828cd15d23350dc9882f3ec8729abe53f154ed3172f93cec >
-struct Serializer< Writer156820147a455f68828cd15d23350dc9882f3ec8729abe53f154ed3172f93cec, ::sz::Multi_Brain::Horizontal_Angle > {
+template < class Writer02701f0e2a430b4b37f9d8001fe10143a7c57a3bf8d28860daf0d4eedc5dbbd8 >
+struct Serializer< Writer02701f0e2a430b4b37f9d8001fe10143a7c57a3bf8d28860daf0d4eedc5dbbd8, ::sz::Multirotor_Brain::Horizontal_Angle > {
 
-    void operator()( Writer156820147a455f68828cd15d23350dc9882f3ec8729abe53f154ed3172f93cec& w, const ::sz::Multi_Brain::Horizontal_Angle& value) const
+    void operator()( Writer02701f0e2a430b4b37f9d8001fe10143a7c57a3bf8d28860daf0d4eedc5dbbd8& w, const ::sz::Multirotor_Brain::Horizontal_Angle& value) const
     {
         w.StartObject();
 
-        w.Key("\x4d\x61\x78\x20\x53\x70\x65\x65\x64\x20\x28\x64\x65\x67\x2f\x73\x29", 17, false); Serializer< Writer156820147a455f68828cd15d23350dc9882f3ec8729abe53f154ed3172f93cec, float >()(w, value.max_speed_deg);
-w.Key("\x43\x6f\x6d\x62\x69\x6e\x65\x64\x20\x50\x49\x44\x73", 13, false); Serializer< Writer156820147a455f68828cd15d23350dc9882f3ec8729abe53f154ed3172f93cec, bool >()(w, value.combined_pids);
-w.Key("\x50\x49\x44\x73", 4, false); Serializer< Writer156820147a455f68828cd15d23350dc9882f3ec8729abe53f154ed3172f93cec, sz::PID >()(w, value.pids);
-w.Key("\x58\x20\x50\x49\x44", 5, false); Serializer< Writer156820147a455f68828cd15d23350dc9882f3ec8729abe53f154ed3172f93cec, sz::PID >()(w, value.x_pid);
-w.Key("\x59\x20\x50\x49\x44", 5, false); Serializer< Writer156820147a455f68828cd15d23350dc9882f3ec8729abe53f154ed3172f93cec, sz::PID >()(w, value.y_pid);
+        w.Key("\x4d\x61\x78\x20\x53\x70\x65\x65\x64\x20\x28\x64\x65\x67\x2f\x73\x29", 17, false); Serializer< Writer02701f0e2a430b4b37f9d8001fe10143a7c57a3bf8d28860daf0d4eedc5dbbd8, float >()(w, value.max_speed_deg);
+w.Key("\x43\x6f\x6d\x62\x69\x6e\x65\x64\x20\x50\x49\x44\x73", 13, false); Serializer< Writer02701f0e2a430b4b37f9d8001fe10143a7c57a3bf8d28860daf0d4eedc5dbbd8, bool >()(w, value.combined_pids);
+w.Key("\x50\x49\x44\x73", 4, false); Serializer< Writer02701f0e2a430b4b37f9d8001fe10143a7c57a3bf8d28860daf0d4eedc5dbbd8, sz::PID >()(w, value.pids);
+w.Key("\x58\x20\x50\x49\x44", 5, false); Serializer< Writer02701f0e2a430b4b37f9d8001fe10143a7c57a3bf8d28860daf0d4eedc5dbbd8, sz::PID >()(w, value.x_pid);
+w.Key("\x59\x20\x50\x49\x44", 5, false); Serializer< Writer02701f0e2a430b4b37f9d8001fe10143a7c57a3bf8d28860daf0d4eedc5dbbd8, sz::PID >()(w, value.y_pid);
 
         w.EndObject(5);
     }
@@ -1091,7 +1091,7 @@ w.Key("\x59\x20\x50\x49\x44", 5, false); Serializer< Writer156820147a455f68828cd
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-namespace sz { namespace Multi_Brain { struct Horizontal_Position {
+namespace sz { namespace Multirotor_Brain { struct Horizontal_Position {
  float max_speed;
 uint32_t lpf_poles;
 float lpf_cutoff_frequency;
@@ -1109,7 +1109,7 @@ explicit Horizontal_Position():max_speed(2), lpf_poles(1), lpf_cutoff_frequency(
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::sz::Multi_Brain::Horizontal_Position > {
+class SAXEventHandler< ::sz::Multirotor_Brain::Horizontal_Position > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
@@ -1179,7 +1179,7 @@ has_lpf_cutoff_frequency = false;
     }
 
 public:
-    explicit SAXEventHandler( ::sz::Multi_Brain::Horizontal_Position * obj)
+    explicit SAXEventHandler( ::sz::Multirotor_Brain::Horizontal_Position * obj)
         : state(-1)
         , depth(0)
         , handler_0(&obj->max_speed)
@@ -1628,18 +1628,18 @@ handler_4.PrepareForReuse();
     }
 };
 
-template < class Writer7493d78af905df1309fc4e48a2d500a2f982adae3112791216282bf9cc8a7444 >
-struct Serializer< Writer7493d78af905df1309fc4e48a2d500a2f982adae3112791216282bf9cc8a7444, ::sz::Multi_Brain::Horizontal_Position > {
+template < class Writer1380f17cd05835f740f25e70e4a26cda42e45f7c57d44c068d67c758c67db1c3 >
+struct Serializer< Writer1380f17cd05835f740f25e70e4a26cda42e45f7c57d44c068d67c758c67db1c3, ::sz::Multirotor_Brain::Horizontal_Position > {
 
-    void operator()( Writer7493d78af905df1309fc4e48a2d500a2f982adae3112791216282bf9cc8a7444& w, const ::sz::Multi_Brain::Horizontal_Position& value) const
+    void operator()( Writer1380f17cd05835f740f25e70e4a26cda42e45f7c57d44c068d67c758c67db1c3& w, const ::sz::Multirotor_Brain::Horizontal_Position& value) const
     {
         w.StartObject();
 
-        w.Key("\x4d\x61\x78\x20\x53\x70\x65\x65\x64\x20\x28\x6d\x2f\x73\x29", 15, false); Serializer< Writer7493d78af905df1309fc4e48a2d500a2f982adae3112791216282bf9cc8a7444, float >()(w, value.max_speed);
-w.Key("\x4c\x50\x46\x20\x50\x6f\x6c\x65\x73", 9, false); Serializer< Writer7493d78af905df1309fc4e48a2d500a2f982adae3112791216282bf9cc8a7444, uint32_t >()(w, value.lpf_poles);
-w.Key("\x4c\x50\x46\x20\x43\x75\x74\x6f\x66\x66\x20\x46\x72\x65\x71\x75\x65\x6e\x63\x79\x20\x28\x48\x7a\x29", 25, false); Serializer< Writer7493d78af905df1309fc4e48a2d500a2f982adae3112791216282bf9cc8a7444, float >()(w, value.lpf_cutoff_frequency);
-w.Key("\x56\x65\x6c\x6f\x63\x69\x74\x79\x20\x50\x49", 11, false); Serializer< Writer7493d78af905df1309fc4e48a2d500a2f982adae3112791216282bf9cc8a7444, sz::PI >()(w, value.velocity_pi);
-w.Key("\x50\x6f\x73\x69\x74\x69\x6f\x6e\x20\x50", 10, false); Serializer< Writer7493d78af905df1309fc4e48a2d500a2f982adae3112791216282bf9cc8a7444, sz::P >()(w, value.position_p);
+        w.Key("\x4d\x61\x78\x20\x53\x70\x65\x65\x64\x20\x28\x6d\x2f\x73\x29", 15, false); Serializer< Writer1380f17cd05835f740f25e70e4a26cda42e45f7c57d44c068d67c758c67db1c3, float >()(w, value.max_speed);
+w.Key("\x4c\x50\x46\x20\x50\x6f\x6c\x65\x73", 9, false); Serializer< Writer1380f17cd05835f740f25e70e4a26cda42e45f7c57d44c068d67c758c67db1c3, uint32_t >()(w, value.lpf_poles);
+w.Key("\x4c\x50\x46\x20\x43\x75\x74\x6f\x66\x66\x20\x46\x72\x65\x71\x75\x65\x6e\x63\x79\x20\x28\x48\x7a\x29", 25, false); Serializer< Writer1380f17cd05835f740f25e70e4a26cda42e45f7c57d44c068d67c758c67db1c3, float >()(w, value.lpf_cutoff_frequency);
+w.Key("\x56\x65\x6c\x6f\x63\x69\x74\x79\x20\x50\x49", 11, false); Serializer< Writer1380f17cd05835f740f25e70e4a26cda42e45f7c57d44c068d67c758c67db1c3, sz::PI >()(w, value.velocity_pi);
+w.Key("\x50\x6f\x73\x69\x74\x69\x6f\x6e\x20\x50", 10, false); Serializer< Writer1380f17cd05835f740f25e70e4a26cda42e45f7c57d44c068d67c758c67db1c3, sz::P >()(w, value.position_p);
 
         w.EndObject(5);
     }
@@ -1675,7 +1675,7 @@ w.Key("\x50\x6f\x73\x69\x74\x69\x6f\x6e\x20\x50", 10, false); Serializer< Writer
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-namespace sz { namespace Multi_Brain { struct Yaw_Angle {
+namespace sz { namespace Multirotor_Brain { struct Yaw_Angle {
  float max_speed_deg;
 sz::PID pid;
 
@@ -1690,7 +1690,7 @@ explicit Yaw_Angle():max_speed_deg(180), pid() {  }
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::sz::Multi_Brain::Yaw_Angle > {
+class SAXEventHandler< ::sz::Multirotor_Brain::Yaw_Angle > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
@@ -1747,7 +1747,7 @@ has_pid = false;
     }
 
 public:
-    explicit SAXEventHandler( ::sz::Multi_Brain::Yaw_Angle * obj)
+    explicit SAXEventHandler( ::sz::Multirotor_Brain::Yaw_Angle * obj)
         : state(-1)
         , depth(0)
         , handler_0(&obj->max_speed_deg)
@@ -2060,15 +2060,15 @@ handler_1.PrepareForReuse();
     }
 };
 
-template < class Writer5043eb0678e30ec0e179be5aedbbc79baa64f0f1c278cf0f17d0dbda745c8a19 >
-struct Serializer< Writer5043eb0678e30ec0e179be5aedbbc79baa64f0f1c278cf0f17d0dbda745c8a19, ::sz::Multi_Brain::Yaw_Angle > {
+template < class Writer59dd4aa5d10ccc4b5cb1b5e83154d6b6128a8605a1b1b570dfbaf766f08b6d53 >
+struct Serializer< Writer59dd4aa5d10ccc4b5cb1b5e83154d6b6128a8605a1b1b570dfbaf766f08b6d53, ::sz::Multirotor_Brain::Yaw_Angle > {
 
-    void operator()( Writer5043eb0678e30ec0e179be5aedbbc79baa64f0f1c278cf0f17d0dbda745c8a19& w, const ::sz::Multi_Brain::Yaw_Angle& value) const
+    void operator()( Writer59dd4aa5d10ccc4b5cb1b5e83154d6b6128a8605a1b1b570dfbaf766f08b6d53& w, const ::sz::Multirotor_Brain::Yaw_Angle& value) const
     {
         w.StartObject();
 
-        w.Key("\x4d\x61\x78\x20\x53\x70\x65\x65\x64\x20\x28\x64\x65\x67\x2f\x73\x29", 17, false); Serializer< Writer5043eb0678e30ec0e179be5aedbbc79baa64f0f1c278cf0f17d0dbda745c8a19, float >()(w, value.max_speed_deg);
-w.Key("\x50\x49\x44", 3, false); Serializer< Writer5043eb0678e30ec0e179be5aedbbc79baa64f0f1c278cf0f17d0dbda745c8a19, sz::PID >()(w, value.pid);
+        w.Key("\x4d\x61\x78\x20\x53\x70\x65\x65\x64\x20\x28\x64\x65\x67\x2f\x73\x29", 17, false); Serializer< Writer59dd4aa5d10ccc4b5cb1b5e83154d6b6128a8605a1b1b570dfbaf766f08b6d53, float >()(w, value.max_speed_deg);
+w.Key("\x50\x49\x44", 3, false); Serializer< Writer59dd4aa5d10ccc4b5cb1b5e83154d6b6128a8605a1b1b570dfbaf766f08b6d53, sz::PID >()(w, value.pid);
 
         w.EndObject(2);
     }
@@ -2104,7 +2104,7 @@ w.Key("\x50\x49\x44", 3, false); Serializer< Writer5043eb0678e30ec0e179be5aedbbc
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-namespace sz { namespace Multi_Brain { struct Altitude {
+namespace sz { namespace Multirotor_Brain { struct Altitude {
  float max_speed;
 uint32_t lpf_poles;
 float lpf_cutoff_frequency;
@@ -2122,7 +2122,7 @@ explicit Altitude():max_speed(2), lpf_poles(1), lpf_cutoff_frequency(), speed_pi
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::sz::Multi_Brain::Altitude > {
+class SAXEventHandler< ::sz::Multirotor_Brain::Altitude > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
@@ -2192,7 +2192,7 @@ has_lpf_cutoff_frequency = false;
     }
 
 public:
-    explicit SAXEventHandler( ::sz::Multi_Brain::Altitude * obj)
+    explicit SAXEventHandler( ::sz::Multirotor_Brain::Altitude * obj)
         : state(-1)
         , depth(0)
         , handler_0(&obj->max_speed)
@@ -2641,18 +2641,18 @@ handler_4.PrepareForReuse();
     }
 };
 
-template < class Writerd3c02eedb98413762edaaaf9feeb56e46c092538992a9ff0ce853b863a6b9f81 >
-struct Serializer< Writerd3c02eedb98413762edaaaf9feeb56e46c092538992a9ff0ce853b863a6b9f81, ::sz::Multi_Brain::Altitude > {
+template < class Writer4732d7470c25378bbc136e28db65cddaae95e6de11f083be642c77a70a8fb628 >
+struct Serializer< Writer4732d7470c25378bbc136e28db65cddaae95e6de11f083be642c77a70a8fb628, ::sz::Multirotor_Brain::Altitude > {
 
-    void operator()( Writerd3c02eedb98413762edaaaf9feeb56e46c092538992a9ff0ce853b863a6b9f81& w, const ::sz::Multi_Brain::Altitude& value) const
+    void operator()( Writer4732d7470c25378bbc136e28db65cddaae95e6de11f083be642c77a70a8fb628& w, const ::sz::Multirotor_Brain::Altitude& value) const
     {
         w.StartObject();
 
-        w.Key("\x4d\x61\x78\x20\x53\x70\x65\x65\x64\x20\x28\x6d\x2f\x73\x29", 15, false); Serializer< Writerd3c02eedb98413762edaaaf9feeb56e46c092538992a9ff0ce853b863a6b9f81, float >()(w, value.max_speed);
-w.Key("\x4c\x50\x46\x20\x50\x6f\x6c\x65\x73", 9, false); Serializer< Writerd3c02eedb98413762edaaaf9feeb56e46c092538992a9ff0ce853b863a6b9f81, uint32_t >()(w, value.lpf_poles);
-w.Key("\x4c\x50\x46\x20\x43\x75\x74\x6f\x66\x66\x20\x46\x72\x65\x71\x75\x65\x6e\x63\x79\x20\x28\x48\x7a\x29", 25, false); Serializer< Writerd3c02eedb98413762edaaaf9feeb56e46c092538992a9ff0ce853b863a6b9f81, float >()(w, value.lpf_cutoff_frequency);
-w.Key("\x53\x70\x65\x65\x64\x20\x50\x49", 8, false); Serializer< Writerd3c02eedb98413762edaaaf9feeb56e46c092538992a9ff0ce853b863a6b9f81, sz::PI >()(w, value.speed_pi);
-w.Key("\x50\x6f\x73\x69\x74\x69\x6f\x6e\x20\x50", 10, false); Serializer< Writerd3c02eedb98413762edaaaf9feeb56e46c092538992a9ff0ce853b863a6b9f81, sz::P >()(w, value.position_p);
+        w.Key("\x4d\x61\x78\x20\x53\x70\x65\x65\x64\x20\x28\x6d\x2f\x73\x29", 15, false); Serializer< Writer4732d7470c25378bbc136e28db65cddaae95e6de11f083be642c77a70a8fb628, float >()(w, value.max_speed);
+w.Key("\x4c\x50\x46\x20\x50\x6f\x6c\x65\x73", 9, false); Serializer< Writer4732d7470c25378bbc136e28db65cddaae95e6de11f083be642c77a70a8fb628, uint32_t >()(w, value.lpf_poles);
+w.Key("\x4c\x50\x46\x20\x43\x75\x74\x6f\x66\x66\x20\x46\x72\x65\x71\x75\x65\x6e\x63\x79\x20\x28\x48\x7a\x29", 25, false); Serializer< Writer4732d7470c25378bbc136e28db65cddaae95e6de11f083be642c77a70a8fb628, float >()(w, value.lpf_cutoff_frequency);
+w.Key("\x53\x70\x65\x65\x64\x20\x50\x49", 8, false); Serializer< Writer4732d7470c25378bbc136e28db65cddaae95e6de11f083be642c77a70a8fb628, sz::PI >()(w, value.speed_pi);
+w.Key("\x50\x6f\x73\x69\x74\x69\x6f\x6e\x20\x50", 10, false); Serializer< Writer4732d7470c25378bbc136e28db65cddaae95e6de11f083be642c77a70a8fb628, sz::P >()(w, value.position_p);
 
         w.EndObject(5);
     }
@@ -2688,13 +2688,13 @@ w.Key("\x50\x6f\x73\x69\x74\x69\x6f\x6e\x20\x50", 10, false); Serializer< Writer
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-namespace sz { namespace Multi_Brain { struct Config {
+namespace sz { namespace Multirotor_Brain { struct Config {
  float max_thrust;
 float min_thrust;
-sz::Multi_Brain::Horizontal_Angle horizontal_angle;
-sz::Multi_Brain::Horizontal_Position horizontal_position;
-sz::Multi_Brain::Yaw_Angle yaw_angle;
-sz::Multi_Brain::Altitude altitude;
+sz::Multirotor_Brain::Horizontal_Angle horizontal_angle;
+sz::Multirotor_Brain::Horizontal_Position horizontal_position;
+sz::Multirotor_Brain::Yaw_Angle yaw_angle;
+sz::Multirotor_Brain::Altitude altitude;
 
 explicit Config():max_thrust(2), min_thrust(1), horizontal_angle(), horizontal_position(), yaw_angle(), altitude() {  }
 
@@ -2707,7 +2707,7 @@ explicit Config():max_thrust(2), min_thrust(1), horizontal_angle(), horizontal_p
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::sz::Multi_Brain::Config > {
+class SAXEventHandler< ::sz::Multirotor_Brain::Config > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
@@ -2715,10 +2715,10 @@ private:
 
     SAXEventHandler< float > handler_0;
 SAXEventHandler< float > handler_1;
-SAXEventHandler< sz::Multi_Brain::Horizontal_Angle > handler_2;
-SAXEventHandler< sz::Multi_Brain::Horizontal_Position > handler_3;
-SAXEventHandler< sz::Multi_Brain::Yaw_Angle > handler_4;
-SAXEventHandler< sz::Multi_Brain::Altitude > handler_5;bool has_horizontal_angle;
+SAXEventHandler< sz::Multirotor_Brain::Horizontal_Angle > handler_2;
+SAXEventHandler< sz::Multirotor_Brain::Horizontal_Position > handler_3;
+SAXEventHandler< sz::Multirotor_Brain::Yaw_Angle > handler_4;
+SAXEventHandler< sz::Multirotor_Brain::Altitude > handler_5;bool has_horizontal_angle;
 
     bool check_depth(const char* type)
     {
@@ -2779,7 +2779,7 @@ has_horizontal_angle = false;
     }
 
 public:
-    explicit SAXEventHandler( ::sz::Multi_Brain::Config * obj)
+    explicit SAXEventHandler( ::sz::Multirotor_Brain::Config * obj)
         : state(-1)
         , depth(0)
         , handler_0(&obj->max_thrust)
@@ -3271,19 +3271,19 @@ handler_5.PrepareForReuse();
     }
 };
 
-template < class Writera6a4a08c0852b3074f98af3855ef76af843d91d54f7bab9b91bb1658487a34ad >
-struct Serializer< Writera6a4a08c0852b3074f98af3855ef76af843d91d54f7bab9b91bb1658487a34ad, ::sz::Multi_Brain::Config > {
+template < class Writer54a7e1e791eb8d31a823350b86274a9db10c2ed310774f421f9a9eeaafdfd096 >
+struct Serializer< Writer54a7e1e791eb8d31a823350b86274a9db10c2ed310774f421f9a9eeaafdfd096, ::sz::Multirotor_Brain::Config > {
 
-    void operator()( Writera6a4a08c0852b3074f98af3855ef76af843d91d54f7bab9b91bb1658487a34ad& w, const ::sz::Multi_Brain::Config& value) const
+    void operator()( Writer54a7e1e791eb8d31a823350b86274a9db10c2ed310774f421f9a9eeaafdfd096& w, const ::sz::Multirotor_Brain::Config& value) const
     {
         w.StartObject();
 
-        w.Key("\x4d\x61\x78\x20\x54\x68\x72\x75\x73\x74\x20\x28\x4e\x29", 14, false); Serializer< Writera6a4a08c0852b3074f98af3855ef76af843d91d54f7bab9b91bb1658487a34ad, float >()(w, value.max_thrust);
-w.Key("\x4d\x69\x6e\x20\x54\x68\x72\x75\x73\x74\x20\x28\x4e\x29", 14, false); Serializer< Writera6a4a08c0852b3074f98af3855ef76af843d91d54f7bab9b91bb1658487a34ad, float >()(w, value.min_thrust);
-w.Key("\x48\x6f\x72\x69\x7a\x6f\x6e\x74\x61\x6c\x20\x41\x6e\x67\x6c\x65", 16, false); Serializer< Writera6a4a08c0852b3074f98af3855ef76af843d91d54f7bab9b91bb1658487a34ad, sz::Multi_Brain::Horizontal_Angle >()(w, value.horizontal_angle);
-w.Key("\x48\x6f\x72\x69\x7a\x6f\x6e\x74\x61\x6c\x20\x50\x6f\x73\x69\x74\x69\x6f\x6e", 19, false); Serializer< Writera6a4a08c0852b3074f98af3855ef76af843d91d54f7bab9b91bb1658487a34ad, sz::Multi_Brain::Horizontal_Position >()(w, value.horizontal_position);
-w.Key("\x59\x61\x77\x20\x41\x6e\x67\x6c\x65", 9, false); Serializer< Writera6a4a08c0852b3074f98af3855ef76af843d91d54f7bab9b91bb1658487a34ad, sz::Multi_Brain::Yaw_Angle >()(w, value.yaw_angle);
-w.Key("\x41\x6c\x74\x69\x74\x75\x64\x65", 8, false); Serializer< Writera6a4a08c0852b3074f98af3855ef76af843d91d54f7bab9b91bb1658487a34ad, sz::Multi_Brain::Altitude >()(w, value.altitude);
+        w.Key("\x4d\x61\x78\x20\x54\x68\x72\x75\x73\x74\x20\x28\x4e\x29", 14, false); Serializer< Writer54a7e1e791eb8d31a823350b86274a9db10c2ed310774f421f9a9eeaafdfd096, float >()(w, value.max_thrust);
+w.Key("\x4d\x69\x6e\x20\x54\x68\x72\x75\x73\x74\x20\x28\x4e\x29", 14, false); Serializer< Writer54a7e1e791eb8d31a823350b86274a9db10c2ed310774f421f9a9eeaafdfd096, float >()(w, value.min_thrust);
+w.Key("\x48\x6f\x72\x69\x7a\x6f\x6e\x74\x61\x6c\x20\x41\x6e\x67\x6c\x65", 16, false); Serializer< Writer54a7e1e791eb8d31a823350b86274a9db10c2ed310774f421f9a9eeaafdfd096, sz::Multirotor_Brain::Horizontal_Angle >()(w, value.horizontal_angle);
+w.Key("\x48\x6f\x72\x69\x7a\x6f\x6e\x74\x61\x6c\x20\x50\x6f\x73\x69\x74\x69\x6f\x6e", 19, false); Serializer< Writer54a7e1e791eb8d31a823350b86274a9db10c2ed310774f421f9a9eeaafdfd096, sz::Multirotor_Brain::Horizontal_Position >()(w, value.horizontal_position);
+w.Key("\x59\x61\x77\x20\x41\x6e\x67\x6c\x65", 9, false); Serializer< Writer54a7e1e791eb8d31a823350b86274a9db10c2ed310774f421f9a9eeaafdfd096, sz::Multirotor_Brain::Yaw_Angle >()(w, value.yaw_angle);
+w.Key("\x41\x6c\x74\x69\x74\x75\x64\x65", 8, false); Serializer< Writer54a7e1e791eb8d31a823350b86274a9db10c2ed310774f421f9a9eeaafdfd096, sz::Multirotor_Brain::Altitude >()(w, value.altitude);
 
         w.EndObject(6);
     }

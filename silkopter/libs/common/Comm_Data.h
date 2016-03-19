@@ -24,11 +24,7 @@ enum class Setup_Message : uint8_t
 {
     CLOCK,
 
-    MULTI_CONFIG,
-//    COPTER_CONFIG,
-//    PLANE_CONFIG,
-//    ROVER_CONFIG,
-//    BOAT_CONFIG,
+    UAV_CONFIG,
 
     ENUMERATE_NODE_DEFS,
     ENUMERATE_NODES,
@@ -48,8 +44,8 @@ enum class Setup_Message : uint8_t
 
 enum class Pilot_Message : uint8_t
 {
-    MULTI_COMMANDS,
-    MULTI_STATE,
+    MULTIROTOR_COMMANDS,
+    MULTIROTOR_STATE,
 
     AIRPLANE_COMMANDS,
     AIRPLANE_STATE,

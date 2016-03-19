@@ -7,7 +7,7 @@ namespace silk
 namespace stream
 {
 
-class ILinear_Acceleration : public ISpatial_Stream<Type::LINEAR_ACCELERATION, Space::UAV>
+class ILinear_Acceleration : public ISpatial_Stream<Semantic::LINEAR_ACCELERATION, Space::UAV>
 {
 public:
     typedef std::true_type can_be_filtered_t;
@@ -16,9 +16,8 @@ public:
     typedef stream::Sample<Value>     Sample;
     virtual auto get_samples() const -> std::vector<Sample> const& = 0;
 };
-DECLARE_CLASS_PTR(ILinear_Acceleration);
 
-class IENU_Linear_Acceleration : public ISpatial_Stream<Type::LINEAR_ACCELERATION, Space::ENU>
+class IENU_Linear_Acceleration : public ISpatial_Stream<Semantic::LINEAR_ACCELERATION, Space::ENU>
 {
 public:
     typedef std::true_type can_be_filtered_t;
@@ -27,9 +26,8 @@ public:
     typedef stream::Sample<Value>     Sample;
     virtual auto get_samples() const -> std::vector<Sample> const& = 0;
 };
-DECLARE_CLASS_PTR(IENU_Linear_Acceleration);
 
-class IECEF_Linear_Acceleration : public ISpatial_Stream<Type::LINEAR_ACCELERATION, Space::ECEF>
+class IECEF_Linear_Acceleration : public ISpatial_Stream<Semantic::LINEAR_ACCELERATION, Space::ECEF>
 {
 public:
     typedef std::true_type can_be_filtered_t;
@@ -38,7 +36,6 @@ public:
     typedef stream::Sample<Value>     Sample;
     virtual auto get_samples() const -> std::vector<Sample> const& = 0;
 };
-DECLARE_CLASS_PTR(IECEF_Linear_Acceleration);
 
 
 }

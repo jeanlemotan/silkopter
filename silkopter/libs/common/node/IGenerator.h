@@ -11,7 +11,6 @@ class IGenerator : public Node_Base<Type::GENERATOR>
 {
 public:
 };
-DECLARE_CLASS_PTR(IGenerator);
 
 
 }

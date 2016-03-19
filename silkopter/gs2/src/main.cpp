@@ -2,7 +2,6 @@
 #include <QQuickView>
 #include <QQmlEngine>
 #include <QQmlContext>
-#include "HAL.h"
 #include "Comms.h"
 #include "CommsQMLProxy.h"
 #include "OSQMLProxy.h"
@@ -58,10 +57,7 @@ int main(int argc, char *argv[])
     view.show();
 
 
-    silk::HAL hal;
     silk::Comms comms;
-    hal.init(comms);
-    comms.init(hal);
 
     OSQMLProxy os_proxy;
 

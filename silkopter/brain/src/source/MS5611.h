@@ -47,13 +47,13 @@ private:
     auto init() -> bool;
 
     HAL& m_hal;
-    bus::II2C_wptr m_i2c;
-    bus::ISPI_wptr m_spi;
+    std::weak_ptr<bus::II2C> m_i2c;
+    std::weak_ptr<bus::ISPI> m_spi;
 
     struct Buses
     {
-        bus::II2C_ptr i2c;
-        bus::ISPI_ptr spi;
+        std::shared_ptr<bus::II2C> i2c;
+        std::shared_ptr<bus::ISPI> spi;
     };
 
     auto lock(Buses& buses) -> bool;

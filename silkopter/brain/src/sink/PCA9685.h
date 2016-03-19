@@ -65,7 +65,7 @@ private:
     struct PWM_Channel
     {
         sz::PCA9685::PWM_Channel* config = nullptr;
-        stream::IPWM_wptr stream;
+        std::weak_ptr<stream::IPWM> stream;
         struct Last_Data
         {
             int pulse = -1;

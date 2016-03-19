@@ -108,7 +108,6 @@ HEADERS += \
     ../../../../autojsoncxx/rapidjson/include/rapidjson/writer.h \
     ../../../libs/json_editor/JSON_Model.h \
     ../../../libs/utils/Json_Util.h \
-    ../../../libs/common/config/Multi.h \
     ../../../libs/common/stream/IAcceleration.h \
     ../../../libs/common/stream/IADC.h \
     ../../../libs/common/stream/IAngular_Velocity.h \
@@ -131,7 +130,7 @@ HEADERS += \
     ../../../libs/common/node/IController.h \
     ../../../libs/common/node/IGenerator.h \
     ../../../libs/common/node/ILPF.h \
-    ../../../libs/common/node/IMulti_Simulator.h \
+    ../../../libs/common/node/IMultirotor_Simulator.h \
     ../../../libs/common/node/INode.h \
     ../../../libs/common/node/IPilot.h \
     ../../../libs/common/node/IProcessor.h \
@@ -147,8 +146,8 @@ HEADERS += \
     ../../../libs/utils/RCP.h \
     ../../../libs/lz4/lz4.h \
     ../../../libs/common/stream/IFloat.h \
-    ../../../libs/common/stream/IMulti_Commands.h \
-    ../../../libs/common/stream/IMulti_State.h \
+    ../../../libs/common/stream/IMultirotor_Commands.h \
+    ../../../libs/common/stream/IMultirotor_State.h \
     ../../../libs/common/stream/IProximity.h \
     ../../../libs/common/stream/Stream_Base.h \
     ../../../libs/utils/Coordinates.h \
@@ -157,7 +156,12 @@ HEADERS += \
     ../../../libs/common/node/ICombiner.h \
     ../../src/CommsQMLProxy.h \
     ../../src/OSQMLProxy.h \
-    ../../src/MenusQMLProxy.h
+    ../../src/MenusQMLProxy.h \
+    ../../src/Nodes.h \
+    ../../../libs/common/config/Multirotor_Config.h \
+    ../../../libs/common/config/UAV_Config.h \
+    ../../../libs/common/stream/IMultirotor_Commands.h \
+    ../../../libs/common/stream/IMultirotor_State.h
 
 SOURCES += \
     ../../src/main.cpp \

@@ -1,21 +1,21 @@
 #include "BrainStdAfx.h"
-#include "Multi_Simulator.h"
+#include "Multirotor_Simulator.h"
 
 #if !defined RASPBERRY_PI
 
 #include "sz_math.hpp"
-#include "sz_Multi_Simulator.hpp"
-#include "sz_Multi_Simulator_Structs.hpp"
+#include "sz_Multirotor_Simulator.hpp"
+#include "sz_Multirotor_Simulator_Structs.hpp"
 
 namespace silk
 {
 namespace node
 {
 
-Multi_Simulator::Multi_Simulator(HAL& hal)
+Multirotor_Simulator::Multirotor_Simulator(HAL& hal)
     : m_hal(hal)
-    , m_init_params(new sz::Multi_Simulator::Init_Params())
-    , m_config(new sz::Multi_Simulator::Config())
+    , m_init_params(new sz::Multirotor_Simulator::Init_Params())
+    , m_config(new sz::Multirotor_Simulator::Config())
 {
     m_angular_velocity_stream = std::make_shared<Angular_Velocity>();
     m_acceleration_stream = std::make_shared<Acceleration>();
@@ -28,23 +28,23 @@ Multi_Simulator::Multi_Simulator(HAL& hal)
     m_ecef_velocity_stream = std::make_shared<ECEF_Velocity>();
 }
 
-auto Multi_Simulator::init(rapidjson::Value const& init_params) -> bool
+auto Multirotor_Simulator::init(rapidjson::Value const& init_params) -> bool
 {
-    QLOG_TOPIC("multi_simulator::init");
+    QLOG_TOPIC("multirotor_simulator::init");
 
-    sz::Multi_Simulator::Init_Params sz;
+    sz::Multirotor_Simulator::Init_Params sz;
     autojsoncxx::error::ErrorStack result;
     if (!autojsoncxx::from_value(sz, init_params, result))
     {
         std::ostringstream ss;
         ss << result;
-        QLOGE("Cannot deserialize Multi_Simulator data: {}", ss.str());
+        QLOGE("Cannot deserialize Multirotor_Simulator data: {}", ss.str());
         return false;
     }
     *m_init_params = sz;
     return init();
 }
-auto Multi_Simulator::init() -> bool
+auto Multirotor_Simulator::init() -> bool
 {
     if (m_init_params->angular_velocity_rate == 0)
     {
@@ -82,8 +82,8 @@ auto Multi_Simulator::init() -> bool
         return false;
     }
 
-    auto multi_config = m_hal.get_multi_config();
-    if (!multi_config)
+    std::shared_ptr<const Multirotor_Config> multirotor_config = m_hal.get_specialized_uav_config<Multirotor_Config>();
+    if (!multirotor_config)
     {
         QLOGE("No multi config found");
         return false;
@@ -94,13 +94,13 @@ auto Multi_Simulator::init() -> bool
         return false;
     }
 
-    if (!m_simulation.init_uav(*multi_config))
+    if (!m_simulation.init_uav(multirotor_config))
     {
         return false;
     }
 
-    m_input_throttle_streams.resize(multi_config->motors.size());
-    m_input_throttle_stream_paths.resize(multi_config->motors.size());
+    m_input_throttle_streams.resize(multirotor_config->motors.size());
+    m_input_throttle_stream_paths.resize(multirotor_config->motors.size());
 
     m_angular_velocity_stream->rate = m_init_params->angular_velocity_rate;
     m_angular_velocity_stream->dt = std::chrono::microseconds(1000000 / m_angular_velocity_stream->rate);
@@ -133,13 +133,13 @@ auto Multi_Simulator::init() -> bool
     return true;
 }
 
-auto Multi_Simulator::start(q::Clock::time_point tp) -> bool
+auto Multirotor_Simulator::start(q::Clock::time_point tp) -> bool
 {
     m_last_tp = tp;
     return true;
 }
 
-auto Multi_Simulator::get_inputs() const -> std::vector<Input>
+auto Multirotor_Simulator::get_inputs() const -> std::vector<Input>
 {
     std::vector<Input> inputs(m_input_throttle_streams.size());
     for (size_t i = 0; i < m_input_throttle_streams.size(); i++)
@@ -151,7 +151,7 @@ auto Multi_Simulator::get_inputs() const -> std::vector<Input>
     }
     return inputs;
 }
-auto Multi_Simulator::get_outputs() const -> std::vector<Output>
+auto Multirotor_Simulator::get_outputs() const -> std::vector<Output>
 {
     std::vector<Output> outputs =
     {
@@ -168,9 +168,9 @@ auto Multi_Simulator::get_outputs() const -> std::vector<Output>
     return outputs;
 }
 
-void Multi_Simulator::process()
+void Multirotor_Simulator::process()
 {
-    QLOG_TOPIC("multi_simulator::process");
+    QLOG_TOPIC("multirotor_simulator::process");
 
     m_angular_velocity_stream->samples.clear();
     m_acceleration_stream->samples.clear();
@@ -207,7 +207,7 @@ void Multi_Simulator::process()
     auto enu_to_ecef_trans = util::coordinates::enu_to_ecef_transform(origin_lla);
     auto enu_to_ecef_rotation = util::coordinates::enu_to_ecef_rotation(origin_lla);
 
-    m_simulation.process(dt, [this, &enu_to_ecef_trans, &enu_to_ecef_rotation](Multi_Simulation& simulation, q::Clock::duration simulation_dt)
+    m_simulation.process(dt, [this, &enu_to_ecef_trans, &enu_to_ecef_rotation](Multirotor_Simulation& simulation, q::Clock::duration simulation_dt)
     {
         auto const& uav_state = simulation.get_uav_state();
         {
@@ -327,7 +327,7 @@ void Multi_Simulator::process()
     });
 }
 
-void Multi_Simulator::set_input_stream_path(size_t idx, q::Path const& path)
+void Multirotor_Simulator::set_input_stream_path(size_t idx, q::Path const& path)
 {
     auto input_stream = m_hal.get_streams().find_by_name<stream::IThrottle>(path.get_as<std::string>());
     auto rate = input_stream ? input_stream->get_rate() : 0u;
@@ -344,17 +344,17 @@ void Multi_Simulator::set_input_stream_path(size_t idx, q::Path const& path)
     }
 }
 
-auto Multi_Simulator::set_config(rapidjson::Value const& json) -> bool
+auto Multirotor_Simulator::set_config(rapidjson::Value const& json) -> bool
 {
-    QLOG_TOPIC("multi_simulator::set_config");
+    QLOG_TOPIC("multirotor_simulator::set_config");
 
-    sz::Multi_Simulator::Config sz;
+    sz::Multirotor_Simulator::Config sz;
     autojsoncxx::error::ErrorStack result;
     if (!autojsoncxx::from_value(sz, json, result))
     {
         std::ostringstream ss;
         ss << result;
-        QLOGE("Cannot deserialize Multi_Simulator config data: {}", ss.str());
+        QLOGE("Cannot deserialize Multirotor_Simulator config data: {}", ss.str());
         return false;
     }
 
@@ -373,14 +373,14 @@ auto Multi_Simulator::set_config(rapidjson::Value const& json) -> bool
 //        uav_config.motors[i].deceleration = sz.motors[i].deceleration;
 //    }
 
-    auto multi_config = m_hal.get_multi_config();
-    if (!multi_config)
+    std::shared_ptr<const Multirotor_Config> multirotor_config = m_hal.get_specialized_uav_config<Multirotor_Config>();
+    if (!multirotor_config)
     {
         QLOGE("No multi config found");
         return false;
     }
 
-    if (!m_simulation.init_uav(*multi_config))
+    if (!m_simulation.init_uav(multirotor_config))
     {
         return false;
     }
@@ -424,20 +424,20 @@ auto Multi_Simulator::set_config(rapidjson::Value const& json) -> bool
 
     return true;
 }
-auto Multi_Simulator::get_config() const -> rapidjson::Document
+auto Multirotor_Simulator::get_config() const -> rapidjson::Document
 {
     rapidjson::Document json;
     autojsoncxx::to_document(*m_config, json);
     return std::move(json);
 }
 
-auto Multi_Simulator::get_init_params() const -> rapidjson::Document
+auto Multirotor_Simulator::get_init_params() const -> rapidjson::Document
 {
     rapidjson::Document json;
     autojsoncxx::to_document(*m_init_params, json);
     return std::move(json);
 }
-auto Multi_Simulator::send_message(rapidjson::Value const& json) -> rapidjson::Document
+auto Multirotor_Simulator::send_message(rapidjson::Value const& json) -> rapidjson::Document
 {
     rapidjson::Document response;
 

@@ -9,6 +9,7 @@ namespace stream
 
 enum class Space : uint8_t
 {
+    SCALAR,
     LLA,
     ECEF,
     ENU,
@@ -31,14 +32,14 @@ inline auto get_as_string(Space s, bool details) -> std::string
     }
 }
 
-enum class Type
+enum class Semantic : uint8_t
 {
     ACCELERATION,
     ADC,
     ANGULAR_VELOCITY,
     BATTERY_STATE,
-    MULTI_COMMANDS,
-    MULTI_STATE,
+    MULTIROTOR_COMMANDS,
+    MULTIROTOR_STATE,
     CURRENT,
     DISTANCE,
     FORCE,
@@ -60,37 +61,62 @@ enum class Type
     BOOL
 };
 
-inline auto get_as_string(Type type, bool details) -> std::string
+inline auto get_as_string(Semantic type, bool details) -> std::string
 {
     switch (type)
     {
-    case Type::ACCELERATION: return GET_AS_STRING("Acceleration", "(vec3, m/s^2)");
-    case Type::ADC: return GET_AS_STRING("ADC", "(float, 0..1)");
-    case Type::ANGULAR_VELOCITY: return GET_AS_STRING("Angular Velocity", "(vec3, Rad/s)");
-    case Type::BATTERY_STATE: return GET_AS_STRING("Battery State", "(struct)");
-    case Type::MULTI_COMMANDS: return GET_AS_STRING("Multi Commands", "(struct)");
-    case Type::MULTI_STATE: return GET_AS_STRING("Multi State", "(struct)");
-    case Type::CURRENT: return GET_AS_STRING("Current", "(float, A)");
-    case Type::DISTANCE: return GET_AS_STRING("Distance", "(vec3, Ray)");
-    case Type::FORCE: return GET_AS_STRING("Force", "(vec3, N)");
-    case Type::FRAME: return GET_AS_STRING("Frame", "(quat)");
-    case Type::LINEAR_ACCELERATION: return GET_AS_STRING("Linear Acceleration", "(vec3, m/s^2)");
-    case Type::POSITION: return GET_AS_STRING("Position", "(vec3, m)");
-    case Type::MAGNETIC_FIELD: return GET_AS_STRING("Magnetic Field", "(vec3, T)");
-    case Type::PRESSURE: return GET_AS_STRING("Pressure", "(double, Pa)");
-    case Type::PWM: return GET_AS_STRING("PWM", "(float, 0..1)");
-    case Type::TEMPERATURE: return GET_AS_STRING("Temperature", "(float, °C)");
-    case Type::TORQUE: return GET_AS_STRING("Torque", "(vec3, Nm)");
-    case Type::VELOCITY: return GET_AS_STRING("Velocity", "(vec3, m/s)");
-    case Type::THROTTLE: return GET_AS_STRING("Throttle", "(float, 0..1)");
-    case Type::VIDEO: return GET_AS_STRING("Video", "(blob)");
-    case Type::PROXIMITY: return GET_AS_STRING("Proximity", "(vector<vec3>, Rays>)");
-    case Type::GPS_INFO: return GET_AS_STRING("GPS Info", "(struct)");
-    case Type::VOLTAGE: return GET_AS_STRING("Voltage", "(float, V)");
-    case Type::FLOAT: return GET_AS_STRING("Float", "(float)");
-    case Type::BOOL: return GET_AS_STRING("Bool", "(bool)");
+    case Semantic::ACCELERATION: return GET_AS_STRING("Acceleration", "(vec3, m/s^2)");
+    case Semantic::ADC: return GET_AS_STRING("ADC", "(float, 0..1)");
+    case Semantic::ANGULAR_VELOCITY: return GET_AS_STRING("Angular Velocity", "(vec3, Rad/s)");
+    case Semantic::BATTERY_STATE: return GET_AS_STRING("Battery State", "(struct)");
+    case Semantic::MULTIROTOR_COMMANDS: return GET_AS_STRING("Multirotor Commands", "(struct)");
+    case Semantic::MULTIROTOR_STATE: return GET_AS_STRING("Multirotor State", "(struct)");
+    case Semantic::CURRENT: return GET_AS_STRING("Current", "(float, A)");
+    case Semantic::DISTANCE: return GET_AS_STRING("Distance", "(vec3, Ray)");
+    case Semantic::FORCE: return GET_AS_STRING("Force", "(vec3, N)");
+    case Semantic::FRAME: return GET_AS_STRING("Frame", "(quat)");
+    case Semantic::LINEAR_ACCELERATION: return GET_AS_STRING("Linear Acceleration", "(vec3, m/s^2)");
+    case Semantic::POSITION: return GET_AS_STRING("Position", "(vec3, m)");
+    case Semantic::MAGNETIC_FIELD: return GET_AS_STRING("Magnetic Field", "(vec3, T)");
+    case Semantic::PRESSURE: return GET_AS_STRING("Pressure", "(double, Pa)");
+    case Semantic::PWM: return GET_AS_STRING("PWM", "(float, 0..1)");
+    case Semantic::TEMPERATURE: return GET_AS_STRING("Temperature", "(float, °C)");
+    case Semantic::TORQUE: return GET_AS_STRING("Torque", "(vec3, Nm)");
+    case Semantic::VELOCITY: return GET_AS_STRING("Velocity", "(vec3, m/s)");
+    case Semantic::THROTTLE: return GET_AS_STRING("Throttle", "(float, 0..1)");
+    case Semantic::VIDEO: return GET_AS_STRING("Video", "(blob)");
+    case Semantic::PROXIMITY: return GET_AS_STRING("Proximity", "(vector<vec3>, Rays>)");
+    case Semantic::GPS_INFO: return GET_AS_STRING("GPS Info", "(struct)");
+    case Semantic::VOLTAGE: return GET_AS_STRING("Voltage", "(float, V)");
+    case Semantic::FLOAT: return GET_AS_STRING("Float", "(float)");
+    case Semantic::BOOL: return GET_AS_STRING("Bool", "(bool)");
     default: QASSERT(false); return "Unknown";
     }
+}
+
+struct Type
+{
+    constexpr Type(Semantic semantic, Space space)
+        : type((static_cast<uint16_t>(semantic) << 8) | static_cast<uint16_t>(space))
+    {
+    }
+    Type() : Type(Semantic::ACCELERATION, Space::UAV) {}
+
+    Semantic get_semantic() const { return static_cast<Semantic>((type >> 8) & 0xFF); }
+    Space get_space() const { return static_cast<Space>((type) & 0xFF); }
+
+    bool operator==(Type const& other) const { return type == other.type; }
+    bool operator!=(Type const& other) const { return !operator==(other); }
+    bool operator<(Type const& other) const { return type < other.type; }
+    bool operator>(Type const& other) const { return type > other.type; }
+
+private:
+    uint16_t type;
+};
+
+inline auto get_as_string(Type type, bool details) -> std::string
+{
+    return get_as_string(type.get_semantic(), details) + " " + get_as_string(type.get_space(), details);
 }
 
 #undef GET_AS_STRING
@@ -102,7 +128,6 @@ public:
     virtual auto get_rate() const -> uint32_t = 0;
     virtual auto get_type() const -> Type = 0;
 };
-DECLARE_CLASS_PTR(IStream);
 
 
 //A stream sample
@@ -158,6 +183,24 @@ template<class T> inline auto deserialize(Buffer_t const& buffer, silk::stream::
         return false;
     }
     sample.is_healthy = data.is_healthy != 0;
+    return true;
+}
+
+template<> inline void serialize(Buffer_t& buffer, silk::stream::Type const& type, size_t& off)
+{
+    serialize(buffer, type.get_semantic(), off);
+    serialize(buffer, type.get_space(), off);
+}
+
+template<> inline auto deserialize(Buffer_t const& buffer, silk::stream::Type& type, size_t& off) -> bool
+{
+    silk::stream::Semantic semantic;
+    silk::stream::Space space;
+    if (!deserialize(buffer, semantic, off) || !deserialize(buffer, space, off))
+    {
+        return false;
+    }
+    type = silk::stream::Type(semantic, space);
     return true;
 }
 

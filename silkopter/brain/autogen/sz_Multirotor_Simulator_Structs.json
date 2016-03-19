@@ -1,7 +1,7 @@
 [
 {
     "definition" : false,
-    "namespace" : "silk::node::IMulti_Simulator",
+    "namespace" : "silk::node::IMultirotor_Simulator",
     "name": "Motor_State",
     "members":
     [
@@ -12,7 +12,7 @@
 },
 {
     "definition" : false,
-    "namespace" : "silk::node::IMulti_Simulator",
+    "namespace" : "silk::node::IMultirotor_Simulator",
     "name": "UAV_State",
     "members":
     [
@@ -22,7 +22,7 @@
         ["math::vec3f", "acceleration", {"required": true, "json_key" : "Acceleration"}],
         ["math::quatf", "local_to_enu_rotation", {"required": true, "json_key" : "Rotation (Local->ENU)"}],
         ["math::vec3f", "angular_velocity", {"required": true, "json_key" : "Angular Velocity"}],
-        ["std::vector<silk::node::IMulti_Simulator::Motor_State>", "motors", {"required": true, "json_key" : "Motors"}]
+        ["std::vector<silk::node::IMultirotor_Simulator::Motor_State>", "motors", {"required": true, "json_key" : "Motors"}]
     ]
 }
 ]

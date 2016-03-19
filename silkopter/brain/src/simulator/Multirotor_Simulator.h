@@ -11,14 +11,14 @@
 #include "common/stream/IGPS_Info.h"
 #include "common/stream/IVelocity.h"
 #include "common/stream/IThrottle.h"
-#include "common/node/IMulti_Simulator.h"
+#include "common/node/IMultirotor_Simulator.h"
 
-#include "Multi_Simulation.h"
+#include "Multirotor_Simulation.h"
 
 
 namespace sz
 {
-namespace Multi_Simulator
+namespace Multirotor_Simulator
 {
 struct Init_Params;
 struct Config;
@@ -30,10 +30,10 @@ namespace silk
 namespace node
 {
 
-class Multi_Simulator : public IMulti_Simulator
+class Multirotor_Simulator : public IMultirotor_Simulator
 {
 public:
-    Multi_Simulator(HAL& hal);
+    Multirotor_Simulator(HAL& hal);
 
     auto init(rapidjson::Value const& init_params) -> bool;
     auto get_init_params() const -> rapidjson::Document;
@@ -56,8 +56,8 @@ private:
 
     HAL& m_hal;
 
-    std::shared_ptr<sz::Multi_Simulator::Init_Params> m_init_params;
-    std::shared_ptr<sz::Multi_Simulator::Config> m_config;
+    std::shared_ptr<sz::Multirotor_Simulator::Init_Params> m_init_params;
+    std::shared_ptr<sz::Multirotor_Simulator::Config> m_config;
 
     q::Clock::time_point m_last_tp = q::Clock::now();
 
@@ -180,10 +180,10 @@ private:
     mutable std::shared_ptr<ECEF_Position> m_ecef_position_stream;
     mutable std::shared_ptr<ECEF_Velocity> m_ecef_velocity_stream;
 
-    std::vector<stream::IThrottle_wptr> m_input_throttle_streams;
+    std::vector<std::weak_ptr<stream::IThrottle>> m_input_throttle_streams;
     std::vector<q::Path> m_input_throttle_stream_paths;
 
-    Multi_Simulation m_simulation;
+    Multirotor_Simulation m_simulation;
 };
 
 

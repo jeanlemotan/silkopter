@@ -12,8 +12,8 @@
 #include "common/stream/IAcceleration.h"
 #include "common/stream/IProximity.h"
 
-#include "common/stream/IMulti_Commands.h"
-#include "common/stream/IMulti_State.h"
+#include "common/stream/IMultirotor_Commands.h"
+#include "common/stream/IMultirotor_State.h"
 
 #include "Comms.h"
 #include "HAL.h"
@@ -27,7 +27,7 @@
 
 namespace sz
 {
-namespace Multi_Brain
+namespace Multirotor_Brain
 {
 struct Init_Params;
 struct Config;
@@ -39,10 +39,10 @@ namespace silk
 namespace node
 {
 
-class Multi_Brain : public IBrain
+class Multirotor_Brain : public IBrain
 {
 public:
-    Multi_Brain(HAL& hal);
+    Multirotor_Brain(HAL& hal);
 
     auto init(rapidjson::Value const& init_params) -> bool;
     auto get_init_params() const -> rapidjson::Document;
@@ -65,12 +65,14 @@ private:
 
     HAL& m_hal;
 
-    std::shared_ptr<sz::Multi_Brain::Init_Params> m_init_params;
-    std::shared_ptr<sz::Multi_Brain::Config> m_config;
+    std::shared_ptr<sz::Multirotor_Brain::Init_Params> m_init_params;
+    std::shared_ptr<sz::Multirotor_Brain::Config> m_config;
+
+    std::shared_ptr<const Multirotor_Config> m_multirotor_config;
 
     LiPo_Battery m_battery;
 
-    Sample_Accumulator<stream::IMulti_Commands> m_commands_accumulator;
+    Sample_Accumulator<stream::IMultirotor_Commands> m_commands_accumulator;
 
     Sample_Accumulator<
         stream::IUAV_Frame,
@@ -82,7 +84,7 @@ private:
         stream::ICurrent
         > m_sensor_accumulator;
 
-    typedef Basic_Output_Stream<stream::IMulti_State> State_Output_Stream;
+    typedef Basic_Output_Stream<stream::IMultirotor_State> State_Output_Stream;
     mutable std::shared_ptr<State_Output_Stream> m_state_output_stream;
 
     typedef Basic_Output_Stream<stream::IAngular_Velocity> Rate_Output_Stream;
@@ -102,8 +104,8 @@ private:
             q::Clock::time_point last_valid_tp;
         };
 
-        Data<stream::IMulti_Commands::Sample> local_commands;
-        Data<stream::IMulti_Commands::Sample> remote_commands;
+        Data<stream::IMultirotor_Commands::Sample> local_commands;
+        Data<stream::IMultirotor_Commands::Sample> remote_commands;
         Data<stream::IUAV_Frame::Sample> frame;
         Data<stream::IECEF_Position::Sample> position;
         Data<stream::IECEF_Velocity::Sample> velocity;
@@ -122,8 +124,8 @@ private:
 
     void process_state_mode_idle();
     void process_state_mode_armed();
-    void state_mode_armed_apply_commands(const stream::IMulti_Commands::Value& prev_commands, stream::IMulti_Commands::Value& commands);
-    void process_return_home_toggle(const stream::IMulti_Commands::Value& prev_commands, stream::IMulti_Commands::Value& commands);
+    void state_mode_armed_apply_commands(const stream::IMultirotor_Commands::Value& prev_commands, stream::IMultirotor_Commands::Value& commands);
+    void process_return_home_toggle(const stream::IMultirotor_Commands::Value& prev_commands, stream::IMultirotor_Commands::Value& commands);
 
     void process_state();
 

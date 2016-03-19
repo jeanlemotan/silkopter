@@ -1,7 +1,7 @@
 [
 {
     "definition" : true,
-    "namespace" : "sz::Multi_Simulator",
+    "namespace" : "sz::Multirotor_Simulator",
     "name": "Init_Params",
     "members":
     [
@@ -17,7 +17,7 @@
 },
 {
     "definition" : true,
-    "namespace" : "sz::Multi_Simulator",
+    "namespace" : "sz::Multirotor_Simulator",
     "name": "Noise",
     "members":
     [
@@ -35,7 +35,7 @@
 },
 {
     "definition" : true,
-    "namespace" : "sz::Multi_Simulator",
+    "namespace" : "sz::Multirotor_Simulator",
     "name": "Config",
     "members":
     [
@@ -43,7 +43,7 @@
         ["bool", "drag_enabled", {"required": true, "json_key" : "Drag Enabled", "default" : true}],
         ["bool", "ground_enabled", {"required": true, "json_key" : "Ground Enabled", "default" : true}],
         ["bool", "gravity_enabled", {"required": true, "json_key" : "Gravity Enabled", "default" : true}],
-        ["sz::Multi_Simulator::Noise", "noise", {"required": false, "json_key" : "Noise"}]
+        ["sz::Multirotor_Simulator::Noise", "noise", {"required": false, "json_key" : "Noise"}]
     ]
 }
 ]

@@ -12,14 +12,14 @@
 #include "IFloat.h"
 #include "IVideo.h"
 
-#include "IMulti_Commands.h"
+#include "IMultirotor_Commands.h"
 
 namespace silk
 {
 namespace stream
 {
 
-class IMulti_State : public IScalar_Stream<Type::MULTI_STATE>
+class IMultirotor_State : public IScalar_Stream<Semantic::MULTIROTOR_STATE>
 {
 public:
     typedef std::false_type can_be_filtered_t;
@@ -36,16 +36,15 @@ public:
         IProximity::Sample proximity;
         IFloat::Sample thrust;
 
-        IMulti_Commands::Value commands;
+        IMultirotor_Commands::Value commands;
     };
 
     typedef stream::Sample<Value>     Sample;
 
-    virtual ~IMulti_State() {}
+    virtual ~IMultirotor_State() {}
 
     virtual auto get_samples() const -> std::vector<Sample> const& = 0;
 };
-DECLARE_CLASS_PTR(IMulti_State);
 
 
 }
@@ -58,7 +57,7 @@ namespace util
 namespace serialization
 {
 
-template<> inline void serialize(Buffer_t& buffer, silk::stream::IMulti_State::Value const& value, size_t& off)
+template<> inline void serialize(Buffer_t& buffer, silk::stream::IMultirotor_State::Value const& value, size_t& off)
 {
     serialize(buffer, value.time_point.time_since_epoch().count(), off);
     serialize(buffer, value.battery_state, off);
@@ -72,7 +71,7 @@ template<> inline void serialize(Buffer_t& buffer, silk::stream::IMulti_State::V
     serialize(buffer, value.commands, off);
 }
 
-template<> inline auto deserialize(Buffer_t const& buffer, silk::stream::IMulti_State::Value& value, size_t& off) -> bool
+template<> inline auto deserialize(Buffer_t const& buffer, silk::stream::IMultirotor_State::Value& value, size_t& off) -> bool
 {
     q::Clock::time_point::rep time_point;
     if (!deserialize(buffer, time_point, off) ||

@@ -63,7 +63,7 @@ auto Servo_Gimbal::get_inputs() const -> std::vector<Input>
     std::vector<Input> inputs =
     {{
         { stream::IUAV_Frame::TYPE, m_init_params->rate, "UAV Frame", m_frame_accumulator.get_stream_path(0) },
-        { stream::IMulti_Commands::TYPE, m_init_params->commands_rate, "Commands", m_commands_accumulator.get_stream_path(0) }
+        { stream::IMultirotor_Commands::TYPE, m_init_params->commands_rate, "Commands", m_commands_accumulator.get_stream_path(0) }
     }};
     return inputs;
 }
@@ -86,7 +86,7 @@ void Servo_Gimbal::process()
     m_y_output_stream->clear();
     m_z_output_stream->clear();
 
-    m_commands_accumulator.process([this](stream::IMulti_Commands::Sample const& i_commands)
+    m_commands_accumulator.process([this](stream::IMultirotor_Commands::Sample const& i_commands)
     {
         m_commands_sample = i_commands;
     });
@@ -98,7 +98,7 @@ void Servo_Gimbal::process()
             math::quatf rotation;
 
 
-            if (m_commands_sample.value.gimbal.reference_frame.get() == stream::IMulti_Commands::Gimbal::Reference_Frame::GIMBAL)
+            if (m_commands_sample.value.gimbal.reference_frame.get() == stream::IMultirotor_Commands::Gimbal::Reference_Frame::GIMBAL)
             {
                 rotation = m_commands_sample.value.gimbal.target_frame.get();
             }

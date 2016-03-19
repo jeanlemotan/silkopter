@@ -52,15 +52,15 @@ private:
 
     HAL& m_hal;
 
-    bus::II2C_wptr m_i2c;
-    bus::ISPI_wptr m_spi;
-    bus::IUART_wptr m_uart;
+    std::weak_ptr<bus::II2C> m_i2c;
+    std::weak_ptr<bus::ISPI> m_spi;
+    std::weak_ptr<bus::IUART> m_uart;
 
     struct Buses
     {
-        bus::II2C_ptr i2c;
-        bus::ISPI_ptr spi;
-        bus::IUART_ptr uart;
+        std::shared_ptr<bus::II2C> i2c;
+        std::shared_ptr<bus::ISPI> spi;
+        std::shared_ptr<bus::IUART> uart;
     };
     //i use 2 vectors to avoid memsetting the tx_data to zero all the time
     std::vector<uint8_t> m_dummy_tx_data;

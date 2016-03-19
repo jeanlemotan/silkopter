@@ -27,7 +27,7 @@
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-namespace sz { namespace Multi_Simulator { struct Init_Params {
+namespace sz { namespace Multirotor_Simulator { struct Init_Params {
  uint32_t throttle_rate;
 uint32_t acceleration_rate;
 uint32_t angular_velocity_rate;
@@ -48,7 +48,7 @@ explicit Init_Params():throttle_rate(100), acceleration_rate(1000), angular_velo
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::sz::Multi_Simulator::Init_Params > {
+class SAXEventHandler< ::sz::Multirotor_Simulator::Init_Params > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
@@ -135,7 +135,7 @@ has_gps_rate = false;
     }
 
 public:
-    explicit SAXEventHandler( ::sz::Multi_Simulator::Init_Params * obj)
+    explicit SAXEventHandler( ::sz::Multirotor_Simulator::Init_Params * obj)
         : state(-1)
         , depth(0)
         , handler_0(&obj->throttle_rate)
@@ -724,21 +724,21 @@ handler_7.PrepareForReuse();
     }
 };
 
-template < class Writer3691670b2ec5fc8ffa61fbaaa32579c3202a80dfcc259ae0899e00921f72ebe1 >
-struct Serializer< Writer3691670b2ec5fc8ffa61fbaaa32579c3202a80dfcc259ae0899e00921f72ebe1, ::sz::Multi_Simulator::Init_Params > {
+template < class Writer82073c5ecbb1895d2adff56646c1815951642486164d572c024c60e60eb35267 >
+struct Serializer< Writer82073c5ecbb1895d2adff56646c1815951642486164d572c024c60e60eb35267, ::sz::Multirotor_Simulator::Init_Params > {
 
-    void operator()( Writer3691670b2ec5fc8ffa61fbaaa32579c3202a80dfcc259ae0899e00921f72ebe1& w, const ::sz::Multi_Simulator::Init_Params& value) const
+    void operator()( Writer82073c5ecbb1895d2adff56646c1815951642486164d572c024c60e60eb35267& w, const ::sz::Multirotor_Simulator::Init_Params& value) const
     {
         w.StartObject();
 
-        w.Key("\x54\x68\x72\x6f\x74\x74\x6c\x65\x20\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 18, false); Serializer< Writer3691670b2ec5fc8ffa61fbaaa32579c3202a80dfcc259ae0899e00921f72ebe1, uint32_t >()(w, value.throttle_rate);
-w.Key("\x41\x63\x63\x65\x6c\x65\x72\x61\x74\x69\x6f\x6e\x20\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 22, false); Serializer< Writer3691670b2ec5fc8ffa61fbaaa32579c3202a80dfcc259ae0899e00921f72ebe1, uint32_t >()(w, value.acceleration_rate);
-w.Key("\x41\x6e\x67\x75\x6c\x61\x72\x20\x56\x65\x6c\x6f\x63\x69\x74\x79\x20\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 26, false); Serializer< Writer3691670b2ec5fc8ffa61fbaaa32579c3202a80dfcc259ae0899e00921f72ebe1, uint32_t >()(w, value.angular_velocity_rate);
-w.Key("\x4d\x61\x67\x6e\x65\x74\x69\x63\x20\x46\x69\x65\x6c\x64\x20\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 24, false); Serializer< Writer3691670b2ec5fc8ffa61fbaaa32579c3202a80dfcc259ae0899e00921f72ebe1, uint32_t >()(w, value.magnetic_field_rate);
-w.Key("\x50\x72\x65\x73\x73\x75\x72\x65\x20\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 18, false); Serializer< Writer3691670b2ec5fc8ffa61fbaaa32579c3202a80dfcc259ae0899e00921f72ebe1, uint32_t >()(w, value.pressure_rate);
-w.Key("\x54\x65\x6d\x70\x65\x72\x61\x74\x75\x72\x65\x20\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 21, false); Serializer< Writer3691670b2ec5fc8ffa61fbaaa32579c3202a80dfcc259ae0899e00921f72ebe1, uint32_t >()(w, value.temperature_rate);
-w.Key("\x44\x69\x73\x74\x61\x6e\x63\x65\x20\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 18, false); Serializer< Writer3691670b2ec5fc8ffa61fbaaa32579c3202a80dfcc259ae0899e00921f72ebe1, uint32_t >()(w, value.distance_rate);
-w.Key("\x47\x50\x53\x20\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 13, false); Serializer< Writer3691670b2ec5fc8ffa61fbaaa32579c3202a80dfcc259ae0899e00921f72ebe1, uint32_t >()(w, value.gps_rate);
+        w.Key("\x54\x68\x72\x6f\x74\x74\x6c\x65\x20\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 18, false); Serializer< Writer82073c5ecbb1895d2adff56646c1815951642486164d572c024c60e60eb35267, uint32_t >()(w, value.throttle_rate);
+w.Key("\x41\x63\x63\x65\x6c\x65\x72\x61\x74\x69\x6f\x6e\x20\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 22, false); Serializer< Writer82073c5ecbb1895d2adff56646c1815951642486164d572c024c60e60eb35267, uint32_t >()(w, value.acceleration_rate);
+w.Key("\x41\x6e\x67\x75\x6c\x61\x72\x20\x56\x65\x6c\x6f\x63\x69\x74\x79\x20\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 26, false); Serializer< Writer82073c5ecbb1895d2adff56646c1815951642486164d572c024c60e60eb35267, uint32_t >()(w, value.angular_velocity_rate);
+w.Key("\x4d\x61\x67\x6e\x65\x74\x69\x63\x20\x46\x69\x65\x6c\x64\x20\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 24, false); Serializer< Writer82073c5ecbb1895d2adff56646c1815951642486164d572c024c60e60eb35267, uint32_t >()(w, value.magnetic_field_rate);
+w.Key("\x50\x72\x65\x73\x73\x75\x72\x65\x20\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 18, false); Serializer< Writer82073c5ecbb1895d2adff56646c1815951642486164d572c024c60e60eb35267, uint32_t >()(w, value.pressure_rate);
+w.Key("\x54\x65\x6d\x70\x65\x72\x61\x74\x75\x72\x65\x20\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 21, false); Serializer< Writer82073c5ecbb1895d2adff56646c1815951642486164d572c024c60e60eb35267, uint32_t >()(w, value.temperature_rate);
+w.Key("\x44\x69\x73\x74\x61\x6e\x63\x65\x20\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 18, false); Serializer< Writer82073c5ecbb1895d2adff56646c1815951642486164d572c024c60e60eb35267, uint32_t >()(w, value.distance_rate);
+w.Key("\x47\x50\x53\x20\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 13, false); Serializer< Writer82073c5ecbb1895d2adff56646c1815951642486164d572c024c60e60eb35267, uint32_t >()(w, value.gps_rate);
 
         w.EndObject(8);
     }
@@ -774,7 +774,7 @@ w.Key("\x47\x50\x53\x20\x52\x61\x74\x65\x20\x28\x48\x7a\x29", 13, false); Serial
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-namespace sz { namespace Multi_Simulator { struct Noise {
+namespace sz { namespace Multirotor_Simulator { struct Noise {
  float gps_position;
 float gps_velocity;
 float gps_pacc;
@@ -797,7 +797,7 @@ explicit Noise():gps_position(2.0), gps_velocity(0.2), gps_pacc(0.5), gps_vacc(0
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::sz::Multi_Simulator::Noise > {
+class SAXEventHandler< ::sz::Multirotor_Simulator::Noise > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
@@ -885,7 +885,7 @@ case 9:
     }
 
 public:
-    explicit SAXEventHandler( ::sz::Multi_Simulator::Noise * obj)
+    explicit SAXEventHandler( ::sz::Multirotor_Simulator::Noise * obj)
         : state(-1)
         , depth(0)
         , handler_0(&obj->gps_position)
@@ -1557,23 +1557,23 @@ handler_9.PrepareForReuse();
     }
 };
 
-template < class Writerc32191061087d721c33a008a377c39a9c9231315e031a3d0860b9f93b250d12d >
-struct Serializer< Writerc32191061087d721c33a008a377c39a9c9231315e031a3d0860b9f93b250d12d, ::sz::Multi_Simulator::Noise > {
+template < class Writerd16fe33fad9c97cebbe385f16d232d35056e1c771e7aadbc2bd55ce2afadf7c1 >
+struct Serializer< Writerd16fe33fad9c97cebbe385f16d232d35056e1c771e7aadbc2bd55ce2afadf7c1, ::sz::Multirotor_Simulator::Noise > {
 
-    void operator()( Writerc32191061087d721c33a008a377c39a9c9231315e031a3d0860b9f93b250d12d& w, const ::sz::Multi_Simulator::Noise& value) const
+    void operator()( Writerd16fe33fad9c97cebbe385f16d232d35056e1c771e7aadbc2bd55ce2afadf7c1& w, const ::sz::Multirotor_Simulator::Noise& value) const
     {
         w.StartObject();
 
-        w.Key("\x47\x50\x53\x20\x50\x6f\x73\x69\x74\x69\x6f\x6e", 12, false); Serializer< Writerc32191061087d721c33a008a377c39a9c9231315e031a3d0860b9f93b250d12d, float >()(w, value.gps_position);
-w.Key("\x47\x50\x53\x20\x56\x65\x6c\x6f\x63\x69\x74\x79", 12, false); Serializer< Writerc32191061087d721c33a008a377c39a9c9231315e031a3d0860b9f93b250d12d, float >()(w, value.gps_velocity);
-w.Key("\x47\x50\x53\x20\x50\x41\x43\x43", 8, false); Serializer< Writerc32191061087d721c33a008a377c39a9c9231315e031a3d0860b9f93b250d12d, float >()(w, value.gps_pacc);
-w.Key("\x47\x50\x53\x20\x56\x41\x43\x43", 8, false); Serializer< Writerc32191061087d721c33a008a377c39a9c9231315e031a3d0860b9f93b250d12d, float >()(w, value.gps_vacc);
-w.Key("\x41\x63\x63\x65\x6c\x65\x72\x61\x74\x69\x6f\x6e", 12, false); Serializer< Writerc32191061087d721c33a008a377c39a9c9231315e031a3d0860b9f93b250d12d, float >()(w, value.acceleration);
-w.Key("\x41\x6e\x67\x75\x6c\x61\x72\x20\x56\x65\x6c\x6f\x63\x69\x74\x79", 16, false); Serializer< Writerc32191061087d721c33a008a377c39a9c9231315e031a3d0860b9f93b250d12d, float >()(w, value.angular_velocity);
-w.Key("\x4d\x61\x67\x6e\x65\x74\x69\x63\x20\x46\x69\x65\x6c\x64", 14, false); Serializer< Writerc32191061087d721c33a008a377c39a9c9231315e031a3d0860b9f93b250d12d, float >()(w, value.magnetic_field);
-w.Key("\x50\x72\x65\x73\x73\x75\x72\x65", 8, false); Serializer< Writerc32191061087d721c33a008a377c39a9c9231315e031a3d0860b9f93b250d12d, float >()(w, value.pressure);
-w.Key("\x54\x65\x6d\x70\x65\x72\x61\x74\x75\x72\x65", 11, false); Serializer< Writerc32191061087d721c33a008a377c39a9c9231315e031a3d0860b9f93b250d12d, float >()(w, value.temperature);
-w.Key("\x47\x72\x6f\x75\x6e\x64\x20\x44\x69\x73\x74\x61\x6e\x63\x65", 15, false); Serializer< Writerc32191061087d721c33a008a377c39a9c9231315e031a3d0860b9f93b250d12d, float >()(w, value.ground_distance);
+        w.Key("\x47\x50\x53\x20\x50\x6f\x73\x69\x74\x69\x6f\x6e", 12, false); Serializer< Writerd16fe33fad9c97cebbe385f16d232d35056e1c771e7aadbc2bd55ce2afadf7c1, float >()(w, value.gps_position);
+w.Key("\x47\x50\x53\x20\x56\x65\x6c\x6f\x63\x69\x74\x79", 12, false); Serializer< Writerd16fe33fad9c97cebbe385f16d232d35056e1c771e7aadbc2bd55ce2afadf7c1, float >()(w, value.gps_velocity);
+w.Key("\x47\x50\x53\x20\x50\x41\x43\x43", 8, false); Serializer< Writerd16fe33fad9c97cebbe385f16d232d35056e1c771e7aadbc2bd55ce2afadf7c1, float >()(w, value.gps_pacc);
+w.Key("\x47\x50\x53\x20\x56\x41\x43\x43", 8, false); Serializer< Writerd16fe33fad9c97cebbe385f16d232d35056e1c771e7aadbc2bd55ce2afadf7c1, float >()(w, value.gps_vacc);
+w.Key("\x41\x63\x63\x65\x6c\x65\x72\x61\x74\x69\x6f\x6e", 12, false); Serializer< Writerd16fe33fad9c97cebbe385f16d232d35056e1c771e7aadbc2bd55ce2afadf7c1, float >()(w, value.acceleration);
+w.Key("\x41\x6e\x67\x75\x6c\x61\x72\x20\x56\x65\x6c\x6f\x63\x69\x74\x79", 16, false); Serializer< Writerd16fe33fad9c97cebbe385f16d232d35056e1c771e7aadbc2bd55ce2afadf7c1, float >()(w, value.angular_velocity);
+w.Key("\x4d\x61\x67\x6e\x65\x74\x69\x63\x20\x46\x69\x65\x6c\x64", 14, false); Serializer< Writerd16fe33fad9c97cebbe385f16d232d35056e1c771e7aadbc2bd55ce2afadf7c1, float >()(w, value.magnetic_field);
+w.Key("\x50\x72\x65\x73\x73\x75\x72\x65", 8, false); Serializer< Writerd16fe33fad9c97cebbe385f16d232d35056e1c771e7aadbc2bd55ce2afadf7c1, float >()(w, value.pressure);
+w.Key("\x54\x65\x6d\x70\x65\x72\x61\x74\x75\x72\x65", 11, false); Serializer< Writerd16fe33fad9c97cebbe385f16d232d35056e1c771e7aadbc2bd55ce2afadf7c1, float >()(w, value.temperature);
+w.Key("\x47\x72\x6f\x75\x6e\x64\x20\x44\x69\x73\x74\x61\x6e\x63\x65", 15, false); Serializer< Writerd16fe33fad9c97cebbe385f16d232d35056e1c771e7aadbc2bd55ce2afadf7c1, float >()(w, value.ground_distance);
 
         w.EndObject(10);
     }
@@ -1609,12 +1609,12 @@ w.Key("\x47\x72\x6f\x75\x6e\x64\x20\x44\x69\x73\x74\x61\x6e\x63\x65", 15, false)
 // The comments are reserved for replacement
 // such syntax is chosen so that the template file looks like valid C++
 
-namespace sz { namespace Multi_Simulator { struct Config {
+namespace sz { namespace Multirotor_Simulator { struct Config {
  bool simulation_enabled;
 bool drag_enabled;
 bool ground_enabled;
 bool gravity_enabled;
-sz::Multi_Simulator::Noise noise;
+sz::Multirotor_Simulator::Noise noise;
 
 explicit Config():simulation_enabled(true), drag_enabled(true), ground_enabled(true), gravity_enabled(true), noise() {  }
 
@@ -1627,7 +1627,7 @@ explicit Config():simulation_enabled(true), drag_enabled(true), ground_enabled(t
 namespace autojsoncxx {
 
 template <>
-class SAXEventHandler< ::sz::Multi_Simulator::Config > {
+class SAXEventHandler< ::sz::Multirotor_Simulator::Config > {
 private:
     utility::scoped_ptr<error::ErrorBase> the_error;
     int state;
@@ -1637,7 +1637,7 @@ private:
 SAXEventHandler< bool > handler_1;
 SAXEventHandler< bool > handler_2;
 SAXEventHandler< bool > handler_3;
-SAXEventHandler< sz::Multi_Simulator::Noise > handler_4;bool has_simulation_enabled;
+SAXEventHandler< sz::Multirotor_Simulator::Noise > handler_4;bool has_simulation_enabled;
 bool has_drag_enabled;
 bool has_ground_enabled;
 bool has_gravity_enabled;
@@ -1698,7 +1698,7 @@ has_gravity_enabled = false;
     }
 
 public:
-    explicit SAXEventHandler( ::sz::Multi_Simulator::Config * obj)
+    explicit SAXEventHandler( ::sz::Multirotor_Simulator::Config * obj)
         : state(-1)
         , depth(0)
         , handler_0(&obj->simulation_enabled)
@@ -2148,18 +2148,18 @@ handler_4.PrepareForReuse();
     }
 };
 
-template < class Writerea792b52c9c9efa6bcec16dcc014708ff3a5e7b621293f760386a97732a4b5ef >
-struct Serializer< Writerea792b52c9c9efa6bcec16dcc014708ff3a5e7b621293f760386a97732a4b5ef, ::sz::Multi_Simulator::Config > {
+template < class Writerb4df968b817bed35d3bac4cf9e86589852d26ed2b087bd8a39642a4b3ac2fbb6 >
+struct Serializer< Writerb4df968b817bed35d3bac4cf9e86589852d26ed2b087bd8a39642a4b3ac2fbb6, ::sz::Multirotor_Simulator::Config > {
 
-    void operator()( Writerea792b52c9c9efa6bcec16dcc014708ff3a5e7b621293f760386a97732a4b5ef& w, const ::sz::Multi_Simulator::Config& value) const
+    void operator()( Writerb4df968b817bed35d3bac4cf9e86589852d26ed2b087bd8a39642a4b3ac2fbb6& w, const ::sz::Multirotor_Simulator::Config& value) const
     {
         w.StartObject();
 
-        w.Key("\x53\x69\x6d\x75\x6c\x61\x74\x69\x6f\x6e\x20\x45\x6e\x61\x62\x6c\x65\x64", 18, false); Serializer< Writerea792b52c9c9efa6bcec16dcc014708ff3a5e7b621293f760386a97732a4b5ef, bool >()(w, value.simulation_enabled);
-w.Key("\x44\x72\x61\x67\x20\x45\x6e\x61\x62\x6c\x65\x64", 12, false); Serializer< Writerea792b52c9c9efa6bcec16dcc014708ff3a5e7b621293f760386a97732a4b5ef, bool >()(w, value.drag_enabled);
-w.Key("\x47\x72\x6f\x75\x6e\x64\x20\x45\x6e\x61\x62\x6c\x65\x64", 14, false); Serializer< Writerea792b52c9c9efa6bcec16dcc014708ff3a5e7b621293f760386a97732a4b5ef, bool >()(w, value.ground_enabled);
-w.Key("\x47\x72\x61\x76\x69\x74\x79\x20\x45\x6e\x61\x62\x6c\x65\x64", 15, false); Serializer< Writerea792b52c9c9efa6bcec16dcc014708ff3a5e7b621293f760386a97732a4b5ef, bool >()(w, value.gravity_enabled);
-w.Key("\x4e\x6f\x69\x73\x65", 5, false); Serializer< Writerea792b52c9c9efa6bcec16dcc014708ff3a5e7b621293f760386a97732a4b5ef, sz::Multi_Simulator::Noise >()(w, value.noise);
+        w.Key("\x53\x69\x6d\x75\x6c\x61\x74\x69\x6f\x6e\x20\x45\x6e\x61\x62\x6c\x65\x64", 18, false); Serializer< Writerb4df968b817bed35d3bac4cf9e86589852d26ed2b087bd8a39642a4b3ac2fbb6, bool >()(w, value.simulation_enabled);
+w.Key("\x44\x72\x61\x67\x20\x45\x6e\x61\x62\x6c\x65\x64", 12, false); Serializer< Writerb4df968b817bed35d3bac4cf9e86589852d26ed2b087bd8a39642a4b3ac2fbb6, bool >()(w, value.drag_enabled);
+w.Key("\x47\x72\x6f\x75\x6e\x64\x20\x45\x6e\x61\x62\x6c\x65\x64", 14, false); Serializer< Writerb4df968b817bed35d3bac4cf9e86589852d26ed2b087bd8a39642a4b3ac2fbb6, bool >()(w, value.ground_enabled);
+w.Key("\x47\x72\x61\x76\x69\x74\x79\x20\x45\x6e\x61\x62\x6c\x65\x64", 15, false); Serializer< Writerb4df968b817bed35d3bac4cf9e86589852d26ed2b087bd8a39642a4b3ac2fbb6, bool >()(w, value.gravity_enabled);
+w.Key("\x4e\x6f\x69\x73\x65", 5, false); Serializer< Writerb4df968b817bed35d3bac4cf9e86589852d26ed2b087bd8a39642a4b3ac2fbb6, sz::Multirotor_Simulator::Noise >()(w, value.noise);
 
         w.EndObject(5);
     }

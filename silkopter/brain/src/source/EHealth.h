@@ -37,11 +37,11 @@ private:
 
     HAL& m_hal;
 
-    bus::IUART_wptr m_uart;
+    std::weak_ptr<bus::IUART> m_uart;
 
     struct Buses
     {
-        bus::IUART_ptr uart;
+        std::shared_ptr<bus::IUART> uart;
     };
 
     std::array<char, 1024> m_temp_buffer;

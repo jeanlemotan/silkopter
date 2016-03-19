@@ -8,7 +8,7 @@ namespace silk
 namespace stream
 {
 
-class IGimbal_Frame : public ISpatial_Stream<Type::FRAME, Space::GIMBAL>
+class IGimbal_Frame : public ISpatial_Stream<Semantic::FRAME, Space::GIMBAL>
 {
 public:
     typedef std::false_type can_be_filtered_t;
@@ -19,10 +19,9 @@ public:
 
     static constexpr Space PARENT_SPACE = Space::UAV;
 };
-DECLARE_CLASS_PTR(IGimbal_Frame);
 
 
-class IUAV_Frame : public ISpatial_Stream<Type::FRAME, Space::UAV>
+class IUAV_Frame : public ISpatial_Stream<Semantic::FRAME, Space::UAV>
 {
 public:
     typedef std::false_type can_be_filtered_t;
@@ -33,9 +32,8 @@ public:
 
     static constexpr Space PARENT_SPACE = Space::ENU;
 };
-DECLARE_CLASS_PTR(IUAV_Frame);
 
-class IENU_Frame : public ISpatial_Stream<Type::FRAME, Space::ENU>
+class IENU_Frame : public ISpatial_Stream<Semantic::FRAME, Space::ENU>
 {
 public:
     typedef std::false_type can_be_filtered_t;
@@ -46,7 +44,6 @@ public:
 
     static constexpr Space PARENT_SPACE = Space::ECEF;
 };
-DECLARE_CLASS_PTR(IENU_Frame);
 
 
 }

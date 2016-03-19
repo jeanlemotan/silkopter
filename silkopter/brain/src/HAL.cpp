@@ -45,12 +45,12 @@
 #include "combiner/Combiner.h"
 #include "lpf/LPF.h"
 #include "resampler/Resampler.h"
-#include "brain/Multi_Brain.h"
-#include "pilot/Multi_Pilot.h"
+#include "brain/Multirotor_Brain.h"
+#include "pilot/Multirotor_Pilot.h"
 
 #include "controller/Rate_Controller.h"
 
-#include "simulator/Multi_Simulator.h"
+#include "simulator/Multirotor_Simulator.h"
 
 #include "transformer/Transformer.h"
 #include "transformer/Transformer_Inv.h"
@@ -67,7 +67,7 @@
 
 #include "autojsoncxx/boost_types.hpp"
 #include "sz_math.hpp"
-#include "sz_Multi_Config.hpp"
+#include "sz_Multirotor_Config.hpp"
 
 
 
@@ -183,16 +183,17 @@ void HAL::save_settings()
 
     auto& allocator = settingsj->GetAllocator();
 
-    if (m_configs.multi)
+    std::shared_ptr<const Multirotor_Config> multirotor_config = get_specialized_uav_config<Multirotor_Config>();
+    if (multirotor_config)
     {
-        auto* configj = jsonutil::get_or_add_value(*settingsj, q::Path("hal/multi_config"), rapidjson::kObjectType, allocator);
+        auto* configj = jsonutil::get_or_add_value(*settingsj, q::Path("hal/uav_config"), rapidjson::kObjectType, allocator);
         if (!configj)
         {
-            QLOGE("Cannot create multi config node.");
+            QLOGE("Cannot create multirotor config node.");
             return;
         }
         rapidjson::Document json;
-        autojsoncxx::to_document(*m_configs.multi, json);
+        autojsoncxx::to_document(*multirotor_config, json);
         jsonutil::clone_value(*configj, json, allocator);
     }
 
@@ -207,8 +208,8 @@ void HAL::save_settings()
         for (auto const& n: nodes)
         {
             if (!jsonutil::add_value(*busesj, q::Path(n.name + "/type"), rapidjson::Value(n.type.c_str(), n.type.size(), allocator), allocator) ||
-                !jsonutil::add_value(*busesj, q::Path(n.name + "/init_params"), jsonutil::clone_value(n.node->get_init_params(), allocator), allocator) ||
-                !jsonutil::add_value(*busesj, q::Path(n.name + "/config"), jsonutil::clone_value(n.node->get_config(), allocator), allocator))
+                !jsonutil::add_value(*busesj, q::Path(n.name + "/init_params"), jsonutil::clone_value(n.ptr->get_init_params(), allocator), allocator) ||
+                !jsonutil::add_value(*busesj, q::Path(n.name + "/config"), jsonutil::clone_value(n.ptr->get_config(), allocator), allocator))
             {
                 QLOGE("Cannot create settings node.");
                 return;
@@ -230,7 +231,7 @@ void HAL::save_settings()
 
             rapidjson::Value input_pathsj;
             {
-                auto inputs = n.node->get_inputs();
+                auto inputs = n.ptr->get_inputs();
                 input_pathsj.SetArray();
                 for (auto const& si: inputs)
                 {
@@ -240,8 +241,8 @@ void HAL::save_settings()
 
             if (!jsonutil::add_value(nodej, std::string("name"), rapidjson::Value(n.name.c_str(), n.name.size(), allocator), allocator) ||
                 !jsonutil::add_value(nodej, std::string("type"), rapidjson::Value(n.type.c_str(), n.type.size(), allocator), allocator) ||
-                !jsonutil::add_value(nodej, std::string("init_params"), jsonutil::clone_value(n.node->get_init_params(), allocator), allocator) ||
-                !jsonutil::add_value(nodej, std::string("config"), jsonutil::clone_value(n.node->get_config(), allocator), allocator) ||
+                !jsonutil::add_value(nodej, std::string("init_params"), jsonutil::clone_value(n.ptr->get_init_params(), allocator), allocator) ||
+                !jsonutil::add_value(nodej, std::string("config"), jsonutil::clone_value(n.ptr->get_config(), allocator), allocator) ||
                 !jsonutil::add_value(nodej, std::string("input_paths"), std::move(input_pathsj), allocator))
             {
                 QLOGE("Cannot create settings node.");
@@ -278,70 +279,89 @@ auto HAL::get_telemetry_data() const -> Telemetry_Data const&
     return m_telemetry_data;
 }
 
-auto HAL::get_bus_factory()    -> Factory<bus::IBus>&
+auto HAL::get_bus_factory()    -> const Factory<bus::IBus>&
 {
     return m_bus_factory;
 }
-auto HAL::get_node_factory()  -> Factory<node::INode>&
+auto HAL::get_node_factory()  -> const Factory<node::INode>&
 {
     return m_node_factory;
 }
-auto HAL::get_buses()    -> Registry<bus::IBus>&
+auto HAL::get_buses()    -> const Registry<bus::IBus>&
 {
     return m_buses;
 }
-auto HAL::get_nodes()  -> Registry<node::INode>&
+auto HAL::get_nodes()  -> const Registry<node::INode>&
 {
     return m_nodes;
 }
-auto HAL::get_streams()  -> Registry<stream::IStream>&
+auto HAL::get_streams()  -> const Registry<stream::IStream>&
 {
     return m_streams;
 }
-auto HAL::get_multi_config() const -> boost::optional<config::Multi>
+auto HAL::get_uav_config() const -> std::shared_ptr<const UAV_Config>
 {
-    return m_configs.multi;
+    return m_uav_config;
 }
-auto HAL::set_multi_config(config::Multi const& config) -> bool
+auto HAL::set_uav_config(std::shared_ptr<UAV_Config> config) -> bool
 {
-    QLOG_TOPIC("hal::set_multi_config");
+    if (!config)
+    {
+        return false;
+    }
 
-    if (config.motors.size() < 2)
+    if (config->get_type() == Multirotor_Config::TYPE)
     {
-        QLOGE("Bad motor count: {}", config.motors.size());
+        return set_multirotor_config(std::dynamic_pointer_cast<Multirotor_Config>(config));
+    }
+    return false;
+}
+auto HAL::set_multirotor_config(std::shared_ptr<Multirotor_Config> config) -> bool
+{
+    QLOG_TOPIC("hal::set_multirotor_config");
+
+    QASSERT(config);
+    if (!config)
+    {
         return false;
     }
-    if (config.height < math::epsilon<float>())
+
+    if (config->motors.size() < 2)
     {
-        QLOGE("Bad height: {}", config.height);
+        QLOGE("Bad motor count: {}", config->motors.size());
         return false;
     }
-    if (config.radius < math::epsilon<float>())
+    if (config->height < math::epsilon<float>())
     {
-        QLOGE("Bad radius: {}", config.radius);
+        QLOGE("Bad height: {}", config->height);
         return false;
     }
-    if (config.mass < math::epsilon<float>())
+    if (config->radius < math::epsilon<float>())
     {
-        QLOGE("Bad mass: {}", config.mass);
+        QLOGE("Bad radius: {}", config->radius);
         return false;
     }
-    if (config.motor_thrust < math::epsilon<float>())
+    if (config->mass < math::epsilon<float>())
     {
-        QLOGE("Bad motor thrust thrust: {}", config.motor_thrust);
+        QLOGE("Bad mass: {}", config->mass);
         return false;
     }
-    if (config.motor_acceleration < math::epsilon<float>())
+    if (config->motor_thrust < math::epsilon<float>())
     {
-        QLOGE("Bad acceleration: {}", config.motor_acceleration);
+        QLOGE("Bad motor thrust thrust: {}", config->motor_thrust);
         return false;
     }
-    if (config.motor_deceleration < math::epsilon<float>())
+    if (config->motor_acceleration < math::epsilon<float>())
     {
-        QLOGE("Bad deceleration: {}", config.motor_deceleration);
+        QLOGE("Bad acceleration: {}", config->motor_acceleration);
         return false;
     }
-    for (auto const& m: config.motors)
+    if (config->motor_deceleration < math::epsilon<float>())
+    {
+        QLOGE("Bad deceleration: {}", config->motor_deceleration);
+        return false;
+    }
+    for (auto const& m: config->motors)
     {
         if (math::is_zero(m.position, math::epsilon<float>()))
         {
@@ -350,13 +370,23 @@ auto HAL::set_multi_config(config::Multi const& config) -> bool
         }
     }
 
-    m_configs.multi = config;
-
     //http://en.wikipedia.org/wiki/List_of_moments_of_inertia
-    m_configs.multi->moment_of_inertia = (1.f / 12.f) * config.mass * (3.f * math::square(config.radius) + math::square(config.height));
+    m_uav_config = config;
+    config->moment_of_inertia = (1.f / 12.f) * config->mass * (3.f * math::square(config->radius) + math::square(config->height));
 
     config_changed_signal.execute(*this);
 
+    return true;
+}
+
+auto HAL::remove_node(std::shared_ptr<node::INode> node) -> bool
+{
+    m_nodes.remove(node);
+    std::vector<node::INode::Output> outputs = node->get_outputs();
+    for (node::INode::Output const& output: outputs)
+    {
+        m_streams.remove(output.stream);
+    }
     return true;
 }
 
@@ -377,33 +407,33 @@ void write_gnu_plot(std::string const& name, std::vector<T> const& samples)
 auto HAL::create_bus(
         std::string const& type,
         std::string const& name,
-        rapidjson::Value const& init_params) -> bus::IBus_ptr
+        rapidjson::Value const& init_params) -> std::shared_ptr<bus::IBus>
 {
     if (m_buses.find_by_name<bus::IBus>(name))
     {
         QLOGE("Bus '{}' already exist", name);
-        return bus::IBus_ptr();
+        return std::shared_ptr<bus::IBus>();
     }
-    auto node = m_bus_factory.create_node(type);
+    auto node = m_bus_factory.create(type);
     if (node && node->init(init_params))
     {
         auto res = m_buses.add(name, type, node); //this has to succeed since we already tested for duplicate names
         QASSERT(res);
         return node;
     }
-    return bus::IBus_ptr();
+    return std::shared_ptr<bus::IBus>();
 }
 auto HAL::create_node(
         std::string const& type,
         std::string const& name,
-        rapidjson::Value const& init_params) -> node::INode_ptr
+        rapidjson::Value const& init_params) -> std::shared_ptr<node::INode>
 {
     if (m_nodes.find_by_name<node::INode>(name))
     {
         QLOGE("Node '{}' already exist", name);
-        return node::INode_ptr();
+        return std::shared_ptr<node::INode>();
     }
-    auto node = m_node_factory.create_node(type);
+    auto node = m_node_factory.create(type);
     if (node && node->init(init_params))
     {
         node->set_config(node->get_config());//apply default config
@@ -416,12 +446,12 @@ auto HAL::create_node(
             if (!m_streams.add(stream_name, std::string(), x.stream))
             {
                 QLOGE("Cannot add stream '{}'", stream_name);
-                return node::INode_ptr();
+                return std::shared_ptr<node::INode>();
             }
         }
         return node;
     }
-    return node::INode_ptr();
+    return std::shared_ptr<node::INode>();
 }
 
 auto HAL::create_buses(rapidjson::Value& json) -> bool
@@ -523,7 +553,7 @@ auto HAL::create_nodes(rapidjson::Value& json) -> bool
     {
         const auto& item = nodes[std::distance(json.Begin(), it)];
         const std::string& name = item.name;
-        std::shared_ptr<node::INode> node = item.node;
+        std::shared_ptr<node::INode> node = item.ptr;
         QASSERT(node);
 
         if (!read_input_stream_paths(name, *node, *it))
@@ -557,7 +587,7 @@ void HAL::sort_nodes(std::shared_ptr<node::INode> first_node)
     typedef Registry<node::INode>::Item Item;
 
     std::vector<Item> items = m_nodes.get_all();
-    auto it = std::find_if(items.begin(), items.end(), [first_node](const Item& item) { return item.node == first_node; });
+    auto it = std::find_if(items.begin(), items.end(), [first_node](const Item& item) { return item.ptr == first_node; });
     QASSERT(it != items.end());
     if (it == items.end())
     {
@@ -576,9 +606,9 @@ void HAL::sort_nodes(std::shared_ptr<node::INode> first_node)
         const std::string& node_name = it->name;
 
         //now find all the nodes that this node uses as input
-        if (it->node != first_node)
+        if (it->ptr != first_node)
         {
-            std::vector<node::INode::Input> inputs = it->node->get_inputs();
+            std::vector<node::INode::Input> inputs = it->ptr->get_inputs();
             for (const node::INode::Input& input : inputs)
             {
                 if (input.stream_path.empty())
@@ -604,7 +634,7 @@ void HAL::sort_nodes(std::shared_ptr<node::INode> first_node)
         for (auto nit = items.begin(); nit != items.end();)
         {
             bool found = false;
-            std::vector<node::INode::Input> inputs = nit->node->get_inputs();
+            std::vector<node::INode::Input> inputs = nit->ptr->get_inputs();
             for (const node::INode::Input& input : inputs)
             {
                 if (!input.stream_path.empty() && input.stream_path[0] == node_name)
@@ -654,236 +684,236 @@ auto HAL::init(Comms& comms) -> bool
 #endif
 
 
-    m_bus_factory.register_node<bus::UART_Linux>("UART Linux");
-    m_bus_factory.register_node<bus::UART_BBang>("UART BBang");
-    m_bus_factory.register_node<bus::I2C_Linux>("I2C Linux");
-    m_bus_factory.register_node<bus::SPI_Linux>("SPI Linux");
-    m_bus_factory.register_node<bus::I2C_BCM>("I2C BCM");
-    m_bus_factory.register_node<bus::SPI_BCM>("SPI BCM");
+    m_bus_factory.add<bus::UART_Linux>("UART Linux");
+    m_bus_factory.add<bus::UART_BBang>("UART BBang");
+    m_bus_factory.add<bus::I2C_Linux>("I2C Linux");
+    m_bus_factory.add<bus::SPI_Linux>("SPI Linux");
+    m_bus_factory.add<bus::I2C_BCM>("I2C BCM");
+    m_bus_factory.add<bus::SPI_BCM>("SPI BCM");
 
 #if !defined RASPBERRY_PI
-    m_node_factory.register_node<Multi_Simulator>("Multi Simulator", *this);
+    m_node_factory.add<Multirotor_Simulator>("Multirotor Simulator", *this);
 #endif
 
-    //m_node_factory.register_node<EHealth>("EHealth", *this);
+    //m_node_factory.add<EHealth>("EHealth", *this);
 
-    m_node_factory.register_node<MPU9250>("MPU9250", *this);
-    m_node_factory.register_node<MS5611>("MS5611", *this);
-    m_node_factory.register_node<SRF01>("SRF01", *this);
-    m_node_factory.register_node<SRF02>("SRF02", *this);
-    m_node_factory.register_node<MaxSonar>("MaxSonar", *this);
-    m_node_factory.register_node<Raspicam>("Raspicam", *this);
-    m_node_factory.register_node<RC5T619>("RC5T619", *this);
-    m_node_factory.register_node<ADS1115>("ADS1115", *this);
-    m_node_factory.register_node<AVRADC>("AVRADC", *this);
-    m_node_factory.register_node<UBLOX>("UBLOX", *this);
+    m_node_factory.add<MPU9250>("MPU9250", *this);
+    m_node_factory.add<MS5611>("MS5611", *this);
+    m_node_factory.add<SRF01>("SRF01", *this);
+    m_node_factory.add<SRF02>("SRF02", *this);
+    m_node_factory.add<MaxSonar>("MaxSonar", *this);
+    m_node_factory.add<Raspicam>("Raspicam", *this);
+    m_node_factory.add<RC5T619>("RC5T619", *this);
+    m_node_factory.add<ADS1115>("ADS1115", *this);
+    m_node_factory.add<AVRADC>("AVRADC", *this);
+    m_node_factory.add<UBLOX>("UBLOX", *this);
 
-    m_node_factory.register_node<PIGPIO>("PIGPIO", *this);
-    m_node_factory.register_node<PCA9685>("PCA9685", *this);
+    m_node_factory.add<PIGPIO>("PIGPIO", *this);
+    m_node_factory.add<PCA9685>("PCA9685", *this);
 
-    m_node_factory.register_node<Multi_Brain>("Multi Brain", *this);
-    m_node_factory.register_node<Multi_Pilot>("Multi Pilot", *this, comms);
+    m_node_factory.add<Multirotor_Brain>("Multirotor Brain", *this);
+    m_node_factory.add<Multirotor_Pilot>("Multirotor Pilot", *this, comms);
 
-    m_node_factory.register_node<ADC_Ammeter>("ADC Ammeter", *this);
-    m_node_factory.register_node<ADC_Voltmeter>("ADC Voltmeter", *this);
-    m_node_factory.register_node<Comp_AHRS>("Comp AHRS", *this);
-    m_node_factory.register_node<Comp_ECEF>("Comp ECEF", *this);
-    m_node_factory.register_node<KF_ECEF>("EKF ECEF", *this);
-    m_node_factory.register_node<Gravity_Filter>("Gravity Filter", *this);
-    m_node_factory.register_node<Throttle_To_PWM>("Throttle To PWM", *this);
-    m_node_factory.register_node<Proximity>("Proximity", *this);
-    m_node_factory.register_node<Pressure_Velocity>("Pressure Velocity", *this);
-    m_node_factory.register_node<ENU_Frame_System>("ENU Frame System", *this);
+    m_node_factory.add<ADC_Ammeter>("ADC Ammeter", *this);
+    m_node_factory.add<ADC_Voltmeter>("ADC Voltmeter", *this);
+    m_node_factory.add<Comp_AHRS>("Comp AHRS", *this);
+    m_node_factory.add<Comp_ECEF>("Comp ECEF", *this);
+    m_node_factory.add<KF_ECEF>("EKF ECEF", *this);
+    m_node_factory.add<Gravity_Filter>("Gravity Filter", *this);
+    m_node_factory.add<Throttle_To_PWM>("Throttle To PWM", *this);
+    m_node_factory.add<Proximity>("Proximity", *this);
+    m_node_factory.add<Pressure_Velocity>("Pressure Velocity", *this);
+    m_node_factory.add<ENU_Frame_System>("ENU Frame System", *this);
 
-    m_node_factory.register_node<Oscillator>("Oscillator", *this);
+    m_node_factory.add<Oscillator>("Oscillator", *this);
 
-    m_node_factory.register_node<Scalar_Generator<stream::IADC>>("ADC Generator", *this);
-    m_node_factory.register_node<Scalar_Generator<stream::ICurrent>>("Current Generator", *this);
-    m_node_factory.register_node<Scalar_Generator<stream::IVoltage>>("Voltage Generator", *this);
-    m_node_factory.register_node<Scalar_Generator<stream::IPressure>>("Pressure Generator", *this);
-    m_node_factory.register_node<Scalar_Generator<stream::ITemperature>>("Temperature Generator", *this);
-    m_node_factory.register_node<Scalar_Generator<stream::IPWM>>("PWM Generator", *this);
-    m_node_factory.register_node<Scalar_Generator<stream::IThrottle>>("Throttle Generator", *this);
-    m_node_factory.register_node<Scalar_Generator<stream::IFloat>>("Float Generator", *this);
+    m_node_factory.add<Scalar_Generator<stream::IADC>>("ADC Generator", *this);
+    m_node_factory.add<Scalar_Generator<stream::ICurrent>>("Current Generator", *this);
+    m_node_factory.add<Scalar_Generator<stream::IVoltage>>("Voltage Generator", *this);
+    m_node_factory.add<Scalar_Generator<stream::IPressure>>("Pressure Generator", *this);
+    m_node_factory.add<Scalar_Generator<stream::ITemperature>>("Temperature Generator", *this);
+    m_node_factory.add<Scalar_Generator<stream::IPWM>>("PWM Generator", *this);
+    m_node_factory.add<Scalar_Generator<stream::IThrottle>>("Throttle Generator", *this);
+    m_node_factory.add<Scalar_Generator<stream::IFloat>>("Float Generator", *this);
 
-    m_node_factory.register_node<Vec3_Generator<stream::IAcceleration>>("Acceleration Generator", *this);
-    m_node_factory.register_node<Vec3_Generator<stream::IENU_Acceleration>>("Acceleration Generator (ENU)", *this);
-//    m_node_factory.register_node<Vec3_Generator<stream::IECEF_Acceleration>>("Acceleration Generator (ECEF)", *this);
-    m_node_factory.register_node<Vec3_Generator<stream::ILinear_Acceleration>>("Linear Acceleration Generator", *this);
-    m_node_factory.register_node<Vec3_Generator<stream::IENU_Linear_Acceleration>>("Linear Acceleration Generator (ENU)", *this);
-    m_node_factory.register_node<Vec3_Generator<stream::IECEF_Linear_Acceleration>>("Linear Acceleration Generator (ECEF)", *this);
-    m_node_factory.register_node<Vec3_Generator<stream::IAngular_Velocity>>("Angular Velocity Generator", *this);
-    m_node_factory.register_node<Vec3_Generator<stream::IENU_Angular_Velocity>>("Angular Velocity Generator (ENU)", *this);
-    m_node_factory.register_node<Vec3_Generator<stream::IECEF_Angular_Velocity>>("Angular Velocity Generator (ECEF)", *this);
-    m_node_factory.register_node<Vec3_Generator<stream::IMagnetic_Field>>("Magnetic Field Generator", *this);
-    m_node_factory.register_node<Vec3_Generator<stream::IENU_Magnetic_Field>>("Magnetic Field Generator (ENU)", *this);
-    m_node_factory.register_node<Vec3_Generator<stream::IECEF_Magnetic_Field>>("Magnetic Field Generator (ECEF)", *this);
-    m_node_factory.register_node<Vec3_Generator<stream::IForce>>("Force Generator", *this);
-    m_node_factory.register_node<Vec3_Generator<stream::IENU_Force>>("Force Generator (ENU)", *this);
-    m_node_factory.register_node<Vec3_Generator<stream::IECEF_Force>>("Force Generator (ECEF)", *this);
-    m_node_factory.register_node<Vec3_Generator<stream::ITorque>>("Torque Generator", *this);
-    m_node_factory.register_node<Vec3_Generator<stream::IENU_Torque>>("Torque Generator (ENU)", *this);
-    m_node_factory.register_node<Vec3_Generator<stream::IECEF_Torque>>("Torque Generator (ECEF)", *this);
-    m_node_factory.register_node<Vec3_Generator<stream::IVelocity>>("Velocity Generator", *this);
-    m_node_factory.register_node<Vec3_Generator<stream::IENU_Velocity>>("Velocity Generator (ENU)", *this);
-    m_node_factory.register_node<Vec3_Generator<stream::IECEF_Velocity>>("Velocity Generator (ECEF)", *this);
+    m_node_factory.add<Vec3_Generator<stream::IAcceleration>>("Acceleration Generator", *this);
+    m_node_factory.add<Vec3_Generator<stream::IENU_Acceleration>>("Acceleration Generator (ENU)", *this);
+//    m_node_factory.add<Vec3_Generator<stream::IECEF_Acceleration>>("Acceleration Generator (ECEF)", *this);
+    m_node_factory.add<Vec3_Generator<stream::ILinear_Acceleration>>("Linear Acceleration Generator", *this);
+    m_node_factory.add<Vec3_Generator<stream::IENU_Linear_Acceleration>>("Linear Acceleration Generator (ENU)", *this);
+    m_node_factory.add<Vec3_Generator<stream::IECEF_Linear_Acceleration>>("Linear Acceleration Generator (ECEF)", *this);
+    m_node_factory.add<Vec3_Generator<stream::IAngular_Velocity>>("Angular Velocity Generator", *this);
+    m_node_factory.add<Vec3_Generator<stream::IENU_Angular_Velocity>>("Angular Velocity Generator (ENU)", *this);
+    m_node_factory.add<Vec3_Generator<stream::IECEF_Angular_Velocity>>("Angular Velocity Generator (ECEF)", *this);
+    m_node_factory.add<Vec3_Generator<stream::IMagnetic_Field>>("Magnetic Field Generator", *this);
+    m_node_factory.add<Vec3_Generator<stream::IENU_Magnetic_Field>>("Magnetic Field Generator (ENU)", *this);
+    m_node_factory.add<Vec3_Generator<stream::IECEF_Magnetic_Field>>("Magnetic Field Generator (ECEF)", *this);
+    m_node_factory.add<Vec3_Generator<stream::IForce>>("Force Generator", *this);
+    m_node_factory.add<Vec3_Generator<stream::IENU_Force>>("Force Generator (ENU)", *this);
+    m_node_factory.add<Vec3_Generator<stream::IECEF_Force>>("Force Generator (ECEF)", *this);
+    m_node_factory.add<Vec3_Generator<stream::ITorque>>("Torque Generator", *this);
+    m_node_factory.add<Vec3_Generator<stream::IENU_Torque>>("Torque Generator (ENU)", *this);
+    m_node_factory.add<Vec3_Generator<stream::IECEF_Torque>>("Torque Generator (ECEF)", *this);
+    m_node_factory.add<Vec3_Generator<stream::IVelocity>>("Velocity Generator", *this);
+    m_node_factory.add<Vec3_Generator<stream::IENU_Velocity>>("Velocity Generator (ENU)", *this);
+    m_node_factory.add<Vec3_Generator<stream::IECEF_Velocity>>("Velocity Generator (ECEF)", *this);
 
-    m_node_factory.register_node<Combiner<stream::IAcceleration>>("Acceleration CMB", *this);
-    m_node_factory.register_node<Combiner<stream::IENU_Acceleration>>("Acceleration CMB (ENU)", *this);
-    m_node_factory.register_node<Combiner<stream::ILinear_Acceleration>>("Linear Acceleration CMB", *this);
-    m_node_factory.register_node<Combiner<stream::IENU_Linear_Acceleration>>("Linear Acceleration CMB (ENU)", *this);
-    m_node_factory.register_node<Combiner<stream::IECEF_Linear_Acceleration>>("Linear Acceleration CMB (ECEF)", *this);
-    m_node_factory.register_node<Combiner<stream::IAngular_Velocity>>("Angular Velocity CMB", *this);
-    m_node_factory.register_node<Combiner<stream::IENU_Angular_Velocity>>("Angular Velocity CMB (ENU)", *this);
-    m_node_factory.register_node<Combiner<stream::IECEF_Angular_Velocity>>("Angular Velocity CMB (ECEF)", *this);
-    m_node_factory.register_node<Combiner<stream::IADC>>("ADC CMB", *this);
-    m_node_factory.register_node<Combiner<stream::ICurrent>>("Current CMB", *this);
-    m_node_factory.register_node<Combiner<stream::IVoltage>>("Voltage CMB", *this);
-    m_node_factory.register_node<Combiner<stream::IECEF_Position>>("Position CMB (ECEF)", *this);
-    m_node_factory.register_node<Combiner<stream::IDistance>>("Distance CMB", *this);
-    m_node_factory.register_node<Combiner<stream::IENU_Distance>>("Distance CMB (ENU)", *this);
-    m_node_factory.register_node<Combiner<stream::IECEF_Distance>>("Distance CMB (ECEF)", *this);
-    m_node_factory.register_node<Combiner<stream::IMagnetic_Field>>("Magnetic Field CMB", *this);
-    m_node_factory.register_node<Combiner<stream::IENU_Magnetic_Field>>("Magnetic Field CMB (ENU)", *this);
-    m_node_factory.register_node<Combiner<stream::IECEF_Magnetic_Field>>("Magnetic Field CMB (ECEF)", *this);
-    m_node_factory.register_node<Combiner<stream::IPressure>>("Pressure CMB", *this);
-    m_node_factory.register_node<Combiner<stream::ITemperature>>("Temperature CMB", *this);
-    m_node_factory.register_node<Combiner<stream::IPWM>>("PWM CMB", *this);
-    m_node_factory.register_node<Combiner<stream::IFloat>>("Float CMB", *this);
-    m_node_factory.register_node<Combiner<stream::IForce>>("Force CMB", *this);
-    m_node_factory.register_node<Combiner<stream::IENU_Force>>("Force CMB (ENU)", *this);
-    m_node_factory.register_node<Combiner<stream::IECEF_Force>>("Force CMB (ECEF)", *this);
-    m_node_factory.register_node<Combiner<stream::ITorque>>("Torque CMB", *this);
-    m_node_factory.register_node<Combiner<stream::IENU_Torque>>("Torque CMB (ENU)", *this);
-    m_node_factory.register_node<Combiner<stream::IECEF_Torque>>("Torque CMB (ECEF)", *this);
-    m_node_factory.register_node<Combiner<stream::IVelocity>>("Velocity CMB", *this);
-    m_node_factory.register_node<Combiner<stream::IENU_Velocity>>("Velocity CMB (ENU)", *this);
-    m_node_factory.register_node<Combiner<stream::IECEF_Velocity>>("Velocity CMB (ECEF)", *this);
+    m_node_factory.add<Combiner<stream::IAcceleration>>("Acceleration CMB", *this);
+    m_node_factory.add<Combiner<stream::IENU_Acceleration>>("Acceleration CMB (ENU)", *this);
+    m_node_factory.add<Combiner<stream::ILinear_Acceleration>>("Linear Acceleration CMB", *this);
+    m_node_factory.add<Combiner<stream::IENU_Linear_Acceleration>>("Linear Acceleration CMB (ENU)", *this);
+    m_node_factory.add<Combiner<stream::IECEF_Linear_Acceleration>>("Linear Acceleration CMB (ECEF)", *this);
+    m_node_factory.add<Combiner<stream::IAngular_Velocity>>("Angular Velocity CMB", *this);
+    m_node_factory.add<Combiner<stream::IENU_Angular_Velocity>>("Angular Velocity CMB (ENU)", *this);
+    m_node_factory.add<Combiner<stream::IECEF_Angular_Velocity>>("Angular Velocity CMB (ECEF)", *this);
+    m_node_factory.add<Combiner<stream::IADC>>("ADC CMB", *this);
+    m_node_factory.add<Combiner<stream::ICurrent>>("Current CMB", *this);
+    m_node_factory.add<Combiner<stream::IVoltage>>("Voltage CMB", *this);
+    m_node_factory.add<Combiner<stream::IECEF_Position>>("Position CMB (ECEF)", *this);
+    m_node_factory.add<Combiner<stream::IDistance>>("Distance CMB", *this);
+    m_node_factory.add<Combiner<stream::IENU_Distance>>("Distance CMB (ENU)", *this);
+    m_node_factory.add<Combiner<stream::IECEF_Distance>>("Distance CMB (ECEF)", *this);
+    m_node_factory.add<Combiner<stream::IMagnetic_Field>>("Magnetic Field CMB", *this);
+    m_node_factory.add<Combiner<stream::IENU_Magnetic_Field>>("Magnetic Field CMB (ENU)", *this);
+    m_node_factory.add<Combiner<stream::IECEF_Magnetic_Field>>("Magnetic Field CMB (ECEF)", *this);
+    m_node_factory.add<Combiner<stream::IPressure>>("Pressure CMB", *this);
+    m_node_factory.add<Combiner<stream::ITemperature>>("Temperature CMB", *this);
+    m_node_factory.add<Combiner<stream::IPWM>>("PWM CMB", *this);
+    m_node_factory.add<Combiner<stream::IFloat>>("Float CMB", *this);
+    m_node_factory.add<Combiner<stream::IForce>>("Force CMB", *this);
+    m_node_factory.add<Combiner<stream::IENU_Force>>("Force CMB (ENU)", *this);
+    m_node_factory.add<Combiner<stream::IECEF_Force>>("Force CMB (ECEF)", *this);
+    m_node_factory.add<Combiner<stream::ITorque>>("Torque CMB", *this);
+    m_node_factory.add<Combiner<stream::IENU_Torque>>("Torque CMB (ENU)", *this);
+    m_node_factory.add<Combiner<stream::IECEF_Torque>>("Torque CMB (ECEF)", *this);
+    m_node_factory.add<Combiner<stream::IVelocity>>("Velocity CMB", *this);
+    m_node_factory.add<Combiner<stream::IENU_Velocity>>("Velocity CMB (ENU)", *this);
+    m_node_factory.add<Combiner<stream::IECEF_Velocity>>("Velocity CMB (ECEF)", *this);
 
-    m_node_factory.register_node<LPF<stream::IAcceleration>>("Acceleration LPF", *this);
-    m_node_factory.register_node<LPF<stream::IENU_Acceleration>>("Acceleration LPF (ENU)", *this);
-//    m_node_factory.register_node<LPF<stream::IECEF_Acceleration>>("Acceleration LPF (ECEF)", *this);
-    m_node_factory.register_node<LPF<stream::ILinear_Acceleration>>("Linear Acceleration LPF", *this);
-    m_node_factory.register_node<LPF<stream::IENU_Linear_Acceleration>>("Linear Acceleration LPF (ENU)", *this);
-    m_node_factory.register_node<LPF<stream::IECEF_Linear_Acceleration>>("Linear Acceleration LPF (ECEF)", *this);
-    m_node_factory.register_node<LPF<stream::IAngular_Velocity>>("Angular Velocity LPF", *this);
-    m_node_factory.register_node<LPF<stream::IENU_Angular_Velocity>>("Angular Velocity LPF (ENU)", *this);
-    m_node_factory.register_node<LPF<stream::IECEF_Angular_Velocity>>("Angular Velocity LPF (ECEF)", *this);
-    m_node_factory.register_node<LPF<stream::IADC>>("ADC LPF", *this);
-    m_node_factory.register_node<LPF<stream::ICurrent>>("Current LPF", *this);
-    m_node_factory.register_node<LPF<stream::IVoltage>>("Voltage LPF", *this);
-    m_node_factory.register_node<LPF<stream::IECEF_Position>>("Position LPF (ECEF)", *this);
-    m_node_factory.register_node<LPF<stream::IDistance>>("Distance LPF", *this);
-    m_node_factory.register_node<LPF<stream::IENU_Distance>>("Distance LPF (ENU)", *this);
-    m_node_factory.register_node<LPF<stream::IECEF_Distance>>("Distance LPF (ECEF)", *this);
-    m_node_factory.register_node<LPF<stream::IMagnetic_Field>>("Magnetic Field LPF", *this);
-    m_node_factory.register_node<LPF<stream::IENU_Magnetic_Field>>("Magnetic Field LPF (ENU)", *this);
-    m_node_factory.register_node<LPF<stream::IECEF_Magnetic_Field>>("Magnetic Field LPF (ECEF)", *this);
-    m_node_factory.register_node<LPF<stream::IPressure>>("Pressure LPF", *this);
-    m_node_factory.register_node<LPF<stream::ITemperature>>("Temperature LPF", *this);
-//    m_node_factory.register_node<LPF<stream::IFrame>>("Frame LPF", *this);
-//    m_node_factory.register_node<LPF<stream::IENU_Frame>>("Frame LPF (ENU)", *this);
-    m_node_factory.register_node<LPF<stream::IPWM>>("PWM LPF", *this);
-    m_node_factory.register_node<LPF<stream::IFloat>>("Float LPF", *this);
-    m_node_factory.register_node<LPF<stream::IForce>>("Force LPF", *this);
-    m_node_factory.register_node<LPF<stream::IENU_Force>>("Force LPF (ENU)", *this);
-    m_node_factory.register_node<LPF<stream::IECEF_Force>>("Force LPF (ECEF)", *this);
-    m_node_factory.register_node<LPF<stream::ITorque>>("Torque LPF", *this);
-    m_node_factory.register_node<LPF<stream::IENU_Torque>>("Torque LPF (ENU)", *this);
-    m_node_factory.register_node<LPF<stream::IECEF_Torque>>("Torque LPF (ECEF)", *this);
-    m_node_factory.register_node<LPF<stream::IVelocity>>("Velocity LPF", *this);
-    m_node_factory.register_node<LPF<stream::IENU_Velocity>>("Velocity LPF (ENU)", *this);
-    m_node_factory.register_node<LPF<stream::IECEF_Velocity>>("Velocity LPF (ECEF)", *this);
+    m_node_factory.add<LPF<stream::IAcceleration>>("Acceleration LPF", *this);
+    m_node_factory.add<LPF<stream::IENU_Acceleration>>("Acceleration LPF (ENU)", *this);
+//    m_node_factory.add<LPF<stream::IECEF_Acceleration>>("Acceleration LPF (ECEF)", *this);
+    m_node_factory.add<LPF<stream::ILinear_Acceleration>>("Linear Acceleration LPF", *this);
+    m_node_factory.add<LPF<stream::IENU_Linear_Acceleration>>("Linear Acceleration LPF (ENU)", *this);
+    m_node_factory.add<LPF<stream::IECEF_Linear_Acceleration>>("Linear Acceleration LPF (ECEF)", *this);
+    m_node_factory.add<LPF<stream::IAngular_Velocity>>("Angular Velocity LPF", *this);
+    m_node_factory.add<LPF<stream::IENU_Angular_Velocity>>("Angular Velocity LPF (ENU)", *this);
+    m_node_factory.add<LPF<stream::IECEF_Angular_Velocity>>("Angular Velocity LPF (ECEF)", *this);
+    m_node_factory.add<LPF<stream::IADC>>("ADC LPF", *this);
+    m_node_factory.add<LPF<stream::ICurrent>>("Current LPF", *this);
+    m_node_factory.add<LPF<stream::IVoltage>>("Voltage LPF", *this);
+    m_node_factory.add<LPF<stream::IECEF_Position>>("Position LPF (ECEF)", *this);
+    m_node_factory.add<LPF<stream::IDistance>>("Distance LPF", *this);
+    m_node_factory.add<LPF<stream::IENU_Distance>>("Distance LPF (ENU)", *this);
+    m_node_factory.add<LPF<stream::IECEF_Distance>>("Distance LPF (ECEF)", *this);
+    m_node_factory.add<LPF<stream::IMagnetic_Field>>("Magnetic Field LPF", *this);
+    m_node_factory.add<LPF<stream::IENU_Magnetic_Field>>("Magnetic Field LPF (ENU)", *this);
+    m_node_factory.add<LPF<stream::IECEF_Magnetic_Field>>("Magnetic Field LPF (ECEF)", *this);
+    m_node_factory.add<LPF<stream::IPressure>>("Pressure LPF", *this);
+    m_node_factory.add<LPF<stream::ITemperature>>("Temperature LPF", *this);
+//    m_node_factory.add<LPF<stream::IFrame>>("Frame LPF", *this);
+//    m_node_factory.add<LPF<stream::IENU_Frame>>("Frame LPF (ENU)", *this);
+    m_node_factory.add<LPF<stream::IPWM>>("PWM LPF", *this);
+    m_node_factory.add<LPF<stream::IFloat>>("Float LPF", *this);
+    m_node_factory.add<LPF<stream::IForce>>("Force LPF", *this);
+    m_node_factory.add<LPF<stream::IENU_Force>>("Force LPF (ENU)", *this);
+    m_node_factory.add<LPF<stream::IECEF_Force>>("Force LPF (ECEF)", *this);
+    m_node_factory.add<LPF<stream::ITorque>>("Torque LPF", *this);
+    m_node_factory.add<LPF<stream::IENU_Torque>>("Torque LPF (ENU)", *this);
+    m_node_factory.add<LPF<stream::IECEF_Torque>>("Torque LPF (ECEF)", *this);
+    m_node_factory.add<LPF<stream::IVelocity>>("Velocity LPF", *this);
+    m_node_factory.add<LPF<stream::IENU_Velocity>>("Velocity LPF (ENU)", *this);
+    m_node_factory.add<LPF<stream::IECEF_Velocity>>("Velocity LPF (ECEF)", *this);
 
-    m_node_factory.register_node<Resampler<stream::IAcceleration>>("Acceleration RS", *this);
-    m_node_factory.register_node<Resampler<stream::IENU_Acceleration>>("Acceleration RS (ENU)", *this);
-//    m_node_factory.register_node<Resampler<stream::IECEF_Acceleration>>("Acceleration RS (ECEF)", *this);
-    m_node_factory.register_node<Resampler<stream::ILinear_Acceleration>>("Linear Acceleration RS", *this);
-    m_node_factory.register_node<Resampler<stream::IENU_Linear_Acceleration>>("Linear Acceleration RS (ENU)", *this);
-    m_node_factory.register_node<Resampler<stream::IECEF_Linear_Acceleration>>("Linear Acceleration RS (ECEF)", *this);
-    m_node_factory.register_node<Resampler<stream::IAngular_Velocity>>("Angular Velocity RS", *this);
-    m_node_factory.register_node<Resampler<stream::IENU_Angular_Velocity>>("Angular Velocity RS (ENU)", *this);
-    m_node_factory.register_node<Resampler<stream::IECEF_Angular_Velocity>>("Angular Velocity RS (ECEF)", *this);
-    m_node_factory.register_node<Resampler<stream::IADC>>("ADC RS", *this);
-    m_node_factory.register_node<Resampler<stream::ICurrent>>("Current RS", *this);
-    m_node_factory.register_node<Resampler<stream::IVoltage>>("Voltage RS", *this);
-    m_node_factory.register_node<Resampler<stream::IECEF_Position>>("Position RS (ECEF)", *this);
-    m_node_factory.register_node<Resampler<stream::IDistance>>("Distance RS", *this);
-    m_node_factory.register_node<Resampler<stream::IENU_Distance>>("Distance RS (ENU)", *this);
-    m_node_factory.register_node<Resampler<stream::IECEF_Distance>>("Distance RS (ECEF)", *this);
-    m_node_factory.register_node<Resampler<stream::IMagnetic_Field>>("Magnetic Field RS", *this);
-    m_node_factory.register_node<Resampler<stream::IENU_Magnetic_Field>>("Magnetic Field RS (ENU)", *this);
-    m_node_factory.register_node<Resampler<stream::IECEF_Magnetic_Field>>("Magnetic Field RS (ECEF)", *this);
-    m_node_factory.register_node<Resampler<stream::IPressure>>("Pressure RS", *this);
-    m_node_factory.register_node<Resampler<stream::ITemperature>>("Temperature RS", *this);
-    m_node_factory.register_node<Resampler<stream::IGimbal_Frame>>("Gimbal Frame RS", *this);
-    m_node_factory.register_node<Resampler<stream::IUAV_Frame>>("UAV Frame RS", *this);
-//    m_node_factory.register_node<Resampler<stream::IENU_Frame>>("Frame RS (ENU)", *this);
-    m_node_factory.register_node<Resampler<stream::IPWM>>("PWM RS", *this);
-    m_node_factory.register_node<Resampler<stream::IFloat>>("Float RS", *this);
-    m_node_factory.register_node<Resampler<stream::IForce>>("Force RS", *this);
-    m_node_factory.register_node<Resampler<stream::IENU_Force>>("Force RS (ENU)", *this);
-    m_node_factory.register_node<Resampler<stream::IECEF_Force>>("Force RS (ECEF)", *this);
-    m_node_factory.register_node<Resampler<stream::ITorque>>("Torque RS", *this);
-    m_node_factory.register_node<Resampler<stream::IENU_Torque>>("Torque RS (ENU)", *this);
-    m_node_factory.register_node<Resampler<stream::IECEF_Torque>>("Torque RS (ECEF)", *this);
-    m_node_factory.register_node<Resampler<stream::IVelocity>>("Velocity RS", *this);
-    m_node_factory.register_node<Resampler<stream::IENU_Velocity>>("Velocity RS (ENU)", *this);
-    m_node_factory.register_node<Resampler<stream::IECEF_Velocity>>("Velocity RS (ECEF)", *this);
-    m_node_factory.register_node<Resampler<stream::IMulti_Commands>>("Multi Commands", *this);
-    m_node_factory.register_node<Resampler<stream::IMulti_State>>("Multi State", *this);
-    m_node_factory.register_node<Resampler<stream::IProximity>>("Proximity RS", *this);
-    m_node_factory.register_node<Resampler<stream::IGPS_Info>>("GPS Info RS", *this);
+    m_node_factory.add<Resampler<stream::IAcceleration>>("Acceleration RS", *this);
+    m_node_factory.add<Resampler<stream::IENU_Acceleration>>("Acceleration RS (ENU)", *this);
+//    m_node_factory.add<Resampler<stream::IECEF_Acceleration>>("Acceleration RS (ECEF)", *this);
+    m_node_factory.add<Resampler<stream::ILinear_Acceleration>>("Linear Acceleration RS", *this);
+    m_node_factory.add<Resampler<stream::IENU_Linear_Acceleration>>("Linear Acceleration RS (ENU)", *this);
+    m_node_factory.add<Resampler<stream::IECEF_Linear_Acceleration>>("Linear Acceleration RS (ECEF)", *this);
+    m_node_factory.add<Resampler<stream::IAngular_Velocity>>("Angular Velocity RS", *this);
+    m_node_factory.add<Resampler<stream::IENU_Angular_Velocity>>("Angular Velocity RS (ENU)", *this);
+    m_node_factory.add<Resampler<stream::IECEF_Angular_Velocity>>("Angular Velocity RS (ECEF)", *this);
+    m_node_factory.add<Resampler<stream::IADC>>("ADC RS", *this);
+    m_node_factory.add<Resampler<stream::ICurrent>>("Current RS", *this);
+    m_node_factory.add<Resampler<stream::IVoltage>>("Voltage RS", *this);
+    m_node_factory.add<Resampler<stream::IECEF_Position>>("Position RS (ECEF)", *this);
+    m_node_factory.add<Resampler<stream::IDistance>>("Distance RS", *this);
+    m_node_factory.add<Resampler<stream::IENU_Distance>>("Distance RS (ENU)", *this);
+    m_node_factory.add<Resampler<stream::IECEF_Distance>>("Distance RS (ECEF)", *this);
+    m_node_factory.add<Resampler<stream::IMagnetic_Field>>("Magnetic Field RS", *this);
+    m_node_factory.add<Resampler<stream::IENU_Magnetic_Field>>("Magnetic Field RS (ENU)", *this);
+    m_node_factory.add<Resampler<stream::IECEF_Magnetic_Field>>("Magnetic Field RS (ECEF)", *this);
+    m_node_factory.add<Resampler<stream::IPressure>>("Pressure RS", *this);
+    m_node_factory.add<Resampler<stream::ITemperature>>("Temperature RS", *this);
+    m_node_factory.add<Resampler<stream::IGimbal_Frame>>("Gimbal Frame RS", *this);
+    m_node_factory.add<Resampler<stream::IUAV_Frame>>("UAV Frame RS", *this);
+//    m_node_factory.add<Resampler<stream::IENU_Frame>>("Frame RS (ENU)", *this);
+    m_node_factory.add<Resampler<stream::IPWM>>("PWM RS", *this);
+    m_node_factory.add<Resampler<stream::IFloat>>("Float RS", *this);
+    m_node_factory.add<Resampler<stream::IForce>>("Force RS", *this);
+    m_node_factory.add<Resampler<stream::IENU_Force>>("Force RS (ENU)", *this);
+    m_node_factory.add<Resampler<stream::IECEF_Force>>("Force RS (ECEF)", *this);
+    m_node_factory.add<Resampler<stream::ITorque>>("Torque RS", *this);
+    m_node_factory.add<Resampler<stream::IENU_Torque>>("Torque RS (ENU)", *this);
+    m_node_factory.add<Resampler<stream::IECEF_Torque>>("Torque RS (ECEF)", *this);
+    m_node_factory.add<Resampler<stream::IVelocity>>("Velocity RS", *this);
+    m_node_factory.add<Resampler<stream::IENU_Velocity>>("Velocity RS (ENU)", *this);
+    m_node_factory.add<Resampler<stream::IECEF_Velocity>>("Velocity RS (ECEF)", *this);
+    m_node_factory.add<Resampler<stream::IMultirotor_Commands>>("Multirotor Commands", *this);
+    m_node_factory.add<Resampler<stream::IMultirotor_State>>("Multirotor State", *this);
+    m_node_factory.add<Resampler<stream::IProximity>>("Proximity RS", *this);
+    m_node_factory.add<Resampler<stream::IGPS_Info>>("GPS Info RS", *this);
 
-    m_node_factory.register_node<Transformer<stream::IECEF_Acceleration, stream::IENU_Acceleration, stream::IENU_Frame>>("Acceleration (ECEF->ENU)", *this);
-    m_node_factory.register_node<Transformer<stream::IENU_Acceleration, stream::IAcceleration, stream::IUAV_Frame>>("Acceleration (ENU->Local)", *this);
-    m_node_factory.register_node<Transformer_Inv<stream::IENU_Acceleration, stream::IECEF_Acceleration, stream::IENU_Frame>>("Acceleration (ENU->ECEF)", *this);
-    m_node_factory.register_node<Transformer_Inv<stream::IAcceleration, stream::IENU_Acceleration, stream::IUAV_Frame>>("Acceleration (Local->ENU)", *this);
+    m_node_factory.add<Transformer<stream::IECEF_Acceleration, stream::IENU_Acceleration, stream::IENU_Frame>>("Acceleration (ECEF->ENU)", *this);
+    m_node_factory.add<Transformer<stream::IENU_Acceleration, stream::IAcceleration, stream::IUAV_Frame>>("Acceleration (ENU->Local)", *this);
+    m_node_factory.add<Transformer_Inv<stream::IENU_Acceleration, stream::IECEF_Acceleration, stream::IENU_Frame>>("Acceleration (ENU->ECEF)", *this);
+    m_node_factory.add<Transformer_Inv<stream::IAcceleration, stream::IENU_Acceleration, stream::IUAV_Frame>>("Acceleration (Local->ENU)", *this);
 
-    m_node_factory.register_node<Transformer<stream::IECEF_Angular_Velocity, stream::IENU_Angular_Velocity, stream::IENU_Frame>>("Angular Velocity (ECEF->ENU)", *this);
-    m_node_factory.register_node<Transformer<stream::IENU_Angular_Velocity, stream::IAngular_Velocity, stream::IUAV_Frame>>("Angular Velocity (ENU->Local)", *this);
-    m_node_factory.register_node<Transformer_Inv<stream::IENU_Angular_Velocity, stream::IECEF_Angular_Velocity, stream::IENU_Frame>>("Angular Velocity (ENU->ECEF)", *this);
-    m_node_factory.register_node<Transformer_Inv<stream::IAngular_Velocity, stream::IENU_Angular_Velocity, stream::IUAV_Frame>>("Angular Velocity (Local->ENU)", *this);
+    m_node_factory.add<Transformer<stream::IECEF_Angular_Velocity, stream::IENU_Angular_Velocity, stream::IENU_Frame>>("Angular Velocity (ECEF->ENU)", *this);
+    m_node_factory.add<Transformer<stream::IENU_Angular_Velocity, stream::IAngular_Velocity, stream::IUAV_Frame>>("Angular Velocity (ENU->Local)", *this);
+    m_node_factory.add<Transformer_Inv<stream::IENU_Angular_Velocity, stream::IECEF_Angular_Velocity, stream::IENU_Frame>>("Angular Velocity (ENU->ECEF)", *this);
+    m_node_factory.add<Transformer_Inv<stream::IAngular_Velocity, stream::IENU_Angular_Velocity, stream::IUAV_Frame>>("Angular Velocity (Local->ENU)", *this);
 
-    m_node_factory.register_node<Transformer<stream::IECEF_Magnetic_Field, stream::IENU_Magnetic_Field, stream::IENU_Frame>>("Magnetic Field (ECEF->ENU)", *this);
-    m_node_factory.register_node<Transformer<stream::IENU_Magnetic_Field, stream::IMagnetic_Field, stream::IUAV_Frame>>("Magnetic Field (ENU->Local)", *this);
-    m_node_factory.register_node<Transformer_Inv<stream::IENU_Magnetic_Field, stream::IECEF_Magnetic_Field, stream::IENU_Frame>>("Magnetic Field (ENU->ECEF)", *this);
-    m_node_factory.register_node<Transformer_Inv<stream::IMagnetic_Field, stream::IENU_Magnetic_Field, stream::IUAV_Frame>>("Magnetic Field (Local->ENU)", *this);
+    m_node_factory.add<Transformer<stream::IECEF_Magnetic_Field, stream::IENU_Magnetic_Field, stream::IENU_Frame>>("Magnetic Field (ECEF->ENU)", *this);
+    m_node_factory.add<Transformer<stream::IENU_Magnetic_Field, stream::IMagnetic_Field, stream::IUAV_Frame>>("Magnetic Field (ENU->Local)", *this);
+    m_node_factory.add<Transformer_Inv<stream::IENU_Magnetic_Field, stream::IECEF_Magnetic_Field, stream::IENU_Frame>>("Magnetic Field (ENU->ECEF)", *this);
+    m_node_factory.add<Transformer_Inv<stream::IMagnetic_Field, stream::IENU_Magnetic_Field, stream::IUAV_Frame>>("Magnetic Field (Local->ENU)", *this);
 
-    m_node_factory.register_node<Transformer<stream::IECEF_Linear_Acceleration, stream::IENU_Linear_Acceleration, stream::IENU_Frame>>("Linear Acceleration (ECEF->ENU)", *this);
-    m_node_factory.register_node<Transformer<stream::IENU_Linear_Acceleration, stream::ILinear_Acceleration, stream::IUAV_Frame>>("Linear Acceleration (ENU->Local)", *this);
-    m_node_factory.register_node<Transformer_Inv<stream::IENU_Linear_Acceleration, stream::IECEF_Linear_Acceleration, stream::IENU_Frame>>("Linear Acceleration (ENU->ECEF)", *this);
-    m_node_factory.register_node<Transformer_Inv<stream::ILinear_Acceleration, stream::IENU_Linear_Acceleration, stream::IUAV_Frame>>("Linear Acceleration (Local->ENU)", *this);
+    m_node_factory.add<Transformer<stream::IECEF_Linear_Acceleration, stream::IENU_Linear_Acceleration, stream::IENU_Frame>>("Linear Acceleration (ECEF->ENU)", *this);
+    m_node_factory.add<Transformer<stream::IENU_Linear_Acceleration, stream::ILinear_Acceleration, stream::IUAV_Frame>>("Linear Acceleration (ENU->Local)", *this);
+    m_node_factory.add<Transformer_Inv<stream::IENU_Linear_Acceleration, stream::IECEF_Linear_Acceleration, stream::IENU_Frame>>("Linear Acceleration (ENU->ECEF)", *this);
+    m_node_factory.add<Transformer_Inv<stream::ILinear_Acceleration, stream::IENU_Linear_Acceleration, stream::IUAV_Frame>>("Linear Acceleration (Local->ENU)", *this);
 
-    m_node_factory.register_node<Transformer<stream::IECEF_Distance, stream::IENU_Distance, stream::IENU_Frame>>("Distance (ECEF->ENU)", *this);
-    m_node_factory.register_node<Transformer<stream::IENU_Distance, stream::IDistance, stream::IUAV_Frame>>("Distance (ENU->Local)", *this);
-    m_node_factory.register_node<Transformer_Inv<stream::IENU_Distance, stream::IECEF_Distance, stream::IENU_Frame>>("Distance (ENU->ECEF)", *this);
-    m_node_factory.register_node<Transformer_Inv<stream::IDistance, stream::IENU_Distance, stream::IUAV_Frame>>("Distance (Local->ENU)", *this);
+    m_node_factory.add<Transformer<stream::IECEF_Distance, stream::IENU_Distance, stream::IENU_Frame>>("Distance (ECEF->ENU)", *this);
+    m_node_factory.add<Transformer<stream::IENU_Distance, stream::IDistance, stream::IUAV_Frame>>("Distance (ENU->Local)", *this);
+    m_node_factory.add<Transformer_Inv<stream::IENU_Distance, stream::IECEF_Distance, stream::IENU_Frame>>("Distance (ENU->ECEF)", *this);
+    m_node_factory.add<Transformer_Inv<stream::IDistance, stream::IENU_Distance, stream::IUAV_Frame>>("Distance (Local->ENU)", *this);
 
-    m_node_factory.register_node<Transformer<stream::IECEF_Force, stream::IENU_Force, stream::IENU_Frame>>("Force (ECEF->ENU)", *this);
-    m_node_factory.register_node<Transformer<stream::IENU_Force, stream::IForce, stream::IUAV_Frame>>("Force (ENU->Local)", *this);
-    m_node_factory.register_node<Transformer_Inv<stream::IENU_Force, stream::IECEF_Force, stream::IENU_Frame>>("Force (ENU->ECEF)", *this);
-    m_node_factory.register_node<Transformer_Inv<stream::IForce, stream::IENU_Force, stream::IUAV_Frame>>("Force (Local->ENU)", *this);
+    m_node_factory.add<Transformer<stream::IECEF_Force, stream::IENU_Force, stream::IENU_Frame>>("Force (ECEF->ENU)", *this);
+    m_node_factory.add<Transformer<stream::IENU_Force, stream::IForce, stream::IUAV_Frame>>("Force (ENU->Local)", *this);
+    m_node_factory.add<Transformer_Inv<stream::IENU_Force, stream::IECEF_Force, stream::IENU_Frame>>("Force (ENU->ECEF)", *this);
+    m_node_factory.add<Transformer_Inv<stream::IForce, stream::IENU_Force, stream::IUAV_Frame>>("Force (Local->ENU)", *this);
 
-    m_node_factory.register_node<Transformer<stream::IECEF_Torque, stream::IENU_Torque, stream::IENU_Frame>>("Torque (ECEF->ENU)", *this);
-    m_node_factory.register_node<Transformer<stream::IENU_Torque, stream::ITorque, stream::IUAV_Frame>>("Torque (ENU->Local)", *this);
-    m_node_factory.register_node<Transformer_Inv<stream::IENU_Torque, stream::IECEF_Torque, stream::IENU_Frame>>("Torque (ENU->ECEF)", *this);
-    m_node_factory.register_node<Transformer_Inv<stream::ITorque, stream::IENU_Torque, stream::IUAV_Frame>>("Torque (Local->ENU)", *this);
+    m_node_factory.add<Transformer<stream::IECEF_Torque, stream::IENU_Torque, stream::IENU_Frame>>("Torque (ECEF->ENU)", *this);
+    m_node_factory.add<Transformer<stream::IENU_Torque, stream::ITorque, stream::IUAV_Frame>>("Torque (ENU->Local)", *this);
+    m_node_factory.add<Transformer_Inv<stream::IENU_Torque, stream::IECEF_Torque, stream::IENU_Frame>>("Torque (ENU->ECEF)", *this);
+    m_node_factory.add<Transformer_Inv<stream::ITorque, stream::IENU_Torque, stream::IUAV_Frame>>("Torque (Local->ENU)", *this);
 
-    m_node_factory.register_node<Transformer<stream::IECEF_Velocity, stream::IENU_Velocity, stream::IENU_Frame>>("Velocity (ECEF->ENU)", *this);
-    m_node_factory.register_node<Transformer<stream::IENU_Velocity, stream::IVelocity, stream::IUAV_Frame>>("Velocity (ENU->Local)", *this);
-    m_node_factory.register_node<Transformer_Inv<stream::IENU_Velocity, stream::IECEF_Velocity, stream::IENU_Frame>>("Velocity (ENU->ECEF)", *this);
-    m_node_factory.register_node<Transformer_Inv<stream::IVelocity, stream::IENU_Velocity, stream::IUAV_Frame>>("Velocity (Local->ENU)", *this);
+    m_node_factory.add<Transformer<stream::IECEF_Velocity, stream::IENU_Velocity, stream::IENU_Frame>>("Velocity (ECEF->ENU)", *this);
+    m_node_factory.add<Transformer<stream::IENU_Velocity, stream::IVelocity, stream::IUAV_Frame>>("Velocity (ENU->Local)", *this);
+    m_node_factory.add<Transformer_Inv<stream::IENU_Velocity, stream::IECEF_Velocity, stream::IENU_Frame>>("Velocity (ENU->ECEF)", *this);
+    m_node_factory.add<Transformer_Inv<stream::IVelocity, stream::IENU_Velocity, stream::IUAV_Frame>>("Velocity (Local->ENU)", *this);
 
-    m_node_factory.register_node<Motor_Mixer>("Motor Mixer", *this);
-    m_node_factory.register_node<Servo_Gimbal>("Servo Gimbal", *this);
+    m_node_factory.add<Motor_Mixer>("Motor Mixer", *this);
+    m_node_factory.add<Servo_Gimbal>("Servo Gimbal", *this);
 
-    m_node_factory.register_node<Rate_Controller>("Rate Controller", *this);
+    m_node_factory.add<Rate_Controller>("Rate Controller", *this);
 
 
     //clear
-    get_streams().remove_all();
-    get_nodes().remove_all();
+    m_streams.remove_all();
+    m_nodes.remove_all();
 
     //read the data
     q::data::File_Source fs(k_settings_path);
@@ -903,19 +933,19 @@ auto HAL::init(Comms& comms) -> bool
     }
 
     //read the UAV config
-    auto* configj = jsonutil::find_value(static_cast<rapidjson::Value&>(settingsj), q::Path("hal/multi_config"));
+    auto* configj = jsonutil::find_value(static_cast<rapidjson::Value&>(settingsj), q::Path("hal/uav_config"));
     if (configj)
     {
-        config::Multi config;
+        std::shared_ptr<Multirotor_Config> config = std::make_shared<Multirotor_Config>();
         autojsoncxx::error::ErrorStack result;
-        if (!autojsoncxx::from_value(config, *configj, result))
+        if (!autojsoncxx::from_value(*config, *configj, result))
         {
             std::ostringstream ss;
             ss << result;
-            QLOGE("Cannot deserialize multi config: {}", ss.str());
+            QLOGE("Cannot deserialize multirotor config: {}", ss.str());
             return false;
         }
-        if (!set_multi_config(config))
+        if (!set_multirotor_config(config))
         {
             return false;
         }
@@ -951,7 +981,7 @@ auto HAL::init(Comms& comms) -> bool
     auto now = q::Clock::now();
     for (auto const& n: m_nodes.get_all())
     {
-        if (!n.node->start(now))
+        if (!n.ptr->start(now))
         {
             return false;
         }
@@ -968,6 +998,12 @@ void HAL::shutdown()
     shutdown_bcm();
     shutdown_pigpio();
 #endif
+}
+
+void HAL::remove_add_nodes()
+{
+    m_streams.remove_all();
+    m_nodes.remove_all();
 }
 
 void HAL::generate_settings_file()
@@ -1072,7 +1108,7 @@ void HAL::process()
 
     for (auto const& n: m_nodes.get_all())
     {
-        n.node->process();
+        n.ptr->process();
 
         auto now = q::Clock::now();
         m_telemetry_data.nodes[n.name].process_duration = now - node_start;

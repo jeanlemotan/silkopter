@@ -40,7 +40,7 @@ void MenusQMLProxy::push(const QString& qml)
     {
         m_isLocked = true;
 
-        m_stack.push_back(QUrl("qrc:/forms/" + qml));
+        m_stack.push_back(QUrl("qrc:/qml/" + qml));
         QTimer::singleShot(0, this, SLOT(setView()));
     }
 }

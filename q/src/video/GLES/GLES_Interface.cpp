@@ -1737,7 +1737,7 @@ void Interface::iglGenVertexArrays(iGLsizei n, iGLuint* arrays)
 #elif defined(Q_RASPBERRY_PI)
     QASSERT(0); //not implemented yet
 #else
-    glGenVertexArraysOES(n, arrays);
+    glGenVertexArrays(n, arrays);
 #endif
 	iassertNoError();
 }

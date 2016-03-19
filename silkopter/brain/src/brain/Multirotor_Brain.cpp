@@ -1,47 +1,47 @@
 #include "BrainStdAfx.h"
-#include "Multi_Brain.h"
+#include "Multirotor_Brain.h"
 #include "physics/constants.h"
 
 #include "sz_math.hpp"
 #include "sz_PID.hpp"
-#include "sz_Multi_Brain.hpp"
+#include "sz_Multirotor_Brain.hpp"
 
 namespace silk
 {
 namespace node
 {
 
-Multi_Brain::Multi_Brain(HAL& hal)
+Multirotor_Brain::Multirotor_Brain(HAL& hal)
     : m_hal(hal)
-    , m_init_params(new sz::Multi_Brain::Init_Params())
-    , m_config(new sz::Multi_Brain::Config())
+    , m_init_params(new sz::Multirotor_Brain::Init_Params())
+    , m_config(new sz::Multirotor_Brain::Config())
 {
     m_state_output_stream = std::make_shared<State_Output_Stream>();
     m_rate_output_stream = std::make_shared<Rate_Output_Stream>();
     m_thrust_output_stream = std::make_shared<Thrust_Output_Stream>();
 }
 
-auto Multi_Brain::init(rapidjson::Value const& init_params) -> bool
+auto Multirotor_Brain::init(rapidjson::Value const& init_params) -> bool
 {
-    QLOG_TOPIC("Multi_Brain::init");
+    QLOG_TOPIC("Multirotor_Brain::init");
 
-    sz::Multi_Brain::Init_Params sz;
+    sz::Multirotor_Brain::Init_Params sz;
     autojsoncxx::error::ErrorStack result;
     if (!autojsoncxx::from_value(sz, init_params, result))
     {
         std::ostringstream ss;
         ss << result;
-        QLOGE("Cannot deserialize Multi_Brain data: {}", ss.str());
+        QLOGE("Cannot deserialize Multirotor_Brain data: {}", ss.str());
         return false;
     }
     *m_init_params = sz;
     return init();
 }
 
-auto Multi_Brain::init() -> bool
+auto Multirotor_Brain::init() -> bool
 {
-    boost::optional<config::Multi> multi_config = m_hal.get_multi_config();
-    if (!multi_config)
+    m_multirotor_config = m_hal.get_specialized_uav_config<Multirotor_Config>();
+    if (!m_multirotor_config)
     {
         QLOGE("No multi config found");
         return false;
@@ -68,7 +68,7 @@ auto Multi_Brain::init() -> bool
     return true;
 }
 
-auto Multi_Brain::start(q::Clock::time_point tp) -> bool
+auto Multirotor_Brain::start(q::Clock::time_point tp) -> bool
 {
     m_state_output_stream->set_tp(tp);
     m_rate_output_stream->set_tp(tp);
@@ -76,11 +76,11 @@ auto Multi_Brain::start(q::Clock::time_point tp) -> bool
     return true;
 }
 
-auto Multi_Brain::get_inputs() const -> std::vector<Input>
+auto Multirotor_Brain::get_inputs() const -> std::vector<Input>
 {
     std::vector<Input> inputs =
     {{
-         { stream::IMulti_Commands::TYPE,    m_init_params->commands_rate, "Commands", m_commands_accumulator.get_stream_path(0) },
+         { stream::IMultirotor_Commands::TYPE,    m_init_params->commands_rate, "Commands", m_commands_accumulator.get_stream_path(0) },
          { stream::IUAV_Frame::TYPE,         m_init_params->rate, "UAV Frame", m_sensor_accumulator.get_stream_path(0) },
          { stream::IECEF_Position::TYPE,     m_init_params->rate, "Position (ecef)", m_sensor_accumulator.get_stream_path(1) },
          { stream::IECEF_Velocity::TYPE,     m_init_params->rate, "Velocity (ecef)", m_sensor_accumulator.get_stream_path(2) },
@@ -91,7 +91,7 @@ auto Multi_Brain::get_inputs() const -> std::vector<Input>
      }};
     return inputs;
 }
-auto Multi_Brain::get_outputs() const -> std::vector<Output>
+auto Multirotor_Brain::get_outputs() const -> std::vector<Output>
 {
     std::vector<Output> outputs =
     {{
@@ -102,13 +102,13 @@ auto Multi_Brain::get_outputs() const -> std::vector<Output>
     return outputs;
 }
 
-void Multi_Brain::process_state_mode_idle()
+void Multirotor_Brain::process_state_mode_idle()
 {
-    stream::IMulti_Commands::Value& prev_commands = m_inputs.local_commands.previous_sample.value;
-    stream::IMulti_Commands::Value& commands = m_inputs.local_commands.sample.value;
-    QASSERT(commands.mode.get() == stream::IMulti_Commands::Mode::IDLE);
+    stream::IMultirotor_Commands::Value& prev_commands = m_inputs.local_commands.previous_sample.value;
+    stream::IMultirotor_Commands::Value& commands = m_inputs.local_commands.sample.value;
+    QASSERT(commands.mode.get() == stream::IMultirotor_Commands::Mode::IDLE);
 
-    if (prev_commands.mode.get() != stream::IMulti_Commands::Mode::IDLE)
+    if (prev_commands.mode.get() != stream::IMultirotor_Commands::Mode::IDLE)
     {
         QLOGI("Reacquiring Home");
         m_home.is_acquired = false;
@@ -128,11 +128,9 @@ void Multi_Brain::process_state_mode_idle()
     m_thrust_output_stream->push_sample(stream::IFloat::Value(), true);
 }
 
-float Multi_Brain::compute_ff_thrust(float target_altitude)
+float Multirotor_Brain::compute_ff_thrust(float target_altitude)
 {
-    boost::optional<config::Multi> multi_config = m_hal.get_multi_config();
-    QASSERT(multi_config);
-    float mass = multi_config->mass;
+    float mass = m_multirotor_config->mass;
 
 
     float v0 = m_enu_velocity.z;
@@ -172,7 +170,7 @@ float Multi_Brain::compute_ff_thrust(float target_altitude)
     }
 }
 
-math::vec2f Multi_Brain::compute_horizontal_rate_for_angle(math::vec2f const& angle)
+math::vec2f Multirotor_Brain::compute_horizontal_rate_for_angle(math::vec2f const& angle)
 {
     float fx, fy, fz;
     m_inputs.frame.sample.value.get_as_euler_zxy(fx, fy, fz);
@@ -193,17 +191,16 @@ math::vec2f Multi_Brain::compute_horizontal_rate_for_angle(math::vec2f const& an
     return math::vec2f(rx, ry);
 }
 
-void Multi_Brain::state_mode_armed_apply_commands(const stream::IMulti_Commands::Value& prev_commands, stream::IMulti_Commands::Value& commands)
+void Multirotor_Brain::state_mode_armed_apply_commands(const stream::IMultirotor_Commands::Value& prev_commands, stream::IMultirotor_Commands::Value& commands)
 {
-    boost::optional<config::Multi> multi_config = m_hal.get_multi_config();
-    QASSERT(multi_config);
+    std::shared_ptr<const Multirotor_Config> multirotor_config = m_hal.get_specialized_uav_config<Multirotor_Config>();
 
-    QASSERT(commands.mode.get() == stream::IMulti_Commands::Mode::ARMED);
+    QASSERT(commands.mode.get() == stream::IMultirotor_Commands::Mode::ARMED);
 
     if (!m_home.is_acquired)
     {
         QLOGW("Trying to arm but Home is not acquired yet. Ignoring request");
-        commands.mode.set(stream::IMulti_Commands::Mode::IDLE);
+        commands.mode.set(stream::IMultirotor_Commands::Mode::IDLE);
         return;
     }
 
@@ -213,11 +210,11 @@ void Multi_Brain::state_mode_armed_apply_commands(const stream::IMulti_Commands:
     //////////////////////////////////////////////////////////////
     // Verticals
 
-    if (commands.vertical.mode.get() == stream::IMulti_Commands::Vertical::Mode::THRUST_RATE)
+    if (commands.vertical.mode.get() == stream::IMultirotor_Commands::Vertical::Mode::THRUST_RATE)
     {
         thrust += commands.vertical.thrust_rate.get() * m_dts;
     }
-    else if (commands.vertical.mode.get() == stream::IMulti_Commands::Vertical::Mode::THRUST)
+    else if (commands.vertical.mode.get() == stream::IMultirotor_Commands::Vertical::Mode::THRUST)
     {
         if (prev_commands.vertical.mode.get() != commands.vertical.mode.get())
         {
@@ -227,7 +224,7 @@ void Multi_Brain::state_mode_armed_apply_commands(const stream::IMulti_Commands:
 
         thrust = commands.vertical.thrust.get();
     }
-    else if (commands.vertical.mode.get() == stream::IMulti_Commands::Vertical::Mode::ALTITUDE)
+    else if (commands.vertical.mode.get() == stream::IMultirotor_Commands::Vertical::Mode::ALTITUDE)
     {
         if (prev_commands.vertical.mode.get() != commands.vertical.mode.get())
         {
@@ -255,7 +252,7 @@ void Multi_Brain::state_mode_armed_apply_commands(const stream::IMulti_Commands:
             output = math::clamp(output, -1.f, 1.f);
             m_vertical_altitude_data.dsp.process(output);
 
-            float hover_thrust = multi_config->mass * physics::constants::g;
+            float hover_thrust = multirotor_config->mass * physics::constants::g;
             float max_thrust_range = math::max(hover_thrust, m_config->max_thrust - hover_thrust);
 
             thrust = output * max_thrust_range + hover_thrust;
@@ -268,18 +265,18 @@ void Multi_Brain::state_mode_armed_apply_commands(const stream::IMulti_Commands:
     ////////////////////////////////////////////////////////////
     // Horizontals
 
-    if (commands.horizontal.mode.get() == stream::IMulti_Commands::Horizontal::Mode::ANGLE_RATE)
+    if (commands.horizontal.mode.get() == stream::IMultirotor_Commands::Horizontal::Mode::ANGLE_RATE)
     {
         rate.x = commands.horizontal.angle_rate.get().x;
         rate.y = commands.horizontal.angle_rate.get().y;
     }
-    else if (commands.horizontal.mode.get() == stream::IMulti_Commands::Horizontal::Mode::ANGLE)
+    else if (commands.horizontal.mode.get() == stream::IMultirotor_Commands::Horizontal::Mode::ANGLE)
     {
         math::vec2f hrate = compute_horizontal_rate_for_angle(commands.horizontal.angle.get());
         rate.x = hrate.x;
         rate.y = hrate.y;
     }
-    else if (commands.horizontal.mode.get() == stream::IMulti_Commands::Horizontal::Mode::POSITION)
+    else if (commands.horizontal.mode.get() == stream::IMultirotor_Commands::Horizontal::Mode::POSITION)
     {
         if (prev_commands.horizontal.mode.get() != commands.horizontal.mode.get())
         {
@@ -324,11 +321,11 @@ void Multi_Brain::state_mode_armed_apply_commands(const stream::IMulti_Commands:
     ///////////////////////////////////////////////////////////
     // Yaw
 
-    if (commands.yaw.mode.get() == stream::IMulti_Commands::Yaw::Mode::ANGLE_RATE)
+    if (commands.yaw.mode.get() == stream::IMultirotor_Commands::Yaw::Mode::ANGLE_RATE)
     {
         rate.z = commands.yaw.angle_rate.get();
     }
-    else if (commands.yaw.mode.get() == stream::IMulti_Commands::Yaw::Mode::ANGLE)
+    else if (commands.yaw.mode.get() == stream::IMultirotor_Commands::Yaw::Mode::ANGLE)
     {
         float fx, fy, fz;
         m_inputs.frame.sample.value.get_as_euler_zxy(fx, fy, fz);
@@ -359,27 +356,27 @@ void Multi_Brain::state_mode_armed_apply_commands(const stream::IMulti_Commands:
     m_thrust_output_stream->push_sample(thrust, true);
 }
 
-void Multi_Brain::process_return_home_toggle(const stream::IMulti_Commands::Value& prev_commands, stream::IMulti_Commands::Value& commands)
+void Multirotor_Brain::process_return_home_toggle(const stream::IMultirotor_Commands::Value& prev_commands, stream::IMultirotor_Commands::Value& commands)
 {
-    commands.vertical.mode.set(stream::IMulti_Commands::Vertical::Mode::ALTITUDE);
+    commands.vertical.mode.set(stream::IMultirotor_Commands::Vertical::Mode::ALTITUDE);
     float distance_2d = math::length(math::vec2f(m_enu_position));
     if (distance_2d < 10.f)
     {
         commands.vertical.altitude.set(5.f);
     }
 
-    commands.horizontal.mode.set(stream::IMulti_Commands::Horizontal::Mode::POSITION);
+    commands.horizontal.mode.set(stream::IMultirotor_Commands::Horizontal::Mode::POSITION);
     commands.horizontal.position.set(math::vec2f::zero);
 }
 
-void Multi_Brain::process_state_mode_armed()
+void Multirotor_Brain::process_state_mode_armed()
 {
-    const stream::IMulti_Commands::Value& prev_commands = m_inputs.local_commands.previous_sample.value;
-    stream::IMulti_Commands::Value& commands = m_inputs.local_commands.sample.value;
+    const stream::IMultirotor_Commands::Value& prev_commands = m_inputs.local_commands.previous_sample.value;
+    stream::IMultirotor_Commands::Value& commands = m_inputs.local_commands.sample.value;
     if (!m_home.is_acquired)
     {
         QLOGW("Trying to arm but Home is not acquired yet. Ignoring request");
-        commands.mode.set(stream::IMulti_Commands::Mode::IDLE);
+        commands.mode.set(stream::IMultirotor_Commands::Mode::IDLE);
         return;
     }
 
@@ -424,16 +421,16 @@ struct Merge_Commands
 };
 
 
-void Multi_Brain::process_state()
+void Multirotor_Brain::process_state()
 {
-    if (m_inputs.local_commands.sample.value.mode.get() == stream::IMulti_Commands::Mode::IDLE)
+    if (m_inputs.local_commands.sample.value.mode.get() == stream::IMultirotor_Commands::Mode::IDLE)
     {
         m_enu_position = math::vec3f::zero;
         m_enu_velocity = math::vec3f::zero;
 
         process_state_mode_idle();
     }
-    else if (m_inputs.local_commands.sample.value.mode.get() == stream::IMulti_Commands::Mode::ARMED)
+    else if (m_inputs.local_commands.sample.value.mode.get() == stream::IMultirotor_Commands::Mode::ARMED)
     {
         m_enu_position = math::vec3f(math::transform(m_home.ecef_to_enu_transform, m_inputs.position.sample.value));
         m_enu_velocity = math::vec3f(math::rotate(m_home.ecef_to_enu_transform, math::vec3d(m_inputs.velocity.sample.value)));
@@ -445,15 +442,15 @@ void Multi_Brain::process_state()
 
     //increment version of overriden commands
     //Increment_Version func;
-    //stream::IMulti_Commands::apply(func, m_inputs.local_commands.previous_sample.value, m_inputs.local_commands.sample.value);
+    //stream::IMultirotor_Commands::apply(func, m_inputs.local_commands.previous_sample.value, m_inputs.local_commands.sample.value);
 
     //back up the current commands
     m_inputs.local_commands.previous_sample = m_inputs.local_commands.sample;
 }
 
-void Multi_Brain::acquire_home_position()
+void Multirotor_Brain::acquire_home_position()
 {
-    if (m_inputs.local_commands.sample.value.mode.get() == stream::IMulti_Commands::Mode::IDLE)
+    if (m_inputs.local_commands.sample.value.mode.get() == stream::IMultirotor_Commands::Mode::IDLE)
     {
         std::deque<util::coordinates::ECEF>& history = m_home.position_history;
         size_t per_second = static_cast<size_t>(1.f / m_dts);
@@ -483,7 +480,7 @@ void Multi_Brain::acquire_home_position()
     }
 }
 
-void Multi_Brain::refresh_inputs(stream::IUAV_Frame::Sample const& frame,
+void Multirotor_Brain::refresh_inputs(stream::IUAV_Frame::Sample const& frame,
                                 stream::IECEF_Position::Sample const& position,
                                 stream::IECEF_Velocity::Sample const& velocity,
                                 stream::IECEF_Linear_Acceleration::Sample const& linear_acceleration,
@@ -516,9 +513,9 @@ void Multi_Brain::refresh_inputs(stream::IUAV_Frame::Sample const& frame,
     m_inputs.proximity.last_valid_tp = proximity.is_healthy ? now : m_inputs.proximity.last_valid_tp;
 }
 
-void Multi_Brain::process()
+void Multirotor_Brain::process()
 {
-    QLOG_TOPIC("Multi_Brain::process");
+    QLOG_TOPIC("Multirotor_Brain::process");
 
     {
         static q::Clock::time_point last_timestamp = q::Clock::now();
@@ -549,14 +546,14 @@ void Multi_Brain::process()
     m_rate_output_stream->clear();
     m_thrust_output_stream->clear();
 
-    m_commands_accumulator.process([this](stream::IMulti_Commands::Sample const& i_commands)
+    m_commands_accumulator.process([this](stream::IMultirotor_Commands::Sample const& i_commands)
     {
         m_inputs.remote_commands.sample = i_commands;
         m_inputs.remote_commands.last_valid_tp = i_commands.is_healthy ? q::Clock::now() : m_inputs.remote_commands.last_valid_tp;
     });
 
     Merge_Commands func;
-    stream::IMulti_Commands::apply(func, m_inputs.remote_commands.previous_sample.value, m_inputs.remote_commands.sample.value, m_inputs.local_commands.sample.value);
+    stream::IMultirotor_Commands::apply(func, m_inputs.remote_commands.previous_sample.value, m_inputs.remote_commands.sample.value, m_inputs.local_commands.sample.value);
     m_inputs.remote_commands.previous_sample.value = m_inputs.remote_commands.sample.value;
 
     m_sensor_accumulator.process([this](stream::IUAV_Frame::Sample const& i_frame,
@@ -578,7 +575,7 @@ void Multi_Brain::process()
     size_t samples_needed = m_state_output_stream->compute_samples_needed();
     if (samples_needed > 0)
     {
-        stream::IMulti_State::Value state;
+        stream::IMultirotor_State::Value state;
         state.time_point = q::Clock::now();
         state.position = m_inputs.position.sample;
         state.velocity = m_inputs.velocity.sample;
@@ -598,7 +595,7 @@ void Multi_Brain::process()
     }
 }
 
-void Multi_Brain::set_input_stream_path(size_t idx, q::Path const& path)
+void Multirotor_Brain::set_input_stream_path(size_t idx, q::Path const& path)
 {
     if (idx == 0)
     {
@@ -635,20 +632,17 @@ void fill_p_params(T& dst, sz::P const& src, size_t rate)
     dst.rate = rate;
 }
 
-auto Multi_Brain::set_config(rapidjson::Value const& json) -> bool
+auto Multirotor_Brain::set_config(rapidjson::Value const& json) -> bool
 {
-    QLOG_TOPIC("Multi_Brain::set_config");
+    QLOG_TOPIC("Multirotor_Brain::set_config");
 
-    boost::optional<config::Multi> multi_config = m_hal.get_multi_config();
-    QASSERT(multi_config);
-
-    sz::Multi_Brain::Config sz;
+    sz::Multirotor_Brain::Config sz;
     autojsoncxx::error::ErrorStack result;
     if (!autojsoncxx::from_value(sz, json, result))
     {
         std::ostringstream ss;
         ss << result;
-        QLOGE("Cannot deserialize Multi_Brain config data: {}", ss.str());
+        QLOGE("Cannot deserialize Multirotor_Brain config data: {}", ss.str());
         return false;
     }
 
@@ -656,8 +650,8 @@ auto Multi_Brain::set_config(rapidjson::Value const& json) -> bool
 
     uint32_t output_rate = m_rate_output_stream->get_rate();
 
-    m_config->min_thrust = math::clamp(m_config->min_thrust, 0.f, multi_config->motor_thrust * multi_config->motors.size() * 0.5f);
-    m_config->max_thrust = math::clamp(m_config->max_thrust, m_config->min_thrust, multi_config->motor_thrust * multi_config->motors.size());
+    m_config->min_thrust = math::clamp(m_config->min_thrust, 0.f, m_multirotor_config->motor_thrust * m_multirotor_config->motors.size() * 0.5f);
+    m_config->max_thrust = math::clamp(m_config->max_thrust, m_config->min_thrust, m_multirotor_config->motor_thrust * m_multirotor_config->motors.size());
 
     m_config->horizontal_angle.max_speed_deg = math::clamp(m_config->horizontal_angle.max_speed_deg, 10.f, 3000.f);
     m_config->yaw_angle.max_speed_deg = math::clamp(m_config->yaw_angle.max_speed_deg, 10.f, 3000.f);
@@ -749,7 +743,7 @@ auto Multi_Brain::set_config(rapidjson::Value const& json) -> bool
 
     return true;
 }
-auto Multi_Brain::get_config() const -> rapidjson::Document
+auto Multirotor_Brain::get_config() const -> rapidjson::Document
 {
     rapidjson::Document json;
     autojsoncxx::to_document(*m_config, json);
@@ -767,14 +761,14 @@ auto Multi_Brain::get_config() const -> rapidjson::Document
     return std::move(json);
 }
 
-auto Multi_Brain::get_init_params() const -> rapidjson::Document
+auto Multirotor_Brain::get_init_params() const -> rapidjson::Document
 {
     rapidjson::Document json;
     autojsoncxx::to_document(*m_init_params, json);
     return std::move(json);
 }
 
-auto Multi_Brain::send_message(rapidjson::Value const& json) -> rapidjson::Document
+auto Multirotor_Brain::send_message(rapidjson::Value const& json) -> rapidjson::Document
 {
     rapidjson::Document response;
 

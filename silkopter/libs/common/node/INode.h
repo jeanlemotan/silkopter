@@ -55,13 +55,12 @@ public:
     struct Output
     {
         std::string name;
-        stream::IStream_ptr stream;
+        std::shared_ptr<stream::IStream> stream;
     };
     virtual auto get_outputs() const -> std::vector<Output> = 0;
 
     virtual void process() = 0;
 };
-DECLARE_CLASS_PTR(INode);
 
 template <Type TYPE_VALUE>
 class Node_Base : public INode

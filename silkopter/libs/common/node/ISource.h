@@ -14,7 +14,6 @@ public:
     virtual void set_input_stream_path(size_t, q::Path const&) {}
     virtual auto get_inputs() const -> std::vector<Input> final { return std::vector<Input>(); }
 };
-DECLARE_CLASS_PTR(ISource);
 
 
 }

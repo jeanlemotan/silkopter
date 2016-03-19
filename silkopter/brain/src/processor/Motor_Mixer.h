@@ -50,7 +50,7 @@ public:
 private:
     auto init() -> bool;
 
-    void compute_throttles(config::Multi const& config, stream::IFloat::Value const& collective_thrust, stream::ITorque::Value const& torque);
+    void compute_throttles(Multirotor_Config const& config, stream::IFloat::Value const& collective_thrust, stream::ITorque::Value const& torque);
 
 
     HAL& m_hal;

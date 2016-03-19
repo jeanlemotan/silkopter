@@ -1,7 +1,7 @@
 [
 {
     "definition" : true,
-    "namespace" : "sz::Multi_Brain",
+    "namespace" : "sz::Multirotor_Brain",
     "name": "Init_Params",
     "members":
     [
@@ -12,7 +12,7 @@
 },
 {
     "definition" : true,
-    "namespace" : "sz::Multi_Brain",
+    "namespace" : "sz::Multirotor_Brain",
     "name": "Horizontal_Angle",
     "members":
     [
@@ -25,7 +25,7 @@
 },
 {
     "definition" : true,
-    "namespace" : "sz::Multi_Brain",
+    "namespace" : "sz::Multirotor_Brain",
     "name": "Horizontal_Position",
     "members":
     [
@@ -38,7 +38,7 @@
 },
 {
     "definition" : true,
-    "namespace" : "sz::Multi_Brain",
+    "namespace" : "sz::Multirotor_Brain",
     "name": "Yaw_Angle",
     "members":
     [
@@ -48,7 +48,7 @@
 },
 {
     "definition" : true,
-    "namespace" : "sz::Multi_Brain",
+    "namespace" : "sz::Multirotor_Brain",
     "name": "Altitude",
     "members":
     [
@@ -61,16 +61,16 @@
 },
 {
     "definition" : true,
-    "namespace" : "sz::Multi_Brain",
+    "namespace" : "sz::Multirotor_Brain",
     "name": "Config",
     "members":
     [
         ["float", "max_thrust", {"required": false, "json_key" : "Max Thrust (N)", "default" : 2}],
         ["float", "min_thrust", {"required": false, "json_key" : "Min Thrust (N)", "default" : 1}],
-        ["sz::Multi_Brain::Horizontal_Angle", "horizontal_angle", {"required": true, "json_key" : "Horizontal Angle"}],
-        ["sz::Multi_Brain::Horizontal_Position", "horizontal_position", {"required": false, "json_key" : "Horizontal Position"}],
-        ["sz::Multi_Brain::Yaw_Angle", "yaw_angle", {"required": false, "json_key" : "Yaw Angle"}],
-        ["sz::Multi_Brain::Altitude", "altitude", {"required": false, "json_key" : "Altitude"}]
+        ["sz::Multirotor_Brain::Horizontal_Angle", "horizontal_angle", {"required": true, "json_key" : "Horizontal Angle"}],
+        ["sz::Multirotor_Brain::Horizontal_Position", "horizontal_position", {"required": false, "json_key" : "Horizontal Position"}],
+        ["sz::Multirotor_Brain::Yaw_Angle", "yaw_angle", {"required": false, "json_key" : "Yaw Angle"}],
+        ["sz::Multirotor_Brain::Altitude", "altitude", {"required": false, "json_key" : "Altitude"}]
     ]
 }
 ]

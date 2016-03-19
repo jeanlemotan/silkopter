@@ -7,7 +7,7 @@ namespace silk
 namespace node
 {
 
-class IMulti_Simulator : public Node_Base<Type::SIMULATOR>
+class IMultirotor_Simulator : public Node_Base<Type::SIMULATOR>
 {
 public:
     struct Motor_State

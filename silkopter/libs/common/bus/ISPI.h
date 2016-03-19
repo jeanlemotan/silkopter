@@ -38,7 +38,6 @@ public:
         return transfer_register(reg, &tx_data, &rx_data, 1, speed);
     }
 };
-DECLARE_CLASS_PTR(ISPI);
 
 
 }

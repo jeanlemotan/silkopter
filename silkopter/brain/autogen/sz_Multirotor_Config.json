@@ -1,7 +1,7 @@
 [
 {
     "definition" : false,
-    "namespace" : "silk::config::Multi",
+    "namespace" : "silk::Multirotor_Config",
     "name": "Motor",
     "members":
     [
@@ -11,8 +11,8 @@
 },
 {
     "definition" : false,
-    "namespace" : "silk::config",
-    "name": "Multi",
+    "namespace" : "silk",
+    "name": "Multirotor_Config",
     "members":
     [
         ["std::string", "name", {"required": true, "json_key" : "Name"}],
@@ -23,7 +23,7 @@
         ["float", "motor_z_torque", {"required": true, "json_key" : "Motor Z Torque @ 100% (Nm)"}],
         ["float", "motor_acceleration", {"required": true, "json_key" : "Motor Acceleration (s)"}],
         ["float", "motor_deceleration", {"required": true, "json_key" : "Motor Deceleration (s)"}],
-        ["std::vector<silk::config::Multi::Motor>", "motors", {"required": true, "json_key" : "Motors"}]
+        ["std::vector<silk::Multirotor_Config::Motor>", "motors", {"required": true, "json_key" : "Motors"}]
     ]
 }
 ]

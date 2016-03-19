@@ -7,7 +7,7 @@ namespace silk
 namespace stream
 {
 
-class IVideo : public IScalar_Stream<Type::VIDEO>
+class IVideo : public IScalar_Stream<Semantic::VIDEO>
 {
 public:
     typedef std::false_type can_be_filtered_t;
@@ -28,7 +28,6 @@ public:
     typedef stream::Sample<Value>     Sample;
     virtual auto get_samples() const -> std::vector<Sample> const& = 0;
 };
-DECLARE_CLASS_PTR(IVideo);
 
 
 }

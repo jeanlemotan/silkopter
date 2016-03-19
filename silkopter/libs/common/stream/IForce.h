@@ -7,7 +7,7 @@ namespace silk
 namespace stream
 {
 
-class IForce : public ISpatial_Stream<Type::FORCE, Space::UAV>
+class IForce : public ISpatial_Stream<Semantic::FORCE, Space::UAV>
 {
 public:
     typedef std::true_type can_be_filtered_t;
@@ -16,9 +16,8 @@ public:
     typedef stream::Sample<Value>     Sample;
     virtual auto get_samples() const -> std::vector<Sample> const& = 0;
 };
-DECLARE_CLASS_PTR(IForce);
 
-class IENU_Force : public ISpatial_Stream<Type::FORCE, Space::ENU>
+class IENU_Force : public ISpatial_Stream<Semantic::FORCE, Space::ENU>
 {
 public:
     typedef std::true_type can_be_filtered_t;
@@ -27,9 +26,8 @@ public:
     typedef stream::Sample<Value>     Sample;
     virtual auto get_samples() const -> std::vector<Sample> const& = 0;
 };
-DECLARE_CLASS_PTR(IENU_Force);
 
-class IECEF_Force : public ISpatial_Stream<Type::FORCE, Space::ECEF>
+class IECEF_Force : public ISpatial_Stream<Semantic::FORCE, Space::ECEF>
 {
 public:
     typedef std::true_type can_be_filtered_t;
@@ -38,7 +36,6 @@ public:
     typedef stream::Sample<Value>     Sample;
     virtual auto get_samples() const -> std::vector<Sample> const& = 0;
 };
-DECLARE_CLASS_PTR(IECEF_Force);
 
 }
 }

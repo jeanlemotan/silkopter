@@ -10,7 +10,7 @@ namespace silk
 namespace stream
 {
 
-class IGPS_Info : public IScalar_Stream<Type::GPS_INFO>
+class IGPS_Info : public IScalar_Stream<Semantic::GPS_INFO>
 {
 public:
     typedef std::false_type can_be_filtered_t;
@@ -36,7 +36,6 @@ public:
     typedef stream::Sample<Value>     Sample;
     virtual auto get_samples() const -> std::vector<Sample> const& = 0;
 };
-DECLARE_CLASS_PTR(IGPS_Info);
 
 
 }

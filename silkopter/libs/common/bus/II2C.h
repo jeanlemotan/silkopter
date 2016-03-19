@@ -51,7 +51,6 @@ public:
         return write_register(address, reg, val, 2);
     }
 };
-DECLARE_CLASS_PTR(II2C);
 
 }
 }

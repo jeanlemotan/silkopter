@@ -1,7 +1,7 @@
 #pragma once
 
-#include "common/node/IMulti_Simulator.h"
-#include "common/config/Multi.h"
+#include "common/node/IMultirotor_Simulator.h"
+#include "common/config/Multirotor_Config.h"
 
 class btCylinderShapeZ;
 class btMotionState;
@@ -20,28 +20,28 @@ namespace silk
 namespace node
 {
 
-class Multi_Simulation : q::util::Noncopyable
+class Multirotor_Simulation : q::util::Noncopyable
 {
 public:
 
-    Multi_Simulation();
-    ~Multi_Simulation();
+    Multirotor_Simulation();
+    ~Multirotor_Simulation();
 
     auto init(uint32_t rate) -> bool;
 
-    auto init_uav(config::Multi const& config) -> bool;
+    auto init_uav(std::shared_ptr<const Multirotor_Config> config) -> bool;
 
     void reset();
     void stop_motion();
 
-    void process(q::Clock::duration dt, std::function<void(Multi_Simulation&, q::Clock::duration)> const& callback);
+    void process(q::Clock::duration dt, std::function<void(Multirotor_Simulation&, q::Clock::duration)> const& callback);
 
     void set_gravity_enabled(bool yes);
     void set_ground_enabled(bool yes);
     void set_simulation_enabled(bool yes);
     void set_drag_enabled(bool yes);
 
-    auto get_uav_state() const -> IMulti_Simulator::UAV_State const&;
+    auto get_uav_state() const -> IMultirotor_Simulator::UAV_State const&;
 
     void set_motor_throttle(size_t motor, float throttle);
 
@@ -58,11 +58,11 @@ private:
 
     struct UAV
     {
-        config::Multi config;
+        std::shared_ptr<const Multirotor_Config> config;
         std::shared_ptr<btCylinderShapeZ> shape;
         std::shared_ptr<btMotionState> motion_state;
         std::shared_ptr<btRigidBody> body;
-        IMulti_Simulator::UAV_State state;
+        IMultirotor_Simulator::UAV_State state;
     } m_uav;
 
 //    math::vec3f m_old_linear_velocity;

@@ -5,21 +5,9 @@
 
 #include "common/Manual_Clock.h"
 #include "common/node/ISource.h"
-#include "common/stream/IMulti_Commands.h"
-#include "common/stream/IMulti_State.h"
+#include "common/stream/IMultirotor_Commands.h"
+#include "common/stream/IMultirotor_State.h"
 #include "common/stream/IVideo.h"
-
-namespace sz
-{
-namespace Comms
-{
-namespace Multi_Comms
-{
-struct Init_Params;
-struct Config;
-}
-}
-}
 
 namespace util
 {
@@ -42,8 +30,8 @@ public:
 
     void process();
 
-    auto get_multi_commands_values() const -> std::vector<stream::IMulti_Commands::Value> const&;
-    void add_multi_state_sample(stream::IMulti_State::Sample const& sample);
+    auto get_multirotor_commands_values() const -> std::vector<stream::IMultirotor_Commands::Value> const&;
+    void add_multirotor_state_sample(stream::IMultirotor_State::Sample const& sample);
     void add_video_sample(stream::IVideo::Sample const& sample);
 
     struct Channels; //this needs to be public...
@@ -56,7 +44,7 @@ private:
     struct Stream_Telemetry_Data
     {
         std::string stream_name;
-        stream::IStream_wptr stream;
+        std::weak_ptr<stream::IStream> stream;
         uint32_t sample_count = 0;
         std::vector<uint8_t> data;
     };
@@ -89,8 +77,8 @@ private:
     void handle_add_node();
     void handle_remove_node();
 
-    void handle_multi_config();
-    void handle_multi_commands();
+    void handle_uav_config();
+    void handle_multirotor_commands();
 
     void handle_streams_telemetry_active();
     void handle_hal_telemetry_active();
@@ -99,7 +87,7 @@ private:
     HAL& m_hal;
     q::Clock::time_point m_uav_sent_tp = q::Clock::now();
 
-    std::vector<stream::IMulti_Commands::Value> m_multi_commands_values;
+    std::vector<stream::IMultirotor_Commands::Value> m_multirotor_commands_values;
 
     q::Clock::time_point m_last_rcp_tp = q::Clock::now();
 

@@ -75,18 +75,18 @@ void Rate_Controller::process()
 
     m_output_stream->clear();
 
-    auto multi_config = m_hal.get_multi_config();
-    if (!multi_config)
+    std::shared_ptr<const Multirotor_Config> multirotor_config = m_hal.get_specialized_uav_config<Multirotor_Config>();
+    if (!multirotor_config)
     {
         return;
     }
 
-    m_accumulator.process([this, &multi_config](stream::IAngular_Velocity::Sample const& i_sample,
+    m_accumulator.process([this, &multirotor_config](stream::IAngular_Velocity::Sample const& i_sample,
                                                 stream::IAngular_Velocity::Sample const& t_sample)
     {
         if (i_sample.is_healthy & t_sample.is_healthy)
         {
-            math::vec3f ff = compute_feedforward(*multi_config, i_sample.value, t_sample.value);
+            math::vec3f ff = compute_feedforward(*multirotor_config, i_sample.value, t_sample.value);
             math::vec3f fb = compute_feedback(i_sample.value, t_sample.value);
 
             Output_Stream::Value value(ff * m_config->feedforward.weight + fb * m_config->feedback.weight);
@@ -101,7 +101,7 @@ void Rate_Controller::process()
 }
 
 
-math::vec3f Rate_Controller::compute_feedforward(config::Multi& config, stream::IAngular_Velocity::Value const& input, stream::IAngular_Velocity::Value const& target)
+math::vec3f Rate_Controller::compute_feedforward(Multirotor_Config const& config, stream::IAngular_Velocity::Value const& input, stream::IAngular_Velocity::Value const& target)
 {
     math::vec3f v = target - input;
     float vm = math::length(v) * config.moment_of_inertia;

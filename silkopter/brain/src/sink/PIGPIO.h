@@ -59,7 +59,7 @@ private:
         sz::PIGPIO::PWM_Config* config = nullptr;
         uint32_t gpio = 0;
         q::Path stream_path;
-        stream::IPWM_wptr stream;
+        std::weak_ptr<stream::IPWM> stream;
     };
 
     std::vector<PWM_Channel> m_pwm_channels;

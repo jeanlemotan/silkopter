@@ -49,7 +49,7 @@ private:
 };
 
 
-class IMulti_Commands : public IScalar_Stream<Type::MULTI_COMMANDS>
+class IMultirotor_Commands : public IScalar_Stream<Semantic::MULTIROTOR_COMMANDS>
 {
 public:
     typedef std::false_type can_be_filtered_t;
@@ -165,7 +165,7 @@ public:
 
     typedef stream::Sample<Value>     Sample;
 
-    virtual ~IMulti_Commands() = default;
+    virtual ~IMultirotor_Commands() = default;
 
     virtual auto get_samples() const -> std::vector<Sample> const& = 0;
 
@@ -217,7 +217,7 @@ public:
         template<class T> bool operator()(T& v1, T const& v2) { v1.value = v2.value; v1.version = v2.version; return true; }
     };
 };
-DECLARE_CLASS_PTR(IMulti_Commands);
+DECLARE_CLASS_PTR(IMultirotor_Commands);
 
 
 }
@@ -283,16 +283,16 @@ struct Deserializer
 };
 }
 
-template<> inline void serialize(Buffer_t& buffer, silk::stream::IMulti_Commands::Value const& value, size_t& off)
+template<> inline void serialize(Buffer_t& buffer, silk::stream::IMultirotor_Commands::Value const& value, size_t& off)
 {
     detail::Serializer serializer(buffer, off);
-    silk::stream::IMulti_Commands::apply(serializer, value);
+    silk::stream::IMultirotor_Commands::apply(serializer, value);
 }
 
-template<> inline auto deserialize(Buffer_t const& buffer, silk::stream::IMulti_Commands::Value& value, size_t& off) -> bool
+template<> inline auto deserialize(Buffer_t const& buffer, silk::stream::IMultirotor_Commands::Value& value, size_t& off) -> bool
 {
     detail::Deserializer deserializer(buffer, off);
-    return silk::stream::IMulti_Commands::apply(deserializer, value);
+    return silk::stream::IMultirotor_Commands::apply(deserializer, value);
 }
 
 

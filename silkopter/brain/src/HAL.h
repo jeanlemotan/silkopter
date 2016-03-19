@@ -1,10 +1,12 @@
 #pragma once
 
+#include <memory>
+
 #include "rapidjson/document.h"
 #include "common/bus/IBus.h"
 #include "common/node/INode.h"
 #include "common/stream/IStream.h"
-#include "common/config/Multi.h"
+#include "common/config/Multirotor_Config.h"
 
 #include "MPL_Helper.h"
 
@@ -17,18 +19,18 @@ template<class Base>
 class Factory : q::util::Noncopyable
 {
 public:
-    template <class T, typename... Params> void register_node(std::string const& class_name, Params&&... params);
-    auto create_node(std::string const& class_name) -> std::shared_ptr<Base>;
-    auto get_node_default_config(std::string const& class_name) -> boost::optional<rapidjson::Document const&>;
-    auto get_node_default_init_params(std::string const& class_name) -> boost::optional<rapidjson::Document const&>;
+    template <class T, typename... Params> void add(std::string const& class_name, Params&&... params);
+    auto create(std::string const& class_name) -> std::shared_ptr<Base>;
+    auto get_default_config(std::string const& class_name) -> boost::optional<rapidjson::Document const&>;
+    auto get_default_init_params(std::string const& class_name) -> boost::optional<rapidjson::Document const&>;
 
-    struct Node_Info
+    struct Info
     {
         std::string name;
-        std::unique_ptr<Base> node;
+        std::unique_ptr<Base> ptr;
     };
 
-    auto create_all() const -> std::vector<Node_Info>;
+    auto create_all() const -> std::vector<Info>;
 private:
     struct Data
     {
@@ -46,15 +48,15 @@ public:
     {
         std::string name;
         std::string type;
-        std::shared_ptr<Base> node;
+        std::shared_ptr<Base> ptr;
     };
 
     auto get_all() const -> std::vector<Item> const&;
     void set_all(std::vector<Item> const& items);
     void remove_all();
     template<class T> auto find_by_name(std::string const& name) const -> std::shared_ptr<T>;
-    auto add(std::string const& name, std::string const& type, std::shared_ptr<Base> const& node) -> bool;
-    void remove(std::shared_ptr<Base> const& node);
+    auto add(std::string const& name, std::string const& type, std::shared_ptr<Base> const& ptr) -> bool;
+    void remove(std::shared_ptr<Base> const& ptr);
 private:
     std::vector<Item> m_items;
 };
@@ -75,23 +77,24 @@ public:
 
     void save_settings();
 
-    auto get_multi_config() const   -> boost::optional<config::Multi>;
-//    auto get_plane_config() const   -> boost::optional<config::Plane const&>;
-//    auto get_copter_config() const  -> boost::optional<config::Copter const&>;
-//    auto get_rover_config() const   -> boost::optional<config::Rover const&>;
-//    auto get_boat_config() const    -> boost::optional<config::Boat const&>;
+    auto set_uav_config(std::shared_ptr<UAV_Config> config) -> bool;
+    auto get_uav_config() const   -> std::shared_ptr<const UAV_Config>;
+
+    template<class Config>
+    auto get_specialized_uav_config() const   -> std::shared_ptr<const Config>;
 
     q::util::Signal<void(HAL&)> config_changed_signal;
 
-    auto get_bus_factory()          -> Factory<bus::IBus>&;
-    auto get_node_factory()         -> Factory<node::INode>&;
+    auto get_bus_factory()          -> const Factory<bus::IBus>&;
+    auto get_node_factory()         -> const Factory<node::INode>&;
 
-    auto get_buses()        -> Registry<bus::IBus>&;
-    auto get_nodes()        -> Registry<node::INode>&;
-    auto get_streams()      -> Registry<stream::IStream>&;
+    auto get_buses()        -> const Registry<bus::IBus>&;
+    auto get_nodes()        -> const Registry<node::INode>&;
+    auto get_streams()      -> const Registry<stream::IStream>&;
+
+    void remove_add_nodes();
 
 protected:
-    auto set_multi_config(config::Multi const& config) -> bool;
 
     struct Telemetry_Data
     {
@@ -108,24 +111,25 @@ protected:
     auto get_telemetry_data() const -> Telemetry_Data const&;
 
 private:
+    auto set_multirotor_config(std::shared_ptr<Multirotor_Config> config) -> bool;
+
     void generate_settings_file();
 
     auto create_bus(std::string const& type,
                     std::string const& name,
-                    rapidjson::Value const& init_params) -> bus::IBus_ptr;
+                    rapidjson::Value const& init_params) -> std::shared_ptr<bus::IBus>;
     auto create_buses(rapidjson::Value& json) -> bool;
 
     auto create_node(std::string const& type,
                      std::string const& name,
-                     rapidjson::Value const& init_params) -> node::INode_ptr;
+                     rapidjson::Value const& init_params) -> std::shared_ptr<node::INode>;
     auto create_nodes(rapidjson::Value& json) -> bool;
+
+    auto remove_node(std::shared_ptr<node::INode> node) -> bool;
 
     void sort_nodes(std::shared_ptr<node::INode> first_node);
 
-    struct Configs
-    {
-        boost::optional<config::Multi> multi;
-    } m_configs;
+    std::shared_ptr<UAV_Config> m_uav_config;
 
     Registry<bus::IBus> m_buses;
     Registry<node::INode> m_nodes;
@@ -140,6 +144,15 @@ private:
     Telemetry_Data m_telemetry_data;
 };
 
+
+/////////////////////////////////////////////////////////////////////////////////////////////////
+
+template<class Config>
+auto HAL::get_specialized_uav_config() const   -> std::shared_ptr<const Config>
+{
+    std::shared_ptr<const UAV_Config> config = get_uav_config();
+    return std::dynamic_pointer_cast<const Config>(config);
+}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -165,29 +178,29 @@ template<class T>
 auto Registry<Base>::find_by_name(std::string const& name) const -> std::shared_ptr<T>
 {
     auto it = std::find_if(m_items.begin(), m_items.end(), [&](Item const& s) { return s.name == name; });
-    return it != m_items.end() ? std::dynamic_pointer_cast<T>(it->node) : nullptr;
+    return it != m_items.end() ? std::dynamic_pointer_cast<T>(it->ptr) : nullptr;
 }
 template<class Base>
-auto Registry<Base>::add(std::string const& name, std::string const& type, std::shared_ptr<Base> const& node) -> bool
+auto Registry<Base>::add(std::string const& name, std::string const& type, std::shared_ptr<Base> const& ptr) -> bool
 {
     if (find_by_name<Base>(name))
     {
-        QLOGE("Duplicated name in node {}", name);
+        QLOGE("Duplicated name {}", name);
         return false;
     }
-    m_items.push_back({name, type, node});
+    m_items.push_back({name, type, ptr});
     return true;
 }
 template<class Base>
-void Registry<Base>::remove(std::shared_ptr<Base> const& node)
+void Registry<Base>::remove(std::shared_ptr<Base> const& ptr)
 {
-    m_items.erase(std::remove_if(m_items.begin(), m_items.end(), [node](Item const& item) { return item.node == node; }), m_items.end());
+    m_items.erase(std::remove_if(m_items.begin(), m_items.end(), [ptr](Item const& item) { return item.ptr == ptr; }), m_items.end());
 }
 
 
 template<class Base>
 template <class T, typename... Params>
-void Factory<Base>::register_node(std::string const& class_name, Params&&... params)
+void Factory<Base>::add(std::string const& class_name, Params&&... params)
 {
 //    T instance(hal);
 
@@ -223,13 +236,13 @@ void Factory<Base>::register_node(std::string const& class_name, Params&&... par
 }
 
 template <class Base>
-auto Factory<Base>::create_node(std::string const& class_name) -> std::shared_ptr<Base>
+auto Factory<Base>::create(std::string const& class_name) -> std::shared_ptr<Base>
 {
     auto it = m_name_registry.find(class_name);
     return std::shared_ptr<Base>(it == m_name_registry.end() ? nullptr : reinterpret_cast<Base*>(it->second.ctor->create()));
 }
 template<class Base>
-auto Factory<Base>::get_node_default_config(std::string const& class_name) -> boost::optional<rapidjson::Document const&>
+auto Factory<Base>::get_default_config(std::string const& class_name) -> boost::optional<rapidjson::Document const&>
 {
     auto it = m_name_registry.find(class_name);
     if (it != m_name_registry.end())
@@ -239,7 +252,7 @@ auto Factory<Base>::get_node_default_config(std::string const& class_name) -> bo
     return boost::none;
 }
 template<class Base>
-auto Factory<Base>::get_node_default_init_params(std::string const& class_name) -> boost::optional<rapidjson::Document const&>
+auto Factory<Base>::get_default_init_params(std::string const& class_name) -> boost::optional<rapidjson::Document const&>
 {
     auto it = m_name_registry.find(class_name);
     if (it != m_name_registry.end())
@@ -250,9 +263,9 @@ auto Factory<Base>::get_node_default_init_params(std::string const& class_name) 
 }
 
 template<class Base>
-auto Factory<Base>::create_all() const -> std::vector<Node_Info>
+auto Factory<Base>::create_all() const -> std::vector<Info>
 {
-    std::vector<Node_Info> info;
+    std::vector<Info> info;
     info.reserve(m_name_registry.size());
     for (auto const& n: m_name_registry)
     {

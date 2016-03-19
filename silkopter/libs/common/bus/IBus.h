@@ -17,7 +17,6 @@ public:
     virtual auto set_config(rapidjson::Value const& json) -> bool = 0;
     virtual auto get_config() const -> rapidjson::Document = 0;
 };
-DECLARE_CLASS_PTR(IBus);
 
 }
 }

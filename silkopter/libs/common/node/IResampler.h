@@ -11,7 +11,6 @@ class IResampler : public Node_Base<Type::RESAMPLER>
 {
 public:
 };
-DECLARE_CLASS_PTR(IResampler);
 
 
 }

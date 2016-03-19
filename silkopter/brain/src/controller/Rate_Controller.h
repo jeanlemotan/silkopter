@@ -56,7 +56,7 @@ private:
 
     Sample_Accumulator<stream::IAngular_Velocity, stream::IAngular_Velocity> m_accumulator;
 
-    math::vec3f compute_feedforward(config::Multi& config, stream::IAngular_Velocity::Value const& input, stream::IAngular_Velocity::Value const& target);
+    math::vec3f compute_feedforward(const Multirotor_Config& config, stream::IAngular_Velocity::Value const& input, stream::IAngular_Velocity::Value const& target);
     math::vec3f compute_feedback(stream::IAngular_Velocity::Value const& input, stream::IAngular_Velocity::Value const& target);
 
     typedef util::PID<float, float, float> PID;

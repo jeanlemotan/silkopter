@@ -1,7 +1,7 @@
 [
 {
     "definition" : true,
-    "namespace" : "sz::Multi_Pilot",
+    "namespace" : "sz::Multirotor_Pilot",
     "name": "Init_Params",
     "members":
     [
@@ -12,7 +12,7 @@
 },
 {
     "definition" : true,
-    "namespace" : "sz::Multi_Pilot",
+    "namespace" : "sz::Multirotor_Pilot",
     "name": "Config",
     "members":
     [

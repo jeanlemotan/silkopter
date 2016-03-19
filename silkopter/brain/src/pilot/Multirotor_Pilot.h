@@ -2,8 +2,8 @@
 
 #include "common/node/IPilot.h"
 
-#include "common/stream/IMulti_Commands.h"
-#include "common/stream/IMulti_State.h"
+#include "common/stream/IMultirotor_Commands.h"
+#include "common/stream/IMultirotor_State.h"
 #include "common/stream/IVideo.h"
 
 #include "Comms.h"
@@ -15,7 +15,7 @@
 
 namespace sz
 {
-namespace Multi_Pilot
+namespace Multirotor_Pilot
 {
 struct Init_Params;
 struct Config;
@@ -27,10 +27,10 @@ namespace silk
 namespace node
 {
 
-class Multi_Pilot : public IPilot
+class Multirotor_Pilot : public IPilot
 {
 public:
-    Multi_Pilot(HAL& hal, Comms& comms);
+    Multirotor_Pilot(HAL& hal, Comms& comms);
 
     auto init(rapidjson::Value const& init_params) -> bool;
     auto get_init_params() const -> rapidjson::Document;
@@ -54,16 +54,16 @@ private:
     HAL& m_hal;
     Comms& m_comms;
 
-    stream::IMulti_Commands::Value m_last_commands_value;
+    stream::IMultirotor_Commands::Value m_last_commands_value;
     q::Clock::time_point m_last_received_commands_value_tp = q::Clock::now();
 
-    std::shared_ptr<sz::Multi_Pilot::Init_Params> m_init_params;
-    std::shared_ptr<sz::Multi_Pilot::Config> m_config;
+    std::shared_ptr<sz::Multirotor_Pilot::Init_Params> m_init_params;
+    std::shared_ptr<sz::Multirotor_Pilot::Config> m_config;
 
-    Sample_Accumulator<stream::IMulti_State> m_state_accumulator;
+    Sample_Accumulator<stream::IMultirotor_State> m_state_accumulator;
     Sample_Accumulator<stream::IVideo> m_video_accumulator;
 
-    typedef Basic_Output_Stream<stream::IMulti_Commands> Output_Stream;
+    typedef Basic_Output_Stream<stream::IMultirotor_Commands> Output_Stream;
     mutable std::shared_ptr<Output_Stream> m_output_stream;
 };
 
