@@ -81,5 +81,6 @@
         <file>icons/ui/waypoints.png</file>
         <file>icons/ui/waypoints-destination.png</file>
         <file>icons/ui/wifi.png</file>
+        <file>qml/nodes/Node.qml</file>
     </qresource>
 </RCC>

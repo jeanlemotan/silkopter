@@ -1,7 +1,7 @@
 import QtQuick 2.0
 import QtQuick.Controls 1.4
 import QtQuick.Controls.Styles 1.4
-
+import com.silk.UAVNodeEditor 1.0
 
 Rectangle {
     id: root
@@ -15,8 +15,7 @@ Rectangle {
         onBackPressed: s_menus.pop()
     }
 
-    MenuButton
-    {
+    MenuButton {
         id: quadxButton
         text: "Quad X"
         icon: "qrc:/icons/ui/quadx.png"
@@ -28,8 +27,7 @@ Rectangle {
         width: 200
     }
 
-    MenuButton
-    {
+    MenuButton {
         id: quadplusButton
         text: "Quad X"
         icon: "qrc:/icons/ui/quadx.png"
@@ -41,4 +39,24 @@ Rectangle {
         width: 200
     }
 
+    UAVNodeEditor {
+        anchors.top: topBar.bottom
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        fillColor: "green"
+
+        ListView {
+            anchors.fill: parent
+            model: parent.nodeDefModel
+            delegate: Rectangle {
+                height: 25
+                width: name.width
+                Text {
+                    id: name
+                    text: modelData.name
+                }
+            }
+        }
+    }
 }

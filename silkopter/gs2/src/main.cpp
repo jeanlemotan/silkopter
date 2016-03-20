@@ -7,9 +7,11 @@
 #include "Comms_QMLProxy.h"
 #include "OS_QMLProxy.h"
 #include "Menus_QMLProxy.h"
-#include "UAV_QMLProxy.h"
+#include "UAVNodeEditor.h"
 
 //boost::asio::io_service s_async_io_service(4);
+
+silk::Comms s_comms;
 
 int main(int argc, char *argv[])
 {
@@ -55,11 +57,7 @@ int main(int argc, char *argv[])
     app.setPalette(palette);
 
     QQuickView view;
-    view.setResizeMode(QQuickView::SizeRootObjectToView);
-    view.show();
 
-
-    silk::Comms comms;
 
     OS_QMLProxy os_proxy;
 
@@ -67,28 +65,27 @@ int main(int argc, char *argv[])
     menus_proxy.init(view);
 
     Comms_QMLProxy comms_proxy;
-    comms_proxy.init(comms);
+    comms_proxy.init(s_comms);
 
-    UAV_QMLProxy uav_proxy;
-    uav_proxy.init(comms);
-
-    qmlRegisterType<Comms_QMLProxy>("com.silk.comms", 1, 0, "Comms");
+    qmlRegisterType<Comms_QMLProxy>("com.silk.Comms", 1, 0, "Comms");
+    qmlRegisterType<UAVNodeEditor>("com.silk.UAVNodeEditor", 1, 0, "UAVNodeEditor");
     view.engine()->rootContext()->setContextProperty("s_comms", &comms_proxy);
     view.engine()->rootContext()->setContextProperty("s_os", &os_proxy);
     view.engine()->rootContext()->setContextProperty("s_menus", &menus_proxy);
-    view.engine()->rootContext()->setContextProperty("s_uav", &uav_proxy);
 
+    view.setResizeMode(QQuickView::SizeRootObjectToView);
+    view.show();
 
     menus_proxy.push("Splash.qml");
 
 
     QTimer timer;
-    timer.setInterval(5);
+    timer.setInterval(1);
     timer.setSingleShot(false);
-    QObject::connect(&timer, &QTimer::timeout, [&comms]()
+    QObject::connect(&timer, &QTimer::timeout, [&s_comms]()
     {
-       comms.process_rcp();
-       comms.process();
+       s_comms.process_rcp();
+       s_comms.process();
     });
     timer.start();
 

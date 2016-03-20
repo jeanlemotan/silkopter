@@ -162,7 +162,8 @@ HEADERS += \
     ../../src/Comms_QMLProxy.h \
     ../../src/Menus_QMLProxy.h \
     ../../src/OS_QMLProxy.h \
-    ../../src/UAV_QMLProxy.h
+    ../../src/Comms_Slots.h \
+    ../../src/UAVNodeEditor.h
 
 SOURCES += \
     ../../src/main.cpp \
@@ -178,7 +179,8 @@ SOURCES += \
     ../../src/Comms_QMLProxy.cpp \
     ../../src/Menus_QMLProxy.cpp \
     ../../src/OS_QMLProxy.cpp \
-    ../../src/UAV_QMLProxy.cpp
+    ../../src/Comms_Slots.cpp \
+    ../../src/UAVNodeEditor.cpp
 
 DISTFILES += \
     ../../src/node.png \
