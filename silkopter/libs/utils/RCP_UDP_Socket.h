@@ -1,7 +1,5 @@
 #pragma once
 
-#if !defined RASPBERRY_PI
-
 #include "RCP.h"
 #include <boost/asio.hpp>
 
@@ -66,5 +64,3 @@ private:
 
 
 }
-
-#endif

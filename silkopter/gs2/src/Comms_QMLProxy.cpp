@@ -1,5 +1,4 @@
 #include "Comms_QMLProxy.h"
-#include "utils/RCP_RFMON_Socket.h"
 
 Comms_QMLProxy::Comms_QMLProxy(QObject *parent)
     : QObject(parent)

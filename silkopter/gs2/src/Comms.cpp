@@ -72,7 +72,6 @@ Comms::Comms()
 
 }
 
-#ifndef RASPBERRY_PI
 auto Comms::start_udp(boost::asio::ip::address const& address, uint16_t send_port, uint16_t receive_port) -> bool
 {
     try
@@ -122,7 +121,6 @@ auto Comms::start_udp(boost::asio::ip::address const& address, uint16_t send_por
 
     return true;
 }
-#endif
 
 auto Comms::start_rfmon(std::string const& interface, uint8_t id) -> bool
 {
@@ -429,7 +427,7 @@ static auto unpack_node_def_data(Comms::Setup_Channel& channel, Comms::Node_Def&
     ok &= channel.unpack_param(node_def.type);
     ok &= unpack_def_inputs(channel, node_def.inputs);
     ok &= unpack_outputs(channel, node_def.outputs);
-    ok &= channel.unpack_param(node_def.default_init_params);
+    ok &= channel.unpack_param(node_def.default_init_params_json);
     return ok;
 }
 
@@ -438,8 +436,8 @@ auto Comms::unpack_node_data(Comms::Setup_Channel& channel, Comms::Node& node) -
     bool ok = channel.unpack_param(node.type);
     ok &= unpack_inputs(channel, node.inputs);
     ok &= unpack_outputs(channel, node.outputs);
-    ok &= channel.unpack_param(node.init_params);
-    ok &= channel.unpack_param(node.config);
+    ok &= channel.unpack_param(node.init_params_json);
+    ok &= channel.unpack_param(node.config_json);
 
 //    if (ok)
 //    {

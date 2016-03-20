@@ -4,6 +4,7 @@
 #include <QQuickView>
 #include <QQmlComponent>
 #include "Comms_Slots.h"
+#include "NodeDefModel.h"
 
 namespace detail
 {
@@ -11,16 +12,25 @@ namespace detail
 class NodeDefObject : public QObject
 {
     Q_OBJECT
+
+    typedef silk::node::Type Type;
+    Q_ENUMS(Type);
+
     Q_PROPERTY(QString name READ getName)
+    Q_PROPERTY(Type type READ getType)
+    Q_PROPERTY(QString description READ getDescription)
 public:
-    NodeDefObject(const QString& name,  QObject* parent)
+    NodeDefObject(const silk::Comms::Node_Def& def, QObject* parent)
         : QObject(parent)
-        , m_name(name)
+        , m_def(def)
     {}
 
-    const QString& getName() const { return m_name; }
+    QString getName() const { return QString(m_def.name.c_str()); }
+    Type getType() const { return m_def.type; }
+    QString getDescription() const { return QString(silk::node::get_as_string(m_def.type).c_str()); }
+
 private:
-    QString m_name;
+    silk::Comms::Node_Def m_def;
 };
 
 }
@@ -29,13 +39,13 @@ class UAVNodeEditor : public QQuickPaintedItem, public Comms_Slots
 {
     Q_OBJECT
 
-    Q_PROPERTY(QVariant nodeDefModel READ getNodeDefModel NOTIFY nodeDefModelChanged)
+    Q_PROPERTY(QAbstractItemModel* nodeDefModel READ getNodeDefModel NOTIFY nodeDefModelChanged)
 
 public:
     explicit UAVNodeEditor(QQuickItem* parent = 0);
 
 
-    QVariant getNodeDefModel() const;
+    QAbstractItemModel* getNodeDefModel() const;
 
 signals:
     void nodeDefModelChanged();
@@ -61,6 +71,7 @@ private:
     QQuickView* m_view = nullptr;
     std::unique_ptr<QQmlComponent> m_nodeComponent;
 
-    QVariant m_nodeDefModel;
+    std::vector<silk::Comms::Node_Def> m_nodeDefs;
+    std::unique_ptr<NodeDefModel> m_nodeDefModel;
 };
 

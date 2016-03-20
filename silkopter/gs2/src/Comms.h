@@ -38,9 +38,7 @@
 #include "common/stream/IVideo.h"
 #include "common/stream/IMultirotor_State.h"
 
-#ifndef RASPBERRY_PI
-#   include <boost/asio.hpp>
-#endif
+#include <boost/asio.hpp>
 
 
 
@@ -52,9 +50,7 @@ class Comms : q::util::Noncopyable
 public:
     Comms();
 
-#ifndef RASPBERRY_PI
     auto start_udp(boost::asio::ip::address const& address, uint16_t send_port, uint16_t receive_port) -> bool;
-#endif
     auto start_rfmon(std::string const& interface, uint8_t id) -> bool;
 
     void disconnect();
@@ -96,7 +92,7 @@ public:
     {
         std::string name;
         node::Type type;
-        rapidjson::Document default_init_params;
+        std::string default_init_params_json;
         struct Input
         {
             stream::Type type;
@@ -120,8 +116,8 @@ public:
     {
         std::string name;
         node::Type type;
-        rapidjson::Document init_params;
-        rapidjson::Document config;
+        std::string init_params_json;
+        std::string config_json;
 
         struct Input
         {

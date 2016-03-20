@@ -42,21 +42,52 @@ Rectangle {
     UAVNodeEditor {
         anchors.top: topBar.bottom
         anchors.left: parent.left
-        anchors.right: parent.right
+        anchors.right: parent.horizontalCenter
         anchors.bottom: parent.bottom
         fillColor: "green"
 
-        ListView {
+        TreeView {
             anchors.fill: parent
             model: parent.nodeDefModel
-            delegate: Rectangle {
-                height: 25
-                width: name.width
-                Text {
-                    id: name
-                    text: modelData.name
-                }
+            TableViewColumn {
+               title: "Name"
+               role: "Name"
             }
+
+            itemDelegate: Item {
+                property string name: styleData.value
+                onNameChanged: {
+                    icon.source = "qrc:/icons/nodes/" + name + ".png"
+                }
+
+                Image {
+                    id: icon
+                    anchors.top: parent.top
+                    anchors.bottom: parent.bottom
+                    anchors.left: parent.left
+                    anchors.margins: 8
+                    fillMode: Image.PreserveAspectFit
+                }
+
+                Text {
+                    anchors.left: icon.right
+                    anchors.verticalCenter: parent.verticalCenter
+                    anchors.margins: 4
+                    color: styleData.textColor
+                    elide: styleData.elideMode
+                    text: name
+                }
+             }
+
+
+            rowDelegate: Rectangle {
+                height: 32
+                color: styleData.selected ? "#E75926" : (styleData.alternate ? "#282830" : "black")
+            }
+
+//            style: TreeViewStyle {
+//                alternateBackgroundColor: "#282830"
+//            }
         }
     }
 }

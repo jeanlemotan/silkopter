@@ -28,24 +28,22 @@ void UAVNodeEditor::slot_reset()
 void UAVNodeEditor::slot_node_defs_reset()
 {
     QQmlEngine* engine = qmlEngine(this);
-    m_nodeComponent.reset(new QQmlComponent(engine, QUrl("qrc:/qml/nodes/Node.qml")));
+    m_nodeComponent.reset(new QQmlComponent(engine, QUrl("qrc:/NodeEditor/qml/Node.qml")));
 
-    QQuickItem* node = qobject_cast<QQuickItem*>(m_nodeComponent->create());
-    node->setParentItem(this);
+//    QQuickItem* node = qobject_cast<QQuickItem*>(m_nodeComponent->create());
+//    node->setParentItem(this);
 
-    m_nodeDefModel = QVariant();
+    m_nodeDefModel.reset(new NodeDefModel());
     emit nodeDefModelChanged();
 }
 
 void UAVNodeEditor::slot_node_defs_added(std::vector<silk::Comms::Node_Def> const& defs)
 {
-    QList<QObject*> list;
-    for (silk::Comms::Node_Def const& def: defs)
-    {
-        list.append(new detail::NodeDefObject(def.name.c_str(), this));
-    }
+    m_nodeDefs = defs;
 
-    m_nodeDefModel = QVariant::fromValue(list);
+    m_nodeDefModel.reset(new NodeDefModel());
+    m_nodeDefModel->init(defs);
+
     emit nodeDefModelChanged();
 }
 
@@ -95,7 +93,7 @@ void UAVNodeEditor::paint(QPainter* painter)
 
 }
 
-QVariant UAVNodeEditor::getNodeDefModel() const
+QAbstractItemModel* UAVNodeEditor::getNodeDefModel() const
 {
-    return m_nodeDefModel;
+    return m_nodeDefModel.get();
 }

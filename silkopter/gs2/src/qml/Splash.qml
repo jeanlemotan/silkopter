@@ -14,7 +14,8 @@ Rectangle {
         text: "Silkopter"
         anchors.verticalCenter: parent.verticalCenter
         anchors.horizontalCenter: parent.horizontalCenter
-        font.pointSize: 42; font.bold: true
+        font.pointSize: 42;
+        font.bold: true
     }
 
     ToolButton

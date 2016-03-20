@@ -7,7 +7,7 @@
 #include "Comms_QMLProxy.h"
 #include "OS_QMLProxy.h"
 #include "Menus_QMLProxy.h"
-#include "UAVNodeEditor.h"
+#include "NodeEditor/UAVNodeEditor.h"
 
 //boost::asio::io_service s_async_io_service(4);
 
@@ -38,7 +38,7 @@ int main(int argc, char *argv[])
 
     app.setQuitOnLastWindowClosed(true);
 
-    QPalette palette;
+    QPalette palette = app.palette();
     palette.setColor(QPalette::Window, QColor(53,53,53));
     palette.setColor(QPalette::WindowText, QColor(0xECF0F1));
     palette.setColor(QPalette::Base, QColor(25,25,25));
@@ -82,7 +82,7 @@ int main(int argc, char *argv[])
     QTimer timer;
     timer.setInterval(1);
     timer.setSingleShot(false);
-    QObject::connect(&timer, &QTimer::timeout, [&s_comms]()
+    QObject::connect(&timer, &QTimer::timeout, []()
     {
        s_comms.process_rcp();
        s_comms.process();

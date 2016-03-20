@@ -25,6 +25,29 @@ enum class Type : uint8_t
     CONFIG
 };
 
+inline auto get_as_string(Type s) -> std::string
+{
+    switch (s)
+    {
+    case Type::NODE: return "Node";
+    case Type::PROCESSOR: return "Processor";
+    case Type::SINK: return "Sink";
+    case Type::SOURCE: return "Source";
+    case Type::LPF: return "LPF";
+    case Type::BRAIN: return "Brain";
+    case Type::PILOT: return "Pilot";
+    case Type::RESAMPLER: return "Resampler";
+    case Type::TRANSFORMER: return "Transformer";
+    case Type::COMBINER: return "Combiner";
+    case Type::CONTROLLER: return "Controller";
+    case Type::GENERATOR: return "Generator";
+    case Type::SIMULATOR: return "Simulator";
+    case Type::CONFIG: return "Config";
+    default: QASSERT(false); return "Unknown";
+    }
+}
+
+
 class INode : q::util::Noncopyable
 {
 public:

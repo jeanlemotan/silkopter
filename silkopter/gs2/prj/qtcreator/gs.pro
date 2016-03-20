@@ -51,6 +51,7 @@ rpi {
     LIBS += -lbcm_host
     LIBS += -lGLESv2
     LIBS += -lEGL
+    LIBS += -lboost_system
 } else {
     CONFIG(debug, debug|release) {
         DEST_FOLDER = pc/debug
@@ -163,7 +164,8 @@ HEADERS += \
     ../../src/Menus_QMLProxy.h \
     ../../src/OS_QMLProxy.h \
     ../../src/Comms_Slots.h \
-    ../../src/UAVNodeEditor.h
+    ../../src/NodeEditor/UAVNodeEditor.h \
+    ../../src/NodeEditor/NodeDefModel.h
 
 SOURCES += \
     ../../src/main.cpp \
@@ -180,7 +182,8 @@ SOURCES += \
     ../../src/Menus_QMLProxy.cpp \
     ../../src/OS_QMLProxy.cpp \
     ../../src/Comms_Slots.cpp \
-    ../../src/UAVNodeEditor.cpp
+    ../../src/NodeEditor/UAVNodeEditor.cpp \
+    ../../src/NodeEditor/NodeDefModel.cpp
 
 DISTFILES += \
     ../../src/node.png \
