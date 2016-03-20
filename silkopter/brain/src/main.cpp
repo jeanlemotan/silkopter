@@ -100,15 +100,15 @@ int main(int argc, char const* argv[])
         param.sched_priority = sched_get_priority_max(policy);
         if (pthread_setschedparam(pthread_self(), policy, &param) != 0)
         {
-            perror("main sched_setscheduler");
-            exit(EXIT_FAILURE);
+            perror("Failed to set priority for main thread");
+            //exit(EXIT_FAILURE);
         }
         policy = SCHED_IDLE;
         param.sched_priority = sched_get_priority_min(policy);
         if (pthread_setschedparam(async_thread.native_handle(), policy, &param) != 0)
         {
-            perror("async_thread sched_setscheduler");
-            exit(EXIT_FAILURE);
+            perror("Failed to set priority for async thread");
+            //exit(EXIT_FAILURE);
         }
     }
 #endif
@@ -124,19 +124,19 @@ int main(int argc, char const* argv[])
             goto exit;
         }
 
-#if defined RASPBERRY_PI
-        if (!comms.start_rfmon("mon0", 5))
-        {
-            QLOGE("Cannot start communication channel! Aborting");
-            goto exit;
-        }
-#else
+//#if defined RASPBERRY_PI
+//        if (!comms.start_rfmon("mon0", 5))
+//        {
+//            QLOGE("Cannot start communication channel! Aborting");
+//            goto exit;
+//        }
+//#else
         if (!comms.start_udp(8000, 8001))
         {
             QLOGE("Cannot start communication channel! Aborting");
             goto exit;
         }
-#endif
+//#endif
 
 //        while (!s_exit)
 //        {

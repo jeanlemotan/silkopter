@@ -19,15 +19,15 @@ extern boost::asio::io_service s_async_io_service;
 
 namespace silk
 {
-    template<typename Res, typename... ArgTypes> auto async(std::function<Res(ArgTypes...)> f) -> std::future<Res>
-    {
-        typedef std::packaged_task<Res(ArgTypes...)> packaged_task;
-        auto task = std::make_shared<packaged_task>(std::move(f));
-        std::future<Res> future = task->get_future();
-        s_async_io_service.post(std::bind(&packaged_task::operator(), task));
-        return future;
-    }
-
+template<typename F> auto async(F f) -> boost::unique_future<decltype(f())>
+   {
+       typedef decltype(f()) result_type;
+       typedef boost::packaged_task<result_type> packaged_task;
+       auto task = std::make_shared<packaged_task>(std::move(f));
+       boost::unique_future<result_type> future = task->get_future();
+       s_async_io_service.post(std::bind(&packaged_task::operator(), task));
+       return future;
+   }
 
     struct At_Exit : q::util::Noncopyable
     {

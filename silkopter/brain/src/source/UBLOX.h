@@ -141,7 +141,7 @@ private:
     };
 
     std::atomic<Setup_State> m_setup_state = {Setup_State::UNKNOWN};
-    std::future<void> m_setup_future;
+    boost::unique_future<void> m_setup_future;
 
 
     std::array<uint8_t, 1024> m_temp_buffer;

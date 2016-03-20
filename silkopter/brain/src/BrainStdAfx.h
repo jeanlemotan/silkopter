@@ -2,7 +2,7 @@
 
 #include <type_traits>
 #include <typeinfo>
-#include <future>
+#include <boost/thread.hpp>
 
 #include <boost/asio.hpp>
 #include <boost/optional.hpp>

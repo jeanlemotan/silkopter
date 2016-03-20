@@ -78,7 +78,6 @@ Comms::Comms(UAV& uav)
 {
 }
 
-#ifndef RASPBERRY_PI
 auto Comms::start_udp(uint16_t send_port, uint16_t receive_port) -> bool
 {
     try
@@ -122,7 +121,6 @@ auto Comms::start_udp(uint16_t send_port, uint16_t receive_port) -> bool
 
     return true;
 }
-#endif
 
 auto Comms::start_rfmon(std::string const& interface, uint8_t id) -> bool
 {
