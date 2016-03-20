@@ -10,8 +10,8 @@ namespace silk
 namespace node
 {
 
-Gravity_Filter::Gravity_Filter(HAL& hal)
-    : m_hal(hal)
+Gravity_Filter::Gravity_Filter(UAV& uav)
+    : m_uav(uav)
     , m_init_params(new sz::Gravity_Filter::Init_Params())
     , m_config(new sz::Gravity_Filter::Config())
 {
@@ -93,7 +93,7 @@ void Gravity_Filter::process()
 
 void Gravity_Filter::set_input_stream_path(size_t idx, q::Path const& path)
 {
-    m_accumulator.set_stream_path(idx, path, m_output_stream->get_rate(), m_hal);
+    m_accumulator.set_stream_path(idx, path, m_output_stream->get_rate(), m_uav);
 }
 
 auto Gravity_Filter::set_config(rapidjson::Value const& json) -> bool

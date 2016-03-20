@@ -5,7 +5,7 @@
 #include "common/stream/ICurrent.h"
 #include "common/stream/IBattery_State.h"
 
-#include "HAL.h"
+#include "UAV.h"
 #include "utils/Butterworth.h"
 
 namespace silk

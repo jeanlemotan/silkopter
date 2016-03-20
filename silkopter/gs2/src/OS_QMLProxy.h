@@ -2,13 +2,13 @@
 
 #include <QObject>
 
-class OSQMLProxy : public QObject
+class OS_QMLProxy : public QObject
 {
     Q_OBJECT
 public:
     Q_PROPERTY(float brightness READ getBrightness WRITE setBrightness NOTIFY brightnessChanged)
 
-    explicit OSQMLProxy(QObject *parent = 0);
+    explicit OS_QMLProxy(QObject *parent = 0);
 
     float getBrightness() const;
     void setBrightness(float v);

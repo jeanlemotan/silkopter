@@ -1,20 +1,20 @@
-#include "MenusQMLProxy.h"
+#include "Menus_QMLProxy.h"
 
 #include <QQmlEngine>
 #include <QQmlContext>
 
 
-MenusQMLProxy::MenusQMLProxy(QObject *parent)
+Menus_QMLProxy::Menus_QMLProxy(QObject *parent)
     : QObject(parent)
 {
 }
 
-void MenusQMLProxy::init(QQuickView& view)
+void Menus_QMLProxy::init(QQuickView& view)
 {
     m_view = &view;
 }
 
-void MenusQMLProxy::pop()
+void Menus_QMLProxy::pop()
 {
     QASSERT(m_stack.size() >= 1);
     QASSERT(!m_isLocked);
@@ -33,7 +33,7 @@ void MenusQMLProxy::pop()
     }
 }
 
-void MenusQMLProxy::push(const QString& qml)
+void Menus_QMLProxy::push(const QString& qml)
 {
     QASSERT(!m_isLocked);
     if (!m_isLocked)
@@ -45,7 +45,7 @@ void MenusQMLProxy::push(const QString& qml)
     }
 }
 
-void MenusQMLProxy::setView()
+void Menus_QMLProxy::setView()
 {
     QASSERT(m_isLocked);
     m_view->setSource(m_stack.back());

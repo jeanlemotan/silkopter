@@ -1,6 +1,6 @@
 #pragma once
 
-#include "HAL.h"
+#include "UAV.h"
 #include "common/node/ISource.h"
 #include "common/Comm_Data.h"
 #include "common/stream/IVideo.h"
@@ -25,7 +25,7 @@ namespace node
 class Raspicam : public ISource
 {
 public:
-    Raspicam(HAL& hal);
+    Raspicam(UAV& uav);
     ~Raspicam();
 
     auto init(rapidjson::Value const& init_params) -> bool;
@@ -54,7 +54,7 @@ public:
     typedef std::function<void(uint8_t const* data, size_t size, math::vec2u32 const& resolution, bool is_keyframe)> Data_Available_Callback;
 
 private:
-    HAL& m_hal;
+    UAV& m_uav;
 
     auto init() -> bool;
 

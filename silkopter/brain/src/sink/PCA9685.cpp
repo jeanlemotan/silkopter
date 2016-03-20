@@ -50,8 +50,8 @@ std::mutex PCA9685::s_pwm_enabled_mutex;
 size_t PCA9685::s_pwm_enabled_count = 0;
 
 
-PCA9685::PCA9685(HAL& hal)
-    : m_hal(hal)
+PCA9685::PCA9685(UAV& uav)
+    : m_uav(uav)
     , m_init_params(new sz::PCA9685::Init_Params())
     , m_config(new sz::PCA9685::Config())
 {
@@ -107,7 +107,7 @@ auto PCA9685::init(rapidjson::Value const& init_params) -> bool
 
 auto PCA9685::init() -> bool
 {
-    m_i2c = m_hal.get_buses().find_by_name<bus::II2C>(m_init_params->bus);
+    m_i2c = m_uav.get_buses().find_by_name<bus::II2C>(m_init_params->bus);
     auto i2c = m_i2c.lock();
     if (!i2c)
     {
@@ -312,7 +312,7 @@ void PCA9685::process()
 #define FIND_STREAM(CH)\
 if (idx == CH)\
 {\
-    auto input_stream = m_hal.get_streams().find_by_name<stream::IPWM>(path.get_as<std::string>());\
+    auto input_stream = m_uav.get_streams().find_by_name<stream::IPWM>(path.get_as<std::string>());\
     auto rate = input_stream ? input_stream->get_rate() : 0u;\
     if (rate != m_init_params->rate)\
     {\

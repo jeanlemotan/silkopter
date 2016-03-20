@@ -36,8 +36,8 @@ constexpr uint8_t CMD_CONVERT_D2_OSR4096 = 0x58;
 constexpr uint8_t ADDR_MS5611 = 0x77;
 
 
-MS5611::MS5611(HAL& hal)
-    : m_hal(hal)
+MS5611::MS5611(UAV& uav)
+    : m_uav(uav)
     , m_init_params(new sz::MS5611::Init_Params())
     , m_config(new sz::MS5611::Config())
 {
@@ -135,8 +135,8 @@ auto MS5611::init(rapidjson::Value const& init_params) -> bool
 }
 auto MS5611::init() -> bool
 {
-    m_i2c = m_hal.get_buses().find_by_name<bus::II2C>(m_init_params->bus);
-    m_spi = m_hal.get_buses().find_by_name<bus::ISPI>(m_init_params->bus);
+    m_i2c = m_uav.get_buses().find_by_name<bus::II2C>(m_init_params->bus);
+    m_spi = m_uav.get_buses().find_by_name<bus::ISPI>(m_init_params->bus);
 
     Buses buses = { m_i2c.lock(), m_spi.lock() };
     if (!buses.i2c && !buses.spi)

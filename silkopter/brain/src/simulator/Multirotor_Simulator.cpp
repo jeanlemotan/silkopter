@@ -12,8 +12,8 @@ namespace silk
 namespace node
 {
 
-Multirotor_Simulator::Multirotor_Simulator(HAL& hal)
-    : m_hal(hal)
+Multirotor_Simulator::Multirotor_Simulator(UAV& uav)
+    : m_uav(uav)
     , m_init_params(new sz::Multirotor_Simulator::Init_Params())
     , m_config(new sz::Multirotor_Simulator::Config())
 {
@@ -82,7 +82,7 @@ auto Multirotor_Simulator::init() -> bool
         return false;
     }
 
-    std::shared_ptr<const Multirotor_Config> multirotor_config = m_hal.get_specialized_uav_config<Multirotor_Config>();
+    std::shared_ptr<const Multirotor_Config> multirotor_config = m_uav.get_specialized_uav_config<Multirotor_Config>();
     if (!multirotor_config)
     {
         QLOGE("No multi config found");
@@ -329,7 +329,7 @@ void Multirotor_Simulator::process()
 
 void Multirotor_Simulator::set_input_stream_path(size_t idx, q::Path const& path)
 {
-    auto input_stream = m_hal.get_streams().find_by_name<stream::IThrottle>(path.get_as<std::string>());
+    auto input_stream = m_uav.get_streams().find_by_name<stream::IThrottle>(path.get_as<std::string>());
     auto rate = input_stream ? input_stream->get_rate() : 0u;
     if (rate != m_init_params->throttle_rate)
     {
@@ -373,7 +373,7 @@ auto Multirotor_Simulator::set_config(rapidjson::Value const& json) -> bool
 //        uav_config.motors[i].deceleration = sz.motors[i].deceleration;
 //    }
 
-    std::shared_ptr<const Multirotor_Config> multirotor_config = m_hal.get_specialized_uav_config<Multirotor_Config>();
+    std::shared_ptr<const Multirotor_Config> multirotor_config = m_uav.get_specialized_uav_config<Multirotor_Config>();
     if (!multirotor_config)
     {
         QLOGE("No multi config found");

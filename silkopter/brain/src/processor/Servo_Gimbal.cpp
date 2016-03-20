@@ -9,8 +9,8 @@ namespace silk
 namespace node
 {
 
-Servo_Gimbal::Servo_Gimbal(HAL& hal)
-    : m_hal(hal)
+Servo_Gimbal::Servo_Gimbal(UAV& uav)
+    : m_uav(uav)
     , m_init_params(new sz::Servo_Gimbal::Init_Params())
     , m_config(new sz::Servo_Gimbal::Config())
 {
@@ -154,11 +154,11 @@ void Servo_Gimbal::set_input_stream_path(size_t idx, q::Path const& path)
 {
     if (idx == 0)
     {
-        m_frame_accumulator.set_stream_path(0, path, m_init_params->rate, m_hal);
+        m_frame_accumulator.set_stream_path(0, path, m_init_params->rate, m_uav);
     }
     else if (idx == 1)
     {
-        m_commands_accumulator.set_stream_path(0, path, m_init_params->commands_rate, m_hal);
+        m_commands_accumulator.set_stream_path(0, path, m_init_params->commands_rate, m_uav);
     }
 }
 

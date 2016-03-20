@@ -1,6 +1,6 @@
 #pragma once
 
-#include "HAL.h"
+#include "UAV.h"
 #include "common/node/ILPF.h"
 #include "utils/Butterworth.h"
 
@@ -19,7 +19,7 @@ template<class Stream_t>
 class LPF : public ILPF
 {
 public:
-    LPF(HAL& hal);
+    LPF(UAV& uav);
 
     auto init(rapidjson::Value const& init_params) -> bool;
     auto get_init_params() const -> rapidjson::Document;
@@ -40,7 +40,7 @@ public:
 private:
     auto init() -> bool;
 
-    HAL& m_hal;
+    UAV& m_uav;
 
     sz::LPF::Init_Params m_init_params;
     sz::LPF::Config m_config;
@@ -55,8 +55,8 @@ private:
 
 
 template<class Stream_t>
-LPF<Stream_t>::LPF(HAL& hal)
-    : m_hal(hal)
+LPF<Stream_t>::LPF(UAV& uav)
+    : m_uav(uav)
 {
     m_output_stream = std::make_shared<Output_Stream>();
 }
@@ -102,7 +102,7 @@ auto LPF<Stream_t>::get_init_params() const -> rapidjson::Document
 template<class Stream_t>
 void LPF<Stream_t>::set_input_stream_path(size_t idx, q::Path const& path)
 {
-    m_accumulator.set_stream_path(idx, path, m_output_stream->get_rate(), m_hal);
+    m_accumulator.set_stream_path(idx, path, m_output_stream->get_rate(), m_uav);
 }
 
 template<class Stream_t>

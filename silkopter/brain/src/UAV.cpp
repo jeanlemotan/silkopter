@@ -1,6 +1,6 @@
 ﻿#include "BrainStdAfx.h"
 
-#include "HAL.h"
+#include "UAV.h"
 #include "Comms.h"
 #include "utils/Json_Util.h"
 #include "utils/Timed_Scope.h"
@@ -166,15 +166,15 @@ template<class T> struct Node_Wrapper : public INode_Wrapper
 
 ///////////////////////////////////////////////////////////////
 
-HAL::HAL()
+UAV::UAV()
 {
 }
 
-HAL::~HAL()
+UAV::~UAV()
 {
 }
 
-void HAL::save_settings()
+void UAV::save_settings()
 {
     TIMED_FUNCTION();
 
@@ -186,7 +186,7 @@ void HAL::save_settings()
     std::shared_ptr<const Multirotor_Config> multirotor_config = get_specialized_uav_config<Multirotor_Config>();
     if (multirotor_config)
     {
-        auto* configj = jsonutil::get_or_add_value(*settingsj, q::Path("hal/uav_config"), rapidjson::kObjectType, allocator);
+        auto* configj = jsonutil::get_or_add_value(*settingsj, q::Path("uav/uav_config"), rapidjson::kObjectType, allocator);
         if (!configj)
         {
             QLOGE("Cannot create multirotor config node.");
@@ -198,7 +198,7 @@ void HAL::save_settings()
     }
 
     {
-        auto busesj = jsonutil::get_or_add_value(*settingsj, q::Path("hal/buses"), rapidjson::kObjectType, allocator);
+        auto busesj = jsonutil::get_or_add_value(*settingsj, q::Path("uav/buses"), rapidjson::kObjectType, allocator);
         if (!busesj)
         {
             QLOGE("Cannot create buses settings node.");
@@ -217,7 +217,7 @@ void HAL::save_settings()
         }
     }
     {
-        auto nodesj = jsonutil::get_or_add_value(*settingsj, q::Path("hal/nodes"), rapidjson::kArrayType, allocator);
+        auto nodesj = jsonutil::get_or_add_value(*settingsj, q::Path("uav/nodes"), rapidjson::kArrayType, allocator);
         if (!nodesj)
         {
             QLOGE("Cannot create nodes settings node.");
@@ -274,36 +274,36 @@ void HAL::save_settings()
     //autojsoncxx::to_pretty_json_file("sensors_pi.cfg", config);
 }
 
-auto HAL::get_telemetry_data() const -> Telemetry_Data const&
+auto UAV::get_telemetry_data() const -> Telemetry_Data const&
 {
     return m_telemetry_data;
 }
 
-auto HAL::get_bus_factory()    -> const Factory<bus::IBus>&
+auto UAV::get_bus_factory()    -> const Factory<bus::IBus>&
 {
     return m_bus_factory;
 }
-auto HAL::get_node_factory()  -> const Factory<node::INode>&
+auto UAV::get_node_factory()  -> const Factory<node::INode>&
 {
     return m_node_factory;
 }
-auto HAL::get_buses()    -> const Registry<bus::IBus>&
+auto UAV::get_buses()    -> const Registry<bus::IBus>&
 {
     return m_buses;
 }
-auto HAL::get_nodes()  -> const Registry<node::INode>&
+auto UAV::get_nodes()  -> const Registry<node::INode>&
 {
     return m_nodes;
 }
-auto HAL::get_streams()  -> const Registry<stream::IStream>&
+auto UAV::get_streams()  -> const Registry<stream::IStream>&
 {
     return m_streams;
 }
-auto HAL::get_uav_config() const -> std::shared_ptr<const UAV_Config>
+auto UAV::get_uav_config() const -> std::shared_ptr<const UAV_Config>
 {
     return m_uav_config;
 }
-auto HAL::set_uav_config(std::shared_ptr<UAV_Config> config) -> bool
+auto UAV::set_uav_config(std::shared_ptr<UAV_Config> config) -> bool
 {
     if (!config)
     {
@@ -316,9 +316,9 @@ auto HAL::set_uav_config(std::shared_ptr<UAV_Config> config) -> bool
     }
     return false;
 }
-auto HAL::set_multirotor_config(std::shared_ptr<Multirotor_Config> config) -> bool
+auto UAV::set_multirotor_config(std::shared_ptr<Multirotor_Config> config) -> bool
 {
-    QLOG_TOPIC("hal::set_multirotor_config");
+    QLOG_TOPIC("uav::set_multirotor_config");
 
     QASSERT(config);
     if (!config)
@@ -379,7 +379,7 @@ auto HAL::set_multirotor_config(std::shared_ptr<Multirotor_Config> config) -> bo
     return true;
 }
 
-auto HAL::remove_node(std::shared_ptr<node::INode> node) -> bool
+auto UAV::remove_node(std::shared_ptr<node::INode> node) -> bool
 {
     m_nodes.remove(node);
     std::vector<node::INode::Output> outputs = node->get_outputs();
@@ -404,7 +404,7 @@ void write_gnu_plot(std::string const& name, std::vector<T> const& samples)
     }
 }
 
-auto HAL::create_bus(
+auto UAV::create_bus(
         std::string const& type,
         std::string const& name,
         rapidjson::Value const& init_params) -> std::shared_ptr<bus::IBus>
@@ -423,7 +423,7 @@ auto HAL::create_bus(
     }
     return std::shared_ptr<bus::IBus>();
 }
-auto HAL::create_node(
+auto UAV::create_node(
         std::string const& type,
         std::string const& name,
         rapidjson::Value const& init_params) -> std::shared_ptr<node::INode>
@@ -454,7 +454,7 @@ auto HAL::create_node(
     return std::shared_ptr<node::INode>();
 }
 
-auto HAL::create_buses(rapidjson::Value& json) -> bool
+auto UAV::create_buses(rapidjson::Value& json) -> bool
 {
     if (!json.IsObject())
     {
@@ -509,7 +509,7 @@ static bool read_input_stream_paths(std::string const& node_name, silk::node::IN
     return true;
 }
 
-auto HAL::create_nodes(rapidjson::Value& json) -> bool
+auto UAV::create_nodes(rapidjson::Value& json) -> bool
 {
     if (!json.IsArray())
     {
@@ -576,7 +576,7 @@ auto HAL::create_nodes(rapidjson::Value& json) -> bool
     return true;
 }
 
-void HAL::sort_nodes(std::shared_ptr<node::INode> first_node)
+void UAV::sort_nodes(std::shared_ptr<node::INode> first_node)
 {
     QASSERT(first_node);
     if (!first_node)
@@ -662,11 +662,11 @@ void HAL::sort_nodes(std::shared_ptr<node::INode> first_node)
 }
 
 
-auto HAL::init(Comms& comms) -> bool
+auto UAV::init(Comms& comms) -> bool
 {
     using namespace silk::node;
 
-    QLOG_TOPIC("hal::init");
+    QLOG_TOPIC("uav::init");
 
 #if defined (RASPBERRY_PI)
     QLOGI("Initializing pigpio");
@@ -933,7 +933,7 @@ auto HAL::init(Comms& comms) -> bool
     }
 
     //read the UAV config
-    auto* configj = jsonutil::find_value(static_cast<rapidjson::Value&>(settingsj), q::Path("hal/uav_config"));
+    auto* configj = jsonutil::find_value(static_cast<rapidjson::Value&>(settingsj), q::Path("uav/uav_config"));
     if (configj)
     {
         std::shared_ptr<Multirotor_Config> config = std::make_shared<Multirotor_Config>();
@@ -953,8 +953,8 @@ auto HAL::init(Comms& comms) -> bool
 
 
     //create buses and nodes
-    auto* busesj = jsonutil::find_value(static_cast<rapidjson::Value&>(settingsj), q::Path("hal/buses"));
-    auto* nodesj = jsonutil::find_value(static_cast<rapidjson::Value&>(settingsj), q::Path("hal/nodes"));
+    auto* busesj = jsonutil::find_value(static_cast<rapidjson::Value&>(settingsj), q::Path("uav/buses"));
+    auto* nodesj = jsonutil::find_value(static_cast<rapidjson::Value&>(settingsj), q::Path("uav/nodes"));
 
     if ((busesj && !create_buses(*busesj)) ||
         (nodesj && !create_nodes(*nodesj)))
@@ -962,10 +962,10 @@ auto HAL::init(Comms& comms) -> bool
         return false;
     }
 
-//    auto* first_nodej = jsonutil::find_value(static_cast<rapidjson::Value&>(settingsj), q::Path("hal/first_node"));
+//    auto* first_nodej = jsonutil::find_value(static_cast<rapidjson::Value&>(settingsj), q::Path("uav/first_node"));
 //    if (!first_nodej || first_nodej->GetType() != rapidjson::kStringType)
 //    {
-//        QLOGE("Json value hal/first_node has to be a string");
+//        QLOGE("Json value uav/first_node has to be a string");
 //        return false;
 //    }
 //    std::shared_ptr<node::INode> first_node = m_nodes.find_by_name<node::INode>(std::string(first_nodej->GetString()));
@@ -992,7 +992,7 @@ auto HAL::init(Comms& comms) -> bool
     return true;
 }
 
-void HAL::shutdown()
+void UAV::shutdown()
 {
 #if defined (RASPBERRY_PI)
     shutdown_bcm();
@@ -1000,13 +1000,13 @@ void HAL::shutdown()
 #endif
 }
 
-void HAL::remove_add_nodes()
+void UAV::remove_add_nodes()
 {
     m_streams.remove_all();
     m_nodes.remove_all();
 }
 
-void HAL::generate_settings_file()
+void UAV::generate_settings_file()
 {
 #if defined RASPBERRY_PI
 
@@ -1030,7 +1030,7 @@ void HAL::generate_settings_file()
 //    }
     for (size_t i = 0; i < 2; i++)
     {
-        auto node = m_bus_factory.create_node("SPI BCM");
+        auto node = m_bus_factory.create("SPI BCM");
         QASSERT(node);
         rapidjson::Document json;
         jsonutil::clone_value(json, node->get_init_params(), json.GetAllocator());
@@ -1048,7 +1048,7 @@ void HAL::generate_settings_file()
     }
 
     {
-        auto node = m_bus_factory.create_node("I2C Linux");
+        auto node = m_bus_factory.create("I2C Linux");
         QASSERT(node);
         rapidjson::Document json;
         jsonutil::clone_value(json, node->get_init_params(), json.GetAllocator());
@@ -1063,7 +1063,7 @@ void HAL::generate_settings_file()
     }
 
     {
-        auto node = m_bus_factory.create_node("UART Linux");
+        auto node = m_bus_factory.create("UART Linux");
         QASSERT(node);
         rapidjson::Document json;
         jsonutil::clone_value(json, node->get_init_params(), json.GetAllocator());
@@ -1091,7 +1091,7 @@ void HAL::generate_settings_file()
 //static std::vector<float> s_samples;
 //static std::vector<float> s_samples_lpf;
 
-void HAL::process()
+void UAV::process()
 {
 //    for (auto const& n: m_buses.get_all())
 //    {

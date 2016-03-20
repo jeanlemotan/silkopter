@@ -304,9 +304,9 @@ void Comms::request_all_data()
         int64_t time_t_data = t;
         m_setup_channel.pack_all(comms::Setup_Message::CLOCK, time_t_data);
     }
+    m_setup_channel.pack_all(comms::Setup_Message::UAV_CONFIG);
     m_setup_channel.pack_all(comms::Setup_Message::ENUMERATE_NODE_DEFS);
     m_setup_channel.pack_all(comms::Setup_Message::ENUMERATE_NODES);
-    m_setup_channel.pack_all(comms::Setup_Message::UAV_CONFIG);
 }
 
 void Comms::request_node_config(std::string const& name)
@@ -314,7 +314,7 @@ void Comms::request_node_config(std::string const& name)
     m_setup_channel.pack_all(comms::Setup_Message::NODE_CONFIG, name);
 }
 
-void Comms::request_uavi_config()
+void Comms::request_uav_config()
 {
     m_setup_channel.pack_all(comms::Setup_Message::UAV_CONFIG);
 }

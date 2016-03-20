@@ -1,6 +1,6 @@
 #pragma once
 
-#include "HAL.h"
+#include "UAV.h"
 #include "common/node/ISource.h"
 #include "common/stream/IDistance.h"
 #include "common/bus/IUART.h"
@@ -25,7 +25,7 @@ namespace node
 class MaxSonar : public ISource
 {
 public:
-    MaxSonar(HAL& hal);
+    MaxSonar(UAV& uav);
 
     auto init(rapidjson::Value const& init_params) -> bool;
     auto get_init_params() const -> rapidjson::Document;
@@ -44,7 +44,7 @@ public:
 private:
     auto init() -> bool;
 
-    HAL& m_hal;
+    UAV& m_uav;
 
     std::weak_ptr<bus::IUART> m_bus;
 

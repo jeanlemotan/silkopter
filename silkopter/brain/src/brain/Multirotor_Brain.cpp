@@ -11,8 +11,8 @@ namespace silk
 namespace node
 {
 
-Multirotor_Brain::Multirotor_Brain(HAL& hal)
-    : m_hal(hal)
+Multirotor_Brain::Multirotor_Brain(UAV& uav)
+    : m_uav(uav)
     , m_init_params(new sz::Multirotor_Brain::Init_Params())
     , m_config(new sz::Multirotor_Brain::Config())
 {
@@ -40,7 +40,7 @@ auto Multirotor_Brain::init(rapidjson::Value const& init_params) -> bool
 
 auto Multirotor_Brain::init() -> bool
 {
-    m_multirotor_config = m_hal.get_specialized_uav_config<Multirotor_Config>();
+    m_multirotor_config = m_uav.get_specialized_uav_config<Multirotor_Config>();
     if (!m_multirotor_config)
     {
         QLOGE("No multi config found");
@@ -193,7 +193,7 @@ math::vec2f Multirotor_Brain::compute_horizontal_rate_for_angle(math::vec2f cons
 
 void Multirotor_Brain::state_mode_armed_apply_commands(const stream::IMultirotor_Commands::Value& prev_commands, stream::IMultirotor_Commands::Value& commands)
 {
-    std::shared_ptr<const Multirotor_Config> multirotor_config = m_hal.get_specialized_uav_config<Multirotor_Config>();
+    std::shared_ptr<const Multirotor_Config> multirotor_config = m_uav.get_specialized_uav_config<Multirotor_Config>();
 
     QASSERT(commands.mode.get() == stream::IMultirotor_Commands::Mode::ARMED);
 
@@ -599,11 +599,11 @@ void Multirotor_Brain::set_input_stream_path(size_t idx, q::Path const& path)
 {
     if (idx == 0)
     {
-        m_commands_accumulator.set_stream_path(0, path, m_init_params->commands_rate, m_hal);
+        m_commands_accumulator.set_stream_path(0, path, m_init_params->commands_rate, m_uav);
     }
     else if (idx >= 1 && idx <= 7)
     {
-        m_sensor_accumulator.set_stream_path(idx - 1, path, m_init_params->rate, m_hal);
+        m_sensor_accumulator.set_stream_path(idx - 1, path, m_init_params->rate, m_uav);
     }
 }
 

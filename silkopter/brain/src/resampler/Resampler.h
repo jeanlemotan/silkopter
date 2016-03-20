@@ -1,6 +1,6 @@
 #pragma once
 
-#include "HAL.h"
+#include "UAV.h"
 #include "common/node/IResampler.h"
 #include "utils/Butterworth.h"
 #include <deque>
@@ -23,7 +23,7 @@ class Resampler : public IResampler
 public:
     static const int MAX_POLES = 8;
 
-    Resampler(HAL& hal);
+    Resampler(UAV& uav);
 
     auto init(rapidjson::Value const& init_params) -> bool;
     auto get_init_params() const -> rapidjson::Document;
@@ -45,7 +45,7 @@ private:
     auto init() -> bool;
     void resample();
 
-    HAL& m_hal;
+    UAV& m_uav;
 
     sz::Resampler::Init_Params m_init_params;
     sz::Resampler::Config m_config;
@@ -110,8 +110,8 @@ private:
 
 
 template<class Stream_t>
-Resampler<Stream_t>::Resampler(HAL& hal)
-    : m_hal(hal)
+Resampler<Stream_t>::Resampler(UAV& uav)
+    : m_uav(uav)
 {
     m_output_stream = std::make_shared<Output_Stream>();
 }
@@ -164,7 +164,7 @@ auto Resampler<Stream_t>::get_init_params() const -> rapidjson::Document
 template<class Stream_t>
 void Resampler<Stream_t>::set_input_stream_path(size_t idx, q::Path const& path)
 {
-    m_accumulator.set_stream_path(idx, path, m_init_params.input_rate, m_hal);
+    m_accumulator.set_stream_path(idx, path, m_init_params.input_rate, m_uav);
 }
 
 template<class Stream_t>

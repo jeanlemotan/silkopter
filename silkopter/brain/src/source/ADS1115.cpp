@@ -99,8 +99,8 @@ constexpr std::chrono::milliseconds MIN_CONVERSION_DURATION(5);
 
 
 
-ADS1115::ADS1115(HAL& hal)
-    : m_hal(hal)
+ADS1115::ADS1115(UAV& uav)
+    : m_uav(uav)
     , m_init_params(new sz::ADS1115::Init_Params())
     , m_config(new sz::ADS1115::Config())
 {
@@ -140,7 +140,7 @@ auto ADS1115::init(rapidjson::Value const& init_params) -> bool
 
 auto ADS1115::init() -> bool
 {
-    m_i2c = m_hal.get_buses().find_by_name<bus::II2C>(m_init_params->bus);
+    m_i2c = m_uav.get_buses().find_by_name<bus::II2C>(m_init_params->bus);
 
     auto i2c = m_i2c.lock();
     if (!i2c)

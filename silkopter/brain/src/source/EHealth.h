@@ -1,6 +1,6 @@
 #pragma once
 
-#include "HAL.h"
+#include "UAV.h"
 #include "common/node/ISource.h"
 #include "common/stream/IAcceleration.h"
 #include "common/bus/IUART.h"
@@ -15,7 +15,7 @@ class EHealth : public ISource
 {
 public:
 
-    EHealth(HAL& hal);
+    EHealth(UAV& uav);
     ~EHealth();
 
     auto init(rapidjson::Value const& init_params) -> bool;
@@ -35,7 +35,7 @@ public:
 private:
     auto init() -> bool;
 
-    HAL& m_hal;
+    UAV& m_uav;
 
     std::weak_ptr<bus::IUART> m_uart;
 

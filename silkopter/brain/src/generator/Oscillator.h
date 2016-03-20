@@ -1,6 +1,6 @@
 #pragma once
 
-#include "HAL.h"
+#include "UAV.h"
 #include "common/stream/IFloat.h"
 #include "common/node/IGenerator.h"
 
@@ -24,7 +24,7 @@ namespace node
 class Oscillator : public IGenerator
 {
 public:
-    Oscillator(HAL& hal);
+    Oscillator(UAV& uav);
 
     auto init(rapidjson::Value const& init_params) -> bool;
     auto get_init_params() const -> rapidjson::Document;
@@ -45,7 +45,7 @@ public:
 private:
     auto init() -> bool;
 
-    HAL& m_hal;
+    UAV& m_uav;
 
     std::shared_ptr<sz::Oscillator::Init_Params> m_init_params;
     std::shared_ptr<sz::Oscillator::Config> m_config;

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "HAL.h"
+#include "UAV.h"
 #include "common/node/ISource.h"
 #include "common/stream/IDistance.h"
 #include "common/bus/II2C.h"
@@ -25,7 +25,7 @@ namespace node
 class SRF02 : public ISource
 {
 public:
-    SRF02(HAL& hal);
+    SRF02(UAV& uav);
 
     auto init(rapidjson::Value const& init_params) -> bool;
     auto get_init_params() const -> rapidjson::Document;
@@ -46,7 +46,7 @@ private:
 
     void trigger(bus::II2C& bus);
 
-    HAL& m_hal;
+    UAV& m_uav;
 
     std::weak_ptr<bus::II2C> m_bus;
 

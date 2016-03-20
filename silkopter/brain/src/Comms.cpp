@@ -72,12 +72,13 @@ struct Comms::Channels
     Video video;
 };
 
-Comms::Comms(HAL& hal)
-    : m_hal(hal)
+Comms::Comms(UAV& uav)
+    : m_uav(uav)
     , m_channels(new Channels())
 {
 }
 
+#ifndef RASPBERRY_PI
 auto Comms::start_udp(uint16_t send_port, uint16_t receive_port) -> bool
 {
     try
@@ -121,6 +122,7 @@ auto Comms::start_udp(uint16_t send_port, uint16_t receive_port) -> bool
 
     return true;
 }
+#endif
 
 auto Comms::start_rfmon(std::string const& interface, uint8_t id) -> bool
 {
@@ -311,28 +313,28 @@ void Comms::gather_telemetry_data()
     }
 
 
-    //pack HAL telemetry
-    if (m_hal_telemetry_data.is_enabled)
+    //pack UAV telemetry
+    if (m_uav_telemetry_data.is_enabled)
     {
-        HAL::Telemetry_Data const& telemetry_data = m_hal.get_telemetry_data();
+        UAV::Telemetry_Data const& telemetry_data = m_uav.get_telemetry_data();
 
-        m_hal_telemetry_data.sample_count++;
-        size_t off = m_hal_telemetry_data.data.size();
+        m_uav_telemetry_data.sample_count++;
+        size_t off = m_uav_telemetry_data.data.size();
 
         auto dt = static_cast<uint32_t>(std::chrono::duration_cast<std::chrono::microseconds>(telemetry_data.total_duration).count());
-        util::serialization::serialize(m_hal_telemetry_data.data, dt, off);
-        util::serialization::serialize(m_hal_telemetry_data.data, telemetry_data.rate, off);
-        util::serialization::serialize(m_hal_telemetry_data.data, static_cast<uint32_t>(telemetry_data.nodes.size()), off);
+        util::serialization::serialize(m_uav_telemetry_data.data, dt, off);
+        util::serialization::serialize(m_uav_telemetry_data.data, telemetry_data.rate, off);
+        util::serialization::serialize(m_uav_telemetry_data.data, static_cast<uint32_t>(telemetry_data.nodes.size()), off);
 
         for (auto const& nt: telemetry_data.nodes)
         {
             auto const& node_name = nt.first;
             auto const& node_telemetry_data = nt.second;
 
-            util::serialization::serialize(m_hal_telemetry_data.data, node_name, off);
+            util::serialization::serialize(m_uav_telemetry_data.data, node_name, off);
             auto dt = static_cast<uint32_t>(std::chrono::duration_cast<std::chrono::microseconds>(node_telemetry_data.process_duration).count());
-            util::serialization::serialize(m_hal_telemetry_data.data, dt, off);
-            util::serialization::serialize(m_hal_telemetry_data.data, node_telemetry_data.process_percentage, off);
+            util::serialization::serialize(m_uav_telemetry_data.data, dt, off);
+            util::serialization::serialize(m_uav_telemetry_data.data, node_telemetry_data.process_percentage, off);
         }
     }
 }
@@ -353,9 +355,9 @@ void Comms::pack_telemetry_data()
         ts.sample_count = 0;
     }
 
-    if (m_hal_telemetry_data.is_enabled)
+    if (m_uav_telemetry_data.is_enabled)
     {
-        auto& t = m_hal_telemetry_data;
+        auto& t = m_uav_telemetry_data;
         if (!t.data.empty() && t.sample_count > 0)
         {
             m_channels->telemetry.begin_pack(comms::Telemetry_Message::STREAM_DATA);
@@ -492,15 +494,15 @@ void Comms::handle_uav_config()
                 return;
             }
         }
-        if (m_hal.set_uav_config(config))
+        if (m_uav.set_uav_config(config))
         {
-            m_hal.save_settings();
+            m_uav.save_settings();
         }
     }
 
     channel.begin_pack(comms::Setup_Message::UAV_CONFIG);
 
-    std::shared_ptr<const Multirotor_Config> config = m_hal.get_specialized_uav_config<Multirotor_Config>();
+    std::shared_ptr<const Multirotor_Config> config = m_uav.get_specialized_uav_config<Multirotor_Config>();
     if (config)
     {
         channel.pack_param(true);
@@ -524,10 +526,10 @@ void Comms::handle_enumerate_node_defs()
 
     //first disable all telemetry because the GS doesn't yet have all the streams
     m_stream_telemetry_data.clear();
-    m_hal_telemetry_data.is_enabled = false;
+    m_uav_telemetry_data.is_enabled = false;
 
     QLOGI("Enumerate node factory");
-    auto nodes = m_hal.get_node_factory().create_all();
+    auto nodes = m_uav.get_node_factory().create_all();
 
     channel.begin_pack(comms::Setup_Message::ENUMERATE_NODE_DEFS);
     channel.pack_param(static_cast<uint32_t>(nodes.size()));
@@ -548,10 +550,10 @@ void Comms::handle_enumerate_nodes()
 
     //first disable all telemetry because the GS doesn't yet have all the streams
     m_stream_telemetry_data.clear();
-    m_hal_telemetry_data.is_enabled = false;
+    m_uav_telemetry_data.is_enabled = false;
 
     QLOGI("Enumerate nodes");
-    auto const& nodes = m_hal.get_nodes().get_all();
+    auto const& nodes = m_uav.get_nodes().get_all();
 
     channel.begin_pack(comms::Setup_Message::ENUMERATE_NODES);
     channel.pack_param(static_cast<uint32_t>(nodes.size()));
@@ -578,7 +580,7 @@ void Comms::handle_get_node_data()
     }
 
     QLOGI("Get node data");
-    auto node = m_hal.get_nodes().find_by_name<node::INode>(name);
+    auto node = m_uav.get_nodes().find_by_name<node::INode>(name);
     if (!node)
     {
         QLOGE("Cannot find node '{}'", name);
@@ -604,7 +606,7 @@ void Comms::handle_node_config()
     }
 
     QLOGI("Node config");
-    auto node = m_hal.get_nodes().find_by_name<node::INode>(name);
+    auto node = m_uav.get_nodes().find_by_name<node::INode>(name);
     if (!node)
     {
         QLOGE("Cannot find node '{}'", name);
@@ -616,7 +618,7 @@ void Comms::handle_node_config()
     {
         node->set_config(config);
     }
-    m_hal.save_settings();
+    m_uav.save_settings();
 
     channel.begin_pack(comms::Setup_Message::NODE_CONFIG);
     channel.pack_param(name);
@@ -637,7 +639,7 @@ void Comms::handle_node_message()
     }
 
 //    QLOGI("Node message");
-    auto node = m_hal.get_nodes().find_by_name<node::INode>(name);
+    auto node = m_uav.get_nodes().find_by_name<node::INode>(name);
     if (!node)
     {
         QLOGE("Cannot find node '{}'", name);
@@ -675,7 +677,7 @@ void Comms::handle_node_input_stream_path()
     }
 
     QLOGI("Node input stream path");
-    auto node = m_hal.get_nodes().find_by_name<node::INode>(name);
+    auto node = m_uav.get_nodes().find_by_name<node::INode>(name);
     if (!node)
     {
         QLOGE("Cannot find node '{}'", name);
@@ -693,7 +695,7 @@ void Comms::handle_node_input_stream_path()
         }
     }
 
-    m_hal.save_settings();
+    m_uav.save_settings();
 
     channel.begin_pack(comms::Setup_Message::NODE_INPUT_STREAM_PATH);
     channel.pack_param(name);
@@ -719,13 +721,13 @@ void Comms::handle_add_node()
     QLOGI("Add node");
     QLOGI("\tAdd node {} of type {}", name, def_name);
 
-    auto node = m_hal.create_node(def_name, name, std::move(init_paramsj));
+    auto node = m_uav.create_node(def_name, name, std::move(init_paramsj));
     if (!node)
     {
         channel.end_pack();
         return;
     }
-    m_hal.save_settings();
+    m_uav.save_settings();
 
     //reply
     channel.begin_pack(comms::Setup_Message::ADD_NODE);
@@ -748,15 +750,15 @@ void Comms::handle_remove_node()
 
     QLOGI("Remove node {}", name);
 
-    auto node = m_hal.get_nodes().find_by_name<node::INode>(name);
+    auto node = m_uav.get_nodes().find_by_name<node::INode>(name);
     if (!node)
     {
         QLOGE("Cannot find node '{}'", name);
         return;
     }
 
-    m_hal.remove_node(node);
-    m_hal.save_settings();
+    m_uav.remove_node(node);
+    m_uav.save_settings();
 
     //reply
     channel.begin_pack(comms::Setup_Message::REMOVE_NODE);
@@ -792,7 +794,7 @@ void Comms::handle_streams_telemetry_active()
 
     if (is_active)
     {
-        auto stream = m_hal.get_streams().find_by_name<stream::IStream>(stream_name);
+        auto stream = m_uav.get_streams().find_by_name<stream::IStream>(stream_name);
         if (stream)
         {
             //add the stream to the telemetry list
@@ -817,7 +819,7 @@ void Comms::handle_streams_telemetry_active()
     channel.end_pack();
 }
 
-void Comms::handle_hal_telemetry_active()
+void Comms::handle_uav_telemetry_active()
 {
     auto& channel = m_channels->setup;
 
@@ -831,13 +833,13 @@ void Comms::handle_hal_telemetry_active()
     bool is_active = false;
     if (channel.unpack_param(is_active))
     {
-        QLOGI("Hal telemetry: {}", is_active ? "ON" : "OFF");
-        m_hal_telemetry_data.is_enabled = is_active;
+        QLOGI("UAV telemetry: {}", is_active ? "ON" : "OFF");
+        m_uav_telemetry_data.is_enabled = is_active;
     }
 
     //respond
-    channel.begin_pack(comms::Setup_Message::HAL_TELEMETRY_ACTIVE);
-    channel.pack_param(m_hal_telemetry_data.is_enabled);
+    channel.begin_pack(comms::Setup_Message::UAV_TELEMETRY_ACTIVE);
+    channel.pack_param(m_uav_telemetry_data.is_enabled);
     channel.end_pack();
 }
 
@@ -909,7 +911,7 @@ void Comms::process()
         case comms::Setup_Message::NODE_INPUT_STREAM_PATH: handle_node_input_stream_path(); break;
 
         case comms::Setup_Message::STREAM_TELEMETRY_ACTIVE: handle_streams_telemetry_active(); break;
-        case comms::Setup_Message::HAL_TELEMETRY_ACTIVE: handle_hal_telemetry_active(); break;
+        case comms::Setup_Message::UAV_TELEMETRY_ACTIVE: handle_uav_telemetry_active(); break;
 
         default: QLOGE("Received unrecognised setup message: {}", static_cast<int>(msg.get())); break;
         }

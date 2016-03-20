@@ -18,8 +18,8 @@ constexpr uint8_t AVRADC_REG_ADC1           = 0x2;
 
 constexpr std::chrono::milliseconds MIN_CONVERSION_DURATION(5);
 
-AVRADC::AVRADC(HAL& hal)
-    : m_hal(hal)
+AVRADC::AVRADC(UAV& uav)
+    : m_uav(uav)
     , m_init_params(new sz::AVRADC::Init_Params())
     , m_config(new sz::AVRADC::Config())
 {
@@ -57,7 +57,7 @@ auto AVRADC::init(rapidjson::Value const& init_params) -> bool
 
 auto AVRADC::init() -> bool
 {
-    m_i2c = m_hal.get_buses().find_by_name<bus::II2C>(m_init_params->bus);
+    m_i2c = m_uav.get_buses().find_by_name<bus::II2C>(m_init_params->bus);
 
     auto i2c = m_i2c.lock();
     if (!i2c)

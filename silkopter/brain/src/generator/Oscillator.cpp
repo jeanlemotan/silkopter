@@ -9,8 +9,8 @@ namespace silk
 namespace node
 {
 
-Oscillator::Oscillator(HAL& hal)
-    : m_hal(hal)
+Oscillator::Oscillator(UAV& uav)
+    : m_uav(uav)
     , m_init_params(new sz::Oscillator::Init_Params())
     , m_config(new sz::Oscillator::Config())
     , m_rnd_distribution(0, 0)

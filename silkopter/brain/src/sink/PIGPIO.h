@@ -1,6 +1,6 @@
 #pragma once
 
-#include "HAL.h"
+#include "UAV.h"
 #include "common/node/ISink.h"
 #include "common/stream/IPWM.h"
 
@@ -24,7 +24,7 @@ namespace node
 class PIGPIO : public ISink
 {
 public:
-    PIGPIO(HAL& hal);
+    PIGPIO(UAV& uav);
     ~PIGPIO();
 
     static const size_t MAX_PWM_CHANNELS = 8;
@@ -47,7 +47,7 @@ public:
 private:
     auto init() -> bool;
 
-    HAL& m_hal;
+    UAV& m_uav;
 
     std::shared_ptr<sz::PIGPIO::Init_Params> m_init_params;
     std::shared_ptr<sz::PIGPIO::Config> m_config;

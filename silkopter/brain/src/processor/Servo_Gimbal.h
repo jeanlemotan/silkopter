@@ -5,7 +5,7 @@
 #include "common/stream/IFloat.h"
 #include "common/stream/IPWM.h"
 #include "common/stream/IMultirotor_Commands.h"
-#include "HAL.h"
+#include "UAV.h"
 
 #include "Sample_Accumulator.h"
 #include "Basic_Output_Stream.h"
@@ -29,7 +29,7 @@ namespace node
 class Servo_Gimbal : public IProcessor
 {
 public:
-    Servo_Gimbal(HAL& hal);
+    Servo_Gimbal(UAV& uav);
 
     auto init(rapidjson::Value const& init_params) -> bool;
     auto get_init_params() const -> rapidjson::Document;
@@ -50,7 +50,7 @@ public:
 private:
     auto init() -> bool;
 
-    HAL& m_hal;
+    UAV& m_uav;
 
     std::shared_ptr<sz::Servo_Gimbal::Init_Params> m_init_params;
     std::shared_ptr<sz::Servo_Gimbal::Config> m_config;

@@ -9,8 +9,8 @@ namespace silk
 namespace node
 {
 
-Throttle_To_PWM::Throttle_To_PWM(HAL& hal)
-    : m_hal(hal)
+Throttle_To_PWM::Throttle_To_PWM(UAV& uav)
+    : m_uav(uav)
     , m_init_params(new sz::Throttle_To_PWM::Init_Params())
     , m_config(new sz::Throttle_To_PWM::Config())
 {
@@ -108,7 +108,7 @@ void Throttle_To_PWM::process()
 
 void Throttle_To_PWM::set_input_stream_path(size_t idx, q::Path const& path)
 {
-    m_accumulators[idx].set_stream_path(0, path, m_output_streams[0]->get_rate(), m_hal);
+    m_accumulators[idx].set_stream_path(0, path, m_output_streams[0]->get_rate(), m_uav);
 }
 
 auto Throttle_To_PWM::set_config(rapidjson::Value const& json) -> bool

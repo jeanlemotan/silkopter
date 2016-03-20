@@ -304,8 +304,8 @@ constexpr size_t MISC_REGISTER_SPEED = 1000000;
 constexpr size_t SENSOR_REGISTER_SPEED = 1000000;
 
 
-MPU9250::MPU9250(HAL& hal)
-    : m_hal(hal)
+MPU9250::MPU9250(UAV& uav)
+    : m_uav(uav)
     , m_init_params(new sz::MPU9250::Init_Params())
     , m_config(new sz::MPU9250::Config())
 {
@@ -489,8 +489,8 @@ auto MPU9250::init(rapidjson::Value const& init_params) -> bool
 
 auto MPU9250::init() -> bool
 {
-    m_i2c = m_hal.get_buses().find_by_name<bus::II2C>(m_init_params->bus);
-    m_spi = m_hal.get_buses().find_by_name<bus::ISPI>(m_init_params->bus);
+    m_i2c = m_uav.get_buses().find_by_name<bus::II2C>(m_init_params->bus);
+    m_spi = m_uav.get_buses().find_by_name<bus::ISPI>(m_init_params->bus);
 
     Buses buses = { m_i2c.lock(), m_spi.lock() };
     if (!buses.i2c && !buses.spi)

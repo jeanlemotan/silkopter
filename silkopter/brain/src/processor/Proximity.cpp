@@ -9,8 +9,8 @@ namespace silk
 namespace node
 {
 
-Proximity::Proximity(HAL& hal)
-    : m_hal(hal)
+Proximity::Proximity(UAV& uav)
+    : m_uav(uav)
     , m_init_params(new sz::Proximity::Init_Params())
     , m_config(new sz::Proximity::Config())
 {
@@ -106,7 +106,7 @@ void Proximity::process()
 
 void Proximity::set_input_stream_path(size_t idx, q::Path const& path)
 {
-    m_accumulators[idx].set_stream_path(0, path, m_output_stream->get_rate(), m_hal);
+    m_accumulators[idx].set_stream_path(0, path, m_output_stream->get_rate(), m_uav);
 }
 
 auto Proximity::set_config(rapidjson::Value const& json) -> bool

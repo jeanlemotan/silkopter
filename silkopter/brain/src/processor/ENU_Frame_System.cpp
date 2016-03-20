@@ -10,8 +10,8 @@ namespace silk
 namespace node
 {
 
-ENU_Frame_System::ENU_Frame_System(HAL& hal)
-    : m_hal(hal)
+ENU_Frame_System::ENU_Frame_System(UAV& uav)
+    : m_uav(uav)
     , m_init_params(new sz::ENU_Frame_System::Init_Params())
     , m_config(new sz::ENU_Frame_System::Config())
 {
@@ -94,7 +94,7 @@ void ENU_Frame_System::process()
 
 void ENU_Frame_System::set_input_stream_path(size_t idx, q::Path const& path)
 {
-    m_accumulator.set_stream_path(idx, path, m_output_stream->get_rate(), m_hal);
+    m_accumulator.set_stream_path(idx, path, m_output_stream->get_rate(), m_uav);
 }
 
 auto ENU_Frame_System::set_config(rapidjson::Value const& json) -> bool

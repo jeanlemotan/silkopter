@@ -9,8 +9,8 @@ namespace silk
 namespace node
 {
 
-Pressure_Velocity::Pressure_Velocity(HAL& hal)
-    : m_hal(hal)
+Pressure_Velocity::Pressure_Velocity(UAV& uav)
+    : m_uav(uav)
     , m_init_params(new sz::Pressure_Velocity::Init_Params())
     , m_config(new sz::Pressure_Velocity::Config())
 {
@@ -98,7 +98,7 @@ void Pressure_Velocity::process()
 
 void Pressure_Velocity::set_input_stream_path(size_t idx, q::Path const& path)
 {
-    m_accumulator.set_stream_path(idx, path, m_output_stream->get_rate(), m_hal);
+    m_accumulator.set_stream_path(idx, path, m_output_stream->get_rate(), m_uav);
 }
 
 auto Pressure_Velocity::set_config(rapidjson::Value const& json) -> bool

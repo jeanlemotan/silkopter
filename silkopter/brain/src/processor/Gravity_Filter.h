@@ -4,7 +4,7 @@
 #include "common/stream/IFrame.h"
 #include "common/stream/IAcceleration.h"
 #include "common/stream/ILinear_Acceleration.h"
-#include "HAL.h"
+#include "UAV.h"
 #include "Sample_Accumulator.h"
 #include "Basic_Output_Stream.h"
 
@@ -26,7 +26,7 @@ namespace node
 class Gravity_Filter : public IProcessor
 {
 public:
-    Gravity_Filter(HAL& hal);
+    Gravity_Filter(UAV& uav);
 
     auto init(rapidjson::Value const& init_params) -> bool;
     auto get_init_params() const -> rapidjson::Document;
@@ -47,7 +47,7 @@ public:
 private:
     auto init() -> bool;
 
-    HAL& m_hal;
+    UAV& m_uav;
 
     std::shared_ptr<sz::Gravity_Filter::Init_Params> m_init_params;
     std::shared_ptr<sz::Gravity_Filter::Config> m_config;

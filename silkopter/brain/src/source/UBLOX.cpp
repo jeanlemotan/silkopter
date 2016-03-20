@@ -244,8 +244,8 @@ struct MON_VER
 #pragma pack(pop)
 
 
-UBLOX::UBLOX(HAL& hal)
-    : m_hal(hal)
+UBLOX::UBLOX(UAV& uav)
+    : m_uav(uav)
     , m_init_params(new sz::UBLOX::Init_Params())
     , m_config(new sz::UBLOX::Config())
 {
@@ -325,9 +325,9 @@ auto UBLOX::init(rapidjson::Value const& init_params) -> bool
 }
 auto UBLOX::init() -> bool
 {
-    m_i2c = m_hal.get_buses().find_by_name<bus::II2C>(m_init_params->bus);
-    m_spi = m_hal.get_buses().find_by_name<bus::ISPI>(m_init_params->bus);
-    m_uart = m_hal.get_buses().find_by_name<bus::IUART>(m_init_params->bus);
+    m_i2c = m_uav.get_buses().find_by_name<bus::II2C>(m_init_params->bus);
+    m_spi = m_uav.get_buses().find_by_name<bus::ISPI>(m_init_params->bus);
+    m_uart = m_uav.get_buses().find_by_name<bus::IUART>(m_init_params->bus);
 
     m_init_params->rate = math::clamp<size_t>(m_init_params->rate, 1, 10);
 

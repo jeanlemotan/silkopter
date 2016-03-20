@@ -123,8 +123,8 @@ constexpr uint8_t RC5T619_AIN0_DATAL	 = 0x77;
 constexpr uint8_t CONVERT_ADC0           = 0x17;
 constexpr uint8_t CONVERT_ADC1           = 0x16;
 
-RC5T619::RC5T619(HAL& hal)
-    : m_hal(hal)
+RC5T619::RC5T619(UAV& uav)
+    : m_uav(uav)
     , m_init_params(new sz::RC5T619::Init_Params())
     , m_config(new sz::RC5T619::Config())
 {
@@ -160,7 +160,7 @@ auto RC5T619::init(rapidjson::Value const& init_params) -> bool
 
 auto RC5T619::init() -> bool
 {
-    m_i2c = m_hal.get_buses().find_by_name<bus::II2C>(m_init_params->bus);
+    m_i2c = m_uav.get_buses().find_by_name<bus::II2C>(m_init_params->bus);
 
     auto i2c = m_i2c.lock();
     if (!i2c)

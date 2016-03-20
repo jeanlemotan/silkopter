@@ -1,6 +1,6 @@
 #pragma once
 
-#include "HAL.h"
+#include "UAV.h"
 #include "common/stream/IAngular_Velocity.h"
 #include "common/stream/IAcceleration.h"
 #include "common/stream/IMagnetic_Field.h"
@@ -33,7 +33,7 @@ namespace node
 class Multirotor_Simulator : public IMultirotor_Simulator
 {
 public:
-    Multirotor_Simulator(HAL& hal);
+    Multirotor_Simulator(UAV& uav);
 
     auto init(rapidjson::Value const& init_params) -> bool;
     auto get_init_params() const -> rapidjson::Document;
@@ -54,7 +54,7 @@ public:
 private:
     auto init() -> bool;
 
-    HAL& m_hal;
+    UAV& m_uav;
 
     std::shared_ptr<sz::Multirotor_Simulator::Init_Params> m_init_params;
     std::shared_ptr<sz::Multirotor_Simulator::Config> m_config;

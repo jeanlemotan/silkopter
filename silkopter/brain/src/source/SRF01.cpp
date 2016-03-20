@@ -24,8 +24,8 @@ constexpr uint8_t CLEAR_ADVANCED_MODE   = 0x63;
 constexpr std::chrono::milliseconds MAX_MEASUREMENT_DURATION(75);
 
 
-SRF01::SRF01(HAL& hal)
-    : m_hal(hal)
+SRF01::SRF01(UAV& uav)
+    : m_uav(uav)
     , m_init_params(new sz::SRF01::Init_Params())
     , m_config(new sz::SRF01::Config())
 {
@@ -60,7 +60,7 @@ auto SRF01::init(rapidjson::Value const& init_params) -> bool
 
 auto SRF01::init() -> bool
 {
-    m_bus = m_hal.get_buses().find_by_name<bus::IUART>(m_init_params->bus);
+    m_bus = m_uav.get_buses().find_by_name<bus::IUART>(m_init_params->bus);
     auto bus = m_bus.lock();
     if (!bus)
     {

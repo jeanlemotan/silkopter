@@ -92,7 +92,6 @@ SOURCES += \
     ../../src/BrainStdAfx.cpp \
     ../../src/Comms.cpp \
     ../../src/main.cpp \
-    ../../src/HAL.cpp \
     ../../src/bus/UART_Linux.cpp \
     ../../src/bus/SPI_Linux.cpp \
     ../../src/bus/I2C_Linux.cpp \ 
@@ -141,7 +140,8 @@ SOURCES += \
     ../../src/processor/ENU_Frame_System.cpp \
     ../../src/source/RaspiCamControl.cpp \
     ../../src/brain/LiPo_Battery.cpp \
-    ../../src/pilot/Multirotor_Pilot.cpp
+    ../../src/pilot/Multirotor_Pilot.cpp \
+    ../../src/UAV.cpp
 
 HEADERS += \
     ../../src/BrainStdAfx.h \
@@ -156,7 +156,6 @@ HEADERS += \
     ../../../libs/physics/constants.h \
     ../../../libs/common/Comm_Data.h \
     ../../../libs/common/Manual_Clock.h \
-    ../../src/HAL.h \
     ../../src/bus/I2C_Linux.h \
     ../../src/bus/SPI_Linux.h \
     ../../src/bus/UART_Linux.h \ 
@@ -291,7 +290,8 @@ HEADERS += \
     ../../../libs/common/config/Multirotor_Config.h \
     ../../../libs/common/config/UAV_Config.h \
     ../../src/pilot/Multirotor_Pilot.h \
-    ../../../libs/common/node/IMultirotor_Simulator.h
+    ../../../libs/common/node/IMultirotor_Simulator.h \
+    ../../src/UAV.h
 
 DISTFILES +=
 

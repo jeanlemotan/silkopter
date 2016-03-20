@@ -18,7 +18,7 @@ class Storage
 {
 public:
     template<size_t N>
-    auto set_stream_path(size_t, q::Path const&, uint32_t, HAL&) -> bool
+    auto set_stream_path(size_t, q::Path const&, uint32_t, UAV&) -> bool
     {
         return false;
     }
@@ -98,14 +98,14 @@ public:
     }
 
     template<size_t N>
-    auto set_stream_path(size_t idx, q::Path const& path, uint32_t desired_rate, HAL& hal) -> bool
+    auto set_stream_path(size_t idx, q::Path const& path, uint32_t desired_rate, UAV& uav) -> bool
     {
         if (idx == N)
         {
             m_stream_path.clear();
             m_stream.reset();
 
-            auto stream = hal.get_streams().find_by_name<Stream>(path.get_as<std::string>());
+            auto stream = uav.get_streams().find_by_name<Stream>(path.get_as<std::string>());
             if (stream)
             {
                 if (desired_rate > 0 && stream->get_rate() != desired_rate)
@@ -121,7 +121,7 @@ public:
         }
         else
         {
-            return Parent_t::template set_stream_path<N + 1>(idx, path, desired_rate, hal);
+            return Parent_t::template set_stream_path<N + 1>(idx, path, desired_rate, uav);
         }
     }
     template<size_t N>
@@ -208,9 +208,9 @@ public:
         m_storage.clear_streams();
     }
 
-    void set_stream_path(size_t idx, q::Path const& path, uint32_t desired_rate, HAL& hal)
+    void set_stream_path(size_t idx, q::Path const& path, uint32_t desired_rate, UAV& uav)
     {
-        m_storage.template set_stream_path<0>(idx, path, desired_rate, hal);
+        m_storage.template set_stream_path<0>(idx, path, desired_rate, uav);
     }
     auto get_stream_path(size_t idx) const -> q::Path const&
     {

@@ -26,8 +26,8 @@ namespace silk
 namespace node
 {
 
-PIGPIO::PIGPIO(HAL& hal)
-    : m_hal(hal)
+PIGPIO::PIGPIO(UAV& uav)
+    : m_uav(uav)
     , m_init_params(new sz::PIGPIO::Init_Params())
     , m_config(new sz::PIGPIO::Config())
 {
@@ -251,7 +251,7 @@ void PIGPIO::process()
 
 void PIGPIO::set_input_stream_path(size_t idx, q::Path const& path)
 {
-    auto input_stream = m_hal.get_streams().find_by_name<stream::IPWM>(path.get_as<std::string>());
+    auto input_stream = m_uav.get_streams().find_by_name<stream::IPWM>(path.get_as<std::string>());
     auto rate = input_stream ? input_stream->get_rate() : 0u;
     if (rate != m_pwm_channels[idx].rate)
     {

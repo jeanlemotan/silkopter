@@ -96,8 +96,8 @@ void KF_ECEF::Delayer<Value>::push_back(Value const& value)
 
 ///////////////////////////////////////////////////////////////////////
 
-KF_ECEF::KF_ECEF(HAL& hal)
-    : m_hal(hal)
+KF_ECEF::KF_ECEF(UAV& uav)
+    : m_uav(uav)
     , m_init_params(new sz::KF_ECEF::Init_Params())
     , m_config(new sz::KF_ECEF::Config())
 {
@@ -264,7 +264,7 @@ void KF_ECEF::process()
 
 void KF_ECEF::set_input_stream_path(size_t idx, q::Path const& path)
 {
-    m_accumulator.set_stream_path(idx, path, m_init_params->rate, m_hal);
+    m_accumulator.set_stream_path(idx, path, m_init_params->rate, m_uav);
 }
 
 auto KF_ECEF::set_config(rapidjson::Value const& json) -> bool

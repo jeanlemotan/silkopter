@@ -1,6 +1,6 @@
 #pragma once
 
-#include "HAL.h"
+#include "UAV.h"
 #include "common/node/ISink.h"
 #include "common/stream/IPWM.h"
 #include "common/bus/II2C.h"
@@ -24,7 +24,7 @@ namespace node
 class PCA9685 : public ISink
 {
 public:
-    PCA9685(HAL& hal);
+    PCA9685(UAV& uav);
     ~PCA9685();
 
     static const size_t MAX_PWM_CHANNELS = 8;
@@ -55,7 +55,7 @@ private:
 
     auto restart(bus::II2C& i2c) -> bool;
 
-    HAL& m_hal;
+    UAV& m_uav;
 
     std::weak_ptr<bus::II2C> m_i2c;
 

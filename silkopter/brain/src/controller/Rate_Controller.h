@@ -3,7 +3,7 @@
 #include "common/node/IController.h"
 #include "common/stream/IAngular_Velocity.h"
 #include "common/stream/ITorque.h"
-#include "HAL.h"
+#include "UAV.h"
 
 #include "utils/PID.h"
 #include "Sample_Accumulator.h"
@@ -28,7 +28,7 @@ namespace node
 class Rate_Controller : public IController
 {
 public:
-    Rate_Controller(HAL& hal);
+    Rate_Controller(UAV& uav);
 
     auto init(rapidjson::Value const& init_params) -> bool;
     auto get_init_params() const -> rapidjson::Document;
@@ -49,7 +49,7 @@ public:
 private:
     auto init() -> bool;
 
-    HAL& m_hal;
+    UAV& m_uav;
 
     std::shared_ptr<sz::Rate_Controller::Init_Params> m_init_params;
     std::shared_ptr<sz::Rate_Controller::Config> m_config;

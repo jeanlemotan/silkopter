@@ -36,8 +36,8 @@ constexpr uint8_t FORCE_AUTOTUNE_RESTART    = 0x60;
 constexpr std::chrono::milliseconds MAX_MEASUREMENT_DURATION(100);
 
 
-SRF02::SRF02(HAL& hal)
-    : m_hal(hal)
+SRF02::SRF02(UAV& uav)
+    : m_uav(uav)
     , m_init_params(new sz::SRF02::Init_Params())
     , m_config(new sz::SRF02::Config())
 {
@@ -72,7 +72,7 @@ auto SRF02::init(rapidjson::Value const& init_params) -> bool
 
 auto SRF02::init() -> bool
 {
-    m_bus = m_hal.get_buses().find_by_name<bus::II2C>(m_init_params->bus);
+    m_bus = m_uav.get_buses().find_by_name<bus::II2C>(m_init_params->bus);
     auto bus = m_bus.lock();
     if (!bus)
     {

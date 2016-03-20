@@ -1,6 +1,6 @@
 #pragma once
 
-#include "HAL.h"
+#include "UAV.h"
 #include "common/node/ISource.h"
 #include "common/stream/IADC.h"
 #include "common/bus/II2C.h"
@@ -26,7 +26,7 @@ namespace node
 class AVRADC : public ISource
 {
 public:
-    AVRADC(HAL& hal);
+    AVRADC(UAV& uav);
 
     auto init(rapidjson::Value const& init_params) -> bool;
     auto get_init_params() const -> rapidjson::Document;
@@ -45,7 +45,7 @@ public:
 private:
     auto init() -> bool;
 
-    HAL& m_hal;
+    UAV& m_uav;
     std::weak_ptr<bus::II2C> m_i2c;
 
     std::shared_ptr<sz::AVRADC::Init_Params> m_init_params;

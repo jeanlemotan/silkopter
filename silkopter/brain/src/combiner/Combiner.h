@@ -1,9 +1,9 @@
 #pragma once
 
-#include "HAL.h"
+#include "UAV.h"
 #include "common/node/ICombiner.h"
 
-#include "HAL.h"
+#include "UAV.h"
 
 #include "Sample_Accumulator.h"
 #include "Basic_Output_Stream.h"
@@ -31,7 +31,7 @@ template<class Stream_t>
 class Combiner : public ICombiner
 {
 public:
-    Combiner(HAL& hal);
+    Combiner(UAV& uav);
 
     auto init(rapidjson::Value const& init_params) -> bool;
     auto get_init_params() const -> rapidjson::Document;
@@ -52,7 +52,7 @@ public:
 private:
     auto init() -> bool;
 
-    HAL& m_hal;
+    UAV& m_uav;
 
     std::shared_ptr<sz::Combiner::Init_Params> m_init_params;
     std::shared_ptr<sz::Combiner::Config> m_config;
@@ -71,8 +71,8 @@ private:
 };
 
 template<class Stream_t>
-Combiner<Stream_t>::Combiner(HAL& hal)
-    : m_hal(hal)
+Combiner<Stream_t>::Combiner(UAV& uav)
+    : m_uav(uav)
     , m_init_params(new sz::Combiner::Init_Params())
     , m_config(new sz::Combiner::Config())
 {
@@ -175,7 +175,7 @@ void Combiner<Stream_t>::process()
 template<class Stream_t>
 void Combiner<Stream_t>::set_input_stream_path(size_t idx, q::Path const& path)
 {
-    m_accumulator.set_stream_path(idx, path, m_output_stream->get_rate(), m_hal);
+    m_accumulator.set_stream_path(idx, path, m_output_stream->get_rate(), m_uav);
 }
 
 template<class Stream_t>

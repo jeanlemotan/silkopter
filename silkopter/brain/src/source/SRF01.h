@@ -1,6 +1,6 @@
 #pragma once
 
-#include "HAL.h"
+#include "UAV.h"
 #include "common/node/ISource.h"
 #include "common/stream/IDistance.h"
 #include "common/bus/IUART.h"
@@ -25,7 +25,7 @@ namespace node
 class SRF01 : public ISource
 {
 public:
-    SRF01(HAL& hal);
+    SRF01(UAV& uav);
 
     auto init(rapidjson::Value const& init_params) -> bool;
     auto get_init_params() const -> rapidjson::Document;
@@ -51,7 +51,7 @@ private:
 
     void trigger(bus::IUART& bus);
 
-    HAL& m_hal;
+    UAV& m_uav;
 
     std::weak_ptr<bus::IUART> m_bus;
 

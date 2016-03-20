@@ -1,6 +1,6 @@
 #pragma once
 
-#include "HAL.h"
+#include "UAV.h"
 #include "common/stream/IPressure.h"
 #include "common/stream/IVelocity.h"
 #include "common/node/IProcessor.h"
@@ -25,7 +25,7 @@ namespace node
 class Pressure_Velocity : public IProcessor
 {
 public:
-    Pressure_Velocity(HAL& hal);
+    Pressure_Velocity(UAV& uav);
 
     auto init(rapidjson::Value const& init_params) -> bool;
     auto get_init_params() const -> rapidjson::Document;
@@ -46,7 +46,7 @@ public:
 private:
     auto init() -> bool;
 
-    HAL& m_hal;
+    UAV& m_uav;
 
     std::shared_ptr<sz::Pressure_Velocity::Init_Params> m_init_params;
     std::shared_ptr<sz::Pressure_Velocity::Config> m_config;

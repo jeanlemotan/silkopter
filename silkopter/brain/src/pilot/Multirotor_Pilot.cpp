@@ -9,8 +9,8 @@ namespace silk
 namespace node
 {
 
-Multirotor_Pilot::Multirotor_Pilot(HAL& hal, Comms& comms)
-    : m_hal(hal)
+Multirotor_Pilot::Multirotor_Pilot(UAV& uav, Comms& comms)
+    : m_uav(uav)
     , m_comms(comms)
     , m_init_params(new sz::Multirotor_Pilot::Init_Params())
     , m_config(new sz::Multirotor_Pilot::Config())
@@ -127,11 +127,11 @@ void Multirotor_Pilot::set_input_stream_path(size_t idx, q::Path const& path)
 {
     if (idx == 0)
     {
-        m_state_accumulator.set_stream_path(0, path, m_init_params->state_rate, m_hal);
+        m_state_accumulator.set_stream_path(0, path, m_init_params->state_rate, m_uav);
     }
     else
     {
-        m_video_accumulator.set_stream_path(0, path, m_init_params->video_rate, m_hal);
+        m_video_accumulator.set_stream_path(0, path, m_init_params->video_rate, m_uav);
     }
 }
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "HAL.h"
+#include "UAV.h"
 #include "common/stream/IADC.h"
 #include "common/stream/IVoltage.h"
 #include "common/node/IProcessor.h"
@@ -25,7 +25,7 @@ namespace node
 class ADC_Voltmeter : public IProcessor
 {
 public:
-    ADC_Voltmeter(HAL& hal);
+    ADC_Voltmeter(UAV& uav);
 
     auto init(rapidjson::Value const& init_params) -> bool;
     auto get_init_params() const -> rapidjson::Document;
@@ -46,7 +46,7 @@ public:
 private:
     auto init() -> bool;
 
-    HAL& m_hal;
+    UAV& m_uav;
 
     std::shared_ptr<sz::ADC_Voltmeter::Init_Params> m_init_params;
     std::shared_ptr<sz::ADC_Voltmeter::Config> m_config;

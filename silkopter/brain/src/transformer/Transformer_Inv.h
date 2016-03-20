@@ -1,6 +1,6 @@
 #pragma once
 
-#include "HAL.h"
+#include "UAV.h"
 #include "common/node/ITransformer.h"
 #include "common/stream/IFrame.h"
 
@@ -19,7 +19,7 @@ template<class In_Stream_t, class Out_Stream_t, class Frame_Stream_t>
 class Transformer_Inv : public ITransformer
 {
 public:
-    Transformer_Inv(HAL& hal);
+    Transformer_Inv(UAV& uav);
 
     auto init(rapidjson::Value const& init_params) -> bool;
     auto get_init_params() const -> rapidjson::Document;
@@ -40,7 +40,7 @@ public:
 private:
     auto init() -> bool;
 
-    HAL& m_hal;
+    UAV& m_uav;
 
     sz::Transformer::Init_Params m_init_params;
     sz::Transformer::Config m_config;
@@ -53,8 +53,8 @@ private:
 
 
 template<class In_Stream_t, class Out_Stream_t, class Frame_Stream_t>
-Transformer_Inv<In_Stream_t, Out_Stream_t, Frame_Stream_t>::Transformer_Inv(HAL& hal)
-    : m_hal(hal)
+Transformer_Inv<In_Stream_t, Out_Stream_t, Frame_Stream_t>::Transformer_Inv(UAV& uav)
+    : m_uav(uav)
 {
     static_assert(In_Stream_t::SEMANTIC == Out_Stream_t::SEMANTIC, "Both streams need to have the same semantic");
     static_assert(In_Stream_t::SPACE == Frame_Stream_t::SPACE, "Bad Input stream or Frame");
@@ -104,7 +104,7 @@ auto Transformer_Inv<In_Stream_t, Out_Stream_t, Frame_Stream_t>::get_init_params
 template<class In_Stream_t, class Out_Stream_t, class Frame_Stream_t>
 void Transformer_Inv<In_Stream_t, Out_Stream_t, Frame_Stream_t>::set_input_stream_path(size_t idx, q::Path const& path)
 {
-    m_accumulator.set_stream_path(idx, path, m_output_stream->get_rate(), m_hal);
+    m_accumulator.set_stream_path(idx, path, m_output_stream->get_rate(), m_uav);
 }
 
 template<class In_Stream_t, class Out_Stream_t, class Frame_Stream_t>

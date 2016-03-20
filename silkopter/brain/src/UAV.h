@@ -13,7 +13,7 @@
 namespace silk
 {
 
-class HAL;
+class UAV;
 
 template<class Base>
 class Factory : q::util::Noncopyable
@@ -64,12 +64,12 @@ private:
 class Comms;
 
 
-class HAL : q::util::Noncopyable
+class UAV : q::util::Noncopyable
 {
     friend class Comms;
 public:
-    HAL();
-    ~HAL();
+    UAV();
+    ~UAV();
 
     auto init(Comms& comms) -> bool;
     void process();
@@ -83,7 +83,7 @@ public:
     template<class Config>
     auto get_specialized_uav_config() const   -> std::shared_ptr<const Config>;
 
-    q::util::Signal<void(HAL&)> config_changed_signal;
+    q::util::Signal<void(UAV&)> config_changed_signal;
 
     auto get_bus_factory()          -> const Factory<bus::IBus>&;
     auto get_node_factory()         -> const Factory<node::INode>&;
@@ -148,7 +148,7 @@ private:
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
 template<class Config>
-auto HAL::get_specialized_uav_config() const   -> std::shared_ptr<const Config>
+auto UAV::get_specialized_uav_config() const   -> std::shared_ptr<const Config>
 {
     std::shared_ptr<const UAV_Config> config = get_uav_config();
     return std::dynamic_pointer_cast<const Config>(config);
@@ -202,7 +202,7 @@ template<class Base>
 template <class T, typename... Params>
 void Factory<Base>::add(std::string const& class_name, Params&&... params)
 {
-//    T instance(hal);
+//    T instance(uav);
 
 //    //write the jsons for testing - to see the structure
 //    {

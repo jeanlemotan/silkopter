@@ -154,14 +154,15 @@ HEADERS += \
     ../../../libs/utils/radiotap/ieee80211_radiotap.h \
     ../../../libs/utils/radiotap/radiotap.h \
     ../../../libs/common/node/ICombiner.h \
-    ../../src/CommsQMLProxy.h \
-    ../../src/OSQMLProxy.h \
-    ../../src/MenusQMLProxy.h \
     ../../src/Nodes.h \
     ../../../libs/common/config/Multirotor_Config.h \
     ../../../libs/common/config/UAV_Config.h \
     ../../../libs/common/stream/IMultirotor_Commands.h \
-    ../../../libs/common/stream/IMultirotor_State.h
+    ../../../libs/common/stream/IMultirotor_State.h \
+    ../../src/Comms_QMLProxy.h \
+    ../../src/Menus_QMLProxy.h \
+    ../../src/OS_QMLProxy.h \
+    ../../src/UAV_QMLProxy.h
 
 SOURCES += \
     ../../src/main.cpp \
@@ -174,9 +175,10 @@ SOURCES += \
     ../../../libs/utils/RCP.cpp \
     ../../../libs/utils/RCP_RFMON_Socket.cpp \
     ../../../libs/utils/radiotap/radiotap.cpp \
-    ../../src/CommsQMLProxy.cpp \
-    ../../src/OSQMLProxy.cpp \
-    ../../src/MenusQMLProxy.cpp
+    ../../src/Comms_QMLProxy.cpp \
+    ../../src/Menus_QMLProxy.cpp \
+    ../../src/OS_QMLProxy.cpp \
+    ../../src/UAV_QMLProxy.cpp
 
 DISTFILES += \
     ../../src/node.png \

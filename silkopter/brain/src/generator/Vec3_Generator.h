@@ -1,6 +1,6 @@
 #pragma once
 
-#include "HAL.h"
+#include "UAV.h"
 #include "common/node/IGenerator.h"
 #include "generator/Oscillator.h"
 
@@ -16,7 +16,7 @@ template<class Stream_t>
 class Vec3_Generator : public IGenerator
 {
 public:
-    Vec3_Generator(HAL& hal);
+    Vec3_Generator(UAV& uav);
 
     auto init(rapidjson::Value const& init_params) -> bool;
     auto get_init_params() const -> rapidjson::Document;
@@ -37,7 +37,7 @@ public:
 private:
     auto init() -> bool;
 
-    HAL& m_hal;
+    UAV& m_uav;
 
     sz::Vec3_Generator::Init_Params m_init_params;
     sz::Vec3_Generator::Config m_config;
@@ -52,8 +52,8 @@ private:
 
 
 template<class Stream_t>
-Vec3_Generator<Stream_t>::Vec3_Generator(HAL& hal)
-    : m_hal(hal)
+Vec3_Generator<Stream_t>::Vec3_Generator(UAV& uav)
+    : m_uav(uav)
 {
     m_output_stream = std::make_shared<Output_Stream>();
 }
@@ -113,7 +113,7 @@ void Vec3_Generator<Stream_t>::set_input_stream_path(size_t idx, q::Path const& 
 
     char name[3] = { 'x', 'y', 'z' };
 
-    auto stream = m_hal.get_streams().template find_by_name<stream::IFloat>(path.get_as<std::string>());
+    auto stream = m_uav.get_streams().template find_by_name<stream::IFloat>(path.get_as<std::string>());
     if (stream && stream->get_rate() != m_output_stream->get_rate())
     {
         QLOGW("Bad {} modulation stream '{}'. Expected rate {}Hz, got {}Hz", name[idx], path, m_output_stream->get_rate(), stream->get_rate());

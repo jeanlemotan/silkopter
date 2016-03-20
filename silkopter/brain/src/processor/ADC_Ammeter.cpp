@@ -9,8 +9,8 @@ namespace silk
 namespace node
 {
 
-ADC_Ammeter::ADC_Ammeter(HAL& hal)
-    : m_hal(hal)
+ADC_Ammeter::ADC_Ammeter(UAV& uav)
+    : m_uav(uav)
     , m_init_params(new sz::ADC_Ammeter::Init_Params())
     , m_config(new sz::ADC_Ammeter::Config())
 {
@@ -88,7 +88,7 @@ void ADC_Ammeter::process()
 
 void ADC_Ammeter::set_input_stream_path(size_t idx, q::Path const& path)
 {
-    m_accumulator.set_stream_path(idx, path, m_output_stream->get_rate(), m_hal);
+    m_accumulator.set_stream_path(idx, path, m_output_stream->get_rate(), m_uav);
 }
 
 auto ADC_Ammeter::set_config(rapidjson::Value const& json) -> bool

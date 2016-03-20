@@ -9,8 +9,8 @@ namespace silk
 namespace node
 {
 
-ADC_Voltmeter::ADC_Voltmeter(HAL& hal)
-    : m_hal(hal)
+ADC_Voltmeter::ADC_Voltmeter(UAV& uav)
+    : m_uav(uav)
     , m_init_params(new sz::ADC_Voltmeter::Init_Params())
     , m_config(new sz::ADC_Voltmeter::Config())
 {
@@ -88,7 +88,7 @@ void ADC_Voltmeter::process()
 
 void ADC_Voltmeter::set_input_stream_path(size_t idx, q::Path const& path)
 {
-    m_accumulator.set_stream_path(idx, path, m_output_stream->get_rate(), m_hal);
+    m_accumulator.set_stream_path(idx, path, m_output_stream->get_rate(), m_uav);
 }
 
 auto ADC_Voltmeter::set_config(rapidjson::Value const& json) -> bool

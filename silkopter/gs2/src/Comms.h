@@ -172,7 +172,7 @@ public:
 
     void request_node_config(std::string const& name);
 
-    void request_uavi_config();
+    void request_uav_config();
     q::util::Signal<void(boost::optional<silk::UAV_Config&> config)> sig_uav_config_received;
 
     void process_rcp();

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "HAL.h"
+#include "UAV.h"
 #include "common/stream/IThrottle.h"
 #include "common/stream/IPWM.h"
 #include "common/node/IProcessor.h"
@@ -25,7 +25,7 @@ namespace node
 class Throttle_To_PWM : public IProcessor
 {
 public:
-    Throttle_To_PWM(HAL& hal);
+    Throttle_To_PWM(UAV& uav);
 
     auto init(rapidjson::Value const& init_params) -> bool;
     auto get_init_params() const -> rapidjson::Document;
@@ -46,7 +46,7 @@ public:
 private:
     auto init() -> bool;
 
-    HAL& m_hal;
+    UAV& m_uav;
 
     std::shared_ptr<sz::Throttle_To_PWM::Init_Params> m_init_params;
     std::shared_ptr<sz::Throttle_To_PWM::Config> m_config;

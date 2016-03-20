@@ -1,27 +1,27 @@
-#include "CommsQMLProxy.h"
+#include "Comms_QMLProxy.h"
 #include "utils/RCP_RFMON_Socket.h"
 
-CommsQMLProxy::CommsQMLProxy(QObject *parent)
+Comms_QMLProxy::Comms_QMLProxy(QObject *parent)
     : QObject(parent)
 {
 
 }
 
-void CommsQMLProxy::init(silk::Comms& comms)
+void Comms_QMLProxy::init(silk::Comms& comms)
 {
     m_comms = &comms;
 }
 
-CommsQMLProxy::ConnectionStatus CommsQMLProxy::getConnectionStatus() const
+Comms_QMLProxy::ConnectionStatus Comms_QMLProxy::getConnectionStatus() const
 {
     return m_comms->is_connected() ? ConnectionStatus::CONNECTED : ConnectionStatus::DISCONNECTED;
 }
 
-CommsQMLProxy::ConnectionType CommsQMLProxy::getConnectionType() const
+Comms_QMLProxy::ConnectionType Comms_QMLProxy::getConnectionType() const
 {
     return m_connectionType;
 }
-void CommsQMLProxy::setConnectionType(ConnectionType type)
+void Comms_QMLProxy::setConnectionType(ConnectionType type)
 {
     if (m_connectionType != type)
     {
@@ -31,7 +31,7 @@ void CommsQMLProxy::setConnectionType(ConnectionType type)
     }
 }
 
-void CommsQMLProxy::connect()
+void Comms_QMLProxy::connect()
 {
     disconnect();
 
@@ -46,7 +46,7 @@ void CommsQMLProxy::connect()
 
     emit connectionStatusChanged(getConnectionStatus());
 }
-void CommsQMLProxy::disconnect()
+void Comms_QMLProxy::disconnect()
 {
     if (getConnectionStatus() != ConnectionStatus::DISCONNECTED)
     {

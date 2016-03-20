@@ -113,8 +113,8 @@ static bool set_connection_enabled(Connection_ptr const& connection, bool yes)
 
 #endif
 
-Raspicam::Raspicam(HAL& hal)
-    : m_hal(hal)
+Raspicam::Raspicam(UAV& uav)
+    : m_uav(uav)
     , m_init_params(new sz::Raspicam::Init_Params())
     , m_config(new sz::Raspicam::Config())
 {

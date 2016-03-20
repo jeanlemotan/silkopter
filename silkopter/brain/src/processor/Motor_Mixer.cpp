@@ -9,8 +9,8 @@ namespace silk
 namespace node
 {
 
-Motor_Mixer::Motor_Mixer(HAL& hal)
-    : m_hal(hal)
+Motor_Mixer::Motor_Mixer(UAV& uav)
+    : m_uav(uav)
     , m_init_params(new sz::Motor_Mixer::Init_Params())
     , m_config(new sz::Motor_Mixer::Config())
 {
@@ -40,7 +40,7 @@ auto Motor_Mixer::init() -> bool
         QLOGE("Bad rate: {}Hz", m_init_params->rate);
         return false;
     }
-    std::shared_ptr<const Multirotor_Config> multirotor_config = m_hal.get_specialized_uav_config<Multirotor_Config>();
+    std::shared_ptr<const Multirotor_Config> multirotor_config = m_uav.get_specialized_uav_config<Multirotor_Config>();
     if (!multirotor_config)
     {
         QLOGE("No multirotor config found");
@@ -113,7 +113,7 @@ void Motor_Mixer::process()
         os->samples.clear();
     }
 
-    std::shared_ptr<const Multirotor_Config> multirotor_config = m_hal.get_specialized_uav_config<Multirotor_Config>();
+    std::shared_ptr<const Multirotor_Config> multirotor_config = m_uav.get_specialized_uav_config<Multirotor_Config>();
     if (!multirotor_config)
     {
         return;
@@ -430,7 +430,7 @@ void Motor_Mixer::compute_throttles(Multirotor_Config const& multirotor_config, 
 
 void Motor_Mixer::set_input_stream_path(size_t idx, q::Path const& path)
 {
-    m_accumulator.set_stream_path(idx, path, m_init_params->rate, m_hal);
+    m_accumulator.set_stream_path(idx, path, m_init_params->rate, m_uav);
 }
 
 auto Motor_Mixer::set_config(rapidjson::Value const& json) -> bool

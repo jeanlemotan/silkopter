@@ -3,7 +3,7 @@
 #include "common/node/IProcessor.h"
 #include "common/stream/IFrame.h"
 #include "common/stream/IPosition.h"
-#include "HAL.h"
+#include "UAV.h"
 #include "Sample_Accumulator.h"
 #include "Basic_Output_Stream.h"
 
@@ -25,7 +25,7 @@ namespace node
 class ENU_Frame_System : public IProcessor
 {
 public:
-    ENU_Frame_System(HAL& hal);
+    ENU_Frame_System(UAV& uav);
 
     auto init(rapidjson::Value const& init_params) -> bool;
     auto get_init_params() const -> rapidjson::Document;
@@ -46,7 +46,7 @@ public:
 private:
     auto init() -> bool;
 
-    HAL& m_hal;
+    UAV& m_uav;
 
     std::shared_ptr<sz::ENU_Frame_System::Init_Params> m_init_params;
     std::shared_ptr<sz::ENU_Frame_System::Config> m_config;

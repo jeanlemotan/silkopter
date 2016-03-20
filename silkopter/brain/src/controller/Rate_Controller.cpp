@@ -10,8 +10,8 @@ namespace silk
 namespace node
 {
 
-Rate_Controller::Rate_Controller(HAL& hal)
-    : m_hal(hal)
+Rate_Controller::Rate_Controller(UAV& uav)
+    : m_uav(uav)
     , m_init_params(new sz::Rate_Controller::Init_Params())
     , m_config(new sz::Rate_Controller::Config())
 {
@@ -75,7 +75,7 @@ void Rate_Controller::process()
 
     m_output_stream->clear();
 
-    std::shared_ptr<const Multirotor_Config> multirotor_config = m_hal.get_specialized_uav_config<Multirotor_Config>();
+    std::shared_ptr<const Multirotor_Config> multirotor_config = m_uav.get_specialized_uav_config<Multirotor_Config>();
     if (!multirotor_config)
     {
         return;
@@ -126,7 +126,7 @@ math::vec3f Rate_Controller::compute_feedback(stream::IAngular_Velocity::Value c
 
 void Rate_Controller::set_input_stream_path(size_t idx, q::Path const& path)
 {
-    m_accumulator.set_stream_path(idx, path, m_output_stream->get_rate(), m_hal);
+    m_accumulator.set_stream_path(idx, path, m_output_stream->get_rate(), m_uav);
 }
 
 auto Rate_Controller::set_config(rapidjson::Value const& json) -> bool

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "HAL.h"
+#include "UAV.h"
 #include "common/node/ISource.h"
 #include "common/stream/IPosition.h"
 #include "common/stream/IVelocity.h"
@@ -30,7 +30,7 @@ class UBLOX : public ISource
 {
 public:
 
-    UBLOX(HAL& hal);
+    UBLOX(UAV& uav);
     ~UBLOX();
 
     auto init(rapidjson::Value const& init_params) -> bool;
@@ -50,7 +50,7 @@ public:
 private:
     auto init() -> bool;
 
-    HAL& m_hal;
+    UAV& m_uav;
 
     std::weak_ptr<bus::II2C> m_i2c;
     std::weak_ptr<bus::ISPI> m_spi;

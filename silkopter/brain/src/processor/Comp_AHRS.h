@@ -5,7 +5,7 @@
 #include "common/stream/IAcceleration.h"
 #include "common/stream/IMagnetic_Field.h"
 #include "common/stream/IFrame.h"
-#include "HAL.h"
+#include "UAV.h"
 
 #include "Sample_Accumulator.h"
 #include "Basic_Output_Stream.h"
@@ -30,7 +30,7 @@ namespace node
 class Comp_AHRS : public IProcessor
 {
 public:
-    Comp_AHRS(HAL& hal);
+    Comp_AHRS(UAV& uav);
 
     auto init(rapidjson::Value const& init_params) -> bool;
     auto get_init_params() const -> rapidjson::Document;
@@ -51,7 +51,7 @@ public:
 private:
     auto init() -> bool;
 
-    HAL& m_hal;
+    UAV& m_uav;
 
     std::shared_ptr<sz::Comp_AHRS::Init_Params> m_init_params;
     std::shared_ptr<sz::Comp_AHRS::Config> m_config;

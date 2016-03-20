@@ -9,8 +9,8 @@ namespace silk
 namespace node
 {
 
-Comp_AHRS::Comp_AHRS(HAL& hal)
-    : m_hal(hal)
+Comp_AHRS::Comp_AHRS(UAV& uav)
+    : m_uav(uav)
     , m_init_params(new sz::Comp_AHRS::Init_Params())
     , m_config(new sz::Comp_AHRS::Config())
 {
@@ -163,7 +163,7 @@ void Comp_AHRS::process()
 
 void Comp_AHRS::set_input_stream_path(size_t idx, q::Path const& path)
 {
-    m_accumulator.set_stream_path(idx, path, m_output_stream->get_rate(), m_hal);
+    m_accumulator.set_stream_path(idx, path, m_output_stream->get_rate(), m_uav);
 }
 
 auto Comp_AHRS::set_config(rapidjson::Value const& json) -> bool

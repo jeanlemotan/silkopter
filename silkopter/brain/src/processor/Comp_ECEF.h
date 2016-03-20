@@ -7,7 +7,7 @@
 #include "common/stream/IPressure.h"
 #include "common/stream/IFrame.h"
 
-#include "HAL.h"
+#include "UAV.h"
 
 #include "Sample_Accumulator.h"
 #include "Basic_Output_Stream.h"
@@ -31,7 +31,7 @@ namespace node
 class Comp_ECEF : public IProcessor
 {
 public:
-    Comp_ECEF(HAL& hal);
+    Comp_ECEF(UAV& uav);
 
     auto init(rapidjson::Value const& init_params) -> bool;
     auto get_init_params() const -> rapidjson::Document;
@@ -52,7 +52,7 @@ public:
 private:
     auto init() -> bool;
 
-    HAL& m_hal;
+    UAV& m_uav;
 
     std::shared_ptr<sz::Comp_ECEF::Init_Params> m_init_params;
     std::shared_ptr<sz::Comp_ECEF::Config> m_config;

@@ -7,7 +7,7 @@
 #include "common/stream/IVideo.h"
 
 #include "Comms.h"
-#include "HAL.h"
+#include "UAV.h"
 
 #include "Sample_Accumulator.h"
 #include "Basic_Output_Stream.h"
@@ -30,7 +30,7 @@ namespace node
 class Multirotor_Pilot : public IPilot
 {
 public:
-    Multirotor_Pilot(HAL& hal, Comms& comms);
+    Multirotor_Pilot(UAV& uav, Comms& comms);
 
     auto init(rapidjson::Value const& init_params) -> bool;
     auto get_init_params() const -> rapidjson::Document;
@@ -51,7 +51,7 @@ public:
 private:
     auto init() -> bool;
 
-    HAL& m_hal;
+    UAV& m_uav;
     Comms& m_comms;
 
     stream::IMultirotor_Commands::Value m_last_commands_value;

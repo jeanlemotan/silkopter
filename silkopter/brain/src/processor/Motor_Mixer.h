@@ -5,7 +5,7 @@
 #include "common/stream/IFloat.h"
 #include "common/stream/IThrottle.h"
 
-#include "HAL.h"
+#include "UAV.h"
 
 #include "Sample_Accumulator.h"
 
@@ -27,7 +27,7 @@ namespace node
 class Motor_Mixer : public IProcessor
 {
 public:
-    Motor_Mixer(HAL& hal);
+    Motor_Mixer(UAV& uav);
 
     auto init(rapidjson::Value const& init_params) -> bool;
     auto get_init_params() const -> rapidjson::Document;
@@ -53,7 +53,7 @@ private:
     void compute_throttles(Multirotor_Config const& config, stream::IFloat::Value const& collective_thrust, stream::ITorque::Value const& torque);
 
 
-    HAL& m_hal;
+    UAV& m_uav;
 
     std::shared_ptr<sz::Motor_Mixer::Init_Params> m_init_params;
     std::shared_ptr<sz::Motor_Mixer::Config> m_config;

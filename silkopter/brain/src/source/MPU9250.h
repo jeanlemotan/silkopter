@@ -1,6 +1,6 @@
 #pragma once
 
-#include "HAL.h"
+#include "UAV.h"
 #include "common/node/ISource.h"
 #include "common/bus/II2C.h"
 #include "common/bus/ISPI.h"
@@ -30,7 +30,7 @@ namespace node
 class MPU9250 : public ISource
 {
 public:
-    MPU9250(HAL& hal);
+    MPU9250(UAV& uav);
     ~MPU9250();
 
     auto init(rapidjson::Value const& init_params) -> bool;
@@ -51,7 +51,7 @@ private:
     auto init() -> bool;
 
 private:
-    HAL& m_hal;
+    UAV& m_uav;
     std::weak_ptr<bus::II2C> m_i2c;
     std::weak_ptr<bus::ISPI> m_spi;
 

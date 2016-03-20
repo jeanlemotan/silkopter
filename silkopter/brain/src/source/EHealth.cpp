@@ -8,8 +8,8 @@ namespace silk
 namespace node
 {
 
-EHealth::EHealth(HAL& hal)
-    : m_hal(hal)
+EHealth::EHealth(UAV& uav)
+    : m_uav(uav)
 {
     m_stream = std::make_shared<Stream>();
 }
@@ -34,7 +34,7 @@ auto EHealth::init(rapidjson::Value const& init_params) -> bool
 }
 auto EHealth::init() -> bool
 {
-    m_uart = m_hal.get_buses().find_by_name<bus::IUART>("uart0");
+    m_uart = m_uav.get_buses().find_by_name<bus::IUART>("uart0");
 
     Buses buses = { m_uart.lock() };
     if (!buses.uart)

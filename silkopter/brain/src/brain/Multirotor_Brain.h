@@ -16,7 +16,7 @@
 #include "common/stream/IMultirotor_State.h"
 
 #include "Comms.h"
-#include "HAL.h"
+#include "UAV.h"
 #include "utils/PID.h"
 #include "utils/Butterworth.h"
 #include "LiPo_Battery.h"
@@ -42,7 +42,7 @@ namespace node
 class Multirotor_Brain : public IBrain
 {
 public:
-    Multirotor_Brain(HAL& hal);
+    Multirotor_Brain(UAV& uav);
 
     auto init(rapidjson::Value const& init_params) -> bool;
     auto get_init_params() const -> rapidjson::Document;
@@ -63,7 +63,7 @@ public:
 private:
     auto init() -> bool;
 
-    HAL& m_hal;
+    UAV& m_uav;
 
     std::shared_ptr<sz::Multirotor_Brain::Init_Params> m_init_params;
     std::shared_ptr<sz::Multirotor_Brain::Config> m_config;

@@ -52,8 +52,8 @@ struct OpenCV_Capture::Impl
 
 #endif
 
-OpenCV_Capture::OpenCV_Capture(HAL& hal)
-    : m_hal(hal)
+OpenCV_Capture::OpenCV_Capture(UAV& uav)
+    : m_uav(uav)
     , m_init_params(new sz::OpenCV_Capture::Init_Params())
     , m_config(new sz::OpenCV_Capture::Config())
 {

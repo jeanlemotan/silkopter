@@ -12,8 +12,8 @@ namespace node
 {
 
 
-MaxSonar::MaxSonar(HAL& hal)
-    : m_hal(hal)
+MaxSonar::MaxSonar(UAV& uav)
+    : m_uav(uav)
     , m_init_params(new sz::MaxSonar::Init_Params())
     , m_config(new sz::MaxSonar::Config())
 {
@@ -48,7 +48,7 @@ auto MaxSonar::init(rapidjson::Value const& init_params) -> bool
 
 auto MaxSonar::init() -> bool
 {
-    m_bus = m_hal.get_buses().find_by_name<bus::IUART>(m_init_params->bus);
+    m_bus = m_uav.get_buses().find_by_name<bus::IUART>(m_init_params->bus);
     auto bus = m_bus.lock();
     if (!bus)
     {
