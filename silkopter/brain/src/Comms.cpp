@@ -448,6 +448,7 @@ void Comms::handle_clock()
     int64_t time_t_data = 0;
     if (channel.unpack_param(time_t_data))
     {
+#ifdef RASPBERRY_PI
         time_t t = time_t_data;
         if (stime(&t) == 0)
         {
@@ -463,6 +464,7 @@ void Comms::handle_clock()
         {
             QLOGE("Failed to set time: {}", strerror(errno));
         }
+#endif
     }
     channel.end_unpack();
 
