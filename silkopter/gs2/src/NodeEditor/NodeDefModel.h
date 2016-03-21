@@ -24,8 +24,8 @@ private:
 
     enum Roles
     {
-        NameRole = Qt::UserRole + 10,
-        DescriptionRole = Qt::UserRole + 11
+        IconRole = Qt::UserRole + 10,
+        NameRole = IconRole + 1,
     };
 
     class TreeItem
@@ -37,13 +37,16 @@ private:
         TreeItem& getChild(size_t row);
         size_t getChildCount() const;
         size_t getColumnCount() const;
-        QVariant data(size_t column) const;
+        QVariant getText(size_t column) const;
+        QVariant getIconSource() const;
         size_t getRow() const;
         TreeItem* getParent();
 
     private:
         std::vector<std::unique_ptr<TreeItem>> m_children;
         Node_Def m_def;
+        QString m_iconSource;
+        QString m_text;
         bool m_isCategory = false;
         TreeItem* m_parent;
     };

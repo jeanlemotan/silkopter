@@ -1,7 +1,9 @@
 import QtQuick 2.0
 import QtQuick.Controls 1.4
 import QtQuick.Controls.Styles 1.4
+import QtQml.Models 2.2
 import com.silk.UAVNodeEditor 1.0
+import "qrc:/NodeEditor/qml"
 
 Rectangle {
     id: root
@@ -46,48 +48,13 @@ Rectangle {
         anchors.bottom: parent.bottom
         fillColor: "green"
 
-        TreeView {
+        NodeDefTree {
             anchors.fill: parent
             model: parent.nodeDefModel
-            TableViewColumn {
-               title: "Name"
-               role: "Name"
+
+            onSelectedItemChanged: {
+                 //console.log("selection ", selectedItem);
             }
-
-            itemDelegate: Item {
-                property string name: styleData.value
-                onNameChanged: {
-                    icon.source = "qrc:/icons/nodes/" + name + ".png"
-                }
-
-                Image {
-                    id: icon
-                    anchors.top: parent.top
-                    anchors.bottom: parent.bottom
-                    anchors.left: parent.left
-                    anchors.margins: 8
-                    fillMode: Image.PreserveAspectFit
-                }
-
-                Text {
-                    anchors.left: icon.right
-                    anchors.verticalCenter: parent.verticalCenter
-                    anchors.margins: 4
-                    color: styleData.textColor
-                    elide: styleData.elideMode
-                    text: name
-                }
-             }
-
-
-            rowDelegate: Rectangle {
-                height: 32
-                color: styleData.selected ? "#E75926" : (styleData.alternate ? "#282830" : "black")
-            }
-
-//            style: TreeViewStyle {
-//                alternateBackgroundColor: "#282830"
-//            }
         }
     }
 }

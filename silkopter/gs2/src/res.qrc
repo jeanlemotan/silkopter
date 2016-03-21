@@ -83,5 +83,6 @@
         <file>icons/nodes/Sink.png</file>
         <file>icons/nodes/Source.png</file>
         <file>icons/nodes/Transformer.png</file>
+        <file>NodeEditor/qml/NodeDefTree.qml</file>
     </qresource>
 </RCC>

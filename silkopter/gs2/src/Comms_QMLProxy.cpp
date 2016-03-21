@@ -3,7 +3,7 @@
 Comms_QMLProxy::Comms_QMLProxy(QObject *parent)
     : QObject(parent)
 {
-
+    m_connectionType = ConnectionType::UDP;
 }
 
 void Comms_QMLProxy::init(silk::Comms& comms)

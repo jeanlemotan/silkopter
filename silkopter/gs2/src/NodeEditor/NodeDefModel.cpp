@@ -6,6 +6,15 @@ NodeDefModel::TreeItem::TreeItem(const Node_Def& def, bool isCategory, TreeItem*
     , m_isCategory(isCategory)
     , m_parent(parent)
 {
+    if (m_isCategory)
+    {
+        m_text = silk::node::get_as_string(m_def.type).c_str();
+        m_iconSource = QString("qrc:/icons/nodes/") + m_text + ".png";
+    }
+    else
+    {
+        m_text = def.name.c_str();
+    }
 }
 
 void NodeDefModel::TreeItem::appendChild(std::unique_ptr<TreeItem>&& child)
@@ -26,16 +35,13 @@ size_t NodeDefModel::TreeItem::getColumnCount() const
 {
     return 1;
 }
-QVariant NodeDefModel::TreeItem::data(size_t column) const
+QVariant NodeDefModel::TreeItem::getText(size_t column) const
 {
-    if (m_isCategory)
-    {
-        return silk::node::get_as_string(m_def.type).c_str();
-    }
-    else
-    {
-        return m_def.name.c_str();
-    }
+    return m_text;
+}
+QVariant NodeDefModel::TreeItem::getIconSource() const
+{
+    return m_iconSource;
 }
 size_t NodeDefModel::TreeItem::getRow() const
 {
@@ -174,13 +180,17 @@ QVariant NodeDefModel::data(const QModelIndex &index, int role) const
         return QVariant();
     }
 
-    if (role != NameRole)
+    TreeItem *item = static_cast<TreeItem*>(index.internalPointer());
+    if (role == NameRole)
     {
-        return QVariant();
+        return item->getText(index.column());
+    }
+    else if (role == IconRole)
+    {
+        return item->getIconSource();
     }
 
-    TreeItem *item = static_cast<TreeItem*>(index.internalPointer());
-    return item->data(index.column());
+    return QVariant();
 }
 
 QVariant NodeDefModel::headerData(int section, Qt::Orientation orientation,
@@ -188,7 +198,7 @@ QVariant NodeDefModel::headerData(int section, Qt::Orientation orientation,
 {
     if (orientation == Qt::Horizontal && role == Qt::DisplayRole)
     {
-        return m_root.data(section);
+        return m_root.getText(section);
     }
 
     return QVariant();
@@ -207,7 +217,7 @@ Qt::ItemFlags NodeDefModel::flags(const QModelIndex &index) const
 QHash<int, QByteArray> NodeDefModel::roleNames() const
 {
     QHash<int, QByteArray> roles;
+    roles[IconRole] = "Icon";
     roles[NameRole] = "Name";
-    roles[DescriptionRole] = "Description";
     return roles;
 }
