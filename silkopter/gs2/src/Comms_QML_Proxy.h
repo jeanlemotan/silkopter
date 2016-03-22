@@ -3,7 +3,7 @@
 #include <QObject>
 #include "Comms.h"
 
-class Comms_QMLProxy : public QObject
+class Comms_QML_Proxy : public QObject
 {
     Q_OBJECT
 public:
@@ -27,7 +27,7 @@ public:
     Q_PROPERTY(ConnectionStatus connectionStatus READ getConnectionStatus NOTIFY connectionStatusChanged)
     Q_PROPERTY(ConnectionType connectionType READ getConnectionType WRITE setConnectionType NOTIFY connectionTypeChanged)
 
-    explicit Comms_QMLProxy(QObject *parent = 0);
+    explicit Comms_QML_Proxy(QObject *parent = 0);
     void init(silk::Comms& comms);
 
     ConnectionStatus getConnectionStatus() const;

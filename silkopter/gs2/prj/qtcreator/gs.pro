@@ -160,12 +160,13 @@ HEADERS += \
     ../../../libs/common/config/UAV_Config.h \
     ../../../libs/common/stream/IMultirotor_Commands.h \
     ../../../libs/common/stream/IMultirotor_State.h \
-    ../../src/Comms_QMLProxy.h \
-    ../../src/Menus_QMLProxy.h \
-    ../../src/OS_QMLProxy.h \
     ../../src/Comms_Slots.h \
     ../../src/NodeEditor/UAVNodeEditor.h \
-    ../../src/NodeEditor/NodeDefModel.h
+    ../../src/NodeEditor/NodeDefModel.h \
+    ../../src/UAV_QML_Proxy.h \
+    ../../src/OS_QML_Proxy.h \
+    ../../src/Menus_QML_Proxy.h \
+    ../../src/Comms_QML_Proxy.h
 
 SOURCES += \
     ../../src/main.cpp \
@@ -178,12 +179,13 @@ SOURCES += \
     ../../../libs/utils/RCP.cpp \
     ../../../libs/utils/RCP_RFMON_Socket.cpp \
     ../../../libs/utils/radiotap/radiotap.cpp \
-    ../../src/Comms_QMLProxy.cpp \
-    ../../src/Menus_QMLProxy.cpp \
-    ../../src/OS_QMLProxy.cpp \
     ../../src/Comms_Slots.cpp \
     ../../src/NodeEditor/UAVNodeEditor.cpp \
-    ../../src/NodeEditor/NodeDefModel.cpp
+    ../../src/NodeEditor/NodeDefModel.cpp \
+    ../../src/UAV_QML_Proxy.cpp \
+    ../../src/Comms_QML_Proxy.cpp \
+    ../../src/Menus_QML_Proxy.cpp \
+    ../../src/OS_QML_Proxy.cpp
 
 DISTFILES += \
     ../../src/node.png \

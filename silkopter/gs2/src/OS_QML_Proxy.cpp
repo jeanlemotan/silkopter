@@ -1,8 +1,8 @@
-#include "OS_QMLProxy.h"
+#include "OS_QML_Proxy.h"
 #include <QSettings>
 #include <QProcess>
 
-OS_QMLProxy::OS_QMLProxy(QObject *parent)
+OS_QML_Proxy::OS_QML_Proxy(QObject *parent)
     : QObject(parent)
 {
     QSettings settings;
@@ -15,7 +15,7 @@ OS_QMLProxy::OS_QMLProxy(QObject *parent)
     }
 }
 
-void OS_QMLProxy::poweroffSystem()
+void OS_QML_Proxy::poweroffSystem()
 {
 #ifdef RASPBERRY_PI
     QProcess process;
@@ -23,12 +23,12 @@ void OS_QMLProxy::poweroffSystem()
 #endif
 }
 
-float OS_QMLProxy::getBrightness() const
+float OS_QML_Proxy::getBrightness() const
 {
     return m_brightness;
 }
 
-void OS_QMLProxy::setBrightness(float v)
+void OS_QML_Proxy::setBrightness(float v)
 {
     v = math::clamp(v, 0.1f, 1.f);
     if (m_brightness != v)

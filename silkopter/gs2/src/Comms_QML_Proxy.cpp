@@ -1,26 +1,26 @@
-#include "Comms_QMLProxy.h"
+#include "Comms_QML_Proxy.h"
 
-Comms_QMLProxy::Comms_QMLProxy(QObject *parent)
+Comms_QML_Proxy::Comms_QML_Proxy(QObject *parent)
     : QObject(parent)
 {
     m_connectionType = ConnectionType::UDP;
 }
 
-void Comms_QMLProxy::init(silk::Comms& comms)
+void Comms_QML_Proxy::init(silk::Comms& comms)
 {
     m_comms = &comms;
 }
 
-Comms_QMLProxy::ConnectionStatus Comms_QMLProxy::getConnectionStatus() const
+Comms_QML_Proxy::ConnectionStatus Comms_QML_Proxy::getConnectionStatus() const
 {
     return m_comms->is_connected() ? ConnectionStatus::CONNECTED : ConnectionStatus::DISCONNECTED;
 }
 
-Comms_QMLProxy::ConnectionType Comms_QMLProxy::getConnectionType() const
+Comms_QML_Proxy::ConnectionType Comms_QML_Proxy::getConnectionType() const
 {
     return m_connectionType;
 }
-void Comms_QMLProxy::setConnectionType(ConnectionType type)
+void Comms_QML_Proxy::setConnectionType(ConnectionType type)
 {
     if (m_connectionType != type)
     {
@@ -30,7 +30,7 @@ void Comms_QMLProxy::setConnectionType(ConnectionType type)
     }
 }
 
-void Comms_QMLProxy::connect()
+void Comms_QML_Proxy::connect()
 {
     disconnect();
 
@@ -45,7 +45,7 @@ void Comms_QMLProxy::connect()
 
     emit connectionStatusChanged(getConnectionStatus());
 }
-void Comms_QMLProxy::disconnect()
+void Comms_QML_Proxy::disconnect()
 {
     if (getConnectionStatus() != ConnectionStatus::DISCONNECTED)
     {

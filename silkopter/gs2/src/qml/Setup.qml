@@ -2,6 +2,8 @@ import QtQuick 2.0
 import QtQuick.Controls 1.4
 import QtQuick.Controls.Styles 1.4
 import Qt.labs.settings 1.0
+import com.silk.UAV 1.0
+import com.silk.Comms 1.0
 
 
 Rectangle {
@@ -24,61 +26,52 @@ Rectangle {
         width: 200
 
         MenuButton {
-            id: multicopterSetupButton
-            text: "Multicopter"
-            icon: "qrc:/icons/ui/uav-multicopter.png"
-            //color: "#bdc3c7"
-            onClicked: s_menus.push("MulticopterSetup.qml")
-            anchors.margins: 10
-            anchors.top: parent.top
-            anchors.left: parent.left
-            anchors.right: parent.right
-            height: 50
-        }
-        MenuButton {
-            id: roverSetupButton
-            text: "Rover"
-            icon: "qrc:/icons/ui/uav-rover.png"
-            //color: "#bdc3c7"
-            onClicked: s_menus.push("RoverSetup.qml")
-            anchors.margins: 10
-            anchors.top: multicopterSetupButton.bottom
-            anchors.left: parent.left
-            anchors.right: parent.right
-            height: 50
-        }
-        MenuButton {
-            id: planeSetupButton
-            text: "Plane"
-            icon: "qrc:/icons/ui/uav-plane.png"
-            //color: "#bdc3c7"
-            onClicked: s_menus.push("PlaneSetup.qml")
-            anchors.margins: 10
-            anchors.top: roverSetupButton.bottom
-            anchors.left: parent.left
-            anchors.right: parent.right
-            height: 50
-        }
-        MenuButton {
-            id: boatSetupButton
-            text: "Boat"
-            icon: "qrc:/icons/ui/uav-boat.png"
-            //color: "#bdc3c7"
-            onClicked: s_menus.push("BoatSetup.qml")
-            anchors.margins: 10
-            anchors.top: planeSetupButton.bottom
-            anchors.left: parent.left
-            anchors.right: parent.right
-            height: 50
-        }
-        MenuButton {
             id: commsSetupButton
             text: "Comms"
             icon: "qrc:/icons/ui/wifi.png"
             //color: "#bdc3c7"
             onClicked: s_menus.push("CommsSetup.qml")
             anchors.margins: 10
-            anchors.top: boatSetupButton.bottom
+            anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.right: parent.right
+            height: 50
+        }
+
+        function capitalizeFirstLetter(string) {
+            return string.charAt(0).toUpperCase() + string.slice(1);
+        }
+        function getUAVTypeString() {
+            if (s_uav.type === UAV.NONE) return "";
+            if (s_uav.type === UAV.MULTIROTOR) return "multirotor";
+            if (s_uav.type === UAV.COPTER) return "copter";
+            if (s_uav.type === UAV.PLANE) return "plane";
+            if (s_uav.type === UAV.BOAT) return "boat";
+            if (s_uav.type === UAV.ROVER) return "rover";
+            return ""
+        }
+
+
+        MenuButton {
+            id: editConfigButton
+            enabled: s_comms.connectionStatus === Comms.CONNECTED
+            text: "UAV Config"
+            icon: "qrc:/icons/ui/uav-" + parent.getUAVTypeString() + ".png"
+            onClicked: s_menus.push("UAVConfig.qml")
+            anchors.margins: 10
+            anchors.top: commsSetupButton.bottom
+            anchors.left: parent.left
+            anchors.right: parent.right
+            height: 50
+        }
+        MenuButton {
+            id: editNodesButton
+            enabled: s_uav.type !== UAV.NONE && s_comms.connectionStatus === Comms.CONNECTED
+            text: "Edit Nodes"
+            icon: "qrc:/icons/ui/uav-" + parent.getUAVTypeString() + ".png"
+            onClicked: s_menus.push("UAVNodeEditor.qml")
+            anchors.margins: 10
+            anchors.top: editConfigButton.bottom
             anchors.left: parent.left
             anchors.right: parent.right
             height: 50

@@ -25,7 +25,7 @@
         <file>qml/TopBar.qml</file>
         <file>qml/Setup.qml</file>
         <file>qml/MenuButton.qml</file>
-        <file>qml/MulticopterSetup.qml</file>
+        <file>qml/UAVNodeEditor.qml</file>
         <file>qml/SideBar.qml</file>
         <file>qml/UAVInfo.qml</file>
         <file>qml/CommsSetup.qml</file>

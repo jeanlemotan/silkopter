@@ -4,9 +4,10 @@
 #include <QQmlContext>
 #include <QTimer>
 #include "Comms.h"
-#include "Comms_QMLProxy.h"
-#include "OS_QMLProxy.h"
-#include "Menus_QMLProxy.h"
+#include "Comms_QML_Proxy.h"
+#include "OS_QML_Proxy.h"
+#include "Menus_QML_Proxy.h"
+#include "UAV_QML_Proxy.h"
 #include "NodeEditor/UAVNodeEditor.h"
 
 //boost::asio::io_service s_async_io_service(4);
@@ -59,19 +60,23 @@ int main(int argc, char *argv[])
     QQuickView view;
 
 
-    OS_QMLProxy os_proxy;
+    OS_QML_Proxy os_proxy;
 
-    Menus_QMLProxy menus_proxy;
+    Menus_QML_Proxy menus_proxy;
     menus_proxy.init(view);
 
-    Comms_QMLProxy comms_proxy;
+    Comms_QML_Proxy comms_proxy;
     comms_proxy.init(s_comms);
 
-    qmlRegisterType<Comms_QMLProxy>("com.silk.Comms", 1, 0, "Comms");
+    UAV_QML_Proxy uav_proxy;
+
+    qmlRegisterType<Comms_QML_Proxy>("com.silk.Comms", 1, 0, "Comms");
+    qmlRegisterType<UAV_QML_Proxy>("com.silk.UAV", 1, 0, "UAV");
     qmlRegisterType<UAVNodeEditor>("com.silk.UAVNodeEditor", 1, 0, "UAVNodeEditor");
     view.engine()->rootContext()->setContextProperty("s_comms", &comms_proxy);
     view.engine()->rootContext()->setContextProperty("s_os", &os_proxy);
     view.engine()->rootContext()->setContextProperty("s_menus", &menus_proxy);
+    view.engine()->rootContext()->setContextProperty("s_uav", &uav_proxy);
 
     view.setResizeMode(QQuickView::SizeRootObjectToView);
     view.show();
