@@ -10,8 +10,14 @@ TARGET = gs
 TEMPLATE = app
 
 TARGET = gs
-target.path = ~/gs
+target.path = gs
 INSTALLS = target
+
+#qmlFiles.path = gs/data
+#qmlFiles.files = ../../src/qml/*
+#qmlFiles.files = ../../src/NodeEditor/qml/*
+#INSTALLS += qmlFiles
+
 
 CONFIG += c++11
 

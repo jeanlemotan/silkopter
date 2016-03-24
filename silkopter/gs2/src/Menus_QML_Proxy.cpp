@@ -40,7 +40,11 @@ void Menus_QML_Proxy::push(const QString& qml)
     {
         m_isLocked = true;
 
+//#ifdef RASPBERRY_PI
         m_stack.push_back(QUrl("qrc:/qml/" + qml));
+//#else
+        //m_stack.push_back(QUrl("qml/" + qml));
+//#endif
         QTimer::singleShot(0, this, SLOT(setView()));
     }
 }
@@ -50,5 +54,11 @@ void Menus_QML_Proxy::setView()
     QASSERT(m_isLocked);
     m_view->setSource(m_stack.back());
     m_isLocked = false;
+
+    //recover from bad screens
+    if (m_view->status() == QQuickView::Error && m_stack.size() >= 2)
+    {
+        pop();
+    }
 }
 

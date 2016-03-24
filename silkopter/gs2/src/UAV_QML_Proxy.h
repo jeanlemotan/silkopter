@@ -25,6 +25,9 @@ public:
 
     Type getType() const;
 
+    Q_INVOKABLE QString createNewUAVConfigJSon(Type type) const;
+    Q_INVOKABLE void setUAVConfigJSon(Type type, const QString& json) const;
+
 signals:
     void typeChanged(Type);
 

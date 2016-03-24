@@ -1,4 +1,13 @@
+#include "autojsoncxx/autojsoncxx.hpp"
+#include "common/config/Multirotor_Config.h"
+#include "sz_math.hpp"
+#include "sz_Multirotor_Config.hpp"
+
 #include "UAV_QML_Proxy.h"
+
+#include "rapidjson/document.h"
+#include "rapidjson/stringbuffer.h"
+#include "rapidjson/writer.h"
 
 extern silk::Comms s_comms;
 
@@ -85,3 +94,44 @@ UAV_QML_Proxy::Type UAV_QML_Proxy::getType() const
     return m_type;
 }
 
+template<class T>
+QString config_to_string(T& config)
+{
+    rapidjson::Document json;
+    autojsoncxx::error::ErrorStack result;
+
+    if (!autojsoncxx::from_value(config, json, result))
+    {
+        std::ostringstream ss;
+        ss << result;
+        QLOGE("Req Id: {} - Cannot convert config to json: {}", ss.str());
+        return QString();
+    }
+
+    rapidjson::StringBuffer str_buf;
+    rapidjson::Writer<rapidjson::StringBuffer> writer(str_buf);
+    json.Accept(writer);
+    QString str(str_buf.GetString());
+    return str;
+}
+
+QString UAV_QML_Proxy::createNewUAVConfigJSon(Type type) const
+{
+    if (type == Type::NONE)
+    {
+        return QString();
+    }
+    else if (type == Type::MULTIROTOR)
+    {
+        int config;
+        return config_to_string(config);
+    }
+    else
+    {
+        return QString();
+    }
+}
+void UAV_QML_Proxy::setUAVConfigJSon(Type type, const QString& json) const
+{
+
+}
