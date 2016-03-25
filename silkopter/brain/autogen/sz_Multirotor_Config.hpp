@@ -258,9 +258,9 @@ case 1:
         if (depth == 1) {
             if (0) {
             }
-            else if (utility::string_equal(str, length, "\x50\x6f\x73\x69\x74\x69\x6f\x6e", 8))
+            else if (utility::string_equal(str, length, "\x70\x6f\x73\x69\x74\x69\x6f\x6e", 8))
 						 { state=0; has_position = true; }
-else if (utility::string_equal(str, length, "\x43\x6c\x6f\x63\x6b\x77\x69\x73\x65", 9))
+else if (utility::string_equal(str, length, "\x63\x6c\x6f\x63\x6b\x77\x69\x73\x65", 9))
 						 { state=1; has_clockwise = true; }
             else {
                 state = -1;
@@ -409,8 +409,8 @@ struct Serializer< Writer02026939e2c271e40ff6821c8f73656d6b4f06a4af2b001cefcc9eb
     {
         w.StartObject();
 
-        w.Key("\x50\x6f\x73\x69\x74\x69\x6f\x6e", 8, false); Serializer< Writer02026939e2c271e40ff6821c8f73656d6b4f06a4af2b001cefcc9eb8964a1e25, math::vec3f >()(w, value.position);
-w.Key("\x43\x6c\x6f\x63\x6b\x77\x69\x73\x65", 9, false); Serializer< Writer02026939e2c271e40ff6821c8f73656d6b4f06a4af2b001cefcc9eb8964a1e25, bool >()(w, value.clockwise);
+        w.Key("\x70\x6f\x73\x69\x74\x69\x6f\x6e", 8, false); Serializer< Writer02026939e2c271e40ff6821c8f73656d6b4f06a4af2b001cefcc9eb8964a1e25, math::vec3f >()(w, value.position);
+w.Key("\x63\x6c\x6f\x63\x6b\x77\x69\x73\x65", 9, false); Serializer< Writer02026939e2c271e40ff6821c8f73656d6b4f06a4af2b001cefcc9eb8964a1e25, bool >()(w, value.clockwise);
 
         w.EndObject(2);
     }
@@ -887,23 +887,23 @@ case 8:
         if (depth == 1) {
             if (0) {
             }
-            else if (utility::string_equal(str, length, "\x4e\x61\x6d\x65", 4))
+            else if (utility::string_equal(str, length, "\x6e\x61\x6d\x65", 4))
 						 { state=0; has_name = true; }
-else if (utility::string_equal(str, length, "\x4d\x61\x73\x73\x20\x28\x4b\x67\x29", 9))
+else if (utility::string_equal(str, length, "\x6d\x61\x73\x73", 4))
 						 { state=1; has_mass = true; }
-else if (utility::string_equal(str, length, "\x48\x65\x69\x67\x68\x74\x20\x28\x6d\x29", 10))
+else if (utility::string_equal(str, length, "\x68\x65\x69\x67\x68\x74", 6))
 						 { state=2; has_height = true; }
-else if (utility::string_equal(str, length, "\x52\x61\x64\x69\x75\x73\x20\x28\x6d\x29", 10))
+else if (utility::string_equal(str, length, "\x72\x61\x64\x69\x75\x73", 6))
 						 { state=3; has_radius = true; }
-else if (utility::string_equal(str, length, "\x4d\x6f\x74\x6f\x72\x20\x54\x68\x72\x75\x73\x74\x20\x40\x20\x31\x30\x30\x25\x20\x28\x4e\x29", 23))
+else if (utility::string_equal(str, length, "\x6d\x6f\x74\x6f\x72\x5f\x74\x68\x72\x75\x73\x74", 12))
 						 { state=4; has_motor_thrust = true; }
-else if (utility::string_equal(str, length, "\x4d\x6f\x74\x6f\x72\x20\x5a\x20\x54\x6f\x72\x71\x75\x65\x20\x40\x20\x31\x30\x30\x25\x20\x28\x4e\x6d\x29", 26))
+else if (utility::string_equal(str, length, "\x6d\x6f\x74\x6f\x72\x5f\x7a\x5f\x74\x6f\x72\x71\x75\x65", 14))
 						 { state=5; has_motor_z_torque = true; }
-else if (utility::string_equal(str, length, "\x4d\x6f\x74\x6f\x72\x20\x41\x63\x63\x65\x6c\x65\x72\x61\x74\x69\x6f\x6e\x20\x28\x73\x29", 22))
+else if (utility::string_equal(str, length, "\x6d\x6f\x74\x6f\x72\x5f\x61\x63\x63\x65\x6c\x65\x72\x61\x74\x69\x6f\x6e", 18))
 						 { state=6; has_motor_acceleration = true; }
-else if (utility::string_equal(str, length, "\x4d\x6f\x74\x6f\x72\x20\x44\x65\x63\x65\x6c\x65\x72\x61\x74\x69\x6f\x6e\x20\x28\x73\x29", 22))
+else if (utility::string_equal(str, length, "\x6d\x6f\x74\x6f\x72\x5f\x64\x65\x63\x65\x6c\x65\x72\x61\x74\x69\x6f\x6e", 18))
 						 { state=7; has_motor_deceleration = true; }
-else if (utility::string_equal(str, length, "\x4d\x6f\x74\x6f\x72\x73", 6))
+else if (utility::string_equal(str, length, "\x6d\x6f\x74\x6f\x72\x73", 6))
 						 { state=8; has_motors = true; }
             else {
                 state = -1;
@@ -1185,15 +1185,15 @@ struct Serializer< Writer2819a258fe782f81a7be8f28b6485e8371f785d42bab872123907ef
     {
         w.StartObject();
 
-        w.Key("\x4e\x61\x6d\x65", 4, false); Serializer< Writer2819a258fe782f81a7be8f28b6485e8371f785d42bab872123907ef566f339ce, std::string >()(w, value.name);
-w.Key("\x4d\x61\x73\x73\x20\x28\x4b\x67\x29", 9, false); Serializer< Writer2819a258fe782f81a7be8f28b6485e8371f785d42bab872123907ef566f339ce, float >()(w, value.mass);
-w.Key("\x48\x65\x69\x67\x68\x74\x20\x28\x6d\x29", 10, false); Serializer< Writer2819a258fe782f81a7be8f28b6485e8371f785d42bab872123907ef566f339ce, float >()(w, value.height);
-w.Key("\x52\x61\x64\x69\x75\x73\x20\x28\x6d\x29", 10, false); Serializer< Writer2819a258fe782f81a7be8f28b6485e8371f785d42bab872123907ef566f339ce, float >()(w, value.radius);
-w.Key("\x4d\x6f\x74\x6f\x72\x20\x54\x68\x72\x75\x73\x74\x20\x40\x20\x31\x30\x30\x25\x20\x28\x4e\x29", 23, false); Serializer< Writer2819a258fe782f81a7be8f28b6485e8371f785d42bab872123907ef566f339ce, float >()(w, value.motor_thrust);
-w.Key("\x4d\x6f\x74\x6f\x72\x20\x5a\x20\x54\x6f\x72\x71\x75\x65\x20\x40\x20\x31\x30\x30\x25\x20\x28\x4e\x6d\x29", 26, false); Serializer< Writer2819a258fe782f81a7be8f28b6485e8371f785d42bab872123907ef566f339ce, float >()(w, value.motor_z_torque);
-w.Key("\x4d\x6f\x74\x6f\x72\x20\x41\x63\x63\x65\x6c\x65\x72\x61\x74\x69\x6f\x6e\x20\x28\x73\x29", 22, false); Serializer< Writer2819a258fe782f81a7be8f28b6485e8371f785d42bab872123907ef566f339ce, float >()(w, value.motor_acceleration);
-w.Key("\x4d\x6f\x74\x6f\x72\x20\x44\x65\x63\x65\x6c\x65\x72\x61\x74\x69\x6f\x6e\x20\x28\x73\x29", 22, false); Serializer< Writer2819a258fe782f81a7be8f28b6485e8371f785d42bab872123907ef566f339ce, float >()(w, value.motor_deceleration);
-w.Key("\x4d\x6f\x74\x6f\x72\x73", 6, false); Serializer< Writer2819a258fe782f81a7be8f28b6485e8371f785d42bab872123907ef566f339ce, std::vector<silk::Multirotor_Config::Motor> >()(w, value.motors);
+        w.Key("\x6e\x61\x6d\x65", 4, false); Serializer< Writer2819a258fe782f81a7be8f28b6485e8371f785d42bab872123907ef566f339ce, std::string >()(w, value.name);
+w.Key("\x6d\x61\x73\x73", 4, false); Serializer< Writer2819a258fe782f81a7be8f28b6485e8371f785d42bab872123907ef566f339ce, float >()(w, value.mass);
+w.Key("\x68\x65\x69\x67\x68\x74", 6, false); Serializer< Writer2819a258fe782f81a7be8f28b6485e8371f785d42bab872123907ef566f339ce, float >()(w, value.height);
+w.Key("\x72\x61\x64\x69\x75\x73", 6, false); Serializer< Writer2819a258fe782f81a7be8f28b6485e8371f785d42bab872123907ef566f339ce, float >()(w, value.radius);
+w.Key("\x6d\x6f\x74\x6f\x72\x5f\x74\x68\x72\x75\x73\x74", 12, false); Serializer< Writer2819a258fe782f81a7be8f28b6485e8371f785d42bab872123907ef566f339ce, float >()(w, value.motor_thrust);
+w.Key("\x6d\x6f\x74\x6f\x72\x5f\x7a\x5f\x74\x6f\x72\x71\x75\x65", 14, false); Serializer< Writer2819a258fe782f81a7be8f28b6485e8371f785d42bab872123907ef566f339ce, float >()(w, value.motor_z_torque);
+w.Key("\x6d\x6f\x74\x6f\x72\x5f\x61\x63\x63\x65\x6c\x65\x72\x61\x74\x69\x6f\x6e", 18, false); Serializer< Writer2819a258fe782f81a7be8f28b6485e8371f785d42bab872123907ef566f339ce, float >()(w, value.motor_acceleration);
+w.Key("\x6d\x6f\x74\x6f\x72\x5f\x64\x65\x63\x65\x6c\x65\x72\x61\x74\x69\x6f\x6e", 18, false); Serializer< Writer2819a258fe782f81a7be8f28b6485e8371f785d42bab872123907ef566f339ce, float >()(w, value.motor_deceleration);
+w.Key("\x6d\x6f\x74\x6f\x72\x73", 6, false); Serializer< Writer2819a258fe782f81a7be8f28b6485e8371f785d42bab872123907ef566f339ce, std::vector<silk::Multirotor_Config::Motor> >()(w, value.motors);
 
         w.EndObject(9);
     }

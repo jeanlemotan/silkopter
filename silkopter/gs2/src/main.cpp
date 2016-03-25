@@ -78,6 +78,7 @@ int main(int argc, char *argv[])
     view.engine()->rootContext()->setContextProperty("s_menus", &menus_proxy);
     view.engine()->rootContext()->setContextProperty("s_uav", &uav_proxy);
 
+    view.resize(800, 480);
     view.setResizeMode(QQuickView::SizeRootObjectToView);
     view.show();
 

@@ -21,12 +21,12 @@ public:
         bool clockwise = false;
     };
 
-    float radius = 0; //m
-    float height = 0; //m
-    float motor_z_torque = 0; //Nm
-    float motor_thrust = 0; //N
-    float motor_acceleration = 0; //rpm/s
-    float motor_deceleration = 0; //rpm/s
+    float radius = 1.f; //m
+    float height = 1.f; //m
+    float motor_z_torque = 0.f; //Nm
+    float motor_thrust = 1.f; //N
+    float motor_acceleration = 10.f; //N/s
+    float motor_deceleration = 10.f; //N/s
     std::vector<Motor> motors;
 };
 

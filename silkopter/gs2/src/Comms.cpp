@@ -317,6 +317,21 @@ void Comms::request_uav_config()
     m_setup_channel.pack_all(comms::Setup_Message::UAV_CONFIG);
 }
 
+void Comms::send_uav_config(boost::optional<silk::UAV_Config&> config)
+{
+    if (!config)
+    {
+        m_setup_channel.pack_all(comms::Setup_Message::UAV_CONFIG, false);
+    }
+    else if (silk::Multirotor_Config* multirotor_config = dynamic_cast<silk::Multirotor_Config*>(config.get_ptr()))
+    {
+        rapidjson::Document configj;
+        configj.SetObject();
+        autojsoncxx::to_document(*multirotor_config, configj);
+        m_setup_channel.pack_all(comms::Setup_Message::UAV_CONFIG, true, silk::UAV_Config::Type::MULTIROTOR, configj);
+    }
+}
+
 
 auto parse_json(std::string const& str) -> std::unique_ptr<rapidjson::Document>
 {
@@ -494,9 +509,9 @@ void Comms::handle_clock()
 
 void Comms::handle_uav_config()
 {
-    bool success = false;
+    bool has_config = false;
     bool ok = m_setup_channel.begin_unpack() &&
-              m_setup_channel.unpack_param(success);
+              m_setup_channel.unpack_param(has_config);
     if (!ok)
     {
         QLOGE("Failed to unpack uav config");
@@ -505,7 +520,7 @@ void Comms::handle_uav_config()
 
     QLOGI("Uav config received");
 
-    if (success)
+    if (has_config)
     {
         UAV_Config::Type type;
         rapidjson::Document configj;

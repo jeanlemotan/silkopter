@@ -186,7 +186,7 @@ void UAV::save_settings()
     std::shared_ptr<const Multirotor_Config> multirotor_config = get_specialized_uav_config<Multirotor_Config>();
     if (multirotor_config)
     {
-        auto* configj = jsonutil::get_or_add_value(*settingsj, q::Path("uav/uav_config"), rapidjson::kObjectType, allocator);
+        auto* configj = jsonutil::get_or_add_value(*settingsj, q::Path("uav/multirotor_config"), rapidjson::kObjectType, allocator);
         if (!configj)
         {
             QLOGE("Cannot create multirotor config node.");
@@ -933,7 +933,7 @@ auto UAV::init(Comms& comms) -> bool
     }
 
     //read the UAV config
-    auto* configj = jsonutil::find_value(static_cast<rapidjson::Value&>(settingsj), q::Path("uav/uav_config"));
+    auto* configj = jsonutil::find_value(static_cast<rapidjson::Value&>(settingsj), q::Path("uav/multirotor_config"));
     if (configj)
     {
         std::shared_ptr<Multirotor_Config> config = std::make_shared<Multirotor_Config>();

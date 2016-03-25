@@ -45,9 +45,9 @@
         <file>icons/ui/hud.png</file>
         <file>icons/ui/lora.png</file>
         <file>icons/ui/minus.png</file>
-        <file>icons/ui/multicopter-land.png</file>
-        <file>icons/ui/multicopter-signal.png</file>
-        <file>icons/ui/multicopter-take_off.png</file>
+        <file>icons/ui/multirotor-land.png</file>
+        <file>icons/ui/multirotor-signal.png</file>
+        <file>icons/ui/multirotor-take_off.png</file>
         <file>icons/ui/new.png</file>
         <file>icons/ui/nodes.png</file>
         <file>icons/ui/plus.png</file>
@@ -62,7 +62,7 @@
         <file>icons/ui/stop.png</file>
         <file>icons/ui/uav-boat.png</file>
         <file>icons/ui/uav-copter.png</file>
-        <file>icons/ui/uav-multicopter.png</file>
+        <file>icons/ui/uav-multirotor.png</file>
         <file>icons/ui/uav-plane.png</file>
         <file>icons/ui/uplink.png</file>
         <file>icons/ui/upload.png</file>
@@ -84,5 +84,7 @@
         <file>icons/nodes/Source.png</file>
         <file>icons/nodes/Transformer.png</file>
         <file>NodeEditor/qml/NodeDefTree.qml</file>
+        <file>qml/UAVConfig.qml</file>
+        <file>qml/MultirotorConfig.qml</file>
     </qresource>
 </RCC>

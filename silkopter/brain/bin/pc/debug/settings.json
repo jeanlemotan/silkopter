@@ -1,5 +1,49 @@
 {
-    "hal": {
+    "uav": {
+        "multirotor_config": {
+            "name": "",
+            "mass": 1.0,
+            "height": 1.0,
+            "radius": 1.0,
+            "motor_thrust": 1.0,
+            "motor_z_torque": 0.0,
+            "motor_acceleration": 10.0,
+            "motor_deceleration": 10.0,
+            "motors": [
+                {
+                    "position": {
+                        "x": 0.25999999046325686,
+                        "y": 0.25999999046325686,
+                        "z": 0.0
+                    },
+                    "clockwise": false
+                },
+                {
+                    "position": {
+                        "x": -0.25999999046325686,
+                        "y": -0.25999999046325686,
+                        "z": 0.0
+                    },
+                    "clockwise": false
+                },
+                {
+                    "position": {
+                        "x": -0.25999999046325686,
+                        "y": 0.25999999046325686,
+                        "z": 0.0
+                    },
+                    "clockwise": true
+                },
+                {
+                    "position": {
+                        "x": 0.25999999046325686,
+                        "y": -0.25999999046325686,
+                        "z": 0.0
+                    },
+                    "clockwise": true
+                }
+            ]
+        },
         "buses": {},
         "nodes": []
     }

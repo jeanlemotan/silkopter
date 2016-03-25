@@ -38,16 +38,22 @@ Rectangle {
             height: 50
         }
 
-        function capitalizeFirstLetter(string) {
-            return string.charAt(0).toUpperCase() + string.slice(1);
+        function getUAVIconName() {
+            if (s_uav.type === UAV.NONE) return "uav.png";
+            if (s_uav.type === UAV.MULTIROTOR) return "uav-multirotor.png";
+            if (s_uav.type === UAV.COPTER) return "uav-copter.png";
+            if (s_uav.type === UAV.PLANE) return "uav-plane.png";
+            if (s_uav.type === UAV.BOAT) return "uav-boat.png";
+            if (s_uav.type === UAV.ROVER) return "uav-rover.png";
+            return "uav.png"
         }
-        function getUAVTypeString() {
-            if (s_uav.type === UAV.NONE) return "";
-            if (s_uav.type === UAV.MULTIROTOR) return "multirotor";
-            if (s_uav.type === UAV.COPTER) return "copter";
-            if (s_uav.type === UAV.PLANE) return "plane";
-            if (s_uav.type === UAV.BOAT) return "boat";
-            if (s_uav.type === UAV.ROVER) return "rover";
+        function getUAVConfigQMLName() {
+            if (s_uav.type === UAV.NONE) return "UAVConfig.qml";
+            if (s_uav.type === UAV.MULTIROTOR) return "MultirotorConfig.qml";
+            if (s_uav.type === UAV.COPTER) return "CopterConfig.qml";
+            if (s_uav.type === UAV.PLANE) return "PlaneConfig.qml";
+            if (s_uav.type === UAV.BOAT) return "BoatConfig.qml";
+            if (s_uav.type === UAV.ROVER) return "RoverConfig.qml";
             return ""
         }
 
@@ -55,9 +61,9 @@ Rectangle {
         MenuButton {
             id: editConfigButton
             enabled: s_comms.connectionStatus === Comms.CONNECTED
-            text: "UAV Config"
-            icon: "qrc:/icons/ui/uav-" + parent.getUAVTypeString() + ".png"
-            onClicked: s_menus.push("UAVConfig.qml")
+            text: s_uav.type === UAV.NONE ? "New Config" : "Config";
+            icon: "qrc:/icons/ui/" + parent.getUAVIconName()
+            onClicked: s_menus.push(parent.getUAVConfigQMLName())
             anchors.margins: 10
             anchors.top: commsSetupButton.bottom
             anchors.left: parent.left
@@ -68,7 +74,7 @@ Rectangle {
             id: editNodesButton
             enabled: s_uav.type !== UAV.NONE && s_comms.connectionStatus === Comms.CONNECTED
             text: "Edit Nodes"
-            icon: "qrc:/icons/ui/uav-" + parent.getUAVTypeString() + ".png"
+            icon: "qrc:/icons/ui/" + parent.getUAVIconName()
             onClicked: s_menus.push("UAVNodeEditor.qml")
             anchors.margins: 10
             anchors.top: editConfigButton.bottom

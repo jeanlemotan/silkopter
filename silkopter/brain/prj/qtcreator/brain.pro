@@ -85,7 +85,7 @@ rpi {
     LIBS += -lGLESv2
     LIBS += -lEGL
 } else {
-    LIBS += -lBulletCollision -lBulletDynamics -lLinearMath -lopencv_core -lopencv_imgproc -lopencv_highgui -lopencv_ml -lopencv_video
+    LIBS += -lBulletCollision -lBulletDynamics -lLinearMath -lopencv_core -lopencv_imgproc -lopencv_highgui -lopencv_ml -lopencv_videoio
 }
 
 SOURCES += \

@@ -170,6 +170,7 @@ public:
 
     void request_uav_config();
     q::util::Signal<void(boost::optional<silk::UAV_Config&> config)> sig_uav_config_received;
+    void send_uav_config(boost::optional<silk::UAV_Config&> config);
 
     void process_rcp();
     void process();

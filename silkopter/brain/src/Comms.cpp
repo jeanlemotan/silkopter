@@ -477,24 +477,34 @@ void Comms::handle_uav_config()
 
     QLOGI("Req multirotor config");
 
+    bool has_config = false;
     UAV_Config::Type type;
     rapidjson::Document configj;
-    if (channel.unpack_param(type) && channel.unpack_param(configj))
+    if (channel.unpack_param(has_config))
     {
-        std::shared_ptr<UAV_Config> config;
-        if (type == Multirotor_Config::TYPE)
+        if (channel.unpack_param(type) && channel.unpack_param(configj))
         {
-            config = std::make_shared<Multirotor_Config>();
-            autojsoncxx::error::ErrorStack result;
-            if (!autojsoncxx::from_value(static_cast<Multirotor_Config&>(*config), configj, result))
+            std::shared_ptr<UAV_Config> config;
+            if (type == Multirotor_Config::TYPE)
             {
-                std::ostringstream ss;
-                ss << result;
-                QLOGE("Req Id: {} - Cannot deserialize multirotor config: {}", ss.str());
-                return;
+                config = std::make_shared<Multirotor_Config>();
+                autojsoncxx::error::ErrorStack result;
+                if (!autojsoncxx::from_value(static_cast<Multirotor_Config&>(*config), configj, result))
+                {
+                    std::ostringstream ss;
+                    ss << result;
+                    QLOGE("Req Id: {} - Cannot deserialize multirotor config: {}", ss.str());
+                }
+            }
+            if (config && m_uav.set_uav_config(config))
+            {
+                m_uav.save_settings();
             }
         }
-        if (m_uav.set_uav_config(config))
+    }
+    else
+    {
+        if (m_uav.set_uav_config(std::shared_ptr<UAV_Config>()))
         {
             m_uav.save_settings();
         }
@@ -502,8 +512,7 @@ void Comms::handle_uav_config()
 
     channel.begin_pack(comms::Setup_Message::UAV_CONFIG);
 
-    std::shared_ptr<const Multirotor_Config> config = m_uav.get_specialized_uav_config<Multirotor_Config>();
-    if (config)
+    if (std::shared_ptr<const Multirotor_Config> config = m_uav.get_specialized_uav_config<Multirotor_Config>())
     {
         channel.pack_param(true);
         configj.SetObject();

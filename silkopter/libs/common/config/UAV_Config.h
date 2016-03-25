@@ -23,8 +23,8 @@ public:
     Type get_type() const { return type; }
 
     std::string name;
-    float mass = 0; //Kg
-    float moment_of_inertia; //computed
+    float mass = 1.f; //Kg
+    float moment_of_inertia = 0.f; //computed
 private:
     Type type;
 };
