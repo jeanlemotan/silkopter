@@ -1,0 +1,11 @@
+
+namespace silk
+{
+
+struct UAV_Config
+{
+    string name;
+    float mass = 1.f : [ ui_name = "Mass (Kg)", min = 0.f ];
+}
+
+}

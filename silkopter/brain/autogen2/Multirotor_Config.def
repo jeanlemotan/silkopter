@@ -1,0 +1,26 @@
+import "UAV_Config.def"
+
+namespace silk
+{
+
+struct Multirotor_Config : public UAV_Config
+{
+    struct Motor
+    {
+        vec3f position = {0, 0, 0};
+        bool clockwise = false;
+    };
+    
+    string name;
+    float mass = 1.f : [ ui_name = "Mass (Kg)", min = 0.f ];
+    float height = 0.5f : [ ui_name = "Height (m)", min = 0.f ];
+    float radius = 0.5f : [ ui_name = "Radius (m)", min = 0.f ];
+    float motor_thrust = 1.f : [ ui_name = "Motor Thrust (N)", min = 0.f ];
+    float motor_z_thrust = 1.f : [ ui_name = "Motor Z Torque (Nm)", min = 0.f ];
+    float motor_acceleration = 10.f : [ ui_name = "Motor Acceleration (N/s)", min = 0.f ];
+    float motor_deceleration = 10.f : [ ui_name = "Motor Deceleration (N/s)", min = 0.f ];
+    vector<Motor> motors : [ ui_name = "Motors" ];
+}
+
+}
+
