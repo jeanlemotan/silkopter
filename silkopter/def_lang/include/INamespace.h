@@ -1,14 +1,13 @@
 #pragma once
 
-#include "INode.h"
+#include "ISymbol.h"
 
 namespace ast
 {
 
-class INamespace : virtual public INode
+class INamespace : virtual public ISymbol
 {
 public:
-    virtual ~INamespace() = default;
 };
 
 }
