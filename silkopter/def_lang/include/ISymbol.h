@@ -1,13 +1,17 @@
 #pragma once
 
+#include "IDeclaration_Scope.h"
 
-namespace ast
+namespace ts
 {
 
-class INode
+class ISymbol
 {
 public:
-    virtual ~INode() = default;
+    virtual ~ISymbol() = default;
+
+    virtual std::string const& get_name() const = 0;
+    //virtual Declaration_Scope const& get_declaration_scope() const = 0;
 };
 
 }

@@ -5,7 +5,7 @@
 namespace ts
 {
 
-class IValue: virtual public IAttribute_Container
+class IValue
 {
 public:
     virtual ~IValue() = default;
