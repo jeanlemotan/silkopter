@@ -1,9 +1,9 @@
 #pragma once
 
-#include "IMember.h"
-
 namespace ts
 {
+
+class IMember;
 
 class IMember_Container
 {

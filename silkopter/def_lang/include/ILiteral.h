@@ -1,10 +1,10 @@
 #pragma once
 
-#include "types/IType.h"
-#include "values/IValue.h"
-
 namespace ts
 {
+
+class IType;
+class IValue;
 
 class ILiteral
 {

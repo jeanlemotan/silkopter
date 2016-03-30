@@ -1,11 +1,12 @@
 #pragma once
 
 #include "ISymbol.h"
-#include "types/IType.h"
-#include "values/IValue.h"
 
 namespace ts
 {
+
+class IType;
+class IValue;
 
 class IConstant : virtual public ISymbol
 {

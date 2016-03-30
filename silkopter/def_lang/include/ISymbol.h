@@ -1,7 +1,5 @@
 #pragma once
 
-#include "IDeclaration_Scope.h"
-
 namespace ts
 {
 

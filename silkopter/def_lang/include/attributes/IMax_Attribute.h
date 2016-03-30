@@ -1,10 +1,11 @@
 #pragma once
 
 #include "IAttribute.h"
-#include "values/IValue.h"
 
 namespace ts
 {
+
+class IValue;
 
 class IMax_Attribute : public virtual IAttribute
 {

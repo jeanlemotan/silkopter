@@ -1,4 +1,14 @@
-#ifndef IDECIMALS_ATTRIBUTE_H
-#define IDECIMALS_ATTRIBUTE_H
+#pragma once
 
-#endif // IDECIMALS_ATTRIBUTE_H
+#include "IAttribute.h"
+
+namespace ts
+{
+
+class IDecimals_Attribute : public virtual IAttribute
+{
+public:
+    virtual auto get_decimals() const -> size_t = 0;
+};
+
+}

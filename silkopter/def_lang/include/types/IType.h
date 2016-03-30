@@ -6,6 +6,8 @@
 namespace ts
 {
 
+class IValue;
+
 class IType : virtual public ISymbol, virtual public IAttribute_Container
 {
 public:

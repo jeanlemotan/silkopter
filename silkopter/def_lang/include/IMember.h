@@ -1,10 +1,12 @@
 #pragma once
 
 #include "ISymbol.h"
-#include "IMember_Def.h"
 
 namespace ts
 {
+
+class IMember_Def;
+class IValue;
 
 class IMember
 {

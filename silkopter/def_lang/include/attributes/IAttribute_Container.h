@@ -1,9 +1,10 @@
 #pragma once
 
-#include "IAttribute.h"
 
 namespace ts
 {
+
+class IAttribute;
 
 class IAttribute_Container
 {

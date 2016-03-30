@@ -1,24 +1,29 @@
-%{
-#include <stdio.h>
-#include <string>
-#include <iostream>
-//    #include "node.h"
-//    NBlock *programBlock; /* the top level root node of our final AST */
-
-    extern int yylex();
-    void yyerror(const char *s) { printf("ERROR: %sn", s); }
-%}
-
-/* use newer C++ skeleton file */
-//%skeleton "lalr1.cc"
-
-/* verbose error messages */
+%skeleton "lalr1.cc"
+%require "2.3"
+%debug
+%defines
 %error-verbose
 
-/* Represents the many different ways we can access our data */
-%union {
+%code 
+{
+    #include <stdio.h>
+    #include <string>
+    #include <iostream>
+%}
+
+
+%union 
+{
     std::string* string;
     int token;
+    ts::IType* type;
+    ts::INamespace* namespace;
+    ts::IMember_Def* member_def;
+    ts::IAttribute* attribute;
+    std::vector<std::unique_ptr<ts::IAttribute>>* attribute_list;
+    ts::ILiteral* literal;
+    ts::IExpression* expression;
+    ts::IInitializer_List* initializer_list;
 }
 
 %token <token> TIMPORT
@@ -73,6 +78,7 @@
 %token <token> TCOLOR_RGBA
 %token <token> TMIN
 %token <token> TMAX
+%token <token> TDECIMALS
 %token <token> TPUBLIC
 %token <token> TPRIVATE
 %token <token> TPROTECTED
@@ -81,8 +87,8 @@
 %token <token> TUI_NAME
 %token <token> TUI_CONST
 %token <token> TNAMESPACE
-%token <token> TFALSE;
-%token <token> TTRUE;
+%token <token> TFALSE
+%token <token> TTRUE
 %token <token> TEQUAL
 %token <token> TLPARENTHESIS
 %token <token> TRPARENTHESIS
@@ -98,10 +104,31 @@
 %token <token> TDOT
 %token <token> TCOMMA
 %token <string> TIDENTIFIER
-%token <string> TFLOAT_CONSTANT
-%token <string> TDOUBLE_CONSTANT
-%token <string> TINTEGER_CONSTANT
+%token <string> TFLOAT_LITERAL
+%token <string> TDOUBLE_LITERAL
+%token <string> TINTEGER_LITERAL
 %token <string> TSTRING_LITERAL
+
+%type <type> builtin_type
+%type <type> alias_declaration struct_declaration
+%type <namespace> namespace
+%type <member_def> member_declaration
+%type <attribute> attribute
+%type <attribute_list> attribute_list
+%type <literal> literal
+%type <expression> expression
+%type <initializer_list> initializer_list
+
+%destructor { delete $$; } TIDENTIFIER TFLOAT_LITERAL TDOUBLE_LITERAL TINTEGER_LITERAL TSTRING_LITERAL
+%destructor { delete $$; } builtin_type
+%destructor { delete $$; } alias_declaration struct_declaration
+%destructor { delete $$; } namespace
+%destructor { delete $$; } member_declaration
+%destructor { delete $$; } attribute
+%destructor { delete $$; } attribute_list
+%destructor { delete $$; } literal
+%destructor { delete $$; } expression
+%destructor { delete $$; } initializer_list
 
 %start program
 
@@ -115,19 +142,43 @@ program : import_list
 import_list : import
             | import_list import
 
-import : TIMPORT TSTRING_LITERAL
+import  : TIMPORT TSTRING_LITERAL
+        {
+            type_system->import($2)
+        }
+        ;
 
 alias_declaration   : TALIAS identifier TEQUAL builtin_type TSEMICOLON
+                    {
+                        $$ = new ts::Alias();
+                    }
                     | TALIAS identifier TEQUAL builtin_type TCOLON attribute_list TSEMICOLON
+                    {
+                        $$ = new ts::Alias();
+                    }
                     ;
 
 struct_declaration  : TSTRUCT identifier TLBRACE TRBRACE TSEMICOLON
+                    {
+                        $$ = new ts::Struct_Type();
+                    }
                     | TSTRUCT identifier TLBRACE struct_body TRBRACE TSEMICOLON
+                    {
+                        $$ = new ts::Struct_Type();
+                    }
                     | TSTRUCT identifier TCOLON inheritance TLBRACE TRBRACE TSEMICOLON
+                    {
+                        $$ = new ts::Struct_Type();
+                    }
                     | TSTRUCT identifier TCOLON inheritance TLBRACE struct_body TRBRACE TSEMICOLON
+                    {
+                        $$ = new ts::Struct_Type();
+                    }
                     ;
 
-struct_body : declaration_list
+struct_body : struct_declaration
+            | alias_declaration
+            | member_declaration
             ;
 
 
@@ -141,23 +192,41 @@ inheritance_type    : TPUBLIC
 
 namespace_list  : namespace
                 | namespace_list namespace
+                ;
 
 namespace   : TNAMESPACE identifier TLBRACE TRBRACE
+            {
+                $$ = new ts::Namespace();
+            }
             | TNAMESPACE identifier TLBRACE namespace_body TRBRACE
+            {
+                $$ = new ts::Namespace();
+            }
             ;
 
 namespace_body  : declaration_list
                 ;
 
-var_declaration : type identifier TSEMICOLON
+member_declaration : type identifier TSEMICOLON
+                {
+                    $$ = new ts::Member_Def();
+                }
                 | type identifier TCOLON attribute_list TSEMICOLON
+                {
+                    $$ = new ts::Member_Def();
+                }
                 | type identifier TEQUAL expression TSEMICOLON
+                {
+                    $$ = new ts::Member_Def();
+                }
                 | type identifier TEQUAL expression TCOLON attribute_list TSEMICOLON
+                {
+                    $$ = new ts::Member_Def();
+                }
                 ;
 
 declaration_list    : struct_declaration
                     | alias_declaration
-                    | var_declaration
                     ;
 
 identifier  : TIDENTIFIER
@@ -165,6 +234,9 @@ identifier  : TIDENTIFIER
 
         
 attribute_list  : TLBRAKET attribute_body TRBRAKET
+                {
+                    $$ = new std::vector<std::unique_ptr<ts::IAttribute>>();
+                }
                 ;
 
 attribute_body  : attribute
@@ -172,17 +244,45 @@ attribute_body  : attribute
                 ;
 
 attribute   : TMIN TEQUAL expression
+            {
+                $$ = new ts::Min_Attribute($3->Evaluate());
+            }
             | TMAX TEQUAL expression
+            {
+                $$ = new ts::Max_Attribute($3->Evaluate());
+            }
+            | TDECIMALS TEQUAL TFLOAT_LITERAL
+            {
+                $$ = new ts::Decimals_Attribute($3);
+            }
             | TUI_NAME TEQUAL TSTRING_LITERAL
+            {
+                $$ = new ts::UI_Name_Attribute($3);
+            }
             ;
         
 expression  : literal
+            {
+                $$ = new ts::Literal_Expression($1);
+            }
             | initializer_list
+            {
+                $$ = new ts::Initializer_List_Expression($1);
+            }
             | TLPARENTHESIS expression TRPARENTHESIS
+            {
+                $$ = $2;
+            }
             ;
 
 initializer_list    : TLBRACE TRBRACE
+                    {
+                        $$ = new ts::Initializer_List();
+                    }
                     | TLBRACE initializer_body TRBRACE
+                    {
+                        $$ = new ts::Initializer_List();
+                    }
                     ;
 
 initializer_body    : expression
@@ -193,22 +293,51 @@ type    : identifier
         | builtin_type
         ;
 
-builtin_type    : builtin_templated_type
-                | TBOOL
-                | TFLOAT | TDOUBLE
-                | TSTRING
-                | TINT8_T | TUINT8_T
-                | TINT16_T | TUINT16_T
-                | TINT32_T | TUINT32_T
-                | TINT64_T | TUINT64_T
-                | TVEC2F | TVEC2D | TVEC2U8 | TVEC2S8 | TVEC2U16 | TVEC2S16 | TVEC2U32 | TVEC2S32
-                | TVEC3F | TVEC3D | TVEC3U8 | TVEC3S8 | TVEC3U16 | TVEC3S16 | TVEC3U32 | TVEC3S32
-                | TVEC4F | TVEC4D | TVEC4U8 | TVEC4S8 | TVEC4U16 | TVEC4S16 | TVEC4U32 | TVEC4S32
-                | TQUATF | TQUATD
-                | TMAT2F | TMAT2D
-                | TMAT3F | TMAT3D
-                | TMAT4F | TMAT4D
-                | TCOLOR_RGB | TCOLOR_RGBA
+builtin_type    : builtin_templated_type { $$ = nullptr; }
+                | TBOOL         { $$ = type_system->get_bool_type().get(); }
+                | TFLOAT        { $$ = type_system->get_float_type().get(); }
+                | TDOUBLE       { $$ = type_system->get_double_type().get(); }
+                | TSTRING       { $$ = type_system->get_string_type().get(); }
+                | TINT8_T       { $$ = type_system->get_int8_type().get(); }
+                | TUINT8_T      { $$ = type_system->get_uint8_type().get(); }
+                | TINT16_T      { $$ = type_system->get_int16_type().get(); }
+                | TUINT16_T     { $$ = type_system->get_uint16_type().get(); }
+                | TINT32_T      { $$ = type_system->get_int32_type().get(); }
+                | TUINT32_T     { $$ = type_system->get_uint32_type().get(); }
+                | TINT64_T      { $$ = type_system->get_int64_type().get(); }
+                | TUINT64_T     { $$ = type_system->get_uint64_type().get(); }
+                | TVEC2F        { $$ = type_system->get_vec2f_type().get(); }
+                | TVEC2D        { $$ = type_system->get_vec2d_type().get(); } 
+                | TVEC2U8       { $$ = type_system->get_vec2u8_type().get(); }
+                | TVEC2S8       { $$ = type_system->get_vec2s8_type().get(); } 
+                | TVEC2U16      { $$ = type_system->get_vec2u16_type().get(); }
+                | TVEC2S16      { $$ = type_system->get_vec2s16_type().get(); }
+                | TVEC2U32      { $$ = type_system->get_vec2u32_type().get(); }
+                | TVEC2S32      { $$ = type_system->get_vec2s32_type().get(); }
+                | TVEC3F        { $$ = type_system->get_vec3f_type().get(); }
+                | TVEC3D        { $$ = type_system->get_vec3d_type().get(); } 
+                | TVEC3U8       { $$ = type_system->get_vec3u8_type().get(); }
+                | TVEC3S8       { $$ = type_system->get_vec3s8_type().get(); } 
+                | TVEC3U16      { $$ = type_system->get_vec3u16_type().get(); }
+                | TVEC3S16      { $$ = type_system->get_vec3s16_type().get(); }
+                | TVEC3U32      { $$ = type_system->get_vec3u32_type().get(); }
+                | TVEC3S32      { $$ = type_system->get_vec3s32_type().get(); }
+                | TVEC4F        { $$ = type_system->get_vec4f_type().get(); }
+                | TVEC4D        { $$ = type_system->get_vec4d_type().get(); } 
+                | TVEC4U8       { $$ = type_system->get_vec4u8_type().get(); }
+                | TVEC4S8       { $$ = type_system->get_vec4s8_type().get(); } 
+                | TVEC4U16      { $$ = type_system->get_vec4u16_type().get(); }
+                | TVEC4S16      { $$ = type_system->get_vec4s16_type().get(); }
+                | TVEC4U32      { $$ = type_system->get_vec4u32_type().get(); }
+                | TVEC4S32      { $$ = type_system->get_vec4s32_type().get(); }
+                | TQUATF        { $$ = type_system->get_quatf_type().get(); }
+                | TQUATD        { $$ = type_system->get_quafd_type().get(); }
+                | TMAT2F        { $$ = type_system->get_mat2f_type().get(); }
+                | TMAT2D        { $$ = type_system->get_mat2d_type().get(); }
+                | TMAT3F        { $$ = type_system->get_mat3f_type().get(); }
+                | TMAT3D        { $$ = type_system->get_mat3d_type().get(); }
+                | TMAT4F        { $$ = type_system->get_mat4f_type().get(); }
+                | TMAT4D        { $$ = type_system->get_mat4d_type().get(); }
                 ;
     
 builtin_templated_type  : TVECTOR template_argument_list
@@ -224,16 +353,35 @@ template_argument_body  : template_argument
 
 template_argument   : type
                     | TSTRING_LITERAL
-                    | TINTEGER_CONSTANT
+                    | TINTEGER_LITERAL
                     ;
 
-literal : TFLOAT_CONSTANT
-        | TDOUBLE_CONSTANT
-        | TINTEGER_CONSTANT
+literal : TFLOAT_LITERAL
+        {
+            $$ = new ts::Literal($1);
+        }
+        | TDOUBLE_LITERAL
+        {
+            $$ = new ts::Literal($1);
+        }
+        | TINTEGER_LITERAL
+        {
+            $$ = new ts::Literal($1);
+        }
         | TSTRING_LITERAL
+        {
+            $$ = new ts::Literal($1);
+        }
         | TFALSE
+        {
+            $$ = new ts::Literal($1);
+        }
         | TTRUE
+        {
+            $$ = new ts::Literal($1);
+        }
         ;
 
 
 %%
+
