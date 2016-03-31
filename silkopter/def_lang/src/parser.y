@@ -29,53 +29,6 @@
 %token <token> TIMPORT
 %token <token> TALIAS
 %token <token> TSTRUCT
-%token <token> TSTRING
-%token <token> TVECTOR
-%token <token> TFLOAT
-%token <token> TDOUBLE
-%token <token> TBOOL
-%token <token> TUINT8_T
-%token <token> TINT8_T
-%token <token> TUINT16_T
-%token <token> TINT16_T
-%token <token> TUINT32_T
-%token <token> TINT32_T
-%token <token> TUINT64_T
-%token <token> TINT64_T
-%token <token> TVEC2F
-%token <token> TVEC2D
-%token <token> TVEC2S8
-%token <token> TVEC2U8
-%token <token> TVEC2S16
-%token <token> TVEC2U16
-%token <token> TVEC2S32
-%token <token> TVEC2U32
-%token <token> TVEC3F
-%token <token> TVEC3D
-%token <token> TVEC3S8
-%token <token> TVEC3U8
-%token <token> TVEC3S16
-%token <token> TVEC3U16
-%token <token> TVEC3S32
-%token <token> TVEC3U32
-%token <token> TVEC4F
-%token <token> TVEC4D
-%token <token> TVEC4S8
-%token <token> TVEC4U8
-%token <token> TVEC4S16
-%token <token> TVEC4U16
-%token <token> TVEC4S32
-%token <token> TVEC4U32
-%token <token> TQUATF
-%token <token> TQUATD
-%token <token> TMAT2F
-%token <token> TMAT2D
-%token <token> TMAT3F
-%token <token> TMAT3D
-%token <token> TMAT4F
-%token <token> TMAT4D
-%token <token> TCOLOR_RGB
-%token <token> TCOLOR_RGBA
 %token <token> TMIN
 %token <token> TMAX
 %token <token> TDECIMALS
@@ -109,7 +62,8 @@
 %token <string> TINTEGER_LITERAL
 %token <string> TSTRING_LITERAL
 
-%type <type> builtin_type
+%type <string> identifier
+%type <string> type_name
 %type <type> alias_declaration struct_declaration
 %type <namespace> namespace
 %type <member_def> member_declaration
@@ -120,7 +74,7 @@
 %type <initializer_list> initializer_list
 
 %destructor { delete $$; } TIDENTIFIER TFLOAT_LITERAL TDOUBLE_LITERAL TINTEGER_LITERAL TSTRING_LITERAL
-%destructor { delete $$; } builtin_type
+%destructor { delete $$; } type_name
 %destructor { delete $$; } alias_declaration struct_declaration
 %destructor { delete $$; } namespace
 %destructor { delete $$; } member_declaration
@@ -148,13 +102,18 @@ import  : TIMPORT TSTRING_LITERAL
         }
         ;
 
-alias_declaration   : TALIAS identifier TEQUAL builtin_type TSEMICOLON
+alias_declaration   : TALIAS identifier TEQUAL type_name TSEMICOLON
                     {
-                        $$ = new ts::Alias();
+                        $$ = new ts::Alias($4);
                     }
-                    | TALIAS identifier TEQUAL builtin_type TCOLON attribute_list TSEMICOLON
+                    | TALIAS identifier TEQUAL type_name TCOLON attribute_list TSEMICOLON
                     {
-                        $$ = new ts::Alias();
+                        ts::Alias* alias = new ts::Alias($4);
+                        for (auto const& att: $6)
+                        {
+                            $$->add_attribute(std::move(att));
+                        }
+                        $$ = alias;
                     }
                     ;
 
@@ -207,21 +166,13 @@ namespace   : TNAMESPACE identifier TLBRACE TRBRACE
 namespace_body  : declaration_list
                 ;
 
-member_declaration : type identifier TSEMICOLON
+member_declaration : type_name identifier TSEMICOLON
                 {
-                    $$ = new ts::Member_Def();
+                    $$ = new ts::Member_Def($1, $2);
                 }
-                | type identifier TCOLON attribute_list TSEMICOLON
+                | type_name identifier TEQUAL expression TSEMICOLON
                 {
-                    $$ = new ts::Member_Def();
-                }
-                | type identifier TEQUAL expression TSEMICOLON
-                {
-                    $$ = new ts::Member_Def();
-                }
-                | type identifier TEQUAL expression TCOLON attribute_list TSEMICOLON
-                {
-                    $$ = new ts::Member_Def();
+                    $$ = new ts::Member_Def($1, $2, $4);
                 }
                 ;
 
@@ -289,69 +240,22 @@ initializer_body    : expression
                     | initializer_body TCOMMA expression
                     ;
 
-type    : identifier
-        | builtin_type
-        ;
+type_name   : templated_type
+            | identifier
+            {
+                $$ = type_system.find_type_symbol_by_name($1).get();
+            }
+            ;
 
-builtin_type    : builtin_templated_type { $$ = nullptr; }
-                | TBOOL         { $$ = type_system->get_bool_type().get(); }
-                | TFLOAT        { $$ = type_system->get_float_type().get(); }
-                | TDOUBLE       { $$ = type_system->get_double_type().get(); }
-                | TSTRING       { $$ = type_system->get_string_type().get(); }
-                | TINT8_T       { $$ = type_system->get_int8_type().get(); }
-                | TUINT8_T      { $$ = type_system->get_uint8_type().get(); }
-                | TINT16_T      { $$ = type_system->get_int16_type().get(); }
-                | TUINT16_T     { $$ = type_system->get_uint16_type().get(); }
-                | TINT32_T      { $$ = type_system->get_int32_type().get(); }
-                | TUINT32_T     { $$ = type_system->get_uint32_type().get(); }
-                | TINT64_T      { $$ = type_system->get_int64_type().get(); }
-                | TUINT64_T     { $$ = type_system->get_uint64_type().get(); }
-                | TVEC2F        { $$ = type_system->get_vec2f_type().get(); }
-                | TVEC2D        { $$ = type_system->get_vec2d_type().get(); } 
-                | TVEC2U8       { $$ = type_system->get_vec2u8_type().get(); }
-                | TVEC2S8       { $$ = type_system->get_vec2s8_type().get(); } 
-                | TVEC2U16      { $$ = type_system->get_vec2u16_type().get(); }
-                | TVEC2S16      { $$ = type_system->get_vec2s16_type().get(); }
-                | TVEC2U32      { $$ = type_system->get_vec2u32_type().get(); }
-                | TVEC2S32      { $$ = type_system->get_vec2s32_type().get(); }
-                | TVEC3F        { $$ = type_system->get_vec3f_type().get(); }
-                | TVEC3D        { $$ = type_system->get_vec3d_type().get(); } 
-                | TVEC3U8       { $$ = type_system->get_vec3u8_type().get(); }
-                | TVEC3S8       { $$ = type_system->get_vec3s8_type().get(); } 
-                | TVEC3U16      { $$ = type_system->get_vec3u16_type().get(); }
-                | TVEC3S16      { $$ = type_system->get_vec3s16_type().get(); }
-                | TVEC3U32      { $$ = type_system->get_vec3u32_type().get(); }
-                | TVEC3S32      { $$ = type_system->get_vec3s32_type().get(); }
-                | TVEC4F        { $$ = type_system->get_vec4f_type().get(); }
-                | TVEC4D        { $$ = type_system->get_vec4d_type().get(); } 
-                | TVEC4U8       { $$ = type_system->get_vec4u8_type().get(); }
-                | TVEC4S8       { $$ = type_system->get_vec4s8_type().get(); } 
-                | TVEC4U16      { $$ = type_system->get_vec4u16_type().get(); }
-                | TVEC4S16      { $$ = type_system->get_vec4s16_type().get(); }
-                | TVEC4U32      { $$ = type_system->get_vec4u32_type().get(); }
-                | TVEC4S32      { $$ = type_system->get_vec4s32_type().get(); }
-                | TQUATF        { $$ = type_system->get_quatf_type().get(); }
-                | TQUATD        { $$ = type_system->get_quafd_type().get(); }
-                | TMAT2F        { $$ = type_system->get_mat2f_type().get(); }
-                | TMAT2D        { $$ = type_system->get_mat2d_type().get(); }
-                | TMAT3F        { $$ = type_system->get_mat3f_type().get(); }
-                | TMAT3D        { $$ = type_system->get_mat3d_type().get(); }
-                | TMAT4F        { $$ = type_system->get_mat4f_type().get(); }
-                | TMAT4D        { $$ = type_system->get_mat4d_type().get(); }
+templated_type  : identifier TLANGLED_BRAKET TRANGLED_BRAKET
+                | identifier TLANGLED_BRAKET template_argument_list TRANGLED_BRAKET
                 ;
-    
-builtin_templated_type  : TVECTOR template_argument_list
-                        ;
-            
-template_argument_list  : TLANGLED_BRAKET TRANGLED_BRAKET
-                        | TLANGLED_BRAKET template_argument_body TRANGLED_BRAKET
+
+template_argument_list  : template_argument
+                        | template_argument_list TCOMMA template_argument
                         ;
 
-template_argument_body  : template_argument
-                        | template_argument_body TCOMMA template_argument
-                        ;
-
-template_argument   : type
+template_argument   : type_name
                     | TSTRING_LITERAL
                     | TINTEGER_LITERAL
                     ;

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <boost/optional.hpp>
 
 namespace ts
 {
@@ -25,7 +26,7 @@ public:
     auto find_specialized_attribute() const -> std::shared_ptr<const T>;
 
     template<typename T>
-    auto find_specialized_attribute() -> std::shared_ptr<T> = 0;
+    auto find_specialized_attribute() -> std::shared_ptr<T>;
 };
 
 }

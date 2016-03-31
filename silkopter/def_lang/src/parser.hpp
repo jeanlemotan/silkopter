@@ -157,85 +157,38 @@ namespace yy {
         TIMPORT = 258,
         TALIAS = 259,
         TSTRUCT = 260,
-        TSTRING = 261,
-        TVECTOR = 262,
-        TFLOAT = 263,
-        TDOUBLE = 264,
-        TBOOL = 265,
-        TUINT8_T = 266,
-        TINT8_T = 267,
-        TUINT16_T = 268,
-        TINT16_T = 269,
-        TUINT32_T = 270,
-        TINT32_T = 271,
-        TUINT64_T = 272,
-        TINT64_T = 273,
-        TVEC2F = 274,
-        TVEC2D = 275,
-        TVEC2S8 = 276,
-        TVEC2U8 = 277,
-        TVEC2S16 = 278,
-        TVEC2U16 = 279,
-        TVEC2S32 = 280,
-        TVEC2U32 = 281,
-        TVEC3F = 282,
-        TVEC3D = 283,
-        TVEC3S8 = 284,
-        TVEC3U8 = 285,
-        TVEC3S16 = 286,
-        TVEC3U16 = 287,
-        TVEC3S32 = 288,
-        TVEC3U32 = 289,
-        TVEC4F = 290,
-        TVEC4D = 291,
-        TVEC4S8 = 292,
-        TVEC4U8 = 293,
-        TVEC4S16 = 294,
-        TVEC4U16 = 295,
-        TVEC4S32 = 296,
-        TVEC4U32 = 297,
-        TQUATF = 298,
-        TQUATD = 299,
-        TMAT2F = 300,
-        TMAT2D = 301,
-        TMAT3F = 302,
-        TMAT3D = 303,
-        TMAT4F = 304,
-        TMAT4D = 305,
-        TCOLOR_RGB = 306,
-        TCOLOR_RGBA = 307,
-        TMIN = 308,
-        TMAX = 309,
-        TDECIMALS = 310,
-        TPUBLIC = 311,
-        TPRIVATE = 312,
-        TPROTECTED = 313,
-        TCONST = 314,
-        TUI_CONTROL = 315,
-        TUI_NAME = 316,
-        TUI_CONST = 317,
-        TNAMESPACE = 318,
-        TFALSE = 319,
-        TTRUE = 320,
-        TEQUAL = 321,
-        TLPARENTHESIS = 322,
-        TRPARENTHESIS = 323,
-        TLBRACE = 324,
-        TRBRACE = 325,
-        TLBRAKET = 326,
-        TRBRAKET = 327,
-        TLANGLED_BRAKET = 328,
-        TRANGLED_BRAKET = 329,
-        TNAMESPACE_SEPARATOR = 330,
-        TCOLON = 331,
-        TSEMICOLON = 332,
-        TDOT = 333,
-        TCOMMA = 334,
-        TIDENTIFIER = 335,
-        TFLOAT_LITERAL = 336,
-        TDOUBLE_LITERAL = 337,
-        TINTEGER_LITERAL = 338,
-        TSTRING_LITERAL = 339
+        TMIN = 261,
+        TMAX = 262,
+        TDECIMALS = 263,
+        TPUBLIC = 264,
+        TPRIVATE = 265,
+        TPROTECTED = 266,
+        TCONST = 267,
+        TUI_CONTROL = 268,
+        TUI_NAME = 269,
+        TUI_CONST = 270,
+        TNAMESPACE = 271,
+        TFALSE = 272,
+        TTRUE = 273,
+        TEQUAL = 274,
+        TLPARENTHESIS = 275,
+        TRPARENTHESIS = 276,
+        TLBRACE = 277,
+        TRBRACE = 278,
+        TLBRAKET = 279,
+        TRBRAKET = 280,
+        TLANGLED_BRAKET = 281,
+        TRANGLED_BRAKET = 282,
+        TNAMESPACE_SEPARATOR = 283,
+        TCOLON = 284,
+        TSEMICOLON = 285,
+        TDOT = 286,
+        TCOMMA = 287,
+        TIDENTIFIER = 288,
+        TFLOAT_LITERAL = 289,
+        TDOUBLE_LITERAL = 290,
+        TINTEGER_LITERAL = 291,
+        TSTRING_LITERAL = 292
       };
     };
 
@@ -399,7 +352,7 @@ namespace yy {
     // Tables.
   // YYPACT[STATE-NUM] -- Index in YYTABLE of the portion describing
   // STATE-NUM.
-  static const short int yypact_[];
+  static const signed char yypact_[];
 
   // YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
   // Performed when YYTABLE does not specify something else to do.  Zero
@@ -407,17 +360,17 @@ namespace yy {
   static const unsigned char yydefact_[];
 
   // YYPGOTO[NTERM-NUM].
-  static const short int yypgoto_[];
+  static const signed char yypgoto_[];
 
   // YYDEFGOTO[NTERM-NUM].
-  static const short int yydefgoto_[];
+  static const signed char yydefgoto_[];
 
   // YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
   // positive, shift that token.  If negative, reduce the rule whose
   // number is the opposite.  If YYTABLE_NINF, syntax error.
   static const unsigned char yytable_[];
 
-  static const short int yycheck_[];
+  static const unsigned char yycheck_[];
 
   // YYSTOS[STATE-NUM] -- The (internal number of the) accessing
   // symbol of state STATE-NUM.
@@ -537,12 +490,12 @@ namespace yy {
     enum
     {
       yyeof_ = 0,
-      yylast_ = 399,     ///< Last index in yytable_.
-      yynnts_ = 28,  ///< Number of nonterminal symbols.
+      yylast_ = 106,     ///< Last index in yytable_.
+      yynnts_ = 26,  ///< Number of nonterminal symbols.
       yyfinal_ = 18, ///< Termination state number.
       yyterror_ = 1,
       yyerrcode_ = 256,
-      yyntokens_ = 85  ///< Number of tokens.
+      yyntokens_ = 38  ///< Number of tokens.
     };
 
 
@@ -551,7 +504,7 @@ namespace yy {
 
 
 } // yy
-#line 555 "parser.hpp" // lalr1.cc:377
+#line 508 "parser.hpp" // lalr1.cc:377
 
 
 
