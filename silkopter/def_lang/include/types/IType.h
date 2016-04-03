@@ -15,7 +15,7 @@ public:
 
     virtual auto get_default_value() const -> std::shared_ptr<const IValue> = 0;
 
-    virtual auto create_value() const -> std::unique_ptr<IValue>;
+    virtual auto create_value() const -> std::unique_ptr<IValue> = 0;
 };
 
 }

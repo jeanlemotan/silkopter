@@ -18,7 +18,7 @@ public:
 
     virtual auto get_type() const -> std::shared_ptr<IType> = 0;
 
-    virtual auto parse_from_ui_string(std::string const& str) = 0;
+    virtual auto parse_from_ui_string(std::string const& str) -> bool = 0;
     virtual auto get_ui_string() const -> std::string = 0;
 
     virtual auto select(Value_Selector const& selector) const -> std::shared_ptr<const IValue> = 0;

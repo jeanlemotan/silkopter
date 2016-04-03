@@ -1,145 +1,227 @@
-%skeleton "lalr1.cc"
-%require "2.3"
-%debug
+%skeleton "lalr1.cc" /* -*- C++ -*- */
+%require "3.0.4"
 %defines
-%error-verbose
+%define parser_class_name { parser }
 
-%code 
+%define api.token.constructor
+%define api.value.type variant
+%define parse.assert
+
+%locations
+%initial-action
 {
-    #include <stdio.h>
+  // Initialize the initial location.
+  //@$.begin.filename = @$.end.filename = &p.get_filename();
+};
+
+%code requires
+{
     #include <string>
-    #include <iostream>
-%}
 
-
-%union 
-{
-    std::string* string;
-    int token;
-    ts::IType* type;
-    ts::INamespace* namespace;
-    ts::IMember_Def* member_def;
-    ts::IAttribute* attribute;
-    std::vector<std::unique_ptr<ts::IAttribute>>* attribute_list;
-    ts::ILiteral* literal;
-    ts::IExpression* expression;
-    ts::IInitializer_List* initializer_list;
+    #include "ast/Builder.h"
+    #include "ast/Node.h"
+    #include "ast/Attribute.h"
 }
 
-%token <token> TIMPORT
-%token <token> TALIAS
-%token <token> TSTRUCT
-%token <token> TMIN
-%token <token> TMAX
-%token <token> TDECIMALS
-%token <token> TPUBLIC
-%token <token> TPRIVATE
-%token <token> TPROTECTED
-%token <token> TCONST
-%token <token> TUI_CONTROL
-%token <token> TUI_NAME
-%token <token> TUI_CONST
-%token <token> TNAMESPACE
-%token <token> TFALSE
-%token <token> TTRUE
-%token <token> TEQUAL
-%token <token> TLPARENTHESIS
-%token <token> TRPARENTHESIS
-%token <token> TLBRACE
-%token <token> TRBRACE
-%token <token> TLBRAKET
-%token <token> TRBRAKET
-%token <token> TLANGLED_BRAKET
-%token <token> TRANGLED_BRAKET
-%token <token> TNAMESPACE_SEPARATOR
-%token <token> TCOLON
-%token <token> TSEMICOLON
-%token <token> TDOT
-%token <token> TCOMMA
-%token <string> TIDENTIFIER
-%token <string> TFLOAT_LITERAL
-%token <string> TDOUBLE_LITERAL
-%token <string> TINTEGER_LITERAL
-%token <string> TSTRING_LITERAL
+%param { ast::Builder& builder }
 
-%type <string> identifier
-%type <string> type_name
-%type <type> alias_declaration struct_declaration
-%type <namespace> namespace
-%type <member_def> member_declaration
-%type <attribute> attribute
-%type <attribute_list> attribute_list
-%type <literal> literal
-%type <expression> expression
-%type <initializer_list> initializer_list
+%define parse.trace
+%define parse.error verbose
 
-%destructor { delete $$; } TIDENTIFIER TFLOAT_LITERAL TDOUBLE_LITERAL TINTEGER_LITERAL TSTRING_LITERAL
-%destructor { delete $$; } type_name
-%destructor { delete $$; } alias_declaration struct_declaration
-%destructor { delete $$; } namespace
-%destructor { delete $$; } member_declaration
-%destructor { delete $$; } attribute
-%destructor { delete $$; } attribute_list
-%destructor { delete $$; } literal
-%destructor { delete $$; } expression
-%destructor { delete $$; } initializer_list
+%code
+{
+    #include "ast/Lexer.h"
 
-%start program
+    // Prototype of the yylex function providing subsequent tokens.
+    yy::parser::symbol_type yylex(ast::Builder& builder)
+    {
+        return builder.get_lexer().astyylex();
+    }
+}
+
+%token
+    TEND 0 "end"
+    TIMPORT "import"
+    TALIAS "alias"
+    TSTRUCT "struct"
+    TPUBLIC "public"
+    TPRIVATE "private"
+    TPROTECTED "protected"
+    TCONST "const"
+    TNAMESPACE "namespace"
+    TFALSE "false"
+    TTRUE "true"
+    TEQUAL "="
+    TLPARENTHESIS "("
+    TRPARENTHESIS ")"
+    TLBRACE "{"
+    TRBRACE "}"
+    TLBRAKET "["
+    TRBRAKET "]"
+    TLANGLED_BRAKET "<"
+    TRANGLED_BRAKET ">"
+    TNAMESPACE_SEPARATOR "::"
+    TCOLON ":"
+    TSEMICOLON ";"
+    TDOT "."
+    TCOMMA ","
+    ;
+
+%token <std::string> TIDENTIFIER "identifier"
+%token <float> TFLOAT_LITERAL "float literal"
+%token <double> TDOUBLE_LITERAL "double literal"
+%token <int64_t> TINTEGER_LITERAL "integer literal"
+%token <std::string> TSTRING_LITERAL "string literal"
+
+%type <::ast::Node> top_level_declaration_list
+%type <::ast::Node> top_level_declaration
+%type <::ast::Node> type_declaration
+%type <::ast::Node> struct_declaration
+%type <::ast::Node> struct_body
+%type <::ast::Node> struct_body_declaration
+%type <::ast::Node> struct_body_declaration_list
+%type <::ast::Node> inheritance
+%type <::ast::Node> identifier
+%type <::ast::Node> type
+%type <::ast::Node> templated_type
+%type <::ast::Node> template_argument_list
+%type <::ast::Node> template_argument
+%type <::ast::Node> alias_declaration
+%type <::ast::Node> namespace_declaration
+%type <::ast::Node> namespace_body
+%type <::ast::Node> namespace_body_declaration
+%type <::ast::Node> namespace_body_declaration_list
+%type <::ast::Node> member_declaration
+%type <::ast::Node> attribute
+%type <::ast::Node> attribute_list
+%type <::ast::Node> attribute_body
+%type <::ast::Node> literal
+%type <::ast::Node> expression
+%type <::ast::Node> initializer_list
+%type <::ast::Node> initializer_body
+
+//%printer { yyoutput << $$; } <>;
 
 %%
+%start program;
 
 program : import_list
-        | declaration_list
-        | namespace_list
-        ;
-
-import_list : import
-            | import_list import
-
-import  : TIMPORT TSTRING_LITERAL
         {
-            type_system->import($2)
+        }
+        | top_level_declaration_list
+        {
+            builder.get_root_node().move_children_from(std::move($1));
         }
         ;
 
-alias_declaration   : TALIAS identifier TEQUAL type_name TSEMICOLON
-                    {
-                        $$ = new ts::Alias($4);
-                    }
-                    | TALIAS identifier TEQUAL type_name TCOLON attribute_list TSEMICOLON
-                    {
-                        ts::Alias* alias = new ts::Alias($4);
-                        for (auto const& att: $6)
+import_list : import
+            {
+            }
+            | import_list import
+            {
+            }
+
+
+import  : TIMPORT TSTRING_LITERAL
+        {
+            builder.start_file($2);
+        }
+        ;
+
+
+top_level_declaration_list  : top_level_declaration
+                            {
+                                $$ = ast::Node(ast::Node::Type::LIST);
+                                $$.add_child($1);
+                            }
+                            | top_level_declaration_list top_level_declaration
+                            {
+                                $$.move_children_from(std::move($1));
+                                $$.add_child($2);
+                            }
+                            ;
+
+top_level_declaration   : type_declaration
                         {
-                            $$->add_attribute(std::move(att));
+                            $$ = $1;
                         }
-                        $$ = alias;
+                        | namespace_declaration
+                        {
+                            $$ = $1;
+                        }
+                        ;
+
+
+alias_declaration   : TALIAS identifier TEQUAL type TSEMICOLON
+                    {
+                        $$ = ast::Node(ast::Node::Type::ALIAS_DECLARATION);
+                        $$.add_child($2);
+                        $$.add_child($4);
+                    }
+                    | TALIAS identifier TEQUAL type TCOLON attribute_list TSEMICOLON
+                    {
+                        $$ = ast::Node(ast::Node::Type::ALIAS_DECLARATION);
+                        $$.add_child($2);
+                        $$.add_child($4);
+                        $$.move_children_from(std::move($6));
                     }
                     ;
 
 struct_declaration  : TSTRUCT identifier TLBRACE TRBRACE TSEMICOLON
                     {
-                        $$ = new ts::Struct_Type();
+                        $$ = ast::Node(ast::Node::Type::STRUCT_DECLARATION);
+                        $$.add_child($2);
                     }
                     | TSTRUCT identifier TLBRACE struct_body TRBRACE TSEMICOLON
                     {
-                        $$ = new ts::Struct_Type();
+                        $$ = ast::Node(ast::Node::Type::STRUCT_DECLARATION);
+                        $$.add_child($2);
+                        $$.add_child($4);
                     }
                     | TSTRUCT identifier TCOLON inheritance TLBRACE TRBRACE TSEMICOLON
                     {
-                        $$ = new ts::Struct_Type();
+                        $$ = ast::Node(ast::Node::Type::STRUCT_DECLARATION);
+                        $$.add_child($2);
+                        $$.add_child($4);
                     }
                     | TSTRUCT identifier TCOLON inheritance TLBRACE struct_body TRBRACE TSEMICOLON
                     {
-                        $$ = new ts::Struct_Type();
+                        $$ = ast::Node(ast::Node::Type::STRUCT_DECLARATION);
+                        $$.add_child($2);
+                        $$.add_child($4);
+                        $$.add_child($6);
                     }
                     ;
 
-struct_body : struct_declaration
-            | alias_declaration
-            | member_declaration
+struct_body : struct_body_declaration_list
+            {
+                $$ = ast::Node(ast::Node::Type::STRUCT_BODY);
+                $$.move_children_from(std::move($1));
+            }
             ;
 
+struct_body_declaration_list    : struct_body_declaration
+                                {
+                                    $$ = ast::Node(ast::Node::Type::LIST);
+                                    $$.add_child($1);
+                                }
+                                | struct_body_declaration_list struct_body_declaration
+                                {
+                                    $$.move_children_from(std::move($1));
+                                    $$.add_child($2);
+                                }
+                                ;
+
+
+struct_body_declaration : type_declaration
+                        {
+                            $$ = $1;
+                        }
+                        | member_declaration
+                        {
+                            $$ = $1;
+                        }
+                        ;
 
 inheritance : inheritance_type identifier
             ;
@@ -149,76 +231,134 @@ inheritance_type    : TPUBLIC
                     | TPROTECTED
                     ;
 
-namespace_list  : namespace
-                | namespace_list namespace
-                ;
-
-namespace   : TNAMESPACE identifier TLBRACE TRBRACE
+namespace_declaration   : TNAMESPACE identifier TLBRACE TRBRACE
             {
-                $$ = new ts::Namespace();
+                $$ = ast::Node(ast::Node::Type::NAMESPACE_DECLARATION);
+                $$.add_child($2);
             }
             | TNAMESPACE identifier TLBRACE namespace_body TRBRACE
             {
-                $$ = new ts::Namespace();
+                $$ = ast::Node(ast::Node::Type::NAMESPACE_DECLARATION);
+                $$.add_child($2);
+                $$.add_child($4);
             }
             ;
 
-namespace_body  : declaration_list
-                ;
-
-member_declaration : type_name identifier TSEMICOLON
+namespace_body  : namespace_body_declaration_list
                 {
-                    $$ = new ts::Member_Def($1, $2);
-                }
-                | type_name identifier TEQUAL expression TSEMICOLON
-                {
-                    $$ = new ts::Member_Def($1, $2, $4);
+                    $$ = ast::Node(ast::Node::Type::NAMESPACE_BODY);
+                    $$.move_children_from(std::move($1));
                 }
                 ;
 
-declaration_list    : struct_declaration
+namespace_body_declaration_list : namespace_body_declaration
+                                {
+                                    $$ = ast::Node(ast::Node::Type::LIST);
+                                    $$.add_child($1);
+                                }
+                                | namespace_body_declaration_list namespace_body_declaration
+                                {
+                                    $$.move_children_from(std::move($1));
+                                    $$.add_child($2);
+                                }
+                                ;
+
+namespace_body_declaration  : type_declaration
+                            {
+                                $$ = $1;
+                            }
+                            | namespace_declaration
+                            {
+                                $$ = $1;
+                            }
+                            ;
+
+
+member_declaration  : type identifier TSEMICOLON
+                    {
+                        $$ = ast::Node(ast::Node::Type::MEMBER_DECLARATION);
+                        $$.add_child($1);
+                        $$.add_child($2);
+                    }
+                    | type identifier TCOLON attribute_list TSEMICOLON
+                    {
+                        $$ = ast::Node(ast::Node::Type::MEMBER_DECLARATION);
+                        $$.add_child($1);
+                        $$.add_child($2);
+                        $$.move_children_from(std::move($4));
+                    }
+                    | type identifier TEQUAL expression TSEMICOLON
+                    {
+                        $$ = ast::Node(ast::Node::Type::MEMBER_DECLARATION);
+                        $$.add_child($1);
+                        $$.add_child($2);
+                        $$.add_child($4);
+                    }
+                    | type identifier TEQUAL expression TCOLON attribute_list TSEMICOLON
+                    {
+                        $$ = ast::Node(ast::Node::Type::MEMBER_DECLARATION);
+                        $$.add_child($1);
+                        $$.add_child($2);
+                        $$.add_child($4);
+                        $$.move_children_from(std::move($6));
+                    }
+                    ;
+
+
+
+type_declaration    : struct_declaration
+                    {
+                        $$ = $1;
+                    }
                     | alias_declaration
+                    {
+                        $$ = $1;
+                    }
                     ;
 
 identifier  : TIDENTIFIER
+            {
+                $$ = ast::Node(ast::Node::Type::IDENTIFIER);
+                $$.add_attribute(ast::Attribute("value", $1));
+            }
             ;
 
         
 attribute_list  : TLBRAKET attribute_body TRBRAKET
                 {
-                    $$ = new std::vector<std::unique_ptr<ts::IAttribute>>();
+                    $$ = $2;
                 }
                 ;
 
 attribute_body  : attribute
+                {
+                    $$ = ast::Node(ast::Node::Type::LIST);
+                    $$.add_child($1);
+                }
                 | attribute_body TCOMMA attribute
+                {
+                    $$.move_children_from(std::move($1));
+                    $$.add_child($3);
+                }
                 ;
 
-attribute   : TMIN TEQUAL expression
+attribute   : identifier TEQUAL expression
             {
-                $$ = new ts::Min_Attribute($3->Evaluate());
-            }
-            | TMAX TEQUAL expression
-            {
-                $$ = new ts::Max_Attribute($3->Evaluate());
-            }
-            | TDECIMALS TEQUAL TFLOAT_LITERAL
-            {
-                $$ = new ts::Decimals_Attribute($3);
-            }
-            | TUI_NAME TEQUAL TSTRING_LITERAL
-            {
-                $$ = new ts::UI_Name_Attribute($3);
+                $$ = ast::Node(ast::Node::Type::ATTRIBUTE);
+                $$.add_child($1);
+                $$.add_child($3);
             }
             ;
         
 expression  : literal
             {
-                $$ = new ts::Literal_Expression($1);
+                $$ = ast::Node(ast::Node::Type::EXPRESSION);
+                $$.add_child($1);
             }
             | initializer_list
             {
-                $$ = new ts::Initializer_List_Expression($1);
+                $$ = ast::Node(ast::Node::Type::EXPRESSION);
+                $$.add_child($1);
             }
             | TLPARENTHESIS expression TRPARENTHESIS
             {
@@ -228,64 +368,132 @@ expression  : literal
 
 initializer_list    : TLBRACE TRBRACE
                     {
-                        $$ = new ts::Initializer_List();
+                        $$ = ast::Node(ast::Node::Type::INITIALIZER_LIST);
                     }
                     | TLBRACE initializer_body TRBRACE
                     {
-                        $$ = new ts::Initializer_List();
+                        $$ = ast::Node(ast::Node::Type::INITIALIZER_LIST);
+                        $$.move_children_from(std::move($2));
                     }
                     ;
 
 initializer_body    : expression
+                    {
+                        $$ = ast::Node(ast::Node::Type::INITIALIZER_LIST);
+                        $$.add_child($1);
+                    }
                     | initializer_body TCOMMA expression
+                    {
+                        $$.move_children_from(std::move($1));
+                        $$.add_child($3);
+                    }
                     ;
 
-type_name   : templated_type
-            | identifier
-            {
-                $$ = type_system.find_type_symbol_by_name($1).get();
-            }
-            ;
+type    : identifier
+        {
+            $$ = ast::Node(ast::Node::Type::TYPE);
+            $$.add_child($1);
+        }
+        | templated_type
+        {
+            $$ = ast::Node(ast::Node::Type::TYPE);
+            $$.add_child($1);
+        }
+        ;
 
 templated_type  : identifier TLANGLED_BRAKET TRANGLED_BRAKET
+                {
+                    $$ = ast::Node(ast::Node::Type::TEMPLATE_INSTANTIATION);
+                    $$.add_child($1);
+                }
                 | identifier TLANGLED_BRAKET template_argument_list TRANGLED_BRAKET
+                {
+                    $$ = ast::Node(ast::Node::Type::TEMPLATE_INSTANTIATION);
+                    $$.add_child($1);
+                    $$.move_children_from(std::move($3));
+                }
                 ;
 
 template_argument_list  : template_argument
+                        {
+                            $$ = ast::Node(ast::Node::Type::LIST);
+                            $$.add_child($1);
+                        }
                         | template_argument_list TCOMMA template_argument
+                        {
+                            $$.move_children_from(std::move($1));
+                            $$.add_child($3);
+                        }
                         ;
 
-template_argument   : type_name
+template_argument   : type
+                    {
+                        $$ = ast::Node(ast::Node::Type::TEMPLATE_ARGUMENT);
+                        $$.add_child($1);
+                    }
                     | TSTRING_LITERAL
+                    {
+                        $$ = ast::Node(ast::Node::Type::TEMPLATE_ARGUMENT);
+                        $$.add_child(ast::Node(ast::Node::Type::LITERAL).add_attribute(ast::Attribute("value", $1)));
+                    }
                     | TINTEGER_LITERAL
+                    {
+                        $$ = ast::Node(ast::Node::Type::TEMPLATE_ARGUMENT);
+                        $$.add_child(ast::Node(ast::Node::Type::LITERAL).add_attribute(ast::Attribute("value", $1)));
+                    }
+                    | TTRUE
+                    {
+                        $$ = ast::Node(ast::Node::Type::TEMPLATE_ARGUMENT);
+                        $$.add_child(ast::Node(ast::Node::Type::LITERAL).add_attribute(ast::Attribute("value", true)));
+                    }
+                    | TFALSE
+                    {
+                        $$ = ast::Node(ast::Node::Type::TEMPLATE_ARGUMENT);
+                        $$.add_child(ast::Node(ast::Node::Type::LITERAL).add_attribute(ast::Attribute("value", false)));
+                    }
                     ;
 
 literal : TFLOAT_LITERAL
         {
-            $$ = new ts::Literal($1);
+            $$ = ast::Node(ast::Node::Type::LITERAL);
+            $$.add_attribute(ast::Attribute("value", $1));
         }
         | TDOUBLE_LITERAL
         {
-            $$ = new ts::Literal($1);
+            $$ = ast::Node(ast::Node::Type::LITERAL);
+            $$.add_attribute(ast::Attribute("value", $1));
         }
         | TINTEGER_LITERAL
         {
-            $$ = new ts::Literal($1);
+            $$ = ast::Node(ast::Node::Type::LITERAL);
+            $$.add_attribute(ast::Attribute("value", $1));
         }
         | TSTRING_LITERAL
         {
-            $$ = new ts::Literal($1);
+            $$ = ast::Node(ast::Node::Type::LITERAL);
+            $$.add_attribute(ast::Attribute("value", $1));
         }
         | TFALSE
         {
-            $$ = new ts::Literal($1);
+            $$ = ast::Node(ast::Node::Type::LITERAL);
+            $$.add_attribute(ast::Attribute("value", false));
         }
         | TTRUE
         {
-            $$ = new ts::Literal($1);
+            $$ = ast::Node(ast::Node::Type::LITERAL);
+            $$.add_attribute(ast::Attribute("value", true));
         }
         ;
 
 
 %%
 
+namespace yy
+{
+// Mandatory error function
+void parser::error (const parser::location_type& loc, const std::string& msg)
+{
+    std::cerr << loc << ": " << msg << std::endl;
+}
+
+}

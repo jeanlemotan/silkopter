@@ -5,7 +5,7 @@
 namespace ts
 {
 
-class Value_Selector
+class Value_Selector final
 {
 public:
 

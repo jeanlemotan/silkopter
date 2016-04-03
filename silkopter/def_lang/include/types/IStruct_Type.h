@@ -13,7 +13,7 @@ class IStruct_Type: virtual public IType, virtual public IDeclaration_Scope, vir
 {
 public:
 
-    virtual auto create_specialized_value() const -> std::unique_ptr<IStruct_Value>;
+    virtual auto create_specialized_value() const -> std::unique_ptr<IStruct_Value> = 0;
 
 };
 

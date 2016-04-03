@@ -1,99 +1,73 @@
 %{
-#include <stdio.h>
-#include <iostream>
-#include <string>
-//#include "node.h"
-#include "parser.hpp"
-#define SAVE_TOKEN yylval.string = new std::string(yytext, yyleng)
-#define TOKEN(t) (yylval.token = t)
-extern "C" int yywrap() { }
+
+#include "yy_parser.hpp"
+#include "ast/Lexer.h"
+
+#undef yywrap
+#define yywrap() 1
+
+yy::location loc;
+%}
+
+%option noyywrap nounput batch debug noinput
+
+%{
+  // Code run each time a pattern is matched.
+#define YY_USER_ACTION  loc.columns (yyleng);
+
+#define yyterminate() return yy::parser::make_TEND(loc)
+
+// Tell Flex the lexer's prototype ...
+#define YY_DECL yy::parser::symbol_type ast::Lexer::astyylex()
+
+// ... and declare it for the parser's sake.
+//YY_DECL;
 %}
 
 %%
 
-[ tn]                 ;
-"import"                return TOKEN(TIMPORT);
-"alias"                 return TOKEN(TALIAS);
-"struct"                return TOKEN(TSTRUCT);
-"string"                return TOKEN(TSTRING);
-"vector"                return TOKEN(TVECTOR);
-"float"                 return TOKEN(TFLOAT);
-"double"                return TOKEN(TDOUBLE);
-"bool"                  return TOKEN(TBOOL);
-"uint8_t"               return TOKEN(TUINT8_T);
-"int8_t"                return TOKEN(TINT8_T);
-"uint16_t"              return TOKEN(TUINT16_T);
-"int16_t"               return TOKEN(TINT16_T);
-"uint32_t"              return TOKEN(TUINT32_T);
-"int32_t"               return TOKEN(TINT32_T);
-"uint64_t"              return TOKEN(TUINT64_T);
-"int64_t"               return TOKEN(TINT64_T);
-"vec2f"                 return TOKEN(TVEC2F);
-"vec2d"                 return TOKEN(TVEC2D);
-"vec2s8"                return TOKEN(TVEC2S8);
-"vec2u8"                return TOKEN(TVEC2U8);
-"vec2s16"               return TOKEN(TVEC2S16);
-"vec2u16"               return TOKEN(TVEC2U16);
-"vec2s32"               return TOKEN(TVEC2S32);
-"vec2u32"               return TOKEN(TVEC2U32);
-"vec3f"                 return TOKEN(TVEC3F);
-"vec3d"                 return TOKEN(TVEC3D);
-"vec3s8"                return TOKEN(TVEC3S8);
-"vec3u8"                return TOKEN(TVEC3U8);
-"vec3s16"               return TOKEN(TVEC3S16);
-"vec3u16"               return TOKEN(TVEC3U16);
-"vec3s32"               return TOKEN(TVEC3S32);
-"vec3u32"               return TOKEN(TVEC3U32);
-"vec4f"                 return TOKEN(TVEC4F);
-"vec4d"                 return TOKEN(TVEC4D);
-"vec4s8"                return TOKEN(TVEC4S8);
-"vec4u8"                return TOKEN(TVEC4U8);
-"vec4s16"               return TOKEN(TVEC4S16);
-"vec4u16"               return TOKEN(TVEC4U16);
-"vec4s32"               return TOKEN(TVEC4S32);
-"vec4u32"               return TOKEN(TVEC4U32);
-"quatf"                 return TOKEN(TQUATF);
-"quatd"                 return TOKEN(TQUATD);
-"mat2f"                 return TOKEN(TMAT2F);
-"mat2d"                 return TOKEN(TMAT2D);
-"mat3f"                 return TOKEN(TMAT3F);
-"mat3d"                 return TOKEN(TMAT3D);
-"mat4f"                 return TOKEN(TMAT4F);
-"mat4d"                 return TOKEN(TMAT4D);
-"color_rgb"             return TOKEN(TCOLOR_RGB);
-"color_rgba"            return TOKEN(TCOLOR_RGBA);
-"min"                   return TOKEN(TMIN);
-"max"                   return TOKEN(TMAX);
-"public"                return TOKEN(TPUBLIC);
-"private"               return TOKEN(TPRIVATE);
-"protected"             return TOKEN(TPROTECTED);
-"const"                 return TOKEN(TCONST);
-"ui_control"            return TOKEN(TUI_CONTROL);
-"ui_name"               return TOKEN(TUI_NAME);
-"ui_const"              return TOKEN(TUI_CONST);
-"namespace"             return TOKEN(TNAMESPACE);
-"false" 	            return TOKEN(TFALSE);
-"true" 	                return TOKEN(TTRUE);
-[a-zA-Z_][a-zA-Z0-9_]*  SAVE_TOKEN; return TIDENTIFIER;
-[0-9]+                  SAVE_TOKEN; return TINTEGER_CONSTANT;
-[0-9]+.[0-9]*           SAVE_TOKEN; return TDOUBLE_CONSTANT;
-[0-9]+.[0-9]*f          SAVE_TOKEN; return TFLOAT_CONSTANT;
-\"([^\\\"]|\\.)*\" 	    SAVE_TOKEN; return TSTRING_LITERAL;
-"="                     return TOKEN(TEQUAL);
-"("                     return TOKEN(TLPARENTHESIS);
-")"                     return TOKEN(TRPARENTHESIS);
-"{"                     return TOKEN(TLBRACE);
-"}"                     return TOKEN(TRBRACE);
-"["                     return TOKEN(TLBRAKET);
-"]"                     return TOKEN(TRBRAKET);
-"<"                     return TOKEN(TLANGLED_BRAKET);
-">"                     return TOKEN(TRANGLED_BRAKET);
-"::"                    return TOKEN(TNAMESPACE_SEPARATOR);
-":"                     return TOKEN(TCOLON);
-";"                     return TOKEN(TSEMICOLON);
-"."                     return TOKEN(TDOT);
-","                     return TOKEN(TCOMMA);
-.                       std::cout << "Unknown token!\n"; yyterminate();
+%{
+  // Code run each time yylex is called.
+  loc.step ();
+%}
 
+[ \t]+                  loc.step();
+[\n]+                   loc.lines(yyleng); loc.step();
+"import"                return yy::parser::make_TIMPORT(loc);
+"alias"                 return yy::parser::make_TALIAS(loc);
+"struct"                return yy::parser::make_TSTRUCT(loc);
+"public"                return yy::parser::make_TPUBLIC(loc);
+"private"               return yy::parser::make_TPRIVATE(loc);
+"protected"             return yy::parser::make_TPROTECTED(loc);
+"const"                 return yy::parser::make_TCONST(loc);
+"namespace"             return yy::parser::make_TNAMESPACE(loc);
+"false" 	            return yy::parser::make_TFALSE(loc);
+"true" 	                return yy::parser::make_TTRUE(loc);
+[a-zA-Z_][a-zA-Z0-9_]*  return yy::parser::make_TIDENTIFIER(yytext, loc);
+[0-9]+                  return yy::parser::make_TINTEGER_LITERAL(strtol(yytext, nullptr, 10), loc);
+[0-9]+\.[0-9]*          return yy::parser::make_TDOUBLE_LITERAL(strtod(yytext, nullptr), loc);
+[0-9]+\.[0-9]*f         return yy::parser::make_TFLOAT_LITERAL(strtof(yytext, nullptr), loc);
+\"(\\.|[^"])*\"         return yy::parser::make_TSTRING_LITERAL(yytext, loc);
+"="                     return yy::parser::make_TEQUAL(loc);
+"("                     return yy::parser::make_TLPARENTHESIS(loc);
+")"                     return yy::parser::make_TRPARENTHESIS(loc);
+"{"                     return yy::parser::make_TLBRACE(loc);
+"}"                     return yy::parser::make_TRBRACE(loc);
+"["                     return yy::parser::make_TLBRAKET(loc);
+"]"                     return yy::parser::make_TRBRAKET(loc);
+"<"                     return yy::parser::make_TLANGLED_BRAKET(loc);
+">"                     return yy::parser::make_TRANGLED_BRAKET(loc);
+"::"                    return yy::parser::make_TNAMESPACE_SEPARATOR(loc);
+":"                     return yy::parser::make_TCOLON(loc);
+";"                     return yy::parser::make_TSEMICOLON(loc);
+"."                     return yy::parser::make_TDOT(loc);
+","                     return yy::parser::make_TCOMMA(loc);
+.                       { std::cout << "Unknown token!\n"; yyterminate(); }
+<<EOF>>                 {
+                            if (!m_builder.end_file())
+                            {
+                                yyterminate();
+                            }
+                        }
 %%
 
