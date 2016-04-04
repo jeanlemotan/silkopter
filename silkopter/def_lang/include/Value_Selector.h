@@ -10,7 +10,7 @@ class Value_Selector final
 public:
 
     Value_Selector() = default;
-    Value_Selector(std::string const& str);
+    explicit Value_Selector(std::string const& str);
 
     struct Element
     {

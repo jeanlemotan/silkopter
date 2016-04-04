@@ -103,7 +103,18 @@ static auto get_name_identifier(Node const& node) -> boost::optional<std::string
     return identifier_value->get_as_string();
 }
 
-static auto create_namespace(ts::IDeclaration_Scope& scope, Node const& node) -> std::unique_ptr<ts::Namespace>
+static auto get_type_name(Node const& node) -> boost::optional<std::string>
+{
+    Node const* type = node.find_first_child_by_type(Node::Type::TYPE);
+    if (!type)
+    {
+        return boost::none;
+    }
+    return get_name_identifier(*type);
+}
+
+
+static auto create_namespace(ts::IDeclaration_Scope& scope, Node const& node) -> bool
 {
     assert(node.get_type() == Node::Type::NAMESPACE_DECLARATION);
 
@@ -111,11 +122,14 @@ static auto create_namespace(ts::IDeclaration_Scope& scope, Node const& node) ->
     if (!name)
     {
         std::cerr << "Cannot find namespace name identifier";
-        return nullptr;
+        return false;
     }
 
-    std::unique_ptr<ts::Namespace> ns;
-    ns.reset(new ts::Namespace(*name));
+    ts::Namespace* ns = new ts::Namespace(*name);
+
+    //add it to the typesystem so we can search for types
+    scope.add_symbol(std::unique_ptr<ts::ISymbol>(ns));
+
 
     Node const* body = node.find_first_child_by_type(Node::Type::NAMESPACE_BODY);
     if (body)
@@ -124,12 +138,12 @@ static auto create_namespace(ts::IDeclaration_Scope& scope, Node const& node) ->
         {
             if (!populate_declaration_scope(*ns, ch))
             {
-                return nullptr;
+                return false;
             }
         }
     }
 
-    return std::move(ns);
+    return true;
 }
 
 static auto create_member_def(ts::IDeclaration_Scope& scope, Node const& node) -> std::unique_ptr<ts::Member_Def>
@@ -139,16 +153,30 @@ static auto create_member_def(ts::IDeclaration_Scope& scope, Node const& node) -
     boost::optional<std::string> name = get_name_identifier(node);
     if (!name)
     {
-        std::cerr << "Cannot find namespace name identifier";
+        std::cerr << "Cannot find member name identifier";
+        return nullptr;
+    }
+
+    boost::optional<std::string> type_name = get_type_name(node);
+    if (!type_name)
+    {
+        std::cerr << "Cannot find member type name";
+        return nullptr;
+    }
+
+    std::shared_ptr<ts::IType> type = scope.find_specialized_symbol_by_name<ts::IType>(*type_name);
+    if (!type)
+    {
+        std::cerr << "Cannot find type " << *type_name;
         return nullptr;
     }
 
     std::unique_ptr<ts::Member_Def> def;
-    def.reset(new ts::Member_Def(*name, nullptr, nullptr));
+    def.reset(new ts::Member_Def(*name, type, nullptr));
     return std::move(def);
 }
 
-static auto create_struct_type(ts::IDeclaration_Scope& scope, Node const& node) -> std::unique_ptr<ts::IStruct_Type>
+static auto create_struct_type(ts::IDeclaration_Scope& scope, Node const& node) -> bool
 {
     assert(node.get_type() == Node::Type::STRUCT_DECLARATION);
 
@@ -156,11 +184,13 @@ static auto create_struct_type(ts::IDeclaration_Scope& scope, Node const& node) 
     if (!name)
     {
         std::cerr << "Cannot find namespace name identifier";
-        return nullptr;
+        return false;
     }
 
-    std::unique_ptr<ts::Struct_Type> type;
-    type.reset(new ts::Struct_Type(*name));
+    ts::Struct_Type* type = new ts::Struct_Type(*name);
+
+    //add it to the typesystem so we can search for types
+    scope.add_symbol(std::unique_ptr<ts::ISymbol>(type));
 
     Node const* body = node.find_first_child_by_type(Node::Type::STRUCT_BODY);
     if (body)
@@ -169,14 +199,9 @@ static auto create_struct_type(ts::IDeclaration_Scope& scope, Node const& node) 
         {
             if (ch.get_type() == Node::Type::STRUCT_DECLARATION)
             {
-                std::unique_ptr<ts::IStruct_Type> t = create_struct_type(*type, ch);
-                if (!t)
+                if (!create_struct_type(*type, ch))
                 {
-                    return nullptr;
-                }
-                if (!type->add_symbol(std::move(t)))
-                {
-                    return nullptr;
+                    return false;
                 }
             }
             else if (ch.get_type() == Node::Type::ALIAS_DECLARATION)
@@ -184,11 +209,11 @@ static auto create_struct_type(ts::IDeclaration_Scope& scope, Node const& node) 
 //                std::unique_ptr<ts::IStruct_Type> t = create_alias(*type, ch);
 //                if (!t)
 //                {
-//                    return nullptr;
+//                    return false;
 //                }
 //                if (!type->add_symbol(std::move(t)))
 //                {
-//                    return nullptr;
+//                    return false;
 //                }
             }
             else if (ch.get_type() == Node::Type::MEMBER_DECLARATION)
@@ -196,25 +221,25 @@ static auto create_struct_type(ts::IDeclaration_Scope& scope, Node const& node) 
                 std::unique_ptr<ts::Member_Def> t = create_member_def(*type, ch);
                 if (!t)
                 {
-                    return nullptr;
+                    return false;
                 }
                 if (!type->add_member_def(std::move(t)))
                 {
-                    return nullptr;
+                    return false;
                 }
             }
             else
             {
                 std::cerr << "Illegal node type in struct";
-                return nullptr;
+                return false;
             }
         }
     }
 
-    return std::move(type);
+    return true;
 }
 
-static auto create_symbol(ts::IDeclaration_Scope& scope, Node const& node) -> std::unique_ptr<ts::ISymbol>
+static auto create_symbol(ts::IDeclaration_Scope& scope, Node const& node) -> bool
 {
     if (node.get_type() == Node::Type::NAMESPACE_DECLARATION)
     {
@@ -229,19 +254,12 @@ static auto create_symbol(ts::IDeclaration_Scope& scope, Node const& node) -> st
 //        return create_alias(scope, node);
     }
 
-    return nullptr;
+    return false;
 }
 
 static auto populate_declaration_scope(ts::IDeclaration_Scope& scope, Node const& node) -> bool
 {
-    std::unique_ptr<ts::ISymbol> symbol = create_symbol(scope, node);
-    if (!symbol)
-    {
-        return false;
-    }
-
-    scope.add_symbol(std::move(symbol));
-    return true;
+    return create_symbol(scope, node);
 }
 
 

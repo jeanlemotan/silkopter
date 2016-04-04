@@ -8,7 +8,7 @@ namespace ts
 
 class ISymbol;
 
-class Declaration_Scope_Impl : virtual public IDeclaration_Scope
+class Declaration_Scope_Impl : virtual public IDeclaration_Scope, std::enable_shared_from_this<Declaration_Scope_Impl>
 {
 public:
 
@@ -23,8 +23,17 @@ public:
     auto find_symbol_by_name(std::string const& name) const -> std::shared_ptr<const ISymbol> override;
     auto find_symbol_by_name(std::string const& name) -> std::shared_ptr<ISymbol> override;
 
+    auto find_symbol_by_path(Symbol_Path const& path) const -> std::shared_ptr<const ISymbol> override;
+    auto find_symbol_by_path(Symbol_Path const& path) -> std::shared_ptr<ISymbol> override;
+
+    auto get_parent_scope() const -> std::shared_ptr<const IDeclaration_Scope> const;
+    auto get_parent_scope() -> std::shared_ptr<IDeclaration_Scope>;
+
 private:
+    void set_parent_scope(std::shared_ptr<IDeclaration_Scope> declaration_scope);
+
     std::vector<std::shared_ptr<ISymbol>> m_symbols;
+    std::weak_ptr<IDeclaration_Scope> m_parent_scope;
 };
 
 }

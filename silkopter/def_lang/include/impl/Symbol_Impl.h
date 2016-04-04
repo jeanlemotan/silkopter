@@ -1,10 +1,13 @@
 #pragma once
 
+#include <memory>
 #include <string>
 #include "ISymbol.h"
 
 namespace ts
 {
+
+class IDeclaration_Scope;
 
 class Symbol_Impl : virtual public ISymbol
 {
