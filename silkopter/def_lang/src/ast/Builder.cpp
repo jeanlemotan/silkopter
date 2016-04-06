@@ -164,7 +164,7 @@ static auto create_member_def(ts::IDeclaration_Scope& scope, Node const& node) -
         return nullptr;
     }
 
-    std::shared_ptr<ts::IType> type = scope.find_specialized_symbol_by_name<ts::IType>(*type_name);
+    std::shared_ptr<ts::IType> type = scope.find_specialized_symbol_by_path<ts::IType>(ts::Symbol_Path(*type_name));
     if (!type)
     {
         std::cerr << "Cannot find type " << *type_name;
@@ -174,6 +174,38 @@ static auto create_member_def(ts::IDeclaration_Scope& scope, Node const& node) -
     std::unique_ptr<ts::Member_Def> def;
     def.reset(new ts::Member_Def(*name, type, nullptr));
     return std::move(def);
+}
+
+static auto create_alias(ts::IDeclaration_Scope& scope, Node const& node) -> bool
+{
+    assert(node.get_type() == Node::Type::ALIAS_DECLARATION);
+
+    boost::optional<std::string> name = get_name_identifier(node);
+    if (!name)
+    {
+        std::cerr << "Cannot find namespace name identifier";
+        return false;
+    }
+
+    boost::optional<std::string> type_name = get_type_name(node);
+    if (!type_name)
+    {
+        std::cerr << "Cannot find alias type name";
+        return false;
+    }
+
+    std::shared_ptr<ts::IType> type = scope.find_specialized_symbol_by_path<ts::IType>(ts::Symbol_Path(*type_name));
+    if (!type)
+    {
+        std::cerr << "Cannot find type " << *type_name;
+        return false;
+    }
+
+    std::unique_ptr<ts::IType> aliased_type = type->clone(*name);
+
+    scope.add_symbol(std::move(aliased_type));
+
+    return true;
 }
 
 static auto create_struct_type(ts::IDeclaration_Scope& scope, Node const& node) -> bool
@@ -206,15 +238,10 @@ static auto create_struct_type(ts::IDeclaration_Scope& scope, Node const& node) 
             }
             else if (ch.get_type() == Node::Type::ALIAS_DECLARATION)
             {
-//                std::unique_ptr<ts::IStruct_Type> t = create_alias(*type, ch);
-//                if (!t)
-//                {
-//                    return false;
-//                }
-//                if (!type->add_symbol(std::move(t)))
-//                {
-//                    return false;
-//                }
+                if (!create_alias(*type, ch))
+                {
+                    return false;
+                }
             }
             else if (ch.get_type() == Node::Type::MEMBER_DECLARATION)
             {
@@ -251,7 +278,7 @@ static auto create_symbol(ts::IDeclaration_Scope& scope, Node const& node) -> bo
     }
     else if (node.get_type() == Node::Type::ALIAS_DECLARATION)
     {
-//        return create_alias(scope, node);
+        return create_alias(scope, node);
     }
 
     return false;

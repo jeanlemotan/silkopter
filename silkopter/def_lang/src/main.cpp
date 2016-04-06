@@ -27,6 +27,7 @@ int main(int argc, char **argv)
     std::cout.flush();
 
     ts::Type_System ts;
+    ts.populate_builtin_types();
     builder.populate_type_system(ts);
 
     return 0;

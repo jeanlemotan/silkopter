@@ -10,6 +10,11 @@ Struct_Type::Struct_Type(std::string const& name)
 {
 }
 
+auto Struct_Type::clone(std::string const& name) const -> std::unique_ptr<IType>
+{
+    return std::unique_ptr<IType>(new Struct_Type(name));
+}
+
 auto Struct_Type::get_default_value() const -> std::shared_ptr<const IValue>
 {
     return nullptr;

@@ -67,6 +67,7 @@
     TCOMMA ","
     ;
 
+%token <std::string> TIDENTIFIER_PATH "identifier path"
 %token <std::string> TIDENTIFIER "identifier"
 %token <float> TFLOAT_LITERAL "float literal"
 %token <double> TDOUBLE_LITERAL "double literal"
@@ -81,6 +82,7 @@
 %type <::ast::Node> struct_body_declaration
 %type <::ast::Node> struct_body_declaration_list
 %type <::ast::Node> inheritance
+%type <::ast::Node> identifier_path
 %type <::ast::Node> identifier
 %type <::ast::Node> type
 %type <::ast::Node> templated_type
@@ -223,7 +225,7 @@ struct_body_declaration : type_declaration
                         }
                         ;
 
-inheritance : inheritance_type identifier
+inheritance : inheritance_type identifier_path
             ;
 
 inheritance_type    : TPUBLIC
@@ -323,6 +325,13 @@ identifier  : TIDENTIFIER
             }
             ;
 
+identifier_path : TIDENTIFIER_PATH
+                {
+                    $$ = ast::Node(ast::Node::Type::IDENTIFIER);
+                    $$.add_attribute(ast::Attribute("value", $1));
+                }
+                ;
+
         
 attribute_list  : TLBRAKET attribute_body TRBRAKET
                 {
@@ -389,7 +398,12 @@ initializer_body    : expression
                     }
                     ;
 
-type    : identifier
+type    : identifier_path
+        {
+            $$ = ast::Node(ast::Node::Type::TYPE);
+            $$.add_child($1);
+        }
+        | identifier
         {
             $$ = ast::Node(ast::Node::Type::TYPE);
             $$.add_child($1);

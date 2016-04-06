@@ -32,11 +32,11 @@ public:
     template<typename T> auto find_specialized_symbol_by_path(Symbol_Path const& path) const -> std::shared_ptr<const T>;
     template<typename T> auto find_specialized_symbol_by_path(Symbol_Path const& path) -> std::shared_ptr<T>;
 
-    virtual auto get_parent_scope() const -> std::shared_ptr<const IDeclaration_Scope> const = 0;
-    virtual auto get_parent_scope() -> std::shared_ptr<IDeclaration_Scope> = 0;
+    virtual auto get_parent_scope() const -> IDeclaration_Scope const* const = 0;
+    virtual auto get_parent_scope() -> IDeclaration_Scope* = 0;
 
 //protected:
-    virtual void set_parent_scope(std::shared_ptr<IDeclaration_Scope> declaration_scope) = 0;
+    virtual void set_parent_scope(IDeclaration_Scope* declaration_scope) = 0;
 };
 
 

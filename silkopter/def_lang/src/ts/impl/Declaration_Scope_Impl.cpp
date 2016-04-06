@@ -17,7 +17,7 @@ auto Declaration_Scope_Impl::add_symbol(std::unique_ptr<ISymbol> symbol) -> bool
 
     if (IDeclaration_Scope* ds = dynamic_cast<IDeclaration_Scope*>(symbol.get()))
     {
-        ds->set_parent_scope(shared_from_this());
+        ds->set_parent_scope(this);
     }
 
     m_symbols.push_back(std::move(symbol));
@@ -25,17 +25,17 @@ auto Declaration_Scope_Impl::add_symbol(std::unique_ptr<ISymbol> symbol) -> bool
     return true;
 }
 
-void Declaration_Scope_Impl::set_parent_scope(std::shared_ptr<IDeclaration_Scope> declaration_scope)
+void Declaration_Scope_Impl::set_parent_scope(IDeclaration_Scope* declaration_scope)
 {
     m_parent_scope = declaration_scope;
 }
-auto Declaration_Scope_Impl::get_parent_scope() const -> std::shared_ptr<const IDeclaration_Scope> const
+auto Declaration_Scope_Impl::get_parent_scope() const -> IDeclaration_Scope const* const
 {
-    return m_parent_scope.lock();
+    return m_parent_scope;
 }
-auto Declaration_Scope_Impl::get_parent_scope() -> std::shared_ptr<IDeclaration_Scope>
+auto Declaration_Scope_Impl::get_parent_scope() -> IDeclaration_Scope*
 {
-    return m_parent_scope.lock();
+    return m_parent_scope;
 }
 
 auto Declaration_Scope_Impl::get_symbol_count() -> const size_t
@@ -79,6 +79,18 @@ auto Declaration_Scope_Impl::find_symbol_by_path(Symbol_Path const& path) -> std
         return nullptr;
     }
 
+    //for absolute paths, search in the root scope (the typesystem directly)
+    if (path.is_absolute() && get_parent_scope())
+    {
+        IDeclaration_Scope* root_scope = get_parent_scope();
+        while (root_scope->get_parent_scope())
+        {
+            root_scope = root_scope->get_parent_scope();
+        }
+        return root_scope->find_symbol_by_path(path);
+    }
+
+    //simple case - a path with one element. Search a symbol by name
     if (path.get_count() == 1)
     {
         std::shared_ptr<ISymbol> symbol = find_symbol_by_name(path.get(0));
@@ -102,7 +114,8 @@ auto Declaration_Scope_Impl::find_symbol_by_path(Symbol_Path const& path) -> std
         }
     }
 
-    if (get_parent_scope())
+    //if the path is not absolute, try in the parent as well
+    if (!path.is_absolute() && get_parent_scope())
     {
         return get_parent_scope()->find_symbol_by_path(path);
     }

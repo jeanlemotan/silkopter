@@ -307,6 +307,7 @@ namespace yy {
       // member_declaration
       // type_declaration
       // identifier
+      // identifier_path
       // attribute_list
       // attribute_body
       // attribute
@@ -329,6 +330,7 @@ namespace yy {
       // "integer literal"
       char dummy4[sizeof(int64_t)];
 
+      // "identifier path"
       // "identifier"
       // "string literal"
       char dummy5[sizeof(std::string)];
@@ -379,11 +381,12 @@ namespace yy {
         TSEMICOLON = 279,
         TDOT = 280,
         TCOMMA = 281,
-        TIDENTIFIER = 282,
-        TFLOAT_LITERAL = 283,
-        TDOUBLE_LITERAL = 284,
-        TINTEGER_LITERAL = 285,
-        TSTRING_LITERAL = 286
+        TIDENTIFIER_PATH = 282,
+        TIDENTIFIER = 283,
+        TFLOAT_LITERAL = 284,
+        TDOUBLE_LITERAL = 285,
+        TINTEGER_LITERAL = 286,
+        TSTRING_LITERAL = 287
       };
     };
 
@@ -597,6 +600,10 @@ namespace yy {
     static inline
     symbol_type
     make_TCOMMA (const location_type& l);
+
+    static inline
+    symbol_type
+    make_TIDENTIFIER_PATH (const std::string& v, const location_type& l);
 
     static inline
     symbol_type
@@ -823,12 +830,12 @@ namespace yy {
     enum
     {
       yyeof_ = 0,
-      yylast_ = 117,     ///< Last index in yytable_.
-      yynnts_ = 31,  ///< Number of nonterminal symbols.
+      yylast_ = 125,     ///< Last index in yytable_.
+      yynnts_ = 32,  ///< Number of nonterminal symbols.
       yyfinal_ = 19, ///< Termination state number.
       yyterror_ = 1,
       yyerrcode_ = 256,
-      yyntokens_ = 32  ///< Number of tokens.
+      yyntokens_ = 33  ///< Number of tokens.
     };
 
 
@@ -873,9 +880,9 @@ namespace yy {
        2,     2,     2,     2,     2,     2,     1,     2,     3,     4,
        5,     6,     7,     8,     9,    10,    11,    12,    13,    14,
       15,    16,    17,    18,    19,    20,    21,    22,    23,    24,
-      25,    26,    27,    28,    29,    30,    31
+      25,    26,    27,    28,    29,    30,    31,    32
     };
-    const unsigned int user_token_number_max_ = 286;
+    const unsigned int user_token_number_max_ = 287;
     const token_number_type undef_token_ = 2;
 
     if (static_cast<int>(t) <= yyeof_)
@@ -908,49 +915,51 @@ namespace yy {
   {
       switch (other.type_get ())
     {
-      case 36: // top_level_declaration_list
-      case 37: // top_level_declaration
-      case 38: // alias_declaration
-      case 39: // struct_declaration
-      case 40: // struct_body
-      case 41: // struct_body_declaration_list
-      case 42: // struct_body_declaration
-      case 43: // inheritance
-      case 45: // namespace_declaration
-      case 46: // namespace_body
-      case 47: // namespace_body_declaration_list
-      case 48: // namespace_body_declaration
-      case 49: // member_declaration
-      case 50: // type_declaration
-      case 51: // identifier
-      case 52: // attribute_list
-      case 53: // attribute_body
-      case 54: // attribute
-      case 55: // expression
-      case 56: // initializer_list
-      case 57: // initializer_body
-      case 58: // type
-      case 59: // templated_type
-      case 60: // template_argument_list
-      case 61: // template_argument
-      case 62: // literal
+      case 37: // top_level_declaration_list
+      case 38: // top_level_declaration
+      case 39: // alias_declaration
+      case 40: // struct_declaration
+      case 41: // struct_body
+      case 42: // struct_body_declaration_list
+      case 43: // struct_body_declaration
+      case 44: // inheritance
+      case 46: // namespace_declaration
+      case 47: // namespace_body
+      case 48: // namespace_body_declaration_list
+      case 49: // namespace_body_declaration
+      case 50: // member_declaration
+      case 51: // type_declaration
+      case 52: // identifier
+      case 53: // identifier_path
+      case 54: // attribute_list
+      case 55: // attribute_body
+      case 56: // attribute
+      case 57: // expression
+      case 58: // initializer_list
+      case 59: // initializer_body
+      case 60: // type
+      case 61: // templated_type
+      case 62: // template_argument_list
+      case 63: // template_argument
+      case 64: // literal
         value.copy< ::ast::Node > (other.value);
         break;
 
-      case 29: // "double literal"
+      case 30: // "double literal"
         value.copy< double > (other.value);
         break;
 
-      case 28: // "float literal"
+      case 29: // "float literal"
         value.copy< float > (other.value);
         break;
 
-      case 30: // "integer literal"
+      case 31: // "integer literal"
         value.copy< int64_t > (other.value);
         break;
 
-      case 27: // "identifier"
-      case 31: // "string literal"
+      case 27: // "identifier path"
+      case 28: // "identifier"
+      case 32: // "string literal"
         value.copy< std::string > (other.value);
         break;
 
@@ -971,49 +980,51 @@ namespace yy {
     (void) v;
       switch (this->type_get ())
     {
-      case 36: // top_level_declaration_list
-      case 37: // top_level_declaration
-      case 38: // alias_declaration
-      case 39: // struct_declaration
-      case 40: // struct_body
-      case 41: // struct_body_declaration_list
-      case 42: // struct_body_declaration
-      case 43: // inheritance
-      case 45: // namespace_declaration
-      case 46: // namespace_body
-      case 47: // namespace_body_declaration_list
-      case 48: // namespace_body_declaration
-      case 49: // member_declaration
-      case 50: // type_declaration
-      case 51: // identifier
-      case 52: // attribute_list
-      case 53: // attribute_body
-      case 54: // attribute
-      case 55: // expression
-      case 56: // initializer_list
-      case 57: // initializer_body
-      case 58: // type
-      case 59: // templated_type
-      case 60: // template_argument_list
-      case 61: // template_argument
-      case 62: // literal
+      case 37: // top_level_declaration_list
+      case 38: // top_level_declaration
+      case 39: // alias_declaration
+      case 40: // struct_declaration
+      case 41: // struct_body
+      case 42: // struct_body_declaration_list
+      case 43: // struct_body_declaration
+      case 44: // inheritance
+      case 46: // namespace_declaration
+      case 47: // namespace_body
+      case 48: // namespace_body_declaration_list
+      case 49: // namespace_body_declaration
+      case 50: // member_declaration
+      case 51: // type_declaration
+      case 52: // identifier
+      case 53: // identifier_path
+      case 54: // attribute_list
+      case 55: // attribute_body
+      case 56: // attribute
+      case 57: // expression
+      case 58: // initializer_list
+      case 59: // initializer_body
+      case 60: // type
+      case 61: // templated_type
+      case 62: // template_argument_list
+      case 63: // template_argument
+      case 64: // literal
         value.copy< ::ast::Node > (v);
         break;
 
-      case 29: // "double literal"
+      case 30: // "double literal"
         value.copy< double > (v);
         break;
 
-      case 28: // "float literal"
+      case 29: // "float literal"
         value.copy< float > (v);
         break;
 
-      case 30: // "integer literal"
+      case 31: // "integer literal"
         value.copy< int64_t > (v);
         break;
 
-      case 27: // "identifier"
-      case 31: // "string literal"
+      case 27: // "identifier path"
+      case 28: // "identifier"
+      case 32: // "string literal"
         value.copy< std::string > (v);
         break;
 
@@ -1093,49 +1104,51 @@ namespace yy {
     // Type destructor.
     switch (yytype)
     {
-      case 36: // top_level_declaration_list
-      case 37: // top_level_declaration
-      case 38: // alias_declaration
-      case 39: // struct_declaration
-      case 40: // struct_body
-      case 41: // struct_body_declaration_list
-      case 42: // struct_body_declaration
-      case 43: // inheritance
-      case 45: // namespace_declaration
-      case 46: // namespace_body
-      case 47: // namespace_body_declaration_list
-      case 48: // namespace_body_declaration
-      case 49: // member_declaration
-      case 50: // type_declaration
-      case 51: // identifier
-      case 52: // attribute_list
-      case 53: // attribute_body
-      case 54: // attribute
-      case 55: // expression
-      case 56: // initializer_list
-      case 57: // initializer_body
-      case 58: // type
-      case 59: // templated_type
-      case 60: // template_argument_list
-      case 61: // template_argument
-      case 62: // literal
+      case 37: // top_level_declaration_list
+      case 38: // top_level_declaration
+      case 39: // alias_declaration
+      case 40: // struct_declaration
+      case 41: // struct_body
+      case 42: // struct_body_declaration_list
+      case 43: // struct_body_declaration
+      case 44: // inheritance
+      case 46: // namespace_declaration
+      case 47: // namespace_body
+      case 48: // namespace_body_declaration_list
+      case 49: // namespace_body_declaration
+      case 50: // member_declaration
+      case 51: // type_declaration
+      case 52: // identifier
+      case 53: // identifier_path
+      case 54: // attribute_list
+      case 55: // attribute_body
+      case 56: // attribute
+      case 57: // expression
+      case 58: // initializer_list
+      case 59: // initializer_body
+      case 60: // type
+      case 61: // templated_type
+      case 62: // template_argument_list
+      case 63: // template_argument
+      case 64: // literal
         value.template destroy< ::ast::Node > ();
         break;
 
-      case 29: // "double literal"
+      case 30: // "double literal"
         value.template destroy< double > ();
         break;
 
-      case 28: // "float literal"
+      case 29: // "float literal"
         value.template destroy< float > ();
         break;
 
-      case 30: // "integer literal"
+      case 31: // "integer literal"
         value.template destroy< int64_t > ();
         break;
 
-      case 27: // "identifier"
-      case 31: // "string literal"
+      case 27: // "identifier path"
+      case 28: // "identifier"
+      case 32: // "string literal"
         value.template destroy< std::string > ();
         break;
 
@@ -1162,49 +1175,51 @@ namespace yy {
     super_type::move(s);
       switch (this->type_get ())
     {
-      case 36: // top_level_declaration_list
-      case 37: // top_level_declaration
-      case 38: // alias_declaration
-      case 39: // struct_declaration
-      case 40: // struct_body
-      case 41: // struct_body_declaration_list
-      case 42: // struct_body_declaration
-      case 43: // inheritance
-      case 45: // namespace_declaration
-      case 46: // namespace_body
-      case 47: // namespace_body_declaration_list
-      case 48: // namespace_body_declaration
-      case 49: // member_declaration
-      case 50: // type_declaration
-      case 51: // identifier
-      case 52: // attribute_list
-      case 53: // attribute_body
-      case 54: // attribute
-      case 55: // expression
-      case 56: // initializer_list
-      case 57: // initializer_body
-      case 58: // type
-      case 59: // templated_type
-      case 60: // template_argument_list
-      case 61: // template_argument
-      case 62: // literal
+      case 37: // top_level_declaration_list
+      case 38: // top_level_declaration
+      case 39: // alias_declaration
+      case 40: // struct_declaration
+      case 41: // struct_body
+      case 42: // struct_body_declaration_list
+      case 43: // struct_body_declaration
+      case 44: // inheritance
+      case 46: // namespace_declaration
+      case 47: // namespace_body
+      case 48: // namespace_body_declaration_list
+      case 49: // namespace_body_declaration
+      case 50: // member_declaration
+      case 51: // type_declaration
+      case 52: // identifier
+      case 53: // identifier_path
+      case 54: // attribute_list
+      case 55: // attribute_body
+      case 56: // attribute
+      case 57: // expression
+      case 58: // initializer_list
+      case 59: // initializer_body
+      case 60: // type
+      case 61: // templated_type
+      case 62: // template_argument_list
+      case 63: // template_argument
+      case 64: // literal
         value.move< ::ast::Node > (s.value);
         break;
 
-      case 29: // "double literal"
+      case 30: // "double literal"
         value.move< double > (s.value);
         break;
 
-      case 28: // "float literal"
+      case 29: // "float literal"
         value.move< float > (s.value);
         break;
 
-      case 30: // "integer literal"
+      case 31: // "integer literal"
         value.move< int64_t > (s.value);
         break;
 
-      case 27: // "identifier"
-      case 31: // "string literal"
+      case 27: // "identifier path"
+      case 28: // "identifier"
+      case 32: // "string literal"
         value.move< std::string > (s.value);
         break;
 
@@ -1266,7 +1281,7 @@ namespace yy {
        0,   256,   257,   258,   259,   260,   261,   262,   263,   264,
      265,   266,   267,   268,   269,   270,   271,   272,   273,   274,
      275,   276,   277,   278,   279,   280,   281,   282,   283,   284,
-     285,   286
+     285,   286,   287
     };
     return static_cast<token_type> (yytoken_number_[type]);
   }
@@ -1422,6 +1437,12 @@ namespace yy {
   }
 
    parser ::symbol_type
+   parser ::make_TIDENTIFIER_PATH (const std::string& v, const location_type& l)
+  {
+    return symbol_type (token::TIDENTIFIER_PATH, v, l);
+  }
+
+   parser ::symbol_type
    parser ::make_TIDENTIFIER (const std::string& v, const location_type& l)
   {
     return symbol_type (token::TIDENTIFIER, v, l);
@@ -1454,7 +1475,7 @@ namespace yy {
 
 
 } // yy
-#line 1458 "yy_parser.hpp" // lalr1.cc:377
+#line 1479 "yy_parser.hpp" // lalr1.cc:377
 
 
 

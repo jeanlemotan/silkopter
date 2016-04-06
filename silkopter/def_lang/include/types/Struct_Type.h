@@ -15,6 +15,8 @@ public:
 
     Struct_Type(std::string const& name);
 
+    auto clone(std::string const& name) const -> std::unique_ptr<IType> override;
+
     auto get_default_value() const -> std::shared_ptr<const IValue> override;
     auto create_value() const -> std::unique_ptr<IValue> override;
     auto create_specialized_value() const -> std::unique_ptr<IStruct_Value> override;

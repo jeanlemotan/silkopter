@@ -1,3 +1,6 @@
+identifier ([A-Za-z]|_)([A-Za-z]|[0-9]|_)*
+scope [:][:]
+%x BLOCK_COMMENT
 %{
 
 #include "yy_parser.hpp"
@@ -43,7 +46,8 @@ yy::location loc;
 "namespace"             return yy::parser::make_TNAMESPACE(loc);
 "false" 	            return yy::parser::make_TFALSE(loc);
 "true" 	                return yy::parser::make_TTRUE(loc);
-[a-zA-Z_][a-zA-Z0-9_]*  return yy::parser::make_TIDENTIFIER(yytext, loc);
+{identifier}            return yy::parser::make_TIDENTIFIER(yytext, loc);
+{scope}?{identifier}({scope}{identifier})+   return yy::parser::make_TIDENTIFIER_PATH(yytext, loc);
 [0-9]+                  return yy::parser::make_TINTEGER_LITERAL(strtol(yytext, nullptr, 10), loc);
 [0-9]+\.[0-9]*          return yy::parser::make_TDOUBLE_LITERAL(strtod(yytext, nullptr), loc);
 [0-9]+\.[0-9]*f         return yy::parser::make_TFLOAT_LITERAL(strtof(yytext, nullptr), loc);
@@ -57,11 +61,20 @@ yy::location loc;
 "]"                     return yy::parser::make_TRBRAKET(loc);
 "<"                     return yy::parser::make_TLANGLED_BRAKET(loc);
 ">"                     return yy::parser::make_TRANGLED_BRAKET(loc);
-"::"                    return yy::parser::make_TNAMESPACE_SEPARATOR(loc);
+{scope}                 return yy::parser::make_TNAMESPACE_SEPARATOR(loc);
 ":"                     return yy::parser::make_TCOLON(loc);
 ";"                     return yy::parser::make_TSEMICOLON(loc);
 "."                     return yy::parser::make_TDOT(loc);
 ","                     return yy::parser::make_TCOMMA(loc);
+\/\*                    {
+                            BEGIN(BLOCK_COMMENT);
+                        }
+<BLOCK_COMMENT>\*\/		{
+                            BEGIN(INITIAL);
+                        }
+<BLOCK_COMMENT>\n		{ }
+<BLOCK_COMMENT>.        ;
+\/\/([^\n])*            ;
 .                       { std::cout << "Unknown token!\n"; yyterminate(); }
 <<EOF>>                 {
                             if (!m_builder.end_file())
