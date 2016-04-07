@@ -1,20 +1,19 @@
-#pragma once
+#include "IVector_Type.h"
 
-#include "types/IStruct_Type.h"
-#include "impl/Declaration_Scope_Impl.h"
 #include "impl/Symbol_Impl.h"
-#include "impl/Member_Def_Container_Impl.h"
 #include "impl/Attribute_Container_Impl.h"
 
 namespace ts
 {
 
-class Struct_Type final: virtual public IStruct_Type, public Symbol_Impl, public Declaration_Scope_Impl, public Member_Def_Container_Impl, public Attribute_Container_Impl
+class Vector_Type final : virtual public IVector_Type, public Symbol_Impl, public Attribute_Container_Impl
 {
 public:
-    typedef IStruct_Value value_type;
+    typedef IVector_Value value_type;
 
-    Struct_Type(std::string const& name);
+    Vector_Type(std::string const& name);
+
+    auto init(std::vector<std::shared_ptr<ITemplate_Argument>> const& arguments) -> bool override;
 
     auto clone(std::string const& name) const -> std::unique_ptr<IType> override;
 
@@ -24,8 +23,11 @@ public:
     auto create_value() const -> std::unique_ptr<IValue> override;
 
     auto get_specialized_default_value() const -> std::shared_ptr<const value_type> override;
-    auto create_specialized_value() const -> std::unique_ptr<IStruct_Value> override;
+    auto create_specialized_value() const -> std::unique_ptr<value_type> override;
 
+public:
+    std::shared_ptr<IType> m_inner_type;
 };
+
 
 }

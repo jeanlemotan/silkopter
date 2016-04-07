@@ -3,7 +3,7 @@ namespace silk
 
 struct Multirotor_Config
 {
-    alias mass_t = ufloat : [ ui_name = "Mass (Kg)" ];
+    alias mass_t = ufloat : [ min = 0.05f ];
 
     struct Motor
     {
@@ -12,14 +12,14 @@ struct Multirotor_Config
     };
     
     string name;
-    mass_t mass = 1.0f;
+    mass_t mass = 1.0f : [ ui_name = "Mass (Kg)" ];
     ufloat height = 0.5f : [ ui_name = "Height (m)" ];
     ufloat radius = 0.5f : [ ui_name = "Radius (m)" ];
     ufloat motor_thrust = 1.0f : [ ui_name = "Motor Thrust (N)" ];
     ufloat motor_z_thrust = 1.0f : [ ui_name = "Motor Z Torque (Nm)" ];
     ufloat motor_acceleration = 10.0f : [ ui_name = "Motor Acceleration (N/s)" ];
     ufloat motor_deceleration = 10.0f : [ ui_name = "Motor Deceleration (N/s)" ];
-    //vector<Motor> motors : [ ui_name = "Motors" ];
+    vector<Motor> motors : [ ui_name = "Motors" ];
 };
 
 }

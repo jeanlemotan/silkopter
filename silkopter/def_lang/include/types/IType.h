@@ -2,13 +2,14 @@
 
 #include "ISymbol.h"
 #include "attributes/IAttribute_Container.h"
+#include "ITemplate_Argument.h"
 
 namespace ts
 {
 
 class IValue;
 
-class IType : virtual public ISymbol, virtual public IAttribute_Container
+class IType : virtual public ISymbol, virtual public IAttribute_Container, virtual public ITemplate_Argument
 {
 public:
     virtual ~IType() = default;

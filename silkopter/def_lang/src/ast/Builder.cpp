@@ -5,6 +5,7 @@
 
 #include "Namespace.h"
 #include "types/Struct_Type.h"
+#include "types/Vector_Type.h"
 #include "Member_Def.h"
 #include "values/IValue.h"
 
@@ -103,14 +104,78 @@ static auto get_name_identifier(Node const& node) -> boost::optional<std::string
     return identifier_value->get_as_string();
 }
 
-static auto get_type_name(Node const& node) -> boost::optional<std::string>
+static auto find_type_or_instantiate_templated_type(ts::IDeclaration_Scope& scope, Node const& node) -> std::shared_ptr<ts::IType>
 {
-    Node const* type = node.find_first_child_by_type(Node::Type::TYPE);
-    if (!type)
+    Node const* type_node = node.find_first_child_by_type(Node::Type::TYPE);
+    if (!type_node)
     {
-        return boost::none;
+        std::cerr << "Malformed type node ast\n";
+        return nullptr;
     }
-    return get_name_identifier(*type);
+    boost::optional<std::string> type_name = get_name_identifier(*type_node);
+    if (type_name)
+    {
+        std::shared_ptr<ts::IType> type = scope.find_specialized_symbol_by_path<ts::IType>(ts::Symbol_Path(*type_name));
+        if (!type)
+        {
+            std::cerr << "Cannot find type " << *type_name << "\n";
+            return nullptr;
+        }
+        return type;
+    }
+    else
+    {
+        Node const* template_node = type_node->find_first_child_by_type(Node::Type::TEMPLATE_INSTANTIATION);
+        if (!template_node)
+        {
+            std::cerr << "Malformed type node ast\n";
+            return nullptr;
+        }
+
+        type_name = get_name_identifier(*template_node);
+        if (!type_name)
+        {
+            std::cerr << "Missing templated type name\n";
+            return nullptr;
+        }
+
+        std::vector<Node> template_argument_nodes = template_node->get_all_children_of_type(Node::Type::TEMPLATE_ARGUMENT);
+        std::vector<std::shared_ptr<ts::ITemplate_Argument>> template_arguments;
+        template_arguments.reserve(template_argument_nodes.size());
+
+        std::string templated_type_name = *type_name;
+        for (Node const& node: template_argument_nodes)
+        {
+            std::shared_ptr<ts::IType> template_argument = find_type_or_instantiate_templated_type(scope, node);
+            if (!template_argument)
+            {
+                std::cerr << "Cannot resolve template argument " << template_arguments.size() << "\n";
+                return nullptr;
+            }
+            if (template_argument->get_template_instantiation_string().empty())
+            {
+                std::cerr << "Template argument " << template_arguments.size() << " cannot be used for instantiation\n";
+                return nullptr;
+            }
+            template_arguments.push_back(template_argument);
+            templated_type_name += "#";
+            templated_type_name += template_argument->get_template_instantiation_string();
+        }
+
+        if (*type_name == "vector")
+        {
+            std::unique_ptr<ts::Vector_Type> vector = std::unique_ptr<ts::Vector_Type>(new ts::Vector_Type(templated_type_name));
+            if (!vector->init(template_arguments))
+            {
+                std::cerr << "Cannot instantiate vector template.\n";
+                return false;
+            }
+            return std::move(vector);
+        }
+
+    }
+
+    return nullptr;
 }
 
 
@@ -153,21 +218,14 @@ static auto create_member_def(ts::IDeclaration_Scope& scope, Node const& node) -
     boost::optional<std::string> name = get_name_identifier(node);
     if (!name)
     {
-        std::cerr << "Cannot find member name identifier";
+        std::cerr << "Cannot find member name identifier\n";
         return nullptr;
     }
 
-    boost::optional<std::string> type_name = get_type_name(node);
-    if (!type_name)
-    {
-        std::cerr << "Cannot find member type name";
-        return nullptr;
-    }
-
-    std::shared_ptr<ts::IType> type = scope.find_specialized_symbol_by_path<ts::IType>(ts::Symbol_Path(*type_name));
+    std::shared_ptr<ts::IType> type = find_type_or_instantiate_templated_type(scope, node);
     if (!type)
     {
-        std::cerr << "Cannot find type " << *type_name;
+        std::cerr << "Cannot find member type\n";
         return nullptr;
     }
 
@@ -183,21 +241,14 @@ static auto create_alias(ts::IDeclaration_Scope& scope, Node const& node) -> boo
     boost::optional<std::string> name = get_name_identifier(node);
     if (!name)
     {
-        std::cerr << "Cannot find namespace name identifier";
+        std::cerr << "Cannot find alias name identifier\n";
         return false;
     }
 
-    boost::optional<std::string> type_name = get_type_name(node);
-    if (!type_name)
-    {
-        std::cerr << "Cannot find alias type name";
-        return false;
-    }
-
-    std::shared_ptr<ts::IType> type = scope.find_specialized_symbol_by_path<ts::IType>(ts::Symbol_Path(*type_name));
+    std::shared_ptr<ts::IType> type = find_type_or_instantiate_templated_type(scope, node);
     if (!type)
     {
-        std::cerr << "Cannot find type " << *type_name;
+        std::cerr << "Cannot find alias type\n";
         return false;
     }
 
@@ -215,7 +266,7 @@ static auto create_struct_type(ts::IDeclaration_Scope& scope, Node const& node) 
     boost::optional<std::string> name = get_name_identifier(node);
     if (!name)
     {
-        std::cerr << "Cannot find namespace name identifier";
+        std::cerr << "Cannot find struct name identifier\n";
         return false;
     }
 
@@ -257,7 +308,7 @@ static auto create_struct_type(ts::IDeclaration_Scope& scope, Node const& node) 
             }
             else
             {
-                std::cerr << "Illegal node type in struct";
+                std::cerr << "Illegal node type in struct\n";
                 return false;
             }
         }

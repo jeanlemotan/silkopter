@@ -15,11 +15,21 @@ auto Struct_Type::clone(std::string const& name) const -> std::unique_ptr<IType>
     return std::unique_ptr<IType>(new Struct_Type(name));
 }
 
+auto Struct_Type::get_template_instantiation_string() const -> std::string const&
+{
+    return get_name();
+}
+
 auto Struct_Type::get_default_value() const -> std::shared_ptr<const IValue>
 {
     return nullptr;
 }
 auto Struct_Type::create_value() const -> std::unique_ptr<IValue>
+{
+    return nullptr;
+}
+
+auto Struct_Type::get_specialized_default_value() const -> std::shared_ptr<const IStruct_Value>
 {
     return nullptr;
 }

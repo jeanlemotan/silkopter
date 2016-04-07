@@ -15,6 +15,11 @@ auto Bool_Type::clone(std::string const& name) const -> std::unique_ptr<IType>
     return std::unique_ptr<IType>(new Bool_Type(name));
 }
 
+auto Bool_Type::get_template_instantiation_string() const -> std::string const&
+{
+    return get_name();
+}
+
 auto Bool_Type::get_default_value() const -> std::shared_ptr<const IValue>
 {
     return nullptr;

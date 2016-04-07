@@ -15,6 +15,12 @@ auto Real_Type<Traits>::clone(std::string const& name) const -> std::unique_ptr<
 }
 
 template<typename Traits>
+auto Real_Type<Traits>::get_template_instantiation_string() const -> std::string const&
+{
+    return get_name();
+}
+
+template<typename Traits>
 auto Real_Type<Traits>::get_default_value() const -> std::shared_ptr<const IValue>
 {
     return nullptr;
