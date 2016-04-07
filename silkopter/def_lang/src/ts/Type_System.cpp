@@ -4,6 +4,8 @@
 #include "types/All_Real_Types.h"
 #include "types/Bool_Type.h"
 #include "types/String_Type.h"
+#include "ITemplate_Argument.h"
+#include "types/Vector_Type.h"
 
 namespace ts
 {
@@ -53,6 +55,44 @@ void Type_System::populate_builtin_types()
     }
 }
 
+
+auto Type_System::instantiate_template(std::string const& name, std::vector<std::shared_ptr<const ITemplate_Argument>> const& arguments) -> std::shared_ptr<const ITemplated_Type>
+{
+    if (name.empty())
+    {
+        return nullptr;
+    }
+    std::string instanced_name = name;
+    for (std::shared_ptr<const ITemplate_Argument> const& arg: arguments)
+    {
+        if (arg->get_template_instantiation_string().empty())
+        {
+            return nullptr;
+        }
+        instanced_name += "#";
+        instanced_name += arg->get_template_instantiation_string();
+    }
+
+    std::shared_ptr<const ITemplated_Type> instance = find_specialized_symbol_by_name<ITemplated_Type>(instanced_name);
+    if (instance)
+    {
+        return instance;
+    }
+
+    if (name == "vector")
+    {
+        std::unique_ptr<ts::Vector_Type> vector = std::unique_ptr<ts::Vector_Type>(new ts::Vector_Type(instanced_name));
+        if (!vector->init(arguments))
+        {
+            return nullptr;
+        }
+        std::shared_ptr<const ISymbol> symbol = add_symbol(std::move(vector));
+
+        return std::dynamic_pointer_cast<const ITemplated_Type>(symbol);
+    }
+
+    return nullptr;
+}
 
 
 

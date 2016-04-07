@@ -10,14 +10,14 @@ Vector_Type::Vector_Type(std::string const& name)
 
 }
 
-auto Vector_Type::init(std::vector<std::shared_ptr<ITemplate_Argument>> const& arguments) -> bool
+auto Vector_Type::init(std::vector<std::shared_ptr<const ITemplate_Argument>> const& arguments) -> bool
 {
     if (arguments.size() != 1)
     {
         return false;
     }
 
-    m_inner_type = std::dynamic_pointer_cast<IType>(arguments[0]);
+    m_inner_type = std::dynamic_pointer_cast<const IType>(arguments[0]);
     if (!m_inner_type)
     {
         return false;

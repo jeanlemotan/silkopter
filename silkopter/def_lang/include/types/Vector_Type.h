@@ -13,7 +13,7 @@ public:
 
     Vector_Type(std::string const& name);
 
-    auto init(std::vector<std::shared_ptr<ITemplate_Argument>> const& arguments) -> bool override;
+    auto init(std::vector<std::shared_ptr<const ITemplate_Argument>> const& arguments) -> bool override;
 
     auto clone(std::string const& name) const -> std::unique_ptr<IType> override;
 
@@ -26,7 +26,7 @@ public:
     auto create_specialized_value() const -> std::unique_ptr<value_type> override;
 
 public:
-    std::shared_ptr<IType> m_inner_type;
+    std::shared_ptr<const IType> m_inner_type;
 };
 
 

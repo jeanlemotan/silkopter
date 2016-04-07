@@ -5,9 +5,9 @@
 
 #include "Namespace.h"
 #include "types/Struct_Type.h"
-#include "types/Vector_Type.h"
 #include "Member_Def.h"
 #include "values/IValue.h"
+#include "types/ITemplated_Type.h"
 
 namespace ast
 {
@@ -82,7 +82,7 @@ auto Builder::get_lexer() -> Lexer&
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static auto populate_declaration_scope(ts::IDeclaration_Scope& scope, Node const& node) -> bool;
+static auto populate_declaration_scope(ts::Type_System& ts, ts::IDeclaration_Scope& scope, Node const& node) -> bool;
 
 
 static auto get_name_identifier(Node const& node) -> boost::optional<std::string>
@@ -104,7 +104,7 @@ static auto get_name_identifier(Node const& node) -> boost::optional<std::string
     return identifier_value->get_as_string();
 }
 
-static auto find_type_or_instantiate_templated_type(ts::IDeclaration_Scope& scope, Node const& node) -> std::shared_ptr<ts::IType>
+static auto find_type_or_instantiate_templated_type(ts::Type_System& ts, ts::IDeclaration_Scope& scope, Node const& node) -> std::shared_ptr<const ts::IType>
 {
     Node const* type_node = node.find_first_child_by_type(Node::Type::TYPE);
     if (!type_node)
@@ -140,46 +140,28 @@ static auto find_type_or_instantiate_templated_type(ts::IDeclaration_Scope& scop
         }
 
         std::vector<Node> template_argument_nodes = template_node->get_all_children_of_type(Node::Type::TEMPLATE_ARGUMENT);
-        std::vector<std::shared_ptr<ts::ITemplate_Argument>> template_arguments;
+        std::vector<std::shared_ptr<const ts::ITemplate_Argument>> template_arguments;
         template_arguments.reserve(template_argument_nodes.size());
 
-        std::string templated_type_name = *type_name;
         for (Node const& node: template_argument_nodes)
         {
-            std::shared_ptr<ts::IType> template_argument = find_type_or_instantiate_templated_type(scope, node);
+            std::shared_ptr<const ts::IType> template_argument = find_type_or_instantiate_templated_type(ts, scope, node);
             if (!template_argument)
             {
                 std::cerr << "Cannot resolve template argument " << template_arguments.size() << "\n";
                 return nullptr;
             }
-            if (template_argument->get_template_instantiation_string().empty())
-            {
-                std::cerr << "Template argument " << template_arguments.size() << " cannot be used for instantiation\n";
-                return nullptr;
-            }
             template_arguments.push_back(template_argument);
-            templated_type_name += "#";
-            templated_type_name += template_argument->get_template_instantiation_string();
         }
 
-        if (*type_name == "vector")
-        {
-            std::unique_ptr<ts::Vector_Type> vector = std::unique_ptr<ts::Vector_Type>(new ts::Vector_Type(templated_type_name));
-            if (!vector->init(template_arguments))
-            {
-                std::cerr << "Cannot instantiate vector template.\n";
-                return false;
-            }
-            return std::move(vector);
-        }
-
+        return ts.instantiate_template(*type_name, template_arguments);
     }
 
     return nullptr;
 }
 
 
-static auto create_namespace(ts::IDeclaration_Scope& scope, Node const& node) -> bool
+static auto create_namespace(ts::Type_System& ts, ts::IDeclaration_Scope& scope, Node const& node) -> bool
 {
     assert(node.get_type() == Node::Type::NAMESPACE_DECLARATION);
 
@@ -193,7 +175,10 @@ static auto create_namespace(ts::IDeclaration_Scope& scope, Node const& node) ->
     ts::Namespace* ns = new ts::Namespace(*name);
 
     //add it to the typesystem so we can search for types
-    scope.add_symbol(std::unique_ptr<ts::ISymbol>(ns));
+    if (!scope.add_symbol(std::unique_ptr<ts::ISymbol>(ns)))
+    {
+        return false;
+    }
 
 
     Node const* body = node.find_first_child_by_type(Node::Type::NAMESPACE_BODY);
@@ -201,7 +186,7 @@ static auto create_namespace(ts::IDeclaration_Scope& scope, Node const& node) ->
     {
         for (Node const& ch: body->get_children())
         {
-            if (!populate_declaration_scope(*ns, ch))
+            if (!populate_declaration_scope(ts, *ns, ch))
             {
                 return false;
             }
@@ -211,7 +196,7 @@ static auto create_namespace(ts::IDeclaration_Scope& scope, Node const& node) ->
     return true;
 }
 
-static auto create_member_def(ts::IDeclaration_Scope& scope, Node const& node) -> std::unique_ptr<ts::Member_Def>
+static auto create_member_def(ts::Type_System& ts, ts::IDeclaration_Scope& scope, Node const& node) -> std::unique_ptr<ts::Member_Def>
 {
     assert(node.get_type() == Node::Type::MEMBER_DECLARATION);
 
@@ -222,7 +207,7 @@ static auto create_member_def(ts::IDeclaration_Scope& scope, Node const& node) -
         return nullptr;
     }
 
-    std::shared_ptr<ts::IType> type = find_type_or_instantiate_templated_type(scope, node);
+    std::shared_ptr<const ts::IType> type = find_type_or_instantiate_templated_type(ts, scope, node);
     if (!type)
     {
         std::cerr << "Cannot find member type\n";
@@ -234,7 +219,7 @@ static auto create_member_def(ts::IDeclaration_Scope& scope, Node const& node) -
     return std::move(def);
 }
 
-static auto create_alias(ts::IDeclaration_Scope& scope, Node const& node) -> bool
+static auto create_alias(ts::Type_System& ts, ts::IDeclaration_Scope& scope, Node const& node) -> bool
 {
     assert(node.get_type() == Node::Type::ALIAS_DECLARATION);
 
@@ -245,7 +230,7 @@ static auto create_alias(ts::IDeclaration_Scope& scope, Node const& node) -> boo
         return false;
     }
 
-    std::shared_ptr<ts::IType> type = find_type_or_instantiate_templated_type(scope, node);
+    std::shared_ptr<const ts::IType> type = find_type_or_instantiate_templated_type(ts, scope, node);
     if (!type)
     {
         std::cerr << "Cannot find alias type\n";
@@ -254,12 +239,10 @@ static auto create_alias(ts::IDeclaration_Scope& scope, Node const& node) -> boo
 
     std::unique_ptr<ts::IType> aliased_type = type->clone(*name);
 
-    scope.add_symbol(std::move(aliased_type));
-
-    return true;
+    return scope.add_symbol(std::move(aliased_type)) != nullptr;
 }
 
-static auto create_struct_type(ts::IDeclaration_Scope& scope, Node const& node) -> bool
+static auto create_struct_type(ts::Type_System& ts, ts::IDeclaration_Scope& scope, Node const& node) -> bool
 {
     assert(node.get_type() == Node::Type::STRUCT_DECLARATION);
 
@@ -273,7 +256,10 @@ static auto create_struct_type(ts::IDeclaration_Scope& scope, Node const& node) 
     ts::Struct_Type* type = new ts::Struct_Type(*name);
 
     //add it to the typesystem so we can search for types
-    scope.add_symbol(std::unique_ptr<ts::ISymbol>(type));
+    if (!scope.add_symbol(std::unique_ptr<ts::ISymbol>(type)))
+    {
+        return false;
+    }
 
     Node const* body = node.find_first_child_by_type(Node::Type::STRUCT_BODY);
     if (body)
@@ -282,21 +268,21 @@ static auto create_struct_type(ts::IDeclaration_Scope& scope, Node const& node) 
         {
             if (ch.get_type() == Node::Type::STRUCT_DECLARATION)
             {
-                if (!create_struct_type(*type, ch))
+                if (!create_struct_type(ts, *type, ch))
                 {
                     return false;
                 }
             }
             else if (ch.get_type() == Node::Type::ALIAS_DECLARATION)
             {
-                if (!create_alias(*type, ch))
+                if (!create_alias(ts, *type, ch))
                 {
                     return false;
                 }
             }
             else if (ch.get_type() == Node::Type::MEMBER_DECLARATION)
             {
-                std::unique_ptr<ts::Member_Def> t = create_member_def(*type, ch);
+                std::unique_ptr<ts::Member_Def> t = create_member_def(ts, *type, ch);
                 if (!t)
                 {
                     return false;
@@ -317,27 +303,27 @@ static auto create_struct_type(ts::IDeclaration_Scope& scope, Node const& node) 
     return true;
 }
 
-static auto create_symbol(ts::IDeclaration_Scope& scope, Node const& node) -> bool
+static auto create_symbol(ts::Type_System& ts, ts::IDeclaration_Scope& scope, Node const& node) -> bool
 {
     if (node.get_type() == Node::Type::NAMESPACE_DECLARATION)
     {
-        return create_namespace(scope, node);
+        return create_namespace(ts, scope, node);
     }
     else if (node.get_type() == Node::Type::STRUCT_DECLARATION)
     {
-        return create_struct_type(scope, node);
+        return create_struct_type(ts, scope, node);
     }
     else if (node.get_type() == Node::Type::ALIAS_DECLARATION)
     {
-        return create_alias(scope, node);
+        return create_alias(ts, scope, node);
     }
 
     return false;
 }
 
-static auto populate_declaration_scope(ts::IDeclaration_Scope& scope, Node const& node) -> bool
+static auto populate_declaration_scope(ts::Type_System& ts, ts::IDeclaration_Scope& scope, Node const& node) -> bool
 {
-    return create_symbol(scope, node);
+    return create_symbol(ts, scope, node);
 }
 
 
@@ -350,7 +336,7 @@ auto Builder::populate_type_system(ts::Type_System& ts) -> bool
 
     for (Node const& ch: m_root_node.get_children())
     {
-        if (!populate_declaration_scope(ts, ch))
+        if (!populate_declaration_scope(ts, ts, ch))
         {
             return false;
         }

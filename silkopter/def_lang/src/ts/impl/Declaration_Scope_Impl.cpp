@@ -4,15 +4,15 @@
 namespace ts
 {
 
-auto Declaration_Scope_Impl::add_symbol(std::unique_ptr<ISymbol> symbol) -> bool
+auto Declaration_Scope_Impl::add_symbol(std::unique_ptr<ISymbol> symbol) -> std::shared_ptr<const ISymbol>
 {
     if (!symbol)
     {
-        return false;
+        return nullptr;
     }
     if (find_symbol_by_name(symbol->get_name()) != nullptr)
     {
-        return false;
+        return nullptr;
     }
 
     if (IDeclaration_Scope* ds = dynamic_cast<IDeclaration_Scope*>(symbol.get()))
@@ -22,7 +22,7 @@ auto Declaration_Scope_Impl::add_symbol(std::unique_ptr<ISymbol> symbol) -> bool
 
     m_symbols.push_back(std::move(symbol));
 
-    return true;
+    return m_symbols.back();
 }
 
 void Declaration_Scope_Impl::set_parent_scope(IDeclaration_Scope* declaration_scope)
