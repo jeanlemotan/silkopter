@@ -2,6 +2,7 @@
 
 #include "Namespace.h"
 #include "types/All_Real_Types.h"
+#include "types/All_Integral_Types.h"
 #include "types/Bool_Type.h"
 #include "types/String_Type.h"
 #include "ITemplate_Argument.h"

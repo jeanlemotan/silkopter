@@ -1,19 +1,19 @@
 #pragma once
 
-#include "Result.h"
 #include "IValue.h"
-#include "ITemplate_Argument.h"
 
 namespace ts
 {
 
-class IBool_Type;
+template<typename Traits> class IReal_Type_Template;
 
-class IBool_Value : virtual public IValue, public virtual ITemplate_Argument
+template<typename Traits>
+class IReal_Value_Template : virtual public IValue
 {
 public:
-    typedef IBool_Type type_type;
-    typedef bool fundamental_type;
+    typedef Traits traits;
+    typedef IReal_Type_Template<Traits> type_type;
+    typedef typename Traits::fundamental_type fundamental_type;
 
     virtual auto get_specialized_type() const -> std::shared_ptr<type_type> = 0;
 

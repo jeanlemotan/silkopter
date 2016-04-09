@@ -15,7 +15,7 @@ auto String_Type::clone(std::string const& name) const -> std::unique_ptr<IType>
     return std::unique_ptr<IType>(new String_Type(name));
 }
 
-auto String_Type::get_template_instantiation_string() const -> std::string const&
+auto String_Type::get_template_instantiation_string() const -> std::string
 {
     return get_name();
 }

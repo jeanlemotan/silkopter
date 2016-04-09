@@ -34,6 +34,7 @@ public:
         MEMBER_DECLARATION,
 
         INITIALIZER_LIST,
+        INITIALIZER,
 
         ATTRIBUTE,
     };

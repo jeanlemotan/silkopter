@@ -1,17 +1,19 @@
 #pragma once
 
+#include <memory>
+#include "ITemplate_Argument.h"
+#include "IInitializer.h"
+
 namespace ts
 {
 
-class IType;
 class IValue;
 
-class ILiteral
+class ILiteral : public virtual ITemplate_Argument, public virtual IInitializer
 {
 public:
     virtual ~ILiteral() = default;
 
-    virtual auto get_type() const -> std::shared_ptr<IType> = 0;
     virtual auto get_value() const -> std::shared_ptr<const IValue> = 0;
 };
 

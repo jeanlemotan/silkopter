@@ -1,4 +1,5 @@
 #include "Node.h"
+#include "ts_assert.h"
 
 namespace ast
 {
@@ -104,8 +105,9 @@ auto Node::to_string(size_t ident_count, bool deep) const -> std::string
     CASE(CONSTANT_DECLARATION);
     CASE(MEMBER_DECLARATION);
     CASE(INITIALIZER_LIST);
+    CASE(INITIALIZER);
     CASE(ATTRIBUTE);
-    default: str += "<unknown>"; break;
+    default: TS_ASSERT(false); str += "<unknown>"; break;
     }
 #undef CASE
 

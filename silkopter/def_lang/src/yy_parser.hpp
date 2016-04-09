@@ -311,7 +311,7 @@ namespace yy {
       // attribute_list
       // attribute_body
       // attribute
-      // expression
+      // initializer
       // initializer_list
       // initializer_body
       // type
@@ -710,7 +710,7 @@ namespace yy {
   // number is the opposite.  If YYTABLE_NINF, syntax error.
   static const unsigned char yytable_[];
 
-  static const unsigned char yycheck_[];
+  static const signed char yycheck_[];
 
   // YYSTOS[STATE-NUM] -- The (internal number of the) accessing
   // symbol of state STATE-NUM.
@@ -830,7 +830,7 @@ namespace yy {
     enum
     {
       yyeof_ = 0,
-      yylast_ = 125,     ///< Last index in yytable_.
+      yylast_ = 124,     ///< Last index in yytable_.
       yynnts_ = 32,  ///< Number of nonterminal symbols.
       yyfinal_ = 19, ///< Termination state number.
       yyterror_ = 1,
@@ -934,7 +934,7 @@ namespace yy {
       case 54: // attribute_list
       case 55: // attribute_body
       case 56: // attribute
-      case 57: // expression
+      case 57: // initializer
       case 58: // initializer_list
       case 59: // initializer_body
       case 60: // type
@@ -999,7 +999,7 @@ namespace yy {
       case 54: // attribute_list
       case 55: // attribute_body
       case 56: // attribute
-      case 57: // expression
+      case 57: // initializer
       case 58: // initializer_list
       case 59: // initializer_body
       case 60: // type
@@ -1123,7 +1123,7 @@ namespace yy {
       case 54: // attribute_list
       case 55: // attribute_body
       case 56: // attribute
-      case 57: // expression
+      case 57: // initializer
       case 58: // initializer_list
       case 59: // initializer_body
       case 60: // type
@@ -1194,7 +1194,7 @@ namespace yy {
       case 54: // attribute_list
       case 55: // attribute_body
       case 56: // attribute
-      case 57: // expression
+      case 57: // initializer
       case 58: // initializer_list
       case 59: // initializer_body
       case 60: // type

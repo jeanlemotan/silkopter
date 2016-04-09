@@ -7,7 +7,23 @@
 #include "types/Struct_Type.h"
 #include "Member_Def.h"
 #include "values/IValue.h"
+#include "IInitializer.h"
+#include "Initializer_List.h"
+#include "expression/IExpression.h"
+#include "expression/Literal_Expression.h"
+#include "ILiteral.h"
+#include "Literal.h"
 #include "types/ITemplated_Type.h"
+
+#include "types/IBool_Type.h"
+#include "types/All_IReal_Types.h"
+#include "types/All_IIntegral_Types.h"
+#include "types/String_Type.h"
+
+#include "values/IBool_Value.h"
+#include "values/All_IReal_Values.h"
+#include "values/All_IIntegral_Values.h"
+#include "values/String_Value.h"
 
 namespace ast
 {
@@ -163,7 +179,7 @@ static auto find_type_or_instantiate_templated_type(ts::Type_System& ts, ts::IDe
 
 static auto create_namespace(ts::Type_System& ts, ts::IDeclaration_Scope& scope, Node const& node) -> bool
 {
-    assert(node.get_type() == Node::Type::NAMESPACE_DECLARATION);
+    TS_ASSERT(node.get_type() == Node::Type::NAMESPACE_DECLARATION);
 
     boost::optional<std::string> name = get_name_identifier(node);
     if (!name)
@@ -196,9 +212,146 @@ static auto create_namespace(ts::Type_System& ts, ts::IDeclaration_Scope& scope,
     return true;
 }
 
+static auto create_literal(ts::Type_System& ts, Node const& node) -> std::unique_ptr<ts::ILiteral>
+{
+    TS_ASSERT(node.get_type() == Node::Type::LITERAL);
+
+    Attribute const* value_attribute = node.find_first_attribute_by_name("value");
+    if (!value_attribute)
+    {
+        std::cerr << "Literal without a value!\n";
+        return nullptr;
+    }
+
+    std::unique_ptr<ts::IValue> value;
+    switch (value_attribute->get_type())
+    {
+    case Attribute::Type::BOOL:
+    {
+        std::shared_ptr<const ts::IBool_Type> type = ts.find_specialized_symbol_by_name<const ts::IBool_Type>("bool");
+        if (type)
+        {
+            std::unique_ptr<ts::IBool_Value> v = type->create_specialized_value();
+            if (v)
+            {
+                v->set_value(value_attribute->get_as_bool());
+                value = std::move(v);
+            }
+        }
+        break;
+    }
+    case Attribute::Type::DOUBLE:
+    {
+        std::shared_ptr<const ts::IDouble_Type> type = ts.find_specialized_symbol_by_name<const ts::IDouble_Type>("double");
+        if (type)
+        {
+            std::unique_ptr<ts::IDouble_Value> v = type->create_specialized_value();
+            if (v)
+            {
+                v->set_value(value_attribute->get_as_double());
+                value = std::move(v);
+            }
+        }
+        break;
+    }
+    case Attribute::Type::FLOAT:
+    {
+        std::shared_ptr<const ts::IFloat_Type> type = ts.find_specialized_symbol_by_name<const ts::IFloat_Type>("float");
+        if (type)
+        {
+            std::unique_ptr<ts::IFloat_Value> v = type->create_specialized_value();
+            if (v)
+            {
+                v->set_value(value_attribute->get_as_float());
+                value = std::move(v);
+            }
+        }
+        break;
+    }
+    case Attribute::Type::INTEGRAL:
+    {
+        std::shared_ptr<const ts::IInt64_Type> type = ts.find_specialized_symbol_by_name<const ts::IInt64_Type>("int64_t");
+        if (type)
+        {
+            std::unique_ptr<ts::IInt64_Value> v = type->create_specialized_value();
+            if (v)
+            {
+                v->set_value(value_attribute->get_as_integral());
+                value = std::move(v);
+            }
+        }
+        break;
+    }
+    case Attribute::Type::STRING:
+    {
+        std::shared_ptr<const ts::IString_Type> type = ts.find_specialized_symbol_by_name<const ts::IString_Type>("string");
+        if (type)
+        {
+            std::unique_ptr<ts::IString_Value> v = type->create_specialized_value();
+            if (v)
+            {
+                v->set_value(value_attribute->get_as_string());
+                value = std::move(v);
+            }
+        }
+        break;
+    }
+    }
+
+    if (!value)
+    {
+        std::cerr << "Cannot create literal of type " << value_attribute->to_string() << "\n";
+        return nullptr;
+    }
+
+    return std::unique_ptr<ts::ILiteral>(new ts::Literal(std::move(value)));
+}
+
+static auto create_initializer(ts::Type_System& ts, ts::IDeclaration_Scope& scope, Node const& node) -> std::unique_ptr<ts::IInitializer>
+{
+    if (node.get_type() == Node::Type::INITIALIZER)
+    {
+        if (node.get_children().size() != 1)
+        {
+            std::cerr << "Invalid intializer node!\n";
+            return nullptr;
+        }
+
+        Node const* literal_node = node.find_first_child_by_type(Node::Type::LITERAL);
+        if (literal_node)
+        {
+            std::unique_ptr<ts::ILiteral> literal = create_literal(ts, *literal_node);
+            return std::move(literal);
+        }
+    }
+    else if (node.get_type() == Node::Type::INITIALIZER_LIST)
+    {
+        std::vector<std::unique_ptr<ts::IInitializer>> initializers;
+        for (Node const& ch: node.get_children())
+        {
+            std::unique_ptr<ts::IInitializer> initializer_ch = create_initializer(ts, scope, ch);
+            if (!initializer_ch)
+            {
+                return nullptr;
+            }
+            initializers.push_back(std::move(initializer_ch));
+        }
+
+        return std::unique_ptr<ts::IInitializer>(new ts::Initializer_List(std::move(initializers)));
+    }
+    else
+    {
+        std::cerr << "Unknown initializer\n";
+        return nullptr;
+    }
+
+    return nullptr;
+}
+
+
 static auto create_member_def(ts::Type_System& ts, ts::IDeclaration_Scope& scope, Node const& node) -> std::unique_ptr<ts::Member_Def>
 {
-    assert(node.get_type() == Node::Type::MEMBER_DECLARATION);
+    TS_ASSERT(node.get_type() == Node::Type::MEMBER_DECLARATION);
 
     boost::optional<std::string> name = get_name_identifier(node);
     if (!name)
@@ -214,14 +367,44 @@ static auto create_member_def(ts::Type_System& ts, ts::IDeclaration_Scope& scope
         return nullptr;
     }
 
+    std::unique_ptr<ts::IValue> value = type->create_value();
+
+    Node const* initializer_node = node.find_first_child_by_type(Node::Type::INITIALIZER);
+    if (!initializer_node)
+    {
+        initializer_node = node.find_first_child_by_type(Node::Type::INITIALIZER_LIST);
+    }
+    if (initializer_node)
+    {
+        std::unique_ptr<ts::IInitializer> initializer = create_initializer(ts, scope, *initializer_node);
+        if (!initializer)
+        {
+            return nullptr;
+        }
+
+        if (value->construct(*initializer) != ts::success)
+        {
+            std::cerr << "Cannot initialize value\n";
+            return nullptr;
+        }
+    }
+    else
+    {
+        if (value->default_construct() != ts::success)
+        {
+            std::cerr << "Cannot construct value\n";
+            return nullptr;
+        }
+    }
+
     std::unique_ptr<ts::Member_Def> def;
-    def.reset(new ts::Member_Def(*name, type, nullptr));
+    def.reset(new ts::Member_Def(*name, type, std::move(value)));
     return std::move(def);
 }
 
 static auto create_alias(ts::Type_System& ts, ts::IDeclaration_Scope& scope, Node const& node) -> bool
 {
-    assert(node.get_type() == Node::Type::ALIAS_DECLARATION);
+    TS_ASSERT(node.get_type() == Node::Type::ALIAS_DECLARATION);
 
     boost::optional<std::string> name = get_name_identifier(node);
     if (!name)
@@ -244,7 +427,7 @@ static auto create_alias(ts::Type_System& ts, ts::IDeclaration_Scope& scope, Nod
 
 static auto create_struct_type(ts::Type_System& ts, ts::IDeclaration_Scope& scope, Node const& node) -> bool
 {
-    assert(node.get_type() == Node::Type::STRUCT_DECLARATION);
+    TS_ASSERT(node.get_type() == Node::Type::STRUCT_DECLARATION);
 
     boost::optional<std::string> name = get_name_identifier(node);
     if (!name)
@@ -287,6 +470,7 @@ static auto create_struct_type(ts::Type_System& ts, ts::IDeclaration_Scope& scop
                 {
                     return false;
                 }
+
                 if (!type->add_member_def(std::move(t)))
                 {
                     return false;

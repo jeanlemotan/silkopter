@@ -98,8 +98,8 @@
 %type <::ast::Node> attribute_list
 %type <::ast::Node> attribute_body
 %type <::ast::Node> literal
-%type <::ast::Node> expression
 %type <::ast::Node> initializer_list
+%type <::ast::Node> initializer
 %type <::ast::Node> initializer_body
 
 //%printer { yyoutput << $$; } <>;
@@ -289,14 +289,14 @@ member_declaration  : type identifier TSEMICOLON
                         $$.add_child($2);
                         $$.move_children_from(std::move($4));
                     }
-                    | type identifier TEQUAL expression TSEMICOLON
+                    | type identifier TEQUAL initializer TSEMICOLON
                     {
                         $$ = ast::Node(ast::Node::Type::MEMBER_DECLARATION);
                         $$.add_child($1);
                         $$.add_child($2);
                         $$.add_child($4);
                     }
-                    | type identifier TEQUAL expression TCOLON attribute_list TSEMICOLON
+                    | type identifier TEQUAL initializer TCOLON attribute_list TSEMICOLON
                     {
                         $$ = ast::Node(ast::Node::Type::MEMBER_DECLARATION);
                         $$.add_child($1);
@@ -351,7 +351,7 @@ attribute_body  : attribute
                 }
                 ;
 
-attribute   : identifier TEQUAL expression
+attribute   : identifier TEQUAL initializer
             {
                 $$ = ast::Node(ast::Node::Type::ATTRIBUTE);
                 $$.add_child($1);
@@ -359,19 +359,15 @@ attribute   : identifier TEQUAL expression
             }
             ;
         
-expression  : literal
+initializer : literal
             {
-                $$ = ast::Node(ast::Node::Type::EXPRESSION);
+                $$ = ast::Node(ast::Node::Type::INITIALIZER);
                 $$.add_child($1);
             }
             | initializer_list
             {
-                $$ = ast::Node(ast::Node::Type::EXPRESSION);
-                $$.add_child($1);
-            }
-            | TLPARENTHESIS expression TRPARENTHESIS
-            {
-                $$ = $2;
+                $$ = ast::Node(ast::Node::Type::INITIALIZER_LIST);
+                $$.move_children_from(std::move($1));
             }
             ;
 
@@ -386,12 +382,11 @@ initializer_list    : TLBRACE TRBRACE
                     }
                     ;
 
-initializer_body    : expression
+initializer_body    : initializer
                     {
-                        $$ = ast::Node(ast::Node::Type::INITIALIZER_LIST);
-                        $$.add_child($1);
+                        $$.add_child(std::move($1));
                     }
-                    | initializer_body TCOMMA expression
+                    | initializer_body TCOMMA initializer
                     {
                         $$.move_children_from(std::move($1));
                         $$.add_child($3);

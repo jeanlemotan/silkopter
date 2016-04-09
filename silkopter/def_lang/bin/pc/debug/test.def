@@ -7,7 +7,7 @@ struct Multirotor_Config
 
     struct Motor
     {
-        math::vec3f position = {0, 0, 0} : [ ui_name = "Position" ];
+        math::vec3f position = {0, {0}, 0} : [ ui_name = "Position" ];
         bool clockwise = false : [ ui_name = "Clockwise" ];
     };
     
@@ -22,6 +22,162 @@ struct Multirotor_Config
     vector<Motor> motors : [ ui_name = "Motors" ];
 };
 
+/*
+
+ROOT
+  NAMESPACE_DECLARATION
+    IDENTIFIER value:silk
+    NAMESPACE_BODY
+      STRUCT_DECLARATION
+        IDENTIFIER value:Multirotor_Config
+        STRUCT_BODY
+          ALIAS_DECLARATION
+            IDENTIFIER value:mass_t
+            TYPE
+              IDENTIFIER value:ufloat
+            ATTRIBUTE
+              IDENTIFIER value:min
+              INITIALIZER
+                EXPRESSION
+                  LITERAL value:0.050000
+          STRUCT_DECLARATION
+            IDENTIFIER value:Motor
+            STRUCT_BODY
+              MEMBER_DECLARATION
+                TYPE
+                  IDENTIFIER value:math::vec3f
+                IDENTIFIER value:position
+                INITIALIZER_LIST
+                  INITIALIZER
+                    EXPRESSION
+                      LITERAL value:0
+                  INITIALIZER_LIST
+                    INITIALIZER
+                      EXPRESSION
+                        LITERAL value:0
+                  INITIALIZER
+                    EXPRESSION
+                      LITERAL value:0
+                ATTRIBUTE
+                  IDENTIFIER value:ui_name
+                  INITIALIZER
+                    EXPRESSION
+                      LITERAL value:"Position"
+              MEMBER_DECLARATION
+                TYPE
+                  IDENTIFIER value:bool
+                IDENTIFIER value:clockwise
+                INITIALIZER
+                  EXPRESSION
+                    LITERAL value:false
+                ATTRIBUTE
+                  IDENTIFIER value:ui_name
+                  INITIALIZER
+                    EXPRESSION
+                      LITERAL value:"Clockwise"
+          MEMBER_DECLARATION
+            TYPE
+              IDENTIFIER value:string
+            IDENTIFIER value:name
+          MEMBER_DECLARATION
+            TYPE
+              IDENTIFIER value:mass_t
+            IDENTIFIER value:mass
+            INITIALIZER
+              EXPRESSION
+                LITERAL value:1.000000
+            ATTRIBUTE
+              IDENTIFIER value:ui_name
+              INITIALIZER
+                EXPRESSION
+                  LITERAL value:"Mass (Kg)"
+          MEMBER_DECLARATION
+            TYPE
+              IDENTIFIER value:ufloat
+            IDENTIFIER value:height
+            INITIALIZER
+              EXPRESSION
+                LITERAL value:0.500000
+            ATTRIBUTE
+              IDENTIFIER value:ui_name
+              INITIALIZER
+                EXPRESSION
+                  LITERAL value:"Height (m)"
+          MEMBER_DECLARATION
+            TYPE
+              IDENTIFIER value:ufloat
+            IDENTIFIER value:radius
+            INITIALIZER
+              EXPRESSION
+                LITERAL value:0.500000
+            ATTRIBUTE
+              IDENTIFIER value:ui_name
+              INITIALIZER
+                EXPRESSION
+                  LITERAL value:"Radius (m)"
+          MEMBER_DECLARATION
+            TYPE
+              IDENTIFIER value:ufloat
+            IDENTIFIER value:motor_thrust
+            INITIALIZER
+              EXPRESSION
+                LITERAL value:1.000000
+            ATTRIBUTE
+              IDENTIFIER value:ui_name
+              INITIALIZER
+                EXPRESSION
+                  LITERAL value:"Motor Thrust (N)"
+          MEMBER_DECLARATION
+            TYPE
+              IDENTIFIER value:ufloat
+            IDENTIFIER value:motor_z_thrust
+            INITIALIZER
+              EXPRESSION
+                LITERAL value:1.000000
+            ATTRIBUTE
+              IDENTIFIER value:ui_name
+              INITIALIZER
+                EXPRESSION
+                  LITERAL value:"Motor Z Torque (Nm)"
+          MEMBER_DECLARATION
+            TYPE
+              IDENTIFIER value:ufloat
+            IDENTIFIER value:motor_acceleration
+            INITIALIZER
+              EXPRESSION
+                LITERAL value:10.000000
+            ATTRIBUTE
+              IDENTIFIER value:ui_name
+              INITIALIZER
+                EXPRESSION
+                  LITERAL value:"Motor Acceleration (N/s)"
+          MEMBER_DECLARATION
+            TYPE
+              IDENTIFIER value:ufloat
+            IDENTIFIER value:motor_deceleration
+            INITIALIZER
+              EXPRESSION
+                LITERAL value:10.000000
+            ATTRIBUTE
+              IDENTIFIER value:ui_name
+              INITIALIZER
+                EXPRESSION
+                  LITERAL value:"Motor Deceleration (N/s)"
+          MEMBER_DECLARATION
+            TYPE
+              TEMPLATE_INSTANTIATION
+                IDENTIFIER value:vector
+                TEMPLATE_ARGUMENT
+                  TYPE
+                    IDENTIFIER value:Motor
+            IDENTIFIER value:motors
+            ATTRIBUTE
+              IDENTIFIER value:ui_name
+              INITIALIZER
+                EXPRESSION
+                  LITERAL value:"Motors"
+
+*/
 }
 
 

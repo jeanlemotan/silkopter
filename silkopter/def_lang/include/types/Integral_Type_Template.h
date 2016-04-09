@@ -1,18 +1,25 @@
-#include "IString_Type.h"
+#pragma once
 
+#include "IIntegral_Type_Template.h"
 #include "impl/Symbol_Impl.h"
 #include "impl/Attribute_Container_Impl.h"
+#include "values/All_IIntegral_Values.h"
 
 namespace ts
 {
 
-class String_Type final : virtual public IString_Type, public Symbol_Impl, public Attribute_Container_Impl
+template<typename Traits> class IIntegral_Value_Template;
+
+
+template<typename Traits>
+class Integral_Type_Template final : virtual public IIntegral_Type_Template<Traits>, public Symbol_Impl, public Attribute_Container_Impl
 {
 public:
-    typedef IString_Value value_type;
-    typedef std::string fundamental_type;
+    typedef Traits traits;
+    typedef IIntegral_Value_Template<Traits> value_type;
+    typedef typename Traits::fundamental_type fundamental_type;
 
-    String_Type(std::string const& name);
+    Integral_Type_Template(std::string const& name);
 
     auto clone(std::string const& name) const -> std::unique_ptr<IType> override;
 
@@ -25,5 +32,6 @@ public:
     auto create_specialized_value() const -> std::unique_ptr<value_type> override;
 };
 
-
 }
+
+#include "Integral_Type_Template.inl"
