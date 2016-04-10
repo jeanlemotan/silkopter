@@ -130,7 +130,7 @@ public:
 		}
 		else
 		{
-            new (&m_data) T(std::move(*reinterpret_cast<Error*>(&other.m_data)));
+            new (&m_data) Error(std::move(*reinterpret_cast<Error*>(&other.m_data)));
 		}
 		return *this;
 	}
