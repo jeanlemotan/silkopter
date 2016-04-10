@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Result.h"
 #include "impl/Declaration_Scope_EP.h"
 #include "types/IType.h"
 
@@ -12,7 +13,7 @@ class ITemplated_Type;
 class Type_System final : virtual public Declaration_Scope_EP
 {
 public:
-    auto instantiate_template(std::string const& name, std::vector<std::shared_ptr<const ITemplate_Argument>> const& arguments) -> std::shared_ptr<const ITemplated_Type>;
+    auto instantiate_template(std::string const& name, std::vector<std::shared_ptr<const ITemplate_Argument>> const& arguments) -> Result<std::shared_ptr<const ITemplated_Type>>;
 
     void populate_builtin_types();
 

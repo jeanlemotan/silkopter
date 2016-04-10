@@ -4,15 +4,15 @@
 namespace ts
 {
 
-auto Declaration_Scope_EP::add_symbol(std::unique_ptr<ISymbol> symbol) -> std::shared_ptr<const ISymbol>
+auto Declaration_Scope_EP::add_symbol(std::unique_ptr<ISymbol> symbol) -> Result<std::shared_ptr<const ISymbol>>
 {
     if (!symbol)
     {
-        return nullptr;
+        return Error("cannot add null symbol");
     }
     if (find_symbol_by_name(symbol->get_name()) != nullptr)
     {
-        return nullptr;
+        return Error("Duplicated symbol '" + symbol->get_name() + "'");
     }
 
     if (IDeclaration_Scope* ds = dynamic_cast<IDeclaration_Scope*>(symbol.get()))

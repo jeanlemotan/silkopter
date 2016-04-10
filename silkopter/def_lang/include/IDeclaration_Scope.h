@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <boost/optional.hpp>
+#include "Result.h"
 #include "Symbol_Path.h"
 
 namespace ts
@@ -14,7 +15,7 @@ class IDeclaration_Scope
 public:
     virtual ~IDeclaration_Scope() = default;
 
-    virtual auto add_symbol(std::unique_ptr<ISymbol> symbol) -> std::shared_ptr<const ISymbol> = 0;
+    virtual auto add_symbol(std::unique_ptr<ISymbol> symbol) -> Result<std::shared_ptr<const ISymbol>> = 0;
 
     virtual auto get_symbol_count() -> const size_t = 0;
     virtual auto get_symbol(size_t idx) const -> std::shared_ptr<const ISymbol> = 0;

@@ -168,7 +168,13 @@ static auto find_type_or_instantiate_templated_type(ts::Type_System& ts, ts::IDe
             template_arguments.push_back(template_argument);
         }
 
-        return ts.instantiate_template(*type_name, template_arguments);
+        auto result = ts.instantiate_template(*type_name, template_arguments);
+        if (result != ts::success)
+        {
+            std::cerr << "Cannot instantiate template: " << result.error().what() << "\n";
+            return nullptr;
+        }
+        return result.payload();
     }
 
     return nullptr;
@@ -189,8 +195,10 @@ static auto create_namespace(ts::Type_System& ts, ts::IDeclaration_Scope& scope,
     ts::Namespace* ns = new ts::Namespace(*name);
 
     //add it to the typesystem so we can search for types
-    if (!scope.add_symbol(std::unique_ptr<ts::ISymbol>(ns)))
+    auto result = scope.add_symbol(std::unique_ptr<ts::ISymbol>(ns));
+    if (result != ts::success)
     {
+        std::cerr << result.error().what();
         return false;
     }
 
@@ -452,8 +460,10 @@ static auto create_struct_type(ts::Type_System& ts, ts::IDeclaration_Scope& scop
     ts::Struct_Type* type = new ts::Struct_Type(*name);
 
     //add it to the typesystem so we can search for types
-    if (!scope.add_symbol(std::unique_ptr<ts::ISymbol>(type)))
+    auto result = scope.add_symbol(std::unique_ptr<ts::ISymbol>(type));
+    if (result != ts::success)
     {
+        std::cerr << result.error().what();
         return false;
     }
 

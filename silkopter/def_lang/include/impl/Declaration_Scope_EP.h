@@ -12,7 +12,7 @@ class Declaration_Scope_EP : virtual public IDeclaration_Scope, std::enable_shar
 {
 public:
 
-    auto add_symbol(std::unique_ptr<ISymbol> symbol) -> std::shared_ptr<const ISymbol> override;
+    auto add_symbol(std::unique_ptr<ISymbol> symbol) -> Result<std::shared_ptr<const ISymbol>> override;
 
     auto get_symbol_count() -> const size_t override;
     auto get_symbol(size_t idx) const -> std::shared_ptr<const ISymbol> override;

@@ -8,7 +8,7 @@ namespace ts
 class IString_Value;
 class IString_Type;
 
-struct IString_Type_Traits
+struct IString_Traits
 {
     typedef IString_Value value_interface;
     typedef IString_Type type_interface;
@@ -20,7 +20,7 @@ class IString_Type : virtual public IType
 public:
     virtual ~IString_Type() = default;
 
-    typedef IString_Type_Traits traits;
+    typedef IString_Traits traits;
 
     virtual auto create_specialized_value() const -> std::unique_ptr<traits::value_interface> = 0;
 };

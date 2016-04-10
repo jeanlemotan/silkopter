@@ -126,7 +126,7 @@ import_list : import
 
 import  : TIMPORT TSTRING_LITERAL
         {
-            builder.start_file($2);
+            builder.start_file($2.substr(1, $2.size() - 2));
         }
         ;
 
@@ -440,16 +440,6 @@ template_argument   : type
                         $$ = ast::Node(ast::Node::Type::TEMPLATE_ARGUMENT);
                         $$.add_child($1);
                     }
-                    | TSTRING_LITERAL
-                    {
-                        $$ = ast::Node(ast::Node::Type::TEMPLATE_ARGUMENT);
-                        $$.add_child(ast::Node(ast::Node::Type::LITERAL).add_attribute(ast::Attribute("value", $1)));
-                    }
-                    | TINTEGER_LITERAL
-                    {
-                        $$ = ast::Node(ast::Node::Type::TEMPLATE_ARGUMENT);
-                        $$.add_child(ast::Node(ast::Node::Type::LITERAL).add_attribute(ast::Attribute("value", $1)));
-                    }
                     | TTRUE
                     {
                         $$ = ast::Node(ast::Node::Type::TEMPLATE_ARGUMENT);
@@ -480,7 +470,7 @@ literal : TFLOAT_LITERAL
         | TSTRING_LITERAL
         {
             $$ = ast::Node(ast::Node::Type::LITERAL);
-            $$.add_attribute(ast::Attribute("value", $1));
+            $$.add_attribute(ast::Attribute("value", $1.substr(1, $1.size() - 2)));
         }
         | TFALSE
         {
