@@ -10,7 +10,9 @@ class IValue;
 class IMax_Attribute : public virtual IAttribute
 {
 public:
-    virtual auto get_max_value() const -> std::shared_ptr<const IValue> = 0;
+    virtual ~IMax_Attribute() = default;
+
+    virtual auto get_max_value() const -> IValue const& = 0;
 };
 
 }

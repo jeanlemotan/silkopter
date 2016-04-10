@@ -8,7 +8,7 @@ namespace ts
 
 class ISymbol;
 
-class Declaration_Scope_Impl : virtual public IDeclaration_Scope, std::enable_shared_from_this<Declaration_Scope_Impl>
+class Declaration_Scope_EP : virtual public IDeclaration_Scope, std::enable_shared_from_this<Declaration_Scope_EP>
 {
 public:
 

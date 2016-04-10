@@ -16,13 +16,11 @@
 #include "types/ITemplated_Type.h"
 
 #include "types/IBool_Type.h"
-#include "types/All_IReal_Types.h"
-#include "types/All_IIntegral_Types.h"
+#include "types/All_INumeric_Types.h"
 #include "types/String_Type.h"
 
 #include "values/IBool_Value.h"
-#include "values/All_IReal_Values.h"
-#include "values/All_IIntegral_Values.h"
+#include "values/All_INumeric_Values.h"
 #include "values/String_Value.h"
 
 namespace ast
@@ -234,7 +232,11 @@ static auto create_literal(ts::Type_System& ts, Node const& node) -> std::unique
             std::unique_ptr<ts::IBool_Value> v = type->create_specialized_value();
             if (v)
             {
-                v->set_value(value_attribute->get_as_bool());
+                if (v->set_value(value_attribute->get_as_bool()) != ts::success)
+                {
+                    std::cerr << "Cannot assign value\n";
+                    return nullptr;
+                }
                 value = std::move(v);
             }
         }
@@ -248,7 +250,11 @@ static auto create_literal(ts::Type_System& ts, Node const& node) -> std::unique
             std::unique_ptr<ts::IDouble_Value> v = type->create_specialized_value();
             if (v)
             {
-                v->set_value(value_attribute->get_as_double());
+                if (v->set_value(value_attribute->get_as_double()) != ts::success)
+                {
+                    std::cerr << "Cannot assign value\n";
+                    return nullptr;
+                }
                 value = std::move(v);
             }
         }
@@ -262,7 +268,11 @@ static auto create_literal(ts::Type_System& ts, Node const& node) -> std::unique
             std::unique_ptr<ts::IFloat_Value> v = type->create_specialized_value();
             if (v)
             {
-                v->set_value(value_attribute->get_as_float());
+                if (v->set_value(value_attribute->get_as_float()) != ts::success)
+                {
+                    std::cerr << "Cannot assign value\n";
+                    return nullptr;
+                }
                 value = std::move(v);
             }
         }
@@ -276,7 +286,11 @@ static auto create_literal(ts::Type_System& ts, Node const& node) -> std::unique
             std::unique_ptr<ts::IInt64_Value> v = type->create_specialized_value();
             if (v)
             {
-                v->set_value(value_attribute->get_as_integral());
+                if (v->set_value(value_attribute->get_as_integral()) != ts::success)
+                {
+                    std::cerr << "Cannot assign value\n";
+                    return nullptr;
+                }
                 value = std::move(v);
             }
         }
@@ -290,7 +304,11 @@ static auto create_literal(ts::Type_System& ts, Node const& node) -> std::unique
             std::unique_ptr<ts::IString_Value> v = type->create_specialized_value();
             if (v)
             {
-                v->set_value(value_attribute->get_as_string());
+                if (v->set_value(value_attribute->get_as_string()) != ts::success)
+                {
+                    std::cerr << "Cannot assign value\n";
+                    return nullptr;
+                }
                 value = std::move(v);
             }
         }
@@ -382,7 +400,7 @@ static auto create_member_def(ts::Type_System& ts, ts::IDeclaration_Scope& scope
             return nullptr;
         }
 
-        if (value->construct(*initializer) != ts::success)
+        if (value->copy_assign(*initializer) != ts::success)
         {
             std::cerr << "Cannot initialize value\n";
             return nullptr;
@@ -390,15 +408,10 @@ static auto create_member_def(ts::Type_System& ts, ts::IDeclaration_Scope& scope
     }
     else
     {
-        if (value->default_construct() != ts::success)
-        {
-            std::cerr << "Cannot construct value\n";
-            return nullptr;
-        }
     }
 
     std::unique_ptr<ts::Member_Def> def;
-    def.reset(new ts::Member_Def(*name, type, std::move(value)));
+    def.reset(new ts::Member_Def(*name, *type, std::move(value)));
     return std::move(def);
 }
 

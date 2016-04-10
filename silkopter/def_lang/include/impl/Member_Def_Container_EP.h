@@ -6,7 +6,7 @@
 namespace ts
 {
 
-class Member_Def_Container_Impl : virtual public IMember_Def_Container
+class Member_Def_Container_EP : virtual public IMember_Def_Container
 {
 public:
 

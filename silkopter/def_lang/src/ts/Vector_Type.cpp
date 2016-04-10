@@ -5,7 +5,7 @@ namespace ts
 {
 
 Vector_Type::Vector_Type(std::string const& name)
-    : Symbol_Impl(name)
+    : Symbol_EP(name)
 {
 
 }
@@ -36,17 +36,7 @@ auto Vector_Type::get_template_instantiation_string() const -> std::string
     return get_name();
 }
 
-auto Vector_Type::get_default_value() const -> std::shared_ptr<const IValue>
-{
-    return nullptr;
-}
-
 auto Vector_Type::create_value() const -> std::unique_ptr<IValue>
-{
-    return nullptr;
-}
-
-auto Vector_Type::get_specialized_default_value() const -> std::shared_ptr<const value_type>
 {
     return nullptr;
 }

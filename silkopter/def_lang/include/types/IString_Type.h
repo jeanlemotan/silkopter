@@ -6,15 +6,24 @@ namespace ts
 {
 
 class IString_Value;
+class IString_Type;
+
+struct IString_Type_Traits
+{
+    typedef IString_Value value_interface;
+    typedef IString_Type type_interface;
+    typedef std::string fundamental_type;
+};
 
 class IString_Type : virtual public IType
 {
 public:
-    typedef IString_Value value_type;
-    typedef std::string fundamental_type;
+    virtual ~IString_Type() = default;
 
-    virtual auto get_specialized_default_value() const -> std::shared_ptr<const value_type> = 0;
-    virtual auto create_specialized_value() const -> std::unique_ptr<value_type> = 0;
+    typedef IString_Type_Traits traits;
+
+    virtual auto create_specialized_value() const -> std::unique_ptr<traits::value_interface> = 0;
 };
 
 }
+

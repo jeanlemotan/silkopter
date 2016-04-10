@@ -1,13 +1,28 @@
 #pragma once
 
+#include "types/IString_Type.h"
 #include "IString_Value.h"
+#include "impl/Value_Template_EP.h"
 
 namespace ts
 {
 
-class String_Value final : public IString_Value
-{
+class String_Value;
 
+struct String_Value_Traits : public IString_Value::traits
+{
+    typedef String_Value value_implementation;
+};
+
+class String_Value final : public Value_Template_EP<String_Value_Traits>
+{
+public:
+
+    String_Value(IString_Type const& type);
+
+    auto copy_assign(IInitializer const& initializer) -> Result<void> override;
+
+private:
 };
 
 }

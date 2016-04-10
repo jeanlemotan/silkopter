@@ -10,9 +10,11 @@ class IVector_Type;
 class IVector_Value : virtual public IValue
 {
 public:
-    typedef IVector_Type type_type;
+    virtual ~IVector_Value() = default;
 
-    virtual auto get_specialized_type() const -> std::shared_ptr<type_type> = 0;
+    typedef IVector_Type type_interface;
+
+    virtual auto get_specialized_type() const -> std::shared_ptr<type_interface> = 0;
 };
 
 }

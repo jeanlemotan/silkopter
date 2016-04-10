@@ -20,11 +20,11 @@ public:
     auto empty() const -> bool;
 
     auto front() const -> std::string const&;
-    auto pop_front() -> std::string const&;
+    auto pop_front() -> std::string;
 //    void push_front(std::string const& string);
 
     auto back() const -> std::string const&;
-    auto pop_back() -> std::string const&;
+    auto pop_back() -> std::string;
 //    void push_back(std::string const& string);
 
 private:

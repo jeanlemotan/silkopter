@@ -10,7 +10,9 @@ class IValue;
 class IMin_Attribute : public virtual IAttribute
 {
 public:
-    virtual auto get_min_value() const -> std::shared_ptr<const IValue> = 0;
+    virtual ~IMin_Attribute() = default;
+
+    virtual auto get_min_value() const -> IValue const& = 0;
 };
 
 }

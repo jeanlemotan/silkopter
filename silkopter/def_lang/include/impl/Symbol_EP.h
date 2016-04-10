@@ -9,11 +9,11 @@ namespace ts
 
 class IDeclaration_Scope;
 
-class Symbol_Impl : virtual public ISymbol
+class Symbol_EP : virtual public ISymbol
 {
 public:
 
-    Symbol_Impl(std::string const& name);
+    Symbol_EP(std::string const& name);
 
     auto get_name() const -> std::string const& override;
 

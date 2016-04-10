@@ -7,7 +7,7 @@ struct Multirotor_Config
 
     struct Motor
     {
-        math::vec3f position = {0, {0}, 0} : [ ui_name = "Position" ];
+        math::vec3f position = {0.f, 0.f, 0.f} : [ ui_name = "Position" ];
         bool clockwise = false : [ ui_name = "Clockwise" ];
     };
     

@@ -6,23 +6,32 @@ namespace ts
 {
 
 Literal::Literal(std::unique_ptr<const IValue> value)
-    : m_value(std::move(m_value))
+    : m_value(std::move(value))
 {
+}
+
+Literal::~Literal()
+{
+
 }
 
 auto Literal::get_template_instantiation_string() const -> std::string
 {
-    if (std::shared_ptr<const ITemplate_Argument> ta = std::dynamic_pointer_cast<const ITemplate_Argument>(m_value))
+    if (ITemplate_Argument const* ta = dynamic_cast<ITemplate_Argument const*>(m_value.get()))
     {
         return ta->get_template_instantiation_string();
     }
     return std::string();
 }
 
-auto Literal::get_value() const -> std::shared_ptr<const IValue>
+auto Literal::get_value() const -> IValue const&
 {
-    return m_value;
+    return *m_value;
 }
 
+auto Literal::get_initializer_value() const -> IValue const*
+{
+    return m_value.get();
+}
 
 }

@@ -1,8 +1,8 @@
 #include "Type_System.h"
 
 #include "Namespace.h"
-#include "types/All_Real_Types.h"
-#include "types/All_Integral_Types.h"
+#include "types/All_Numeric_Types.h"
+#include "values/All_Numeric_Values.h"
 #include "types/Bool_Type.h"
 #include "types/String_Type.h"
 #include "ITemplate_Argument.h"
@@ -15,6 +15,14 @@ void Type_System::populate_builtin_types()
 {
     add_symbol(std::unique_ptr<IType>(new Bool_Type("bool")));
     add_symbol(std::unique_ptr<IType>(new String_Type("string")));
+
+    add_symbol(std::unique_ptr<IType>(new Int8_Type("int8_t")));
+    add_symbol(std::unique_ptr<IType>(new UInt8_Type("uint8_t")));
+    add_symbol(std::unique_ptr<IType>(new Int16_Type("int16_t")));
+    add_symbol(std::unique_ptr<IType>(new UInt16_Type("uint16_t")));
+    add_symbol(std::unique_ptr<IType>(new Int32_Type("int32_t")));
+    add_symbol(std::unique_ptr<IType>(new UInt32_Type("uint32_t")));
+    add_symbol(std::unique_ptr<IType>(new Int64_Type("int64_t")));
 
     add_symbol(std::unique_ptr<IType>(new Float_Type("float")));
     add_symbol(std::unique_ptr<IType>(new Double_Type("double")));

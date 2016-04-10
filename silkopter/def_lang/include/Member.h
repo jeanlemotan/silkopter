@@ -13,8 +13,8 @@ class Member final
 public:
     virtual auto get_member_def() const -> std::shared_ptr<const Member_Def> = 0;
 
-    virtual auto get_value() const -> std::shared_ptr<const IValue> = 0;
-    virtual auto get_value() -> std::shared_ptr<IValue> = 0;
+    virtual auto get_value() const -> IValue const& = 0;
+    virtual auto get_value() -> IValue& = 0;
 };
 
 }

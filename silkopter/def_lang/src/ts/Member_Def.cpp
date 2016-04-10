@@ -4,8 +4,8 @@
 namespace ts
 {
 
-Member_Def::Member_Def(std::string const& name, std::shared_ptr<const IType> type, std::unique_ptr<const IValue> default_value)
-    : Symbol_Impl(name)
+Member_Def::Member_Def(std::string const& name, IType const& type, std::unique_ptr<const IValue> default_value)
+    : Symbol_EP(name)
     , m_type(type)
     , m_default_value(std::move(default_value))
 {
@@ -17,13 +17,13 @@ Member_Def::~Member_Def()
 
 }
 
-auto Member_Def::get_type() const -> std::shared_ptr<const IType>
+auto Member_Def::get_type() const -> IType const&
 {
     return m_type;
 }
-auto Member_Def::get_default_value() const -> std::shared_ptr<const IValue>
+auto Member_Def::get_default_value() const -> IValue const&
 {
-    return m_default_value;
+    return *m_default_value;
 }
 
 }

@@ -1,12 +1,12 @@
 #include "IVector_Type.h"
 
-#include "impl/Symbol_Impl.h"
-#include "impl/Attribute_Container_Impl.h"
+#include "impl/Symbol_EP.h"
+#include "impl/Attribute_Container_EP.h"
 
 namespace ts
 {
 
-class Vector_Type final : virtual public IVector_Type, public Symbol_Impl, public Attribute_Container_Impl
+class Vector_Type final : virtual public IVector_Type, public Symbol_EP, public Attribute_Container_EP
 {
 public:
     typedef IVector_Value value_type;
@@ -19,10 +19,7 @@ public:
 
     auto get_template_instantiation_string() const -> std::string override;
 
-    auto get_default_value() const -> std::shared_ptr<const IValue> override;
     auto create_value() const -> std::unique_ptr<IValue> override;
-
-    auto get_specialized_default_value() const -> std::shared_ptr<const value_type> override;
     auto create_specialized_value() const -> std::unique_ptr<value_type> override;
 
 public:

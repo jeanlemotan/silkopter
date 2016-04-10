@@ -28,7 +28,6 @@ public:
 
 
     //IType
-    auto get_default_value() const -> std::shared_ptr<const IValue> override;
     auto create_value() const -> std::unique_ptr<IValue> override;
 
 };

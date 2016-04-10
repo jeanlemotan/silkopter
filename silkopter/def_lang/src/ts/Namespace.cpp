@@ -4,7 +4,7 @@ namespace ts
 {
 
 Namespace::Namespace(std::string const& name)
-    : Symbol_Impl(name)
+    : Symbol_EP(name)
 {
 }
 

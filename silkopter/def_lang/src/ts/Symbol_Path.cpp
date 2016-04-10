@@ -33,7 +33,7 @@ auto Symbol_Path::front() const -> std::string const&
 {
     return m_elements.front();
 }
-auto Symbol_Path::pop_front() -> std::string const&
+auto Symbol_Path::pop_front() -> std::string
 {
     std::string element = std::move(m_elements.front());
     m_elements.erase(m_elements.begin());
@@ -49,7 +49,7 @@ auto Symbol_Path::back() const -> std::string const&
 {
     return m_elements.back();
 }
-auto Symbol_Path::pop_back() -> std::string const&
+auto Symbol_Path::pop_back() -> std::string
 {
     std::string element = std::move(m_elements.back());
     m_elements.pop_back();

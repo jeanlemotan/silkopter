@@ -1,15 +1,15 @@
 #pragma once
 
 #include "types/IStruct_Type.h"
-#include "impl/Declaration_Scope_Impl.h"
-#include "impl/Symbol_Impl.h"
-#include "impl/Member_Def_Container_Impl.h"
-#include "impl/Attribute_Container_Impl.h"
+#include "impl/Declaration_Scope_EP.h"
+#include "impl/Symbol_EP.h"
+#include "impl/Member_Def_Container_EP.h"
+#include "impl/Attribute_Container_EP.h"
 
 namespace ts
 {
 
-class Struct_Type final: virtual public IStruct_Type, public Symbol_Impl, public Declaration_Scope_Impl, public Member_Def_Container_Impl, public Attribute_Container_Impl
+class Struct_Type final: virtual public IStruct_Type, public Symbol_EP, public Declaration_Scope_EP, public Member_Def_Container_EP, public Attribute_Container_EP
 {
 public:
     typedef IStruct_Value value_type;
@@ -20,10 +20,7 @@ public:
 
     auto get_template_instantiation_string() const -> std::string override;
 
-    auto get_default_value() const -> std::shared_ptr<const IValue> override;
     auto create_value() const -> std::unique_ptr<IValue> override;
-
-    auto get_specialized_default_value() const -> std::shared_ptr<const value_type> override;
     auto create_specialized_value() const -> std::unique_ptr<IStruct_Value> override;
 
 };

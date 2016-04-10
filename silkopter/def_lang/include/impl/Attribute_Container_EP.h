@@ -6,7 +6,7 @@
 namespace ts
 {
 
-class Attribute_Container_Impl : virtual public IAttribute_Container
+class Attribute_Container_EP : virtual public IAttribute_Container
 {
 public:
 
