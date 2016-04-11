@@ -1,6 +1,7 @@
 #include "types/Struct_Type.h"
 #include "values/IValue.h"
 #include "values/IStruct_Value.h"
+#include "attributes/IAttribute.h"
 
 namespace ts
 {
@@ -8,6 +9,11 @@ namespace ts
 Struct_Type::Struct_Type(std::string const& name)
     : Symbol_EP(name)
 {
+}
+
+auto Struct_Type::validate_attribute(IAttribute const& attribute) -> Result<void>
+{
+    return Error("Attribute " + attribute.get_name() + " not supported");
 }
 
 auto Struct_Type::clone(std::string const& name) const -> std::unique_ptr<IType>

@@ -1,5 +1,6 @@
 #include "types/Vector_Type.h"
 #include "values/Vector_Value.h"
+#include "attributes/IAttribute.h"
 
 namespace ts
 {
@@ -24,6 +25,11 @@ auto Vector_Type::init(std::vector<std::shared_ptr<const ITemplate_Argument>> co
     }
 
     return success;
+}
+
+auto Vector_Type::validate_attribute(IAttribute const& attribute) -> Result<void>
+{
+    return Error("Attribute " + attribute.get_name() + " not supported");
 }
 
 auto Vector_Type::clone(std::string const& name) const -> std::unique_ptr<IType>

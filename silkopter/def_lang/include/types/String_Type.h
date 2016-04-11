@@ -19,6 +19,8 @@ class String_Type final : public Type_Template_EP<String_Type_Traits>
 public:
     String_Type(std::string const& name);
 
+protected:
+    auto validate_attribute(IAttribute const& attribute) -> Result<void> override;
 };
 
 

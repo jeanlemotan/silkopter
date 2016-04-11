@@ -22,6 +22,9 @@ public:
     auto create_value() const -> std::unique_ptr<IValue> override;
     auto create_specialized_value() const -> std::unique_ptr<value_type> override;
 
+protected:
+    auto validate_attribute(IAttribute const& attribute) -> Result<void> override;
+
 public:
     std::shared_ptr<const IType> m_inner_type;
 };

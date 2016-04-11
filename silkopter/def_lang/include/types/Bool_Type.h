@@ -19,6 +19,8 @@ class Bool_Type final : public Type_Template_EP<Bool_Type_Traits>
 public:
     Bool_Type(std::string const& name);
 
+protected:
+    auto validate_attribute(IAttribute const& attribute) -> Result<void> override;
 };
 
 
