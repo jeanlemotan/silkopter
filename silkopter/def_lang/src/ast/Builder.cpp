@@ -13,6 +13,11 @@
 #include "expression/Literal_Expression.h"
 #include "ILiteral.h"
 #include "Literal.h"
+#include "attributes/IAttribute_Container.h"
+#include "attributes/Max_Attribute.h"
+#include "attributes/Min_Attribute.h"
+#include "attributes/Decimals_Attribute.h"
+#include "attributes/UI_Name_Attribute.h"
 #include "types/ITemplated_Type.h"
 
 #include "types/IBool_Type.h"
@@ -333,7 +338,7 @@ static auto create_literal(ts::Type_System& ts, Node const& node) -> std::unique
     return std::unique_ptr<ts::ILiteral>(new ts::Literal(std::move(value)));
 }
 
-static auto create_initializer(ts::Type_System& ts, ts::IDeclaration_Scope& scope, Node const& node) -> std::unique_ptr<ts::IInitializer>
+static auto create_initializer(ts::Type_System& ts, Node const& node) -> std::unique_ptr<ts::IInitializer>
 {
     if (node.get_type() == Node::Type::INITIALIZER)
     {
@@ -355,7 +360,7 @@ static auto create_initializer(ts::Type_System& ts, ts::IDeclaration_Scope& scop
         std::vector<std::unique_ptr<ts::IInitializer>> initializers;
         for (Node const& ch: node.get_children())
         {
-            std::unique_ptr<ts::IInitializer> initializer_ch = create_initializer(ts, scope, ch);
+            std::unique_ptr<ts::IInitializer> initializer_ch = create_initializer(ts, ch);
             if (!initializer_ch)
             {
                 return nullptr;
@@ -372,6 +377,53 @@ static auto create_initializer(ts::Type_System& ts, ts::IDeclaration_Scope& scop
     }
 
     return nullptr;
+}
+
+static auto create_attributes(ts::Type_System& ts, ts::IAttribute_Container& container, Node const& node) -> bool
+{
+    std::vector<Node> attribute_nodes = node.get_all_children_of_type(Node::Type::ATTRIBUTE);
+    for (Node const& attribute_node: attribute_nodes)
+    {
+        boost::optional<std::string> name = get_name_identifier(attribute_node);
+        if (!name)
+        {
+            std::cerr << "Missing attribute identifier\n";
+            return false;
+        }
+
+        if (*name == "min")
+        {
+            std::unique_ptr<ts::Min_Attribute> attribute = std::unique_ptr<ts::Min_Attribute>(new ts::Min_Attribute());
+            Node const* initializer_node = attribute_node.find_first_child_by_type(Node::Type::INITIALIZER);
+            if (!initializer_node)
+            {
+                std::cerr << "Missing attribute initializer\n";
+                return false;
+            }
+
+            std::unique_ptr<ts::IInitializer> initializer = create_initializer(ts, *initializer_node);
+            if (!initializer_node)
+            {
+                return false;
+            }
+
+            auto init_result = attribute->init(*initializer);
+            if (init_result != ts::success)
+            {
+                std::cerr << "Bad attribute: " + init_result.error().what() + "\n";
+                return false;
+            }
+
+            auto add_result = container.add_attribute(std::move(attribute));
+            if (add_result != ts::success)
+            {
+                std::cerr << "Bad attribute: " + add_result.error().what() + "\n";
+                return false;
+            }
+        }
+    }
+
+    return true;
 }
 
 
@@ -402,7 +454,7 @@ static auto create_member_def(ts::Type_System& ts, ts::IDeclaration_Scope& scope
     }
     if (initializer_node)
     {
-        std::unique_ptr<ts::IInitializer> initializer = create_initializer(ts, scope, *initializer_node);
+        std::unique_ptr<ts::IInitializer> initializer = create_initializer(ts, *initializer_node);
         if (!initializer)
         {
             return nullptr;
@@ -442,6 +494,11 @@ static auto create_alias(ts::Type_System& ts, ts::IDeclaration_Scope& scope, Nod
     }
 
     std::unique_ptr<ts::IType> aliased_type = type->clone(*name);
+
+    if (!create_attributes(ts, *aliased_type, node))
+    {
+        return false;
+    }
 
     return scope.add_symbol(std::move(aliased_type)) != nullptr;
 }

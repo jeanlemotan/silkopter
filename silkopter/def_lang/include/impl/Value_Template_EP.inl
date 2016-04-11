@@ -48,7 +48,8 @@ template<typename Traits>
 auto Value_Template_EP<Traits>::clone() const -> std::unique_ptr<IValue>
 {
     std::unique_ptr<value_interface> v = get_specialized_type().create_specialized_value();
-    v->copy_assign(*this);
+    auto result = v->copy_assign(*this);
+    TS_ASSERT(result == success);
     return std::move(v);
 }
 
