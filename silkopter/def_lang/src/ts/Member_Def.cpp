@@ -26,4 +26,18 @@ auto Member_Def::get_default_value() const -> IValue const&
     return *m_default_value;
 }
 
+auto Member_Def::validate_attribute(IAttribute const& attribute) -> Result<void>
+{
+    if (UI_Name_Attribute const* att = dynamic_cast<UI_Name_Attribute const*>(&attribute))
+    {
+        m_ui_name_attribute = att;
+    }
+    else
+    {
+        return Error("Attribute " + attribute.get_name() + " not supported");
+    }
+
+    return success;
+}
+
 }

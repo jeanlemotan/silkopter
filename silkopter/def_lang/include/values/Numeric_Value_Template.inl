@@ -55,9 +55,13 @@ auto Numeric_Value_Template<Traits>::copy_assign(IInitializer const& initializer
 
     if (IInitializer_List const* ilist = dynamic_cast<IInitializer_List const*>(&initializer))
     {
-        if (ilist->get_initializer_count() != Traits::component_count)
+        if (ilist->get_initializer_count() > Traits::component_count)
         {
             return Error("Too many initializers. Expected " + std::to_string(Traits::component_count) + ", got " + std::to_string(ilist->get_initializer_count()));
+        }
+        if (ilist->get_initializer_count() < Traits::component_count)
+        {
+            return Error("Too few initializers. Expected " + std::to_string(Traits::component_count) + ", got " + std::to_string(ilist->get_initializer_count()));
         }
 
         for (size_t i = 0; i < ilist->get_initializer_count(); i++)

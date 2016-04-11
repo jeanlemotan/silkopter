@@ -1,16 +1,22 @@
 #pragma once
 
 #include "IAttribute.h"
+#include <string>
 
 namespace ts
 {
 
-class IUI_Name_Attribute : public virtual IAttribute
+class UI_Name_Attribute : public virtual IAttribute
 {
 public:
-    virtual ~IUI_Name_Attribute() = default;
+    UI_Name_Attribute(std::string const& ui_name);
+    ~UI_Name_Attribute();
 
-    virtual auto get_ui_name() const -> std::string const& = 0;
+    auto get_name() const -> std::string override;
+    auto get_ui_name() const -> std::string const&;
+
+private:
+    std::string m_ui_name;
 };
 
 }

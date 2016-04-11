@@ -15,8 +15,8 @@ template<class T> struct Scalar_INumeric_Traits
     typedef T fundamental_type;
     typedef T component_type;
     constexpr static size_t component_count = 1;
-    constexpr static int64_t min_value = std::numeric_limits<T>::lowest();
-    constexpr static int64_t max_value = std::numeric_limits<T>::max();
+    constexpr static T min_value = std::numeric_limits<T>::lowest();
+    constexpr static T max_value = std::numeric_limits<T>::max();
     constexpr static bool supports_decimals_attribute = std::is_floating_point<T>::value;
     typedef Scalar_INumeric_Traits<component_type> component_interfaces_traits;
     typedef INumeric_Value_Template<Scalar_INumeric_Traits<T>> value_interface;
@@ -28,8 +28,8 @@ template<class T> struct Vec2_INumeric_Traits
     typedef vec2<T> fundamental_type;
     typedef T component_type;
     constexpr static size_t component_count = 2;
-    constexpr static int64_t min_value = std::numeric_limits<T>::lowest();
-    constexpr static int64_t max_value = std::numeric_limits<T>::max();
+    constexpr static T min_value = std::numeric_limits<T>::lowest();
+    constexpr static T max_value = std::numeric_limits<T>::max();
     constexpr static bool supports_decimals_attribute = std::is_floating_point<T>::value;
     typedef Scalar_INumeric_Traits<component_type> component_interfaces_traits;
     typedef INumeric_Value_Template<Vec2_INumeric_Traits<T>> value_interface;
@@ -41,8 +41,8 @@ template<class T> struct Vec3_INumeric_Traits
     typedef vec3<T> fundamental_type;
     typedef T component_type;
     constexpr static size_t component_count = 3;
-    constexpr static int64_t min_value = std::numeric_limits<T>::lowest();
-    constexpr static int64_t max_value = std::numeric_limits<T>::max();
+    constexpr static T min_value = std::numeric_limits<T>::lowest();
+    constexpr static T max_value = std::numeric_limits<T>::max();
     constexpr static bool supports_decimals_attribute = std::is_floating_point<T>::value;
     typedef Scalar_INumeric_Traits<component_type> component_interfaces_traits;
     typedef INumeric_Value_Template<Vec3_INumeric_Traits<T>> value_interface;
@@ -54,8 +54,8 @@ template<class T> struct Vec4_INumeric_Traits
     typedef vec4<T> fundamental_type;
     typedef T component_type;
     constexpr static size_t component_count = 4;
-    constexpr static int64_t min_value = std::numeric_limits<T>::lowest();
-    constexpr static int64_t max_value = std::numeric_limits<T>::max();
+    constexpr static T min_value = std::numeric_limits<T>::lowest();
+    constexpr static T max_value = std::numeric_limits<T>::max();
     constexpr static bool supports_decimals_attribute = std::is_floating_point<T>::value;
     typedef Scalar_INumeric_Traits<component_type> component_interfaces_traits;
     typedef INumeric_Value_Template<Vec4_INumeric_Traits<T>> value_interface;

@@ -3,7 +3,9 @@ namespace silk
 
 struct Multirotor_Config
 {
-    alias mass_t = ufloat : [ min = 0.05f ];
+    alias position_t = math::vec3f : [ min = { 1.f, 1.f, 1.f } ];
+
+    alias mass_t = ufloat : [ min = 0.f, max = 32.f, decimals = 7 ];
 
     struct Motor
     {
@@ -21,6 +23,143 @@ struct Multirotor_Config
     ufloat motor_deceleration = 10.0f : [ ui_name = "Motor Deceleration (N/s)" ];
     vector<Motor> motors : [ ui_name = "Motors" ];
 };
+
+/*
+
+ROOT
+  NAMESPACE_DECLARATION
+    IDENTIFIER value:silk
+    NAMESPACE_BODY
+      STRUCT_DECLARATION
+        IDENTIFIER value:Multirotor_Config
+        STRUCT_BODY
+          ALIAS_DECLARATION
+            IDENTIFIER value:mass_t
+            TYPE
+              IDENTIFIER value:ufloat
+            ATTRIBUTE
+              IDENTIFIER value:min
+              INITIALIZER
+                LITERAL value:0.050000
+          STRUCT_DECLARATION
+            IDENTIFIER value:Motor
+            STRUCT_BODY
+              MEMBER_DECLARATION
+                TYPE
+                  IDENTIFIER value:math::vec3f
+                IDENTIFIER value:position
+                INITIALIZER_LIST
+                  INITIALIZER
+                    LITERAL value:0.000000
+                  INITIALIZER
+                    LITERAL value:0.000000
+                  INITIALIZER
+                    LITERAL value:0.000000
+                ATTRIBUTE
+                  IDENTIFIER value:ui_name
+                  INITIALIZER
+                    LITERAL value:Position
+              MEMBER_DECLARATION
+                TYPE
+                  IDENTIFIER value:bool
+                IDENTIFIER value:clockwise
+                INITIALIZER
+                  LITERAL value:false
+                ATTRIBUTE
+                  IDENTIFIER value:ui_name
+                  INITIALIZER
+                    LITERAL value:Clockwise
+          MEMBER_DECLARATION
+            TYPE
+              IDENTIFIER value:string
+            IDENTIFIER value:name
+            INITIALIZER
+              LITERAL value:UAV
+          MEMBER_DECLARATION
+            TYPE
+              IDENTIFIER value:mass_t
+            IDENTIFIER value:mass
+            INITIALIZER
+              LITERAL value:1.000000
+            ATTRIBUTE
+              IDENTIFIER value:ui_name
+              INITIALIZER
+                LITERAL value:Mass (Kg)
+          MEMBER_DECLARATION
+            TYPE
+              IDENTIFIER value:ufloat
+            IDENTIFIER value:height
+            INITIALIZER
+              LITERAL value:0.500000
+            ATTRIBUTE
+              IDENTIFIER value:ui_name
+              INITIALIZER
+                LITERAL value:Height (m)
+          MEMBER_DECLARATION
+            TYPE
+              IDENTIFIER value:ufloat
+            IDENTIFIER value:radius
+            INITIALIZER
+              LITERAL value:0.500000
+            ATTRIBUTE
+              IDENTIFIER value:ui_name
+              INITIALIZER
+                LITERAL value:Radius (m)
+          MEMBER_DECLARATION
+            TYPE
+              IDENTIFIER value:ufloat
+            IDENTIFIER value:motor_thrust
+            INITIALIZER
+              LITERAL value:1.000000
+            ATTRIBUTE
+              IDENTIFIER value:ui_name
+              INITIALIZER
+                LITERAL value:Motor Thrust (N)
+          MEMBER_DECLARATION
+            TYPE
+              IDENTIFIER value:ufloat
+            IDENTIFIER value:motor_z_thrust
+            INITIALIZER
+              LITERAL value:1.000000
+            ATTRIBUTE
+              IDENTIFIER value:ui_name
+              INITIALIZER
+                LITERAL value:Motor Z Torque (Nm)
+          MEMBER_DECLARATION
+            TYPE
+              IDENTIFIER value:ufloat
+            IDENTIFIER value:motor_acceleration
+            INITIALIZER
+              LITERAL value:10.000000
+            ATTRIBUTE
+              IDENTIFIER value:ui_name
+              INITIALIZER
+                LITERAL value:Motor Acceleration (N/s)
+          MEMBER_DECLARATION
+            TYPE
+              IDENTIFIER value:ufloat
+            IDENTIFIER value:motor_deceleration
+            INITIALIZER
+              LITERAL value:10.000000
+            ATTRIBUTE
+              IDENTIFIER value:ui_name
+              INITIALIZER
+                LITERAL value:Motor Deceleration (N/s)
+          MEMBER_DECLARATION
+            TYPE
+              TEMPLATE_INSTANTIATION
+                IDENTIFIER value:vector
+                TEMPLATE_ARGUMENT
+                  TYPE
+                    IDENTIFIER value:Motor
+            IDENTIFIER value:motors
+            ATTRIBUTE
+              IDENTIFIER value:ui_name
+              INITIALIZER
+                LITERAL value:Motors
+
+*/
+
 
 }
 

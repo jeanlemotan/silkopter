@@ -379,7 +379,7 @@ static auto create_initializer(ts::Type_System& ts, Node const& node) -> std::un
     return nullptr;
 }
 
-static auto create_attributes(ts::Type_System& ts, ts::IAttribute_Container& container, Node const& node) -> bool
+static auto create_attributes(ts::Type_System& ts, ts::IType const& type, ts::IAttribute_Container& container, Node const& node) -> bool
 {
     std::vector<Node> attribute_nodes = node.get_all_children_of_type(Node::Type::ATTRIBUTE);
     for (Node const& attribute_node: attribute_nodes)
@@ -391,35 +391,100 @@ static auto create_attributes(ts::Type_System& ts, ts::IAttribute_Container& con
             return false;
         }
 
+        std::unique_ptr<ts::IInitializer> initializer;
+        Node const* initializer_node = attribute_node.find_first_child_by_type(Node::Type::INITIALIZER);
+        if (!initializer_node)
+        {
+            initializer_node = attribute_node.find_first_child_by_type(Node::Type::INITIALIZER_LIST);
+        }
+        if (initializer_node)
+        {
+            initializer = create_initializer(ts, *initializer_node);
+            if (!initializer)
+            {
+                return false;
+            }
+        }
+
+        std::unique_ptr<ts::IAttribute> attribute;
+
         if (*name == "min")
         {
-            std::unique_ptr<ts::Min_Attribute> attribute = std::unique_ptr<ts::Min_Attribute>(new ts::Min_Attribute());
-            Node const* initializer_node = attribute_node.find_first_child_by_type(Node::Type::INITIALIZER);
-            if (!initializer_node)
+            if (!initializer)
             {
-                std::cerr << "Missing attribute initializer\n";
+                std::cerr << "Missing initializer for attribute\n";
                 return false;
             }
 
-            std::unique_ptr<ts::IInitializer> initializer = create_initializer(ts, *initializer_node);
-            if (!initializer_node)
+            std::unique_ptr<ts::IValue> value = type.create_value();
+            auto result = value->copy_assign(*initializer);
+            if (result != ts::success)
             {
+                std::cerr << "Cannot initialize attribute: " + result.error().what() + "\n";
                 return false;
             }
 
-            auto init_result = attribute->init(*initializer);
-            if (init_result != ts::success)
+            attribute = std::unique_ptr<ts::Min_Attribute>(new ts::Min_Attribute(std::move(value)));
+        }
+        else if (*name == "max")
+        {
+            if (!initializer)
             {
-                std::cerr << "Bad attribute: " + init_result.error().what() + "\n";
+                std::cerr << "Missing initializer for attribute\n";
                 return false;
             }
 
-            auto add_result = container.add_attribute(std::move(attribute));
-            if (add_result != ts::success)
+            std::unique_ptr<ts::IValue> value = type.create_value();
+            auto result = value->copy_assign(*initializer);
+            if (result != ts::success)
             {
-                std::cerr << "Bad attribute: " + add_result.error().what() + "\n";
+                std::cerr << "Cannot initialize attribute: " + result.error().what() + "\n";
                 return false;
             }
+
+            attribute = std::unique_ptr<ts::Max_Attribute>(new ts::Max_Attribute(std::move(value)));
+        }
+        else if (*name == "decimals")
+        {
+            if (!initializer)
+            {
+                std::cerr << "Missing initializer for attribute\n";
+                return false;
+            }
+
+            std::unique_ptr<ts::IInt64_Value> value = ts.find_specialized_symbol_by_name<ts::IInt64_Type>("int64_t")->create_specialized_value();
+            auto result = value->copy_assign(*initializer);
+            if (result != ts::success)
+            {
+                std::cerr << "Cannot initialize attribute: " + result.error().what() + "\n";
+                return false;
+            }
+
+            attribute = std::unique_ptr<ts::Decimals_Attribute>(new ts::Decimals_Attribute(value->get_value()));
+        }
+        else if (*name == "ui_name")
+        {
+            std::unique_ptr<ts::IString_Value> value = ts.find_specialized_symbol_by_name<ts::IString_Type>("string")->create_specialized_value();
+            auto result = value->copy_assign(*initializer);
+            if (result != ts::success)
+            {
+                std::cerr << "Cannot initialize attribute: " + result.error().what() + "\n";
+                return false;
+            }
+
+            attribute = std::unique_ptr<ts::UI_Name_Attribute>(new ts::UI_Name_Attribute(value->get_value()));
+        }
+        else
+        {
+            std::cerr << "Unknown attribute " << *name << "\n";
+            return false;
+        }
+
+        auto add_result = container.add_attribute(std::move(attribute));
+        if (add_result != ts::success)
+        {
+            std::cerr << "Bad attribute: " + add_result.error().what() + "\n";
+            return false;
         }
     }
 
@@ -472,6 +537,12 @@ static auto create_member_def(ts::Type_System& ts, ts::IDeclaration_Scope& scope
 
     std::unique_ptr<ts::Member_Def> def;
     def.reset(new ts::Member_Def(*name, *type, std::move(value)));
+
+    if (!create_attributes(ts, *type, *def, node))
+    {
+        return false;
+    }
+
     return std::move(def);
 }
 
@@ -495,12 +566,12 @@ static auto create_alias(ts::Type_System& ts, ts::IDeclaration_Scope& scope, Nod
 
     std::unique_ptr<ts::IType> aliased_type = type->clone(*name);
 
-    if (!create_attributes(ts, *aliased_type, node))
+    if (!create_attributes(ts, *aliased_type, *aliased_type, node))
     {
         return false;
     }
 
-    return scope.add_symbol(std::move(aliased_type)) != nullptr;
+    return scope.add_symbol(std::move(aliased_type)) == ts::success;
 }
 
 static auto create_struct_type(ts::Type_System& ts, ts::IDeclaration_Scope& scope, Node const& node) -> bool

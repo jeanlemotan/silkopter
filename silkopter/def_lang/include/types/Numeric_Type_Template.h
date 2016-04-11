@@ -4,9 +4,13 @@
 #include "values/All_INumeric_Values.h"
 #include "impl/Type_Template_EP.h"
 #include "attributes/IAttribute.h"
+#include "attributes/Min_Attribute.h"
+#include "attributes/Max_Attribute.h"
+#include "attributes/Decimals_Attribute.h"
 
 namespace ts
 {
+
 
 template<typename Traits>
 class Numeric_Type_Template final : public Type_Template_EP<Traits>
@@ -16,6 +20,11 @@ public:
 
 protected:
     auto validate_attribute(IAttribute const& attribute) -> Result<void> override;
+
+private:
+    Min_Attribute const* m_min_attribute = nullptr;
+    Max_Attribute const* m_max_attribute = nullptr;
+    Decimals_Attribute const* m_decimals_attribute = nullptr;
 };
 
 }

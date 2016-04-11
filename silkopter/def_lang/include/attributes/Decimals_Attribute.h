@@ -5,12 +5,17 @@
 namespace ts
 {
 
-class IDecimals_Attribute : public virtual IAttribute
+class Decimals_Attribute : public virtual IAttribute
 {
 public:
-    virtual ~IDecimals_Attribute() = default;
+    Decimals_Attribute(size_t decimals);
+    ~Decimals_Attribute();
 
-    virtual auto get_decimals() const -> size_t = 0;
+    auto get_name() const -> std::string override;
+    auto get_decimals() const -> size_t;
+
+private:
+    size_t m_decimals = 0;
 };
 
 }

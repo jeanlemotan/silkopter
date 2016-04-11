@@ -1,9 +1,12 @@
 #pragma once
 
 #include <string>
+#include "Result.h"
 
 namespace ts
 {
+
+class IInitializer;
 
 class IAttribute
 {
