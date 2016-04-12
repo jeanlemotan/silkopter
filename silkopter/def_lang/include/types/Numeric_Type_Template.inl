@@ -8,6 +8,25 @@ Numeric_Type_Template<Traits>::Numeric_Type_Template(std::string const& name)
 
 }
 
+template<typename Traits>
+auto Numeric_Type_Template<Traits>::get_min_value() const -> typename Traits::value_interface const*
+{
+    return m_min_value;
+}
+
+template<typename Traits>
+auto Numeric_Type_Template<Traits>::get_max_value() const -> typename Traits::value_interface const*
+{
+    return m_max_value;
+}
+
+template<typename Traits>
+auto Numeric_Type_Template<Traits>::get_decimals() const -> size_t
+{
+    return m_decimals;
+}
+
+
 namespace detail
 {
 template<typename T> bool is_smaller(T const& value, T min) { return value < min; }
@@ -36,7 +55,7 @@ auto Numeric_Type_Template<Traits>::validate_attribute(IAttribute const& attribu
         {
             return Error("Attribute min is too small. Minimum value is : " + std::to_string(Traits::min_value));
         }
-        m_min_attribute = att;
+        m_min_value = v;
     }
     else if (Max_Attribute const* att = dynamic_cast<Max_Attribute const*>(&attribute))
     {
@@ -50,7 +69,7 @@ auto Numeric_Type_Template<Traits>::validate_attribute(IAttribute const& attribu
         {
             return Error("Attribute max is too big. Maximum value is : " + std::to_string(Traits::max_value));
         }
-        m_max_attribute = att;
+        m_max_value = v;
     }
     else if (Decimals_Attribute const* att = dynamic_cast<Decimals_Attribute const*>(&attribute))
     {
@@ -58,7 +77,7 @@ auto Numeric_Type_Template<Traits>::validate_attribute(IAttribute const& attribu
         {
             return Error("Attribute decimals not supported on integral types");
         }
-        m_decimals_attribute = att;
+        m_decimals = att->get_decimals();
     }
     else
     {

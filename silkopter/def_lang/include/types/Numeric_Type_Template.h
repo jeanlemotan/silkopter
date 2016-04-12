@@ -21,10 +21,14 @@ public:
 protected:
     auto validate_attribute(IAttribute const& attribute) -> Result<void> override;
 
+    auto get_min_value() const -> typename Traits::value_interface const*;
+    auto get_max_value() const -> typename Traits::value_interface const*;
+    auto get_decimals() const -> size_t;
+
 private:
-    Min_Attribute const* m_min_attribute = nullptr;
-    Max_Attribute const* m_max_attribute = nullptr;
-    Decimals_Attribute const* m_decimals_attribute = nullptr;
+    typename Traits::value_interface const* m_min_value = nullptr;
+    typename Traits::value_interface const* m_max_value = nullptr;
+    size_t m_decimals = 0;
 };
 
 }

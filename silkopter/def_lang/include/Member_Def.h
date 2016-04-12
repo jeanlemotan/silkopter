@@ -21,13 +21,15 @@ public:
     auto get_type() const -> IType const&;
     auto get_default_value() const -> IValue const&;
 
+    auto get_ui_name() const -> std::string const&;
+
 protected:
     auto validate_attribute(IAttribute const& attribute) -> Result<void>;
 
 private:
     IType const& m_type;
     std::unique_ptr<const IValue> m_default_value;
-    UI_Name_Attribute const* m_ui_name_attribute = nullptr;
+    std::string m_ui_name;
 };
 
 }
