@@ -11,7 +11,7 @@ class Source_Location
 {
 public:
     Source_Location() = default;
-    Source_Location(std::string const&, uint32_t, uint32_t);
+    Source_Location(std::string const&, uint32_t line, uint32_t column);
 
     void set_line(std::uint32_t);
     void set_column(std::uint32_t);

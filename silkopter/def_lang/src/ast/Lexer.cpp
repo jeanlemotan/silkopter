@@ -21,4 +21,9 @@ Lexer::Lexer(Builder& builder)
 
 }
 
+auto Lexer::get_location() const -> yy::location const&
+{
+    return m_location;
+}
+
 }

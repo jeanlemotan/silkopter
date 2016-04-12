@@ -4,14 +4,20 @@
 namespace ast
 {
 
-Node::Node(Type type)
+Node::Node(Type type, ts::Source_Location const& loc)
     : m_type(type)
+    , m_location(loc)
 {
     m_children.reserve(8);
 }
 auto Node::get_type() const -> Type
 {
     return m_type;
+}
+
+auto Node::get_source_location() const -> ts::Source_Location const&
+{
+    return m_location;
 }
 
 auto Node::copy_children_from(Node const& node) -> Node&

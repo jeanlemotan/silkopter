@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Attribute.h"
+#include "Source_Location.h"
 
 namespace ast
 {
@@ -40,9 +41,11 @@ public:
     };
 
     Node() = default;
-    Node(Type type);
+    Node(Type type, ts::Source_Location const& loc);
 
     auto get_type() const -> Type;
+
+    auto get_source_location() const -> ts::Source_Location const&;
 
     auto copy_children_from(Node const& node) -> Node&;
     auto move_children_from(Node&& node) -> Node&;
@@ -61,6 +64,7 @@ public:
 
 private:
     Type m_type = Type::NONE;
+    ts::Source_Location m_location;
     std::vector<Node> m_children;
     std::vector<Attribute> m_attributes;
 

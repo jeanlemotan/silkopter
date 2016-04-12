@@ -580,10 +580,10 @@ static yyconst flex_int16_t yy_chk[257] =
 
 static yyconst flex_int16_t yy_rule_linenum[39] =
     {   0,
-       37,   38,   39,   40,   41,   42,   43,   44,   45,   46,
-       47,   48,   49,   50,   51,   52,   53,   54,   55,   56,
-       57,   58,   59,   60,   61,   62,   63,   64,   65,   66,
-       67,   68,   69,   72,   75,   76,   77,   78
+       36,   37,   38,   39,   40,   41,   42,   43,   44,   45,
+       46,   47,   48,   49,   50,   51,   52,   53,   54,   55,
+       56,   57,   58,   59,   60,   61,   62,   63,   64,   65,
+       66,   67,   68,   71,   74,   75,   76,   77
     } ;
 
 /* The intent behind this definition is that it'll catch
@@ -603,20 +603,19 @@ static yyconst flex_int16_t yy_rule_linenum[39] =
 #undef yywrap
 #define yywrap() 1
 
-yy::location loc;
 #define YY_NO_INPUT 1
-#line 18 "tokens.l"
+#line 17 "tokens.l"
   // Code run each time a pattern is matched.
-#define YY_USER_ACTION  loc.columns (yyleng);
+#define YY_USER_ACTION  m_location.columns (yyleng);
 
-#define yyterminate() return yy::parser::make_TEND(loc)
+#define yyterminate() return yy::parser::make_TEND(m_location)
 
 // Tell Flex the lexer's prototype ...
 #define YY_DECL yy::parser::symbol_type ast::Lexer::astyylex()
 
 // ... and declare it for the parser's sake.
 //YY_DECL;
-#line 620 "yy_lexer.cpp"
+#line 619 "yy_lexer.cpp"
 
 #define INITIAL 0
 #define BLOCK_COMMENT 1
@@ -814,15 +813,15 @@ YY_DECL
 
 	{
 /* %% [7.0] user's declarations go here */
-#line 30 "tokens.l"
+#line 29 "tokens.l"
 
 
 
   // Code run each time yylex is called.
-  loc.step ();
+  m_location.step ();
 
 
-#line 826 "yy_lexer.cpp"
+#line 825 "yy_lexer.cpp"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -899,176 +898,176 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 37 "tokens.l"
-loc.step();
+#line 36 "tokens.l"
+m_location.step();
 	YY_BREAK
 case 2:
 /* rule 2 can match eol */
 YY_RULE_SETUP
-#line 38 "tokens.l"
-loc.lines(yyleng); loc.step();
+#line 37 "tokens.l"
+m_location.lines(yyleng); m_location.step();
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 39 "tokens.l"
-return yy::parser::make_TIMPORT(loc);
+#line 38 "tokens.l"
+return yy::parser::make_TIMPORT(m_location);
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 40 "tokens.l"
-return yy::parser::make_TALIAS(loc);
+#line 39 "tokens.l"
+return yy::parser::make_TALIAS(m_location);
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 41 "tokens.l"
-return yy::parser::make_TSTRUCT(loc);
+#line 40 "tokens.l"
+return yy::parser::make_TSTRUCT(m_location);
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 42 "tokens.l"
-return yy::parser::make_TPUBLIC(loc);
+#line 41 "tokens.l"
+return yy::parser::make_TPUBLIC(m_location);
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 43 "tokens.l"
-return yy::parser::make_TPRIVATE(loc);
+#line 42 "tokens.l"
+return yy::parser::make_TPRIVATE(m_location);
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 44 "tokens.l"
-return yy::parser::make_TPROTECTED(loc);
+#line 43 "tokens.l"
+return yy::parser::make_TPROTECTED(m_location);
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 45 "tokens.l"
-return yy::parser::make_TCONST(loc);
+#line 44 "tokens.l"
+return yy::parser::make_TCONST(m_location);
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 46 "tokens.l"
-return yy::parser::make_TNAMESPACE(loc);
+#line 45 "tokens.l"
+return yy::parser::make_TNAMESPACE(m_location);
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 47 "tokens.l"
-return yy::parser::make_TFALSE(loc);
+#line 46 "tokens.l"
+return yy::parser::make_TFALSE(m_location);
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 48 "tokens.l"
-return yy::parser::make_TTRUE(loc);
+#line 47 "tokens.l"
+return yy::parser::make_TTRUE(m_location);
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 49 "tokens.l"
-return yy::parser::make_TIDENTIFIER(yytext, loc);
+#line 48 "tokens.l"
+return yy::parser::make_TIDENTIFIER(yytext, m_location);
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 50 "tokens.l"
-return yy::parser::make_TIDENTIFIER_PATH(yytext, loc);
+#line 49 "tokens.l"
+return yy::parser::make_TIDENTIFIER_PATH(yytext, m_location);
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 51 "tokens.l"
-return yy::parser::make_TINTEGER_LITERAL(strtol(yytext, nullptr, 10), loc);
+#line 50 "tokens.l"
+return yy::parser::make_TINTEGER_LITERAL(strtol(yytext, nullptr, 10), m_location);
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 52 "tokens.l"
-return yy::parser::make_TDOUBLE_LITERAL(strtod(yytext, nullptr), loc);
+#line 51 "tokens.l"
+return yy::parser::make_TDOUBLE_LITERAL(strtod(yytext, nullptr), m_location);
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 53 "tokens.l"
-return yy::parser::make_TFLOAT_LITERAL(strtof(yytext, nullptr), loc);
+#line 52 "tokens.l"
+return yy::parser::make_TFLOAT_LITERAL(strtof(yytext, nullptr), m_location);
 	YY_BREAK
 case 18:
 /* rule 18 can match eol */
 YY_RULE_SETUP
-#line 54 "tokens.l"
-return yy::parser::make_TSTRING_LITERAL(yytext, loc);
+#line 53 "tokens.l"
+return yy::parser::make_TSTRING_LITERAL(yytext, m_location);
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 55 "tokens.l"
-return yy::parser::make_TEQUAL(loc);
+#line 54 "tokens.l"
+return yy::parser::make_TEQUAL(m_location);
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 56 "tokens.l"
-return yy::parser::make_TLPARENTHESIS(loc);
+#line 55 "tokens.l"
+return yy::parser::make_TLPARENTHESIS(m_location);
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 57 "tokens.l"
-return yy::parser::make_TRPARENTHESIS(loc);
+#line 56 "tokens.l"
+return yy::parser::make_TRPARENTHESIS(m_location);
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 58 "tokens.l"
-return yy::parser::make_TLBRACE(loc);
+#line 57 "tokens.l"
+return yy::parser::make_TLBRACE(m_location);
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 59 "tokens.l"
-return yy::parser::make_TRBRACE(loc);
+#line 58 "tokens.l"
+return yy::parser::make_TRBRACE(m_location);
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 60 "tokens.l"
-return yy::parser::make_TLBRAKET(loc);
+#line 59 "tokens.l"
+return yy::parser::make_TLBRAKET(m_location);
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 61 "tokens.l"
-return yy::parser::make_TRBRAKET(loc);
+#line 60 "tokens.l"
+return yy::parser::make_TRBRAKET(m_location);
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 62 "tokens.l"
-return yy::parser::make_TLANGLED_BRAKET(loc);
+#line 61 "tokens.l"
+return yy::parser::make_TLANGLED_BRAKET(m_location);
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 63 "tokens.l"
-return yy::parser::make_TRANGLED_BRAKET(loc);
+#line 62 "tokens.l"
+return yy::parser::make_TRANGLED_BRAKET(m_location);
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 64 "tokens.l"
-return yy::parser::make_TNAMESPACE_SEPARATOR(loc);
+#line 63 "tokens.l"
+return yy::parser::make_TNAMESPACE_SEPARATOR(m_location);
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 65 "tokens.l"
-return yy::parser::make_TCOLON(loc);
+#line 64 "tokens.l"
+return yy::parser::make_TCOLON(m_location);
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 66 "tokens.l"
-return yy::parser::make_TSEMICOLON(loc);
+#line 65 "tokens.l"
+return yy::parser::make_TSEMICOLON(m_location);
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 67 "tokens.l"
-return yy::parser::make_TDOT(loc);
+#line 66 "tokens.l"
+return yy::parser::make_TDOT(m_location);
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 68 "tokens.l"
-return yy::parser::make_TCOMMA(loc);
+#line 67 "tokens.l"
+return yy::parser::make_TCOMMA(m_location);
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 69 "tokens.l"
+#line 68 "tokens.l"
 {
                             BEGIN(BLOCK_COMMENT);
                         }
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 72 "tokens.l"
+#line 71 "tokens.l"
 {
                             BEGIN(INITIAL);
                         }
@@ -1076,27 +1075,27 @@ YY_RULE_SETUP
 case 35:
 /* rule 35 can match eol */
 YY_RULE_SETUP
-#line 75 "tokens.l"
+#line 74 "tokens.l"
 { }
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 76 "tokens.l"
+#line 75 "tokens.l"
 ;
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 77 "tokens.l"
+#line 76 "tokens.l"
 ;
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 78 "tokens.l"
+#line 77 "tokens.l"
 { std::cout << "Unknown token!\n"; yyterminate(); }
 	YY_BREAK
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(BLOCK_COMMENT):
-#line 79 "tokens.l"
+#line 78 "tokens.l"
 {
                             if (!m_builder.end_file())
                             {
@@ -1106,10 +1105,10 @@ case YY_STATE_EOF(BLOCK_COMMENT):
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
-#line 85 "tokens.l"
+#line 84 "tokens.l"
 ECHO;
 	YY_BREAK
-#line 1113 "yy_lexer.cpp"
+#line 1112 "yy_lexer.cpp"
 
 	case YY_END_OF_BUFFER:
 		{
@@ -2220,7 +2219,7 @@ void yyfree (void * ptr )
 
 /* %ok-for-header */
 
-#line 85 "tokens.l"
+#line 84 "tokens.l"
 
 
 

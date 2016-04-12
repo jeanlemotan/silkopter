@@ -26,9 +26,12 @@ public:
         return 0;
     }
 
-    yy::parser::symbol_type astyylex();
+    auto astyylex() -> yy::parser::symbol_type;
+
+    auto get_location() const -> yy::location const&;
 
 private:
+    yy::location m_location;
     Builder& m_builder;
 };
 

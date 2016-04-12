@@ -133,7 +133,7 @@ import  : TIMPORT TSTRING_LITERAL
 
 top_level_declaration_list  : top_level_declaration
                             {
-                                $$ = ast::Node(ast::Node::Type::LIST);
+                                $$ = ast::Node(ast::Node::Type::LIST, builder.get_location());
                                 $$.add_child($1);
                             }
                             | top_level_declaration_list top_level_declaration
@@ -156,13 +156,13 @@ top_level_declaration   : type_declaration
 
 alias_declaration   : TALIAS identifier TEQUAL type TSEMICOLON
                     {
-                        $$ = ast::Node(ast::Node::Type::ALIAS_DECLARATION);
+                        $$ = ast::Node(ast::Node::Type::ALIAS_DECLARATION, builder.get_location());
                         $$.add_child($2);
                         $$.add_child($4);
                     }
                     | TALIAS identifier TEQUAL type TCOLON attribute_list TSEMICOLON
                     {
-                        $$ = ast::Node(ast::Node::Type::ALIAS_DECLARATION);
+                        $$ = ast::Node(ast::Node::Type::ALIAS_DECLARATION, builder.get_location());
                         $$.add_child($2);
                         $$.add_child($4);
                         $$.move_children_from(std::move($6));
@@ -171,24 +171,24 @@ alias_declaration   : TALIAS identifier TEQUAL type TSEMICOLON
 
 struct_declaration  : TSTRUCT identifier TLBRACE TRBRACE TSEMICOLON
                     {
-                        $$ = ast::Node(ast::Node::Type::STRUCT_DECLARATION);
+                        $$ = ast::Node(ast::Node::Type::STRUCT_DECLARATION, builder.get_location());
                         $$.add_child($2);
                     }
                     | TSTRUCT identifier TLBRACE struct_body TRBRACE TSEMICOLON
                     {
-                        $$ = ast::Node(ast::Node::Type::STRUCT_DECLARATION);
+                        $$ = ast::Node(ast::Node::Type::STRUCT_DECLARATION, builder.get_location());
                         $$.add_child($2);
                         $$.add_child($4);
                     }
                     | TSTRUCT identifier TCOLON inheritance TLBRACE TRBRACE TSEMICOLON
                     {
-                        $$ = ast::Node(ast::Node::Type::STRUCT_DECLARATION);
+                        $$ = ast::Node(ast::Node::Type::STRUCT_DECLARATION, builder.get_location());
                         $$.add_child($2);
                         $$.add_child($4);
                     }
                     | TSTRUCT identifier TCOLON inheritance TLBRACE struct_body TRBRACE TSEMICOLON
                     {
-                        $$ = ast::Node(ast::Node::Type::STRUCT_DECLARATION);
+                        $$ = ast::Node(ast::Node::Type::STRUCT_DECLARATION, builder.get_location());
                         $$.add_child($2);
                         $$.add_child($4);
                         $$.add_child($6);
@@ -197,14 +197,14 @@ struct_declaration  : TSTRUCT identifier TLBRACE TRBRACE TSEMICOLON
 
 struct_body : struct_body_declaration_list
             {
-                $$ = ast::Node(ast::Node::Type::STRUCT_BODY);
+                $$ = ast::Node(ast::Node::Type::STRUCT_BODY, builder.get_location());
                 $$.move_children_from(std::move($1));
             }
             ;
 
 struct_body_declaration_list    : struct_body_declaration
                                 {
-                                    $$ = ast::Node(ast::Node::Type::LIST);
+                                    $$ = ast::Node(ast::Node::Type::LIST, builder.get_location());
                                     $$.add_child($1);
                                 }
                                 | struct_body_declaration_list struct_body_declaration
@@ -235,12 +235,12 @@ inheritance_type    : TPUBLIC
 
 namespace_declaration   : TNAMESPACE identifier TLBRACE TRBRACE
             {
-                $$ = ast::Node(ast::Node::Type::NAMESPACE_DECLARATION);
+                $$ = ast::Node(ast::Node::Type::NAMESPACE_DECLARATION, builder.get_location());
                 $$.add_child($2);
             }
             | TNAMESPACE identifier TLBRACE namespace_body TRBRACE
             {
-                $$ = ast::Node(ast::Node::Type::NAMESPACE_DECLARATION);
+                $$ = ast::Node(ast::Node::Type::NAMESPACE_DECLARATION, builder.get_location());
                 $$.add_child($2);
                 $$.add_child($4);
             }
@@ -248,14 +248,14 @@ namespace_declaration   : TNAMESPACE identifier TLBRACE TRBRACE
 
 namespace_body  : namespace_body_declaration_list
                 {
-                    $$ = ast::Node(ast::Node::Type::NAMESPACE_BODY);
+                    $$ = ast::Node(ast::Node::Type::NAMESPACE_BODY, builder.get_location());
                     $$.move_children_from(std::move($1));
                 }
                 ;
 
 namespace_body_declaration_list : namespace_body_declaration
                                 {
-                                    $$ = ast::Node(ast::Node::Type::LIST);
+                                    $$ = ast::Node(ast::Node::Type::LIST, builder.get_location());
                                     $$.add_child($1);
                                 }
                                 | namespace_body_declaration_list namespace_body_declaration
@@ -278,27 +278,27 @@ namespace_body_declaration  : type_declaration
 
 member_declaration  : type identifier TSEMICOLON
                     {
-                        $$ = ast::Node(ast::Node::Type::MEMBER_DECLARATION);
+                        $$ = ast::Node(ast::Node::Type::MEMBER_DECLARATION, builder.get_location());
                         $$.add_child($1);
                         $$.add_child($2);
                     }
                     | type identifier TCOLON attribute_list TSEMICOLON
                     {
-                        $$ = ast::Node(ast::Node::Type::MEMBER_DECLARATION);
+                        $$ = ast::Node(ast::Node::Type::MEMBER_DECLARATION, builder.get_location());
                         $$.add_child($1);
                         $$.add_child($2);
                         $$.move_children_from(std::move($4));
                     }
                     | type identifier TEQUAL initializer TSEMICOLON
                     {
-                        $$ = ast::Node(ast::Node::Type::MEMBER_DECLARATION);
+                        $$ = ast::Node(ast::Node::Type::MEMBER_DECLARATION, builder.get_location());
                         $$.add_child($1);
                         $$.add_child($2);
                         $$.add_child($4);
                     }
                     | type identifier TEQUAL initializer TCOLON attribute_list TSEMICOLON
                     {
-                        $$ = ast::Node(ast::Node::Type::MEMBER_DECLARATION);
+                        $$ = ast::Node(ast::Node::Type::MEMBER_DECLARATION, builder.get_location());
                         $$.add_child($1);
                         $$.add_child($2);
                         $$.add_child($4);
@@ -320,14 +320,14 @@ type_declaration    : struct_declaration
 
 identifier  : TIDENTIFIER
             {
-                $$ = ast::Node(ast::Node::Type::IDENTIFIER);
+                $$ = ast::Node(ast::Node::Type::IDENTIFIER, builder.get_location());
                 $$.add_attribute(ast::Attribute("value", $1));
             }
             ;
 
 identifier_path : TIDENTIFIER_PATH
                 {
-                    $$ = ast::Node(ast::Node::Type::IDENTIFIER);
+                    $$ = ast::Node(ast::Node::Type::IDENTIFIER, builder.get_location());
                     $$.add_attribute(ast::Attribute("value", $1));
                 }
                 ;
@@ -341,7 +341,7 @@ attribute_list  : TLBRAKET attribute_body TRBRAKET
 
 attribute_body  : attribute
                 {
-                    $$ = ast::Node(ast::Node::Type::LIST);
+                    $$ = ast::Node(ast::Node::Type::LIST, builder.get_location());
                     $$.add_child($1);
                 }
                 | attribute_body TCOMMA attribute
@@ -353,7 +353,7 @@ attribute_body  : attribute
 
 attribute   : identifier TEQUAL initializer
             {
-                $$ = ast::Node(ast::Node::Type::ATTRIBUTE);
+                $$ = ast::Node(ast::Node::Type::ATTRIBUTE, builder.get_location());
                 $$.add_child($1);
                 $$.add_child($3);
             }
@@ -361,23 +361,23 @@ attribute   : identifier TEQUAL initializer
         
 initializer : literal
             {
-                $$ = ast::Node(ast::Node::Type::INITIALIZER);
+                $$ = ast::Node(ast::Node::Type::INITIALIZER, builder.get_location());
                 $$.add_child($1);
             }
             | initializer_list
             {
-                $$ = ast::Node(ast::Node::Type::INITIALIZER_LIST);
+                $$ = ast::Node(ast::Node::Type::INITIALIZER_LIST, builder.get_location());
                 $$.move_children_from(std::move($1));
             }
             ;
 
 initializer_list    : TLBRACE TRBRACE
                     {
-                        $$ = ast::Node(ast::Node::Type::INITIALIZER_LIST);
+                        $$ = ast::Node(ast::Node::Type::INITIALIZER_LIST, builder.get_location());
                     }
                     | TLBRACE initializer_body TRBRACE
                     {
-                        $$ = ast::Node(ast::Node::Type::INITIALIZER_LIST);
+                        $$ = ast::Node(ast::Node::Type::INITIALIZER_LIST, builder.get_location());
                         $$.move_children_from(std::move($2));
                     }
                     ;
@@ -395,29 +395,29 @@ initializer_body    : initializer
 
 type    : identifier_path
         {
-            $$ = ast::Node(ast::Node::Type::TYPE);
+            $$ = ast::Node(ast::Node::Type::TYPE, builder.get_location());
             $$.add_child($1);
         }
         | identifier
         {
-            $$ = ast::Node(ast::Node::Type::TYPE);
+            $$ = ast::Node(ast::Node::Type::TYPE, builder.get_location());
             $$.add_child($1);
         }
         | templated_type
         {
-            $$ = ast::Node(ast::Node::Type::TYPE);
+            $$ = ast::Node(ast::Node::Type::TYPE, builder.get_location());
             $$.add_child($1);
         }
         ;
 
 templated_type  : identifier TLANGLED_BRAKET TRANGLED_BRAKET
                 {
-                    $$ = ast::Node(ast::Node::Type::TEMPLATE_INSTANTIATION);
+                    $$ = ast::Node(ast::Node::Type::TEMPLATE_INSTANTIATION, builder.get_location());
                     $$.add_child($1);
                 }
                 | identifier TLANGLED_BRAKET template_argument_list TRANGLED_BRAKET
                 {
-                    $$ = ast::Node(ast::Node::Type::TEMPLATE_INSTANTIATION);
+                    $$ = ast::Node(ast::Node::Type::TEMPLATE_INSTANTIATION, builder.get_location());
                     $$.add_child($1);
                     $$.move_children_from(std::move($3));
                 }
@@ -425,7 +425,7 @@ templated_type  : identifier TLANGLED_BRAKET TRANGLED_BRAKET
 
 template_argument_list  : template_argument
                         {
-                            $$ = ast::Node(ast::Node::Type::LIST);
+                            $$ = ast::Node(ast::Node::Type::LIST, builder.get_location());
                             $$.add_child($1);
                         }
                         | template_argument_list TCOMMA template_argument
@@ -437,49 +437,49 @@ template_argument_list  : template_argument
 
 template_argument   : type
                     {
-                        $$ = ast::Node(ast::Node::Type::TEMPLATE_ARGUMENT);
+                        $$ = ast::Node(ast::Node::Type::TEMPLATE_ARGUMENT, builder.get_location());
                         $$.add_child($1);
                     }
                     | TTRUE
                     {
-                        $$ = ast::Node(ast::Node::Type::TEMPLATE_ARGUMENT);
-                        $$.add_child(ast::Node(ast::Node::Type::LITERAL).add_attribute(ast::Attribute("value", true)));
+                        $$ = ast::Node(ast::Node::Type::TEMPLATE_ARGUMENT, builder.get_location());
+                        $$.add_child(ast::Node(ast::Node::Type::LITERAL, builder.get_location()).add_attribute(ast::Attribute("value", true)));
                     }
                     | TFALSE
                     {
-                        $$ = ast::Node(ast::Node::Type::TEMPLATE_ARGUMENT);
-                        $$.add_child(ast::Node(ast::Node::Type::LITERAL).add_attribute(ast::Attribute("value", false)));
+                        $$ = ast::Node(ast::Node::Type::TEMPLATE_ARGUMENT, builder.get_location());
+                        $$.add_child(ast::Node(ast::Node::Type::LITERAL, builder.get_location()).add_attribute(ast::Attribute("value", false)));
                     }
                     ;
 
 literal : TFLOAT_LITERAL
         {
-            $$ = ast::Node(ast::Node::Type::LITERAL);
+            $$ = ast::Node(ast::Node::Type::LITERAL, builder.get_location());
             $$.add_attribute(ast::Attribute("value", $1));
         }
         | TDOUBLE_LITERAL
         {
-            $$ = ast::Node(ast::Node::Type::LITERAL);
+            $$ = ast::Node(ast::Node::Type::LITERAL, builder.get_location());
             $$.add_attribute(ast::Attribute("value", $1));
         }
         | TINTEGER_LITERAL
         {
-            $$ = ast::Node(ast::Node::Type::LITERAL);
+            $$ = ast::Node(ast::Node::Type::LITERAL, builder.get_location());
             $$.add_attribute(ast::Attribute("value", $1));
         }
         | TSTRING_LITERAL
         {
-            $$ = ast::Node(ast::Node::Type::LITERAL);
+            $$ = ast::Node(ast::Node::Type::LITERAL, builder.get_location());
             $$.add_attribute(ast::Attribute("value", $1.substr(1, $1.size() - 2)));
         }
         | TFALSE
         {
-            $$ = ast::Node(ast::Node::Type::LITERAL);
+            $$ = ast::Node(ast::Node::Type::LITERAL, builder.get_location());
             $$.add_attribute(ast::Attribute("value", false));
         }
         | TTRUE
         {
-            $$ = ast::Node(ast::Node::Type::LITERAL);
+            $$ = ast::Node(ast::Node::Type::LITERAL, builder.get_location());
             $$.add_attribute(ast::Attribute("value", true));
         }
         ;

@@ -28,17 +28,30 @@
 #include "values/All_INumeric_Values.h"
 #include "values/String_Value.h"
 
+std::ostream& operator<<(std::ostream& os, ts::Source_Location const& location)
+{
+    os << location.get_file_path() << ":" << location.get_line() << ":" << location.get_column() << ": ";
+    return os;
+}
+
+
 namespace ast
 {
 
 Builder::Builder()
-    : m_root_node(Node::Type::ROOT)
+    : m_root_node(Node::Type::ROOT, ts::Source_Location())
 {
     m_lexer.reset(new Lexer(*this));
 }
 
 Builder::~Builder()
 {
+}
+
+auto Builder::get_location() const -> ts::Source_Location
+{
+    yy::location const& loc = m_lexer->get_location();
+    return ts::Source_Location(get_filename(), loc.begin.line, loc.begin.column);
 }
 
 auto Builder::start_file(std::string const& filename) -> bool
@@ -55,7 +68,10 @@ auto Builder::start_file(std::string const& filename) -> bool
         return false;
     }
 
-    m_imported_files.push_back(std::move(fs));
+    Import import;
+    import.stream = std::move(fs);
+    import.filename = filename;
+    m_imports.push_back(std::move(import));
 
     m_lexer->yypush_buffer_state(buffer);
 
@@ -64,14 +80,14 @@ auto Builder::start_file(std::string const& filename) -> bool
 
 auto Builder::end_file() -> bool
 {
-    if (m_imported_files.empty())
+    if (m_imports.empty())
     {
         return false;
     }
     m_lexer->yypop_buffer_state();
-    m_imported_files.pop_back();
+    m_imports.pop_back();
 
-    if (m_imported_files.empty())
+    if (m_imports.empty())
     {
         return false;
     }
@@ -90,7 +106,7 @@ auto Builder::get_root_node() const -> Node const&
 
 auto Builder::get_filename() const -> std::string
 {
-    return m_filename;
+    return m_imports.empty() ? std::string() : m_imports.back().filename;
 }
 
 auto Builder::get_lexer() -> Lexer&
@@ -128,7 +144,7 @@ static auto find_type_or_instantiate_templated_type(ts::Type_System& ts, ts::IDe
     Node const* type_node = node.find_first_child_by_type(Node::Type::TYPE);
     if (!type_node)
     {
-        std::cerr << "Malformed type node ast\n";
+        std::cerr << node.get_source_location() << "Malformed type node ast\n";
         return nullptr;
     }
     boost::optional<std::string> type_name = get_name_identifier(*type_node);
@@ -137,7 +153,7 @@ static auto find_type_or_instantiate_templated_type(ts::Type_System& ts, ts::IDe
         std::shared_ptr<ts::IType> type = scope.find_specialized_symbol_by_path<ts::IType>(ts::Symbol_Path(*type_name));
         if (!type)
         {
-            std::cerr << "Cannot find type " << *type_name << "\n";
+            std::cerr << type_node->get_source_location() << "Cannot find type " << *type_name << "\n";
             return nullptr;
         }
         return type;
@@ -147,14 +163,14 @@ static auto find_type_or_instantiate_templated_type(ts::Type_System& ts, ts::IDe
         Node const* template_node = type_node->find_first_child_by_type(Node::Type::TEMPLATE_INSTANTIATION);
         if (!template_node)
         {
-            std::cerr << "Malformed type node ast\n";
+            std::cerr << type_node->get_source_location() << "Malformed type node ast\n";
             return nullptr;
         }
 
         type_name = get_name_identifier(*template_node);
         if (!type_name)
         {
-            std::cerr << "Missing templated type name\n";
+            std::cerr << template_node->get_source_location() << "Missing templated type name\n";
             return nullptr;
         }
 
@@ -167,7 +183,7 @@ static auto find_type_or_instantiate_templated_type(ts::Type_System& ts, ts::IDe
             std::shared_ptr<const ts::IType> template_argument = find_type_or_instantiate_templated_type(ts, scope, node);
             if (!template_argument)
             {
-                std::cerr << "Cannot resolve template argument " << template_arguments.size() << "\n";
+                std::cerr << node.get_source_location() << "Cannot resolve template argument " << template_arguments.size() << "\n";
                 return nullptr;
             }
             template_arguments.push_back(template_argument);
@@ -176,7 +192,7 @@ static auto find_type_or_instantiate_templated_type(ts::Type_System& ts, ts::IDe
         auto result = ts.instantiate_template(*type_name, template_arguments);
         if (result != ts::success)
         {
-            std::cerr << "Cannot instantiate template: " << result.error().what() << "\n";
+            std::cerr << type_node->get_source_location() << "Cannot instantiate template: " << result.error().what() << "\n";
             return nullptr;
         }
         return result.payload();
@@ -193,7 +209,7 @@ static auto create_namespace(ts::Type_System& ts, ts::IDeclaration_Scope& scope,
     boost::optional<std::string> name = get_name_identifier(node);
     if (!name)
     {
-        std::cerr << "Cannot find namespace name identifier";
+        std::cerr << node.get_source_location() << "Cannot find namespace name identifier";
         return false;
     }
 
@@ -203,7 +219,7 @@ static auto create_namespace(ts::Type_System& ts, ts::IDeclaration_Scope& scope,
     auto result = scope.add_symbol(std::unique_ptr<ts::ISymbol>(ns));
     if (result != ts::success)
     {
-        std::cerr << result.error().what();
+        std::cerr << node.get_source_location() << result.error().what();
         return false;
     }
 
@@ -230,7 +246,7 @@ static auto create_literal(ts::Type_System& ts, Node const& node) -> std::unique
     Attribute const* value_attribute = node.find_first_attribute_by_name("value");
     if (!value_attribute)
     {
-        std::cerr << "Literal without a value!\n";
+        std::cerr << node.get_source_location() << "Literal without a value!\n";
         return nullptr;
     }
 
@@ -247,7 +263,7 @@ static auto create_literal(ts::Type_System& ts, Node const& node) -> std::unique
             {
                 if (v->set_value(value_attribute->get_as_bool()) != ts::success)
                 {
-                    std::cerr << "Cannot assign value\n";
+                    std::cerr << node.get_source_location() << "Cannot assign value\n";
                     return nullptr;
                 }
                 value = std::move(v);
@@ -265,7 +281,7 @@ static auto create_literal(ts::Type_System& ts, Node const& node) -> std::unique
             {
                 if (v->set_value(value_attribute->get_as_double()) != ts::success)
                 {
-                    std::cerr << "Cannot assign value\n";
+                    std::cerr << node.get_source_location() << "Cannot assign value\n";
                     return nullptr;
                 }
                 value = std::move(v);
@@ -283,7 +299,7 @@ static auto create_literal(ts::Type_System& ts, Node const& node) -> std::unique
             {
                 if (v->set_value(value_attribute->get_as_float()) != ts::success)
                 {
-                    std::cerr << "Cannot assign value\n";
+                    std::cerr << node.get_source_location() << "Cannot assign value\n";
                     return nullptr;
                 }
                 value = std::move(v);
@@ -301,7 +317,7 @@ static auto create_literal(ts::Type_System& ts, Node const& node) -> std::unique
             {
                 if (v->set_value(value_attribute->get_as_integral()) != ts::success)
                 {
-                    std::cerr << "Cannot assign value\n";
+                    std::cerr << node.get_source_location() << "Cannot assign value\n";
                     return nullptr;
                 }
                 value = std::move(v);
@@ -319,7 +335,7 @@ static auto create_literal(ts::Type_System& ts, Node const& node) -> std::unique
             {
                 if (v->set_value(value_attribute->get_as_string()) != ts::success)
                 {
-                    std::cerr << "Cannot assign value\n";
+                    std::cerr << node.get_source_location() << "Cannot assign value\n";
                     return nullptr;
                 }
                 value = std::move(v);
@@ -331,7 +347,7 @@ static auto create_literal(ts::Type_System& ts, Node const& node) -> std::unique
 
     if (!value)
     {
-        std::cerr << "Cannot create literal of type " << value_attribute->to_string() << "\n";
+        std::cerr << node.get_source_location() << "Cannot create literal of type " << value_attribute->to_string() << "\n";
         return nullptr;
     }
 
@@ -344,7 +360,7 @@ static auto create_initializer(ts::Type_System& ts, Node const& node) -> std::un
     {
         if (node.get_children().size() != 1)
         {
-            std::cerr << "Invalid intializer node!\n";
+            std::cerr << node.get_source_location() << "Invalid intializer node!\n";
             return nullptr;
         }
 
@@ -363,6 +379,7 @@ static auto create_initializer(ts::Type_System& ts, Node const& node) -> std::un
             std::unique_ptr<ts::IInitializer> initializer_ch = create_initializer(ts, ch);
             if (!initializer_ch)
             {
+                std::cerr << ch.get_source_location() << "Unknown initializer\n";
                 return nullptr;
             }
             initializers.push_back(std::move(initializer_ch));
@@ -372,7 +389,7 @@ static auto create_initializer(ts::Type_System& ts, Node const& node) -> std::un
     }
     else
     {
-        std::cerr << "Unknown initializer\n";
+        std::cerr << node.get_source_location() << "Unknown initializer\n";
         return nullptr;
     }
 
@@ -387,7 +404,7 @@ static auto create_attributes(ts::Type_System& ts, ts::IType const& type, ts::IA
         boost::optional<std::string> name = get_name_identifier(attribute_node);
         if (!name)
         {
-            std::cerr << "Missing attribute identifier\n";
+            std::cerr << attribute_node.get_source_location() << "Missing attribute identifier\n";
             return false;
         }
 
@@ -412,7 +429,7 @@ static auto create_attributes(ts::Type_System& ts, ts::IType const& type, ts::IA
         {
             if (!initializer)
             {
-                std::cerr << "Missing initializer for attribute\n";
+                std::cerr << attribute_node.get_source_location() << "Missing initializer for attribute\n";
                 return false;
             }
 
@@ -420,7 +437,7 @@ static auto create_attributes(ts::Type_System& ts, ts::IType const& type, ts::IA
             auto result = value->copy_assign(*initializer);
             if (result != ts::success)
             {
-                std::cerr << "Cannot initialize attribute: " + result.error().what() + "\n";
+                std::cerr << attribute_node.get_source_location() << "Cannot initialize attribute: " + result.error().what() + "\n";
                 return false;
             }
 
@@ -430,7 +447,7 @@ static auto create_attributes(ts::Type_System& ts, ts::IType const& type, ts::IA
         {
             if (!initializer)
             {
-                std::cerr << "Missing initializer for attribute\n";
+                std::cerr << attribute_node.get_source_location() << "Missing initializer for attribute\n";
                 return false;
             }
 
@@ -438,7 +455,7 @@ static auto create_attributes(ts::Type_System& ts, ts::IType const& type, ts::IA
             auto result = value->copy_assign(*initializer);
             if (result != ts::success)
             {
-                std::cerr << "Cannot initialize attribute: " + result.error().what() + "\n";
+                std::cerr << attribute_node.get_source_location() << "Cannot initialize attribute: " + result.error().what() + "\n";
                 return false;
             }
 
@@ -448,7 +465,7 @@ static auto create_attributes(ts::Type_System& ts, ts::IType const& type, ts::IA
         {
             if (!initializer)
             {
-                std::cerr << "Missing initializer for attribute\n";
+                std::cerr << attribute_node.get_source_location() << "Missing initializer for attribute\n";
                 return false;
             }
 
@@ -456,7 +473,7 @@ static auto create_attributes(ts::Type_System& ts, ts::IType const& type, ts::IA
             auto result = value->copy_assign(*initializer);
             if (result != ts::success)
             {
-                std::cerr << "Cannot initialize attribute: " + result.error().what() + "\n";
+                std::cerr << attribute_node.get_source_location() << "Cannot initialize attribute: " + result.error().what() + "\n";
                 return false;
             }
 
@@ -468,7 +485,7 @@ static auto create_attributes(ts::Type_System& ts, ts::IType const& type, ts::IA
             auto result = value->copy_assign(*initializer);
             if (result != ts::success)
             {
-                std::cerr << "Cannot initialize attribute: " + result.error().what() + "\n";
+                std::cerr << attribute_node.get_source_location() << "Cannot initialize attribute: " + result.error().what() + "\n";
                 return false;
             }
 
@@ -476,14 +493,14 @@ static auto create_attributes(ts::Type_System& ts, ts::IType const& type, ts::IA
         }
         else
         {
-            std::cerr << "Unknown attribute " << *name << "\n";
+            std::cerr << attribute_node.get_source_location() << "Unknown attribute " << *name << "\n";
             return false;
         }
 
         auto add_result = container.add_attribute(std::move(attribute));
         if (add_result != ts::success)
         {
-            std::cerr << "Bad attribute: " + add_result.error().what() + "\n";
+            std::cerr << attribute_node.get_source_location() << "Bad attribute: " + add_result.error().what() + "\n";
             return false;
         }
     }
@@ -499,14 +516,14 @@ static auto create_member_def(ts::Type_System& ts, ts::IDeclaration_Scope& scope
     boost::optional<std::string> name = get_name_identifier(node);
     if (!name)
     {
-        std::cerr << "Cannot find member name identifier\n";
+        std::cerr << node.get_source_location() << "Cannot find member name identifier\n";
         return nullptr;
     }
 
     std::shared_ptr<const ts::IType> type = find_type_or_instantiate_templated_type(ts, scope, node);
     if (!type)
     {
-        std::cerr << "Cannot find member type\n";
+        std::cerr << node.get_source_location() << "Cannot find member type\n";
         return nullptr;
     }
 
@@ -527,7 +544,7 @@ static auto create_member_def(ts::Type_System& ts, ts::IDeclaration_Scope& scope
 
         if (value->copy_assign(*initializer) != ts::success)
         {
-            std::cerr << "Cannot initialize value\n";
+            std::cerr << initializer_node->get_source_location() << "Cannot initialize value\n";
             return nullptr;
         }
     }
@@ -553,14 +570,14 @@ static auto create_alias(ts::Type_System& ts, ts::IDeclaration_Scope& scope, Nod
     boost::optional<std::string> name = get_name_identifier(node);
     if (!name)
     {
-        std::cerr << "Cannot find alias name identifier\n";
+        std::cerr << node.get_source_location() << "Cannot find alias name identifier\n";
         return false;
     }
 
     std::shared_ptr<const ts::IType> type = find_type_or_instantiate_templated_type(ts, scope, node);
     if (!type)
     {
-        std::cerr << "Cannot find alias type\n";
+        std::cerr << node.get_source_location() << "Cannot find alias type\n";
         return false;
     }
 
@@ -581,7 +598,7 @@ static auto create_struct_type(ts::Type_System& ts, ts::IDeclaration_Scope& scop
     boost::optional<std::string> name = get_name_identifier(node);
     if (!name)
     {
-        std::cerr << "Cannot find struct name identifier\n";
+        std::cerr << node.get_source_location() << "Cannot find struct name identifier\n";
         return false;
     }
 
@@ -591,7 +608,7 @@ static auto create_struct_type(ts::Type_System& ts, ts::IDeclaration_Scope& scop
     auto result = scope.add_symbol(std::unique_ptr<ts::ISymbol>(type));
     if (result != ts::success)
     {
-        std::cerr << result.error().what();
+        std::cerr << node.get_source_location() << result.error().what();
         return false;
     }
 
@@ -629,7 +646,7 @@ static auto create_struct_type(ts::Type_System& ts, ts::IDeclaration_Scope& scop
             }
             else
             {
-                std::cerr << "Illegal node type in struct\n";
+                std::cerr << body->get_source_location() << "Illegal node type in struct\n";
                 return false;
             }
         }
