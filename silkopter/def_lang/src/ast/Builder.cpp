@@ -261,9 +261,10 @@ static auto create_literal(ts::Type_System& ts, Node const& node) -> std::unique
             std::unique_ptr<ts::IBool_Value> v = type->create_specialized_value();
             if (v)
             {
-                if (v->set_value(value_attribute->get_as_bool()) != ts::success)
+                auto result = v->set_value(value_attribute->get_as_bool());
+                if (result != ts::success)
                 {
-                    std::cerr << node.get_source_location() << "Cannot assign value\n";
+                    std::cerr << node.get_source_location() << "Cannot assign value:" + result.error().what() + "\n";
                     return nullptr;
                 }
                 value = std::move(v);
@@ -279,9 +280,10 @@ static auto create_literal(ts::Type_System& ts, Node const& node) -> std::unique
             std::unique_ptr<ts::IDouble_Value> v = type->create_specialized_value();
             if (v)
             {
-                if (v->set_value(value_attribute->get_as_double()) != ts::success)
+                auto result = v->set_value(value_attribute->get_as_double());
+                if (result != ts::success)
                 {
-                    std::cerr << node.get_source_location() << "Cannot assign value\n";
+                    std::cerr << node.get_source_location() << "Cannot assign value:" + result.error().what() + "\n";
                     return nullptr;
                 }
                 value = std::move(v);
@@ -297,9 +299,10 @@ static auto create_literal(ts::Type_System& ts, Node const& node) -> std::unique
             std::unique_ptr<ts::IFloat_Value> v = type->create_specialized_value();
             if (v)
             {
-                if (v->set_value(value_attribute->get_as_float()) != ts::success)
+                auto result = v->set_value(value_attribute->get_as_float());
+                if (result != ts::success)
                 {
-                    std::cerr << node.get_source_location() << "Cannot assign value\n";
+                    std::cerr << node.get_source_location() << "Cannot assign value:" + result.error().what() + "\n";
                     return nullptr;
                 }
                 value = std::move(v);
@@ -315,9 +318,10 @@ static auto create_literal(ts::Type_System& ts, Node const& node) -> std::unique
             std::unique_ptr<ts::IInt64_Value> v = type->create_specialized_value();
             if (v)
             {
-                if (v->set_value(value_attribute->get_as_integral()) != ts::success)
+                auto result = v->set_value(value_attribute->get_as_integral());
+                if (result != ts::success)
                 {
-                    std::cerr << node.get_source_location() << "Cannot assign value\n";
+                    std::cerr << node.get_source_location() << "Cannot assign value:" + result.error().what() + "\n";
                     return nullptr;
                 }
                 value = std::move(v);
@@ -333,9 +337,10 @@ static auto create_literal(ts::Type_System& ts, Node const& node) -> std::unique
             std::unique_ptr<ts::IString_Value> v = type->create_specialized_value();
             if (v)
             {
-                if (v->set_value(value_attribute->get_as_string()) != ts::success)
+                auto result = v->set_value(value_attribute->get_as_string());
+                if (result != ts::success)
                 {
-                    std::cerr << node.get_source_location() << "Cannot assign value\n";
+                    std::cerr << node.get_source_location() << "Cannot assign value:" + result.error().what() + "\n";
                     return nullptr;
                 }
                 value = std::move(v);
@@ -542,9 +547,10 @@ static auto create_member_def(ts::Type_System& ts, ts::IDeclaration_Scope& scope
             return nullptr;
         }
 
-        if (value->copy_assign(*initializer) != ts::success)
+        auto result = value->copy_assign(*initializer);
+        if (result != ts::success)
         {
-            std::cerr << initializer_node->get_source_location() << "Cannot initialize value\n";
+            std::cerr << initializer_node->get_source_location() << "Cannot initialize value: " + result.error().what() + "\n";
             return nullptr;
         }
     }

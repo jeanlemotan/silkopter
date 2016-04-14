@@ -1,6 +1,6 @@
 #include "types/Struct_Type.h"
 #include "values/IValue.h"
-#include "values/IStruct_Value.h"
+#include "values/Struct_Value.h"
 #include "attributes/IAttribute.h"
 
 namespace ts
@@ -28,12 +28,12 @@ auto Struct_Type::get_template_instantiation_string() const -> std::string
 
 auto Struct_Type::create_value() const -> std::unique_ptr<IValue>
 {
-    return nullptr;
+    return create_specialized_value();
 }
 
 auto Struct_Type::create_specialized_value() const -> std::unique_ptr<IStruct_Value>
 {
-    return nullptr;
+    return std::unique_ptr<IStruct_Value>(new Struct_Value(*this));
 }
 
 

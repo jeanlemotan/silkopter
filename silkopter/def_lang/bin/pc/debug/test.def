@@ -13,6 +13,7 @@ struct Multirotor_Config
         bool clockwise = false : [ ui_name = "Clockwise" ];
     };
     
+    Motor motor = {};
     string name = "UAV";
     mass_t mass = 1.0f : [ ui_name = "Mass (Kg)" ];
     ufloat height = 0.5f : [ ui_name = "Height (m)" ];

@@ -25,7 +25,6 @@ public:
 
 protected:
     auto validate_attribute(IAttribute const& attribute) -> Result<void> override;
-
 };
 
 }
