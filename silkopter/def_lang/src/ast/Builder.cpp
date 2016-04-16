@@ -1,5 +1,7 @@
 #include "Builder.h"
 #include "Lexer.h"
+#include "yy_parser.hpp"
+
 
 #include <boost/optional.hpp>
 
@@ -28,13 +30,6 @@
 #include "impl/String_Value.h"
 
 
-std::ostream& operator<<(std::ostream& os, ts::Source_Location const& location)
-{
-    os << location.get_file_path() << ":" << location.get_line() << ":" << location.get_column() << ": ";
-    return os;
-}
-
-
 namespace ast
 {
 
@@ -42,6 +37,7 @@ Builder::Builder()
     : m_root_node(Node::Type::ROOT, ts::Source_Location())
 {
     m_lexer.reset(new Lexer(*this));
+    m_parser.reset(new yy::parser(*this));
 }
 
 Builder::~Builder()
@@ -54,18 +50,31 @@ auto Builder::get_location() const -> ts::Source_Location
     return ts::Source_Location(get_filename(), loc.begin.line, loc.begin.column);
 }
 
-auto Builder::start_file(std::string const& filename) -> bool
+auto Builder::parse(std::string const& filename) -> ts::Result<void>
+{
+    auto result = start_file(filename);
+    if (result != ts::success)
+    {
+        return result;
+    }
+
+    m_parser->parse();
+
+    return ts::success;
+}
+
+auto Builder::start_file(std::string const& filename) -> ts::Result<void>
 {
     std::unique_ptr<std::ifstream> fs(new std::ifstream(filename));
     if (!fs->is_open())
     {
-        return false;
+        return ts::Error("Cannot open file '" + filename + "'");
     }
 
     yy_buffer_state* buffer = m_lexer->yy_create_buffer(*fs, 32);
     if (!buffer)
     {
-        return false;
+        return ts::Error("Cannot create lexer buffer");
     }
 
     Import import;
@@ -75,7 +84,7 @@ auto Builder::start_file(std::string const& filename) -> bool
 
     m_lexer->yypush_buffer_state(buffer);
 
-    return true;
+    return ts::success;
 }
 
 auto Builder::end_file() -> bool
@@ -94,12 +103,12 @@ auto Builder::end_file() -> bool
     return true;
 }
 
-auto Builder::get_root_node() -> Node&
+auto Builder::get_ast_root_node() -> Node&
 {
     return m_root_node;
 }
 
-auto Builder::get_root_node() const -> Node const&
+auto Builder::get_ast_root_node() const -> Node const&
 {
     return m_root_node;
 }
@@ -117,44 +126,43 @@ auto Builder::get_lexer() -> Lexer&
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static auto populate_declaration_scope(ts::Type_System& ts, ts::IDeclaration_Scope& scope, Node const& node) -> bool;
+static auto populate_declaration_scope(ts::Type_System& ts, ts::IDeclaration_Scope& scope, Node const& node) -> ts::Result<void>;
 
 
-static auto get_name_identifier(Node const& node) -> boost::optional<std::string>
+static auto get_name_identifier(Node const& node) -> ts::Result<std::string>
 {
     Node const* identifier = node.find_first_child_by_type(Node::Type::IDENTIFIER);
     if (!identifier)
     {
-        return boost::none;
+        return ts::Error("Cannot find 'identifier'' node");
     }
     Attribute const* identifier_value = identifier->find_first_attribute_by_name("value");
     if (!identifier_value)
     {
-        return boost::none;
+        return ts::Error("Cannot find 'value'' attribute for identifier node");
     }
     if (identifier_value->get_type() != Attribute::Type::STRING)
     {
-        return boost::none;
+        return ts::Error("Wrong type for 'value' attribute of 'identifier' node. Expected string.");
     }
     return identifier_value->get_as_string();
 }
 
-static auto find_type_or_instantiate_templated_type(ts::Type_System& ts, ts::IDeclaration_Scope& scope, Node const& node) -> std::shared_ptr<const ts::IType>
+static ts::Result<std::shared_ptr<const ts::IType>> find_type_or_instantiate_templated_type(ts::Type_System& ts, ts::IDeclaration_Scope& scope, Node const& node)
 {
     Node const* type_node = node.find_first_child_by_type(Node::Type::TYPE);
     if (!type_node)
     {
-        std::cerr << node.get_source_location() << "Malformed type node ast\n";
-        return nullptr;
+        return ts::Error(node.get_source_location().to_string() + "Malformed type node ast");
     }
-    boost::optional<std::string> type_name = get_name_identifier(*type_node);
-    if (type_name)
+    auto name_result = get_name_identifier(*type_node);
+    if (name_result == ts::success)
     {
-        std::shared_ptr<ts::IType> type = scope.find_specialized_symbol_by_path<ts::IType>(ts::Symbol_Path(*type_name));
+        std::string type_name = name_result.payload();
+        std::shared_ptr<ts::IType> type = scope.find_specialized_symbol_by_path<ts::IType>(ts::Symbol_Path(type_name));
         if (!type)
         {
-            std::cerr << type_node->get_source_location() << "Cannot find type " << *type_name << "\n";
-            return nullptr;
+            return ts::Error(type_node->get_source_location().to_string() + "Cannot find type " + type_name);
         }
         return type;
     }
@@ -163,16 +171,15 @@ static auto find_type_or_instantiate_templated_type(ts::Type_System& ts, ts::IDe
         Node const* template_node = type_node->find_first_child_by_type(Node::Type::TEMPLATE_INSTANTIATION);
         if (!template_node)
         {
-            std::cerr << type_node->get_source_location() << "Malformed type node ast\n";
-            return nullptr;
+            return ts::Error(type_node->get_source_location().to_string() + "Malformed type node ast");
         }
 
-        type_name = get_name_identifier(*template_node);
-        if (!type_name)
+        name_result = get_name_identifier(*template_node);
+        if (name_result != ts::success)
         {
-            std::cerr << template_node->get_source_location() << "Missing templated type name\n";
-            return nullptr;
+            return ts::Error(template_node->get_source_location().to_string() + "Missing templated type name: " + name_result.error().what());
         }
+        std::string type_name = name_result.payload();
 
         std::vector<Node> template_argument_nodes = template_node->get_all_children_of_type(Node::Type::TEMPLATE_ARGUMENT);
         std::vector<std::shared_ptr<const ts::ITemplate_Argument>> template_arguments;
@@ -180,74 +187,75 @@ static auto find_type_or_instantiate_templated_type(ts::Type_System& ts, ts::IDe
 
         for (Node const& node: template_argument_nodes)
         {
-            std::shared_ptr<const ts::IType> template_argument = find_type_or_instantiate_templated_type(ts, scope, node);
-            if (!template_argument)
+            auto instantiate_result = find_type_or_instantiate_templated_type(ts, scope, node);
+            if (instantiate_result != ts::success)
             {
-                std::cerr << node.get_source_location() << "Cannot resolve template argument " << template_arguments.size() << "\n";
-                return nullptr;
+                return ts::Error(node.get_source_location().to_string() +
+                                 "Cannot resolve template argument " +
+                                 std::to_string(template_arguments.size()) +
+                                 ": " +
+                                 instantiate_result.error().what());
             }
+
+            std::shared_ptr<const ts::IType> template_argument = instantiate_result.payload();
             template_arguments.push_back(template_argument);
         }
 
-        auto result = ts.instantiate_template(*type_name, template_arguments);
-        if (result != ts::success)
+        auto instantiate_result = ts.instantiate_template(type_name, template_arguments);
+        if (instantiate_result != ts::success)
         {
-            std::cerr << type_node->get_source_location() << "Cannot instantiate template: " << result.error().what() << "\n";
-            return nullptr;
+            return ts::Error(type_node->get_source_location().to_string() + "Cannot instantiate template: " + instantiate_result.error().what());
         }
-        return result.payload();
+        return instantiate_result.payload();
     }
-
-    return nullptr;
 }
 
 
-static auto create_namespace(ts::Type_System& ts, ts::IDeclaration_Scope& scope, Node const& node) -> bool
+static ts::Result<void> create_namespace(ts::Type_System& ts, ts::IDeclaration_Scope& scope, Node const& node)
 {
     TS_ASSERT(node.get_type() == Node::Type::NAMESPACE_DECLARATION);
 
-    boost::optional<std::string> name = get_name_identifier(node);
-    if (!name)
+    auto name_result = get_name_identifier(node);
+    if (name_result != ts::success)
     {
-        std::cerr << node.get_source_location() << "Cannot find namespace name identifier";
-        return false;
+        return ts::Error(node.get_source_location().to_string() + "Cannot find namespace name identifier: " + name_result.error().what());
     }
 
-    ts::Namespace* ns = new ts::Namespace(*name);
+    std::string name = name_result.payload();
+
+    ts::Namespace* ns = new ts::Namespace(name);
 
     //add it to the typesystem so we can search for types
     auto result = scope.add_symbol(std::unique_ptr<ts::ISymbol>(ns));
     if (result != ts::success)
     {
-        std::cerr << node.get_source_location() << result.error().what();
-        return false;
+        return ts::Error(node.get_source_location().to_string() + result.error().what());
     }
-
 
     Node const* body = node.find_first_child_by_type(Node::Type::NAMESPACE_BODY);
     if (body)
     {
         for (Node const& ch: body->get_children())
         {
-            if (!populate_declaration_scope(ts, *ns, ch))
+            auto result = populate_declaration_scope(ts, *ns, ch);
+            if (result != ts::success)
             {
-                return false;
+                return result;
             }
         }
     }
 
-    return true;
+    return ts::success;
 }
 
-static auto create_literal(ts::Type_System& ts, Node const& node) -> std::unique_ptr<ts::ILiteral>
+static ts::Result<std::unique_ptr<ts::ILiteral>> create_literal(ts::Type_System& ts, Node const& node)
 {
     TS_ASSERT(node.get_type() == Node::Type::LITERAL);
 
     Attribute const* value_attribute = node.find_first_attribute_by_name("value");
     if (!value_attribute)
     {
-        std::cerr << node.get_source_location() << "Literal without a value!\n";
-        return nullptr;
+        return ts::Error(node.get_source_location().to_string() + "Literal without a value!");
     }
 
     std::unique_ptr<ts::IValue> value;
@@ -264,8 +272,7 @@ static auto create_literal(ts::Type_System& ts, Node const& node) -> std::unique
                 auto result = v->set_value(value_attribute->get_as_bool());
                 if (result != ts::success)
                 {
-                    std::cerr << node.get_source_location() << "Cannot assign value:" + result.error().what() + "\n";
-                    return nullptr;
+                    return ts::Error(node.get_source_location().to_string() + "Cannot assign value:" + result.error().what());
                 }
                 value = std::move(v);
             }
@@ -283,8 +290,7 @@ static auto create_literal(ts::Type_System& ts, Node const& node) -> std::unique
                 auto result = v->set_value(value_attribute->get_as_double());
                 if (result != ts::success)
                 {
-                    std::cerr << node.get_source_location() << "Cannot assign value:" + result.error().what() + "\n";
-                    return nullptr;
+                    return ts::Error(node.get_source_location().to_string() + "Cannot assign value:" + result.error().what());
                 }
                 value = std::move(v);
             }
@@ -302,8 +308,7 @@ static auto create_literal(ts::Type_System& ts, Node const& node) -> std::unique
                 auto result = v->set_value(value_attribute->get_as_float());
                 if (result != ts::success)
                 {
-                    std::cerr << node.get_source_location() << "Cannot assign value:" + result.error().what() + "\n";
-                    return nullptr;
+                    return ts::Error(node.get_source_location().to_string() + "Cannot assign value:" + result.error().what());
                 }
                 value = std::move(v);
             }
@@ -321,8 +326,7 @@ static auto create_literal(ts::Type_System& ts, Node const& node) -> std::unique
                 auto result = v->set_value(value_attribute->get_as_integral());
                 if (result != ts::success)
                 {
-                    std::cerr << node.get_source_location() << "Cannot assign value:" + result.error().what() + "\n";
-                    return nullptr;
+                    return ts::Error(node.get_source_location().to_string() + "Cannot assign value:" + result.error().what());
                 }
                 value = std::move(v);
             }
@@ -340,8 +344,7 @@ static auto create_literal(ts::Type_System& ts, Node const& node) -> std::unique
                 auto result = v->set_value(value_attribute->get_as_string());
                 if (result != ts::success)
                 {
-                    std::cerr << node.get_source_location() << "Cannot assign value:" + result.error().what() + "\n";
-                    return nullptr;
+                    return ts::Error(node.get_source_location().to_string() + "Cannot assign value:" + result.error().what());
                 }
                 value = std::move(v);
             }
@@ -352,27 +355,30 @@ static auto create_literal(ts::Type_System& ts, Node const& node) -> std::unique
 
     if (!value)
     {
-        std::cerr << node.get_source_location() << "Cannot create literal of type " << value_attribute->to_string() << "\n";
-        return nullptr;
+        return ts::Error(node.get_source_location().to_string() + "Cannot create literal of type " + value_attribute->to_string());
     }
 
     return std::unique_ptr<ts::ILiteral>(new ts::Literal(std::move(value)));
 }
 
-static auto create_initializer(ts::Type_System& ts, Node const& node) -> std::unique_ptr<ts::IInitializer>
+static ts::Result<std::unique_ptr<ts::IInitializer>> create_initializer(ts::Type_System& ts, Node const& node)
 {
     if (node.get_type() == Node::Type::INITIALIZER)
     {
         if (node.get_children().size() != 1)
         {
-            std::cerr << node.get_source_location() << "Invalid intializer node!\n";
-            return nullptr;
+            return ts::Error(node.get_source_location().to_string() + "Invalid intializer node!");
         }
 
         Node const* literal_node = node.find_first_child_by_type(Node::Type::LITERAL);
         if (literal_node)
         {
-            std::unique_ptr<ts::ILiteral> literal = create_literal(ts, *literal_node);
+            auto result = create_literal(ts, *literal_node);
+            if (result != ts::success)
+            {
+                return result.error();
+            }
+            std::unique_ptr<ts::ILiteral> literal = result.extract_payload();
             return std::move(literal);
         }
     }
@@ -381,12 +387,12 @@ static auto create_initializer(ts::Type_System& ts, Node const& node) -> std::un
         std::vector<std::unique_ptr<ts::IInitializer>> initializers;
         for (Node const& ch: node.get_children())
         {
-            std::unique_ptr<ts::IInitializer> initializer_ch = create_initializer(ts, ch);
-            if (!initializer_ch)
+            auto result = create_initializer(ts, ch);
+            if (result != ts::success)
             {
-                std::cerr << ch.get_source_location() << "Unknown initializer\n";
-                return nullptr;
+                return result.error();
             }
+            std::unique_ptr<ts::IInitializer> initializer_ch = result.extract_payload();
             initializers.push_back(std::move(initializer_ch));
         }
 
@@ -394,24 +400,24 @@ static auto create_initializer(ts::Type_System& ts, Node const& node) -> std::un
     }
     else
     {
-        std::cerr << node.get_source_location() << "Unknown initializer\n";
-        return nullptr;
+        return ts::Error(node.get_source_location().to_string() + "Unknown initializer");
     }
 
     return nullptr;
 }
 
-static auto create_attributes(ts::Type_System& ts, ts::IType const& type, ts::IAttribute_Container& container, Node const& node) -> bool
+static ts::Result<void> create_attributes(ts::Type_System& ts, ts::IType const& type, ts::IAttribute_Container& container, Node const& node)
 {
     std::vector<Node> attribute_nodes = node.get_all_children_of_type(Node::Type::ATTRIBUTE);
     for (Node const& attribute_node: attribute_nodes)
     {
-        boost::optional<std::string> name = get_name_identifier(attribute_node);
-        if (!name)
+        auto name_result = get_name_identifier(attribute_node);
+        if (name_result != ts::success)
         {
-            std::cerr << attribute_node.get_source_location() << "Missing attribute identifier\n";
-            return false;
+            return name_result.error();
         }
+
+        std::string attribute_name = name_result.payload();
 
         std::unique_ptr<ts::IInitializer> initializer;
         Node const* initializer_node = attribute_node.find_first_child_by_type(Node::Type::INITIALIZER);
@@ -421,116 +427,109 @@ static auto create_attributes(ts::Type_System& ts, ts::IType const& type, ts::IA
         }
         if (initializer_node)
         {
-            initializer = create_initializer(ts, *initializer_node);
-            if (!initializer)
+            auto result = create_initializer(ts, *initializer_node);
+            if (result != ts::success)
             {
-                return false;
+                return ts::Error(attribute_node.get_source_location().to_string() + "Cannot create initializer: " + result.error().what());
             }
+            initializer = result.extract_payload();
         }
 
         std::unique_ptr<ts::IAttribute> attribute;
 
-        if (*name == "min")
+        if (attribute_name == "min")
         {
             if (!initializer)
             {
-                std::cerr << attribute_node.get_source_location() << "Missing initializer for attribute\n";
-                return false;
+                return ts::Error(attribute_node.get_source_location().to_string() + "Missing initializer for attribute");
             }
 
             std::unique_ptr<ts::IValue> value = type.create_value();
             auto result = value->copy_assign(*initializer);
             if (result != ts::success)
             {
-                std::cerr << attribute_node.get_source_location() << "Cannot initialize attribute: " + result.error().what() + "\n";
-                return false;
+                return ts::Error(attribute_node.get_source_location().to_string() + "Cannot initialize attribute: " + result.error().what());
             }
 
             attribute = std::unique_ptr<ts::Min_Attribute>(new ts::Min_Attribute(std::move(value)));
         }
-        else if (*name == "max")
+        else if (attribute_name == "max")
         {
             if (!initializer)
             {
-                std::cerr << attribute_node.get_source_location() << "Missing initializer for attribute\n";
-                return false;
+                return ts::Error(attribute_node.get_source_location().to_string() + "Missing initializer for attribute");
             }
 
             std::unique_ptr<ts::IValue> value = type.create_value();
             auto result = value->copy_assign(*initializer);
             if (result != ts::success)
             {
-                std::cerr << attribute_node.get_source_location() << "Cannot initialize attribute: " + result.error().what() + "\n";
-                return false;
+                return ts::Error(attribute_node.get_source_location().to_string() + "Cannot initialize attribute: " + result.error().what());
             }
 
             attribute = std::unique_ptr<ts::Max_Attribute>(new ts::Max_Attribute(std::move(value)));
         }
-        else if (*name == "decimals")
+        else if (attribute_name == "decimals")
         {
             if (!initializer)
             {
-                std::cerr << attribute_node.get_source_location() << "Missing initializer for attribute\n";
-                return false;
+                return ts::Error(attribute_node.get_source_location().to_string() + "Missing initializer for attribute");
             }
 
             std::unique_ptr<ts::IInt64_Value> value = ts.find_specialized_symbol_by_name<ts::IInt64_Type>("int64_t")->create_specialized_value();
             auto result = value->copy_assign(*initializer);
             if (result != ts::success)
             {
-                std::cerr << attribute_node.get_source_location() << "Cannot initialize attribute: " + result.error().what() + "\n";
-                return false;
+                return ts::Error(attribute_node.get_source_location().to_string() + "Cannot initialize attribute: " + result.error().what());
             }
 
             attribute = std::unique_ptr<ts::Decimals_Attribute>(new ts::Decimals_Attribute(value->get_value()));
         }
-        else if (*name == "ui_name")
+        else if (attribute_name == "ui_name")
         {
             std::unique_ptr<ts::IString_Value> value = ts.find_specialized_symbol_by_name<ts::IString_Type>("string")->create_specialized_value();
             auto result = value->copy_assign(*initializer);
             if (result != ts::success)
             {
-                std::cerr << attribute_node.get_source_location() << "Cannot initialize attribute: " + result.error().what() + "\n";
-                return false;
+                return ts::Error(attribute_node.get_source_location().to_string() + "Cannot initialize attribute: " + result.error().what());
             }
 
             attribute = std::unique_ptr<ts::UI_Name_Attribute>(new ts::UI_Name_Attribute(value->get_value()));
         }
         else
         {
-            std::cerr << attribute_node.get_source_location() << "Unknown attribute " << *name << "\n";
-            return false;
+            return ts::Error(attribute_node.get_source_location().to_string() + "Unknown attribute " + attribute_name);
         }
 
         auto add_result = container.add_attribute(std::move(attribute));
         if (add_result != ts::success)
         {
-            std::cerr << attribute_node.get_source_location() << "Bad attribute: " + add_result.error().what() + "\n";
-            return false;
+            return ts::Error(attribute_node.get_source_location().to_string() + "Bad attribute: " + add_result.error().what());
         }
     }
 
-    return true;
+    return ts::success;
 }
 
 
-static auto create_member_def(ts::Type_System& ts, ts::IDeclaration_Scope& scope, Node const& node) -> std::unique_ptr<ts::IMember_Def>
+static ts::Result<std::unique_ptr<ts::IMember_Def>> create_member_def(ts::Type_System& ts, ts::IDeclaration_Scope& scope, Node const& node)
 {
     TS_ASSERT(node.get_type() == Node::Type::MEMBER_DECLARATION);
 
-    boost::optional<std::string> name = get_name_identifier(node);
-    if (!name)
+    auto name_result = get_name_identifier(node);
+    if (name_result != ts::success)
     {
-        std::cerr << node.get_source_location() << "Cannot find member name identifier\n";
-        return nullptr;
+        return name_result.error();
+    }
+    std::string name = name_result.payload();
+
+    auto type_result = find_type_or_instantiate_templated_type(ts, scope, node);
+    if (type_result != ts::success)
+    {
+        return ts::Error(node.get_source_location().to_string() + "Cannot find member type: " + type_result.error().what());
     }
 
-    std::shared_ptr<const ts::IType> type = find_type_or_instantiate_templated_type(ts, scope, node);
-    if (!type)
-    {
-        std::cerr << node.get_source_location() << "Cannot find member type\n";
-        return nullptr;
-    }
+    std::shared_ptr<const ts::IType> type = type_result.extract_payload();
 
     std::unique_ptr<ts::IValue> value = type->create_value();
 
@@ -541,17 +540,17 @@ static auto create_member_def(ts::Type_System& ts, ts::IDeclaration_Scope& scope
     }
     if (initializer_node)
     {
-        std::unique_ptr<ts::IInitializer> initializer = create_initializer(ts, *initializer_node);
-        if (!initializer)
+        auto initializer_result = create_initializer(ts, *initializer_node);
+        if (initializer_result != ts::success)
         {
-            return nullptr;
+            return ts::Error(initializer_node->get_source_location().to_string() + "Cannot create member initializer: " + initializer_result.error().what());
         }
 
+        std::unique_ptr<ts::IInitializer> initializer = initializer_result.extract_payload();
         auto result = value->copy_assign(*initializer);
         if (result != ts::success)
         {
-            std::cerr << initializer_node->get_source_location() << "Cannot initialize value: " + result.error().what() + "\n";
-            return nullptr;
+            return ts::Error(initializer_node->get_source_location().to_string() + "Cannot initialize value: " + result.error().what());
         }
     }
     else
@@ -559,63 +558,71 @@ static auto create_member_def(ts::Type_System& ts, ts::IDeclaration_Scope& scope
     }
 
     std::unique_ptr<ts::IMember_Def> def;
-    def.reset(new ts::Member_Def(*name, *type, std::move(value)));
+    def.reset(new ts::Member_Def(name, *type, std::move(value)));
 
-    if (!create_attributes(ts, *type, *def, node))
+    auto create_result = create_attributes(ts, *type, *def, node);
+    if (create_result != ts::success)
     {
-        return false;
+        return create_result.error();
     }
 
     return std::move(def);
 }
 
-static auto create_alias(ts::Type_System& ts, ts::IDeclaration_Scope& scope, Node const& node) -> bool
+static ts::Result<void> create_alias(ts::Type_System& ts, ts::IDeclaration_Scope& scope, Node const& node)
 {
     TS_ASSERT(node.get_type() == Node::Type::ALIAS_DECLARATION);
 
-    boost::optional<std::string> name = get_name_identifier(node);
-    if (!name)
+    auto name_result = get_name_identifier(node);
+    if (name_result != ts::success)
     {
-        std::cerr << node.get_source_location() << "Cannot find alias name identifier\n";
-        return false;
+        return name_result.error();
+    }
+    std::string name = name_result.payload();
+
+    auto type_result = find_type_or_instantiate_templated_type(ts, scope, node);
+    if (type_result != ts::success)
+    {
+        return ts::Error(node.get_source_location().to_string() + "Cannot find member type: " + type_result.error().what());
     }
 
-    std::shared_ptr<const ts::IType> type = find_type_or_instantiate_templated_type(ts, scope, node);
-    if (!type)
+    std::shared_ptr<const ts::IType> type = type_result.extract_payload();
+
+    std::unique_ptr<ts::IType> aliased_type = type->clone(name);
+
+    auto create_result = create_attributes(ts, *aliased_type, *aliased_type, node);
+    if (create_result != ts::success)
     {
-        std::cerr << node.get_source_location() << "Cannot find alias type\n";
-        return false;
+        return ts::Error(node.get_source_location().to_string() + "Cannot create alias attributes: " + create_result.error().what());
     }
 
-    std::unique_ptr<ts::IType> aliased_type = type->clone(*name);
-
-    if (!create_attributes(ts, *aliased_type, *aliased_type, node))
+    auto add_result = scope.add_symbol(std::move(aliased_type));
+    if (add_result != ts::success)
     {
-        return false;
+        return ts::Error(node.get_source_location().to_string() + "Cannot add alias: " + add_result.error().what());
     }
 
-    return scope.add_symbol(std::move(aliased_type)) == ts::success;
+    return ts::success;
 }
 
-static auto create_struct_type(ts::Type_System& ts, ts::IDeclaration_Scope& scope, Node const& node) -> bool
+static ts::Result<void> create_struct_type(ts::Type_System& ts, ts::IDeclaration_Scope& scope, Node const& node)
 {
     TS_ASSERT(node.get_type() == Node::Type::STRUCT_DECLARATION);
 
-    boost::optional<std::string> name = get_name_identifier(node);
-    if (!name)
+    auto name_result = get_name_identifier(node);
+    if (name_result != ts::success)
     {
-        std::cerr << node.get_source_location() << "Cannot find struct name identifier\n";
-        return false;
+        return name_result.error();
     }
+    std::string name = name_result.payload();
 
-    ts::Struct_Type* type = new ts::Struct_Type(*name);
+    ts::Struct_Type* type = new ts::Struct_Type(name);
 
     //add it to the typesystem so we can search for types
     auto result = scope.add_symbol(std::unique_ptr<ts::ISymbol>(type));
     if (result != ts::success)
     {
-        std::cerr << node.get_source_location() << result.error().what();
-        return false;
+        return ts::Error(node.get_source_location().to_string() + result.error().what());
     }
 
     Node const* body = node.find_first_child_by_type(Node::Type::STRUCT_BODY);
@@ -625,45 +632,46 @@ static auto create_struct_type(ts::Type_System& ts, ts::IDeclaration_Scope& scop
         {
             if (ch.get_type() == Node::Type::STRUCT_DECLARATION)
             {
-                if (!create_struct_type(ts, *type, ch))
+                auto result = create_struct_type(ts, *type, ch);
+                if (result != ts::success)
                 {
-                    return false;
+                    return result.error();
                 }
             }
             else if (ch.get_type() == Node::Type::ALIAS_DECLARATION)
             {
-                if (!create_alias(ts, *type, ch))
+                auto result = create_alias(ts, *type, ch);
+                if (result != ts::success)
                 {
-                    return false;
+                    return result.error();
                 }
             }
             else if (ch.get_type() == Node::Type::MEMBER_DECLARATION)
             {
-                std::unique_ptr<ts::IMember_Def> t = create_member_def(ts, *type, ch);
-                if (!t)
-                {
-                    return false;
-                }
-
-                auto result = type->add_member_def(std::move(t));
+                auto result = create_member_def(ts, *type, ch);
                 if (result != ts::success)
                 {
-                    std::cerr << body->get_source_location() << "Illegal node type in struct\n";
-                    return false;
+                    return result.error();
+                }
+
+                std::unique_ptr<ts::IMember_Def> t = result.extract_payload();
+                auto add_result = type->add_member_def(std::move(t));
+                if (add_result != ts::success)
+                {
+                    return ts::Error(body->get_source_location().to_string() + "Cannot add member: " + add_result.error().what());
                 }
             }
             else
             {
-                std::cerr << body->get_source_location() << "Illegal node type in struct\n";
-                return false;
+                return ts::Error(body->get_source_location().to_string() + "Illegal node type in struct");
             }
         }
     }
 
-    return true;
+    return ts::success;
 }
 
-static auto create_symbol(ts::Type_System& ts, ts::IDeclaration_Scope& scope, Node const& node) -> bool
+static ts::Result<void> create_symbol(ts::Type_System& ts, ts::IDeclaration_Scope& scope, Node const& node)
 {
     if (node.get_type() == Node::Type::NAMESPACE_DECLARATION)
     {
@@ -681,28 +689,29 @@ static auto create_symbol(ts::Type_System& ts, ts::IDeclaration_Scope& scope, No
     return false;
 }
 
-static auto populate_declaration_scope(ts::Type_System& ts, ts::IDeclaration_Scope& scope, Node const& node) -> bool
+static ts::Result<void> populate_declaration_scope(ts::Type_System& ts, ts::IDeclaration_Scope& scope, Node const& node)
 {
     return create_symbol(ts, scope, node);
 }
 
 
-auto Builder::populate_type_system(ts::Type_System& ts) -> bool
+auto Builder::compile(ts::Type_System& ts) -> ts::Result<void>
 {
     if (m_root_node.get_children().empty())
     {
-        return true;
+        return ts::success;
     }
 
     for (Node const& ch: m_root_node.get_children())
     {
-        if (!populate_declaration_scope(ts, ts, ch))
+        auto result = populate_declaration_scope(ts, ts, ch);
+        if (result != ts::success)
         {
-            return false;
+            return result;
         }
     }
 
-    return true;
+    return ts::success;
 }
 
 }

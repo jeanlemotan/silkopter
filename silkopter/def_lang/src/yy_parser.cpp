@@ -680,7 +680,7 @@ namespace yy {
   case 3:
 #line 114 "parser.y" // lalr1.cc:859
     {
-            builder.get_root_node().move_children_from(std::move(yystack_[0].value.as< ::ast::Node > ()));
+            builder.get_ast_root_node().move_children_from(std::move(yystack_[0].value.as< ::ast::Node > ()));
         }
 #line 686 "yy_parser.cpp" // lalr1.cc:859
     break;

@@ -1,30 +1,28 @@
 #include "Type_System.h"
 #include "ast/Builder.h"
 
-//ast::Builder g_parser;
-
-//extern int yyparse();
-
-#include "yy_parser.hpp"
-
-//extern YY_BUFFER_STATE yy_scan_string (yyconst char *yy_str  );
 
 int main(int argc, char **argv)
 {
     ast::Builder builder;
 
-    yy::parser x(builder);
+    auto parse_result = builder.parse("test.def");
+    if (parse_result != ts::success)
+    {
+        std::cerr << parse_result.error().what();
+    }
 
-    builder.start_file("test.def");
-
-    x.parse();
-
-    std::cout << builder.get_root_node().to_string(0, true) << std::endl;
+    std::cout << builder.get_ast_root_node().to_string(0, true) << std::endl;
     std::cout.flush();
 
     ts::Type_System ts;
     ts.populate_builtin_types();
-    builder.populate_type_system(ts);
+
+    auto compile_result = builder.compile(ts);
+    if (compile_result != ts::success)
+    {
+        std::cerr << compile_result.error().what();
+    }
 
     return 0;
 }

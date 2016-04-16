@@ -112,7 +112,7 @@ program : import_list
         }
         | top_level_declaration_list
         {
-            builder.get_root_node().move_children_from(std::move($1));
+            builder.get_ast_root_node().move_children_from(std::move($1));
         }
         ;
 
