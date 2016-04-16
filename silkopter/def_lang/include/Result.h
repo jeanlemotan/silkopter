@@ -266,13 +266,6 @@ public:
         return *reinterpret_cast<const Error*>(&m_data);
 	}
 
-//	explicit inline operator bool() const
-//	{
-//#ifndef NDEBUG
-//        m_check_pending = false;
-//#endif
-//        return m_is_success;
-//	}
     inline bool operator==(success_t) const
 	{
 

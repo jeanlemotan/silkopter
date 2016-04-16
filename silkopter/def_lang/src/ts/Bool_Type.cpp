@@ -1,6 +1,6 @@
-#include "types/Bool_Type.h"
-#include "values/Bool_Value.h"
-#include "attributes/IAttribute.h"
+#include "IAttribute.h"
+#include "impl/Bool_Type.h"
+#include "impl/Bool_Value.h"
 
 namespace ts
 {

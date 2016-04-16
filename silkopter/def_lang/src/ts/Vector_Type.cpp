@@ -1,6 +1,6 @@
-#include "types/Vector_Type.h"
-#include "values/Vector_Value.h"
-#include "attributes/IAttribute.h"
+#include "impl/Vector_Type.h"
+#include "impl/Vector_Value.h"
+#include "IAttribute.h"
 
 namespace ts
 {

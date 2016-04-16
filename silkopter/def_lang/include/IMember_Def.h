@@ -2,7 +2,7 @@
 
 #include <memory>
 #include "ISymbol.h"
-#include "attributes/IAttribute_Container.h"
+#include "IAttribute_Container.h"
 
 namespace ts
 {

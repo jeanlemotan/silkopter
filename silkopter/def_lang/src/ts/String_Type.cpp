@@ -1,6 +1,6 @@
-#include "types/String_Type.h"
-#include "values/String_Value.h"
-#include "attributes/IAttribute.h"
+#include "impl/String_Type.h"
+#include "impl//String_Value.h"
+#include "IAttribute.h"
 
 namespace ts
 {

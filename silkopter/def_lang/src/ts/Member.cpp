@@ -1,6 +1,6 @@
-#include "Member.h"
+#include "impl/Member.h"
 #include "IMember_Def.h"
-#include "values/IValue.h"
+#include "IValue.h"
 
 namespace ts
 {

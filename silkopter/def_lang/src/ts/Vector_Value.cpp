@@ -1,4 +1,4 @@
-#include "values/Vector_Value.h"
+#include "impl/Vector_Value.h"
 
 namespace ts
 {
@@ -65,6 +65,7 @@ auto Vector_Value::copy_assign(IValue const& other) -> Result<void>
         }
     }
 
+    //insert missing values
     while (get_value_count() < v->get_value_count())
     {
         size_t idx = get_value_count();
@@ -75,6 +76,7 @@ auto Vector_Value::copy_assign(IValue const& other) -> Result<void>
         }
     }
 
+    //remove extra values
     while (get_value_count() > v->get_value_count())
     {
         size_t idx = get_value_count() - 1;

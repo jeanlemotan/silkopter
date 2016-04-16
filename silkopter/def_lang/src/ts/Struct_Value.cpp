@@ -1,5 +1,5 @@
-#include "values/Struct_Value.h"
-#include "Member.h"
+#include "impl/Struct_Value.h"
+#include "impl/Member.h"
 
 namespace ts
 {

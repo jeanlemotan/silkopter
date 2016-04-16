@@ -1,7 +1,7 @@
-#include "types/Struct_Type.h"
-#include "values/IValue.h"
-#include "values/Struct_Value.h"
-#include "attributes/IAttribute.h"
+#include "impl/Struct_Type.h"
+#include "IValue.h"
+#include "impl/Struct_Value.h"
+#include "IAttribute.h"
 
 namespace ts
 {

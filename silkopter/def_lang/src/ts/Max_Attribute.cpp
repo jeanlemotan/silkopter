@@ -1,6 +1,6 @@
-#include "attributes/Max_Attribute.h"
+#include "impl/Max_Attribute.h"
 #include "IInitializer.h"
-#include "values/IValue.h"
+#include "IValue.h"
 
 namespace ts
 {

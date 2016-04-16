@@ -1,6 +1,6 @@
-#include "attributes/UI_Name_Attribute.h"
+#include "impl/UI_Name_Attribute.h"
 #include "IInitializer.h"
-#include "values/IString_Value.h"
+#include "IString_Value.h"
 
 namespace ts
 {

@@ -1,6 +1,6 @@
-#include "values/Bool_Value.h"
 #include "IInitializer_List.h"
 #include "ILiteral.h"
+#include "impl/Bool_Value.h"
 
 namespace ts
 {

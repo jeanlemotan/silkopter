@@ -1,12 +1,12 @@
 #include "Type_System.h"
 
-#include "Namespace.h"
-#include "types/All_Numeric_Types.h"
-#include "values/All_Numeric_Values.h"
-#include "types/Bool_Type.h"
-#include "types/String_Type.h"
+#include "impl/Namespace.h"
+#include "impl/All_Numeric_Types.h"
+#include "impl/All_Numeric_Values.h"
+#include "impl/Bool_Type.h"
+#include "impl/String_Type.h"
 #include "ITemplate_Argument.h"
-#include "types/Vector_Type.h"
+#include "impl/Vector_Type.h"
 
 namespace ts
 {

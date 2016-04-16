@@ -1,6 +1,6 @@
-#include "attributes/Min_Attribute.h"
+#include "impl/Min_Attribute.h"
 #include "IInitializer.h"
-#include "values/IValue.h"
+#include "IValue.h"
 
 namespace ts
 {

@@ -1,6 +1,5 @@
-#include "Literal.h"
-
-#include "values/IValue.h"
+#include "impl/Literal.h"
+#include "IValue.h"
 
 namespace ts
 {

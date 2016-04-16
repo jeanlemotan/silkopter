@@ -1,8 +1,8 @@
 #pragma once
 
 #include "Result.h"
-#include "impl/Declaration_Scope_EP.h"
-#include "types/IType.h"
+#include "ep/Declaration_Scope_EP.h"
+#include "IType.h"
 
 namespace ts
 {

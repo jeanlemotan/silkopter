@@ -1,5 +1,5 @@
-#include "expression/Literal_Expression.h"
-#include "values/IValue.h"
+#include "impl/Literal_Expression.h"
+#include "IValue.h"
 #include "ILiteral.h"
 
 namespace ts
