@@ -2,12 +2,13 @@
 
 #include "types/IStruct_Type.h"
 #include "IStruct_Value.h"
-#include "Member.h"
+#include "IMember.h"
+#include "impl/Member_Container_EP.h"
 
 namespace ts
 {
 
-class Struct_Value final : public virtual IStruct_Value
+class Struct_Value final : public virtual IStruct_Value, public Member_Container_EP
 {
 public:
 
@@ -32,7 +33,6 @@ public:
 
 private:
     IStruct_Type const& m_type;
-    std::vector<Member> m_members;
 };
 
 }

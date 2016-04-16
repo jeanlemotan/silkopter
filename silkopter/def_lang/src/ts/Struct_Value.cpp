@@ -1,4 +1,5 @@
 #include "values/Struct_Value.h"
+#include "Member.h"
 
 namespace ts
 {
@@ -6,7 +7,11 @@ namespace ts
 Struct_Value::Struct_Value(IStruct_Type const& type)
     : m_type(type)
 {
-
+    for (size_t i = 0; i < type.get_member_def_count(); i++)
+    {
+        auto result = add_member(std::unique_ptr<Member>(new Member(type.get_member_def(i))));
+        TS_ASSERT(result == success);
+    }
 }
 
 auto Struct_Value::is_equal(IValue const& other) const -> Result<bool>

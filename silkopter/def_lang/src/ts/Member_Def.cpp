@@ -9,7 +9,7 @@ Member_Def::Member_Def(std::string const& name, IType const& type, std::unique_p
     , m_type(type)
     , m_default_value(std::move(default_value))
 {
-
+    TS_ASSERT(m_default_value);
 }
 
 Member_Def::~Member_Def()

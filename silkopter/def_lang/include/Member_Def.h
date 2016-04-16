@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include "IMember_Def.h"
 #include "impl/Symbol_EP.h"
 #include "impl/Attribute_Container_EP.h"
 #include "attributes/UI_Name_Attribute.h"
@@ -11,7 +12,7 @@ namespace ts
 class IType;
 class IValue;
 
-class Member_Def final : public Symbol_EP, public Attribute_Container_EP
+class Member_Def final : virtual public IMember_Def, public Symbol_EP, public Attribute_Container_EP
 {
 public:
 

@@ -514,7 +514,7 @@ static auto create_attributes(ts::Type_System& ts, ts::IType const& type, ts::IA
 }
 
 
-static auto create_member_def(ts::Type_System& ts, ts::IDeclaration_Scope& scope, Node const& node) -> std::unique_ptr<ts::Member_Def>
+static auto create_member_def(ts::Type_System& ts, ts::IDeclaration_Scope& scope, Node const& node) -> std::unique_ptr<ts::IMember_Def>
 {
     TS_ASSERT(node.get_type() == Node::Type::MEMBER_DECLARATION);
 
@@ -558,7 +558,7 @@ static auto create_member_def(ts::Type_System& ts, ts::IDeclaration_Scope& scope
     {
     }
 
-    std::unique_ptr<ts::Member_Def> def;
+    std::unique_ptr<ts::IMember_Def> def;
     def.reset(new ts::Member_Def(*name, *type, std::move(value)));
 
     if (!create_attributes(ts, *type, *def, node))
@@ -639,14 +639,16 @@ static auto create_struct_type(ts::Type_System& ts, ts::IDeclaration_Scope& scop
             }
             else if (ch.get_type() == Node::Type::MEMBER_DECLARATION)
             {
-                std::unique_ptr<ts::Member_Def> t = create_member_def(ts, *type, ch);
+                std::unique_ptr<ts::IMember_Def> t = create_member_def(ts, *type, ch);
                 if (!t)
                 {
                     return false;
                 }
 
-                if (!type->add_member_def(std::move(t)))
+                auto result = type->add_member_def(std::move(t));
+                if (result != ts::success)
                 {
+                    std::cerr << body->get_source_location() << "Illegal node type in struct\n";
                     return false;
                 }
             }

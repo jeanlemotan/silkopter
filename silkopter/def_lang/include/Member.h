@@ -1,20 +1,27 @@
 #pragma once
 
-#include "ISymbol.h"
+#include <memory>
+#include "IMember.h"
 
 namespace ts
 {
 
-class Member_Def;
 class IValue;
 
-class Member final
+class Member final : public IMember
 {
 public:
-    auto get_member_def() const -> std::shared_ptr<const Member_Def>;
+    Member(IMember_Def const& member_def);
+    ~Member();
 
-    auto get_value() const -> IValue const&;
-    auto get_value() -> IValue&;
+    auto get_member_def() const -> IMember_Def const& override;
+
+    auto get_value() const -> IValue const& override;
+    auto get_value() -> IValue& override;
+
+private:
+    IMember_Def const& m_member_def;
+    std::unique_ptr<IValue> m_value;
 };
 
 }
