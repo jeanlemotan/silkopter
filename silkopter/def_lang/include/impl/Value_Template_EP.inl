@@ -14,7 +14,7 @@ auto Value_Template_EP<Traits>::is_equal(IValue const& other) const -> Result<bo
     value_interface const* v = dynamic_cast<const value_interface*>(&other);
     if (!v)
     {
-        return Error("incompatible types");
+        return Error("incompatible values");
     }
 
     return get_value() == v->get_value();
@@ -26,7 +26,7 @@ auto Value_Template_EP<Traits>::copy_assign(IValue const& other) -> Result<void>
     value_interface const* v = dynamic_cast<const value_interface*>(&other);
     if (!v)
     {
-        return Error("incompatible types");
+        return Error("incompatible values");
     }
 
     return set_value(v->get_value());
@@ -38,7 +38,7 @@ auto Value_Template_EP<Traits>::copy_assign(IValue const& other) -> Result<void>
 //    IValue const* v = dynamic_cast<value_interface>(&other);
 //    if (!v)
 //    {
-//        return Error("incompatible types");
+//        return Error("incompatible values");
 //    }
 
 //    return set_value(v->get_value());
@@ -62,12 +62,12 @@ auto Value_Template_EP<Traits>::get_type() const -> IType const&
 template<typename Traits>
 auto Value_Template_EP<Traits>::parse_from_ui_string(std::string const& str) -> Result<void>
 {
-    return Error("Not implemented");
+    return Error("Not Supported");
 }
 template<typename Traits>
-auto Value_Template_EP<Traits>::get_ui_string() const -> std::string
+auto Value_Template_EP<Traits>::get_ui_string() const -> Result<std::string>
 {
-    return "Not implemented";
+    return Error("Not Supported");
 }
 
 template<typename Traits>

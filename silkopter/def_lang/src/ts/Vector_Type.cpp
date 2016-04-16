@@ -44,12 +44,12 @@ auto Vector_Type::get_template_instantiation_string() const -> std::string
 
 auto Vector_Type::create_value() const -> std::unique_ptr<IValue>
 {
-    return nullptr;
+    return create_specialized_value();
 }
 
 auto Vector_Type::create_specialized_value() const -> std::unique_ptr<value_type>
 {
-    return nullptr;
+    return std::unique_ptr<IVector_Value>(new Vector_Value(*this));
 }
 
 

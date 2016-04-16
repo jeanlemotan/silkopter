@@ -25,7 +25,7 @@ public:
     virtual auto get_type() const -> IType const& = 0;
 
     virtual auto parse_from_ui_string(std::string const& str) -> Result<void> = 0;
-    virtual auto get_ui_string() const -> std::string = 0;
+    virtual auto get_ui_string() const -> Result<std::string> = 0;
 
     virtual auto select(Value_Selector const& selector) const -> IValue const* = 0;
     virtual auto select(Value_Selector const& selector) -> IValue* = 0;

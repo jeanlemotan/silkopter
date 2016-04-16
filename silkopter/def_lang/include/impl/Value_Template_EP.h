@@ -28,7 +28,7 @@ public:
     auto get_type() const -> IType const& override;
 
     auto parse_from_ui_string(std::string const& str) -> Result<void> override;
-    auto get_ui_string() const -> std::string override;
+    auto get_ui_string() const -> Result<std::string> override;
 
     auto select(Value_Selector const& selector) const -> IValue const* override;
     auto select(Value_Selector const& selector) -> IValue* override;
