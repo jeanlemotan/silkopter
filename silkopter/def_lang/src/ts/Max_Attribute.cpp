@@ -12,11 +12,11 @@ Max_Attribute::Max_Attribute(std::unique_ptr<IValue> value)
 Max_Attribute::~Max_Attribute()
 {
 }
-auto Max_Attribute::get_name() const -> std::string
+std::string Max_Attribute::get_name() const
 {
     return "max";
 }
-auto Max_Attribute::get_max_value() const -> IValue const&
+IValue const& Max_Attribute::get_max_value() const
 {
     return *m_value;
 }

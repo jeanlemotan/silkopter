@@ -8,7 +8,7 @@ Symbol_EP::Symbol_EP(std::string const& name)
 {
 }
 
-auto Symbol_EP::get_name() const -> std::string const&
+std::string const& Symbol_EP::get_name() const
 {
     return m_name;
 }

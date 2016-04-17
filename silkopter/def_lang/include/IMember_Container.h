@@ -15,17 +15,17 @@ class IMember_Container
 public:
     virtual ~IMember_Container() = default;
 
-    virtual auto get_member_count() const -> size_t = 0;
+    virtual size_t get_member_count() const = 0;
 
-    virtual auto add_member(std::unique_ptr<IMember>&& member) -> Result<void> = 0;
+    virtual Result<void> add_member(std::unique_ptr<IMember>&& member) = 0;
 
-    virtual auto get_member(size_t idx) const -> IMember const& = 0;
-    virtual auto get_member(size_t idx) -> IMember& = 0;
+    virtual IMember const& get_member(size_t idx) const = 0;
+    virtual IMember& get_member(size_t idx) = 0;
 
-    virtual auto find_member_idx_by_name(std::string const& name) const -> boost::optional<size_t> = 0;
+    virtual boost::optional<size_t> find_member_idx_by_name(std::string const& name) const = 0;
 
-    virtual auto find_member_by_name(std::string const& name) const -> IMember const* = 0;
-    virtual auto find_member_by_name(std::string const& name) -> IMember* = 0;
+    virtual IMember const* find_member_by_name(std::string const& name) const = 0;
+    virtual IMember* find_member_by_name(std::string const& name) = 0;
 };
 
 }

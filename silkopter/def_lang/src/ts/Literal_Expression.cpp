@@ -16,7 +16,7 @@ Literal_Expression::~Literal_Expression()
 
 }
 
-auto Literal_Expression::evaluate() const -> std::unique_ptr<IValue>
+std::unique_ptr<IValue> Literal_Expression::evaluate() const
 {
     return m_literal->get_value().clone();
 }

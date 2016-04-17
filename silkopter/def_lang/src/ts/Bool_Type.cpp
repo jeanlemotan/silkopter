@@ -11,7 +11,7 @@ Bool_Type::Bool_Type(std::string const& name)
 
 }
 
-auto Bool_Type::validate_attribute(IAttribute const& attribute) -> Result<void>
+Result<void> Bool_Type::validate_attribute(IAttribute const& attribute)
 {
     return Error("Attribute " + attribute.get_name() + " not supported");
 }

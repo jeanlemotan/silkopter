@@ -13,21 +13,21 @@ class Attribute_Container_EP : virtual public IAttribute_Container
 {
 public:
 
-    auto get_attribute_count() const -> size_t override;
+    size_t get_attribute_count() const override;
 
-    auto add_attribute(std::unique_ptr<IAttribute>&& attribute) -> Result<void> override;
+    Result<void> add_attribute(std::unique_ptr<IAttribute>&& attribute) override;
 
-    auto get_attribute(size_t idx) const -> IAttribute const& override;
-    auto get_attribute(size_t idx) -> IAttribute& override;
+    std::shared_ptr<IAttribute const> get_attribute(size_t idx) const override;
+    std::shared_ptr<IAttribute> get_attribute(size_t idx) override;
 
-    auto find_attribute_idx_by_name(std::string const& name) const -> boost::optional<size_t> override;
+    boost::optional<size_t> find_attribute_idx_by_name(std::string const& name) const override;
 
-    auto find_attribute_by_name(std::string const& name) const -> IAttribute const* override;
-    auto find_attribute_by_name(std::string const& name) -> IAttribute* override;
+    std::shared_ptr<IAttribute const> find_attribute_by_name(std::string const& name) const override;
+    std::shared_ptr<IAttribute> find_attribute_by_name(std::string const& name) override;
 
 protected:
 
-    virtual auto validate_attribute(IAttribute const& attribute) -> Result<void> = 0;
+    virtual Result<void> validate_attribute(IAttribute const& attribute) = 0;
 
 private:
     std::vector<std::shared_ptr<IAttribute>> m_attributes;

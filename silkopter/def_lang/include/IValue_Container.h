@@ -14,13 +14,13 @@ class IValue_Container
 public:
     virtual ~IValue_Container() = default;
 
-    virtual auto insert_value(size_t idx, std::unique_ptr<IValue>&& value) -> Result<void> = 0;
-    virtual auto erase_value(size_t idx) -> Result<void> = 0;
+    virtual Result<void> insert_value(size_t idx, std::unique_ptr<IValue>&& value) = 0;
+    virtual Result<void> erase_value(size_t idx) = 0;
 
-    virtual auto get_value_count() const -> size_t = 0;
+    virtual size_t get_value_count() const = 0;
 
-    virtual auto get_value(size_t idx) const -> IValue const& = 0;
-    virtual auto get_value(size_t idx) -> IValue& = 0;
+    virtual IValue const& get_value(size_t idx) const = 0;
+    virtual IValue& get_value(size_t idx) = 0;
 };
 
 }

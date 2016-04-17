@@ -31,17 +31,17 @@ public:
         };
     };
 
-    auto get_element_count() const -> size_t;
-    auto get_element() const -> Element const&;
+    size_t get_element_count() const;
+    Element const& get_element() const;
 
-    auto empty() const -> bool;
+    bool empty() const;
 
-    auto front() const -> Element const&;
-    auto pop_front() const -> Element const&;
+    Element const& front() const;
+    Element pop_front() const;
     void push_front(Element const& element);
 
-    auto back() const -> Element const&;
-    auto pop_back() const -> Element const&;
+    Element const& back() const;
+    Element pop_back() const;
     void push_back(Element const& element);
 
 private:

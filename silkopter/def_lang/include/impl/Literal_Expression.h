@@ -15,7 +15,7 @@ public:
     Literal_Expression(std::unique_ptr<const ILiteral> literal);
     ~Literal_Expression();
 
-    auto evaluate() const -> std::unique_ptr<IValue> override;
+    std::unique_ptr<IValue> evaluate() const override;
 
 private:
     std::unique_ptr<const ILiteral> m_literal;

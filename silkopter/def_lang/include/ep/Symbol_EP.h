@@ -15,7 +15,7 @@ public:
 
     Symbol_EP(std::string const& name);
 
-    auto get_name() const -> std::string const& override;
+    std::string const& get_name() const override;
 
 private:
     std::string m_name;

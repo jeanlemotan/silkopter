@@ -10,20 +10,20 @@ Member_Container_EP::~Member_Container_EP()
 
 }
 
-auto Member_Container_EP::get_member_count() const -> size_t
+size_t Member_Container_EP::get_member_count() const
 {
     return m_members.size();
 }
 
-auto Member_Container_EP::add_member(std::unique_ptr<IMember>&& member) -> Result<void>
+Result<void> Member_Container_EP::add_member(std::unique_ptr<IMember>&& member)
 {
     if (!member)
     {
         return Error("Cannot add null member");
     }
-    if (find_member_by_name(member->get_member_def().get_name()) != nullptr)
+    if (find_member_by_name(member->get_member_def()->get_name()) != nullptr)
     {
-        return Error("Duplicate member name: " + member->get_member_def().get_name());
+        return Error("Duplicate member name: " + member->get_member_def()->get_name());
     }
 
     m_members.push_back(std::move(member));
@@ -31,25 +31,25 @@ auto Member_Container_EP::add_member(std::unique_ptr<IMember>&& member) -> Resul
     return success;
 }
 
-auto Member_Container_EP::get_member(size_t idx) const -> IMember const&
+IMember const& Member_Container_EP::get_member(size_t idx) const
 {
     return *m_members[idx];
 }
-auto Member_Container_EP::get_member(size_t idx) -> IMember&
+IMember& Member_Container_EP::get_member(size_t idx)
 {
     return *m_members[idx];
 }
 
-auto Member_Container_EP::find_member_idx_by_name(std::string const& name) const -> boost::optional<size_t>
+boost::optional<size_t> Member_Container_EP::find_member_idx_by_name(std::string const& name) const
 {
     return boost::none;
 }
 
-auto Member_Container_EP::find_member_by_name(std::string const& name) const -> IMember const*
+IMember const* Member_Container_EP::find_member_by_name(std::string const& name) const
 {
     return nullptr;
 }
-auto Member_Container_EP::find_member_by_name(std::string const& name) -> IMember*
+IMember* Member_Container_EP::find_member_by_name(std::string const& name)
 {
     return nullptr;
 }

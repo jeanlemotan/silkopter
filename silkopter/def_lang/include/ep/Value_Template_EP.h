@@ -16,30 +16,30 @@ public:
     typedef typename Traits::type_interface type_interface;
     typedef typename Traits::fundamental_type fundamental_type;
 
-    Value_Template_EP(type_interface const& type);
+    Value_Template_EP(std::shared_ptr<type_interface const> type);
 
-    auto is_equal(IValue const& other) const -> Result<bool> override;
+    Result<bool> is_equal(IValue const& other) const override;
 
-    auto copy_assign(IValue const& other) -> Result<void> override;
-    //auto copy_assign(IInitializer const& initializer) -> Result<void> override;
+    Result<void> copy_assign(IValue const& other) override;
+    //Result<void> copy_assign(IInitializer const& initializer) override;
 
-    auto clone() const -> std::unique_ptr<IValue> override;
+    //std::unique_ptr<IValue> clone() const override;
 
-    auto get_type() const -> IType const& override;
+    std::shared_ptr<IType const> get_type() const override;
 
-    auto parse_from_ui_string(std::string const& str) -> Result<void> override;
-    auto get_ui_string() const -> Result<std::string> override;
+    Result<void> parse_from_ui_string(std::string const& str) override;
+    Result<std::string> get_ui_string() const override;
 
-    auto select(Value_Selector const& selector) const -> IValue const* override;
-    auto select(Value_Selector const& selector) -> IValue* override;
+    IValue const* select(Value_Selector const& selector) const override;
+    IValue* select(Value_Selector const& selector) override;
 
-    auto get_specialized_type() const -> type_interface const& override;
+    std::shared_ptr<type_interface const> get_specialized_type() const override;
 
-    auto set_value(fundamental_type value) -> Result<void> override;
-    auto get_value() const -> fundamental_type override;
+    Result<void> set_value(fundamental_type value) override;
+    fundamental_type get_value() const override;
 
 private:
-    type_interface const& m_type;
+    std::shared_ptr<type_interface const> m_type;
     fundamental_type m_value;
 };
 

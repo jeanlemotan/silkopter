@@ -10,30 +10,30 @@ Symbol_Path::Symbol_Path(std::string const& str)
     parse(str.c_str(), str.size());
 }
 
-auto Symbol_Path::is_absolute() const -> bool
+bool Symbol_Path::is_absolute() const
 {
     return m_is_absolute;
 }
 
-auto Symbol_Path::get_count() const -> size_t
+size_t Symbol_Path::get_count() const
 {
     return m_elements.size();
 }
-auto Symbol_Path::get(size_t idx) const -> std::string const&
+std::string const& Symbol_Path::get(size_t idx) const
 {
     return m_elements[idx];
 }
 
-auto Symbol_Path::empty() const -> bool
+bool Symbol_Path::empty() const
 {
     return m_elements.empty();
 }
 
-auto Symbol_Path::front() const -> std::string const&
+std::string const& Symbol_Path::front() const
 {
     return m_elements.front();
 }
-auto Symbol_Path::pop_front() -> std::string
+std::string Symbol_Path::pop_front()
 {
     std::string element = std::move(m_elements.front());
     m_elements.erase(m_elements.begin());
@@ -45,11 +45,11 @@ auto Symbol_Path::pop_front() -> std::string
 //    m_elements.insert(m_elements.begin(), string);
 //}
 
-auto Symbol_Path::back() const -> std::string const&
+std::string const& Symbol_Path::back() const
 {
     return m_elements.back();
 }
-auto Symbol_Path::pop_back() -> std::string
+std::string Symbol_Path::pop_back()
 {
     std::string element = std::move(m_elements.back());
     m_elements.pop_back();

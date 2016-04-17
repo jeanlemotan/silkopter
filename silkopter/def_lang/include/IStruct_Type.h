@@ -16,7 +16,7 @@ public:
 
     typedef IStruct_Value value_type;
 
-    virtual auto create_specialized_value() const -> std::unique_ptr<IStruct_Value> = 0;
+    virtual std::unique_ptr<IStruct_Value> create_specialized_value() const = 0;
 
 };
 

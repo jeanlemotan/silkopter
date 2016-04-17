@@ -43,24 +43,24 @@ public:
     Node() = default;
     Node(Type type, ts::Source_Location const& loc);
 
-    auto get_type() const -> Type;
+    Type get_type() const;
 
-    auto get_source_location() const -> ts::Source_Location const&;
+    ts::Source_Location const& get_source_location() const;
 
-    auto copy_children_from(Node const& node) -> Node&;
-    auto move_children_from(Node&& node) -> Node&;
+    Node& copy_children_from(Node const& node);
+    Node& move_children_from(Node&& node);
 
-    auto add_child(Node const& node) -> Node&;
-    auto get_children() const -> std::vector<Node> const&;
+    Node& add_child(Node const& node);
+    std::vector<Node> const& get_children() const;
 
-    auto find_first_child_by_type(Type type) const -> Node const*;
-    auto get_all_children_of_type(Type type) const -> std::vector<Node>;
+    Node const* find_first_child_by_type(Type type) const;
+    std::vector<Node> get_all_children_of_type(Type type) const;
 
-    auto add_attribute(Attribute const& att) -> Node&;
-    auto get_attributes() const -> std::vector<Attribute> const&;
-    auto find_first_attribute_by_name(std::string const& name) const -> Attribute const*;
+    Node& add_attribute(Attribute const& att);
+    std::vector<Attribute> const& get_attributes() const;
+    Attribute const* find_first_attribute_by_name(std::string const& name) const;
 
-    auto to_string(size_t ident, bool deep) const -> std::string;
+    std::string to_string(size_t ident, bool deep) const;
 
 private:
     Type m_type = Type::NONE;

@@ -12,17 +12,17 @@ public:
 
     ~Member_Container_EP();
 
-    auto get_member_count() const -> size_t override;
+    size_t get_member_count() const override;
 
-    auto add_member(std::unique_ptr<IMember>&& member) -> Result<void> override;
+    Result<void> add_member(std::unique_ptr<IMember>&& member) override;
 
-    auto get_member(size_t idx) const -> IMember const& override;
-    auto get_member(size_t idx) -> IMember& override;
+    IMember const& get_member(size_t idx) const override;
+    IMember& get_member(size_t idx) override;
 
-    auto find_member_idx_by_name(std::string const& name) const -> boost::optional<size_t> override;
+    boost::optional<size_t> find_member_idx_by_name(std::string const& name) const override;
 
-    auto find_member_by_name(std::string const& name) const -> IMember const* override;
-    auto find_member_by_name(std::string const& name) -> IMember* override;
+    IMember const* find_member_by_name(std::string const& name) const override;
+    IMember* find_member_by_name(std::string const& name) override;
 
 private:
     std::vector<std::shared_ptr<IMember>> m_members;

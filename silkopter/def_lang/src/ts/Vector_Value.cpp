@@ -3,12 +3,12 @@
 namespace ts
 {
 
-Vector_Value::Vector_Value(IVector_Type const& type)
+Vector_Value::Vector_Value(std::shared_ptr<IVector_Type const> type)
     : m_type(type)
 {
 }
 
-auto Vector_Value::is_equal(IValue const& other) const -> Result<bool>
+Result<bool> Vector_Value::is_equal(IValue const& other) const
 {
     IVector_Value const* v = dynamic_cast<const IVector_Value*>(&other);
     if (!v)
@@ -16,7 +16,7 @@ auto Vector_Value::is_equal(IValue const& other) const -> Result<bool>
         return Error("incompatible values");
     }
 
-    if (&get_type() != &v->get_type())
+    if (get_type() != v->get_type())
     {
         return Error("incompatible types");
     }
@@ -42,7 +42,7 @@ auto Vector_Value::is_equal(IValue const& other) const -> Result<bool>
     return true;
 }
 
-auto Vector_Value::copy_assign(IValue const& other) -> Result<void>
+Result<void> Vector_Value::copy_assign(IValue const& other)
 {
     IVector_Value const* v = dynamic_cast<const IVector_Value*>(&other);
     if (!v)
@@ -50,7 +50,7 @@ auto Vector_Value::copy_assign(IValue const& other) -> Result<void>
         return Error("incompatible values");
     }
 
-    if (&get_type() != &v->get_type())
+    if (get_type() != v->get_type())
     {
         return Error("incompatible types");
     }
@@ -89,40 +89,40 @@ auto Vector_Value::copy_assign(IValue const& other) -> Result<void>
 
     return success;
 }
-auto Vector_Value::copy_assign(IInitializer const& initializer) -> Result<void>
+Result<void> Vector_Value::copy_assign(IInitializer const& initializer)
 {
     return Error("not implemented");
 }
 
-auto Vector_Value::clone() const -> std::unique_ptr<IValue>
+std::unique_ptr<IValue> Vector_Value::clone() const
 {
     return std::unique_ptr<IValue>(new Vector_Value(*this));
 }
 
-auto Vector_Value::get_type() const -> IType const&
+std::shared_ptr<IType const> Vector_Value::get_type() const
 {
     return m_type;
 }
 
-auto Vector_Value::parse_from_ui_string(std::string const& str) -> Result<void>
+Result<void> Vector_Value::parse_from_ui_string(std::string const& str)
 {
     return Error("Not Supported");
 }
-auto Vector_Value::get_ui_string() const -> Result<std::string>
+Result<std::string> Vector_Value::get_ui_string() const
 {
     return Error("Not Supported");
 }
 
-auto Vector_Value::select(Value_Selector const& selector) const -> IValue const*
+IValue const* Vector_Value::select(Value_Selector const& selector) const
 {
     return nullptr;
 }
-auto Vector_Value::select(Value_Selector const& selector) -> IValue*
+IValue* Vector_Value::select(Value_Selector const& selector)
 {
     return nullptr;
 }
 
-auto Vector_Value::get_specialized_type() const -> IVector_Type const&
+std::shared_ptr<IVector_Type const> Vector_Value::get_specialized_type() const
 {
     return m_type;
 }

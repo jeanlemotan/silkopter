@@ -47,9 +47,9 @@ scope [:][:]
 "true" 	                return yy::parser::make_TTRUE(m_location);
 {identifier}            return yy::parser::make_TIDENTIFIER(yytext, m_location);
 {scope}?{identifier}({scope}{identifier})+   return yy::parser::make_TIDENTIFIER_PATH(yytext, m_location);
-[0-9]+                  return yy::parser::make_TINTEGER_LITERAL(strtol(yytext, nullptr, 10), m_location);
-[0-9]+\.[0-9]*          return yy::parser::make_TDOUBLE_LITERAL(strtod(yytext, nullptr), m_location);
-[0-9]+\.[0-9]*f         return yy::parser::make_TFLOAT_LITERAL(strtof(yytext, nullptr), m_location);
+-?[0-9]+           return yy::parser::make_TINTEGER_LITERAL(strtol(yytext, nullptr, 10), m_location);
+-?[0-9]+\.[0-9]*   return yy::parser::make_TDOUBLE_LITERAL(strtod(yytext, nullptr), m_location);
+-?[0-9]+\.[0-9]*f  return yy::parser::make_TFLOAT_LITERAL(strtof(yytext, nullptr), m_location);
 \"(\\.|[^"])*\"         return yy::parser::make_TSTRING_LITERAL(yytext, m_location);
 "="                     return yy::parser::make_TEQUAL(m_location);
 "("                     return yy::parser::make_TLPARENTHESIS(m_location);

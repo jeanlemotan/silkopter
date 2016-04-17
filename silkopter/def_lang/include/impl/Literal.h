@@ -11,10 +11,10 @@ public:
     Literal(std::unique_ptr<const IValue> value);
     ~Literal();
 
-    auto get_template_instantiation_string() const -> std::string;
+    std::string get_template_instantiation_string() const;
 
-    auto get_value() const -> IValue const& override;
-    auto get_initializer_value() const -> IValue const* override;
+    IValue const& get_value() const override;
+    IValue const* get_initializer_value() const override;
 
 private:
     std::unique_ptr<const IValue> m_value;

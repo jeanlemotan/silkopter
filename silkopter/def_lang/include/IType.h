@@ -14,9 +14,9 @@ class IType : virtual public ISymbol, virtual public IAttribute_Container, virtu
 public:
     virtual ~IType() = default;
 
-    virtual auto clone(std::string const& name) const -> std::unique_ptr<IType> = 0;
+    virtual std::unique_ptr<IType> clone(std::string const& name) const = 0;
 
-    virtual auto create_value() const -> std::unique_ptr<IValue> = 0;
+    virtual std::unique_ptr<IValue> create_value() const = 0;
 };
 
 }

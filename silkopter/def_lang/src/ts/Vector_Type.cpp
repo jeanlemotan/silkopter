@@ -11,7 +11,7 @@ Vector_Type::Vector_Type(std::string const& name)
 
 }
 
-auto Vector_Type::init(std::vector<std::shared_ptr<const ITemplate_Argument>> const& arguments) -> Result<void>
+Result<void> Vector_Type::init(std::vector<std::shared_ptr<const ITemplate_Argument>> const& arguments)
 {
     if (arguments.size() != 1)
     {
@@ -27,29 +27,29 @@ auto Vector_Type::init(std::vector<std::shared_ptr<const ITemplate_Argument>> co
     return success;
 }
 
-auto Vector_Type::validate_attribute(IAttribute const& attribute) -> Result<void>
+Result<void> Vector_Type::validate_attribute(IAttribute const& attribute)
 {
     return Error("Attribute " + attribute.get_name() + " not supported");
 }
 
-auto Vector_Type::clone(std::string const& name) const -> std::unique_ptr<IType>
+std::unique_ptr<IType> Vector_Type::clone(std::string const& name) const
 {
     return std::unique_ptr<IType>(new Vector_Type(*this));
 }
 
-auto Vector_Type::get_template_instantiation_string() const -> std::string
+std::string Vector_Type::get_template_instantiation_string() const
 {
     return get_name();
 }
 
-auto Vector_Type::create_value() const -> std::unique_ptr<IValue>
+std::unique_ptr<IValue> Vector_Type::create_value() const
 {
     return create_specialized_value();
 }
 
-auto Vector_Type::create_specialized_value() const -> std::unique_ptr<value_type>
+std::unique_ptr<Vector_Type::value_type> Vector_Type::create_specialized_value() const
 {
-    return std::unique_ptr<IVector_Value>(new Vector_Value(*this));
+    return std::unique_ptr<IVector_Value>(new Vector_Value(shared_from_this()));
 }
 
 

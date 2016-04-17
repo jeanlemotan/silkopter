@@ -12,9 +12,9 @@ class Initializer_List final : public virtual IInitializer_List
 public:
     Initializer_List(std::vector<std::unique_ptr<IInitializer>> initializers);
 
-    auto get_initializer_count() const -> size_t override;
-    auto get_initializer(size_t idx) const -> IInitializer const& override;
-    auto get_initializer_value() const -> IValue const* override;
+    size_t get_initializer_count() const override;
+    IInitializer const& get_initializer(size_t idx) const override;
+    IValue const* get_initializer_value() const override;
 
 private:
     std::vector<std::unique_ptr<IInitializer>> m_initializers;

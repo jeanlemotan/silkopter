@@ -13,7 +13,7 @@ class IConstant : virtual public ISymbol
 public:
     virtual ~IConstant() = default;
 
-    virtual auto get_value() const -> IValue const& = 0;
+    virtual IValue const& get_value() const = 0;
 };
 
 }

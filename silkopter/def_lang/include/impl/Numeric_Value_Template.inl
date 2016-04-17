@@ -3,54 +3,18 @@ namespace ts
 {
 
 template<typename Traits>
-Numeric_Value_Template<Traits>::Numeric_Value_Template(typename Traits::type_interface const& type)
+Numeric_Value_Template<Traits>::Numeric_Value_Template(std::shared_ptr<typename Traits::type_interface const> type)
     : Value_Template_EP<Traits>(type)
 {
 
 }
 
-namespace detail
-{
-
-template<typename T>
-void set_component(T& value, T const& component_value, size_t idx)
-{
-    TS_ASSERT(idx == 0);
-    value = component_value;
-}
-template<typename T>
-void set_component(vec2<T>& value, T const& component_value, size_t idx)
-{
-    TS_ASSERT(idx < 2);
-    if (idx == 0) value.x = component_value;
-    else if (idx == 1) value.y = component_value;
-}
-template<typename T>
-void set_component(vec3<T>& value, T const& component_value, size_t idx)
-{
-    TS_ASSERT(idx < 3);
-    if (idx == 0) value.x = component_value;
-    else if (idx == 1) value.y = component_value;
-    else if (idx == 2) value.z = component_value;
-}
-template<typename T>
-void set_component(vec4<T>& value, T const& component_value, size_t idx)
-{
-    TS_ASSERT(idx < 4);
-    if (idx == 0) value.x = component_value;
-    else if (idx == 1) value.y = component_value;
-    else if (idx == 2) value.z = component_value;
-    else if (idx == 4) value.w = component_value;
-}
-
-}
-
 template<typename Traits>
-auto Numeric_Value_Template<Traits>::copy_assign(IInitializer const& initializer) -> Result<void>
+Result<void> Numeric_Value_Template<Traits>::copy_assign(IInitializer const& initializer)
 {
     typename Traits::fundamental_type value;
 
-    Numeric_Type_Template<typename Traits::component_implementation_traits> component_type("temp");
+    auto component_type = std::make_shared<Numeric_Type_Template<typename Traits::component_implementation_traits>>("temp");
     Numeric_Value_Template<typename Traits::component_implementation_traits> component_value(component_type);
 
     if (IInitializer_List const* ilist = dynamic_cast<IInitializer_List const*>(&initializer))
@@ -72,6 +36,15 @@ auto Numeric_Value_Template<Traits>::copy_assign(IInitializer const& initializer
                 return Error("Cannot evaluate initializer list, item " + std::to_string(i) + ": " + result.error().what());
             }
             detail::set_component(value, component_value.get_value(), i);
+        }
+
+        if (detail::is_smaller(value, get_specialized_type()->get_min_value()))
+        {
+            return Error("Initializer is smaller than the min value");
+        }
+        if (detail::is_greater(value, get_specialized_type()->get_max_value()))
+        {
+            return Error("Initializer is greater than the max value");
         }
 
         return set_value(value);
@@ -96,10 +69,25 @@ auto Numeric_Value_Template<Traits>::copy_assign(IInitializer const& initializer
 
         detail::set_component(value, component_value.get_value(), 0);
 
+        if (detail::is_smaller(value, get_specialized_type()->get_min_value()))
+        {
+            return Error("Initializer is smaller than the min value");
+        }
+        if (detail::is_greater(value, get_specialized_type()->get_max_value()))
+        {
+            return Error("Initializer is greater than the max value");
+        }
+
         return set_value(value);
     }
 
     return Error("Invalid initialization list");
+}
+
+template<typename Traits>
+std::unique_ptr<IValue> Numeric_Value_Template<Traits>::clone() const
+{
+    return std::unique_ptr<IValue>(new Numeric_Value_Template<Traits>(*this));
 }
 
 }

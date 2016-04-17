@@ -8,12 +8,6 @@ namespace ts
 
 typedef INumeric_Value_Template<Scalar_INumeric_Traits<float>>     IFloat_Value;
 typedef INumeric_Value_Template<Scalar_INumeric_Traits<double>>    IDouble_Value;
-typedef INumeric_Value_Template<Scalar_INumeric_Traits<int8_t>>    IInt8_Value;
-typedef INumeric_Value_Template<Scalar_INumeric_Traits<uint8_t>>   IUInt8_Value;
-typedef INumeric_Value_Template<Scalar_INumeric_Traits<int16_t>>   IInt16_Value;
-typedef INumeric_Value_Template<Scalar_INumeric_Traits<uint16_t>>  IUInt16_Value;
-typedef INumeric_Value_Template<Scalar_INumeric_Traits<int32_t>>   IInt32_Value;
-typedef INumeric_Value_Template<Scalar_INumeric_Traits<uint32_t>>  IUInt32_Value;
 typedef INumeric_Value_Template<Scalar_INumeric_Traits<int64_t>>   IInt64_Value;
 
 typedef INumeric_Value_Template<Vec2_INumeric_Traits<float>>       IVec2f_Value;

@@ -12,13 +12,13 @@ public:
 
     ~Value_Container_EP();
 
-    auto insert_value(size_t idx, std::unique_ptr<IValue>&& value) -> Result<void> override;
-    auto erase_value(size_t idx) -> Result<void> override;
+    Result<void> insert_value(size_t idx, std::unique_ptr<IValue>&& value) override;
+    Result<void> erase_value(size_t idx) override;
 
-    auto get_value_count() const -> size_t override;
+    size_t get_value_count() const override;
 
-    auto get_value(size_t idx) const -> IValue const& override;
-    auto get_value(size_t idx) -> IValue& override;
+    IValue const& get_value(size_t idx) const override;
+    IValue& get_value(size_t idx) override;
 
 private:
     std::vector<std::shared_ptr<IValue>> m_values;

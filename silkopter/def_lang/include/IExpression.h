@@ -14,8 +14,8 @@ class IExpression: public virtual IInitializer
 public:
     virtual ~IExpression() = default;
 
-    virtual auto get_type() const -> IType const& = 0;
-    virtual auto evaluate() const -> std::unique_ptr<IValue> = 0;
+    virtual std::shared_ptr<IType const> get_type() const = 0;
+    virtual std::unique_ptr<IValue> evaluate() const = 0;
 };
 
 }

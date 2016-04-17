@@ -11,7 +11,7 @@ String_Type::String_Type(std::string const& name)
 
 }
 
-auto String_Type::validate_attribute(IAttribute const& attribute) -> Result<void>
+Result<void> String_Type::validate_attribute(IAttribute const& attribute)
 {
     return Error("Attribute " + attribute.get_name() + " not supported");
 }

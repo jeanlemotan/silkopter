@@ -15,26 +15,26 @@ class IDeclaration_Scope
 public:
     virtual ~IDeclaration_Scope() = default;
 
-    virtual auto add_symbol(std::unique_ptr<ISymbol> symbol) -> Result<std::shared_ptr<const ISymbol>> = 0;
+    virtual Result<std::shared_ptr<const ISymbol>> add_symbol(std::shared_ptr<ISymbol> symbol) = 0;
 
-    virtual auto get_symbol_count() -> const size_t = 0;
-    virtual auto get_symbol(size_t idx) const -> std::shared_ptr<const ISymbol> = 0;
-    virtual auto get_symbol(size_t idx) -> std::shared_ptr<ISymbol> = 0;
+    virtual size_t get_symbol_count() const  = 0;
+    virtual std::shared_ptr<const ISymbol> get_symbol(size_t idx) const = 0;
+    virtual std::shared_ptr<ISymbol> get_symbol(size_t idx) = 0;
 
-    virtual auto find_symbol_idx_by_name(std::string const& name) const -> boost::optional<size_t> = 0;
+    virtual boost::optional<size_t> find_symbol_idx_by_name(std::string const& name) const = 0;
 
-    virtual auto find_symbol_by_name(std::string const& name) const -> std::shared_ptr<const ISymbol> = 0;
-    virtual auto find_symbol_by_name(std::string const& name) -> std::shared_ptr<ISymbol> = 0;
-    template<typename T> auto find_specialized_symbol_by_name(std::string const& name) const -> std::shared_ptr<const T>;
-    template<typename T> auto find_specialized_symbol_by_name(std::string const& name) -> std::shared_ptr<T>;
+    virtual std::shared_ptr<const ISymbol> find_symbol_by_name(std::string const& name) const = 0;
+    virtual std::shared_ptr<ISymbol> find_symbol_by_name(std::string const& name) = 0;
+    template<typename T> std::shared_ptr<const T> find_specialized_symbol_by_name(std::string const& name) const;
+    template<typename T> std::shared_ptr<T> find_specialized_symbol_by_name(std::string const& name);
 
-    virtual auto find_symbol_by_path(Symbol_Path const& path) const -> std::shared_ptr<const ISymbol> = 0;
-    virtual auto find_symbol_by_path(Symbol_Path const& path) -> std::shared_ptr<ISymbol> = 0;
-    template<typename T> auto find_specialized_symbol_by_path(Symbol_Path const& path) const -> std::shared_ptr<const T>;
-    template<typename T> auto find_specialized_symbol_by_path(Symbol_Path const& path) -> std::shared_ptr<T>;
+    virtual std::shared_ptr<const ISymbol> find_symbol_by_path(Symbol_Path const& path) const = 0;
+    virtual std::shared_ptr<ISymbol> find_symbol_by_path(Symbol_Path const& path) = 0;
+    template<typename T> std::shared_ptr<const T> find_specialized_symbol_by_path(Symbol_Path const& path) const;
+    template<typename T> std::shared_ptr<T> find_specialized_symbol_by_path(Symbol_Path const& path);
 
-    virtual auto get_parent_scope() const -> IDeclaration_Scope const* const = 0;
-    virtual auto get_parent_scope() -> IDeclaration_Scope* = 0;
+    virtual IDeclaration_Scope const* get_parent_scope() const = 0;
+    virtual IDeclaration_Scope* get_parent_scope() = 0;
 
 //protected:
     virtual void set_parent_scope(IDeclaration_Scope* declaration_scope) = 0;
@@ -42,25 +42,25 @@ public:
 
 
 template<typename T>
-auto IDeclaration_Scope::find_specialized_symbol_by_name(std::string const& name) const -> std::shared_ptr<const T>
+std::shared_ptr<const T> IDeclaration_Scope::find_specialized_symbol_by_name(std::string const& name) const
 {
     return std::dynamic_pointer_cast<T>(find_symbol_by_name(name));
 }
 
 template<typename T>
-auto IDeclaration_Scope::find_specialized_symbol_by_name(std::string const& name) -> std::shared_ptr<T>
+std::shared_ptr<T> IDeclaration_Scope::find_specialized_symbol_by_name(std::string const& name)
 {
     return std::dynamic_pointer_cast<T>(find_symbol_by_name(name));
 }
 
 template<typename T>
-auto IDeclaration_Scope::find_specialized_symbol_by_path(Symbol_Path const& path) const -> std::shared_ptr<const T>
+std::shared_ptr<const T> IDeclaration_Scope::find_specialized_symbol_by_path(Symbol_Path const& path) const
 {
     return std::dynamic_pointer_cast<T>(find_symbol_by_path(path));
 }
 
 template<typename T>
-auto IDeclaration_Scope::find_specialized_symbol_by_path(Symbol_Path const& path) -> std::shared_ptr<T>
+std::shared_ptr<T> IDeclaration_Scope::find_specialized_symbol_by_path(Symbol_Path const& path)
 {
     return std::dynamic_pointer_cast<T>(find_symbol_by_path(path));
 }

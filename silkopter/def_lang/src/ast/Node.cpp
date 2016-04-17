@@ -10,48 +10,48 @@ Node::Node(Type type, ts::Source_Location const& loc)
 {
     m_children.reserve(8);
 }
-auto Node::get_type() const -> Type
+Node::Type Node::get_type() const
 {
     return m_type;
 }
 
-auto Node::get_source_location() const -> ts::Source_Location const&
+ts::Source_Location const& Node::get_source_location() const
 {
     return m_location;
 }
 
-auto Node::copy_children_from(Node const& node) -> Node&
+Node& Node::copy_children_from(Node const& node)
 {
     m_children.reserve(m_children.size() + node.m_children.size());
     std::copy(node.m_children.begin(), node.m_children.end(), std::back_inserter(m_children));
     return *this;
 }
 
-auto Node::move_children_from(Node&& node) -> Node&
+Node& Node::move_children_from(Node&& node)
 {
     m_children.reserve(m_children.size() + node.m_children.size());
     std::move(node.m_children.begin(), node.m_children.end(), std::back_inserter(m_children));
     return *this;
 }
 
-auto Node::add_child(Node const& node) -> Node&
+Node& Node::add_child(Node const& node)
 {
     m_children.push_back(node);
     return *this;
 }
 
-auto Node::get_children() const -> std::vector<Node> const&
+std::vector<Node> const& Node::get_children() const
 {
     return m_children;
 }
 
-auto Node::find_first_child_by_type(Type type) const -> Node const*
+Node const* Node::find_first_child_by_type(Type type) const
 {
     auto it = std::find_if(m_children.begin(), m_children.end(), [&](Node const& child) { return child.get_type() == type; });
     return it != m_children.end() ? &(*it) : nullptr;
 }
 
-auto Node::get_all_children_of_type(Type type) const -> std::vector<Node>
+std::vector<Node> Node::get_all_children_of_type(Type type) const
 {
     std::vector<Node> res;
     res.reserve(m_children.size() / 2);
@@ -65,18 +65,18 @@ auto Node::get_all_children_of_type(Type type) const -> std::vector<Node>
     return res;
 }
 
-auto Node::add_attribute(Attribute const& att) -> Node&
+Node& Node::add_attribute(Attribute const& att)
 {
     m_attributes.push_back(att);
     return *this;
 }
 
-auto Node::get_attributes() const -> std::vector<Attribute> const&
+std::vector<Attribute> const& Node::get_attributes() const
 {
     return m_attributes;
 }
 
-auto Node::find_first_attribute_by_name(std::string const& name) const -> Attribute const*
+Attribute const* Node::find_first_attribute_by_name(std::string const& name) const
 {
     auto it = std::find_if(m_attributes.cbegin(), m_attributes.cend(), [&](Attribute const& attribute)
     {
@@ -86,7 +86,7 @@ auto Node::find_first_attribute_by_name(std::string const& name) const -> Attrib
     return it != m_attributes.cend() ? &(*it) : nullptr;
 }
 
-auto Node::to_string(size_t ident_count, bool deep) const -> std::string
+std::string Node::to_string(size_t ident_count, bool deep) const
 {
     std::string ident(ident_count, ' ');
 

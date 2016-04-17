@@ -18,10 +18,11 @@ class String_Value final : public Value_Template_EP<String_Traits>
 {
 public:
 
-    String_Value(IString_Type const& type);
+    String_Value(std::shared_ptr<IString_Type const> type);
 
     using Value_Template_EP<String_Traits>::copy_assign;
-    auto copy_assign(IInitializer const& initializer) -> Result<void> override;
+    Result<void> copy_assign(IInitializer const& initializer) override;
+    std::unique_ptr<IValue> clone() const override;
 
 private:
 };

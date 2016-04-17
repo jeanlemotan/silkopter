@@ -13,7 +13,7 @@ class IAttribute
 public:
     virtual ~IAttribute() = default;
 
-    virtual auto get_name() const -> std::string = 0;
+    virtual std::string get_name() const = 0;
 };
 
 }

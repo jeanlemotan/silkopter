@@ -5,10 +5,10 @@
 namespace ts
 {
 
-Member::Member(IMember_Def const& member_def)
+Member::Member(std::shared_ptr<IMember_Def const> member_def)
     : m_member_def(member_def)
 {
-    m_value = member_def.get_default_value().clone();
+    m_value = member_def->get_default_value().clone();
 }
 
 Member::~Member()
@@ -16,17 +16,17 @@ Member::~Member()
 
 }
 
-auto Member::get_member_def() const -> IMember_Def const&
+std::shared_ptr<IMember_Def const> Member::get_member_def() const
 {
     return m_member_def;
 }
 
-auto Member::get_value() const -> IValue const&
+IValue const& Member::get_value() const
 {
     return *m_value;
 }
 
-auto Member::get_value() -> IValue&
+IValue& Member::get_value()
 {
     return *m_value;
 }

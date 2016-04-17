@@ -8,26 +8,26 @@ namespace ts
 
 class ISymbol;
 
-class Declaration_Scope_EP : virtual public IDeclaration_Scope, std::enable_shared_from_this<Declaration_Scope_EP>
+class Declaration_Scope_EP : virtual public IDeclaration_Scope
 {
 public:
 
-    auto add_symbol(std::unique_ptr<ISymbol> symbol) -> Result<std::shared_ptr<const ISymbol>> override;
+    Result<std::shared_ptr<const ISymbol>> add_symbol(std::shared_ptr<ISymbol> symbol) override;
 
-    auto get_symbol_count() -> const size_t override;
-    auto get_symbol(size_t idx) const -> std::shared_ptr<const ISymbol> override;
-    auto get_symbol(size_t idx) -> std::shared_ptr<ISymbol> override;
+    size_t get_symbol_count() const override;
+    std::shared_ptr<const ISymbol> get_symbol(size_t idx) const override;
+    std::shared_ptr<ISymbol> get_symbol(size_t idx) override;
 
-    auto find_symbol_idx_by_name(std::string const& name) const -> boost::optional<size_t> override;
+    boost::optional<size_t> find_symbol_idx_by_name(std::string const& name) const override;
 
-    auto find_symbol_by_name(std::string const& name) const -> std::shared_ptr<const ISymbol> override;
-    auto find_symbol_by_name(std::string const& name) -> std::shared_ptr<ISymbol> override;
+    std::shared_ptr<const ISymbol> find_symbol_by_name(std::string const& name) const override;
+    std::shared_ptr<ISymbol> find_symbol_by_name(std::string const& name) override;
 
-    auto find_symbol_by_path(Symbol_Path const& path) const -> std::shared_ptr<const ISymbol> override;
-    auto find_symbol_by_path(Symbol_Path const& path) -> std::shared_ptr<ISymbol> override;
+    std::shared_ptr<const ISymbol> find_symbol_by_path(Symbol_Path const& path) const override;
+    std::shared_ptr<ISymbol> find_symbol_by_path(Symbol_Path const& path) override;
 
-    auto get_parent_scope() const -> IDeclaration_Scope const* const;
-    auto get_parent_scope() -> IDeclaration_Scope*;
+    IDeclaration_Scope const* get_parent_scope() const;
+    IDeclaration_Scope* get_parent_scope();
 
 private:
     void set_parent_scope(IDeclaration_Scope* declaration_scope);

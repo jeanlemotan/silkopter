@@ -4,7 +4,7 @@
 namespace ts
 {
 
-auto Declaration_Scope_EP::add_symbol(std::unique_ptr<ISymbol> symbol) -> Result<std::shared_ptr<const ISymbol>>
+Result<std::shared_ptr<const ISymbol>> Declaration_Scope_EP::add_symbol(std::shared_ptr<ISymbol> symbol)
 {
     if (!symbol)
     {
@@ -29,50 +29,50 @@ void Declaration_Scope_EP::set_parent_scope(IDeclaration_Scope* declaration_scop
 {
     m_parent_scope = declaration_scope;
 }
-auto Declaration_Scope_EP::get_parent_scope() const -> IDeclaration_Scope const* const
+IDeclaration_Scope const* Declaration_Scope_EP::get_parent_scope() const
 {
     return m_parent_scope;
 }
-auto Declaration_Scope_EP::get_parent_scope() -> IDeclaration_Scope*
+IDeclaration_Scope* Declaration_Scope_EP::get_parent_scope()
 {
     return m_parent_scope;
 }
 
-auto Declaration_Scope_EP::get_symbol_count() -> const size_t
+size_t Declaration_Scope_EP::get_symbol_count() const
 {
     return m_symbols.size();
 }
-auto Declaration_Scope_EP::get_symbol(size_t idx) const -> std::shared_ptr<const ISymbol>
+std::shared_ptr<const ISymbol> Declaration_Scope_EP::get_symbol(size_t idx) const
 {
     return m_symbols[idx];
 }
-auto Declaration_Scope_EP::get_symbol(size_t idx) -> std::shared_ptr<ISymbol>
+std::shared_ptr<ISymbol> Declaration_Scope_EP::get_symbol(size_t idx)
 {
     return m_symbols[idx];
 }
 
-auto Declaration_Scope_EP::find_symbol_idx_by_name(std::string const& name) const -> boost::optional<size_t>
+boost::optional<size_t> Declaration_Scope_EP::find_symbol_idx_by_name(std::string const& name) const
 {
     auto it = std::find_if(m_symbols.begin(), m_symbols.end(), [&](std::shared_ptr<ISymbol> const& s) { return s->get_name() == name; });
     return it != m_symbols.end() ? std::distance(m_symbols.begin(), it) : boost::optional<size_t>();
 }
 
-auto Declaration_Scope_EP::find_symbol_by_name(std::string const& name) const -> std::shared_ptr<const ISymbol>
+std::shared_ptr<const ISymbol> Declaration_Scope_EP::find_symbol_by_name(std::string const& name) const
 {
     auto it = std::find_if(m_symbols.begin(), m_symbols.end(), [&](std::shared_ptr<ISymbol> const& s) { return s->get_name() == name; });
     return it != m_symbols.end() ? *it : std::shared_ptr<const ISymbol>();
 }
-auto Declaration_Scope_EP::find_symbol_by_name(std::string const& name) -> std::shared_ptr<ISymbol>
+std::shared_ptr<ISymbol> Declaration_Scope_EP::find_symbol_by_name(std::string const& name)
 {
     auto it = std::find_if(m_symbols.begin(), m_symbols.end(), [&](std::shared_ptr<ISymbol> const& s) { return s->get_name() == name; });
     return it != m_symbols.end() ? *it : std::shared_ptr<ISymbol>();
 }
 
-auto Declaration_Scope_EP::find_symbol_by_path(Symbol_Path const& path) const -> std::shared_ptr<const ISymbol>
+std::shared_ptr<const ISymbol> Declaration_Scope_EP::find_symbol_by_path(Symbol_Path const& path) const
 {
     return const_cast<Declaration_Scope_EP*>(this)->find_symbol_by_path(path);
 }
-auto Declaration_Scope_EP::find_symbol_by_path(Symbol_Path const& path) -> std::shared_ptr<ISymbol>
+std::shared_ptr<ISymbol> Declaration_Scope_EP::find_symbol_by_path(Symbol_Path const& path)
 {
     if (path.empty())
     {

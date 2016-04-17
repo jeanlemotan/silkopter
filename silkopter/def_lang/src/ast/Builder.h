@@ -27,22 +27,22 @@ public:
     Builder();
     ~Builder();
 
-    auto parse(std::string const& filename) -> ts::Result<void>;
+    ts::Result<void> parse(std::string const& filename);
 
-    auto get_ast_root_node() -> Node&;
-    auto get_ast_root_node() const -> Node const&;
+    Node& get_ast_root_node();
+    Node const& get_ast_root_node() const;
 
-    auto compile(ts::Type_System& ts) -> ts::Result<void>;
+    ts::Result<void> compile(ts::Type_System& ts);
 
-    auto get_lexer() -> Lexer&;
+    Lexer& get_lexer();
 
 protected:
-    auto get_filename() const -> std::string;
+    std::string get_filename() const;
 
-    auto get_location() const -> ts::Source_Location;
+    ts::Source_Location get_location() const;
 
-    auto start_file(std::string const& filename) -> ts::Result<void>;
-    auto end_file() -> bool;
+    ts::Result<void> start_file(std::string const& filename);
+    bool end_file();
 
 private:
     Node m_root_node;

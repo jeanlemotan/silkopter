@@ -19,9 +19,9 @@ public:
 
     uint32_t get_line() const;
     uint32_t get_column() const;
-    auto get_file_path() const -> std::string const&;
+    std::string const& get_file_path() const;
 
-    auto to_string() const -> std::string;
+    std::string to_string() const;
 
     bool operator==(const Source_Location& other) const;
     bool operator!=(const Source_Location& other) const;

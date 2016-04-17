@@ -8,15 +8,15 @@ Initializer_List::Initializer_List(std::vector<std::unique_ptr<IInitializer>> in
 {
 }
 
-auto Initializer_List::get_initializer_count() const -> size_t
+size_t Initializer_List::get_initializer_count() const
 {
     return m_initializers.size();
 }
-auto Initializer_List::get_initializer(size_t idx) const -> IInitializer const&
+IInitializer const& Initializer_List::get_initializer(size_t idx) const
 {
     return *m_initializers[idx];
 }
-auto Initializer_List::get_initializer_value() const -> IValue const*
+IValue const* Initializer_List::get_initializer_value() const
 {
     if (m_initializers.size() == 1)
     {

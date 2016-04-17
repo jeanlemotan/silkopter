@@ -12,11 +12,11 @@ Min_Attribute::Min_Attribute(std::unique_ptr<IValue> value)
 Min_Attribute::~Min_Attribute()
 {
 }
-auto Min_Attribute::get_name() const -> std::string
+std::string Min_Attribute::get_name() const
 {
     return "min";
 }
-auto Min_Attribute::get_min_value() const -> IValue const&
+IValue const& Min_Attribute::get_min_value() const
 {
     return *m_value;
 }

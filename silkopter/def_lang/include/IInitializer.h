@@ -12,10 +12,10 @@ class IInitializer
 public:
     virtual ~IInitializer() = default;
 
-    virtual auto get_initializer_value() const -> IValue const* = 0;
+    virtual IValue const* get_initializer_value() const = 0;
 
     template<typename T>
-    auto get_specialized_initializer_value() const -> T const*;
+    T const* get_specialized_initializer_value() const;
 };
 
 }

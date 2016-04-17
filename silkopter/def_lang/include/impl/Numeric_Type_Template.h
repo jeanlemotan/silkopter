@@ -19,15 +19,15 @@ public:
     Numeric_Type_Template(std::string const& name);
 
 protected:
-    auto validate_attribute(IAttribute const& attribute) -> Result<void> override;
+    Result<void> validate_attribute(IAttribute const& attribute) override;
 
-    auto get_min_value() const -> typename Traits::value_interface const*;
-    auto get_max_value() const -> typename Traits::value_interface const*;
-    auto get_decimals() const -> size_t;
+    typename Traits::fundamental_type const& get_min_value() const override;
+    typename Traits::fundamental_type const& get_max_value() const override;
+    size_t get_decimals() const override;
 
 private:
-    typename Traits::value_interface const* m_min_value = nullptr;
-    typename Traits::value_interface const* m_max_value = nullptr;
+    typename Traits::fundamental_type m_min_value = typename Traits::fundamental_type(Traits::min_value);
+    typename Traits::fundamental_type m_max_value = typename Traits::fundamental_type(Traits::max_value);
     size_t m_decimals = 0;
 };
 

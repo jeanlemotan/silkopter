@@ -5,16 +5,16 @@
 namespace ts
 {
 
-Bool_Value::Bool_Value(IBool_Type const& type)
+Bool_Value::Bool_Value(std::shared_ptr<IBool_Type const> type)
     : Value_Template_EP<Bool_Traits>(type)
 {
 }
 
-auto Bool_Value::get_template_instantiation_string() const -> std::string
+std::string Bool_Value::get_template_instantiation_string() const
 {
     return get_value() ? "true" : "false";
 }
-auto Bool_Value::copy_assign(IInitializer const& initializer) -> Result<void>
+Result<void> Bool_Value::copy_assign(IInitializer const& initializer)
 {
     IValue const* value = initializer.get_initializer_value();
     if (!value)
@@ -23,6 +23,11 @@ auto Bool_Value::copy_assign(IInitializer const& initializer) -> Result<void>
     }
 
     return copy_assign(*value);
+}
+
+std::unique_ptr<IValue> Bool_Value::clone() const
+{
+    return std::unique_ptr<IValue>(new Bool_Value(*this));
 }
 
 

@@ -16,19 +16,19 @@ class Member_Def final : virtual public IMember_Def, public Symbol_EP, public At
 {
 public:
 
-    Member_Def(std::string const& name, IType const& type, std::unique_ptr<const IValue> default_value);
+    Member_Def(std::string const& name, std::shared_ptr<IType const> type, std::unique_ptr<const IValue> default_value);
     ~Member_Def();
 
-    auto get_type() const -> IType const&;
-    auto get_default_value() const -> IValue const&;
+    std::shared_ptr<IType const> get_type() const;
+    IValue const& get_default_value() const;
 
-    auto get_ui_name() const -> std::string const&;
+    std::string const& get_ui_name() const;
 
 protected:
-    auto validate_attribute(IAttribute const& attribute) -> Result<void>;
+    Result<void> validate_attribute(IAttribute const& attribute);
 
 private:
-    IType const& m_type;
+    std::shared_ptr<IType const> m_type;
     std::unique_ptr<const IValue> m_default_value;
     std::string m_ui_name;
 };

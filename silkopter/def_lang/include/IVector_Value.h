@@ -13,9 +13,7 @@ class IVector_Value : virtual public IValue, virtual public IValue_Container
 public:
     virtual ~IVector_Value() = default;
 
-    typedef IVector_Type type_interface;
-
-    virtual auto get_specialized_type() const -> type_interface const& = 0;
+    virtual std::shared_ptr<IVector_Type const> get_specialized_type() const = 0;
 };
 
 }

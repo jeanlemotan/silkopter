@@ -13,12 +13,15 @@ class Numeric_Value_Template final : public Value_Template_EP<Traits>
 {
 public:
 
-    Numeric_Value_Template(typename Traits::type_interface const& type);
+    Numeric_Value_Template(std::shared_ptr<typename Traits::type_interface const> type);
 
-    auto copy_assign(IInitializer const& initializer) -> Result<void> override;
+    Result<void> copy_assign(IInitializer const& initializer) override;
+
+    std::unique_ptr<IValue> clone() const override;
 
     using Value_Template_EP<Traits>::copy_assign;
     using Value_Template_EP<Traits>::set_value;
+    using Value_Template_EP<Traits>::get_specialized_type;
 
 private:
 

@@ -9,15 +9,14 @@ namespace ts
 template<typename Traits> class INumeric_Value_Template;
 template<typename Traits> class INumeric_Type_Template;
 
-
 template<class T> struct Scalar_INumeric_Traits
 {
     typedef T fundamental_type;
     typedef T component_type;
     constexpr static size_t component_count = 1;
+    constexpr static bool supports_decimals_attribute = std::is_floating_point<T>::value;
     constexpr static T min_value = std::numeric_limits<T>::lowest();
     constexpr static T max_value = std::numeric_limits<T>::max();
-    constexpr static bool supports_decimals_attribute = std::is_floating_point<T>::value;
     typedef Scalar_INumeric_Traits<component_type> component_interfaces_traits;
     typedef INumeric_Value_Template<Scalar_INumeric_Traits<T>> value_interface;
     typedef INumeric_Type_Template<Scalar_INumeric_Traits<T>> type_interface;
@@ -64,12 +63,6 @@ template<class T> struct Vec4_INumeric_Traits
 
 typedef INumeric_Type_Template<Scalar_INumeric_Traits<float>>     IFloat_Type;
 typedef INumeric_Type_Template<Scalar_INumeric_Traits<double>>    IDouble_Type;
-typedef INumeric_Type_Template<Scalar_INumeric_Traits<int8_t>>    IInt8_Type;
-typedef INumeric_Type_Template<Scalar_INumeric_Traits<uint8_t>>   IUInt8_Type;
-typedef INumeric_Type_Template<Scalar_INumeric_Traits<int16_t>>   IInt16_Type;
-typedef INumeric_Type_Template<Scalar_INumeric_Traits<uint16_t>>  IUInt16_Type;
-typedef INumeric_Type_Template<Scalar_INumeric_Traits<int32_t>>   IInt32_Type;
-typedef INumeric_Type_Template<Scalar_INumeric_Traits<uint32_t>>  IUInt32_Type;
 typedef INumeric_Type_Template<Scalar_INumeric_Traits<int64_t>>   IInt64_Type;
 
 typedef INumeric_Type_Template<Vec2_INumeric_Traits<float>>       IVec2f_Type;

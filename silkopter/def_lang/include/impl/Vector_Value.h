@@ -11,27 +11,27 @@ class Vector_Value final : virtual public IVector_Value, public Value_Container_
 {
 public:
 
-    Vector_Value(IVector_Type const& type);
+    Vector_Value(std::shared_ptr<IVector_Type const> type);
 
-    auto is_equal(IValue const& other) const -> Result<bool> override;
+    Result<bool> is_equal(IValue const& other) const override;
 
-    auto copy_assign(IValue const& other) -> Result<void> override;
-    auto copy_assign(IInitializer const& initializer) -> Result<void> override;
+    Result<void> copy_assign(IValue const& other) override;
+    Result<void> copy_assign(IInitializer const& initializer) override;
 
-    auto clone() const -> std::unique_ptr<IValue> override;
+    std::unique_ptr<IValue> clone() const override;
 
-    auto get_type() const -> IType const& override;
+    std::shared_ptr<IType const> get_type() const override;
 
-    auto parse_from_ui_string(std::string const& str) -> Result<void> override;
-    auto get_ui_string() const -> Result<std::string> override;
+    Result<void> parse_from_ui_string(std::string const& str) override;
+    Result<std::string> get_ui_string() const override;
 
-    auto select(Value_Selector const& selector) const -> IValue const* override;
-    auto select(Value_Selector const& selector) -> IValue* override;
+    IValue const* select(Value_Selector const& selector) const override;
+    IValue* select(Value_Selector const& selector) override;
 
-    auto get_specialized_type() const -> IVector_Type const& override;
+    std::shared_ptr<IVector_Type const> get_specialized_type() const override;
 
 private:
-    IVector_Type const& m_type;
+    std::shared_ptr<IVector_Type const> m_type;
 };
 
 }

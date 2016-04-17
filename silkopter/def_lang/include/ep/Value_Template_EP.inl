@@ -2,14 +2,14 @@ namespace ts
 {
 
 template<typename Traits>
-Value_Template_EP<Traits>::Value_Template_EP(type_interface const& type)
+Value_Template_EP<Traits>::Value_Template_EP(std::shared_ptr<type_interface const> type)
     : m_type(type)
     , m_value()
 {
 }
 
 template<typename Traits>
-auto Value_Template_EP<Traits>::is_equal(IValue const& other) const -> Result<bool>
+Result<bool> Value_Template_EP<Traits>::is_equal(IValue const& other) const
 {
     value_interface const* v = dynamic_cast<const value_interface*>(&other);
     if (!v)
@@ -21,7 +21,7 @@ auto Value_Template_EP<Traits>::is_equal(IValue const& other) const -> Result<bo
 }
 
 template<typename Traits>
-auto Value_Template_EP<Traits>::copy_assign(IValue const& other) -> Result<void>
+Result<void> Value_Template_EP<Traits>::copy_assign(IValue const& other)
 {
     value_interface const* v = dynamic_cast<const value_interface*>(&other);
     if (!v)
@@ -33,7 +33,7 @@ auto Value_Template_EP<Traits>::copy_assign(IValue const& other) -> Result<void>
 }
 
 //template<typename Traits>
-//auto Value_Template_EP<Traits>::copy_assign(IInitializer const& initializer) -> Result<void>
+//Result<void> Value_Template_EP<Traits>::copy_assign(IInitializer const& initializer)
 //{
 //    IValue const* v = dynamic_cast<value_interface>(&other);
 //    if (!v)
@@ -44,57 +44,58 @@ auto Value_Template_EP<Traits>::copy_assign(IValue const& other) -> Result<void>
 //    return set_value(v->get_value());
 //}
 
-template<typename Traits>
-auto Value_Template_EP<Traits>::clone() const -> std::unique_ptr<IValue>
-{
-    std::unique_ptr<value_interface> v = get_specialized_type().create_specialized_value();
-    auto result = v->copy_assign(*this);
-    TS_ASSERT(result == success);
-    return std::move(v);
-}
+//template<typename Traits>
+//std::unique_ptr<IValue> Value_Template_EP<Traits>::clone() const
+//{
+//    std::unique_ptr<value_interface> v = get_specialized_type().create_specialized_value();
+//    auto result = v->copy_assign(*this);
+//    TS_ASSERT(result == success);
+//    return std::move(v);
+////    return std::unique_ptr<IValue>(new Value_Template_EP<Traits>(*this));
+//}
 
 template<typename Traits>
-auto Value_Template_EP<Traits>::get_type() const -> IType const&
+std::shared_ptr<IType const> Value_Template_EP<Traits>::get_type() const
 {
     return m_type;
 }
 
 template<typename Traits>
-auto Value_Template_EP<Traits>::parse_from_ui_string(std::string const& str) -> Result<void>
+Result<void> Value_Template_EP<Traits>::parse_from_ui_string(std::string const& str)
 {
     return Error("Not Supported");
 }
 template<typename Traits>
-auto Value_Template_EP<Traits>::get_ui_string() const -> Result<std::string>
+Result<std::string> Value_Template_EP<Traits>::get_ui_string() const
 {
     return Error("Not Supported");
 }
 
 template<typename Traits>
-auto Value_Template_EP<Traits>::select(Value_Selector const& selector) const -> IValue const*
+IValue const* Value_Template_EP<Traits>::select(Value_Selector const& selector) const
 {
     return nullptr;
 }
 template<typename Traits>
-auto Value_Template_EP<Traits>::select(Value_Selector const& selector) -> IValue*
+IValue* Value_Template_EP<Traits>::select(Value_Selector const& selector)
 {
     return nullptr;
 }
 
 template<typename Traits>
-auto Value_Template_EP<Traits>::get_specialized_type() const -> type_interface const&
+std::shared_ptr<typename Traits::type_interface const> Value_Template_EP<Traits>::get_specialized_type() const
 {
     return m_type;
 }
 
 template<typename Traits>
-auto Value_Template_EP<Traits>::set_value(fundamental_type value) -> Result<void>
+Result<void> Value_Template_EP<Traits>::set_value(fundamental_type value)
 {
     m_value = value;
     return ts::success;
 }
 template<typename Traits>
-auto Value_Template_EP<Traits>::get_value() const -> fundamental_type
+typename Traits::fundamental_type Value_Template_EP<Traits>::get_value() const
 {
     return m_value;
 }

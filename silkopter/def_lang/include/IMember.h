@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include "ISymbol.h"
 
 namespace ts
@@ -13,10 +14,10 @@ class IMember
 public:
     virtual ~IMember() = default;
 
-    virtual auto get_member_def() const -> IMember_Def const& = 0;
+    virtual std::shared_ptr<IMember_Def const> get_member_def() const = 0;
 
-    virtual auto get_value() const -> IValue const& = 0;
-    virtual auto get_value() -> IValue& = 0;
+    virtual IValue const& get_value() const = 0;
+    virtual IValue& get_value() = 0;
 };
 
 }

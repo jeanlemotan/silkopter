@@ -11,8 +11,8 @@ public:
     Decimals_Attribute(size_t decimals);
     ~Decimals_Attribute();
 
-    auto get_name() const -> std::string override;
-    auto get_decimals() const -> size_t;
+    std::string get_name() const override;
+    size_t get_decimals() const;
 
 private:
     size_t m_decimals = 0;

@@ -26,9 +26,9 @@ public:
         return 0;
     }
 
-    auto astyylex() -> yy::parser::symbol_type;
+    yy::parser::symbol_type astyylex();
 
-    auto get_location() const -> yy::location const&;
+    yy::location const& get_location() const;
 
 private:
     yy::location m_location;

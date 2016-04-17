@@ -4,17 +4,17 @@
 namespace ts
 {
 
-Struct_Value::Struct_Value(IStruct_Type const& type)
+Struct_Value::Struct_Value(std::shared_ptr<IStruct_Type const> type)
     : m_type(type)
 {
-    for (size_t i = 0; i < type.get_member_def_count(); i++)
+    for (size_t i = 0; i < type->get_member_def_count(); i++)
     {
-        auto result = add_member(std::unique_ptr<Member>(new Member(type.get_member_def(i))));
+        auto result = add_member(std::unique_ptr<Member>(new Member(type->get_member_def(i))));
         TS_ASSERT(result == success);
     }
 }
 
-auto Struct_Value::is_equal(IValue const& other) const -> Result<bool>
+Result<bool> Struct_Value::is_equal(IValue const& other) const
 {
     IStruct_Value const* v = dynamic_cast<const IStruct_Value*>(&other);
     if (!v)
@@ -22,7 +22,7 @@ auto Struct_Value::is_equal(IValue const& other) const -> Result<bool>
         return Error("incompatible values");
     }
 
-    if (&get_type() != &v->get_type())
+    if (get_type() != v->get_type())
     {
         return Error("incompatible types");
     }
@@ -45,7 +45,7 @@ auto Struct_Value::is_equal(IValue const& other) const -> Result<bool>
     return true;
 }
 
-auto Struct_Value::copy_assign(IValue const& other) -> Result<void>
+Result<void> Struct_Value::copy_assign(IValue const& other)
 {
     IStruct_Value const* v = dynamic_cast<const IStruct_Value*>(&other);
     if (!v)
@@ -53,7 +53,7 @@ auto Struct_Value::copy_assign(IValue const& other) -> Result<void>
         return Error("incompatible values");
     }
 
-    if (&get_type() != &v->get_type())
+    if (get_type() != v->get_type())
     {
         return Error("incompatible types");
     }
@@ -71,40 +71,40 @@ auto Struct_Value::copy_assign(IValue const& other) -> Result<void>
 
     return success;
 }
-auto Struct_Value::copy_assign(IInitializer const& initializer) -> Result<void>
+Result<void> Struct_Value::copy_assign(IInitializer const& initializer)
 {
     return Error("not implemented");
 }
 
-auto Struct_Value::clone() const -> std::unique_ptr<IValue>
+std::unique_ptr<IValue> Struct_Value::clone() const
 {
     return std::unique_ptr<IValue>(new Struct_Value(*this));
 }
 
-auto Struct_Value::get_type() const -> IType const&
+std::shared_ptr<IType const> Struct_Value::get_type() const
 {
     return m_type;
 }
 
-auto Struct_Value::parse_from_ui_string(std::string const& str) -> Result<void>
+Result<void> Struct_Value::parse_from_ui_string(std::string const& str)
 {
     return Error("Not Supported");
 }
-auto Struct_Value::get_ui_string() const -> Result<std::string>
+Result<std::string> Struct_Value::get_ui_string() const
 {
     return Error("Not Supported");
 }
 
-auto Struct_Value::select(Value_Selector const& selector) const -> IValue const*
+IValue const* Struct_Value::select(Value_Selector const& selector) const
 {
     return nullptr;
 }
-auto Struct_Value::select(Value_Selector const& selector) -> IValue*
+IValue* Struct_Value::select(Value_Selector const& selector)
 {
     return nullptr;
 }
 
-auto Struct_Value::get_specialized_type() const -> IStruct_Type const&
+std::shared_ptr<IStruct_Type const> Struct_Value::get_specialized_type() const
 {
     return m_type;
 }

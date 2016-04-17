@@ -10,7 +10,7 @@ class ISymbol
 public:
     virtual ~ISymbol() = default;
 
-    virtual auto get_name() const -> std::string const& = 0;
+    virtual std::string const& get_name() const = 0;
 };
 
 }

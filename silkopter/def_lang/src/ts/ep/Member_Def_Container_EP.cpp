@@ -4,7 +4,7 @@
 namespace ts
 {
 
-auto Member_Def_Container_EP::get_member_def_count() const -> size_t
+size_t Member_Def_Container_EP::get_member_def_count() const
 {
     return m_member_defs.size();
 }
@@ -14,7 +14,7 @@ Member_Def_Container_EP::~Member_Def_Container_EP()
 
 }
 
-auto Member_Def_Container_EP::add_member_def(std::unique_ptr<IMember_Def>&& member_def) -> Result<void>
+Result<void> Member_Def_Container_EP::add_member_def(std::unique_ptr<IMember_Def>&& member_def)
 {
     if (!member_def)
     {
@@ -30,25 +30,25 @@ auto Member_Def_Container_EP::add_member_def(std::unique_ptr<IMember_Def>&& memb
     return success;
 }
 
-auto Member_Def_Container_EP::get_member_def(size_t idx) const -> IMember_Def const&
+std::shared_ptr<IMember_Def const> Member_Def_Container_EP::get_member_def(size_t idx) const
 {
-    return *m_member_defs[idx];
+    return m_member_defs[idx];
 }
-auto Member_Def_Container_EP::get_member_def(size_t idx) -> IMember_Def&
+std::shared_ptr<IMember_Def> Member_Def_Container_EP::get_member_def(size_t idx)
 {
-    return *m_member_defs[idx];
+    return m_member_defs[idx];
 }
 
-auto Member_Def_Container_EP::find_member_def_idx_by_name(std::string const& name) const -> boost::optional<size_t>
+boost::optional<size_t> Member_Def_Container_EP::find_member_def_idx_by_name(std::string const& name) const
 {
     return boost::none;
 }
 
-auto Member_Def_Container_EP::find_member_def_by_name(std::string const& name) const -> IMember_Def const*
+std::shared_ptr<IMember_Def const> Member_Def_Container_EP::find_member_def_by_name(std::string const& name) const
 {
     return nullptr;
 }
-auto Member_Def_Container_EP::find_member_def_by_name(std::string const& name) -> IMember_Def*
+std::shared_ptr<IMember_Def> Member_Def_Container_EP::find_member_def_by_name(std::string const& name)
 {
     return nullptr;
 }

@@ -9,7 +9,7 @@ Value_Container_EP::~Value_Container_EP()
 
 }
 
-auto Value_Container_EP::insert_value(size_t idx, std::unique_ptr<IValue>&& value) -> Result<void>
+Result<void> Value_Container_EP::insert_value(size_t idx, std::unique_ptr<IValue>&& value)
 {
     if (!value)
     {
@@ -25,7 +25,7 @@ auto Value_Container_EP::insert_value(size_t idx, std::unique_ptr<IValue>&& valu
 
     return success;
 }
-auto Value_Container_EP::erase_value(size_t idx) -> Result<void>
+Result<void> Value_Container_EP::erase_value(size_t idx)
 {
     if (idx >= get_value_count())
     {
@@ -37,16 +37,16 @@ auto Value_Container_EP::erase_value(size_t idx) -> Result<void>
     return success;
 }
 
-auto Value_Container_EP::get_value_count() const -> size_t
+size_t Value_Container_EP::get_value_count() const
 {
     return m_values.size();
 }
 
-auto Value_Container_EP::get_value(size_t idx) const -> IValue const&
+IValue const& Value_Container_EP::get_value(size_t idx) const
 {
     return *m_values[idx];
 }
-auto Value_Container_EP::get_value(size_t idx) -> IValue&
+IValue& Value_Container_EP::get_value(size_t idx)
 {
     return *m_values[idx];
 }

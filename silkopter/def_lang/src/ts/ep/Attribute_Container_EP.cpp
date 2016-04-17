@@ -4,12 +4,12 @@
 namespace ts
 {
 
-auto Attribute_Container_EP::get_attribute_count() const -> size_t
+size_t Attribute_Container_EP::get_attribute_count() const
 {
     return m_attributes.size();
 }
 
-auto Attribute_Container_EP::add_attribute(std::unique_ptr<IAttribute>&& attribute) -> Result<void>
+Result<void> Attribute_Container_EP::add_attribute(std::unique_ptr<IAttribute>&& attribute)
 {
     if (!attribute)
     {
@@ -31,25 +31,25 @@ auto Attribute_Container_EP::add_attribute(std::unique_ptr<IAttribute>&& attribu
     return success;
 }
 
-auto Attribute_Container_EP::get_attribute(size_t idx) const -> IAttribute const&
+std::shared_ptr<IAttribute const> Attribute_Container_EP::get_attribute(size_t idx) const
 {
-    return *m_attributes[idx];
+    return m_attributes[idx];
 }
-auto Attribute_Container_EP::get_attribute(size_t idx) -> IAttribute&
+std::shared_ptr<IAttribute> Attribute_Container_EP::get_attribute(size_t idx)
 {
-    return *m_attributes[idx];
+    return m_attributes[idx];
 }
 
-auto Attribute_Container_EP::find_attribute_idx_by_name(std::string const& name) const -> boost::optional<size_t>
+boost::optional<size_t> Attribute_Container_EP::find_attribute_idx_by_name(std::string const& name) const
 {
     return boost::none;
 }
 
-auto Attribute_Container_EP::find_attribute_by_name(std::string const& name) const -> IAttribute const*
+std::shared_ptr<IAttribute const> Attribute_Container_EP::find_attribute_by_name(std::string const& name) const
 {
     return nullptr;
 }
-auto Attribute_Container_EP::find_attribute_by_name(std::string const& name) -> IAttribute*
+std::shared_ptr<IAttribute> Attribute_Container_EP::find_attribute_by_name(std::string const& name)
 {
     return nullptr;
 }

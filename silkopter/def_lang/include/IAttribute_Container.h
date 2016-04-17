@@ -14,23 +14,23 @@ class IAttribute_Container
 public:
     virtual ~IAttribute_Container() = default;
 
-    virtual auto add_attribute(std::unique_ptr<IAttribute>&& att) -> Result<void> = 0;
+    virtual Result<void> add_attribute(std::unique_ptr<IAttribute>&& att) = 0;
 
-    virtual auto get_attribute_count() const -> size_t = 0;
+    virtual size_t get_attribute_count() const = 0;
 
-    virtual auto get_attribute(size_t idx) const -> IAttribute const& = 0;
-    virtual auto get_attribute(size_t idx) -> IAttribute& = 0;
+    virtual std::shared_ptr<IAttribute const> get_attribute(size_t idx) const = 0;
+    virtual std::shared_ptr<IAttribute> get_attribute(size_t idx) = 0;
 
-    virtual auto find_attribute_idx_by_name(std::string const& name) const -> boost::optional<size_t> = 0;
+    virtual boost::optional<size_t> find_attribute_idx_by_name(std::string const& name) const = 0;
 
-    virtual auto find_attribute_by_name(std::string const& name) const -> IAttribute const* = 0;
-    virtual auto find_attribute_by_name(std::string const& name) -> IAttribute* = 0;
-
-    template<typename T>
-    auto find_specialized_attribute_by_name() const -> T const*;
+    virtual std::shared_ptr<IAttribute const> find_attribute_by_name(std::string const& name) const = 0;
+    virtual std::shared_ptr<IAttribute> find_attribute_by_name(std::string const& name) = 0;
 
     template<typename T>
-    auto find_specialized_attribute_by_name() -> T*;
+    std::shared_ptr<T const> find_specialized_attribute_by_name() const;
+
+    template<typename T>
+    std::shared_ptr<T> find_specialized_attribute_by_name();
 };
 
 }

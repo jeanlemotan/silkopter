@@ -14,7 +14,7 @@ Literal::~Literal()
 
 }
 
-auto Literal::get_template_instantiation_string() const -> std::string
+std::string Literal::get_template_instantiation_string() const
 {
     if (ITemplate_Argument const* ta = dynamic_cast<ITemplate_Argument const*>(m_value.get()))
     {
@@ -23,12 +23,12 @@ auto Literal::get_template_instantiation_string() const -> std::string
     return std::string();
 }
 
-auto Literal::get_value() const -> IValue const&
+IValue const& Literal::get_value() const
 {
     return *m_value;
 }
 
-auto Literal::get_initializer_value() const -> IValue const*
+IValue const* Literal::get_initializer_value() const
 {
     return m_value.get();
 }

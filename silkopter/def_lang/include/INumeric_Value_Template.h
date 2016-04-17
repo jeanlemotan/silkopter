@@ -14,10 +14,10 @@ public:
 
     typedef Traits traits;
 
-    virtual auto get_specialized_type() const -> typename traits::type_interface const& = 0;
+    virtual std::shared_ptr<typename traits::type_interface const> get_specialized_type() const = 0;
 
-    virtual auto set_value(typename traits::fundamental_type value) -> Result<void> = 0;
-    virtual auto get_value() const -> typename traits::fundamental_type = 0;
+    virtual Result<void> set_value(typename traits::fundamental_type value) = 0;
+    virtual typename traits::fundamental_type get_value() const = 0;
 };
 
 }

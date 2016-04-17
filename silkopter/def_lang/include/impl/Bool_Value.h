@@ -18,12 +18,14 @@ class Bool_Value final : public Value_Template_EP<Bool_Traits>
 {
 public:
 
-    Bool_Value(IBool_Type const& type);
+    Bool_Value(std::shared_ptr<IBool_Type const> type);
 
-    auto get_template_instantiation_string() const -> std::string override;
+    std::string get_template_instantiation_string() const override;
+
+    std::unique_ptr<IValue> clone() const override;
 
     using Value_Template_EP<Bool_Traits>::copy_assign;
-    auto copy_assign(IInitializer const& initializer) -> Result<void> override;
+    Result<void> copy_assign(IInitializer const& initializer) override;
 
 private:
 };

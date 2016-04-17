@@ -22,7 +22,7 @@ public:
 
     typedef IString_Traits traits;
 
-    virtual auto create_specialized_value() const -> std::unique_ptr<traits::value_interface> = 0;
+    virtual std::unique_ptr<traits::value_interface> create_specialized_value() const = 0;
 };
 
 }

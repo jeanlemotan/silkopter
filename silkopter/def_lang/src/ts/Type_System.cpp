@@ -4,7 +4,9 @@
 #include "impl/All_Numeric_Types.h"
 #include "impl/All_Numeric_Values.h"
 #include "impl/Bool_Type.h"
+#include "impl/Bool_Value.h"
 #include "impl/String_Type.h"
+#include "impl/String_Value.h"
 #include "ITemplate_Argument.h"
 #include "impl/Vector_Type.h"
 
@@ -18,29 +20,12 @@ void Type_System::populate_builtin_types()
     result = add_symbol(std::unique_ptr<IType>(new String_Type("string")));
     TS_ASSERT(result == success);
 
-    result = add_symbol(std::unique_ptr<IType>(new Int8_Type("int8_t")));
-    TS_ASSERT(result == success);
-    result = add_symbol(std::unique_ptr<IType>(new UInt8_Type("uint8_t")));
-    TS_ASSERT(result == success);
-    result = add_symbol(std::unique_ptr<IType>(new Int16_Type("int16_t")));
-    TS_ASSERT(result == success);
-    result = add_symbol(std::unique_ptr<IType>(new UInt16_Type("uint16_t")));
-    TS_ASSERT(result == success);
-    result = add_symbol(std::unique_ptr<IType>(new Int32_Type("int32_t")));
-    TS_ASSERT(result == success);
-    result = add_symbol(std::unique_ptr<IType>(new UInt32_Type("uint32_t")));
-    TS_ASSERT(result == success);
     result = add_symbol(std::unique_ptr<IType>(new Int64_Type("int64_t")));
     TS_ASSERT(result == success);
 
     result = add_symbol(std::unique_ptr<IType>(new Float_Type("float")));
     TS_ASSERT(result == success);
     result = add_symbol(std::unique_ptr<IType>(new Double_Type("double")));
-    TS_ASSERT(result == success);
-
-    result = add_symbol(std::unique_ptr<IType>(new Float_Type("ufloat")));
-    TS_ASSERT(result == success);
-    result = add_symbol(std::unique_ptr<IType>(new Double_Type("udouble")));
     TS_ASSERT(result == success);
 
     {
@@ -103,7 +88,7 @@ void Type_System::populate_builtin_types()
 }
 
 
-auto Type_System::instantiate_template(std::string const& name, std::vector<std::shared_ptr<const ITemplate_Argument>> const& arguments) -> Result<std::shared_ptr<const ITemplated_Type>>
+Result<std::shared_ptr<const ITemplated_Type>> Type_System::instantiate_template(std::string const& name, std::vector<std::shared_ptr<const ITemplate_Argument>> const& arguments)
 {
     if (name.empty())
     {

@@ -14,11 +14,11 @@ Decimals_Attribute::~Decimals_Attribute()
 {
 
 }
-auto Decimals_Attribute::get_name() const -> std::string
+std::string Decimals_Attribute::get_name() const
 {
     return "decimals";
 }
-auto Decimals_Attribute::get_decimals() const -> size_t
+size_t Decimals_Attribute::get_decimals() const
 {
     return m_decimals;
 }

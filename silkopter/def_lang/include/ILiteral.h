@@ -14,7 +14,7 @@ class ILiteral : public virtual ITemplate_Argument, public virtual IInitializer
 public:
     virtual ~ILiteral() = default;
 
-    virtual auto get_value() const -> IValue const& = 0;
+    virtual IValue const& get_value() const = 0;
 };
 
 }

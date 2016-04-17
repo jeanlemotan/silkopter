@@ -41,32 +41,32 @@ Attribute::Attribute(std::string const& name, char const* value)
 {
 }
 
-auto Attribute::get_type() const -> Type
+Attribute::Type Attribute::get_type() const
 {
     return m_type;
 }
-auto Attribute::get_name() const -> std::string const&
+std::string const& Attribute::get_name() const
 {
     return m_name;
 }
 
-auto Attribute::get_as_bool() const -> bool
+bool Attribute::get_as_bool() const
 {
     return boost::get<bool>(m_value);
 }
-auto Attribute::get_as_integral() const -> int64_t
+int64_t Attribute::get_as_integral() const
 {
     return boost::get<int64_t>(m_value);
 }
-auto Attribute::get_as_float() const -> float
+float Attribute::get_as_float() const
 {
     return boost::get<float>(m_value);
 }
-auto Attribute::get_as_double() const -> double
+double Attribute::get_as_double() const
 {
     return boost::get<double>(m_value);
 }
-auto Attribute::get_as_string() const -> std::string const&
+std::string const& Attribute::get_as_string() const
 {
     return boost::get<std::string>(m_value);
 }
@@ -82,6 +82,10 @@ public:
     {
         return v;
     }
+    std::string operator()(float v) const
+    {
+        return std::to_string(v) + "f";
+    }
     template<typename T>
     std::string operator()(T v) const
     {
@@ -89,7 +93,7 @@ public:
     }
 };
 
-auto Attribute::to_string() const -> std::string
+std::string Attribute::to_string() const
 {
     return m_name + ":" + boost::apply_visitor(to_string_visitor(), m_value);
 }

@@ -44,13 +44,13 @@ Builder::~Builder()
 {
 }
 
-auto Builder::get_location() const -> ts::Source_Location
+ts::Source_Location Builder::get_location() const
 {
     yy::location const& loc = m_lexer->get_location();
     return ts::Source_Location(get_filename(), loc.begin.line, loc.begin.column);
 }
 
-auto Builder::parse(std::string const& filename) -> ts::Result<void>
+ts::Result<void> Builder::parse(std::string const& filename)
 {
     auto result = start_file(filename);
     if (result != ts::success)
@@ -63,7 +63,7 @@ auto Builder::parse(std::string const& filename) -> ts::Result<void>
     return ts::success;
 }
 
-auto Builder::start_file(std::string const& filename) -> ts::Result<void>
+ts::Result<void> Builder::start_file(std::string const& filename)
 {
     std::unique_ptr<std::ifstream> fs(new std::ifstream(filename));
     if (!fs->is_open())
@@ -87,7 +87,7 @@ auto Builder::start_file(std::string const& filename) -> ts::Result<void>
     return ts::success;
 }
 
-auto Builder::end_file() -> bool
+bool Builder::end_file()
 {
     if (m_imports.empty())
     {
@@ -103,22 +103,22 @@ auto Builder::end_file() -> bool
     return true;
 }
 
-auto Builder::get_ast_root_node() -> Node&
+Node& Builder::get_ast_root_node()
 {
     return m_root_node;
 }
 
-auto Builder::get_ast_root_node() const -> Node const&
+Node const& Builder::get_ast_root_node() const
 {
     return m_root_node;
 }
 
-auto Builder::get_filename() const -> std::string
+std::string Builder::get_filename() const
 {
     return m_imports.empty() ? std::string() : m_imports.back().filename;
 }
 
-auto Builder::get_lexer() -> Lexer&
+Lexer& Builder::get_lexer()
 {
     return *m_lexer;
 
@@ -126,10 +126,10 @@ auto Builder::get_lexer() -> Lexer&
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static auto populate_declaration_scope(ts::Type_System& ts, ts::IDeclaration_Scope& scope, Node const& node) -> ts::Result<void>;
+static ts::Result<void> populate_declaration_scope(ts::Type_System& ts, ts::IDeclaration_Scope& scope, Node const& node);
 
 
-static auto get_name_identifier(Node const& node) -> ts::Result<std::string>
+static ts::Result<std::string> get_name_identifier(Node const& node)
 {
     Node const* identifier = node.find_first_child_by_type(Node::Type::IDENTIFIER);
     if (!identifier)
@@ -558,7 +558,7 @@ static ts::Result<std::unique_ptr<ts::IMember_Def>> create_member_def(ts::Type_S
     }
 
     std::unique_ptr<ts::IMember_Def> def;
-    def.reset(new ts::Member_Def(name, *type, std::move(value)));
+    def.reset(new ts::Member_Def(name, type, std::move(value)));
 
     auto create_result = create_attributes(ts, *type, *def, node);
     if (create_result != ts::success)
@@ -588,7 +588,7 @@ static ts::Result<void> create_alias(ts::Type_System& ts, ts::IDeclaration_Scope
 
     std::shared_ptr<const ts::IType> type = type_result.extract_payload();
 
-    std::unique_ptr<ts::IType> aliased_type = type->clone(name);
+    std::shared_ptr<ts::IType> aliased_type = type->clone(name);
 
     auto create_result = create_attributes(ts, *aliased_type, *aliased_type, node);
     if (create_result != ts::success)
@@ -695,7 +695,7 @@ static ts::Result<void> populate_declaration_scope(ts::Type_System& ts, ts::IDec
 }
 
 
-auto Builder::compile(ts::Type_System& ts) -> ts::Result<void>
+ts::Result<void> Builder::compile(ts::Type_System& ts)
 {
     if (m_root_node.get_children().empty())
     {

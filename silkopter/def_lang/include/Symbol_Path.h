@@ -12,19 +12,19 @@ public:
     Symbol_Path() = default;
     explicit Symbol_Path(std::string const& str);
 
-    auto is_absolute() const -> bool;
+    bool is_absolute() const;
 
-    auto get_count() const -> size_t;
-    auto get(size_t idx) const -> std::string const&;
+    size_t get_count() const;
+    std::string const& get(size_t idx) const;
 
-    auto empty() const -> bool;
+    bool empty() const;
 
-    auto front() const -> std::string const&;
-    auto pop_front() -> std::string;
+    std::string const& front() const;
+    std::string pop_front();
 //    void push_front(std::string const& string);
 
-    auto back() const -> std::string const&;
-    auto pop_back() -> std::string;
+    std::string const& back() const;
+    std::string pop_back();
 //    void push_back(std::string const& string);
 
 private:

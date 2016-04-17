@@ -11,16 +11,16 @@ class IValue;
 class Member final : public IMember
 {
 public:
-    Member(IMember_Def const& member_def);
+    Member(std::shared_ptr<IMember_Def const> member_def);
     ~Member();
 
-    auto get_member_def() const -> IMember_Def const& override;
+    std::shared_ptr<IMember_Def const> get_member_def() const override;
 
-    auto get_value() const -> IValue const& override;
-    auto get_value() -> IValue& override;
+    IValue const& get_value() const override;
+    IValue& get_value() override;
 
 private:
-    IMember_Def const& m_member_def;
+    std::shared_ptr<IMember_Def const> m_member_def;
     std::unique_ptr<IValue> m_value;
 };
 

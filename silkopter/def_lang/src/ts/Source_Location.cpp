@@ -73,7 +73,7 @@ bool Source_Location::operator!=(const Source_Location& other) const
 //////////////////////////////////////////////////////////////////////////
 
 
-auto Source_Location::to_string() const -> std::string
+std::string Source_Location::to_string() const
 {
     return get_file_path() + ":" + std::to_string(get_line()) + ":" + std::to_string(get_column()) + ": ";
 }

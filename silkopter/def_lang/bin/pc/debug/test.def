@@ -1,15 +1,17 @@
+alias ufloat = float : [ min = 0.f ];
+
 namespace silk
 {
 
 struct Multirotor_Config
 {
-    alias position_t = math::vec3f : [ min = { 1.f, 1.f, 1.f } ];
-
-    alias mass_t = ufloat : [ min = 0.f, max = 32.f, decimals = 7 ];
+    alias mass_t = ufloat : [ max = 32.f, decimals = 7 ];
 
     struct Motor
     {
-        math::vec3f position = {0.f, 0.f, 0.f} : [ ui_name = "Position" ];
+        alias motor_position_t = math::vec3f : [ min = { 0.1f, 0.1f, 0.1f }, max = { 10.0f, 10.0f, 10.0f } ];
+
+        motor_position_t position = {0.1f, 0.1f, 0.1f} : [ ui_name = "Position" ];
         bool clockwise = false : [ ui_name = "Clockwise" ];
     };
     

@@ -10,7 +10,7 @@ namespace ts
 {
 
 template<typename Traits>
-class Type_Template_EP : public virtual Traits::type_interface, public Symbol_EP, public Attribute_Container_EP
+class Type_Template_EP : public virtual Traits::type_interface, public Symbol_EP, public Attribute_Container_EP, public std::enable_shared_from_this<Type_Template_EP<Traits>>
 {
 public:
     typedef typename Traits::value_interface        value_interface;
@@ -21,12 +21,12 @@ public:
 
     Type_Template_EP(std::string const& name);
 
-    auto clone(std::string const& name) const -> std::unique_ptr<IType> override;
+    std::unique_ptr<IType> clone(std::string const& name) const override;
 
-    auto get_template_instantiation_string() const -> std::string override;
+    std::string get_template_instantiation_string() const override;
 
-    auto create_value() const -> std::unique_ptr<IValue> override;
-    auto create_specialized_value() const -> std::unique_ptr<value_interface> override;
+    std::unique_ptr<IValue> create_value() const override;
+    std::unique_ptr<value_interface> create_specialized_value() const override;
 
 private:
 };

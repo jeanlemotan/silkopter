@@ -25,16 +25,16 @@ public:
     Attribute(std::string const& name, std::string const& value);
     Attribute(std::string const& name, char const* value);
 
-    auto get_type() const -> Type;
-    auto get_name() const -> std::string const&;
+    Type get_type() const;
+    std::string const& get_name() const;
 
-    auto get_as_bool() const -> bool;
-    auto get_as_integral() const -> int64_t;
-    auto get_as_float() const -> float;
-    auto get_as_double() const -> double;
-    auto get_as_string() const -> std::string const&;
+    bool get_as_bool() const;
+    int64_t get_as_integral() const;
+    float get_as_float() const;
+    double get_as_double() const;
+    std::string const& get_as_string() const;
 
-    auto to_string() const -> std::string;
+    std::string to_string() const;
 
 private:
     Type m_type;

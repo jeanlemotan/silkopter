@@ -41,12 +41,6 @@ template<class T> struct Vec4_Numeric_Traits : public Vec4_INumeric_Traits<T>
 
 typedef Numeric_Type_Template<Scalar_Numeric_Traits<float>>     Float_Type;
 typedef Numeric_Type_Template<Scalar_Numeric_Traits<double>>    Double_Type;
-typedef Numeric_Type_Template<Scalar_Numeric_Traits<int8_t>>    Int8_Type;
-typedef Numeric_Type_Template<Scalar_Numeric_Traits<uint8_t>>   UInt8_Type;
-typedef Numeric_Type_Template<Scalar_Numeric_Traits<int16_t>>   Int16_Type;
-typedef Numeric_Type_Template<Scalar_Numeric_Traits<uint16_t>>  UInt16_Type;
-typedef Numeric_Type_Template<Scalar_Numeric_Traits<int32_t>>   Int32_Type;
-typedef Numeric_Type_Template<Scalar_Numeric_Traits<uint32_t>>  UInt32_Type;
 typedef Numeric_Type_Template<Scalar_Numeric_Traits<int64_t>>   Int64_Type;
 
 typedef Numeric_Type_Template<Vec2_Numeric_Traits<float>>       Vec2f_Type;
