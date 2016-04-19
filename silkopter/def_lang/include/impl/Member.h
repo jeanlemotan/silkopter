@@ -21,7 +21,7 @@ public:
 
 private:
     std::shared_ptr<IMember_Def const> m_member_def;
-    std::unique_ptr<IValue> m_value;
+    std::shared_ptr<IValue> m_value;
 };
 
 }

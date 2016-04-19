@@ -22,7 +22,7 @@ public:
 
     typedef IBool_Traits traits;
 
-    virtual std::unique_ptr<traits::value_interface> create_specialized_value() const = 0;
+    virtual std::shared_ptr<traits::value_interface> create_specialized_value() const = 0;
 };
 
 }

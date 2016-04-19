@@ -15,7 +15,7 @@ public:
 
     size_t get_attribute_count() const override;
 
-    Result<void> add_attribute(std::unique_ptr<IAttribute>&& attribute) override;
+    Result<void> add_attribute(std::shared_ptr<IAttribute> attribute) override;
 
     std::shared_ptr<IAttribute const> get_attribute(size_t idx) const override;
     std::shared_ptr<IAttribute> get_attribute(size_t idx) override;

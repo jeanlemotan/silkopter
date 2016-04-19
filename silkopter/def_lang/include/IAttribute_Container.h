@@ -14,7 +14,7 @@ class IAttribute_Container
 public:
     virtual ~IAttribute_Container() = default;
 
-    virtual Result<void> add_attribute(std::unique_ptr<IAttribute>&& att) = 0;
+    virtual Result<void> add_attribute(std::shared_ptr<IAttribute> att) = 0;
 
     virtual size_t get_attribute_count() const = 0;
 

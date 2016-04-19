@@ -4,7 +4,7 @@
 namespace ts
 {
 
-Member_Def::Member_Def(std::string const& name, std::shared_ptr<IType const> type, std::unique_ptr<const IValue> default_value)
+Member_Def::Member_Def(std::string const& name, std::shared_ptr<IType const> type, std::shared_ptr<const IValue> default_value)
     : Symbol_EP(name)
     , m_type(type)
     , m_default_value(std::move(default_value))

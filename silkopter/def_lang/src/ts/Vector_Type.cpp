@@ -32,9 +32,9 @@ Result<void> Vector_Type::validate_attribute(IAttribute const& attribute)
     return Error("Attribute " + attribute.get_name() + " not supported");
 }
 
-std::unique_ptr<IType> Vector_Type::clone(std::string const& name) const
+std::shared_ptr<IType> Vector_Type::clone(std::string const& name) const
 {
-    return std::unique_ptr<IType>(new Vector_Type(*this));
+    return std::shared_ptr<IType>(new Vector_Type(*this));
 }
 
 std::string Vector_Type::get_template_instantiation_string() const
@@ -42,14 +42,14 @@ std::string Vector_Type::get_template_instantiation_string() const
     return get_name();
 }
 
-std::unique_ptr<IValue> Vector_Type::create_value() const
+std::shared_ptr<IValue> Vector_Type::create_value() const
 {
     return create_specialized_value();
 }
 
-std::unique_ptr<Vector_Type::value_type> Vector_Type::create_specialized_value() const
+std::shared_ptr<Vector_Type::value_type> Vector_Type::create_specialized_value() const
 {
-    return std::unique_ptr<IVector_Value>(new Vector_Value(shared_from_this()));
+    return std::make_shared<Vector_Value>(shared_from_this());
 }
 
 

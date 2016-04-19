@@ -15,12 +15,12 @@ public:
 
     Result<void> init(std::vector<std::shared_ptr<const ITemplate_Argument>> const& arguments) override;
 
-    std::unique_ptr<IType> clone(std::string const& name) const override;
+    std::shared_ptr<IType> clone(std::string const& name) const override;
 
     std::string get_template_instantiation_string() const override;
 
-    std::unique_ptr<IValue> create_value() const override;
-    std::unique_ptr<value_type> create_specialized_value() const override;
+    std::shared_ptr<IValue> create_value() const override;
+    std::shared_ptr<value_type> create_specialized_value() const override;
 
 protected:
     Result<void> validate_attribute(IAttribute const& attribute) override;

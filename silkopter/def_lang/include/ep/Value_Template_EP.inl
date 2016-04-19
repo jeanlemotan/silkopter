@@ -45,13 +45,13 @@ Result<void> Value_Template_EP<Traits>::copy_assign(IValue const& other)
 //}
 
 //template<typename Traits>
-//std::unique_ptr<IValue> Value_Template_EP<Traits>::clone() const
+//std::shared_ptr<IValue> Value_Template_EP<Traits>::clone() const
 //{
-//    std::unique_ptr<value_interface> v = get_specialized_type().create_specialized_value();
+//    std::shared_ptr<value_interface> v = get_specialized_type().create_specialized_value();
 //    auto result = v->copy_assign(*this);
 //    TS_ASSERT(result == success);
 //    return std::move(v);
-////    return std::unique_ptr<IValue>(new Value_Template_EP<Traits>(*this));
+////    return std::shared_ptr<IValue>(new Value_Template_EP<Traits>(*this));
 //}
 
 template<typename Traits>

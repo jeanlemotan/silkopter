@@ -16,7 +16,7 @@ class Member_Def final : virtual public IMember_Def, public Symbol_EP, public At
 {
 public:
 
-    Member_Def(std::string const& name, std::shared_ptr<IType const> type, std::unique_ptr<const IValue> default_value);
+    Member_Def(std::string const& name, std::shared_ptr<IType const> type, std::shared_ptr<const IValue> default_value);
     ~Member_Def();
 
     std::shared_ptr<IType const> get_type() const;
@@ -29,7 +29,7 @@ protected:
 
 private:
     std::shared_ptr<IType const> m_type;
-    std::unique_ptr<const IValue> m_default_value;
+    std::shared_ptr<const IValue> m_default_value;
     std::string m_ui_name;
 };
 

@@ -18,7 +18,7 @@ public:
     Result<void> copy_assign(IValue const& other) override;
     Result<void> copy_assign(IInitializer const& initializer) override;
 
-    std::unique_ptr<IValue> clone() const override;
+    std::shared_ptr<IValue> clone() const override;
 
     std::shared_ptr<IType const> get_type() const override;
 

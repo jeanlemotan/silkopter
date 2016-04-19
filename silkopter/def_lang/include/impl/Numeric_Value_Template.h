@@ -17,7 +17,7 @@ public:
 
     Result<void> copy_assign(IInitializer const& initializer) override;
 
-    std::unique_ptr<IValue> clone() const override;
+    std::shared_ptr<IValue> clone() const override;
 
     using Value_Template_EP<Traits>::copy_assign;
     using Value_Template_EP<Traits>::set_value;

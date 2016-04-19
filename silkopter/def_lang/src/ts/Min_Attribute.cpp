@@ -5,7 +5,7 @@
 namespace ts
 {
 
-Min_Attribute::Min_Attribute(std::unique_ptr<IValue> value)
+Min_Attribute::Min_Attribute(std::shared_ptr<IValue> value)
     : m_value(std::move(value))
 {
 }

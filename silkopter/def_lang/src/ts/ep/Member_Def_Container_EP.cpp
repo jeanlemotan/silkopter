@@ -14,7 +14,7 @@ Member_Def_Container_EP::~Member_Def_Container_EP()
 
 }
 
-Result<void> Member_Def_Container_EP::add_member_def(std::unique_ptr<IMember_Def>&& member_def)
+Result<void> Member_Def_Container_EP::add_member_def(std::shared_ptr<IMember_Def> member_def)
 {
     if (!member_def)
     {

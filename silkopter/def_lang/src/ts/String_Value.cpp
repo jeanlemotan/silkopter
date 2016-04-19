@@ -21,9 +21,9 @@ Result<void> String_Value::copy_assign(IInitializer const& initializer)
     return copy_assign(*value);
 }
 
-std::unique_ptr<IValue> String_Value::clone() const
+std::shared_ptr<IValue> String_Value::clone() const
 {
-    return std::unique_ptr<IValue>(new String_Value(*this));
+    return std::make_shared<String_Value>(*this);
 }
 
 

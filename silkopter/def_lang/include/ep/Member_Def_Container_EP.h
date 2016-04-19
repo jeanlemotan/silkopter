@@ -14,7 +14,7 @@ public:
 
     size_t get_member_def_count() const override;
 
-    Result<void> add_member_def(std::unique_ptr<IMember_Def>&& member_def) override;
+    Result<void> add_member_def(std::shared_ptr<IMember_Def> member_def) override;
 
     std::shared_ptr<IMember_Def const> get_member_def(size_t idx) const override;
     std::shared_ptr<IMember_Def> get_member_def(size_t idx) override;

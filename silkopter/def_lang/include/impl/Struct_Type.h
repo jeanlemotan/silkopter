@@ -16,12 +16,12 @@ public:
 
     Struct_Type(std::string const& name);
 
-    std::unique_ptr<IType> clone(std::string const& name) const override;
+    std::shared_ptr<IType> clone(std::string const& name) const override;
 
     std::string get_template_instantiation_string() const override;
 
-    std::unique_ptr<IValue> create_value() const override;
-    std::unique_ptr<IStruct_Value> create_specialized_value() const override;
+    std::shared_ptr<IValue> create_value() const override;
+    std::shared_ptr<IStruct_Value> create_specialized_value() const override;
 
 protected:
     Result<void> validate_attribute(IAttribute const& attribute) override;

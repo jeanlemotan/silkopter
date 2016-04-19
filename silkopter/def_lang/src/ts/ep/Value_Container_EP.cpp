@@ -9,7 +9,7 @@ Value_Container_EP::~Value_Container_EP()
 
 }
 
-Result<void> Value_Container_EP::insert_value(size_t idx, std::unique_ptr<IValue>&& value)
+Result<void> Value_Container_EP::insert_value(size_t idx, std::shared_ptr<IValue> value)
 {
     if (!value)
     {

@@ -14,7 +14,7 @@ class IValue_Container
 public:
     virtual ~IValue_Container() = default;
 
-    virtual Result<void> insert_value(size_t idx, std::unique_ptr<IValue>&& value) = 0;
+    virtual Result<void> insert_value(size_t idx, std::shared_ptr<IValue> value) = 0;
     virtual Result<void> erase_value(size_t idx) = 0;
 
     virtual size_t get_value_count() const = 0;

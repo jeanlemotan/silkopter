@@ -15,7 +15,7 @@ size_t Member_Container_EP::get_member_count() const
     return m_members.size();
 }
 
-Result<void> Member_Container_EP::add_member(std::unique_ptr<IMember>&& member)
+Result<void> Member_Container_EP::add_member(std::shared_ptr<IMember> member)
 {
     if (!member)
     {

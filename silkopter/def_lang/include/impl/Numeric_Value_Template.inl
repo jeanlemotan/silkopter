@@ -85,9 +85,9 @@ Result<void> Numeric_Value_Template<Traits>::copy_assign(IInitializer const& ini
 }
 
 template<typename Traits>
-std::unique_ptr<IValue> Numeric_Value_Template<Traits>::clone() const
+std::shared_ptr<IValue> Numeric_Value_Template<Traits>::clone() const
 {
-    return std::unique_ptr<IValue>(new Numeric_Value_Template<Traits>(*this));
+    return std::make_shared<Numeric_Value_Template<Traits>>(*this);
 }
 
 }

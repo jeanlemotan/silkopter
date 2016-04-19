@@ -21,12 +21,12 @@ public:
 
     Type_Template_EP(std::string const& name);
 
-    std::unique_ptr<IType> clone(std::string const& name) const override;
+    std::shared_ptr<IType> clone(std::string const& name) const override;
 
     std::string get_template_instantiation_string() const override;
 
-    std::unique_ptr<IValue> create_value() const override;
-    std::unique_ptr<value_interface> create_specialized_value() const override;
+    std::shared_ptr<IValue> create_value() const override;
+    std::shared_ptr<value_interface> create_specialized_value() const override;
 
 private:
 };

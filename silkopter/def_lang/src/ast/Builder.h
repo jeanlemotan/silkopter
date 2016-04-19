@@ -46,13 +46,13 @@ protected:
 
 private:
     Node m_root_node;
-    std::unique_ptr<Lexer> m_lexer;
-    std::unique_ptr<yy::parser> m_parser;
+    std::shared_ptr<Lexer> m_lexer;
+    std::shared_ptr<yy::parser> m_parser;
 
     struct Import
     {
         std::string filename;
-        std::unique_ptr<std::ifstream> stream;
+        std::shared_ptr<std::ifstream> stream;
     };
 
     std::vector<Import> m_imports;

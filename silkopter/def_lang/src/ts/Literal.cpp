@@ -4,7 +4,7 @@
 namespace ts
 {
 
-Literal::Literal(std::unique_ptr<const IValue> value)
+Literal::Literal(std::shared_ptr<const IValue> value)
     : m_value(std::move(value))
 {
 }

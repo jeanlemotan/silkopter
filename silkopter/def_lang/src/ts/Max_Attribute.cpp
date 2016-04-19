@@ -5,7 +5,7 @@
 namespace ts
 {
 
-Max_Attribute::Max_Attribute(std::unique_ptr<IValue> value)
+Max_Attribute::Max_Attribute(std::shared_ptr<IValue> value)
     : m_value(std::move(value))
 {
 }

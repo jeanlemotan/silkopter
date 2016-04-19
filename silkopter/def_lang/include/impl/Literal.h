@@ -8,7 +8,7 @@ namespace ts
 class Literal final : public virtual ILiteral
 {
 public:
-    Literal(std::unique_ptr<const IValue> value);
+    Literal(std::shared_ptr<const IValue> value);
     ~Literal();
 
     std::string get_template_instantiation_string() const;
@@ -17,7 +17,7 @@ public:
     IValue const* get_initializer_value() const override;
 
 private:
-    std::unique_ptr<const IValue> m_value;
+    std::shared_ptr<const IValue> m_value;
 };
 
 }

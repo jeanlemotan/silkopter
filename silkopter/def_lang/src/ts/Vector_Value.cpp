@@ -94,9 +94,9 @@ Result<void> Vector_Value::copy_assign(IInitializer const& initializer)
     return Error("not implemented");
 }
 
-std::unique_ptr<IValue> Vector_Value::clone() const
+std::shared_ptr<IValue> Vector_Value::clone() const
 {
-    return std::unique_ptr<IValue>(new Vector_Value(*this));
+    return std::make_shared<Vector_Value>(*this);
 }
 
 std::shared_ptr<IType const> Vector_Value::get_type() const

@@ -9,7 +9,7 @@ Struct_Value::Struct_Value(std::shared_ptr<IStruct_Type const> type)
 {
     for (size_t i = 0; i < type->get_member_def_count(); i++)
     {
-        auto result = add_member(std::unique_ptr<Member>(new Member(type->get_member_def(i))));
+        auto result = add_member(std::make_shared<Member>(type->get_member_def(i)));
         TS_ASSERT(result == success);
     }
 }
@@ -76,9 +76,9 @@ Result<void> Struct_Value::copy_assign(IInitializer const& initializer)
     return Error("not implemented");
 }
 
-std::unique_ptr<IValue> Struct_Value::clone() const
+std::shared_ptr<IValue> Struct_Value::clone() const
 {
-    return std::unique_ptr<IValue>(new Struct_Value(*this));
+    return std::make_shared<Struct_Value>(*this);
 }
 
 std::shared_ptr<IType const> Struct_Value::get_type() const

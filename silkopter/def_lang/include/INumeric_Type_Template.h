@@ -13,7 +13,7 @@ public:
 
     typedef Traits traits;
 
-    virtual std::unique_ptr<typename traits::value_interface> create_specialized_value() const = 0;
+    virtual std::shared_ptr<typename traits::value_interface> create_specialized_value() const = 0;
 
     virtual typename Traits::fundamental_type const& get_min_value() const = 0;
     virtual typename Traits::fundamental_type const& get_max_value() const = 0;

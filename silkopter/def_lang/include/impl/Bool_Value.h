@@ -22,7 +22,7 @@ public:
 
     std::string get_template_instantiation_string() const override;
 
-    std::unique_ptr<IValue> clone() const override;
+    std::shared_ptr<IValue> clone() const override;
 
     using Value_Template_EP<Bool_Traits>::copy_assign;
     Result<void> copy_assign(IInitializer const& initializer) override;

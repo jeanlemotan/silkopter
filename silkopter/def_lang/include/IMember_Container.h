@@ -17,7 +17,7 @@ public:
 
     virtual size_t get_member_count() const = 0;
 
-    virtual Result<void> add_member(std::unique_ptr<IMember>&& member) = 0;
+    virtual Result<void> add_member(std::shared_ptr<IMember> member) = 0;
 
     virtual IMember const& get_member(size_t idx) const = 0;
     virtual IMember& get_member(size_t idx) = 0;

@@ -3,7 +3,7 @@
 namespace ts
 {
 
-Initializer_List::Initializer_List(std::vector<std::unique_ptr<IInitializer>> initializers)
+Initializer_List::Initializer_List(std::vector<std::shared_ptr<IInitializer>> initializers)
     : m_initializers(std::move(initializers))
 {
 }

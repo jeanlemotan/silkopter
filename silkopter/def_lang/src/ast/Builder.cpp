@@ -65,7 +65,7 @@ ts::Result<void> Builder::parse(std::string const& filename)
 
 ts::Result<void> Builder::start_file(std::string const& filename)
 {
-    std::unique_ptr<std::ifstream> fs(new std::ifstream(filename));
+    std::shared_ptr<std::ifstream> fs(new std::ifstream(filename));
     if (!fs->is_open())
     {
         return ts::Error("Cannot open file '" + filename + "'");
@@ -226,7 +226,7 @@ static ts::Result<void> create_namespace(ts::Type_System& ts, ts::IDeclaration_S
     ts::Namespace* ns = new ts::Namespace(name);
 
     //add it to the typesystem so we can search for types
-    auto result = scope.add_symbol(std::unique_ptr<ts::ISymbol>(ns));
+    auto result = scope.add_symbol(std::shared_ptr<ts::ISymbol>(ns));
     if (result != ts::success)
     {
         return ts::Error(node.get_source_location().to_string() + result.error().what());
@@ -248,7 +248,7 @@ static ts::Result<void> create_namespace(ts::Type_System& ts, ts::IDeclaration_S
     return ts::success;
 }
 
-static ts::Result<std::unique_ptr<ts::ILiteral>> create_literal(ts::Type_System& ts, Node const& node)
+static ts::Result<std::shared_ptr<ts::ILiteral>> create_literal(ts::Type_System& ts, Node const& node)
 {
     TS_ASSERT(node.get_type() == Node::Type::LITERAL);
 
@@ -258,7 +258,7 @@ static ts::Result<std::unique_ptr<ts::ILiteral>> create_literal(ts::Type_System&
         return ts::Error(node.get_source_location().to_string() + "Literal without a value!");
     }
 
-    std::unique_ptr<ts::IValue> value;
+    std::shared_ptr<ts::IValue> value;
     switch (value_attribute->get_type())
     {
     case Attribute::Type::BOOL:
@@ -266,7 +266,7 @@ static ts::Result<std::unique_ptr<ts::ILiteral>> create_literal(ts::Type_System&
         std::shared_ptr<const ts::IBool_Type> type = ts.find_specialized_symbol_by_name<const ts::IBool_Type>("bool");
         if (type)
         {
-            std::unique_ptr<ts::IBool_Value> v = type->create_specialized_value();
+            std::shared_ptr<ts::IBool_Value> v = type->create_specialized_value();
             if (v)
             {
                 auto result = v->set_value(value_attribute->get_as_bool());
@@ -284,7 +284,7 @@ static ts::Result<std::unique_ptr<ts::ILiteral>> create_literal(ts::Type_System&
         std::shared_ptr<const ts::IDouble_Type> type = ts.find_specialized_symbol_by_name<const ts::IDouble_Type>("double");
         if (type)
         {
-            std::unique_ptr<ts::IDouble_Value> v = type->create_specialized_value();
+            std::shared_ptr<ts::IDouble_Value> v = type->create_specialized_value();
             if (v)
             {
                 auto result = v->set_value(value_attribute->get_as_double());
@@ -302,7 +302,7 @@ static ts::Result<std::unique_ptr<ts::ILiteral>> create_literal(ts::Type_System&
         std::shared_ptr<const ts::IFloat_Type> type = ts.find_specialized_symbol_by_name<const ts::IFloat_Type>("float");
         if (type)
         {
-            std::unique_ptr<ts::IFloat_Value> v = type->create_specialized_value();
+            std::shared_ptr<ts::IFloat_Value> v = type->create_specialized_value();
             if (v)
             {
                 auto result = v->set_value(value_attribute->get_as_float());
@@ -320,7 +320,7 @@ static ts::Result<std::unique_ptr<ts::ILiteral>> create_literal(ts::Type_System&
         std::shared_ptr<const ts::IInt64_Type> type = ts.find_specialized_symbol_by_name<const ts::IInt64_Type>("int64_t");
         if (type)
         {
-            std::unique_ptr<ts::IInt64_Value> v = type->create_specialized_value();
+            std::shared_ptr<ts::IInt64_Value> v = type->create_specialized_value();
             if (v)
             {
                 auto result = v->set_value(value_attribute->get_as_integral());
@@ -338,7 +338,7 @@ static ts::Result<std::unique_ptr<ts::ILiteral>> create_literal(ts::Type_System&
         std::shared_ptr<const ts::IString_Type> type = ts.find_specialized_symbol_by_name<const ts::IString_Type>("string");
         if (type)
         {
-            std::unique_ptr<ts::IString_Value> v = type->create_specialized_value();
+            std::shared_ptr<ts::IString_Value> v = type->create_specialized_value();
             if (v)
             {
                 auto result = v->set_value(value_attribute->get_as_string());
@@ -358,10 +358,10 @@ static ts::Result<std::unique_ptr<ts::ILiteral>> create_literal(ts::Type_System&
         return ts::Error(node.get_source_location().to_string() + "Cannot create literal of type " + value_attribute->to_string());
     }
 
-    return std::unique_ptr<ts::ILiteral>(new ts::Literal(std::move(value)));
+    return std::make_shared<ts::Literal>(std::move(value));
 }
 
-static ts::Result<std::unique_ptr<ts::IInitializer>> create_initializer(ts::Type_System& ts, Node const& node)
+static ts::Result<std::shared_ptr<ts::IInitializer>> create_initializer(ts::Type_System& ts, Node const& node)
 {
     if (node.get_type() == Node::Type::INITIALIZER)
     {
@@ -378,13 +378,13 @@ static ts::Result<std::unique_ptr<ts::IInitializer>> create_initializer(ts::Type
             {
                 return result.error();
             }
-            std::unique_ptr<ts::ILiteral> literal = result.extract_payload();
+            std::shared_ptr<ts::ILiteral> literal = result.extract_payload();
             return std::move(literal);
         }
     }
     else if (node.get_type() == Node::Type::INITIALIZER_LIST)
     {
-        std::vector<std::unique_ptr<ts::IInitializer>> initializers;
+        std::vector<std::shared_ptr<ts::IInitializer>> initializers;
         for (Node const& ch: node.get_children())
         {
             auto result = create_initializer(ts, ch);
@@ -392,11 +392,11 @@ static ts::Result<std::unique_ptr<ts::IInitializer>> create_initializer(ts::Type
             {
                 return result.error();
             }
-            std::unique_ptr<ts::IInitializer> initializer_ch = result.extract_payload();
+            std::shared_ptr<ts::IInitializer> initializer_ch = result.extract_payload();
             initializers.push_back(std::move(initializer_ch));
         }
 
-        return std::unique_ptr<ts::IInitializer>(new ts::Initializer_List(std::move(initializers)));
+        return std::make_shared<ts::Initializer_List>(std::move(initializers));
     }
     else
     {
@@ -419,7 +419,7 @@ static ts::Result<void> create_attributes(ts::Type_System& ts, ts::IType const& 
 
         std::string attribute_name = name_result.payload();
 
-        std::unique_ptr<ts::IInitializer> initializer;
+        std::shared_ptr<ts::IInitializer> initializer;
         Node const* initializer_node = attribute_node.find_first_child_by_type(Node::Type::INITIALIZER);
         if (!initializer_node)
         {
@@ -435,7 +435,7 @@ static ts::Result<void> create_attributes(ts::Type_System& ts, ts::IType const& 
             initializer = result.extract_payload();
         }
 
-        std::unique_ptr<ts::IAttribute> attribute;
+        std::shared_ptr<ts::IAttribute> attribute;
 
         if (attribute_name == "min")
         {
@@ -444,14 +444,14 @@ static ts::Result<void> create_attributes(ts::Type_System& ts, ts::IType const& 
                 return ts::Error(attribute_node.get_source_location().to_string() + "Missing initializer for attribute");
             }
 
-            std::unique_ptr<ts::IValue> value = type.create_value();
+            std::shared_ptr<ts::IValue> value = type.create_value();
             auto result = value->copy_assign(*initializer);
             if (result != ts::success)
             {
                 return ts::Error(attribute_node.get_source_location().to_string() + "Cannot initialize attribute: " + result.error().what());
             }
 
-            attribute = std::unique_ptr<ts::Min_Attribute>(new ts::Min_Attribute(std::move(value)));
+            attribute = std::make_shared<ts::Min_Attribute>(std::move(value));
         }
         else if (attribute_name == "max")
         {
@@ -460,14 +460,14 @@ static ts::Result<void> create_attributes(ts::Type_System& ts, ts::IType const& 
                 return ts::Error(attribute_node.get_source_location().to_string() + "Missing initializer for attribute");
             }
 
-            std::unique_ptr<ts::IValue> value = type.create_value();
+            std::shared_ptr<ts::IValue> value = type.create_value();
             auto result = value->copy_assign(*initializer);
             if (result != ts::success)
             {
                 return ts::Error(attribute_node.get_source_location().to_string() + "Cannot initialize attribute: " + result.error().what());
             }
 
-            attribute = std::unique_ptr<ts::Max_Attribute>(new ts::Max_Attribute(std::move(value)));
+            attribute = std::make_shared<ts::Max_Attribute>(std::move(value));
         }
         else if (attribute_name == "decimals")
         {
@@ -476,25 +476,25 @@ static ts::Result<void> create_attributes(ts::Type_System& ts, ts::IType const& 
                 return ts::Error(attribute_node.get_source_location().to_string() + "Missing initializer for attribute");
             }
 
-            std::unique_ptr<ts::IInt64_Value> value = ts.find_specialized_symbol_by_name<ts::IInt64_Type>("int64_t")->create_specialized_value();
+            std::shared_ptr<ts::IInt64_Value> value = ts.find_specialized_symbol_by_name<ts::IInt64_Type>("int64_t")->create_specialized_value();
             auto result = value->copy_assign(*initializer);
             if (result != ts::success)
             {
                 return ts::Error(attribute_node.get_source_location().to_string() + "Cannot initialize attribute: " + result.error().what());
             }
 
-            attribute = std::unique_ptr<ts::Decimals_Attribute>(new ts::Decimals_Attribute(value->get_value()));
+            attribute = std::make_shared<ts::Decimals_Attribute>(value->get_value());
         }
         else if (attribute_name == "ui_name")
         {
-            std::unique_ptr<ts::IString_Value> value = ts.find_specialized_symbol_by_name<ts::IString_Type>("string")->create_specialized_value();
+            std::shared_ptr<ts::IString_Value> value = ts.find_specialized_symbol_by_name<ts::IString_Type>("string")->create_specialized_value();
             auto result = value->copy_assign(*initializer);
             if (result != ts::success)
             {
                 return ts::Error(attribute_node.get_source_location().to_string() + "Cannot initialize attribute: " + result.error().what());
             }
 
-            attribute = std::unique_ptr<ts::UI_Name_Attribute>(new ts::UI_Name_Attribute(value->get_value()));
+            attribute = std::make_shared<ts::UI_Name_Attribute>(value->get_value());
         }
         else
         {
@@ -512,7 +512,7 @@ static ts::Result<void> create_attributes(ts::Type_System& ts, ts::IType const& 
 }
 
 
-static ts::Result<std::unique_ptr<ts::IMember_Def>> create_member_def(ts::Type_System& ts, ts::IDeclaration_Scope& scope, Node const& node)
+static ts::Result<std::shared_ptr<ts::IMember_Def>> create_member_def(ts::Type_System& ts, ts::IDeclaration_Scope& scope, Node const& node)
 {
     TS_ASSERT(node.get_type() == Node::Type::MEMBER_DECLARATION);
 
@@ -531,7 +531,7 @@ static ts::Result<std::unique_ptr<ts::IMember_Def>> create_member_def(ts::Type_S
 
     std::shared_ptr<const ts::IType> type = type_result.extract_payload();
 
-    std::unique_ptr<ts::IValue> value = type->create_value();
+    std::shared_ptr<ts::IValue> value = type->create_value();
 
     Node const* initializer_node = node.find_first_child_by_type(Node::Type::INITIALIZER);
     if (!initializer_node)
@@ -546,7 +546,7 @@ static ts::Result<std::unique_ptr<ts::IMember_Def>> create_member_def(ts::Type_S
             return ts::Error(initializer_node->get_source_location().to_string() + "Cannot create member initializer: " + initializer_result.error().what());
         }
 
-        std::unique_ptr<ts::IInitializer> initializer = initializer_result.extract_payload();
+        std::shared_ptr<ts::IInitializer> initializer = initializer_result.extract_payload();
         auto result = value->copy_assign(*initializer);
         if (result != ts::success)
         {
@@ -557,8 +557,7 @@ static ts::Result<std::unique_ptr<ts::IMember_Def>> create_member_def(ts::Type_S
     {
     }
 
-    std::unique_ptr<ts::IMember_Def> def;
-    def.reset(new ts::Member_Def(name, type, std::move(value)));
+    std::shared_ptr<ts::IMember_Def> def = std::make_shared<ts::Member_Def>(name, type, std::move(value));
 
     auto create_result = create_attributes(ts, *type, *def, node);
     if (create_result != ts::success)
@@ -619,7 +618,7 @@ static ts::Result<void> create_struct_type(ts::Type_System& ts, ts::IDeclaration
     ts::Struct_Type* type = new ts::Struct_Type(name);
 
     //add it to the typesystem so we can search for types
-    auto result = scope.add_symbol(std::unique_ptr<ts::ISymbol>(type));
+    auto result = scope.add_symbol(std::shared_ptr<ts::ISymbol>(type));
     if (result != ts::success)
     {
         return ts::Error(node.get_source_location().to_string() + result.error().what());
@@ -654,7 +653,7 @@ static ts::Result<void> create_struct_type(ts::Type_System& ts, ts::IDeclaration
                     return result.error();
                 }
 
-                std::unique_ptr<ts::IMember_Def> t = result.extract_payload();
+                std::shared_ptr<ts::IMember_Def> t = result.extract_payload();
                 auto add_result = type->add_member_def(std::move(t));
                 if (add_result != ts::success)
                 {

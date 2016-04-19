@@ -9,7 +9,7 @@ size_t Attribute_Container_EP::get_attribute_count() const
     return m_attributes.size();
 }
 
-Result<void> Attribute_Container_EP::add_attribute(std::unique_ptr<IAttribute>&& attribute)
+Result<void> Attribute_Container_EP::add_attribute(std::shared_ptr<IAttribute> attribute)
 {
     if (!attribute)
     {

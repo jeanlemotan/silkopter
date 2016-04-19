@@ -20,7 +20,7 @@ public:
     virtual Result<void> copy_assign(IValue const& other) = 0;
     virtual Result<void> copy_assign(IInitializer const& initializer) = 0;
 
-    virtual std::unique_ptr<IValue> clone() const = 0;
+    virtual std::shared_ptr<IValue> clone() const = 0;
 
     virtual std::shared_ptr<IType const> get_type() const = 0;
 

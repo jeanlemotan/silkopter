@@ -12,7 +12,7 @@ public:
 
     ~Value_Container_EP();
 
-    Result<void> insert_value(size_t idx, std::unique_ptr<IValue>&& value) override;
+    Result<void> insert_value(size_t idx, std::shared_ptr<IValue> value) override;
     Result<void> erase_value(size_t idx) override;
 
     size_t get_value_count() const override;
