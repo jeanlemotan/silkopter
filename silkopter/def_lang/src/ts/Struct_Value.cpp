@@ -95,11 +95,11 @@ Result<std::string> Struct_Value::get_ui_string() const
     return Error("Not Supported");
 }
 
-IValue const* Struct_Value::select(Value_Selector const& selector) const
+std::shared_ptr<const IValue> Struct_Value::select(Value_Selector const& selector) const
 {
     return nullptr;
 }
-IValue* Struct_Value::select(Value_Selector const& selector)
+std::shared_ptr<IValue> Struct_Value::select(Value_Selector const& selector)
 {
     return nullptr;
 }
