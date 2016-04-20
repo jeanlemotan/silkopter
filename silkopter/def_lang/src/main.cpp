@@ -3,6 +3,7 @@
 
 #include "IStruct_Type.h"
 #include "IStruct_Value.h"
+#include "IString_Value.h"
 #include "Value_Selector.h"
 
 int main(int argc, char **argv)
@@ -27,12 +28,12 @@ int main(int argc, char **argv)
         std::cerr << compile_result.error().what();
     }
 
-    std::shared_ptr<ts::IStruct_Type> type = ts.find_specialized_symbol_by_name<ts::IStruct_Type>("Multirotor_Config");
+    std::shared_ptr<ts::IStruct_Type> type = ts.find_specialized_symbol_by_path<ts::IStruct_Type>(ts::Symbol_Path("silk::Multirotor_Config"));
     TS_ASSERT(type);
 
     std::shared_ptr<ts::IStruct_Value> value = type->create_specialized_value();
 
-    value->select(ts::Value_Selector("name"));
+    std::shared_ptr<ts::IString_Value> name = value->select_specialized<ts::IString_Value>(ts::Value_Selector("name"));
 
     return 0;
 }

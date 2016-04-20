@@ -1,5 +1,6 @@
 #pragma once
 
+#include <string>
 #include <vector>
 
 namespace ts
@@ -18,6 +19,10 @@ public:
     {
         Element();
         ~Element();
+
+        Element(size_t index);
+        Element(std::string const& name);
+
         Element(Element const& other);
         Element(Element&& other);
         Element& operator=(Element const& other);

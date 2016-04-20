@@ -1,4 +1,5 @@
 #include "Value_Selector.h"
+#include "ts_assert.h"
 
 namespace ts
 {
@@ -6,6 +7,18 @@ namespace ts
 Value_Selector::Element::Element()
     : type(Type::NAME)
     , name()
+{
+}
+
+Value_Selector::Element::Element(size_t index)
+    : type(Type::INDEX)
+    , index(index)
+{
+}
+
+Value_Selector::Element::Element(std::string const& name)
+    : type(Type::NAME)
+    , name(name)
 {
 }
 
@@ -94,7 +107,43 @@ Value_Selector::Value_Selector(std::string const& str)
 
 void Value_Selector::parse(std::string const& str)
 {
+    const char* sep = ".[";
 
+    size_t start = 0;
+    size_t off = 0;
+    do
+    {
+        off = str.find_first_of(sep, start);
+        if (off == std::string::npos)
+        {
+            off = str.size();
+        }
+        if (off > start)
+        {
+            Element element(str.substr(start, off - start));
+            push_back(element);
+        }
+
+        if (str[off] == '[')
+        {
+            size_t end = str.find(']', off);
+            if (end == std::string::npos)
+            {
+                TS_ASSERT(false);
+                break;
+            }
+
+            int index = atoi(str.data() + off + 1);
+            Element element(static_cast<size_t>(index));
+            push_back(element);
+
+            start = end + 1;
+        }
+        else
+        {
+            start = off + 1;
+        }
+    } while (start < str.size());
 }
 
 size_t Value_Selector::get_element_count() const

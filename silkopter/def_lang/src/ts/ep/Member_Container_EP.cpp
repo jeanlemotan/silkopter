@@ -31,13 +31,13 @@ Result<void> Member_Container_EP::add_member(std::shared_ptr<IMember> member)
     return success;
 }
 
-IMember const& Member_Container_EP::get_member(size_t idx) const
+std::shared_ptr<const IMember> Member_Container_EP::get_member(size_t idx) const
 {
-    return *m_members[idx];
+    return m_members[idx];
 }
-IMember& Member_Container_EP::get_member(size_t idx)
+std::shared_ptr<IMember> Member_Container_EP::get_member(size_t idx)
 {
-    return *m_members[idx];
+    return m_members[idx];
 }
 
 boost::optional<size_t> Member_Container_EP::find_member_idx_by_name(std::string const& name) const
@@ -45,11 +45,11 @@ boost::optional<size_t> Member_Container_EP::find_member_idx_by_name(std::string
     return boost::none;
 }
 
-IMember const* Member_Container_EP::find_member_by_name(std::string const& name) const
+std::shared_ptr<const IMember> Member_Container_EP::find_member_by_name(std::string const& name) const
 {
     return nullptr;
 }
-IMember* Member_Container_EP::find_member_by_name(std::string const& name)
+std::shared_ptr<IMember> Member_Container_EP::find_member_by_name(std::string const& name)
 {
     return nullptr;
 }

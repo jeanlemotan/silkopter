@@ -27,8 +27,16 @@ public:
     virtual Result<void> parse_from_ui_string(std::string const& str) = 0;
     virtual Result<std::string> get_ui_string() const = 0;
 
-    virtual std::shared_ptr<const IValue> select(Value_Selector const& selector) const = 0;
-    virtual std::shared_ptr<IValue> select(Value_Selector const& selector) = 0;
+    virtual std::shared_ptr<const IValue> select(Value_Selector&& selector) const = 0;
+    virtual std::shared_ptr<IValue> select(Value_Selector&& selector) = 0;
+
+    template<typename T>
+    std::shared_ptr<const T> select_specialized(Value_Selector&& selector) const;
+
+    template<typename T>
+    std::shared_ptr<T> select_specialized(Value_Selector&& selector);
 };
 
 }
+
+#include "impl/IValue.inl"

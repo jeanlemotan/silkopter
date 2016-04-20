@@ -113,11 +113,11 @@ Result<std::string> Vector_Value::get_ui_string() const
     return Error("Not Supported");
 }
 
-std::shared_ptr<const IValue> Vector_Value::select(Value_Selector const& selector) const
+std::shared_ptr<const IValue> Vector_Value::select(Value_Selector&& selector) const
 {
     return nullptr;
 }
-std::shared_ptr<IValue> Vector_Value::select(Value_Selector const& selector)
+std::shared_ptr<IValue> Vector_Value::select(Value_Selector&& selector)
 {
     return nullptr;
 }

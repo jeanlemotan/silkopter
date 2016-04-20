@@ -72,12 +72,12 @@ Result<std::string> Value_Template_EP<Traits>::get_ui_string() const
 }
 
 template<typename Traits>
-std::shared_ptr<const IValue> Value_Template_EP<Traits>::select(Value_Selector const& selector) const
+std::shared_ptr<const IValue> Value_Template_EP<Traits>::select(Value_Selector&& selector) const
 {
     return nullptr;
 }
 template<typename Traits>
-std::shared_ptr<IValue> Value_Template_EP<Traits>::select(Value_Selector const& selector)
+std::shared_ptr<IValue> Value_Template_EP<Traits>::select(Value_Selector&& selector)
 {
     return nullptr;
 }

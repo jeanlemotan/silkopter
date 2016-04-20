@@ -16,8 +16,8 @@ public:
 
     std::shared_ptr<IMember_Def const> get_member_def() const override;
 
-    IValue const& get_value() const override;
-    IValue& get_value() override;
+    std::shared_ptr<const IValue> get_value() const override;
+    std::shared_ptr<IValue> get_value() override;
 
 private:
     std::shared_ptr<IMember_Def const> m_member_def;

@@ -21,14 +21,14 @@ std::shared_ptr<IMember_Def const> Member::get_member_def() const
     return m_member_def;
 }
 
-IValue const& Member::get_value() const
+std::shared_ptr<const IValue> Member::get_value() const
 {
-    return *m_value;
+    return m_value;
 }
 
-IValue& Member::get_value()
+std::shared_ptr<IValue> Member::get_value()
 {
-    return *m_value;
+    return m_value;
 }
 
 
