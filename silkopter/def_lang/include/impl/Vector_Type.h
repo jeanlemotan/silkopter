@@ -19,6 +19,8 @@ public:
 
     std::string get_template_instantiation_string() const override;
 
+    std::shared_ptr<const IType> get_inner_type() const override;
+
     std::shared_ptr<IValue> create_value() const override;
     std::shared_ptr<value_type> create_specialized_value() const override;
 

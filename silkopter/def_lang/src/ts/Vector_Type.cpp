@@ -42,6 +42,11 @@ std::string Vector_Type::get_template_instantiation_string() const
     return get_name();
 }
 
+std::shared_ptr<const IType> Vector_Type::get_inner_type() const
+{
+    return m_inner_type;
+}
+
 std::shared_ptr<IValue> Vector_Type::create_value() const
 {
     return create_specialized_value();

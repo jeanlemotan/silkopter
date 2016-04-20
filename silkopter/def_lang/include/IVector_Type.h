@@ -14,6 +14,8 @@ public:
 
     typedef IVector_Value value_type;
 
+    virtual std::shared_ptr<const IType> get_inner_type() const = 0;
+
     virtual std::shared_ptr<value_type> create_specialized_value() const = 0;
 };
 

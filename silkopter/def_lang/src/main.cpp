@@ -35,5 +35,13 @@ int main(int argc, char **argv)
 
     std::shared_ptr<ts::IString_Value> name = value->select_specialized<ts::IString_Value>(ts::Value_Selector("name"));
 
+    for (volatile size_t i = 0; i < 1000; i++)
+    {
+        size_t idx = i % 10;
+        ts::Value_Selector selector("motors");
+        selector.push_back(ts::Value_Selector::Element(idx));
+        std::shared_ptr<ts::IStruct_Value> motor = value->select_specialized<ts::IStruct_Value>(std::move(selector));
+    }
+
     return 0;
 }

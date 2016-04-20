@@ -17,8 +17,8 @@ public:
 
     size_t get_value_count() const override;
 
-    IValue const& get_value(size_t idx) const override;
-    IValue& get_value(size_t idx) override;
+    std::shared_ptr<const IValue> get_value(size_t idx) const override;
+    std::shared_ptr<IValue> get_value(size_t idx) override;
 
 private:
     std::vector<std::shared_ptr<IValue>> m_values;

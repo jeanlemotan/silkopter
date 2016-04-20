@@ -98,31 +98,7 @@ Result<std::string> Struct_Value::get_ui_string() const
 
 std::shared_ptr<const IValue> Struct_Value::select(Value_Selector&& selector) const
 {
-    TS_ASSERT(!selector.empty());
-    if (selector.empty())
-    {
-        return nullptr;
-    }
-
-    std::shared_ptr<const IMember> member;
-    Value_Selector::Element const& element = selector.front();
-    if (element.type == Value_Selector::Element::Type::NAME)
-    {
-        member = find_member_by_name(element.name);
-    }
-
-    if (!member)
-    {
-        return nullptr;
-    }
-
-    selector.pop_front();
-    if (selector.empty())
-    {
-        return member->get_value();
-    }
-
-    return member->get_value()->select(std::move(selector));
+    return const_cast<Struct_Value*>(this)->select(std::move(selector));
 }
 std::shared_ptr<IValue> Struct_Value::select(Value_Selector&& selector)
 {

@@ -47,11 +47,13 @@ boost::optional<size_t> Member_Container_EP::find_member_idx_by_name(std::string
 
 std::shared_ptr<const IMember> Member_Container_EP::find_member_by_name(std::string const& name) const
 {
-    return nullptr;
+    auto it = std::find_if(m_members.begin(), m_members.end(), [&name](std::shared_ptr<const IMember> const& member) { return member->get_member_def()->get_name() == name; });
+    return it != m_members.end() ? *it : std::shared_ptr<const IMember>();
 }
 std::shared_ptr<IMember> Member_Container_EP::find_member_by_name(std::string const& name)
 {
-    return nullptr;
+    auto it = std::find_if(m_members.begin(), m_members.end(), [&name](std::shared_ptr<IMember> const& member) { return member->get_member_def()->get_name() == name; });
+    return it != m_members.end() ? *it : std::shared_ptr<IMember>();
 }
 
 

@@ -19,8 +19,8 @@ public:
 
     virtual size_t get_value_count() const = 0;
 
-    virtual IValue const& get_value(size_t idx) const = 0;
-    virtual IValue& get_value(size_t idx) = 0;
+    virtual std::shared_ptr<const IValue> get_value(size_t idx) const = 0;
+    virtual std::shared_ptr<IValue> get_value(size_t idx) = 0;
 };
 
 }

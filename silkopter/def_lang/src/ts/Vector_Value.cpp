@@ -1,4 +1,5 @@
 #include "impl/Vector_Value.h"
+#include "Value_Selector.h"
 
 namespace ts
 {
@@ -28,7 +29,7 @@ Result<bool> Vector_Value::is_equal(IValue const& other) const
 
     for (size_t i = 0; i < get_value_count(); i++)
     {
-        auto result = get_value(i).is_equal(v->get_value(i));
+        auto result = get_value(i)->is_equal(*v->get_value(i));
         if (result != success)
         {
             return result;
@@ -58,7 +59,7 @@ Result<void> Vector_Value::copy_assign(IValue const& other)
     size_t common_size = std::min(get_value_count(), v->get_value_count());
     for (size_t i = 0; i < common_size; i++)
     {
-        auto result = get_value(i).copy_assign(v->get_value(i));
+        auto result = get_value(i)->copy_assign(*v->get_value(i));
         if (result != success)
         {
             return result;
@@ -69,7 +70,7 @@ Result<void> Vector_Value::copy_assign(IValue const& other)
     while (get_value_count() < v->get_value_count())
     {
         size_t idx = get_value_count();
-        auto result = insert_value(idx, v->get_value(idx).clone());
+        auto result = insert_value(idx, v->get_value(idx)->clone());
         if (result != success)
         {
             return result;
@@ -115,11 +116,35 @@ Result<std::string> Vector_Value::get_ui_string() const
 
 std::shared_ptr<const IValue> Vector_Value::select(Value_Selector&& selector) const
 {
-    return nullptr;
+    return const_cast<Vector_Value*>(this)->select(std::move(selector));
 }
 std::shared_ptr<IValue> Vector_Value::select(Value_Selector&& selector)
 {
-    return nullptr;
+    TS_ASSERT(!selector.empty());
+    if (selector.empty())
+    {
+        return nullptr;
+    }
+
+    std::shared_ptr<IValue> value;
+    Value_Selector::Element const& element = selector.front();
+    if (element.type == Value_Selector::Element::Type::INDEX)
+    {
+        value = element.index < get_value_count() ? get_value(element.index) : std::shared_ptr<IValue>();
+    }
+
+    if (!value)
+    {
+        return nullptr;
+    }
+
+    selector.pop_front();
+    if (selector.empty())
+    {
+        return value;
+    }
+
+    return value->select(std::move(selector));
 }
 
 std::shared_ptr<IVector_Type const> Vector_Value::get_specialized_type() const

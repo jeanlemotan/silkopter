@@ -42,13 +42,13 @@ size_t Value_Container_EP::get_value_count() const
     return m_values.size();
 }
 
-IValue const& Value_Container_EP::get_value(size_t idx) const
+std::shared_ptr<const IValue> Value_Container_EP::get_value(size_t idx) const
 {
-    return *m_values[idx];
+    return m_values[idx];
 }
-IValue& Value_Container_EP::get_value(size_t idx)
+std::shared_ptr<IValue> Value_Container_EP::get_value(size_t idx)
 {
-    return *m_values[idx];
+    return m_values[idx];
 }
 
 
