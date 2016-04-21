@@ -152,5 +152,57 @@ std::shared_ptr<IVector_Type const> Vector_Value::get_specialized_type() const
     return m_type;
 }
 
+Result<void> Vector_Value::insert_default_value(size_t idx)
+{
+    std::shared_ptr<IValue> value = get_specialized_type()->get_inner_type()->create_value();
+    return insert_value(idx, value);
+}
+
+Result<void> Vector_Value::insert_value(size_t idx, std::shared_ptr<IValue> value)
+{
+    if (!value)
+    {
+        return Error("Cannot insert null value");
+    }
+
+    if (idx > get_value_count())
+    {
+        return Error("Cannot insert beyond the end");
+    }
+    if (value->get_type() != get_specialized_type()->get_inner_type())
+    {
+        return Error("Cannot insert value of type '" + value->get_type()->get_name() + "'. Expected values of type '" + get_specialized_type()->get_inner_type()->get_name() + "'");
+    }
+
+    m_values.insert(m_values.begin() + idx, std::move(value));
+
+    return success;
+}
+Result<void> Vector_Value::erase_value(size_t idx)
+{
+    if (idx >= get_value_count())
+    {
+        return Error("Cannot erase beyond the end");
+    }
+
+    m_values.erase(m_values.begin() + idx);
+
+    return success;
+}
+
+size_t Vector_Value::get_value_count() const
+{
+    return m_values.size();
+}
+
+std::shared_ptr<const IValue> Vector_Value::get_value(size_t idx) const
+{
+    return m_values[idx];
+}
+std::shared_ptr<IValue> Vector_Value::get_value(size_t idx)
+{
+    return m_values[idx];
+}
+
 
 }

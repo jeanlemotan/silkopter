@@ -105,6 +105,11 @@ Value_Selector::Value_Selector(std::string const& str)
     parse(str);
 }
 
+Value_Selector::Value_Selector(char const* str)
+{
+    parse(std::string(str));
+}
+
 void Value_Selector::parse(std::string const& str)
 {
     const char* sep = ".[";
@@ -190,5 +195,25 @@ void Value_Selector::push_back(Element const& element)
     m_elements.push_back(element);
 }
 
+std::string Value_Selector::to_string() const
+{
+    std::string str;
+    for (Element const& element: m_elements)
+    {
+        if (element.type == Element::Type::INDEX)
+        {
+            str += "[" + std::to_string(element.index) + "]";
+        }
+        else
+        {
+            if (!str.empty())
+            {
+                str += ".";
+            }
+            str += element.name;
+        }
+    }
+    return str;
+}
 
 }

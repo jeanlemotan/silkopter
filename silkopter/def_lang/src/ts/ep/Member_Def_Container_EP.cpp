@@ -41,16 +41,19 @@ std::shared_ptr<IMember_Def> Member_Def_Container_EP::get_member_def(size_t idx)
 
 boost::optional<size_t> Member_Def_Container_EP::find_member_def_idx_by_name(std::string const& name) const
 {
-    return boost::none;
+    auto it = std::find_if(m_member_defs.begin(), m_member_defs.end(), [&name](std::shared_ptr<const IMember_Def> const& member_def) { return member_def->get_name() == name; });
+    return it != m_member_defs.end() ? boost::optional<size_t>(std::distance(m_member_defs.begin(), it)) : boost::optional<size_t>();
 }
 
 std::shared_ptr<IMember_Def const> Member_Def_Container_EP::find_member_def_by_name(std::string const& name) const
 {
-    return nullptr;
+    auto it = std::find_if(m_member_defs.begin(), m_member_defs.end(), [&name](std::shared_ptr<const IMember_Def> const& member_def) { return member_def->get_name() == name; });
+    return it != m_member_defs.end() ? *it : std::shared_ptr<const IMember_Def>();
 }
 std::shared_ptr<IMember_Def> Member_Def_Container_EP::find_member_def_by_name(std::string const& name)
 {
-    return nullptr;
+    auto it = std::find_if(m_member_defs.begin(), m_member_defs.end(), [&name](std::shared_ptr<IMember_Def> const& member_def) { return member_def->get_name() == name; });
+    return it != m_member_defs.end() ? *it : std::shared_ptr<IMember_Def>();
 }
 
 

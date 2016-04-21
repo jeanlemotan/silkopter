@@ -1,7 +1,7 @@
 #pragma once
 
 #include "INumeric_Value_Template.h"
-#include "impl/All_INumeric_Types.h"
+#include "All_INumeric_Types.h"
 
 namespace ts
 {

@@ -11,7 +11,8 @@ class Value_Selector final
 public:
 
     Value_Selector() = default;
-    explicit Value_Selector(std::string const& str);
+    Value_Selector(std::string const& str);
+    Value_Selector(char const* str);
 
     //---------------------------------------------------------
 
@@ -60,6 +61,8 @@ public:
     Element const& back() const;
     Element pop_back();
     void push_back(Element const& element);
+
+    std::string to_string() const;
 
 private:
     void parse(std::string const& str);

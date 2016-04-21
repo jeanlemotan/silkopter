@@ -13,6 +13,8 @@
 #include "ITemplated_Type.h"
 #include "IBool_Type.h"
 #include "IBool_Value.h"
+#include "All_INumeric_Types.h"
+#include "All_INumeric_Values.h"
 
 #include "impl/Namespace.h"
 #include "impl/Struct_Type.h"
@@ -24,9 +26,7 @@
 #include "impl/Min_Attribute.h"
 #include "impl/Decimals_Attribute.h"
 #include "impl/UI_Name_Attribute.h"
-#include "impl/All_INumeric_Types.h"
 #include "impl/String_Type.h"
-#include "impl/All_INumeric_Values.h"
 #include "impl/String_Value.h"
 
 

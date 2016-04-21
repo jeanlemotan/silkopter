@@ -1,7 +1,7 @@
 #pragma once
 
 #include "INumeric_Type_Template.h"
-#include "impl/All_INumeric_Values.h"
+#include "All_INumeric_Values.h"
 #include "ep/Type_Template_EP.h"
 #include "IAttribute.h"
 #include "impl/Min_Attribute.h"

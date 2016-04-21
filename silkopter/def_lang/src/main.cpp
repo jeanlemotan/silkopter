@@ -4,7 +4,10 @@
 #include "IStruct_Type.h"
 #include "IStruct_Value.h"
 #include "IString_Value.h"
+#include "IVector_Value.h"
+#include "All_INumeric_Values.h"
 #include "Value_Selector.h"
+#include "Mapper.h"
 
 int main(int argc, char **argv)
 {
@@ -33,14 +36,23 @@ int main(int argc, char **argv)
 
     std::shared_ptr<ts::IStruct_Value> value = type->create_specialized_value();
 
-    std::shared_ptr<ts::IString_Value> name = value->select_specialized<ts::IString_Value>(ts::Value_Selector("name"));
-
-    for (volatile size_t i = 0; i < 1000; i++)
     {
-        size_t idx = i % 10;
-        ts::Value_Selector selector("motors");
-        selector.push_back(ts::Value_Selector::Element(idx));
-        std::shared_ptr<ts::IStruct_Value> motor = value->select_specialized<ts::IStruct_Value>(std::move(selector));
+//        std::shared_ptr<ts::IString_Value> name = value->select_specialized<ts::IString_Value>("name");
+//        auto result = name->set_value("silkopter");
+
+//        std::shared_ptr<ts::IVector_Value> motors = value->select_specialized<ts::IVector_Value>("motors");
+//        result = motors->insert_default_value(0);
+
+//        std::shared_ptr<ts::IVec3f_Value> motor = value->select_specialized<ts::IVec3f_Value>("motors[0].position");
+    }
+
+    {
+        std::string name;
+        float mass;
+        auto result = ts::mapper::get(*value, "name", name);
+        TS_ASSERT(result == ts::success);
+        result = ts::mapper::get(*value, "mass", mass);
+        TS_ASSERT(result == ts::success);
     }
 
     return 0;

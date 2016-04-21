@@ -42,7 +42,8 @@ std::shared_ptr<IMember> Member_Container_EP::get_member(size_t idx)
 
 boost::optional<size_t> Member_Container_EP::find_member_idx_by_name(std::string const& name) const
 {
-    return boost::none;
+    auto it = std::find_if(m_members.begin(), m_members.end(), [&name](std::shared_ptr<const IMember> const& member) { return member->get_member_def()->get_name() == name; });
+    return it != m_members.end() ? boost::optional<size_t>(std::distance(m_members.begin(), it)) : boost::optional<size_t>();
 }
 
 std::shared_ptr<const IMember> Member_Container_EP::find_member_by_name(std::string const& name) const
