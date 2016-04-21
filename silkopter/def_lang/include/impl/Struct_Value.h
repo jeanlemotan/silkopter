@@ -29,6 +29,8 @@ public:
     std::shared_ptr<const IValue> select(Value_Selector&& selector) const override;
     std::shared_ptr<IValue> select(Value_Selector&& selector) override;
 
+    Result<void> serialize(ISerializer& serializer) const override;
+
     std::shared_ptr<IStruct_Type const> get_specialized_type() const override;
 
 private:

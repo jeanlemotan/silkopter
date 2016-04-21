@@ -9,6 +9,7 @@ namespace ts
 
 class IType;
 class Value_Selector;
+class ISerializer;
 
 class IValue
 {
@@ -29,6 +30,8 @@ public:
 
     virtual std::shared_ptr<const IValue> select(Value_Selector&& selector) const = 0;
     virtual std::shared_ptr<IValue> select(Value_Selector&& selector) = 0;
+
+    virtual Result<void> serialize(ISerializer& serializer) const = 0;
 
     template<typename T>
     std::shared_ptr<const T> select_specialized(Value_Selector&& selector) const;

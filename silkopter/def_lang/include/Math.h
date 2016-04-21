@@ -40,11 +40,24 @@ void set_component(T& value, T const& component_value, size_t idx)
     value = component_value;
 }
 template<typename T>
+T get_component(T const& value, size_t idx)
+{
+    TS_ASSERT(idx == 0);
+    return value;
+}
+template<typename T>
 void set_component(vec2<T>& value, T const& component_value, size_t idx)
 {
     TS_ASSERT(idx < 2);
     if (idx == 0) value.x = component_value;
     else if (idx == 1) value.y = component_value;
+}
+template<typename T>
+T get_component(vec2<T> const& value, size_t idx)
+{
+    TS_ASSERT(idx < 2);
+    if (idx == 0) return value.x;
+    return value.y;
 }
 template<typename T>
 void set_component(vec3<T>& value, T const& component_value, size_t idx)
@@ -55,6 +68,14 @@ void set_component(vec3<T>& value, T const& component_value, size_t idx)
     else if (idx == 2) value.z = component_value;
 }
 template<typename T>
+T get_component(vec3<T> const& value, size_t idx)
+{
+    TS_ASSERT(idx < 3);
+    if (idx == 0) return value.x;
+    else if (idx == 1) return value.y;
+    return value.z;
+}
+template<typename T>
 void set_component(vec4<T>& value, T const& component_value, size_t idx)
 {
     TS_ASSERT(idx < 4);
@@ -62,6 +83,15 @@ void set_component(vec4<T>& value, T const& component_value, size_t idx)
     else if (idx == 1) value.y = component_value;
     else if (idx == 2) value.z = component_value;
     else if (idx == 4) value.w = component_value;
+}
+template<typename T>
+T get_component(vec4<T> const& value, size_t idx)
+{
+    TS_ASSERT(idx < 4);
+    if (idx == 0) return value.x;
+    else if (idx == 1) return value.y;
+    else if (idx == 2) return value.z;
+    return value.w;
 }
 
 template<typename T> bool is_smaller(T const& value, T min) { return value < min; }

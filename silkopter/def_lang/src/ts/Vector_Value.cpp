@@ -152,6 +152,11 @@ std::shared_ptr<IVector_Type const> Vector_Value::get_specialized_type() const
     return m_type;
 }
 
+Result<void> Vector_Value::serialize(ISerializer& serializer) const
+{
+    return success;
+}
+
 Result<void> Vector_Value::insert_default_value(size_t idx)
 {
     std::shared_ptr<IValue> value = get_specialized_type()->get_inner_type()->create_value();

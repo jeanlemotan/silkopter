@@ -1,6 +1,8 @@
 #include "impl/Struct_Value.h"
 #include "impl/Member.h"
 #include "Value_Selector.h"
+#include "ISerializer.h"
+#include "IMember_Def.h"
 
 namespace ts
 {
@@ -134,5 +136,28 @@ std::shared_ptr<IStruct_Type const> Struct_Value::get_specialized_type() const
     return m_type;
 }
 
+Result<void> Struct_Value::serialize(ISerializer& serializer) const
+{
+    for (size_t i = 0; i < get_member_count(); i++)
+    {
+        IMember const& member = *get_member(i);
+        auto result = serializer.begin_object(member.get_member_def()->get_name());
+        if (result != success)
+        {
+            return result;
+        }
+        result = member.get_value()->serialize(serializer);
+        if (result != success)
+        {
+            return result;
+        }
+        result = serializer.end_object();
+        if (result != success)
+        {
+            return result;
+        }
+    }
+    return success;
+}
 
 }

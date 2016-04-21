@@ -1,6 +1,7 @@
 #include "IInitializer_List.h"
 #include "ILiteral.h"
 #include "impl/Bool_Value.h"
+#include "ISerializer.h"
 
 namespace ts
 {
@@ -28,6 +29,11 @@ Result<void> Bool_Value::copy_assign(IInitializer const& initializer)
 std::shared_ptr<IValue> Bool_Value::clone() const
 {
     return std::make_shared<Bool_Value>(*this);
+}
+
+Result<void> Bool_Value::serialize(ISerializer& serializer) const
+{
+    return serializer.add_member("value", ISerializer::Value(get_value()));
 }
 
 

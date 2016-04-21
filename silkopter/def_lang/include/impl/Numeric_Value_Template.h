@@ -4,6 +4,7 @@
 #include "INumeric_Value_Template.h"
 #include "ep/Value_Template_EP.h"
 #include "IInitializer_List.h"
+#include "ISerializer.h"
 
 namespace ts
 {
@@ -22,6 +23,9 @@ public:
     using Value_Template_EP<Traits>::copy_assign;
     using Value_Template_EP<Traits>::set_value;
     using Value_Template_EP<Traits>::get_specialized_type;
+
+    Result<void> serialize(ISerializer& serializer) const override;
+
 
 private:
 

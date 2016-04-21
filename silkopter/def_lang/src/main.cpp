@@ -8,6 +8,7 @@
 #include "All_INumeric_Values.h"
 #include "Value_Selector.h"
 #include "Mapper.h"
+#include "JSON_Serializer.h"
 
 int main(int argc, char **argv)
 {
@@ -55,6 +56,14 @@ int main(int argc, char **argv)
         result = ts::mapper::get(*value, "mass", mass);
         TS_ASSERT(result == ts::success);
     }
+
+    ts::JSON_Serializer serializer;
+
+    auto result = value->serialize(serializer);
+    TS_ASSERT(result == ts::success);
+
+    std::cout << serializer.to_string() << "\n";
+    std::cout.flush();
 
     return 0;
 }
