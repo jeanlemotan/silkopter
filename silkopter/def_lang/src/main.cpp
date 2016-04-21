@@ -49,6 +49,7 @@ int main(int argc, char **argv)
     {
         std::string name;
         float mass;
+
         auto result = ts::mapper::get(*value, "name", name);
         TS_ASSERT(result == ts::success);
         result = ts::mapper::get(*value, "mass", mass);
