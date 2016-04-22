@@ -43,9 +43,9 @@ int main(int argc, char **argv)
         TS_ASSERT(result == ts::success);
 
         std::shared_ptr<ts::IVector_Value> motors = value->select_specialized<ts::IVector_Value>("motors");
-        for (size_t i = 0; i < 1000000; i++)
+        for (size_t i = 0; i < 100000; i++)
         {
-            result = motors->insert_default_value(0);
+            result = motors->insert_default_value(motors->get_value_count());
             TS_ASSERT(result == ts::success);
         }
 

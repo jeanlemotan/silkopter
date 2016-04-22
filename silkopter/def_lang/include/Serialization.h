@@ -82,8 +82,6 @@ struct Value final
     size_t get_array_element_count() const;
     Value const& get_array_element_value(size_t idx) const;
 
-    std::string to_string() const;
-
 private:
     typedef std::string string_type;
     typedef std::vector<std::pair<string_type, Value>> object_type;

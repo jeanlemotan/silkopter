@@ -153,7 +153,7 @@ Result<serialization::Value> Struct_Value::serialize() const
         svalue.add_object_member(member.get_member_def()->get_name(), result.extract_payload());
     }
 
-    return svalue;
+    return std::move(svalue);
 }
 
 }

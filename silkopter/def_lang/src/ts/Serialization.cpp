@@ -255,12 +255,12 @@ Value const& Value::get_object_member_value(size_t idx) const
 void Value::add_array_element(Value const& member)
 {
     TS_ASSERT(type == Type::ARRAY);
-    array_value.push_back(member);
+    array_value.emplace_back(member);
 }
 void Value::add_array_element(Value&& member)
 {
     TS_ASSERT(type == Type::ARRAY);
-    array_value.push_back(std::move(member));
+    array_value.emplace_back(std::move(member));
 }
 
 size_t Value::get_array_element_count() const
@@ -320,26 +320,6 @@ void Value::construct()
         break;
     }
     default: break;
-    }
-}
-
-std::string Value::to_string() const
-{
-    switch (type)
-    {
-    case Type::BOOL: return bool_value ? "true" : "false"; break;
-    case Type::INT8: return std::to_string(int8_value); break;
-    case Type::UINT8: return std::to_string(uint8_value); break;
-    case Type::INT16: return std::to_string(int16_value); break;
-    case Type::UINT16: return std::to_string(uint16_value); break;
-    case Type::INT32: return std::to_string(int32_value); break;
-    case Type::UINT32: return std::to_string(uint32_value); break;
-    case Type::INT64: return std::to_string(int64_value); break;
-    case Type::UINT64: return std::to_string(uint64_value); break;
-    case Type::FLOAT: return std::to_string(float_value); break;
-    case Type::DOUBLE: return std::to_string(double_value); break;
-    case Type::STRING: return "\"" + string_value + "\""; break;
-    default: TS_ASSERT(false); break;
     }
 }
 

@@ -167,7 +167,7 @@ Result<serialization::Value> Vector_Value::serialize() const
         svalue.add_array_element(result.extract_payload());
     }
 
-    return svalue;
+    return std::move(svalue);
 }
 
 Result<void> Vector_Value::insert_default_value(size_t idx)
