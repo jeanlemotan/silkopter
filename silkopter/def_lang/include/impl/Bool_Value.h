@@ -27,7 +27,7 @@ public:
     using Value_Template_EP<Bool_Traits>::copy_assign;
     Result<void> copy_assign(IInitializer const& initializer) override;
 
-    Result<void> serialize(ISerializer& serializer) const override;
+    Result<serialization::Value> serialize() const override;
 
 
 private:

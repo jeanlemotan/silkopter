@@ -1,7 +1,7 @@
 #include "impl/String_Value.h"
 #include "IInitializer_List.h"
 #include "ILiteral.h"
-#include "ISerializer.h"
+#include "Serialization.h"
 
 namespace ts
 {
@@ -27,9 +27,9 @@ std::shared_ptr<IValue> String_Value::clone() const
     return std::make_shared<String_Value>(*this);
 }
 
-Result<void> String_Value::serialize(ISerializer& serializer) const
+Result<serialization::Value> String_Value::serialize() const
 {
-    return serializer.add_member("value", ISerializer::Value(get_value()));
+    return serialization::Value(get_value());
 }
 
 

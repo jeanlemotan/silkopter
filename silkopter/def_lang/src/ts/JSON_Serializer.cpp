@@ -1,99 +1,70 @@
 #include "JSON_Serializer.h"
+#include "ts_assert.h"
 
 namespace ts
 {
-
-Result<void> JSON_Serializer::begin_object(std::string const& name, size_t reserve)
+namespace serialization
 {
-    if (name.empty())
+
+void to_json(Value const& value, std::string& dst, size_t ident)
+{
+    switch (value.get_type())
     {
-        return Error("Cannot add an unnamed object");
-    }
-    m_objects_started++;
-
-    m_json += std::string(m_ident, '\t');
-    m_json += "\"";
-    m_json += name;
-    m_json += "\"= {\n";
-    m_ident++;
-    return success;
-}
-
-Result<void> JSON_Serializer::end_object()
-{
-    if (m_objects_started == 0)
+    case Value::Type::BOOL: dst += value.get_as_bool() ? "true" : "false"; break;
+    case Value::Type::INT8: dst += std::to_string(value.get_as_int8()); break;
+    case Value::Type::UINT8: dst += std::to_string(value.get_as_uint8()); break;
+    case Value::Type::INT16: dst += std::to_string(value.get_as_int16()); break;
+    case Value::Type::UINT16: dst += std::to_string(value.get_as_uint16()); break;
+    case Value::Type::INT32: dst += std::to_string(value.get_as_int32()); break;
+    case Value::Type::UINT32: dst += std::to_string(value.get_as_uint32()); break;
+    case Value::Type::INT64: dst += std::to_string(value.get_as_int64()); break;
+    case Value::Type::UINT64: dst += std::to_string(value.get_as_uint64()); break;
+    case Value::Type::FLOAT: dst += std::to_string(value.get_as_float()); break;
+    case Value::Type::DOUBLE: dst += std::to_string(value.get_as_double()); break;
+    case Value::Type::STRING: dst += "\"" + value.get_as_string() + "\""; break;
+    case Value::Type::OBJECT:
     {
-        return Error("No object started");
+        std::string ident_str(ident > 0 ? ident - 1 : ident, '\t');
+        std::string member_ident_str(ident, '\t');
+        dst += "{\n";
+        for (size_t i = 0; i < value.get_object_member_count(); i++)
+        {
+            dst += member_ident_str;
+            dst += "\"";
+            dst += value.get_object_member_name(i);
+            dst += "\"=";
+            to_json(value.get_object_member_value(i), dst, ident + 1);
+            dst += ",\n";
+        }
+        dst += ident_str;
+        dst += "}";
+        break;
     }
-    TS_ASSERT(m_ident > 0);
-    m_ident--;
-    m_json += std::string(m_ident, '\t');
-    m_json += "}\n";
-
-    m_objects_started--;
-    return success;
-}
-
-Result<void> JSON_Serializer::add_member(std::string const& name, Value const& value)
-{
-    if (name.empty())
+    case Value::Type::ARRAY:
     {
-        return Error("Cannot add an unnamed member");
+        std::string ident_str(ident > 0 ? ident - 1 : ident, '\t');
+        std::string element_ident_str(ident, '\t');
+        dst += "[\n";
+        for (size_t i = 0; i < value.get_array_element_count(); i++)
+        {
+            dst += element_ident_str;
+            to_json(value.get_array_element_value(i), dst, ident + 1);
+            dst += ",\n";
+        }
+        dst += ident_str;
+        dst += "]";
+        break;
     }
-    if (m_objects_started == 0)
-    {
-        return Error("No object started");
+    default: TS_ASSERT(false); break;
     }
-    m_json += std::string(m_ident, '\t');
-    m_json += "\"";
-    m_json += name;
-    m_json += "\"=";
-    m_json += value.to_string();
-    m_json += "\n";
-    return success;
 }
 
-Result<void> JSON_Serializer::begin_array(size_t reserve)
+std::string to_json(Value const& value)
 {
-    m_arrays_started++;
-
-    m_json += std::string(m_ident, '\t');
-    m_json += "[\n";
-    m_ident++;
-    return success;
+    std::string json;
+    to_json(value, json, 1);
+    return json;
 }
 
-Result<void> JSON_Serializer::end_array()
-{
-    if (m_arrays_started == 0)
-    {
-        return Error("No array started");
-    }
-    TS_ASSERT(m_ident > 0);
-    m_ident--;
-    m_json += std::string(m_ident, '\t');
-    m_json += "]\n";
-
-    m_arrays_started--;
-    return success;
 }
-
-Result<void> JSON_Serializer::add_element(Value const& value)
-{
-    if (m_arrays_started == 0)
-    {
-        return Error("No array started");
-    }
-    m_json += std::string(m_ident, '\t');
-    m_json += value.to_string();
-    m_json += "\n";
-    return success;
-}
-
-std::string JSON_Serializer::to_string() const
-{
-    return m_json;
-}
-
-
 }

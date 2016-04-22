@@ -24,7 +24,7 @@ public:
     Result<void> copy_assign(IInitializer const& initializer) override;
     std::shared_ptr<IValue> clone() const override;
 
-    Result<void> serialize(ISerializer& serializer) const override;
+    Result<serialization::Value> serialize() const override;
 
 private:
 };

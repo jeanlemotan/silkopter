@@ -38,11 +38,16 @@ int main(int argc, char **argv)
     std::shared_ptr<ts::IStruct_Value> value = type->create_specialized_value();
 
     {
-//        std::shared_ptr<ts::IString_Value> name = value->select_specialized<ts::IString_Value>("name");
-//        auto result = name->set_value("silkopter");
+        std::shared_ptr<ts::IString_Value> name = value->select_specialized<ts::IString_Value>("name");
+        auto result = name->set_value("silkopter");
+        TS_ASSERT(result == ts::success);
 
-//        std::shared_ptr<ts::IVector_Value> motors = value->select_specialized<ts::IVector_Value>("motors");
-//        result = motors->insert_default_value(0);
+        std::shared_ptr<ts::IVector_Value> motors = value->select_specialized<ts::IVector_Value>("motors");
+        for (size_t i = 0; i < 1000000; i++)
+        {
+            result = motors->insert_default_value(0);
+            TS_ASSERT(result == ts::success);
+        }
 
 //        std::shared_ptr<ts::IVec3f_Value> motor = value->select_specialized<ts::IVec3f_Value>("motors[0].position");
     }
@@ -57,12 +62,10 @@ int main(int argc, char **argv)
         TS_ASSERT(result == ts::success);
     }
 
-    ts::JSON_Serializer serializer;
-
-    auto result = value->serialize(serializer);
+    auto result = value->serialize();
     TS_ASSERT(result == ts::success);
 
-    std::cout << serializer.to_string() << "\n";
+    std::cout << ts::serialization::to_json(result.payload()) << "\n";
     std::cout.flush();
 
     return 0;

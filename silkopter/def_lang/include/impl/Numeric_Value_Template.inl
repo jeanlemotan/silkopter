@@ -91,38 +91,24 @@ std::shared_ptr<IValue> Numeric_Value_Template<Traits>::clone() const
 }
 
 template<typename Traits>
-Result<void> Numeric_Value_Template<Traits>::serialize(ISerializer& serializer) const
+Result<serialization::Value> Numeric_Value_Template<Traits>::serialize() const
 {
     if (Traits::component_count == 1)
     {
-        return serializer.add_member("value", ISerializer::Value(detail::get_component(this->get_value(), 0)));
+        return serialization::Value(detail::get_component(this->get_value(), 0));
     }
     else
     {
-        auto result = serializer.begin_object("value", Traits::component_count);
-        if (result != success)
-        {
-            return result;
-        }
+        serialization::Value svalue(serialization::Value::Type::OBJECT);
 
         for (size_t i = 0; i < Traits::component_count; i++)
         {
             const char* name = Traits::component_names[i];
-            result = serializer.add_member(name, ISerializer::Value(detail::get_component(this->get_value(), i)));
-            if (result != success)
-            {
-                return result;
-            }
+            svalue.add_object_member(name, serialization::Value(detail::get_component(this->get_value(), i)));
         }
 
-        result = serializer.end_object();
-        if (result != success)
-        {
-            return result;
-        }
+        return std::move(svalue);
     }
-
-    return success;
 }
 
 }

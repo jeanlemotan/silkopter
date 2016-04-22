@@ -1,5 +1,6 @@
 #include "impl/Vector_Value.h"
 #include "Value_Selector.h"
+#include "Serialization.h"
 
 namespace ts
 {
@@ -152,9 +153,21 @@ std::shared_ptr<IVector_Type const> Vector_Value::get_specialized_type() const
     return m_type;
 }
 
-Result<void> Vector_Value::serialize(ISerializer& serializer) const
+Result<serialization::Value> Vector_Value::serialize() const
 {
-    return success;
+    serialization::Value svalue(serialization::Value::Type::ARRAY);
+
+    for (size_t i = 0; i < get_value_count(); i++)
+    {
+        auto result = get_value(i)->serialize();
+        if (result != success)
+        {
+            return result;
+        }
+        svalue.add_array_element(result.extract_payload());
+    }
+
+    return svalue;
 }
 
 Result<void> Vector_Value::insert_default_value(size_t idx)
