@@ -34,24 +34,25 @@ struct Value final
 
     ~Value();
 
-    Value(Type      type);
-    Value(bool      value);
-    Value(int8_t    value);
-    Value(uint8_t   value);
-    Value(int16_t   value);
-    Value(uint16_t  value);
-    Value(int32_t   value);
-    Value(uint32_t  value);
-    Value(int64_t   value);
-    Value(uint64_t  value);
-    Value(float     value);
-    Value(double    value);
-    Value(std::string const& value);
+    Value(Type      type) noexcept;
+    Value(bool      value) noexcept;
+    Value(int8_t    value) noexcept;
+    Value(uint8_t   value) noexcept;
+    Value(int16_t   value) noexcept;
+    Value(uint16_t  value) noexcept;
+    Value(int32_t   value) noexcept;
+    Value(uint32_t  value) noexcept;
+    Value(int64_t   value) noexcept;
+    Value(uint64_t  value) noexcept;
+    Value(float     value) noexcept;
+    Value(double    value) noexcept;
+    Value(std::string const& value) noexcept;
+    Value(std::string&& value) noexcept;
 
-    Value(Value const& other);
-    Value(Value&& other);
-    Value& operator=(Value const& other);
-    Value& operator=(Value&& other);
+    Value(Value const& other) noexcept;
+    Value(Value&& other) noexcept;
+    Value& operator=(Value const& other) noexcept;
+    Value& operator=(Value&& other) noexcept;
 
     //----------------------
 
@@ -69,9 +70,11 @@ struct Value final
     float       get_as_float() const;
     double      get_as_double() const;
     std::string const& get_as_string() const;
+    std::string&& extract_as_string();
 
     void add_object_member(std::string const& name, Value const& member);
     void add_object_member(std::string const& name, Value&& member);
+    void add_object_member(std::string&& name, Value&& member);
 
     size_t get_object_member_count() const;
     std::string const& get_object_member_name(size_t idx) const;

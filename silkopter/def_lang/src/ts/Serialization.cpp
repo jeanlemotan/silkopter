@@ -11,73 +11,77 @@ Value::~Value()
     destruct();
 }
 
-Value::Value(Type type)
+Value::Value(Type type) noexcept
     : type(type)
 {
     construct();
 }
-Value::Value(bool        value)
+Value::Value(bool        value) noexcept
     : type(Type::BOOL)
     , bool_value(value)
 {
 }
-Value::Value(int8_t      value)
+Value::Value(int8_t      value) noexcept
     : type(Type::INT8)
     , int8_value(value)
 {
 }
-Value::Value(uint8_t     value)
+Value::Value(uint8_t     value) noexcept
     : type(Type::UINT8)
     , uint8_value(value)
 {
 }
-Value::Value(int16_t     value)
+Value::Value(int16_t     value) noexcept
     : type(Type::INT16)
     , int16_value(value)
 {
 }
-Value::Value(uint16_t    value)
+Value::Value(uint16_t    value) noexcept
     : type(Type::UINT16)
     , uint16_value(value)
 {
 }
-Value::Value(int32_t     value)
+Value::Value(int32_t     value) noexcept
     : type(Type::INT32)
     , int32_value(value)
 {
 }
-Value::Value(uint32_t    value)
+Value::Value(uint32_t    value) noexcept
     : type(Type::UINT32)
     , uint32_value(value)
 {
 }
-Value::Value(int64_t     value)
+Value::Value(int64_t     value) noexcept
     : type(Type::INT64)
     , int64_value(value)
 {
 }
-Value::Value(uint64_t    value)
+Value::Value(uint64_t    value) noexcept
     : type(Type::UINT64)
     , uint64_value(value)
 {
 }
-Value::Value(float       value)
+Value::Value(float       value) noexcept
     : type(Type::FLOAT)
     , float_value(value)
 {
 }
-Value::Value(double      value)
+Value::Value(double      value) noexcept
     : type(Type::DOUBLE)
     , double_value(value)
 {
 }
-Value::Value(std::string const& value)
+Value::Value(std::string const& value) noexcept
     : type(Type::STRING)
     , string_value(value)
 {
 }
-
-Value::Value(Value const& other)
+Value::Value(std::string&& value) noexcept
+    : type(Type::STRING)
+    , string_value(std::move(value))
+{
+}
+Value::Value(Value const& other) noexcept
     : type(other.type)
 {
     construct();
@@ -102,7 +106,7 @@ Value::Value(Value const& other)
     }
 }
 
-Value::Value(Value&& other)
+Value::Value(Value&& other) noexcept
     : type(other.type)
 {
     construct();
@@ -126,13 +130,13 @@ Value::Value(Value&& other)
     default: TS_ASSERT(false); break;
     }
 }
-Value& Value::operator=(Value const& other)
+Value& Value::operator=(Value const& other) noexcept
 {
     *this = Value(other); //using the move;
     return *this;
 }
 
-Value& Value::operator=(Value&& other)
+Value& Value::operator=(Value&& other) noexcept
 {
     destruct();
 
@@ -225,7 +229,11 @@ std::string const& Value::get_as_string() const
     TS_ASSERT(type == Type::STRING);
     return string_value;
 }
-
+std::string&& Value::extract_as_string()
+{
+    TS_ASSERT(type == Type::STRING);
+    return std::move(string_value);
+}
 
 void Value::add_object_member(std::string const& name, Value const& member)
 {
@@ -237,6 +245,12 @@ void Value::add_object_member(std::string const& name, Value&& member)
 {
     TS_ASSERT(type == Type::OBJECT);
     object_value.emplace_back(name, std::move(member));
+}
+
+void Value::add_object_member(std::string&& name, Value&& member)
+{
+    TS_ASSERT(type == Type::OBJECT);
+    object_value.emplace_back(std::move(name), std::move(member));
 }
 
 size_t Value::get_object_member_count() const

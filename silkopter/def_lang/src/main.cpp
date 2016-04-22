@@ -10,11 +10,13 @@
 #include "Mapper.h"
 #include "JSON_Serializer.h"
 
+#include <chrono>
+
 int main(int argc, char **argv)
 {
     ast::Builder builder;
 
-    auto parse_result = builder.parse("test.def");
+    auto parse_result = builder.parse("../test.def");
     if (parse_result != ts::success)
     {
         std::cerr << parse_result.error().what();
@@ -70,6 +72,11 @@ int main(int argc, char **argv)
     std::cout.flush();
 
     {
+        std::ifstream fs("../test.json");
+        std::string json((std::istreambuf_iterator<char>(fs)),
+                         std::istreambuf_iterator<char>());
+
+        auto start = std::chrono::system_clock::now();
         ts::Result<ts::serialization::Value> result = ts::serialization::from_json(json);
         if (result != ts::success)
         {
@@ -77,8 +84,11 @@ int main(int argc, char **argv)
             return 1;
         }
 
-        ts::serialization::Value parsed = result.extract_payload();
+        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - start).count();
+        std::cout << duration << "\n";
 
+        ts::serialization::Value parsed = result.extract_payload();
+        std::cout.flush();
     }
 
     return 0;

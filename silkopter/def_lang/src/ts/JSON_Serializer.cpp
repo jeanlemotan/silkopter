@@ -33,7 +33,7 @@ static void to_json(Value const& value, std::string& dst, size_t ident)
             dst += member_ident_str;
             dst += "\"";
             dst += value.get_object_member_name(i);
-            dst += "\"=";
+            dst += "\":";
             to_json(value.get_object_member_value(i), dst, ident + 1);
             dst += ",\n";
         }
@@ -67,40 +67,34 @@ static size_t skip_whitespace(std::string const& json, size_t offset)
 
 static Result<Value> parse_string_value(std::string const& json, size_t& offset)
 {
-    offset = skip_whitespace(json, offset);
-    if (offset == std::string::npos)
-    {
-        return Error("Unexpected end of string");
-    }
-
     if (json[offset] != '"')
     {
         return Error("Unexpected char '" + std::to_string(json[offset]) + "' while parsing string value");
     }
     offset++;
 
-    size_t end = json.find_first_of('"', offset);
-    if (end == std::string::npos)
+    size_t size = json.size();
+    char prev_ch = 0;
+    for (size_t i = offset; i < size; ++i)
     {
-        return Error("Unexpected end of string");
+        char ch = json[i];
+        if (ch == '"' && prev_ch != '\\')
+        {
+            Value value(json.substr(offset, i - offset));
+            offset = i + 1;
+
+            return std::move(value);
+        }
+        prev_ch = ch;
     }
 
-    Value value(json.substr(offset, end - offset));
-    offset = end + 1;
-
-    return std::move(value);
+    return Error("Unexpected end of string");
 }
 
 static Result<Value> parse_value(std::string const& json, size_t& offset);
 
 static Result<Value> parse_object_value(std::string const& json, size_t& offset)
 {
-    offset = skip_whitespace(json, offset);
-    if (offset == std::string::npos)
-    {
-        return Error("Unexpected end of string");
-    }
-
     if (json[offset] != '{')
     {
         return Error("Unexpected char '" + std::to_string(json[offset]) + "' while parsing object value");
@@ -146,7 +140,7 @@ static Result<Value> parse_object_value(std::string const& json, size_t& offset)
         auto result = parse_string_value(json, offset);
         if (result != success)
         {
-            return result;
+            return std::move(result);
         }
         Value name_value = result.extract_payload();
 
@@ -156,25 +150,19 @@ static Result<Value> parse_object_value(std::string const& json, size_t& offset)
             return Error("Unexpected end of string");
         }
 
-        if (json[offset] != '=')
+        if (json[offset] != ':')
         {
-            return Error("Missing '=' while parsing object value");
+            return Error("Missing ':' while parsing object value");
         }
         offset++;
-
-        offset = skip_whitespace(json, offset);
-        if (offset == std::string::npos)
-        {
-            return Error("Unexpected end of string");
-        }
 
         result = parse_value(json, offset);
         if (result != success)
         {
-            return result;
+            return std::move(result);
         }
 
-        object_value.add_object_member(name_value.get_as_string(), result.extract_payload());
+        object_value.add_object_member(name_value.extract_as_string(), result.extract_payload());
     }
 
     return Error("Unexpected end of string");
@@ -182,12 +170,6 @@ static Result<Value> parse_object_value(std::string const& json, size_t& offset)
 
 static Result<Value> parse_array_value(std::string const& json, size_t& offset)
 {
-    offset = skip_whitespace(json, offset);
-    if (offset == std::string::npos)
-    {
-        return Error("Unexpected end of string");
-    }
-
     if (json[offset] != '[')
     {
         return Error("Unexpected char '" + std::to_string(json[offset]) + "' while parsing array value");
@@ -235,7 +217,7 @@ static Result<Value> parse_array_value(std::string const& json, size_t& offset)
         auto result = parse_value(json, offset);
         if (result != success)
         {
-            return result;
+            return std::move(result);
         }
 
         array_value.add_array_element(result.extract_payload());
@@ -246,12 +228,6 @@ static Result<Value> parse_array_value(std::string const& json, size_t& offset)
 
 static Result<Value> parse_true_value(std::string const& json, size_t& offset)
 {
-    offset = skip_whitespace(json, offset);
-    if (offset == std::string::npos)
-    {
-        return Error("Unexpected end of string");
-    }
-
     if (json.find("true", offset, 4) != offset)
     {
         return Error("Unexpected value");
@@ -262,12 +238,6 @@ static Result<Value> parse_true_value(std::string const& json, size_t& offset)
 
 static Result<Value> parse_false_value(std::string const& json, size_t& offset)
 {
-    offset = skip_whitespace(json, offset);
-    if (offset == std::string::npos)
-    {
-        return Error("Unexpected end of string");
-    }
-
     if (json.find("false", offset, 5) != offset)
     {
         return Error("Unexpected value");
@@ -278,12 +248,6 @@ static Result<Value> parse_false_value(std::string const& json, size_t& offset)
 
 static Result<Value> parse_null_value(std::string const& json, size_t& offset)
 {
-    offset = skip_whitespace(json, offset);
-    if (offset == std::string::npos)
-    {
-        return Error("Unexpected end of string");
-    }
-
     if (json.find("null", offset, 4) != offset)
     {
         return Error("Unexpected value");
@@ -294,13 +258,7 @@ static Result<Value> parse_null_value(std::string const& json, size_t& offset)
 
 static Result<Value> parse_number_value(std::string const& json, size_t& offset)
 {
-    offset = skip_whitespace(json, offset);
-    if (offset == std::string::npos)
-    {
-        return Error("Unexpected end of string");
-    }
-
-    size_t end = json.find_first_of(" \t,\n\r", offset);
+    size_t end = json.find_first_of(" \t,\n\r]}", offset);
     if (end == std::string::npos)
     {
         return Error("Unexpected end of string");
