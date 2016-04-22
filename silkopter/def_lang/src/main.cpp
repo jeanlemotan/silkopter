@@ -43,7 +43,7 @@ int main(int argc, char **argv)
         TS_ASSERT(result == ts::success);
 
         std::shared_ptr<ts::IVector_Value> motors = value->select_specialized<ts::IVector_Value>("motors");
-        for (size_t i = 0; i < 100000; i++)
+        for (size_t i = 0; i < 10; i++)
         {
             result = motors->insert_default_value(motors->get_value_count());
             TS_ASSERT(result == ts::success);
@@ -65,8 +65,21 @@ int main(int argc, char **argv)
     auto result = value->serialize();
     TS_ASSERT(result == ts::success);
 
-    std::cout << ts::serialization::to_json(result.payload()) << "\n";
+    std::string json = ts::serialization::to_json(result.payload());
+    std::cout << json << "\n";
     std::cout.flush();
+
+    {
+        ts::Result<ts::serialization::Value> result = ts::serialization::from_json(json);
+        if (result != ts::success)
+        {
+            std::cerr << result.error().what();
+            return 1;
+        }
+
+        ts::serialization::Value parsed = result.extract_payload();
+
+    }
 
     return 0;
 }

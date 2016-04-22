@@ -83,6 +83,7 @@ Value::Value(Value const& other)
     construct();
     switch (type)
     {
+    case Type::EMPTY: break;
     case Type::BOOL: bool_value = other.bool_value; break;
     case Type::INT8: int8_value = other.int8_value; break;
     case Type::UINT8: uint8_value = other.uint8_value; break;
@@ -107,6 +108,7 @@ Value::Value(Value&& other)
     construct();
     switch (type)
     {
+    case Type::EMPTY: break;
     case Type::BOOL: bool_value = other.bool_value; break;
     case Type::INT8: int8_value = other.int8_value; break;
     case Type::UINT8: uint8_value = other.uint8_value; break;
@@ -138,6 +140,7 @@ Value& Value::operator=(Value&& other)
     construct();
     switch (type)
     {
+    case Type::EMPTY: break;
     case Type::BOOL: bool_value = other.bool_value; break;
     case Type::INT8: int8_value = other.int8_value; break;
     case Type::UINT8: uint8_value = other.uint8_value; break;

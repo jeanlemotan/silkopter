@@ -16,6 +16,7 @@ struct Value final
     enum class Type : uint8_t
     {
         BOOL,
+        EMPTY,
         INT8,
         UINT8,
         INT16,
