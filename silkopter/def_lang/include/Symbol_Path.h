@@ -10,7 +10,8 @@ class Symbol_Path
 {
 public:
     Symbol_Path() = default;
-    explicit Symbol_Path(std::string const& str);
+    Symbol_Path(std::string const& str);
+    Symbol_Path(char const* str);
 
     bool is_absolute() const;
 

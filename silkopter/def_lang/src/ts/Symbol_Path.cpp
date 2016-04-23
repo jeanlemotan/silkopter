@@ -10,6 +10,14 @@ Symbol_Path::Symbol_Path(std::string const& str)
     parse(str.c_str(), str.size());
 }
 
+Symbol_Path::Symbol_Path(char const* str)
+{
+    if (str)
+    {
+        parse(str, strlen(str));
+    }
+}
+
 bool Symbol_Path::is_absolute() const
 {
     return m_is_absolute;
