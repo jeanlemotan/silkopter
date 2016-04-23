@@ -121,9 +121,21 @@ inline Value::Value(Value&& other) noexcept
     case Type::UINT64: uint64_value = other.uint64_value; break;
     case Type::FLOAT: float_value = other.float_value; break;
     case Type::DOUBLE: double_value = other.double_value; break;
-    case Type::STRING: string_value = std::move(other.string_value); break;
-    case Type::OBJECT: object_value = std::move(other.object_value); break;
-    case Type::ARRAY: array_value = std::move(other.array_value); break;
+    case Type::STRING:
+        string_value = std::move(other.string_value);
+        other.string_value.~string_type();
+        other.type = Type::EMPTY;
+        break;
+    case Type::OBJECT:
+        object_value = std::move(other.object_value);
+        other.object_value.~object_type();
+        other.type = Type::EMPTY;
+        break;
+    case Type::ARRAY:
+        array_value = std::move(other.array_value);
+        other.array_value.~array_type();
+        other.type = Type::EMPTY;
+        break;
     default: TS_ASSERT(false); break;
     }
 }
@@ -135,10 +147,12 @@ inline Value& Value::operator=(Value const& other) noexcept
 
 inline Value& Value::operator=(Value&& other) noexcept
 {
-    destruct();
-
-    type = other.type;
-    construct();
+    if (type != other.type)
+    {
+        destruct();
+        type = other.type;
+        construct();
+    }
     switch (type)
     {
     case Type::EMPTY: break;
@@ -153,9 +167,21 @@ inline Value& Value::operator=(Value&& other) noexcept
     case Type::UINT64: uint64_value = other.uint64_value; break;
     case Type::FLOAT: float_value = other.float_value; break;
     case Type::DOUBLE: double_value = other.double_value; break;
-    case Type::STRING: string_value = std::move(other.string_value); break;
-    case Type::OBJECT: object_value = std::move(other.object_value); break;
-    case Type::ARRAY: array_value = std::move(other.array_value); break;
+    case Type::STRING:
+        string_value = std::move(other.string_value);
+        other.string_value.~string_type();
+        other.type = Type::EMPTY;
+        break;
+    case Type::OBJECT:
+        object_value = std::move(other.object_value);
+        other.object_value.~object_type();
+        other.type = Type::EMPTY;
+        break;
+    case Type::ARRAY:
+        array_value = std::move(other.array_value);
+        other.array_value.~array_type();
+        other.type = Type::EMPTY;
+        break;
     default: TS_ASSERT(false); break;
     }
     return *this;
