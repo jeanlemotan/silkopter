@@ -32,5 +32,14 @@ Result<serialization::Value> String_Value::serialize() const
     return serialization::Value(get_value());
 }
 
+Result<void> String_Value::deserialize(serialization::Value const& sz_value)
+{
+    if (sz_value.get_type() != serialization::Value::Type::STRING)
+    {
+        return Error("Expected string value when deserializing");
+    }
+    return set_value(sz_value.get_as_string());
+}
+
 
 }

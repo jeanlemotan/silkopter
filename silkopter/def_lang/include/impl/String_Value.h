@@ -25,6 +25,7 @@ public:
     std::shared_ptr<IValue> clone() const override;
 
     Result<serialization::Value> serialize() const override;
+    Result<void> deserialize(serialization::Value const&) override;
 
 private:
 };

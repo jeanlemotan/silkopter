@@ -156,4 +156,29 @@ Result<serialization::Value> Struct_Value::serialize() const
     return std::move(svalue);
 }
 
+Result<void> Struct_Value::deserialize(serialization::Value const& sz_value)
+{
+    if (sz_value.get_type() != serialization::Value::Type::OBJECT)
+    {
+        return Error("Expected object value when deserializing");
+    }
+
+    for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
+    {
+        std::string const& name = sz_value.get_object_member_name(i);
+        std::shared_ptr<IMember> member = find_member_by_name(name);
+        if (!member)
+        {
+            return Error("Cannot find member name '" + name + "'");
+        }
+        auto result = member->get_value()->deserialize(sz_value.get_object_member_value(i));
+        if (result != ts::success)
+        {
+            return result;
+        }
+    }
+
+    return success;
+}
+
 }

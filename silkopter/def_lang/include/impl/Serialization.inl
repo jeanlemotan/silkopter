@@ -247,6 +247,42 @@ inline double Value::get_as_double() const noexcept
     TS_ASSERT(type == Type::DOUBLE);
     return double_value;
 }
+inline double Value::get_as_number() const noexcept
+{
+    switch (type)
+    {
+    case Type::INT8: return static_cast<double>(get_as_int8());
+    case Type::UINT8: return static_cast<double>(get_as_uint8());
+    case Type::INT16: return static_cast<double>(get_as_int16());
+    case Type::UINT16: return static_cast<double>(get_as_uint16());
+    case Type::INT32: return static_cast<double>(get_as_int32());
+    case Type::UINT32: return static_cast<double>(get_as_uint32());
+    case Type::INT64: return static_cast<double>(get_as_int64());
+    case Type::FLOAT: return static_cast<double>(get_as_float());
+    default: return get_as_double();
+    }
+}
+inline double Value::get_as_real_number() const noexcept
+{
+    switch (type)
+    {
+    case Type::FLOAT: return get_as_float();
+    default: return get_as_double();
+    }
+}
+inline int64_t Value::get_as_integral_number() const noexcept
+{
+    switch (type)
+    {
+    case Type::INT8: return get_as_int8();
+    case Type::UINT8: return get_as_uint8();
+    case Type::INT16: return get_as_int16();
+    case Type::UINT16: return get_as_uint16();
+    case Type::INT32: return get_as_int32();
+    case Type::UINT32: return get_as_uint32();
+    default: return get_as_int64();
+    }
+}
 inline std::string const& Value::get_as_string() const noexcept
 {
     TS_ASSERT(type == Type::STRING);
@@ -312,6 +348,42 @@ inline Value const& Value::get_array_element_value(size_t idx) const noexcept
 {
     TS_ASSERT(type == Type::ARRAY);
     return array_value[idx];
+}
+
+inline bool Value::is_empty() const noexcept
+{
+    return type == Type::EMPTY;
+}
+inline bool Value::is_bool() const noexcept
+{
+    return type == Type::BOOL;
+}
+inline bool Value::is_number() const noexcept
+{
+    return is_integral_number() || is_real_number();
+}
+inline bool Value::is_integral_number() const noexcept
+{
+    return type == Type::INT8 || type == Type::UINT8 ||
+            type == Type::INT16 || type == Type::UINT16 ||
+            type == Type::INT32 || type == Type::UINT32 ||
+            type == Type::INT64;
+}
+inline bool Value::is_real_number() const noexcept
+{
+    return type == Type::FLOAT || type == Type::DOUBLE;
+}
+inline bool Value::is_string() const noexcept
+{
+    return type == Type::STRING;
+}
+inline bool Value::is_object() const noexcept
+{
+    return type == Type::OBJECT;
+}
+inline bool Value::is_array() const noexcept
+{
+    return type == Type::ARRAY;
 }
 
 inline void Value::destruct() noexcept

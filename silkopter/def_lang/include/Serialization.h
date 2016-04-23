@@ -59,6 +59,15 @@ struct Value final
 
     Type    get_type() const noexcept;
 
+    bool    is_empty() const noexcept;
+    bool    is_bool() const noexcept;
+    bool    is_number() const noexcept;
+    bool    is_integral_number() const noexcept;
+    bool    is_real_number() const noexcept;
+    bool    is_string() const noexcept;
+    bool    is_object() const noexcept;
+    bool    is_array() const noexcept;
+
     bool        get_as_bool() const noexcept;
     int8_t      get_as_int8() const noexcept;
     uint8_t     get_as_uint8() const noexcept;
@@ -70,6 +79,9 @@ struct Value final
     uint64_t    get_as_uint64() const noexcept;
     float       get_as_float() const noexcept;
     double      get_as_double() const noexcept;
+    double      get_as_number() const noexcept;
+    double      get_as_real_number() const noexcept;
+    int64_t     get_as_integral_number() const noexcept;
     std::string const& get_as_string() const noexcept;
     std::string&& extract_as_string() noexcept;
 

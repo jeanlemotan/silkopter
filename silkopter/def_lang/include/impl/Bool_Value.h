@@ -28,6 +28,7 @@ public:
     Result<void> copy_assign(IInitializer const& initializer) override;
 
     Result<serialization::Value> serialize() const override;
+    Result<void> deserialize(serialization::Value const&) override;
 
 
 private:

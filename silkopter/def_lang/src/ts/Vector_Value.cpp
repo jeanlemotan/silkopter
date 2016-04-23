@@ -170,6 +170,34 @@ Result<serialization::Value> Vector_Value::serialize() const
     return std::move(svalue);
 }
 
+Result<void> Vector_Value::deserialize(serialization::Value const& sz_value)
+{
+    if (sz_value.get_type() != serialization::Value::Type::ARRAY)
+    {
+        return Error("Expected array value when deserializing");
+    }
+
+    while (get_value_count() > sz_value.get_array_element_count())
+    {
+        erase_value(get_value_count() - 1);
+    }
+    while (get_value_count() < sz_value.get_array_element_count())
+    {
+        insert_default_value(get_value_count());
+    }
+
+    for (size_t i = 0; i < sz_value.get_array_element_count(); i++)
+    {
+        auto result = get_value(i)->deserialize(sz_value.get_array_element_value(i));
+        if (result != ts::success)
+        {
+            return result;
+        }
+    }
+
+    return success;
+}
+
 Result<void> Vector_Value::insert_default_value(size_t idx)
 {
     std::shared_ptr<IValue> value = get_specialized_type()->get_inner_type()->create_value();

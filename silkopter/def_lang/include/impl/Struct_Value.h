@@ -30,6 +30,7 @@ public:
     std::shared_ptr<IValue> select(Value_Selector&& selector) override;
 
     Result<serialization::Value> serialize() const override;
+    Result<void> deserialize(serialization::Value const&) override;
 
     std::shared_ptr<IStruct_Type const> get_specialized_type() const override;
 

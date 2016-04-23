@@ -111,5 +111,76 @@ Result<serialization::Value> Numeric_Value_Template<Traits>::serialize() const
     }
 }
 
+template<typename Traits>
+Result<void> Numeric_Value_Template<Traits>::deserialize(serialization::Value const& sz_value)
+{
+    if (Traits::component_count == 1)
+    {
+        typename Traits::fundamental_type value = this->get_value();
+
+        if (Traits::supports_decimals_attribute)
+        {
+            if (!sz_value.is_number())
+            {
+                return Error("Expected number");
+            }
+            detail::set_component(value, static_cast<typename Traits::component_type>(sz_value.get_as_number()), 0);
+        }
+        else
+        {
+            if (!sz_value.is_integral_number())
+            {
+                return Error("Expected integral number");
+            }
+            detail::set_component(value, static_cast<typename Traits::component_type>(sz_value.get_as_integral_number()), 0);
+        }
+
+        return set_value(value);
+    }
+    else
+    {
+        if (!sz_value.is_object())
+        {
+            return Error("Expected object");
+        }
+        if (sz_value.get_object_member_count() != Traits::component_count)
+        {
+            return Error("Wrong number of components");
+        }
+
+        typename Traits::fundamental_type value = this->get_value();
+
+        for (size_t i = 0; i < Traits::component_count; i++)
+        {
+            const char* name = Traits::component_names[i];
+            if (sz_value.get_object_member_name(i) != name)
+            {
+                return Error("Unexpected member: '" + sz_value.get_object_member_name(i) + "'. Expected: '" + name + "'");
+            }
+
+            serialization::Value const& sz_member_value = sz_value.get_object_member_value(i);
+
+            if (Traits::supports_decimals_attribute)
+            {
+                if (!sz_member_value.is_number())
+                {
+                    return Error("Expected number");
+                }
+                detail::set_component(value, static_cast<typename Traits::component_type>(sz_member_value.get_as_number()), i);
+            }
+            else
+            {
+                if (!sz_member_value.is_integral_number())
+                {
+                    return Error("Expected integral number");
+                }
+                detail::set_component(value, static_cast<typename Traits::component_type>(sz_member_value.get_as_integral_number()), i);
+            }
+        }
+
+        return set_value(value);
+    }
+}
+
 }
 

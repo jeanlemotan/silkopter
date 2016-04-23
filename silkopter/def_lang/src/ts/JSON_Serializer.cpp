@@ -60,18 +60,22 @@ static void to_json(Value const& value, std::string& dst, size_t ident)
     }
 }
 
+
+////////////////////////////////////////////////////////////////////////////////////////////
+
+
 static size_t skip_whitespace(std::string const& json, size_t offset)
 {
-    size_t size = json.size();
-    const char* data = json.data();
-    while (offset < size)
+    const char* data = json.data() + offset;
+    const char* end = data + json.size();
+    while (data < end)
     {
-        char ch = data[offset];
+        char ch = *data;
         if (ch != ' ' && ch != '\t' && ch != '\n' && ch != '\r')
         {
-            return offset;
+            return data - json.data();
         }
-        offset++;
+        data++;
     }
     return std::string::npos;
 }
@@ -84,18 +88,21 @@ static Result<std::string> parse_string(std::string const& json, size_t& offset)
     }
     offset++;
 
-    size_t size = json.size();
     char prev_ch = 0;
-    for (size_t i = offset; i < size; ++i)
+
+    const char* data = json.data() + offset;
+    const char* start = data;
+    const char* end = data + json.size();
+    while (data < end)
     {
-        char ch = json[i];
+        char ch = *data;
         if (ch == '"' && prev_ch != '\\')
         {
-            size_t start = offset;
-            offset = i + 1;
-            return json.substr(start, i - start);
+            offset = data - json.data() + 1;
+            return std::string(start, data);
         }
         prev_ch = ch;
+        data++;
     }
 
     return Error("Unexpected end of string");
@@ -322,27 +329,26 @@ static Result<Value> parse_number_value(std::string const& json, size_t& offset)
             decimal_digit_count++;
             data++;
         }
+    }
+    if (*data == 'e' || *data == 'E')
+    {
+        data++; //skip the 'e'
 
-        if (*data == 'e' || *data == 'E')
+        if (*data == '-')
         {
-            data++; //skip the 'e'
+            exponent_sign = -1;
+            data++;
+        }
 
-            if (*data == '-')
+        while (data != 0)
+        {
+            char ch = *data;
+            if (ch < '0' || ch > '9')
             {
-                exponent_sign = -1;
-                data++;
+                break;
             }
-
-            while (data != 0)
-            {
-                char ch = *data;
-                if (ch < '0' || ch > '9')
-                {
-                    break;
-                }
-                exponent = exponent * 10 + (ch - '0');
-                data++;
-            }
+            exponent = exponent * 10 + (ch - '0');
+            data++;
         }
     }
 
@@ -383,23 +389,6 @@ static Result<Value> parse_number_value(std::string const& json, size_t& offset)
         return Error("Exponent too big");
     }
 
-    static constexpr double s_inv_pow[15] = { 1.0,
-                                          0.1,
-                                          0.01,
-                                          0.001,
-                                          0.0001,
-                                          0.00001,
-                                          0.000001,
-                                          0.0000001,
-                                          0.00000001,
-                                          0.000000001,
-                                          0.0000000001,
-                                          0.00000000001,
-                                          0.000000000001,
-                                          0.0000000000001,
-                                          0.00000000000001,
-                                        };
-
     static constexpr double s_pow[15] = { 1.0,
                                           10.0,
                                           100.0,
@@ -418,7 +407,7 @@ static Result<Value> parse_number_value(std::string const& json, size_t& offset)
                                         };
 
     double value = static_cast<double>(whole);
-    value += static_cast<double>(decimal) * s_inv_pow[decimal_digit_count];
+    value += static_cast<double>(decimal) / s_pow[decimal_digit_count];
 
     value *= exponent_sign * s_pow[exponent];
 

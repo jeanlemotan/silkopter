@@ -36,5 +36,13 @@ Result<serialization::Value> Bool_Value::serialize() const
     return serialization::Value(get_value());
 }
 
+Result<void> Bool_Value::deserialize(serialization::Value const& sz_value)
+{
+    if (sz_value.get_type() != serialization::Value::Type::BOOL)
+    {
+        return Error("Expected bool value when deserializing");
+    }
+    return set_value(sz_value.get_as_bool());
+}
 
 }
