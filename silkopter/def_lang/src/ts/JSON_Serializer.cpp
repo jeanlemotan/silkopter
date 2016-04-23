@@ -62,10 +62,21 @@ static void to_json(Value const& value, std::string& dst, size_t ident)
 
 static size_t skip_whitespace(std::string const& json, size_t offset)
 {
-    return json.find_first_not_of(" \t\n\r", offset);
+    size_t size = json.size();
+    const char* data = json.data();
+    while (offset < size)
+    {
+        char ch = data[offset];
+        if (ch != ' ' && ch != '\t' && ch != '\n' && ch != '\r')
+        {
+            return offset;
+        }
+        offset++;
+    }
+    return std::string::npos;
 }
 
-static Result<Value> parse_string_value(std::string const& json, size_t& offset)
+static Result<std::string> parse_string(std::string const& json, size_t& offset)
 {
     if (json[offset] != '"')
     {
@@ -80,15 +91,24 @@ static Result<Value> parse_string_value(std::string const& json, size_t& offset)
         char ch = json[i];
         if (ch == '"' && prev_ch != '\\')
         {
-            Value value(json.substr(offset, i - offset));
+            size_t start = offset;
             offset = i + 1;
-
-            return std::move(value);
+            return json.substr(start, i - start);
         }
         prev_ch = ch;
     }
 
     return Error("Unexpected end of string");
+}
+
+static Result<Value> parse_string_value(std::string const& json, size_t& offset)
+{
+    auto result = parse_string(json, offset);
+    if (result != success)
+    {
+        return result.error();
+    }
+    return Value(result.extract_payload());
 }
 
 static Result<Value> parse_value(std::string const& json, size_t& offset);
@@ -137,12 +157,12 @@ static Result<Value> parse_object_value(std::string const& json, size_t& offset)
             }
         }
 
-        auto result = parse_string_value(json, offset);
-        if (result != success)
+        auto name_result = parse_string(json, offset);
+        if (name_result != success)
         {
-            return std::move(result);
+            return name_result.error();
         }
-        Value name_value = result.extract_payload();
+        std::string name = name_result.extract_payload();
 
         offset = skip_whitespace(json, offset);
         if (offset == std::string::npos)
@@ -156,13 +176,13 @@ static Result<Value> parse_object_value(std::string const& json, size_t& offset)
         }
         offset++;
 
-        result = parse_value(json, offset);
+        auto result = parse_value(json, offset);
         if (result != success)
         {
             return std::move(result);
         }
 
-        object_value.add_object_member(name_value.extract_as_string(), result.extract_payload());
+        object_value.add_object_member(std::move(name), result.extract_payload());
     }
 
     return Error("Unexpected end of string");
@@ -258,15 +278,151 @@ static Result<Value> parse_null_value(std::string const& json, size_t& offset)
 
 static Result<Value> parse_number_value(std::string const& json, size_t& offset)
 {
-    size_t end = json.find_first_of(" \t,\n\r]}", offset);
-    if (end == std::string::npos)
+    if (offset + 1 >= json.size())
     {
-        return Error("Unexpected end of string");
+        return Error("Malformed number");
     }
 
-    offset = end;
+    int64_t sign = 1;
+    if (json[offset] == '-')
+    {
+        sign = -1;
+        offset++;
+    }
 
-    return Value(0);
+    int64_t whole = 0;
+    int64_t decimal = 0;
+    uint32_t decimal_digit_count = 0;
+    int64_t exponent = 0;
+    int32_t exponent_sign = 1;
+
+    const char* data = json.c_str() + offset;
+    while (data != 0)
+    {
+        char ch = *data;
+        if (ch < '0' || ch > '9')
+        {
+            break;
+        }
+        whole = whole * 10 + (ch - '0');
+        data++;
+    }
+
+    if (*data == '.')
+    {
+        data++; //skip the '.'
+        while (data != 0)
+        {
+            char ch = *data;
+            if (ch < '0' || ch > '9')
+            {
+                break;
+            }
+            decimal = decimal * 10 + (ch - '0');
+            decimal_digit_count++;
+            data++;
+        }
+
+        if (*data == 'e' || *data == 'E')
+        {
+            data++; //skip the 'e'
+
+            if (*data == '-')
+            {
+                exponent_sign = -1;
+                data++;
+            }
+
+            while (data != 0)
+            {
+                char ch = *data;
+                if (ch < '0' || ch > '9')
+                {
+                    break;
+                }
+                exponent = exponent * 10 + (ch - '0');
+                data++;
+            }
+        }
+    }
+
+    offset = data - json.data();
+
+    whole *= sign;
+
+    if (decimal_digit_count == 0)
+    {
+        static constexpr int64_t s_pow[15] = {
+                1,
+                10,
+                100,
+                1000,
+                10000,
+                100000,
+                1000000,
+                10000000,
+                100000000,
+                1000000000,
+                10000000000,
+                100000000000,
+                1000000000000,
+                10000000000000,
+                100000000000000,
+        };
+
+        whole = whole * exponent_sign * s_pow[exponent];
+        return Value(whole);
+    }
+
+    if (decimal_digit_count > 15)
+    {
+        return Error("Too many decimals");
+    }
+    if (exponent > 15)
+    {
+        return Error("Exponent too big");
+    }
+
+    static constexpr double s_inv_pow[15] = { 1.0,
+                                          0.1,
+                                          0.01,
+                                          0.001,
+                                          0.0001,
+                                          0.00001,
+                                          0.000001,
+                                          0.0000001,
+                                          0.00000001,
+                                          0.000000001,
+                                          0.0000000001,
+                                          0.00000000001,
+                                          0.000000000001,
+                                          0.0000000000001,
+                                          0.00000000000001,
+                                        };
+
+    static constexpr double s_pow[15] = { 1.0,
+                                          10.0,
+                                          100.0,
+                                          1000.0,
+                                          10000.0,
+                                          100000.0,
+                                          1000000.0,
+                                          10000000.0,
+                                          100000000.0,
+                                          1000000000.0,
+                                          10000000000.0,
+                                          100000000000.0,
+                                          1000000000000.0,
+                                          10000000000000.0,
+                                          100000000000000.0,
+                                        };
+
+    double value = static_cast<double>(whole);
+    value += static_cast<double>(decimal) * s_inv_pow[decimal_digit_count];
+
+    value *= exponent_sign * s_pow[exponent];
+
+    return Value(value);
 }
 
 static Result<Value> parse_value(std::string const& json, size_t& offset)
@@ -303,7 +459,7 @@ std::string to_json(Value const& value)
 Result<Value> from_json(std::string const& json)
 {
     size_t offset = 0;
-    return parse_object_value(json, offset);
+    return parse_value(json, offset);
 }
 
 }

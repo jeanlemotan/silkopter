@@ -4,6 +4,7 @@
 #include <string>
 #include <map>
 #include <vector>
+#include "ts_assert.h"
 
 namespace ts
 {
@@ -56,35 +57,35 @@ struct Value final
 
     //----------------------
 
-    Type    get_type() const;
+    Type    get_type() const noexcept;
 
-    bool        get_as_bool() const;
-    int8_t      get_as_int8() const;
-    uint8_t     get_as_uint8() const;
-    int16_t     get_as_int16() const;
-    uint16_t    get_as_uint16() const;
-    int32_t     get_as_int32() const;
-    uint32_t    get_as_uint32() const;
-    int64_t     get_as_int64() const;
-    uint64_t    get_as_uint64() const;
-    float       get_as_float() const;
-    double      get_as_double() const;
-    std::string const& get_as_string() const;
-    std::string&& extract_as_string();
+    bool        get_as_bool() const noexcept;
+    int8_t      get_as_int8() const noexcept;
+    uint8_t     get_as_uint8() const noexcept;
+    int16_t     get_as_int16() const noexcept;
+    uint16_t    get_as_uint16() const noexcept;
+    int32_t     get_as_int32() const noexcept;
+    uint32_t    get_as_uint32() const noexcept;
+    int64_t     get_as_int64() const noexcept;
+    uint64_t    get_as_uint64() const noexcept;
+    float       get_as_float() const noexcept;
+    double      get_as_double() const noexcept;
+    std::string const& get_as_string() const noexcept;
+    std::string&& extract_as_string() noexcept;
 
-    void add_object_member(std::string const& name, Value const& member);
-    void add_object_member(std::string const& name, Value&& member);
-    void add_object_member(std::string&& name, Value&& member);
+    void add_object_member(std::string const& name, Value const& member) noexcept;
+    void add_object_member(std::string const& name, Value&& member) noexcept;
+    void add_object_member(std::string&& name, Value&& member) noexcept;
 
-    size_t get_object_member_count() const;
-    std::string const& get_object_member_name(size_t idx) const;
-    Value const& get_object_member_value(size_t idx) const;
+    size_t get_object_member_count() const noexcept;
+    std::string const& get_object_member_name(size_t idx) const noexcept;
+    Value const& get_object_member_value(size_t idx) const noexcept;
 
-    void add_array_element(Value const& member);
-    void add_array_element(Value&& member);
+    void add_array_element(Value const& member) noexcept;
+    void add_array_element(Value&& member) noexcept;
 
-    size_t get_array_element_count() const;
-    Value const& get_array_element_value(size_t idx) const;
+    size_t get_array_element_count() const noexcept;
+    Value const& get_array_element_value(size_t idx) const noexcept;
 
 private:
     typedef std::string string_type;
@@ -110,9 +111,11 @@ private:
         array_type  array_value;
     };
 
-    void construct();
-    void destruct();
+    void construct() noexcept;
+    void destruct() noexcept;
 };
 
 }
 }
+
+#include "impl/Serialization.inl"
