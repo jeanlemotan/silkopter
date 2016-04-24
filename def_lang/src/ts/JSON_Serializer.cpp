@@ -11,6 +11,7 @@ static void to_json(Value const& value, std::string& dst, size_t ident)
 {
     switch (value.get_type())
     {
+    case Value::Type::EMPTY: dst += "null"; break;
     case Value::Type::BOOL: dst += value.get_as_bool() ? "true" : "false"; break;
     case Value::Type::INT8: dst += std::to_string(value.get_as_int8()); break;
     case Value::Type::UINT8: dst += std::to_string(value.get_as_uint8()); break;
