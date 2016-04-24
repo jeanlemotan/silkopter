@@ -296,7 +296,31 @@ private:
     mutable bool m_check_pending = true;
 #endif
 };
+
 //////////////////////////////////////////////////////////////////////////
+
+inline Result<void> operator&(Result<void> const& a, Result<void> const& b)
+{
+    if (a == success && b == success)
+    {
+        return success;
+    }
+    std::string msg;
+    if (a != success)
+    {
+        msg += a.error().what();
+    }
+    if (b != success)
+    {
+        if (!msg.empty())
+        {
+            msg += "\n";
+        }
+        msg += b.error().what();
+    }
+    return Error(msg);
+}
+
 }
 
  
