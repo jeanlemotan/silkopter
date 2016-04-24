@@ -219,19 +219,42 @@ Result<void> set(IValue& dst, std::vector<T> const& src)
         value->clear();
         for (size_t i = 0; i < src.size(); i++)
         {
-            auto result = value->insert_default_value(value->get_value_count());
-            if (result != ts::success)
+            auto insert_result = value->insert_default_value(value->get_value_count());
+            if (insert_result != ts::success)
             {
-                return result;
+                return insert_result.error();
             }
 
-            result = set(*value->get_value(i), src[i]);
+            auto result = set(*value->get_value(i), src[i]);
             if (result != ts::success)
             {
                 return result;
             }
         }
         return success;
+    }
+    return Error("Cannot set vector to " + dst.get_type()->get_name());
+}
+
+template<>
+inline Result<void> get(IValue const& src, IValue& dst)
+{
+    if (IPtr_Value const* value = dynamic_cast<IPtr_Value const*>(&src))
+    {
+        if (value->get_value() == nullptr)
+        {
+            return Error("Null ptr value");
+        }
+        return dst.copy_assign(*value->get_value());
+    }
+    return Error("Cannot get vector from " + src.get_type()->get_name());
+}
+template<>
+inline Result<void> set(IValue& dst, IValue const& src)
+{
+    if (IPtr_Value* value = dynamic_cast<IPtr_Value*>(&dst))
+    {
+        return value->copy_assign(src);
     }
     return Error("Cannot set vector to " + dst.get_type()->get_name());
 }
