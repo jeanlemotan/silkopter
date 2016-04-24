@@ -1,0 +1,2210 @@
+Terminals unused in grammar
+
+   TVECTOR
+   TCONST
+   TUI_CONTROL
+   TUI_CONST
+   TNAMESPACE_SEPARATOR
+   TDOT
+
+
+Grammar
+
+    0 $accept: program $end
+
+    1 program: import
+    2        | declaration_list
+    3        | namespace
+
+    4 import: TIMPORT TSTRING_LITERAL
+
+    5 alias_declaration: TALIAS identifier TEQUAL identifier TSEMICOLON
+    6                  | TALIAS identifier TEQUAL identifier TCOLON attribute_list TSEMICOLON
+
+    7 struct_declaration: TSTRUCT identifier TLBRACE struct_body TRBRACE TSEMICOLON
+    8                   | TSTRUCT identifier TCOLON inheritance TLBRACE struct_body TRBRACE TSEMICOLON
+
+    9 struct_body: declaration_list
+
+   10 inheritance: inheritance_type identifier
+
+   11 inheritance_type: TPUBLIC
+   12                 | TPRIVATE
+   13                 | TPROTECTED
+
+   14 namespace: TNAMESPACE identifier TLBRACE namespace_body TRBRACE
+
+   15 namespace_body: declaration_list
+
+   16 var_declaration: type identifier TSEMICOLON
+   17                | type identifier TCOLON attribute_list TSEMICOLON
+   18                | type identifier TEQUAL expression TSEMICOLON
+   19                | type identifier TEQUAL expression TCOLON attribute_list TSEMICOLON
+
+   20 declaration_list: struct_declaration
+   21                 | alias_declaration
+   22                 | var_declaration
+
+   23 identifier: TIDENTIFIER
+
+   24 attribute_list: TLBRAKET attribute_body TRBRAKET
+
+   25 attribute_body: attribute
+   26               | attribute_body TCOMMA attribute
+
+   27 attribute: TMIN TEQUAL expression
+   28          | TMAX TEQUAL expression
+   29          | TUI_NAME TEQUAL TSTRING_LITERAL
+
+   30 expression: literal
+   31           | initializer_list
+   32           | TLPARENTHESIS expression TRPARENTHESIS
+
+   33 initializer_list: TLBRACE TRBRACE
+   34                 | TLBRACE initializer_body TRBRACE
+
+   35 initializer_body: expression
+   36                 | initializer_body TCOMMA expression
+
+   37 type: templated_type
+   38     | TBOOL
+   39     | TFLOAT
+   40     | TDOUBLE
+   41     | TSTRING
+   42     | TINT8_T
+   43     | TUINT8_T
+   44     | TINT16_T
+   45     | TUINT16_T
+   46     | TINT32_T
+   47     | TUINT32_T
+   48     | TINT64_T
+   49     | TUINT64_T
+   50     | TVEC2F
+   51     | TVEC2D
+   52     | TVEC2U8
+   53     | TVEC2S8
+   54     | TVEC2U16
+   55     | TVEC2S16
+   56     | TVEC2U32
+   57     | TVEC2S32
+   58     | TVEC3F
+   59     | TVEC3D
+   60     | TVEC3U8
+   61     | TVEC3S8
+   62     | TVEC3U16
+   63     | TVEC3S16
+   64     | TVEC3U32
+   65     | TVEC3S32
+   66     | TVEC4F
+   67     | TVEC4D
+   68     | TVEC4U8
+   69     | TVEC4S8
+   70     | TVEC4U16
+   71     | TVEC4S16
+   72     | TVEC4U32
+   73     | TVEC4S32
+   74     | TQUATF
+   75     | TQUATD
+   76     | TMAT2F
+   77     | TMAT2D
+   78     | TMAT3F
+   79     | TMAT3D
+   80     | TMAT4F
+   81     | TMAT4D
+   82     | TCOLOR_RGB
+   83     | TCOLOR_RGBA
+
+   84 templated_type: type template_argument_list
+
+   85 template_argument_list: TLANGLED_BRAKET TRANGLED_BRAKET
+   86                       | TLANGLED_BRAKET template_argument_body TRANGLED_BRAKET
+
+   87 template_argument_body: template_argument
+   88                       | template_argument_body TCOMMA template_argument
+
+   89 template_argument: type
+   90                  | TSTRING_LITERAL
+   91                  | TINTEGER_CONSTANT
+
+   92 literal: TFLOAT_CONSTANT
+   93        | TDOUBLE_CONSTANT
+   94        | TINTEGER_CONSTANT
+   95        | TSTRING_LITERAL
+   96        | TFALSE
+   97        | TTRUE
+
+
+Terminals, with rules where they appear
+
+$end (0) 0
+error (256)
+TIMPORT (258) 4
+TALIAS (259) 5 6
+TSTRUCT (260) 7 8
+TSTRING (261) 41
+TVECTOR (262)
+TFLOAT (263) 39
+TDOUBLE (264) 40
+TBOOL (265) 38
+TUINT8_T (266) 43
+TINT8_T (267) 42
+TUINT16_T (268) 45
+TINT16_T (269) 44
+TUINT32_T (270) 47
+TINT32_T (271) 46
+TUINT64_T (272) 49
+TINT64_T (273) 48
+TVEC2F (274) 50
+TVEC2D (275) 51
+TVEC2S8 (276) 53
+TVEC2U8 (277) 52
+TVEC2S16 (278) 55
+TVEC2U16 (279) 54
+TVEC2S32 (280) 57
+TVEC2U32 (281) 56
+TVEC3F (282) 58
+TVEC3D (283) 59
+TVEC3S8 (284) 61
+TVEC3U8 (285) 60
+TVEC3S16 (286) 63
+TVEC3U16 (287) 62
+TVEC3S32 (288) 65
+TVEC3U32 (289) 64
+TVEC4F (290) 66
+TVEC4D (291) 67
+TVEC4S8 (292) 69
+TVEC4U8 (293) 68
+TVEC4S16 (294) 71
+TVEC4U16 (295) 70
+TVEC4S32 (296) 73
+TVEC4U32 (297) 72
+TQUATF (298) 74
+TQUATD (299) 75
+TMAT2F (300) 76
+TMAT2D (301) 77
+TMAT3F (302) 78
+TMAT3D (303) 79
+TMAT4F (304) 80
+TMAT4D (305) 81
+TCOLOR_RGB (306) 82
+TCOLOR_RGBA (307) 83
+TMIN (308) 27
+TMAX (309) 28
+TPUBLIC (310) 11
+TPRIVATE (311) 12
+TPROTECTED (312) 13
+TCONST (313)
+TUI_CONTROL (314)
+TUI_NAME (315) 29
+TUI_CONST (316)
+TNAMESPACE (317) 14
+TFALSE (318) 96
+TTRUE (319) 97
+TEQUAL (320) 5 6 18 19 27 28 29
+TLPARENTHESIS (321) 32
+TRPARENTHESIS (322) 32
+TLBRACE (323) 7 8 14 33 34
+TRBRACE (324) 7 8 14 33 34
+TLBRAKET (325) 24
+TRBRAKET (326) 24
+TLANGLED_BRAKET (327) 85 86
+TRANGLED_BRAKET (328) 85 86
+TNAMESPACE_SEPARATOR (329)
+TCOLON (330) 6 8 17 19
+TSEMICOLON (331) 5 6 7 8 16 17 18 19
+TDOT (332)
+TCOMMA (333) 26 36 88
+TIDENTIFIER (334) 23
+TFLOAT_CONSTANT (335) 92
+TDOUBLE_CONSTANT (336) 93
+TINTEGER_CONSTANT (337) 91 94
+TSTRING_LITERAL (338) 4 29 90 95
+
+
+Nonterminals, with rules where they appear
+
+$accept (84)
+    on left: 0
+program (85)
+    on left: 1 2 3, on right: 0
+import (86)
+    on left: 4, on right: 1
+alias_declaration (87)
+    on left: 5 6, on right: 21
+struct_declaration (88)
+    on left: 7 8, on right: 20
+struct_body (89)
+    on left: 9, on right: 7 8
+inheritance (90)
+    on left: 10, on right: 8
+inheritance_type (91)
+    on left: 11 12 13, on right: 10
+namespace (92)
+    on left: 14, on right: 3
+namespace_body (93)
+    on left: 15, on right: 14
+var_declaration (94)
+    on left: 16 17 18 19, on right: 22
+declaration_list (95)
+    on left: 20 21 22, on right: 2 9 15
+identifier (96)
+    on left: 23, on right: 5 6 7 8 10 14 16 17 18 19
+attribute_list (97)
+    on left: 24, on right: 6 17 19
+attribute_body (98)
+    on left: 25 26, on right: 24 26
+attribute (99)
+    on left: 27 28 29, on right: 25 26
+expression (100)
+    on left: 30 31 32, on right: 18 19 27 28 32 35 36
+initializer_list (101)
+    on left: 33 34, on right: 31
+initializer_body (102)
+    on left: 35 36, on right: 34 36
+type (103)
+    on left: 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54
+    55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75
+    76 77 78 79 80 81 82 83, on right: 16 17 18 19 84 89
+templated_type (104)
+    on left: 84, on right: 37
+template_argument_list (105)
+    on left: 85 86, on right: 84
+template_argument_body (106)
+    on left: 87 88, on right: 86 88
+template_argument (107)
+    on left: 89 90 91, on right: 87 88
+literal (108)
+    on left: 92 93 94 95 96 97, on right: 30
+
+
+State 0
+
+    0 $accept: . program $end
+    1 program: . import
+    2        | . declaration_list
+    3        | . namespace
+    4 import: . TIMPORT TSTRING_LITERAL
+    5 alias_declaration: . TALIAS identifier TEQUAL identifier TSEMICOLON
+    6                  | . TALIAS identifier TEQUAL identifier TCOLON attribute_list TSEMICOLON
+    7 struct_declaration: . TSTRUCT identifier TLBRACE struct_body TRBRACE TSEMICOLON
+    8                   | . TSTRUCT identifier TCOLON inheritance TLBRACE struct_body TRBRACE TSEMICOLON
+   14 namespace: . TNAMESPACE identifier TLBRACE namespace_body TRBRACE
+   16 var_declaration: . type identifier TSEMICOLON
+   17                | . type identifier TCOLON attribute_list TSEMICOLON
+   18                | . type identifier TEQUAL expression TSEMICOLON
+   19                | . type identifier TEQUAL expression TCOLON attribute_list TSEMICOLON
+   20 declaration_list: . struct_declaration
+   21                 | . alias_declaration
+   22                 | . var_declaration
+   37 type: . templated_type
+   38     | . TBOOL
+   39     | . TFLOAT
+   40     | . TDOUBLE
+   41     | . TSTRING
+   42     | . TINT8_T
+   43     | . TUINT8_T
+   44     | . TINT16_T
+   45     | . TUINT16_T
+   46     | . TINT32_T
+   47     | . TUINT32_T
+   48     | . TINT64_T
+   49     | . TUINT64_T
+   50     | . TVEC2F
+   51     | . TVEC2D
+   52     | . TVEC2U8
+   53     | . TVEC2S8
+   54     | . TVEC2U16
+   55     | . TVEC2S16
+   56     | . TVEC2U32
+   57     | . TVEC2S32
+   58     | . TVEC3F
+   59     | . TVEC3D
+   60     | . TVEC3U8
+   61     | . TVEC3S8
+   62     | . TVEC3U16
+   63     | . TVEC3S16
+   64     | . TVEC3U32
+   65     | . TVEC3S32
+   66     | . TVEC4F
+   67     | . TVEC4D
+   68     | . TVEC4U8
+   69     | . TVEC4S8
+   70     | . TVEC4U16
+   71     | . TVEC4S16
+   72     | . TVEC4U32
+   73     | . TVEC4S32
+   74     | . TQUATF
+   75     | . TQUATD
+   76     | . TMAT2F
+   77     | . TMAT2D
+   78     | . TMAT3F
+   79     | . TMAT3D
+   80     | . TMAT4F
+   81     | . TMAT4D
+   82     | . TCOLOR_RGB
+   83     | . TCOLOR_RGBA
+   84 templated_type: . type template_argument_list
+
+    TIMPORT      shift, and go to state 1
+    TALIAS       shift, and go to state 2
+    TSTRUCT      shift, and go to state 3
+    TSTRING      shift, and go to state 4
+    TFLOAT       shift, and go to state 5
+    TDOUBLE      shift, and go to state 6
+    TBOOL        shift, and go to state 7
+    TUINT8_T     shift, and go to state 8
+    TINT8_T      shift, and go to state 9
+    TUINT16_T    shift, and go to state 10
+    TINT16_T     shift, and go to state 11
+    TUINT32_T    shift, and go to state 12
+    TINT32_T     shift, and go to state 13
+    TUINT64_T    shift, and go to state 14
+    TINT64_T     shift, and go to state 15
+    TVEC2F       shift, and go to state 16
+    TVEC2D       shift, and go to state 17
+    TVEC2S8      shift, and go to state 18
+    TVEC2U8      shift, and go to state 19
+    TVEC2S16     shift, and go to state 20
+    TVEC2U16     shift, and go to state 21
+    TVEC2S32     shift, and go to state 22
+    TVEC2U32     shift, and go to state 23
+    TVEC3F       shift, and go to state 24
+    TVEC3D       shift, and go to state 25
+    TVEC3S8      shift, and go to state 26
+    TVEC3U8      shift, and go to state 27
+    TVEC3S16     shift, and go to state 28
+    TVEC3U16     shift, and go to state 29
+    TVEC3S32     shift, and go to state 30
+    TVEC3U32     shift, and go to state 31
+    TVEC4F       shift, and go to state 32
+    TVEC4D       shift, and go to state 33
+    TVEC4S8      shift, and go to state 34
+    TVEC4U8      shift, and go to state 35
+    TVEC4S16     shift, and go to state 36
+    TVEC4U16     shift, and go to state 37
+    TVEC4S32     shift, and go to state 38
+    TVEC4U32     shift, and go to state 39
+    TQUATF       shift, and go to state 40
+    TQUATD       shift, and go to state 41
+    TMAT2F       shift, and go to state 42
+    TMAT2D       shift, and go to state 43
+    TMAT3F       shift, and go to state 44
+    TMAT3D       shift, and go to state 45
+    TMAT4F       shift, and go to state 46
+    TMAT4D       shift, and go to state 47
+    TCOLOR_RGB   shift, and go to state 48
+    TCOLOR_RGBA  shift, and go to state 49
+    TNAMESPACE   shift, and go to state 50
+
+    program             go to state 51
+    import              go to state 52
+    alias_declaration   go to state 53
+    struct_declaration  go to state 54
+    namespace           go to state 55
+    var_declaration     go to state 56
+    declaration_list    go to state 57
+    type                go to state 58
+    templated_type      go to state 59
+
+
+State 1
+
+    4 import: TIMPORT . TSTRING_LITERAL
+
+    TSTRING_LITERAL  shift, and go to state 60
+
+
+State 2
+
+    5 alias_declaration: TALIAS . identifier TEQUAL identifier TSEMICOLON
+    6                  | TALIAS . identifier TEQUAL identifier TCOLON attribute_list TSEMICOLON
+   23 identifier: . TIDENTIFIER
+
+    TIDENTIFIER  shift, and go to state 61
+
+    identifier  go to state 62
+
+
+State 3
+
+    7 struct_declaration: TSTRUCT . identifier TLBRACE struct_body TRBRACE TSEMICOLON
+    8                   | TSTRUCT . identifier TCOLON inheritance TLBRACE struct_body TRBRACE TSEMICOLON
+   23 identifier: . TIDENTIFIER
+
+    TIDENTIFIER  shift, and go to state 61
+
+    identifier  go to state 63
+
+
+State 4
+
+   41 type: TSTRING .
+
+    $default  reduce using rule 41 (type)
+
+
+State 5
+
+   39 type: TFLOAT .
+
+    $default  reduce using rule 39 (type)
+
+
+State 6
+
+   40 type: TDOUBLE .
+
+    $default  reduce using rule 40 (type)
+
+
+State 7
+
+   38 type: TBOOL .
+
+    $default  reduce using rule 38 (type)
+
+
+State 8
+
+   43 type: TUINT8_T .
+
+    $default  reduce using rule 43 (type)
+
+
+State 9
+
+   42 type: TINT8_T .
+
+    $default  reduce using rule 42 (type)
+
+
+State 10
+
+   45 type: TUINT16_T .
+
+    $default  reduce using rule 45 (type)
+
+
+State 11
+
+   44 type: TINT16_T .
+
+    $default  reduce using rule 44 (type)
+
+
+State 12
+
+   47 type: TUINT32_T .
+
+    $default  reduce using rule 47 (type)
+
+
+State 13
+
+   46 type: TINT32_T .
+
+    $default  reduce using rule 46 (type)
+
+
+State 14
+
+   49 type: TUINT64_T .
+
+    $default  reduce using rule 49 (type)
+
+
+State 15
+
+   48 type: TINT64_T .
+
+    $default  reduce using rule 48 (type)
+
+
+State 16
+
+   50 type: TVEC2F .
+
+    $default  reduce using rule 50 (type)
+
+
+State 17
+
+   51 type: TVEC2D .
+
+    $default  reduce using rule 51 (type)
+
+
+State 18
+
+   53 type: TVEC2S8 .
+
+    $default  reduce using rule 53 (type)
+
+
+State 19
+
+   52 type: TVEC2U8 .
+
+    $default  reduce using rule 52 (type)
+
+
+State 20
+
+   55 type: TVEC2S16 .
+
+    $default  reduce using rule 55 (type)
+
+
+State 21
+
+   54 type: TVEC2U16 .
+
+    $default  reduce using rule 54 (type)
+
+
+State 22
+
+   57 type: TVEC2S32 .
+
+    $default  reduce using rule 57 (type)
+
+
+State 23
+
+   56 type: TVEC2U32 .
+
+    $default  reduce using rule 56 (type)
+
+
+State 24
+
+   58 type: TVEC3F .
+
+    $default  reduce using rule 58 (type)
+
+
+State 25
+
+   59 type: TVEC3D .
+
+    $default  reduce using rule 59 (type)
+
+
+State 26
+
+   61 type: TVEC3S8 .
+
+    $default  reduce using rule 61 (type)
+
+
+State 27
+
+   60 type: TVEC3U8 .
+
+    $default  reduce using rule 60 (type)
+
+
+State 28
+
+   63 type: TVEC3S16 .
+
+    $default  reduce using rule 63 (type)
+
+
+State 29
+
+   62 type: TVEC3U16 .
+
+    $default  reduce using rule 62 (type)
+
+
+State 30
+
+   65 type: TVEC3S32 .
+
+    $default  reduce using rule 65 (type)
+
+
+State 31
+
+   64 type: TVEC3U32 .
+
+    $default  reduce using rule 64 (type)
+
+
+State 32
+
+   66 type: TVEC4F .
+
+    $default  reduce using rule 66 (type)
+
+
+State 33
+
+   67 type: TVEC4D .
+
+    $default  reduce using rule 67 (type)
+
+
+State 34
+
+   69 type: TVEC4S8 .
+
+    $default  reduce using rule 69 (type)
+
+
+State 35
+
+   68 type: TVEC4U8 .
+
+    $default  reduce using rule 68 (type)
+
+
+State 36
+
+   71 type: TVEC4S16 .
+
+    $default  reduce using rule 71 (type)
+
+
+State 37
+
+   70 type: TVEC4U16 .
+
+    $default  reduce using rule 70 (type)
+
+
+State 38
+
+   73 type: TVEC4S32 .
+
+    $default  reduce using rule 73 (type)
+
+
+State 39
+
+   72 type: TVEC4U32 .
+
+    $default  reduce using rule 72 (type)
+
+
+State 40
+
+   74 type: TQUATF .
+
+    $default  reduce using rule 74 (type)
+
+
+State 41
+
+   75 type: TQUATD .
+
+    $default  reduce using rule 75 (type)
+
+
+State 42
+
+   76 type: TMAT2F .
+
+    $default  reduce using rule 76 (type)
+
+
+State 43
+
+   77 type: TMAT2D .
+
+    $default  reduce using rule 77 (type)
+
+
+State 44
+
+   78 type: TMAT3F .
+
+    $default  reduce using rule 78 (type)
+
+
+State 45
+
+   79 type: TMAT3D .
+
+    $default  reduce using rule 79 (type)
+
+
+State 46
+
+   80 type: TMAT4F .
+
+    $default  reduce using rule 80 (type)
+
+
+State 47
+
+   81 type: TMAT4D .
+
+    $default  reduce using rule 81 (type)
+
+
+State 48
+
+   82 type: TCOLOR_RGB .
+
+    $default  reduce using rule 82 (type)
+
+
+State 49
+
+   83 type: TCOLOR_RGBA .
+
+    $default  reduce using rule 83 (type)
+
+
+State 50
+
+   14 namespace: TNAMESPACE . identifier TLBRACE namespace_body TRBRACE
+   23 identifier: . TIDENTIFIER
+
+    TIDENTIFIER  shift, and go to state 61
+
+    identifier  go to state 64
+
+
+State 51
+
+    0 $accept: program . $end
+
+    $end  shift, and go to state 65
+
+
+State 52
+
+    1 program: import .
+
+    $default  reduce using rule 1 (program)
+
+
+State 53
+
+   21 declaration_list: alias_declaration .
+
+    $default  reduce using rule 21 (declaration_list)
+
+
+State 54
+
+   20 declaration_list: struct_declaration .
+
+    $default  reduce using rule 20 (declaration_list)
+
+
+State 55
+
+    3 program: namespace .
+
+    $default  reduce using rule 3 (program)
+
+
+State 56
+
+   22 declaration_list: var_declaration .
+
+    $default  reduce using rule 22 (declaration_list)
+
+
+State 57
+
+    2 program: declaration_list .
+
+    $default  reduce using rule 2 (program)
+
+
+State 58
+
+   16 var_declaration: type . identifier TSEMICOLON
+   17                | type . identifier TCOLON attribute_list TSEMICOLON
+   18                | type . identifier TEQUAL expression TSEMICOLON
+   19                | type . identifier TEQUAL expression TCOLON attribute_list TSEMICOLON
+   23 identifier: . TIDENTIFIER
+   84 templated_type: type . template_argument_list
+   85 template_argument_list: . TLANGLED_BRAKET TRANGLED_BRAKET
+   86                       | . TLANGLED_BRAKET template_argument_body TRANGLED_BRAKET
+
+    TLANGLED_BRAKET  shift, and go to state 66
+    TIDENTIFIER      shift, and go to state 61
+
+    identifier              go to state 67
+    template_argument_list  go to state 68
+
+
+State 59
+
+   37 type: templated_type .
+
+    $default  reduce using rule 37 (type)
+
+
+State 60
+
+    4 import: TIMPORT TSTRING_LITERAL .
+
+    $default  reduce using rule 4 (import)
+
+
+State 61
+
+   23 identifier: TIDENTIFIER .
+
+    $default  reduce using rule 23 (identifier)
+
+
+State 62
+
+    5 alias_declaration: TALIAS identifier . TEQUAL identifier TSEMICOLON
+    6                  | TALIAS identifier . TEQUAL identifier TCOLON attribute_list TSEMICOLON
+
+    TEQUAL  shift, and go to state 69
+
+
+State 63
+
+    7 struct_declaration: TSTRUCT identifier . TLBRACE struct_body TRBRACE TSEMICOLON
+    8                   | TSTRUCT identifier . TCOLON inheritance TLBRACE struct_body TRBRACE TSEMICOLON
+
+    TLBRACE  shift, and go to state 70
+    TCOLON   shift, and go to state 71
+
+
+State 64
+
+   14 namespace: TNAMESPACE identifier . TLBRACE namespace_body TRBRACE
+
+    TLBRACE  shift, and go to state 72
+
+
+State 65
+
+    0 $accept: program $end .
+
+    $default  accept
+
+
+State 66
+
+   37 type: . templated_type
+   38     | . TBOOL
+   39     | . TFLOAT
+   40     | . TDOUBLE
+   41     | . TSTRING
+   42     | . TINT8_T
+   43     | . TUINT8_T
+   44     | . TINT16_T
+   45     | . TUINT16_T
+   46     | . TINT32_T
+   47     | . TUINT32_T
+   48     | . TINT64_T
+   49     | . TUINT64_T
+   50     | . TVEC2F
+   51     | . TVEC2D
+   52     | . TVEC2U8
+   53     | . TVEC2S8
+   54     | . TVEC2U16
+   55     | . TVEC2S16
+   56     | . TVEC2U32
+   57     | . TVEC2S32
+   58     | . TVEC3F
+   59     | . TVEC3D
+   60     | . TVEC3U8
+   61     | . TVEC3S8
+   62     | . TVEC3U16
+   63     | . TVEC3S16
+   64     | . TVEC3U32
+   65     | . TVEC3S32
+   66     | . TVEC4F
+   67     | . TVEC4D
+   68     | . TVEC4U8
+   69     | . TVEC4S8
+   70     | . TVEC4U16
+   71     | . TVEC4S16
+   72     | . TVEC4U32
+   73     | . TVEC4S32
+   74     | . TQUATF
+   75     | . TQUATD
+   76     | . TMAT2F
+   77     | . TMAT2D
+   78     | . TMAT3F
+   79     | . TMAT3D
+   80     | . TMAT4F
+   81     | . TMAT4D
+   82     | . TCOLOR_RGB
+   83     | . TCOLOR_RGBA
+   84 templated_type: . type template_argument_list
+   85 template_argument_list: TLANGLED_BRAKET . TRANGLED_BRAKET
+   86                       | TLANGLED_BRAKET . template_argument_body TRANGLED_BRAKET
+   87 template_argument_body: . template_argument
+   88                       | . template_argument_body TCOMMA template_argument
+   89 template_argument: . type
+   90                  | . TSTRING_LITERAL
+   91                  | . TINTEGER_CONSTANT
+
+    TSTRING            shift, and go to state 4
+    TFLOAT             shift, and go to state 5
+    TDOUBLE            shift, and go to state 6
+    TBOOL              shift, and go to state 7
+    TUINT8_T           shift, and go to state 8
+    TINT8_T            shift, and go to state 9
+    TUINT16_T          shift, and go to state 10
+    TINT16_T           shift, and go to state 11
+    TUINT32_T          shift, and go to state 12
+    TINT32_T           shift, and go to state 13
+    TUINT64_T          shift, and go to state 14
+    TINT64_T           shift, and go to state 15
+    TVEC2F             shift, and go to state 16
+    TVEC2D             shift, and go to state 17
+    TVEC2S8            shift, and go to state 18
+    TVEC2U8            shift, and go to state 19
+    TVEC2S16           shift, and go to state 20
+    TVEC2U16           shift, and go to state 21
+    TVEC2S32           shift, and go to state 22
+    TVEC2U32           shift, and go to state 23
+    TVEC3F             shift, and go to state 24
+    TVEC3D             shift, and go to state 25
+    TVEC3S8            shift, and go to state 26
+    TVEC3U8            shift, and go to state 27
+    TVEC3S16           shift, and go to state 28
+    TVEC3U16           shift, and go to state 29
+    TVEC3S32           shift, and go to state 30
+    TVEC3U32           shift, and go to state 31
+    TVEC4F             shift, and go to state 32
+    TVEC4D             shift, and go to state 33
+    TVEC4S8            shift, and go to state 34
+    TVEC4U8            shift, and go to state 35
+    TVEC4S16           shift, and go to state 36
+    TVEC4U16           shift, and go to state 37
+    TVEC4S32           shift, and go to state 38
+    TVEC4U32           shift, and go to state 39
+    TQUATF             shift, and go to state 40
+    TQUATD             shift, and go to state 41
+    TMAT2F             shift, and go to state 42
+    TMAT2D             shift, and go to state 43
+    TMAT3F             shift, and go to state 44
+    TMAT3D             shift, and go to state 45
+    TMAT4F             shift, and go to state 46
+    TMAT4D             shift, and go to state 47
+    TCOLOR_RGB         shift, and go to state 48
+    TCOLOR_RGBA        shift, and go to state 49
+    TRANGLED_BRAKET    shift, and go to state 73
+    TINTEGER_CONSTANT  shift, and go to state 74
+    TSTRING_LITERAL    shift, and go to state 75
+
+    type                    go to state 76
+    templated_type          go to state 59
+    template_argument_body  go to state 77
+    template_argument       go to state 78
+
+
+State 67
+
+   16 var_declaration: type identifier . TSEMICOLON
+   17                | type identifier . TCOLON attribute_list TSEMICOLON
+   18                | type identifier . TEQUAL expression TSEMICOLON
+   19                | type identifier . TEQUAL expression TCOLON attribute_list TSEMICOLON
+
+    TEQUAL      shift, and go to state 79
+    TCOLON      shift, and go to state 80
+    TSEMICOLON  shift, and go to state 81
+
+
+State 68
+
+   84 templated_type: type template_argument_list .
+
+    $default  reduce using rule 84 (templated_type)
+
+
+State 69
+
+    5 alias_declaration: TALIAS identifier TEQUAL . identifier TSEMICOLON
+    6                  | TALIAS identifier TEQUAL . identifier TCOLON attribute_list TSEMICOLON
+   23 identifier: . TIDENTIFIER
+
+    TIDENTIFIER  shift, and go to state 61
+
+    identifier  go to state 82
+
+
+State 70
+
+    5 alias_declaration: . TALIAS identifier TEQUAL identifier TSEMICOLON
+    6                  | . TALIAS identifier TEQUAL identifier TCOLON attribute_list TSEMICOLON
+    7 struct_declaration: . TSTRUCT identifier TLBRACE struct_body TRBRACE TSEMICOLON
+    7                   | TSTRUCT identifier TLBRACE . struct_body TRBRACE TSEMICOLON
+    8                   | . TSTRUCT identifier TCOLON inheritance TLBRACE struct_body TRBRACE TSEMICOLON
+    9 struct_body: . declaration_list
+   16 var_declaration: . type identifier TSEMICOLON
+   17                | . type identifier TCOLON attribute_list TSEMICOLON
+   18                | . type identifier TEQUAL expression TSEMICOLON
+   19                | . type identifier TEQUAL expression TCOLON attribute_list TSEMICOLON
+   20 declaration_list: . struct_declaration
+   21                 | . alias_declaration
+   22                 | . var_declaration
+   37 type: . templated_type
+   38     | . TBOOL
+   39     | . TFLOAT
+   40     | . TDOUBLE
+   41     | . TSTRING
+   42     | . TINT8_T
+   43     | . TUINT8_T
+   44     | . TINT16_T
+   45     | . TUINT16_T
+   46     | . TINT32_T
+   47     | . TUINT32_T
+   48     | . TINT64_T
+   49     | . TUINT64_T
+   50     | . TVEC2F
+   51     | . TVEC2D
+   52     | . TVEC2U8
+   53     | . TVEC2S8
+   54     | . TVEC2U16
+   55     | . TVEC2S16
+   56     | . TVEC2U32
+   57     | . TVEC2S32
+   58     | . TVEC3F
+   59     | . TVEC3D
+   60     | . TVEC3U8
+   61     | . TVEC3S8
+   62     | . TVEC3U16
+   63     | . TVEC3S16
+   64     | . TVEC3U32
+   65     | . TVEC3S32
+   66     | . TVEC4F
+   67     | . TVEC4D
+   68     | . TVEC4U8
+   69     | . TVEC4S8
+   70     | . TVEC4U16
+   71     | . TVEC4S16
+   72     | . TVEC4U32
+   73     | . TVEC4S32
+   74     | . TQUATF
+   75     | . TQUATD
+   76     | . TMAT2F
+   77     | . TMAT2D
+   78     | . TMAT3F
+   79     | . TMAT3D
+   80     | . TMAT4F
+   81     | . TMAT4D
+   82     | . TCOLOR_RGB
+   83     | . TCOLOR_RGBA
+   84 templated_type: . type template_argument_list
+
+    TALIAS       shift, and go to state 2
+    TSTRUCT      shift, and go to state 3
+    TSTRING      shift, and go to state 4
+    TFLOAT       shift, and go to state 5
+    TDOUBLE      shift, and go to state 6
+    TBOOL        shift, and go to state 7
+    TUINT8_T     shift, and go to state 8
+    TINT8_T      shift, and go to state 9
+    TUINT16_T    shift, and go to state 10
+    TINT16_T     shift, and go to state 11
+    TUINT32_T    shift, and go to state 12
+    TINT32_T     shift, and go to state 13
+    TUINT64_T    shift, and go to state 14
+    TINT64_T     shift, and go to state 15
+    TVEC2F       shift, and go to state 16
+    TVEC2D       shift, and go to state 17
+    TVEC2S8      shift, and go to state 18
+    TVEC2U8      shift, and go to state 19
+    TVEC2S16     shift, and go to state 20
+    TVEC2U16     shift, and go to state 21
+    TVEC2S32     shift, and go to state 22
+    TVEC2U32     shift, and go to state 23
+    TVEC3F       shift, and go to state 24
+    TVEC3D       shift, and go to state 25
+    TVEC3S8      shift, and go to state 26
+    TVEC3U8      shift, and go to state 27
+    TVEC3S16     shift, and go to state 28
+    TVEC3U16     shift, and go to state 29
+    TVEC3S32     shift, and go to state 30
+    TVEC3U32     shift, and go to state 31
+    TVEC4F       shift, and go to state 32
+    TVEC4D       shift, and go to state 33
+    TVEC4S8      shift, and go to state 34
+    TVEC4U8      shift, and go to state 35
+    TVEC4S16     shift, and go to state 36
+    TVEC4U16     shift, and go to state 37
+    TVEC4S32     shift, and go to state 38
+    TVEC4U32     shift, and go to state 39
+    TQUATF       shift, and go to state 40
+    TQUATD       shift, and go to state 41
+    TMAT2F       shift, and go to state 42
+    TMAT2D       shift, and go to state 43
+    TMAT3F       shift, and go to state 44
+    TMAT3D       shift, and go to state 45
+    TMAT4F       shift, and go to state 46
+    TMAT4D       shift, and go to state 47
+    TCOLOR_RGB   shift, and go to state 48
+    TCOLOR_RGBA  shift, and go to state 49
+
+    alias_declaration   go to state 53
+    struct_declaration  go to state 54
+    struct_body         go to state 83
+    var_declaration     go to state 56
+    declaration_list    go to state 84
+    type                go to state 58
+    templated_type      go to state 59
+
+
+State 71
+
+    8 struct_declaration: TSTRUCT identifier TCOLON . inheritance TLBRACE struct_body TRBRACE TSEMICOLON
+   10 inheritance: . inheritance_type identifier
+   11 inheritance_type: . TPUBLIC
+   12                 | . TPRIVATE
+   13                 | . TPROTECTED
+
+    TPUBLIC     shift, and go to state 85
+    TPRIVATE    shift, and go to state 86
+    TPROTECTED  shift, and go to state 87
+
+    inheritance       go to state 88
+    inheritance_type  go to state 89
+
+
+State 72
+
+    5 alias_declaration: . TALIAS identifier TEQUAL identifier TSEMICOLON
+    6                  | . TALIAS identifier TEQUAL identifier TCOLON attribute_list TSEMICOLON
+    7 struct_declaration: . TSTRUCT identifier TLBRACE struct_body TRBRACE TSEMICOLON
+    8                   | . TSTRUCT identifier TCOLON inheritance TLBRACE struct_body TRBRACE TSEMICOLON
+   14 namespace: TNAMESPACE identifier TLBRACE . namespace_body TRBRACE
+   15 namespace_body: . declaration_list
+   16 var_declaration: . type identifier TSEMICOLON
+   17                | . type identifier TCOLON attribute_list TSEMICOLON
+   18                | . type identifier TEQUAL expression TSEMICOLON
+   19                | . type identifier TEQUAL expression TCOLON attribute_list TSEMICOLON
+   20 declaration_list: . struct_declaration
+   21                 | . alias_declaration
+   22                 | . var_declaration
+   37 type: . templated_type
+   38     | . TBOOL
+   39     | . TFLOAT
+   40     | . TDOUBLE
+   41     | . TSTRING
+   42     | . TINT8_T
+   43     | . TUINT8_T
+   44     | . TINT16_T
+   45     | . TUINT16_T
+   46     | . TINT32_T
+   47     | . TUINT32_T
+   48     | . TINT64_T
+   49     | . TUINT64_T
+   50     | . TVEC2F
+   51     | . TVEC2D
+   52     | . TVEC2U8
+   53     | . TVEC2S8
+   54     | . TVEC2U16
+   55     | . TVEC2S16
+   56     | . TVEC2U32
+   57     | . TVEC2S32
+   58     | . TVEC3F
+   59     | . TVEC3D
+   60     | . TVEC3U8
+   61     | . TVEC3S8
+   62     | . TVEC3U16
+   63     | . TVEC3S16
+   64     | . TVEC3U32
+   65     | . TVEC3S32
+   66     | . TVEC4F
+   67     | . TVEC4D
+   68     | . TVEC4U8
+   69     | . TVEC4S8
+   70     | . TVEC4U16
+   71     | . TVEC4S16
+   72     | . TVEC4U32
+   73     | . TVEC4S32
+   74     | . TQUATF
+   75     | . TQUATD
+   76     | . TMAT2F
+   77     | . TMAT2D
+   78     | . TMAT3F
+   79     | . TMAT3D
+   80     | . TMAT4F
+   81     | . TMAT4D
+   82     | . TCOLOR_RGB
+   83     | . TCOLOR_RGBA
+   84 templated_type: . type template_argument_list
+
+    TALIAS       shift, and go to state 2
+    TSTRUCT      shift, and go to state 3
+    TSTRING      shift, and go to state 4
+    TFLOAT       shift, and go to state 5
+    TDOUBLE      shift, and go to state 6
+    TBOOL        shift, and go to state 7
+    TUINT8_T     shift, and go to state 8
+    TINT8_T      shift, and go to state 9
+    TUINT16_T    shift, and go to state 10
+    TINT16_T     shift, and go to state 11
+    TUINT32_T    shift, and go to state 12
+    TINT32_T     shift, and go to state 13
+    TUINT64_T    shift, and go to state 14
+    TINT64_T     shift, and go to state 15
+    TVEC2F       shift, and go to state 16
+    TVEC2D       shift, and go to state 17
+    TVEC2S8      shift, and go to state 18
+    TVEC2U8      shift, and go to state 19
+    TVEC2S16     shift, and go to state 20
+    TVEC2U16     shift, and go to state 21
+    TVEC2S32     shift, and go to state 22
+    TVEC2U32     shift, and go to state 23
+    TVEC3F       shift, and go to state 24
+    TVEC3D       shift, and go to state 25
+    TVEC3S8      shift, and go to state 26
+    TVEC3U8      shift, and go to state 27
+    TVEC3S16     shift, and go to state 28
+    TVEC3U16     shift, and go to state 29
+    TVEC3S32     shift, and go to state 30
+    TVEC3U32     shift, and go to state 31
+    TVEC4F       shift, and go to state 32
+    TVEC4D       shift, and go to state 33
+    TVEC4S8      shift, and go to state 34
+    TVEC4U8      shift, and go to state 35
+    TVEC4S16     shift, and go to state 36
+    TVEC4U16     shift, and go to state 37
+    TVEC4S32     shift, and go to state 38
+    TVEC4U32     shift, and go to state 39
+    TQUATF       shift, and go to state 40
+    TQUATD       shift, and go to state 41
+    TMAT2F       shift, and go to state 42
+    TMAT2D       shift, and go to state 43
+    TMAT3F       shift, and go to state 44
+    TMAT3D       shift, and go to state 45
+    TMAT4F       shift, and go to state 46
+    TMAT4D       shift, and go to state 47
+    TCOLOR_RGB   shift, and go to state 48
+    TCOLOR_RGBA  shift, and go to state 49
+
+    alias_declaration   go to state 53
+    struct_declaration  go to state 54
+    namespace_body      go to state 90
+    var_declaration     go to state 56
+    declaration_list    go to state 91
+    type                go to state 58
+    templated_type      go to state 59
+
+
+State 73
+
+   85 template_argument_list: TLANGLED_BRAKET TRANGLED_BRAKET .
+
+    $default  reduce using rule 85 (template_argument_list)
+
+
+State 74
+
+   91 template_argument: TINTEGER_CONSTANT .
+
+    $default  reduce using rule 91 (template_argument)
+
+
+State 75
+
+   90 template_argument: TSTRING_LITERAL .
+
+    $default  reduce using rule 90 (template_argument)
+
+
+State 76
+
+   84 templated_type: type . template_argument_list
+   85 template_argument_list: . TLANGLED_BRAKET TRANGLED_BRAKET
+   86                       | . TLANGLED_BRAKET template_argument_body TRANGLED_BRAKET
+   89 template_argument: type .  [TRANGLED_BRAKET, TCOMMA]
+
+    TLANGLED_BRAKET  shift, and go to state 66
+
+    $default  reduce using rule 89 (template_argument)
+
+    template_argument_list  go to state 68
+
+
+State 77
+
+   86 template_argument_list: TLANGLED_BRAKET template_argument_body . TRANGLED_BRAKET
+   88 template_argument_body: template_argument_body . TCOMMA template_argument
+
+    TRANGLED_BRAKET  shift, and go to state 92
+    TCOMMA           shift, and go to state 93
+
+
+State 78
+
+   87 template_argument_body: template_argument .
+
+    $default  reduce using rule 87 (template_argument_body)
+
+
+State 79
+
+   18 var_declaration: type identifier TEQUAL . expression TSEMICOLON
+   19                | type identifier TEQUAL . expression TCOLON attribute_list TSEMICOLON
+   30 expression: . literal
+   31           | . initializer_list
+   32           | . TLPARENTHESIS expression TRPARENTHESIS
+   33 initializer_list: . TLBRACE TRBRACE
+   34                 | . TLBRACE initializer_body TRBRACE
+   92 literal: . TFLOAT_CONSTANT
+   93        | . TDOUBLE_CONSTANT
+   94        | . TINTEGER_CONSTANT
+   95        | . TSTRING_LITERAL
+   96        | . TFALSE
+   97        | . TTRUE
+
+    TFALSE             shift, and go to state 94
+    TTRUE              shift, and go to state 95
+    TLPARENTHESIS      shift, and go to state 96
+    TLBRACE            shift, and go to state 97
+    TFLOAT_CONSTANT    shift, and go to state 98
+    TDOUBLE_CONSTANT   shift, and go to state 99
+    TINTEGER_CONSTANT  shift, and go to state 100
+    TSTRING_LITERAL    shift, and go to state 101
+
+    expression        go to state 102
+    initializer_list  go to state 103
+    literal           go to state 104
+
+
+State 80
+
+   17 var_declaration: type identifier TCOLON . attribute_list TSEMICOLON
+   24 attribute_list: . TLBRAKET attribute_body TRBRAKET
+
+    TLBRAKET  shift, and go to state 105
+
+    attribute_list  go to state 106
+
+
+State 81
+
+   16 var_declaration: type identifier TSEMICOLON .
+
+    $default  reduce using rule 16 (var_declaration)
+
+
+State 82
+
+    5 alias_declaration: TALIAS identifier TEQUAL identifier . TSEMICOLON
+    6                  | TALIAS identifier TEQUAL identifier . TCOLON attribute_list TSEMICOLON
+
+    TCOLON      shift, and go to state 107
+    TSEMICOLON  shift, and go to state 108
+
+
+State 83
+
+    7 struct_declaration: TSTRUCT identifier TLBRACE struct_body . TRBRACE TSEMICOLON
+
+    TRBRACE  shift, and go to state 109
+
+
+State 84
+
+    9 struct_body: declaration_list .
+
+    $default  reduce using rule 9 (struct_body)
+
+
+State 85
+
+   11 inheritance_type: TPUBLIC .
+
+    $default  reduce using rule 11 (inheritance_type)
+
+
+State 86
+
+   12 inheritance_type: TPRIVATE .
+
+    $default  reduce using rule 12 (inheritance_type)
+
+
+State 87
+
+   13 inheritance_type: TPROTECTED .
+
+    $default  reduce using rule 13 (inheritance_type)
+
+
+State 88
+
+    8 struct_declaration: TSTRUCT identifier TCOLON inheritance . TLBRACE struct_body TRBRACE TSEMICOLON
+
+    TLBRACE  shift, and go to state 110
+
+
+State 89
+
+   10 inheritance: inheritance_type . identifier
+   23 identifier: . TIDENTIFIER
+
+    TIDENTIFIER  shift, and go to state 61
+
+    identifier  go to state 111
+
+
+State 90
+
+   14 namespace: TNAMESPACE identifier TLBRACE namespace_body . TRBRACE
+
+    TRBRACE  shift, and go to state 112
+
+
+State 91
+
+   15 namespace_body: declaration_list .
+
+    $default  reduce using rule 15 (namespace_body)
+
+
+State 92
+
+   86 template_argument_list: TLANGLED_BRAKET template_argument_body TRANGLED_BRAKET .
+
+    $default  reduce using rule 86 (template_argument_list)
+
+
+State 93
+
+   37 type: . templated_type
+   38     | . TBOOL
+   39     | . TFLOAT
+   40     | . TDOUBLE
+   41     | . TSTRING
+   42     | . TINT8_T
+   43     | . TUINT8_T
+   44     | . TINT16_T
+   45     | . TUINT16_T
+   46     | . TINT32_T
+   47     | . TUINT32_T
+   48     | . TINT64_T
+   49     | . TUINT64_T
+   50     | . TVEC2F
+   51     | . TVEC2D
+   52     | . TVEC2U8
+   53     | . TVEC2S8
+   54     | . TVEC2U16
+   55     | . TVEC2S16
+   56     | . TVEC2U32
+   57     | . TVEC2S32
+   58     | . TVEC3F
+   59     | . TVEC3D
+   60     | . TVEC3U8
+   61     | . TVEC3S8
+   62     | . TVEC3U16
+   63     | . TVEC3S16
+   64     | . TVEC3U32
+   65     | . TVEC3S32
+   66     | . TVEC4F
+   67     | . TVEC4D
+   68     | . TVEC4U8
+   69     | . TVEC4S8
+   70     | . TVEC4U16
+   71     | . TVEC4S16
+   72     | . TVEC4U32
+   73     | . TVEC4S32
+   74     | . TQUATF
+   75     | . TQUATD
+   76     | . TMAT2F
+   77     | . TMAT2D
+   78     | . TMAT3F
+   79     | . TMAT3D
+   80     | . TMAT4F
+   81     | . TMAT4D
+   82     | . TCOLOR_RGB
+   83     | . TCOLOR_RGBA
+   84 templated_type: . type template_argument_list
+   88 template_argument_body: template_argument_body TCOMMA . template_argument
+   89 template_argument: . type
+   90                  | . TSTRING_LITERAL
+   91                  | . TINTEGER_CONSTANT
+
+    TSTRING            shift, and go to state 4
+    TFLOAT             shift, and go to state 5
+    TDOUBLE            shift, and go to state 6
+    TBOOL              shift, and go to state 7
+    TUINT8_T           shift, and go to state 8
+    TINT8_T            shift, and go to state 9
+    TUINT16_T          shift, and go to state 10
+    TINT16_T           shift, and go to state 11
+    TUINT32_T          shift, and go to state 12
+    TINT32_T           shift, and go to state 13
+    TUINT64_T          shift, and go to state 14
+    TINT64_T           shift, and go to state 15
+    TVEC2F             shift, and go to state 16
+    TVEC2D             shift, and go to state 17
+    TVEC2S8            shift, and go to state 18
+    TVEC2U8            shift, and go to state 19
+    TVEC2S16           shift, and go to state 20
+    TVEC2U16           shift, and go to state 21
+    TVEC2S32           shift, and go to state 22
+    TVEC2U32           shift, and go to state 23
+    TVEC3F             shift, and go to state 24
+    TVEC3D             shift, and go to state 25
+    TVEC3S8            shift, and go to state 26
+    TVEC3U8            shift, and go to state 27
+    TVEC3S16           shift, and go to state 28
+    TVEC3U16           shift, and go to state 29
+    TVEC3S32           shift, and go to state 30
+    TVEC3U32           shift, and go to state 31
+    TVEC4F             shift, and go to state 32
+    TVEC4D             shift, and go to state 33
+    TVEC4S8            shift, and go to state 34
+    TVEC4U8            shift, and go to state 35
+    TVEC4S16           shift, and go to state 36
+    TVEC4U16           shift, and go to state 37
+    TVEC4S32           shift, and go to state 38
+    TVEC4U32           shift, and go to state 39
+    TQUATF             shift, and go to state 40
+    TQUATD             shift, and go to state 41
+    TMAT2F             shift, and go to state 42
+    TMAT2D             shift, and go to state 43
+    TMAT3F             shift, and go to state 44
+    TMAT3D             shift, and go to state 45
+    TMAT4F             shift, and go to state 46
+    TMAT4D             shift, and go to state 47
+    TCOLOR_RGB         shift, and go to state 48
+    TCOLOR_RGBA        shift, and go to state 49
+    TINTEGER_CONSTANT  shift, and go to state 74
+    TSTRING_LITERAL    shift, and go to state 75
+
+    type               go to state 76
+    templated_type     go to state 59
+    template_argument  go to state 113
+
+
+State 94
+
+   96 literal: TFALSE .
+
+    $default  reduce using rule 96 (literal)
+
+
+State 95
+
+   97 literal: TTRUE .
+
+    $default  reduce using rule 97 (literal)
+
+
+State 96
+
+   30 expression: . literal
+   31           | . initializer_list
+   32           | . TLPARENTHESIS expression TRPARENTHESIS
+   32           | TLPARENTHESIS . expression TRPARENTHESIS
+   33 initializer_list: . TLBRACE TRBRACE
+   34                 | . TLBRACE initializer_body TRBRACE
+   92 literal: . TFLOAT_CONSTANT
+   93        | . TDOUBLE_CONSTANT
+   94        | . TINTEGER_CONSTANT
+   95        | . TSTRING_LITERAL
+   96        | . TFALSE
+   97        | . TTRUE
+
+    TFALSE             shift, and go to state 94
+    TTRUE              shift, and go to state 95
+    TLPARENTHESIS      shift, and go to state 96
+    TLBRACE            shift, and go to state 97
+    TFLOAT_CONSTANT    shift, and go to state 98
+    TDOUBLE_CONSTANT   shift, and go to state 99
+    TINTEGER_CONSTANT  shift, and go to state 100
+    TSTRING_LITERAL    shift, and go to state 101
+
+    expression        go to state 114
+    initializer_list  go to state 103
+    literal           go to state 104
+
+
+State 97
+
+   30 expression: . literal
+   31           | . initializer_list
+   32           | . TLPARENTHESIS expression TRPARENTHESIS
+   33 initializer_list: . TLBRACE TRBRACE
+   33                 | TLBRACE . TRBRACE
+   34                 | . TLBRACE initializer_body TRBRACE
+   34                 | TLBRACE . initializer_body TRBRACE
+   35 initializer_body: . expression
+   36                 | . initializer_body TCOMMA expression
+   92 literal: . TFLOAT_CONSTANT
+   93        | . TDOUBLE_CONSTANT
+   94        | . TINTEGER_CONSTANT
+   95        | . TSTRING_LITERAL
+   96        | . TFALSE
+   97        | . TTRUE
+
+    TFALSE             shift, and go to state 94
+    TTRUE              shift, and go to state 95
+    TLPARENTHESIS      shift, and go to state 96
+    TLBRACE            shift, and go to state 97
+    TRBRACE            shift, and go to state 115
+    TFLOAT_CONSTANT    shift, and go to state 98
+    TDOUBLE_CONSTANT   shift, and go to state 99
+    TINTEGER_CONSTANT  shift, and go to state 100
+    TSTRING_LITERAL    shift, and go to state 101
+
+    expression        go to state 116
+    initializer_list  go to state 103
+    initializer_body  go to state 117
+    literal           go to state 104
+
+
+State 98
+
+   92 literal: TFLOAT_CONSTANT .
+
+    $default  reduce using rule 92 (literal)
+
+
+State 99
+
+   93 literal: TDOUBLE_CONSTANT .
+
+    $default  reduce using rule 93 (literal)
+
+
+State 100
+
+   94 literal: TINTEGER_CONSTANT .
+
+    $default  reduce using rule 94 (literal)
+
+
+State 101
+
+   95 literal: TSTRING_LITERAL .
+
+    $default  reduce using rule 95 (literal)
+
+
+State 102
+
+   18 var_declaration: type identifier TEQUAL expression . TSEMICOLON
+   19                | type identifier TEQUAL expression . TCOLON attribute_list TSEMICOLON
+
+    TCOLON      shift, and go to state 118
+    TSEMICOLON  shift, and go to state 119
+
+
+State 103
+
+   31 expression: initializer_list .
+
+    $default  reduce using rule 31 (expression)
+
+
+State 104
+
+   30 expression: literal .
+
+    $default  reduce using rule 30 (expression)
+
+
+State 105
+
+   24 attribute_list: TLBRAKET . attribute_body TRBRAKET
+   25 attribute_body: . attribute
+   26               | . attribute_body TCOMMA attribute
+   27 attribute: . TMIN TEQUAL expression
+   28          | . TMAX TEQUAL expression
+   29          | . TUI_NAME TEQUAL TSTRING_LITERAL
+
+    TMIN      shift, and go to state 120
+    TMAX      shift, and go to state 121
+    TUI_NAME  shift, and go to state 122
+
+    attribute_body  go to state 123
+    attribute       go to state 124
+
+
+State 106
+
+   17 var_declaration: type identifier TCOLON attribute_list . TSEMICOLON
+
+    TSEMICOLON  shift, and go to state 125
+
+
+State 107
+
+    6 alias_declaration: TALIAS identifier TEQUAL identifier TCOLON . attribute_list TSEMICOLON
+   24 attribute_list: . TLBRAKET attribute_body TRBRAKET
+
+    TLBRAKET  shift, and go to state 105
+
+    attribute_list  go to state 126
+
+
+State 108
+
+    5 alias_declaration: TALIAS identifier TEQUAL identifier TSEMICOLON .
+
+    $default  reduce using rule 5 (alias_declaration)
+
+
+State 109
+
+    7 struct_declaration: TSTRUCT identifier TLBRACE struct_body TRBRACE . TSEMICOLON
+
+    TSEMICOLON  shift, and go to state 127
+
+
+State 110
+
+    5 alias_declaration: . TALIAS identifier TEQUAL identifier TSEMICOLON
+    6                  | . TALIAS identifier TEQUAL identifier TCOLON attribute_list TSEMICOLON
+    7 struct_declaration: . TSTRUCT identifier TLBRACE struct_body TRBRACE TSEMICOLON
+    8                   | . TSTRUCT identifier TCOLON inheritance TLBRACE struct_body TRBRACE TSEMICOLON
+    8                   | TSTRUCT identifier TCOLON inheritance TLBRACE . struct_body TRBRACE TSEMICOLON
+    9 struct_body: . declaration_list
+   16 var_declaration: . type identifier TSEMICOLON
+   17                | . type identifier TCOLON attribute_list TSEMICOLON
+   18                | . type identifier TEQUAL expression TSEMICOLON
+   19                | . type identifier TEQUAL expression TCOLON attribute_list TSEMICOLON
+   20 declaration_list: . struct_declaration
+   21                 | . alias_declaration
+   22                 | . var_declaration
+   37 type: . templated_type
+   38     | . TBOOL
+   39     | . TFLOAT
+   40     | . TDOUBLE
+   41     | . TSTRING
+   42     | . TINT8_T
+   43     | . TUINT8_T
+   44     | . TINT16_T
+   45     | . TUINT16_T
+   46     | . TINT32_T
+   47     | . TUINT32_T
+   48     | . TINT64_T
+   49     | . TUINT64_T
+   50     | . TVEC2F
+   51     | . TVEC2D
+   52     | . TVEC2U8
+   53     | . TVEC2S8
+   54     | . TVEC2U16
+   55     | . TVEC2S16
+   56     | . TVEC2U32
+   57     | . TVEC2S32
+   58     | . TVEC3F
+   59     | . TVEC3D
+   60     | . TVEC3U8
+   61     | . TVEC3S8
+   62     | . TVEC3U16
+   63     | . TVEC3S16
+   64     | . TVEC3U32
+   65     | . TVEC3S32
+   66     | . TVEC4F
+   67     | . TVEC4D
+   68     | . TVEC4U8
+   69     | . TVEC4S8
+   70     | . TVEC4U16
+   71     | . TVEC4S16
+   72     | . TVEC4U32
+   73     | . TVEC4S32
+   74     | . TQUATF
+   75     | . TQUATD
+   76     | . TMAT2F
+   77     | . TMAT2D
+   78     | . TMAT3F
+   79     | . TMAT3D
+   80     | . TMAT4F
+   81     | . TMAT4D
+   82     | . TCOLOR_RGB
+   83     | . TCOLOR_RGBA
+   84 templated_type: . type template_argument_list
+
+    TALIAS       shift, and go to state 2
+    TSTRUCT      shift, and go to state 3
+    TSTRING      shift, and go to state 4
+    TFLOAT       shift, and go to state 5
+    TDOUBLE      shift, and go to state 6
+    TBOOL        shift, and go to state 7
+    TUINT8_T     shift, and go to state 8
+    TINT8_T      shift, and go to state 9
+    TUINT16_T    shift, and go to state 10
+    TINT16_T     shift, and go to state 11
+    TUINT32_T    shift, and go to state 12
+    TINT32_T     shift, and go to state 13
+    TUINT64_T    shift, and go to state 14
+    TINT64_T     shift, and go to state 15
+    TVEC2F       shift, and go to state 16
+    TVEC2D       shift, and go to state 17
+    TVEC2S8      shift, and go to state 18
+    TVEC2U8      shift, and go to state 19
+    TVEC2S16     shift, and go to state 20
+    TVEC2U16     shift, and go to state 21
+    TVEC2S32     shift, and go to state 22
+    TVEC2U32     shift, and go to state 23
+    TVEC3F       shift, and go to state 24
+    TVEC3D       shift, and go to state 25
+    TVEC3S8      shift, and go to state 26
+    TVEC3U8      shift, and go to state 27
+    TVEC3S16     shift, and go to state 28
+    TVEC3U16     shift, and go to state 29
+    TVEC3S32     shift, and go to state 30
+    TVEC3U32     shift, and go to state 31
+    TVEC4F       shift, and go to state 32
+    TVEC4D       shift, and go to state 33
+    TVEC4S8      shift, and go to state 34
+    TVEC4U8      shift, and go to state 35
+    TVEC4S16     shift, and go to state 36
+    TVEC4U16     shift, and go to state 37
+    TVEC4S32     shift, and go to state 38
+    TVEC4U32     shift, and go to state 39
+    TQUATF       shift, and go to state 40
+    TQUATD       shift, and go to state 41
+    TMAT2F       shift, and go to state 42
+    TMAT2D       shift, and go to state 43
+    TMAT3F       shift, and go to state 44
+    TMAT3D       shift, and go to state 45
+    TMAT4F       shift, and go to state 46
+    TMAT4D       shift, and go to state 47
+    TCOLOR_RGB   shift, and go to state 48
+    TCOLOR_RGBA  shift, and go to state 49
+
+    alias_declaration   go to state 53
+    struct_declaration  go to state 54
+    struct_body         go to state 128
+    var_declaration     go to state 56
+    declaration_list    go to state 84
+    type                go to state 58
+    templated_type      go to state 59
+
+
+State 111
+
+   10 inheritance: inheritance_type identifier .
+
+    $default  reduce using rule 10 (inheritance)
+
+
+State 112
+
+   14 namespace: TNAMESPACE identifier TLBRACE namespace_body TRBRACE .
+
+    $default  reduce using rule 14 (namespace)
+
+
+State 113
+
+   88 template_argument_body: template_argument_body TCOMMA template_argument .
+
+    $default  reduce using rule 88 (template_argument_body)
+
+
+State 114
+
+   32 expression: TLPARENTHESIS expression . TRPARENTHESIS
+
+    TRPARENTHESIS  shift, and go to state 129
+
+
+State 115
+
+   33 initializer_list: TLBRACE TRBRACE .
+
+    $default  reduce using rule 33 (initializer_list)
+
+
+State 116
+
+   35 initializer_body: expression .
+
+    $default  reduce using rule 35 (initializer_body)
+
+
+State 117
+
+   34 initializer_list: TLBRACE initializer_body . TRBRACE
+   36 initializer_body: initializer_body . TCOMMA expression
+
+    TRBRACE  shift, and go to state 130
+    TCOMMA   shift, and go to state 131
+
+
+State 118
+
+   19 var_declaration: type identifier TEQUAL expression TCOLON . attribute_list TSEMICOLON
+   24 attribute_list: . TLBRAKET attribute_body TRBRAKET
+
+    TLBRAKET  shift, and go to state 105
+
+    attribute_list  go to state 132
+
+
+State 119
+
+   18 var_declaration: type identifier TEQUAL expression TSEMICOLON .
+
+    $default  reduce using rule 18 (var_declaration)
+
+
+State 120
+
+   27 attribute: TMIN . TEQUAL expression
+
+    TEQUAL  shift, and go to state 133
+
+
+State 121
+
+   28 attribute: TMAX . TEQUAL expression
+
+    TEQUAL  shift, and go to state 134
+
+
+State 122
+
+   29 attribute: TUI_NAME . TEQUAL TSTRING_LITERAL
+
+    TEQUAL  shift, and go to state 135
+
+
+State 123
+
+   24 attribute_list: TLBRAKET attribute_body . TRBRAKET
+   26 attribute_body: attribute_body . TCOMMA attribute
+
+    TRBRAKET  shift, and go to state 136
+    TCOMMA    shift, and go to state 137
+
+
+State 124
+
+   25 attribute_body: attribute .
+
+    $default  reduce using rule 25 (attribute_body)
+
+
+State 125
+
+   17 var_declaration: type identifier TCOLON attribute_list TSEMICOLON .
+
+    $default  reduce using rule 17 (var_declaration)
+
+
+State 126
+
+    6 alias_declaration: TALIAS identifier TEQUAL identifier TCOLON attribute_list . TSEMICOLON
+
+    TSEMICOLON  shift, and go to state 138
+
+
+State 127
+
+    7 struct_declaration: TSTRUCT identifier TLBRACE struct_body TRBRACE TSEMICOLON .
+
+    $default  reduce using rule 7 (struct_declaration)
+
+
+State 128
+
+    8 struct_declaration: TSTRUCT identifier TCOLON inheritance TLBRACE struct_body . TRBRACE TSEMICOLON
+
+    TRBRACE  shift, and go to state 139
+
+
+State 129
+
+   32 expression: TLPARENTHESIS expression TRPARENTHESIS .
+
+    $default  reduce using rule 32 (expression)
+
+
+State 130
+
+   34 initializer_list: TLBRACE initializer_body TRBRACE .
+
+    $default  reduce using rule 34 (initializer_list)
+
+
+State 131
+
+   30 expression: . literal
+   31           | . initializer_list
+   32           | . TLPARENTHESIS expression TRPARENTHESIS
+   33 initializer_list: . TLBRACE TRBRACE
+   34                 | . TLBRACE initializer_body TRBRACE
+   36 initializer_body: initializer_body TCOMMA . expression
+   92 literal: . TFLOAT_CONSTANT
+   93        | . TDOUBLE_CONSTANT
+   94        | . TINTEGER_CONSTANT
+   95        | . TSTRING_LITERAL
+   96        | . TFALSE
+   97        | . TTRUE
+
+    TFALSE             shift, and go to state 94
+    TTRUE              shift, and go to state 95
+    TLPARENTHESIS      shift, and go to state 96
+    TLBRACE            shift, and go to state 97
+    TFLOAT_CONSTANT    shift, and go to state 98
+    TDOUBLE_CONSTANT   shift, and go to state 99
+    TINTEGER_CONSTANT  shift, and go to state 100
+    TSTRING_LITERAL    shift, and go to state 101
+
+    expression        go to state 140
+    initializer_list  go to state 103
+    literal           go to state 104
+
+
+State 132
+
+   19 var_declaration: type identifier TEQUAL expression TCOLON attribute_list . TSEMICOLON
+
+    TSEMICOLON  shift, and go to state 141
+
+
+State 133
+
+   27 attribute: TMIN TEQUAL . expression
+   30 expression: . literal
+   31           | . initializer_list
+   32           | . TLPARENTHESIS expression TRPARENTHESIS
+   33 initializer_list: . TLBRACE TRBRACE
+   34                 | . TLBRACE initializer_body TRBRACE
+   92 literal: . TFLOAT_CONSTANT
+   93        | . TDOUBLE_CONSTANT
+   94        | . TINTEGER_CONSTANT
+   95        | . TSTRING_LITERAL
+   96        | . TFALSE
+   97        | . TTRUE
+
+    TFALSE             shift, and go to state 94
+    TTRUE              shift, and go to state 95
+    TLPARENTHESIS      shift, and go to state 96
+    TLBRACE            shift, and go to state 97
+    TFLOAT_CONSTANT    shift, and go to state 98
+    TDOUBLE_CONSTANT   shift, and go to state 99
+    TINTEGER_CONSTANT  shift, and go to state 100
+    TSTRING_LITERAL    shift, and go to state 101
+
+    expression        go to state 142
+    initializer_list  go to state 103
+    literal           go to state 104
+
+
+State 134
+
+   28 attribute: TMAX TEQUAL . expression
+   30 expression: . literal
+   31           | . initializer_list
+   32           | . TLPARENTHESIS expression TRPARENTHESIS
+   33 initializer_list: . TLBRACE TRBRACE
+   34                 | . TLBRACE initializer_body TRBRACE
+   92 literal: . TFLOAT_CONSTANT
+   93        | . TDOUBLE_CONSTANT
+   94        | . TINTEGER_CONSTANT
+   95        | . TSTRING_LITERAL
+   96        | . TFALSE
+   97        | . TTRUE
+
+    TFALSE             shift, and go to state 94
+    TTRUE              shift, and go to state 95
+    TLPARENTHESIS      shift, and go to state 96
+    TLBRACE            shift, and go to state 97
+    TFLOAT_CONSTANT    shift, and go to state 98
+    TDOUBLE_CONSTANT   shift, and go to state 99
+    TINTEGER_CONSTANT  shift, and go to state 100
+    TSTRING_LITERAL    shift, and go to state 101
+
+    expression        go to state 143
+    initializer_list  go to state 103
+    literal           go to state 104
+
+
+State 135
+
+   29 attribute: TUI_NAME TEQUAL . TSTRING_LITERAL
+
+    TSTRING_LITERAL  shift, and go to state 144
+
+
+State 136
+
+   24 attribute_list: TLBRAKET attribute_body TRBRAKET .
+
+    $default  reduce using rule 24 (attribute_list)
+
+
+State 137
+
+   26 attribute_body: attribute_body TCOMMA . attribute
+   27 attribute: . TMIN TEQUAL expression
+   28          | . TMAX TEQUAL expression
+   29          | . TUI_NAME TEQUAL TSTRING_LITERAL
+
+    TMIN      shift, and go to state 120
+    TMAX      shift, and go to state 121
+    TUI_NAME  shift, and go to state 122
+
+    attribute  go to state 145
+
+
+State 138
+
+    6 alias_declaration: TALIAS identifier TEQUAL identifier TCOLON attribute_list TSEMICOLON .
+
+    $default  reduce using rule 6 (alias_declaration)
+
+
+State 139
+
+    8 struct_declaration: TSTRUCT identifier TCOLON inheritance TLBRACE struct_body TRBRACE . TSEMICOLON
+
+    TSEMICOLON  shift, and go to state 146
+
+
+State 140
+
+   36 initializer_body: initializer_body TCOMMA expression .
+
+    $default  reduce using rule 36 (initializer_body)
+
+
+State 141
+
+   19 var_declaration: type identifier TEQUAL expression TCOLON attribute_list TSEMICOLON .
+
+    $default  reduce using rule 19 (var_declaration)
+
+
+State 142
+
+   27 attribute: TMIN TEQUAL expression .
+
+    $default  reduce using rule 27 (attribute)
+
+
+State 143
+
+   28 attribute: TMAX TEQUAL expression .
+
+    $default  reduce using rule 28 (attribute)
+
+
+State 144
+
+   29 attribute: TUI_NAME TEQUAL TSTRING_LITERAL .
+
+    $default  reduce using rule 29 (attribute)
+
+
+State 145
+
+   26 attribute_body: attribute_body TCOMMA attribute .
+
+    $default  reduce using rule 26 (attribute_body)
+
+
+State 146
+
+    8 struct_declaration: TSTRUCT identifier TCOLON inheritance TLBRACE struct_body TRBRACE TSEMICOLON .
+
+    $default  reduce using rule 8 (struct_declaration)
