@@ -6,9 +6,21 @@
 namespace ts
 {
 
-Struct_Type::Struct_Type(std::string const& name)
+Struct_Type::Struct_Type(std::string const& name, std::shared_ptr<const IStruct_Type> parent)
     : Declaration_Scope_EP(name)
+    , m_base_struct(parent)
 {
+    if (m_base_struct)
+    {
+        for (size_t i = 0; i < m_base_struct->get_member_def_count(); i++)
+        {
+            add_member_def(m_base_struct->get_member_def(i));
+        }
+        for (size_t i = 0; i < m_base_struct->get_attribute_count(); i++)
+        {
+            add_attribute(m_base_struct->get_attribute(i));
+        }
+    }
 }
 
 Result<void> Struct_Type::validate_attribute(IAttribute const& attribute)
@@ -34,6 +46,21 @@ std::shared_ptr<IValue> Struct_Type::create_value() const
 std::shared_ptr<IStruct_Value> Struct_Type::create_specialized_value() const
 {
     return std::make_shared<Struct_Value>(this->shared_from_this());
+}
+
+std::shared_ptr<const IStruct_Type> Struct_Type::get_base_struct() const
+{
+    return m_base_struct;
+}
+
+bool Struct_Type::is_base_of(IStruct_Type const& type) const
+{
+    std::shared_ptr<const IStruct_Type> type_base = type.get_base_struct();
+    if (type_base == nullptr)
+    {
+        return false;
+    }
+    return type_base.get() == this || is_base_of(*type_base);
 }
 
 

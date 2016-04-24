@@ -17,7 +17,9 @@
 %code requires
 {
     #include <string>
+    #include <sstream>
 
+    #include "def_lang/Result.h"
     #include "ast/Builder.h"
     #include "ast/Node.h"
     #include "ast/Attribute.h"
@@ -225,13 +227,13 @@ struct_body_declaration : type_declaration
                         }
                         ;
 
-inheritance : inheritance_type identifier_path
+inheritance : TPUBLIC identifier_path
+            {
+                $$ = ast::Node(ast::Node::Type::INHERITANCE, builder.get_location());
+                $$.add_child($2);
+                $$.add_attribute(ast::Attribute("visibility", "public"));
+            }
             ;
-
-inheritance_type    : TPUBLIC
-                    | TPRIVATE
-                    | TPROTECTED
-                    ;
 
 namespace_declaration   : TNAMESPACE identifier TLBRACE TRBRACE
             {
@@ -492,7 +494,9 @@ namespace yy
 // Mandatory error function
 void parser::error (const parser::location_type& loc, const std::string& msg)
 {
-    std::cerr << loc << ": " << msg << std::endl;
+    std::stringstream ss;
+    ss << loc << ": " << msg;
+    builder.report_error(ts::Error(ss.str()));
 }
 
 }

@@ -22,7 +22,6 @@ public:
         {
             NAME,
             INDEX,
-            DEREFERENCE
         };
 
         //----------------------

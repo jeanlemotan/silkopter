@@ -14,7 +14,7 @@ Member_Def_Container_EP::~Member_Def_Container_EP()
 
 }
 
-Result<void> Member_Def_Container_EP::add_member_def(std::shared_ptr<IMember_Def> member_def)
+Result<void> Member_Def_Container_EP::add_member_def(std::shared_ptr<const IMember_Def> member_def)
 {
     if (!member_def)
     {
@@ -34,10 +34,6 @@ std::shared_ptr<IMember_Def const> Member_Def_Container_EP::get_member_def(size_
 {
     return m_member_defs[idx];
 }
-std::shared_ptr<IMember_Def> Member_Def_Container_EP::get_member_def(size_t idx)
-{
-    return m_member_defs[idx];
-}
 
 boost::optional<size_t> Member_Def_Container_EP::find_member_def_idx_by_name(std::string const& name) const
 {
@@ -49,11 +45,6 @@ std::shared_ptr<IMember_Def const> Member_Def_Container_EP::find_member_def_by_n
 {
     auto it = std::find_if(m_member_defs.begin(), m_member_defs.end(), [&name](std::shared_ptr<const IMember_Def> const& member_def) { return member_def->get_name() == name; });
     return it != m_member_defs.end() ? *it : std::shared_ptr<const IMember_Def>();
-}
-std::shared_ptr<IMember_Def> Member_Def_Container_EP::find_member_def_by_name(std::string const& name)
-{
-    auto it = std::find_if(m_member_defs.begin(), m_member_defs.end(), [&name](std::shared_ptr<IMember_Def> const& member_def) { return member_def->get_name() == name; });
-    return it != m_member_defs.end() ? *it : std::shared_ptr<IMember_Def>();
 }
 
 

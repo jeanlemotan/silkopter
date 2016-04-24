@@ -35,6 +35,7 @@ namespace ast
 
 Builder::Builder()
     : m_root_node(Node::Type::ROOT, ts::Source_Location())
+    , m_parse_result(ts::success)
 {
     m_lexer.reset(new Lexer(*this));
     m_parser.reset(new yy::parser(*this));
@@ -50,31 +51,40 @@ ts::Source_Location Builder::get_location() const
     return ts::Source_Location(get_filename(), loc.begin.line, loc.begin.column);
 }
 
+void Builder::report_error(ts::Error const& error)
+{
+    m_parse_result = error;
+}
+
 ts::Result<void> Builder::parse(std::string const& filename)
 {
+    m_parse_result = ts::success;
+
     auto result = start_file(filename);
-    if (result != ts::success)
+    if (!result)
     {
-        return result;
+        return ts::Error("");
     }
 
     m_parser->parse();
 
-    return ts::success;
+    return std::move(m_parse_result);
 }
 
-ts::Result<void> Builder::start_file(std::string const& filename)
+bool Builder::start_file(std::string const& filename)
 {
     std::shared_ptr<std::ifstream> fs(new std::ifstream(filename));
     if (!fs->is_open())
     {
-        return ts::Error("Cannot open file '" + filename + "'");
+        std::cerr << "Cannot open file '" + filename + "'";
+        return false;
     }
 
-    yy_buffer_state* buffer = m_lexer->yy_create_buffer(*fs, 32);
+    yy_buffer_state* buffer = m_lexer->yy_create_buffer(*fs, 8192);
     if (!buffer)
     {
-        return ts::Error("Cannot create lexer buffer");
+        std::cerr << "Cannot create lexer buffer";
+        return false;
     }
 
     Import import;
@@ -84,7 +94,7 @@ ts::Result<void> Builder::start_file(std::string const& filename)
 
     m_lexer->yypush_buffer_state(buffer);
 
-    return ts::success;
+    return true;
 }
 
 bool Builder::end_file()
@@ -615,7 +625,25 @@ static ts::Result<void> create_struct_type(ts::Type_System& ts, ts::IDeclaration
     }
     std::string name = name_result.payload();
 
-    ts::Struct_Type* type = new ts::Struct_Type(name);
+    std::shared_ptr<const ts::IStruct_Type> parent;
+
+    Node const* inheritance_node = node.find_first_child_by_type(Node::Type::INHERITANCE);
+    if (inheritance_node)
+    {
+        auto type_result = find_type_or_instantiate_templated_type(ts, scope, *inheritance_node);
+        if (type_result != ts::success)
+        {
+            return ts::Error(node.get_source_location().to_string() + "Cannot find parent type: " + type_result.error().what());
+        }
+
+        parent = std::dynamic_pointer_cast<const ts::IStruct_Type>(type_result.payload());
+        if (!parent)
+        {
+            return ts::Error(node.get_source_location().to_string() + "Wrong parent type. Expecting struct, got " + type_result.payload()->get_symbol_path().to_string());
+        }
+    }
+
+    ts::Struct_Type* type = new ts::Struct_Type(name, parent);
 
     //add it to the typesystem so we can search for types
     auto result = scope.add_symbol(std::shared_ptr<ts::ISymbol>(type));

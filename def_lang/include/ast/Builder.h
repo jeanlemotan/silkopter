@@ -37,11 +37,12 @@ public:
     Lexer& get_lexer();
 
 protected:
+    void report_error(ts::Error const& error);
     std::string get_filename() const;
 
     ts::Source_Location get_location() const;
 
-    ts::Result<void> start_file(std::string const& filename);
+    bool start_file(std::string const& filename);
     bool end_file();
 
 private:
@@ -56,6 +57,8 @@ private:
     };
 
     std::vector<Import> m_imports;
+
+    ts::Result<void> m_parse_result;
 };
 
 }

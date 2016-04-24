@@ -14,6 +14,12 @@
 namespace ts
 {
 
+Type_System::Type_System()
+    : Declaration_Scope_EP(std::string())
+{
+
+}
+
 void Type_System::populate_builtin_types()
 {
     auto result = add_symbol(std::shared_ptr<IType>(new Bool_Type("bool")));

@@ -43,12 +43,14 @@
 #line 18 "parser.y" // lalr1.cc:377
 
     #include <string>
+    #include <sstream>
 
+    #include "def_lang/Result.h"
     #include "ast/Builder.h"
     #include "ast/Node.h"
     #include "ast/Attribute.h"
 
-#line 52 "yy_parser.hpp" // lalr1.cc:377
+#line 54 "yy_parser.hpp" // lalr1.cc:377
 
 # include <cassert>
 # include <cstdlib> // std::abort
@@ -125,7 +127,7 @@
 
 
 namespace yy {
-#line 129 "yy_parser.hpp" // lalr1.cc:377
+#line 131 "yy_parser.hpp" // lalr1.cc:377
 
 
 
@@ -830,8 +832,8 @@ namespace yy {
     enum
     {
       yyeof_ = 0,
-      yylast_ = 124,     ///< Last index in yytable_.
-      yynnts_ = 32,  ///< Number of nonterminal symbols.
+      yylast_ = 125,     ///< Last index in yytable_.
+      yynnts_ = 31,  ///< Number of nonterminal symbols.
       yyfinal_ = 19, ///< Termination state number.
       yyterror_ = 1,
       yyerrcode_ = 256,
@@ -923,25 +925,25 @@ namespace yy {
       case 42: // struct_body_declaration_list
       case 43: // struct_body_declaration
       case 44: // inheritance
-      case 46: // namespace_declaration
-      case 47: // namespace_body
-      case 48: // namespace_body_declaration_list
-      case 49: // namespace_body_declaration
-      case 50: // member_declaration
-      case 51: // type_declaration
-      case 52: // identifier
-      case 53: // identifier_path
-      case 54: // attribute_list
-      case 55: // attribute_body
-      case 56: // attribute
-      case 57: // initializer
-      case 58: // initializer_list
-      case 59: // initializer_body
-      case 60: // type
-      case 61: // templated_type
-      case 62: // template_argument_list
-      case 63: // template_argument
-      case 64: // literal
+      case 45: // namespace_declaration
+      case 46: // namespace_body
+      case 47: // namespace_body_declaration_list
+      case 48: // namespace_body_declaration
+      case 49: // member_declaration
+      case 50: // type_declaration
+      case 51: // identifier
+      case 52: // identifier_path
+      case 53: // attribute_list
+      case 54: // attribute_body
+      case 55: // attribute
+      case 56: // initializer
+      case 57: // initializer_list
+      case 58: // initializer_body
+      case 59: // type
+      case 60: // templated_type
+      case 61: // template_argument_list
+      case 62: // template_argument
+      case 63: // literal
         value.copy< ::ast::Node > (other.value);
         break;
 
@@ -988,25 +990,25 @@ namespace yy {
       case 42: // struct_body_declaration_list
       case 43: // struct_body_declaration
       case 44: // inheritance
-      case 46: // namespace_declaration
-      case 47: // namespace_body
-      case 48: // namespace_body_declaration_list
-      case 49: // namespace_body_declaration
-      case 50: // member_declaration
-      case 51: // type_declaration
-      case 52: // identifier
-      case 53: // identifier_path
-      case 54: // attribute_list
-      case 55: // attribute_body
-      case 56: // attribute
-      case 57: // initializer
-      case 58: // initializer_list
-      case 59: // initializer_body
-      case 60: // type
-      case 61: // templated_type
-      case 62: // template_argument_list
-      case 63: // template_argument
-      case 64: // literal
+      case 45: // namespace_declaration
+      case 46: // namespace_body
+      case 47: // namespace_body_declaration_list
+      case 48: // namespace_body_declaration
+      case 49: // member_declaration
+      case 50: // type_declaration
+      case 51: // identifier
+      case 52: // identifier_path
+      case 53: // attribute_list
+      case 54: // attribute_body
+      case 55: // attribute
+      case 56: // initializer
+      case 57: // initializer_list
+      case 58: // initializer_body
+      case 59: // type
+      case 60: // templated_type
+      case 61: // template_argument_list
+      case 62: // template_argument
+      case 63: // literal
         value.copy< ::ast::Node > (v);
         break;
 
@@ -1112,25 +1114,25 @@ namespace yy {
       case 42: // struct_body_declaration_list
       case 43: // struct_body_declaration
       case 44: // inheritance
-      case 46: // namespace_declaration
-      case 47: // namespace_body
-      case 48: // namespace_body_declaration_list
-      case 49: // namespace_body_declaration
-      case 50: // member_declaration
-      case 51: // type_declaration
-      case 52: // identifier
-      case 53: // identifier_path
-      case 54: // attribute_list
-      case 55: // attribute_body
-      case 56: // attribute
-      case 57: // initializer
-      case 58: // initializer_list
-      case 59: // initializer_body
-      case 60: // type
-      case 61: // templated_type
-      case 62: // template_argument_list
-      case 63: // template_argument
-      case 64: // literal
+      case 45: // namespace_declaration
+      case 46: // namespace_body
+      case 47: // namespace_body_declaration_list
+      case 48: // namespace_body_declaration
+      case 49: // member_declaration
+      case 50: // type_declaration
+      case 51: // identifier
+      case 52: // identifier_path
+      case 53: // attribute_list
+      case 54: // attribute_body
+      case 55: // attribute
+      case 56: // initializer
+      case 57: // initializer_list
+      case 58: // initializer_body
+      case 59: // type
+      case 60: // templated_type
+      case 61: // template_argument_list
+      case 62: // template_argument
+      case 63: // literal
         value.template destroy< ::ast::Node > ();
         break;
 
@@ -1183,25 +1185,25 @@ namespace yy {
       case 42: // struct_body_declaration_list
       case 43: // struct_body_declaration
       case 44: // inheritance
-      case 46: // namespace_declaration
-      case 47: // namespace_body
-      case 48: // namespace_body_declaration_list
-      case 49: // namespace_body_declaration
-      case 50: // member_declaration
-      case 51: // type_declaration
-      case 52: // identifier
-      case 53: // identifier_path
-      case 54: // attribute_list
-      case 55: // attribute_body
-      case 56: // attribute
-      case 57: // initializer
-      case 58: // initializer_list
-      case 59: // initializer_body
-      case 60: // type
-      case 61: // templated_type
-      case 62: // template_argument_list
-      case 63: // template_argument
-      case 64: // literal
+      case 45: // namespace_declaration
+      case 46: // namespace_body
+      case 47: // namespace_body_declaration_list
+      case 48: // namespace_body_declaration
+      case 49: // member_declaration
+      case 50: // type_declaration
+      case 51: // identifier
+      case 52: // identifier_path
+      case 53: // attribute_list
+      case 54: // attribute_body
+      case 55: // attribute
+      case 56: // initializer
+      case 57: // initializer_list
+      case 58: // initializer_body
+      case 59: // type
+      case 60: // templated_type
+      case 61: // template_argument_list
+      case 62: // template_argument
+      case 63: // literal
         value.move< ::ast::Node > (s.value);
         break;
 
@@ -1475,7 +1477,7 @@ namespace yy {
 
 
 } // yy
-#line 1479 "yy_parser.hpp" // lalr1.cc:377
+#line 1481 "yy_parser.hpp" // lalr1.cc:377
 
 
 

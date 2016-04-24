@@ -9,7 +9,7 @@ size_t Attribute_Container_EP::get_attribute_count() const
     return m_attributes.size();
 }
 
-Result<void> Attribute_Container_EP::add_attribute(std::shared_ptr<IAttribute> attribute)
+Result<void> Attribute_Container_EP::add_attribute(std::shared_ptr<const IAttribute> attribute)
 {
     if (!attribute)
     {
@@ -35,21 +35,11 @@ std::shared_ptr<IAttribute const> Attribute_Container_EP::get_attribute(size_t i
 {
     return m_attributes[idx];
 }
-std::shared_ptr<IAttribute> Attribute_Container_EP::get_attribute(size_t idx)
-{
-    return m_attributes[idx];
-}
-
 boost::optional<size_t> Attribute_Container_EP::find_attribute_idx_by_name(std::string const& name) const
 {
     return boost::none;
 }
-
 std::shared_ptr<IAttribute const> Attribute_Container_EP::find_attribute_by_name(std::string const& name) const
-{
-    return nullptr;
-}
-std::shared_ptr<IAttribute> Attribute_Container_EP::find_attribute_by_name(std::string const& name)
 {
     return nullptr;
 }

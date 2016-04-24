@@ -139,13 +139,7 @@ void Value_Selector::parse(std::string const& str)
             push_back(element);
         }
 
-        if (str[off] == '*')
-        {
-            Element element(Element::Type::DEREFERENCE);
-            push_back(element);
-            start++;
-        }
-        else if (str[off] == '[')
+        if (str[off] == '[')
         {
             size_t end = str.find(']', off);
             if (end == std::string::npos)
@@ -216,15 +210,11 @@ std::string Value_Selector::to_string() const
     std::string str;
     for (Element const& element: m_elements)
     {
-        if (element.type == Element::Type::DEREFERENCE)
-        {
-            str += "*";
-        }
-        else if (element.type == Element::Type::INDEX)
+        if (element.type == Element::Type::INDEX)
         {
             str += "[" + std::to_string(element.index) + "]";
         }
-        else
+        else if (element.type == Element::Type::NAME)
         {
             if (!str.empty())
             {

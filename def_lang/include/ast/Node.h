@@ -18,6 +18,7 @@ public:
         LITERAL,
         EXPRESSION,
         IDENTIFIER,
+        INHERITANCE,
 
         TEMPLATE_INSTANTIATION,
         TEMPLATE_ARGUMENT,

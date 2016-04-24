@@ -37,6 +37,8 @@ public:
     Result<void> set_value(std::shared_ptr<IValue>) override;
 
 private:
+    bool is_type_allowed(IType const& type) const;
+
     std::shared_ptr<IPtr_Type const> m_type;
     std::shared_ptr<IValue> m_value;
 };

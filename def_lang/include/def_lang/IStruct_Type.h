@@ -18,6 +18,8 @@ public:
 
     virtual std::shared_ptr<IStruct_Value> create_specialized_value() const = 0;
 
+    virtual std::shared_ptr<const IStruct_Type> get_base_struct() const = 0;
+    virtual bool is_base_of(IStruct_Type const& type) const = 0;
 };
 
 }

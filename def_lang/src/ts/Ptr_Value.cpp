@@ -1,6 +1,7 @@
 #include "def_lang/impl/Ptr_Value.h"
 #include "def_lang/Value_Selector.h"
 #include "def_lang/Serialization.h"
+#include "def_lang/IStruct_Type.h"
 
 namespace ts
 {
@@ -56,9 +57,9 @@ Result<void> Ptr_Value::copy_assign(IValue const& other)
         return Error("incompatible types");
     }
 
-    if (get_specialized_type()->get_inner_type() != v->get_specialized_type()->get_inner_type())
+    if (!is_type_allowed(*v->get_specialized_type()->get_inner_type()))
     {
-        return Error("incompatible inner types");
+        return Error("Cannot point to type " + v->get_specialized_type()->get_inner_type()->get_symbol_path().to_string());
     }
 
     if (get_value() == nullptr)
@@ -114,21 +115,12 @@ std::shared_ptr<IValue> Ptr_Value::select(Value_Selector&& selector)
         return nullptr;
     }
 
-    Value_Selector::Element const& element = selector.front();
-    if (element.type == Value_Selector::Element::Type::DEREFERENCE)
+    if (get_value() == nullptr)
     {
-        selector.pop_front();
-        if (selector.empty())
-        {
-            return get_value();
-        }
         return nullptr;
     }
-    else
-    {
-        selector.pop_front();
-        return get_value()->select(std::move(selector));
-    }
+
+    return get_value()->select(std::move(selector));
 }
 
 std::shared_ptr<IPtr_Type const> Ptr_Value::get_specialized_type() const
@@ -185,14 +177,45 @@ std::shared_ptr<IValue> Ptr_Value::get_value()
 
 Result<void> Ptr_Value::set_value(std::shared_ptr<IValue> value)
 {
-    if (value && value->get_type() != get_specialized_type()->get_inner_type())
+    if (!value)
     {
-        return Error("Wrong value type. Got '" +
-                     value->get_type()->get_symbol_path().to_string() +
-                     "', expected '" + get_specialized_type()->get_inner_type()->get_symbol_path().to_string() + "'");
+        m_value = nullptr;
+        return success;
     }
+
+    IPtr_Value const* v = dynamic_cast<const IPtr_Value*>(value.get());
+    if (!v)
+    {
+        return Error("Incompatible values");
+    }
+
+    if (!is_type_allowed(*v->get_specialized_type()->get_inner_type()))
+    {
+        return Error("Cannot point to type " + v->get_specialized_type()->get_inner_type()->get_symbol_path().to_string());
+    }
+
     m_value = value;
+    return success;
 }
+
+bool Ptr_Value::is_type_allowed(IType const& type) const
+{
+    if (get_specialized_type()->get_inner_type().get() == &type)
+    {
+        return true;
+    }
+
+    IStruct_Type const* inner_type = dynamic_cast<IStruct_Type const*>(get_specialized_type()->get_inner_type().get());
+    IStruct_Type const* other_type = dynamic_cast<IStruct_Type const*>(&type);
+
+    if (inner_type && other_type)
+    {
+        return inner_type->is_base_of(*other_type);
+    }
+
+    return false;
+}
+
 
 
 }
