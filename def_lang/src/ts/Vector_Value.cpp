@@ -198,10 +198,15 @@ Result<void> Vector_Value::deserialize(serialization::Value const& sz_value)
     return success;
 }
 
-Result<void> Vector_Value::insert_default_value(size_t idx)
+Result<std::shared_ptr<IValue>> Vector_Value::insert_default_value(size_t idx)
 {
     std::shared_ptr<IValue> value = get_specialized_type()->get_inner_type()->create_value();
-    return insert_value(idx, value);
+    auto result = insert_value(idx, value);
+    if (result != success)
+    {
+        return result.error();
+    }
+    return value;
 }
 
 Result<void> Vector_Value::insert_value(size_t idx, std::shared_ptr<IValue> value)
