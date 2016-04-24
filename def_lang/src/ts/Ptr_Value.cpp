@@ -183,15 +183,9 @@ Result<void> Ptr_Value::set_value(std::shared_ptr<IValue> value)
         return success;
     }
 
-    IPtr_Value const* v = dynamic_cast<const IPtr_Value*>(value.get());
-    if (!v)
+    if (!is_type_allowed(*value->get_type()))
     {
-        return Error("Incompatible values");
-    }
-
-    if (!is_type_allowed(*v->get_specialized_type()->get_inner_type()))
-    {
-        return Error("Cannot point to type " + v->get_specialized_type()->get_inner_type()->get_symbol_path().to_string());
+        return Error("Cannot point to type " + value->get_type()->get_symbol_path().to_string());
     }
 
     m_value = value;
