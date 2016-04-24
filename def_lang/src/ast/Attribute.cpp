@@ -1,4 +1,4 @@
-#include "Attribute.h"
+#include "ast/Attribute.h"
 
 namespace ast
 {
