@@ -2,16 +2,6 @@
 
 #include "common/bus/II2C.h"
 
-namespace sz
-{
-namespace I2C_BCM
-{
-struct Init_Params;
-struct Config;
-}
-}
-
-
 namespace silk
 {
 namespace bus
@@ -20,14 +10,11 @@ namespace bus
 class I2C_BCM : public II2C
 {
 public:
-    I2C_BCM();
+    I2C_BCM(ts::IDeclaration_Scope const& scope);
     ~I2C_BCM();
 
-    auto init(rapidjson::Value const& init_params) -> bool;
-    auto get_init_params() const -> rapidjson::Document;
-
-    auto set_config(rapidjson::Value const& json) -> bool;
-    auto get_config() const -> rapidjson::Document;
+    bool init(std::shared_ptr<ts::IValue> descriptor) override;
+    std::shared_ptr<const ts::IValue> get_descriptor() const override;
 
     void lock();
     auto try_lock() -> bool;
@@ -40,10 +27,9 @@ public:
     auto write_register(uint8_t address, uint8_t reg, uint8_t const* data, size_t size) -> bool;
 
 private:
-    auto init() -> bool;
+    bool init(uint32_t dev);
 
-    std::shared_ptr<sz::I2C_BCM::Init_Params> m_init_params;
-    std::shared_ptr<sz::I2C_BCM::Config> m_config;
+    std::shared_ptr<ts::IValue> m_descriptor;
 
     std::recursive_mutex m_mutex;
     std::vector<uint8_t> m_buffer;

@@ -1,8 +1,6 @@
 #include "BrainStdAfx.h"
 #include "bus/UART_Linux.h"
-
-#include "sz_UART_Linux.hpp"
-
+#include "def_lang/Mapper.h"
 #include <termios.h>
 
 namespace silk
@@ -10,10 +8,17 @@ namespace silk
 namespace bus
 {
 
-UART_Linux::UART_Linux()
-    : m_init_params(new sz::UART_Linux::Init_Params())
-    , m_config(new sz::UART_Linux::Config())
+UART_Linux::UART_Linux(ts::IDeclaration_Scope const& scope)
 {
+    std::shared_ptr<const ts::IType> type = scope.find_specialized_symbol_by_path<const ts::IType>("::silk::UART_Linux_Descriptor");
+    if (!type)
+    {
+        QLOGE("Cannot find descriptor type");
+    }
+    else
+    {
+        m_descriptor = type->create_value();
+    }
 }
 
 UART_Linux::~UART_Linux()
@@ -21,28 +26,45 @@ UART_Linux::~UART_Linux()
     close();
 }
 
-auto UART_Linux::init(rapidjson::Value const& init_params) -> bool
+bool UART_Linux::init(std::shared_ptr<ts::IValue> descriptor)
 {
-    QLOG_TOPIC("uart_linux::init");
-
-    sz::UART_Linux::Init_Params sz;
-    autojsoncxx::error::ErrorStack result;
-    if (!autojsoncxx::from_value(sz, init_params, result))
+    if (!descriptor)
     {
-        std::ostringstream ss;
-        ss << result;
-        QLOGE("Cannot deserialize UART_Linux data: {}", ss.str());
+        QLOGE("Null descriptor!");
         return false;
     }
-    *m_init_params = sz;
-    return init();
+    std::string dev;
+    uint32_t baud = 0;
+
+    auto result = ts::mapper::get(*descriptor, "dev", dev) &
+                    ts::mapper::get(*descriptor, "baud", baud);
+    if (result != ts::success)
+    {
+        QLOGE("{}", result.error().what());
+        return false;
+    }
+
+    result = m_descriptor->copy_assign(*descriptor);
+    if (result != ts::success)
+    {
+        QLOGE("{}", result.error().what());
+        return false;
+    }
+
+    return init(dev, baud);
 }
-auto UART_Linux::init() -> bool
+
+std::shared_ptr<const ts::IValue> UART_Linux::get_descriptor() const
+{
+    return m_descriptor;
+}
+
+auto UART_Linux::init(std::string const& dev, uint32_t baud) -> bool
 {
     close();
 
     int b = -1;
-    switch (m_init_params->baud)
+    switch (baud)
     {
     case 9600: b = B9600; break;
     case 19200: b = B19200; break;
@@ -54,18 +76,20 @@ auto UART_Linux::init() -> bool
 
     if (b < 0)
     {
-        QLOGE("Invalid baud requested: {}", m_init_params->baud);
+        QLOGE("Invalid baud requested: {}", baud);
         return false;
     }
 
     std::lock_guard<UART_Linux> lg(*this);
 
-    m_fd = ::open(m_init_params->dev.c_str(), O_RDWR | O_NOCTTY | O_NDELAY | O_NONBLOCK);
+    m_fd = ::open(dev.c_str(), O_RDWR | O_NOCTTY | O_NDELAY | O_NONBLOCK);
     if (m_fd < 0)
     {
-        QLOGE("can't open {}: {}", m_init_params->dev, strerror(errno));
+        QLOGE("can't open {}: {}", dev, strerror(errno));
         return false;
     }
+
+    m_dev = dev;
 
     struct termios options;
     tcgetattr(m_fd, &options);
@@ -119,7 +143,7 @@ auto UART_Linux::read(uint8_t* data, size_t max_size) -> size_t
     {
         if (errno != EWOULDBLOCK && errno != EAGAIN)
         {
-            QLOGE("error reading from {}: {}", m_init_params->dev, strerror(errno));
+            QLOGE("error reading from {}: {}", m_dev, strerror(errno));
         }
         return 0;
     }
@@ -135,7 +159,7 @@ auto UART_Linux::write(uint8_t const* data, size_t size) -> bool
     auto res = ::write(m_fd, data, size);
     if (res < 0)
     {
-        QLOGE("error writing to {}: {}", m_init_params->dev, strerror(errno));
+        QLOGE("error writing to {}: {}", m_dev, strerror(errno));
         return false;
     }
     return static_cast<size_t>(res) == size;
@@ -145,38 +169,6 @@ void UART_Linux::send_break()
 {
     tcsendbreak(m_fd, 1);
 }
-
-auto UART_Linux::set_config(rapidjson::Value const& json) -> bool
-{
-    QLOG_TOPIC("uart_linux::set_config");
-
-    sz::UART_Linux::Config sz;
-    autojsoncxx::error::ErrorStack result;
-    if (!autojsoncxx::from_value(sz, json, result))
-    {
-        std::ostringstream ss;
-        ss << result;
-        QLOGE("Cannot deserialize UART_Linux config data: {}", ss.str());
-        return false;
-    }
-
-    *m_config = sz;
-    return true;
-}
-auto UART_Linux::get_config() const -> rapidjson::Document
-{
-    rapidjson::Document json;
-    autojsoncxx::to_document(*m_config, json);
-    return std::move(json);
-}
-
-auto UART_Linux::get_init_params() const -> rapidjson::Document
-{
-    rapidjson::Document json;
-    autojsoncxx::to_document(*m_init_params, json);
-    return std::move(json);
-}
-
 
 }
 }

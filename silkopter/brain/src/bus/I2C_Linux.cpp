@@ -1,7 +1,6 @@
 #include "BrainStdAfx.h"
 #include "bus/I2C_Linux.h"
-
-#include "sz_I2C_Linux.hpp"
+#include "def_lang/Mapper.h"
 
 #include <errno.h>
 #include <unistd.h>
@@ -33,10 +32,17 @@ namespace silk
 namespace bus
 {
 
-I2C_Linux::I2C_Linux()
-    : m_init_params(new sz::I2C_Linux::Init_Params())
-    , m_config(new sz::I2C_Linux::Config())
+I2C_Linux::I2C_Linux(ts::IDeclaration_Scope const& scope)
 {
+    std::shared_ptr<const ts::IType> type = scope.find_specialized_symbol_by_path<const ts::IType>("::silk::I2C_Linux_Descriptor");
+    if (!type)
+    {
+        QLOGE("Cannot find descriptor type");
+    }
+    else
+    {
+        m_descriptor = type->create_value();
+    }
 }
 
 I2C_Linux::~I2C_Linux()
@@ -44,34 +50,47 @@ I2C_Linux::~I2C_Linux()
     close();
 }
 
-
-auto I2C_Linux::init(rapidjson::Value const& init_params) -> bool
+bool I2C_Linux::init(std::shared_ptr<ts::IValue> descriptor)
 {
-    QLOG_TOPIC("i2c_linux::init");
-
-    sz::I2C_Linux::Init_Params sz;
-    autojsoncxx::error::ErrorStack result;
-    if (!autojsoncxx::from_value(sz, init_params, result))
+    if (!descriptor)
     {
-        std::ostringstream ss;
-        ss << result;
-        QLOGE("Cannot deserialize I2C_Linux data: {}", ss.str());
+        QLOGE("Null descriptor!");
         return false;
     }
-    *m_init_params = sz;
-    return init();
+    std::string dev;
+
+    auto result = ts::mapper::get(*descriptor, "dev", dev);
+    if (result != ts::success)
+    {
+        QLOGE("{}", result.error().what());
+        return false;
+    }
+
+    result = m_descriptor->copy_assign(*descriptor);
+    if (result != ts::success)
+    {
+        QLOGE("{}", result.error().what());
+        return false;
+    }
+
+    return init(dev);
 }
 
-auto I2C_Linux::init() -> bool
+std::shared_ptr<const ts::IValue> I2C_Linux::get_descriptor() const
+{
+    return m_descriptor;
+}
+
+bool I2C_Linux::init(std::string const& dev)
 {
     close();
 
     std::lock_guard<I2C_Linux> lg(*this);
 
-    m_fd = ::open(m_init_params->dev.c_str(), O_RDWR);
+    m_fd = ::open(dev.c_str(), O_RDWR);
     if (m_fd < 0)
     {
-        QLOGE("can't open {}: {}", m_init_params->dev, strerror(errno));
+        QLOGE("can't open {}: {}", dev, strerror(errno));
         return false;
     }
 
@@ -224,37 +243,6 @@ auto I2C_Linux::write_register(uint8_t address, uint8_t reg, uint8_t const* data
         return false;
     }
     return true;
-}
-
-auto I2C_Linux::set_config(rapidjson::Value const& json) -> bool
-{
-    QLOG_TOPIC("i2c_linux::set_config");
-
-    sz::I2C_Linux::Config sz;
-    autojsoncxx::error::ErrorStack result;
-    if (!autojsoncxx::from_value(sz, json, result))
-    {
-        std::ostringstream ss;
-        ss << result;
-        QLOGE("Cannot deserialize I2C_Linux config data: {}", ss.str());
-        return false;
-    }
-
-    *m_config = sz;
-    return true;
-}
-auto I2C_Linux::get_config() const -> rapidjson::Document
-{
-    rapidjson::Document json;
-    autojsoncxx::to_document(*m_config, json);
-    return std::move(json);
-}
-
-auto I2C_Linux::get_init_params() const -> rapidjson::Document
-{
-    rapidjson::Document json;
-    autojsoncxx::to_document(*m_init_params, json);
-    return std::move(json);
 }
 
 

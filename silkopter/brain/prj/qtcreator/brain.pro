@@ -52,6 +52,7 @@ INCLUDEPATH += /usr/include/bullet
 INCLUDEPATH += ../../src
 INCLUDEPATH += ../../autogen
 INCLUDEPATH += ../../../libs
+INCLUDEPATH += ../../../../def_lang/include
 INCLUDEPATH += ../../../../qbase/include
 INCLUDEPATH += ../../../../qdata/include
 INCLUDEPATH += ../../../../qmath/include
@@ -63,6 +64,7 @@ LIBS += -L=/opt/vc/lib/
 
 ROOT_LIBS_PATH = ../../../..
 
+LIBS += -L$${ROOT_LIBS_PATH}/def_lang/lib/$${DEST_FOLDER} -ldef_lang
 LIBS += -L$${ROOT_LIBS_PATH}/qdata/lib/$${DEST_FOLDER} -lqdata
 LIBS += -L$${ROOT_LIBS_PATH}/qmath/lib/$${DEST_FOLDER} -lqmath
 LIBS += -L$${ROOT_LIBS_PATH}/qbase/lib/$${DEST_FOLDER} -lqbase
@@ -85,7 +87,14 @@ rpi {
     LIBS += -lGLESv2
     LIBS += -lEGL
 } else {
-    LIBS += -lBulletCollision -lBulletDynamics -lLinearMath -lopencv_core -lopencv_imgproc -lopencv_highgui -lopencv_ml -lopencv_videoio
+    LIBS += -lBulletCollision
+    LIBS += -lBulletDynamics
+    LIBS += -lLinearMath
+    LIBS += -lopencv_core
+    LIBS += -lopencv_imgproc
+    LIBS += -lopencv_highgui
+    LIBS += -lopencv_ml
+    #LIBS += -lopencv_videoio
 }
 
 SOURCES += \
@@ -291,7 +300,8 @@ HEADERS += \
     ../../../libs/common/config/UAV_Config.h \
     ../../src/pilot/Multirotor_Pilot.h \
     ../../../libs/common/node/IMultirotor_Simulator.h \
-    ../../src/UAV.h
+    ../../src/UAV.h \
+    ../../../libs/common/Math_Mappers.h
 
 DISTFILES +=
 

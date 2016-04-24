@@ -1,5 +1,6 @@
 #include "BrainStdAfx.h"
 #include "bus/SPI_BCM.h"
+#include "def_lang/Mapper.h"
 
 #ifdef RASPBERRY_PI
 
@@ -9,8 +10,6 @@ extern "C"
 }
 
 #endif
-
-#include "sz_SPI_BCM.hpp"
 
 ///////////////////////////////////////////////////////////////////
 
@@ -22,50 +21,79 @@ namespace bus
 std::mutex SPI_BCM::s_mutex;
 
 
-SPI_BCM::SPI_BCM()
-    : m_init_params(new sz::SPI_BCM::Init_Params())
-    , m_config(new sz::SPI_BCM::Config())
+SPI_BCM::SPI_BCM(ts::IDeclaration_Scope const& scope)
 {
+    std::shared_ptr<const ts::IType> type = scope.find_specialized_symbol_by_path<const ts::IType>("::silk::SPI_BCM_Descriptor");
+    if (!type)
+    {
+        QLOGE("Cannot find descriptor type");
+    }
+    else
+    {
+        m_descriptor = type->create_value();
+    }
 }
 
 SPI_BCM::~SPI_BCM()
 {
 }
 
-auto SPI_BCM::init(rapidjson::Value const& init_params) -> bool
+bool SPI_BCM::init(std::shared_ptr<ts::IValue> descriptor)
 {
-    QLOG_TOPIC("spi_bcm::init");
-
-    sz::SPI_BCM::Init_Params sz;
-    autojsoncxx::error::ErrorStack result;
-    if (!autojsoncxx::from_value(sz, init_params, result))
+    if (!descriptor)
     {
-        std::ostringstream ss;
-        ss << result;
-        QLOGE("Cannot deserialize spi_bcm data: {}", ss.str());
+        QLOGE("Null descriptor!");
         return false;
     }
-    *m_init_params = sz;
-    return init();
+    uint32_t dev = 0;
+    uint32_t speed = 0;
+    uint32_t mode = 0;
+
+    auto result = ts::mapper::get(*descriptor, "dev", dev) &
+                    ts::mapper::get(*descriptor, "speed", speed) &
+                    ts::mapper::get(*descriptor, "mode", mode);
+    if (result != ts::success)
+    {
+        QLOGE("{}", result.error().what());
+        return false;
+    }
+
+    result = m_descriptor->copy_assign(*descriptor);
+    if (result != ts::success)
+    {
+        QLOGE("{}", result.error().what());
+        return false;
+    }
+
+    return open(dev, speed, mode);
 }
-auto SPI_BCM::init() -> bool
+
+std::shared_ptr<const ts::IValue> SPI_BCM::get_descriptor() const
 {
-    if (m_init_params->dev > 1)
+    return m_descriptor;
+}
+
+bool SPI_BCM::open(size_t dev, size_t speed, size_t mode)
+{
+    if (dev > 1)
     {
         QLOGE("Only SPI devices 0 & 1 are allowed");
         return false;
     }
-    if (m_init_params->mode > 3)
+    if (mode > 3)
     {
         QLOGE("Only SPI modes 0 to 3 are allowed");
         return false;
     }
 
+    m_dev = dev;
+    m_speed = speed;
+
 #ifdef RASPBERRY_PI
 
     bcm2835_spi_begin();
     bcm2835_spi_setBitOrder(BCM2835_SPI_BIT_ORDER_MSBFIRST);      // The default
-    bcm2835_spi_setChipSelectPolarity(m_init_params->dev, LOW);      // the default
+    bcm2835_spi_setChipSelectPolarity(dev, LOW);      // the default
 
 #endif
 
@@ -121,10 +149,10 @@ auto SPI_BCM::do_transfer(uint8_t const* tx_data, uint8_t* rx_data, size_t size,
 
 #ifdef RASPBERRY_PI
 
-    uint32_t divider = get_divider(speed ? speed : m_init_params->speed);
+    uint32_t divider = get_divider(speed ? speed : m_speed);
 
-    bcm2835_spi_chipSelect(m_init_params->dev);
-    bcm2835_spi_setDataMode(m_init_params->mode);
+    bcm2835_spi_chipSelect(m_dev);
+    bcm2835_spi_setDataMode(m_mode);
     bcm2835_spi_setClockDivider(divider);
 
     if (!tx_data)
@@ -165,37 +193,6 @@ auto SPI_BCM::transfer_register(uint8_t reg, uint8_t const* tx_data, uint8_t* rx
 
     std::copy(m_rx_buffer.begin() + 1, m_rx_buffer.end(), rx_data);
     return true;
-}
-
-auto SPI_BCM::set_config(rapidjson::Value const& json) -> bool
-{
-    QLOG_TOPIC("spi_bcm::set_config");
-
-    sz::SPI_BCM::Config sz;
-    autojsoncxx::error::ErrorStack result;
-    if (!autojsoncxx::from_value(sz, json, result))
-    {
-        std::ostringstream ss;
-        ss << result;
-        QLOGE("Cannot deserialize spi_bcm config data: {}", ss.str());
-        return false;
-    }
-
-    *m_config = sz;
-    return true;
-}
-auto SPI_BCM::get_config() const -> rapidjson::Document
-{
-    rapidjson::Document json;
-    autojsoncxx::to_document(*m_config, json);
-    return std::move(json);
-}
-
-auto SPI_BCM::get_init_params() const -> rapidjson::Document
-{
-    rapidjson::Document json;
-    autojsoncxx::to_document(*m_init_params, json);
-    return std::move(json);
 }
 
 

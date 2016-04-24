@@ -2,16 +2,6 @@
 
 #include "common/bus/IUART.h"
 
-namespace sz
-{
-namespace UART_BBang
-{
-struct Init_Params;
-struct Config;
-}
-}
-
-
 namespace silk
 {
 namespace bus
@@ -20,16 +10,11 @@ namespace bus
 class UART_BBang : public IUART
 {
 public:
-    UART_BBang();
+    UART_BBang(ts::IDeclaration_Scope const& scope);
     ~UART_BBang();
 
-    auto init(rapidjson::Value const& init_params) -> bool;
-    auto get_init_params() const -> rapidjson::Document;
-
-    auto set_config(rapidjson::Value const& json) -> bool;
-    auto get_config() const -> rapidjson::Document;
-
-    void close();
+    bool init(std::shared_ptr<ts::IValue> descriptor) override;
+    std::shared_ptr<const ts::IValue> get_descriptor() const override;
 
     void lock();
     auto try_lock() -> bool;
@@ -41,10 +26,10 @@ public:
     void send_break();
 
 private:
-    auto init() -> bool;
+    bool init(size_t rx_pin, size_t baud, bool invert);
+    void close();
 
-    std::shared_ptr<sz::UART_BBang::Init_Params> m_init_params;
-    std::shared_ptr<sz::UART_BBang::Config> m_config;
+    std::shared_ptr<ts::IValue> m_descriptor;
 
     std::recursive_mutex m_mutex;
 

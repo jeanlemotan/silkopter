@@ -10,6 +10,9 @@
 
 #include "MPL_Helper.h"
 
+#include "def_lang/Type_System.h"
+
+
 namespace silk
 {
 
@@ -75,7 +78,10 @@ public:
     void process();
     void shutdown();
 
+    void load_settings();
+
     void save_settings();
+    void save_settings2();
 
     auto set_uav_config(std::shared_ptr<UAV_Config> config) -> bool;
     auto get_uav_config() const   -> std::shared_ptr<const UAV_Config>;
@@ -142,6 +148,8 @@ private:
 
 
     Telemetry_Data m_telemetry_data;
+
+    ts::Type_System m_type_system;
 };
 
 

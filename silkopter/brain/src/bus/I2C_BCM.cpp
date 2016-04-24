@@ -1,5 +1,6 @@
 #include "BrainStdAfx.h"
 #include "bus/I2C_BCM.h"
+#include "def_lang/Mapper.h"
 
 #ifdef RASPBERRY_PI
 
@@ -10,9 +11,6 @@ extern "C"
 
 #endif
 
-#include "sz_I2C_BCM.hpp"
-
-
 namespace silk
 {
 namespace bus
@@ -22,36 +20,57 @@ std::mutex I2C_BCM::s_mutex;
 
 
 
-I2C_BCM::I2C_BCM()
-    : m_init_params(new sz::I2C_BCM::Init_Params())
-    , m_config(new sz::I2C_BCM::Config())
+I2C_BCM::I2C_BCM(ts::IDeclaration_Scope const& scope)
 {
+    std::shared_ptr<const ts::IType> type = scope.find_specialized_symbol_by_path<const ts::IType>("::silk::I2C_BCM_Descriptor");
+    if (!type)
+    {
+        QLOGE("Cannot find descriptor type");
+    }
+    else
+    {
+        m_descriptor = type->create_value();
+    }
 }
 
 I2C_BCM::~I2C_BCM()
 {
 }
 
-auto I2C_BCM::init(rapidjson::Value const& init_params) -> bool
+bool I2C_BCM::init(std::shared_ptr<ts::IValue> descriptor)
 {
-    QLOG_TOPIC("i2c_bcm::init");
-
-    sz::I2C_BCM::Init_Params sz;
-    autojsoncxx::error::ErrorStack result;
-    if (!autojsoncxx::from_value(sz, init_params, result))
+    if (!descriptor)
     {
-        std::ostringstream ss;
-        ss << result;
-        QLOGE("Cannot deserialize i2c_bcm data: {}", ss.str());
+        QLOGE("Null descriptor!");
         return false;
     }
-    *m_init_params = sz;
-    return init();
+    uint32_t dev = 0;
+
+    auto result = ts::mapper::get(*descriptor, "dev", dev);
+    if (result != ts::success)
+    {
+        QLOGE("{}", result.error().what());
+        return false;
+    }
+
+    result = m_descriptor->copy_assign(*descriptor);
+    if (result != ts::success)
+    {
+        QLOGE("{}", result.error().what());
+        return false;
+    }
+
+    return init(dev);
 }
 
-auto I2C_BCM::init() -> bool
+std::shared_ptr<const ts::IValue> I2C_BCM::get_descriptor() const
 {
-    if (m_init_params->dev > 1)
+    return m_descriptor;
+}
+
+bool I2C_BCM::init(uint32_t dev)
+{
+    if (dev > 1)
     {
         QLOGE("Only I2C devices 0 & 1 are allowed");
         return false;
@@ -162,38 +181,6 @@ auto I2C_BCM::write_register(uint8_t address, uint8_t reg, uint8_t const* data, 
 
     return true;
 }
-
-auto I2C_BCM::set_config(rapidjson::Value const& json) -> bool
-{
-    QLOG_TOPIC("i2c_bcm::set_config");
-
-    sz::I2C_BCM::Config sz;
-    autojsoncxx::error::ErrorStack result;
-    if (!autojsoncxx::from_value(sz, json, result))
-    {
-        std::ostringstream ss;
-        ss << result;
-        QLOGE("Cannot deserialize i2c_bcm config data: {}", ss.str());
-        return false;
-    }
-
-    *m_config = sz;
-    return true;
-}
-auto I2C_BCM::get_config() const -> rapidjson::Document
-{
-    rapidjson::Document json;
-    autojsoncxx::to_document(*m_config, json);
-    return std::move(json);
-}
-
-auto I2C_BCM::get_init_params() const -> rapidjson::Document
-{
-    rapidjson::Document json;
-    autojsoncxx::to_document(*m_init_params, json);
-    return std::move(json);
-}
-
 
 }
 }

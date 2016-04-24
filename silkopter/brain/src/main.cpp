@@ -124,6 +124,9 @@ int main(int argc, char const* argv[])
             goto exit;
         }
 
+        uav.load_settings();
+        uav.save_settings2();
+
 //#if defined RASPBERRY_PI
 //        if (!comms.start_rfmon("mon0", 5))
 //        {

@@ -55,7 +55,7 @@ namespace detail
 #else
         quick_logf("Assert '{}' in {}:{} :: {}", condition ? condition : "N/A", file, line, msg ? msg : "N/A");
         dump_stacktrace();
-		QBREAK();
+        QBREAK();
 #endif
 	}
 

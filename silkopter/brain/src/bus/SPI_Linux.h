@@ -2,16 +2,6 @@
 
 #include "common/bus/ISPI.h"
 
-namespace sz
-{
-namespace SPI_Linux
-{
-struct Init_Params;
-struct Config;
-}
-}
-
-
 namespace silk
 {
 namespace bus
@@ -20,16 +10,11 @@ namespace bus
 class SPI_Linux : public ISPI
 {
 public:
-    SPI_Linux();
+    SPI_Linux(ts::IDeclaration_Scope const& scope);
     ~SPI_Linux();
 
-    auto init(rapidjson::Value const& init_params) -> bool;
-    auto get_init_params() const -> rapidjson::Document;
-
-    auto set_config(rapidjson::Value const& json) -> bool;
-    auto get_config() const -> rapidjson::Document;
-
-    void close();
+    bool init(std::shared_ptr<ts::IValue> descriptor) override;
+    std::shared_ptr<const ts::IValue> get_descriptor() const override;
 
     void lock();
     auto try_lock() -> bool;
@@ -39,17 +24,16 @@ public:
     virtual auto transfer_register(uint8_t reg, uint8_t const* tx_data, uint8_t* rx_data, size_t size, size_t speed = 0) -> bool override;
 
 private:
-    auto init() -> bool;
-
-    auto open() -> bool;
+    bool init(std::string const& dev, size_t speed);
+    bool open(std::string const& dev, size_t speed);
+    void close();
 
     auto do_transfer(uint8_t const* tx_data, uint8_t* rx_data, size_t size, size_t speed) -> bool;
 
-
-    std::shared_ptr<sz::SPI_Linux::Init_Params> m_init_params;
-    std::shared_ptr<sz::SPI_Linux::Config> m_config;
+    std::shared_ptr<ts::IValue> m_descriptor;
 
     int m_fd = -1;
+    size_t m_speed = 100000;
     std::vector<uint8_t> m_tx_buffer;
     std::vector<uint8_t> m_rx_buffer;
 };

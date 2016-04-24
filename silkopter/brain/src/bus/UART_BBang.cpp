@@ -1,7 +1,6 @@
 #include "BrainStdAfx.h"
 #include "bus/UART_BBang.h"
-
-#include "sz_UART_BBang.hpp"
+#include "def_lang/Mapper.h"
 
 #ifdef RASPBERRY_PI
 extern "C"
@@ -15,10 +14,17 @@ namespace silk
 namespace bus
 {
 
-UART_BBang::UART_BBang()
-    : m_init_params(new sz::UART_BBang::Init_Params())
-    , m_config(new sz::UART_BBang::Config())
+UART_BBang::UART_BBang(ts::IDeclaration_Scope const& scope)
 {
+    std::shared_ptr<const ts::IType> type = scope.find_specialized_symbol_by_path<const ts::IType>("::silk::UART_BBang_Descriptor");
+    if (!type)
+    {
+        QLOGE("Cannot find descriptor type");
+    }
+    else
+    {
+        m_descriptor = type->create_value();
+    }
 }
 
 UART_BBang::~UART_BBang()
@@ -26,23 +32,42 @@ UART_BBang::~UART_BBang()
     close();
 }
 
-auto UART_BBang::init(rapidjson::Value const& init_params) -> bool
+bool UART_BBang::init(std::shared_ptr<ts::IValue> descriptor)
 {
-    QLOG_TOPIC("uart_BBang::init");
-
-    sz::UART_BBang::Init_Params sz;
-    autojsoncxx::error::ErrorStack result;
-    if (!autojsoncxx::from_value(sz, init_params, result))
+    if (!descriptor)
     {
-        std::ostringstream ss;
-        ss << result;
-        QLOGE("Cannot deserialize UART_BBang data: {}", ss.str());
+        QLOGE("Null descriptor!");
         return false;
     }
-    *m_init_params = sz;
-    return init();
+    uint32_t rx_pin = 0;
+    uint32_t baud = 0;
+    bool invert = false;
+
+    auto result = ts::mapper::get(*descriptor, "rx_pin", rx_pin) &
+                    ts::mapper::get(*descriptor, "baud", baud) &
+                    ts::mapper::get(*descriptor, "invert", invert);
+    if (result != ts::success)
+    {
+        QLOGE("{}", result.error().what());
+        return false;
+    }
+
+    result = m_descriptor->copy_assign(*descriptor);
+    if (result != ts::success)
+    {
+        QLOGE("{}", result.error().what());
+        return false;
+    }
+
+    return init(rx_pin, baud, invert);
 }
-auto UART_BBang::init() -> bool
+
+std::shared_ptr<const ts::IValue> UART_BBang::get_descriptor() const
+{
+    return m_descriptor;
+}
+
+auto UART_BBang::init(size_t rx_pin, size_t baud, bool invert) -> bool
 {
     close();
 
@@ -50,24 +75,24 @@ auto UART_BBang::init() -> bool
 
 #if defined (RASPBERRY_PI)
 
-    int res = gpioSetMode(m_init_params->rx_pin, PI_INPUT);
+    int res = gpioSetMode(rx_pin, PI_INPUT);
     if (res != 0)
     {
-        QLOGE("can't change bit-banging rx pin to input {}: {}", m_init_params->rx_pin, res);
+        QLOGE("can't change bit-banging rx pin to input {}: {}", rx_pin, res);
         return false;
     }
 
-    res = gpioSerialReadOpen(m_init_params->rx_pin, m_init_params->baud, 8);
+    res = gpioSerialReadOpen(rx_pin, baud, 8);
     if (res != 0)
     {
-        QLOGE("can't open bit-banging rx pin {}: {}", m_init_params->rx_pin, res);
+        QLOGE("can't open bit-banging rx pin {}: {}", rx_pin, res);
         return false;
     }
 
-    res = gpioSerialReadInvert(m_init_params->rx_pin, m_init_params->invert ? PI_BB_SER_INVERT : PI_BB_SER_NORMAL);
+    res = gpioSerialReadInvert(rx_pin, invert ? PI_BB_SER_INVERT : PI_BB_SER_NORMAL);
     if (res != 0)
     {
-        QLOGE("can't open bit-banging invert property on pin {}: {}", m_init_params->rx_pin, res);
+        QLOGE("can't open bit-banging invert property on pin {}: {}", rx_pin, res);
         return false;
     }
 #endif
@@ -85,7 +110,7 @@ void UART_BBang::close()
 
     if (m_is_initialized)
     {
-        int res = gpioSerialReadClose(m_init_params->rx_pin);
+        int res = gpioSerialReadClose(m_rx_pin);
         QASSERT(res == 0);
     }
 
@@ -115,10 +140,10 @@ auto UART_BBang::read(uint8_t* data, size_t max_size) -> size_t
     std::lock_guard<UART_BBang> lg(*this);
 
 #if defined (RASPBERRY_PI)
-    int res = gpioSerialRead(m_init_params->rx_pin, data, max_size);
+    int res = gpioSerialRead(m_rx_pin, data, max_size);
     if (res < 0)
     {
-        QLOGE("error reading from bit-banged rx pin {}: {}", m_init_params->rx_pin, res);
+        QLOGE("error reading from bit-banged rx pin {}: {}", m_rx_pin, res);
         return 0;
     }
     return res;
@@ -138,38 +163,6 @@ void UART_BBang::send_break()
     QLOG_TOPIC("uart_bbang::send_break");
     QLOGE("not supported");
 }
-
-auto UART_BBang::set_config(rapidjson::Value const& json) -> bool
-{
-    QLOG_TOPIC("uart_BBang::set_config");
-
-    sz::UART_BBang::Config sz;
-    autojsoncxx::error::ErrorStack result;
-    if (!autojsoncxx::from_value(sz, json, result))
-    {
-        std::ostringstream ss;
-        ss << result;
-        QLOGE("Cannot deserialize UART_BBang config data: {}", ss.str());
-        return false;
-    }
-
-    *m_config = sz;
-    return true;
-}
-auto UART_BBang::get_config() const -> rapidjson::Document
-{
-    rapidjson::Document json;
-    autojsoncxx::to_document(*m_config, json);
-    return std::move(json);
-}
-
-auto UART_BBang::get_init_params() const -> rapidjson::Document
-{
-    rapidjson::Document json;
-    autojsoncxx::to_document(*m_init_params, json);
-    return std::move(json);
-}
-
 
 }
 }

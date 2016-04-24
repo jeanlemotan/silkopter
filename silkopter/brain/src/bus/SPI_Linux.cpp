@@ -1,19 +1,24 @@
 #include "BrainStdAfx.h"
 #include "bus/SPI_Linux.h"
-
+#include "def_lang/Mapper.h"
 #include <linux/spi/spidev.h>
-
-#include "sz_SPI_Linux.hpp"
 
 namespace silk
 {
 namespace bus
 {
 
-SPI_Linux::SPI_Linux()
-    : m_init_params(new sz::SPI_Linux::Init_Params())
-    , m_config(new sz::SPI_Linux::Config())
+SPI_Linux::SPI_Linux(ts::IDeclaration_Scope const& scope)
 {
+    std::shared_ptr<const ts::IType> type = scope.find_specialized_symbol_by_path<const ts::IType>("::silk::SPI_Linux_Descriptor");
+    if (!type)
+    {
+        QLOGE("Cannot find descriptor type");
+    }
+    else
+    {
+        m_descriptor = type->create_value();
+    }
 }
 
 SPI_Linux::~SPI_Linux()
@@ -21,42 +26,52 @@ SPI_Linux::~SPI_Linux()
     close();
 }
 
-auto SPI_Linux::init(rapidjson::Value const& init_params) -> bool
+bool SPI_Linux::init(std::shared_ptr<ts::IValue> descriptor)
 {
-    QLOG_TOPIC("spi_linux::init");
-
-    sz::SPI_Linux::Init_Params sz;
-    autojsoncxx::error::ErrorStack result;
-    if (!autojsoncxx::from_value(sz, init_params, result))
+    if (!descriptor)
     {
-        std::ostringstream ss;
-        ss << result;
-        QLOGE("Cannot deserialize SPI_Linux data: {}", ss.str());
+        QLOGE("Null descriptor!");
         return false;
     }
-    *m_init_params = sz;
-    return init();
+    std::string dev;
+    uint32_t speed = 0;
+
+    auto result = ts::mapper::get(*descriptor, "dev", dev) &
+                    ts::mapper::get(*descriptor, "speed", speed);
+    if (result != ts::success)
+    {
+        QLOGE("{}", result.error().what());
+        return false;
+    }
+
+    result = m_descriptor->copy_assign(*descriptor);
+    if (result != ts::success)
+    {
+        QLOGE("{}", result.error().what());
+        return false;
+    }
+
+    return open(dev, speed);
 }
-auto SPI_Linux::init() -> bool
+
+std::shared_ptr<const ts::IValue> SPI_Linux::get_descriptor() const
 {
-    auto ok = open();
-//    if (ok)
-//    {
-//        close();
-//    }
-    return ok;
+    return m_descriptor;
 }
-auto SPI_Linux::open() -> bool
+
+bool SPI_Linux::open(std::string const& dev, size_t speed)
 {
     QLOG_TOPIC("spi_linux::open");
 
     QASSERT(m_fd < 0);
-    m_fd = ::open(m_init_params->dev.c_str(), O_RDWR);
+    m_fd = ::open(dev.c_str(), O_RDWR);
     if (m_fd < 0)
     {
-        QLOGE("can't open {}: {}", m_init_params->dev, strerror(errno));
+        QLOGE("can't open {}: {}", dev, strerror(errno));
+        return false;
     }
-    return m_fd >= 0;
+    m_speed = speed;
+    return true;
 }
 void SPI_Linux::close()
 {
@@ -110,7 +125,7 @@ auto SPI_Linux::do_transfer(uint8_t const* tx_data, uint8_t* rx_data, size_t siz
     spi_transfer.tx_buf = (unsigned long)tx_data;
     spi_transfer.rx_buf = (unsigned long)rx_data;
     spi_transfer.len = size;
-    spi_transfer.speed_hz = speed ? speed : m_init_params->speed;
+    spi_transfer.speed_hz = speed ? speed : m_speed;
     spi_transfer.bits_per_word = 8;
     spi_transfer.delay_usecs = 0;
 
@@ -147,38 +162,6 @@ auto SPI_Linux::transfer_register(uint8_t reg, uint8_t const* tx_data, uint8_t* 
     std::copy(m_rx_buffer.begin() + 1, m_rx_buffer.end(), rx_data);
     return true;
 }
-
-auto SPI_Linux::set_config(rapidjson::Value const& json) -> bool
-{
-    QLOG_TOPIC("spi_linux::set_config");
-
-    sz::SPI_Linux::Config sz;
-    autojsoncxx::error::ErrorStack result;
-    if (!autojsoncxx::from_value(sz, json, result))
-    {
-        std::ostringstream ss;
-        ss << result;
-        QLOGE("Cannot deserialize SPI_Linux config data: {}", ss.str());
-        return false;
-    }
-
-    *m_config = sz;
-    return true;
-}
-auto SPI_Linux::get_config() const -> rapidjson::Document
-{
-    rapidjson::Document json;
-    autojsoncxx::to_document(*m_config, json);
-    return std::move(json);
-}
-
-auto SPI_Linux::get_init_params() const -> rapidjson::Document
-{
-    rapidjson::Document json;
-    autojsoncxx::to_document(*m_init_params, json);
-    return std::move(json);
-}
-
 
 }
 }

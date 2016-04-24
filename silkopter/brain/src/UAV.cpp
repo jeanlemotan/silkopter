@@ -7,6 +7,12 @@
 
 /////////////////////////////////////////////////////////////////////////////////////
 
+#include "def_lang/Type_System.h"
+#include "ast/Builder.h"
+#include "def_lang/Mapper.h"
+
+/////////////////////////////////////////////////////////////////////////////////////
+
 #include "bus/I2C_Linux.h"
 #include "bus/SPI_Linux.h"
 #include "bus/I2C_BCM.h"
@@ -69,7 +75,8 @@
 #include "sz_math.hpp"
 #include "sz_Multirotor_Config.hpp"
 
-
+#include "def_lang/Serialization.h"
+#include "def_lang/JSON_Serializer.h"
 
 #ifdef RASPBERRY_PI
 
@@ -174,6 +181,138 @@ UAV::~UAV()
 {
 }
 
+void UAV::load_settings()
+{
+    m_type_system = ts::Type_System();
+
+    ast::Builder builder;
+
+    auto parse_result = builder.parse("uav.def");
+    if (parse_result != ts::success)
+    {
+        QLOGE("Error parsing uav.def: {}", parse_result.error().what());
+        return;
+    }
+
+    m_type_system.populate_builtin_types();
+
+    auto compile_result = builder.compile(m_type_system);
+    if (compile_result != ts::success)
+    {
+        QLOGE("Error compiling uav.def: {}", compile_result.error().what());
+        return;
+    }
+}
+
+void UAV::save_settings2()
+{
+    TIMED_FUNCTION();
+
+    std::shared_ptr<const ts::IType> type = m_type_system.find_specialized_symbol_by_path<const ts::IType>("::silk::Settings");
+    if (!type)
+    {
+        QLOGE("Cannot find silk::Settings type.");
+        return;
+    }
+
+    std::shared_ptr<ts::IValue> settings_value = type->create_value();
+    QASSERT(settings_value);
+
+    std::shared_ptr<ts::IValue> config_value;
+
+    std::shared_ptr<const Multirotor_Config> multirotor_config = get_specialized_uav_config<Multirotor_Config>();
+    if (multirotor_config)
+    {
+        std::shared_ptr<const ts::IType> type = m_type_system.find_specialized_symbol_by_path<const ts::IType>("::silk::Multirotor_Config");
+        if (!type)
+        {
+            QLOGE("Cannot find silk::Multirotor_Config type.");
+            return;
+        }
+
+        config_value = type->create_value();
+        QASSERT(config_value);
+
+        auto result = ts::mapper::set(*config_value, *multirotor_config);
+        if (result != ts::success)
+        {
+            QLOGE("Cannot map/set the config: {}", result.error().what());
+            return;
+        }
+    }
+
+    std::shared_ptr<ts::IPtr_Value> settings_config_value = settings_value->select_specialized<ts::IPtr_Value>("config");
+    QASSERT(settings_config_value);
+    auto result = settings_config_value->set_value(config_value);
+    if (result != ts::success)
+    {
+        QLOGE("Cannot set multirotor config value: {}", result.error().what());
+        return;
+    }
+
+    {
+        std::shared_ptr<ts::IVector_Value> settings_buses_value = settings_value->select_specialized<ts::IVector_Value>("buses");
+        QASSERT(settings_buses_value);
+        settings_buses_value->clear();
+
+        std::vector<Registry<bus::IBus>::Item> const& buses = get_buses().get_all();
+        for (Registry<bus::IBus>::Item const& bus: buses)
+        {
+            auto insert_result = settings_buses_value->insert_default_value(settings_buses_value->get_value_count());
+            if (insert_result != ts::success)
+            {
+                QLOGE("Failed to create bus value: {}", insert_result.error().what());
+                return;
+            }
+            std::shared_ptr<ts::IValue> value = insert_result.payload();
+            auto result = ts::mapper::set(*value, "name", bus.name) &
+                    ts::mapper::set(*value, "type", bus.type) &
+                    ts::mapper::set(*value, "descriptor", *bus.ptr->get_descriptor());
+            if (result != ts::success)
+            {
+                QLOGE("Failed to set bus value: {}", result.error().what());
+                return;
+            }
+        }
+    }
+
+
+    silk::async(std::function<void()>([=]()
+    {
+        TIMED_FUNCTION();
+
+        auto result = settings_value->serialize();
+        if (result != ts::success)
+        {
+            QLOGE("Failed to serialize settings: {}", result.error().what());
+            return;
+        }
+
+        std::string json = ts::serialization::to_json(result.payload());
+
+        q::data::File_Sink fs(k_settings_path);
+        if (fs.is_open())
+        {
+            fs.write(reinterpret_cast<uint8_t const*>(json.data()), json.size());
+        }
+        else
+        {
+            QLOGE("Cannot open '{}' to save settings.", k_settings_path);
+        }
+    }));
+
+
+//        auto* configj = jsonutil::get_or_add_value(*settingsj, q::Path("uav/multirotor_config"), rapidjson::kObjectType, allocator);
+//        if (!configj)
+//        {
+//            QLOGE("Cannot create multirotor config node.");
+//            return;
+//        }
+//        rapidjson::Document json;
+//        autojsoncxx::to_document(*multirotor_config, json);
+//        jsonutil::clone_value(*configj, json, allocator);
+}
+
 void UAV::save_settings()
 {
     TIMED_FUNCTION();
@@ -204,17 +343,17 @@ void UAV::save_settings()
             QLOGE("Cannot create buses settings node.");
             return;
         }
-        auto const& nodes = get_buses().get_all();
-        for (auto const& n: nodes)
-        {
-            if (!jsonutil::add_value(*busesj, q::Path(n.name + "/type"), rapidjson::Value(n.type.c_str(), n.type.size(), allocator), allocator) ||
-                !jsonutil::add_value(*busesj, q::Path(n.name + "/init_params"), jsonutil::clone_value(n.ptr->get_init_params(), allocator), allocator) ||
-                !jsonutil::add_value(*busesj, q::Path(n.name + "/config"), jsonutil::clone_value(n.ptr->get_config(), allocator), allocator))
-            {
-                QLOGE("Cannot create settings node.");
-                return;
-            }
-        }
+//        auto const& nodes = get_buses().get_all();
+//        for (auto const& n: nodes)
+//        {
+//            if (!jsonutil::add_value(*busesj, q::Path(n.name + "/type"), rapidjson::Value(n.type.c_str(), n.type.size(), allocator), allocator) ||
+//                !jsonutil::add_value(*busesj, q::Path(n.name + "/init_params"), jsonutil::clone_value(n.ptr->get_init_params(), allocator), allocator) ||
+//                !jsonutil::add_value(*busesj, q::Path(n.name + "/config"), jsonutil::clone_value(n.ptr->get_config(), allocator), allocator))
+//            {
+//                QLOGE("Cannot create settings node.");
+//                return;
+//            }
+//        }
     }
     {
         auto nodesj = jsonutil::get_or_add_value(*settingsj, q::Path("uav/nodes"), rapidjson::kArrayType, allocator);
@@ -415,12 +554,12 @@ auto UAV::create_bus(
         return std::shared_ptr<bus::IBus>();
     }
     auto node = m_bus_factory.create(type);
-    if (node && node->init(init_params))
-    {
-        auto res = m_buses.add(name, type, node); //this has to succeed since we already tested for duplicate names
-        QASSERT(res);
-        return node;
-    }
+//    if (node && node->init(init_params))
+//    {
+//        auto res = m_buses.add(name, type, node); //this has to succeed since we already tested for duplicate names
+//        QASSERT(res);
+//        return node;
+//    }
     return std::shared_ptr<bus::IBus>();
 }
 auto UAV::create_node(
@@ -683,13 +822,14 @@ auto UAV::init(Comms& comms) -> bool
     }
 #endif
 
+    load_settings();
 
-    m_bus_factory.add<bus::UART_Linux>("UART Linux");
-    m_bus_factory.add<bus::UART_BBang>("UART BBang");
-    m_bus_factory.add<bus::I2C_Linux>("I2C Linux");
-    m_bus_factory.add<bus::SPI_Linux>("SPI Linux");
-    m_bus_factory.add<bus::I2C_BCM>("I2C BCM");
-    m_bus_factory.add<bus::SPI_BCM>("SPI BCM");
+    m_bus_factory.add<bus::UART_Linux>("UART Linux", m_type_system);
+    m_bus_factory.add<bus::UART_BBang>("UART BBang", m_type_system);
+    m_bus_factory.add<bus::I2C_Linux>("I2C Linux", m_type_system);
+    m_bus_factory.add<bus::SPI_Linux>("SPI Linux", m_type_system);
+    m_bus_factory.add<bus::I2C_BCM>("I2C BCM", m_type_system);
+    m_bus_factory.add<bus::SPI_BCM>("SPI BCM", m_type_system);
 
 #if !defined RASPBERRY_PI
     m_node_factory.add<Multirotor_Simulator>("Multirotor Simulator", *this);

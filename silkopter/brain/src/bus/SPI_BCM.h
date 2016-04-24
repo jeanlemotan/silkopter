@@ -2,16 +2,6 @@
 
 #include "common/bus/ISPI.h"
 
-namespace sz
-{
-namespace SPI_BCM
-{
-struct Init_Params;
-struct Config;
-}
-}
-
-
 namespace silk
 {
 namespace bus
@@ -20,14 +10,11 @@ namespace bus
 class SPI_BCM : public ISPI
 {
 public:
-    SPI_BCM();
+    SPI_BCM(ts::IDeclaration_Scope const& scope);
     ~SPI_BCM();
 
-    auto init(rapidjson::Value const& init_params) -> bool;
-    auto get_init_params() const -> rapidjson::Document;
-
-    auto set_config(rapidjson::Value const& json) -> bool;
-    auto get_config() const -> rapidjson::Document;
+    bool init(std::shared_ptr<ts::IValue> descriptor) override;
+    std::shared_ptr<const ts::IValue> get_descriptor() const override;
 
     void lock();
     auto try_lock() -> bool;
@@ -37,15 +24,15 @@ public:
     virtual auto transfer_register(uint8_t reg, uint8_t const* tx_data, uint8_t* rx_data, size_t size, size_t speed = 0) -> bool override;
 
 private:
-    auto init() -> bool;
+    bool open(size_t dev, size_t speed, size_t mode);
 
     auto get_divider(uint32_t speed) const -> uint32_t;
 
     auto do_transfer(uint8_t const* tx_data, uint8_t* rx_data, size_t size, size_t speed) -> bool;
 
-
-    std::shared_ptr<sz::SPI_BCM::Init_Params> m_init_params;
-    std::shared_ptr<sz::SPI_BCM::Config> m_config;
+    std::shared_ptr<ts::IValue> m_descriptor;
+    size_t m_dev = 0;
+    size_t m_speed = 0;
 
     uint32_t m_clock_divider = 0;
 

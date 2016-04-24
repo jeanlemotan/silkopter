@@ -11,7 +11,7 @@ class II2C: public IBus
 {
     DEFINE_RTTI_CLASS(II2C, IBus);
 public:
-    virtual ~II2C() {}
+    virtual ~II2C() = default;
 
     virtual void lock() = 0;
     virtual auto try_lock() -> bool = 0;
