@@ -227,7 +227,7 @@ struct_body_declaration : type_declaration
                         }
                         ;
 
-inheritance : TPUBLIC identifier_path
+inheritance : TPUBLIC type
             {
                 $$ = ast::Node(ast::Node::Type::INHERITANCE, builder.get_location());
                 $$.add_child($2);

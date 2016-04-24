@@ -14,11 +14,13 @@ Struct_Type::Struct_Type(std::string const& name, std::shared_ptr<const IStruct_
     {
         for (size_t i = 0; i < m_base_struct->get_member_def_count(); i++)
         {
-            add_member_def(m_base_struct->get_member_def(i));
+            auto result = add_member_def(m_base_struct->get_member_def(i));
+            TS_ASSERT(result == success);
         }
         for (size_t i = 0; i < m_base_struct->get_attribute_count(); i++)
         {
-            add_attribute(m_base_struct->get_attribute(i));
+            auto result = add_attribute(m_base_struct->get_attribute(i));
+            TS_ASSERT(result == success);
         }
     }
 }
