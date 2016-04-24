@@ -169,7 +169,7 @@ static ts::Result<std::shared_ptr<const ts::IType>> find_type_or_instantiate_tem
     if (name_result == ts::success)
     {
         std::string type_name = name_result.payload();
-        std::shared_ptr<ts::IType> type = scope.find_specialized_symbol_by_path<ts::IType>(ts::Symbol_Path(type_name));
+        std::shared_ptr<const ts::IType> type = scope.find_specialized_symbol_by_path<const ts::IType>(ts::Symbol_Path(type_name));
         if (!type)
         {
             return ts::Error(type_node->get_source_location().to_string() + "Cannot find type " + type_name);
