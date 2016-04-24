@@ -5,10 +5,42 @@ namespace ts
 {
 
 Declaration_Scope_EP::Declaration_Scope_EP(std::string const& name)
-    : Symbol_EP(name)
+    : m_name(name)
 {
-
 }
+
+std::string const& Declaration_Scope_EP::get_name() const
+{
+    return m_name;
+}
+
+Symbol_Path Declaration_Scope_EP::get_symbol_path() const
+{
+    std::string path = m_name;
+    IDeclaration_Scope* parent = m_parent_scope;
+    while (parent)
+    {
+        path = parent->get_name() + "::" + path;
+        parent = parent->get_parent_scope();
+    }
+
+    return Symbol_Path(path);
+}
+
+IDeclaration_Scope const* Declaration_Scope_EP::get_parent_scope() const
+{
+    return m_parent_scope;
+}
+IDeclaration_Scope* Declaration_Scope_EP::get_parent_scope()
+{
+    return m_parent_scope;
+}
+
+void Declaration_Scope_EP::set_parent_scope(IDeclaration_Scope* declaration_scope)
+{
+    m_parent_scope = declaration_scope;
+}
+
 
 Result<std::shared_ptr<const ISymbol>> Declaration_Scope_EP::add_symbol(std::shared_ptr<ISymbol> symbol)
 {
