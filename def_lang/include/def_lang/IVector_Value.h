@@ -13,7 +13,7 @@ class IVector_Value : virtual public IValue, virtual public IValue_Container
 public:
     virtual ~IVector_Value() = default;
 
-    virtual Result<void> insert_default_value(size_t idx) = 0;
+    virtual Result<std::shared_ptr<IValue>> insert_default_value(size_t idx) = 0;
     virtual Result<void> insert_value(size_t idx, std::shared_ptr<IValue> value) = 0;
     virtual Result<void> erase_value(size_t idx) = 0;
     virtual void clear() = 0;

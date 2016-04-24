@@ -32,7 +32,7 @@ public:
 
     std::shared_ptr<IVector_Type const> get_specialized_type() const override;
 
-    Result<void> insert_default_value(size_t idx) override;
+    Result<std::shared_ptr<IValue>> insert_default_value(size_t idx) override;
     Result<void> insert_value(size_t idx, std::shared_ptr<IValue> value) override;
     Result<void> erase_value(size_t idx) override;
     void clear() override;
