@@ -1,0 +1,113 @@
+//import "types.def"
+
+alias int8_t = int64_t : [ min = -128, max = 127 ];
+alias uint8_t = int64_t : [ min = 0, max = 255 ];
+alias int16_t = int64_t : [ min = -32768, max = 32767 ];
+alias uint16_t = int64_t : [ min = 0, max = 65535 ];
+alias int32_t = int64_t : [ min = -2147483648, max = 2147483647 ];
+alias uint32_t = int64_t : [ min = 0, max = 4294967295 ];
+alias ufloat = float : [ min = 0.f ];
+
+namespace silk
+{
+
+alias mass_t = ufloat;
+
+struct UAV_Config_Base
+{
+    string name : [ui_name = "Name"];
+    mass_t mass : [ui_name = "Mass (Kg)"];
+    ufloat moment_of_inertia : [ui_name = "Moment Of Inertia"];
+};
+
+struct Multirotor_Config : public UAV_Config_Base
+{
+    struct Motor
+    {
+        math::vec3f position;
+        math::vec3f thrust_vector = {0.f, 0.f, 1.f};
+        bool clockwise = false;
+    };
+
+    ufloat radius = 1.f; //m
+    ufloat height = 1.f; //m
+    ufloat motor_z_torque = 0.f; //Nm
+    ufloat motor_thrust = 1.f; //N
+    ufloat motor_acceleration = 10.f; //N/s
+    ufloat motor_deceleration = 10.f; //N/s
+    vector<Motor> motors;
+};
+
+struct Bus_Descriptor_Base
+{
+};
+
+struct Bus
+{
+    string name;
+    string type;
+    ptr<Bus_Descriptor_Base> descriptor;
+};
+
+struct Node_Descriptor_Base
+{
+};
+
+struct Node_Config_Base
+{
+};
+
+struct Node
+{
+    string name;
+    string type;
+    ptr<Node_Descriptor_Base> descriptor;
+    ptr<Node_Config_Base> config;
+    vector<string> input_paths;
+};
+
+struct Settings
+{
+    ptr<UAV_Config_Base> config;
+
+    vector<Bus> buses;
+    vector<Node> nodes;
+};
+
+
+struct UART_Linux_Descriptor : public Bus_Descriptor_Base
+{
+    string dev = "/dev/ttyAMA0";
+    uint32_t baud = 115200;
+};
+struct UART_BBang_Descriptor : public Bus_Descriptor_Base
+{
+    uint32_t rx_pin = 0;
+    uint32_t baud = 115200;
+    bool invert = false;
+};
+
+struct I2C_BCM_Descriptor : public Bus_Descriptor_Base
+{
+    uint32_t dev = 0;
+};
+struct I2C_Linux_Descriptor : public Bus_Descriptor_Base
+{
+    string dev = "/dev/i2c0";
+};
+
+struct SPI_BCM_Descriptor : public Bus_Descriptor_Base
+{
+    alias mode_t = uint32_t : [max = 3];
+
+    uint32_t dev = 0;
+    uint32_t baud = 1000000;
+    mode_t mode = 0;
+};
+struct SPI_Linux_Descriptor : public Bus_Descriptor_Base
+{
+    string dev = "/dev/ttyAMA0";
+    uint32_t speed = 1000000;
+};
+}
+
