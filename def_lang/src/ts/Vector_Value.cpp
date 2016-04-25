@@ -179,11 +179,13 @@ Result<void> Vector_Value::deserialize(serialization::Value const& sz_value)
 
     while (get_value_count() > sz_value.get_array_element_count())
     {
-        erase_value(get_value_count() - 1);
+        auto result = erase_value(get_value_count() - 1);
+        TS_ASSERT(result == success);
     }
     while (get_value_count() < sz_value.get_array_element_count())
     {
-        insert_default_value(get_value_count());
+        auto result = insert_default_value(get_value_count());
+        TS_ASSERT(result == success);
     }
 
     for (size_t i = 0; i < sz_value.get_array_element_count(); i++)
