@@ -17,6 +17,8 @@ public:
     Result<std::shared_ptr<const ITemplated_Type>> instantiate_template(std::string const& name, std::vector<std::shared_ptr<const ITemplate_Argument>> const& arguments);
 
     void populate_builtin_types();
+
+    std::shared_ptr<IValue> create_value(Symbol_Path const& type_path) const;
 };
 
 }

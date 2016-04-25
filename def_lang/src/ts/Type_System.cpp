@@ -152,6 +152,16 @@ Result<std::shared_ptr<const ITemplated_Type>> Type_System::instantiate_template
     return nullptr;
 }
 
+std::shared_ptr<IValue> Type_System::create_value(Symbol_Path const& type_path) const
+{
+    std::shared_ptr<const ts::IType> type = find_specialized_symbol_by_path<const ts::IType>(type_path);
+    if (!type)
+    {
+        return nullptr;
+    }
+    return type->create_value();
+}
+
 
 
 
