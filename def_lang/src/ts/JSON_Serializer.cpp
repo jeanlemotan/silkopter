@@ -359,7 +359,7 @@ static Result<Value> parse_number_value(std::string const& json, size_t& offset)
 
     if (decimal_digit_count == 0)
     {
-        static constexpr int64_t s_pow[15] = {
+        static constexpr int64_t s_pow[19] = {
                 1,
                 10,
                 100,
@@ -375,22 +375,26 @@ static Result<Value> parse_number_value(std::string const& json, size_t& offset)
                 1000000000000,
                 10000000000000,
                 100000000000000,
+                1000000000000000,
+                10000000000000000,
+                100000000000000000,
+                1000000000000000000,
         };
 
         whole = whole * exponent_sign * s_pow[exponent];
         return Value(whole);
     }
 
-    if (decimal_digit_count > 15)
+    if (decimal_digit_count > 19)
     {
         return Error("Too many decimals");
     }
-    if (exponent > 15)
+    if (exponent > 19)
     {
         return Error("Exponent too big");
     }
 
-    static constexpr double s_pow[15] = { 1.0,
+    static constexpr double s_pow[19] = { 1.0,
                                           10.0,
                                           100.0,
                                           1000.0,
@@ -405,6 +409,10 @@ static Result<Value> parse_number_value(std::string const& json, size_t& offset)
                                           1000000000000.0,
                                           10000000000000.0,
                                           100000000000000.0,
+                                          1000000000000000.0,
+                                          10000000000000000.0,
+                                          100000000000000000.0,
+                                          1000000000000000000.0,
                                         };
 
     double value = static_cast<double>(whole);
