@@ -10,7 +10,7 @@ namespace bus
 class I2C_Linux : public II2C
 {
 public:
-    I2C_Linux(ts::IDeclaration_Scope const& scope);
+    I2C_Linux(ts::Type_System const& ts);
     ~I2C_Linux();
 
     bool init(std::shared_ptr<ts::IValue> descriptor) override;

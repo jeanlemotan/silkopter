@@ -10,7 +10,7 @@ namespace bus
 class SPI_Linux : public ISPI
 {
 public:
-    SPI_Linux(ts::IDeclaration_Scope const& scope);
+    SPI_Linux(ts::Type_System const& ts);
     ~SPI_Linux();
 
     bool init(std::shared_ptr<ts::IValue> descriptor) override;

@@ -1,6 +1,7 @@
 #include "BrainStdAfx.h"
 #include "bus/SPI_BCM.h"
 #include "def_lang/Mapper.h"
+#include "def_lang/Type_System.h"
 
 #ifdef RASPBERRY_PI
 
@@ -21,16 +22,12 @@ namespace bus
 std::mutex SPI_BCM::s_mutex;
 
 
-SPI_BCM::SPI_BCM(ts::IDeclaration_Scope const& scope)
+SPI_BCM::SPI_BCM(ts::Type_System const& ts)
 {
-    std::shared_ptr<const ts::IType> type = scope.find_specialized_symbol_by_path<const ts::IType>("::silk::SPI_BCM_Descriptor");
-    if (!type)
+    m_descriptor = ts.create_value("::silk::SPI_BCM_Descriptor");
+    if (!m_descriptor)
     {
-        QLOGE("Cannot find descriptor type");
-    }
-    else
-    {
-        m_descriptor = type->create_value();
+        QLOGE("Cannot create descriptor value");
     }
 }
 

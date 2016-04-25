@@ -10,7 +10,7 @@ namespace bus
 class UART_Linux : public IUART
 {
 public:
-    UART_Linux(ts::IDeclaration_Scope const& scope);
+    UART_Linux(ts::Type_System const& ts);
     ~UART_Linux();
 
     bool init(std::shared_ptr<ts::IValue> descriptor) override;

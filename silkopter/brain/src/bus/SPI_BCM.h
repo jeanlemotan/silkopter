@@ -10,7 +10,7 @@ namespace bus
 class SPI_BCM : public ISPI
 {
 public:
-    SPI_BCM(ts::IDeclaration_Scope const& scope);
+    SPI_BCM(ts::Type_System const& ts);
     ~SPI_BCM();
 
     bool init(std::shared_ptr<ts::IValue> descriptor) override;

@@ -1,6 +1,7 @@
 #include "BrainStdAfx.h"
 #include "bus/UART_BBang.h"
 #include "def_lang/Mapper.h"
+#include "def_lang/Type_System.h"
 
 #ifdef RASPBERRY_PI
 extern "C"
@@ -14,16 +15,12 @@ namespace silk
 namespace bus
 {
 
-UART_BBang::UART_BBang(ts::IDeclaration_Scope const& scope)
+UART_BBang::UART_BBang(ts::Type_System const& ts)
 {
-    std::shared_ptr<const ts::IType> type = scope.find_specialized_symbol_by_path<const ts::IType>("::silk::UART_BBang_Descriptor");
-    if (!type)
+    m_descriptor = ts.create_value("::silk::UART_BBang_Descriptor");
+    if (!m_descriptor)
     {
-        QLOGE("Cannot find descriptor type");
-    }
-    else
-    {
-        m_descriptor = type->create_value();
+        QLOGE("Cannot create descriptor value");
     }
 }
 

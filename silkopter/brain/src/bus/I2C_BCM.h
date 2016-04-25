@@ -10,7 +10,7 @@ namespace bus
 class I2C_BCM : public II2C
 {
 public:
-    I2C_BCM(ts::IDeclaration_Scope const& scope);
+    I2C_BCM(ts::Type_System const& ts);
     ~I2C_BCM();
 
     bool init(std::shared_ptr<ts::IValue> descriptor) override;

@@ -1,6 +1,8 @@
 #include "BrainStdAfx.h"
 #include "bus/UART_Linux.h"
 #include "def_lang/Mapper.h"
+#include "def_lang/Type_System.h"
+
 #include <termios.h>
 
 namespace silk
@@ -8,16 +10,12 @@ namespace silk
 namespace bus
 {
 
-UART_Linux::UART_Linux(ts::IDeclaration_Scope const& scope)
+UART_Linux::UART_Linux(ts::Type_System const& ts)
 {
-    std::shared_ptr<const ts::IType> type = scope.find_specialized_symbol_by_path<const ts::IType>("::silk::UART_Linux_Descriptor");
-    if (!type)
+    m_descriptor = ts.create_value("::silk::UART_Linux_Descriptor");
+    if (!m_descriptor)
     {
-        QLOGE("Cannot find descriptor type");
-    }
-    else
-    {
-        m_descriptor = type->create_value();
+        QLOGE("Cannot create descriptor value");
     }
 }
 

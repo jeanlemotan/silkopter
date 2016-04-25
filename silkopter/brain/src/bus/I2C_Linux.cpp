@@ -1,6 +1,7 @@
 #include "BrainStdAfx.h"
 #include "bus/I2C_Linux.h"
 #include "def_lang/Mapper.h"
+#include "def_lang/Type_System.h"
 
 #include <errno.h>
 #include <unistd.h>
@@ -32,16 +33,12 @@ namespace silk
 namespace bus
 {
 
-I2C_Linux::I2C_Linux(ts::IDeclaration_Scope const& scope)
+I2C_Linux::I2C_Linux(ts::Type_System const& ts)
 {
-    std::shared_ptr<const ts::IType> type = scope.find_specialized_symbol_by_path<const ts::IType>("::silk::I2C_Linux_Descriptor");
-    if (!type)
+    m_descriptor = ts.create_value("::silk::I2C_Linux_Descriptor");
+    if (!m_descriptor)
     {
-        QLOGE("Cannot find descriptor type");
-    }
-    else
-    {
-        m_descriptor = type->create_value();
+        QLOGE("Cannot create descriptor value");
     }
 }
 

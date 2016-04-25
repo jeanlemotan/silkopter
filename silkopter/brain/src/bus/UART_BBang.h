@@ -10,7 +10,7 @@ namespace bus
 class UART_BBang : public IUART
 {
 public:
-    UART_BBang(ts::IDeclaration_Scope const& scope);
+    UART_BBang(ts::Type_System const& ts);
     ~UART_BBang();
 
     bool init(std::shared_ptr<ts::IValue> descriptor) override;

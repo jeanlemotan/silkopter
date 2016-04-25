@@ -1,6 +1,8 @@
 #include "BrainStdAfx.h"
 #include "bus/SPI_Linux.h"
 #include "def_lang/Mapper.h"
+#include "def_lang/Type_System.h"
+
 #include <linux/spi/spidev.h>
 
 namespace silk
@@ -8,16 +10,12 @@ namespace silk
 namespace bus
 {
 
-SPI_Linux::SPI_Linux(ts::IDeclaration_Scope const& scope)
+SPI_Linux::SPI_Linux(ts::Type_System const& ts)
 {
-    std::shared_ptr<const ts::IType> type = scope.find_specialized_symbol_by_path<const ts::IType>("::silk::SPI_Linux_Descriptor");
-    if (!type)
+    m_descriptor = ts.create_value("::silk::SPI_Linux_Descriptor");
+    if (!m_descriptor)
     {
-        QLOGE("Cannot find descriptor type");
-    }
-    else
-    {
-        m_descriptor = type->create_value();
+        QLOGE("Cannot create descriptor value");
     }
 }
 
