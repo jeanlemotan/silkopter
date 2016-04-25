@@ -151,19 +151,42 @@ Result<serialization::Value> Ptr_Value::serialize() const
 
 Result<void> Ptr_Value::deserialize(serialization::Value const& sz_value)
 {
-    if (sz_value.get_type() == serialization::Value::Type::EMPTY)
+    if (sz_value.is_empty())
     {
         set_value(std::shared_ptr<IValue>());
         return success;
     }
 
-    if (sz_value.get_type() != serialization::Value::Type::OBJECT)
+    if (!sz_value.is_object())
     {
         return Error("Expected object or null value when deserializing");
     }
 
-    TS_ASSERT(false);
-    return Error("Not implemented");
+    serialization::Value const* type_sz_value = sz_value.find_object_member_by_name("type");
+    if (!type_sz_value || !type_sz_value->is_string())
+    {
+        return Error("Expected 'type' string value when deserializing");
+    }
+
+    std::shared_ptr<const IType> type = get_type()->get_parent_scope()->find_specialized_symbol_by_path<const IType>(Symbol_Path(type_sz_value->get_as_string()));
+    if (!type)
+    {
+        return Error("Cannot find type '" + type_sz_value->get_as_string() + "' when deserializing");
+    }
+
+    auto result = set_value(type->create_value());
+    if (result != success)
+    {
+        return Error("Cannot create value when deserializing: " + result.error().what());
+    }
+
+    serialization::Value const* value_sz_value = sz_value.find_object_member_by_name("value");
+    if (!value_sz_value)
+    {
+        return Error("Expected 'value' when deserializing");
+    }
+
+    return get_value()->deserialize(*value_sz_value);
 }
 
 std::shared_ptr<const IValue> Ptr_Value::get_value() const
