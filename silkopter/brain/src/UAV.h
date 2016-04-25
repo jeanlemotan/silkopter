@@ -78,7 +78,7 @@ public:
     void process();
     void shutdown();
 
-    void load_settings();
+    void load_type_system();
 
     void save_settings();
     void save_settings2();

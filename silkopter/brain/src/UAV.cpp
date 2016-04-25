@@ -181,7 +181,7 @@ UAV::~UAV()
 {
 }
 
-void UAV::load_settings()
+void UAV::load_type_system()
 {
     m_type_system = ts::Type_System();
 
@@ -208,14 +208,7 @@ void UAV::save_settings2()
 {
     TIMED_FUNCTION();
 
-    std::shared_ptr<const ts::IType> type = m_type_system.find_specialized_symbol_by_path<const ts::IType>("::silk::Settings");
-    if (!type)
-    {
-        QLOGE("Cannot find silk::Settings type.");
-        return;
-    }
-
-    std::shared_ptr<ts::IValue> settings_value = type->create_value();
+    std::shared_ptr<ts::IValue> settings_value = m_type_system.create_value("::silk::Settings");
     QASSERT(settings_value);
 
     std::shared_ptr<ts::IValue> config_value;
@@ -822,7 +815,7 @@ auto UAV::init(Comms& comms) -> bool
     }
 #endif
 
-    load_settings();
+    load_type_system();
 
     m_bus_factory.add<bus::UART_Linux>("UART Linux", m_type_system);
     m_bus_factory.add<bus::UART_BBang>("UART BBang", m_type_system);
@@ -1064,7 +1057,51 @@ auto UAV::init(Comms& comms) -> bool
         return false;
     }
 
-    auto data = q::data::read_whole_source_as_string<std::string>(fs);
+    std::string data = q::data::read_whole_source_as_string<std::string>(fs);
+
+    ts::Result<ts::serialization::Value> result = ts::serialization::from_json(data);
+    if (result != ts::success)
+    {
+        QLOGE("Failed to load '{}': {}", k_settings_path, result.error().what());
+        return false;
+    }
+
+    std::shared_ptr<ts::IValue> settings_value = m_type_system.create_value("::silk::Settings");
+    QASSERT(settings_value);
+
+    auto deserialization_result = settings_value->deserialize(result.payload());
+    if (deserialization_result != ts::success)
+    {
+        QLOGE("Failed to deserialize settings: {}", deserialization_result.error().what());
+        return false;
+    }
+
+    std::shared_ptr<ts::IPtr_Value> config_value = settings_value->select_specialized<ts::IPtr_Value>("config");
+    QASSERT(config_value);
+
+//    std::shared_ptr<const Multirotor_Config> multirotor_config = get_specialized_uav_config<Multirotor_Config>();
+//    if (multirotor_config)
+//    {
+//        std::shared_ptr<const ts::IType> type = m_type_system.find_specialized_symbol_by_path<const ts::IType>("::silk::Multirotor_Config");
+//        if (!type)
+//        {
+//            QLOGE("Cannot find silk::Multirotor_Config type.");
+//            return;
+//        }
+
+//        config_value = type->create_value();
+//        QASSERT(config_value);
+
+//        auto result = ts::mapper::set(*config_value, *multirotor_config);
+//        if (result != ts::success)
+//        {
+//            QLOGE("Cannot map/set the config: {}", result.error().what());
+//            return;
+//        }
+//    }
+
+
+
     rapidjson::Document settingsj;
     if (settingsj.Parse(data.c_str()).HasParseError())
     {

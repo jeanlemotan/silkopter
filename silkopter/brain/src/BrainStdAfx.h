@@ -28,7 +28,10 @@
 #include "def_lang/IStruct_Value.h"
 #include "def_lang/IBool_Value.h"
 
-
+namespace ts
+{
+class Type_System;
+}
 
 
 #endif
