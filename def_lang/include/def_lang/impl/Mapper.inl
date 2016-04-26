@@ -239,7 +239,7 @@ Result<void> set(IValue& dst, std::vector<T> const& src)
 template<>
 inline Result<void> get(IValue const& src, IValue& dst)
 {
-    if (IPtr_Value const* value = dynamic_cast<IPtr_Value const*>(&src))
+    if (IPoly_Value const* value = dynamic_cast<IPoly_Value const*>(&src))
     {
         if (value->get_value() == nullptr)
         {
@@ -252,7 +252,7 @@ inline Result<void> get(IValue const& src, IValue& dst)
 template<>
 inline Result<void> set(IValue& dst, IValue const& src)
 {
-    if (IPtr_Value* value = dynamic_cast<IPtr_Value*>(&dst))
+    if (IPoly_Value* value = dynamic_cast<IPoly_Value*>(&dst))
     {
         return value->copy_assign(src);
     }

@@ -1,4 +1,4 @@
-#include "def_lang/IPtr_Type.h"
+#include "def_lang/IPoly_Type.h"
 
 #include "def_lang/ep/Symbol_EP.h"
 #include "def_lang/ep/Attribute_Container_EP.h"
@@ -6,12 +6,12 @@
 namespace ts
 {
 
-class Ptr_Type final : virtual public IPtr_Type, public Symbol_EP, public Attribute_Container_EP, public std::enable_shared_from_this<Ptr_Type>
+class Poly_Type final : virtual public IPoly_Type, public Symbol_EP, public Attribute_Container_EP, public std::enable_shared_from_this<Poly_Type>
 {
 public:
-    typedef IPtr_Value value_type;
+    typedef IPoly_Value value_type;
 
-    Ptr_Type(std::string const& name);
+    Poly_Type(std::string const& name);
 
     Result<void> init(std::vector<std::shared_ptr<const ITemplate_Argument>> const& arguments) override;
 

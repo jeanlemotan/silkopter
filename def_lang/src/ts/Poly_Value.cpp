@@ -1,4 +1,4 @@
-#include "def_lang/impl/Ptr_Value.h"
+#include "def_lang/impl/Poly_Value.h"
 #include "def_lang/Value_Selector.h"
 #include "def_lang/Serialization.h"
 #include "def_lang/IStruct_Type.h"
@@ -6,14 +6,14 @@
 namespace ts
 {
 
-Ptr_Value::Ptr_Value(std::shared_ptr<IPtr_Type const> type)
+Poly_Value::Poly_Value(std::shared_ptr<IPoly_Type const> type)
     : m_type(type)
 {
 }
 
-Result<bool> Ptr_Value::is_equal(IValue const& other) const
+Result<bool> Poly_Value::is_equal(IValue const& other) const
 {
-    IPtr_Value const* v = dynamic_cast<const IPtr_Value*>(&other);
+    IPoly_Value const* v = dynamic_cast<const IPoly_Value*>(&other);
     if (!v)
     {
         return Error("incompatible values");
@@ -44,9 +44,9 @@ Result<bool> Ptr_Value::is_equal(IValue const& other) const
     return get_value()->is_equal(*v->get_value());
 }
 
-Result<void> Ptr_Value::copy_assign(IValue const& other)
+Result<void> Poly_Value::copy_assign(IValue const& other)
 {
-    IPtr_Value const* v = dynamic_cast<const IPtr_Value*>(&other);
+    IPoly_Value const* v = dynamic_cast<const IPoly_Value*>(&other);
     if (!v)
     {
         return Error("incompatible values");
@@ -79,35 +79,35 @@ Result<void> Ptr_Value::copy_assign(IValue const& other)
         return get_value()->copy_assign(*v->get_value());
     }
 }
-Result<void> Ptr_Value::copy_assign(IInitializer const& initializer)
+Result<void> Poly_Value::copy_assign(IInitializer const& initializer)
 {
     return Error("not implemented");
 }
 
-std::shared_ptr<IValue> Ptr_Value::clone() const
+std::shared_ptr<IValue> Poly_Value::clone() const
 {
-    return std::make_shared<Ptr_Value>(*this);
+    return std::make_shared<Poly_Value>(*this);
 }
 
-std::shared_ptr<IType const> Ptr_Value::get_type() const
+std::shared_ptr<IType const> Poly_Value::get_type() const
 {
     return m_type;
 }
 
-Result<void> Ptr_Value::parse_from_ui_string(std::string const& str)
+Result<void> Poly_Value::parse_from_ui_string(std::string const& str)
 {
     return Error("Not Supported");
 }
-Result<std::string> Ptr_Value::get_ui_string() const
+Result<std::string> Poly_Value::get_ui_string() const
 {
     return Error("Not Supported");
 }
 
-std::shared_ptr<const IValue> Ptr_Value::select(Value_Selector&& selector) const
+std::shared_ptr<const IValue> Poly_Value::select(Value_Selector&& selector) const
 {
-    return const_cast<Ptr_Value*>(this)->select(std::move(selector));
+    return const_cast<Poly_Value*>(this)->select(std::move(selector));
 }
-std::shared_ptr<IValue> Ptr_Value::select(Value_Selector&& selector)
+std::shared_ptr<IValue> Poly_Value::select(Value_Selector&& selector)
 {
     TS_ASSERT(!selector.empty());
     if (selector.empty())
@@ -123,12 +123,12 @@ std::shared_ptr<IValue> Ptr_Value::select(Value_Selector&& selector)
     return get_value()->select(std::move(selector));
 }
 
-std::shared_ptr<IPtr_Type const> Ptr_Value::get_specialized_type() const
+std::shared_ptr<IPoly_Type const> Poly_Value::get_specialized_type() const
 {
     return m_type;
 }
 
-Result<serialization::Value> Ptr_Value::serialize() const
+Result<serialization::Value> Poly_Value::serialize() const
 {
     std::shared_ptr<const IValue> value = get_value();
     if (value)
@@ -149,7 +149,7 @@ Result<serialization::Value> Ptr_Value::serialize() const
     }
 }
 
-Result<void> Ptr_Value::deserialize(serialization::Value const& sz_value)
+Result<void> Poly_Value::deserialize(serialization::Value const& sz_value)
 {
     if (sz_value.is_empty())
     {
@@ -189,16 +189,16 @@ Result<void> Ptr_Value::deserialize(serialization::Value const& sz_value)
     return get_value()->deserialize(*value_sz_value);
 }
 
-std::shared_ptr<const IValue> Ptr_Value::get_value() const
+std::shared_ptr<const IValue> Poly_Value::get_value() const
 {
     return m_value;
 }
-std::shared_ptr<IValue> Ptr_Value::get_value()
+std::shared_ptr<IValue> Poly_Value::get_value()
 {
     return m_value;
 }
 
-Result<void> Ptr_Value::set_value(std::shared_ptr<IValue> value)
+Result<void> Poly_Value::set_value(std::shared_ptr<IValue> value)
 {
     if (!value)
     {
@@ -215,7 +215,7 @@ Result<void> Ptr_Value::set_value(std::shared_ptr<IValue> value)
     return success;
 }
 
-bool Ptr_Value::is_type_allowed(IType const& type) const
+bool Poly_Value::is_type_allowed(IType const& type) const
 {
     if (get_specialized_type()->get_inner_type().get() == &type)
     {

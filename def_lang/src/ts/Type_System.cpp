@@ -9,7 +9,7 @@
 #include "def_lang/impl/String_Value.h"
 #include "def_lang/ITemplate_Argument.h"
 #include "def_lang/impl/Vector_Type.h"
-#include "def_lang/impl/Ptr_Type.h"
+#include "def_lang/impl/Poly_Type.h"
 
 namespace ts
 {
@@ -133,15 +133,15 @@ Result<std::shared_ptr<const ITemplated_Type>> Type_System::instantiate_template
         }
         return std::dynamic_pointer_cast<const ITemplated_Type>(add_result.payload());
     }
-    else if (name == "ptr")
+    else if (name == "poly")
     {
-        std::shared_ptr<ts::Ptr_Type> ptr = std::shared_ptr<ts::Ptr_Type>(new ts::Ptr_Type(instanced_name));
-        auto init_result = ptr->init(arguments);
+        std::shared_ptr<ts::Poly_Type> poly = std::shared_ptr<ts::Poly_Type>(new ts::Poly_Type(instanced_name));
+        auto init_result = poly->init(arguments);
         if (init_result != success)
         {
             return init_result.error();
         }
-        auto add_result = add_symbol(std::move(ptr));
+        auto add_result = add_symbol(std::move(poly));
         if (add_result != success)
         {
             return add_result.error();
@@ -149,7 +149,7 @@ Result<std::shared_ptr<const ITemplated_Type>> Type_System::instantiate_template
         return std::dynamic_pointer_cast<const ITemplated_Type>(add_result.payload());
     }
 
-    return nullptr;
+    return Error("Unknown template type '" + name + "'");
 }
 
 std::shared_ptr<IValue> Type_System::create_value(Symbol_Path const& type_path) const

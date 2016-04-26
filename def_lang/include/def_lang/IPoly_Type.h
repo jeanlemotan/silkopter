@@ -5,20 +5,20 @@
 namespace ts
 {
 
-class IPtr_Value;
-class IPtr_Type;
+class IPoly_Value;
+class IPoly_Type;
 
 struct IPtr_Traits
 {
-    typedef IPtr_Value value_interface;
-    typedef IPtr_Type type_interface;
+    typedef IPoly_Value value_interface;
+    typedef IPoly_Type type_interface;
     typedef std::shared_ptr<IValue> fundamental_type;
 };
 
-class IPtr_Type : virtual public ITemplated_Type
+class IPoly_Type : virtual public ITemplated_Type
 {
 public:
-    virtual ~IPtr_Type() = default;
+    virtual ~IPoly_Type() = default;
 
     typedef IPtr_Traits traits;
 

@@ -1,16 +1,16 @@
 #pragma once
 
-#include "def_lang/IPtr_Type.h"
-#include "def_lang/IPtr_Value.h"
+#include "def_lang/IPoly_Type.h"
+#include "def_lang/IPoly_Value.h"
 
 namespace ts
 {
 
-class Ptr_Value final : virtual public IPtr_Value
+class Poly_Value final : virtual public IPoly_Value
 {
 public:
 
-    Ptr_Value(std::shared_ptr<IPtr_Type const> type);
+    Poly_Value(std::shared_ptr<IPoly_Type const> type);
 
     Result<bool> is_equal(IValue const& other) const override;
 
@@ -30,7 +30,7 @@ public:
     Result<serialization::Value> serialize() const override;
     Result<void> deserialize(serialization::Value const&) override;
 
-    std::shared_ptr<IPtr_Type const> get_specialized_type() const override;
+    std::shared_ptr<IPoly_Type const> get_specialized_type() const override;
 
     std::shared_ptr<const IValue> get_value() const override;
     std::shared_ptr<IValue> get_value() override;
@@ -39,7 +39,7 @@ public:
 private:
     bool is_type_allowed(IType const& type) const;
 
-    std::shared_ptr<IPtr_Type const> m_type;
+    std::shared_ptr<IPoly_Type const> m_type;
     std::shared_ptr<IValue> m_value;
 };
 
