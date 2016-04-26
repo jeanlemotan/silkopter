@@ -136,10 +136,10 @@ HEADERS += \
     ../../include/def_lang/JSON_Serializer.h \
     ../../include/def_lang/Serialization.h \
     ../../include/def_lang/impl/Serialization.inl \
-    ../../include/def_lang/IPtr_Type.h \
-    ../../include/def_lang/impl/Ptr_Type.h \
-    ../../include/def_lang/IPtr_Value.h \
-    ../../include/def_lang/impl/Ptr_Value.h
+    ../../include/def_lang/IPoly_Type.h \
+    ../../include/def_lang/IPoly_Value.h \
+    ../../include/def_lang/impl/Poly_Type.h \
+    ../../include/def_lang/impl/Poly_Value.h
 
 SOURCES += \
     ../../src/main.cpp \
@@ -177,7 +177,7 @@ SOURCES += \
     ../../src/ts/Value_Selector.cpp \
     ../../src/ts/JSON_Serializer.cpp \
     ../../src/ts/Serialization.cpp \
-    ../../src/ts/Ptr_Type.cpp \
-    ../../src/ts/Ptr_Value.cpp \
-    ../../src/ts/ep/Symbol_EP.cpp
+    ../../src/ts/ep/Symbol_EP.cpp \
+    ../../src/ts/Poly_Type.cpp \
+    ../../src/ts/Poly_Value.cpp
 

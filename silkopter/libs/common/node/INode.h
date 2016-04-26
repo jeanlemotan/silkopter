@@ -51,17 +51,24 @@ inline auto get_as_string(Type s) -> std::string
 class INode : q::util::Noncopyable
 {
 public:
-    virtual ~INode() {}
+    virtual ~INode() = default;
 
-    virtual auto get_type() const -> Type = 0;
+    virtual Type get_type() const = 0;
 
-    virtual auto init(rapidjson::Value const& init_params) -> bool = 0;
+    virtual bool init(std::shared_ptr<ts::IValue> descriptor) { return false; }
+    virtual std::shared_ptr<const ts::IValue> get_descriptor() const { return nullptr; }
+
+    virtual bool set_config(std::shared_ptr<ts::IValue> config) { return false; }
+    virtual std::shared_ptr<const ts::IValue> get_config2() const  { return nullptr; }
+
+
+    virtual bool init(rapidjson::Value const& init_params) = 0;
     virtual auto get_init_params() const -> rapidjson::Document = 0;
 
     virtual auto set_config(rapidjson::Value const& json) -> bool = 0;
     virtual auto get_config() const -> rapidjson::Document = 0;
 
-    virtual auto start(q::Clock::time_point tp) -> bool = 0;
+    virtual bool start(q::Clock::time_point tp) = 0;
 
     virtual auto send_message(rapidjson::Value const& json) -> rapidjson::Document = 0;
 
@@ -72,7 +79,7 @@ public:
         std::string name;
         q::Path stream_path; //the path of the stream connected to this input in the "node/output" format
     };
-    virtual auto get_inputs() const -> std::vector<Input> = 0;
+    virtual std::vector<Input> get_inputs() const = 0;
     virtual void set_input_stream_path(size_t idx, q::Path const& path) = 0;
 
     struct Output
@@ -80,7 +87,7 @@ public:
         std::string name;
         std::shared_ptr<stream::IStream> stream;
     };
-    virtual auto get_outputs() const -> std::vector<Output> = 0;
+    virtual std::vector<Output> get_outputs() const  = 0;
 
     virtual void process() = 0;
 };
@@ -90,7 +97,7 @@ class Node_Base : public INode
 {
 public:
     static constexpr Type TYPE = TYPE_VALUE;
-    virtual auto get_type() const -> Type { return TYPE; }
+    virtual Type get_type() const { return TYPE; }
 };
 
 template<Type T> Type constexpr Node_Base<T>::TYPE;

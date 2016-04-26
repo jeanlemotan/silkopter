@@ -216,15 +216,12 @@ void UAV::save_settings2()
     std::shared_ptr<const Multirotor_Config> multirotor_config = get_specialized_uav_config<Multirotor_Config>();
     if (multirotor_config)
     {
-        std::shared_ptr<const ts::IType> type = m_type_system.find_specialized_symbol_by_path<const ts::IType>("::silk::Multirotor_Config");
-        if (!type)
+        config_value = m_type_system.create_value("::silk::Multirotor_Config");
+        if (!config_value)
         {
-            QLOGE("Cannot find silk::Multirotor_Config type.");
+            QLOGE("Cannot create a silk::Multirotor_Config value.");
             return;
         }
-
-        config_value = type->create_value();
-        QASSERT(config_value);
 
         auto result = ts::mapper::set(*config_value, *multirotor_config);
         if (result != ts::success)
@@ -234,7 +231,7 @@ void UAV::save_settings2()
         }
     }
 
-    std::shared_ptr<ts::IPtr_Value> settings_config_value = settings_value->select_specialized<ts::IPtr_Value>("config");
+    std::shared_ptr<ts::IPoly_Value> settings_config_value = settings_value->select_specialized<ts::IPoly_Value>("config");
     QASSERT(settings_config_value);
     auto result = settings_config_value->set_value(config_value);
     if (result != ts::success)
@@ -1076,32 +1073,22 @@ auto UAV::init(Comms& comms) -> bool
         return false;
     }
 
-    std::shared_ptr<ts::IPtr_Value> config_value = settings_value->select_specialized<ts::IPtr_Value>("config");
+    std::shared_ptr<ts::IPoly_Value> config_value = settings_value->select_specialized<ts::IPoly_Value>("config");
     QASSERT(config_value);
 
-//    std::shared_ptr<const Multirotor_Config> multirotor_config = get_specialized_uav_config<Multirotor_Config>();
-//    if (multirotor_config)
-//    {
-//        std::shared_ptr<const ts::IType> type = m_type_system.find_specialized_symbol_by_path<const ts::IType>("::silk::Multirotor_Config");
-//        if (!type)
-//        {
-//            QLOGE("Cannot find silk::Multirotor_Config type.");
-//            return;
-//        }
+    if (config_value->get_value() && config_value->get_value()->get_type()->get_symbol_path() == ts::Symbol_Path("::silk::Multirotor_Config"))
+    {
+        silk::Multirotor_Config config;
+        auto result = ts::mapper::get(*config_value->get_value(), config);
+        if (result != ts::success)
+        {
+            QLOGE("Failed to map/get Multirotor_Config: {}", result.error().what());
+            return false;
+        }
+        set_multirotor_config(std::make_shared<silk::Multirotor_Config>(config));
+    }
 
-//        config_value = type->create_value();
-//        QASSERT(config_value);
-
-//        auto result = ts::mapper::set(*config_value, *multirotor_config);
-//        if (result != ts::success)
-//        {
-//            QLOGE("Cannot map/set the config: {}", result.error().what());
-//            return;
-//        }
-//    }
-
-
-
+/*
     rapidjson::Document settingsj;
     if (settingsj.Parse(data.c_str()).HasParseError())
     {
@@ -1153,7 +1140,7 @@ auto UAV::init(Comms& comms) -> bool
 //    }
 
     //sort_nodes(first_node);
-
+*/
     //start the system
     auto now = q::Clock::now();
     for (auto const& n: m_nodes.get_all())

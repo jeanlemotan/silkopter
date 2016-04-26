@@ -22,7 +22,7 @@
 #include "def_lang/IType.h"
 #include "def_lang/IValue.h"
 #include "def_lang/All_INumeric_Values.h"
-#include "def_lang/IPtr_Value.h"
+#include "def_lang/IPoly_Value.h"
 #include "def_lang/IVector_Value.h"
 #include "def_lang/IString_Value.h"
 #include "def_lang/IStruct_Value.h"
