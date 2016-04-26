@@ -18,6 +18,16 @@ Symbol_Path::Symbol_Path(char const* str)
     }
 }
 
+bool Symbol_Path::operator==(Symbol_Path const& other) const
+{
+    return m_is_absolute == other.m_is_absolute &&
+            m_elements == other.m_elements;
+}
+bool Symbol_Path::operator!=(Symbol_Path const& other) const
+{
+    return !operator==(other);
+}
+
 bool Symbol_Path::is_absolute() const
 {
     return m_is_absolute;
