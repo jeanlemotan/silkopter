@@ -27,7 +27,7 @@ void Type_System::populate_builtin_types()
     result = add_symbol(std::shared_ptr<IType>(new String_Type("string")));
     TS_ASSERT(result == success);
 
-    result = add_symbol(std::shared_ptr<IType>(new Int64_Type("int64_t")));
+    result = add_symbol(std::shared_ptr<IType>(new Int_Type("int")));
     TS_ASSERT(result == success);
 
     result = add_symbol(std::shared_ptr<IType>(new Float_Type("float")));
@@ -42,51 +42,21 @@ void Type_System::populate_builtin_types()
         TS_ASSERT(result == success);
         result = math_namespace->add_symbol(std::shared_ptr<IType>(new Vec2d_Type("vec2d")));
         TS_ASSERT(result == success);
-        result = math_namespace->add_symbol(std::shared_ptr<IType>(new Vec2u8_Type("vec2u8")));
-        TS_ASSERT(result == success);
-        result = math_namespace->add_symbol(std::shared_ptr<IType>(new Vec2s8_Type("vec2s8")));
-        TS_ASSERT(result == success);
-        result = math_namespace->add_symbol(std::shared_ptr<IType>(new Vec2u16_Type("vec2u16")));
-        TS_ASSERT(result == success);
-        result = math_namespace->add_symbol(std::shared_ptr<IType>(new Vec2s16_Type("vec2s16")));
-        TS_ASSERT(result == success);
-        result = math_namespace->add_symbol(std::shared_ptr<IType>(new Vec2u32_Type("vec2u32")));
-        TS_ASSERT(result == success);
-        result = math_namespace->add_symbol(std::shared_ptr<IType>(new Vec2s32_Type("vec2s32")));
+        result = math_namespace->add_symbol(std::shared_ptr<IType>(new Vec2i_Type("vec2i")));
         TS_ASSERT(result == success);
 
         result = math_namespace->add_symbol(std::shared_ptr<IType>(new Vec3f_Type("vec3f")));
         TS_ASSERT(result == success);
         result = math_namespace->add_symbol(std::shared_ptr<IType>(new Vec3d_Type("vec3d")));
         TS_ASSERT(result == success);
-        result = math_namespace->add_symbol(std::shared_ptr<IType>(new Vec3u8_Type("vec3u8")));
-        TS_ASSERT(result == success);
-        result = math_namespace->add_symbol(std::shared_ptr<IType>(new Vec3s8_Type("vec3s8")));
-        TS_ASSERT(result == success);
-        result = math_namespace->add_symbol(std::shared_ptr<IType>(new Vec3u16_Type("vec3u16")));
-        TS_ASSERT(result == success);
-        result = math_namespace->add_symbol(std::shared_ptr<IType>(new Vec3s16_Type("vec3s16")));
-        TS_ASSERT(result == success);
-        result = math_namespace->add_symbol(std::shared_ptr<IType>(new Vec3u32_Type("vec3u32")));
-        TS_ASSERT(result == success);
-        result = math_namespace->add_symbol(std::shared_ptr<IType>(new Vec3s32_Type("vec3s32")));
+        result = math_namespace->add_symbol(std::shared_ptr<IType>(new Vec3i_Type("vec3i")));
         TS_ASSERT(result == success);
 
         result = math_namespace->add_symbol(std::shared_ptr<IType>(new Vec4f_Type("vec4f")));
         TS_ASSERT(result == success);
         result = math_namespace->add_symbol(std::shared_ptr<IType>(new Vec4d_Type("vec4d")));
         TS_ASSERT(result == success);
-        result = math_namespace->add_symbol(std::shared_ptr<IType>(new Vec4u8_Type("vec4u8")));
-        TS_ASSERT(result == success);
-        result = math_namespace->add_symbol(std::shared_ptr<IType>(new Vec4s8_Type("vec4s8")));
-        TS_ASSERT(result == success);
-        result = math_namespace->add_symbol(std::shared_ptr<IType>(new Vec4u16_Type("vec4u16")));
-        TS_ASSERT(result == success);
-        result = math_namespace->add_symbol(std::shared_ptr<IType>(new Vec4s16_Type("vec4s16")));
-        TS_ASSERT(result == success);
-        result = math_namespace->add_symbol(std::shared_ptr<IType>(new Vec4u32_Type("vec4u32")));
-        TS_ASSERT(result == success);
-        result = math_namespace->add_symbol(std::shared_ptr<IType>(new Vec4s32_Type("vec4s32")));
+        result = math_namespace->add_symbol(std::shared_ptr<IType>(new Vec4i_Type("vec4i")));
         TS_ASSERT(result == success);
 
         result = add_symbol(std::move(math_namespace));

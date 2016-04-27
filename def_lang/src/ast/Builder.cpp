@@ -327,10 +327,10 @@ static ts::Result<std::shared_ptr<ts::ILiteral>> create_literal(ts::Type_System&
     }
     case Attribute::Type::INTEGRAL:
     {
-        std::shared_ptr<const ts::IInt64_Type> type = ts.find_specialized_symbol_by_name<const ts::IInt64_Type>("int64_t");
+        std::shared_ptr<const ts::IInt_Type> type = ts.find_specialized_symbol_by_name<const ts::IInt_Type>("int");
         if (type)
         {
-            std::shared_ptr<ts::IInt64_Value> v = type->create_specialized_value();
+            std::shared_ptr<ts::IInt_Value> v = type->create_specialized_value();
             if (v)
             {
                 auto result = v->set_value(value_attribute->get_as_integral());
@@ -486,7 +486,7 @@ static ts::Result<void> create_attributes(ts::Type_System& ts, ts::IType const& 
                 return ts::Error(attribute_node.get_source_location().to_string() + "Missing initializer for attribute");
             }
 
-            std::shared_ptr<ts::IInt64_Value> value = ts.find_specialized_symbol_by_name<ts::IInt64_Type>("int64_t")->create_specialized_value();
+            std::shared_ptr<ts::IInt_Value> value = ts.find_specialized_symbol_by_name<ts::IInt_Type>("int")->create_specialized_value();
             auto result = value->copy_assign(*initializer);
             if (result != ts::success)
             {

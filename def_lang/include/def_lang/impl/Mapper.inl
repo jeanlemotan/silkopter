@@ -25,7 +25,7 @@ template<typename VALUE_T, typename NATIVE_T> Result<void> setter(IValue& ivalue
 
 template<typename T> Result<void> integral_getter(IValue const& ivalue, T& native)
 {
-    if (IInt64_Value const* value = dynamic_cast<IInt64_Value const*>(&ivalue))
+    if (IInt_Value const* value = dynamic_cast<IInt_Value const*>(&ivalue))
     {
         int64_t x = value->get_value();
         if (x < std::numeric_limits<T>::lowest() || x > std::numeric_limits<T>::max())
@@ -92,7 +92,7 @@ inline Result<void> get(IValue const& src, uint8_t& dst)
 template<>
 inline Result<void> set(IValue& dst, uint8_t const& src)
 {
-    return detail::setter<IInt64_Value, uint8_t>(dst, src);
+    return detail::setter<IInt_Value, uint8_t>(dst, src);
 }
 
 template<>
@@ -103,7 +103,7 @@ inline Result<void> get(IValue const& src, int8_t& dst)
 template<>
 inline Result<void> set(IValue& dst, int8_t const& src)
 {
-    return detail::setter<IInt64_Value, int8_t>(dst, src);
+    return detail::setter<IInt_Value, int8_t>(dst, src);
 }
 
 template<>
@@ -114,7 +114,7 @@ inline Result<void> get(IValue const& src, uint16_t& dst)
 template<>
 inline Result<void> set(IValue& dst, uint16_t const& src)
 {
-    return detail::setter<IInt64_Value, uint16_t>(dst, src);
+    return detail::setter<IInt_Value, uint16_t>(dst, src);
 }
 
 template<>
@@ -125,7 +125,7 @@ inline Result<void> get(IValue const& src, int16_t& dst)
 template<>
 inline Result<void> set(IValue& dst, int16_t const& src)
 {
-    return detail::setter<IInt64_Value, int16_t>(dst, src);
+    return detail::setter<IInt_Value, int16_t>(dst, src);
 }
 
 template<>
@@ -136,7 +136,7 @@ inline Result<void> get(IValue const& src, uint32_t& dst)
 template<>
 inline Result<void> set(IValue& dst, uint32_t const& src)
 {
-    return detail::setter<IInt64_Value, uint32_t>(dst, src);
+    return detail::setter<IInt_Value, uint32_t>(dst, src);
 }
 
 template<>
@@ -147,7 +147,7 @@ inline Result<void> get(IValue const& src, int32_t& dst)
 template<>
 inline Result<void> set(IValue& dst, int32_t const& src)
 {
-    return detail::setter<IInt64_Value, int32_t>(dst, src);
+    return detail::setter<IInt_Value, int32_t>(dst, src);
 }
 
 template<>
@@ -158,7 +158,7 @@ inline Result<void> get(IValue const& src, int64_t& dst)
 template<>
 inline Result<void> set(IValue& dst, int64_t const& src)
 {
-    return detail::setter<IInt64_Value, int64_t>(dst, src);
+    return detail::setter<IInt_Value, int64_t>(dst, src);
 }
 
 template<>
