@@ -16,6 +16,8 @@ alias rate_t = uint32_t : [ max = 10000 ];
 alias muf_t = ufloat : [ max = 1.f ];
 alias direction_t = math::vec3f;// : [ normalized = true ];
 alias euler3_t = math::vec3f : [ min = {-180.f, -180.f, -180.f}, max = {180.f, 180.f, 180.f} ];
+alias servo_signal_t = float : [ min = 1.f, max = 2.f ];
+alias pwm_signal_t = float : [ min = 0.f, max = 1.f ];
 
 struct UAV_Config_Base
 {
@@ -442,6 +444,200 @@ struct Multirotor_Simulator_Config : public Node_Config_Base
     bool ground_enabled = true : [ ui_name = "Ground Enabled" ];
     bool gravity_enabled = true : [ ui_name = "Gravity Enabled" ];
     Noise noise : [ ui_name = "Noise" ];
+};
+
+//////////////////////////////////////////////////////////////
+
+struct Oscillator_Descriptor : public Node_Descriptor_Base
+{
+    alias component_count_t = int32_t : [ min = 1, max = 32 ];
+
+    rate_t rate = 30 : [ ui_name = "Rate (Hz)" ];
+    component_count_t component_count = 1 : [ ui_name = "Components" ];
+};
+
+struct Oscillator_Config : public Node_Config_Base
+{
+    struct Component
+    {
+        ufloat frequency = 1.f : [ ui_name = "Frequency (Hz)" ];
+        ufloat amplitude = 1.f : [ ui_name = "Amplitude" ];
+        bool square = false : [ ui_name = "Square" ];
+    };
+
+    ufloat amplitude = 1.f : [ ui_name = "Amplitude" ];
+    ufloat noise = 0.f : [ ui_name = "Noise" ];
+    vector<Component> components : [ ui_name = "Components" ];
+};
+
+//////////////////////////////////////////////////////////////
+
+struct PCA9685_Descriptor : public Node_Descriptor_Base
+{
+    string bus : [ ui_name = "Bus" ];
+    rate_t rate = 30 : [ ui_name = "Rate (Hz)" ];
+    uint8_t address = 64 : [ ui_name = "Address" ];
+};
+
+struct PCA9685_Config : public Node_Config_Base
+{
+    struct Channel
+    {
+        bool servo_signal = false : [ ui_name = "Servo Signal" ];
+        servo_signal_t min_servo = 1.f : [ ui_name = "Min Servo (ms)" ];
+        servo_signal_t max_servo = 2.f : [ ui_name = "Max Servo (ms)" ];
+        pwm_signal_t min_pwm = 0.f : [ ui_name = "Min PWM" ];
+        pwm_signal_t max_pwm = 1.f : [ ui_name = "Max PWM" ];
+    };
+
+    vector<Channel> channels : [ ui_name = "Channels" ];
+};
+
+//////////////////////////////////////////////////////////////
+
+struct PIGPIO_Descriptor : public Node_Descriptor_Base
+{
+    struct Channel
+    {
+        bool enabled = false : [ ui_name = "Enabled"];
+        bool servo_signal = false : [ ui_name = "Servo Signal"];
+        rate_t rate = 400 : [ ui_name = "Rate (Hz)" ];
+    };
+
+    Channel gpio_2 : [ ui_name = "GPIO 2" ];
+    Channel gpio_3 : [ ui_name = "GPIO 3" ];
+    Channel gpio_4 : [ ui_name = "GPIO 4" ];
+    Channel gpio_5 : [ ui_name = "GPIO 5" ];
+    Channel gpio_6 : [ ui_name = "GPIO 6" ];
+    Channel gpio_7 : [ ui_name = "GPIO 7" ];
+    Channel gpio_8 : [ ui_name = "GPIO 8" ];
+    Channel gpio_9 : [ ui_name = "GPIO 9" ];
+    Channel gpio_10 : [ ui_name = "GPIO 10" ];
+    Channel gpio_11 : [ ui_name = "GPIO 11" ];
+    Channel gpio_12 : [ ui_name = "GPIO 12" ];
+    Channel gpio_13 : [ ui_name = "GPIO 13" ];
+    Channel gpio_14 : [ ui_name = "GPIO 14" ];
+    Channel gpio_15 : [ ui_name = "GPIO 15" ];
+    Channel gpio_16 : [ ui_name = "GPIO 16" ];
+    Channel gpio_17 : [ ui_name = "GPIO 17" ];
+    Channel gpio_18 : [ ui_name = "GPIO 18" ];
+    Channel gpio_19 : [ ui_name = "GPIO 19" ];
+    Channel gpio_20 : [ ui_name = "GPIO 20" ];
+    Channel gpio_21 : [ ui_name = "GPIO 21" ];
+    Channel gpio_22 : [ ui_name = "GPIO 22" ];
+    Channel gpio_23 : [ ui_name = "GPIO 23" ];
+    Channel gpio_24 : [ ui_name = "GPIO 24" ];
+    Channel gpio_25 : [ ui_name = "GPIO 25" ];
+    Channel gpio_26 : [ ui_name = "GPIO 26" ];
+    Channel gpio_27 : [ ui_name = "GPIO 27" ];
+};
+
+struct PIGPIO_Config : public Node_Config_Base
+{
+    struct Channel
+    {
+        servo_signal_t min_servo = 1.f : [ ui_name = "Min Servo (ms)" ];
+        servo_signal_t max_servo = 2.f : [ ui_name = "Max Servo (ms)" ];
+        pwm_signal_t min_pwm = 0.f : [ ui_name = "Min PWM" ];
+        pwm_signal_t max_pwm = 1.f : [ ui_name = "Max PWM" ];
+    };
+
+    Channel gpio_2 : [ ui_name = "GPIO 2" ];
+    Channel gpio_3 : [ ui_name = "GPIO 3" ];
+    Channel gpio_4 : [ ui_name = "GPIO 4" ];
+    Channel gpio_5 : [ ui_name = "GPIO 5" ];
+    Channel gpio_6 : [ ui_name = "GPIO 6" ];
+    Channel gpio_7 : [ ui_name = "GPIO 7" ];
+    Channel gpio_8 : [ ui_name = "GPIO 8" ];
+    Channel gpio_9 : [ ui_name = "GPIO 9" ];
+    Channel gpio_10 : [ ui_name = "GPIO 10" ];
+    Channel gpio_11 : [ ui_name = "GPIO 11" ];
+    Channel gpio_12 : [ ui_name = "GPIO 12" ];
+    Channel gpio_13 : [ ui_name = "GPIO 13" ];
+    Channel gpio_14 : [ ui_name = "GPIO 14" ];
+    Channel gpio_15 : [ ui_name = "GPIO 15" ];
+    Channel gpio_16 : [ ui_name = "GPIO 16" ];
+    Channel gpio_17 : [ ui_name = "GPIO 17" ];
+    Channel gpio_18 : [ ui_name = "GPIO 18" ];
+    Channel gpio_19 : [ ui_name = "GPIO 19" ];
+    Channel gpio_20 : [ ui_name = "GPIO 20" ];
+    Channel gpio_21 : [ ui_name = "GPIO 21" ];
+    Channel gpio_22 : [ ui_name = "GPIO 22" ];
+    Channel gpio_23 : [ ui_name = "GPIO 23" ];
+    Channel gpio_24 : [ ui_name = "GPIO 24" ];
+    Channel gpio_25 : [ ui_name = "GPIO 25" ];
+    Channel gpio_26 : [ ui_name = "GPIO 26" ];
+    Channel gpio_27 : [ ui_name = "GPIO 27" ];
+};
+
+//////////////////////////////////////////////////////////////
+
+struct Pressure_Velocity_Descriptor : public Node_Descriptor_Base
+{
+    rate_t rate = 0 : [ ui_name = "Rate (Hz)" ];
+};
+
+struct Pressure_Velocity_Config : public Node_Config_Base
+{
+};
+
+//////////////////////////////////////////////////////////////
+
+struct Proximity_Descriptor : public Node_Descriptor_Base
+{
+    alias channel_count_t = int32_t : [ min = 1, max = 128 ];
+
+    rate_t rate = 0 : [ ui_name = "Rate (Hz)" ];
+    channel_count_t channel_count = 1 : [ ui_name = "Channel Count" ];
+};
+
+struct Proximity_Config : public Node_Config_Base
+{
+};
+
+//////////////////////////////////////////////////////////////
+
+struct Raspicam_Descriptor : public Node_Descriptor_Base
+{
+    struct Quality
+    {
+        alias resolution_t = math::vec2s32 : [ min = { 8, 8 }, max = { 1980, 1080 } ];
+        alias bitrate_t = int32_t : [ min = 10000, max = 32000000 ];
+
+        resolution_t resolution : [ ui_name = "Resolution" ];
+        bitrate_t bitrate : [ ui_name = "Bitrate" ];
+    };
+
+    alias fps_t = int32_t : [ min = 10, max = 60 ];
+
+    fps_t fps : [ ui_name = "FPS" ];
+    Quality streaming_low : [ ui_name = "Streaming Low" ];
+    Quality streaming_high : [ ui_name = "Streaming High" ];
+    Quality recording : [ ui_name = "Recording" ];
+};
+
+struct Raspicam_Config : public Node_Config_Base
+{
+    alias iso_t = int32_t : [ min = 0, max = 1600 ];
+    alias shutter_speed_t = float : [ min = 0, max = 1000 ];
+    alias ev_t = int32_t : [ min = -10, max = 10 ];
+    alias sharpness_t = int32_t : [ min = 0, max = 100 ];
+    alias contrast_t = int32_t : [ min = 0, max = 100 ];
+    alias brightness_t = int32_t : [ min = 0, max = 100 ];
+    alias saturation_t = int32_t : [ min = 0, max = 100 ];
+    alias awb_mode_t = int32_t : [ min = 0, max = 8 ];
+    alias quality_t = int32_t : [ min = 0, max = 1 ];
+
+    iso_t iso : [ ui_name = "Iso" ];
+    shutter_speed_t shutter_speed : [ ui_name = "Shutter Speed (ms)" ];
+    ev_t ev : [ ui_name = "Exposure Compensation" ];
+    sharpness_t sharpness : [ ui_name = "Sharpness" ];
+    contrast_t contrast : [ ui_name = "Contrast" ];
+    brightness_t brightness : [ ui_name = "Brightness" ];
+    saturation_t saturation : [ ui_name = "Saturation" ];
+    awb_mode_t awb_mode : [ ui_name = "AWB Mode" ];
+    quality_t quality : [ ui_name = "Quality" ];
+    bool recording : [ ui_name = "Recording" ];
 };
 
 
