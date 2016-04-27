@@ -10,7 +10,7 @@ Type_Template_EP<Traits>::Type_Template_EP(std::string const& name)
 template<typename Traits>
 std::string Type_Template_EP<Traits>::get_template_instantiation_string() const
 {
-    return get_name();
+    return get_symbol_path().to_string();
 }
 
 template<typename Traits>

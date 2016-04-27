@@ -39,7 +39,7 @@ std::shared_ptr<IType> Poly_Type::clone(std::string const& name) const
 
 std::string Poly_Type::get_template_instantiation_string() const
 {
-    return get_name();
+    return get_symbol_path().to_string();
 }
 
 std::shared_ptr<const IType> Poly_Type::get_inner_type() const

@@ -37,7 +37,7 @@ std::shared_ptr<IType> Struct_Type::clone(std::string const& name) const
 
 std::string Struct_Type::get_template_instantiation_string() const
 {
-    return get_name();
+    return get_symbol_path().to_string();
 }
 
 std::shared_ptr<IValue> Struct_Type::create_value() const
