@@ -381,8 +381,39 @@ static Result<Value> parse_number_value(std::string const& json, size_t& offset)
                 1000000000000000000,
         };
 
-        whole = whole * exponent_sign * s_pow[exponent];
-        return Value(whole);
+        int64_t value = whole * exponent_sign * s_pow[exponent];
+        if (value >= 0)
+        {
+            if (value <= 255)
+            {
+                return Value(static_cast<uint8_t>(value));
+            }
+            else if (value <= 65535)
+            {
+                return Value(static_cast<uint16_t>(value));
+            }
+            else if (value <= 4294967295)
+            {
+                return Value(static_cast<uint32_t>(value));
+            }
+            return Value(static_cast<uint64_t>(value));
+        }
+        else
+        {
+            if (value >= -128 && value < 127)
+            {
+                return Value(static_cast<int8_t>(value));
+            }
+            else if (value >= -32768 && value < 32767)
+            {
+                return Value(static_cast<int16_t>(value));
+            }
+            else if (value >= -2147483648 && value < 2147483647)
+            {
+                return Value(static_cast<int32_t>(value));
+            }
+            return Value(value);
+        }
     }
 
     if (decimal_digit_count > 19)
