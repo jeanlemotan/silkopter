@@ -13,6 +13,9 @@ namespace silk
 
 alias mass_t = ufloat;
 alias rate_t = uint32_t : [ max = 10000 ];
+alias muf_t = ufloat : [ max = 1.f ];
+alias direction_t = math::vec3f;// : [ normalized = true ];
+alias euler3_t = math::vec3f : [ min = {-180.f, -180.f, -180.f}, max = {180.f, 180.f, 180.f} ];
 
 struct UAV_Config_Base
 {
@@ -136,6 +139,209 @@ struct PID_Controller_Descriptor : public PD_Controller_Descriptor
     ufloat max_i = 0.f : [ ui_name = "Max I" ];
 };
 
+//////////////////////////////////////////////////////////////
+
+struct ADC_Ammeter_Descriptor : public Node_Descriptor_Base
+{
+    rate_t rate = 100 : [ ui_name = "Rate (Hz)" ];
+};
+
+struct ADC_Ammeter_Config : public Node_Config_Base
+{
+    float scale = 1.f : [ ui_name = "Scale" ];
+    float bias = 0.f : [ ui_name = "Scale" ];
+};
+
+//////////////////////////////////////////////////////////////
+
+struct ADC_Voltmeter_Descriptor : public Node_Descriptor_Base
+{
+    rate_t rate = 100 : [ ui_name = "Rate (Hz)" ];
+};
+
+struct ADC_Voltmeter_Config : public Node_Config_Base
+{
+    float scale = 1.f : [ ui_name = "Scale" ];
+    float bias = 0.f : [ ui_name = "Scale" ];
+};
+
+//////////////////////////////////////////////////////////////
+
+struct ADS1115_Descriptor : public Node_Descriptor_Base
+{
+    string bus : [ ui_name = "Bus" ];
+    rate_t adc0_rate = 200 : [ ui_name = "ADC0 Rate (Hz)" ];
+    rate_t adc1_rate = 200 : [ ui_name = "ADC1 Rate (Hz)" ];
+    rate_t adc2_rate = 200 : [ ui_name = "ADC2 Rate (Hz)" ];
+    rate_t adc3_rate = 200 : [ ui_name = "ADC3 Rate (Hz)" ];
+};
+
+struct ADS1115_Config : public Node_Config_Base
+{
+};
+
+//////////////////////////////////////////////////////////////
+
+struct AVRADC_Descriptor : public Node_Descriptor_Base
+{
+    string bus : [ ui_name = "Bus" ];
+    rate_t rate = 200 : [ ui_name = "Rate (Hz)" ];
+};
+
+struct AVRADC_Config : public Node_Config_Base
+{
+};
+
+//////////////////////////////////////////////////////////////
+
+struct AHRS_Comp_Descriptor : public Node_Descriptor_Base
+{
+    rate_t rate = 200 : [ ui_name = "Rate (Hz)" ];
+};
+
+struct AHRS_Comp_Config : public Node_Config_Base
+{
+    muf_t drift_correction_factor = 0.3f : [ ui_name = "Drift Correction Factor" ];
+};
+
+//////////////////////////////////////////////////////////////
+
+struct Combiner_Descriptor : public Node_Descriptor_Base
+{
+    rate_t rate = 200 : [ ui_name = "Rate (Hz)" ];
+};
+
+struct Combiner_Config : public Node_Config_Base
+{
+};
+
+//////////////////////////////////////////////////////////////
+
+struct Gravity_Filter_Descriptor : public Node_Descriptor_Base
+{
+    rate_t rate = 0 : [ ui_name = "Rate (Hz)" ];
+};
+
+struct Gravity_Filter_Config : public Node_Config_Base
+{
+};
+
+//////////////////////////////////////////////////////////////
+
+struct ECEF_KF_Descriptor : public Node_Descriptor_Base
+{
+    rate_t rate = 0 : [ ui_name = "Rate (Hz)" ];
+};
+
+struct ECEF_KF_Filter_Config : public Node_Config_Base
+{
+    ufloat gps_position_lag = 0.f : [ ui_name = "GPS Position Lag (s)" ];
+    ufloat gps_position_accuracy = 2.f : [ ui_name = "GPS Position Accuracy (CEP m)" ];
+    ufloat gps_velocity_lag = 0.f : [ ui_name = "GPS Velocity Lag (s)" ];
+    ufloat gps_velocity_accuracy = 0.2f : [ ui_name = "GPS Velocity Accuracy (m/s)" ];
+    ufloat acceleration_lag = 0.f : [ ui_name = "Acceleration Lag (s)" ];
+    ufloat acceleration_accuracy = 2.f : [ ui_name = "Acceleration Accuracy (m/s^2)" ];
+};
+
+//////////////////////////////////////////////////////////////
+
+struct LPF_Descriptor : public Node_Descriptor_Base
+{
+    rate_t rate = 0 : [ ui_name = "Rate (Hz)" ];
+};
+
+struct LPF_Filter_Config : public Node_Config_Base
+{
+    alias lpf_poles_t = uint32_t : [ max = 6 ];
+
+    lpf_poles_t lpf_poles = 1 : [ ui_name = "LPF Poles" ];
+    ufloat lpf_cutoff_frequency = 1.f : [ ui_name = "LPF Cutoff Frequency (Hz)" ];
+};
+
+//////////////////////////////////////////////////////////////
+
+struct MaxSonar_Descriptor : public Node_Descriptor_Base
+{
+    string bus : [ ui_name = "Bus" ];
+    rate_t rate = 0 : [ ui_name = "Rate (Hz)" ];
+};
+
+struct MaxSonar_Config : public Node_Config_Base
+{
+    direction_t direction : [ui_name = "Direction" ];
+    ufloat max_distance = 6.f : [ui_name = "Maximum Distance (m)"];
+    ufloat min_distance = 0.2f : [ui_name = "Minimum Distance (m)"];
+};
+
+//////////////////////////////////////////////////////////////
+
+struct Motor_Mixer_Descriptor : public Node_Descriptor_Base
+{
+    rate_t rate = 0 : [ ui_name = "Rate (Hz)" ];
+};
+
+struct Motor_Mixer_Config : public Node_Config_Base
+{
+    ufloat armed_thrust = 0.f : [ui_name = "Armed Thrust (N)"];
+};
+
+//////////////////////////////////////////////////////////////
+
+struct Acceleration_Calibration_Point
+{
+    float temperature : [ ui_name = "Temperature" ];
+    math::vec3f bias : [ ui_name = "Bias" ];
+    math::vec3f scale = { 1.f, 1.f, 1.f } : [ ui_name = "Scale" ];
+};
+struct Angular_Velocity_Calibration_Point
+{
+    float temperature : [ ui_name = "Temperature" ];
+    math::vec3f bias : [ ui_name = "Bias" ];
+};
+struct Magnetic_Field_Calibration_Point
+{
+    float temperature : [ ui_name = "Temperature" ];
+    math::vec3f bias : [ ui_name = "Bias" ];
+    math::vec3f scale = { 1.f, 1.f, 1.f } : [ ui_name = "Scale" ];
+};
+
+struct MPU9250_Descriptor : public Node_Descriptor_Base
+{
+    string bus : [ ui_name = "Bus" ];
+    rate_t imu_rate = 1000 : [ ui_name = "IMU Rate (Hz)" ];
+    rate_t magnetometer_rate = 100 : [ ui_name = "Magnetometer Rate (Hz)" ];
+    rate_t thermometer_rate = 10 : [ ui_name = "Thermometer Rate (Hz)" ];
+    uint32_t acceleration_range = 8 : [ ui_name = "Acceleration Range (G)" ];
+    uint32_t angular_velocity_range = 500 : [ ui_name = "Angular Velocity Range (DPS)" ];
+};
+
+struct MPU9250_Config : public Node_Config_Base
+{
+    struct Calibration
+    {
+        vector<Acceleration_Calibration_Point> acceleration : [ ui_name = "Acceleration" ];
+        vector<Angular_Velocity_Calibration_Point> angular_velocity : [ ui_name = "Angular Velocity" ];
+        vector<Magnetic_Field_Calibration_Point> magnetic_field : [ ui_name = "Magnetic Field" ];
+    };
+
+    euler3_t rotation : [ ui_name = "Rotation (deg)" ];
+    Calibration calibration : [ ui_name = "Calibration" ];
+};
+
+//////////////////////////////////////////////////////////////
+
+struct MS5611_Descriptor : public Node_Descriptor_Base
+{
+    string bus : [ ui_name = "Bus" ];
+    rate_t pressure_rate = 100 : [ ui_name = "Pressure Rate (Hz)" ];
+    rate_t temperature_rate = 10 : [ ui_name = "Temperature Rate (Hz)" ];
+};
+
+struct MS5611_Config : public Node_Config_Base
+{
+};
+
+//////////////////////////////////////////////////////////////
 
 struct Multirotor_Brain_Descriptor : public Node_Descriptor_Base
 {
@@ -159,11 +365,10 @@ struct Multirotor_Brain_Config : public Node_Config_Base
     struct Horizontal_Position
     {
         alias speed_t = ufloat : [ max = 100.f ];
-        alias lpf_poles_t = uint32_t : [ max = 6 ];
 
         speed_t max_speed = 2.f : [ ui_name = "Max Speed (m/s)" ];
-        lpf_poles_t lpf_poles = 1 : [ ui_name = "LPF Poles" ];
-        ufloat lpf_cutoff_frequency = 1.f : [ ui_name = "LPF Cutoff Frequency (Hz)" ];
+
+        LPF_Filter_Config lpf : [ ui_name = "LPF" ];
         PI_Controller_Descriptor velocity_pi : [ ui_name = "Velocity PI" ];
         P_Controller_Descriptor position_p : [ ui_name = "Position P" ];
     };
@@ -176,11 +381,9 @@ struct Multirotor_Brain_Config : public Node_Config_Base
     struct Altitude
     {
         alias speed_t = ufloat : [ max = 100.f ];
-        alias lpf_poles_t = uint32_t : [ max = 6 ];
 
         speed_t max_speed = 2.f : [ ui_name = "Max Speed (m/s)" ];
-        lpf_poles_t lpf_poles = 1 : [ ui_name = "LPF Poles" ];
-        ufloat lpf_cutoff_frequency = 1.f : [ ui_name = "LPF Cutoff Frequency (Hz)" ];
+        LPF_Filter_Config lpf : [ ui_name = "LPF" ];
         PI_Controller_Descriptor speed_pi : [ ui_name = "Speed PI" ];
         P_Controller_Descriptor position_p : [ ui_name = "Position P" ];
     };
@@ -190,6 +393,57 @@ struct Multirotor_Brain_Config : public Node_Config_Base
     Yaw_Angle yaw_angle : [ ui_name = "Yaw Angle" ];
     Altitude altitude : [ ui_name = "Altitude" ];
 };
+
+//////////////////////////////////////////////////////////////
+
+struct Multirotor_Pilot_Descriptor : public Node_Descriptor_Base
+{
+    rate_t commands_rate = 30 : [ ui_name = "Commands Rate (Hz)" ];
+    rate_t state_rate = 30 : [ ui_name = "State Rate (Hz)" ];
+    rate_t video_rate = 30 : [ ui_name = "Video Rate (Hz)" ];
+};
+
+struct Multirotor_Pilot_Config : public Node_Config_Base
+{
+};
+
+//////////////////////////////////////////////////////////////
+
+struct Multirotor_Simulator_Descriptor : public Node_Descriptor_Base
+{
+    rate_t throttle_rate = 100 : [ ui_name = "Throttle Rate (Hz)" ];
+    rate_t acceleration_rate = 1000 : [ ui_name = "Acceleration Rate (Hz)" ];
+    rate_t angular_velocity_rate = 1000 : [ ui_name = "Angular Velocity Rate (Hz)" ];
+    rate_t magnetic_field_rate = 100 : [ ui_name = "Magnetic Field Rate (Hz)" ];
+    rate_t pressure_rate = 100 : [ ui_name = "Pressure Rate (Hz)" ];
+    rate_t temperature_rate = 10 : [ ui_name = "Temperature Rate (Hz)" ];
+    rate_t distance_rate = 12 : [ ui_name = "Distance Rate (Hz)" ];
+    rate_t gps_rate = 5 : [ ui_name = "GPS Rate (Hz)" ];
+};
+
+struct Multirotor_Simulator_Config : public Node_Config_Base
+{
+    struct Noise
+    {
+        ufloat gps_position = 2.f : [ ui_name = "GPS Position" ];
+        ufloat gps_velocity = 0.2f : [ ui_name = "GPS Velocity" ];
+        ufloat gps_pacc = 0.5f : [ ui_name = "GPS PACC" ];
+        ufloat gps_vacc = 0.1f : [ ui_name = "GPS VACC" ];
+        ufloat acceleration = 0.01f : [ ui_name = "Acceleration" ];
+        ufloat angular_velocity = 0.01f : [ ui_name = "Angular Velocity" ];
+        ufloat magnetic_field = 0.1f : [ ui_name = "Magnetic Field" ];
+        ufloat pressure = 0.1f : [ ui_name = "Pressure" ];
+        ufloat temperature = 0.1f : [ ui_name = "Temperature" ];
+        ufloat ground_distance = 0.01f : [ ui_name = "Ground Distance" ];
+    };
+
+    bool simulation_enabled = true : [ ui_name = "Simulation Enabled" ];
+    bool drag_enabled = true : [ ui_name = "Drag Enabled" ];
+    bool ground_enabled = true : [ ui_name = "Ground Enabled" ];
+    bool gravity_enabled = true : [ ui_name = "Gravity Enabled" ];
+    Noise noise : [ ui_name = "Noise" ];
+};
+
 
 }
 
