@@ -183,6 +183,8 @@ UAV::~UAV()
 
 void UAV::load_type_system()
 {
+    TIMED_FUNCTION();
+
     m_type_system = ts::Type_System();
 
     ast::Builder builder;

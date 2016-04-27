@@ -124,7 +124,6 @@ int main(int argc, char const* argv[])
             goto exit;
         }
 
-        uav.load_type_system();
         uav.save_settings2();
 
 //#if defined RASPBERRY_PI

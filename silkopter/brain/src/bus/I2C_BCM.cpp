@@ -36,9 +36,9 @@ I2C_BCM::~I2C_BCM()
 
 bool I2C_BCM::init(std::shared_ptr<ts::IValue> descriptor)
 {
-    if (!descriptor)
+    if (!descriptor || descriptor->get_type() != m_descriptor->get_type())
     {
-        QLOGE("Null descriptor!");
+        QLOGE("Bad descriptor!");
         return false;
     }
     uint32_t dev = 0;
@@ -50,14 +50,14 @@ bool I2C_BCM::init(std::shared_ptr<ts::IValue> descriptor)
         return false;
     }
 
-    result = m_descriptor->copy_assign(*descriptor);
-    if (result != ts::success)
+    if (!init(dev))
     {
-        QLOGE("{}", result.error().what());
         return false;
     }
 
-    return init(dev);
+    result = m_descriptor->copy_assign(*descriptor);
+    QASSERT(result == ts::success);
+    return true;
 }
 
 std::shared_ptr<const ts::IValue> I2C_BCM::get_descriptor() const

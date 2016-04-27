@@ -37,9 +37,9 @@ SPI_BCM::~SPI_BCM()
 
 bool SPI_BCM::init(std::shared_ptr<ts::IValue> descriptor)
 {
-    if (!descriptor)
+    if (!descriptor || descriptor->get_type() != m_descriptor->get_type())
     {
-        QLOGE("Null descriptor!");
+        QLOGE("Bad descriptor!");
         return false;
     }
     uint32_t dev = 0;
@@ -55,14 +55,14 @@ bool SPI_BCM::init(std::shared_ptr<ts::IValue> descriptor)
         return false;
     }
 
-    result = m_descriptor->copy_assign(*descriptor);
-    if (result != ts::success)
+    if (!open(dev, speed, mode))
     {
-        QLOGE("{}", result.error().what());
         return false;
     }
 
-    return open(dev, speed, mode);
+    result = m_descriptor->copy_assign(*descriptor);
+    QASSERT(result == ts::success);
+    return true;
 }
 
 std::shared_ptr<const ts::IValue> SPI_BCM::get_descriptor() const

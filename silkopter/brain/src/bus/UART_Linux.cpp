@@ -26,9 +26,9 @@ UART_Linux::~UART_Linux()
 
 bool UART_Linux::init(std::shared_ptr<ts::IValue> descriptor)
 {
-    if (!descriptor)
+    if (!descriptor || descriptor->get_type() != m_descriptor->get_type())
     {
-        QLOGE("Null descriptor!");
+        QLOGE("Bad descriptor!");
         return false;
     }
     std::string dev;
@@ -42,14 +42,14 @@ bool UART_Linux::init(std::shared_ptr<ts::IValue> descriptor)
         return false;
     }
 
-    result = m_descriptor->copy_assign(*descriptor);
-    if (result != ts::success)
+    if (!init(dev, baud))
     {
-        QLOGE("{}", result.error().what());
         return false;
     }
 
-    return init(dev, baud);
+    result = m_descriptor->copy_assign(*descriptor);
+    QASSERT(result == ts::success);
+    return true;
 }
 
 std::shared_ptr<const ts::IValue> UART_Linux::get_descriptor() const
