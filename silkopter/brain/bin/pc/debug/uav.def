@@ -625,8 +625,21 @@ struct Raspicam_Config : public Node_Config_Base
     alias contrast_t = int32_t : [ min = 0, max = 100 ];
     alias brightness_t = int32_t : [ min = 0, max = 100 ];
     alias saturation_t = int32_t : [ min = 0, max = 100 ];
-    alias awb_mode_t = int32_t : [ min = 0, max = 8 ];
     alias quality_t = int32_t : [ min = 0, max = 1 ];
+
+    enum awb_mode_t
+    {
+        OFF = 0 : [ ui_name = "Off" ],
+        AUTO : [ ui_name = "Auto" ],
+        SUNLIGHT : [ ui_name = "Sunlight" ],
+        CLOUDY : [ ui_name = "Cloudy" ],
+        SHADE : [ ui_name = "Shade" ],
+        TUNGSTEN : [ ui_name = "Tungsten" ],
+        FLUORESCENT : [ ui_name = "Flourescent" ],
+        INCANDESCENT : [ ui_name = "Incandescent" ],
+        FLASH : [ ui_name = "Flash" ],
+        HORIZON : [ ui_name = "Horizon" ],
+    };
 
     iso_t iso : [ ui_name = "Iso" ];
     shutter_speed_t shutter_speed : [ ui_name = "Shutter Speed (ms)" ];
@@ -635,7 +648,7 @@ struct Raspicam_Config : public Node_Config_Base
     contrast_t contrast : [ ui_name = "Contrast" ];
     brightness_t brightness : [ ui_name = "Brightness" ];
     saturation_t saturation : [ ui_name = "Saturation" ];
-    awb_mode_t awb_mode : [ ui_name = "AWB Mode" ];
+    awb_mode_t awb_mode = aub_mode_t::AUTO : [ ui_name = "AWB Mode" ];
     quality_t quality : [ ui_name = "Quality" ];
     bool recording : [ ui_name = "Recording" ];
 };
