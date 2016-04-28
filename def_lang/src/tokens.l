@@ -38,6 +38,7 @@ scope [:][:]
 "import"                return yy::parser::make_TIMPORT(m_location);
 "alias"                 return yy::parser::make_TALIAS(m_location);
 "struct"                return yy::parser::make_TSTRUCT(m_location);
+"enum"                  return yy::parser::make_TENUM(m_location);
 "public"                return yy::parser::make_TPUBLIC(m_location);
 "private"               return yy::parser::make_TPRIVATE(m_location);
 "protected"             return yy::parser::make_TPROTECTED(m_location);

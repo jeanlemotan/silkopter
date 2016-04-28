@@ -46,6 +46,7 @@
     TIMPORT "import"
     TALIAS "alias"
     TSTRUCT "struct"
+    TENUM "enum"
     TPUBLIC "public"
     TPRIVATE "private"
     TPROTECTED "protected"
@@ -79,6 +80,10 @@
 %type <::ast::Node> top_level_declaration_list
 %type <::ast::Node> top_level_declaration
 %type <::ast::Node> type_declaration
+%type <::ast::Node> enum_declaration
+%type <::ast::Node> enum_body
+%type <::ast::Node> enum_body_item
+%type <::ast::Node> enum_body_item_list
 %type <::ast::Node> struct_declaration
 %type <::ast::Node> struct_body
 %type <::ast::Node> struct_body_declaration
@@ -170,6 +175,61 @@ alias_declaration   : TALIAS identifier TEQUAL type TSEMICOLON
                         $$.move_children_from(std::move($6));
                     }
                     ;
+
+enum_declaration    : TENUM identifier TLBRACE TRBRACE TSEMICOLON
+                    {
+                        $$ = ast::Node(ast::Node::Type::ENUM_DECLARATION, builder.get_location());
+                        $$.add_child($2);
+                    }
+                    | TENUM identifier TLBRACE enum_body TRBRACE TSEMICOLON
+                    {
+                        $$ = ast::Node(ast::Node::Type::ENUM_DECLARATION, builder.get_location());
+                        $$.add_child($2);
+                        $$.add_child($4);
+                    }
+                    ;
+
+enum_body   : enum_body_item_list
+            {
+                $$ = ast::Node(ast::Node::Type::ENUM_BODY, builder.get_location());
+                $$.move_children_from(std::move($1));
+            }
+            ;
+
+enum_body_item_list : enum_body_item
+                    {
+                        $$ = ast::Node(ast::Node::Type::LIST, builder.get_location());
+                        $$.add_child($1);
+                    }
+                    | enum_body_item_list enum_body_item
+                    {
+                        $$.move_children_from(std::move($1));
+                        $$.add_child($2);
+                    }
+                    ;
+
+
+enum_body_item  : identifier TCOMMA
+                {
+                    $$ = $1;
+                }
+                | identifier TEQUAL TINTEGER_LITERAL TCOMMA
+                {
+                    $$ = $1;
+                    $$.add_attribute(ast::Attribute("integral_value", $3));
+                }
+                | identifier TCOLON attribute_list TCOMMA
+                {
+                    $$ = $1;
+                }
+                | identifier TEQUAL TINTEGER_LITERAL TCOLON attribute_list TCOMMA
+                {
+                    $$ = $1;
+                    $$.add_attribute(ast::Attribute("integral_value", $3));
+                    $$.move_children_from(std::move($5));
+                }
+                ;
+
 
 struct_declaration  : TSTRUCT identifier TLBRACE TRBRACE TSEMICOLON
                     {
@@ -318,6 +378,10 @@ type_declaration    : struct_declaration
                     {
                         $$ = $1;
                     }
+                    | enum_declaration
+                    {
+                        $$ = $1;
+                    }
                     ;
 
 identifier  : TIDENTIFIER
@@ -362,6 +426,11 @@ attribute   : identifier TEQUAL initializer
             ;
         
 initializer : literal
+            {
+                $$ = ast::Node(ast::Node::Type::INITIALIZER, builder.get_location());
+                $$.add_child($1);
+            }
+            | identifier_path
             {
                 $$ = ast::Node(ast::Node::Type::INITIALIZER, builder.get_location());
                 $$.add_child($1);

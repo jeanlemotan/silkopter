@@ -1,16 +1,16 @@
-#if 0
+#if 1
 
-#include "Type_System.h"
+#include "def_lang/Type_System.h"
 #include "ast/Builder.h"
 
-#include "IStruct_Type.h"
-#include "IStruct_Value.h"
-#include "IString_Value.h"
-#include "IVector_Value.h"
-#include "All_INumeric_Values.h"
-#include "Value_Selector.h"
-#include "Mapper.h"
-#include "JSON_Serializer.h"
+#include "def_lang/IStruct_Type.h"
+#include "def_lang/IStruct_Value.h"
+#include "def_lang/IString_Value.h"
+#include "def_lang/IVector_Value.h"
+#include "def_lang/All_INumeric_Values.h"
+#include "def_lang/Value_Selector.h"
+#include "def_lang/Mapper.h"
+#include "def_lang/JSON_Serializer.h"
 
 #include <chrono>
 
@@ -18,10 +18,11 @@ int main(int argc, char **argv)
 {
     ast::Builder builder;
 
-    auto parse_result = builder.parse("../test.def");
+    auto parse_result = builder.parse("../uav.def");
     if (parse_result != ts::success)
     {
         std::cerr << parse_result.error().what();
+        std::cerr.flush();
     }
 
     std::cout << builder.get_ast_root_node().to_string(0, true) << std::endl;
@@ -34,6 +35,7 @@ int main(int argc, char **argv)
     if (compile_result != ts::success)
     {
         std::cerr << compile_result.error().what();
+        std::cerr.flush();
     }
 
     std::shared_ptr<ts::IStruct_Type> type = ts.find_specialized_symbol_by_path<ts::IStruct_Type>("silk::Multirotor_Config");
@@ -49,7 +51,7 @@ int main(int argc, char **argv)
         std::shared_ptr<ts::IVector_Value> motors = value->select_specialized<ts::IVector_Value>("motors");
         for (size_t i = 0; i < 10; i++)
         {
-            result = motors->insert_default_value(motors->get_value_count());
+            auto result = motors->insert_default_value(motors->get_value_count());
             TS_ASSERT(result == ts::success);
         }
 

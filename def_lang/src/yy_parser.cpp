@@ -257,51 +257,55 @@ namespace yy {
   {
       switch (that.type_get ())
     {
-      case 37: // top_level_declaration_list
-      case 38: // top_level_declaration
-      case 39: // alias_declaration
-      case 40: // struct_declaration
-      case 41: // struct_body
-      case 42: // struct_body_declaration_list
-      case 43: // struct_body_declaration
-      case 44: // inheritance
-      case 45: // namespace_declaration
-      case 46: // namespace_body
-      case 47: // namespace_body_declaration_list
-      case 48: // namespace_body_declaration
-      case 49: // member_declaration
-      case 50: // type_declaration
-      case 51: // identifier
-      case 52: // identifier_path
-      case 53: // attribute_list
-      case 54: // attribute_body
-      case 55: // attribute
-      case 56: // initializer
-      case 57: // initializer_list
-      case 58: // initializer_body
-      case 59: // type
-      case 60: // templated_type
-      case 61: // template_argument_list
-      case 62: // template_argument
-      case 63: // literal
+      case 38: // top_level_declaration_list
+      case 39: // top_level_declaration
+      case 40: // alias_declaration
+      case 41: // enum_declaration
+      case 42: // enum_body
+      case 43: // enum_body_item_list
+      case 44: // enum_body_item
+      case 45: // struct_declaration
+      case 46: // struct_body
+      case 47: // struct_body_declaration_list
+      case 48: // struct_body_declaration
+      case 49: // inheritance
+      case 50: // namespace_declaration
+      case 51: // namespace_body
+      case 52: // namespace_body_declaration_list
+      case 53: // namespace_body_declaration
+      case 54: // member_declaration
+      case 55: // type_declaration
+      case 56: // identifier
+      case 57: // identifier_path
+      case 58: // attribute_list
+      case 59: // attribute_body
+      case 60: // attribute
+      case 61: // initializer
+      case 62: // initializer_list
+      case 63: // initializer_body
+      case 64: // type
+      case 65: // templated_type
+      case 66: // template_argument_list
+      case 67: // template_argument
+      case 68: // literal
         value.move< ::ast::Node > (that.value);
         break;
 
-      case 30: // "double literal"
+      case 31: // "double literal"
         value.move< double > (that.value);
         break;
 
-      case 29: // "float literal"
+      case 30: // "float literal"
         value.move< float > (that.value);
         break;
 
-      case 31: // "integer literal"
+      case 32: // "integer literal"
         value.move< int64_t > (that.value);
         break;
 
-      case 27: // "identifier path"
-      case 28: // "identifier"
-      case 32: // "string literal"
+      case 28: // "identifier path"
+      case 29: // "identifier"
+      case 33: // "string literal"
         value.move< std::string > (that.value);
         break;
 
@@ -320,51 +324,55 @@ namespace yy {
     state = that.state;
       switch (that.type_get ())
     {
-      case 37: // top_level_declaration_list
-      case 38: // top_level_declaration
-      case 39: // alias_declaration
-      case 40: // struct_declaration
-      case 41: // struct_body
-      case 42: // struct_body_declaration_list
-      case 43: // struct_body_declaration
-      case 44: // inheritance
-      case 45: // namespace_declaration
-      case 46: // namespace_body
-      case 47: // namespace_body_declaration_list
-      case 48: // namespace_body_declaration
-      case 49: // member_declaration
-      case 50: // type_declaration
-      case 51: // identifier
-      case 52: // identifier_path
-      case 53: // attribute_list
-      case 54: // attribute_body
-      case 55: // attribute
-      case 56: // initializer
-      case 57: // initializer_list
-      case 58: // initializer_body
-      case 59: // type
-      case 60: // templated_type
-      case 61: // template_argument_list
-      case 62: // template_argument
-      case 63: // literal
+      case 38: // top_level_declaration_list
+      case 39: // top_level_declaration
+      case 40: // alias_declaration
+      case 41: // enum_declaration
+      case 42: // enum_body
+      case 43: // enum_body_item_list
+      case 44: // enum_body_item
+      case 45: // struct_declaration
+      case 46: // struct_body
+      case 47: // struct_body_declaration_list
+      case 48: // struct_body_declaration
+      case 49: // inheritance
+      case 50: // namespace_declaration
+      case 51: // namespace_body
+      case 52: // namespace_body_declaration_list
+      case 53: // namespace_body_declaration
+      case 54: // member_declaration
+      case 55: // type_declaration
+      case 56: // identifier
+      case 57: // identifier_path
+      case 58: // attribute_list
+      case 59: // attribute_body
+      case 60: // attribute
+      case 61: // initializer
+      case 62: // initializer_list
+      case 63: // initializer_body
+      case 64: // type
+      case 65: // templated_type
+      case 66: // template_argument_list
+      case 67: // template_argument
+      case 68: // literal
         value.copy< ::ast::Node > (that.value);
         break;
 
-      case 30: // "double literal"
+      case 31: // "double literal"
         value.copy< double > (that.value);
         break;
 
-      case 29: // "float literal"
+      case 30: // "float literal"
         value.copy< float > (that.value);
         break;
 
-      case 31: // "integer literal"
+      case 32: // "integer literal"
         value.copy< int64_t > (that.value);
         break;
 
-      case 27: // "identifier path"
-      case 28: // "identifier"
-      case 32: // "string literal"
+      case 28: // "identifier path"
+      case 29: // "identifier"
+      case 33: // "string literal"
         value.copy< std::string > (that.value);
         break;
 
@@ -515,7 +523,7 @@ namespace yy {
   //@$.begin.filename = @$.end.filename = &p.get_filename();
 }
 
-#line 519 "yy_parser.cpp" // lalr1.cc:741
+#line 527 "yy_parser.cpp" // lalr1.cc:741
 
     /* Initialize the stack.  The initial state will be set in
        yynewstate, since the latter expects the semantical and the
@@ -605,51 +613,55 @@ namespace yy {
          when using variants.  */
         switch (yyr1_[yyn])
     {
-      case 37: // top_level_declaration_list
-      case 38: // top_level_declaration
-      case 39: // alias_declaration
-      case 40: // struct_declaration
-      case 41: // struct_body
-      case 42: // struct_body_declaration_list
-      case 43: // struct_body_declaration
-      case 44: // inheritance
-      case 45: // namespace_declaration
-      case 46: // namespace_body
-      case 47: // namespace_body_declaration_list
-      case 48: // namespace_body_declaration
-      case 49: // member_declaration
-      case 50: // type_declaration
-      case 51: // identifier
-      case 52: // identifier_path
-      case 53: // attribute_list
-      case 54: // attribute_body
-      case 55: // attribute
-      case 56: // initializer
-      case 57: // initializer_list
-      case 58: // initializer_body
-      case 59: // type
-      case 60: // templated_type
-      case 61: // template_argument_list
-      case 62: // template_argument
-      case 63: // literal
+      case 38: // top_level_declaration_list
+      case 39: // top_level_declaration
+      case 40: // alias_declaration
+      case 41: // enum_declaration
+      case 42: // enum_body
+      case 43: // enum_body_item_list
+      case 44: // enum_body_item
+      case 45: // struct_declaration
+      case 46: // struct_body
+      case 47: // struct_body_declaration_list
+      case 48: // struct_body_declaration
+      case 49: // inheritance
+      case 50: // namespace_declaration
+      case 51: // namespace_body
+      case 52: // namespace_body_declaration_list
+      case 53: // namespace_body_declaration
+      case 54: // member_declaration
+      case 55: // type_declaration
+      case 56: // identifier
+      case 57: // identifier_path
+      case 58: // attribute_list
+      case 59: // attribute_body
+      case 60: // attribute
+      case 61: // initializer
+      case 62: // initializer_list
+      case 63: // initializer_body
+      case 64: // type
+      case 65: // templated_type
+      case 66: // template_argument_list
+      case 67: // template_argument
+      case 68: // literal
         yylhs.value.build< ::ast::Node > ();
         break;
 
-      case 30: // "double literal"
+      case 31: // "double literal"
         yylhs.value.build< double > ();
         break;
 
-      case 29: // "float literal"
+      case 30: // "float literal"
         yylhs.value.build< float > ();
         break;
 
-      case 31: // "integer literal"
+      case 32: // "integer literal"
         yylhs.value.build< int64_t > ();
         break;
 
-      case 27: // "identifier path"
-      case 28: // "identifier"
-      case 32: // "string literal"
+      case 28: // "identifier path"
+      case 29: // "identifier"
+      case 33: // "string literal"
         yylhs.value.build< std::string > ();
         break;
 
@@ -671,286 +683,367 @@ namespace yy {
           switch (yyn)
             {
   case 2:
-#line 113 "parser.y" // lalr1.cc:859
+#line 118 "parser.y" // lalr1.cc:859
     {
         }
-#line 678 "yy_parser.cpp" // lalr1.cc:859
+#line 690 "yy_parser.cpp" // lalr1.cc:859
     break;
 
   case 3:
-#line 116 "parser.y" // lalr1.cc:859
+#line 121 "parser.y" // lalr1.cc:859
     {
             builder.get_ast_root_node().move_children_from(std::move(yystack_[0].value.as< ::ast::Node > ()));
         }
-#line 686 "yy_parser.cpp" // lalr1.cc:859
+#line 698 "yy_parser.cpp" // lalr1.cc:859
     break;
 
   case 4:
-#line 122 "parser.y" // lalr1.cc:859
+#line 127 "parser.y" // lalr1.cc:859
     {
             }
-#line 693 "yy_parser.cpp" // lalr1.cc:859
+#line 705 "yy_parser.cpp" // lalr1.cc:859
     break;
 
   case 5:
-#line 125 "parser.y" // lalr1.cc:859
+#line 130 "parser.y" // lalr1.cc:859
     {
             }
-#line 700 "yy_parser.cpp" // lalr1.cc:859
+#line 712 "yy_parser.cpp" // lalr1.cc:859
     break;
 
   case 6:
-#line 130 "parser.y" // lalr1.cc:859
+#line 135 "parser.y" // lalr1.cc:859
     {
             builder.start_file(yystack_[0].value.as< std::string > ().substr(1, yystack_[0].value.as< std::string > ().size() - 2));
         }
-#line 708 "yy_parser.cpp" // lalr1.cc:859
+#line 720 "yy_parser.cpp" // lalr1.cc:859
     break;
 
   case 7:
-#line 137 "parser.y" // lalr1.cc:859
+#line 142 "parser.y" // lalr1.cc:859
     {
                                 yylhs.value.as< ::ast::Node > () = ast::Node(ast::Node::Type::LIST, builder.get_location());
                                 yylhs.value.as< ::ast::Node > ().add_child(yystack_[0].value.as< ::ast::Node > ());
                             }
-#line 717 "yy_parser.cpp" // lalr1.cc:859
+#line 729 "yy_parser.cpp" // lalr1.cc:859
     break;
 
   case 8:
-#line 142 "parser.y" // lalr1.cc:859
+#line 147 "parser.y" // lalr1.cc:859
     {
                                 yylhs.value.as< ::ast::Node > ().move_children_from(std::move(yystack_[1].value.as< ::ast::Node > ()));
                                 yylhs.value.as< ::ast::Node > ().add_child(yystack_[0].value.as< ::ast::Node > ());
                             }
-#line 726 "yy_parser.cpp" // lalr1.cc:859
+#line 738 "yy_parser.cpp" // lalr1.cc:859
     break;
 
   case 9:
-#line 149 "parser.y" // lalr1.cc:859
+#line 154 "parser.y" // lalr1.cc:859
     {
                             yylhs.value.as< ::ast::Node > () = yystack_[0].value.as< ::ast::Node > ();
                         }
-#line 734 "yy_parser.cpp" // lalr1.cc:859
+#line 746 "yy_parser.cpp" // lalr1.cc:859
     break;
 
   case 10:
-#line 153 "parser.y" // lalr1.cc:859
+#line 158 "parser.y" // lalr1.cc:859
     {
                             yylhs.value.as< ::ast::Node > () = yystack_[0].value.as< ::ast::Node > ();
                         }
-#line 742 "yy_parser.cpp" // lalr1.cc:859
+#line 754 "yy_parser.cpp" // lalr1.cc:859
     break;
 
   case 11:
-#line 160 "parser.y" // lalr1.cc:859
+#line 165 "parser.y" // lalr1.cc:859
     {
                         yylhs.value.as< ::ast::Node > () = ast::Node(ast::Node::Type::ALIAS_DECLARATION, builder.get_location());
                         yylhs.value.as< ::ast::Node > ().add_child(yystack_[3].value.as< ::ast::Node > ());
                         yylhs.value.as< ::ast::Node > ().add_child(yystack_[1].value.as< ::ast::Node > ());
                     }
-#line 752 "yy_parser.cpp" // lalr1.cc:859
+#line 764 "yy_parser.cpp" // lalr1.cc:859
     break;
 
   case 12:
-#line 166 "parser.y" // lalr1.cc:859
+#line 171 "parser.y" // lalr1.cc:859
     {
                         yylhs.value.as< ::ast::Node > () = ast::Node(ast::Node::Type::ALIAS_DECLARATION, builder.get_location());
                         yylhs.value.as< ::ast::Node > ().add_child(yystack_[5].value.as< ::ast::Node > ());
                         yylhs.value.as< ::ast::Node > ().add_child(yystack_[3].value.as< ::ast::Node > ());
                         yylhs.value.as< ::ast::Node > ().move_children_from(std::move(yystack_[1].value.as< ::ast::Node > ()));
                     }
-#line 763 "yy_parser.cpp" // lalr1.cc:859
+#line 775 "yy_parser.cpp" // lalr1.cc:859
     break;
 
   case 13:
-#line 175 "parser.y" // lalr1.cc:859
+#line 180 "parser.y" // lalr1.cc:859
+    {
+                        yylhs.value.as< ::ast::Node > () = ast::Node(ast::Node::Type::ENUM_DECLARATION, builder.get_location());
+                        yylhs.value.as< ::ast::Node > ().add_child(yystack_[3].value.as< ::ast::Node > ());
+                    }
+#line 784 "yy_parser.cpp" // lalr1.cc:859
+    break;
+
+  case 14:
+#line 185 "parser.y" // lalr1.cc:859
+    {
+                        yylhs.value.as< ::ast::Node > () = ast::Node(ast::Node::Type::ENUM_DECLARATION, builder.get_location());
+                        yylhs.value.as< ::ast::Node > ().add_child(yystack_[4].value.as< ::ast::Node > ());
+                        yylhs.value.as< ::ast::Node > ().add_child(yystack_[2].value.as< ::ast::Node > ());
+                    }
+#line 794 "yy_parser.cpp" // lalr1.cc:859
+    break;
+
+  case 15:
+#line 193 "parser.y" // lalr1.cc:859
+    {
+                yylhs.value.as< ::ast::Node > () = ast::Node(ast::Node::Type::ENUM_BODY, builder.get_location());
+                yylhs.value.as< ::ast::Node > ().move_children_from(std::move(yystack_[0].value.as< ::ast::Node > ()));
+            }
+#line 803 "yy_parser.cpp" // lalr1.cc:859
+    break;
+
+  case 16:
+#line 200 "parser.y" // lalr1.cc:859
+    {
+                        yylhs.value.as< ::ast::Node > () = ast::Node(ast::Node::Type::LIST, builder.get_location());
+                        yylhs.value.as< ::ast::Node > ().add_child(yystack_[0].value.as< ::ast::Node > ());
+                    }
+#line 812 "yy_parser.cpp" // lalr1.cc:859
+    break;
+
+  case 17:
+#line 205 "parser.y" // lalr1.cc:859
+    {
+                        yylhs.value.as< ::ast::Node > ().move_children_from(std::move(yystack_[1].value.as< ::ast::Node > ()));
+                        yylhs.value.as< ::ast::Node > ().add_child(yystack_[0].value.as< ::ast::Node > ());
+                    }
+#line 821 "yy_parser.cpp" // lalr1.cc:859
+    break;
+
+  case 18:
+#line 213 "parser.y" // lalr1.cc:859
+    {
+                    yylhs.value.as< ::ast::Node > () = yystack_[1].value.as< ::ast::Node > ();
+                }
+#line 829 "yy_parser.cpp" // lalr1.cc:859
+    break;
+
+  case 19:
+#line 217 "parser.y" // lalr1.cc:859
+    {
+                    yylhs.value.as< ::ast::Node > () = yystack_[3].value.as< ::ast::Node > ();
+                    yylhs.value.as< ::ast::Node > ().add_attribute(ast::Attribute("integral_value", yystack_[1].value.as< int64_t > ()));
+                }
+#line 838 "yy_parser.cpp" // lalr1.cc:859
+    break;
+
+  case 20:
+#line 222 "parser.y" // lalr1.cc:859
+    {
+                    yylhs.value.as< ::ast::Node > () = yystack_[3].value.as< ::ast::Node > ();
+                }
+#line 846 "yy_parser.cpp" // lalr1.cc:859
+    break;
+
+  case 21:
+#line 226 "parser.y" // lalr1.cc:859
+    {
+                    yylhs.value.as< ::ast::Node > () = yystack_[5].value.as< ::ast::Node > ();
+                    yylhs.value.as< ::ast::Node > ().add_attribute(ast::Attribute("integral_value", yystack_[3].value.as< int64_t > ()));
+                    yylhs.value.as< ::ast::Node > ().move_children_from(std::move(yystack_[1].value.as< ::ast::Node > ()));
+                }
+#line 856 "yy_parser.cpp" // lalr1.cc:859
+    break;
+
+  case 22:
+#line 235 "parser.y" // lalr1.cc:859
     {
                         yylhs.value.as< ::ast::Node > () = ast::Node(ast::Node::Type::STRUCT_DECLARATION, builder.get_location());
                         yylhs.value.as< ::ast::Node > ().add_child(yystack_[3].value.as< ::ast::Node > ());
                     }
-#line 772 "yy_parser.cpp" // lalr1.cc:859
+#line 865 "yy_parser.cpp" // lalr1.cc:859
     break;
 
-  case 14:
-#line 180 "parser.y" // lalr1.cc:859
+  case 23:
+#line 240 "parser.y" // lalr1.cc:859
     {
                         yylhs.value.as< ::ast::Node > () = ast::Node(ast::Node::Type::STRUCT_DECLARATION, builder.get_location());
                         yylhs.value.as< ::ast::Node > ().add_child(yystack_[4].value.as< ::ast::Node > ());
                         yylhs.value.as< ::ast::Node > ().add_child(yystack_[2].value.as< ::ast::Node > ());
                     }
-#line 782 "yy_parser.cpp" // lalr1.cc:859
+#line 875 "yy_parser.cpp" // lalr1.cc:859
     break;
 
-  case 15:
-#line 186 "parser.y" // lalr1.cc:859
+  case 24:
+#line 246 "parser.y" // lalr1.cc:859
     {
                         yylhs.value.as< ::ast::Node > () = ast::Node(ast::Node::Type::STRUCT_DECLARATION, builder.get_location());
                         yylhs.value.as< ::ast::Node > ().add_child(yystack_[5].value.as< ::ast::Node > ());
                         yylhs.value.as< ::ast::Node > ().add_child(yystack_[3].value.as< ::ast::Node > ());
                     }
-#line 792 "yy_parser.cpp" // lalr1.cc:859
-    break;
-
-  case 16:
-#line 192 "parser.y" // lalr1.cc:859
-    {
-                        yylhs.value.as< ::ast::Node > () = ast::Node(ast::Node::Type::STRUCT_DECLARATION, builder.get_location());
-                        yylhs.value.as< ::ast::Node > ().add_child(yystack_[6].value.as< ::ast::Node > ());
-                        yylhs.value.as< ::ast::Node > ().add_child(yystack_[4].value.as< ::ast::Node > ());
-                        yylhs.value.as< ::ast::Node > ().add_child(yystack_[2].value.as< ::ast::Node > ());
-                    }
-#line 803 "yy_parser.cpp" // lalr1.cc:859
-    break;
-
-  case 17:
-#line 201 "parser.y" // lalr1.cc:859
-    {
-                yylhs.value.as< ::ast::Node > () = ast::Node(ast::Node::Type::STRUCT_BODY, builder.get_location());
-                yylhs.value.as< ::ast::Node > ().move_children_from(std::move(yystack_[0].value.as< ::ast::Node > ()));
-            }
-#line 812 "yy_parser.cpp" // lalr1.cc:859
-    break;
-
-  case 18:
-#line 208 "parser.y" // lalr1.cc:859
-    {
-                                    yylhs.value.as< ::ast::Node > () = ast::Node(ast::Node::Type::LIST, builder.get_location());
-                                    yylhs.value.as< ::ast::Node > ().add_child(yystack_[0].value.as< ::ast::Node > ());
-                                }
-#line 821 "yy_parser.cpp" // lalr1.cc:859
-    break;
-
-  case 19:
-#line 213 "parser.y" // lalr1.cc:859
-    {
-                                    yylhs.value.as< ::ast::Node > ().move_children_from(std::move(yystack_[1].value.as< ::ast::Node > ()));
-                                    yylhs.value.as< ::ast::Node > ().add_child(yystack_[0].value.as< ::ast::Node > ());
-                                }
-#line 830 "yy_parser.cpp" // lalr1.cc:859
-    break;
-
-  case 20:
-#line 221 "parser.y" // lalr1.cc:859
-    {
-                            yylhs.value.as< ::ast::Node > () = yystack_[0].value.as< ::ast::Node > ();
-                        }
-#line 838 "yy_parser.cpp" // lalr1.cc:859
-    break;
-
-  case 21:
-#line 225 "parser.y" // lalr1.cc:859
-    {
-                            yylhs.value.as< ::ast::Node > () = yystack_[0].value.as< ::ast::Node > ();
-                        }
-#line 846 "yy_parser.cpp" // lalr1.cc:859
-    break;
-
-  case 22:
-#line 231 "parser.y" // lalr1.cc:859
-    {
-                yylhs.value.as< ::ast::Node > () = ast::Node(ast::Node::Type::INHERITANCE, builder.get_location());
-                yylhs.value.as< ::ast::Node > ().add_child(yystack_[0].value.as< ::ast::Node > ());
-                yylhs.value.as< ::ast::Node > ().add_attribute(ast::Attribute("visibility", "public"));
-            }
-#line 856 "yy_parser.cpp" // lalr1.cc:859
-    break;
-
-  case 23:
-#line 239 "parser.y" // lalr1.cc:859
-    {
-                yylhs.value.as< ::ast::Node > () = ast::Node(ast::Node::Type::NAMESPACE_DECLARATION, builder.get_location());
-                yylhs.value.as< ::ast::Node > ().add_child(yystack_[2].value.as< ::ast::Node > ());
-            }
-#line 865 "yy_parser.cpp" // lalr1.cc:859
-    break;
-
-  case 24:
-#line 244 "parser.y" // lalr1.cc:859
-    {
-                yylhs.value.as< ::ast::Node > () = ast::Node(ast::Node::Type::NAMESPACE_DECLARATION, builder.get_location());
-                yylhs.value.as< ::ast::Node > ().add_child(yystack_[3].value.as< ::ast::Node > ());
-                yylhs.value.as< ::ast::Node > ().add_child(yystack_[1].value.as< ::ast::Node > ());
-            }
-#line 875 "yy_parser.cpp" // lalr1.cc:859
+#line 885 "yy_parser.cpp" // lalr1.cc:859
     break;
 
   case 25:
 #line 252 "parser.y" // lalr1.cc:859
     {
-                    yylhs.value.as< ::ast::Node > () = ast::Node(ast::Node::Type::NAMESPACE_BODY, builder.get_location());
-                    yylhs.value.as< ::ast::Node > ().move_children_from(std::move(yystack_[0].value.as< ::ast::Node > ()));
-                }
-#line 884 "yy_parser.cpp" // lalr1.cc:859
+                        yylhs.value.as< ::ast::Node > () = ast::Node(ast::Node::Type::STRUCT_DECLARATION, builder.get_location());
+                        yylhs.value.as< ::ast::Node > ().add_child(yystack_[6].value.as< ::ast::Node > ());
+                        yylhs.value.as< ::ast::Node > ().add_child(yystack_[4].value.as< ::ast::Node > ());
+                        yylhs.value.as< ::ast::Node > ().add_child(yystack_[2].value.as< ::ast::Node > ());
+                    }
+#line 896 "yy_parser.cpp" // lalr1.cc:859
     break;
 
   case 26:
-#line 259 "parser.y" // lalr1.cc:859
+#line 261 "parser.y" // lalr1.cc:859
+    {
+                yylhs.value.as< ::ast::Node > () = ast::Node(ast::Node::Type::STRUCT_BODY, builder.get_location());
+                yylhs.value.as< ::ast::Node > ().move_children_from(std::move(yystack_[0].value.as< ::ast::Node > ()));
+            }
+#line 905 "yy_parser.cpp" // lalr1.cc:859
+    break;
+
+  case 27:
+#line 268 "parser.y" // lalr1.cc:859
     {
                                     yylhs.value.as< ::ast::Node > () = ast::Node(ast::Node::Type::LIST, builder.get_location());
                                     yylhs.value.as< ::ast::Node > ().add_child(yystack_[0].value.as< ::ast::Node > ());
                                 }
-#line 893 "yy_parser.cpp" // lalr1.cc:859
+#line 914 "yy_parser.cpp" // lalr1.cc:859
     break;
 
-  case 27:
-#line 264 "parser.y" // lalr1.cc:859
+  case 28:
+#line 273 "parser.y" // lalr1.cc:859
     {
                                     yylhs.value.as< ::ast::Node > ().move_children_from(std::move(yystack_[1].value.as< ::ast::Node > ()));
                                     yylhs.value.as< ::ast::Node > ().add_child(yystack_[0].value.as< ::ast::Node > ());
                                 }
-#line 902 "yy_parser.cpp" // lalr1.cc:859
-    break;
-
-  case 28:
-#line 271 "parser.y" // lalr1.cc:859
-    {
-                                yylhs.value.as< ::ast::Node > () = yystack_[0].value.as< ::ast::Node > ();
-                            }
-#line 910 "yy_parser.cpp" // lalr1.cc:859
+#line 923 "yy_parser.cpp" // lalr1.cc:859
     break;
 
   case 29:
-#line 275 "parser.y" // lalr1.cc:859
+#line 281 "parser.y" // lalr1.cc:859
     {
-                                yylhs.value.as< ::ast::Node > () = yystack_[0].value.as< ::ast::Node > ();
-                            }
-#line 918 "yy_parser.cpp" // lalr1.cc:859
+                            yylhs.value.as< ::ast::Node > () = yystack_[0].value.as< ::ast::Node > ();
+                        }
+#line 931 "yy_parser.cpp" // lalr1.cc:859
     break;
 
   case 30:
-#line 282 "parser.y" // lalr1.cc:859
+#line 285 "parser.y" // lalr1.cc:859
+    {
+                            yylhs.value.as< ::ast::Node > () = yystack_[0].value.as< ::ast::Node > ();
+                        }
+#line 939 "yy_parser.cpp" // lalr1.cc:859
+    break;
+
+  case 31:
+#line 291 "parser.y" // lalr1.cc:859
+    {
+                yylhs.value.as< ::ast::Node > () = ast::Node(ast::Node::Type::INHERITANCE, builder.get_location());
+                yylhs.value.as< ::ast::Node > ().add_child(yystack_[0].value.as< ::ast::Node > ());
+                yylhs.value.as< ::ast::Node > ().add_attribute(ast::Attribute("visibility", "public"));
+            }
+#line 949 "yy_parser.cpp" // lalr1.cc:859
+    break;
+
+  case 32:
+#line 299 "parser.y" // lalr1.cc:859
+    {
+                yylhs.value.as< ::ast::Node > () = ast::Node(ast::Node::Type::NAMESPACE_DECLARATION, builder.get_location());
+                yylhs.value.as< ::ast::Node > ().add_child(yystack_[2].value.as< ::ast::Node > ());
+            }
+#line 958 "yy_parser.cpp" // lalr1.cc:859
+    break;
+
+  case 33:
+#line 304 "parser.y" // lalr1.cc:859
+    {
+                yylhs.value.as< ::ast::Node > () = ast::Node(ast::Node::Type::NAMESPACE_DECLARATION, builder.get_location());
+                yylhs.value.as< ::ast::Node > ().add_child(yystack_[3].value.as< ::ast::Node > ());
+                yylhs.value.as< ::ast::Node > ().add_child(yystack_[1].value.as< ::ast::Node > ());
+            }
+#line 968 "yy_parser.cpp" // lalr1.cc:859
+    break;
+
+  case 34:
+#line 312 "parser.y" // lalr1.cc:859
+    {
+                    yylhs.value.as< ::ast::Node > () = ast::Node(ast::Node::Type::NAMESPACE_BODY, builder.get_location());
+                    yylhs.value.as< ::ast::Node > ().move_children_from(std::move(yystack_[0].value.as< ::ast::Node > ()));
+                }
+#line 977 "yy_parser.cpp" // lalr1.cc:859
+    break;
+
+  case 35:
+#line 319 "parser.y" // lalr1.cc:859
+    {
+                                    yylhs.value.as< ::ast::Node > () = ast::Node(ast::Node::Type::LIST, builder.get_location());
+                                    yylhs.value.as< ::ast::Node > ().add_child(yystack_[0].value.as< ::ast::Node > ());
+                                }
+#line 986 "yy_parser.cpp" // lalr1.cc:859
+    break;
+
+  case 36:
+#line 324 "parser.y" // lalr1.cc:859
+    {
+                                    yylhs.value.as< ::ast::Node > ().move_children_from(std::move(yystack_[1].value.as< ::ast::Node > ()));
+                                    yylhs.value.as< ::ast::Node > ().add_child(yystack_[0].value.as< ::ast::Node > ());
+                                }
+#line 995 "yy_parser.cpp" // lalr1.cc:859
+    break;
+
+  case 37:
+#line 331 "parser.y" // lalr1.cc:859
+    {
+                                yylhs.value.as< ::ast::Node > () = yystack_[0].value.as< ::ast::Node > ();
+                            }
+#line 1003 "yy_parser.cpp" // lalr1.cc:859
+    break;
+
+  case 38:
+#line 335 "parser.y" // lalr1.cc:859
+    {
+                                yylhs.value.as< ::ast::Node > () = yystack_[0].value.as< ::ast::Node > ();
+                            }
+#line 1011 "yy_parser.cpp" // lalr1.cc:859
+    break;
+
+  case 39:
+#line 342 "parser.y" // lalr1.cc:859
     {
                         yylhs.value.as< ::ast::Node > () = ast::Node(ast::Node::Type::MEMBER_DECLARATION, builder.get_location());
                         yylhs.value.as< ::ast::Node > ().add_child(yystack_[2].value.as< ::ast::Node > ());
                         yylhs.value.as< ::ast::Node > ().add_child(yystack_[1].value.as< ::ast::Node > ());
                     }
-#line 928 "yy_parser.cpp" // lalr1.cc:859
+#line 1021 "yy_parser.cpp" // lalr1.cc:859
     break;
 
-  case 31:
-#line 288 "parser.y" // lalr1.cc:859
+  case 40:
+#line 348 "parser.y" // lalr1.cc:859
     {
                         yylhs.value.as< ::ast::Node > () = ast::Node(ast::Node::Type::MEMBER_DECLARATION, builder.get_location());
                         yylhs.value.as< ::ast::Node > ().add_child(yystack_[4].value.as< ::ast::Node > ());
                         yylhs.value.as< ::ast::Node > ().add_child(yystack_[3].value.as< ::ast::Node > ());
                         yylhs.value.as< ::ast::Node > ().move_children_from(std::move(yystack_[1].value.as< ::ast::Node > ()));
                     }
-#line 939 "yy_parser.cpp" // lalr1.cc:859
+#line 1032 "yy_parser.cpp" // lalr1.cc:859
     break;
 
-  case 32:
-#line 295 "parser.y" // lalr1.cc:859
+  case 41:
+#line 355 "parser.y" // lalr1.cc:859
     {
                         yylhs.value.as< ::ast::Node > () = ast::Node(ast::Node::Type::MEMBER_DECLARATION, builder.get_location());
                         yylhs.value.as< ::ast::Node > ().add_child(yystack_[4].value.as< ::ast::Node > ());
                         yylhs.value.as< ::ast::Node > ().add_child(yystack_[3].value.as< ::ast::Node > ());
                         yylhs.value.as< ::ast::Node > ().add_child(yystack_[1].value.as< ::ast::Node > ());
                     }
-#line 950 "yy_parser.cpp" // lalr1.cc:859
+#line 1043 "yy_parser.cpp" // lalr1.cc:859
     break;
 
-  case 33:
-#line 302 "parser.y" // lalr1.cc:859
+  case 42:
+#line 362 "parser.y" // lalr1.cc:859
     {
                         yylhs.value.as< ::ast::Node > () = ast::Node(ast::Node::Type::MEMBER_DECLARATION, builder.get_location());
                         yylhs.value.as< ::ast::Node > ().add_child(yystack_[6].value.as< ::ast::Node > ());
@@ -958,278 +1051,295 @@ namespace yy {
                         yylhs.value.as< ::ast::Node > ().add_child(yystack_[3].value.as< ::ast::Node > ());
                         yylhs.value.as< ::ast::Node > ().move_children_from(std::move(yystack_[1].value.as< ::ast::Node > ()));
                     }
-#line 962 "yy_parser.cpp" // lalr1.cc:859
-    break;
-
-  case 34:
-#line 314 "parser.y" // lalr1.cc:859
-    {
-                        yylhs.value.as< ::ast::Node > () = yystack_[0].value.as< ::ast::Node > ();
-                    }
-#line 970 "yy_parser.cpp" // lalr1.cc:859
-    break;
-
-  case 35:
-#line 318 "parser.y" // lalr1.cc:859
-    {
-                        yylhs.value.as< ::ast::Node > () = yystack_[0].value.as< ::ast::Node > ();
-                    }
-#line 978 "yy_parser.cpp" // lalr1.cc:859
-    break;
-
-  case 36:
-#line 324 "parser.y" // lalr1.cc:859
-    {
-                yylhs.value.as< ::ast::Node > () = ast::Node(ast::Node::Type::IDENTIFIER, builder.get_location());
-                yylhs.value.as< ::ast::Node > ().add_attribute(ast::Attribute("value", yystack_[0].value.as< std::string > ()));
-            }
-#line 987 "yy_parser.cpp" // lalr1.cc:859
-    break;
-
-  case 37:
-#line 331 "parser.y" // lalr1.cc:859
-    {
-                    yylhs.value.as< ::ast::Node > () = ast::Node(ast::Node::Type::IDENTIFIER, builder.get_location());
-                    yylhs.value.as< ::ast::Node > ().add_attribute(ast::Attribute("value", yystack_[0].value.as< std::string > ()));
-                }
-#line 996 "yy_parser.cpp" // lalr1.cc:859
-    break;
-
-  case 38:
-#line 339 "parser.y" // lalr1.cc:859
-    {
-                    yylhs.value.as< ::ast::Node > () = yystack_[1].value.as< ::ast::Node > ();
-                }
-#line 1004 "yy_parser.cpp" // lalr1.cc:859
-    break;
-
-  case 39:
-#line 345 "parser.y" // lalr1.cc:859
-    {
-                    yylhs.value.as< ::ast::Node > () = ast::Node(ast::Node::Type::LIST, builder.get_location());
-                    yylhs.value.as< ::ast::Node > ().add_child(yystack_[0].value.as< ::ast::Node > ());
-                }
-#line 1013 "yy_parser.cpp" // lalr1.cc:859
-    break;
-
-  case 40:
-#line 350 "parser.y" // lalr1.cc:859
-    {
-                    yylhs.value.as< ::ast::Node > ().move_children_from(std::move(yystack_[2].value.as< ::ast::Node > ()));
-                    yylhs.value.as< ::ast::Node > ().add_child(yystack_[0].value.as< ::ast::Node > ());
-                }
-#line 1022 "yy_parser.cpp" // lalr1.cc:859
-    break;
-
-  case 41:
-#line 357 "parser.y" // lalr1.cc:859
-    {
-                yylhs.value.as< ::ast::Node > () = ast::Node(ast::Node::Type::ATTRIBUTE, builder.get_location());
-                yylhs.value.as< ::ast::Node > ().add_child(yystack_[2].value.as< ::ast::Node > ());
-                yylhs.value.as< ::ast::Node > ().add_child(yystack_[0].value.as< ::ast::Node > ());
-            }
-#line 1032 "yy_parser.cpp" // lalr1.cc:859
-    break;
-
-  case 42:
-#line 365 "parser.y" // lalr1.cc:859
-    {
-                yylhs.value.as< ::ast::Node > () = ast::Node(ast::Node::Type::INITIALIZER, builder.get_location());
-                yylhs.value.as< ::ast::Node > ().add_child(yystack_[0].value.as< ::ast::Node > ());
-            }
-#line 1041 "yy_parser.cpp" // lalr1.cc:859
+#line 1055 "yy_parser.cpp" // lalr1.cc:859
     break;
 
   case 43:
-#line 370 "parser.y" // lalr1.cc:859
+#line 374 "parser.y" // lalr1.cc:859
     {
-                yylhs.value.as< ::ast::Node > () = ast::Node(ast::Node::Type::INITIALIZER_LIST, builder.get_location());
-                yylhs.value.as< ::ast::Node > ().move_children_from(std::move(yystack_[0].value.as< ::ast::Node > ()));
-            }
-#line 1050 "yy_parser.cpp" // lalr1.cc:859
+                        yylhs.value.as< ::ast::Node > () = yystack_[0].value.as< ::ast::Node > ();
+                    }
+#line 1063 "yy_parser.cpp" // lalr1.cc:859
     break;
 
   case 44:
-#line 377 "parser.y" // lalr1.cc:859
+#line 378 "parser.y" // lalr1.cc:859
     {
-                        yylhs.value.as< ::ast::Node > () = ast::Node(ast::Node::Type::INITIALIZER_LIST, builder.get_location());
+                        yylhs.value.as< ::ast::Node > () = yystack_[0].value.as< ::ast::Node > ();
                     }
-#line 1058 "yy_parser.cpp" // lalr1.cc:859
+#line 1071 "yy_parser.cpp" // lalr1.cc:859
     break;
 
   case 45:
-#line 381 "parser.y" // lalr1.cc:859
+#line 382 "parser.y" // lalr1.cc:859
     {
-                        yylhs.value.as< ::ast::Node > () = ast::Node(ast::Node::Type::INITIALIZER_LIST, builder.get_location());
-                        yylhs.value.as< ::ast::Node > ().move_children_from(std::move(yystack_[1].value.as< ::ast::Node > ()));
+                        yylhs.value.as< ::ast::Node > () = yystack_[0].value.as< ::ast::Node > ();
                     }
-#line 1067 "yy_parser.cpp" // lalr1.cc:859
+#line 1079 "yy_parser.cpp" // lalr1.cc:859
     break;
 
   case 46:
 #line 388 "parser.y" // lalr1.cc:859
     {
-                        yylhs.value.as< ::ast::Node > ().add_child(std::move(yystack_[0].value.as< ::ast::Node > ()));
-                    }
-#line 1075 "yy_parser.cpp" // lalr1.cc:859
+                yylhs.value.as< ::ast::Node > () = ast::Node(ast::Node::Type::IDENTIFIER, builder.get_location());
+                yylhs.value.as< ::ast::Node > ().add_attribute(ast::Attribute("value", yystack_[0].value.as< std::string > ()));
+            }
+#line 1088 "yy_parser.cpp" // lalr1.cc:859
     break;
 
   case 47:
-#line 392 "parser.y" // lalr1.cc:859
+#line 395 "parser.y" // lalr1.cc:859
+    {
+                    yylhs.value.as< ::ast::Node > () = ast::Node(ast::Node::Type::IDENTIFIER, builder.get_location());
+                    yylhs.value.as< ::ast::Node > ().add_attribute(ast::Attribute("value", yystack_[0].value.as< std::string > ()));
+                }
+#line 1097 "yy_parser.cpp" // lalr1.cc:859
+    break;
+
+  case 48:
+#line 403 "parser.y" // lalr1.cc:859
+    {
+                    yylhs.value.as< ::ast::Node > () = yystack_[1].value.as< ::ast::Node > ();
+                }
+#line 1105 "yy_parser.cpp" // lalr1.cc:859
+    break;
+
+  case 49:
+#line 409 "parser.y" // lalr1.cc:859
+    {
+                    yylhs.value.as< ::ast::Node > () = ast::Node(ast::Node::Type::LIST, builder.get_location());
+                    yylhs.value.as< ::ast::Node > ().add_child(yystack_[0].value.as< ::ast::Node > ());
+                }
+#line 1114 "yy_parser.cpp" // lalr1.cc:859
+    break;
+
+  case 50:
+#line 414 "parser.y" // lalr1.cc:859
+    {
+                    yylhs.value.as< ::ast::Node > ().move_children_from(std::move(yystack_[2].value.as< ::ast::Node > ()));
+                    yylhs.value.as< ::ast::Node > ().add_child(yystack_[0].value.as< ::ast::Node > ());
+                }
+#line 1123 "yy_parser.cpp" // lalr1.cc:859
+    break;
+
+  case 51:
+#line 421 "parser.y" // lalr1.cc:859
+    {
+                yylhs.value.as< ::ast::Node > () = ast::Node(ast::Node::Type::ATTRIBUTE, builder.get_location());
+                yylhs.value.as< ::ast::Node > ().add_child(yystack_[2].value.as< ::ast::Node > ());
+                yylhs.value.as< ::ast::Node > ().add_child(yystack_[0].value.as< ::ast::Node > ());
+            }
+#line 1133 "yy_parser.cpp" // lalr1.cc:859
+    break;
+
+  case 52:
+#line 429 "parser.y" // lalr1.cc:859
+    {
+                yylhs.value.as< ::ast::Node > () = ast::Node(ast::Node::Type::INITIALIZER, builder.get_location());
+                yylhs.value.as< ::ast::Node > ().add_child(yystack_[0].value.as< ::ast::Node > ());
+            }
+#line 1142 "yy_parser.cpp" // lalr1.cc:859
+    break;
+
+  case 53:
+#line 434 "parser.y" // lalr1.cc:859
+    {
+                yylhs.value.as< ::ast::Node > () = ast::Node(ast::Node::Type::INITIALIZER, builder.get_location());
+                yylhs.value.as< ::ast::Node > ().add_child(yystack_[0].value.as< ::ast::Node > ());
+            }
+#line 1151 "yy_parser.cpp" // lalr1.cc:859
+    break;
+
+  case 54:
+#line 439 "parser.y" // lalr1.cc:859
+    {
+                yylhs.value.as< ::ast::Node > () = ast::Node(ast::Node::Type::INITIALIZER_LIST, builder.get_location());
+                yylhs.value.as< ::ast::Node > ().move_children_from(std::move(yystack_[0].value.as< ::ast::Node > ()));
+            }
+#line 1160 "yy_parser.cpp" // lalr1.cc:859
+    break;
+
+  case 55:
+#line 446 "parser.y" // lalr1.cc:859
+    {
+                        yylhs.value.as< ::ast::Node > () = ast::Node(ast::Node::Type::INITIALIZER_LIST, builder.get_location());
+                    }
+#line 1168 "yy_parser.cpp" // lalr1.cc:859
+    break;
+
+  case 56:
+#line 450 "parser.y" // lalr1.cc:859
+    {
+                        yylhs.value.as< ::ast::Node > () = ast::Node(ast::Node::Type::INITIALIZER_LIST, builder.get_location());
+                        yylhs.value.as< ::ast::Node > ().move_children_from(std::move(yystack_[1].value.as< ::ast::Node > ()));
+                    }
+#line 1177 "yy_parser.cpp" // lalr1.cc:859
+    break;
+
+  case 57:
+#line 457 "parser.y" // lalr1.cc:859
+    {
+                        yylhs.value.as< ::ast::Node > ().add_child(std::move(yystack_[0].value.as< ::ast::Node > ()));
+                    }
+#line 1185 "yy_parser.cpp" // lalr1.cc:859
+    break;
+
+  case 58:
+#line 461 "parser.y" // lalr1.cc:859
     {
                         yylhs.value.as< ::ast::Node > ().move_children_from(std::move(yystack_[2].value.as< ::ast::Node > ()));
                         yylhs.value.as< ::ast::Node > ().add_child(yystack_[0].value.as< ::ast::Node > ());
                     }
-#line 1084 "yy_parser.cpp" // lalr1.cc:859
+#line 1194 "yy_parser.cpp" // lalr1.cc:859
     break;
 
-  case 48:
-#line 399 "parser.y" // lalr1.cc:859
+  case 59:
+#line 468 "parser.y" // lalr1.cc:859
     {
             yylhs.value.as< ::ast::Node > () = ast::Node(ast::Node::Type::TYPE, builder.get_location());
             yylhs.value.as< ::ast::Node > ().add_child(yystack_[0].value.as< ::ast::Node > ());
         }
-#line 1093 "yy_parser.cpp" // lalr1.cc:859
+#line 1203 "yy_parser.cpp" // lalr1.cc:859
     break;
 
-  case 49:
-#line 404 "parser.y" // lalr1.cc:859
+  case 60:
+#line 473 "parser.y" // lalr1.cc:859
     {
             yylhs.value.as< ::ast::Node > () = ast::Node(ast::Node::Type::TYPE, builder.get_location());
             yylhs.value.as< ::ast::Node > ().add_child(yystack_[0].value.as< ::ast::Node > ());
         }
-#line 1102 "yy_parser.cpp" // lalr1.cc:859
+#line 1212 "yy_parser.cpp" // lalr1.cc:859
     break;
 
-  case 50:
-#line 409 "parser.y" // lalr1.cc:859
+  case 61:
+#line 478 "parser.y" // lalr1.cc:859
     {
             yylhs.value.as< ::ast::Node > () = ast::Node(ast::Node::Type::TYPE, builder.get_location());
             yylhs.value.as< ::ast::Node > ().add_child(yystack_[0].value.as< ::ast::Node > ());
         }
-#line 1111 "yy_parser.cpp" // lalr1.cc:859
+#line 1221 "yy_parser.cpp" // lalr1.cc:859
     break;
 
-  case 51:
-#line 416 "parser.y" // lalr1.cc:859
+  case 62:
+#line 485 "parser.y" // lalr1.cc:859
     {
                     yylhs.value.as< ::ast::Node > () = ast::Node(ast::Node::Type::TEMPLATE_INSTANTIATION, builder.get_location());
                     yylhs.value.as< ::ast::Node > ().add_child(yystack_[2].value.as< ::ast::Node > ());
                 }
-#line 1120 "yy_parser.cpp" // lalr1.cc:859
+#line 1230 "yy_parser.cpp" // lalr1.cc:859
     break;
 
-  case 52:
-#line 421 "parser.y" // lalr1.cc:859
+  case 63:
+#line 490 "parser.y" // lalr1.cc:859
     {
                     yylhs.value.as< ::ast::Node > () = ast::Node(ast::Node::Type::TEMPLATE_INSTANTIATION, builder.get_location());
                     yylhs.value.as< ::ast::Node > ().add_child(yystack_[3].value.as< ::ast::Node > ());
                     yylhs.value.as< ::ast::Node > ().move_children_from(std::move(yystack_[1].value.as< ::ast::Node > ()));
                 }
-#line 1130 "yy_parser.cpp" // lalr1.cc:859
+#line 1240 "yy_parser.cpp" // lalr1.cc:859
     break;
 
-  case 53:
-#line 429 "parser.y" // lalr1.cc:859
+  case 64:
+#line 498 "parser.y" // lalr1.cc:859
     {
                             yylhs.value.as< ::ast::Node > () = ast::Node(ast::Node::Type::LIST, builder.get_location());
                             yylhs.value.as< ::ast::Node > ().add_child(yystack_[0].value.as< ::ast::Node > ());
                         }
-#line 1139 "yy_parser.cpp" // lalr1.cc:859
+#line 1249 "yy_parser.cpp" // lalr1.cc:859
     break;
 
-  case 54:
-#line 434 "parser.y" // lalr1.cc:859
+  case 65:
+#line 503 "parser.y" // lalr1.cc:859
     {
                             yylhs.value.as< ::ast::Node > ().move_children_from(std::move(yystack_[2].value.as< ::ast::Node > ()));
                             yylhs.value.as< ::ast::Node > ().add_child(yystack_[0].value.as< ::ast::Node > ());
                         }
-#line 1148 "yy_parser.cpp" // lalr1.cc:859
+#line 1258 "yy_parser.cpp" // lalr1.cc:859
     break;
 
-  case 55:
-#line 441 "parser.y" // lalr1.cc:859
+  case 66:
+#line 510 "parser.y" // lalr1.cc:859
     {
                         yylhs.value.as< ::ast::Node > () = ast::Node(ast::Node::Type::TEMPLATE_ARGUMENT, builder.get_location());
                         yylhs.value.as< ::ast::Node > ().add_child(yystack_[0].value.as< ::ast::Node > ());
                     }
-#line 1157 "yy_parser.cpp" // lalr1.cc:859
+#line 1267 "yy_parser.cpp" // lalr1.cc:859
     break;
 
-  case 56:
-#line 446 "parser.y" // lalr1.cc:859
+  case 67:
+#line 515 "parser.y" // lalr1.cc:859
     {
                         yylhs.value.as< ::ast::Node > () = ast::Node(ast::Node::Type::TEMPLATE_ARGUMENT, builder.get_location());
                         yylhs.value.as< ::ast::Node > ().add_child(ast::Node(ast::Node::Type::LITERAL, builder.get_location()).add_attribute(ast::Attribute("value", true)));
                     }
-#line 1166 "yy_parser.cpp" // lalr1.cc:859
+#line 1276 "yy_parser.cpp" // lalr1.cc:859
     break;
 
-  case 57:
-#line 451 "parser.y" // lalr1.cc:859
+  case 68:
+#line 520 "parser.y" // lalr1.cc:859
     {
                         yylhs.value.as< ::ast::Node > () = ast::Node(ast::Node::Type::TEMPLATE_ARGUMENT, builder.get_location());
                         yylhs.value.as< ::ast::Node > ().add_child(ast::Node(ast::Node::Type::LITERAL, builder.get_location()).add_attribute(ast::Attribute("value", false)));
                     }
-#line 1175 "yy_parser.cpp" // lalr1.cc:859
+#line 1285 "yy_parser.cpp" // lalr1.cc:859
     break;
 
-  case 58:
-#line 458 "parser.y" // lalr1.cc:859
+  case 69:
+#line 527 "parser.y" // lalr1.cc:859
     {
             yylhs.value.as< ::ast::Node > () = ast::Node(ast::Node::Type::LITERAL, builder.get_location());
             yylhs.value.as< ::ast::Node > ().add_attribute(ast::Attribute("value", yystack_[0].value.as< float > ()));
         }
-#line 1184 "yy_parser.cpp" // lalr1.cc:859
+#line 1294 "yy_parser.cpp" // lalr1.cc:859
     break;
 
-  case 59:
-#line 463 "parser.y" // lalr1.cc:859
+  case 70:
+#line 532 "parser.y" // lalr1.cc:859
     {
             yylhs.value.as< ::ast::Node > () = ast::Node(ast::Node::Type::LITERAL, builder.get_location());
             yylhs.value.as< ::ast::Node > ().add_attribute(ast::Attribute("value", yystack_[0].value.as< double > ()));
         }
-#line 1193 "yy_parser.cpp" // lalr1.cc:859
+#line 1303 "yy_parser.cpp" // lalr1.cc:859
     break;
 
-  case 60:
-#line 468 "parser.y" // lalr1.cc:859
+  case 71:
+#line 537 "parser.y" // lalr1.cc:859
     {
             yylhs.value.as< ::ast::Node > () = ast::Node(ast::Node::Type::LITERAL, builder.get_location());
             yylhs.value.as< ::ast::Node > ().add_attribute(ast::Attribute("value", yystack_[0].value.as< int64_t > ()));
         }
-#line 1202 "yy_parser.cpp" // lalr1.cc:859
+#line 1312 "yy_parser.cpp" // lalr1.cc:859
     break;
 
-  case 61:
-#line 473 "parser.y" // lalr1.cc:859
+  case 72:
+#line 542 "parser.y" // lalr1.cc:859
     {
             yylhs.value.as< ::ast::Node > () = ast::Node(ast::Node::Type::LITERAL, builder.get_location());
             yylhs.value.as< ::ast::Node > ().add_attribute(ast::Attribute("value", yystack_[0].value.as< std::string > ().substr(1, yystack_[0].value.as< std::string > ().size() - 2)));
         }
-#line 1211 "yy_parser.cpp" // lalr1.cc:859
+#line 1321 "yy_parser.cpp" // lalr1.cc:859
     break;
 
-  case 62:
-#line 478 "parser.y" // lalr1.cc:859
+  case 73:
+#line 547 "parser.y" // lalr1.cc:859
     {
             yylhs.value.as< ::ast::Node > () = ast::Node(ast::Node::Type::LITERAL, builder.get_location());
             yylhs.value.as< ::ast::Node > ().add_attribute(ast::Attribute("value", false));
         }
-#line 1220 "yy_parser.cpp" // lalr1.cc:859
+#line 1330 "yy_parser.cpp" // lalr1.cc:859
     break;
 
-  case 63:
-#line 483 "parser.y" // lalr1.cc:859
+  case 74:
+#line 552 "parser.y" // lalr1.cc:859
     {
             yylhs.value.as< ::ast::Node > () = ast::Node(ast::Node::Type::LITERAL, builder.get_location());
             yylhs.value.as< ::ast::Node > ().add_attribute(ast::Attribute("value", true));
         }
-#line 1229 "yy_parser.cpp" // lalr1.cc:859
+#line 1339 "yy_parser.cpp" // lalr1.cc:859
     break;
 
 
-#line 1233 "yy_parser.cpp" // lalr1.cc:859
+#line 1343 "yy_parser.cpp" // lalr1.cc:859
             default:
               break;
             }
@@ -1484,132 +1594,151 @@ namespace yy {
   }
 
 
-  const signed char  parser ::yypact_ninf_ = -75;
+  const signed char  parser ::yypact_ninf_ = -91;
 
   const signed char  parser ::yytable_ninf_ = -1;
 
   const signed char
    parser ::yypact_[] =
   {
-      66,   -24,   -14,   -14,   -14,    26,    28,   -75,    85,   -75,
-     -75,   -75,   -75,   -75,   -75,   -75,    21,    -5,    36,   -75,
-     -75,   -75,    69,     5,    31,    75,   -75,    22,   -75,    70,
-     -75,    24,    45,    16,   -75,   -75,   -75,   -14,    69,    44,
-     -75,   -75,    81,    85,   -75,   -75,    56,    60,   -75,   -75,
-      77,   -75,     0,   -75,    11,   -75,   -75,   -75,   -75,   -75,
-     -75,    61,   -75,   -14,    78,   -75,    43,    60,   -75,    79,
-      87,   -75,    29,    73,    62,   -75,   -75,   -75,   -75,    34,
-     -75,   -75,   -75,   -75,    76,   -75,   -75,    82,   -75,    83,
-     -75,    43,   -75,   -14,   -75,   -75,    32,    60,   -75,   -75,
-     -75,   -75,   -75,   -75,    43,    84,   -75,   -75
+     106,   -19,   -13,   -13,   -13,   -13,    22,    27,   -91,   110,
+     -91,   -91,   -91,   -91,   -91,   -91,   -91,   -91,    24,    -7,
+      28,    40,   -91,   -91,   -91,    31,    23,    75,     2,     7,
+     -91,    67,   -91,    82,   -91,    65,    79,    58,   -91,   -91,
+     -91,   -13,    31,    87,    95,   107,   -13,   -91,    81,   -91,
+     -91,   108,   110,   -91,   -91,    55,   105,   -91,   -91,   102,
+     -91,    41,   -91,    43,   -91,   103,   -91,    97,   105,   -91,
+     -91,   -91,   -91,   -91,   -91,   -91,    48,   -91,   -13,   109,
+     -91,    68,   105,   -91,   111,   112,   -91,    26,   104,   -91,
+      90,   118,    16,   -91,   -91,   -91,   -91,    61,   -91,   -91,
+     -91,   -91,   -91,    98,   -91,   -91,   113,   -91,   114,   105,
+     -91,   -91,   -91,    68,   -91,   -13,   -91,   -91,    15,   105,
+     -91,   -91,   -91,   115,   -91,   -91,   -91,    68,   116,   -91,
+     -91,   -91
   };
 
   const unsigned char
    parser ::yydefact_[] =
   {
-       0,     0,     0,     0,     0,     0,     2,     4,     3,     7,
-      35,    34,    10,     9,     6,    36,     0,     0,     0,     1,
-       5,     8,     0,     0,     0,     0,    37,    49,    48,     0,
-      50,     0,     0,    17,    18,    21,    20,     0,     0,     0,
-      23,    29,     0,    25,    26,    28,     0,     0,    11,    13,
-       0,    19,     0,    22,     0,    24,    27,    57,    56,    51,
-      55,     0,    53,     0,     0,    14,     0,     0,    30,     0,
-       0,    52,     0,     0,     0,    39,    12,    62,    63,     0,
-      58,    59,    60,    61,     0,    43,    42,     0,    15,     0,
-      54,     0,    38,     0,    44,    46,     0,     0,    32,    31,
-      16,    41,    40,    45,     0,     0,    47,    33
+       0,     0,     0,     0,     0,     0,     0,     2,     4,     3,
+       7,    44,    45,    43,    10,     9,     6,    46,     0,     0,
+       0,     0,     1,     5,     8,     0,     0,     0,     0,     0,
+      47,    60,    59,     0,    61,     0,     0,    26,    27,    30,
+      29,     0,     0,     0,     0,     0,    15,    16,     0,    32,
+      38,     0,    34,    35,    37,     0,     0,    11,    22,     0,
+      28,     0,    31,     0,    13,     0,    17,     0,     0,    18,
+      33,    36,    68,    67,    62,    66,     0,    64,     0,     0,
+      23,     0,     0,    39,     0,     0,    14,     0,     0,    63,
+       0,     0,     0,    49,    12,    73,    74,     0,    69,    70,
+      71,    72,    53,     0,    54,    52,     0,    24,     0,     0,
+      19,    20,    65,     0,    48,     0,    55,    57,     0,     0,
+      41,    40,    25,     0,    51,    50,    56,     0,     0,    21,
+      58,    42
   };
 
-  const signed char
+  const short int
    parser ::yypgoto_[] =
   {
-     -75,   -75,   -75,    99,   -75,   101,   -75,   -75,    57,   -75,
-      80,   -75,   -18,   -75,   -75,    67,   -75,     4,    -2,   -75,
-     -61,   -75,    19,   -74,   -75,   -75,   -19,   -75,   -75,    42,
-     -75
+     -91,   -91,   -91,   126,   -91,   128,   -91,   -91,   -91,   -91,
+      89,   -91,    77,   -91,   117,   -91,   -20,   -91,   -91,    91,
+     -91,     6,    -2,   -73,   -63,   -91,    29,   -90,   -91,   -91,
+     -21,   -91,   -91,    56,   -91
   };
 
   const signed char
    parser ::yydefgoto_[] =
   {
-      -1,     5,     6,     7,     8,     9,    10,    11,    32,    33,
-      34,    39,    12,    42,    43,    44,    35,    36,    27,    28,
-      64,    74,    75,    84,    85,    96,    37,    30,    61,    62,
-      86
+      -1,     6,     7,     8,     9,    10,    11,    12,    45,    46,
+      47,    13,    36,    37,    38,    43,    14,    51,    52,    53,
+      39,    40,    31,    32,    79,    92,    93,   103,   104,   118,
+      41,    34,    76,    77,   105
   };
 
   const unsigned char
    parser ::yytable_[] =
   {
-      16,    17,    18,    29,    13,    95,    87,    41,    14,     2,
-       3,    23,    13,    66,    15,     2,     3,   101,    24,    53,
-       2,     3,    31,    67,    68,    41,    19,    60,    69,    45,
-     106,     1,    26,    15,    22,    52,   105,    38,    26,    15,
-      57,    58,    46,    26,    15,    77,    78,    45,    49,   103,
-      79,    94,    25,    60,    77,    78,    26,    15,   104,    79,
-      54,    73,    50,    80,    81,    82,    83,    57,    58,     1,
-       2,     3,    80,    81,    82,    83,     4,    59,    63,     2,
-       3,    92,    71,    26,    15,     4,    91,    72,    93,     2,
-       3,    73,    40,    47,    48,     4,    26,    15,    55,    97,
-      98,    65,    76,    88,    89,    20,    99,   100,   107,    21,
-      56,    70,   102,    51,    90
+      18,    19,    20,    21,    33,    88,    15,   117,   102,    50,
+      26,     2,     3,     4,    16,    15,    17,    27,     5,   106,
+      44,    62,    22,   124,   102,    49,    48,     2,     3,     4,
+       1,    17,    50,   126,    75,    54,   114,   130,    25,    61,
+     102,    35,   127,   115,    48,    28,   123,     2,     3,     4,
+     109,    30,    17,   110,   102,    81,   128,    29,    54,    30,
+      17,    84,     2,     3,     4,    82,    83,    72,    73,    75,
+      89,    30,    17,    95,    96,    90,    91,    74,    97,   116,
+      95,    96,    42,    30,    17,    97,    30,    17,    55,    30,
+      58,    98,    99,   100,   101,    67,    30,    59,    98,    99,
+     100,   101,    72,    73,    63,    68,    56,    57,    69,     1,
+       2,     3,     4,    91,     2,     3,     4,     5,    30,    17,
+      64,     5,   119,   120,    78,    65,    70,    80,    86,    87,
+     108,   111,   113,    23,    94,    66,   107,    24,   121,   122,
+      85,   131,   129,    71,   125,     0,   112,     0,     0,     0,
+       0,     0,     0,     0,    60
   };
 
-  const unsigned char
+  const signed char
    parser ::yycheck_[] =
   {
-       2,     3,     4,    22,     0,    79,    67,    25,    32,     4,
-       5,    16,     8,    13,    28,     4,     5,    91,    23,    38,
-       4,     5,    17,    23,    24,    43,     0,    46,    17,    25,
-     104,     3,    27,    28,    13,    37,    97,     6,    27,    28,
-      11,    12,    20,    27,    28,    11,    12,    43,    24,    17,
-      16,    17,    16,    72,    11,    12,    27,    28,    26,    16,
-      16,    63,    17,    29,    30,    31,    32,    11,    12,     3,
-       4,     5,    29,    30,    31,    32,    10,    21,    18,     4,
-       5,    19,    21,    27,    28,    10,    13,    26,    26,     4,
-       5,    93,    17,    23,    24,    10,    27,    28,    17,    23,
-      24,    24,    24,    24,    17,     6,    24,    24,    24,     8,
-      43,    54,    93,    33,    72
+       2,     3,     4,     5,    25,    68,     0,    97,    81,    29,
+      17,     4,     5,     6,    33,     9,    29,    24,    11,    82,
+      18,    42,     0,   113,    97,    18,    28,     4,     5,     6,
+       3,    29,    52,    18,    55,    29,    20,   127,    14,    41,
+     113,    18,    27,    27,    46,    17,   109,     4,     5,     6,
+      24,    28,    29,    27,   127,    14,   119,    17,    52,    28,
+      29,    18,     4,     5,     6,    24,    25,    12,    13,    90,
+      22,    28,    29,    12,    13,    27,    78,    22,    17,    18,
+      12,    13,     7,    28,    29,    17,    28,    29,    21,    28,
+      25,    30,    31,    32,    33,    14,    28,    18,    30,    31,
+      32,    33,    12,    13,    17,    24,    24,    25,    27,     3,
+       4,     5,     6,   115,     4,     5,     6,    11,    28,    29,
+      25,    11,    24,    25,    19,    18,    18,    25,    25,    32,
+      18,    27,    14,     7,    25,    46,    25,     9,    25,    25,
+      63,    25,    27,    52,   115,    -1,    90,    -1,    -1,    -1,
+      -1,    -1,    -1,    -1,    37
   };
 
   const unsigned char
    parser ::yystos_[] =
   {
-       0,     3,     4,     5,    10,    34,    35,    36,    37,    38,
-      39,    40,    45,    50,    32,    28,    51,    51,    51,     0,
-      36,    38,    13,    16,    23,    16,    27,    51,    52,    59,
-      60,    17,    41,    42,    43,    49,    50,    59,     6,    44,
-      17,    45,    46,    47,    48,    50,    20,    23,    24,    24,
-      17,    43,    51,    59,    16,    17,    48,    11,    12,    21,
-      59,    61,    62,    18,    53,    24,    13,    23,    24,    17,
-      41,    21,    26,    51,    54,    55,    24,    11,    12,    16,
-      29,    30,    31,    32,    56,    57,    63,    53,    24,    17,
-      62,    13,    19,    26,    17,    56,    58,    23,    24,    24,
-      24,    56,    55,    17,    26,    53,    56,    24
+       0,     3,     4,     5,     6,    11,    35,    36,    37,    38,
+      39,    40,    41,    45,    50,    55,    33,    29,    56,    56,
+      56,    56,     0,    37,    39,    14,    17,    24,    17,    17,
+      28,    56,    57,    64,    65,    18,    46,    47,    48,    54,
+      55,    64,     7,    49,    18,    42,    43,    44,    56,    18,
+      50,    51,    52,    53,    55,    21,    24,    25,    25,    18,
+      48,    56,    64,    17,    25,    18,    44,    14,    24,    27,
+      18,    53,    12,    13,    22,    64,    66,    67,    19,    58,
+      25,    14,    24,    25,    18,    46,    25,    32,    58,    22,
+      27,    56,    59,    60,    25,    12,    13,    17,    30,    31,
+      32,    33,    57,    61,    62,    68,    58,    25,    18,    24,
+      27,    27,    67,    14,    20,    27,    18,    61,    63,    24,
+      25,    25,    25,    58,    61,    60,    18,    27,    58,    27,
+      61,    25
   };
 
   const unsigned char
    parser ::yyr1_[] =
   {
-       0,    33,    34,    34,    35,    35,    36,    37,    37,    38,
-      38,    39,    39,    40,    40,    40,    40,    41,    42,    42,
-      43,    43,    44,    45,    45,    46,    47,    47,    48,    48,
-      49,    49,    49,    49,    50,    50,    51,    52,    53,    54,
-      54,    55,    56,    56,    57,    57,    58,    58,    59,    59,
-      59,    60,    60,    61,    61,    62,    62,    62,    63,    63,
-      63,    63,    63,    63
+       0,    34,    35,    35,    36,    36,    37,    38,    38,    39,
+      39,    40,    40,    41,    41,    42,    43,    43,    44,    44,
+      44,    44,    45,    45,    45,    45,    46,    47,    47,    48,
+      48,    49,    50,    50,    51,    52,    52,    53,    53,    54,
+      54,    54,    54,    55,    55,    55,    56,    57,    58,    59,
+      59,    60,    61,    61,    61,    62,    62,    63,    63,    64,
+      64,    64,    65,    65,    66,    66,    67,    67,    67,    68,
+      68,    68,    68,    68,    68
   };
 
   const unsigned char
    parser ::yyr2_[] =
   {
        0,     2,     1,     1,     1,     2,     2,     1,     2,     1,
-       1,     5,     7,     5,     6,     7,     8,     1,     1,     2,
-       1,     1,     2,     4,     5,     1,     1,     2,     1,     1,
-       3,     5,     5,     7,     1,     1,     1,     1,     3,     1,
-       3,     3,     1,     1,     2,     3,     1,     3,     1,     1,
-       1,     3,     4,     1,     3,     1,     1,     1,     1,     1,
-       1,     1,     1,     1
+       1,     5,     7,     5,     6,     1,     1,     2,     2,     4,
+       4,     6,     5,     6,     7,     8,     1,     1,     2,     1,
+       1,     2,     4,     5,     1,     1,     2,     1,     1,     3,
+       5,     5,     7,     1,     1,     1,     1,     1,     3,     1,
+       3,     3,     1,     1,     1,     2,     3,     1,     3,     1,
+       1,     1,     3,     4,     1,     3,     1,     1,     1,     1,
+       1,     1,     1,     1,     1
   };
 
 
@@ -1620,21 +1749,22 @@ namespace yy {
   const  parser ::yytname_[] =
   {
   "\"end\"", "error", "$undefined", "\"import\"", "\"alias\"",
-  "\"struct\"", "\"public\"", "\"private\"", "\"protected\"", "\"const\"",
-  "\"namespace\"", "\"false\"", "\"true\"", "\"=\"", "\"(\"", "\")\"",
-  "\"{\"", "\"}\"", "\"[\"", "\"]\"", "\"<\"", "\">\"", "\"::\"", "\":\"",
-  "\";\"", "\".\"", "\",\"", "\"identifier path\"", "\"identifier\"",
-  "\"float literal\"", "\"double literal\"", "\"integer literal\"",
-  "\"string literal\"", "$accept", "program", "import_list", "import",
-  "top_level_declaration_list", "top_level_declaration",
-  "alias_declaration", "struct_declaration", "struct_body",
-  "struct_body_declaration_list", "struct_body_declaration", "inheritance",
-  "namespace_declaration", "namespace_body",
-  "namespace_body_declaration_list", "namespace_body_declaration",
-  "member_declaration", "type_declaration", "identifier",
-  "identifier_path", "attribute_list", "attribute_body", "attribute",
-  "initializer", "initializer_list", "initializer_body", "type",
-  "templated_type", "template_argument_list", "template_argument",
+  "\"struct\"", "\"enum\"", "\"public\"", "\"private\"", "\"protected\"",
+  "\"const\"", "\"namespace\"", "\"false\"", "\"true\"", "\"=\"", "\"(\"",
+  "\")\"", "\"{\"", "\"}\"", "\"[\"", "\"]\"", "\"<\"", "\">\"", "\"::\"",
+  "\":\"", "\";\"", "\".\"", "\",\"", "\"identifier path\"",
+  "\"identifier\"", "\"float literal\"", "\"double literal\"",
+  "\"integer literal\"", "\"string literal\"", "$accept", "program",
+  "import_list", "import", "top_level_declaration_list",
+  "top_level_declaration", "alias_declaration", "enum_declaration",
+  "enum_body", "enum_body_item_list", "enum_body_item",
+  "struct_declaration", "struct_body", "struct_body_declaration_list",
+  "struct_body_declaration", "inheritance", "namespace_declaration",
+  "namespace_body", "namespace_body_declaration_list",
+  "namespace_body_declaration", "member_declaration", "type_declaration",
+  "identifier", "identifier_path", "attribute_list", "attribute_body",
+  "attribute", "initializer", "initializer_list", "initializer_body",
+  "type", "templated_type", "template_argument_list", "template_argument",
   "literal", YY_NULLPTR
   };
 
@@ -1642,13 +1772,14 @@ namespace yy {
   const unsigned short int
    parser ::yyrline_[] =
   {
-       0,   112,   112,   115,   121,   124,   129,   136,   141,   148,
-     152,   159,   165,   174,   179,   185,   191,   200,   207,   212,
-     220,   224,   230,   238,   243,   251,   258,   263,   270,   274,
-     281,   287,   294,   301,   313,   317,   323,   330,   338,   344,
-     349,   356,   364,   369,   376,   380,   387,   391,   398,   403,
-     408,   415,   420,   428,   433,   440,   445,   450,   457,   462,
-     467,   472,   477,   482
+       0,   117,   117,   120,   126,   129,   134,   141,   146,   153,
+     157,   164,   170,   179,   184,   192,   199,   204,   212,   216,
+     221,   225,   234,   239,   245,   251,   260,   267,   272,   280,
+     284,   290,   298,   303,   311,   318,   323,   330,   334,   341,
+     347,   354,   361,   373,   377,   381,   387,   394,   402,   408,
+     413,   420,   428,   433,   438,   445,   449,   456,   460,   467,
+     472,   477,   484,   489,   497,   502,   509,   514,   519,   526,
+     531,   536,   541,   546,   551
   };
 
   // Print the state stack on the debug stream.
@@ -1683,8 +1814,8 @@ namespace yy {
 
 
 } // yy
-#line 1687 "yy_parser.cpp" // lalr1.cc:1167
-#line 490 "parser.y" // lalr1.cc:1168
+#line 1818 "yy_parser.cpp" // lalr1.cc:1167
+#line 559 "parser.y" // lalr1.cc:1168
 
 
 namespace yy

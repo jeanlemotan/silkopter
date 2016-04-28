@@ -7,6 +7,7 @@
 #include "IVector_Value.h"
 #include "IString_Value.h"
 #include "IBool_Value.h"
+#include "IPoly_Value.h"
 
 namespace ts
 {

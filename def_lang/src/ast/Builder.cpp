@@ -28,6 +28,7 @@
 #include "def_lang/impl/UI_Name_Attribute.h"
 #include "def_lang/impl/String_Type.h"
 #include "def_lang/impl/String_Value.h"
+#include "def_lang/impl/Enum_Type.h"
 
 
 namespace ast
@@ -63,7 +64,7 @@ ts::Result<void> Builder::parse(std::string const& filename)
     auto result = start_file(filename);
     if (!result)
     {
-        return ts::Error("");
+        return ts::Error("Cannot parse file '" + filename + "'");
     }
 
     m_parser->parse();
@@ -137,7 +138,7 @@ Lexer& Builder::get_lexer()
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 
 static ts::Result<void> populate_declaration_scope(ts::Type_System& ts, ts::IDeclaration_Scope& scope, Node const& node);
-
+static ts::Result<void> create_enum_type(ts::Type_System& ts, ts::IDeclaration_Scope& scope, Node const& node);
 
 static ts::Result<std::string> get_name_identifier(Node const& node)
 {
@@ -665,6 +666,14 @@ static ts::Result<void> create_struct_type(ts::Type_System& ts, ts::IDeclaration
                     return result.error();
                 }
             }
+            else if (ch.get_type() == Node::Type::ENUM_DECLARATION)
+            {
+                auto result = create_enum_type(ts, *type, ch);
+                if (result != ts::success)
+                {
+                    return result.error();
+                }
+            }
             else if (ch.get_type() == Node::Type::ALIAS_DECLARATION)
             {
                 auto result = create_alias(ts, *type, ch);
@@ -698,6 +707,92 @@ static ts::Result<void> create_struct_type(ts::Type_System& ts, ts::IDeclaration
     return ts::success;
 }
 
+static ts::Result<void> create_enum_item(ts::Type_System& ts, ts::IEnum_Type& type, Node const& node)
+{
+    TS_ASSERT(node.get_type() == Node::Type::IDENTIFIER);
+
+//    auto name_result = get_name_identifier(node);
+//    if (name_result != ts::success)
+//    {
+//        return name_result.error();
+//    }
+//    std::string name = name_result.payload();
+
+//    ts::Enum_Type* type = new ts::Enum_Type(name, parent);
+
+//    //add it to the typesystem so we can search for types
+//    auto result = scope.add_symbol(std::shared_ptr<ts::ISymbol>(type));
+//    if (result != ts::success)
+//    {
+//        return ts::Error(node.get_source_location().to_string() + result.error().what());
+//    }
+
+//    Node const* body = node.find_first_child_by_type(Node::Type::ENUM_BODY);
+//    if (body)
+//    {
+//        for (Node const& ch: body->get_children())
+//        {
+//            if (ch.get_type() == Node::Type::IDENTIFIER)
+//            {
+//                auto result = create_enum_item(ts, *type, ch);
+//                if (result != ts::success)
+//                {
+//                    return result.error();
+//                }
+//            }
+//            else
+//            {
+//                return ts::Error(body->get_source_location().to_string() + "Illegal node type in enum");
+//            }
+//        }
+//    }
+
+    return ts::success;
+}
+
+static ts::Result<void> create_enum_type(ts::Type_System& ts, ts::IDeclaration_Scope& scope, Node const& node)
+{
+    TS_ASSERT(node.get_type() == Node::Type::ENUM_DECLARATION);
+
+    auto name_result = get_name_identifier(node);
+    if (name_result != ts::success)
+    {
+        return name_result.error();
+    }
+    std::string name = name_result.payload();
+
+    ts::Enum_Type* type = new ts::Enum_Type(name);
+
+    //add it to the typesystem so we can search for types
+    auto result = scope.add_symbol(std::shared_ptr<ts::ISymbol>(type));
+    if (result != ts::success)
+    {
+        return ts::Error(node.get_source_location().to_string() + result.error().what());
+    }
+
+    Node const* body = node.find_first_child_by_type(Node::Type::ENUM_BODY);
+    if (body)
+    {
+        for (Node const& ch: body->get_children())
+        {
+            if (ch.get_type() == Node::Type::IDENTIFIER)
+            {
+                auto result = create_enum_item(ts, *type, ch);
+                if (result != ts::success)
+                {
+                    return result.error();
+                }
+            }
+            else
+            {
+                return ts::Error(body->get_source_location().to_string() + "Illegal node type in enum");
+            }
+        }
+    }
+
+    return ts::success;
+}
+
 static ts::Result<void> create_symbol(ts::Type_System& ts, ts::IDeclaration_Scope& scope, Node const& node)
 {
     if (node.get_type() == Node::Type::NAMESPACE_DECLARATION)
@@ -707,6 +802,10 @@ static ts::Result<void> create_symbol(ts::Type_System& ts, ts::IDeclaration_Scop
     else if (node.get_type() == Node::Type::STRUCT_DECLARATION)
     {
         return create_struct_type(ts, scope, node);
+    }
+    else if (node.get_type() == Node::Type::ENUM_DECLARATION)
+    {
+        return create_enum_type(ts, scope, node);
     }
     else if (node.get_type() == Node::Type::ALIAS_DECLARATION)
     {

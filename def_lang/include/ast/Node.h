@@ -31,6 +31,9 @@ public:
         STRUCT_DECLARATION,
         STRUCT_BODY,
 
+        ENUM_DECLARATION,
+        ENUM_BODY,
+
         CONSTANT_DECLARATION,
 
         MEMBER_DECLARATION,
