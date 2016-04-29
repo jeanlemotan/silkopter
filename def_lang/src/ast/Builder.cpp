@@ -410,12 +410,8 @@ static ts::Result<std::shared_ptr<ts::IInitializer>> create_initializer(ts::Type
 
         return std::make_shared<ts::Initializer_List>(std::move(initializers));
     }
-    else
-    {
-        return ts::Error(node.get_source_location().to_string() + "Unknown initializer");
-    }
 
-    return nullptr;
+    return ts::Error(node.get_source_location().to_string() + "Unknown initializer");
 }
 
 static ts::Result<void> create_attributes(ts::Type_System& ts, ts::IType const& type, ts::IAttribute_Container& container, Node const& node)
