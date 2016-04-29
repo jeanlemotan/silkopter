@@ -17,7 +17,7 @@ std::string Bool_Value::get_template_instantiation_string() const
 }
 Result<void> Bool_Value::copy_assign(IInitializer const& initializer)
 {
-    IValue const* value = initializer.get_initializer_value();
+    std::shared_ptr<const IValue> value = initializer.get_initializer_value();
     if (!value)
     {
         return Error("Cannot evaluate initializer list");
@@ -38,7 +38,7 @@ Result<serialization::Value> Bool_Value::serialize() const
 
 Result<void> Bool_Value::deserialize(serialization::Value const& sz_value)
 {
-    if (sz_value.get_type() != serialization::Value::Type::BOOL)
+    if (!sz_value.is_bool())
     {
         return Error("Expected bool value when deserializing");
     }

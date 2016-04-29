@@ -12,10 +12,10 @@ class IInitializer
 public:
     virtual ~IInitializer() = default;
 
-    virtual IValue const* get_initializer_value() const = 0;
+    virtual std::shared_ptr<const IValue> get_initializer_value() const = 0;
 
     template<typename T>
-    T const* get_specialized_initializer_value() const;
+    std::shared_ptr<const T> get_specialized_initializer_value() const;
 };
 
 }

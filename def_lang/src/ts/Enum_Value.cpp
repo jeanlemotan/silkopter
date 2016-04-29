@@ -44,7 +44,16 @@ Result<void> Enum_Value::copy_assign(IValue const& other)
 
 Result<void> Enum_Value::copy_assign(IInitializer const& initializer)
 {
-    return Error("not implemented");
+    if (IEnum_Item const* item = dynamic_cast<IEnum_Item const*>(&initializer))
+    {
+        if (item->get_parent_scope() != m_type.get())
+        {
+            return Error("Cannot initialize a '" + m_type->get_symbol_path().to_string() + "' with a '" + item->get_symbol_path().to_string() + "'");
+        }
+        std::shared_ptr<const IEnum_Item> i = m_type->find_item_by_name(item->get_name());
+        return set_value(i);
+    }
+    return Error("Bad initializer item for '" + m_type->get_symbol_path().to_string() + "'");
 }
 
 std::shared_ptr<IValue> Enum_Value::clone() const
@@ -106,9 +115,9 @@ std::shared_ptr<IEnum_Type const> Enum_Value::get_specialized_type() const
 
 Result<void> Enum_Value::set_value(std::shared_ptr<const IEnum_Item> item)
 {
-    if (!item)
+    if (item->get_parent_scope() != m_type.get())
     {
-        return Error("Cannot set a null item");
+        return Error("Cannot initialize a '" + m_type->get_symbol_path().to_string() + "' with a '" + item->get_symbol_path().to_string() + "'");
     }
     m_value = item;
     return success;

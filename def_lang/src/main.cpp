@@ -38,44 +38,46 @@ int main(int argc, char **argv)
         std::cerr.flush();
     }
 
-    std::shared_ptr<ts::IStruct_Type> type = ts.find_specialized_symbol_by_path<ts::IStruct_Type>("silk::Multirotor_Config");
+    std::shared_ptr<ts::IStruct_Type> type = ts.find_specialized_symbol_by_path<ts::IStruct_Type>("silk::Raspicam_Config");
     TS_ASSERT(type);
 
     std::shared_ptr<ts::IStruct_Value> value = type->create_specialized_value();
 
-    {
-        std::shared_ptr<ts::IString_Value> name = value->select_specialized<ts::IString_Value>("name");
-        auto result = name->set_value("silkopter");
-        TS_ASSERT(result == ts::success);
+//    {
+//        std::shared_ptr<ts::IString_Value> name = value->select_specialized<ts::IString_Value>("name");
+//        auto result = name->set_value("silkopter");
+//        TS_ASSERT(result == ts::success);
 
-        std::shared_ptr<ts::IVector_Value> motors = value->select_specialized<ts::IVector_Value>("motors");
-        for (size_t i = 0; i < 10; i++)
-        {
-            auto result = motors->insert_default_value(motors->get_value_count());
-            TS_ASSERT(result == ts::success);
-        }
+//        std::shared_ptr<ts::IVector_Value> motors = value->select_specialized<ts::IVector_Value>("motors");
+//        for (size_t i = 0; i < 10; i++)
+//        {
+//            auto result = motors->insert_default_value(motors->get_value_count());
+//            TS_ASSERT(result == ts::success);
+//        }
 
-//        std::shared_ptr<ts::IVec3f_Value> motor = value->select_specialized<ts::IVec3f_Value>("motors[0].position");
-    }
+////        std::shared_ptr<ts::IVec3f_Value> motor = value->select_specialized<ts::IVec3f_Value>("motors[0].position");
+//    }
 
-    {
-        std::string name;
-        float mass;
+//    {
+//        std::string name;
+//        float mass;
 
-        auto result = ts::mapper::get(*value, "name", name);
-        TS_ASSERT(result == ts::success);
-        result = ts::mapper::get(*value, "mass", mass);
-        TS_ASSERT(result == ts::success);
-    }
+//        auto result = ts::mapper::get(*value, "name", name);
+//        TS_ASSERT(result == ts::success);
+//        result = ts::mapper::get(*value, "mass", mass);
+//        TS_ASSERT(result == ts::success);
+//    }
 
-    auto result = value->serialize();
-    TS_ASSERT(result == ts::success);
+    auto serialize_result = value->serialize();
+    TS_ASSERT(serialize_result == ts::success);
 
-    value->deserialize(result.payload());
-
-    std::string json = ts::serialization::to_json(result.payload());
+    std::string json = ts::serialization::to_json(serialize_result.payload());
     std::cout << json << "\n";
     std::cout.flush();
+
+    auto deserialize_result = value->deserialize(serialize_result.payload());
+    TS_ASSERT(deserialize_result == ts::success);
+
 
     {
         std::ifstream fs("../test.json");

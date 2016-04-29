@@ -14,7 +14,7 @@ public:
     std::string get_template_instantiation_string() const;
 
     IValue const& get_value() const override;
-    IValue const* get_initializer_value() const override;
+    std::shared_ptr<const IValue> get_initializer_value() const override;
 
 private:
     std::shared_ptr<const IValue> m_value;

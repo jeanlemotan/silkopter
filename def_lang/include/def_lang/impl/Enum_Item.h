@@ -12,6 +12,8 @@ class Enum_Item final: virtual public IEnum_Item, public Symbol_EP, public Attri
 public:
     Enum_Item(std::string const& name, int64_t integral_value);
 
+    std::shared_ptr<const IValue> get_initializer_value() const override;
+
     int64_t get_integral_value() const override;
     std::string const& get_ui_name() const override;
     bool is_default() const override;

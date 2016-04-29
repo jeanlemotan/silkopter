@@ -37,7 +37,7 @@ public:
 template<typename T>
 std::shared_ptr<const T> IDeclaration_Scope::find_specialized_symbol_by_name(std::string const& name) const
 {
-    return std::dynamic_pointer_cast<T>(find_symbol_by_name(name));
+    return std::dynamic_pointer_cast<const T>(find_symbol_by_name(name));
 }
 
 template<typename T>
@@ -49,7 +49,7 @@ std::shared_ptr<T> IDeclaration_Scope::find_specialized_symbol_by_name(std::stri
 template<typename T>
 std::shared_ptr<const T> IDeclaration_Scope::find_specialized_symbol_by_path(Symbol_Path const& path) const
 {
-    return std::dynamic_pointer_cast<T>(find_symbol_by_path(path));
+    return std::dynamic_pointer_cast<const T>(find_symbol_by_path(path));
 }
 
 template<typename T>

@@ -28,9 +28,9 @@ IValue const& Literal::get_value() const
     return *m_value;
 }
 
-IValue const* Literal::get_initializer_value() const
+std::shared_ptr<const IValue> Literal::get_initializer_value() const
 {
-    return m_value.get();
+    return m_value;
 }
 
 }

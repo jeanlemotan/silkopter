@@ -172,7 +172,7 @@ Result<serialization::Value> Vector_Value::serialize() const
 
 Result<void> Vector_Value::deserialize(serialization::Value const& sz_value)
 {
-    if (sz_value.get_type() != serialization::Value::Type::ARRAY)
+    if (!sz_value.is_array())
     {
         return Error("Expected array value when deserializing");
     }

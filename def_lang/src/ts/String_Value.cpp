@@ -13,7 +13,7 @@ String_Value::String_Value(std::shared_ptr<IString_Type const> type)
 
 Result<void> String_Value::copy_assign(IInitializer const& initializer)
 {
-    IValue const* value = initializer.get_initializer_value();
+    std::shared_ptr<const IValue> value = initializer.get_initializer_value();
     if (!value)
     {
         return Error("Cannot evaluate initializer list");
@@ -34,7 +34,7 @@ Result<serialization::Value> String_Value::serialize() const
 
 Result<void> String_Value::deserialize(serialization::Value const& sz_value)
 {
-    if (sz_value.get_type() != serialization::Value::Type::STRING)
+    if (!sz_value.is_string())
     {
         return Error("Expected string value when deserializing");
     }

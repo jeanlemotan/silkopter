@@ -3,7 +3,7 @@
 namespace ts
 {
 
-Initializer_List::Initializer_List(std::vector<std::shared_ptr<IInitializer>> initializers)
+Initializer_List::Initializer_List(std::vector<std::shared_ptr<const IInitializer>> initializers)
     : m_initializers(std::move(initializers))
 {
 }
@@ -16,7 +16,7 @@ IInitializer const& Initializer_List::get_initializer(size_t idx) const
 {
     return *m_initializers[idx];
 }
-IValue const* Initializer_List::get_initializer_value() const
+std::shared_ptr<const IValue> Initializer_List::get_initializer_value() const
 {
     if (m_initializers.size() == 1)
     {

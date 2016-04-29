@@ -1,12 +1,13 @@
 #pragma once
 
+#include "IInitializer.h"
 #include "ISymbol.h"
 #include "IAttribute_Container.h"
 
 namespace ts
 {
 
-class IEnum_Item: virtual public ISymbol, virtual public IAttribute_Container
+class IEnum_Item: virtual public ISymbol, virtual public IAttribute_Container, public virtual IInitializer
 {
 public:
     virtual ~IEnum_Item() = default;

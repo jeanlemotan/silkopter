@@ -56,7 +56,7 @@ Result<void> Numeric_Value_Template<Traits>::copy_assign(IInitializer const& ini
             return Error("Too few initializers. Expected " + std::to_string(Traits::component_count) + ", got 1");
         }
 
-        IValue const* v = initializer.get_initializer_value();
+        std::shared_ptr<const IValue> v = initializer.get_initializer_value();
         if (!v)
         {
             return Error("Cannot evaluate initializer");
