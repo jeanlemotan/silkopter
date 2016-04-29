@@ -20,6 +20,7 @@ public:
     virtual std::shared_ptr<const IEnum_Item> get_item(size_t idx) const = 0;
     virtual std::shared_ptr<const IEnum_Item> find_item_by_name(std::string const& name) const = 0;
     virtual std::shared_ptr<const IEnum_Item> find_item_by_integral_value(int64_t value) const = 0;
+    virtual std::shared_ptr<const IEnum_Item> get_default_item() const = 0;
 
     virtual std::shared_ptr<IEnum_Value> create_specialized_value() const = 0;
 };

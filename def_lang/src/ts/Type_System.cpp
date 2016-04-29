@@ -20,6 +20,11 @@ Type_System::Type_System()
 
 }
 
+Result<void> Type_System::validate_symbol(std::shared_ptr<const ISymbol> symbol)
+{
+    return ts::success;
+}
+
 void Type_System::populate_builtin_types()
 {
     auto result = add_symbol(std::shared_ptr<IType>(new Bool_Type("bool")));

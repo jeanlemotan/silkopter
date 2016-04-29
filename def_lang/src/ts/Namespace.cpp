@@ -8,4 +8,9 @@ Namespace::Namespace(std::string const& name)
 {
 }
 
+Result<void> Namespace::validate_symbol(std::shared_ptr<const ISymbol> symbol)
+{
+    return ts::success;
+}
+
 }

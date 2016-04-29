@@ -1,6 +1,4 @@
 #include "def_lang/impl/Min_Attribute.h"
-#include "def_lang/IInitializer.h"
-#include "def_lang/IValue.h"
 
 namespace ts
 {

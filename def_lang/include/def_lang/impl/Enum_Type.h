@@ -22,15 +22,18 @@ public:
     std::shared_ptr<IValue> create_value() const override;
     std::shared_ptr<IEnum_Value> create_specialized_value() const override;
 
-    Result<void> add_item(std::shared_ptr<IEnum_Item> item);
-
     size_t get_item_count() const override;
     std::shared_ptr<const IEnum_Item> get_item(size_t idx) const override;
     std::shared_ptr<const IEnum_Item> find_item_by_name(std::string const& name) const override;
     std::shared_ptr<const IEnum_Item> find_item_by_integral_value(int64_t value) const override;
+    std::shared_ptr<const IEnum_Item> get_default_item() const override;
 
 protected:
+    Result<void> validate_symbol(std::shared_ptr<const ISymbol> symbol) override;
     Result<void> validate_attribute(IAttribute const& attribute) override;
+
+private:
+    std::shared_ptr<const IEnum_Item> m_default_item;
 };
 
 }

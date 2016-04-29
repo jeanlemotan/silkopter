@@ -25,6 +25,7 @@
 #include "def_lang/impl/Max_Attribute.h"
 #include "def_lang/impl/Min_Attribute.h"
 #include "def_lang/impl/Decimals_Attribute.h"
+#include "def_lang/impl/Default_Attribute.h"
 #include "def_lang/impl/UI_Name_Attribute.h"
 #include "def_lang/impl/String_Type.h"
 #include "def_lang/impl/String_Value.h"
@@ -495,6 +496,15 @@ static ts::Result<void> create_attributes(ts::Type_System& ts, ts::IType const& 
             }
 
             attribute = std::make_shared<ts::Decimals_Attribute>(value->get_value());
+        }
+        else if (attribute_name == "default")
+        {
+            if (initializer)
+            {
+                return ts::Error(attribute_node.get_source_location().to_string() + "Initializer for default attribute not supported");
+            }
+
+            attribute = std::make_shared<ts::Default_Attribute>();
         }
         else if (attribute_name == "ui_name")
         {

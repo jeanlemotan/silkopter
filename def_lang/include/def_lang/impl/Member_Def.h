@@ -4,7 +4,6 @@
 #include "def_lang/IMember_Def.h"
 #include "def_lang/ep/Symbol_EP.h"
 #include "def_lang/ep/Attribute_Container_EP.h"
-#include "def_lang/impl/UI_Name_Attribute.h"
 
 namespace ts
 {

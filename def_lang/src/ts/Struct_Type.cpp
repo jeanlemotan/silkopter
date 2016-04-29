@@ -25,6 +25,11 @@ Struct_Type::Struct_Type(std::string const& name, std::shared_ptr<const IStruct_
     }
 }
 
+Result<void> Struct_Type::validate_symbol(std::shared_ptr<const ISymbol> symbol)
+{
+    return ts::success;
+}
+
 Result<void> Struct_Type::validate_attribute(IAttribute const& attribute)
 {
     return Error("Attribute " + attribute.get_name() + " not supported");

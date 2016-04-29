@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <memory>
 #include "def_lang/IDeclaration_Scope.h"
 
 namespace ts
@@ -33,6 +34,8 @@ public:
 protected:
     IDeclaration_Scope const* get_parent_scope() const override;
     IDeclaration_Scope* get_parent_scope() override;
+
+    virtual Result<void> validate_symbol(std::shared_ptr<const ISymbol> symbol) = 0;
 
 private:
     void set_parent_scope(IDeclaration_Scope* declaration_scope) override;

@@ -158,7 +158,7 @@ Result<serialization::Value> Struct_Value::serialize() const
 
 Result<void> Struct_Value::deserialize(serialization::Value const& sz_value)
 {
-    if (sz_value.get_type() != serialization::Value::Type::OBJECT)
+    if (!sz_value.is_object())
     {
         return Error("Expected object value when deserializing");
     }

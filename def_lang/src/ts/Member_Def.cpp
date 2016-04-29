@@ -1,5 +1,6 @@
 #include "def_lang/impl/Member_Def.h"
 #include "def_lang/IValue.h"
+#include "def_lang/impl/UI_Name_Attribute.h"
 
 namespace ts
 {

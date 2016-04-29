@@ -1,6 +1,4 @@
 #include "def_lang/impl/Decimals_Attribute.h"
-#include "def_lang/IInitializer.h"
-#include "def_lang/All_INumeric_Values.h"
 
 namespace ts
 {

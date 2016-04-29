@@ -19,6 +19,7 @@ public:
     using Declaration_Scope_EP::get_symbol;
 
 private:
+    Result<void> validate_symbol(std::shared_ptr<const ISymbol> symbol) override;
 };
 
 }

@@ -26,7 +26,10 @@ public:
     bool is_base_of(IStruct_Type const& type) const override;
 
 protected:
+    Result<void> validate_symbol(std::shared_ptr<const ISymbol> symbol) override;
     Result<void> validate_attribute(IAttribute const& attribute) override;
+
+private:
     std::shared_ptr<const IStruct_Type> m_base_struct;
 };
 

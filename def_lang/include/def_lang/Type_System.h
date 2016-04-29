@@ -19,6 +19,9 @@ public:
     void populate_builtin_types();
 
     std::shared_ptr<IValue> create_value(Symbol_Path const& type_path) const;
+
+private:
+    Result<void> validate_symbol(std::shared_ptr<const ISymbol> symbol) override;
 };
 
 }

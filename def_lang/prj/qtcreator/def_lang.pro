@@ -1,5 +1,8 @@
-TEMPLATE = lib
-CONFIG += staticlib
+#TEMPLATE = lib
+#CONFIG += staticlib
+TEMPLATE = app
+CONFIG += console
+
 CONFIG -= app_bundle
 CONFIG -= qt
 CONFIG += c++11
@@ -45,6 +48,9 @@ INCLUDEPATH += ../../../qmath/include
 INCLUDEPATH += ../../include
 INCLUDEPATH += ../../src
 
+
+LIBS += -L../../../qmath/lib/$${DEST_FOLDER} -lqmath
+LIBS += -L../../../qbase/lib/$${DEST_FOLDER} -lqbase
 
 HEADERS += \
     ../../include/def_lang/ep/Type_Template_EP.inl \
@@ -139,7 +145,14 @@ HEADERS += \
     ../../include/def_lang/IPoly_Type.h \
     ../../include/def_lang/IPoly_Value.h \
     ../../include/def_lang/impl/Poly_Type.h \
-    ../../include/def_lang/impl/Poly_Value.h
+    ../../include/def_lang/impl/Poly_Value.h \
+    ../../include/def_lang/IEnum_Type.h \
+    ../../include/def_lang/IEnum_Item.h \
+    ../../include/def_lang/IEnum_Value.h \
+    ../../include/def_lang/impl/Enum_Type.h \
+    ../../include/def_lang/impl/Enum_Item.h \
+    ../../include/def_lang/impl/Enum_Value.h \
+    ../../include/def_lang/impl/Default_Attribute.h
 
 SOURCES += \
     ../../src/main.cpp \
@@ -179,5 +192,9 @@ SOURCES += \
     ../../src/ts/Serialization.cpp \
     ../../src/ts/ep/Symbol_EP.cpp \
     ../../src/ts/Poly_Type.cpp \
-    ../../src/ts/Poly_Value.cpp
+    ../../src/ts/Poly_Value.cpp \
+    ../../src/ts/Enum_Type.cpp \
+    ../../src/ts/Enum_Value.cpp \
+    ../../src/ts/Enum_Item.cpp \
+    ../../src/ts/Default_Attribute.cpp
 
