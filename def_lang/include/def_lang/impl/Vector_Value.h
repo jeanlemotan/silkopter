@@ -16,7 +16,7 @@ public:
 
     bool is_constructed() const override;
 
-    Result<void> construct(IInitializer_List const& initializer_list) override;
+    Result<void> construct(IInitializer_List const& initializer_list = Initializer_List({})) override;
     Result<void> copy_construct(IValue const& other) override;
 
     Result<void> copy_assign(IValue const& other) override;

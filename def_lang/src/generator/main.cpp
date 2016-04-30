@@ -43,7 +43,7 @@ int main(int argc, char **argv)
     TS_ASSERT(type);
 
     std::shared_ptr<ts::IStruct_Value> value = type->create_specialized_value();
-    auto construct_result = value->construct(ts::Initializer_List({}));
+    auto construct_result = value->construct();
     TS_ASSERT(construct_result == ts::success);
 
 //    {

@@ -73,7 +73,7 @@ Result<void> Vector_Value::construct(IInitializer_List const& initializer_list)
 }
 Result<void> Vector_Value::copy_construct(IValue const& other)
 {
-    auto result = construct(Initializer_List({}));
+    auto result = construct();
     if (result != success)
     {
         return result;

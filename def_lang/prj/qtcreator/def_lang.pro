@@ -1,7 +1,5 @@
-#TEMPLATE = lib
-#CONFIG += staticlib
-TEMPLATE = app
-CONFIG += console
+TEMPLATE = lib
+CONFIG += staticlib
 
 CONFIG -= app_bundle
 CONFIG -= qt
@@ -32,10 +30,10 @@ rpi {
     }
 }
 
-OBJECTS_DIR = ./.obj/$${DEST_FOLDER}
-MOC_DIR = ./.moc/$${DEST_FOLDER}
-RCC_DIR = ./.rcc/$${DEST_FOLDER}
-UI_DIR = ./.ui/$${DEST_FOLDER}
+OBJECTS_DIR = ./def_lang/.obj/$${DEST_FOLDER}
+MOC_DIR = ./def_lang/.moc/$${DEST_FOLDER}
+RCC_DIR = ./def_lang/.rcc/$${DEST_FOLDER}
+UI_DIR = ./def_lang/.ui/$${DEST_FOLDER}
 DESTDIR = ../../lib/$${DEST_FOLDER}
 
 QMAKE_CXXFLAGS += -Wno-unused-variable -Wno-unused-parameter
@@ -163,7 +161,6 @@ HEADERS += \
     ../../include/def_lang/impl/Enum_Item_Initializer.h
 
 SOURCES += \
-    ../../src/main.cpp \
     ../../src/yy_lexer.cpp \
     ../../src/yy_parser.cpp \
     ../../src/ast/Attribute.cpp \

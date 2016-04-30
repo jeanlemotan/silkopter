@@ -56,7 +56,7 @@ Result<void> Variant_Value::construct(IInitializer_List const& initializer_list)
     }
 
     std::shared_ptr<IValue> value = m_type->get_inner_type(0)->create_value();
-    auto result = value->construct(ts::Initializer_List({}));
+    auto result = value->construct();
     if (result != success)
     {
         return result;
@@ -75,7 +75,7 @@ Result<void> Variant_Value::construct(IInitializer_List const& initializer_list)
 }
 Result<void> Variant_Value::copy_construct(IValue const& other)
 {
-    auto result = construct(Initializer_List({}));
+    auto result = construct();
     if (result != success)
     {
         return result;

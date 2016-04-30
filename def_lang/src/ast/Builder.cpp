@@ -679,7 +679,7 @@ static ts::Result<std::shared_ptr<ts::IMember_Def>> create_member_def(ts::Type_S
     }
     else
     {
-        auto result = value->construct(ts::Initializer_List({}));
+        auto result = value->construct();
         if (result != ts::success)
         {
             return ts::Error(node.get_source_location().to_string() + "Cannot initialize value: " + result.error().what());

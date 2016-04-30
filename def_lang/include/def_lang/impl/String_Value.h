@@ -21,7 +21,7 @@ public:
     String_Value(std::shared_ptr<IString_Type const> type);
 
     using Value_Template_EP<String_Traits>::copy_construct;
-    Result<void> construct(IInitializer_List const& initializer_list) override;
+    Result<void> construct(IInitializer_List const& initializer_list = Initializer_List({})) override;
 
     using Value_Template_EP<String_Traits>::copy_assign;
     Result<void> copy_assign(IInitializer_List const& initializer_list) override;

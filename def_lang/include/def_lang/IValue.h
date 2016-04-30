@@ -3,6 +3,7 @@
 #include <memory>
 #include "Result.h"
 #include "IInitializer_List.h"
+#include "impl/Initializer_List.h"
 #include "Serialization.h"
 
 namespace ts
@@ -18,7 +19,7 @@ public:
 
     virtual bool is_constructed() const = 0;
 
-    virtual Result<void> construct(IInitializer_List const& initializer_list) = 0;
+    virtual Result<void> construct(IInitializer_List const& initializer_list = Initializer_List({})) = 0;
     virtual Result<void> copy_construct(IValue const& other) = 0;
 
     virtual Result<void> copy_assign(IValue const& other) = 0;

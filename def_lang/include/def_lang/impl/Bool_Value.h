@@ -23,7 +23,7 @@ public:
     std::string get_template_instantiation_string() const override;
 
     using Value_Template_EP<Bool_Traits>::copy_construct;
-    Result<void> construct(IInitializer_List const& initializer_list) override;
+    Result<void> construct(IInitializer_List const& initializer_list = Initializer_List({})) override;
 
     using Value_Template_EP<Bool_Traits>::copy_assign;
     Result<void> copy_assign(IInitializer_List const& initializer_list) override;

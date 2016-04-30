@@ -23,7 +23,7 @@ Literal::Literal(IDeclaration_Scope const& scope, bool value)
     }
 
     std::shared_ptr<ts::IBool_Value> v = type->create_specialized_value();
-    auto result = v->construct(ts::Initializer_List({}));
+    auto result = v->construct();
     if (result != success)
     {
         TS_ASSERT(false);
@@ -49,7 +49,7 @@ Literal::Literal(IDeclaration_Scope const& scope, int64_t value)
     }
 
     std::shared_ptr<ts::IInt_Value> v = type->create_specialized_value();
-    auto result = v->construct(ts::Initializer_List({}));
+    auto result = v->construct();
     if (result != success)
     {
         TS_ASSERT(false);
@@ -75,7 +75,7 @@ Literal::Literal(IDeclaration_Scope const& scope, float value)
     }
 
     std::shared_ptr<ts::IFloat_Value> v = type->create_specialized_value();
-    auto result = v->construct(ts::Initializer_List({}));
+    auto result = v->construct();
     if (result != success)
     {
         TS_ASSERT(false);
@@ -101,7 +101,7 @@ Literal::Literal(IDeclaration_Scope const& scope, double value)
     }
 
     std::shared_ptr<ts::IDouble_Value> v = type->create_specialized_value();
-    auto result = v->construct(ts::Initializer_List({}));
+    auto result = v->construct();
     if (result != success)
     {
         TS_ASSERT(false);
@@ -127,7 +127,7 @@ Literal::Literal(IDeclaration_Scope const& scope, std::string const& value)
     }
 
     std::shared_ptr<ts::IString_Value> v = type->create_specialized_value();
-    auto result = v->construct(ts::Initializer_List({}));
+    auto result = v->construct();
     if (result != success)
     {
         TS_ASSERT(false);

@@ -20,7 +20,7 @@ public:
     Numeric_Value_Template(std::shared_ptr<typename Traits::type_interface const> type);
 
     using Value_Template_EP<Traits>::copy_construct;
-    Result<void> construct(IInitializer_List const& initializer_list) override;
+    Result<void> construct(IInitializer_List const& initializer_list = Initializer_List({})) override;
 
     using Value_Template_EP<Traits>::copy_assign;
     Result<void> copy_assign(IInitializer_List const& initializer_list) override;
