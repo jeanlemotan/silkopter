@@ -13,12 +13,15 @@ public:
 
     Enum_Value(std::shared_ptr<IEnum_Type const> type);
 
+    bool is_constructed() const override;
+
     Result<bool> is_equal(IValue const& other) const override;
 
-    Result<void> copy_assign(IValue const& other) override;
-    Result<void> copy_assign(IInitializer const& initializer) override;
+    Result<void> construct(IInitializer_List const& initializer_list) override;
+    Result<void> copy_construct(IValue const& other) override;
 
-    std::shared_ptr<IValue> clone() const override;
+    Result<void> copy_assign(IValue const& other) override;
+    Result<void> copy_assign(IInitializer_List const& initializer_list) override;
 
     std::shared_ptr<IType const> get_type() const override;
 
@@ -37,6 +40,7 @@ public:
     std::shared_ptr<const IEnum_Item> get_value() const override;
 
 private:
+    bool m_is_constructed = false;
     std::shared_ptr<const IEnum_Type> m_type;
     std::shared_ptr<const IEnum_Item> m_value;
 };

@@ -7,7 +7,7 @@
 namespace ts
 {
 
-class IEnum_Item: virtual public ISymbol, virtual public IAttribute_Container, public virtual IInitializer
+class IEnum_Item: virtual public ISymbol, virtual public IAttribute_Container
 {
 public:
     virtual ~IEnum_Item() = default;

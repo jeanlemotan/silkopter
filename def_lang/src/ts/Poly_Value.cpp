@@ -2,6 +2,7 @@
 #include "def_lang/Value_Selector.h"
 #include "def_lang/Serialization.h"
 #include "def_lang/IStruct_Type.h"
+#include "def_lang/impl/Initializer_List.h"
 
 namespace ts
 {
@@ -11,8 +12,18 @@ Poly_Value::Poly_Value(std::shared_ptr<IPoly_Type const> type)
 {
 }
 
+bool Poly_Value::is_constructed() const
+{
+    return m_is_constructed;
+}
+
 Result<bool> Poly_Value::is_equal(IValue const& other) const
 {
+    if (!is_constructed() || !other.is_constructed())
+    {
+        TS_ASSERT(false);
+        return Error("Unconstructed value");
+    }
     IPoly_Value const* v = dynamic_cast<const IPoly_Value*>(&other);
     if (!v)
     {
@@ -44,8 +55,38 @@ Result<bool> Poly_Value::is_equal(IValue const& other) const
     return get_value()->is_equal(*v->get_value());
 }
 
+Result<void> Poly_Value::construct(IInitializer_List const& initializer_list)
+{
+    if (is_constructed())
+    {
+        TS_ASSERT(false);
+        return Error("Already constructed value");
+    }
+    if (initializer_list.get_initializer_count() != 0)
+    {
+        return Error("Not supported");
+    }
+
+    m_is_constructed = true;
+    return success;
+}
+Result<void> Poly_Value::copy_construct(IValue const& other)
+{
+    auto result = construct(Initializer_List({}));
+    if (result != success)
+    {
+        return result;
+    }
+    return copy_assign(other);
+}
+
 Result<void> Poly_Value::copy_assign(IValue const& other)
 {
+    if (!is_constructed() || !other.is_constructed())
+    {
+        TS_ASSERT(false);
+        return Error("Unconstructed value");
+    }
     IPoly_Value const* v = dynamic_cast<const IPoly_Value*>(&other);
     if (!v)
     {
@@ -68,7 +109,16 @@ Result<void> Poly_Value::copy_assign(IValue const& other)
         {
             return success;
         }
-        return set_value(v->get_value()->clone());
+
+
+        std::shared_ptr<IValue> value = v->get_value()->get_type()->create_value();
+        auto result = value->copy_construct(*v->get_value());
+        if (result != success)
+        {
+            return result;
+        }
+
+        return set_value(value);
     }
     else
     {
@@ -79,14 +129,14 @@ Result<void> Poly_Value::copy_assign(IValue const& other)
         return get_value()->copy_assign(*v->get_value());
     }
 }
-Result<void> Poly_Value::copy_assign(IInitializer const& initializer)
+Result<void> Poly_Value::copy_assign(IInitializer_List const& initializer_list)
 {
+    if (!is_constructed())
+    {
+        TS_ASSERT(false);
+        return Error("Unconstructed value");
+    }
     return Error("not implemented");
-}
-
-std::shared_ptr<IValue> Poly_Value::clone() const
-{
-    return std::make_shared<Poly_Value>(*this);
 }
 
 std::shared_ptr<IType const> Poly_Value::get_type() const
@@ -96,19 +146,39 @@ std::shared_ptr<IType const> Poly_Value::get_type() const
 
 Result<void> Poly_Value::parse_from_ui_string(std::string const& str)
 {
+    if (!is_constructed())
+    {
+        TS_ASSERT(false);
+        return Error("Unconstructed value");
+    }
     return Error("Not Supported");
 }
 Result<std::string> Poly_Value::get_ui_string() const
 {
+    if (!is_constructed())
+    {
+        TS_ASSERT(false);
+        return Error("Unconstructed value");
+    }
     return Error("Not Supported");
 }
 
 std::shared_ptr<const IValue> Poly_Value::select(Value_Selector&& selector) const
 {
+    if (!is_constructed())
+    {
+        TS_ASSERT(false);
+        return nullptr;
+    }
     return const_cast<Poly_Value*>(this)->select(std::move(selector));
 }
 std::shared_ptr<IValue> Poly_Value::select(Value_Selector&& selector)
 {
+    if (!is_constructed())
+    {
+        TS_ASSERT(false);
+        return nullptr;
+    }
     TS_ASSERT(!selector.empty());
     if (selector.empty())
     {
@@ -130,6 +200,11 @@ std::shared_ptr<IPoly_Type const> Poly_Value::get_specialized_type() const
 
 Result<serialization::Value> Poly_Value::serialize() const
 {
+    if (!is_constructed())
+    {
+        TS_ASSERT(false);
+        return Error("Unconstructed value");
+    }
     std::shared_ptr<const IValue> value = get_value();
     if (value)
     {
@@ -151,6 +226,11 @@ Result<serialization::Value> Poly_Value::serialize() const
 
 Result<void> Poly_Value::deserialize(serialization::Value const& sz_value)
 {
+    if (!is_constructed())
+    {
+        TS_ASSERT(false);
+        return Error("Unconstructed value");
+    }
     if (sz_value.is_empty())
     {
         set_value(std::shared_ptr<IValue>());
@@ -191,10 +271,12 @@ Result<void> Poly_Value::deserialize(serialization::Value const& sz_value)
 
 std::shared_ptr<const IValue> Poly_Value::get_value() const
 {
+    TS_ASSERT(is_constructed());
     return m_value;
 }
 std::shared_ptr<IValue> Poly_Value::get_value()
 {
+    TS_ASSERT(is_constructed());
     return m_value;
 }
 
@@ -202,9 +284,18 @@ Result<void> Poly_Value::set_value(std::shared_ptr<IValue> value)
 {
     if (!value)
     {
-        m_value = nullptr;
-        return success;
+        return Error("Cannot insert null value");
     }
+    if (!is_constructed() || !value->is_constructed())
+    {
+        TS_ASSERT(false);
+        return Error("Unconstructed value");
+    }
+//    if (!value)
+//    {
+//        m_value = nullptr;
+//        return success;
+//    }
 
     if (!is_type_allowed(*value->get_type()))
     {
@@ -217,6 +308,11 @@ Result<void> Poly_Value::set_value(std::shared_ptr<IValue> value)
 
 bool Poly_Value::is_type_allowed(IType const& type) const
 {
+    if (!is_constructed())
+    {
+        TS_ASSERT(false);
+        return false;
+    }
     if (get_specialized_type()->get_inner_type().get() == &type)
     {
         return true;

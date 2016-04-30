@@ -9,12 +9,12 @@ namespace ts
 
 class IValue;
 
-class ILiteral : public virtual ITemplate_Argument, public virtual IInitializer
+class ILiteral : public virtual ITemplate_Argument
 {
 public:
     virtual ~ILiteral() = default;
 
-    virtual IValue const& get_value() const = 0;
+    virtual std::shared_ptr<const IValue> get_value() const = 0;
 };
 
 }

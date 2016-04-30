@@ -157,7 +157,10 @@ HEADERS += \
     ../../include/def_lang/IVariant_Value.h \
     ../../include/def_lang/impl/Variant_Type.h \
     ../../include/def_lang/impl/Variant_Value.h \
-    ../../include/def_lang/ILiteral_Initializer.h
+    ../../include/def_lang/ILiteral_Initializer.h \
+    ../../include/def_lang/IEnum_Item_Initializer.h \
+    ../../include/def_lang/impl/Literal_Initializer.h \
+    ../../include/def_lang/impl/Enum_Item_Initializer.h
 
 SOURCES += \
     ../../src/main.cpp \
@@ -203,5 +206,7 @@ SOURCES += \
     ../../src/ts/Enum_Item.cpp \
     ../../src/ts/Default_Attribute.cpp \
     ../../src/ts/Variant_Type.cpp \
-    ../../src/ts/Variant_Value.cpp
+    ../../src/ts/Variant_Value.cpp \
+    ../../src/ts/Literal_Initializer.cpp \
+    ../../src/ts/Enum_Item_Initializer.cpp
 

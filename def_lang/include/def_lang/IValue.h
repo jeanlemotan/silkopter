@@ -2,7 +2,7 @@
 
 #include <memory>
 #include "Result.h"
-#include "IInitializer.h"
+#include "IInitializer_List.h"
 #include "Serialization.h"
 
 namespace ts
@@ -16,12 +16,15 @@ class IValue
 public:
     virtual ~IValue() = default;
 
-    virtual Result<bool> is_equal(IValue const& other) const = 0;
+    virtual bool is_constructed() const = 0;
+
+    virtual Result<void> construct(IInitializer_List const& initializer_list) = 0;
+    virtual Result<void> copy_construct(IValue const& other) = 0;
 
     virtual Result<void> copy_assign(IValue const& other) = 0;
-    virtual Result<void> copy_assign(IInitializer const& initializer) = 0;
+    virtual Result<void> copy_assign(IInitializer_List const& initializer_list) = 0;
 
-    virtual std::shared_ptr<IValue> clone() const = 0;
+    virtual Result<bool> is_equal(IValue const& other) const = 0;
 
     virtual std::shared_ptr<IType const> get_type() const = 0;
 

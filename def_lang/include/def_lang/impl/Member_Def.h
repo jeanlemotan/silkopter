@@ -18,10 +18,10 @@ public:
     Member_Def(std::string const& name, std::shared_ptr<IType const> type, std::shared_ptr<const IValue> default_value);
     ~Member_Def();
 
-    std::shared_ptr<IType const> get_type() const;
-    IValue const& get_default_value() const;
+    std::shared_ptr<IType const> get_type() const override;
+    std::shared_ptr<const IValue> get_default_value() const override;
 
-    std::string const& get_ui_name() const;
+    std::string const& get_ui_name() const override;
 
 protected:
     Result<void> validate_attribute(IAttribute const& attribute);

@@ -20,8 +20,8 @@ public:
 
     Result<bool> is_equal(IValue const& other) const override;
 
+    Result<void> copy_construct(IValue const& other) override;
     Result<void> copy_assign(IValue const& other) override;
-    //Result<void> copy_assign(IInitializer const& initializer) override;
 
     //std::shared_ptr<IValue> clone() const override;
 
@@ -37,8 +37,12 @@ public:
 
     Result<void> set_value(fundamental_type value) override;
     fundamental_type get_value() const override;
+protected:
+    bool is_constructed() const override;
+    void set_constructed(bool constructed);
 
 private:
+    bool m_is_constructed = false;
     std::shared_ptr<type_interface const> m_type;
     fundamental_type m_value;
 };

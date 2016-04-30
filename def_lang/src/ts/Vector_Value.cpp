@@ -1,6 +1,7 @@
 #include "def_lang/impl/Vector_Value.h"
 #include "def_lang/Value_Selector.h"
 #include "def_lang/Serialization.h"
+#include "def_lang/impl/Initializer_List.h"
 
 namespace ts
 {
@@ -10,8 +11,19 @@ Vector_Value::Vector_Value(std::shared_ptr<IVector_Type const> type)
 {
 }
 
+bool Vector_Value::is_constructed() const
+{
+    return m_is_constructed;
+}
+
 Result<bool> Vector_Value::is_equal(IValue const& other) const
 {
+    if (!is_constructed() || !other.is_constructed())
+    {
+        TS_ASSERT(false);
+        return Error("Unconstructed value");
+    }
+
     IVector_Value const* v = dynamic_cast<const IVector_Value*>(&other);
     if (!v)
     {
@@ -44,8 +56,39 @@ Result<bool> Vector_Value::is_equal(IValue const& other) const
     return true;
 }
 
+Result<void> Vector_Value::construct(IInitializer_List const& initializer_list)
+{
+    if (is_constructed())
+    {
+        TS_ASSERT(false);
+        return Error("Already constructed value");
+    }
+    if (initializer_list.get_initializer_count() != 0)
+    {
+        return Error("Not supported");
+    }
+
+    m_is_constructed = true;
+    return success;
+}
+Result<void> Vector_Value::copy_construct(IValue const& other)
+{
+    auto result = construct(Initializer_List({}));
+    if (result != success)
+    {
+        return result;
+    }
+    return copy_assign(other);
+}
+
 Result<void> Vector_Value::copy_assign(IValue const& other)
 {
+    if (!is_constructed() || !other.is_constructed())
+    {
+        TS_ASSERT(false);
+        return Error("Unconstructed value");
+    }
+
     IVector_Value const* v = dynamic_cast<const IVector_Value*>(&other);
     if (!v)
     {
@@ -71,7 +114,14 @@ Result<void> Vector_Value::copy_assign(IValue const& other)
     while (get_value_count() < v->get_value_count())
     {
         size_t idx = get_value_count();
-        auto result = insert_value(idx, v->get_value(idx)->clone());
+        std::shared_ptr<IValue> value = v->get_value(idx)->get_type()->create_value();
+        auto result = value->copy_construct(*v->get_value(idx));
+        if (result != success)
+        {
+            return result;
+        }
+
+        result = insert_value(idx, value);
         if (result != success)
         {
             return result;
@@ -91,14 +141,14 @@ Result<void> Vector_Value::copy_assign(IValue const& other)
 
     return success;
 }
-Result<void> Vector_Value::copy_assign(IInitializer const& initializer)
+Result<void> Vector_Value::copy_assign(IInitializer_List const& initializer_list)
 {
+    if (!is_constructed())
+    {
+        TS_ASSERT(false);
+        return Error("Unconstructed value");
+    }
     return Error("not implemented");
-}
-
-std::shared_ptr<IValue> Vector_Value::clone() const
-{
-    return std::make_shared<Vector_Value>(*this);
 }
 
 std::shared_ptr<IType const> Vector_Value::get_type() const
@@ -108,19 +158,39 @@ std::shared_ptr<IType const> Vector_Value::get_type() const
 
 Result<void> Vector_Value::parse_from_ui_string(std::string const& str)
 {
+    if (!is_constructed())
+    {
+        TS_ASSERT(false);
+        return Error("Unconstructed value");
+    }
     return Error("Not Supported");
 }
 Result<std::string> Vector_Value::get_ui_string() const
 {
+    if (!is_constructed())
+    {
+        TS_ASSERT(false);
+        return Error("Unconstructed value");
+    }
     return Error("Not Supported");
 }
 
 std::shared_ptr<const IValue> Vector_Value::select(Value_Selector&& selector) const
 {
+    if (!is_constructed())
+    {
+        TS_ASSERT(false);
+        return nullptr;
+    }
     return const_cast<Vector_Value*>(this)->select(std::move(selector));
 }
 std::shared_ptr<IValue> Vector_Value::select(Value_Selector&& selector)
 {
+    if (!is_constructed())
+    {
+        TS_ASSERT(false);
+        return nullptr;
+    }
     TS_ASSERT(!selector.empty());
     if (selector.empty())
     {
@@ -155,6 +225,11 @@ std::shared_ptr<IVector_Type const> Vector_Value::get_specialized_type() const
 
 Result<serialization::Value> Vector_Value::serialize() const
 {
+    if (!is_constructed())
+    {
+        TS_ASSERT(false);
+        return Error("Unconstructed value");
+    }
     serialization::Value svalue(serialization::Value::Type::ARRAY);
 
     for (size_t i = 0; i < get_value_count(); i++)
@@ -172,6 +247,11 @@ Result<serialization::Value> Vector_Value::serialize() const
 
 Result<void> Vector_Value::deserialize(serialization::Value const& sz_value)
 {
+    if (!is_constructed())
+    {
+        TS_ASSERT(false);
+        return Error("Unconstructed value");
+    }
     if (!sz_value.is_array())
     {
         return Error("Expected array value when deserializing");
@@ -202,6 +282,11 @@ Result<void> Vector_Value::deserialize(serialization::Value const& sz_value)
 
 Result<std::shared_ptr<IValue>> Vector_Value::insert_default_value(size_t idx)
 {
+    if (!is_constructed())
+    {
+        TS_ASSERT(false);
+        return Error("Unconstructed value");
+    }
     std::shared_ptr<IValue> value = get_specialized_type()->get_inner_type()->create_value();
     auto result = insert_value(idx, value);
     if (result != success)
@@ -216,6 +301,11 @@ Result<void> Vector_Value::insert_value(size_t idx, std::shared_ptr<IValue> valu
     if (!value)
     {
         return Error("Cannot insert null value");
+    }
+    if (!is_constructed() || !value->is_constructed())
+    {
+        TS_ASSERT(false);
+        return Error("Unconstructed value");
     }
 
     if (idx > get_value_count())
@@ -233,6 +323,11 @@ Result<void> Vector_Value::insert_value(size_t idx, std::shared_ptr<IValue> valu
 }
 Result<void> Vector_Value::erase_value(size_t idx)
 {
+    if (!is_constructed())
+    {
+        TS_ASSERT(false);
+        return Error("Unconstructed value");
+    }
     if (idx >= get_value_count())
     {
         return Error("Cannot erase beyond the end");
@@ -245,20 +340,24 @@ Result<void> Vector_Value::erase_value(size_t idx)
 
 void Vector_Value::clear()
 {
+    TS_ASSERT(is_constructed());
     m_values.clear();
 }
 
 size_t Vector_Value::get_value_count() const
 {
+    TS_ASSERT(is_constructed());
     return m_values.size();
 }
 
 std::shared_ptr<const IValue> Vector_Value::get_value(size_t idx) const
 {
+    TS_ASSERT(is_constructed());
     return m_values[idx];
 }
 std::shared_ptr<IValue> Vector_Value::get_value(size_t idx)
 {
+    TS_ASSERT(is_constructed());
     return m_values[idx];
 }
 

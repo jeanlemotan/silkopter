@@ -45,9 +45,4 @@ Result<void> Enum_Item::validate_attribute(IAttribute const& attribute)
     return success;
 }
 
-std::shared_ptr<const IValue> Enum_Item::get_initializer_value() const
-{
-    return nullptr;
-}
-
 }

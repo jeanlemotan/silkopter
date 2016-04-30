@@ -3,6 +3,7 @@
 #include "def_lang/Value_Selector.h"
 #include "def_lang/Serialization.h"
 #include "def_lang/IMember_Def.h"
+#include "def_lang/impl/Initializer_List.h"
 
 namespace ts
 {
@@ -17,8 +18,19 @@ Struct_Value::Struct_Value(std::shared_ptr<IStruct_Type const> type)
     }
 }
 
+bool Struct_Value::is_constructed() const
+{
+    return m_is_constructed;
+}
+
 Result<bool> Struct_Value::is_equal(IValue const& other) const
 {
+    if (!is_constructed() || !other.is_constructed())
+    {
+        TS_ASSERT(false);
+        return Error("Unconstructed value");
+    }
+
     IStruct_Value const* v = dynamic_cast<const IStruct_Value*>(&other);
     if (!v)
     {
@@ -48,8 +60,39 @@ Result<bool> Struct_Value::is_equal(IValue const& other) const
     return true;
 }
 
+Result<void> Struct_Value::construct(IInitializer_List const& initializer_list)
+{
+    if (is_constructed())
+    {
+        TS_ASSERT(false);
+        return Error("Already constructed value");
+    }
+    if (initializer_list.get_initializer_count() != 0)
+    {
+        return Error("Not supported");
+    }
+
+    m_is_constructed = true;
+    return success;
+}
+Result<void> Struct_Value::copy_construct(IValue const& other)
+{
+    auto result = construct(Initializer_List({}));
+    if (result != success)
+    {
+        return result;
+    }
+    return copy_assign(other);
+}
+
 Result<void> Struct_Value::copy_assign(IValue const& other)
 {
+    if (!is_constructed() || !other.is_constructed())
+    {
+        TS_ASSERT(false);
+        return Error("Unconstructed value");
+    }
+
     IStruct_Value const* v = dynamic_cast<const IStruct_Value*>(&other);
     if (!v)
     {
@@ -74,14 +117,15 @@ Result<void> Struct_Value::copy_assign(IValue const& other)
 
     return success;
 }
-Result<void> Struct_Value::copy_assign(IInitializer const& initializer)
+Result<void> Struct_Value::copy_assign(IInitializer_List const& initializer_list)
 {
-    return Error("not implemented");
-}
+    if (!is_constructed())
+    {
+        TS_ASSERT(false);
+        return Error("Unconstructed value");
+    }
 
-std::shared_ptr<IValue> Struct_Value::clone() const
-{
-    return std::make_shared<Struct_Value>(*this);
+    return Error("not implemented");
 }
 
 std::shared_ptr<IType const> Struct_Value::get_type() const
@@ -91,19 +135,39 @@ std::shared_ptr<IType const> Struct_Value::get_type() const
 
 Result<void> Struct_Value::parse_from_ui_string(std::string const& str)
 {
+    if (!is_constructed())
+    {
+        TS_ASSERT(false);
+        return Error("Unconstructed value");
+    }
     return Error("Not Supported");
 }
 Result<std::string> Struct_Value::get_ui_string() const
 {
+    if (!is_constructed())
+    {
+        TS_ASSERT(false);
+        return Error("Unconstructed value");
+    }
     return Error("Not Supported");
 }
 
 std::shared_ptr<const IValue> Struct_Value::select(Value_Selector&& selector) const
 {
+    if (!is_constructed())
+    {
+        TS_ASSERT(false);
+        return nullptr;
+    }
     return const_cast<Struct_Value*>(this)->select(std::move(selector));
 }
 std::shared_ptr<IValue> Struct_Value::select(Value_Selector&& selector)
 {
+    if (!is_constructed())
+    {
+        TS_ASSERT(false);
+        return nullptr;
+    }
     TS_ASSERT(!selector.empty());
     if (selector.empty())
     {
@@ -138,6 +202,11 @@ std::shared_ptr<IStruct_Type const> Struct_Value::get_specialized_type() const
 
 Result<serialization::Value> Struct_Value::serialize() const
 {
+    if (!is_constructed())
+    {
+        TS_ASSERT(false);
+        return Error("Unconstructed value");
+    }
     serialization::Value svalue(serialization::Value::Type::OBJECT);
 
     for (size_t i = 0; i < get_member_count(); i++)
@@ -158,6 +227,11 @@ Result<serialization::Value> Struct_Value::serialize() const
 
 Result<void> Struct_Value::deserialize(serialization::Value const& sz_value)
 {
+    if (!is_constructed())
+    {
+        TS_ASSERT(false);
+        return Error("Unconstructed value");
+    }
     if (!sz_value.is_object())
     {
         return Error("Expected object value when deserializing");

@@ -11,18 +11,73 @@ Value_Template_EP<Traits>::Value_Template_EP(std::shared_ptr<type_interface cons
 template<typename Traits>
 Result<bool> Value_Template_EP<Traits>::is_equal(IValue const& other) const
 {
+    if (!is_constructed() || !other.is_constructed())
+    {
+        TS_ASSERT(false);
+        return Error("Unconstructed values");
+    }
     value_interface const* v = dynamic_cast<const value_interface*>(&other);
     if (!v)
     {
-        return Error("incompatible values");
+        return Error("Incompatible values");
     }
 
     return get_value() == v->get_value();
 }
 
 template<typename Traits>
+bool Value_Template_EP<Traits>::is_constructed() const
+{
+    return m_is_constructed;
+}
+
+template<typename Traits>
+void Value_Template_EP<Traits>::set_constructed(bool constructed)
+{
+    m_is_constructed = constructed;
+}
+
+template<typename Traits>
+Result<void> Value_Template_EP<Traits>::copy_construct(IValue const& other)
+{
+    if (is_constructed())
+    {
+        TS_ASSERT(false);
+        return Error("Already constructed value");
+    }
+    if (!other.is_constructed())
+    {
+        TS_ASSERT(false);
+        return Error("Unconstructed value");
+    }
+
+    value_interface const* v = dynamic_cast<const value_interface*>(&other);
+    if (!v)
+    {
+        return Error("incompatible values");
+    }
+
+    m_is_constructed = true;
+
+    auto result = set_value(v->get_value());
+    if (result != success)
+    {
+        m_is_constructed = false;
+        return result;
+    }
+
+    return success;
+}
+
+template<typename Traits>
 Result<void> Value_Template_EP<Traits>::copy_assign(IValue const& other)
 {
+    if (!is_constructed() || !other.is_constructed())
+    {
+        TS_ASSERT(false);
+        return Error("Unconstructed values");
+    }
+
     value_interface const* v = dynamic_cast<const value_interface*>(&other);
     if (!v)
     {
@@ -31,28 +86,6 @@ Result<void> Value_Template_EP<Traits>::copy_assign(IValue const& other)
 
     return set_value(v->get_value());
 }
-
-//template<typename Traits>
-//Result<void> Value_Template_EP<Traits>::copy_assign(IInitializer const& initializer)
-//{
-//    IValue const* v = dynamic_cast<value_interface>(&other);
-//    if (!v)
-//    {
-//        return Error("incompatible values");
-//    }
-
-//    return set_value(v->get_value());
-//}
-
-//template<typename Traits>
-//std::shared_ptr<IValue> Value_Template_EP<Traits>::clone() const
-//{
-//    std::shared_ptr<value_interface> v = get_specialized_type().create_specialized_value();
-//    auto result = v->copy_assign(*this);
-//    TS_ASSERT(result == success);
-//    return std::move(v);
-////    return std::shared_ptr<IValue>(new Value_Template_EP<Traits>(*this));
-//}
 
 template<typename Traits>
 std::shared_ptr<IType const> Value_Template_EP<Traits>::get_type() const
@@ -63,22 +96,34 @@ std::shared_ptr<IType const> Value_Template_EP<Traits>::get_type() const
 template<typename Traits>
 Result<void> Value_Template_EP<Traits>::parse_from_ui_string(std::string const& str)
 {
+    TS_ASSERT(is_constructed());
+    if (!is_constructed())
+    {
+        return Error("Unconstructed value");
+    }
     return Error("Not Supported");
 }
 template<typename Traits>
 Result<std::string> Value_Template_EP<Traits>::get_ui_string() const
 {
+    TS_ASSERT(is_constructed());
+    if (!is_constructed())
+    {
+        return Error("Unconstructed value");
+    }
     return Error("Not Supported");
 }
 
 template<typename Traits>
 std::shared_ptr<const IValue> Value_Template_EP<Traits>::select(Value_Selector&& selector) const
 {
+    TS_ASSERT(is_constructed());
     return nullptr;
 }
 template<typename Traits>
 std::shared_ptr<IValue> Value_Template_EP<Traits>::select(Value_Selector&& selector)
 {
+    TS_ASSERT(is_constructed());
     return nullptr;
 }
 
@@ -91,12 +136,18 @@ std::shared_ptr<typename Traits::type_interface const> Value_Template_EP<Traits>
 template<typename Traits>
 Result<void> Value_Template_EP<Traits>::set_value(fundamental_type value)
 {
+    TS_ASSERT(is_constructed());
+    if (!is_constructed())
+    {
+        return Error("Unconstructed value");
+    }
     m_value = value;
     return ts::success;
 }
 template<typename Traits>
 typename Traits::fundamental_type Value_Template_EP<Traits>::get_value() const
 {
+    TS_ASSERT(is_constructed());
     return m_value;
 }
 

@@ -4,6 +4,9 @@
 #include "def_lang/INumeric_Value_Template.h"
 #include "def_lang/ep/Value_Template_EP.h"
 #include "def_lang/IInitializer_List.h"
+#include "def_lang/ILiteral_Initializer.h"
+#include "def_lang/ILiteral.h"
+#include "def_lang/impl/Initializer_List.h"
 #include "def_lang/Serialization.h"
 
 namespace ts
@@ -16,11 +19,12 @@ public:
 
     Numeric_Value_Template(std::shared_ptr<typename Traits::type_interface const> type);
 
-    Result<void> copy_assign(IInitializer const& initializer) override;
-
-    std::shared_ptr<IValue> clone() const override;
+    using Value_Template_EP<Traits>::copy_construct;
+    Result<void> construct(IInitializer_List const& initializer_list) override;
 
     using Value_Template_EP<Traits>::copy_assign;
+    Result<void> copy_assign(IInitializer_List const& initializer_list) override;
+
     using Value_Template_EP<Traits>::set_value;
     using Value_Template_EP<Traits>::get_specialized_type;
 

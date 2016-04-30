@@ -22,10 +22,11 @@ public:
 
     std::string get_template_instantiation_string() const override;
 
-    std::shared_ptr<IValue> clone() const override;
+    using Value_Template_EP<Bool_Traits>::copy_construct;
+    Result<void> construct(IInitializer_List const& initializer_list) override;
 
     using Value_Template_EP<Bool_Traits>::copy_assign;
-    Result<void> copy_assign(IInitializer const& initializer) override;
+    Result<void> copy_assign(IInitializer_List const& initializer_list) override;
 
     Result<serialization::Value> serialize() const override;
     Result<void> deserialize(serialization::Value const&) override;

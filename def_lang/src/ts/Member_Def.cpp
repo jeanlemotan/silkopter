@@ -11,6 +11,7 @@ Member_Def::Member_Def(std::string const& name, std::shared_ptr<IType const> typ
     , m_default_value(std::move(default_value))
 {
     TS_ASSERT(m_default_value);
+    TS_ASSERT(m_default_value->is_constructed());
 }
 
 Member_Def::~Member_Def()
@@ -22,9 +23,9 @@ std::shared_ptr<IType const> Member_Def::get_type() const
 {
     return m_type;
 }
-IValue const& Member_Def::get_default_value() const
+std::shared_ptr<const IValue> Member_Def::get_default_value() const
 {
-    return *m_default_value;
+    return m_default_value;
 }
 
 std::string const& Member_Def::get_ui_name() const

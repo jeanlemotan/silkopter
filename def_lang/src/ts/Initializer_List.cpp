@@ -12,18 +12,9 @@ size_t Initializer_List::get_initializer_count() const
 {
     return m_initializers.size();
 }
-IInitializer const& Initializer_List::get_initializer(size_t idx) const
+std::shared_ptr<const IInitializer> Initializer_List::get_initializer(size_t idx) const
 {
-    return *m_initializers[idx];
+    return m_initializers[idx];
 }
-std::shared_ptr<const IValue> Initializer_List::get_initializer_value() const
-{
-    if (m_initializers.size() == 1)
-    {
-        return m_initializers.front()->get_initializer_value();
-    }
-    return nullptr;
-}
-
 
 }

@@ -9,6 +9,7 @@
 #include "def_lang/IVector_Value.h"
 #include "def_lang/All_INumeric_Values.h"
 #include "def_lang/Value_Selector.h"
+#include "def_lang/impl/Initializer_List.h"
 #include "def_lang/Mapper.h"
 #include "def_lang/JSON_Serializer.h"
 
@@ -42,6 +43,8 @@ int main(int argc, char **argv)
     TS_ASSERT(type);
 
     std::shared_ptr<ts::IStruct_Value> value = type->create_specialized_value();
+    auto construct_result = value->construct(ts::Initializer_List({}));
+    TS_ASSERT(construct_result == ts::success);
 
 //    {
 //        std::shared_ptr<ts::IString_Value> name = value->select_specialized<ts::IString_Value>("name");

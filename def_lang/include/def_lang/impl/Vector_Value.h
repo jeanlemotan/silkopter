@@ -14,10 +14,13 @@ public:
 
     Result<bool> is_equal(IValue const& other) const override;
 
-    Result<void> copy_assign(IValue const& other) override;
-    Result<void> copy_assign(IInitializer const& initializer) override;
+    bool is_constructed() const override;
 
-    std::shared_ptr<IValue> clone() const override;
+    Result<void> construct(IInitializer_List const& initializer_list) override;
+    Result<void> copy_construct(IValue const& other) override;
+
+    Result<void> copy_assign(IValue const& other) override;
+    Result<void> copy_assign(IInitializer_List const& initializer_list) override;
 
     std::shared_ptr<IType const> get_type() const override;
 
@@ -43,6 +46,7 @@ public:
     std::shared_ptr<IValue> get_value(size_t idx) override;
 
 private:
+    bool m_is_constructed = false;
     std::shared_ptr<IVector_Type const> m_type;
     std::vector<std::shared_ptr<IValue>> m_values;
 };

@@ -12,12 +12,15 @@ public:
 
     Poly_Value(std::shared_ptr<IPoly_Type const> type);
 
+    bool is_constructed() const override;
+
     Result<bool> is_equal(IValue const& other) const override;
 
-    Result<void> copy_assign(IValue const& other) override;
-    Result<void> copy_assign(IInitializer const& initializer) override;
+    Result<void> construct(IInitializer_List const& initializer_list) override;
+    Result<void> copy_construct(IValue const& other) override;
 
-    std::shared_ptr<IValue> clone() const override;
+    Result<void> copy_assign(IValue const& other) override;
+    Result<void> copy_assign(IInitializer_List const& initializer_list) override;
 
     std::shared_ptr<IType const> get_type() const override;
 
@@ -39,6 +42,7 @@ public:
 private:
     bool is_type_allowed(IType const& type) const;
 
+    bool m_is_constructed = false;
     std::shared_ptr<IPoly_Type const> m_type;
     std::shared_ptr<IValue> m_value;
 };
