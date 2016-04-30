@@ -4,7 +4,7 @@
 #include "def_lang/IValue.h"
 #include "def_lang/ep/Symbol_EP.h"
 #include "def_lang/ep/Attribute_Container_EP.h"
-
+#include "def_lang/impl/UI_Name_Attribute.h"
 
 namespace ts
 {
@@ -20,6 +20,9 @@ public:
     typedef typename Traits::fundamental_type       fundamental_type;
 
     Type_Template_EP(std::string const& name);
+    Type_Template_EP(Type_Template_EP<Traits> const& other, std::string const& name);
+
+    std::string const& get_ui_name() const override;
 
     std::shared_ptr<IType> clone(std::string const& name) const override;
 
@@ -28,7 +31,13 @@ public:
     std::shared_ptr<IValue> create_value() const override;
     std::shared_ptr<value_interface> create_specialized_value() const override;
 
+protected:
+    virtual Result<void> validate_attribute_impl(IAttribute const& attribute) = 0;
+
 private:
+    Result<void> validate_attribute(IAttribute const& attribute) final override;
+
+    std::string m_ui_name;
 };
 
 }

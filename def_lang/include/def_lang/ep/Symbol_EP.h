@@ -14,6 +14,7 @@ class Symbol_EP : virtual public ISymbol
 public:
 
     Symbol_EP(std::string const& name);
+    Symbol_EP(Symbol_EP const& other, std::string const& name);
 
     std::string const& get_name() const override;
     Symbol_Path get_symbol_path() const override;

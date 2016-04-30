@@ -2,6 +2,7 @@
 #include "def_lang/IValue.h"
 #include "def_lang/impl/Struct_Value.h"
 #include "def_lang/IAttribute.h"
+#include "def_lang/impl/UI_Name_Attribute.h"
 
 namespace ts
 {
@@ -9,6 +10,21 @@ namespace ts
 Struct_Type::Struct_Type(std::string const& name, std::shared_ptr<const IStruct_Type> parent)
     : Declaration_Scope_EP(name)
     , m_base_struct(parent)
+    , m_ui_name(name)
+{
+    replicate_base_struct();
+}
+
+Struct_Type::Struct_Type(Struct_Type const& other, std::string const& name)
+    : Declaration_Scope_EP(other, name)
+    , Member_Def_Container_EP(other)
+    , Attribute_Container_EP(other)
+    , m_base_struct(other.m_base_struct)
+    , m_ui_name(name)
+{
+}
+
+void Struct_Type::replicate_base_struct()
 {
     if (m_base_struct)
     {
@@ -25,6 +41,11 @@ Struct_Type::Struct_Type(std::string const& name, std::shared_ptr<const IStruct_
     }
 }
 
+std::string const& Struct_Type::get_ui_name() const
+{
+    return m_ui_name;
+}
+
 Result<void> Struct_Type::validate_symbol(std::shared_ptr<const ISymbol> symbol)
 {
     return ts::success;
@@ -32,12 +53,20 @@ Result<void> Struct_Type::validate_symbol(std::shared_ptr<const ISymbol> symbol)
 
 Result<void> Struct_Type::validate_attribute(IAttribute const& attribute)
 {
-    return Error("Attribute " + attribute.get_name() + " not supported");
+    if (UI_Name_Attribute const* att = dynamic_cast<UI_Name_Attribute const*>(&attribute))
+    {
+        m_ui_name = att->get_ui_name();
+        return success;
+    }
+    else
+    {
+        return Error("Attribute " + attribute.get_name() + " not supported");
+    }
 }
 
 std::shared_ptr<IType> Struct_Type::clone(std::string const& name) const
 {
-    return std::shared_ptr<IType>(new Struct_Type(*this));
+    return std::make_shared<Struct_Type>(*this, name);
 }
 
 std::string Struct_Type::get_template_instantiation_string() const

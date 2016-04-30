@@ -12,8 +12,11 @@ public:
     typedef IPoly_Value value_type;
 
     Poly_Type(std::string const& name);
+    Poly_Type(Poly_Type const& other, std::string const& name);
 
     Result<void> init(std::vector<std::shared_ptr<const ITemplate_Argument>> const& arguments) override;
+
+    std::string const& get_ui_name() const override;
 
     std::shared_ptr<IType> clone(std::string const& name) const override;
 
@@ -29,6 +32,7 @@ protected:
 
 private:
     std::shared_ptr<const IType> m_inner_type;
+    std::string m_ui_name;
 };
 
 

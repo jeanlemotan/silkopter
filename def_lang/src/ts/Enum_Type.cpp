@@ -2,24 +2,40 @@
 #include "def_lang/impl/Enum_Value.h"
 #include "def_lang/IEnum_Item.h"
 #include "def_lang/IAttribute.h"
+#include "def_lang/impl/UI_Name_Attribute.h"
 
 namespace ts
 {
 
 Enum_Type::Enum_Type(std::string const& name)
     : Declaration_Scope_EP(name)
+    , m_ui_name(name)
+{
+
+}
+
+Enum_Type::Enum_Type(Enum_Type const& other, std::string const& name)
+    : Declaration_Scope_EP(other, name)
+    , Attribute_Container_EP(other)
+    , m_default_item(other.m_default_item)
+    , m_ui_name(name)
 {
 
 }
 
 std::shared_ptr<IType> Enum_Type::clone(std::string const& name) const
 {
-    return std::shared_ptr<IType>(new Enum_Type(*this));
+    return std::make_shared<Enum_Type>(*this, name);
 }
 
 std::string Enum_Type::get_template_instantiation_string() const
 {
     return get_symbol_path().to_string();
+}
+
+std::string const& Enum_Type::get_ui_name() const
+{
+    return m_ui_name;
 }
 
 std::shared_ptr<IValue> Enum_Type::create_value() const
@@ -62,7 +78,15 @@ std::shared_ptr<const IEnum_Item> Enum_Type::get_default_item() const
 
 Result<void> Enum_Type::validate_attribute(IAttribute const& attribute)
 {
-    return Error("Attribute " + attribute.get_name() + " not supported");
+    if (UI_Name_Attribute const* att = dynamic_cast<UI_Name_Attribute const*>(&attribute))
+    {
+        m_ui_name = att->get_ui_name();
+        return success;
+    }
+    else
+    {
+        return Error("Attribute " + attribute.get_name() + " not supported");
+    }
 }
 
 Result<void> Enum_Type::validate_symbol(std::shared_ptr<const ISymbol> symbol)

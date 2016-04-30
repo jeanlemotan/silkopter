@@ -439,7 +439,7 @@ static ts::Result<std::shared_ptr<const ts::IInitializer>> create_identifier_ini
             }
 
             ts::Symbol_Path symbol_path(value_attribute->get_as_string());
-            if (symbol_path.get_count() < 2)
+            if (symbol_path.get_count() == 0)
             {
                 return ts::Error(identifier_node->get_source_location().to_string() + "Bad identifier!");
             }
@@ -554,6 +554,17 @@ static ts::Result<void> create_type_attributes(ts::Type_System& ts, ts::IType& t
             }
 
             attribute = std::make_shared<ts::Decimals_Attribute>(value->get_value());
+        }
+        else if (attribute_name == "ui_name")
+        {
+            std::shared_ptr<ts::IString_Value> value = ts.find_specialized_symbol_by_name<ts::IString_Type>("string")->create_specialized_value();
+            auto result = value->copy_assign(*initializer);
+            if (result != ts::success)
+            {
+                return ts::Error(attribute_node.get_source_location().to_string() + "Cannot initialize attribute: " + result.error().what());
+            }
+
+            attribute = std::make_shared<ts::UI_Name_Attribute>(value->get_value());
         }
         else
         {

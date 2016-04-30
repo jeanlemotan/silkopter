@@ -5,7 +5,15 @@ template<typename Traits>
 Numeric_Type_Template<Traits>::Numeric_Type_Template(std::string const& name)
     : Type_Template_EP<Traits>(name)
 {
+}
 
+template<typename Traits>
+Numeric_Type_Template<Traits>::Numeric_Type_Template(Numeric_Type_Template<Traits> const& other, std::string const& name)
+    : Type_Template_EP<Traits>(other, name)
+    , m_min_value(other.m_min_value)
+    , m_max_value(other.m_max_value)
+    , m_decimals(other.m_decimals)
+{
 }
 
 template<typename Traits>
@@ -27,7 +35,7 @@ size_t Numeric_Type_Template<Traits>::get_decimals() const
 }
 
 template<typename Traits>
-Result<void> Numeric_Type_Template<Traits>::validate_attribute(IAttribute const& attribute)
+Result<void> Numeric_Type_Template<Traits>::validate_attribute_impl(IAttribute const& attribute)
 {
     if (Min_Attribute const* att = dynamic_cast<Min_Attribute const*>(&attribute))
     {

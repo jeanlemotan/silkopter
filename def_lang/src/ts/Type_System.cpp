@@ -10,6 +10,7 @@
 #include "def_lang/ITemplate_Argument.h"
 #include "def_lang/impl/Vector_Type.h"
 #include "def_lang/impl/Poly_Type.h"
+#include "def_lang/impl/Variant_Type.h"
 
 namespace ts
 {
@@ -93,38 +94,36 @@ Result<std::shared_ptr<const ITemplated_Type>> Type_System::instantiate_template
         return instance;
     }
 
+    std::shared_ptr<ts::ITemplated_Type> type;
+
     if (name == "vector")
     {
-        std::shared_ptr<ts::Vector_Type> vector = std::shared_ptr<ts::Vector_Type>(new ts::Vector_Type(instanced_name));
-        auto init_result = vector->init(arguments);
-        if (init_result != success)
-        {
-            return init_result.error();
-        }
-        auto add_result = add_symbol(std::move(vector));
-        if (add_result != success)
-        {
-            return add_result.error();
-        }
-        return std::dynamic_pointer_cast<const ITemplated_Type>(add_result.payload());
+        type = std::make_shared<ts::Vector_Type>(instanced_name);
     }
     else if (name == "poly")
     {
-        std::shared_ptr<ts::Poly_Type> poly = std::shared_ptr<ts::Poly_Type>(new ts::Poly_Type(instanced_name));
-        auto init_result = poly->init(arguments);
-        if (init_result != success)
-        {
-            return init_result.error();
-        }
-        auto add_result = add_symbol(std::move(poly));
-        if (add_result != success)
-        {
-            return add_result.error();
-        }
-        return std::dynamic_pointer_cast<const ITemplated_Type>(add_result.payload());
+        type = std::make_shared<ts::Poly_Type>(instanced_name);
+    }
+    else if (name == "variant")
+    {
+        type = std::make_shared<ts::Variant_Type>(instanced_name);
+    }
+    else
+    {
+        return Error("Unknown template type '" + name + "'");
     }
 
-    return Error("Unknown template type '" + name + "'");
+    auto init_result = type->init(arguments);
+    if (init_result != success)
+    {
+        return init_result.error();
+    }
+    auto add_result = add_symbol(std::move(type));
+    if (add_result != success)
+    {
+        return add_result.error();
+    }
+    return std::dynamic_pointer_cast<const ITemplated_Type>(add_result.payload());
 }
 
 std::shared_ptr<IValue> Type_System::create_value(Symbol_Path const& type_path) const

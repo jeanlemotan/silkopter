@@ -236,11 +236,24 @@ struct_declaration  : TSTRUCT identifier TLBRACE TRBRACE TSEMICOLON
                         $$ = ast::Node(ast::Node::Type::STRUCT_DECLARATION, builder.get_location());
                         $$.add_child($2);
                     }
+                    | TSTRUCT identifier TCOLON attribute_list TLBRACE TRBRACE TSEMICOLON
+                    {
+                        $$ = ast::Node(ast::Node::Type::STRUCT_DECLARATION, builder.get_location());
+                        $$.add_child($2);
+                        $$.move_children_from(std::move($4));
+                    }
                     | TSTRUCT identifier TLBRACE struct_body TRBRACE TSEMICOLON
                     {
                         $$ = ast::Node(ast::Node::Type::STRUCT_DECLARATION, builder.get_location());
                         $$.add_child($2);
                         $$.add_child($4);
+                    }
+                    | TSTRUCT identifier TCOLON attribute_list TLBRACE struct_body TRBRACE TSEMICOLON
+                    {
+                        $$ = ast::Node(ast::Node::Type::STRUCT_DECLARATION, builder.get_location());
+                        $$.add_child($2);
+                        $$.move_children_from(std::move($4));
+                        $$.add_child($6);
                     }
                     | TSTRUCT identifier TCOLON inheritance TLBRACE TRBRACE TSEMICOLON
                     {
@@ -248,12 +261,27 @@ struct_declaration  : TSTRUCT identifier TLBRACE TRBRACE TSEMICOLON
                         $$.add_child($2);
                         $$.add_child($4);
                     }
+                    | TSTRUCT identifier TCOLON inheritance TCOLON attribute_list TLBRACE TRBRACE TSEMICOLON
+                    {
+                        $$ = ast::Node(ast::Node::Type::STRUCT_DECLARATION, builder.get_location());
+                        $$.add_child($2);
+                        $$.add_child($4);
+                        $$.move_children_from(std::move($6));
+                    }
                     | TSTRUCT identifier TCOLON inheritance TLBRACE struct_body TRBRACE TSEMICOLON
                     {
                         $$ = ast::Node(ast::Node::Type::STRUCT_DECLARATION, builder.get_location());
                         $$.add_child($2);
                         $$.add_child($4);
                         $$.add_child($6);
+                    }
+                    | TSTRUCT identifier TCOLON inheritance TCOLON attribute_list TLBRACE struct_body TRBRACE TSEMICOLON
+                    {
+                        $$ = ast::Node(ast::Node::Type::STRUCT_DECLARATION, builder.get_location());
+                        $$.add_child($2);
+                        $$.add_child($4);
+                        $$.move_children_from(std::move($6));
+                        $$.add_child($8);
                     }
                     ;
 
@@ -431,6 +459,11 @@ initializer : literal
                 $$.add_child($1);
             }
             | identifier_path
+            {
+                $$ = ast::Node(ast::Node::Type::INITIALIZER, builder.get_location());
+                $$.add_child($1);
+            }
+            | identifier
             {
                 $$ = ast::Node(ast::Node::Type::INITIALIZER, builder.get_location());
                 $$.add_child($1);

@@ -2,7 +2,6 @@
 
 #include "def_lang/IEnum_Type.h"
 #include "def_lang/ep/Declaration_Scope_EP.h"
-#include "def_lang/ep/Member_Def_Container_EP.h"
 #include "def_lang/ep/Attribute_Container_EP.h"
 
 namespace ts
@@ -14,8 +13,11 @@ public:
     typedef IEnum_Value value_type;
 
     Enum_Type(std::string const& name);
+    Enum_Type(Enum_Type const& other, std::string const& name);
 
     std::shared_ptr<IType> clone(std::string const& name) const override;
+
+    std::string const& get_ui_name() const override;
 
     std::string get_template_instantiation_string() const override;
 
@@ -34,6 +36,7 @@ protected:
 
 private:
     std::shared_ptr<const IEnum_Item> m_default_item;
+    std::string m_ui_name;
 };
 
 }

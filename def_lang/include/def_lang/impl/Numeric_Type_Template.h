@@ -17,9 +17,10 @@ class Numeric_Type_Template final : public Type_Template_EP<Traits>
 {
 public:
     Numeric_Type_Template(std::string const& name);
+    Numeric_Type_Template(Numeric_Type_Template<Traits> const& other, std::string const& name);
 
 protected:
-    Result<void> validate_attribute(IAttribute const& attribute) override;
+    Result<void> validate_attribute_impl(IAttribute const& attribute) override;
 
     typename Traits::fundamental_type const& get_min_value() const override;
     typename Traits::fundamental_type const& get_max_value() const override;

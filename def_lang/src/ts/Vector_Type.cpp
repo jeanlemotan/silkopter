@@ -1,14 +1,23 @@
 #include "def_lang/impl/Vector_Type.h"
 #include "def_lang/impl/Vector_Value.h"
 #include "def_lang/IAttribute.h"
+#include "def_lang/impl/UI_Name_Attribute.h"
 
 namespace ts
 {
 
 Vector_Type::Vector_Type(std::string const& name)
     : Symbol_EP(name)
+    , m_ui_name(name)
 {
+}
 
+Vector_Type::Vector_Type(Vector_Type const& other, std::string const& name)
+    : Symbol_EP(other, name)
+    , Attribute_Container_EP(other)
+    , m_inner_type(other.m_inner_type)
+    , m_ui_name(name)
+{
 }
 
 Result<void> Vector_Type::init(std::vector<std::shared_ptr<const ITemplate_Argument>> const& arguments)
@@ -27,14 +36,27 @@ Result<void> Vector_Type::init(std::vector<std::shared_ptr<const ITemplate_Argum
     return success;
 }
 
+std::string const& Vector_Type::get_ui_name() const
+{
+    return m_ui_name;
+}
+
 Result<void> Vector_Type::validate_attribute(IAttribute const& attribute)
 {
-    return Error("Attribute " + attribute.get_name() + " not supported");
+    if (UI_Name_Attribute const* att = dynamic_cast<UI_Name_Attribute const*>(&attribute))
+    {
+        m_ui_name = att->get_ui_name();
+        return success;
+    }
+    else
+    {
+        return Error("Attribute " + attribute.get_name() + " not supported");
+    }
 }
 
 std::shared_ptr<IType> Vector_Type::clone(std::string const& name) const
 {
-    return std::shared_ptr<IType>(new Vector_Type(*this));
+    return std::make_shared<Vector_Type>(*this, name);
 }
 
 std::string Vector_Type::get_template_instantiation_string() const

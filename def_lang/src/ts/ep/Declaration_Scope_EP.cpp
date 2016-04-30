@@ -9,6 +9,12 @@ Declaration_Scope_EP::Declaration_Scope_EP(std::string const& name)
 {
 }
 
+Declaration_Scope_EP::Declaration_Scope_EP(Declaration_Scope_EP const& other, std::string const& name)
+    : m_name(name)
+    , m_symbols(other.m_symbols)
+{
+}
+
 std::string const& Declaration_Scope_EP::get_name() const
 {
     return m_name;

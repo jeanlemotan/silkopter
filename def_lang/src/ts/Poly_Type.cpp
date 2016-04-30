@@ -1,14 +1,23 @@
 #include "def_lang/impl/Poly_Type.h"
 #include "def_lang/impl/Poly_Value.h"
 #include "def_lang/IAttribute.h"
+#include "def_lang/impl/UI_Name_Attribute.h"
 
 namespace ts
 {
 
 Poly_Type::Poly_Type(std::string const& name)
     : Symbol_EP(name)
+    , m_ui_name(name)
 {
+}
 
+Poly_Type::Poly_Type(Poly_Type const& other, std::string const& name)
+    : Symbol_EP(other, name)
+    , Attribute_Container_EP(other)
+    , m_inner_type(other.m_inner_type)
+    , m_ui_name(name)
+{
 }
 
 Result<void> Poly_Type::init(std::vector<std::shared_ptr<const ITemplate_Argument>> const& arguments)
@@ -27,14 +36,27 @@ Result<void> Poly_Type::init(std::vector<std::shared_ptr<const ITemplate_Argumen
     return success;
 }
 
+std::string const& Poly_Type::get_ui_name() const
+{
+    return m_ui_name;
+}
+
 Result<void> Poly_Type::validate_attribute(IAttribute const& attribute)
 {
-    return Error("Attribute " + attribute.get_name() + " not supported");
+    if (UI_Name_Attribute const* att = dynamic_cast<UI_Name_Attribute const*>(&attribute))
+    {
+        m_ui_name = att->get_ui_name();
+        return success;
+    }
+    else
+    {
+        return Error("Attribute " + attribute.get_name() + " not supported");
+    }
 }
 
 std::shared_ptr<IType> Poly_Type::clone(std::string const& name) const
 {
-    return std::shared_ptr<IType>(new Poly_Type(*this));
+    return std::make_shared<Poly_Type>(*this, name);
 }
 
 std::string Poly_Type::get_template_instantiation_string() const

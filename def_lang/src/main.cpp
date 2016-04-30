@@ -38,7 +38,7 @@ int main(int argc, char **argv)
         std::cerr.flush();
     }
 
-    std::shared_ptr<ts::IStruct_Type> type = ts.find_specialized_symbol_by_path<ts::IStruct_Type>("silk::Raspicam_Config");
+    std::shared_ptr<ts::IStruct_Type> type = ts.find_specialized_symbol_by_path<ts::IStruct_Type>("silk::Rate_Controller_Config");
     TS_ASSERT(type);
 
     std::shared_ptr<ts::IStruct_Value> value = type->create_specialized_value();

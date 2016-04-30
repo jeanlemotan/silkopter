@@ -14,6 +14,9 @@ public:
     typedef IStruct_Value value_type;
 
     Struct_Type(std::string const& name, std::shared_ptr<const IStruct_Type> parent);
+    Struct_Type(Struct_Type const& other, std::string const& name);
+
+    std::string const& get_ui_name() const override;
 
     std::shared_ptr<IType> clone(std::string const& name) const override;
 
@@ -30,7 +33,10 @@ protected:
     Result<void> validate_attribute(IAttribute const& attribute) override;
 
 private:
+    void replicate_base_struct();
+
     std::shared_ptr<const IStruct_Type> m_base_struct;
+    std::string m_ui_name;
 };
 
 }
