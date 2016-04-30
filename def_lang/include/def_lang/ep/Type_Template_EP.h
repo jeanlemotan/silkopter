@@ -5,6 +5,7 @@
 #include "def_lang/ep/Symbol_EP.h"
 #include "def_lang/ep/Attribute_Container_EP.h"
 #include "def_lang/impl/UI_Name_Attribute.h"
+#include "def_lang/impl/Native_Type_Attribute.h"
 
 namespace ts
 {
@@ -23,6 +24,7 @@ public:
     Type_Template_EP(Type_Template_EP<Traits> const& other, std::string const& name);
 
     std::string const& get_ui_name() const override;
+    std::string const& get_native_type() const override;
 
     std::shared_ptr<IType> clone(std::string const& name) const override;
 
@@ -38,6 +40,7 @@ private:
     Result<void> validate_attribute(IAttribute const& attribute) final override;
 
     std::string m_ui_name;
+    std::string m_native_type;
 };
 
 }

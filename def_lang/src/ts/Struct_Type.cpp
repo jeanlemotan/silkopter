@@ -3,6 +3,7 @@
 #include "def_lang/impl/Struct_Value.h"
 #include "def_lang/IAttribute.h"
 #include "def_lang/impl/UI_Name_Attribute.h"
+#include "def_lang/impl/Native_Type_Attribute.h"
 
 namespace ts
 {
@@ -45,6 +46,10 @@ std::string const& Struct_Type::get_ui_name() const
 {
     return m_ui_name;
 }
+std::string const& Struct_Type::get_native_type() const
+{
+    return m_native_type;
+}
 
 Result<void> Struct_Type::validate_symbol(std::shared_ptr<const ISymbol> symbol)
 {
@@ -56,6 +61,11 @@ Result<void> Struct_Type::validate_attribute(IAttribute const& attribute)
     if (UI_Name_Attribute const* att = dynamic_cast<UI_Name_Attribute const*>(&attribute))
     {
         m_ui_name = att->get_ui_name();
+        return success;
+    }
+    else if (Native_Type_Attribute const* att = dynamic_cast<Native_Type_Attribute const*>(&attribute))
+    {
+        m_native_type = att->get_native_type();
         return success;
     }
     else

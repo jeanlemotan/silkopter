@@ -17,6 +17,7 @@ public:
     Result<void> init(std::vector<std::shared_ptr<const ITemplate_Argument>> const& arguments) override;
 
     std::string const& get_ui_name() const override;
+    std::string const& get_native_type() const override;
 
     std::shared_ptr<IType> clone(std::string const& name) const override;
 
@@ -33,6 +34,7 @@ protected:
 private:
     std::shared_ptr<const IType> m_inner_type;
     std::string m_ui_name;
+    std::string m_native_type;
 };
 
 

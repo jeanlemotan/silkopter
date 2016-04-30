@@ -3,6 +3,7 @@
 #include "def_lang/IEnum_Item.h"
 #include "def_lang/IAttribute.h"
 #include "def_lang/impl/UI_Name_Attribute.h"
+#include "def_lang/impl/Native_Type_Attribute.h"
 
 namespace ts
 {
@@ -36,6 +37,11 @@ std::string Enum_Type::get_template_instantiation_string() const
 std::string const& Enum_Type::get_ui_name() const
 {
     return m_ui_name;
+}
+
+std::string const& Enum_Type::get_native_type() const
+{
+    return m_native_type;
 }
 
 std::shared_ptr<IValue> Enum_Type::create_value() const
@@ -81,6 +87,11 @@ Result<void> Enum_Type::validate_attribute(IAttribute const& attribute)
     if (UI_Name_Attribute const* att = dynamic_cast<UI_Name_Attribute const*>(&attribute))
     {
         m_ui_name = att->get_ui_name();
+        return success;
+    }
+    else if (Native_Type_Attribute const* att = dynamic_cast<Native_Type_Attribute const*>(&attribute))
+    {
+        m_native_type = att->get_native_type();
         return success;
     }
     else

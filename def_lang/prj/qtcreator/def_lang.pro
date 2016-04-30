@@ -158,7 +158,8 @@ HEADERS += \
     ../../include/def_lang/ILiteral_Initializer.h \
     ../../include/def_lang/IEnum_Item_Initializer.h \
     ../../include/def_lang/impl/Literal_Initializer.h \
-    ../../include/def_lang/impl/Enum_Item_Initializer.h
+    ../../include/def_lang/impl/Enum_Item_Initializer.h \
+    ../../include/def_lang/impl/Native_Type_Attribute.h
 
 SOURCES += \
     ../../src/yy_lexer.cpp \
@@ -205,5 +206,6 @@ SOURCES += \
     ../../src/ts/Variant_Type.cpp \
     ../../src/ts/Variant_Value.cpp \
     ../../src/ts/Literal_Initializer.cpp \
-    ../../src/ts/Enum_Item_Initializer.cpp
+    ../../src/ts/Enum_Item_Initializer.cpp \
+    ../../src/ts/Native_Type_Attribute.cpp
 

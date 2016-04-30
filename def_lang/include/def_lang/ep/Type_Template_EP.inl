@@ -26,6 +26,11 @@ std::string const& Type_Template_EP<Traits>::get_ui_name() const
 {
     return m_ui_name.empty() ? get_name() : m_ui_name;
 }
+template<typename Traits>
+std::string const& Type_Template_EP<Traits>::get_native_type() const
+{
+    return m_native_type;
+}
 
 template<typename Traits>
 std::shared_ptr<IType> Type_Template_EP<Traits>::clone(std::string const& name) const
@@ -51,6 +56,11 @@ Result<void> Type_Template_EP<Traits>::validate_attribute(IAttribute const& attr
     if (UI_Name_Attribute const* att = dynamic_cast<UI_Name_Attribute const*>(&attribute))
     {
         m_ui_name = att->get_ui_name();
+        return success;
+    }
+    else if (Native_Type_Attribute const* att = dynamic_cast<Native_Type_Attribute const*>(&attribute))
+    {
+        m_native_type = att->get_native_type();
         return success;
     }
     else

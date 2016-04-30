@@ -29,6 +29,7 @@
 #include "def_lang/impl/Decimals_Attribute.h"
 #include "def_lang/impl/Default_Attribute.h"
 #include "def_lang/impl/UI_Name_Attribute.h"
+#include "def_lang/impl/Native_Type_Attribute.h"
 #include "def_lang/impl/String_Type.h"
 #include "def_lang/impl/String_Value.h"
 #include "def_lang/impl/Enum_Type.h"
@@ -487,6 +488,17 @@ static ts::Result<void> create_type_attributes(ts::Type_System& ts, ts::IType& t
             }
 
             attribute = std::make_shared<ts::UI_Name_Attribute>(value->get_value());
+        }
+        else if (attribute_name == "native_type")
+        {
+            std::shared_ptr<ts::IString_Value> value = ts.find_specialized_symbol_by_name<ts::IString_Type>("string")->create_specialized_value();
+            auto result = value->construct(*initializer_list);
+            if (result != ts::success)
+            {
+                return ts::Error(attribute_node.get_source_location().to_string() + "Cannot initialize attribute: " + result.error().what());
+            }
+
+            attribute = std::make_shared<ts::Native_Type_Attribute>(value->get_value());
         }
         else
         {
