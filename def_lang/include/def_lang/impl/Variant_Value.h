@@ -1,0 +1,4 @@
+#ifndef VARIANT_VALUE_H
+#define VARIANT_VALUE_H
+
+#endif // VARIANT_VALUE_H

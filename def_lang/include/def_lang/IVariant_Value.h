@@ -1,0 +1,4 @@
+#ifndef IVARIANT_VALUE_H
+#define IVARIANT_VALUE_H
+
+#endif // IVARIANT_VALUE_H
