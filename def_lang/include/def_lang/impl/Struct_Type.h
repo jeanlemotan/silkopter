@@ -17,7 +17,7 @@ public:
     Struct_Type(Struct_Type const& other, std::string const& name);
 
     std::string const& get_ui_name() const override;
-    std::string const& get_native_type() const override;
+    Symbol_Path get_native_type() const override;
 
     std::shared_ptr<IType> clone(std::string const& name) const override;
 
@@ -38,7 +38,7 @@ private:
 
     std::shared_ptr<const IStruct_Type> m_base_struct;
     std::string m_ui_name;
-    std::string m_native_type;
+    Symbol_Path m_native_type;
 };
 
 }

@@ -2,7 +2,11 @@
 
 #include "Attribute.h"
 #include "def_lang/Source_Location.h"
+#include "def_lang/Serialization.h"
+#include "def_lang/Result.h"
 
+namespace ts
+{
 namespace ast
 {
 
@@ -66,6 +70,8 @@ public:
 
     std::string to_string(size_t ident, bool deep) const;
 
+    Result<serialization::Value> serialize() const;
+
 private:
     Type m_type = Type::NONE;
     ts::Source_Location m_location;
@@ -74,4 +80,5 @@ private:
 
 };
 
+}
 }

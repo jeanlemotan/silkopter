@@ -12,6 +12,7 @@ Type_Template_EP<Traits>::Type_Template_EP(Type_Template_EP<Traits> const& other
     : Symbol_EP(other, name)
     , Attribute_Container_EP(other)
     , m_ui_name(name)
+    , m_native_type(other.m_native_type)
 {
 }
 
@@ -27,9 +28,9 @@ std::string const& Type_Template_EP<Traits>::get_ui_name() const
     return m_ui_name.empty() ? get_name() : m_ui_name;
 }
 template<typename Traits>
-std::string const& Type_Template_EP<Traits>::get_native_type() const
+Symbol_Path Type_Template_EP<Traits>::get_native_type() const
 {
-    return m_native_type;
+    return m_native_type.empty() ? get_symbol_path() : m_native_type;
 }
 
 template<typename Traits>

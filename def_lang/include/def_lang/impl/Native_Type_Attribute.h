@@ -1,6 +1,7 @@
 #pragma once
 
 #include "def_lang/IAttribute.h"
+#include "def_lang/Symbol_Path.h"
 #include <string>
 
 namespace ts
@@ -9,14 +10,14 @@ namespace ts
 class Native_Type_Attribute : public virtual IAttribute
 {
 public:
-    Native_Type_Attribute(std::string const& native_type);
+    Native_Type_Attribute(Symbol_Path const& native_type);
     ~Native_Type_Attribute();
 
     std::string get_name() const override;
-    std::string const& get_native_type() const;
+    Symbol_Path const& get_native_type() const;
 
 private:
-    std::string m_native_type;
+    Symbol_Path m_native_type;
 };
 
 }

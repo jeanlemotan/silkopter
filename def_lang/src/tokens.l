@@ -4,7 +4,7 @@ scope [:][:]
 %{
 
 #include "yy_parser.hpp"
-#include "ast/Lexer.h"
+#include "ts/ast/Lexer.h"
 
 #undef yywrap
 #define yywrap() 1
@@ -20,7 +20,7 @@ scope [:][:]
 #define yyterminate() return yy::parser::make_TEND(m_location)
 
 // Tell Flex the lexer's prototype ...
-#define YY_DECL yy::parser::symbol_type ast::Lexer::astyylex()
+#define YY_DECL yy::parser::symbol_type ts::ast::Lexer::astyylex()
 
 // ... and declare it for the parser's sake.
 //YY_DECL;

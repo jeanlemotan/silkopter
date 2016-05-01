@@ -18,6 +18,7 @@ Poly_Type::Poly_Type(Poly_Type const& other, std::string const& name)
     , Attribute_Container_EP(other)
     , m_inner_type(other.m_inner_type)
     , m_ui_name(name)
+    , m_native_type(other.m_ui_name)
 {
 }
 
@@ -34,6 +35,11 @@ Result<void> Poly_Type::init(std::vector<std::shared_ptr<const ITemplate_Argumen
         return Error("Invalid template argument. Expected type");
     }
 
+    if (m_native_type.empty())
+    {
+        m_native_type = Symbol_Path("std::shared_ptr<" + m_inner_type->get_native_type().to_string() + ">");
+    }
+
     return success;
 }
 
@@ -42,9 +48,9 @@ std::string const& Poly_Type::get_ui_name() const
     return m_ui_name;
 }
 
-std::string const& Poly_Type::get_native_type() const
+Symbol_Path Poly_Type::get_native_type() const
 {
-    return m_native_type;
+    return m_native_type.empty() ? get_symbol_path() : m_native_type;
 }
 
 Result<void> Poly_Type::validate_attribute(IAttribute const& attribute)

@@ -12,6 +12,8 @@ int xxFlexLexer::yywrap()
 }
 
 
+namespace ts
+{
 namespace ast
 {
 
@@ -26,4 +28,5 @@ yy::location const& Lexer::get_location() const
     return m_location;
 }
 
+}
 }

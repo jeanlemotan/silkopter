@@ -18,6 +18,7 @@ Vector_Type::Vector_Type(Vector_Type const& other, std::string const& name)
     , Attribute_Container_EP(other)
     , m_inner_type(other.m_inner_type)
     , m_ui_name(name)
+    , m_native_type(other.m_ui_name)
 {
 }
 
@@ -34,6 +35,11 @@ Result<void> Vector_Type::init(std::vector<std::shared_ptr<const ITemplate_Argum
         return Error("Invalid template argument. Expected type");
     }
 
+    if (m_native_type.empty())
+    {
+        m_native_type = Symbol_Path("std::vector<" + m_inner_type->get_native_type().to_string() + ">");
+    }
+
     return success;
 }
 
@@ -41,9 +47,9 @@ std::string const& Vector_Type::get_ui_name() const
 {
     return m_ui_name;
 }
-std::string const& Vector_Type::get_native_type() const
+Symbol_Path Vector_Type::get_native_type() const
 {
-    return m_native_type;
+    return m_native_type.empty() ? get_symbol_path() : m_native_type;
 }
 
 Result<void> Vector_Type::validate_attribute(IAttribute const& attribute)

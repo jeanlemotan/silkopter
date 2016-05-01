@@ -50,6 +50,7 @@ INCLUDEPATH += ../../src
 LIBS += -L../../lib/$${DEST_FOLDER} -ldef_lang
 LIBS += -L../../../qmath/lib/$${DEST_FOLDER} -lqmath
 LIBS += -L../../../qbase/lib/$${DEST_FOLDER} -lqbase
+LIBS += -lboost_program_options
 
 HEADERS += \
 

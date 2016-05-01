@@ -18,7 +18,7 @@ public:
     std::shared_ptr<IType> clone(std::string const& name) const override;
 
     std::string const& get_ui_name() const override;
-    std::string const& get_native_type() const override;
+    Symbol_Path get_native_type() const override;
 
     std::string get_template_instantiation_string() const override;
 
@@ -38,7 +38,7 @@ protected:
 private:
     std::shared_ptr<const IEnum_Item> m_default_item;
     std::string m_ui_name;
-    std::string m_native_type;
+    Symbol_Path m_native_type;
 };
 
 }

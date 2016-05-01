@@ -78,4 +78,4 @@ std::string Source_Location::to_string() const
     return get_file_path() + ":" + std::to_string(get_line()) + ":" + std::to_string(get_column()) + ": ";
 }
 
-} // namespace ast
+}

@@ -127,10 +127,10 @@ HEADERS += \
     ../../src/stack.hh \
     ../../src/tokens.l \
     ../../src/yy_parser.hpp \
-    ../../include/ast/Attribute.h \
-    ../../include/ast/Builder.h \
+    ../../include/def_lang/ast/Attribute.h \
+    ../../include/def_lang/ast/Builder.h \
     ../../src/ast/Lexer.h \
-    ../../include/ast/Node.h \
+    ../../include/def_lang/ast/Node.h \
     ../../include/def_lang/impl/IValue.impl \
     ../../include/def_lang/impl/IValue.inl \
     ../../include/def_lang/All_INumeric_Types.h \
@@ -164,10 +164,10 @@ HEADERS += \
 SOURCES += \
     ../../src/yy_lexer.cpp \
     ../../src/yy_parser.cpp \
-    ../../src/ast/Attribute.cpp \
-    ../../src/ast/Builder.cpp \
-    ../../src/ast/Lexer.cpp \
-    ../../src/ast/Node.cpp \
+    ../../src/ts/ast/Attribute.cpp \
+    ../../src/ts/ast/Builder.cpp \
+    ../../src/ts/ast/Lexer.cpp \
+    ../../src/ts/ast/Node.cpp \
     ../../src/ts/Bool_Type.cpp \
     ../../src/ts/Bool_Value.cpp \
     ../../src/ts/Decimals_Attribute.cpp \

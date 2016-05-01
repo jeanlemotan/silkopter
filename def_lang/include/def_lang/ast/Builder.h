@@ -2,13 +2,16 @@
 
 #include <fstream>
 #include "def_lang/Result.h"
-#include "ast/Node.h"
+#include "def_lang/ast/Node.h"
 #include "def_lang/Type_System.h"
 #include "def_lang/Source_Location.h"
 
+namespace ts
+{
 namespace ast
 {
 class Lexer;
+}
 }
 
 namespace yy
@@ -16,6 +19,8 @@ namespace yy
 class parser;
 }
 
+namespace ts
+{
 namespace ast
 {
 
@@ -27,7 +32,8 @@ public:
     Builder();
     ~Builder();
 
-    ts::Result<void> parse(std::string const& filename);
+    ts::Result<void> parse_file(std::string const& filename);
+    ts::Result<void> parse_string(std::string const& def);
 
     Node& get_ast_root_node();
     Node const& get_ast_root_node() const;
@@ -46,6 +52,8 @@ protected:
     bool end_file();
 
 private:
+    bool start_stream(std::string const& filename, std::shared_ptr<std::istream>&& stream);
+
     Node m_root_node;
     std::shared_ptr<Lexer> m_lexer;
     std::shared_ptr<yy::parser> m_parser;
@@ -53,7 +61,7 @@ private:
     struct Import
     {
         std::string filename;
-        std::shared_ptr<std::ifstream> stream;
+        std::shared_ptr<std::istream> stream;
     };
 
     std::vector<Import> m_imports;
@@ -61,4 +69,5 @@ private:
     ts::Result<void> m_parse_result;
 };
 
+}
 }

@@ -22,6 +22,7 @@ Struct_Type::Struct_Type(Struct_Type const& other, std::string const& name)
     , Attribute_Container_EP(other)
     , m_base_struct(other.m_base_struct)
     , m_ui_name(name)
+    , m_native_type(other.m_ui_name)
 {
 }
 
@@ -46,9 +47,9 @@ std::string const& Struct_Type::get_ui_name() const
 {
     return m_ui_name;
 }
-std::string const& Struct_Type::get_native_type() const
+Symbol_Path Struct_Type::get_native_type() const
 {
-    return m_native_type;
+    return m_native_type.empty() ? get_symbol_path() : m_native_type;
 }
 
 Result<void> Struct_Type::validate_symbol(std::shared_ptr<const ISymbol> symbol)

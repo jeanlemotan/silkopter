@@ -15,7 +15,7 @@ public:
     virtual ~IType() = default;
 
     virtual std::string const& get_ui_name() const = 0;
-    virtual std::string const& get_native_type() const = 0;
+    virtual Symbol_Path get_native_type() const = 0;
 
     virtual std::shared_ptr<IType> clone(std::string const& name) const = 0;
 

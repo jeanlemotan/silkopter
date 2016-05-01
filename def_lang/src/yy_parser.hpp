@@ -46,9 +46,9 @@
     #include <sstream>
 
     #include "def_lang/Result.h"
-    #include "ast/Builder.h"
-    #include "ast/Node.h"
-    #include "ast/Attribute.h"
+    #include "def_lang/ast/Builder.h"
+    #include "def_lang/ast/Node.h"
+    #include "def_lang/ast/Attribute.h"
 
 #line 54 "yy_parser.hpp" // lalr1.cc:377
 
@@ -294,6 +294,20 @@ namespace yy {
     /// An auxiliary type to compute the largest semantic type.
     union union_type
     {
+      // "double literal"
+      char dummy1[sizeof(double)];
+
+      // "float literal"
+      char dummy2[sizeof(float)];
+
+      // "integer literal"
+      char dummy3[sizeof(int64_t)];
+
+      // "identifier path"
+      // "identifier"
+      // "string literal"
+      char dummy4[sizeof(std::string)];
+
       // top_level_declaration_list
       // top_level_declaration
       // alias_declaration
@@ -325,21 +339,7 @@ namespace yy {
       // template_argument_list
       // template_argument
       // literal
-      char dummy1[sizeof(::ast::Node)];
-
-      // "double literal"
-      char dummy2[sizeof(double)];
-
-      // "float literal"
-      char dummy3[sizeof(float)];
-
-      // "integer literal"
-      char dummy4[sizeof(int64_t)];
-
-      // "identifier path"
-      // "identifier"
-      // "string literal"
-      char dummy5[sizeof(std::string)];
+      char dummy5[sizeof(ts::ast::Node)];
 };
 
     /// Symbol semantic values.
@@ -431,8 +431,6 @@ namespace yy {
 
   basic_symbol (typename Base::kind_type t, const location_type& l);
 
-  basic_symbol (typename Base::kind_type t, const ::ast::Node v, const location_type& l);
-
   basic_symbol (typename Base::kind_type t, const double v, const location_type& l);
 
   basic_symbol (typename Base::kind_type t, const float v, const location_type& l);
@@ -440,6 +438,8 @@ namespace yy {
   basic_symbol (typename Base::kind_type t, const int64_t v, const location_type& l);
 
   basic_symbol (typename Base::kind_type t, const std::string v, const location_type& l);
+
+  basic_symbol (typename Base::kind_type t, const ts::ast::Node v, const location_type& l);
 
 
       /// Constructor for symbols with semantic value.
@@ -638,7 +638,7 @@ namespace yy {
 
 
     /// Build a parser object.
-     parser  (ast::Builder& builder_yyarg);
+     parser  (ts::ast::Builder& builder_yyarg);
     virtual ~ parser  ();
 
     /// Parse.
@@ -851,7 +851,7 @@ namespace yy {
 
 
     // User arguments.
-    ast::Builder& builder;
+    ts::ast::Builder& builder;
   };
 
   // Symbol number corresponding to token number t.
@@ -926,6 +926,24 @@ namespace yy {
   {
       switch (other.type_get ())
     {
+      case 31: // "double literal"
+        value.copy< double > (other.value);
+        break;
+
+      case 30: // "float literal"
+        value.copy< float > (other.value);
+        break;
+
+      case 32: // "integer literal"
+        value.copy< int64_t > (other.value);
+        break;
+
+      case 28: // "identifier path"
+      case 29: // "identifier"
+      case 33: // "string literal"
+        value.copy< std::string > (other.value);
+        break;
+
       case 38: // top_level_declaration_list
       case 39: // top_level_declaration
       case 40: // alias_declaration
@@ -957,25 +975,7 @@ namespace yy {
       case 66: // template_argument_list
       case 67: // template_argument
       case 68: // literal
-        value.copy< ::ast::Node > (other.value);
-        break;
-
-      case 31: // "double literal"
-        value.copy< double > (other.value);
-        break;
-
-      case 30: // "float literal"
-        value.copy< float > (other.value);
-        break;
-
-      case 32: // "integer literal"
-        value.copy< int64_t > (other.value);
-        break;
-
-      case 28: // "identifier path"
-      case 29: // "identifier"
-      case 33: // "string literal"
-        value.copy< std::string > (other.value);
+        value.copy< ts::ast::Node > (other.value);
         break;
 
       default:
@@ -995,6 +995,24 @@ namespace yy {
     (void) v;
       switch (this->type_get ())
     {
+      case 31: // "double literal"
+        value.copy< double > (v);
+        break;
+
+      case 30: // "float literal"
+        value.copy< float > (v);
+        break;
+
+      case 32: // "integer literal"
+        value.copy< int64_t > (v);
+        break;
+
+      case 28: // "identifier path"
+      case 29: // "identifier"
+      case 33: // "string literal"
+        value.copy< std::string > (v);
+        break;
+
       case 38: // top_level_declaration_list
       case 39: // top_level_declaration
       case 40: // alias_declaration
@@ -1026,25 +1044,7 @@ namespace yy {
       case 66: // template_argument_list
       case 67: // template_argument
       case 68: // literal
-        value.copy< ::ast::Node > (v);
-        break;
-
-      case 31: // "double literal"
-        value.copy< double > (v);
-        break;
-
-      case 30: // "float literal"
-        value.copy< float > (v);
-        break;
-
-      case 32: // "integer literal"
-        value.copy< int64_t > (v);
-        break;
-
-      case 28: // "identifier path"
-      case 29: // "identifier"
-      case 33: // "string literal"
-        value.copy< std::string > (v);
+        value.copy< ts::ast::Node > (v);
         break;
 
       default:
@@ -1059,13 +1059,6 @@ namespace yy {
    parser ::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const location_type& l)
     : Base (t)
     , value ()
-    , location (l)
-  {}
-
-  template <typename Base>
-   parser ::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const ::ast::Node v, const location_type& l)
-    : Base (t)
-    , value (v)
     , location (l)
   {}
 
@@ -1097,6 +1090,13 @@ namespace yy {
     , location (l)
   {}
 
+  template <typename Base>
+   parser ::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const ts::ast::Node v, const location_type& l)
+    : Base (t)
+    , value (v)
+    , location (l)
+  {}
+
 
   template <typename Base>
   inline
@@ -1123,6 +1123,24 @@ namespace yy {
     // Type destructor.
     switch (yytype)
     {
+      case 31: // "double literal"
+        value.template destroy< double > ();
+        break;
+
+      case 30: // "float literal"
+        value.template destroy< float > ();
+        break;
+
+      case 32: // "integer literal"
+        value.template destroy< int64_t > ();
+        break;
+
+      case 28: // "identifier path"
+      case 29: // "identifier"
+      case 33: // "string literal"
+        value.template destroy< std::string > ();
+        break;
+
       case 38: // top_level_declaration_list
       case 39: // top_level_declaration
       case 40: // alias_declaration
@@ -1154,25 +1172,7 @@ namespace yy {
       case 66: // template_argument_list
       case 67: // template_argument
       case 68: // literal
-        value.template destroy< ::ast::Node > ();
-        break;
-
-      case 31: // "double literal"
-        value.template destroy< double > ();
-        break;
-
-      case 30: // "float literal"
-        value.template destroy< float > ();
-        break;
-
-      case 32: // "integer literal"
-        value.template destroy< int64_t > ();
-        break;
-
-      case 28: // "identifier path"
-      case 29: // "identifier"
-      case 33: // "string literal"
-        value.template destroy< std::string > ();
+        value.template destroy< ts::ast::Node > ();
         break;
 
       default:
@@ -1198,6 +1198,24 @@ namespace yy {
     super_type::move(s);
       switch (this->type_get ())
     {
+      case 31: // "double literal"
+        value.move< double > (s.value);
+        break;
+
+      case 30: // "float literal"
+        value.move< float > (s.value);
+        break;
+
+      case 32: // "integer literal"
+        value.move< int64_t > (s.value);
+        break;
+
+      case 28: // "identifier path"
+      case 29: // "identifier"
+      case 33: // "string literal"
+        value.move< std::string > (s.value);
+        break;
+
       case 38: // top_level_declaration_list
       case 39: // top_level_declaration
       case 40: // alias_declaration
@@ -1229,25 +1247,7 @@ namespace yy {
       case 66: // template_argument_list
       case 67: // template_argument
       case 68: // literal
-        value.move< ::ast::Node > (s.value);
-        break;
-
-      case 31: // "double literal"
-        value.move< double > (s.value);
-        break;
-
-      case 30: // "float literal"
-        value.move< float > (s.value);
-        break;
-
-      case 32: // "integer literal"
-        value.move< int64_t > (s.value);
-        break;
-
-      case 28: // "identifier path"
-      case 29: // "identifier"
-      case 33: // "string literal"
-        value.move< std::string > (s.value);
+        value.move< ts::ast::Node > (s.value);
         break;
 
       default:

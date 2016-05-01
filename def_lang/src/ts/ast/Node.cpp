@@ -1,6 +1,8 @@
-#include "ast/Node.h"
+#include "def_lang/ast/Node.h"
 #include "def_lang/ts_assert.h"
 
+namespace ts
+{
 namespace ast
 {
 
@@ -86,13 +88,10 @@ Attribute const* Node::find_first_attribute_by_name(std::string const& name) con
     return it != m_attributes.cend() ? &(*it) : nullptr;
 }
 
-std::string Node::to_string(size_t ident_count, bool deep) const
+static const char* type_to_string(Node::Type type)
 {
-    std::string ident(ident_count, ' ');
-
-    std::string str = ident;// + "Type: ";
-#define CASE(X) case Type::X: str += #X; break;
-    switch (m_type)
+#define CASE(X) case Node::Type::X: return #X; break;
+    switch (type)
     {
     CASE(NONE);
     CASE(ROOT);
@@ -116,10 +115,16 @@ std::string Node::to_string(size_t ident_count, bool deep) const
     CASE(INITIALIZER_LIST);
     CASE(INITIALIZER);
     CASE(ATTRIBUTE);
-    default: TS_ASSERT(false); str += "<unknown>"; break;
+    default: TS_ASSERT(false); return "<unknown>"; break;
     }
 #undef CASE
+}
 
+std::string Node::to_string(size_t ident_count, bool deep) const
+{
+    std::string ident(ident_count, ' ');
+
+    std::string str = ident + type_to_string(m_type);
 
     for (Attribute const& att: m_attributes)
     {
@@ -140,4 +145,44 @@ std::string Node::to_string(size_t ident_count, bool deep) const
     return str;
 }
 
+Result<serialization::Value> Node::serialize() const
+{
+    ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+
+    sz_value.add_object_member("type", ts::serialization::Value(static_cast<uint8_t>(m_type)));
+
+    if (!m_attributes.empty())
+    {
+        ts::serialization::Value sz_value_attributes(ts::serialization::Value::Type::ARRAY);
+        for (Attribute const& att: m_attributes)
+        {
+            auto result = att.serialize();
+            if (result != success)
+            {
+                return result;
+            }
+            sz_value_attributes.add_array_element(result.extract_payload());
+        }
+        sz_value.add_object_member("attributes", std::move(sz_value_attributes));
+    }
+
+    if (!m_children.empty())
+    {
+        ts::serialization::Value sz_value_children(ts::serialization::Value::Type::ARRAY);
+        for (Node const& ch: m_children)
+        {
+            auto result = ch.serialize();
+            if (result != success)
+            {
+                return result;
+            }
+            sz_value_children.add_array_element(result.extract_payload());
+        }
+        sz_value.add_object_member("children", std::move(sz_value_children));
+    }
+
+    return sz_value;
+}
+
+}
 }

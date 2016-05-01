@@ -7,7 +7,7 @@ namespace ts
 namespace serialization
 {
 
-static void to_json(Value const& value, std::string& dst, size_t ident)
+static void to_json(Value const& value, std::string& dst, size_t ident_count, bool nice)
 {
     switch (value.get_type())
     {
@@ -26,35 +26,59 @@ static void to_json(Value const& value, std::string& dst, size_t ident)
     case Value::Type::STRING: dst += "\"" + value.get_as_string() + "\""; break;
     case Value::Type::OBJECT:
     {
-        std::string ident_str(ident > 0 ? ident - 1 : ident, '\t');
-        std::string member_ident_str(ident, '\t');
-        dst += "{\n";
-        for (size_t i = 0; i < value.get_object_member_count(); i++)
+        std::string ident_str = nice ? std::string(ident_count > 0 ? ident_count - 1 : ident_count, '\t') : std::string();
+        std::string member_ident_str = nice ? std::string(ident_count, '\t') : std::string();
+        dst.push_back('{');
+        if (nice)
+        {
+            dst.push_back('\n');
+        }
+        size_t count = value.get_object_member_count();
+        for (size_t i = 0; i < count; i++)
         {
             dst += member_ident_str;
-            dst += "\"";
+            dst.push_back('"');
             dst += value.get_object_member_name(i);
             dst += "\":";
-            to_json(value.get_object_member_value(i), dst, ident + 1);
-            dst += ",\n";
+            to_json(value.get_object_member_value(i), dst, ident_count + 1, nice);
+            if (i + 1 < count)
+            {
+                dst.push_back(',');
+            }
+            if (nice)
+            {
+                dst.push_back('\n');
+            }
         }
         dst += ident_str;
-        dst += "}";
+        dst.push_back('}');
         break;
     }
     case Value::Type::ARRAY:
     {
-        std::string ident_str(ident > 0 ? ident - 1 : ident, '\t');
-        std::string element_ident_str(ident, '\t');
-        dst += "[\n";
-        for (size_t i = 0; i < value.get_array_element_count(); i++)
+        std::string ident_str = nice ? std::string(ident_count > 0 ? ident_count - 1 : ident_count, '\t') : std::string();
+        std::string element_ident_str = nice ? std::string(ident_count, '\t') : std::string();
+        dst.push_back('[');
+        if (nice)
+        {
+            dst.push_back('\n');
+        }
+        size_t count = value.get_array_element_count();
+        for (size_t i = 0; i < count; i++)
         {
             dst += element_ident_str;
-            to_json(value.get_array_element_value(i), dst, ident + 1);
-            dst += ",\n";
+            to_json(value.get_array_element_value(i), dst, ident_count + 1, nice);
+            if (i + 1 < count)
+            {
+                dst.push_back(',');
+            }
+            if (nice)
+            {
+                dst.push_back('\n');
+            }
         }
         dst += ident_str;
-        dst += "]";
+        dst.push_back(']');
         break;
     }
     default: TS_ASSERT(false); break;
@@ -478,10 +502,10 @@ static Result<Value> parse_value(std::string const& json, size_t& offset)
 
 /////////////////////////////////////////////////////////////////////////////////////
 
-std::string to_json(Value const& value)
+std::string to_json(Value const& value, bool nice)
 {
     std::string json;
-    to_json(value, json, 1);
+    to_json(value, json, 1, nice);
     return json;
 }
 

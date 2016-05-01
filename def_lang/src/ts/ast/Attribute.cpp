@@ -1,5 +1,7 @@
-#include "ast/Attribute.h"
+#include "def_lang/ast/Attribute.h"
 
+namespace ts
+{
 namespace ast
 {
 
@@ -84,7 +86,7 @@ public:
     }
     std::string operator()(float v) const
     {
-        return std::to_string(v) + "f";
+        return std::to_string(v);
     }
     template<typename T>
     std::string operator()(T v) const
@@ -93,9 +95,47 @@ public:
     }
 };
 
-std::string Attribute::to_string() const
+static const char* type_to_string(Attribute::Type type)
 {
-    return m_name + ":" + boost::apply_visitor(to_string_visitor(), m_value);
+#define CASE(X) case Attribute::Type::X: return #X; break;
+    switch (type)
+    {
+    CASE(STRING);
+    CASE(BOOL);
+    CASE(INTEGRAL);
+    CASE(FLOAT);
+    CASE(DOUBLE);
+    default: TS_ASSERT(false); return "<unknown>"; break;
+    }
+#undef CASE
 }
 
+std::string Attribute::to_string() const
+{
+    return m_name + ":" + type_to_string(m_type) + ":" + boost::apply_visitor(to_string_visitor(), m_value);
+}
+
+
+class serialize_visitor : public boost::static_visitor<serialization::Value>
+{
+public:
+    template<typename T>
+    serialization::Value operator()(T v) const
+    {
+        return serialization::Value(v);
+    }
+};
+
+Result<serialization::Value> Attribute::serialize() const
+{
+    ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+
+    sz_value.add_object_member("type", ts::serialization::Value(static_cast<uint8_t>(m_type)));
+    sz_value.add_object_member("value", boost::apply_visitor(serialize_visitor(), m_value));
+
+    return sz_value;
+}
+
+
+}
 }

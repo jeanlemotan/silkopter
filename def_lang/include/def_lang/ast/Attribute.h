@@ -1,7 +1,11 @@
 #pragma once
 
 #include <boost/variant.hpp>
+#include "def_lang/Serialization.h"
+#include "def_lang/Result.h"
 
+namespace ts
+{
 namespace ast
 {
 
@@ -36,6 +40,8 @@ public:
 
     std::string to_string() const;
 
+    Result<serialization::Value> serialize() const;
+
 private:
     Type m_type;
     std::string m_name;
@@ -43,4 +49,5 @@ private:
 };
 
 
+}
 }

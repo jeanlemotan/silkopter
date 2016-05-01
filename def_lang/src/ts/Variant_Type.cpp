@@ -18,6 +18,7 @@ Variant_Type::Variant_Type(Variant_Type const& other, std::string const& name)
     , Attribute_Container_EP(other)
     , m_inner_types(other.m_inner_types)
     , m_ui_name(name)
+    , m_native_type(other.m_ui_name)
 {
 }
 
@@ -39,6 +40,18 @@ Result<void> Variant_Type::init(std::vector<std::shared_ptr<const ITemplate_Argu
         m_inner_types.push_back(inner_type);
     }
 
+    if (m_native_type.empty())
+    {
+        std::string type = "boost::variant<";
+        for (std::shared_ptr<const IType> const& inner_type: m_inner_types)
+        {
+            type += inner_type->get_native_type().to_string() + ",";
+        }
+        type.pop_back();
+        type += ">";
+        m_native_type = type;
+    }
+
     return success;
 }
 
@@ -46,9 +59,9 @@ std::string const& Variant_Type::get_ui_name() const
 {
     return m_ui_name;
 }
-std::string const& Variant_Type::get_native_type() const
+Symbol_Path Variant_Type::get_native_type() const
 {
-    return m_native_type;
+    return m_native_type.empty() ? get_symbol_path() : m_native_type;
 }
 
 Result<void> Variant_Type::validate_attribute(IAttribute const& attribute)

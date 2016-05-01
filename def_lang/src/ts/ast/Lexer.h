@@ -4,13 +4,18 @@
 #define yyFlexLexer xxFlexLexer
 #include "FlexLexer.h"
 
+namespace ts
+{
 namespace ast
 {
 class Builder;
 }
+}
 
 #include "yy_parser.hpp"
 
+namespace ts
+{
 namespace ast
 {
 
@@ -35,4 +40,5 @@ private:
     Builder& m_builder;
 };
 
+}
 }

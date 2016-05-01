@@ -20,6 +20,7 @@ Enum_Type::Enum_Type(Enum_Type const& other, std::string const& name)
     , Attribute_Container_EP(other)
     , m_default_item(other.m_default_item)
     , m_ui_name(name)
+    , m_native_type(other.m_ui_name)
 {
 
 }
@@ -39,9 +40,9 @@ std::string const& Enum_Type::get_ui_name() const
     return m_ui_name;
 }
 
-std::string const& Enum_Type::get_native_type() const
+Symbol_Path Enum_Type::get_native_type() const
 {
-    return m_native_type;
+    return m_native_type.empty() ? get_symbol_path() : m_native_type;
 }
 
 std::shared_ptr<IValue> Enum_Type::create_value() const

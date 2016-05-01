@@ -28,45 +28,95 @@ Result<void> Type_System::validate_symbol(std::shared_ptr<const ISymbol> symbol)
 
 void Type_System::populate_builtin_types()
 {
-    auto result = add_symbol(std::shared_ptr<IType>(new Bool_Type("bool")));
-    TS_ASSERT(result == success);
-    result = add_symbol(std::shared_ptr<IType>(new String_Type("string")));
-    TS_ASSERT(result == success);
+    std::shared_ptr<IType> type = std::make_shared<Bool_Type>("bool");
+    auto att_result = type->add_attribute(std::make_shared<Native_Type_Attribute>("bool"));
+    TS_ASSERT(att_result == success);
+    auto sym_result = add_symbol(type);
+    TS_ASSERT(sym_result == success);
 
-    result = add_symbol(std::shared_ptr<IType>(new Int_Type("int")));
-    TS_ASSERT(result == success);
+    type = std::make_shared<String_Type>("string");
+    att_result = type->add_attribute(std::make_shared<Native_Type_Attribute>("std::string"));
+    TS_ASSERT(att_result == success);
+    sym_result = add_symbol(type);
+    TS_ASSERT(sym_result == success);
 
-    result = add_symbol(std::shared_ptr<IType>(new Float_Type("float")));
-    TS_ASSERT(result == success);
-    result = add_symbol(std::shared_ptr<IType>(new Double_Type("double")));
-    TS_ASSERT(result == success);
+    type = std::make_shared<Int_Type>("int");
+    att_result = type->add_attribute(std::make_shared<Native_Type_Attribute>("int64_t"));
+    TS_ASSERT(att_result == success);
+    sym_result = add_symbol(type);
+    TS_ASSERT(sym_result == success);
+
+    type = std::make_shared<Float_Type>("float");
+    att_result = type->add_attribute(std::make_shared<Native_Type_Attribute>("float"));
+    TS_ASSERT(att_result == success);
+    sym_result = add_symbol(type);
+    TS_ASSERT(sym_result == success);
+
+    type = std::make_shared<Double_Type>("double");
+    att_result = type->add_attribute(std::make_shared<Native_Type_Attribute>("double"));
+    TS_ASSERT(att_result == success);
+    sym_result = add_symbol(type);
+    TS_ASSERT(sym_result == success);
 
     {
         std::shared_ptr<Namespace> math_namespace = std::shared_ptr<Namespace>(new Namespace("math"));
 
-        result = math_namespace->add_symbol(std::shared_ptr<IType>(new Vec2f_Type("vec2f")));
-        TS_ASSERT(result == success);
-        result = math_namespace->add_symbol(std::shared_ptr<IType>(new Vec2d_Type("vec2d")));
-        TS_ASSERT(result == success);
-        result = math_namespace->add_symbol(std::shared_ptr<IType>(new Vec2i_Type("vec2i")));
-        TS_ASSERT(result == success);
+        type = std::make_shared<Vec2f_Type>("vec2f");
+        att_result = type->add_attribute(std::make_shared<Native_Type_Attribute>("math::vec2f"));
+        TS_ASSERT(att_result == success);
+        sym_result = math_namespace->add_symbol(type);
+        TS_ASSERT(sym_result == success);
 
-        result = math_namespace->add_symbol(std::shared_ptr<IType>(new Vec3f_Type("vec3f")));
-        TS_ASSERT(result == success);
-        result = math_namespace->add_symbol(std::shared_ptr<IType>(new Vec3d_Type("vec3d")));
-        TS_ASSERT(result == success);
-        result = math_namespace->add_symbol(std::shared_ptr<IType>(new Vec3i_Type("vec3i")));
-        TS_ASSERT(result == success);
+        type = std::make_shared<Vec2d_Type>("vec2d");
+        att_result = type->add_attribute(std::make_shared<Native_Type_Attribute>("math::vec2d"));
+        TS_ASSERT(att_result == success);
+        sym_result = math_namespace->add_symbol(type);
+        TS_ASSERT(sym_result == success);
 
-        result = math_namespace->add_symbol(std::shared_ptr<IType>(new Vec4f_Type("vec4f")));
-        TS_ASSERT(result == success);
-        result = math_namespace->add_symbol(std::shared_ptr<IType>(new Vec4d_Type("vec4d")));
-        TS_ASSERT(result == success);
-        result = math_namespace->add_symbol(std::shared_ptr<IType>(new Vec4i_Type("vec4i")));
-        TS_ASSERT(result == success);
+        type = std::make_shared<Vec2i_Type>("vec2i");
+        att_result = type->add_attribute(std::make_shared<Native_Type_Attribute>("math::vec2i"));
+        TS_ASSERT(att_result == success);
+        sym_result = math_namespace->add_symbol(type);
+        TS_ASSERT(sym_result == success);
 
-        result = add_symbol(std::move(math_namespace));
-        TS_ASSERT(result == success);
+        type = std::make_shared<Vec3f_Type>("vec3f");
+        att_result = type->add_attribute(std::make_shared<Native_Type_Attribute>("math::vec3f"));
+        TS_ASSERT(att_result == success);
+        sym_result = math_namespace->add_symbol(type);
+        TS_ASSERT(sym_result == success);
+
+        type = std::make_shared<Vec3d_Type>("vec3d");
+        att_result = type->add_attribute(std::make_shared<Native_Type_Attribute>("math::vec3d"));
+        TS_ASSERT(att_result == success);
+        sym_result = math_namespace->add_symbol(type);
+        TS_ASSERT(sym_result == success);
+
+        type = std::make_shared<Vec3i_Type>("vec3i");
+        att_result = type->add_attribute(std::make_shared<Native_Type_Attribute>("math::vec3i"));
+        TS_ASSERT(att_result == success);
+        sym_result = math_namespace->add_symbol(type);
+        TS_ASSERT(sym_result == success);
+
+        type = std::make_shared<Vec4f_Type>("vec4f");
+        att_result = type->add_attribute(std::make_shared<Native_Type_Attribute>("math::vec4f"));
+        TS_ASSERT(att_result == success);
+        sym_result = math_namespace->add_symbol(type);
+        TS_ASSERT(sym_result == success);
+
+        type = std::make_shared<Vec4d_Type>("vec4d");
+        att_result = type->add_attribute(std::make_shared<Native_Type_Attribute>("math::vec4d"));
+        TS_ASSERT(att_result == success);
+        sym_result = math_namespace->add_symbol(type);
+        TS_ASSERT(sym_result == success);
+
+        type = std::make_shared<Vec4i_Type>("vec4i");
+        att_result = type->add_attribute(std::make_shared<Native_Type_Attribute>("math::vec4i"));
+        TS_ASSERT(att_result == success);
+        sym_result = math_namespace->add_symbol(type);
+        TS_ASSERT(sym_result == success);
+
+        sym_result = add_symbol(std::move(math_namespace));
+        TS_ASSERT(sym_result == success);
     }
 }
 
