@@ -25,6 +25,8 @@
 
 static ts::Result<void> generate_code(std::string& h_file, std::string& cpp_file, ts::ast::Node const& ast_root_node, ts::Type_System const& ts);
 
+static ts::Symbol_Path s_namespace;
+
 
 int main(int argc, char **argv)
 {
@@ -38,6 +40,7 @@ int main(int argc, char **argv)
         ("help", "This help message")
         ("ast", "Print the AST")
         ("nice", "Format the AST JSON nicely")
+        ("namespace", po::value<std::string>(), "The namespace where to put it all")
         ("def", po::value<std::string>(&def_filename), "Definition file")
         ("out", po::value<std::string>(&out_filename), "Output file");
 
@@ -79,6 +82,7 @@ int main(int argc, char **argv)
 
     bool show_ast = vm.count("ast") != 0;
     bool nice_json = vm.count("nice") != 0;
+    s_namespace = vm.count("namespace") ? ts::Symbol_Path(vm["namespace"].as<std::string>()) : ts::Symbol_Path();
 
     ts::ast::Builder builder;
 
@@ -229,14 +233,6 @@ static ts::Symbol_Path get_symbol_path(ts::Symbol_Path const& path)
 
 static ts::Symbol_Path get_native_type(ts::IType const& type)
 {
-//    if (ts::IVector_Type const* vector_type = dynamic_cast<ts::IVector_Type const*>(&type))
-//    {
-//        return "std::vector<" + get_native_type_str(*vector_type->get_inner_type()) + ">";
-//    }
-//    if (ts::IPoly_Type const* poly_type = dynamic_cast<ts::IPoly_Type const*>(&type))
-//    {
-//        return get_native_type_str(*poly_type->get_inner_type()) + " const*";
-//    }
     return get_symbol_path(type.get_native_type());
 }
 
@@ -315,20 +311,45 @@ static std::string get_value_str(ts::IValue const& value)
     return "";
 }
 
-static ts::Result<void> generate_member_def_declaration_code(std::string& o_h_file, std::string& o_cpp_file, std::string const& ident_str, ts::IMember_Def const& member_def)
+static void generate_member_def_declaration_code(std::string& o_h_file, std::string& o_cpp_file, std::string const& ident_str, ts::IMember_Def const& member_def)
 {
     std::string native_type_str = get_native_type(*member_def.get_type()).to_string();
 
     o_h_file += ident_str +
             native_type_str +
-            " " +
+            " m_" +
             member_def.get_name() +
             " = " +
             native_type_str +
             "(" +
             get_value_str(*member_def.get_default_value()) +
             ");\n";
-    return ts::success;
+}
+
+static void generate_member_def_getter_code(std::string& o_h_file, std::string& o_cpp_file, std::string const& ident_str, ts::IStruct_Type const& struct_type, ts::IMember_Def const& member_def)
+{
+//    std::string struct_full_name = get_native_type(struct_type).to_string();
+    std::string native_type_str = get_native_type(*member_def.get_type()).to_string();
+
+    o_h_file += ident_str + native_type_str + " const& get_" + member_def.get_name() + "() const;\n";
+
+    o_cpp_file += ident_str + native_type_str + " const& get_" + member_def.get_name() + "() const\n" +
+            ident_str + "{\n" +
+            ident_str + "  return m_" + member_def.get_name() + ";\n" +
+            ident_str + "}\n\n";
+}
+
+static void generate_member_def_setter_code(std::string& o_h_file, std::string& o_cpp_file, std::string const& ident_str, ts::IStruct_Type const& struct_type, ts::IMember_Def const& member_def)
+{
+//    std::string struct_full_name = get_native_type(struct_type).to_string();
+    std::string native_type_str = get_native_type(*member_def.get_type()).to_string();
+
+    o_h_file += ident_str + "void set_" + member_def.get_name() + "(" + native_type_str + " const& value);\n";
+
+    o_cpp_file += ident_str + "void set_" + member_def.get_name() + "(" + native_type_str + " const& value)\n" +
+            ident_str + "{\n" +
+            ident_str + "  m_" + member_def.get_name() + " = value;\n" +
+            ident_str + "}\n";
 }
 
 static ts::Result<void> generate_struct_type_code(std::string& o_h_file, std::string& o_cpp_file, std::string const& ident_str, ts::IStruct_Type const& struct_type)
@@ -340,7 +361,7 @@ static ts::Result<void> generate_struct_type_code(std::string& o_h_file, std::st
         o_h_file += " : public " + get_native_type(*struct_type.get_base_struct()).to_string();
     }
     o_h_file += "\n";
-    o_h_file += ident_str +  "{\n";
+    o_h_file += ident_str +  "{\n\n";
     o_h_file += ident_str + "public:\n";
 
     o_h_file += ident_str + "  virtual ~" + struct_name + "() = default;\n\n";
@@ -351,15 +372,20 @@ static ts::Result<void> generate_struct_type_code(std::string& o_h_file, std::st
         return result;
     }
 
+    for (size_t i = 0; i < struct_type.get_member_def_count(); i++)
+    {
+        generate_member_def_getter_code(o_h_file, o_cpp_file, ident_str + "  ", struct_type, *struct_type.get_member_def(i));
+        generate_member_def_setter_code(o_h_file, o_cpp_file, ident_str + "  ", struct_type, *struct_type.get_member_def(i));
+        o_h_file += "\n";
+        o_cpp_file += "\n////////////////////////////////////////////////////////////\n\n";
+    }
+
+    o_h_file += "\n\n";
     o_h_file += ident_str + "private:\n";
 
     for (size_t i = 0; i < struct_type.get_member_def_count(); i++)
     {
-        auto result = generate_member_def_declaration_code(o_h_file, o_cpp_file, ident_str + "  ", *struct_type.get_member_def(i));
-        if (result != ts::success)
-        {
-            return result;
-        }
+        generate_member_def_declaration_code(o_h_file, o_cpp_file, ident_str + "  ", *struct_type.get_member_def(i));
     }
 
     o_h_file += ident_str + "};\n\n";
@@ -455,11 +481,17 @@ static ts::Result<void> generate_code(std::string& o_h_file, std::string& o_cpp_
         return serialize_result.error();
     }
 
-    o_h_file += "namespace gen\n"
-                "{\n\n";
+    if (!s_namespace.empty())
+    {
+        for (size_t i = 0; i < s_namespace.get_count(); i++)
+        {
+            o_h_file += "namespace " + s_namespace.get(i) + "\n"
+                        "{\n\n";
 
-    o_cpp_file += "namespace gen\n"
-                  "{\n\n";
+            o_cpp_file += "namespace " + s_namespace.get(i) + "\n"
+                          "{\n\n";
+        }
+    }
 
     std::string ast_json = ts::serialization::to_json(serialize_result.payload(), false);
 
@@ -476,8 +508,11 @@ static ts::Result<void> generate_code(std::string& o_h_file, std::string& o_cpp_
         return result;
     }
 
-    o_h_file += "}\n";
-    o_cpp_file += "}\n";
+    if (!s_namespace.empty())
+    {
+        o_h_file += "}\n";
+        o_cpp_file += "}\n";
+    }
 
     return ts::success;
 }

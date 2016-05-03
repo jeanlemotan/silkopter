@@ -16,6 +16,8 @@ public:
     bool operator==(Symbol_Path const& other) const;
     bool operator!=(Symbol_Path const& other) const;
 
+    Symbol_Path operator+(Symbol_Path const& other) const;
+
     bool is_absolute() const;
 
     size_t get_count() const;

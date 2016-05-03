@@ -28,6 +28,16 @@ bool Symbol_Path::operator!=(Symbol_Path const& other) const
     return !operator==(other);
 }
 
+Symbol_Path Symbol_Path::operator+(Symbol_Path const& other) const
+{
+    Symbol_Path res = *this;
+    for (std::string const& e: other.m_elements)
+    {
+        res.m_elements.push_back(e);
+    }
+    return res;
+}
+
 bool Symbol_Path::is_absolute() const
 {
     return m_is_absolute;
