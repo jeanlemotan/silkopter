@@ -74,7 +74,7 @@ void Type_System::populate_builtin_types()
         TS_ASSERT(sym_result == success);
 
         type = std::make_shared<Vec2i_Type>("vec2i");
-        att_result = type->add_attribute(std::make_shared<Native_Type_Attribute>("math::vec2i"));
+        att_result = type->add_attribute(std::make_shared<Native_Type_Attribute>("math::vec2<int64_t>"));
         TS_ASSERT(att_result == success);
         sym_result = math_namespace->add_symbol(type);
         TS_ASSERT(sym_result == success);
@@ -92,7 +92,7 @@ void Type_System::populate_builtin_types()
         TS_ASSERT(sym_result == success);
 
         type = std::make_shared<Vec3i_Type>("vec3i");
-        att_result = type->add_attribute(std::make_shared<Native_Type_Attribute>("math::vec3i"));
+        att_result = type->add_attribute(std::make_shared<Native_Type_Attribute>("math::vec3<int64_t>"));
         TS_ASSERT(att_result == success);
         sym_result = math_namespace->add_symbol(type);
         TS_ASSERT(sym_result == success);
@@ -110,7 +110,7 @@ void Type_System::populate_builtin_types()
         TS_ASSERT(sym_result == success);
 
         type = std::make_shared<Vec4i_Type>("vec4i");
-        att_result = type->add_attribute(std::make_shared<Native_Type_Attribute>("math::vec4i"));
+        att_result = type->add_attribute(std::make_shared<Native_Type_Attribute>("math::vec4<int64_t>"));
         TS_ASSERT(att_result == success);
         sym_result = math_namespace->add_symbol(type);
         TS_ASSERT(sym_result == success);
@@ -137,6 +137,7 @@ Result<std::shared_ptr<const ITemplated_Type>> Type_System::instantiate_template
         instanced_name += "#";
         instanced_name += arg->get_template_instantiation_string();
     }
+    std::transform(instanced_name.begin(), instanced_name.end(), instanced_name.begin(), [](char c) { return c == ':' ? '_' : c; });
 
     std::shared_ptr<const ITemplated_Type> instance = find_specialized_symbol_by_name<ITemplated_Type>(instanced_name);
     if (instance)

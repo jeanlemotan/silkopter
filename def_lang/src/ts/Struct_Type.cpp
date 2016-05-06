@@ -22,7 +22,7 @@ Struct_Type::Struct_Type(Struct_Type const& other, std::string const& name)
     , Attribute_Container_EP(other)
     , m_base_struct(other.m_base_struct)
     , m_ui_name(name)
-    , m_native_type(other.m_ui_name)
+    , m_native_type(other.m_native_type)
 {
 }
 

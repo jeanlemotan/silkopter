@@ -13,10 +13,14 @@ public:
     Symbol_Path(std::string const& str);
     Symbol_Path(char const* str);
 
+    Symbol_Path get_path_to(Symbol_Path const& path) const;
+
     bool operator==(Symbol_Path const& other) const;
     bool operator!=(Symbol_Path const& other) const;
 
     Symbol_Path operator+(Symbol_Path const& other) const;
+
+    Symbol_Path parent() const;
 
     bool is_absolute() const;
 

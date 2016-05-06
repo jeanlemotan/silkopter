@@ -1,4 +1,5 @@
 #include "def_lang/Symbol_Path.h"
+#include "def_lang/ts_assert.h"
 
 #include <cstring>
 
@@ -16,6 +17,38 @@ Symbol_Path::Symbol_Path(char const* str)
     {
         parse(str, strlen(str));
     }
+}
+
+Symbol_Path Symbol_Path::get_path_to(Symbol_Path const& path) const
+{
+    if (get_count() > path.get_count())
+    {
+        return path;
+    }
+
+    Symbol_Path res;
+
+    for (size_t i = 0; i < get_count(); i++)
+    {
+        if (get(i) != path.get(i))
+        {
+            return path;
+        }
+    }
+
+    for (size_t i = get_count(); i < path.get_count(); i++)
+    {
+        res.m_elements.push_back(path.m_elements[i]);
+    }
+
+    return res;
+}
+
+Symbol_Path Symbol_Path::parent() const
+{
+    Symbol_Path res = *this;
+    res.pop_back();
+    return res;
 }
 
 bool Symbol_Path::operator==(Symbol_Path const& other) const

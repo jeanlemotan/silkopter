@@ -3,6 +3,7 @@
 
 #include "def_lang/IMember_Def.h"
 #include "def_lang/IVector_Type.h"
+#include "def_lang/IVariant_Type.h"
 #include "def_lang/IPoly_Type.h"
 #include "def_lang/IEnum_Type.h"
 #include "def_lang/IEnum_Value.h"
@@ -23,7 +24,23 @@
 
 #include <boost/program_options.hpp>
 
-static ts::Result<void> generate_code(std::string& h_file, std::string& cpp_file, ts::ast::Node const& ast_root_node, ts::Type_System const& ts);
+
+struct Context
+{
+    Context(std::string& o_h_file, std::string& o_cpp_file, ts::IDeclaration_Scope const& parent_scope)
+        : h_file(o_h_file)
+        , cpp_file(o_cpp_file)
+        , parent_scope(parent_scope)
+    {}
+    std::string h_filename;
+    std::string& h_file;
+    std::string& cpp_file;
+    ts::IDeclaration_Scope const& parent_scope;
+    std::string ident_str;
+};
+
+
+static ts::Result<void> generate_code(Context& context, ts::ast::Node const& ast_root_node, ts::Type_System const& ts);
 
 static ts::Symbol_Path s_namespace;
 
@@ -65,18 +82,18 @@ int main(int argc, char **argv)
         out_filename = def_filename;
     }
 
-    std::string filename = out_filename + ".h";
-    std::ofstream h_stream(filename);
+    std::string h_filename = out_filename + ".h";
+    std::ofstream h_stream(h_filename);
     if (!h_stream.is_open())
     {
-        std::cerr << "Cannot open out file '" + filename + "'";
+        std::cerr << "Cannot open out file '" + h_filename + "'";
         return 1;
     }
-    filename = out_filename + ".cpp";
-    std::ofstream cpp_stream(filename);
+    std::string cpp_filename = out_filename + ".cpp";
+    std::ofstream cpp_stream(cpp_filename);
     if (!cpp_stream.is_open())
     {
-        std::cerr << "Cannot open out file '" + filename + "'";
+        std::cerr << "Cannot open out file '" + cpp_filename + "'";
         return 1;
     }
 
@@ -112,7 +129,9 @@ int main(int argc, char **argv)
     }
 
     std::string h_file, cpp_file;
-    auto result = generate_code(h_file, cpp_file, builder.get_ast_root_node(), ts);
+    Context context(h_file, cpp_file, ts);
+    context.h_filename = h_filename;
+    auto result = generate_code(context, builder.get_ast_root_node(), ts);
     if (result != ts::success)
     {
         std::cerr << result.error().what();
@@ -190,40 +209,41 @@ int main(int argc, char **argv)
     return 0;
 }
 
-static ts::Result<void> generate_ast_code(std::string& o_h_file, std::string& o_cpp_file, std::string const& ident_str, std::string const& ast_json)
+static ts::Result<void> generate_ast_code(Context& context, std::string const& ast_json)
 {
-    o_h_file += ident_str + "// Returns the ast json from which a ast root node can be serialized\n";
-    o_h_file += ident_str + "std::string const& get_ast_json();\n";
-    o_h_file += ident_str + "// Returns the root ast node from which a typesystem can be generated\n";
-    o_h_file += ident_str + "ts::Result<ts::ast::Node> get_ast_root_node();\n\n";
+    context.h_file += context.ident_str + "// Returns the ast json from which a ast root node can be serialized\n";
+    context.h_file += context.ident_str + "std::string const& get_ast_json();\n";
+    context.h_file += context.ident_str + "// Returns the root ast node from which a typesystem can be generated\n";
+    context.h_file += context.ident_str + "ts::Result<ts::ast::Node> get_ast_root_node();\n\n";
 
-    o_cpp_file += ident_str + "std::string const& get_ast_json()\n";
-    o_cpp_file += ident_str + "{\n";
-    o_cpp_file += ident_str + "  static constexpr std::string s_json = R\"xxx(";
-    o_cpp_file += ident_str + ast_json;
-    o_cpp_file += ident_str + ")xxx\"\n";
-    o_cpp_file += ident_str + "  return s_json;\n";
-    o_cpp_file += ident_str + "}\n\n";
-    o_cpp_file += ident_str + "ts::Result<ts::ast::Node> get_ast_root_node()\n";
-    o_cpp_file += ident_str + "{\n";
-    o_cpp_file += ident_str + "  ts::Result<ts::serialization::Value> result = ts::serialization::from_json(get_ast_json());\n";
-    o_cpp_file += ident_str + "  if (result != ts::success)\n";
-    o_cpp_file += ident_str + "  {\n";
-    o_cpp_file += ident_str + "    return result.error();\n";
-    o_cpp_file += ident_str + "  }\n";
-    o_cpp_file += ident_str + "  ts::ast::Node root_node;\n";
-    o_cpp_file += ident_str + "  auto deserialize_result = root_node.deserialize(result.payload());\n";
-    o_cpp_file += ident_str + "  if (deserialize_result != ts::success)\n";
-    o_cpp_file += ident_str + "  {\n";
-    o_cpp_file += ident_str + "    return deserialize_result.error();\n";
-    o_cpp_file += ident_str + "  }\n";
-    o_cpp_file += ident_str + "  return root_node;\n";
-    o_cpp_file += ident_str + "}\n\n";
+    context.cpp_file += context.ident_str + "std::string const& get_ast_json()\n";
+    context.cpp_file += context.ident_str + "{\n";
+    context.cpp_file += context.ident_str + "  static const std::string s_json = R\"xxx(";
+    context.cpp_file += context.ident_str + ast_json;
+    context.cpp_file += context.ident_str + ")xxx\";\n";
+    context.cpp_file += context.ident_str + "  return s_json;\n";
+    context.cpp_file += context.ident_str + "}\n\n";
+    context.cpp_file += context.ident_str + "ts::Result<ts::ast::Node> get_ast_root_node()\n";
+    context.cpp_file += context.ident_str + "{\n";
+    context.cpp_file += context.ident_str + "  ts::Result<ts::serialization::Value> result = ts::serialization::from_json(get_ast_json());\n";
+    context.cpp_file += context.ident_str + "  if (result != ts::success)\n";
+    context.cpp_file += context.ident_str + "  {\n";
+    context.cpp_file += context.ident_str + "    return result.error();\n";
+    context.cpp_file += context.ident_str + "  }\n";
+    context.cpp_file += context.ident_str + "  ts::ast::Node root_node;\n";
+    context.cpp_file += context.ident_str + "  auto deserialize_result = root_node.deserialize(result.payload());\n";
+    context.cpp_file += context.ident_str + "  if (deserialize_result != ts::success)\n";
+    context.cpp_file += context.ident_str + "  {\n";
+    context.cpp_file += context.ident_str + "    return deserialize_result.error();\n";
+    context.cpp_file += context.ident_str + "  }\n";
+    context.cpp_file += context.ident_str + "  return root_node;\n";
+    context.cpp_file += context.ident_str + "}\n\n";
 
     return ts::success;
 }
 
-static ts::Result<void> generate_declaration_scope_code(std::string& o_h_file, std::string& o_cpp_file, std::string const& ident_str, ts::IDeclaration_Scope const& ds);
+static ts::Result<void> generate_declaration_scope_code(Context& context, ts::IDeclaration_Scope const& ds);
+static ts::Symbol_Path get_type_relative_scope_path(ts::IDeclaration_Scope const& scope, ts::IType const& type);
 
 
 static ts::Symbol_Path get_symbol_path(ts::Symbol_Path const& path)
@@ -231,9 +251,38 @@ static ts::Symbol_Path get_symbol_path(ts::Symbol_Path const& path)
     return path;
 }
 
-static ts::Symbol_Path get_native_type(ts::IType const& type)
+static ts::Symbol_Path get_native_type(ts::IDeclaration_Scope const& scope, ts::IType const& type)
 {
+    if (ts::IVariant_Type const* v = dynamic_cast<ts::IVariant_Type const*>(&type))
+    {
+        std::string str = "boost::variant<";
+        for (size_t i = 0; i < v->get_inner_type_count(); i++)
+        {
+            std::shared_ptr<const ts::IType> const& inner_type = v->get_inner_type(i);
+            str += scope.get_symbol_path().get_path_to(get_native_type(scope, *inner_type)).to_string() + ",";
+        }
+        str.pop_back();
+        str += ">";
+        return ts::Symbol_Path(str);
+    }
+    else if (ts::IVector_Type const* v = dynamic_cast<ts::IVector_Type const*>(&type))
+    {
+        return ts::Symbol_Path("std::vector<" + get_native_type(scope, *v->get_inner_type()).to_string() + ">");
+    }
+    else if (ts::IPoly_Type const* v = dynamic_cast<ts::IPoly_Type const*>(&type))
+    {
+        return ts::Symbol_Path("std::shared_ptr<" + get_native_type(scope, *v->get_inner_type()).to_string() + ">");
+    }
+
     return get_symbol_path(type.get_native_type());
+}
+
+static ts::Symbol_Path get_type_relative_scope_path(ts::IDeclaration_Scope const& scope, ts::IType const& type)
+{
+    ts::Symbol_Path scope_path = get_symbol_path(scope.get_symbol_path());
+    ts::Symbol_Path type_path = get_symbol_path(get_native_type(scope, type));
+
+    return scope_path.get_path_to(type_path);
 }
 
 static std::string get_value_str(ts::IValue const& value)
@@ -311,129 +360,160 @@ static std::string get_value_str(ts::IValue const& value)
     return "";
 }
 
-static void generate_member_def_declaration_code(std::string& o_h_file, std::string& o_cpp_file, std::string const& ident_str, ts::IMember_Def const& member_def)
+static void generate_member_def_declaration_code(Context& context, ts::IMember_Def const& member_def)
 {
-    std::string native_type_str = get_native_type(*member_def.get_type()).to_string();
+    std::string native_type_str = get_type_relative_scope_path(context.parent_scope, *member_def.get_type()).to_string();
 
-    o_h_file += ident_str +
+    context.h_file += context.ident_str +
             native_type_str +
             " m_" +
             member_def.get_name() +
-            " = " +
-            native_type_str +
-            "(" +
+            " = {" +
             get_value_str(*member_def.get_default_value()) +
-            ");\n";
+            "};\n";
 }
 
-static void generate_member_def_getter_code(std::string& o_h_file, std::string& o_cpp_file, std::string const& ident_str, ts::IStruct_Type const& struct_type, ts::IMember_Def const& member_def)
+static void generate_member_def_getter_code(Context& context, ts::IStruct_Type const& struct_type, ts::IMember_Def const& member_def)
 {
-//    std::string struct_full_name = get_native_type(struct_type).to_string();
-    std::string native_type_str = get_native_type(*member_def.get_type()).to_string();
+    ts::IDeclaration_Scope const* ds = &struct_type;
+    while (dynamic_cast<const ts::IStruct_Type*>(ds))
+    {
+        ds = ds->get_parent_scope();
+    }
+    TS_ASSERT(ds);
 
-    o_h_file += ident_str + native_type_str + " const& get_" + member_def.get_name() + "() const;\n";
+    std::string struct_type_str = get_type_relative_scope_path(*ds, struct_type).to_string();
+    std::string native_type_str = get_type_relative_scope_path(context.parent_scope, *member_def.get_type()).to_string();
 
-    o_cpp_file += ident_str + native_type_str + " const& get_" + member_def.get_name() + "() const\n" +
-            ident_str + "{\n" +
-            ident_str + "  return m_" + member_def.get_name() + ";\n" +
-            ident_str + "}\n\n";
+    context.h_file += context.ident_str + "auto get_" + member_def.get_name() + "() const -> " + native_type_str + " const&;\n";
+
+    context.cpp_file += context.ident_str + "auto " + struct_type_str + "::get_" + member_def.get_name() + "() const -> " + native_type_str + " const& \n" +
+            context.ident_str + "{\n" +
+            context.ident_str + "  return m_" + member_def.get_name() + ";\n" +
+            context.ident_str + "}\n\n";
 }
 
-static void generate_member_def_setter_code(std::string& o_h_file, std::string& o_cpp_file, std::string const& ident_str, ts::IStruct_Type const& struct_type, ts::IMember_Def const& member_def)
+static void generate_member_def_setter_code(Context& context, ts::IStruct_Type const& struct_type, ts::IMember_Def const& member_def)
 {
-//    std::string struct_full_name = get_native_type(struct_type).to_string();
-    std::string native_type_str = get_native_type(*member_def.get_type()).to_string();
+    ts::IDeclaration_Scope const* ds = &struct_type;
+    while (dynamic_cast<const ts::IStruct_Type*>(ds))
+    {
+        ds = ds->get_parent_scope();
+    }
+    TS_ASSERT(ds);
 
-    o_h_file += ident_str + "void set_" + member_def.get_name() + "(" + native_type_str + " const& value);\n";
+    std::string struct_type_str = get_type_relative_scope_path(*ds, struct_type).to_string();
+    std::string native_type_str = get_type_relative_scope_path(context.parent_scope, *member_def.get_type()).to_string();
 
-    o_cpp_file += ident_str + "void set_" + member_def.get_name() + "(" + native_type_str + " const& value)\n" +
-            ident_str + "{\n" +
-            ident_str + "  m_" + member_def.get_name() + " = value;\n" +
-            ident_str + "}\n";
+    context.h_file += context.ident_str + "void set_" + member_def.get_name() + "(" + native_type_str + " const& value);\n";
+
+    context.cpp_file += context.ident_str + "void " + struct_type_str + "::set_" + member_def.get_name() + "(" + native_type_str + " const& value)\n" +
+            context.ident_str + "{\n" +
+            context.ident_str + "  m_" + member_def.get_name() + " = value;\n" +
+            context.ident_str + "}\n";
 }
 
-static ts::Result<void> generate_struct_type_code(std::string& o_h_file, std::string& o_cpp_file, std::string const& ident_str, ts::IStruct_Type const& struct_type)
+static ts::Result<void> generate_struct_type_code(Context& context, ts::IStruct_Type const& struct_type)
 {
-    std::string struct_name = get_native_type(struct_type).back();
-    o_h_file += ident_str + "struct " + struct_name;
+    std::string struct_name = get_native_type(context.parent_scope, struct_type).back();
+    context.h_file += context.ident_str + "struct " + struct_name;
     if (struct_type.get_base_struct())
     {
-        o_h_file += " : public " + get_native_type(*struct_type.get_base_struct()).to_string();
+        context.h_file += " : public " + get_native_type(context.parent_scope, *struct_type.get_base_struct()).to_string();
     }
-    o_h_file += "\n";
-    o_h_file += ident_str +  "{\n\n";
-    o_h_file += ident_str + "public:\n";
+    context.h_file += "\n";
+    context.h_file += context.ident_str +  "{\n\n";
+    context.h_file += context.ident_str + "public:\n";
 
-    o_h_file += ident_str + "  virtual ~" + struct_name + "() = default;\n\n";
-
-    auto result = generate_declaration_scope_code(o_h_file, o_cpp_file, ident_str + "  ", struct_type);
+    Context c(context.h_file, context.cpp_file, struct_type);
+    c.ident_str = context.ident_str + "  ";
+    auto result = generate_declaration_scope_code(c, struct_type);
     if (result != ts::success)
     {
         return result;
     }
 
-    for (size_t i = 0; i < struct_type.get_member_def_count(); i++)
-    {
-        generate_member_def_getter_code(o_h_file, o_cpp_file, ident_str + "  ", struct_type, *struct_type.get_member_def(i));
-        generate_member_def_setter_code(o_h_file, o_cpp_file, ident_str + "  ", struct_type, *struct_type.get_member_def(i));
-        o_h_file += "\n";
-        o_cpp_file += "\n////////////////////////////////////////////////////////////\n\n";
-    }
-
-    o_h_file += "\n\n";
-    o_h_file += ident_str + "private:\n";
+    context.h_file += c.ident_str + struct_name + "() noexcept = default;\n";
+    context.h_file += c.ident_str + "virtual ~" + struct_name + "() noexcept = default;\n\n";
 
     for (size_t i = 0; i < struct_type.get_member_def_count(); i++)
     {
-        generate_member_def_declaration_code(o_h_file, o_cpp_file, ident_str + "  ", *struct_type.get_member_def(i));
+        if (std::shared_ptr<const ts::IStruct_Type> base = struct_type.get_base_struct())
+        {
+            if (base->find_member_def_by_name(struct_type.get_member_def(i)->get_name()))
+            {
+                continue;
+            }
+        }
+
+        generate_member_def_getter_code(c, struct_type, *struct_type.get_member_def(i));
+        generate_member_def_setter_code(c, struct_type, *struct_type.get_member_def(i));
+        context.h_file += "\n";
+        context.cpp_file += "\n////////////////////////////////////////////////////////////\n\n";
     }
 
-    o_h_file += ident_str + "};\n\n";
+    context.h_file += "\n\n";
+    context.h_file += context.ident_str + "private:\n";
+
+    for (size_t i = 0; i < struct_type.get_member_def_count(); i++)
+    {
+        if (std::shared_ptr<const ts::IStruct_Type> base = struct_type.get_base_struct())
+        {
+            if (base->find_member_def_by_name(struct_type.get_member_def(i)->get_name()))
+            {
+                continue;
+            }
+        }
+
+        generate_member_def_declaration_code(c, *struct_type.get_member_def(i));
+    }
+
+    context.h_file += context.ident_str + "};\n\n";
 
     return ts::success;
 }
 
-static ts::Result<void> generate_enum_type_code(std::string& o_h_file, std::string& o_cpp_file, std::string const& ident_str, ts::IEnum_Type const& enum_type)
+static ts::Result<void> generate_enum_type_code(Context& context, ts::IEnum_Type const& enum_type)
 {
-    std::string enum_name = get_native_type(enum_type).back();
-    o_h_file += ident_str + "enum class " + enum_name + "\n";
-    o_h_file += ident_str + "{\n";
+    std::string enum_name = get_native_type(context.parent_scope, enum_type).back();
+    context.h_file += context.ident_str + "enum class " + enum_name + "\n";
+    context.h_file += context.ident_str + "{\n";
 
     for (size_t i = 0; i < enum_type.get_item_count(); i++)
     {
         std::shared_ptr<const ts::IEnum_Item> item = enum_type.get_item(i);
-        o_h_file += ident_str + "  " + item->get_name() + " = " + std::to_string(item->get_integral_value()) + ",\n";
+        context.h_file += context.ident_str + "  " + item->get_name() + " = " + std::to_string(item->get_integral_value()) + ",\n";
     }
 
-    o_h_file += ident_str + "};\n\n";
+    context.h_file += context.ident_str + "};\n\n";
 
     return ts::success;
 }
 
-static ts::Result<void> generate_namespace_code(std::string& o_h_file, std::string& o_cpp_file, std::string const& ident_str, ts::Namespace const& ns)
+static ts::Result<void> generate_namespace_code(Context& context, ts::Namespace const& ns)
 {
-    o_h_file += ident_str + "namespace " + ns.get_name() + "\n";
-    o_h_file += ident_str + "{\n\n";
-    o_cpp_file += ident_str + "namespace " + ns.get_name() + "\n";
-    o_cpp_file += ident_str + "{\n\n";
+    context.h_file += context.ident_str + "namespace " + ns.get_name() + "\n";
+    context.h_file += context.ident_str + "{\n\n";
+    context.cpp_file += context.ident_str + "namespace " + ns.get_name() + "\n";
+    context.cpp_file += context.ident_str + "{\n\n";
 
-    auto result = generate_declaration_scope_code(o_h_file, o_cpp_file, ident_str, ns);
+    auto result = generate_declaration_scope_code(context, ns);
     if (result != ts::success)
     {
         return result;
     }
 
-    o_h_file += ident_str + "}\n";
-    o_cpp_file += ident_str + "}\n";
+    context.h_file += context.ident_str + "}\n";
+    context.cpp_file += context.ident_str + "}\n";
 
     return ts::success;
 }
 
-static ts::Result<void> generate_symbol_code(std::string& o_h_file, std::string& o_cpp_file, std::string const& ident_str, ts::ISymbol const& symbol)
+static ts::Result<void> generate_symbol_code(Context& context, ts::ISymbol const& symbol)
 {
     if (ts::IStruct_Type const* struct_type = dynamic_cast<ts::IStruct_Type const*>(&symbol))
     {
-        auto result = generate_struct_type_code(o_h_file, o_cpp_file, ident_str, *struct_type);
+        auto result = generate_struct_type_code(context, *struct_type);
         if (result != ts::success)
         {
             return result;
@@ -441,7 +521,7 @@ static ts::Result<void> generate_symbol_code(std::string& o_h_file, std::string&
     }
     else if (ts::IEnum_Type const* enum_type = dynamic_cast<ts::IEnum_Type const*>(&symbol))
     {
-        auto result = generate_enum_type_code(o_h_file, o_cpp_file, ident_str, *enum_type);
+        auto result = generate_enum_type_code(context, *enum_type);
         if (result != ts::success)
         {
             return result;
@@ -449,7 +529,7 @@ static ts::Result<void> generate_symbol_code(std::string& o_h_file, std::string&
     }
     else if (ts::Namespace const* ns = dynamic_cast<ts::Namespace const*>(&symbol))
     {
-        auto result = generate_namespace_code(o_h_file, o_cpp_file, ident_str, *ns);
+        auto result = generate_namespace_code(context, *ns);
         if (result != ts::success)
         {
             return result;
@@ -459,11 +539,11 @@ static ts::Result<void> generate_symbol_code(std::string& o_h_file, std::string&
     return ts::success;
 }
 
-static ts::Result<void> generate_declaration_scope_code(std::string& o_h_file, std::string& o_cpp_file, std::string const& ident_str, ts::IDeclaration_Scope const& ds)
+static ts::Result<void> generate_declaration_scope_code(Context& context, ts::IDeclaration_Scope const& ds)
 {
     for (size_t i = 0; i < ds.get_symbol_count(); i++)
     {
-        auto result = generate_symbol_code(o_h_file, o_cpp_file, ident_str, *ds.get_symbol(i));
+        auto result = generate_symbol_code(context, *ds.get_symbol(i));
         if (result != ts::success)
         {
             return result;
@@ -473,7 +553,7 @@ static ts::Result<void> generate_declaration_scope_code(std::string& o_h_file, s
     return ts::success;
 }
 
-static ts::Result<void> generate_code(std::string& o_h_file, std::string& o_cpp_file, ts::ast::Node const& ast_root_node, ts::Type_System const& ts)
+static ts::Result<void> generate_code(Context& context, ts::ast::Node const& ast_root_node, ts::Type_System const& ts)
 {
     auto serialize_result = ast_root_node.serialize();
     if (serialize_result != ts::success)
@@ -481,28 +561,41 @@ static ts::Result<void> generate_code(std::string& o_h_file, std::string& o_cpp_
         return serialize_result.error();
     }
 
+    context.h_file += "#pragma once\n\n";
+    context.h_file += "#include <stdint.h>\n";
+    context.h_file += "#include <string>\n";
+    context.h_file += "#include <vector>\n";
+    context.h_file += "#include <memory>\n";
+    context.h_file += "#include <qmath.h>\n";
+    context.h_file += "#include <def_lang/ast/Node.h>\n";
+    context.h_file += "#include <def_lang/Result.h>\n";
+    context.h_file += "#include <def_lang/Serialization.h>\n";
+    context.h_file += "#include <def_lang/JSON_Serializer.h>\n";
+    context.h_file += "#include <boost/variant.hpp>\n";
+
+    context.cpp_file += "#include \"" + context.h_filename + "\"\n";
+
     if (!s_namespace.empty())
     {
         for (size_t i = 0; i < s_namespace.get_count(); i++)
         {
-            o_h_file += "namespace " + s_namespace.get(i) + "\n"
+            context.h_file += "namespace " + s_namespace.get(i) + "\n"
                         "{\n\n";
 
-            o_cpp_file += "namespace " + s_namespace.get(i) + "\n"
+            context.cpp_file += "namespace " + s_namespace.get(i) + "\n"
                           "{\n\n";
         }
     }
 
     std::string ast_json = ts::serialization::to_json(serialize_result.payload(), false);
 
-    std::string ident_str;
-    auto result = generate_ast_code(o_h_file, o_cpp_file, ident_str, ast_json);
+    auto result = generate_ast_code(context, ast_json);
     if (result != ts::success)
     {
         return result;
     }
 
-    result = generate_declaration_scope_code(o_h_file, o_cpp_file, ident_str, ts);
+    result = generate_declaration_scope_code(context, ts);
     if (result != ts::success)
     {
         return result;
@@ -510,8 +603,8 @@ static ts::Result<void> generate_code(std::string& o_h_file, std::string& o_cpp_
 
     if (!s_namespace.empty())
     {
-        o_h_file += "}\n";
-        o_cpp_file += "}\n";
+        context.h_file += "}\n";
+        context.cpp_file += "}\n";
     }
 
     return ts::success;

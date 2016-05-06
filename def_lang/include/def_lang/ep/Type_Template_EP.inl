@@ -30,7 +30,7 @@ std::string const& Type_Template_EP<Traits>::get_ui_name() const
 template<typename Traits>
 Symbol_Path Type_Template_EP<Traits>::get_native_type() const
 {
-    return m_native_type.empty() ? get_symbol_path() : m_native_type;
+    return m_native_type;
 }
 
 template<typename Traits>

@@ -26,7 +26,7 @@ Symbol_Path Symbol_EP::get_symbol_path() const
     IDeclaration_Scope* parent = m_parent_scope;
     while (parent)
     {
-        path = parent->get_name() + path;
+        path = parent->get_name() + "::" + path;
         parent = parent->get_parent_scope();
     }
 

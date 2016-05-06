@@ -35,11 +35,6 @@ Result<void> Vector_Type::init(std::vector<std::shared_ptr<const ITemplate_Argum
         return Error("Invalid template argument. Expected type");
     }
 
-    if (m_native_type.empty())
-    {
-        m_native_type = Symbol_Path("std::vector<" + m_inner_type->get_native_type().to_string() + ">");
-    }
-
     return success;
 }
 
@@ -49,7 +44,7 @@ std::string const& Vector_Type::get_ui_name() const
 }
 Symbol_Path Vector_Type::get_native_type() const
 {
-    return m_native_type.empty() ? get_symbol_path() : m_native_type;
+    return m_native_type;
 }
 
 Result<void> Vector_Type::validate_attribute(IAttribute const& attribute)
