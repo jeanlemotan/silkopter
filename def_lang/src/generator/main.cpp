@@ -422,8 +422,8 @@ static ts::Result<void> generate_struct_type_code(Context& context, ts::IStruct_
         context.h_file += " : public " + get_native_type(context.parent_scope, *struct_type.get_base_struct()).to_string();
     }
     context.h_file += "\n";
-    context.h_file += context.ident_str +  "{\n\n";
-    context.h_file += context.ident_str + "public:\n";
+    context.h_file += context.ident_str +  "{\n";
+    context.h_file += context.ident_str + "public:\n\n";
 
     Context c(context.h_file, context.cpp_file, struct_type);
     c.ident_str = context.ident_str + "  ";
@@ -452,8 +452,8 @@ static ts::Result<void> generate_struct_type_code(Context& context, ts::IStruct_
         context.cpp_file += "\n////////////////////////////////////////////////////////////\n\n";
     }
 
-    context.h_file += "\n\n";
-    context.h_file += context.ident_str + "private:\n";
+    context.h_file += "\n";
+    context.h_file += context.ident_str + "private:\n\n";
 
     for (size_t i = 0; i < struct_type.get_member_def_count(); i++)
     {

@@ -184,5 +184,10 @@ Result<serialization::Value> Node::serialize() const
     return sz_value;
 }
 
+Result<void> Node::deserialize(serialization::Value const& value)
+{
+    return ts::success;
+}
+
 }
 }
