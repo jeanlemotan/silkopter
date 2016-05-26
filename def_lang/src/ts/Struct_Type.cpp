@@ -23,6 +23,7 @@ Struct_Type::Struct_Type(Struct_Type const& other, std::string const& name)
     , m_base_struct(other.m_base_struct)
     , m_ui_name(name)
     , m_native_type(other.m_native_type)
+    , m_first_noninherited_member_def_index(other.m_first_noninherited_member_def_index)
 {
 }
 
@@ -41,6 +42,20 @@ void Struct_Type::replicate_base_struct()
             TS_ASSERT(result == success);
         }
     }
+}
+
+size_t Struct_Type::get_first_noninhereted_member_def_index() const
+{
+    return m_first_noninherited_member_def_index;
+}
+size_t Struct_Type::get_noninherited_member_def_count() const
+{
+    return get_member_def_count() - m_first_noninherited_member_def_index;
+}
+
+std::shared_ptr<IMember_Def const> Struct_Type::get_noninherited_member_def(size_t idx) const
+{
+    return get_member_def(idx + m_first_noninherited_member_def_index);
 }
 
 std::string const& Struct_Type::get_ui_name() const

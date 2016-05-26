@@ -213,8 +213,6 @@ static ts::Result<void> generate_ast_code(Context& context, std::string const& a
 {
     context.h_file += context.ident_str + "// Returns the ast json from which a ast root node can be serialized\n";
     context.h_file += context.ident_str + "std::string const& get_ast_json();\n";
-    context.h_file += context.ident_str + "// Returns the root ast node from which a typesystem can be generated\n";
-    context.h_file += context.ident_str + "ts::Result<ts::ast::Node> get_ast_root_node();\n\n";
 
     context.cpp_file += context.ident_str + "std::string const& get_ast_json()\n";
     context.cpp_file += context.ident_str + "{\n";
@@ -222,21 +220,6 @@ static ts::Result<void> generate_ast_code(Context& context, std::string const& a
     context.cpp_file += context.ident_str + ast_json;
     context.cpp_file += context.ident_str + ")xxx\";\n";
     context.cpp_file += context.ident_str + "  return s_json;\n";
-    context.cpp_file += context.ident_str + "}\n\n";
-    context.cpp_file += context.ident_str + "ts::Result<ts::ast::Node> get_ast_root_node()\n";
-    context.cpp_file += context.ident_str + "{\n";
-    context.cpp_file += context.ident_str + "  ts::Result<ts::serialization::Value> result = ts::serialization::from_json(get_ast_json());\n";
-    context.cpp_file += context.ident_str + "  if (result != ts::success)\n";
-    context.cpp_file += context.ident_str + "  {\n";
-    context.cpp_file += context.ident_str + "    return result.error();\n";
-    context.cpp_file += context.ident_str + "  }\n";
-    context.cpp_file += context.ident_str + "  ts::ast::Node root_node;\n";
-    context.cpp_file += context.ident_str + "  auto deserialize_result = root_node.deserialize(result.payload());\n";
-    context.cpp_file += context.ident_str + "  if (deserialize_result != ts::success)\n";
-    context.cpp_file += context.ident_str + "  {\n";
-    context.cpp_file += context.ident_str + "    return deserialize_result.error();\n";
-    context.cpp_file += context.ident_str + "  }\n";
-    context.cpp_file += context.ident_str + "  return root_node;\n";
     context.cpp_file += context.ident_str + "}\n\n";
 
     return ts::success;
@@ -285,77 +268,84 @@ static ts::Symbol_Path get_type_relative_scope_path(ts::IDeclaration_Scope const
     return scope_path.get_path_to(type_path);
 }
 
-static std::string get_value_str(ts::IValue const& value)
+static std::string to_string(bool v) { return v ? "true" : "false"; }
+static std::string to_string(int64_t v) { return std::to_string(v); }
+static std::string to_string(float v) { return std::to_string(v) + "f"; }
+static std::string to_string(double v) { return std::to_string(v); }
+static std::string to_string(math::vec2f const& v) { return to_string(v.x) + ", " + to_string(v.y); }
+static std::string to_string(math::vec2d const& v) { return to_string(v.x) + ", " + to_string(v.y); }
+static std::string to_string(math::vec2<int64_t> const& v) { return to_string(v.x) + ", " + to_string(v.y); }
+static std::string to_string(math::vec3f const& v) { return to_string(v.x) + ", " + to_string(v.y) + ", " + to_string(v.z); }
+static std::string to_string(math::vec3d const& v) { return to_string(v.x) + ", " + to_string(v.y) + ", " + to_string(v.z); }
+static std::string to_string(math::vec3<int64_t> const& v) { return to_string(v.x) + ", " + to_string(v.y) + ", " + to_string(v.z); }
+static std::string to_string(math::vec4f const& v) { return to_string(v.x) + ", " + to_string(v.y) + ", " + to_string(v.z) + ", " + to_string(v.w); }
+static std::string to_string(math::vec4d const& v) { return to_string(v.x) + ", " + to_string(v.y) + ", " + to_string(v.z) + ", " + to_string(v.w); }
+static std::string to_string(math::vec4<int64_t> const& v) { return to_string(v.x) + ", " + to_string(v.y) + ", " + to_string(v.z) + ", " + to_string(v.w); }
+static std::string to_string(std::string const& v) { return v.empty() ? v : "\"" + v + "\""; }
+static std::string to_string(ts::IEnum_Item const& v) { return get_symbol_path(v.get_symbol_path()).to_string(); }
+
+
+static std::string to_string(ts::IValue const& value)
 {
     if (ts::IBool_Value const* v = dynamic_cast<ts::IBool_Value const*>(&value))
     {
-        return v->get_value() ? "true" : "false";
+        return to_string(v->get_value());
     }
     if (ts::IInt_Value const* v = dynamic_cast<ts::IInt_Value const*>(&value))
     {
-        return std::to_string(v->get_value());
+        return to_string(v->get_value());
     }
     if (ts::IFloat_Value const* v = dynamic_cast<ts::IFloat_Value const*>(&value))
     {
-        return std::to_string(v->get_value()) + "f";
+        return to_string(v->get_value());
     }
     if (ts::IDouble_Value const* v = dynamic_cast<ts::IDouble_Value const*>(&value))
     {
-        return std::to_string(v->get_value());
+        return to_string(v->get_value());
     }
     if (ts::IVec2f_Value const* v = dynamic_cast<ts::IVec2f_Value const*>(&value))
     {
-        auto vec = v->get_value();
-        return std::to_string(vec.x) + "f, " + std::to_string(vec.y) + "f";
+        return to_string(v->get_value());
     }
     if (ts::IVec2d_Value const* v = dynamic_cast<ts::IVec2d_Value const*>(&value))
     {
-        auto vec = v->get_value();
-        return std::to_string(vec.x) + ", " + std::to_string(vec.y);
+        return to_string(v->get_value());
     }
     if (ts::IVec2i_Value const* v = dynamic_cast<ts::IVec2i_Value const*>(&value))
     {
-        auto vec = v->get_value();
-        return std::to_string(vec.x) + ", " + std::to_string(vec.y);
+        return to_string(v->get_value());
     }
     if (ts::IVec3f_Value const* v = dynamic_cast<ts::IVec3f_Value const*>(&value))
     {
-        auto vec = v->get_value();
-        return std::to_string(vec.x) + "f, " + std::to_string(vec.y) + "f, " + std::to_string(vec.z) + "f";
+        return to_string(v->get_value());
     }
     if (ts::IVec3d_Value const* v = dynamic_cast<ts::IVec3d_Value const*>(&value))
     {
-        auto vec = v->get_value();
-        return std::to_string(vec.x) + ", " + std::to_string(vec.y) + ", " + std::to_string(vec.z);
+        return to_string(v->get_value());
     }
     if (ts::IVec3i_Value const* v = dynamic_cast<ts::IVec3i_Value const*>(&value))
     {
-        auto vec = v->get_value();
-        return std::to_string(vec.x) + ", " + std::to_string(vec.y) + ", " + std::to_string(vec.z);
+        return to_string(v->get_value());
     }
     if (ts::IVec4f_Value const* v = dynamic_cast<ts::IVec4f_Value const*>(&value))
     {
-        auto vec = v->get_value();
-        return std::to_string(vec.x) + "f, " + std::to_string(vec.y) + "f, " + std::to_string(vec.z) + "f, " + std::to_string(vec.w) + "f";
+        return to_string(v->get_value());
     }
     if (ts::IVec4d_Value const* v = dynamic_cast<ts::IVec4d_Value const*>(&value))
     {
-        auto vec = v->get_value();
-        return std::to_string(vec.x) + ", " + std::to_string(vec.y) + ", " + std::to_string(vec.z) + ", " + std::to_string(vec.w);
+        return to_string(v->get_value());
     }
     if (ts::IVec4i_Value const* v = dynamic_cast<ts::IVec4i_Value const*>(&value))
     {
-        auto vec = v->get_value();
-        return std::to_string(vec.x) + ", " + std::to_string(vec.y) + ", " + std::to_string(vec.z) + ", " + std::to_string(vec.w);
+        return to_string(v->get_value());
     }
     if (ts::IString_Value const* v = dynamic_cast<ts::IString_Value const*>(&value))
     {
-        std::string const& str = v->get_value();
-        return str.empty() ? str : "\"" + v->get_value() + "\"";
+        return to_string(v->get_value());
     }
     if (ts::IEnum_Value const* v = dynamic_cast<ts::IEnum_Value const*>(&value))
     {
-        return get_symbol_path(v->get_value()->get_symbol_path()).to_string();
+        return to_string(*v->get_value());
     }
     return "";
 }
@@ -369,31 +359,65 @@ static void generate_member_def_declaration_code(Context& context, ts::IMember_D
             " m_" +
             member_def.get_name() +
             " = {" +
-            get_value_str(*member_def.get_default_value()) +
+            to_string(*member_def.get_default_value()) +
             "};\n";
 }
 
-static void generate_member_def_getter_code(Context& context, ts::IStruct_Type const& struct_type, ts::IMember_Def const& member_def)
+static std::string generate_numeric_type_clamping_code(Context& context, ts::IStruct_Type const& struct_type, ts::IMember_Def const& member_def)
 {
-    ts::IDeclaration_Scope const* ds = &struct_type;
-    while (dynamic_cast<const ts::IStruct_Type*>(ds))
-    {
-        ds = ds->get_parent_scope();
-    }
-    TS_ASSERT(ds);
-
-    std::string struct_type_str = get_type_relative_scope_path(*ds, struct_type).to_string();
     std::string native_type_str = get_type_relative_scope_path(context.parent_scope, *member_def.get_type()).to_string();
-
-    context.h_file += context.ident_str + "auto get_" + member_def.get_name() + "() const -> " + native_type_str + " const&;\n";
-
-    context.cpp_file += context.ident_str + "auto " + struct_type_str + "::get_" + member_def.get_name() + "() const -> " + native_type_str + " const& \n" +
-            context.ident_str + "{\n" +
-            context.ident_str + "  return m_" + member_def.get_name() + ";\n" +
-            context.ident_str + "}\n\n";
+    if (std::shared_ptr<const ts::IInt_Type> type = std::dynamic_pointer_cast<const ts::IInt_Type>(member_def.get_type()))
+    {
+        return "math::clamp(value, " + native_type_str + "(" + to_string(type->get_min_value()) + "), " + native_type_str + "(" + to_string(type->get_max_value()) + "))";
+    }
+    if (std::shared_ptr<const ts::IFloat_Type> type = std::dynamic_pointer_cast<const ts::IFloat_Type>(member_def.get_type()))
+    {
+        return "math::clamp(value, " + native_type_str + "(" + to_string(type->get_min_value()) + "), " + native_type_str + "(" + to_string(type->get_max_value()) + "))";
+    }
+    if (std::shared_ptr<const ts::IDouble_Type> type = std::dynamic_pointer_cast<const ts::IDouble_Type>(member_def.get_type()))
+    {
+        return "math::clamp(value, " + native_type_str + "(" + to_string(type->get_min_value()) + "), " + native_type_str + "(" + to_string(type->get_max_value()) + "))";
+    }
+    if (std::shared_ptr<const ts::IVec2f_Type> type = std::dynamic_pointer_cast<const ts::IVec2f_Type>(member_def.get_type()))
+    {
+        return "math::clamp(value, " + native_type_str + "(" + to_string(type->get_min_value()) + "), " + native_type_str + "(" + to_string(type->get_max_value()) + "))";
+    }
+    if (std::shared_ptr<const ts::IVec2d_Type> type = std::dynamic_pointer_cast<const ts::IVec2d_Type>(member_def.get_type()))
+    {
+        return "math::clamp(value, " + native_type_str + "(" + to_string(type->get_min_value()) + "), " + native_type_str + "(" + to_string(type->get_max_value()) + "))";
+    }
+    if (std::shared_ptr<const ts::IVec2i_Type> type = std::dynamic_pointer_cast<const ts::IVec2i_Type>(member_def.get_type()))
+    {
+        return "math::clamp(value, " + native_type_str + "(" + to_string(type->get_min_value()) + "), " + native_type_str + "(" + to_string(type->get_max_value()) + "))";
+    }
+    if (std::shared_ptr<const ts::IVec3f_Type> type = std::dynamic_pointer_cast<const ts::IVec3f_Type>(member_def.get_type()))
+    {
+        return "math::clamp(value, " + native_type_str + "(" + to_string(type->get_min_value()) + "), " + native_type_str + "(" + to_string(type->get_max_value()) + "))";
+    }
+    if (std::shared_ptr<const ts::IVec3d_Type> type = std::dynamic_pointer_cast<const ts::IVec3d_Type>(member_def.get_type()))
+    {
+        return "math::clamp(value, " + native_type_str + "(" + to_string(type->get_min_value()) + "), " + native_type_str + "(" + to_string(type->get_max_value()) + "))";
+    }
+    if (std::shared_ptr<const ts::IVec3i_Type> type = std::dynamic_pointer_cast<const ts::IVec3i_Type>(member_def.get_type()))
+    {
+        return "math::clamp(value, " + native_type_str + "(" + to_string(type->get_min_value()) + "), " + native_type_str + "(" + to_string(type->get_max_value()) + "))";
+    }
+    if (std::shared_ptr<const ts::IVec4f_Type> type = std::dynamic_pointer_cast<const ts::IVec4f_Type>(member_def.get_type()))
+    {
+        return "math::clamp(value, " + native_type_str + "(" + to_string(type->get_min_value()) + "), " + native_type_str + "(" + to_string(type->get_max_value()) + "))";
+    }
+    if (std::shared_ptr<const ts::IVec4d_Type> type = std::dynamic_pointer_cast<const ts::IVec4d_Type>(member_def.get_type()))
+    {
+        return "math::clamp(value, " + native_type_str + "(" + to_string(type->get_min_value()) + "), " + native_type_str + "(" + to_string(type->get_max_value()) + "))";
+    }
+    if (std::shared_ptr<const ts::IVec4i_Type> type = std::dynamic_pointer_cast<const ts::IVec4i_Type>(member_def.get_type()))
+    {
+        return "math::clamp(value, " + native_type_str + "(" + to_string(type->get_min_value()) + "), " + native_type_str + "(" + to_string(type->get_max_value()) + "))";
+    }
+    return "value";
 }
 
-static void generate_member_def_setter_code(Context& context, ts::IStruct_Type const& struct_type, ts::IMember_Def const& member_def)
+static void generate_member_def_setter_getter_code(Context& context, ts::IStruct_Type const& struct_type, ts::IMember_Def const& member_def)
 {
     ts::IDeclaration_Scope const* ds = &struct_type;
     while (dynamic_cast<const ts::IStruct_Type*>(ds))
@@ -406,11 +430,17 @@ static void generate_member_def_setter_code(Context& context, ts::IStruct_Type c
     std::string native_type_str = get_type_relative_scope_path(context.parent_scope, *member_def.get_type()).to_string();
 
     context.h_file += context.ident_str + "void set_" + member_def.get_name() + "(" + native_type_str + " const& value);\n";
+    context.h_file += context.ident_str + "auto get_" + member_def.get_name() + "() const -> " + native_type_str + " const&;\n";
 
     context.cpp_file += context.ident_str + "void " + struct_type_str + "::set_" + member_def.get_name() + "(" + native_type_str + " const& value)\n" +
             context.ident_str + "{\n" +
-            context.ident_str + "  m_" + member_def.get_name() + " = value;\n" +
+            context.ident_str + "  m_" + member_def.get_name() + " = " + generate_numeric_type_clamping_code(context, struct_type, member_def) + ";\n" +
             context.ident_str + "}\n";
+
+    context.cpp_file += context.ident_str + "auto " + struct_type_str + "::get_" + member_def.get_name() + "() const -> " + native_type_str + " const& \n" +
+            context.ident_str + "{\n" +
+            context.ident_str + "  return m_" + member_def.get_name() + ";\n" +
+            context.ident_str + "}\n\n";
 }
 
 static ts::Result<void> generate_struct_type_code(Context& context, ts::IStruct_Type const& struct_type)
@@ -436,18 +466,9 @@ static ts::Result<void> generate_struct_type_code(Context& context, ts::IStruct_
     context.h_file += c.ident_str + struct_name + "() noexcept = default;\n";
     context.h_file += c.ident_str + "virtual ~" + struct_name + "() noexcept = default;\n\n";
 
-    for (size_t i = 0; i < struct_type.get_member_def_count(); i++)
+    for (size_t i = 0; i < struct_type.get_noninherited_member_def_count(); i++)
     {
-        if (std::shared_ptr<const ts::IStruct_Type> base = struct_type.get_base_struct())
-        {
-            if (base->find_member_def_by_name(struct_type.get_member_def(i)->get_name()))
-            {
-                continue;
-            }
-        }
-
-        generate_member_def_getter_code(c, struct_type, *struct_type.get_member_def(i));
-        generate_member_def_setter_code(c, struct_type, *struct_type.get_member_def(i));
+        generate_member_def_setter_getter_code(c, struct_type, *struct_type.get_noninherited_member_def(i));
         context.h_file += "\n";
         context.cpp_file += "\n////////////////////////////////////////////////////////////\n\n";
     }
@@ -455,17 +476,9 @@ static ts::Result<void> generate_struct_type_code(Context& context, ts::IStruct_
     context.h_file += "\n";
     context.h_file += context.ident_str + "private:\n\n";
 
-    for (size_t i = 0; i < struct_type.get_member_def_count(); i++)
+    for (size_t i = 0; i < struct_type.get_noninherited_member_def_count(); i++)
     {
-        if (std::shared_ptr<const ts::IStruct_Type> base = struct_type.get_base_struct())
-        {
-            if (base->find_member_def_by_name(struct_type.get_member_def(i)->get_name()))
-            {
-                continue;
-            }
-        }
-
-        generate_member_def_declaration_code(c, *struct_type.get_member_def(i));
+        generate_member_def_declaration_code(c, *struct_type.get_noninherited_member_def(i));
     }
 
     context.h_file += context.ident_str + "};\n\n";
@@ -567,10 +580,6 @@ static ts::Result<void> generate_code(Context& context, ts::ast::Node const& ast
     context.h_file += "#include <vector>\n";
     context.h_file += "#include <memory>\n";
     context.h_file += "#include <qmath.h>\n";
-    context.h_file += "#include <def_lang/ast/Node.h>\n";
-    context.h_file += "#include <def_lang/Result.h>\n";
-    context.h_file += "#include <def_lang/Serialization.h>\n";
-    context.h_file += "#include <def_lang/JSON_Serializer.h>\n";
     context.h_file += "#include <boost/variant.hpp>\n";
 
     context.cpp_file += "#include \"" + context.h_filename + "\"\n";

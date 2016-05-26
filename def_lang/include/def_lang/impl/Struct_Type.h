@@ -23,6 +23,10 @@ public:
 
     std::string get_template_instantiation_string() const override;
 
+    size_t get_first_noninhereted_member_def_index() const override;
+    size_t get_noninherited_member_def_count() const override;
+    std::shared_ptr<IMember_Def const> get_noninherited_member_def(size_t idx) const override;
+
     std::shared_ptr<IValue> create_value() const override;
     std::shared_ptr<IStruct_Value> create_specialized_value() const override;
 
@@ -39,6 +43,7 @@ private:
     std::shared_ptr<const IStruct_Type> m_base_struct;
     std::string m_ui_name;
     Symbol_Path m_native_type;
+    size_t m_first_noninherited_member_def_index = 0;
 };
 
 }

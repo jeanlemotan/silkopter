@@ -37,6 +37,11 @@ public:
 
     std::shared_ptr<IStruct_Type const> get_specialized_type() const override;
 
+    size_t get_first_noninhereted_member_index() const override;
+    size_t get_noninherited_member_count() const override;
+    std::shared_ptr<IMember const> get_noninherited_member(size_t idx) const override;
+    std::shared_ptr<IMember> get_noninherited_member(size_t idx) override;
+
 private:
     bool m_is_constructed = false;
     std::shared_ptr<IStruct_Type const> m_type;

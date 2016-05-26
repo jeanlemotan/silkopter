@@ -2,6 +2,11 @@
 
 #include "common/stream/IStream.h"
 
+namespace ts
+{
+class IValue;
+}
+
 namespace silk
 {
 namespace node

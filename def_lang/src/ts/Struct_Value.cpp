@@ -152,6 +152,23 @@ Result<std::string> Struct_Value::get_ui_string() const
     return Error("Not Supported");
 }
 
+size_t Struct_Value::get_first_noninhereted_member_index() const
+{
+    return m_type->get_first_noninhereted_member_def_index();
+}
+size_t Struct_Value::get_noninherited_member_count() const
+{
+    return m_type->get_noninherited_member_def_count();
+}
+std::shared_ptr<IMember const> Struct_Value::get_noninherited_member(size_t idx) const
+{
+    return get_member(idx + get_first_noninhereted_member_index());
+}
+std::shared_ptr<IMember> Struct_Value::get_noninherited_member(size_t idx)
+{
+    return get_member(idx + get_first_noninhereted_member_index());
+}
+
 std::shared_ptr<const IValue> Struct_Value::select(Value_Selector&& selector) const
 {
     if (!is_constructed())
