@@ -121,4 +121,10 @@ Result<void> Enum_Type::validate_symbol(std::shared_ptr<const ISymbol> symbol)
     return ts::success;
 }
 
+std::string Enum_Type::generate_serialization_code() const
+{
+    return "";
+}
+
+
 }

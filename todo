@@ -50,3 +50,33 @@
 - add autolanding
 - add return home
 - add failsafe for signal loss
+
+
+nodes parsing:
+
+Each node has an init and config structs, that are custom. I want a uniform init() and set_config() method in the INode abstract interface so the Init_Params and Config have to inherit from a IInit_Params and IConfig interface and cast internally
+
+So:
+struct IInit_Params
+{
+}
+struct IConfig
+{
+}
+
+class INode
+{
+    virtual bool init(std::unique_ptr<IInit_Params> params) = 0;
+    virtual bool set_config(std::unique_ptr<IConfig> config) = 0;
+}
+
+The IInit_Params and IConfig have to be serializable from/to:
+    - JSON, for saving the settings / config on the brain
+    - binary (optional), for transmitting from/to the GS. This can work with JSON as well
+Ideally this code has to be generated, not hand written
+
+I need a way to create UI on the GS for both the init params and the config.
+Ideally this code has to be generated as well, or has to be created at run-time (the init params & config iterated for fields and the UI property sheet created from this.) Ideally this has to support ui-specific fields like UI Name ('Motor Torque' instead of 'motor_torque'), tool-tips for units, specific controls (like a rotation control instead of 4 floats for a quaternion).
+
+
+

@@ -503,6 +503,13 @@ static ts::Result<void> generate_enum_type_code(Context& context, ts::IEnum_Type
     return ts::success;
 }
 
+static ts::Result<void> generate_type_code(Context& context, ts::IType const& type)
+{
+    type.generate_serialization_code();
+
+    return ts::success;
+}
+
 static ts::Result<void> generate_namespace_code(Context& context, ts::Namespace const& ns)
 {
     context.h_file += context.ident_str + "namespace " + ns.get_name() + "\n";
@@ -524,29 +531,26 @@ static ts::Result<void> generate_namespace_code(Context& context, ts::Namespace 
 
 static ts::Result<void> generate_symbol_code(Context& context, ts::ISymbol const& symbol)
 {
-    if (ts::IStruct_Type const* struct_type = dynamic_cast<ts::IStruct_Type const*>(&symbol))
+    if (ts::IStruct_Type const* type = dynamic_cast<ts::IStruct_Type const*>(&symbol))
     {
-        auto result = generate_struct_type_code(context, *struct_type);
-        if (result != ts::success)
-        {
-            return result;
-        }
+        return generate_struct_type_code(context, *type);
     }
-    else if (ts::IEnum_Type const* enum_type = dynamic_cast<ts::IEnum_Type const*>(&symbol))
+    else if (ts::IEnum_Type const* type = dynamic_cast<ts::IEnum_Type const*>(&symbol))
     {
-        auto result = generate_enum_type_code(context, *enum_type);
-        if (result != ts::success)
-        {
-            return result;
-        }
+        return generate_enum_type_code(context, *type);
     }
     else if (ts::Namespace const* ns = dynamic_cast<ts::Namespace const*>(&symbol))
     {
-        auto result = generate_namespace_code(context, *ns);
-        if (result != ts::success)
-        {
-            return result;
-        }
+        return generate_namespace_code(context, *ns);
+    }
+    else if (ts::IType const* type = dynamic_cast<ts::IType const*>(&symbol))
+    {
+        return generate_type_code(context, *type);
+    }
+    else
+    {
+        TS_ASSERT(false);
+        return ts::Error("Unhandled symbol - " + symbol.get_name());
     }
 
     return ts::success;
@@ -581,6 +585,7 @@ static ts::Result<void> generate_code(Context& context, ts::ast::Node const& ast
     context.h_file += "#include <memory>\n";
     context.h_file += "#include <qmath.h>\n";
     context.h_file += "#include <boost/variant.hpp>\n";
+    context.h_file += "#include <def_lang/Result.h>\n";
 
     context.cpp_file += "#include \"" + context.h_filename + "\"\n";
 

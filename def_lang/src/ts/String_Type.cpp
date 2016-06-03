@@ -21,5 +21,10 @@ Result<void> String_Type::validate_attribute_impl(IAttribute const& attribute)
     return Error("Attribute " + attribute.get_name() + " not supported");
 }
 
+std::string String_Type::generate_serialization_code() const
+{
+    return "";
+}
+
 
 }

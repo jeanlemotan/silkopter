@@ -91,5 +91,10 @@ std::shared_ptr<Poly_Type::value_type> Poly_Type::create_specialized_value() con
     return std::make_shared<Poly_Value>(shared_from_this());
 }
 
+std::string Poly_Type::generate_serialization_code() const
+{
+    return "";
+}
+
 
 }

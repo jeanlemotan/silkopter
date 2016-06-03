@@ -31,6 +31,8 @@ public:
     std::shared_ptr<const IType> get_inner_type(size_t idx) const override;
     boost::optional<size_t> find_inner_type_idx(std::shared_ptr<const IType> type) const override;
 
+    std::string generate_serialization_code() const;
+
 protected:
     Result<void> validate_attribute(IAttribute const& attribute) override;
 

@@ -125,5 +125,10 @@ bool Struct_Type::is_base_of(IStruct_Type const& type) const
     return type_base.get() == this || is_base_of(*type_base);
 }
 
+std::string Struct_Type::generate_serialization_code() const
+{
+    return "";
+}
+
 
 }

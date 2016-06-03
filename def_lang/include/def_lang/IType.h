@@ -20,6 +20,8 @@ public:
     virtual std::shared_ptr<IType> clone(std::string const& name) const = 0;
 
     virtual std::shared_ptr<IValue> create_value() const = 0;
+
+    virtual std::string generate_serialization_code() const = 0;
 };
 
 }

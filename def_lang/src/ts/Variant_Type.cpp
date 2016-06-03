@@ -106,5 +106,10 @@ std::shared_ptr<Variant_Type::value_type> Variant_Type::create_specialized_value
     return std::make_shared<Variant_Value>(shared_from_this());
 }
 
+std::string Variant_Type::generate_serialization_code() const
+{
+    return "";
+}
+
 
 }

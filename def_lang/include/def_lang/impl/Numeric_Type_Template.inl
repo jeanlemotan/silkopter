@@ -81,4 +81,10 @@ Result<void> Numeric_Type_Template<Traits>::validate_attribute_impl(IAttribute c
     return success;
 }
 
+template<typename Traits>
+std::string Numeric_Type_Template<Traits>::generate_serialization_code() const
+{
+    return "";
+}
+
 }

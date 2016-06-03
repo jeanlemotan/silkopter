@@ -31,6 +31,8 @@ public:
     std::shared_ptr<const IEnum_Item> find_item_by_integral_value(int64_t value) const override;
     std::shared_ptr<const IEnum_Item> get_default_item() const override;
 
+    std::string generate_serialization_code() const;
+
 protected:
     Result<void> validate_symbol(std::shared_ptr<const ISymbol> symbol) override;
     Result<void> validate_attribute(IAttribute const& attribute) override;

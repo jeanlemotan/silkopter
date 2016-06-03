@@ -20,6 +20,8 @@ public:
     String_Type(std::string const& name);
     String_Type(String_Type const& other, std::string const& name);
 
+    std::string generate_serialization_code() const;
+
 protected:
     Result<void> validate_attribute_impl(IAttribute const& attribute) override;
 };
