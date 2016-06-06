@@ -3,6 +3,9 @@
 #include "def_lang/IAttribute.h"
 #include "def_lang/impl/UI_Name_Attribute.h"
 #include "def_lang/impl/Native_Type_Attribute.h"
+#include "def_lang/IStruct_Type.h"
+
+#include <deque>
 
 namespace ts
 {
@@ -29,10 +32,10 @@ Result<void> Poly_Type::init(std::vector<std::shared_ptr<const ITemplate_Argumen
         return Error("Expected only one template argument, got " + std::to_string(arguments.size()));
     }
 
-    m_inner_type = std::dynamic_pointer_cast<const IType>(arguments[0]);
+    m_inner_type = std::dynamic_pointer_cast<const IStruct_Type>(arguments[0]);
     if (!m_inner_type)
     {
-        return Error("Invalid template argument. Expected type");
+        return Error("Invalid template argument. Expected struct type");
     }
 
     return success;
@@ -76,9 +79,49 @@ std::string Poly_Type::get_template_instantiation_string() const
     return get_symbol_path().to_string();
 }
 
-std::shared_ptr<const IType> Poly_Type::get_inner_type() const
+std::shared_ptr<const IStruct_Type> Poly_Type::get_inner_type() const
 {
     return m_inner_type;
+}
+std::vector<std::shared_ptr<const IStruct_Type>> Poly_Type::get_all_inner_types() const
+{
+    IDeclaration_Scope const* top_scope = get_parent_scope();
+    if (!top_scope)
+    {
+        return {};
+    }
+    while (top_scope->get_parent_scope())
+    {
+        top_scope = top_scope->get_parent_scope();
+    }
+
+    std::vector<std::shared_ptr<const IStruct_Type>> results;
+
+    std::deque<const IDeclaration_Scope*> stack{ top_scope };
+    while (!stack.empty())
+    {
+        IDeclaration_Scope const* scope = stack.front();
+        stack.pop_front();
+
+        for (size_t i = 0; i < scope->get_symbol_count(); i++)
+        {
+            std::shared_ptr<ISymbol const> symbol = scope->get_symbol(i);
+            if (std::shared_ptr<IStruct_Type const> struct_type = std::dynamic_pointer_cast<IStruct_Type const>(symbol))
+            {
+                if (m_inner_type->is_base_of(*struct_type))
+                {
+                    results.push_back(struct_type);
+                }
+            }
+
+            if (std::shared_ptr<IDeclaration_Scope const> s = std::dynamic_pointer_cast<IDeclaration_Scope const>(symbol))
+            {
+                stack.push_back(s.get());
+            }
+        }
+    }
+
+    return results;
 }
 
 std::shared_ptr<IValue> Poly_Type::create_value() const
@@ -90,11 +133,5 @@ std::shared_ptr<Poly_Type::value_type> Poly_Type::create_specialized_value() con
 {
     return std::make_shared<Poly_Value>(shared_from_this());
 }
-
-std::string Poly_Type::generate_serialization_code() const
-{
-    return "";
-}
-
 
 }

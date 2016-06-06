@@ -6,6 +6,8 @@
 namespace ts
 {
 
+class IStruct_Type;
+
 class Poly_Type final : virtual public IPoly_Type, public Symbol_EP, public Attribute_Container_EP, public std::enable_shared_from_this<Poly_Type>
 {
 public:
@@ -23,18 +25,17 @@ public:
 
     std::string get_template_instantiation_string() const override;
 
-    std::shared_ptr<const IType> get_inner_type() const override;
+    std::shared_ptr<const IStruct_Type> get_inner_type() const override;
+    std::vector<std::shared_ptr<const IStruct_Type>> get_all_inner_types() const override;
 
     std::shared_ptr<IValue> create_value() const override;
     std::shared_ptr<value_type> create_specialized_value() const override;
-
-    std::string generate_serialization_code() const;
 
 protected:
     Result<void> validate_attribute(IAttribute const& attribute) override;
 
 private:
-    std::shared_ptr<const IType> m_inner_type;
+    std::shared_ptr<const IStruct_Type> m_inner_type;
     std::string m_ui_name;
     Symbol_Path m_native_type;
 };

@@ -28,8 +28,6 @@ public:
     std::shared_ptr<IValue> create_value() const override;
     std::shared_ptr<value_type> create_specialized_value() const override;
 
-    std::string generate_serialization_code() const;
-
 protected:
     Result<void> validate_attribute(IAttribute const& attribute) override;
 

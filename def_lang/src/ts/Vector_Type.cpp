@@ -90,10 +90,4 @@ std::shared_ptr<Vector_Type::value_type> Vector_Type::create_specialized_value()
     return std::make_shared<Vector_Value>(shared_from_this());
 }
 
-std::string Vector_Type::generate_serialization_code() const
-{
-    return "";
-}
-
-
 }

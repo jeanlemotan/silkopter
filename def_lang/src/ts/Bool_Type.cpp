@@ -20,9 +20,4 @@ Result<void> Bool_Type::validate_attribute_impl(IAttribute const& attribute)
     return Error("Attribute " + attribute.get_name() + " not supported");
 }
 
-std::string Bool_Type::generate_serialization_code() const
-{
-    return "";
-}
-
 }

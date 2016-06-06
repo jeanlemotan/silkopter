@@ -26,8 +26,6 @@ protected:
     typename Traits::fundamental_type const& get_max_value() const override;
     size_t get_decimals() const override;
 
-    std::string generate_serialization_code() const;
-
 private:
     typename Traits::fundamental_type m_min_value = typename Traits::fundamental_type(Traits::min_value);
     typename Traits::fundamental_type m_max_value = typename Traits::fundamental_type(Traits::max_value);
