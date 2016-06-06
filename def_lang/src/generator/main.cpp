@@ -515,12 +515,12 @@ static ts::Result<void> generate_poly_type_code(Context& context, ts::IPoly_Type
 
     std::vector<std::shared_ptr<const ts::IStruct_Type>> inner_types = type.get_all_inner_types();
 
-    context.serialization_section_h += "ts::Result<void> deserialize(" + native_type_str + "& result, ts::serialization::Value const& sz_value);\n";
-    context.serialization_section_cpp += "ts::Result<void> deserialize(" + native_type_str + "& result, ts::serialization::Value const& sz_value)\n"
+    context.serialization_section_h += "ts::Result<void> deserialize(" + native_type_str + "& value, ts::serialization::Value const& sz_value);\n";
+    context.serialization_section_cpp += "ts::Result<void> deserialize(" + native_type_str + "& value, ts::serialization::Value const& sz_value)\n"
                                            "{\n"
-                                           "  if (sz_value.is_null())\n"
+                                           "  if (sz_value.is_empty())\n"
                                            "  {\n"
-                                           "    result = nullptr;"
+                                           "    value = nullptr;"
                                            "    return ts::success;\n"
                                            "  }\n"
                                            "  if (!sz_value.is_object())\n"
@@ -530,28 +530,29 @@ static ts::Result<void> generate_poly_type_code(Context& context, ts::IPoly_Type
                                            "  ts::serialization::Value const* type_sz_value = sz_value.find_object_member_by_name(\"type\");\n"
                                            "  if (!type_sz_value || !type_sz_value->is_string())\n"
                                            "  {\n"
-                                           "    return Error(\"Expected 'type' string value when deserializing\");\n"
+                                           "    return ts::Error(\"Expected 'type' string value when deserializing\");\n"
                                            "  }\n"
-                                           "  std::string path = type_sz_value.get_as_string();\n"
+                                           "  ts::serialization::Value const* value_sz_value = sz_value.find_object_member_by_name(\"value\");\n"
+                                           "  if (!value_sz_value)\n"
+                                           "  {\n"
+                                           "    return ts::Error(\"Expected 'value' when deserializing\");\n"
+                                           "  }\n"
+                                           "  std::string path = type_sz_value->get_as_string();\n"
                                            "  if (false) {} //this is here just to have the next items with 'else if'\n";
 
     for (std::shared_ptr<const ts::IStruct_Type> inner_type: inner_types)
     {
+        std::string native_inner_type_str = get_native_type(context.parent_scope, *inner_type).to_string();
         context.serialization_section_cpp += "  else if (path == \"" + inner_type->get_symbol_path().to_string() + "\")\n"
                                          "  {\n"
-                                         "    result = new " + get_native_type(context.parent_scope, *inner_type).to_string() + "();\n"
+                                         "    value.reset(new " + native_inner_type_str + "());\n"
+                                         "    return deserialize((" + native_inner_type_str + "&)*value, *value_sz_value);\n"
                                          "  }\n";
     }
     context.serialization_section_cpp += "  else\n"
                                      "  {\n"
-                                     "    return Error(\"Cannot find type '\" + path + \"' when deserializing\");\n"
+                                     "    return ts::Error(\"Cannot find type '\" + path + \"' when deserializing\");\n"
                                      "  }\n"
-                                     "  serialization::Value const* value_sz_value = sz_value.find_object_member_by_name(\"value\");\n"
-                                     "  if (!value_sz_value)\n"
-                                     "  {\n"
-                                     "    return Error(\"Expected 'value' when deserializing\");\n"
-                                     "  }\n"
-                                     "  return result->deserialize(*value_sz_value);\n"
                                      "}\n";
 
     context.serialization_section_h += "ts::Result<ts::serialization::Value> serialize(" + native_type_str + " const& value);\n";
@@ -559,29 +560,30 @@ static ts::Result<void> generate_poly_type_code(Context& context, ts::IPoly_Type
                                            "{\n"
                                            "  if (!value)\n"
                                            "  {\n"
-                                           "    return ts::serialization::Value();\n"
+                                           "    return ts::serialization::Value(ts::serialization::Value::Type::EMPTY);\n"
                                            "  }\n"
-                                           "  serialization::Value sz_value(serialization::Value::Type::OBJECT);\n"
+                                           "  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);\n"
                                            "  if (false) {} //this is here just to have the next items with 'else if'\n";
 
     for (std::shared_ptr<const ts::IStruct_Type> inner_type: inner_types)
     {
-        context.serialization_section_cpp += "  else if (typeid(*value) == typeid(" + inner_type->get_symbol_path().to_string() + "))\n"
+        std::string native_inner_type_str = get_native_type(context.parent_scope, *inner_type).to_string();
+        context.serialization_section_cpp += "  else if (typeid(*value) == typeid(" + native_inner_type_str + "))\n"
                                          "  {\n"
-                                         "    sz_value.add_object_member(\"type\", \"" + inner_type->get_symbol_path().to_string() + "\"));"
+                                         "    sz_value.add_object_member(\"type\", \"" + native_inner_type_str + "\");"
+                                         "    auto result = serialize((" + native_inner_type_str + "&)*value);\n"
+                                         "    if (result != ts::success)\n"
+                                         "    {\n"
+                                         "      return result;\n"
+                                         "    }\n"
+                                         "    sz_value.add_object_member(\"value\", result.extract_payload());\n"
+                                         "    return std::move(sz_value);\n"
                                          "  }\n";
     }
     context.serialization_section_cpp += "  else\n"
                                      "  {\n"
-                                     "    return Error(\"Cannot serialize type\");\n"
+                                     "    return ts::Error(\"Cannot serialize type\");\n"
                                      "  }\n"
-                                     "  auto result = value->serialize();\n"
-                                     "  if (result != success)\n"
-                                     "  {\n"
-                                     "    return result;\n"
-                                     "  }\n"
-                                     "  sz_value.add_object_member(\"value\", result.extract_payload());\n"
-                                     "  return std::move(sz_value);\n"
                                      "}\n";
     return ts::success;
 }
@@ -593,14 +595,14 @@ static ts::Result<void> generate_bool_type_code(Context& context, ts::IBool_Type
     }
     context.serialization_code_generated.insert(get_native_type(context.parent_scope, type).to_string());
 
-    context.serialization_section_h += "ts::Result<void> deserialize(bool& result, ts::serialization::Value const& sz_value);\n";
-    context.serialization_section_cpp += "ts::Result<void> deserialize(bool& result, ts::serialization::Value const& sz_value)\n"
+    context.serialization_section_h += "ts::Result<void> deserialize(bool& value, ts::serialization::Value const& sz_value);\n";
+    context.serialization_section_cpp += "ts::Result<void> deserialize(bool& value, ts::serialization::Value const& sz_value)\n"
                                            "{\n"
                                            "  if (!sz_value.is_bool())\n"
                                            "  {\n"
                                            "    return ts::Error(\"Expected bool value when deserializing\");\n"
                                            "  }\n"
-                                           "  result = sz_value.get_as_bool();\n"
+                                           "  value = sz_value.get_as_bool();\n"
                                            "  return ts::success;\n"
                                            "}\n";
     context.serialization_section_h += "ts::Result<ts::serialization::Value> serialize(bool const& value)\n";
@@ -817,6 +819,7 @@ static ts::Result<void> generate_code(Context& context, ts::ast::Node const& ast
     context.h_file += "#include <qmath.h>\n";
     context.h_file += "#include <boost/variant.hpp>\n";
     context.h_file += "#include <def_lang/Result.h>\n";
+    context.h_file += "#include <def_lang/Serialization.h>\n";
 
     context.cpp_file += "#include \"" + context.h_filename + "\"\n";
 
