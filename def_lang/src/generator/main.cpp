@@ -148,71 +148,6 @@ int main(int argc, char **argv)
     cpp_stream << cpp_file;
 
     return 0;
-
-    std::shared_ptr<ts::IStruct_Type> type = ts.find_specialized_symbol_by_path<ts::IStruct_Type>("silk::Rate_Controller_Config");
-    TS_ASSERT(type);
-
-    std::shared_ptr<ts::IStruct_Value> value = type->create_specialized_value();
-    auto construct_result = value->construct();
-    TS_ASSERT(construct_result == ts::success);
-
-//    {
-//        std::shared_ptr<ts::IString_Value> name = value->select_specialized<ts::IString_Value>("name");
-//        auto result = name->set_value("silkopter");
-//        TS_ASSERT(result == ts::success);
-
-//        std::shared_ptr<ts::IVector_Value> motors = value->select_specialized<ts::IVector_Value>("motors");
-//        for (size_t i = 0; i < 10; i++)
-//        {
-//            auto result = motors->insert_default_value(motors->get_value_count());
-//            TS_ASSERT(result == ts::success);
-//        }
-
-////        std::shared_ptr<ts::IVec3f_Value> motor = value->select_specialized<ts::IVec3f_Value>("motors[0].position");
-//    }
-
-//    {
-//        std::string name;
-//        float mass;
-
-//        auto result = ts::mapper::get(*value, "name", name);
-//        TS_ASSERT(result == ts::success);
-//        result = ts::mapper::get(*value, "mass", mass);
-//        TS_ASSERT(result == ts::success);
-//    }
-
-    auto serialize_result = value->serialize();
-    TS_ASSERT(serialize_result == ts::success);
-
-    std::string json = ts::serialization::to_json(serialize_result.payload(), true);
-    std::cout << json << "\n";
-    std::cout.flush();
-
-    auto deserialize_result = value->deserialize(serialize_result.payload());
-    TS_ASSERT(deserialize_result == ts::success);
-
-
-    {
-        std::ifstream fs("../test.json");
-        std::string json((std::istreambuf_iterator<char>(fs)),
-                         std::istreambuf_iterator<char>());
-
-        auto start = std::chrono::system_clock::now();
-        ts::Result<ts::serialization::Value> result = ts::serialization::from_json(json);
-        if (result != ts::success)
-        {
-            std::cerr << result.error().what();
-            return 1;
-        }
-
-        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - start).count();
-        std::cout << duration << "\n";
-
-        ts::serialization::Value parsed = result.extract_payload();
-        std::cout.flush();
-    }
-
-    return 0;
 }
 
 static ts::Result<void> generate_ast_code(Context& context, std::string const& ast_json)
@@ -364,54 +299,54 @@ static void generate_member_def_declaration_code(Context& context, ts::IMember_D
             "};\n";
 }
 
-static std::string generate_numeric_type_clamping_code(Context& context, ts::IStruct_Type const& struct_type, ts::IMember_Def const& member_def)
+static std::string generate_numeric_type_clamping_code(Context& context, ts::IType const& _type)
 {
-    std::string native_type_str = get_type_relative_scope_path(context.parent_scope, *member_def.get_type()).to_string();
-    if (std::shared_ptr<const ts::IInt_Type> type = std::dynamic_pointer_cast<const ts::IInt_Type>(member_def.get_type()))
+    std::string native_type_str = get_type_relative_scope_path(context.parent_scope, _type).to_string();
+    if (ts::IInt_Type const* type = dynamic_cast<ts::IInt_Type const*>(&_type))
     {
         return "math::clamp(value, " + native_type_str + "(" + to_string(type->get_min_value()) + "), " + native_type_str + "(" + to_string(type->get_max_value()) + "))";
     }
-    if (std::shared_ptr<const ts::IFloat_Type> type = std::dynamic_pointer_cast<const ts::IFloat_Type>(member_def.get_type()))
+    if (ts::IFloat_Type const* type = dynamic_cast<ts::IFloat_Type const*>(&_type))
     {
         return "math::clamp(value, " + native_type_str + "(" + to_string(type->get_min_value()) + "), " + native_type_str + "(" + to_string(type->get_max_value()) + "))";
     }
-    if (std::shared_ptr<const ts::IDouble_Type> type = std::dynamic_pointer_cast<const ts::IDouble_Type>(member_def.get_type()))
+    if (ts::IDouble_Type const* type = dynamic_cast<ts::IDouble_Type const*>(&_type))
     {
         return "math::clamp(value, " + native_type_str + "(" + to_string(type->get_min_value()) + "), " + native_type_str + "(" + to_string(type->get_max_value()) + "))";
     }
-    if (std::shared_ptr<const ts::IVec2f_Type> type = std::dynamic_pointer_cast<const ts::IVec2f_Type>(member_def.get_type()))
+    if (ts::IVec2f_Type const* type = dynamic_cast<ts::IVec2f_Type const*>(&_type))
     {
         return "math::clamp(value, " + native_type_str + "(" + to_string(type->get_min_value()) + "), " + native_type_str + "(" + to_string(type->get_max_value()) + "))";
     }
-    if (std::shared_ptr<const ts::IVec2d_Type> type = std::dynamic_pointer_cast<const ts::IVec2d_Type>(member_def.get_type()))
+    if (ts::IVec2d_Type const* type = dynamic_cast<ts::IVec2d_Type const*>(&_type))
     {
         return "math::clamp(value, " + native_type_str + "(" + to_string(type->get_min_value()) + "), " + native_type_str + "(" + to_string(type->get_max_value()) + "))";
     }
-    if (std::shared_ptr<const ts::IVec2i_Type> type = std::dynamic_pointer_cast<const ts::IVec2i_Type>(member_def.get_type()))
+    if (ts::IVec2i_Type const* type = dynamic_cast<ts::IVec2i_Type const*>(&_type))
     {
         return "math::clamp(value, " + native_type_str + "(" + to_string(type->get_min_value()) + "), " + native_type_str + "(" + to_string(type->get_max_value()) + "))";
     }
-    if (std::shared_ptr<const ts::IVec3f_Type> type = std::dynamic_pointer_cast<const ts::IVec3f_Type>(member_def.get_type()))
+    if (ts::IVec3f_Type const* type = dynamic_cast<ts::IVec3f_Type const*>(&_type))
     {
         return "math::clamp(value, " + native_type_str + "(" + to_string(type->get_min_value()) + "), " + native_type_str + "(" + to_string(type->get_max_value()) + "))";
     }
-    if (std::shared_ptr<const ts::IVec3d_Type> type = std::dynamic_pointer_cast<const ts::IVec3d_Type>(member_def.get_type()))
+    if (ts::IVec3d_Type const* type = dynamic_cast<ts::IVec3d_Type const*>(&_type))
     {
         return "math::clamp(value, " + native_type_str + "(" + to_string(type->get_min_value()) + "), " + native_type_str + "(" + to_string(type->get_max_value()) + "))";
     }
-    if (std::shared_ptr<const ts::IVec3i_Type> type = std::dynamic_pointer_cast<const ts::IVec3i_Type>(member_def.get_type()))
+    if (ts::IVec3i_Type const* type = dynamic_cast<ts::IVec3i_Type const*>(&_type))
     {
         return "math::clamp(value, " + native_type_str + "(" + to_string(type->get_min_value()) + "), " + native_type_str + "(" + to_string(type->get_max_value()) + "))";
     }
-    if (std::shared_ptr<const ts::IVec4f_Type> type = std::dynamic_pointer_cast<const ts::IVec4f_Type>(member_def.get_type()))
+    if (ts::IVec4f_Type const* type = dynamic_cast<ts::IVec4f_Type const*>(&_type))
     {
         return "math::clamp(value, " + native_type_str + "(" + to_string(type->get_min_value()) + "), " + native_type_str + "(" + to_string(type->get_max_value()) + "))";
     }
-    if (std::shared_ptr<const ts::IVec4d_Type> type = std::dynamic_pointer_cast<const ts::IVec4d_Type>(member_def.get_type()))
+    if (ts::IVec4d_Type const* type = dynamic_cast<ts::IVec4d_Type const*>(&_type))
     {
         return "math::clamp(value, " + native_type_str + "(" + to_string(type->get_min_value()) + "), " + native_type_str + "(" + to_string(type->get_max_value()) + "))";
     }
-    if (std::shared_ptr<const ts::IVec4i_Type> type = std::dynamic_pointer_cast<const ts::IVec4i_Type>(member_def.get_type()))
+    if (ts::IVec4i_Type const* type = dynamic_cast<ts::IVec4i_Type const*>(&_type))
     {
         return "math::clamp(value, " + native_type_str + "(" + to_string(type->get_min_value()) + "), " + native_type_str + "(" + to_string(type->get_max_value()) + "))";
     }
@@ -435,7 +370,7 @@ static void generate_member_def_setter_getter_code(Context& context, ts::IStruct
 
     context.cpp_file += context.ident_str + "void " + struct_type_str + "::set_" + member_def.get_name() + "(" + native_type_str + " const& value)\n" +
             context.ident_str + "{\n" +
-            context.ident_str + "  m_" + member_def.get_name() + " = " + generate_numeric_type_clamping_code(context, struct_type, member_def) + ";\n" +
+            context.ident_str + "  m_" + member_def.get_name() + " = " + generate_numeric_type_clamping_code(context, *member_def.get_type()) + ";\n" +
             context.ident_str + "}\n";
 
     context.cpp_file += context.ident_str + "auto " + struct_type_str + "::get_" + member_def.get_name() + "() const -> " + native_type_str + " const& \n" +
@@ -463,12 +398,9 @@ static ts::Result<void> generate_struct_type_serialization_code(Context& context
         ts::IMember_Def const& member_def = *type.get_member_def(i);
 
         context.serialization_section_cpp += "  {\n"
-                                             "    ts::serialization::Value const* member_sz_value = sz_value.find_object_member_by_name(\"" + member_def.get_name() + "\");\n"
+                                             "    auto const* member_sz_value = sz_value.find_object_member_by_name(\"" + member_def.get_name() + "\");\n"
                                              "    if (!member_sz_value) { return ts::Error(\"Cannot find member value '" + member_def.get_name() + "'\"); }\n"
-                                             "    typedef decltype(value.get_" + member_def.get_name() + "()) const_ref_member_t;\n"
-                                             "    typedef std::remove_reference<const_ref_member_t>::type const_member_t;\n"
-                                             "    typedef std::remove_cv<const_member_t>::type member_t;\n"
-                                             "    member_t v;\n"
+                                             "    std::remove_cv<std::remove_reference<decltype(value.get_" + member_def.get_name() + "())>::type>::type v;\n"
                                              "    auto result = deserialize(v, *member_sz_value);\n"
                                              "    if (result != ts::success) { return result; }\n"
                                              "    value.set_" + member_def.get_name() + "(v);\n"
@@ -549,6 +481,51 @@ static ts::Result<void> generate_struct_type_code(Context& context, ts::IStruct_
     return generate_struct_type_serialization_code(context, struct_type);
 }
 
+static ts::Result<void> generate_enum_type_serialization_code(Context& context, ts::IEnum_Type const& type)
+{
+    std::string native_type_str = get_native_type(context.parent_scope, type).to_string();
+    if (context.serialization_code_generated.find(native_type_str) != context.serialization_code_generated.end())
+    {
+        return ts::success;
+    }
+    context.serialization_code_generated.insert(native_type_str);
+
+    context.serialization_section_h += "ts::Result<void> deserialize(" + native_type_str + "& value, ts::serialization::Value const& sz_value);\n";
+    context.serialization_section_cpp += "ts::Result<void> deserialize(" + native_type_str + "& value, ts::serialization::Value const& sz_value)\n"
+                                           "{\n"
+                                           "  if (!sz_value.is_string()) { return ts::Error(\"Expected string or null value when deserializing\"); }\n"
+                                           "  std::string const& str = sz_value.get_as_string();\n"
+                                           "  if (false) {} //this is here just to have the next items with 'else if'\n";
+
+    for (size_t i = 0; i < type.get_item_count(); i++)
+    {
+        std::string item_str = type.get_item(i)->get_name();
+        context.serialization_section_cpp += "  else if (str == \"" + item_str + "\")\n"
+                                             "  {\n"
+                                             "    value = " + native_type_str + "::" + item_str + ";\n"
+                                             "  }\n";
+    }
+    context.serialization_section_cpp += "  else { return ts::Error(\"Cannot find item '\" + str + \"' when deserializing\"); }\n"
+                                         "}\n";
+
+    context.serialization_section_h += "ts::Result<ts::serialization::Value> serialize(" + native_type_str + " const& value);\n";
+    context.serialization_section_cpp += "ts::Result<ts::serialization::Value> serialize(" + native_type_str + " const& value)\n"
+                                         "{\n"
+                                         "  if (false) {} //this is here just to have the next items with 'else if'\n";
+
+    for (size_t i = 0; i < type.get_item_count(); i++)
+    {
+        std::string item_str = type.get_item(i)->get_name();
+        context.serialization_section_cpp += "  else if (value == " + native_type_str + "::" + item_str + ")\n"
+                                             "  {\n"
+                                             "    return ts::serialization::Value(\"" + item_str + "\");\n"
+                                             "  }\n";
+    }
+    context.serialization_section_cpp += "  else { return ts::Error(\"Cannot serialize type\"); }\n"
+                                         "}\n";
+    return ts::success;
+}
+
 static ts::Result<void> generate_enum_type_code(Context& context, ts::IEnum_Type const& enum_type)
 {
     std::string enum_name = get_native_type(context.parent_scope, enum_type).back();
@@ -563,7 +540,7 @@ static ts::Result<void> generate_enum_type_code(Context& context, ts::IEnum_Type
 
     context.h_file += context.ident_str + "};\n\n";
 
-    return ts::success;
+    return generate_enum_type_serialization_code(context, enum_type);
 }
 
 static ts::Result<void> generate_poly_type_code(Context& context, ts::IPoly_Type const& type)
@@ -586,11 +563,11 @@ static ts::Result<void> generate_poly_type_code(Context& context, ts::IPoly_Type
                                            "    return ts::success;\n"
                                            "  }\n"
                                            "  if (!sz_value.is_object()) { return ts::Error(\"Expected object or null value when deserializing\"); }\n"
-                                           "  ts::serialization::Value const* type_sz_value = sz_value.find_object_member_by_name(\"type\");\n"
+                                           "  auto const* type_sz_value = sz_value.find_object_member_by_name(\"type\");\n"
                                            "  if (!type_sz_value || !type_sz_value->is_string()) { return ts::Error(\"Expected 'type' string value when deserializing\"); }\n"
-                                           "  ts::serialization::Value const* value_sz_value = sz_value.find_object_member_by_name(\"value\");\n"
+                                           "  auto const* value_sz_value = sz_value.find_object_member_by_name(\"value\");\n"
                                            "  if (!value_sz_value) { return ts::Error(\"Expected 'value' when deserializing\"); }\n"
-                                           "  std::string path = type_sz_value->get_as_string();\n"
+                                           "  std::string const& path = type_sz_value->get_as_string();\n"
                                            "  if (false) {} //this is here just to have the next items with 'else if'\n";
 
     for (std::shared_ptr<const ts::IStruct_Type> inner_type: inner_types)
@@ -686,12 +663,12 @@ static ts::Result<void> generate_variant_type_code(Context& context, ts::IVarian
     context.serialization_section_h += "ts::Result<void> deserialize(" + native_type_str + "& value, ts::serialization::Value const& sz_value);\n";
     context.serialization_section_cpp += "ts::Result<void> deserialize(" + native_type_str + "& value, ts::serialization::Value const& sz_value)\n"
                                            "{\n"
-                                           "  if (!sz_value.is_object()) { return ts::Error(\"Expected object or null value when deserializing\"); }\n"
-                                           "  ts::serialization::Value const* type_sz_value = sz_value.find_object_member_by_name(\"type\");\n"
+                                           "  if (!sz_value.is_object()) { return ts::Error(\"Expected object value when deserializing\"); }\n"
+                                           "  auto const* type_sz_value = sz_value.find_object_member_by_name(\"type\");\n"
                                            "  if (!type_sz_value || !type_sz_value->is_string()) { return ts::Error(\"Expected 'type' string value when deserializing\"); }\n"
-                                           "  ts::serialization::Value const* value_sz_value = sz_value.find_object_member_by_name(\"value\");\n"
+                                           "  auto const* value_sz_value = sz_value.find_object_member_by_name(\"value\");\n"
                                            "  if (!value_sz_value) { return ts::Error(\"Expected 'value' when deserializing\"); }\n"
-                                           "  std::string path = type_sz_value->get_as_string();\n"
+                                           "  std::string const& path = type_sz_value->get_as_string();\n"
                                            "  if (false) {} //this is here just to have the next items with 'else if'\n";
 
     for (size_t i = 0; i < type.get_inner_type_count(); i++)
@@ -851,7 +828,7 @@ static ts::Result<void> generate_vecXY_type_code(Context& context, std::string c
     for (std::string const& component_name: component_names)
     {
         context.serialization_section_cpp += "  {\n"
-                                             "    ts::serialization::Value const* sz_v = sz_value.find_object_member_by_name(\"" + component_name + "\");\n"
+                                             "    auto const* sz_v = sz_value.find_object_member_by_name(\"" + component_name + "\");\n"
                                              "    if (!sz_v) { return ts::Error(\"Cannot find component '" + component_name + "'\"); }\n"
                                              "    auto result = deserialize(value." + component_name + ", *sz_v);\n"
                                              "    if (result != ts::success) { return result; }\n"
