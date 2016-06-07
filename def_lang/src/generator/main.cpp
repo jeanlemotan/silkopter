@@ -465,7 +465,10 @@ static ts::Result<void> generate_struct_type_serialization_code(Context& context
         context.serialization_section_cpp += "  {\n"
                                              "    ts::serialization::Value const* member_sz_value = sz_value.find_object_member_by_name(\"" + member_def.get_name() + "\");\n"
                                              "    if (!member_sz_value) { return ts::Error(\"Cannot find member value '" + member_def.get_name() + "'\"); }\n"
-                                             "    " + get_native_type(context.parent_scope, *member_def.get_type()).to_string() + " v;\n"
+                                             "    typedef decltype(value.get_" + member_def.get_name() + "()) const_ref_member_t;\n"
+                                             "    typedef std::remove_reference<const_ref_member_t>::type const_member_t;\n"
+                                             "    typedef std::remove_cv<const_member_t>::type member_t;\n"
+                                             "    member_t v;\n"
                                              "    auto result = deserialize(v, *member_sz_value);\n"
                                              "    if (result != ts::success) { return result; }\n"
                                              "    value.set_" + member_def.get_name() + "(v);\n"
@@ -510,12 +513,18 @@ static ts::Result<void> generate_struct_type_code(Context& context, ts::IStruct_
     context.h_file += context.ident_str + "public:\n\n";
 
     Context c(context.h_file, context.cpp_file, struct_type, context.type_system);
+    c.serialization_code_generated = context.serialization_code_generated;
+
     c.ident_str = context.ident_str + "  ";
     auto result = generate_declaration_scope_code(c, struct_type);
     if (result != ts::success)
     {
         return result;
     }
+
+    context.serialization_code_generated.insert(c.serialization_code_generated.begin(), c.serialization_code_generated.end());
+    context.serialization_section_cpp += c.serialization_section_cpp;
+    context.serialization_section_h += c.serialization_section_h;
 
     context.h_file += c.ident_str + struct_name + "() noexcept {};\n";
     context.h_file += c.ident_str + "virtual ~" + struct_name + "() noexcept {};\n\n";
@@ -667,10 +676,94 @@ static ts::Result<void> generate_string_type_code(Context& context, ts::IString_
 }
 static ts::Result<void> generate_variant_type_code(Context& context, ts::IVariant_Type const& type)
 {
+    std::string native_type_str = get_native_type(context.parent_scope, type).to_string();
+    if (context.serialization_code_generated.find(native_type_str) != context.serialization_code_generated.end())
+    {
+        return ts::success;
+    }
+    context.serialization_code_generated.insert(native_type_str);
+
+    context.serialization_section_h += "ts::Result<void> deserialize(" + native_type_str + "& value, ts::serialization::Value const& sz_value);\n";
+    context.serialization_section_cpp += "ts::Result<void> deserialize(" + native_type_str + "& value, ts::serialization::Value const& sz_value)\n"
+                                           "{\n"
+                                           "  if (!sz_value.is_object()) { return ts::Error(\"Expected object or null value when deserializing\"); }\n"
+                                           "  ts::serialization::Value const* type_sz_value = sz_value.find_object_member_by_name(\"type\");\n"
+                                           "  if (!type_sz_value || !type_sz_value->is_string()) { return ts::Error(\"Expected 'type' string value when deserializing\"); }\n"
+                                           "  ts::serialization::Value const* value_sz_value = sz_value.find_object_member_by_name(\"value\");\n"
+                                           "  if (!value_sz_value) { return ts::Error(\"Expected 'value' when deserializing\"); }\n"
+                                           "  std::string path = type_sz_value->get_as_string();\n"
+                                           "  if (false) {} //this is here just to have the next items with 'else if'\n";
+
+    for (size_t i = 0; i < type.get_inner_type_count(); i++)
+    {
+        std::string native_inner_type_str = get_native_type(context.parent_scope, *type.get_inner_type(i)).to_string();
+        context.serialization_section_cpp += "  else if (path == \"" + type.get_inner_type(i)->get_symbol_path().to_string() + "\")\n"
+                                             "  {\n"
+                                             "    " + native_inner_type_str + " v;\n"
+                                             "    auto result = deserialize(boost::get<" + native_inner_type_str + ">(value), *value_sz_value);\n"
+                                             "    if (result != ts::success) { return result; }\n"
+                                             "    value = v;\n"
+                                             "  }\n";
+    }
+    context.serialization_section_cpp += "  else { return ts::Error(\"Cannot find type '\" + path + \"' when deserializing\"); }\n"
+                                         "}\n";
+
+    context.serialization_section_h += "ts::Result<ts::serialization::Value> serialize(" + native_type_str + " const& value);\n";
+    context.serialization_section_cpp += "ts::Result<ts::serialization::Value> serialize(" + native_type_str + " const& value)\n"
+                                         "{\n"
+                                         "  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);\n"
+                                         "  if (false) {} //this is here just to have the next items with 'else if'\n";
+
+    for (size_t i = 0; i < type.get_inner_type_count(); i++)
+    {
+        std::string native_inner_type_str = get_native_type(context.parent_scope, *type.get_inner_type(i)).to_string();
+        context.serialization_section_cpp += "  else if (auto* v = boost::get<" + native_inner_type_str + ">(&value))\n"
+                                             "  {\n"
+                                             "    sz_value.add_object_member(\"type\", \"" + native_inner_type_str + "\");\n"
+                                             "    auto result = serialize(*v);\n"
+                                             "    if (result != ts::success) { return result; }\n"
+                                             "    sz_value.add_object_member(\"value\", result.extract_payload());\n"
+                                             "    return std::move(sz_value);\n"
+                                             "  }\n";
+    }
+    context.serialization_section_cpp += "  else { return ts::Error(\"Cannot serialize type\"); }\n"
+                                         "}\n";
     return ts::success;
 }
 static ts::Result<void> generate_vector_type_code(Context& context, ts::IVector_Type const& type)
 {
+    std::string native_type_str = get_native_type(context.parent_scope, type).to_string();
+    if (context.serialization_code_generated.find(native_type_str) != context.serialization_code_generated.end())
+    {
+        return ts::success;
+    }
+    context.serialization_code_generated.insert(native_type_str);
+
+    context.serialization_section_h += "ts::Result<void> deserialize(" + native_type_str + "& value, ts::serialization::Value const& sz_value);\n";
+    context.serialization_section_cpp += "ts::Result<void> deserialize(" + native_type_str + "& value, ts::serialization::Value const& sz_value)\n"
+                                           "{\n"
+                                           "  value.clear();\n"
+                                           "  if (!sz_value.is_array()) { return ts::Error(\"Expected array value when deserializing\"); }\n"
+                                           "  value.resize(sz_value.get_array_element_count());\n"
+                                           "  for (size_t i = 0; i < value.size(); i++)\n"
+                                           "  {\n"
+                                           "    auto result = deserialize(value[i], sz_value.get_array_element_value(i));\n"
+                                           "    if (result != ts::success) { return result; }\n"
+                                           "  }\n"
+                                           "  return ts::success;\n"
+                                           "}\n";
+    context.serialization_section_h += "ts::Result<ts::serialization::Value> serialize(" + native_type_str + " const& value);\n";
+    context.serialization_section_cpp += "ts::Result<ts::serialization::Value> serialize(" + native_type_str + " const& value)\n"
+                                           "{\n"
+                                           "  ts::serialization::Value sz_value(ts::serialization::Value::Type::ARRAY);\n"
+                                           "  for (size_t i = 0; i < value.size(); i++)\n"
+                                           "  {\n"
+                                           "    auto result = serialize(value[i]);\n"
+                                           "    if (result != ts::success) { return result; }\n"
+                                           "    sz_value.add_array_element(result.extract_payload());\n"
+                                           "  }\n"
+                                           "  return sz_value;\n"
+                                           "}\n";
     return ts::success;
 }
 static ts::Result<void> generate_int_type_code(Context& context, ts::IInt_Type const& type)
@@ -742,41 +835,92 @@ static ts::Result<void> generate_double_type_code(Context& context, ts::IDouble_
                                            "}\n";
     return ts::success;
 }
+
+static ts::Result<void> generate_vecXY_type_code(Context& context, std::string const& native_type_str, std::vector<std::string> const& component_names)
+{
+    if (context.serialization_code_generated.find(native_type_str) != context.serialization_code_generated.end())
+    {
+        return ts::success;
+    }
+    context.serialization_code_generated.insert(native_type_str);
+
+    context.serialization_section_h += "ts::Result<void> deserialize(" + native_type_str + "& value, ts::serialization::Value const& sz_value);\n";
+    context.serialization_section_cpp += "ts::Result<void> deserialize(" + native_type_str + "& value, ts::serialization::Value const& sz_value)\n"
+                                           "{\n"
+                                           "  if (!sz_value.is_object()) { return ts::Error(\"Expected object value when deserializing\"); }\n";
+    for (std::string const& component_name: component_names)
+    {
+        context.serialization_section_cpp += "  {\n"
+                                             "    ts::serialization::Value const* sz_v = sz_value.find_object_member_by_name(\"" + component_name + "\");\n"
+                                             "    if (!sz_v) { return ts::Error(\"Cannot find component '" + component_name + "'\"); }\n"
+                                             "    auto result = deserialize(value." + component_name + ", *sz_v);\n"
+                                             "    if (result != ts::success) { return result; }\n"
+                                             "  }\n";
+    }
+    context.serialization_section_cpp += "  return ts::success;\n"
+                                         "}\n";
+
+    context.serialization_section_h += "ts::Result<ts::serialization::Value> serialize(" + native_type_str + " const& value);\n";
+    context.serialization_section_cpp += "ts::Result<ts::serialization::Value> serialize(" + native_type_str + " const& value)\n"
+                                           "{\n"
+                                           "  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);\n";
+    for (std::string const& component_name: component_names)
+    {
+        context.serialization_section_cpp += "  {\n"
+                                             "    auto result = serialize(value." + component_name + ");\n"
+                                             "    if (result != ts::success) { return result; }\n"
+                                             "    sz_value.add_object_member(\"" + component_name + "\", result.extract_payload());\n"
+                                             "  }\n";
+    }
+    context.serialization_section_cpp += "  return sz_value;\n"
+                                         "}\n";
+    return ts::success;
+}
+
 static ts::Result<void> generate_vec2i_type_code(Context& context, ts::IVec2i_Type const& type)
 {
-    return ts::success;
+    std::string native_type_str = get_native_type(context.parent_scope, type).to_string();
+    return generate_vecXY_type_code(context, native_type_str, {"x", "y"});
 }
 static ts::Result<void> generate_vec2f_type_code(Context& context, ts::IVec2f_Type const& type)
 {
-    return ts::success;
+    std::string native_type_str = get_native_type(context.parent_scope, type).to_string();
+    return generate_vecXY_type_code(context, native_type_str, {"x", "y"});
 }
 static ts::Result<void> generate_vec2d_type_code(Context& context, ts::IVec2d_Type const& type)
 {
-    return ts::success;
+    std::string native_type_str = get_native_type(context.parent_scope, type).to_string();
+    return generate_vecXY_type_code(context, native_type_str, {"x", "y"});
 }
 static ts::Result<void> generate_vec3i_type_code(Context& context, ts::IVec3i_Type const& type)
 {
-    return ts::success;
+    std::string native_type_str = get_native_type(context.parent_scope, type).to_string();
+    return generate_vecXY_type_code(context, native_type_str, {"x", "y", "z"});
 }
 static ts::Result<void> generate_vec3f_type_code(Context& context, ts::IVec3f_Type const& type)
 {
-    return ts::success;
+    std::string native_type_str = get_native_type(context.parent_scope, type).to_string();
+    return generate_vecXY_type_code(context, native_type_str, {"x", "y", "z"});
 }
 static ts::Result<void> generate_vec3d_type_code(Context& context, ts::IVec3d_Type const& type)
 {
-    return ts::success;
+    std::string native_type_str = get_native_type(context.parent_scope, type).to_string();
+    return generate_vecXY_type_code(context, native_type_str, {"x", "y", "z"});
 }
 static ts::Result<void> generate_vec4i_type_code(Context& context, ts::IVec4i_Type const& type)
 {
-    return ts::success;
+    std::string native_type_str = get_native_type(context.parent_scope, type).to_string();
+    return generate_vecXY_type_code(context, native_type_str, {"x", "y", "z", "w"});
 }
 static ts::Result<void> generate_vec4f_type_code(Context& context, ts::IVec4f_Type const& type)
 {
-    return ts::success;
+    std::string native_type_str = get_native_type(context.parent_scope, type).to_string();
+    return generate_vecXY_type_code(context, native_type_str, {"x", "y", "z", "w"});
 }
 static ts::Result<void> generate_vec4d_type_code(Context& context, ts::IVec4d_Type const& type)
 {
-    return ts::success;
+    std::string native_type_str = get_native_type(context.parent_scope, type).to_string();
+    return generate_vecXY_type_code(context, native_type_str, {"x", "y", "z", "w"});
 }
 
 static ts::Result<void> generate_type_code(Context& context, ts::IType const& _type)
