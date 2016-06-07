@@ -41,14 +41,8 @@ QMAKE_CFLAGS += -Wno-unused-variable -Wno-unused-parameter
 QMAKE_LFLAGS += -rdynamic
 
 
-INCLUDEPATH += ../../../qbase/include
-INCLUDEPATH += ../../../qmath/include
 INCLUDEPATH += ../../include
 INCLUDEPATH += ../../src
-
-
-LIBS += -L../../../qmath/lib/$${DEST_FOLDER} -lqmath
-LIBS += -L../../../qbase/lib/$${DEST_FOLDER} -lqbase
 
 HEADERS += \
     ../../include/def_lang/ep/Type_Template_EP.inl \

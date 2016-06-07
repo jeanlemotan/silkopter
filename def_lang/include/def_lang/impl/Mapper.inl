@@ -162,34 +162,34 @@ inline Result<void> set(IValue& dst, int64_t const& src)
 }
 
 template<>
-inline Result<void> get(IValue const& src, math::vec2f& dst)
+inline Result<void> get(IValue const& src, ts::vec2f& dst)
 {
-    return detail::getter<IVec2f_Value, math::vec2f>(src, dst);
+    return detail::getter<IVec2f_Value, ts::vec2f>(src, dst);
 }
 template<>
-inline Result<void> set(IValue& dst, math::vec2f const& src)
+inline Result<void> set(IValue& dst, ts::vec2f const& src)
 {
-    return detail::setter<IVec2f_Value, math::vec2f>(dst, src);
+    return detail::setter<IVec2f_Value, ts::vec2f>(dst, src);
 }
 template<>
-inline Result<void> get(IValue const& src, math::vec3f& dst)
+inline Result<void> get(IValue const& src, ts::vec3f& dst)
 {
-    return detail::getter<IVec3f_Value, math::vec3f>(src, dst);
+    return detail::getter<IVec3f_Value, ts::vec3f>(src, dst);
 }
 template<>
-inline Result<void> set(IValue& dst, math::vec3f const& src)
+inline Result<void> set(IValue& dst, ts::vec3f const& src)
 {
-    return detail::setter<IVec3f_Value, math::vec3f>(dst, src);
+    return detail::setter<IVec3f_Value, ts::vec3f>(dst, src);
 }
 template<>
-inline Result<void> get(IValue const& src, math::vec4f& dst)
+inline Result<void> get(IValue const& src, ts::vec4f& dst)
 {
-    return detail::getter<IVec4f_Value, math::vec4f>(src, dst);
+    return detail::getter<IVec4f_Value, ts::vec4f>(src, dst);
 }
 template<>
-inline Result<void> set(IValue& dst, math::vec4f const& src)
+inline Result<void> set(IValue& dst, ts::vec4f const& src)
 {
-    return detail::setter<IVec4f_Value, math::vec4f>(dst, src);
+    return detail::setter<IVec4f_Value, ts::vec4f>(dst, src);
 }
 
 

@@ -27,7 +27,7 @@ template<class T> constexpr std::array<const char*, Scalar_INumeric_Traits<T>::c
 
 template<class T> struct Vec2_INumeric_Traits
 {
-    typedef math::vec2<T> fundamental_type;
+    typedef ts::vec2<T> fundamental_type;
     typedef T component_type;
     constexpr static size_t component_count = 2;
     constexpr static std::array<const char*, component_count> component_names = { "x", "y" };
@@ -42,7 +42,7 @@ template<class T> constexpr std::array<const char*, Vec2_INumeric_Traits<T>::com
 
 template<class T> struct Vec3_INumeric_Traits
 {
-    typedef math::vec3<T> fundamental_type;
+    typedef ts::vec3<T> fundamental_type;
     typedef T component_type;
     constexpr static size_t component_count = 3;
     constexpr static std::array<const char*, component_count> component_names = { "x", "y", "z" };
@@ -57,7 +57,7 @@ template<class T> constexpr std::array<const char*, Vec3_INumeric_Traits<T>::com
 
 template<class T> struct Vec4_INumeric_Traits
 {
-    typedef math::vec4<T> fundamental_type;
+    typedef ts::vec4<T> fundamental_type;
     typedef T component_type;
     constexpr static size_t component_count = 4;
     constexpr static std::array<const char*, component_count> component_names = { "x", "y", "z", "w" };

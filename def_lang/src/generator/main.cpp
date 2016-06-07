@@ -49,6 +49,7 @@ struct Context
 static ts::Result<void> generate_code(Context& context, ts::ast::Node const& ast_root_node, ts::Type_System const& ts);
 
 static ts::Symbol_Path s_namespace;
+static std::string s_extra_include;
 
 
 int main(int argc, char **argv)
@@ -64,6 +65,7 @@ int main(int argc, char **argv)
         ("ast", "Print the AST")
         ("nice", "Format the AST JSON nicely")
         ("namespace", po::value<std::string>(), "The namespace where to put it all")
+        ("xheader", po::value<std::string>(), "A custom support header that will be included in the generated code files")
         ("def", po::value<std::string>(&def_filename), "Definition file")
         ("out", po::value<std::string>(&out_filename), "Output file");
 
@@ -106,6 +108,7 @@ int main(int argc, char **argv)
     bool show_ast = vm.count("ast") != 0;
     bool nice_json = vm.count("nice") != 0;
     s_namespace = vm.count("namespace") ? ts::Symbol_Path(vm["namespace"].as<std::string>()) : ts::Symbol_Path();
+    s_extra_include = vm.count("xheader") ? vm["xheader"].as<std::string>() : std::string();
 
     ts::ast::Builder builder;
 
@@ -150,7 +153,7 @@ int main(int argc, char **argv)
     return 0;
 }
 
-static ts::Result<void> generate_ast_code(Context& context, std::string const& ast_json)
+static void generate_ast_code(Context& context, std::string const& ast_json)
 {
     context.h_file += context.ident_str + "// Returns the ast json from which a ast root node can be serialized\n";
     context.h_file += context.ident_str + "std::string const& get_ast_json();\n";
@@ -162,8 +165,15 @@ static ts::Result<void> generate_ast_code(Context& context, std::string const& a
     context.cpp_file += context.ident_str + ")xxx\";\n";
     context.cpp_file += context.ident_str + "  return s_json;\n";
     context.cpp_file += context.ident_str + "}\n\n";
+}
 
-    return ts::success;
+static void generate_aux_functions(Context& context)
+{
+    context.cpp_file += context.ident_str + "template <typename T>\n";
+    context.cpp_file += context.ident_str + "T clamp(T v, T min, T max)\n";
+    context.cpp_file += context.ident_str + "{\n";
+    context.cpp_file += context.ident_str + "  return std::min(std::max(v, min), max);\n";
+    context.cpp_file += context.ident_str + "}\n";
 }
 
 static ts::Result<void> generate_declaration_scope_code(Context& context, ts::IDeclaration_Scope const& ds);
@@ -208,15 +218,15 @@ static std::string to_string(bool v) { return v ? "true" : "false"; }
 static std::string to_string(int64_t v) { return std::to_string(v); }
 static std::string to_string(float v) { return std::to_string(v) + "f"; }
 static std::string to_string(double v) { return std::to_string(v); }
-static std::string to_string(math::vec2f const& v) { return to_string(v.x) + ", " + to_string(v.y); }
-static std::string to_string(math::vec2d const& v) { return to_string(v.x) + ", " + to_string(v.y); }
-static std::string to_string(math::vec2<int64_t> const& v) { return to_string(v.x) + ", " + to_string(v.y); }
-static std::string to_string(math::vec3f const& v) { return to_string(v.x) + ", " + to_string(v.y) + ", " + to_string(v.z); }
-static std::string to_string(math::vec3d const& v) { return to_string(v.x) + ", " + to_string(v.y) + ", " + to_string(v.z); }
-static std::string to_string(math::vec3<int64_t> const& v) { return to_string(v.x) + ", " + to_string(v.y) + ", " + to_string(v.z); }
-static std::string to_string(math::vec4f const& v) { return to_string(v.x) + ", " + to_string(v.y) + ", " + to_string(v.z) + ", " + to_string(v.w); }
-static std::string to_string(math::vec4d const& v) { return to_string(v.x) + ", " + to_string(v.y) + ", " + to_string(v.z) + ", " + to_string(v.w); }
-static std::string to_string(math::vec4<int64_t> const& v) { return to_string(v.x) + ", " + to_string(v.y) + ", " + to_string(v.z) + ", " + to_string(v.w); }
+static std::string to_string(ts::vec2f const& v) { return to_string(v.x) + ", " + to_string(v.y); }
+static std::string to_string(ts::vec2d const& v) { return to_string(v.x) + ", " + to_string(v.y); }
+static std::string to_string(ts::vec2<int64_t> const& v) { return to_string(v.x) + ", " + to_string(v.y); }
+static std::string to_string(ts::vec3f const& v) { return to_string(v.x) + ", " + to_string(v.y) + ", " + to_string(v.z); }
+static std::string to_string(ts::vec3d const& v) { return to_string(v.x) + ", " + to_string(v.y) + ", " + to_string(v.z); }
+static std::string to_string(ts::vec3<int64_t> const& v) { return to_string(v.x) + ", " + to_string(v.y) + ", " + to_string(v.z); }
+static std::string to_string(ts::vec4f const& v) { return to_string(v.x) + ", " + to_string(v.y) + ", " + to_string(v.z) + ", " + to_string(v.w); }
+static std::string to_string(ts::vec4d const& v) { return to_string(v.x) + ", " + to_string(v.y) + ", " + to_string(v.z) + ", " + to_string(v.w); }
+static std::string to_string(ts::vec4<int64_t> const& v) { return to_string(v.x) + ", " + to_string(v.y) + ", " + to_string(v.z) + ", " + to_string(v.w); }
 static std::string to_string(std::string const& v) { return v.empty() ? v : "\"" + v + "\""; }
 static std::string to_string(ts::IEnum_Item const& v) { return v.get_symbol_path().to_string(); }
 
@@ -304,51 +314,51 @@ static std::string generate_numeric_type_clamping_code(Context& context, ts::ITy
     std::string native_type_str = get_type_relative_scope_path(context.parent_scope, _type).to_string();
     if (ts::IInt_Type const* type = dynamic_cast<ts::IInt_Type const*>(&_type))
     {
-        return "math::clamp(value, " + native_type_str + "(" + to_string(type->get_min_value()) + "), " + native_type_str + "(" + to_string(type->get_max_value()) + "))";
+        return "clamp(value, " + native_type_str + "(" + to_string(type->get_min_value()) + "), " + native_type_str + "(" + to_string(type->get_max_value()) + "))";
     }
     if (ts::IFloat_Type const* type = dynamic_cast<ts::IFloat_Type const*>(&_type))
     {
-        return "math::clamp(value, " + native_type_str + "(" + to_string(type->get_min_value()) + "), " + native_type_str + "(" + to_string(type->get_max_value()) + "))";
+        return "clamp(value, " + native_type_str + "(" + to_string(type->get_min_value()) + "), " + native_type_str + "(" + to_string(type->get_max_value()) + "))";
     }
     if (ts::IDouble_Type const* type = dynamic_cast<ts::IDouble_Type const*>(&_type))
     {
-        return "math::clamp(value, " + native_type_str + "(" + to_string(type->get_min_value()) + "), " + native_type_str + "(" + to_string(type->get_max_value()) + "))";
+        return "clamp(value, " + native_type_str + "(" + to_string(type->get_min_value()) + "), " + native_type_str + "(" + to_string(type->get_max_value()) + "))";
     }
     if (ts::IVec2f_Type const* type = dynamic_cast<ts::IVec2f_Type const*>(&_type))
     {
-        return "math::clamp(value, " + native_type_str + "(" + to_string(type->get_min_value()) + "), " + native_type_str + "(" + to_string(type->get_max_value()) + "))";
+        return "clamp(value, " + native_type_str + "(" + to_string(type->get_min_value()) + "), " + native_type_str + "(" + to_string(type->get_max_value()) + "))";
     }
     if (ts::IVec2d_Type const* type = dynamic_cast<ts::IVec2d_Type const*>(&_type))
     {
-        return "math::clamp(value, " + native_type_str + "(" + to_string(type->get_min_value()) + "), " + native_type_str + "(" + to_string(type->get_max_value()) + "))";
+        return "clamp(value, " + native_type_str + "(" + to_string(type->get_min_value()) + "), " + native_type_str + "(" + to_string(type->get_max_value()) + "))";
     }
     if (ts::IVec2i_Type const* type = dynamic_cast<ts::IVec2i_Type const*>(&_type))
     {
-        return "math::clamp(value, " + native_type_str + "(" + to_string(type->get_min_value()) + "), " + native_type_str + "(" + to_string(type->get_max_value()) + "))";
+        return "clamp(value, " + native_type_str + "(" + to_string(type->get_min_value()) + "), " + native_type_str + "(" + to_string(type->get_max_value()) + "))";
     }
     if (ts::IVec3f_Type const* type = dynamic_cast<ts::IVec3f_Type const*>(&_type))
     {
-        return "math::clamp(value, " + native_type_str + "(" + to_string(type->get_min_value()) + "), " + native_type_str + "(" + to_string(type->get_max_value()) + "))";
+        return "clamp(value, " + native_type_str + "(" + to_string(type->get_min_value()) + "), " + native_type_str + "(" + to_string(type->get_max_value()) + "))";
     }
     if (ts::IVec3d_Type const* type = dynamic_cast<ts::IVec3d_Type const*>(&_type))
     {
-        return "math::clamp(value, " + native_type_str + "(" + to_string(type->get_min_value()) + "), " + native_type_str + "(" + to_string(type->get_max_value()) + "))";
+        return "clamp(value, " + native_type_str + "(" + to_string(type->get_min_value()) + "), " + native_type_str + "(" + to_string(type->get_max_value()) + "))";
     }
     if (ts::IVec3i_Type const* type = dynamic_cast<ts::IVec3i_Type const*>(&_type))
     {
-        return "math::clamp(value, " + native_type_str + "(" + to_string(type->get_min_value()) + "), " + native_type_str + "(" + to_string(type->get_max_value()) + "))";
+        return "clamp(value, " + native_type_str + "(" + to_string(type->get_min_value()) + "), " + native_type_str + "(" + to_string(type->get_max_value()) + "))";
     }
     if (ts::IVec4f_Type const* type = dynamic_cast<ts::IVec4f_Type const*>(&_type))
     {
-        return "math::clamp(value, " + native_type_str + "(" + to_string(type->get_min_value()) + "), " + native_type_str + "(" + to_string(type->get_max_value()) + "))";
+        return "clamp(value, " + native_type_str + "(" + to_string(type->get_min_value()) + "), " + native_type_str + "(" + to_string(type->get_max_value()) + "))";
     }
     if (ts::IVec4d_Type const* type = dynamic_cast<ts::IVec4d_Type const*>(&_type))
     {
-        return "math::clamp(value, " + native_type_str + "(" + to_string(type->get_min_value()) + "), " + native_type_str + "(" + to_string(type->get_max_value()) + "))";
+        return "clamp(value, " + native_type_str + "(" + to_string(type->get_min_value()) + "), " + native_type_str + "(" + to_string(type->get_max_value()) + "))";
     }
     if (ts::IVec4i_Type const* type = dynamic_cast<ts::IVec4i_Type const*>(&_type))
     {
-        return "math::clamp(value, " + native_type_str + "(" + to_string(type->get_min_value()) + "), " + native_type_str + "(" + to_string(type->get_max_value()) + "))";
+        return "clamp(value, " + native_type_str + "(" + to_string(type->get_min_value()) + "), " + native_type_str + "(" + to_string(type->get_max_value()) + "))";
     }
     return "value";
 }
@@ -1043,12 +1053,19 @@ static ts::Result<void> generate_code(Context& context, ts::ast::Node const& ast
     context.h_file += "#include <string>\n";
     context.h_file += "#include <vector>\n";
     context.h_file += "#include <memory>\n";
-    context.h_file += "#include <qmath.h>\n";
     context.h_file += "#include <boost/variant.hpp>\n";
     context.h_file += "#include <def_lang/Result.h>\n";
     context.h_file += "#include <def_lang/Serialization.h>\n";
+    if (!s_extra_include.empty())
+    {
+        context.h_file += "#include \"" + s_extra_include + "\"\n";
+    }
+
+
 
     context.cpp_file += "#include \"" + context.h_filename + "\"\n";
+
+    generate_aux_functions(context);
 
     if (!s_namespace.empty())
     {
@@ -1063,14 +1080,9 @@ static ts::Result<void> generate_code(Context& context, ts::ast::Node const& ast
     }
 
     std::string ast_json = ts::serialization::to_json(serialize_result.payload(), false);
+    generate_ast_code(context, ast_json);
 
-    auto result = generate_ast_code(context, ast_json);
-    if (result != ts::success)
-    {
-        return result;
-    }
-
-    result = generate_declaration_scope_code(context, ts);
+    auto result = generate_declaration_scope_code(context, ts);
     if (result != ts::success)
     {
         return result;
