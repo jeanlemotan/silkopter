@@ -378,6 +378,16 @@ static void generate_member_def_setter_getter_code(Context& context, ts::IStruct
     context.h_file += context.ident_str + "void set_" + member_def.get_name() + "(" + native_type_str + " const& value);\n";
     context.h_file += context.ident_str + "auto get_" + member_def.get_name() + "() const -> " + native_type_str + " const&;\n";
 
+    bool has_mutable_getter = std::dynamic_pointer_cast<const ts::IStruct_Type>(member_def.get_type()) != nullptr ||
+                                std::dynamic_pointer_cast<const ts::IVector_Type>(member_def.get_type()) != nullptr ||
+                                std::dynamic_pointer_cast<const ts::IVariant_Type>(member_def.get_type()) != nullptr ||
+                                std::dynamic_pointer_cast<const ts::IPoly_Type>(member_def.get_type()) != nullptr;
+
+    if (has_mutable_getter)
+    {
+        context.h_file += context.ident_str + "auto get_" + member_def.get_name() + "() -> " + native_type_str + "&;\n";
+    }
+
     context.cpp_file += context.ident_str + "void " + struct_type_str + "::set_" + member_def.get_name() + "(" + native_type_str + " const& value)\n" +
             context.ident_str + "{\n" +
             context.ident_str + "  m_" + member_def.get_name() + " = " + generate_numeric_type_clamping_code(context, *member_def.get_type()) + ";\n" +
@@ -387,6 +397,14 @@ static void generate_member_def_setter_getter_code(Context& context, ts::IStruct
             context.ident_str + "{\n" +
             context.ident_str + "  return m_" + member_def.get_name() + ";\n" +
             context.ident_str + "}\n\n";
+
+    if (has_mutable_getter)
+    {
+        context.cpp_file += context.ident_str + "auto " + struct_type_str + "::get_" + member_def.get_name() + "() -> " + native_type_str + "& \n" +
+                context.ident_str + "{\n" +
+                context.ident_str + "  return m_" + member_def.get_name() + ";\n" +
+                context.ident_str + "}\n\n";
+    }
 }
 
 static ts::Result<void> generate_struct_type_serialization_code(Context& context, ts::IStruct_Type const& type)
@@ -505,7 +523,7 @@ static ts::Result<void> generate_enum_type_serialization_code(Context& context, 
                                            "{\n"
                                            "  if (!sz_value.is_string()) { return ts::Error(\"Expected string or null value when deserializing\"); }\n"
                                            "  std::string const& str = sz_value.get_as_string();\n"
-                                           "  if (false) {} //this is here just to have the next items with 'else if'\n";
+                                           "  if (false) { return ts::Error(\"\"); } //this is here just to have the next items with 'else if'\n";
 
     for (size_t i = 0; i < type.get_item_count(); i++)
     {
@@ -516,12 +534,13 @@ static ts::Result<void> generate_enum_type_serialization_code(Context& context, 
                                              "  }\n";
     }
     context.serialization_section_cpp += "  else { return ts::Error(\"Cannot find item '\" + str + \"' when deserializing\"); }\n"
+                                         "  return ts::success;\n"
                                          "}\n";
 
     context.serialization_section_h += "ts::Result<ts::serialization::Value> serialize(" + native_type_str + " const& value);\n";
     context.serialization_section_cpp += "ts::Result<ts::serialization::Value> serialize(" + native_type_str + " const& value)\n"
                                          "{\n"
-                                         "  if (false) {} //this is here just to have the next items with 'else if'\n";
+                                         "  if (false) { return ts::Error(\"\"); } //this is here just to have the next items with 'else if'\n";
 
     for (size_t i = 0; i < type.get_item_count(); i++)
     {
@@ -578,7 +597,7 @@ static ts::Result<void> generate_poly_type_code(Context& context, ts::IPoly_Type
                                            "  auto const* value_sz_value = sz_value.find_object_member_by_name(\"value\");\n"
                                            "  if (!value_sz_value) { return ts::Error(\"Expected 'value' when deserializing\"); }\n"
                                            "  std::string const& path = type_sz_value->get_as_string();\n"
-                                           "  if (false) {} //this is here just to have the next items with 'else if'\n";
+                                           "  if (false) { return ts::Error(\"\"); } //this is here just to have the next items with 'else if'\n";
 
     for (std::shared_ptr<const ts::IStruct_Type> inner_type: inner_types)
     {
@@ -590,14 +609,15 @@ static ts::Result<void> generate_poly_type_code(Context& context, ts::IPoly_Type
                                          "  }\n";
     }
     context.serialization_section_cpp += "  else { return ts::Error(\"Cannot find type '\" + path + \"' when deserializing\"); }\n"
-                                     "}\n";
+                                         "  return ts::success;\n"
+                                         "}\n";
 
     context.serialization_section_h += "ts::Result<ts::serialization::Value> serialize(" + native_type_str + " const& value);\n";
     context.serialization_section_cpp += "ts::Result<ts::serialization::Value> serialize(" + native_type_str + " const& value)\n"
                                            "{\n"
                                            "  if (!value) { return ts::serialization::Value(ts::serialization::Value::Type::EMPTY); }\n"
                                            "  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);\n"
-                                           "  if (false) {} //this is here just to have the next items with 'else if'\n";
+                                           "  if (false) { return ts::Error(\"\"); } //this is here just to have the next items with 'else if'\n";
 
     for (std::shared_ptr<const ts::IStruct_Type> inner_type: inner_types)
     {
@@ -679,7 +699,7 @@ static ts::Result<void> generate_variant_type_code(Context& context, ts::IVarian
                                            "  auto const* value_sz_value = sz_value.find_object_member_by_name(\"value\");\n"
                                            "  if (!value_sz_value) { return ts::Error(\"Expected 'value' when deserializing\"); }\n"
                                            "  std::string const& path = type_sz_value->get_as_string();\n"
-                                           "  if (false) {} //this is here just to have the next items with 'else if'\n";
+                                           "  if (false) { return ts::Error(\"\"); } //this is here just to have the next items with 'else if'\n";
 
     for (size_t i = 0; i < type.get_inner_type_count(); i++)
     {
@@ -693,13 +713,14 @@ static ts::Result<void> generate_variant_type_code(Context& context, ts::IVarian
                                              "  }\n";
     }
     context.serialization_section_cpp += "  else { return ts::Error(\"Cannot find type '\" + path + \"' when deserializing\"); }\n"
+                                         "  return ts::success;\n"
                                          "}\n";
 
     context.serialization_section_h += "ts::Result<ts::serialization::Value> serialize(" + native_type_str + " const& value);\n";
     context.serialization_section_cpp += "ts::Result<ts::serialization::Value> serialize(" + native_type_str + " const& value)\n"
                                          "{\n"
                                          "  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);\n"
-                                         "  if (false) {} //this is here just to have the next items with 'else if'\n";
+                                         "  if (false) { return ts::Error(\"\"); } //this is here just to have the next items with 'else if'\n";
 
     for (size_t i = 0; i < type.get_inner_type_count(); i++)
     {
