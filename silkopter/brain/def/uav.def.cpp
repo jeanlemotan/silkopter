@@ -6,7 +6,7 @@ T clamp(T v, T min, T max)
 }
 std::string const& get_ast_json()
 {
-  static const std::string s_json = R"xxx({"type":1,"children":[{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"int8_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"int"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":-128}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":127}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"native_type"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"int8_t"}]}]}]}]},{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"uint8_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"int"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":0}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":255}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"native_type"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"uint8_t"}]}]}]}]},{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"int16_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"int"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":-32768}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":32767}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"native_type"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"int16_t"}]}]}]}]},{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"uint16_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"int"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":0}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":65535}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"native_type"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"uint16_t"}]}]}]}]},{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"int32_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"int"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":-2147483648}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":2147483647}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"native_type"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"int32_t"}]}]}]}]},{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"uint32_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"int"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":0}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":4294967295}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"native_type"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"uint32_t"}]}]}]}]},{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"ufloat"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"float"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":0.000000}]}]}]}]},{"type":10,"children":[{"type":6,"attributes":[{"type":0,"value":"silk"}]},{"type":11,"children":[{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"mass_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"ufloat"}]}]}]},{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"int"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":10000}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"native_type"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"uint32_t"}]}]}]}]},{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"muf_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"float"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":0.000000}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":1.000000}]}]}]}]},{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"direction_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"math::vec3f"}]}]}]},{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"euler_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"float"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":-180.000000}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":180.000000}]}]}]}]},{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"euler3_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"math::vec3f"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":19,"children":[{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":-180.000000}]}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":-180.000000}]}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":-180.000000}]}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":19,"children":[{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":180.000000}]}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":180.000000}]}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":180.000000}]}]}]}]}]},{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"servo_signal_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"float"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":1.000000}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":2.000000}]}]}]}]},{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"pwm_signal_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"float"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":0.000000}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":1.000000}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"UAV_Config_Base"}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"string"}]}]},{"type":6,"attributes":[{"type":0,"value":"name"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Name"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"mass_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"mass"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Mass (Kg)"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"ufloat"}]}]},{"type":6,"attributes":[{"type":0,"value":"moment_of_inertia"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Moment Of Inertia"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Multirotor_Config"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"UAV_Config_Base"}]}]}]},{"type":14,"children":[{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Motor"}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"math::vec3f"}]}]},{"type":6,"attributes":[{"type":0,"value":"position"}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"direction_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"thrust_vector"}]},{"type":19,"children":[{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":0.000000}]}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":0.000000}]}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":1.000000}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"bool"}]}]},{"type":6,"attributes":[{"type":0,"value":"clockwise"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":1,"value":false}]}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"ufloat"}]}]},{"type":6,"attributes":[{"type":0,"value":"radius"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":1.000000}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"ufloat"}]}]},{"type":6,"attributes":[{"type":0,"value":"height"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":1.000000}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"ufloat"}]}]},{"type":6,"attributes":[{"type":0,"value":"motor_z_torque"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":0.000000}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"ufloat"}]}]},{"type":6,"attributes":[{"type":0,"value":"motor_thrust"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":1.000000}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"ufloat"}]}]},{"type":6,"attributes":[{"type":0,"value":"motor_acceleration"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":10.000000}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"ufloat"}]}]},{"type":6,"attributes":[{"type":0,"value":"motor_deceleration"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":10.000000}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":8,"children":[{"type":6,"attributes":[{"type":0,"value":"vector"}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Motor"}]}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"motors"}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Bus_Descriptor_Base"}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Bus"}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"string"}]}]},{"type":6,"attributes":[{"type":0,"value":"name"}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"string"}]}]},{"type":6,"attributes":[{"type":0,"value":"type"}]}]},{"type":18,"children":[{"type":3,"children":[{"type":8,"children":[{"type":6,"attributes":[{"type":0,"value":"poly"}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Bus_Descriptor_Base"}]}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"descriptor"}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Descriptor_Base"}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Config_Base"}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Node"}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"string"}]}]},{"type":6,"attributes":[{"type":0,"value":"name"}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"string"}]}]},{"type":6,"attributes":[{"type":0,"value":"type"}]}]},{"type":18,"children":[{"type":3,"children":[{"type":8,"children":[{"type":6,"attributes":[{"type":0,"value":"poly"}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Descriptor_Base"}]}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"descriptor"}]}]},{"type":18,"children":[{"type":3,"children":[{"type":8,"children":[{"type":6,"attributes":[{"type":0,"value":"poly"}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Config_Base"}]}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"config"}]}]},{"type":18,"children":[{"type":3,"children":[{"type":8,"children":[{"type":6,"attributes":[{"type":0,"value":"vector"}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"string"}]}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"input_paths"}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Settings"}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":8,"children":[{"type":6,"attributes":[{"type":0,"value":"poly"}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"UAV_Config_Base"}]}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"config"}]}]},{"type":18,"children":[{"type":3,"children":[{"type":8,"children":[{"type":6,"attributes":[{"type":0,"value":"vector"}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Bus"}]}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"buses"}]}]},{"type":18,"children":[{"type":3,"children":[{"type":8,"children":[{"type":6,"attributes":[{"type":0,"value":"vector"}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node"}]}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"nodes"}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"UART_Linux_Descriptor"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Bus_Descriptor_Base"}]}]}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"string"}]}]},{"type":6,"attributes":[{"type":0,"value":"dev"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"/dev/ttyAMA0"}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"uint32_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"baud"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":115200}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"UART_BBang_Descriptor"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Bus_Descriptor_Base"}]}]}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"uint32_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"rx_pin"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":0}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"uint32_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"baud"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":115200}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"bool"}]}]},{"type":6,"attributes":[{"type":0,"value":"invert"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":1,"value":false}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"I2C_BCM_Descriptor"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Bus_Descriptor_Base"}]}]}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"uint32_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"dev"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":0}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"I2C_Linux_Descriptor"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Bus_Descriptor_Base"}]}]}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"string"}]}]},{"type":6,"attributes":[{"type":0,"value":"dev"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"/dev/i2c0"}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"SPI_BCM_Descriptor"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Bus_Descriptor_Base"}]}]}]},{"type":14,"children":[{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"mode_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"uint32_t"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":3}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"uint32_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"dev"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":0}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"uint32_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"baud"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1000000}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"mode_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"mode"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":0}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"SPI_Linux_Descriptor"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Bus_Descriptor_Base"}]}]}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"string"}]}]},{"type":6,"attributes":[{"type":0,"value":"dev"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"/dev/ttyAMA0"}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"uint32_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"speed"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1000000}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"P_Controller_Descriptor"}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"ufloat"}]}]},{"type":6,"attributes":[{"type":0,"value":"kp"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":0.000000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"kP"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"PI_Controller_Descriptor"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"P_Controller_Descriptor"}]}]}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"ufloat"}]}]},{"type":6,"attributes":[{"type":0,"value":"ki"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":0.000000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"kI"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"ufloat"}]}]},{"type":6,"attributes":[{"type":0,"value":"max_i"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":0.000000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Max I"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"PD_Controller_Descriptor"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"P_Controller_Descriptor"}]}]}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"ufloat"}]}]},{"type":6,"attributes":[{"type":0,"value":"kd"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":0.000000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"kD"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"muf_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"d_filter"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":0.000000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"D Filter"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"PID_Controller_Descriptor"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"PD_Controller_Descriptor"}]}]}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"ufloat"}]}]},{"type":6,"attributes":[{"type":0,"value":"ki"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":0.000000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"kI"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"ufloat"}]}]},{"type":6,"attributes":[{"type":0,"value":"max_i"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":0.000000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Max I"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"ADC_Ammeter_Descriptor"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Descriptor_Base"}]}]}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"rate"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":100}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Rate (Hz)"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"ADC_Ammeter_Config"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Config_Base"}]}]}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"float"}]}]},{"type":6,"attributes":[{"type":0,"value":"scale"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":1.000000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Scale"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"float"}]}]},{"type":6,"attributes":[{"type":0,"value":"bias"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":0.000000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Scale"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"ADC_Voltmeter_Descriptor"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Descriptor_Base"}]}]}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"rate"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":100}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Rate (Hz)"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"ADC_Voltmeter_Config"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Config_Base"}]}]}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"float"}]}]},{"type":6,"attributes":[{"type":0,"value":"scale"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":1.000000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Scale"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"float"}]}]},{"type":6,"attributes":[{"type":0,"value":"bias"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":0.000000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Scale"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"ADS1115_Descriptor"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Descriptor_Base"}]}]}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"string"}]}]},{"type":6,"attributes":[{"type":0,"value":"bus"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Bus"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"adc0_rate"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":200}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"ADC0 Rate (Hz)"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"adc1_rate"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":200}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"ADC1 Rate (Hz)"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"adc2_rate"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":200}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"ADC2 Rate (Hz)"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"adc3_rate"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":200}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"ADC3 Rate (Hz)"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"ADS1115_Config"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Config_Base"}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"AVRADC_Descriptor"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Descriptor_Base"}]}]}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"string"}]}]},{"type":6,"attributes":[{"type":0,"value":"bus"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Bus"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"rate"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":200}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Rate (Hz)"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"AVRADC_Config"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Config_Base"}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Comp_AHRS_Descriptor"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Descriptor_Base"}]}]}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"rate"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":200}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Rate (Hz)"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Comp_AHRS_Config"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Config_Base"}]}]}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"muf_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"drift_correction_factor"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":0.300000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Drift Correction Factor"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Combiner_Descriptor"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Descriptor_Base"}]}]}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"rate"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":200}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Rate (Hz)"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Combiner_Config"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Config_Base"}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Gravity_Filter_Descriptor"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Descriptor_Base"}]}]}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"rate"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Rate (Hz)"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Gravity_Filter_Config"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Config_Base"}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"ECEF_KF_Descriptor"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Descriptor_Base"}]}]}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"rate"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Rate (Hz)"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"ECEF_KF_Filter_Config"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Config_Base"}]}]}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"ufloat"}]}]},{"type":6,"attributes":[{"type":0,"value":"gps_position_lag"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":0.000000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPS Position Lag (s)"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"ufloat"}]}]},{"type":6,"attributes":[{"type":0,"value":"gps_position_accuracy"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":2.000000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPS Position Accuracy (CEP m)"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"ufloat"}]}]},{"type":6,"attributes":[{"type":0,"value":"gps_velocity_lag"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":0.000000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPS Velocity Lag (s)"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"ufloat"}]}]},{"type":6,"attributes":[{"type":0,"value":"gps_velocity_accuracy"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":0.200000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPS Velocity Accuracy (m/s)"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"ufloat"}]}]},{"type":6,"attributes":[{"type":0,"value":"acceleration_lag"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":0.000000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Acceleration Lag (s)"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"ufloat"}]}]},{"type":6,"attributes":[{"type":0,"value":"acceleration_accuracy"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":2.000000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Acceleration Accuracy (m/s^2)"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"LPF_Descriptor"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Descriptor_Base"}]}]}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"rate"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Rate (Hz)"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"LPF_Filter_Config"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Config_Base"}]}]}]},{"type":14,"children":[{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"lpf_poles_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"uint32_t"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":6}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"lpf_poles_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"lpf_poles"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"LPF Poles"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"ufloat"}]}]},{"type":6,"attributes":[{"type":0,"value":"lpf_cutoff_frequency"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":1.000000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"LPF Cutoff Frequency (Hz)"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"MaxSonar_Descriptor"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Descriptor_Base"}]}]}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"string"}]}]},{"type":6,"attributes":[{"type":0,"value":"bus"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Bus"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"rate"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Rate (Hz)"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"MaxSonar_Config"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Config_Base"}]}]}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"direction_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"direction"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Direction"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"ufloat"}]}]},{"type":6,"attributes":[{"type":0,"value":"max_distance"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":6.000000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Maximum Distance (m)"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"ufloat"}]}]},{"type":6,"attributes":[{"type":0,"value":"min_distance"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":0.200000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Minimum Distance (m)"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Motor_Mixer_Descriptor"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Descriptor_Base"}]}]}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"rate"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Rate (Hz)"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Motor_Mixer_Config"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Config_Base"}]}]}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"ufloat"}]}]},{"type":6,"attributes":[{"type":0,"value":"armed_thrust"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":0.000000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Armed Thrust (N)"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Acceleration_Calibration_Point"}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"float"}]}]},{"type":6,"attributes":[{"type":0,"value":"temperature"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Temperature"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"math::vec3f"}]}]},{"type":6,"attributes":[{"type":0,"value":"bias"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Bias"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"math::vec3f"}]}]},{"type":6,"attributes":[{"type":0,"value":"scale"}]},{"type":19,"children":[{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":1.000000}]}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":1.000000}]}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":1.000000}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Scale"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Angular_Velocity_Calibration_Point"}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"float"}]}]},{"type":6,"attributes":[{"type":0,"value":"temperature"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Temperature"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"math::vec3f"}]}]},{"type":6,"attributes":[{"type":0,"value":"bias"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Bias"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Magnetic_Field_Calibration_Point"}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"float"}]}]},{"type":6,"attributes":[{"type":0,"value":"temperature"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Temperature"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"math::vec3f"}]}]},{"type":6,"attributes":[{"type":0,"value":"bias"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Bias"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"math::vec3f"}]}]},{"type":6,"attributes":[{"type":0,"value":"scale"}]},{"type":19,"children":[{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":1.000000}]}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":1.000000}]}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":1.000000}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Scale"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"MPU9250_Descriptor"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Descriptor_Base"}]}]}]},{"type":14,"children":[{"type":15,"children":[{"type":6,"attributes":[{"type":0,"value":"imu_rate_t"}]},{"type":16,"children":[{"type":6,"attributes":[{"type":0,"value":"_250"},{"type":2,"value":250}],"children":[{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"250"}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"_500"},{"type":2,"value":500}],"children":[{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"500"}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"_1000"},{"type":2,"value":1000}],"children":[{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"1000"}]}]}]}]}]}]},{"type":15,"children":[{"type":6,"attributes":[{"type":0,"value":"acceleration_range_t"}]},{"type":16,"children":[{"type":6,"attributes":[{"type":0,"value":"_2"},{"type":2,"value":2}],"children":[{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"2"}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"_4"},{"type":2,"value":4}],"children":[{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"4"}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"_8"},{"type":2,"value":8}],"children":[{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"8"}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"_16"},{"type":2,"value":16}],"children":[{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"16"}]}]}]}]}]}]},{"type":15,"children":[{"type":6,"attributes":[{"type":0,"value":"angular_velocity_range_t"}]},{"type":16,"children":[{"type":6,"attributes":[{"type":0,"value":"_250"},{"type":2,"value":250}],"children":[{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"250"}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"_500"},{"type":2,"value":500}],"children":[{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"500"}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"_1000"},{"type":2,"value":1000}],"children":[{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"1000"}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"_2000"},{"type":2,"value":2000}],"children":[{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"2000"}]}]}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"string"}]}]},{"type":6,"attributes":[{"type":0,"value":"bus"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Bus"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"imu_rate_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"imu_rate"}]},{"type":20,"children":[{"type":6,"attributes":[{"type":0,"value":"imu_rate_t::_1000"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"IMU Rate (Hz)"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"magnetometer_rate"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":100}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Magnetometer Rate (Hz)"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"thermometer_rate"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":10}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Thermometer Rate (Hz)"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"acceleration_range_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"acceleration_range"}]},{"type":20,"children":[{"type":6,"attributes":[{"type":0,"value":"acceleration_range_t::_8"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Acceleration Range (G)"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"angular_velocity_range_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"angular_velocity_range"}]},{"type":20,"children":[{"type":6,"attributes":[{"type":0,"value":"angular_velocity_range_t::_500"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Angular Velocity Range (DPS)"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"MPU9250_Config"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Config_Base"}]}]}]},{"type":14,"children":[{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Calibration"}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":8,"children":[{"type":6,"attributes":[{"type":0,"value":"vector"}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Acceleration_Calibration_Point"}]}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"acceleration"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Acceleration"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":8,"children":[{"type":6,"attributes":[{"type":0,"value":"vector"}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Angular_Velocity_Calibration_Point"}]}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"angular_velocity"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Angular Velocity"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":8,"children":[{"type":6,"attributes":[{"type":0,"value":"vector"}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Magnetic_Field_Calibration_Point"}]}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"magnetic_field"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Magnetic Field"}]}]}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"euler3_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"rotation"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Rotation (deg)"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Calibration"}]}]},{"type":6,"attributes":[{"type":0,"value":"calibration"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Calibration"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"MS5611_Descriptor"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Descriptor_Base"}]}]}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"string"}]}]},{"type":6,"attributes":[{"type":0,"value":"bus"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Bus"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"pressure_rate"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":100}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Pressure Rate (Hz)"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"temperature_rate"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":10}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Temperature Rate (Hz)"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"MS5611_Config"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Config_Base"}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Multirotor_Brain_Descriptor"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Descriptor_Base"}]}]}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"rate"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":100}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Rate (Hz)"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"commands_rate"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":30}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Commands Rate (Hz)"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"state_rate"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":30}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Commands Rate (Hz)"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Multirotor_Brain_Config"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Config_Base"}]}]}]},{"type":14,"children":[{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Horizontal_Angle"}]},{"type":14,"children":[{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"speed_deg_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"ufloat"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":500.000000}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"speed_deg_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"max_speed_deg"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":180.000000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Max Speed (deg/s)"}]}]}]}]},{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"Combined_XY_PIDs"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"PID_Controller_Descriptor"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Combined"}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Separate_XY_PIDs"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Separate"}]}]}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"PID_Controller_Descriptor"}]}]},{"type":6,"attributes":[{"type":0,"value":"x_pid"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"X"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"PID_Controller_Descriptor"}]}]},{"type":6,"attributes":[{"type":0,"value":"y_pid"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Y"}]}]}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":8,"children":[{"type":6,"attributes":[{"type":0,"value":"variant"}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Combined_XY_PIDs"}]}]}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Separate_XY_PIDs"}]}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"xy_pids"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"PIDs"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Horizontal_Position"}]},{"type":14,"children":[{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"speed_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"ufloat"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":100.000000}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"speed_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"max_speed"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":2.000000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Max Speed (m/s)"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"LPF_Filter_Config"}]}]},{"type":6,"attributes":[{"type":0,"value":"lpf"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"LPF"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"PI_Controller_Descriptor"}]}]},{"type":6,"attributes":[{"type":0,"value":"velocity_pi"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Velocity PI"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"P_Controller_Descriptor"}]}]},{"type":6,"attributes":[{"type":0,"value":"position_p"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Position P"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Yaw_Angle"}]},{"type":14,"children":[{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"speed_deg_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"ufloat"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":500.000000}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"speed_deg_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"max_speed_deg"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":180.000000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Max Speed (deg/s)"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"PID_Controller_Descriptor"}]}]},{"type":6,"attributes":[{"type":0,"value":"pid"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"PID"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Altitude"}]},{"type":14,"children":[{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"speed_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"ufloat"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":100.000000}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"speed_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"max_speed"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":2.000000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Max Speed (m/s)"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"LPF_Filter_Config"}]}]},{"type":6,"attributes":[{"type":0,"value":"lpf"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"LPF"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"PI_Controller_Descriptor"}]}]},{"type":6,"attributes":[{"type":0,"value":"speed_pi"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Speed PI"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"P_Controller_Descriptor"}]}]},{"type":6,"attributes":[{"type":0,"value":"position_p"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Position P"}]}]}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Horizontal_Angle"}]}]},{"type":6,"attributes":[{"type":0,"value":"horizontal_angle"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Horizontal Angle"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Horizontal_Position"}]}]},{"type":6,"attributes":[{"type":0,"value":"horizontal_position"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Horizontal Position"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Yaw_Angle"}]}]},{"type":6,"attributes":[{"type":0,"value":"yaw_angle"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Yaw Angle"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Altitude"}]}]},{"type":6,"attributes":[{"type":0,"value":"altitude"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Altitude"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Multirotor_Pilot_Descriptor"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Descriptor_Base"}]}]}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"commands_rate"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":30}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Commands Rate (Hz)"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"state_rate"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":30}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"State Rate (Hz)"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"video_rate"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":30}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Video Rate (Hz)"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Multirotor_Pilot_Config"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Config_Base"}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Multirotor_Simulator_Descriptor"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Descriptor_Base"}]}]}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"throttle_rate"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":100}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Throttle Rate (Hz)"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"acceleration_rate"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Acceleration Rate (Hz)"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"angular_velocity_rate"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Angular Velocity Rate (Hz)"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"magnetic_field_rate"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":100}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Magnetic Field Rate (Hz)"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"pressure_rate"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":100}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Pressure Rate (Hz)"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"temperature_rate"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":10}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Temperature Rate (Hz)"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"distance_rate"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":12}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Distance Rate (Hz)"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"gps_rate"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":5}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPS Rate (Hz)"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Multirotor_Simulator_Config"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Config_Base"}]}]}]},{"type":14,"children":[{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Noise"}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"ufloat"}]}]},{"type":6,"attributes":[{"type":0,"value":"gps_position"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":2.000000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPS Position"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"ufloat"}]}]},{"type":6,"attributes":[{"type":0,"value":"gps_velocity"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":0.200000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPS Velocity"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"ufloat"}]}]},{"type":6,"attributes":[{"type":0,"value":"gps_pacc"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":0.500000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPS PACC"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"ufloat"}]}]},{"type":6,"attributes":[{"type":0,"value":"gps_vacc"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":0.100000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPS VACC"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"ufloat"}]}]},{"type":6,"attributes":[{"type":0,"value":"acceleration"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":0.010000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Acceleration"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"ufloat"}]}]},{"type":6,"attributes":[{"type":0,"value":"angular_velocity"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":0.010000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Angular Velocity"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"ufloat"}]}]},{"type":6,"attributes":[{"type":0,"value":"magnetic_field"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":0.100000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Magnetic Field"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"ufloat"}]}]},{"type":6,"attributes":[{"type":0,"value":"pressure"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":0.100000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Pressure"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"ufloat"}]}]},{"type":6,"attributes":[{"type":0,"value":"temperature"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":0.100000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Temperature"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"ufloat"}]}]},{"type":6,"attributes":[{"type":0,"value":"ground_distance"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":0.010000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Ground Distance"}]}]}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"bool"}]}]},{"type":6,"attributes":[{"type":0,"value":"simulation_enabled"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":1,"value":true}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Simulation Enabled"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"bool"}]}]},{"type":6,"attributes":[{"type":0,"value":"drag_enabled"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":1,"value":true}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Drag Enabled"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"bool"}]}]},{"type":6,"attributes":[{"type":0,"value":"ground_enabled"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":1,"value":true}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Ground Enabled"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"bool"}]}]},{"type":6,"attributes":[{"type":0,"value":"gravity_enabled"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":1,"value":true}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Gravity Enabled"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Noise"}]}]},{"type":6,"attributes":[{"type":0,"value":"noise"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Noise"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Oscillator_Descriptor"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Descriptor_Base"}]}]}]},{"type":14,"children":[{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"component_count_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"int32_t"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":32}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"rate"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":30}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Rate (Hz)"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"component_count_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"component_count"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Components"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Oscillator_Config"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Config_Base"}]}]}]},{"type":14,"children":[{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Component"}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"ufloat"}]}]},{"type":6,"attributes":[{"type":0,"value":"frequency"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":1.000000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Frequency (Hz)"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"ufloat"}]}]},{"type":6,"attributes":[{"type":0,"value":"amplitude"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":1.000000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Amplitude"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"bool"}]}]},{"type":6,"attributes":[{"type":0,"value":"square"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":1,"value":false}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Square"}]}]}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"ufloat"}]}]},{"type":6,"attributes":[{"type":0,"value":"amplitude"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":1.000000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Amplitude"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"ufloat"}]}]},{"type":6,"attributes":[{"type":0,"value":"noise"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":0.000000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Noise"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":8,"children":[{"type":6,"attributes":[{"type":0,"value":"vector"}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Component"}]}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"components"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Components"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"PCA9685_Descriptor"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Descriptor_Base"}]}]}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"string"}]}]},{"type":6,"attributes":[{"type":0,"value":"bus"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Bus"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"rate"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":30}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Rate (Hz)"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"uint8_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"address"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":64}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Address"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"PCA9685_Config"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Config_Base"}]}]}]},{"type":14,"children":[{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Channel"}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"bool"}]}]},{"type":6,"attributes":[{"type":0,"value":"servo_signal"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":1,"value":false}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Servo Signal"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"servo_signal_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"min_servo"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":1.000000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Min Servo (ms)"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"servo_signal_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"max_servo"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":2.000000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Max Servo (ms)"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"pwm_signal_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"min_pwm"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":0.000000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Min PWM"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"pwm_signal_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"max_pwm"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":1.000000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Max PWM"}]}]}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":8,"children":[{"type":6,"attributes":[{"type":0,"value":"vector"}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Channel"}]}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"channels"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Channels"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"PIGPIO_Descriptor"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Descriptor_Base"}]}]}]},{"type":14,"children":[{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Channel"}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"bool"}]}]},{"type":6,"attributes":[{"type":0,"value":"enabled"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":1,"value":false}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Enabled"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"bool"}]}]},{"type":6,"attributes":[{"type":0,"value":"servo_signal"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":1,"value":false}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Servo Signal"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"rate"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":400}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Rate (Hz)"}]}]}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Channel"}]}]},{"type":6,"attributes":[{"type":0,"value":"gpio_2"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPIO 2"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Channel"}]}]},{"type":6,"attributes":[{"type":0,"value":"gpio_3"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPIO 3"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Channel"}]}]},{"type":6,"attributes":[{"type":0,"value":"gpio_4"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPIO 4"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Channel"}]}]},{"type":6,"attributes":[{"type":0,"value":"gpio_5"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPIO 5"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Channel"}]}]},{"type":6,"attributes":[{"type":0,"value":"gpio_6"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPIO 6"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Channel"}]}]},{"type":6,"attributes":[{"type":0,"value":"gpio_7"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPIO 7"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Channel"}]}]},{"type":6,"attributes":[{"type":0,"value":"gpio_8"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPIO 8"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Channel"}]}]},{"type":6,"attributes":[{"type":0,"value":"gpio_9"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPIO 9"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Channel"}]}]},{"type":6,"attributes":[{"type":0,"value":"gpio_10"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPIO 10"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Channel"}]}]},{"type":6,"attributes":[{"type":0,"value":"gpio_11"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPIO 11"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Channel"}]}]},{"type":6,"attributes":[{"type":0,"value":"gpio_12"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPIO 12"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Channel"}]}]},{"type":6,"attributes":[{"type":0,"value":"gpio_13"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPIO 13"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Channel"}]}]},{"type":6,"attributes":[{"type":0,"value":"gpio_14"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPIO 14"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Channel"}]}]},{"type":6,"attributes":[{"type":0,"value":"gpio_15"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPIO 15"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Channel"}]}]},{"type":6,"attributes":[{"type":0,"value":"gpio_16"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPIO 16"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Channel"}]}]},{"type":6,"attributes":[{"type":0,"value":"gpio_17"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPIO 17"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Channel"}]}]},{"type":6,"attributes":[{"type":0,"value":"gpio_18"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPIO 18"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Channel"}]}]},{"type":6,"attributes":[{"type":0,"value":"gpio_19"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPIO 19"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Channel"}]}]},{"type":6,"attributes":[{"type":0,"value":"gpio_20"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPIO 20"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Channel"}]}]},{"type":6,"attributes":[{"type":0,"value":"gpio_21"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPIO 21"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Channel"}]}]},{"type":6,"attributes":[{"type":0,"value":"gpio_22"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPIO 22"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Channel"}]}]},{"type":6,"attributes":[{"type":0,"value":"gpio_23"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPIO 23"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Channel"}]}]},{"type":6,"attributes":[{"type":0,"value":"gpio_24"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPIO 24"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Channel"}]}]},{"type":6,"attributes":[{"type":0,"value":"gpio_25"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPIO 25"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Channel"}]}]},{"type":6,"attributes":[{"type":0,"value":"gpio_26"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPIO 26"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Channel"}]}]},{"type":6,"attributes":[{"type":0,"value":"gpio_27"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPIO 27"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"PIGPIO_Config"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Config_Base"}]}]}]},{"type":14,"children":[{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Servo_Channel"}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"servo_signal_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":1.000000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Min (ms)"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"servo_signal_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":2.000000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Max (ms)"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"PWM_Channel"}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"pwm_signal_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":0.000000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Min"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"pwm_signal_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":1.000000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Max"}]}]}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":8,"children":[{"type":6,"attributes":[{"type":0,"value":"variant"}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Servo_Channel"}]}]}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"PWM_Channel"}]}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"gpio_2"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPIO 2"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":8,"children":[{"type":6,"attributes":[{"type":0,"value":"variant"}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Servo_Channel"}]}]}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"PWM_Channel"}]}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"gpio_3"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPIO 3"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":8,"children":[{"type":6,"attributes":[{"type":0,"value":"variant"}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Servo_Channel"}]}]}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"PWM_Channel"}]}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"gpio_4"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPIO 4"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":8,"children":[{"type":6,"attributes":[{"type":0,"value":"variant"}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Servo_Channel"}]}]}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"PWM_Channel"}]}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"gpio_5"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPIO 5"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":8,"children":[{"type":6,"attributes":[{"type":0,"value":"variant"}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Servo_Channel"}]}]}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"PWM_Channel"}]}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"gpio_6"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPIO 6"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":8,"children":[{"type":6,"attributes":[{"type":0,"value":"variant"}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Servo_Channel"}]}]}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"PWM_Channel"}]}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"gpio_7"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPIO 7"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":8,"children":[{"type":6,"attributes":[{"type":0,"value":"variant"}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Servo_Channel"}]}]}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"PWM_Channel"}]}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"gpio_8"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPIO 8"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":8,"children":[{"type":6,"attributes":[{"type":0,"value":"variant"}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Servo_Channel"}]}]}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"PWM_Channel"}]}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"gpio_9"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPIO 9"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":8,"children":[{"type":6,"attributes":[{"type":0,"value":"variant"}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Servo_Channel"}]}]}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"PWM_Channel"}]}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"gpio_10"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPIO 10"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":8,"children":[{"type":6,"attributes":[{"type":0,"value":"variant"}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Servo_Channel"}]}]}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"PWM_Channel"}]}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"gpio_11"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPIO 11"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":8,"children":[{"type":6,"attributes":[{"type":0,"value":"variant"}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Servo_Channel"}]}]}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"PWM_Channel"}]}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"gpio_12"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPIO 12"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":8,"children":[{"type":6,"attributes":[{"type":0,"value":"variant"}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Servo_Channel"}]}]}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"PWM_Channel"}]}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"gpio_13"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPIO 13"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":8,"children":[{"type":6,"attributes":[{"type":0,"value":"variant"}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Servo_Channel"}]}]}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"PWM_Channel"}]}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"gpio_14"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPIO 14"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":8,"children":[{"type":6,"attributes":[{"type":0,"value":"variant"}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Servo_Channel"}]}]}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"PWM_Channel"}]}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"gpio_15"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPIO 15"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":8,"children":[{"type":6,"attributes":[{"type":0,"value":"variant"}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Servo_Channel"}]}]}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"PWM_Channel"}]}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"gpio_16"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPIO 16"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":8,"children":[{"type":6,"attributes":[{"type":0,"value":"variant"}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Servo_Channel"}]}]}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"PWM_Channel"}]}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"gpio_17"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPIO 17"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":8,"children":[{"type":6,"attributes":[{"type":0,"value":"variant"}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Servo_Channel"}]}]}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"PWM_Channel"}]}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"gpio_18"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPIO 18"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":8,"children":[{"type":6,"attributes":[{"type":0,"value":"variant"}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Servo_Channel"}]}]}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"PWM_Channel"}]}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"gpio_19"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPIO 19"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":8,"children":[{"type":6,"attributes":[{"type":0,"value":"variant"}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Servo_Channel"}]}]}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"PWM_Channel"}]}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"gpio_20"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPIO 20"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":8,"children":[{"type":6,"attributes":[{"type":0,"value":"variant"}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Servo_Channel"}]}]}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"PWM_Channel"}]}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"gpio_21"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPIO 21"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":8,"children":[{"type":6,"attributes":[{"type":0,"value":"variant"}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Servo_Channel"}]}]}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"PWM_Channel"}]}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"gpio_22"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPIO 22"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":8,"children":[{"type":6,"attributes":[{"type":0,"value":"variant"}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Servo_Channel"}]}]}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"PWM_Channel"}]}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"gpio_23"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPIO 23"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":8,"children":[{"type":6,"attributes":[{"type":0,"value":"variant"}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Servo_Channel"}]}]}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"PWM_Channel"}]}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"gpio_24"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPIO 24"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":8,"children":[{"type":6,"attributes":[{"type":0,"value":"variant"}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Servo_Channel"}]}]}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"PWM_Channel"}]}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"gpio_25"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPIO 25"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":8,"children":[{"type":6,"attributes":[{"type":0,"value":"variant"}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Servo_Channel"}]}]}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"PWM_Channel"}]}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"gpio_26"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPIO 26"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":8,"children":[{"type":6,"attributes":[{"type":0,"value":"variant"}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Servo_Channel"}]}]}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"PWM_Channel"}]}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"gpio_27"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPIO 27"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Pressure_Velocity_Descriptor"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Descriptor_Base"}]}]}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"rate"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Rate (Hz)"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Pressure_Velocity_Config"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Config_Base"}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Proximity_Descriptor"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Descriptor_Base"}]}]}]},{"type":14,"children":[{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"channel_count_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"int32_t"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":128}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"rate"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Rate (Hz)"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"channel_count_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"channel_count"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Channel Count"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Proximity_Config"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Config_Base"}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Rate_Controller_Descriptor"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Descriptor_Base"}]}]}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"rate"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Rate (Hz)"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Rate_Controller_Config"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Config_Base"}]}]}]},{"type":14,"children":[{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Feedback"}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"muf_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"weight"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":1.000000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Weight"}]}]}]}]},{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"Combined_XY_PIDs"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"PID_Controller_Descriptor"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Combined"}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Separate_XY_PIDs"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Separate"}]}]}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"PID_Controller_Descriptor"}]}]},{"type":6,"attributes":[{"type":0,"value":"x_pid"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"X"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"PID_Controller_Descriptor"}]}]},{"type":6,"attributes":[{"type":0,"value":"y_pid"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Y"}]}]}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":8,"children":[{"type":6,"attributes":[{"type":0,"value":"variant"}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Combined_XY_PIDs"}]}]}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Separate_XY_PIDs"}]}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"xy_pids"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"XY PIDs"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"PID_Controller_Descriptor"}]}]},{"type":6,"attributes":[{"type":0,"value":"z_pid"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Z PID"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Feedforward"}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"muf_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"weight"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":0.000000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Weight"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"ufloat"}]}]},{"type":6,"attributes":[{"type":0,"value":"max_torque"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":1.000000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Max Torque (N)"}]}]}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Feedback"}]}]},{"type":6,"attributes":[{"type":0,"value":"feedback"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Feedback"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Feedforward"}]}]},{"type":6,"attributes":[{"type":0,"value":"feedforward"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Feedforward"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Raspicam_Descriptor"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Descriptor_Base"}]}]}]},{"type":14,"children":[{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Quality"}]},{"type":14,"children":[{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"resolution_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"math::vec2i"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":19,"children":[{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":8}]}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":8}]}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":19,"children":[{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1980}]}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1080}]}]}]}]}]},{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"bitrate_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"int32_t"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":10000}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":32000000}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"resolution_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"resolution"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Resolution"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"bitrate_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"bitrate"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Bitrate"}]}]}]}]}]}]},{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"fps_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"int32_t"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":10}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":60}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"fps_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"fps"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"FPS"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Quality"}]}]},{"type":6,"attributes":[{"type":0,"value":"streaming_low"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Streaming Low"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Quality"}]}]},{"type":6,"attributes":[{"type":0,"value":"streaming_high"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Streaming High"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Quality"}]}]},{"type":6,"attributes":[{"type":0,"value":"recording"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Recording"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Raspicam_Config"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Config_Base"}]}]}]},{"type":14,"children":[{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"iso_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"int32_t"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":0}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1600}]}]}]}]},{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"shutter_speed_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"float"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":0.000000}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":1000.000000}]}]}]}]},{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"ev_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"int32_t"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":-10}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":10}]}]}]}]},{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"sharpness_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"int32_t"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":0}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":100}]}]}]}]},{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"contrast_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"int32_t"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":0}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":100}]}]}]}]},{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"brightness_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"int32_t"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":0}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":100}]}]}]}]},{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"saturation_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"int32_t"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":0}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":100}]}]}]}]},{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"quality_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"int32_t"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":0}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1}]}]}]}]},{"type":15,"children":[{"type":6,"attributes":[{"type":0,"value":"awb_mode_t"}]},{"type":16,"children":[{"type":6,"attributes":[{"type":0,"value":"OFF"},{"type":2,"value":0}],"children":[{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Off"}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"AUTO"}]},{"type":6,"attributes":[{"type":0,"value":"SUNLIGHT"}]},{"type":6,"attributes":[{"type":0,"value":"CLOUDY"}]},{"type":6,"attributes":[{"type":0,"value":"SHADE"}]},{"type":6,"attributes":[{"type":0,"value":"TUNGSTEN"}]},{"type":6,"attributes":[{"type":0,"value":"FLUORESCENT"}]},{"type":6,"attributes":[{"type":0,"value":"INCANDESCENT"}]},{"type":6,"attributes":[{"type":0,"value":"FLASH"}]},{"type":6,"attributes":[{"type":0,"value":"HORIZON"}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"iso_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"iso"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Iso"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"shutter_speed_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"shutter_speed"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Shutter Speed (ms)"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"ev_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"ev"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Exposure Compensation"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"sharpness_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"sharpness"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Sharpness"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"contrast_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"contrast"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Contrast"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"brightness_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"brightness"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Brightness"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"saturation_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"saturation"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Saturation"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"awb_mode_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"awb_mode"}]},{"type":20,"children":[{"type":6,"attributes":[{"type":0,"value":"awb_mode_t::AUTO"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"AWB Mode"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"quality_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"quality"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Quality"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"bool"}]}]},{"type":6,"attributes":[{"type":0,"value":"recording"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Recording"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"RC5T619_Descriptor"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Descriptor_Base"}]}]}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"string"}]}]},{"type":6,"attributes":[{"type":0,"value":"bus"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Bus"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"adc0_rate"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":50}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"ADC0 Rate (Hz)"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"adc1_rate"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":5}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"ADC1 Rate (Hz)"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"RC5T619_Config"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Config_Base"}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Resampler_Descriptor"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Descriptor_Base"}]}]}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"input_rate"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Input Rate (Hz)"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"output_rate"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Output Rate (Hz)"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Resampler_Config"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Config_Base"}]}]}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"LPF_Filter_Config"}]}]},{"type":6,"attributes":[{"type":0,"value":"lpf"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"LPF"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Scalar_Generator_Descriptor"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Descriptor_Base"}]}]}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"rate"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Rate (Hz)"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Scalar_Generator_Config"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Config_Base"}]}]}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"float"}]}]},{"type":6,"attributes":[{"type":0,"value":"value"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":0.000000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Value"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Servo_Gimbal_Descriptor"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Descriptor_Base"}]}]}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"rate"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Rate (Hz)"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"commands_rate"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Commands Rate (Hz)"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Servo_Gimbal_Config"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Config_Base"}]}]}]},{"type":14,"children":[{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Channel"}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"euler_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"min_angle"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":-180.000000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Min Angle (°)"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"euler_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"max_angle"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":180.000000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Max Angle (°)"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"pwm_signal_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"min_pwm"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":0.000000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Max PWM"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"pwm_signal_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"max_pwm"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":1.000000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Max PWM"}]}]}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Channel"}]}]},{"type":6,"attributes":[{"type":0,"value":"x_channel"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"X Channel"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Channel"}]}]},{"type":6,"attributes":[{"type":0,"value":"y_channel"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Y Channel"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Channel"}]}]},{"type":6,"attributes":[{"type":0,"value":"z_channel"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Z Channel"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"SRF01_Descriptor"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Descriptor_Base"}]}]}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"string"}]}]},{"type":6,"attributes":[{"type":0,"value":"bus"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Bus"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"rate"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Rate (Hz)"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"SRF01_Config"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Config_Base"}]}]}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"direction_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"direction"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Direction"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"ufloat"}]}]},{"type":6,"attributes":[{"type":0,"value":"max_distance"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":6.000000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Maximum Distance (m)"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"ufloat"}]}]},{"type":6,"attributes":[{"type":0,"value":"min_distance"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":0.200000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Minimum Distance (m)"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"SRF02_Descriptor"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Descriptor_Base"}]}]}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"string"}]}]},{"type":6,"attributes":[{"type":0,"value":"bus"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Bus"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"rate"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Rate (Hz)"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"SRF02_Config"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Config_Base"}]}]}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"direction_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"direction"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Direction"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"ufloat"}]}]},{"type":6,"attributes":[{"type":0,"value":"max_distance"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":6.000000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Maximum Distance (m)"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"ufloat"}]}]},{"type":6,"attributes":[{"type":0,"value":"min_distance"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":0.200000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Minimum Distance (m)"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Throttle_To_PWM_Descriptor"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Descriptor_Base"}]}]}]},{"type":14,"children":[{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"channel_count_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"int32_t"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":128}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"rate"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Rate (Hz)"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"channel_count_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"channel_count"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Channel Count"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Throttle_To_PWM_Config"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Config_Base"}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Transformer_Descriptor"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Descriptor_Base"}]}]}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"rate"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Rate (Hz)"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Transformer_Config"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Config_Base"}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"UBLOX_Descriptor"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Descriptor_Base"}]}]}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"string"}]}]},{"type":6,"attributes":[{"type":0,"value":"bus"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Bus"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"rate"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Rate (Hz)"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"UBLOX_Config"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Config_Base"}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Vec3_Generator_Descriptor"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Descriptor_Base"}]}]}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"rate"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Rate (Hz)"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Vec3_Generator_Config"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Config_Base"}]}]}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"math::vec3f"}]}]},{"type":6,"attributes":[{"type":0,"value":"value"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Value"}]}]}]}]}]}]}]}]}]})xxx";
+  static const std::string s_json = R"xxx({"type":1,"children":[{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"int8_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"int"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":-128}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":127}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"native_type"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"int8_t"}]}]}]}]},{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"uint8_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"int"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":0}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":255}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"native_type"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"uint8_t"}]}]}]}]},{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"int16_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"int"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":-32768}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":32767}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"native_type"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"int16_t"}]}]}]}]},{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"uint16_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"int"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":0}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":65535}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"native_type"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"uint16_t"}]}]}]}]},{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"int32_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"int"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":-2147483648}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":2147483647}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"native_type"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"int32_t"}]}]}]}]},{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"uint32_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"int"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":0}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":4294967295}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"native_type"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"uint32_t"}]}]}]}]},{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"ufloat"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"float"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":0.000000}]}]}]}]},{"type":10,"children":[{"type":6,"attributes":[{"type":0,"value":"silk"}]},{"type":11,"children":[{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"muf_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"float"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":0.000000}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":1.000000}]}]}]}]},{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"direction_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"math::vec3f"}]}]}]},{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"euler_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"float"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":-180.000000}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":180.000000}]}]}]}]},{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"euler3_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"math::vec3f"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":19,"children":[{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":-180.000000}]}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":-180.000000}]}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":-180.000000}]}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":19,"children":[{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":180.000000}]}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":180.000000}]}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":180.000000}]}]}]}]}]},{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"servo_signal_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"float"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":1.000000}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":2.000000}]}]}]}]},{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"pwm_signal_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"float"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":0.000000}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":1.000000}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"UAV_Config_Base"}]},{"type":14,"children":[{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"mass_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"float"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":0.010000}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":100.000000}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"string"}]}]},{"type":6,"attributes":[{"type":0,"value":"name"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Name"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"mass_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"mass"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Mass (Kg)"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"ufloat"}]}]},{"type":6,"attributes":[{"type":0,"value":"moment_of_inertia"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Moment Of Inertia"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Multirotor_Config"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"UAV_Config_Base"}]}]}]},{"type":14,"children":[{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"height_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"float"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":0.010000}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":100.000000}]}]}]}]},{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"radius_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"float"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":0.010000}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":100.000000}]}]}]}]},{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"torque_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"float"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":0.010000}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":1000.000000}]}]}]}]},{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"thrust_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"float"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":0.010000}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":1000.000000}]}]}]}]},{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"acceleration_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"float"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":0.100000}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Motor"}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"math::vec3f"}]}]},{"type":6,"attributes":[{"type":0,"value":"position"}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"direction_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"thrust_vector"}]},{"type":19,"children":[{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":0.000000}]}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":0.000000}]}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":1.000000}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"bool"}]}]},{"type":6,"attributes":[{"type":0,"value":"clockwise"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":1,"value":false}]}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"radius_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"radius"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":1.000000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Radius (m)"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"height_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"height"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":1.000000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Height (m)"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"torque_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"motor_z_torque"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":1.000000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Motor Z Torque (Nm)"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"thrust_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"motor_thrust"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":1.000000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Motor Thrust (N)"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"acceleration_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"motor_acceleration"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":10.000000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Motor acceleration (N/s)"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"acceleration_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"motor_deceleration"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":10.000000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Motor Deceleration (N/s)"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":8,"children":[{"type":6,"attributes":[{"type":0,"value":"vector"}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Motor"}]}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"motors"}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Bus_Descriptor_Base"}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Bus"}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"string"}]}]},{"type":6,"attributes":[{"type":0,"value":"name"}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"string"}]}]},{"type":6,"attributes":[{"type":0,"value":"type"}]}]},{"type":18,"children":[{"type":3,"children":[{"type":8,"children":[{"type":6,"attributes":[{"type":0,"value":"poly"}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Bus_Descriptor_Base"}]}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"descriptor"}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Descriptor_Base"}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Config_Base"}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Node"}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"string"}]}]},{"type":6,"attributes":[{"type":0,"value":"name"}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"string"}]}]},{"type":6,"attributes":[{"type":0,"value":"type"}]}]},{"type":18,"children":[{"type":3,"children":[{"type":8,"children":[{"type":6,"attributes":[{"type":0,"value":"poly"}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Descriptor_Base"}]}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"descriptor"}]}]},{"type":18,"children":[{"type":3,"children":[{"type":8,"children":[{"type":6,"attributes":[{"type":0,"value":"poly"}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Config_Base"}]}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"config"}]}]},{"type":18,"children":[{"type":3,"children":[{"type":8,"children":[{"type":6,"attributes":[{"type":0,"value":"vector"}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"string"}]}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"input_paths"}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Settings"}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":8,"children":[{"type":6,"attributes":[{"type":0,"value":"poly"}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"UAV_Config_Base"}]}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"config"}]}]},{"type":18,"children":[{"type":3,"children":[{"type":8,"children":[{"type":6,"attributes":[{"type":0,"value":"vector"}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Bus"}]}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"buses"}]}]},{"type":18,"children":[{"type":3,"children":[{"type":8,"children":[{"type":6,"attributes":[{"type":0,"value":"vector"}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node"}]}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"nodes"}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"UART_Linux_Descriptor"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Bus_Descriptor_Base"}]}]}]},{"type":14,"children":[{"type":15,"children":[{"type":6,"attributes":[{"type":0,"value":"baud_t"}]},{"type":16,"children":[{"type":6,"attributes":[{"type":0,"value":"_9600"}]},{"type":6,"attributes":[{"type":0,"value":"_19200"}]},{"type":6,"attributes":[{"type":0,"value":"_38400"}]},{"type":6,"attributes":[{"type":0,"value":"_57600"}]},{"type":6,"attributes":[{"type":0,"value":"_115200"}]},{"type":6,"attributes":[{"type":0,"value":"_230400"}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"string"}]}]},{"type":6,"attributes":[{"type":0,"value":"dev"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"/dev/ttyAMA0"}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"baud_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"baud"}]},{"type":20,"children":[{"type":6,"attributes":[{"type":0,"value":"baud_t::_115200"}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"UART_BBang_Descriptor"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Bus_Descriptor_Base"}]}]}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"uint32_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"rx_pin"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":0}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"uint32_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"baud"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":115200}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"bool"}]}]},{"type":6,"attributes":[{"type":0,"value":"invert"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":1,"value":false}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"I2C_BCM_Descriptor"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Bus_Descriptor_Base"}]}]}]},{"type":14,"children":[{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"dev_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"uint32_t"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":0}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1}]}]}]}]},{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"baud_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"uint32_t"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":10000}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1000000}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"dev_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"dev"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":0}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"baud_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"baud"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":400000}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"I2C_Linux_Descriptor"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Bus_Descriptor_Base"}]}]}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"string"}]}]},{"type":6,"attributes":[{"type":0,"value":"dev"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"/dev/i2c0"}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"SPI_BCM_Descriptor"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Bus_Descriptor_Base"}]}]}]},{"type":14,"children":[{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"dev_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"uint32_t"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":0}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1}]}]}]}]},{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"mode_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"uint32_t"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":3}]}]}]}]},{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"speed_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"uint32_t"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1000}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"dev_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"dev"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":0}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"uint32_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"baud"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1000000}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"mode_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"mode"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":0}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"speed_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"speed"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1000000}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"SPI_Linux_Descriptor"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Bus_Descriptor_Base"}]}]}]},{"type":14,"children":[{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"speed_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"uint32_t"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1000}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"string"}]}]},{"type":6,"attributes":[{"type":0,"value":"dev"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"/dev/ttyAMA0"}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"speed_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"speed"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1000000}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"P_Controller_Descriptor"}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"ufloat"}]}]},{"type":6,"attributes":[{"type":0,"value":"kp"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":0.000000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"kP"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"PI_Controller_Descriptor"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"P_Controller_Descriptor"}]}]}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"ufloat"}]}]},{"type":6,"attributes":[{"type":0,"value":"ki"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":0.000000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"kI"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"ufloat"}]}]},{"type":6,"attributes":[{"type":0,"value":"max_i"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":0.000000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Max I"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"PD_Controller_Descriptor"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"P_Controller_Descriptor"}]}]}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"ufloat"}]}]},{"type":6,"attributes":[{"type":0,"value":"kd"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":0.000000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"kD"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"muf_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"d_filter"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":0.000000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"D Filter"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"PID_Controller_Descriptor"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"PD_Controller_Descriptor"}]}]}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"ufloat"}]}]},{"type":6,"attributes":[{"type":0,"value":"ki"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":0.000000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"kI"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"ufloat"}]}]},{"type":6,"attributes":[{"type":0,"value":"max_i"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":0.000000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Max I"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"ADC_Ammeter_Descriptor"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Descriptor_Base"}]}]}]},{"type":14,"children":[{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"int"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":10000}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"native_type"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"uint32_t"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"rate"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":100}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Rate (Hz)"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"ADC_Ammeter_Config"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Config_Base"}]}]}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"float"}]}]},{"type":6,"attributes":[{"type":0,"value":"scale"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":1.000000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Scale"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"float"}]}]},{"type":6,"attributes":[{"type":0,"value":"bias"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":0.000000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Scale"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"ADC_Voltmeter_Descriptor"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Descriptor_Base"}]}]}]},{"type":14,"children":[{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"int"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":10000}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"native_type"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"uint32_t"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"rate"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":100}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Rate (Hz)"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"ADC_Voltmeter_Config"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Config_Base"}]}]}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"float"}]}]},{"type":6,"attributes":[{"type":0,"value":"scale"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":1.000000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Scale"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"float"}]}]},{"type":6,"attributes":[{"type":0,"value":"bias"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":0.000000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Scale"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"ADS1115_Descriptor"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Descriptor_Base"}]}]}]},{"type":14,"children":[{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"int"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":200}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"native_type"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"uint32_t"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"string"}]}]},{"type":6,"attributes":[{"type":0,"value":"bus"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Bus"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"adc0_rate"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":200}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"ADC0 Rate (Hz)"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"adc1_rate"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":200}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"ADC1 Rate (Hz)"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"adc2_rate"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":200}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"ADC2 Rate (Hz)"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"adc3_rate"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":200}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"ADC3 Rate (Hz)"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"ADS1115_Config"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Config_Base"}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"AVRADC_Descriptor"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Descriptor_Base"}]}]}]},{"type":14,"children":[{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"int"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":500}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"native_type"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"uint32_t"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"string"}]}]},{"type":6,"attributes":[{"type":0,"value":"bus"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Bus"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"rate"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":200}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Rate (Hz)"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"AVRADC_Config"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Config_Base"}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Comp_AHRS_Descriptor"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Descriptor_Base"}]}]}]},{"type":14,"children":[{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"int"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":10000}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"native_type"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"uint32_t"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"rate"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":200}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Rate (Hz)"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Comp_AHRS_Config"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Config_Base"}]}]}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"muf_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"drift_correction_factor"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":0.300000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Drift Correction Factor"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Combiner_Descriptor"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Descriptor_Base"}]}]}]},{"type":14,"children":[{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"int"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":10000}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"native_type"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"uint32_t"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"rate"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":200}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Rate (Hz)"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Combiner_Config"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Config_Base"}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Gravity_Filter_Descriptor"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Descriptor_Base"}]}]}]},{"type":14,"children":[{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"int"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":10000}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"native_type"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"uint32_t"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"rate"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Rate (Hz)"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Gravity_Filter_Config"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Config_Base"}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"KF_ECEF_Descriptor"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Descriptor_Base"}]}]}]},{"type":14,"children":[{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"int"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":10000}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"native_type"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"uint32_t"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"rate"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Rate (Hz)"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"KF_ECEF_Config"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Config_Base"}]}]}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"ufloat"}]}]},{"type":6,"attributes":[{"type":0,"value":"gps_position_lag"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":0.000000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPS Position Lag (s)"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"ufloat"}]}]},{"type":6,"attributes":[{"type":0,"value":"gps_position_accuracy"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":2.000000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPS Position Accuracy (CEP m)"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"ufloat"}]}]},{"type":6,"attributes":[{"type":0,"value":"gps_velocity_lag"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":0.000000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPS Velocity Lag (s)"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"ufloat"}]}]},{"type":6,"attributes":[{"type":0,"value":"gps_velocity_accuracy"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":0.200000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPS Velocity Accuracy (m/s)"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"ufloat"}]}]},{"type":6,"attributes":[{"type":0,"value":"acceleration_lag"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":0.000000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Acceleration Lag (s)"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"ufloat"}]}]},{"type":6,"attributes":[{"type":0,"value":"acceleration_accuracy"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":2.000000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Acceleration Accuracy (m/s^2)"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"ENU_Frame_System_Descriptor"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Descriptor_Base"}]}]}]},{"type":14,"children":[{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"int"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":10000}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"native_type"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"uint32_t"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"rate"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Rate (Hz)"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"ENU_Frame_System_Config"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Config_Base"}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"LPF_Descriptor"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Descriptor_Base"}]}]}]},{"type":14,"children":[{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"int"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":10000}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"native_type"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"uint32_t"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"rate"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Rate (Hz)"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"LPF_Config"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Config_Base"}]}]}]},{"type":14,"children":[{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"poles_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"uint32_t"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":6}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"poles_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"poles"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"LPF Poles"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"ufloat"}]}]},{"type":6,"attributes":[{"type":0,"value":"cutoff_frequency"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":1.000000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"LPF Cutoff Frequency (Hz)"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"MaxSonar_Descriptor"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Descriptor_Base"}]}]}]},{"type":14,"children":[{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"int"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":15}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"native_type"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"uint32_t"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"string"}]}]},{"type":6,"attributes":[{"type":0,"value":"bus"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Bus"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"rate"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Rate (Hz)"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"MaxSonar_Config"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Config_Base"}]}]}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"direction_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"direction"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Direction"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"ufloat"}]}]},{"type":6,"attributes":[{"type":0,"value":"max_distance"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":10.000000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Maximum Distance (m)"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"ufloat"}]}]},{"type":6,"attributes":[{"type":0,"value":"min_distance"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":0.200000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Minimum Distance (m)"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Motor_Mixer_Descriptor"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Descriptor_Base"}]}]}]},{"type":14,"children":[{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"int"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":10000}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"native_type"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"uint32_t"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"rate"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Rate (Hz)"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Motor_Mixer_Config"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Config_Base"}]}]}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"ufloat"}]}]},{"type":6,"attributes":[{"type":0,"value":"armed_thrust"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":0.000000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Armed Thrust (N)"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Acceleration_Calibration_Point"}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"float"}]}]},{"type":6,"attributes":[{"type":0,"value":"temperature"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Temperature"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"math::vec3f"}]}]},{"type":6,"attributes":[{"type":0,"value":"bias"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Bias"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"math::vec3f"}]}]},{"type":6,"attributes":[{"type":0,"value":"scale"}]},{"type":19,"children":[{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":1.000000}]}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":1.000000}]}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":1.000000}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Scale"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Angular_Velocity_Calibration_Point"}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"float"}]}]},{"type":6,"attributes":[{"type":0,"value":"temperature"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Temperature"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"math::vec3f"}]}]},{"type":6,"attributes":[{"type":0,"value":"bias"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Bias"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Magnetic_Field_Calibration_Point"}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"float"}]}]},{"type":6,"attributes":[{"type":0,"value":"temperature"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Temperature"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"math::vec3f"}]}]},{"type":6,"attributes":[{"type":0,"value":"bias"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Bias"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"math::vec3f"}]}]},{"type":6,"attributes":[{"type":0,"value":"scale"}]},{"type":19,"children":[{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":1.000000}]}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":1.000000}]}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":1.000000}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Scale"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"MPU9250_Descriptor"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Descriptor_Base"}]}]}]},{"type":14,"children":[{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"int"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":100}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"native_type"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"uint32_t"}]}]}]}]},{"type":15,"children":[{"type":6,"attributes":[{"type":0,"value":"imu_rate_t"}]},{"type":16,"children":[{"type":6,"attributes":[{"type":0,"value":"_250"},{"type":2,"value":250}],"children":[{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"250"}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"_500"},{"type":2,"value":500}],"children":[{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"500"}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"_1000"},{"type":2,"value":1000}],"children":[{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"1000"}]}]}]}]}]}]},{"type":15,"children":[{"type":6,"attributes":[{"type":0,"value":"acceleration_range_t"}]},{"type":16,"children":[{"type":6,"attributes":[{"type":0,"value":"_2"},{"type":2,"value":2}],"children":[{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"2"}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"_4"},{"type":2,"value":4}],"children":[{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"4"}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"_8"},{"type":2,"value":8}],"children":[{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"8"}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"_16"},{"type":2,"value":16}],"children":[{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"16"}]}]}]}]}]}]},{"type":15,"children":[{"type":6,"attributes":[{"type":0,"value":"angular_velocity_range_t"}]},{"type":16,"children":[{"type":6,"attributes":[{"type":0,"value":"_250"},{"type":2,"value":250}],"children":[{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"250"}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"_500"},{"type":2,"value":500}],"children":[{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"500"}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"_1000"},{"type":2,"value":1000}],"children":[{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"1000"}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"_2000"},{"type":2,"value":2000}],"children":[{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"2000"}]}]}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"string"}]}]},{"type":6,"attributes":[{"type":0,"value":"bus"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Bus"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"imu_rate_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"imu_rate"}]},{"type":20,"children":[{"type":6,"attributes":[{"type":0,"value":"imu_rate_t::_1000"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"IMU Rate (Hz)"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"magnetometer_rate"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":100}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Magnetometer Rate (Hz)"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"thermometer_rate"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":10}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Thermometer Rate (Hz)"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"acceleration_range_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"acceleration_range"}]},{"type":20,"children":[{"type":6,"attributes":[{"type":0,"value":"acceleration_range_t::_8"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Acceleration Range (G)"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"angular_velocity_range_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"angular_velocity_range"}]},{"type":20,"children":[{"type":6,"attributes":[{"type":0,"value":"angular_velocity_range_t::_500"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Angular Velocity Range (DPS)"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"MPU9250_Config"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Config_Base"}]}]}]},{"type":14,"children":[{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Calibration"}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":8,"children":[{"type":6,"attributes":[{"type":0,"value":"vector"}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Acceleration_Calibration_Point"}]}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"acceleration"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Acceleration"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":8,"children":[{"type":6,"attributes":[{"type":0,"value":"vector"}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Angular_Velocity_Calibration_Point"}]}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"angular_velocity"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Angular Velocity"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":8,"children":[{"type":6,"attributes":[{"type":0,"value":"vector"}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Magnetic_Field_Calibration_Point"}]}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"magnetic_field"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Magnetic Field"}]}]}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"euler3_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"rotation"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Rotation (deg)"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Calibration"}]}]},{"type":6,"attributes":[{"type":0,"value":"calibration"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Calibration"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"MS5611_Descriptor"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Descriptor_Base"}]}]}]},{"type":14,"children":[{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"int"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":100}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"native_type"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"uint32_t"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"string"}]}]},{"type":6,"attributes":[{"type":0,"value":"bus"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Bus"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"pressure_rate"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":100}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Pressure Rate (Hz)"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"temperature_rate"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":10}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Temperature Rate (Hz)"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"MS5611_Config"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Config_Base"}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Multirotor_Brain_Descriptor"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Descriptor_Base"}]}]}]},{"type":14,"children":[{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"int"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":10000}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"native_type"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"uint32_t"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"rate"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":100}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Rate (Hz)"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"commands_rate"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":30}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Commands Rate (Hz)"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"state_rate"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":30}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Commands Rate (Hz)"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Multirotor_Brain_Config"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Config_Base"}]}]}]},{"type":14,"children":[{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Horizontal_Angle"}]},{"type":14,"children":[{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"speed_deg_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"ufloat"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":10.000000}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":3000.000000}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"speed_deg_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"max_speed_deg"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":180.000000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Max Speed (deg/s)"}]}]}]}]},{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"Combined_XY_PIDs"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"PID_Controller_Descriptor"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Combined"}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Separate_XY_PIDs"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Separate"}]}]}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"PID_Controller_Descriptor"}]}]},{"type":6,"attributes":[{"type":0,"value":"x_pid"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"X"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"PID_Controller_Descriptor"}]}]},{"type":6,"attributes":[{"type":0,"value":"y_pid"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Y"}]}]}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":8,"children":[{"type":6,"attributes":[{"type":0,"value":"variant"}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Combined_XY_PIDs"}]}]}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Separate_XY_PIDs"}]}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"xy_pids"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"PIDs"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Horizontal_Position"}]},{"type":14,"children":[{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"speed_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"ufloat"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":10.000000}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"speed_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"max_speed"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":2.000000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Max Speed (m/s)"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"LPF_Config"}]}]},{"type":6,"attributes":[{"type":0,"value":"lpf"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"LPF"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"PI_Controller_Descriptor"}]}]},{"type":6,"attributes":[{"type":0,"value":"velocity_pi"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Velocity PI"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"P_Controller_Descriptor"}]}]},{"type":6,"attributes":[{"type":0,"value":"position_p"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Position P"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Yaw_Angle"}]},{"type":14,"children":[{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"speed_deg_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"ufloat"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":10.000000}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":3000.000000}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"speed_deg_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"max_speed_deg"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":180.000000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Max Speed (deg/s)"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"PID_Controller_Descriptor"}]}]},{"type":6,"attributes":[{"type":0,"value":"pid"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"PID"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Altitude"}]},{"type":14,"children":[{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"speed_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"ufloat"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":10.000000}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"speed_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"max_speed"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":2.000000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Max Speed (m/s)"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"LPF_Config"}]}]},{"type":6,"attributes":[{"type":0,"value":"lpf"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"LPF"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"PI_Controller_Descriptor"}]}]},{"type":6,"attributes":[{"type":0,"value":"speed_pi"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Speed PI"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"P_Controller_Descriptor"}]}]},{"type":6,"attributes":[{"type":0,"value":"position_p"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Position P"}]}]}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"ufloat"}]}]},{"type":6,"attributes":[{"type":0,"value":"max_thrust"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":2.000000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Max Thrust (N)"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"ufloat"}]}]},{"type":6,"attributes":[{"type":0,"value":"min_thrust"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":1.000000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Min Thrust (N)"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Horizontal_Angle"}]}]},{"type":6,"attributes":[{"type":0,"value":"horizontal_angle"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Horizontal Angle"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Horizontal_Position"}]}]},{"type":6,"attributes":[{"type":0,"value":"horizontal_position"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Horizontal Position"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Yaw_Angle"}]}]},{"type":6,"attributes":[{"type":0,"value":"yaw_angle"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Yaw Angle"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Altitude"}]}]},{"type":6,"attributes":[{"type":0,"value":"altitude"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Altitude"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Multirotor_Pilot_Descriptor"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Descriptor_Base"}]}]}]},{"type":14,"children":[{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"int"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":10000}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"native_type"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"uint32_t"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"commands_rate"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":30}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Commands Rate (Hz)"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"state_rate"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":30}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"State Rate (Hz)"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"video_rate"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":30}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Video Rate (Hz)"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Multirotor_Pilot_Config"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Config_Base"}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Multirotor_Simulator_Descriptor"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Descriptor_Base"}]}]}]},{"type":14,"children":[{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"int"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":10000}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"native_type"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"uint32_t"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"throttle_rate"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":100}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Throttle Rate (Hz)"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"acceleration_rate"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Acceleration Rate (Hz)"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"angular_velocity_rate"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Angular Velocity Rate (Hz)"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"magnetic_field_rate"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":100}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Magnetic Field Rate (Hz)"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"pressure_rate"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":100}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Pressure Rate (Hz)"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"temperature_rate"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":10}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Temperature Rate (Hz)"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"distance_rate"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":12}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Distance Rate (Hz)"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"gps_rate"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":5}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPS Rate (Hz)"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Multirotor_Simulator_Config"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Config_Base"}]}]}]},{"type":14,"children":[{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Noise"}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"ufloat"}]}]},{"type":6,"attributes":[{"type":0,"value":"gps_position"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":2.000000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPS Position"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"ufloat"}]}]},{"type":6,"attributes":[{"type":0,"value":"gps_velocity"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":0.200000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPS Velocity"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"ufloat"}]}]},{"type":6,"attributes":[{"type":0,"value":"gps_pacc"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":0.500000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPS PACC"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"ufloat"}]}]},{"type":6,"attributes":[{"type":0,"value":"gps_vacc"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":0.100000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPS VACC"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"ufloat"}]}]},{"type":6,"attributes":[{"type":0,"value":"acceleration"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":0.010000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Acceleration"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"ufloat"}]}]},{"type":6,"attributes":[{"type":0,"value":"angular_velocity"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":0.010000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Angular Velocity"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"ufloat"}]}]},{"type":6,"attributes":[{"type":0,"value":"magnetic_field"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":0.100000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Magnetic Field"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"ufloat"}]}]},{"type":6,"attributes":[{"type":0,"value":"pressure"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":0.100000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Pressure"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"ufloat"}]}]},{"type":6,"attributes":[{"type":0,"value":"temperature"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":0.100000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Temperature"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"ufloat"}]}]},{"type":6,"attributes":[{"type":0,"value":"ground_distance"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":0.010000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Ground Distance"}]}]}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"bool"}]}]},{"type":6,"attributes":[{"type":0,"value":"simulation_enabled"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":1,"value":true}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Simulation Enabled"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"bool"}]}]},{"type":6,"attributes":[{"type":0,"value":"drag_enabled"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":1,"value":true}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Drag Enabled"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"bool"}]}]},{"type":6,"attributes":[{"type":0,"value":"ground_enabled"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":1,"value":true}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Ground Enabled"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"bool"}]}]},{"type":6,"attributes":[{"type":0,"value":"gravity_enabled"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":1,"value":true}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Gravity Enabled"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Noise"}]}]},{"type":6,"attributes":[{"type":0,"value":"noise"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Noise"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Oscillator_Descriptor"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Descriptor_Base"}]}]}]},{"type":14,"children":[{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"int"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":10000}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"native_type"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"uint32_t"}]}]}]}]},{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"component_count_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"int32_t"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":32}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"rate"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":30}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Rate (Hz)"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"component_count_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"component_count"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Components"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Oscillator_Config"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Config_Base"}]}]}]},{"type":14,"children":[{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Component"}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"ufloat"}]}]},{"type":6,"attributes":[{"type":0,"value":"frequency"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":1.000000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Frequency (Hz)"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"ufloat"}]}]},{"type":6,"attributes":[{"type":0,"value":"amplitude"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":1.000000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Amplitude"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"bool"}]}]},{"type":6,"attributes":[{"type":0,"value":"square"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":1,"value":false}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Square"}]}]}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"ufloat"}]}]},{"type":6,"attributes":[{"type":0,"value":"amplitude"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":1.000000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Amplitude"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"ufloat"}]}]},{"type":6,"attributes":[{"type":0,"value":"noise"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":0.000000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Noise"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":8,"children":[{"type":6,"attributes":[{"type":0,"value":"vector"}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Component"}]}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"components"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Components"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"PCA9685_Descriptor"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Descriptor_Base"}]}]}]},{"type":14,"children":[{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"int"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":8000}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"native_type"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"uint32_t"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"string"}]}]},{"type":6,"attributes":[{"type":0,"value":"bus"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Bus"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"rate"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":30}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Rate (Hz)"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"uint8_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"address"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":64}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Address"}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Channel"}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"bool"}]}]},{"type":6,"attributes":[{"type":0,"value":"enabled"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":1,"value":false}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Enabled"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"bool"}]}]},{"type":6,"attributes":[{"type":0,"value":"servo_signal"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":1,"value":false}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Servo Signal"}]}]}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":8,"children":[{"type":6,"attributes":[{"type":0,"value":"vector"}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Channel"}]}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"channels"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Channels"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"PCA9685_Config"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Config_Base"}]}]}]},{"type":14,"children":[{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Servo_Channel"}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"servo_signal_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":1.000000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Min (ms)"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"servo_signal_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":2.000000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Max (ms)"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"PWM_Channel"}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"pwm_signal_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":0.000000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Min"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"pwm_signal_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":1.000000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Max"}]}]}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":8,"children":[{"type":6,"attributes":[{"type":0,"value":"vector"}]},{"type":9,"children":[{"type":3,"children":[{"type":8,"children":[{"type":6,"attributes":[{"type":0,"value":"variant"}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Servo_Channel"}]}]}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"PWM_Channel"}]}]}]}]}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"channels"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Channels"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"PIGPIO_Descriptor"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Descriptor_Base"}]}]}]},{"type":14,"children":[{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"int"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":8000}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"native_type"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"uint32_t"}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Channel"}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"bool"}]}]},{"type":6,"attributes":[{"type":0,"value":"enabled"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":1,"value":false}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Enabled"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"bool"}]}]},{"type":6,"attributes":[{"type":0,"value":"servo_signal"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":1,"value":false}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Servo Signal"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"rate"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":400}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Rate (Hz)"}]}]}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Channel"}]}]},{"type":6,"attributes":[{"type":0,"value":"gpio_2"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPIO 2"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Channel"}]}]},{"type":6,"attributes":[{"type":0,"value":"gpio_3"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPIO 3"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Channel"}]}]},{"type":6,"attributes":[{"type":0,"value":"gpio_4"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPIO 4"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Channel"}]}]},{"type":6,"attributes":[{"type":0,"value":"gpio_5"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPIO 5"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Channel"}]}]},{"type":6,"attributes":[{"type":0,"value":"gpio_6"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPIO 6"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Channel"}]}]},{"type":6,"attributes":[{"type":0,"value":"gpio_7"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPIO 7"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Channel"}]}]},{"type":6,"attributes":[{"type":0,"value":"gpio_8"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPIO 8"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Channel"}]}]},{"type":6,"attributes":[{"type":0,"value":"gpio_9"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPIO 9"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Channel"}]}]},{"type":6,"attributes":[{"type":0,"value":"gpio_10"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPIO 10"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Channel"}]}]},{"type":6,"attributes":[{"type":0,"value":"gpio_11"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPIO 11"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Channel"}]}]},{"type":6,"attributes":[{"type":0,"value":"gpio_12"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPIO 12"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Channel"}]}]},{"type":6,"attributes":[{"type":0,"value":"gpio_13"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPIO 13"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Channel"}]}]},{"type":6,"attributes":[{"type":0,"value":"gpio_14"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPIO 14"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Channel"}]}]},{"type":6,"attributes":[{"type":0,"value":"gpio_15"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPIO 15"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Channel"}]}]},{"type":6,"attributes":[{"type":0,"value":"gpio_16"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPIO 16"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Channel"}]}]},{"type":6,"attributes":[{"type":0,"value":"gpio_17"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPIO 17"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Channel"}]}]},{"type":6,"attributes":[{"type":0,"value":"gpio_18"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPIO 18"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Channel"}]}]},{"type":6,"attributes":[{"type":0,"value":"gpio_19"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPIO 19"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Channel"}]}]},{"type":6,"attributes":[{"type":0,"value":"gpio_20"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPIO 20"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Channel"}]}]},{"type":6,"attributes":[{"type":0,"value":"gpio_21"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPIO 21"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Channel"}]}]},{"type":6,"attributes":[{"type":0,"value":"gpio_22"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPIO 22"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Channel"}]}]},{"type":6,"attributes":[{"type":0,"value":"gpio_23"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPIO 23"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Channel"}]}]},{"type":6,"attributes":[{"type":0,"value":"gpio_24"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPIO 24"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Channel"}]}]},{"type":6,"attributes":[{"type":0,"value":"gpio_25"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPIO 25"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Channel"}]}]},{"type":6,"attributes":[{"type":0,"value":"gpio_26"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPIO 26"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Channel"}]}]},{"type":6,"attributes":[{"type":0,"value":"gpio_27"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPIO 27"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"PIGPIO_Config"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Config_Base"}]}]}]},{"type":14,"children":[{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Servo_Channel"}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"servo_signal_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":1.000000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Min (ms)"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"servo_signal_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":2.000000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Max (ms)"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"PWM_Channel"}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"pwm_signal_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":0.000000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Min"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"pwm_signal_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":1.000000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Max"}]}]}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":8,"children":[{"type":6,"attributes":[{"type":0,"value":"variant"}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Servo_Channel"}]}]}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"PWM_Channel"}]}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"gpio_2"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPIO 2"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":8,"children":[{"type":6,"attributes":[{"type":0,"value":"variant"}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Servo_Channel"}]}]}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"PWM_Channel"}]}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"gpio_3"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPIO 3"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":8,"children":[{"type":6,"attributes":[{"type":0,"value":"variant"}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Servo_Channel"}]}]}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"PWM_Channel"}]}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"gpio_4"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPIO 4"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":8,"children":[{"type":6,"attributes":[{"type":0,"value":"variant"}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Servo_Channel"}]}]}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"PWM_Channel"}]}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"gpio_5"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPIO 5"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":8,"children":[{"type":6,"attributes":[{"type":0,"value":"variant"}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Servo_Channel"}]}]}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"PWM_Channel"}]}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"gpio_6"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPIO 6"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":8,"children":[{"type":6,"attributes":[{"type":0,"value":"variant"}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Servo_Channel"}]}]}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"PWM_Channel"}]}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"gpio_7"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPIO 7"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":8,"children":[{"type":6,"attributes":[{"type":0,"value":"variant"}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Servo_Channel"}]}]}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"PWM_Channel"}]}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"gpio_8"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPIO 8"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":8,"children":[{"type":6,"attributes":[{"type":0,"value":"variant"}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Servo_Channel"}]}]}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"PWM_Channel"}]}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"gpio_9"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPIO 9"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":8,"children":[{"type":6,"attributes":[{"type":0,"value":"variant"}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Servo_Channel"}]}]}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"PWM_Channel"}]}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"gpio_10"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPIO 10"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":8,"children":[{"type":6,"attributes":[{"type":0,"value":"variant"}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Servo_Channel"}]}]}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"PWM_Channel"}]}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"gpio_11"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPIO 11"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":8,"children":[{"type":6,"attributes":[{"type":0,"value":"variant"}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Servo_Channel"}]}]}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"PWM_Channel"}]}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"gpio_12"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPIO 12"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":8,"children":[{"type":6,"attributes":[{"type":0,"value":"variant"}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Servo_Channel"}]}]}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"PWM_Channel"}]}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"gpio_13"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPIO 13"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":8,"children":[{"type":6,"attributes":[{"type":0,"value":"variant"}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Servo_Channel"}]}]}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"PWM_Channel"}]}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"gpio_14"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPIO 14"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":8,"children":[{"type":6,"attributes":[{"type":0,"value":"variant"}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Servo_Channel"}]}]}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"PWM_Channel"}]}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"gpio_15"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPIO 15"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":8,"children":[{"type":6,"attributes":[{"type":0,"value":"variant"}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Servo_Channel"}]}]}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"PWM_Channel"}]}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"gpio_16"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPIO 16"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":8,"children":[{"type":6,"attributes":[{"type":0,"value":"variant"}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Servo_Channel"}]}]}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"PWM_Channel"}]}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"gpio_17"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPIO 17"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":8,"children":[{"type":6,"attributes":[{"type":0,"value":"variant"}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Servo_Channel"}]}]}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"PWM_Channel"}]}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"gpio_18"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPIO 18"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":8,"children":[{"type":6,"attributes":[{"type":0,"value":"variant"}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Servo_Channel"}]}]}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"PWM_Channel"}]}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"gpio_19"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPIO 19"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":8,"children":[{"type":6,"attributes":[{"type":0,"value":"variant"}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Servo_Channel"}]}]}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"PWM_Channel"}]}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"gpio_20"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPIO 20"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":8,"children":[{"type":6,"attributes":[{"type":0,"value":"variant"}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Servo_Channel"}]}]}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"PWM_Channel"}]}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"gpio_21"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPIO 21"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":8,"children":[{"type":6,"attributes":[{"type":0,"value":"variant"}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Servo_Channel"}]}]}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"PWM_Channel"}]}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"gpio_22"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPIO 22"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":8,"children":[{"type":6,"attributes":[{"type":0,"value":"variant"}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Servo_Channel"}]}]}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"PWM_Channel"}]}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"gpio_23"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPIO 23"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":8,"children":[{"type":6,"attributes":[{"type":0,"value":"variant"}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Servo_Channel"}]}]}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"PWM_Channel"}]}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"gpio_24"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPIO 24"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":8,"children":[{"type":6,"attributes":[{"type":0,"value":"variant"}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Servo_Channel"}]}]}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"PWM_Channel"}]}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"gpio_25"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPIO 25"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":8,"children":[{"type":6,"attributes":[{"type":0,"value":"variant"}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Servo_Channel"}]}]}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"PWM_Channel"}]}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"gpio_26"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPIO 26"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":8,"children":[{"type":6,"attributes":[{"type":0,"value":"variant"}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Servo_Channel"}]}]}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"PWM_Channel"}]}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"gpio_27"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"GPIO 27"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Pressure_Velocity_Descriptor"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Descriptor_Base"}]}]}]},{"type":14,"children":[{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"int"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":10000}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"native_type"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"uint32_t"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"rate"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Rate (Hz)"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Pressure_Velocity_Config"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Config_Base"}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Proximity_Descriptor"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Descriptor_Base"}]}]}]},{"type":14,"children":[{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"int"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":10000}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"native_type"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"uint32_t"}]}]}]}]},{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"channel_count_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"int32_t"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":128}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"rate"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Rate (Hz)"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"channel_count_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"channel_count"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Channel Count"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Proximity_Config"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Config_Base"}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Rate_Controller_Descriptor"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Descriptor_Base"}]}]}]},{"type":14,"children":[{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"int"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":10000}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"native_type"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"uint32_t"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"rate"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Rate (Hz)"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Rate_Controller_Config"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Config_Base"}]}]}]},{"type":14,"children":[{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Feedback"}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"muf_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"weight"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":1.000000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Weight"}]}]}]}]},{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"Combined_XY_PIDs"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"PID_Controller_Descriptor"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Combined"}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Separate_XY_PIDs"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Separate"}]}]}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"PID_Controller_Descriptor"}]}]},{"type":6,"attributes":[{"type":0,"value":"x_pid"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"X"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"PID_Controller_Descriptor"}]}]},{"type":6,"attributes":[{"type":0,"value":"y_pid"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Y"}]}]}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":8,"children":[{"type":6,"attributes":[{"type":0,"value":"variant"}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Combined_XY_PIDs"}]}]}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Separate_XY_PIDs"}]}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"xy_pids"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"XY PIDs"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"PID_Controller_Descriptor"}]}]},{"type":6,"attributes":[{"type":0,"value":"z_pid"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Z PID"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Feedforward"}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"muf_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"weight"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":0.000000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Weight"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"ufloat"}]}]},{"type":6,"attributes":[{"type":0,"value":"max_torque"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":1.000000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Max Torque (N)"}]}]}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Feedback"}]}]},{"type":6,"attributes":[{"type":0,"value":"feedback"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Feedback"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Feedforward"}]}]},{"type":6,"attributes":[{"type":0,"value":"feedforward"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Feedforward"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Raspicam_Descriptor"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Descriptor_Base"}]}]}]},{"type":14,"children":[{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Quality"}]},{"type":14,"children":[{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"resolution_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"math::vec2i"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":19,"children":[{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":8}]}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":8}]}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":19,"children":[{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1980}]}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1080}]}]}]}]}]},{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"bitrate_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"int32_t"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":10000}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":32000000}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"resolution_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"resolution"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Resolution"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"bitrate_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"bitrate"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Bitrate"}]}]}]}]}]}]},{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"fps_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"int32_t"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":10}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":60}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"fps_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"fps"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"FPS"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Quality"}]}]},{"type":6,"attributes":[{"type":0,"value":"streaming_low"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Streaming Low"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Quality"}]}]},{"type":6,"attributes":[{"type":0,"value":"streaming_high"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Streaming High"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Quality"}]}]},{"type":6,"attributes":[{"type":0,"value":"recording"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Recording"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Raspicam_Config"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Config_Base"}]}]}]},{"type":14,"children":[{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"iso_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"int32_t"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":0}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1600}]}]}]}]},{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"shutter_speed_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"float"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":0.000000}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":1000.000000}]}]}]}]},{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"ev_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"int32_t"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":-10}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":10}]}]}]}]},{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"sharpness_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"int32_t"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":0}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":100}]}]}]}]},{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"contrast_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"int32_t"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":0}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":100}]}]}]}]},{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"brightness_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"int32_t"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":0}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":100}]}]}]}]},{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"saturation_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"int32_t"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":0}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":100}]}]}]}]},{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"quality_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"int32_t"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":0}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1}]}]}]}]},{"type":15,"children":[{"type":6,"attributes":[{"type":0,"value":"awb_mode_t"}]},{"type":16,"children":[{"type":6,"attributes":[{"type":0,"value":"OFF"},{"type":2,"value":0}],"children":[{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Off"}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"AUTO"}]},{"type":6,"attributes":[{"type":0,"value":"SUNLIGHT"}]},{"type":6,"attributes":[{"type":0,"value":"CLOUDY"}]},{"type":6,"attributes":[{"type":0,"value":"SHADE"}]},{"type":6,"attributes":[{"type":0,"value":"TUNGSTEN"}]},{"type":6,"attributes":[{"type":0,"value":"FLUORESCENT"}]},{"type":6,"attributes":[{"type":0,"value":"INCANDESCENT"}]},{"type":6,"attributes":[{"type":0,"value":"FLASH"}]},{"type":6,"attributes":[{"type":0,"value":"HORIZON"}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"iso_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"iso"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Iso"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"shutter_speed_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"shutter_speed"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Shutter Speed (ms)"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"ev_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"ev"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Exposure Compensation"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"sharpness_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"sharpness"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Sharpness"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"contrast_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"contrast"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Contrast"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"brightness_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"brightness"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Brightness"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"saturation_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"saturation"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Saturation"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"awb_mode_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"awb_mode"}]},{"type":20,"children":[{"type":6,"attributes":[{"type":0,"value":"awb_mode_t::AUTO"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"AWB Mode"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"quality_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"quality"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Quality"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"bool"}]}]},{"type":6,"attributes":[{"type":0,"value":"recording"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Recording"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"RC5T619_Descriptor"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Descriptor_Base"}]}]}]},{"type":14,"children":[{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"int"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":200}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"native_type"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"uint32_t"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"string"}]}]},{"type":6,"attributes":[{"type":0,"value":"bus"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Bus"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"adc0_rate"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":50}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"ADC0 Rate (Hz)"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"adc1_rate"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":5}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"ADC1 Rate (Hz)"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"RC5T619_Config"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Config_Base"}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Resampler_Descriptor"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Descriptor_Base"}]}]}]},{"type":14,"children":[{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"int"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":10000}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"native_type"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"uint32_t"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"input_rate"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Input Rate (Hz)"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"output_rate"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Output Rate (Hz)"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Resampler_Config"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Config_Base"}]}]}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"LPF_Config"}]}]},{"type":6,"attributes":[{"type":0,"value":"lpf"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"LPF"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Scalar_Generator_Descriptor"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Descriptor_Base"}]}]}]},{"type":14,"children":[{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"int"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":10000}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"native_type"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"uint32_t"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"rate"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Rate (Hz)"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Scalar_Generator_Config"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Config_Base"}]}]}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"float"}]}]},{"type":6,"attributes":[{"type":0,"value":"value"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":0.000000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Value"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Servo_Gimbal_Descriptor"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Descriptor_Base"}]}]}]},{"type":14,"children":[{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"int"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":10000}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"native_type"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"uint32_t"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"rate"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Rate (Hz)"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"commands_rate"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Commands Rate (Hz)"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Servo_Gimbal_Config"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Config_Base"}]}]}]},{"type":14,"children":[{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Channel"}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"euler_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"min_angle"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":-180.000000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Min Angle (°)"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"euler_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"max_angle"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":180.000000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Max Angle (°)"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"pwm_signal_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"min_pwm"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":0.000000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Max PWM"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"pwm_signal_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"max_pwm"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":1.000000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Max PWM"}]}]}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Channel"}]}]},{"type":6,"attributes":[{"type":0,"value":"x_channel"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"X Channel"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Channel"}]}]},{"type":6,"attributes":[{"type":0,"value":"y_channel"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Y Channel"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Channel"}]}]},{"type":6,"attributes":[{"type":0,"value":"z_channel"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Z Channel"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"SRF01_Descriptor"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Descriptor_Base"}]}]}]},{"type":14,"children":[{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"int"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":10}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"native_type"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"uint32_t"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"string"}]}]},{"type":6,"attributes":[{"type":0,"value":"bus"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Bus"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"rate"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Rate (Hz)"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"SRF01_Config"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Config_Base"}]}]}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"direction_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"direction"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Direction"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"ufloat"}]}]},{"type":6,"attributes":[{"type":0,"value":"max_distance"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":6.000000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Maximum Distance (m)"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"ufloat"}]}]},{"type":6,"attributes":[{"type":0,"value":"min_distance"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":0.200000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Minimum Distance (m)"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"SRF02_Descriptor"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Descriptor_Base"}]}]}]},{"type":14,"children":[{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"int"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":10}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"native_type"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"uint32_t"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"string"}]}]},{"type":6,"attributes":[{"type":0,"value":"bus"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Bus"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"rate"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Rate (Hz)"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"SRF02_Config"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Config_Base"}]}]}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"direction_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"direction"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Direction"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"ufloat"}]}]},{"type":6,"attributes":[{"type":0,"value":"max_distance"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":6.000000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Maximum Distance (m)"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"ufloat"}]}]},{"type":6,"attributes":[{"type":0,"value":"min_distance"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":0.200000}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Minimum Distance (m)"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Throttle_To_PWM_Descriptor"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Descriptor_Base"}]}]}]},{"type":14,"children":[{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"int"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":10000}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"native_type"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"uint32_t"}]}]}]}]},{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"channel_count_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"int32_t"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":128}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"rate"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Rate (Hz)"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"channel_count_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"channel_count"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Channel Count"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Throttle_To_PWM_Config"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Config_Base"}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Transformer_Descriptor"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Descriptor_Base"}]}]}]},{"type":14,"children":[{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"int"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":10000}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"native_type"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"uint32_t"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"rate"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Rate (Hz)"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Transformer_Config"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Config_Base"}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"UBLOX_Descriptor"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Descriptor_Base"}]}]}]},{"type":14,"children":[{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"int"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":10}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"native_type"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"uint32_t"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"string"}]}]},{"type":6,"attributes":[{"type":0,"value":"bus"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Bus"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"rate"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Rate (Hz)"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"UBLOX_Config"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Config_Base"}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Vec3_Generator_Descriptor"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Descriptor_Base"}]}]}]},{"type":14,"children":[{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"int"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":10000}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"native_type"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"uint32_t"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"rate_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"rate"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":1}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Rate (Hz)"}]}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Vec3_Generator_Config"}]},{"type":7,"attributes":[{"type":0,"value":"public"}],"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Config_Base"}]}]}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"math::vec3f"}]}]},{"type":6,"attributes":[{"type":0,"value":"value"}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"ui_name"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"Value"}]}]}]}]}]}]}]}]}]})xxx";
   return s_json;
 }
 
@@ -31,7 +31,7 @@ namespace silk
 
   void UAV_Config_Base::set_mass(float const& value)
   {
-    m_mass = clamp(value, float(0.000000f), float(340282346638528859811704183484516925440.000000f));
+    m_mass = clamp(value, float(0.010000f), float(100.000000f));
   }
   auto UAV_Config_Base::get_mass() const -> float const& 
   {
@@ -103,7 +103,7 @@ namespace silk
 
   void Multirotor_Config::set_mass(float const& value)
   {
-    m_mass = clamp(value, float(0.000000f), float(340282346638528859811704183484516925440.000000f));
+    m_mass = clamp(value, float(0.010000f), float(100.000000f));
   }
   auto Multirotor_Config::get_mass() const -> float const& 
   {
@@ -127,7 +127,7 @@ namespace silk
 
   void Multirotor_Config::set_radius(float const& value)
   {
-    m_radius = clamp(value, float(0.000000f), float(340282346638528859811704183484516925440.000000f));
+    m_radius = clamp(value, float(0.010000f), float(100.000000f));
   }
   auto Multirotor_Config::get_radius() const -> float const& 
   {
@@ -139,7 +139,7 @@ namespace silk
 
   void Multirotor_Config::set_height(float const& value)
   {
-    m_height = clamp(value, float(0.000000f), float(340282346638528859811704183484516925440.000000f));
+    m_height = clamp(value, float(0.010000f), float(100.000000f));
   }
   auto Multirotor_Config::get_height() const -> float const& 
   {
@@ -151,7 +151,7 @@ namespace silk
 
   void Multirotor_Config::set_motor_z_torque(float const& value)
   {
-    m_motor_z_torque = clamp(value, float(0.000000f), float(340282346638528859811704183484516925440.000000f));
+    m_motor_z_torque = clamp(value, float(0.010000f), float(1000.000000f));
   }
   auto Multirotor_Config::get_motor_z_torque() const -> float const& 
   {
@@ -163,7 +163,7 @@ namespace silk
 
   void Multirotor_Config::set_motor_thrust(float const& value)
   {
-    m_motor_thrust = clamp(value, float(0.000000f), float(340282346638528859811704183484516925440.000000f));
+    m_motor_thrust = clamp(value, float(0.010000f), float(1000.000000f));
   }
   auto Multirotor_Config::get_motor_thrust() const -> float const& 
   {
@@ -175,7 +175,7 @@ namespace silk
 
   void Multirotor_Config::set_motor_acceleration(float const& value)
   {
-    m_motor_acceleration = clamp(value, float(0.000000f), float(340282346638528859811704183484516925440.000000f));
+    m_motor_acceleration = clamp(value, float(0.100000f), float(340282346638528859811704183484516925440.000000f));
   }
   auto Multirotor_Config::get_motor_acceleration() const -> float const& 
   {
@@ -187,7 +187,7 @@ namespace silk
 
   void Multirotor_Config::set_motor_deceleration(float const& value)
   {
-    m_motor_deceleration = clamp(value, float(0.000000f), float(340282346638528859811704183484516925440.000000f));
+    m_motor_deceleration = clamp(value, float(0.100000f), float(340282346638528859811704183484516925440.000000f));
   }
   auto Multirotor_Config::get_motor_deceleration() const -> float const& 
   {
@@ -202,6 +202,11 @@ namespace silk
     m_motors = value;
   }
   auto Multirotor_Config::get_motors() const -> std::vector<::silk::Multirotor_Config::Motor> const& 
+  {
+    return m_motors;
+  }
+
+  auto Multirotor_Config::get_motors() -> std::vector<::silk::Multirotor_Config::Motor>& 
   {
     return m_motors;
   }
@@ -242,6 +247,11 @@ namespace silk
     return m_descriptor;
   }
 
+  auto Bus::get_descriptor() -> std::shared_ptr<::silk::Bus_Descriptor_Base>& 
+  {
+    return m_descriptor;
+  }
+
 
 ////////////////////////////////////////////////////////////
 
@@ -278,6 +288,11 @@ namespace silk
     return m_descriptor;
   }
 
+  auto Node::get_descriptor() -> std::shared_ptr<::silk::Node_Descriptor_Base>& 
+  {
+    return m_descriptor;
+  }
+
 
 ////////////////////////////////////////////////////////////
 
@@ -286,6 +301,11 @@ namespace silk
     m_config = value;
   }
   auto Node::get_config() const -> std::shared_ptr<::silk::Node_Config_Base> const& 
+  {
+    return m_config;
+  }
+
+  auto Node::get_config() -> std::shared_ptr<::silk::Node_Config_Base>& 
   {
     return m_config;
   }
@@ -302,6 +322,11 @@ namespace silk
     return m_input_paths;
   }
 
+  auto Node::get_input_paths() -> std::vector<std::string>& 
+  {
+    return m_input_paths;
+  }
+
 
 ////////////////////////////////////////////////////////////
 
@@ -310,6 +335,11 @@ namespace silk
     m_config = value;
   }
   auto Settings::get_config() const -> std::shared_ptr<::silk::UAV_Config_Base> const& 
+  {
+    return m_config;
+  }
+
+  auto Settings::get_config() -> std::shared_ptr<::silk::UAV_Config_Base>& 
   {
     return m_config;
   }
@@ -326,6 +356,11 @@ namespace silk
     return m_buses;
   }
 
+  auto Settings::get_buses() -> std::vector<::silk::Bus>& 
+  {
+    return m_buses;
+  }
+
 
 ////////////////////////////////////////////////////////////
 
@@ -334,6 +369,11 @@ namespace silk
     m_nodes = value;
   }
   auto Settings::get_nodes() const -> std::vector<::silk::Node> const& 
+  {
+    return m_nodes;
+  }
+
+  auto Settings::get_nodes() -> std::vector<::silk::Node>& 
   {
     return m_nodes;
   }
@@ -353,11 +393,11 @@ namespace silk
 
 ////////////////////////////////////////////////////////////
 
-  void UART_Linux_Descriptor::set_baud(uint32_t const& value)
+  void UART_Linux_Descriptor::set_baud(baud_t const& value)
   {
-    m_baud = clamp(value, uint32_t(0), uint32_t(4294967295));
+    m_baud = value;
   }
-  auto UART_Linux_Descriptor::get_baud() const -> uint32_t const& 
+  auto UART_Linux_Descriptor::get_baud() const -> baud_t const& 
   {
     return m_baud;
   }
@@ -403,11 +443,23 @@ namespace silk
 
   void I2C_BCM_Descriptor::set_dev(uint32_t const& value)
   {
-    m_dev = clamp(value, uint32_t(0), uint32_t(4294967295));
+    m_dev = clamp(value, uint32_t(0), uint32_t(1));
   }
   auto I2C_BCM_Descriptor::get_dev() const -> uint32_t const& 
   {
     return m_dev;
+  }
+
+
+////////////////////////////////////////////////////////////
+
+  void I2C_BCM_Descriptor::set_baud(uint32_t const& value)
+  {
+    m_baud = clamp(value, uint32_t(10000), uint32_t(1000000));
+  }
+  auto I2C_BCM_Descriptor::get_baud() const -> uint32_t const& 
+  {
+    return m_baud;
   }
 
 
@@ -427,7 +479,7 @@ namespace silk
 
   void SPI_BCM_Descriptor::set_dev(uint32_t const& value)
   {
-    m_dev = clamp(value, uint32_t(0), uint32_t(4294967295));
+    m_dev = clamp(value, uint32_t(0), uint32_t(1));
   }
   auto SPI_BCM_Descriptor::get_dev() const -> uint32_t const& 
   {
@@ -461,6 +513,18 @@ namespace silk
 
 ////////////////////////////////////////////////////////////
 
+  void SPI_BCM_Descriptor::set_speed(uint32_t const& value)
+  {
+    m_speed = clamp(value, uint32_t(1000), uint32_t(4294967295));
+  }
+  auto SPI_BCM_Descriptor::get_speed() const -> uint32_t const& 
+  {
+    return m_speed;
+  }
+
+
+////////////////////////////////////////////////////////////
+
   void SPI_Linux_Descriptor::set_dev(std::string const& value)
   {
     m_dev = value;
@@ -475,7 +539,7 @@ namespace silk
 
   void SPI_Linux_Descriptor::set_speed(uint32_t const& value)
   {
-    m_speed = clamp(value, uint32_t(0), uint32_t(4294967295));
+    m_speed = clamp(value, uint32_t(1000), uint32_t(4294967295));
   }
   auto SPI_Linux_Descriptor::get_speed() const -> uint32_t const& 
   {
@@ -715,7 +779,7 @@ namespace silk
 
   void ADS1115_Descriptor::set_adc0_rate(uint32_t const& value)
   {
-    m_adc0_rate = clamp(value, uint32_t(1), uint32_t(10000));
+    m_adc0_rate = clamp(value, uint32_t(1), uint32_t(200));
   }
   auto ADS1115_Descriptor::get_adc0_rate() const -> uint32_t const& 
   {
@@ -727,7 +791,7 @@ namespace silk
 
   void ADS1115_Descriptor::set_adc1_rate(uint32_t const& value)
   {
-    m_adc1_rate = clamp(value, uint32_t(1), uint32_t(10000));
+    m_adc1_rate = clamp(value, uint32_t(1), uint32_t(200));
   }
   auto ADS1115_Descriptor::get_adc1_rate() const -> uint32_t const& 
   {
@@ -739,7 +803,7 @@ namespace silk
 
   void ADS1115_Descriptor::set_adc2_rate(uint32_t const& value)
   {
-    m_adc2_rate = clamp(value, uint32_t(1), uint32_t(10000));
+    m_adc2_rate = clamp(value, uint32_t(1), uint32_t(200));
   }
   auto ADS1115_Descriptor::get_adc2_rate() const -> uint32_t const& 
   {
@@ -751,7 +815,7 @@ namespace silk
 
   void ADS1115_Descriptor::set_adc3_rate(uint32_t const& value)
   {
-    m_adc3_rate = clamp(value, uint32_t(1), uint32_t(10000));
+    m_adc3_rate = clamp(value, uint32_t(1), uint32_t(200));
   }
   auto ADS1115_Descriptor::get_adc3_rate() const -> uint32_t const& 
   {
@@ -775,7 +839,7 @@ namespace silk
 
   void AVRADC_Descriptor::set_rate(uint32_t const& value)
   {
-    m_rate = clamp(value, uint32_t(1), uint32_t(10000));
+    m_rate = clamp(value, uint32_t(1), uint32_t(500));
   }
   auto AVRADC_Descriptor::get_rate() const -> uint32_t const& 
   {
@@ -833,11 +897,11 @@ namespace silk
 
 ////////////////////////////////////////////////////////////
 
-  void ECEF_KF_Descriptor::set_rate(uint32_t const& value)
+  void KF_ECEF_Descriptor::set_rate(uint32_t const& value)
   {
     m_rate = clamp(value, uint32_t(1), uint32_t(10000));
   }
-  auto ECEF_KF_Descriptor::get_rate() const -> uint32_t const& 
+  auto KF_ECEF_Descriptor::get_rate() const -> uint32_t const& 
   {
     return m_rate;
   }
@@ -845,11 +909,11 @@ namespace silk
 
 ////////////////////////////////////////////////////////////
 
-  void ECEF_KF_Filter_Config::set_gps_position_lag(float const& value)
+  void KF_ECEF_Config::set_gps_position_lag(float const& value)
   {
     m_gps_position_lag = clamp(value, float(0.000000f), float(340282346638528859811704183484516925440.000000f));
   }
-  auto ECEF_KF_Filter_Config::get_gps_position_lag() const -> float const& 
+  auto KF_ECEF_Config::get_gps_position_lag() const -> float const& 
   {
     return m_gps_position_lag;
   }
@@ -857,11 +921,11 @@ namespace silk
 
 ////////////////////////////////////////////////////////////
 
-  void ECEF_KF_Filter_Config::set_gps_position_accuracy(float const& value)
+  void KF_ECEF_Config::set_gps_position_accuracy(float const& value)
   {
     m_gps_position_accuracy = clamp(value, float(0.000000f), float(340282346638528859811704183484516925440.000000f));
   }
-  auto ECEF_KF_Filter_Config::get_gps_position_accuracy() const -> float const& 
+  auto KF_ECEF_Config::get_gps_position_accuracy() const -> float const& 
   {
     return m_gps_position_accuracy;
   }
@@ -869,11 +933,11 @@ namespace silk
 
 ////////////////////////////////////////////////////////////
 
-  void ECEF_KF_Filter_Config::set_gps_velocity_lag(float const& value)
+  void KF_ECEF_Config::set_gps_velocity_lag(float const& value)
   {
     m_gps_velocity_lag = clamp(value, float(0.000000f), float(340282346638528859811704183484516925440.000000f));
   }
-  auto ECEF_KF_Filter_Config::get_gps_velocity_lag() const -> float const& 
+  auto KF_ECEF_Config::get_gps_velocity_lag() const -> float const& 
   {
     return m_gps_velocity_lag;
   }
@@ -881,11 +945,11 @@ namespace silk
 
 ////////////////////////////////////////////////////////////
 
-  void ECEF_KF_Filter_Config::set_gps_velocity_accuracy(float const& value)
+  void KF_ECEF_Config::set_gps_velocity_accuracy(float const& value)
   {
     m_gps_velocity_accuracy = clamp(value, float(0.000000f), float(340282346638528859811704183484516925440.000000f));
   }
-  auto ECEF_KF_Filter_Config::get_gps_velocity_accuracy() const -> float const& 
+  auto KF_ECEF_Config::get_gps_velocity_accuracy() const -> float const& 
   {
     return m_gps_velocity_accuracy;
   }
@@ -893,11 +957,11 @@ namespace silk
 
 ////////////////////////////////////////////////////////////
 
-  void ECEF_KF_Filter_Config::set_acceleration_lag(float const& value)
+  void KF_ECEF_Config::set_acceleration_lag(float const& value)
   {
     m_acceleration_lag = clamp(value, float(0.000000f), float(340282346638528859811704183484516925440.000000f));
   }
-  auto ECEF_KF_Filter_Config::get_acceleration_lag() const -> float const& 
+  auto KF_ECEF_Config::get_acceleration_lag() const -> float const& 
   {
     return m_acceleration_lag;
   }
@@ -905,13 +969,25 @@ namespace silk
 
 ////////////////////////////////////////////////////////////
 
-  void ECEF_KF_Filter_Config::set_acceleration_accuracy(float const& value)
+  void KF_ECEF_Config::set_acceleration_accuracy(float const& value)
   {
     m_acceleration_accuracy = clamp(value, float(0.000000f), float(340282346638528859811704183484516925440.000000f));
   }
-  auto ECEF_KF_Filter_Config::get_acceleration_accuracy() const -> float const& 
+  auto KF_ECEF_Config::get_acceleration_accuracy() const -> float const& 
   {
     return m_acceleration_accuracy;
+  }
+
+
+////////////////////////////////////////////////////////////
+
+  void ENU_Frame_System_Descriptor::set_rate(uint32_t const& value)
+  {
+    m_rate = clamp(value, uint32_t(1), uint32_t(10000));
+  }
+  auto ENU_Frame_System_Descriptor::get_rate() const -> uint32_t const& 
+  {
+    return m_rate;
   }
 
 
@@ -929,25 +1005,25 @@ namespace silk
 
 ////////////////////////////////////////////////////////////
 
-  void LPF_Filter_Config::set_lpf_poles(uint32_t const& value)
+  void LPF_Config::set_poles(uint32_t const& value)
   {
-    m_lpf_poles = clamp(value, uint32_t(0), uint32_t(6));
+    m_poles = clamp(value, uint32_t(0), uint32_t(6));
   }
-  auto LPF_Filter_Config::get_lpf_poles() const -> uint32_t const& 
+  auto LPF_Config::get_poles() const -> uint32_t const& 
   {
-    return m_lpf_poles;
+    return m_poles;
   }
 
 
 ////////////////////////////////////////////////////////////
 
-  void LPF_Filter_Config::set_lpf_cutoff_frequency(float const& value)
+  void LPF_Config::set_cutoff_frequency(float const& value)
   {
-    m_lpf_cutoff_frequency = clamp(value, float(0.000000f), float(340282346638528859811704183484516925440.000000f));
+    m_cutoff_frequency = clamp(value, float(0.000000f), float(340282346638528859811704183484516925440.000000f));
   }
-  auto LPF_Filter_Config::get_lpf_cutoff_frequency() const -> float const& 
+  auto LPF_Config::get_cutoff_frequency() const -> float const& 
   {
-    return m_lpf_cutoff_frequency;
+    return m_cutoff_frequency;
   }
 
 
@@ -967,7 +1043,7 @@ namespace silk
 
   void MaxSonar_Descriptor::set_rate(uint32_t const& value)
   {
-    m_rate = clamp(value, uint32_t(1), uint32_t(10000));
+    m_rate = clamp(value, uint32_t(1), uint32_t(15));
   }
   auto MaxSonar_Descriptor::get_rate() const -> uint32_t const& 
   {
@@ -1159,7 +1235,7 @@ namespace silk
 
   void MPU9250_Descriptor::set_magnetometer_rate(uint32_t const& value)
   {
-    m_magnetometer_rate = clamp(value, uint32_t(1), uint32_t(10000));
+    m_magnetometer_rate = clamp(value, uint32_t(1), uint32_t(100));
   }
   auto MPU9250_Descriptor::get_magnetometer_rate() const -> uint32_t const& 
   {
@@ -1171,7 +1247,7 @@ namespace silk
 
   void MPU9250_Descriptor::set_thermometer_rate(uint32_t const& value)
   {
-    m_thermometer_rate = clamp(value, uint32_t(1), uint32_t(10000));
+    m_thermometer_rate = clamp(value, uint32_t(1), uint32_t(100));
   }
   auto MPU9250_Descriptor::get_thermometer_rate() const -> uint32_t const& 
   {
@@ -1214,6 +1290,11 @@ namespace silk
       return m_acceleration;
     }
 
+    auto MPU9250_Config::Calibration::get_acceleration() -> std::vector<::silk::Acceleration_Calibration_Point>& 
+    {
+      return m_acceleration;
+    }
+
 
 ////////////////////////////////////////////////////////////
 
@@ -1226,6 +1307,11 @@ namespace silk
       return m_angular_velocity;
     }
 
+    auto MPU9250_Config::Calibration::get_angular_velocity() -> std::vector<::silk::Angular_Velocity_Calibration_Point>& 
+    {
+      return m_angular_velocity;
+    }
+
 
 ////////////////////////////////////////////////////////////
 
@@ -1234,6 +1320,11 @@ namespace silk
       m_magnetic_field = value;
     }
     auto MPU9250_Config::Calibration::get_magnetic_field() const -> std::vector<::silk::Magnetic_Field_Calibration_Point> const& 
+    {
+      return m_magnetic_field;
+    }
+
+    auto MPU9250_Config::Calibration::get_magnetic_field() -> std::vector<::silk::Magnetic_Field_Calibration_Point>& 
     {
       return m_magnetic_field;
     }
@@ -1262,6 +1353,11 @@ namespace silk
     return m_calibration;
   }
 
+  auto MPU9250_Config::get_calibration() -> Calibration& 
+  {
+    return m_calibration;
+  }
+
 
 ////////////////////////////////////////////////////////////
 
@@ -1279,7 +1375,7 @@ namespace silk
 
   void MS5611_Descriptor::set_pressure_rate(uint32_t const& value)
   {
-    m_pressure_rate = clamp(value, uint32_t(1), uint32_t(10000));
+    m_pressure_rate = clamp(value, uint32_t(1), uint32_t(100));
   }
   auto MS5611_Descriptor::get_pressure_rate() const -> uint32_t const& 
   {
@@ -1291,7 +1387,7 @@ namespace silk
 
   void MS5611_Descriptor::set_temperature_rate(uint32_t const& value)
   {
-    m_temperature_rate = clamp(value, uint32_t(1), uint32_t(10000));
+    m_temperature_rate = clamp(value, uint32_t(1), uint32_t(100));
   }
   auto MS5611_Descriptor::get_temperature_rate() const -> uint32_t const& 
   {
@@ -1406,6 +1502,11 @@ namespace silk
         return m_x_pid;
       }
 
+      auto Multirotor_Brain_Config::Horizontal_Angle::Separate_XY_PIDs::get_x_pid() -> ::silk::PID_Controller_Descriptor& 
+      {
+        return m_x_pid;
+      }
+
 
 ////////////////////////////////////////////////////////////
 
@@ -1418,12 +1519,17 @@ namespace silk
         return m_y_pid;
       }
 
+      auto Multirotor_Brain_Config::Horizontal_Angle::Separate_XY_PIDs::get_y_pid() -> ::silk::PID_Controller_Descriptor& 
+      {
+        return m_y_pid;
+      }
+
 
 ////////////////////////////////////////////////////////////
 
     void Multirotor_Brain_Config::Horizontal_Angle::set_max_speed_deg(float const& value)
     {
-      m_max_speed_deg = clamp(value, float(0.000000f), float(500.000000f));
+      m_max_speed_deg = clamp(value, float(10.000000f), float(3000.000000f));
     }
     auto Multirotor_Brain_Config::Horizontal_Angle::get_max_speed_deg() const -> float const& 
     {
@@ -1442,12 +1548,17 @@ namespace silk
       return m_xy_pids;
     }
 
+    auto Multirotor_Brain_Config::Horizontal_Angle::get_xy_pids() -> boost::variant<Combined_XY_PIDs,Separate_XY_PIDs>& 
+    {
+      return m_xy_pids;
+    }
+
 
 ////////////////////////////////////////////////////////////
 
     void Multirotor_Brain_Config::Horizontal_Position::set_max_speed(float const& value)
     {
-      m_max_speed = clamp(value, float(0.000000f), float(100.000000f));
+      m_max_speed = clamp(value, float(0.000000f), float(10.000000f));
     }
     auto Multirotor_Brain_Config::Horizontal_Position::get_max_speed() const -> float const& 
     {
@@ -1457,11 +1568,16 @@ namespace silk
 
 ////////////////////////////////////////////////////////////
 
-    void Multirotor_Brain_Config::Horizontal_Position::set_lpf(::silk::LPF_Filter_Config const& value)
+    void Multirotor_Brain_Config::Horizontal_Position::set_lpf(::silk::LPF_Config const& value)
     {
       m_lpf = value;
     }
-    auto Multirotor_Brain_Config::Horizontal_Position::get_lpf() const -> ::silk::LPF_Filter_Config const& 
+    auto Multirotor_Brain_Config::Horizontal_Position::get_lpf() const -> ::silk::LPF_Config const& 
+    {
+      return m_lpf;
+    }
+
+    auto Multirotor_Brain_Config::Horizontal_Position::get_lpf() -> ::silk::LPF_Config& 
     {
       return m_lpf;
     }
@@ -1478,6 +1594,11 @@ namespace silk
       return m_velocity_pi;
     }
 
+    auto Multirotor_Brain_Config::Horizontal_Position::get_velocity_pi() -> ::silk::PI_Controller_Descriptor& 
+    {
+      return m_velocity_pi;
+    }
+
 
 ////////////////////////////////////////////////////////////
 
@@ -1490,12 +1611,17 @@ namespace silk
       return m_position_p;
     }
 
+    auto Multirotor_Brain_Config::Horizontal_Position::get_position_p() -> ::silk::P_Controller_Descriptor& 
+    {
+      return m_position_p;
+    }
+
 
 ////////////////////////////////////////////////////////////
 
     void Multirotor_Brain_Config::Yaw_Angle::set_max_speed_deg(float const& value)
     {
-      m_max_speed_deg = clamp(value, float(0.000000f), float(500.000000f));
+      m_max_speed_deg = clamp(value, float(10.000000f), float(3000.000000f));
     }
     auto Multirotor_Brain_Config::Yaw_Angle::get_max_speed_deg() const -> float const& 
     {
@@ -1514,12 +1640,17 @@ namespace silk
       return m_pid;
     }
 
+    auto Multirotor_Brain_Config::Yaw_Angle::get_pid() -> ::silk::PID_Controller_Descriptor& 
+    {
+      return m_pid;
+    }
+
 
 ////////////////////////////////////////////////////////////
 
     void Multirotor_Brain_Config::Altitude::set_max_speed(float const& value)
     {
-      m_max_speed = clamp(value, float(0.000000f), float(100.000000f));
+      m_max_speed = clamp(value, float(0.000000f), float(10.000000f));
     }
     auto Multirotor_Brain_Config::Altitude::get_max_speed() const -> float const& 
     {
@@ -1529,11 +1660,16 @@ namespace silk
 
 ////////////////////////////////////////////////////////////
 
-    void Multirotor_Brain_Config::Altitude::set_lpf(::silk::LPF_Filter_Config const& value)
+    void Multirotor_Brain_Config::Altitude::set_lpf(::silk::LPF_Config const& value)
     {
       m_lpf = value;
     }
-    auto Multirotor_Brain_Config::Altitude::get_lpf() const -> ::silk::LPF_Filter_Config const& 
+    auto Multirotor_Brain_Config::Altitude::get_lpf() const -> ::silk::LPF_Config const& 
+    {
+      return m_lpf;
+    }
+
+    auto Multirotor_Brain_Config::Altitude::get_lpf() -> ::silk::LPF_Config& 
     {
       return m_lpf;
     }
@@ -1550,6 +1686,11 @@ namespace silk
       return m_speed_pi;
     }
 
+    auto Multirotor_Brain_Config::Altitude::get_speed_pi() -> ::silk::PI_Controller_Descriptor& 
+    {
+      return m_speed_pi;
+    }
+
 
 ////////////////////////////////////////////////////////////
 
@@ -1562,6 +1703,35 @@ namespace silk
       return m_position_p;
     }
 
+    auto Multirotor_Brain_Config::Altitude::get_position_p() -> ::silk::P_Controller_Descriptor& 
+    {
+      return m_position_p;
+    }
+
+
+////////////////////////////////////////////////////////////
+
+  void Multirotor_Brain_Config::set_max_thrust(float const& value)
+  {
+    m_max_thrust = clamp(value, float(0.000000f), float(340282346638528859811704183484516925440.000000f));
+  }
+  auto Multirotor_Brain_Config::get_max_thrust() const -> float const& 
+  {
+    return m_max_thrust;
+  }
+
+
+////////////////////////////////////////////////////////////
+
+  void Multirotor_Brain_Config::set_min_thrust(float const& value)
+  {
+    m_min_thrust = clamp(value, float(0.000000f), float(340282346638528859811704183484516925440.000000f));
+  }
+  auto Multirotor_Brain_Config::get_min_thrust() const -> float const& 
+  {
+    return m_min_thrust;
+  }
+
 
 ////////////////////////////////////////////////////////////
 
@@ -1570,6 +1740,11 @@ namespace silk
     m_horizontal_angle = value;
   }
   auto Multirotor_Brain_Config::get_horizontal_angle() const -> Horizontal_Angle const& 
+  {
+    return m_horizontal_angle;
+  }
+
+  auto Multirotor_Brain_Config::get_horizontal_angle() -> Horizontal_Angle& 
   {
     return m_horizontal_angle;
   }
@@ -1586,6 +1761,11 @@ namespace silk
     return m_horizontal_position;
   }
 
+  auto Multirotor_Brain_Config::get_horizontal_position() -> Horizontal_Position& 
+  {
+    return m_horizontal_position;
+  }
+
 
 ////////////////////////////////////////////////////////////
 
@@ -1598,6 +1778,11 @@ namespace silk
     return m_yaw_angle;
   }
 
+  auto Multirotor_Brain_Config::get_yaw_angle() -> Yaw_Angle& 
+  {
+    return m_yaw_angle;
+  }
+
 
 ////////////////////////////////////////////////////////////
 
@@ -1606,6 +1791,11 @@ namespace silk
     m_altitude = value;
   }
   auto Multirotor_Brain_Config::get_altitude() const -> Altitude const& 
+  {
+    return m_altitude;
+  }
+
+  auto Multirotor_Brain_Config::get_altitude() -> Altitude& 
   {
     return m_altitude;
   }
@@ -1922,6 +2112,11 @@ namespace silk
     return m_noise;
   }
 
+  auto Multirotor_Simulator_Config::get_noise() -> Noise& 
+  {
+    return m_noise;
+  }
+
 
 ////////////////////////////////////////////////////////////
 
@@ -2018,6 +2213,35 @@ namespace silk
     return m_components;
   }
 
+  auto Oscillator_Config::get_components() -> std::vector<::silk::Oscillator_Config::Component>& 
+  {
+    return m_components;
+  }
+
+
+////////////////////////////////////////////////////////////
+
+    void PCA9685_Descriptor::Channel::set_enabled(bool const& value)
+    {
+      m_enabled = value;
+    }
+    auto PCA9685_Descriptor::Channel::get_enabled() const -> bool const& 
+    {
+      return m_enabled;
+    }
+
+
+////////////////////////////////////////////////////////////
+
+    void PCA9685_Descriptor::Channel::set_servo_signal(bool const& value)
+    {
+      m_servo_signal = value;
+    }
+    auto PCA9685_Descriptor::Channel::get_servo_signal() const -> bool const& 
+    {
+      return m_servo_signal;
+    }
+
 
 ////////////////////////////////////////////////////////////
 
@@ -2035,7 +2259,7 @@ namespace silk
 
   void PCA9685_Descriptor::set_rate(uint32_t const& value)
   {
-    m_rate = clamp(value, uint32_t(1), uint32_t(10000));
+    m_rate = clamp(value, uint32_t(1), uint32_t(8000));
   }
   auto PCA9685_Descriptor::get_rate() const -> uint32_t const& 
   {
@@ -2057,71 +2281,81 @@ namespace silk
 
 ////////////////////////////////////////////////////////////
 
-    void PCA9685_Config::Channel::set_servo_signal(bool const& value)
-    {
-      m_servo_signal = value;
-    }
-    auto PCA9685_Config::Channel::get_servo_signal() const -> bool const& 
-    {
-      return m_servo_signal;
-    }
-
-
-////////////////////////////////////////////////////////////
-
-    void PCA9685_Config::Channel::set_min_servo(float const& value)
-    {
-      m_min_servo = clamp(value, float(1.000000f), float(2.000000f));
-    }
-    auto PCA9685_Config::Channel::get_min_servo() const -> float const& 
-    {
-      return m_min_servo;
-    }
-
-
-////////////////////////////////////////////////////////////
-
-    void PCA9685_Config::Channel::set_max_servo(float const& value)
-    {
-      m_max_servo = clamp(value, float(1.000000f), float(2.000000f));
-    }
-    auto PCA9685_Config::Channel::get_max_servo() const -> float const& 
-    {
-      return m_max_servo;
-    }
-
-
-////////////////////////////////////////////////////////////
-
-    void PCA9685_Config::Channel::set_min_pwm(float const& value)
-    {
-      m_min_pwm = clamp(value, float(0.000000f), float(1.000000f));
-    }
-    auto PCA9685_Config::Channel::get_min_pwm() const -> float const& 
-    {
-      return m_min_pwm;
-    }
-
-
-////////////////////////////////////////////////////////////
-
-    void PCA9685_Config::Channel::set_max_pwm(float const& value)
-    {
-      m_max_pwm = clamp(value, float(0.000000f), float(1.000000f));
-    }
-    auto PCA9685_Config::Channel::get_max_pwm() const -> float const& 
-    {
-      return m_max_pwm;
-    }
-
-
-////////////////////////////////////////////////////////////
-
-  void PCA9685_Config::set_channels(std::vector<::silk::PCA9685_Config::Channel> const& value)
+  void PCA9685_Descriptor::set_channels(std::vector<::silk::PCA9685_Descriptor::Channel> const& value)
   {
     m_channels = value;
   }
-  auto PCA9685_Config::get_channels() const -> std::vector<::silk::PCA9685_Config::Channel> const& 
+  auto PCA9685_Descriptor::get_channels() const -> std::vector<::silk::PCA9685_Descriptor::Channel> const& 
+  {
+    return m_channels;
+  }
+
+  auto PCA9685_Descriptor::get_channels() -> std::vector<::silk::PCA9685_Descriptor::Channel>& 
+  {
+    return m_channels;
+  }
+
+
+////////////////////////////////////////////////////////////
+
+    void PCA9685_Config::Servo_Channel::set_min(float const& value)
+    {
+      m_min = clamp(value, float(1.000000f), float(2.000000f));
+    }
+    auto PCA9685_Config::Servo_Channel::get_min() const -> float const& 
+    {
+      return m_min;
+    }
+
+
+////////////////////////////////////////////////////////////
+
+    void PCA9685_Config::Servo_Channel::set_max(float const& value)
+    {
+      m_max = clamp(value, float(1.000000f), float(2.000000f));
+    }
+    auto PCA9685_Config::Servo_Channel::get_max() const -> float const& 
+    {
+      return m_max;
+    }
+
+
+////////////////////////////////////////////////////////////
+
+    void PCA9685_Config::PWM_Channel::set_min(float const& value)
+    {
+      m_min = clamp(value, float(0.000000f), float(1.000000f));
+    }
+    auto PCA9685_Config::PWM_Channel::get_min() const -> float const& 
+    {
+      return m_min;
+    }
+
+
+////////////////////////////////////////////////////////////
+
+    void PCA9685_Config::PWM_Channel::set_max(float const& value)
+    {
+      m_max = clamp(value, float(0.000000f), float(1.000000f));
+    }
+    auto PCA9685_Config::PWM_Channel::get_max() const -> float const& 
+    {
+      return m_max;
+    }
+
+
+////////////////////////////////////////////////////////////
+
+  void PCA9685_Config::set_channels(std::vector<boost::variant<Servo_Channel,PWM_Channel>> const& value)
+  {
+    m_channels = value;
+  }
+  auto PCA9685_Config::get_channels() const -> std::vector<boost::variant<Servo_Channel,PWM_Channel>> const& 
+  {
+    return m_channels;
+  }
+
+  auto PCA9685_Config::get_channels() -> std::vector<boost::variant<Servo_Channel,PWM_Channel>>& 
   {
     return m_channels;
   }
@@ -2155,7 +2389,7 @@ namespace silk
 
     void PIGPIO_Descriptor::Channel::set_rate(uint32_t const& value)
     {
-      m_rate = clamp(value, uint32_t(1), uint32_t(10000));
+      m_rate = clamp(value, uint32_t(1), uint32_t(8000));
     }
     auto PIGPIO_Descriptor::Channel::get_rate() const -> uint32_t const& 
     {
@@ -2174,6 +2408,11 @@ namespace silk
     return m_gpio_2;
   }
 
+  auto PIGPIO_Descriptor::get_gpio_2() -> Channel& 
+  {
+    return m_gpio_2;
+  }
+
 
 ////////////////////////////////////////////////////////////
 
@@ -2182,6 +2421,11 @@ namespace silk
     m_gpio_3 = value;
   }
   auto PIGPIO_Descriptor::get_gpio_3() const -> Channel const& 
+  {
+    return m_gpio_3;
+  }
+
+  auto PIGPIO_Descriptor::get_gpio_3() -> Channel& 
   {
     return m_gpio_3;
   }
@@ -2198,6 +2442,11 @@ namespace silk
     return m_gpio_4;
   }
 
+  auto PIGPIO_Descriptor::get_gpio_4() -> Channel& 
+  {
+    return m_gpio_4;
+  }
+
 
 ////////////////////////////////////////////////////////////
 
@@ -2206,6 +2455,11 @@ namespace silk
     m_gpio_5 = value;
   }
   auto PIGPIO_Descriptor::get_gpio_5() const -> Channel const& 
+  {
+    return m_gpio_5;
+  }
+
+  auto PIGPIO_Descriptor::get_gpio_5() -> Channel& 
   {
     return m_gpio_5;
   }
@@ -2222,6 +2476,11 @@ namespace silk
     return m_gpio_6;
   }
 
+  auto PIGPIO_Descriptor::get_gpio_6() -> Channel& 
+  {
+    return m_gpio_6;
+  }
+
 
 ////////////////////////////////////////////////////////////
 
@@ -2230,6 +2489,11 @@ namespace silk
     m_gpio_7 = value;
   }
   auto PIGPIO_Descriptor::get_gpio_7() const -> Channel const& 
+  {
+    return m_gpio_7;
+  }
+
+  auto PIGPIO_Descriptor::get_gpio_7() -> Channel& 
   {
     return m_gpio_7;
   }
@@ -2246,6 +2510,11 @@ namespace silk
     return m_gpio_8;
   }
 
+  auto PIGPIO_Descriptor::get_gpio_8() -> Channel& 
+  {
+    return m_gpio_8;
+  }
+
 
 ////////////////////////////////////////////////////////////
 
@@ -2254,6 +2523,11 @@ namespace silk
     m_gpio_9 = value;
   }
   auto PIGPIO_Descriptor::get_gpio_9() const -> Channel const& 
+  {
+    return m_gpio_9;
+  }
+
+  auto PIGPIO_Descriptor::get_gpio_9() -> Channel& 
   {
     return m_gpio_9;
   }
@@ -2270,6 +2544,11 @@ namespace silk
     return m_gpio_10;
   }
 
+  auto PIGPIO_Descriptor::get_gpio_10() -> Channel& 
+  {
+    return m_gpio_10;
+  }
+
 
 ////////////////////////////////////////////////////////////
 
@@ -2278,6 +2557,11 @@ namespace silk
     m_gpio_11 = value;
   }
   auto PIGPIO_Descriptor::get_gpio_11() const -> Channel const& 
+  {
+    return m_gpio_11;
+  }
+
+  auto PIGPIO_Descriptor::get_gpio_11() -> Channel& 
   {
     return m_gpio_11;
   }
@@ -2294,6 +2578,11 @@ namespace silk
     return m_gpio_12;
   }
 
+  auto PIGPIO_Descriptor::get_gpio_12() -> Channel& 
+  {
+    return m_gpio_12;
+  }
+
 
 ////////////////////////////////////////////////////////////
 
@@ -2302,6 +2591,11 @@ namespace silk
     m_gpio_13 = value;
   }
   auto PIGPIO_Descriptor::get_gpio_13() const -> Channel const& 
+  {
+    return m_gpio_13;
+  }
+
+  auto PIGPIO_Descriptor::get_gpio_13() -> Channel& 
   {
     return m_gpio_13;
   }
@@ -2318,6 +2612,11 @@ namespace silk
     return m_gpio_14;
   }
 
+  auto PIGPIO_Descriptor::get_gpio_14() -> Channel& 
+  {
+    return m_gpio_14;
+  }
+
 
 ////////////////////////////////////////////////////////////
 
@@ -2326,6 +2625,11 @@ namespace silk
     m_gpio_15 = value;
   }
   auto PIGPIO_Descriptor::get_gpio_15() const -> Channel const& 
+  {
+    return m_gpio_15;
+  }
+
+  auto PIGPIO_Descriptor::get_gpio_15() -> Channel& 
   {
     return m_gpio_15;
   }
@@ -2342,6 +2646,11 @@ namespace silk
     return m_gpio_16;
   }
 
+  auto PIGPIO_Descriptor::get_gpio_16() -> Channel& 
+  {
+    return m_gpio_16;
+  }
+
 
 ////////////////////////////////////////////////////////////
 
@@ -2350,6 +2659,11 @@ namespace silk
     m_gpio_17 = value;
   }
   auto PIGPIO_Descriptor::get_gpio_17() const -> Channel const& 
+  {
+    return m_gpio_17;
+  }
+
+  auto PIGPIO_Descriptor::get_gpio_17() -> Channel& 
   {
     return m_gpio_17;
   }
@@ -2366,6 +2680,11 @@ namespace silk
     return m_gpio_18;
   }
 
+  auto PIGPIO_Descriptor::get_gpio_18() -> Channel& 
+  {
+    return m_gpio_18;
+  }
+
 
 ////////////////////////////////////////////////////////////
 
@@ -2374,6 +2693,11 @@ namespace silk
     m_gpio_19 = value;
   }
   auto PIGPIO_Descriptor::get_gpio_19() const -> Channel const& 
+  {
+    return m_gpio_19;
+  }
+
+  auto PIGPIO_Descriptor::get_gpio_19() -> Channel& 
   {
     return m_gpio_19;
   }
@@ -2390,6 +2714,11 @@ namespace silk
     return m_gpio_20;
   }
 
+  auto PIGPIO_Descriptor::get_gpio_20() -> Channel& 
+  {
+    return m_gpio_20;
+  }
+
 
 ////////////////////////////////////////////////////////////
 
@@ -2398,6 +2727,11 @@ namespace silk
     m_gpio_21 = value;
   }
   auto PIGPIO_Descriptor::get_gpio_21() const -> Channel const& 
+  {
+    return m_gpio_21;
+  }
+
+  auto PIGPIO_Descriptor::get_gpio_21() -> Channel& 
   {
     return m_gpio_21;
   }
@@ -2414,6 +2748,11 @@ namespace silk
     return m_gpio_22;
   }
 
+  auto PIGPIO_Descriptor::get_gpio_22() -> Channel& 
+  {
+    return m_gpio_22;
+  }
+
 
 ////////////////////////////////////////////////////////////
 
@@ -2422,6 +2761,11 @@ namespace silk
     m_gpio_23 = value;
   }
   auto PIGPIO_Descriptor::get_gpio_23() const -> Channel const& 
+  {
+    return m_gpio_23;
+  }
+
+  auto PIGPIO_Descriptor::get_gpio_23() -> Channel& 
   {
     return m_gpio_23;
   }
@@ -2438,6 +2782,11 @@ namespace silk
     return m_gpio_24;
   }
 
+  auto PIGPIO_Descriptor::get_gpio_24() -> Channel& 
+  {
+    return m_gpio_24;
+  }
+
 
 ////////////////////////////////////////////////////////////
 
@@ -2446,6 +2795,11 @@ namespace silk
     m_gpio_25 = value;
   }
   auto PIGPIO_Descriptor::get_gpio_25() const -> Channel const& 
+  {
+    return m_gpio_25;
+  }
+
+  auto PIGPIO_Descriptor::get_gpio_25() -> Channel& 
   {
     return m_gpio_25;
   }
@@ -2462,6 +2816,11 @@ namespace silk
     return m_gpio_26;
   }
 
+  auto PIGPIO_Descriptor::get_gpio_26() -> Channel& 
+  {
+    return m_gpio_26;
+  }
+
 
 ////////////////////////////////////////////////////////////
 
@@ -2470,6 +2829,11 @@ namespace silk
     m_gpio_27 = value;
   }
   auto PIGPIO_Descriptor::get_gpio_27() const -> Channel const& 
+  {
+    return m_gpio_27;
+  }
+
+  auto PIGPIO_Descriptor::get_gpio_27() -> Channel& 
   {
     return m_gpio_27;
   }
@@ -2534,6 +2898,11 @@ namespace silk
     return m_gpio_2;
   }
 
+  auto PIGPIO_Config::get_gpio_2() -> boost::variant<Servo_Channel,PWM_Channel>& 
+  {
+    return m_gpio_2;
+  }
+
 
 ////////////////////////////////////////////////////////////
 
@@ -2542,6 +2911,11 @@ namespace silk
     m_gpio_3 = value;
   }
   auto PIGPIO_Config::get_gpio_3() const -> boost::variant<Servo_Channel,PWM_Channel> const& 
+  {
+    return m_gpio_3;
+  }
+
+  auto PIGPIO_Config::get_gpio_3() -> boost::variant<Servo_Channel,PWM_Channel>& 
   {
     return m_gpio_3;
   }
@@ -2558,6 +2932,11 @@ namespace silk
     return m_gpio_4;
   }
 
+  auto PIGPIO_Config::get_gpio_4() -> boost::variant<Servo_Channel,PWM_Channel>& 
+  {
+    return m_gpio_4;
+  }
+
 
 ////////////////////////////////////////////////////////////
 
@@ -2566,6 +2945,11 @@ namespace silk
     m_gpio_5 = value;
   }
   auto PIGPIO_Config::get_gpio_5() const -> boost::variant<Servo_Channel,PWM_Channel> const& 
+  {
+    return m_gpio_5;
+  }
+
+  auto PIGPIO_Config::get_gpio_5() -> boost::variant<Servo_Channel,PWM_Channel>& 
   {
     return m_gpio_5;
   }
@@ -2582,6 +2966,11 @@ namespace silk
     return m_gpio_6;
   }
 
+  auto PIGPIO_Config::get_gpio_6() -> boost::variant<Servo_Channel,PWM_Channel>& 
+  {
+    return m_gpio_6;
+  }
+
 
 ////////////////////////////////////////////////////////////
 
@@ -2590,6 +2979,11 @@ namespace silk
     m_gpio_7 = value;
   }
   auto PIGPIO_Config::get_gpio_7() const -> boost::variant<Servo_Channel,PWM_Channel> const& 
+  {
+    return m_gpio_7;
+  }
+
+  auto PIGPIO_Config::get_gpio_7() -> boost::variant<Servo_Channel,PWM_Channel>& 
   {
     return m_gpio_7;
   }
@@ -2606,6 +3000,11 @@ namespace silk
     return m_gpio_8;
   }
 
+  auto PIGPIO_Config::get_gpio_8() -> boost::variant<Servo_Channel,PWM_Channel>& 
+  {
+    return m_gpio_8;
+  }
+
 
 ////////////////////////////////////////////////////////////
 
@@ -2614,6 +3013,11 @@ namespace silk
     m_gpio_9 = value;
   }
   auto PIGPIO_Config::get_gpio_9() const -> boost::variant<Servo_Channel,PWM_Channel> const& 
+  {
+    return m_gpio_9;
+  }
+
+  auto PIGPIO_Config::get_gpio_9() -> boost::variant<Servo_Channel,PWM_Channel>& 
   {
     return m_gpio_9;
   }
@@ -2630,6 +3034,11 @@ namespace silk
     return m_gpio_10;
   }
 
+  auto PIGPIO_Config::get_gpio_10() -> boost::variant<Servo_Channel,PWM_Channel>& 
+  {
+    return m_gpio_10;
+  }
+
 
 ////////////////////////////////////////////////////////////
 
@@ -2638,6 +3047,11 @@ namespace silk
     m_gpio_11 = value;
   }
   auto PIGPIO_Config::get_gpio_11() const -> boost::variant<Servo_Channel,PWM_Channel> const& 
+  {
+    return m_gpio_11;
+  }
+
+  auto PIGPIO_Config::get_gpio_11() -> boost::variant<Servo_Channel,PWM_Channel>& 
   {
     return m_gpio_11;
   }
@@ -2654,6 +3068,11 @@ namespace silk
     return m_gpio_12;
   }
 
+  auto PIGPIO_Config::get_gpio_12() -> boost::variant<Servo_Channel,PWM_Channel>& 
+  {
+    return m_gpio_12;
+  }
+
 
 ////////////////////////////////////////////////////////////
 
@@ -2662,6 +3081,11 @@ namespace silk
     m_gpio_13 = value;
   }
   auto PIGPIO_Config::get_gpio_13() const -> boost::variant<Servo_Channel,PWM_Channel> const& 
+  {
+    return m_gpio_13;
+  }
+
+  auto PIGPIO_Config::get_gpio_13() -> boost::variant<Servo_Channel,PWM_Channel>& 
   {
     return m_gpio_13;
   }
@@ -2678,6 +3102,11 @@ namespace silk
     return m_gpio_14;
   }
 
+  auto PIGPIO_Config::get_gpio_14() -> boost::variant<Servo_Channel,PWM_Channel>& 
+  {
+    return m_gpio_14;
+  }
+
 
 ////////////////////////////////////////////////////////////
 
@@ -2686,6 +3115,11 @@ namespace silk
     m_gpio_15 = value;
   }
   auto PIGPIO_Config::get_gpio_15() const -> boost::variant<Servo_Channel,PWM_Channel> const& 
+  {
+    return m_gpio_15;
+  }
+
+  auto PIGPIO_Config::get_gpio_15() -> boost::variant<Servo_Channel,PWM_Channel>& 
   {
     return m_gpio_15;
   }
@@ -2702,6 +3136,11 @@ namespace silk
     return m_gpio_16;
   }
 
+  auto PIGPIO_Config::get_gpio_16() -> boost::variant<Servo_Channel,PWM_Channel>& 
+  {
+    return m_gpio_16;
+  }
+
 
 ////////////////////////////////////////////////////////////
 
@@ -2710,6 +3149,11 @@ namespace silk
     m_gpio_17 = value;
   }
   auto PIGPIO_Config::get_gpio_17() const -> boost::variant<Servo_Channel,PWM_Channel> const& 
+  {
+    return m_gpio_17;
+  }
+
+  auto PIGPIO_Config::get_gpio_17() -> boost::variant<Servo_Channel,PWM_Channel>& 
   {
     return m_gpio_17;
   }
@@ -2726,6 +3170,11 @@ namespace silk
     return m_gpio_18;
   }
 
+  auto PIGPIO_Config::get_gpio_18() -> boost::variant<Servo_Channel,PWM_Channel>& 
+  {
+    return m_gpio_18;
+  }
+
 
 ////////////////////////////////////////////////////////////
 
@@ -2734,6 +3183,11 @@ namespace silk
     m_gpio_19 = value;
   }
   auto PIGPIO_Config::get_gpio_19() const -> boost::variant<Servo_Channel,PWM_Channel> const& 
+  {
+    return m_gpio_19;
+  }
+
+  auto PIGPIO_Config::get_gpio_19() -> boost::variant<Servo_Channel,PWM_Channel>& 
   {
     return m_gpio_19;
   }
@@ -2750,6 +3204,11 @@ namespace silk
     return m_gpio_20;
   }
 
+  auto PIGPIO_Config::get_gpio_20() -> boost::variant<Servo_Channel,PWM_Channel>& 
+  {
+    return m_gpio_20;
+  }
+
 
 ////////////////////////////////////////////////////////////
 
@@ -2758,6 +3217,11 @@ namespace silk
     m_gpio_21 = value;
   }
   auto PIGPIO_Config::get_gpio_21() const -> boost::variant<Servo_Channel,PWM_Channel> const& 
+  {
+    return m_gpio_21;
+  }
+
+  auto PIGPIO_Config::get_gpio_21() -> boost::variant<Servo_Channel,PWM_Channel>& 
   {
     return m_gpio_21;
   }
@@ -2774,6 +3238,11 @@ namespace silk
     return m_gpio_22;
   }
 
+  auto PIGPIO_Config::get_gpio_22() -> boost::variant<Servo_Channel,PWM_Channel>& 
+  {
+    return m_gpio_22;
+  }
+
 
 ////////////////////////////////////////////////////////////
 
@@ -2782,6 +3251,11 @@ namespace silk
     m_gpio_23 = value;
   }
   auto PIGPIO_Config::get_gpio_23() const -> boost::variant<Servo_Channel,PWM_Channel> const& 
+  {
+    return m_gpio_23;
+  }
+
+  auto PIGPIO_Config::get_gpio_23() -> boost::variant<Servo_Channel,PWM_Channel>& 
   {
     return m_gpio_23;
   }
@@ -2798,6 +3272,11 @@ namespace silk
     return m_gpio_24;
   }
 
+  auto PIGPIO_Config::get_gpio_24() -> boost::variant<Servo_Channel,PWM_Channel>& 
+  {
+    return m_gpio_24;
+  }
+
 
 ////////////////////////////////////////////////////////////
 
@@ -2806,6 +3285,11 @@ namespace silk
     m_gpio_25 = value;
   }
   auto PIGPIO_Config::get_gpio_25() const -> boost::variant<Servo_Channel,PWM_Channel> const& 
+  {
+    return m_gpio_25;
+  }
+
+  auto PIGPIO_Config::get_gpio_25() -> boost::variant<Servo_Channel,PWM_Channel>& 
   {
     return m_gpio_25;
   }
@@ -2822,6 +3306,11 @@ namespace silk
     return m_gpio_26;
   }
 
+  auto PIGPIO_Config::get_gpio_26() -> boost::variant<Servo_Channel,PWM_Channel>& 
+  {
+    return m_gpio_26;
+  }
+
 
 ////////////////////////////////////////////////////////////
 
@@ -2830,6 +3319,11 @@ namespace silk
     m_gpio_27 = value;
   }
   auto PIGPIO_Config::get_gpio_27() const -> boost::variant<Servo_Channel,PWM_Channel> const& 
+  {
+    return m_gpio_27;
+  }
+
+  auto PIGPIO_Config::get_gpio_27() -> boost::variant<Servo_Channel,PWM_Channel>& 
   {
     return m_gpio_27;
   }
@@ -2954,6 +3448,11 @@ namespace silk
         return m_x_pid;
       }
 
+      auto Rate_Controller_Config::Feedback::Separate_XY_PIDs::get_x_pid() -> ::silk::PID_Controller_Descriptor& 
+      {
+        return m_x_pid;
+      }
+
 
 ////////////////////////////////////////////////////////////
 
@@ -2962,6 +3461,11 @@ namespace silk
         m_y_pid = value;
       }
       auto Rate_Controller_Config::Feedback::Separate_XY_PIDs::get_y_pid() const -> ::silk::PID_Controller_Descriptor const& 
+      {
+        return m_y_pid;
+      }
+
+      auto Rate_Controller_Config::Feedback::Separate_XY_PIDs::get_y_pid() -> ::silk::PID_Controller_Descriptor& 
       {
         return m_y_pid;
       }
@@ -2990,6 +3494,11 @@ namespace silk
       return m_xy_pids;
     }
 
+    auto Rate_Controller_Config::Feedback::get_xy_pids() -> boost::variant<Combined_XY_PIDs,Separate_XY_PIDs>& 
+    {
+      return m_xy_pids;
+    }
+
 
 ////////////////////////////////////////////////////////////
 
@@ -2998,6 +3507,11 @@ namespace silk
       m_z_pid = value;
     }
     auto Rate_Controller_Config::Feedback::get_z_pid() const -> ::silk::PID_Controller_Descriptor const& 
+    {
+      return m_z_pid;
+    }
+
+    auto Rate_Controller_Config::Feedback::get_z_pid() -> ::silk::PID_Controller_Descriptor& 
     {
       return m_z_pid;
     }
@@ -3038,6 +3552,11 @@ namespace silk
     return m_feedback;
   }
 
+  auto Rate_Controller_Config::get_feedback() -> Feedback& 
+  {
+    return m_feedback;
+  }
+
 
 ////////////////////////////////////////////////////////////
 
@@ -3046,6 +3565,11 @@ namespace silk
     m_feedforward = value;
   }
   auto Rate_Controller_Config::get_feedforward() const -> Feedforward const& 
+  {
+    return m_feedforward;
+  }
+
+  auto Rate_Controller_Config::get_feedforward() -> Feedforward& 
   {
     return m_feedforward;
   }
@@ -3098,6 +3622,11 @@ namespace silk
     return m_streaming_low;
   }
 
+  auto Raspicam_Descriptor::get_streaming_low() -> Quality& 
+  {
+    return m_streaming_low;
+  }
+
 
 ////////////////////////////////////////////////////////////
 
@@ -3110,6 +3639,11 @@ namespace silk
     return m_streaming_high;
   }
 
+  auto Raspicam_Descriptor::get_streaming_high() -> Quality& 
+  {
+    return m_streaming_high;
+  }
+
 
 ////////////////////////////////////////////////////////////
 
@@ -3118,6 +3652,11 @@ namespace silk
     m_recording = value;
   }
   auto Raspicam_Descriptor::get_recording() const -> Quality const& 
+  {
+    return m_recording;
+  }
+
+  auto Raspicam_Descriptor::get_recording() -> Quality& 
   {
     return m_recording;
   }
@@ -3259,7 +3798,7 @@ namespace silk
 
   void RC5T619_Descriptor::set_adc0_rate(uint32_t const& value)
   {
-    m_adc0_rate = clamp(value, uint32_t(1), uint32_t(10000));
+    m_adc0_rate = clamp(value, uint32_t(1), uint32_t(200));
   }
   auto RC5T619_Descriptor::get_adc0_rate() const -> uint32_t const& 
   {
@@ -3271,7 +3810,7 @@ namespace silk
 
   void RC5T619_Descriptor::set_adc1_rate(uint32_t const& value)
   {
-    m_adc1_rate = clamp(value, uint32_t(1), uint32_t(10000));
+    m_adc1_rate = clamp(value, uint32_t(1), uint32_t(200));
   }
   auto RC5T619_Descriptor::get_adc1_rate() const -> uint32_t const& 
   {
@@ -3305,11 +3844,16 @@ namespace silk
 
 ////////////////////////////////////////////////////////////
 
-  void Resampler_Config::set_lpf(::silk::LPF_Filter_Config const& value)
+  void Resampler_Config::set_lpf(::silk::LPF_Config const& value)
   {
     m_lpf = value;
   }
-  auto Resampler_Config::get_lpf() const -> ::silk::LPF_Filter_Config const& 
+  auto Resampler_Config::get_lpf() const -> ::silk::LPF_Config const& 
+  {
+    return m_lpf;
+  }
+
+  auto Resampler_Config::get_lpf() -> ::silk::LPF_Config& 
   {
     return m_lpf;
   }
@@ -3422,6 +3966,11 @@ namespace silk
     return m_x_channel;
   }
 
+  auto Servo_Gimbal_Config::get_x_channel() -> Channel& 
+  {
+    return m_x_channel;
+  }
+
 
 ////////////////////////////////////////////////////////////
 
@@ -3434,6 +3983,11 @@ namespace silk
     return m_y_channel;
   }
 
+  auto Servo_Gimbal_Config::get_y_channel() -> Channel& 
+  {
+    return m_y_channel;
+  }
+
 
 ////////////////////////////////////////////////////////////
 
@@ -3442,6 +3996,11 @@ namespace silk
     m_z_channel = value;
   }
   auto Servo_Gimbal_Config::get_z_channel() const -> Channel const& 
+  {
+    return m_z_channel;
+  }
+
+  auto Servo_Gimbal_Config::get_z_channel() -> Channel& 
   {
     return m_z_channel;
   }
@@ -3463,7 +4022,7 @@ namespace silk
 
   void SRF01_Descriptor::set_rate(uint32_t const& value)
   {
-    m_rate = clamp(value, uint32_t(1), uint32_t(10000));
+    m_rate = clamp(value, uint32_t(1), uint32_t(10));
   }
   auto SRF01_Descriptor::get_rate() const -> uint32_t const& 
   {
@@ -3523,7 +4082,7 @@ namespace silk
 
   void SRF02_Descriptor::set_rate(uint32_t const& value)
   {
-    m_rate = clamp(value, uint32_t(1), uint32_t(10000));
+    m_rate = clamp(value, uint32_t(1), uint32_t(10));
   }
   auto SRF02_Descriptor::get_rate() const -> uint32_t const& 
   {
@@ -3619,7 +4178,7 @@ namespace silk
 
   void UBLOX_Descriptor::set_rate(uint32_t const& value)
   {
-    m_rate = clamp(value, uint32_t(1), uint32_t(10000));
+    m_rate = clamp(value, uint32_t(1), uint32_t(10));
   }
   auto UBLOX_Descriptor::get_rate() const -> uint32_t const& 
   {
@@ -4592,6 +5151,67 @@ ts::Result<ts::serialization::Value> serialize(::silk::Settings const& value)
   }
   return sz_value;
 }
+ts::Result<void> deserialize(::silk::UART_Linux_Descriptor::baud_t& value, ts::serialization::Value const& sz_value)
+{
+  if (!sz_value.is_string()) { return ts::Error("Expected string or null value when deserializing"); }
+  std::string const& str = sz_value.get_as_string();
+  if (false) { return ts::Error(""); } //this is here just to have the next items with 'else if'
+  else if (str == "_9600")
+  {
+    value = ::silk::UART_Linux_Descriptor::baud_t::_9600;
+  }
+  else if (str == "_19200")
+  {
+    value = ::silk::UART_Linux_Descriptor::baud_t::_19200;
+  }
+  else if (str == "_38400")
+  {
+    value = ::silk::UART_Linux_Descriptor::baud_t::_38400;
+  }
+  else if (str == "_57600")
+  {
+    value = ::silk::UART_Linux_Descriptor::baud_t::_57600;
+  }
+  else if (str == "_115200")
+  {
+    value = ::silk::UART_Linux_Descriptor::baud_t::_115200;
+  }
+  else if (str == "_230400")
+  {
+    value = ::silk::UART_Linux_Descriptor::baud_t::_230400;
+  }
+  else { return ts::Error("Cannot find item '" + str + "' when deserializing"); }
+  return ts::success;
+}
+ts::Result<ts::serialization::Value> serialize(::silk::UART_Linux_Descriptor::baud_t const& value)
+{
+  if (false) { return ts::Error(""); } //this is here just to have the next items with 'else if'
+  else if (value == ::silk::UART_Linux_Descriptor::baud_t::_9600)
+  {
+    return ts::serialization::Value("_9600");
+  }
+  else if (value == ::silk::UART_Linux_Descriptor::baud_t::_19200)
+  {
+    return ts::serialization::Value("_19200");
+  }
+  else if (value == ::silk::UART_Linux_Descriptor::baud_t::_38400)
+  {
+    return ts::serialization::Value("_38400");
+  }
+  else if (value == ::silk::UART_Linux_Descriptor::baud_t::_57600)
+  {
+    return ts::serialization::Value("_57600");
+  }
+  else if (value == ::silk::UART_Linux_Descriptor::baud_t::_115200)
+  {
+    return ts::serialization::Value("_115200");
+  }
+  else if (value == ::silk::UART_Linux_Descriptor::baud_t::_230400)
+  {
+    return ts::serialization::Value("_230400");
+  }
+  else { return ts::Error("Cannot serialize type"); }
+}
 ts::Result<void> deserialize(::silk::UART_Linux_Descriptor& value, ts::serialization::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
@@ -4688,6 +5308,14 @@ ts::Result<void> deserialize(::silk::I2C_BCM_Descriptor& value, ts::serializatio
     if (result != ts::success) { return result; }
     value.set_dev(v);
   }
+  {
+    auto const* member_sz_value = sz_value.find_object_member_by_name("baud");
+    if (!member_sz_value) { return ts::Error("Cannot find member value 'baud'"); }
+    std::remove_cv<std::remove_reference<decltype(value.get_baud())>::type>::type v;
+    auto result = deserialize(v, *member_sz_value);
+    if (result != ts::success) { return result; }
+    value.set_baud(v);
+  }
   return ts::success;
 }
 ts::Result<ts::serialization::Value> serialize(::silk::I2C_BCM_Descriptor const& value)
@@ -4697,6 +5325,11 @@ ts::Result<ts::serialization::Value> serialize(::silk::I2C_BCM_Descriptor const&
     auto result = serialize(value.get_dev());
     if (result != ts::success) { return result; }
     sz_value.add_object_member("dev", result.extract_payload());
+  }
+  {
+    auto result = serialize(value.get_baud());
+    if (result != ts::success) { return result; }
+    sz_value.add_object_member("baud", result.extract_payload());
   }
   return sz_value;
 }
@@ -4750,6 +5383,14 @@ ts::Result<void> deserialize(::silk::SPI_BCM_Descriptor& value, ts::serializatio
     if (result != ts::success) { return result; }
     value.set_mode(v);
   }
+  {
+    auto const* member_sz_value = sz_value.find_object_member_by_name("speed");
+    if (!member_sz_value) { return ts::Error("Cannot find member value 'speed'"); }
+    std::remove_cv<std::remove_reference<decltype(value.get_speed())>::type>::type v;
+    auto result = deserialize(v, *member_sz_value);
+    if (result != ts::success) { return result; }
+    value.set_speed(v);
+  }
   return ts::success;
 }
 ts::Result<ts::serialization::Value> serialize(::silk::SPI_BCM_Descriptor const& value)
@@ -4769,6 +5410,11 @@ ts::Result<ts::serialization::Value> serialize(::silk::SPI_BCM_Descriptor const&
     auto result = serialize(value.get_mode());
     if (result != ts::success) { return result; }
     sz_value.add_object_member("mode", result.extract_payload());
+  }
+  {
+    auto result = serialize(value.get_speed());
+    if (result != ts::success) { return result; }
+    sz_value.add_object_member("speed", result.extract_payload());
   }
   return sz_value;
 }
@@ -5365,7 +6011,7 @@ ts::Result<ts::serialization::Value> serialize(::silk::Gravity_Filter_Config con
   ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
   return sz_value;
 }
-ts::Result<void> deserialize(::silk::ECEF_KF_Descriptor& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(::silk::KF_ECEF_Descriptor& value, ts::serialization::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -5378,7 +6024,7 @@ ts::Result<void> deserialize(::silk::ECEF_KF_Descriptor& value, ts::serializatio
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(::silk::ECEF_KF_Descriptor const& value)
+ts::Result<ts::serialization::Value> serialize(::silk::KF_ECEF_Descriptor const& value)
 {
   ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
   {
@@ -5388,7 +6034,7 @@ ts::Result<ts::serialization::Value> serialize(::silk::ECEF_KF_Descriptor const&
   }
   return sz_value;
 }
-ts::Result<void> deserialize(::silk::ECEF_KF_Filter_Config& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(::silk::KF_ECEF_Config& value, ts::serialization::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -5441,7 +6087,7 @@ ts::Result<void> deserialize(::silk::ECEF_KF_Filter_Config& value, ts::serializa
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(::silk::ECEF_KF_Filter_Config const& value)
+ts::Result<ts::serialization::Value> serialize(::silk::KF_ECEF_Config const& value)
 {
   ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
   {
@@ -5476,6 +6122,39 @@ ts::Result<ts::serialization::Value> serialize(::silk::ECEF_KF_Filter_Config con
   }
   return sz_value;
 }
+ts::Result<void> deserialize(::silk::ENU_Frame_System_Descriptor& value, ts::serialization::Value const& sz_value)
+{
+  if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  {
+    auto const* member_sz_value = sz_value.find_object_member_by_name("rate");
+    if (!member_sz_value) { return ts::Error("Cannot find member value 'rate'"); }
+    std::remove_cv<std::remove_reference<decltype(value.get_rate())>::type>::type v;
+    auto result = deserialize(v, *member_sz_value);
+    if (result != ts::success) { return result; }
+    value.set_rate(v);
+  }
+  return ts::success;
+}
+ts::Result<ts::serialization::Value> serialize(::silk::ENU_Frame_System_Descriptor const& value)
+{
+  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  {
+    auto result = serialize(value.get_rate());
+    if (result != ts::success) { return result; }
+    sz_value.add_object_member("rate", result.extract_payload());
+  }
+  return sz_value;
+}
+ts::Result<void> deserialize(::silk::ENU_Frame_System_Config& value, ts::serialization::Value const& sz_value)
+{
+  if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  return ts::success;
+}
+ts::Result<ts::serialization::Value> serialize(::silk::ENU_Frame_System_Config const& value)
+{
+  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  return sz_value;
+}
 ts::Result<void> deserialize(::silk::LPF_Descriptor& value, ts::serialization::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
@@ -5499,39 +6178,39 @@ ts::Result<ts::serialization::Value> serialize(::silk::LPF_Descriptor const& val
   }
   return sz_value;
 }
-ts::Result<void> deserialize(::silk::LPF_Filter_Config& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(::silk::LPF_Config& value, ts::serialization::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("lpf_poles");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'lpf_poles'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_lpf_poles())>::type>::type v;
+    auto const* member_sz_value = sz_value.find_object_member_by_name("poles");
+    if (!member_sz_value) { return ts::Error("Cannot find member value 'poles'"); }
+    std::remove_cv<std::remove_reference<decltype(value.get_poles())>::type>::type v;
     auto result = deserialize(v, *member_sz_value);
     if (result != ts::success) { return result; }
-    value.set_lpf_poles(v);
+    value.set_poles(v);
   }
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("lpf_cutoff_frequency");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'lpf_cutoff_frequency'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_lpf_cutoff_frequency())>::type>::type v;
+    auto const* member_sz_value = sz_value.find_object_member_by_name("cutoff_frequency");
+    if (!member_sz_value) { return ts::Error("Cannot find member value 'cutoff_frequency'"); }
+    std::remove_cv<std::remove_reference<decltype(value.get_cutoff_frequency())>::type>::type v;
     auto result = deserialize(v, *member_sz_value);
     if (result != ts::success) { return result; }
-    value.set_lpf_cutoff_frequency(v);
+    value.set_cutoff_frequency(v);
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(::silk::LPF_Filter_Config const& value)
+ts::Result<ts::serialization::Value> serialize(::silk::LPF_Config const& value)
 {
   ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
   {
-    auto result = serialize(value.get_lpf_poles());
+    auto result = serialize(value.get_poles());
     if (result != ts::success) { return result; }
-    sz_value.add_object_member("lpf_poles", result.extract_payload());
+    sz_value.add_object_member("poles", result.extract_payload());
   }
   {
-    auto result = serialize(value.get_lpf_cutoff_frequency());
+    auto result = serialize(value.get_cutoff_frequency());
     if (result != ts::success) { return result; }
-    sz_value.add_object_member("lpf_cutoff_frequency", result.extract_payload());
+    sz_value.add_object_member("cutoff_frequency", result.extract_payload());
   }
   return sz_value;
 }
@@ -5804,7 +6483,7 @@ ts::Result<void> deserialize(::silk::MPU9250_Descriptor::imu_rate_t& value, ts::
 {
   if (!sz_value.is_string()) { return ts::Error("Expected string or null value when deserializing"); }
   std::string const& str = sz_value.get_as_string();
-  if (false) {} //this is here just to have the next items with 'else if'
+  if (false) { return ts::Error(""); } //this is here just to have the next items with 'else if'
   else if (str == "_250")
   {
     value = ::silk::MPU9250_Descriptor::imu_rate_t::_250;
@@ -5818,10 +6497,11 @@ ts::Result<void> deserialize(::silk::MPU9250_Descriptor::imu_rate_t& value, ts::
     value = ::silk::MPU9250_Descriptor::imu_rate_t::_1000;
   }
   else { return ts::Error("Cannot find item '" + str + "' when deserializing"); }
+  return ts::success;
 }
 ts::Result<ts::serialization::Value> serialize(::silk::MPU9250_Descriptor::imu_rate_t const& value)
 {
-  if (false) {} //this is here just to have the next items with 'else if'
+  if (false) { return ts::Error(""); } //this is here just to have the next items with 'else if'
   else if (value == ::silk::MPU9250_Descriptor::imu_rate_t::_250)
   {
     return ts::serialization::Value("_250");
@@ -5840,7 +6520,7 @@ ts::Result<void> deserialize(::silk::MPU9250_Descriptor::acceleration_range_t& v
 {
   if (!sz_value.is_string()) { return ts::Error("Expected string or null value when deserializing"); }
   std::string const& str = sz_value.get_as_string();
-  if (false) {} //this is here just to have the next items with 'else if'
+  if (false) { return ts::Error(""); } //this is here just to have the next items with 'else if'
   else if (str == "_2")
   {
     value = ::silk::MPU9250_Descriptor::acceleration_range_t::_2;
@@ -5858,10 +6538,11 @@ ts::Result<void> deserialize(::silk::MPU9250_Descriptor::acceleration_range_t& v
     value = ::silk::MPU9250_Descriptor::acceleration_range_t::_16;
   }
   else { return ts::Error("Cannot find item '" + str + "' when deserializing"); }
+  return ts::success;
 }
 ts::Result<ts::serialization::Value> serialize(::silk::MPU9250_Descriptor::acceleration_range_t const& value)
 {
-  if (false) {} //this is here just to have the next items with 'else if'
+  if (false) { return ts::Error(""); } //this is here just to have the next items with 'else if'
   else if (value == ::silk::MPU9250_Descriptor::acceleration_range_t::_2)
   {
     return ts::serialization::Value("_2");
@@ -5884,7 +6565,7 @@ ts::Result<void> deserialize(::silk::MPU9250_Descriptor::angular_velocity_range_
 {
   if (!sz_value.is_string()) { return ts::Error("Expected string or null value when deserializing"); }
   std::string const& str = sz_value.get_as_string();
-  if (false) {} //this is here just to have the next items with 'else if'
+  if (false) { return ts::Error(""); } //this is here just to have the next items with 'else if'
   else if (str == "_250")
   {
     value = ::silk::MPU9250_Descriptor::angular_velocity_range_t::_250;
@@ -5902,10 +6583,11 @@ ts::Result<void> deserialize(::silk::MPU9250_Descriptor::angular_velocity_range_
     value = ::silk::MPU9250_Descriptor::angular_velocity_range_t::_2000;
   }
   else { return ts::Error("Cannot find item '" + str + "' when deserializing"); }
+  return ts::success;
 }
 ts::Result<ts::serialization::Value> serialize(::silk::MPU9250_Descriptor::angular_velocity_range_t const& value)
 {
-  if (false) {} //this is here just to have the next items with 'else if'
+  if (false) { return ts::Error(""); } //this is here just to have the next items with 'else if'
   else if (value == ::silk::MPU9250_Descriptor::angular_velocity_range_t::_250)
   {
     return ts::serialization::Value("_250");
@@ -6516,6 +7198,22 @@ ts::Result<void> deserialize(::silk::Multirotor_Brain_Config& value, ts::seriali
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
+    auto const* member_sz_value = sz_value.find_object_member_by_name("max_thrust");
+    if (!member_sz_value) { return ts::Error("Cannot find member value 'max_thrust'"); }
+    std::remove_cv<std::remove_reference<decltype(value.get_max_thrust())>::type>::type v;
+    auto result = deserialize(v, *member_sz_value);
+    if (result != ts::success) { return result; }
+    value.set_max_thrust(v);
+  }
+  {
+    auto const* member_sz_value = sz_value.find_object_member_by_name("min_thrust");
+    if (!member_sz_value) { return ts::Error("Cannot find member value 'min_thrust'"); }
+    std::remove_cv<std::remove_reference<decltype(value.get_min_thrust())>::type>::type v;
+    auto result = deserialize(v, *member_sz_value);
+    if (result != ts::success) { return result; }
+    value.set_min_thrust(v);
+  }
+  {
     auto const* member_sz_value = sz_value.find_object_member_by_name("horizontal_angle");
     if (!member_sz_value) { return ts::Error("Cannot find member value 'horizontal_angle'"); }
     std::remove_cv<std::remove_reference<decltype(value.get_horizontal_angle())>::type>::type v;
@@ -6552,6 +7250,16 @@ ts::Result<void> deserialize(::silk::Multirotor_Brain_Config& value, ts::seriali
 ts::Result<ts::serialization::Value> serialize(::silk::Multirotor_Brain_Config const& value)
 {
   ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  {
+    auto result = serialize(value.get_max_thrust());
+    if (result != ts::success) { return result; }
+    sz_value.add_object_member("max_thrust", result.extract_payload());
+  }
+  {
+    auto result = serialize(value.get_min_thrust());
+    if (result != ts::success) { return result; }
+    sz_value.add_object_member("min_thrust", result.extract_payload());
+  }
   {
     auto result = serialize(value.get_horizontal_angle());
     if (result != ts::success) { return result; }
@@ -7096,6 +7804,42 @@ ts::Result<ts::serialization::Value> serialize(::silk::Oscillator_Config const& 
   }
   return sz_value;
 }
+ts::Result<void> deserialize(::silk::PCA9685_Descriptor::Channel& value, ts::serialization::Value const& sz_value)
+{
+  if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  {
+    auto const* member_sz_value = sz_value.find_object_member_by_name("enabled");
+    if (!member_sz_value) { return ts::Error("Cannot find member value 'enabled'"); }
+    std::remove_cv<std::remove_reference<decltype(value.get_enabled())>::type>::type v;
+    auto result = deserialize(v, *member_sz_value);
+    if (result != ts::success) { return result; }
+    value.set_enabled(v);
+  }
+  {
+    auto const* member_sz_value = sz_value.find_object_member_by_name("servo_signal");
+    if (!member_sz_value) { return ts::Error("Cannot find member value 'servo_signal'"); }
+    std::remove_cv<std::remove_reference<decltype(value.get_servo_signal())>::type>::type v;
+    auto result = deserialize(v, *member_sz_value);
+    if (result != ts::success) { return result; }
+    value.set_servo_signal(v);
+  }
+  return ts::success;
+}
+ts::Result<ts::serialization::Value> serialize(::silk::PCA9685_Descriptor::Channel const& value)
+{
+  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  {
+    auto result = serialize(value.get_enabled());
+    if (result != ts::success) { return result; }
+    sz_value.add_object_member("enabled", result.extract_payload());
+  }
+  {
+    auto result = serialize(value.get_servo_signal());
+    if (result != ts::success) { return result; }
+    sz_value.add_object_member("servo_signal", result.extract_payload());
+  }
+  return sz_value;
+}
 ts::Result<void> deserialize(::silk::PCA9685_Descriptor& value, ts::serialization::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
@@ -7123,6 +7867,14 @@ ts::Result<void> deserialize(::silk::PCA9685_Descriptor& value, ts::serializatio
     if (result != ts::success) { return result; }
     value.set_address(v);
   }
+  {
+    auto const* member_sz_value = sz_value.find_object_member_by_name("channels");
+    if (!member_sz_value) { return ts::Error("Cannot find member value 'channels'"); }
+    std::remove_cv<std::remove_reference<decltype(value.get_channels())>::type>::type v;
+    auto result = deserialize(v, *member_sz_value);
+    if (result != ts::success) { return result; }
+    value.set_channels(v);
+  }
   return ts::success;
 }
 ts::Result<ts::serialization::Value> serialize(::silk::PCA9685_Descriptor const& value)
@@ -7143,80 +7895,82 @@ ts::Result<ts::serialization::Value> serialize(::silk::PCA9685_Descriptor const&
     if (result != ts::success) { return result; }
     sz_value.add_object_member("address", result.extract_payload());
   }
+  {
+    auto result = serialize(value.get_channels());
+    if (result != ts::success) { return result; }
+    sz_value.add_object_member("channels", result.extract_payload());
+  }
   return sz_value;
 }
-ts::Result<void> deserialize(::silk::PCA9685_Config::Channel& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(::silk::PCA9685_Config::Servo_Channel& value, ts::serialization::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("servo_signal");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'servo_signal'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_servo_signal())>::type>::type v;
+    auto const* member_sz_value = sz_value.find_object_member_by_name("min");
+    if (!member_sz_value) { return ts::Error("Cannot find member value 'min'"); }
+    std::remove_cv<std::remove_reference<decltype(value.get_min())>::type>::type v;
     auto result = deserialize(v, *member_sz_value);
     if (result != ts::success) { return result; }
-    value.set_servo_signal(v);
+    value.set_min(v);
   }
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("min_servo");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'min_servo'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_min_servo())>::type>::type v;
+    auto const* member_sz_value = sz_value.find_object_member_by_name("max");
+    if (!member_sz_value) { return ts::Error("Cannot find member value 'max'"); }
+    std::remove_cv<std::remove_reference<decltype(value.get_max())>::type>::type v;
     auto result = deserialize(v, *member_sz_value);
     if (result != ts::success) { return result; }
-    value.set_min_servo(v);
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("max_servo");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'max_servo'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_max_servo())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_max_servo(v);
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("min_pwm");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'min_pwm'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_min_pwm())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_min_pwm(v);
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("max_pwm");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'max_pwm'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_max_pwm())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_max_pwm(v);
+    value.set_max(v);
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(::silk::PCA9685_Config::Channel const& value)
+ts::Result<ts::serialization::Value> serialize(::silk::PCA9685_Config::Servo_Channel const& value)
 {
   ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
   {
-    auto result = serialize(value.get_servo_signal());
+    auto result = serialize(value.get_min());
     if (result != ts::success) { return result; }
-    sz_value.add_object_member("servo_signal", result.extract_payload());
+    sz_value.add_object_member("min", result.extract_payload());
   }
   {
-    auto result = serialize(value.get_min_servo());
+    auto result = serialize(value.get_max());
     if (result != ts::success) { return result; }
-    sz_value.add_object_member("min_servo", result.extract_payload());
+    sz_value.add_object_member("max", result.extract_payload());
+  }
+  return sz_value;
+}
+ts::Result<void> deserialize(::silk::PCA9685_Config::PWM_Channel& value, ts::serialization::Value const& sz_value)
+{
+  if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  {
+    auto const* member_sz_value = sz_value.find_object_member_by_name("min");
+    if (!member_sz_value) { return ts::Error("Cannot find member value 'min'"); }
+    std::remove_cv<std::remove_reference<decltype(value.get_min())>::type>::type v;
+    auto result = deserialize(v, *member_sz_value);
+    if (result != ts::success) { return result; }
+    value.set_min(v);
   }
   {
-    auto result = serialize(value.get_max_servo());
+    auto const* member_sz_value = sz_value.find_object_member_by_name("max");
+    if (!member_sz_value) { return ts::Error("Cannot find member value 'max'"); }
+    std::remove_cv<std::remove_reference<decltype(value.get_max())>::type>::type v;
+    auto result = deserialize(v, *member_sz_value);
     if (result != ts::success) { return result; }
-    sz_value.add_object_member("max_servo", result.extract_payload());
+    value.set_max(v);
+  }
+  return ts::success;
+}
+ts::Result<ts::serialization::Value> serialize(::silk::PCA9685_Config::PWM_Channel const& value)
+{
+  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  {
+    auto result = serialize(value.get_min());
+    if (result != ts::success) { return result; }
+    sz_value.add_object_member("min", result.extract_payload());
   }
   {
-    auto result = serialize(value.get_min_pwm());
+    auto result = serialize(value.get_max());
     if (result != ts::success) { return result; }
-    sz_value.add_object_member("min_pwm", result.extract_payload());
-  }
-  {
-    auto result = serialize(value.get_max_pwm());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("max_pwm", result.extract_payload());
+    sz_value.add_object_member("max", result.extract_payload());
   }
   return sz_value;
 }
@@ -8496,7 +9250,7 @@ ts::Result<void> deserialize(::silk::Raspicam_Config::awb_mode_t& value, ts::ser
 {
   if (!sz_value.is_string()) { return ts::Error("Expected string or null value when deserializing"); }
   std::string const& str = sz_value.get_as_string();
-  if (false) {} //this is here just to have the next items with 'else if'
+  if (false) { return ts::Error(""); } //this is here just to have the next items with 'else if'
   else if (str == "OFF")
   {
     value = ::silk::Raspicam_Config::awb_mode_t::OFF;
@@ -8538,10 +9292,11 @@ ts::Result<void> deserialize(::silk::Raspicam_Config::awb_mode_t& value, ts::ser
     value = ::silk::Raspicam_Config::awb_mode_t::HORIZON;
   }
   else { return ts::Error("Cannot find item '" + str + "' when deserializing"); }
+  return ts::success;
 }
 ts::Result<ts::serialization::Value> serialize(::silk::Raspicam_Config::awb_mode_t const& value)
 {
-  if (false) {} //this is here just to have the next items with 'else if'
+  if (false) { return ts::Error(""); } //this is here just to have the next items with 'else if'
   else if (value == ::silk::Raspicam_Config::awb_mode_t::OFF)
   {
     return ts::serialization::Value("OFF");
@@ -9411,7 +10166,7 @@ ts::Result<void> deserialize(std::shared_ptr<::silk::Bus_Descriptor_Base>& value
   auto const* value_sz_value = sz_value.find_object_member_by_name("value");
   if (!value_sz_value) { return ts::Error("Expected 'value' when deserializing"); }
   std::string const& path = type_sz_value->get_as_string();
-  if (false) {} //this is here just to have the next items with 'else if'
+  if (false) { return ts::Error(""); } //this is here just to have the next items with 'else if'
   else if (path == "::silk::UART_Linux_Descriptor")
   {
     value.reset(new ::silk::UART_Linux_Descriptor());
@@ -9443,12 +10198,13 @@ ts::Result<void> deserialize(std::shared_ptr<::silk::Bus_Descriptor_Base>& value
     return deserialize((::silk::SPI_Linux_Descriptor&)*value, *value_sz_value);
   }
   else { return ts::Error("Cannot find type '" + path + "' when deserializing"); }
+  return ts::success;
 }
 ts::Result<ts::serialization::Value> serialize(std::shared_ptr<::silk::Bus_Descriptor_Base> const& value)
 {
   if (!value) { return ts::serialization::Value(ts::serialization::Value::Type::EMPTY); }
   ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
-  if (false) {} //this is here just to have the next items with 'else if'
+  if (false) { return ts::Error(""); } //this is here just to have the next items with 'else if'
   else if (typeid(*value) == typeid(::silk::UART_Linux_Descriptor))
   {
     sz_value.add_object_member("type", "::silk::UART_Linux_Descriptor");
@@ -9511,7 +10267,7 @@ ts::Result<void> deserialize(std::shared_ptr<::silk::Node_Descriptor_Base>& valu
   auto const* value_sz_value = sz_value.find_object_member_by_name("value");
   if (!value_sz_value) { return ts::Error("Expected 'value' when deserializing"); }
   std::string const& path = type_sz_value->get_as_string();
-  if (false) {} //this is here just to have the next items with 'else if'
+  if (false) { return ts::Error(""); } //this is here just to have the next items with 'else if'
   else if (path == "::silk::ADC_Ammeter_Descriptor")
   {
     value.reset(new ::silk::ADC_Ammeter_Descriptor());
@@ -9547,10 +10303,15 @@ ts::Result<void> deserialize(std::shared_ptr<::silk::Node_Descriptor_Base>& valu
     value.reset(new ::silk::Gravity_Filter_Descriptor());
     return deserialize((::silk::Gravity_Filter_Descriptor&)*value, *value_sz_value);
   }
-  else if (path == "::silk::ECEF_KF_Descriptor")
+  else if (path == "::silk::KF_ECEF_Descriptor")
   {
-    value.reset(new ::silk::ECEF_KF_Descriptor());
-    return deserialize((::silk::ECEF_KF_Descriptor&)*value, *value_sz_value);
+    value.reset(new ::silk::KF_ECEF_Descriptor());
+    return deserialize((::silk::KF_ECEF_Descriptor&)*value, *value_sz_value);
+  }
+  else if (path == "::silk::ENU_Frame_System_Descriptor")
+  {
+    value.reset(new ::silk::ENU_Frame_System_Descriptor());
+    return deserialize((::silk::ENU_Frame_System_Descriptor&)*value, *value_sz_value);
   }
   else if (path == "::silk::LPF_Descriptor")
   {
@@ -9678,12 +10439,13 @@ ts::Result<void> deserialize(std::shared_ptr<::silk::Node_Descriptor_Base>& valu
     return deserialize((::silk::Vec3_Generator_Descriptor&)*value, *value_sz_value);
   }
   else { return ts::Error("Cannot find type '" + path + "' when deserializing"); }
+  return ts::success;
 }
 ts::Result<ts::serialization::Value> serialize(std::shared_ptr<::silk::Node_Descriptor_Base> const& value)
 {
   if (!value) { return ts::serialization::Value(ts::serialization::Value::Type::EMPTY); }
   ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
-  if (false) {} //this is here just to have the next items with 'else if'
+  if (false) { return ts::Error(""); } //this is here just to have the next items with 'else if'
   else if (typeid(*value) == typeid(::silk::ADC_Ammeter_Descriptor))
   {
     sz_value.add_object_member("type", "::silk::ADC_Ammeter_Descriptor");
@@ -9740,10 +10502,18 @@ ts::Result<ts::serialization::Value> serialize(std::shared_ptr<::silk::Node_Desc
     sz_value.add_object_member("value", result.extract_payload());
     return std::move(sz_value);
   }
-  else if (typeid(*value) == typeid(::silk::ECEF_KF_Descriptor))
+  else if (typeid(*value) == typeid(::silk::KF_ECEF_Descriptor))
   {
-    sz_value.add_object_member("type", "::silk::ECEF_KF_Descriptor");
-    auto result = serialize((::silk::ECEF_KF_Descriptor&)*value);
+    sz_value.add_object_member("type", "::silk::KF_ECEF_Descriptor");
+    auto result = serialize((::silk::KF_ECEF_Descriptor&)*value);
+    if (result != ts::success) { return result; }
+    sz_value.add_object_member("value", result.extract_payload());
+    return std::move(sz_value);
+  }
+  else if (typeid(*value) == typeid(::silk::ENU_Frame_System_Descriptor))
+  {
+    sz_value.add_object_member("type", "::silk::ENU_Frame_System_Descriptor");
+    auto result = serialize((::silk::ENU_Frame_System_Descriptor&)*value);
     if (result != ts::success) { return result; }
     sz_value.add_object_member("value", result.extract_payload());
     return std::move(sz_value);
@@ -9962,7 +10732,7 @@ ts::Result<void> deserialize(std::shared_ptr<::silk::Node_Config_Base>& value, t
   auto const* value_sz_value = sz_value.find_object_member_by_name("value");
   if (!value_sz_value) { return ts::Error("Expected 'value' when deserializing"); }
   std::string const& path = type_sz_value->get_as_string();
-  if (false) {} //this is here just to have the next items with 'else if'
+  if (false) { return ts::Error(""); } //this is here just to have the next items with 'else if'
   else if (path == "::silk::ADC_Ammeter_Config")
   {
     value.reset(new ::silk::ADC_Ammeter_Config());
@@ -9998,15 +10768,20 @@ ts::Result<void> deserialize(std::shared_ptr<::silk::Node_Config_Base>& value, t
     value.reset(new ::silk::Gravity_Filter_Config());
     return deserialize((::silk::Gravity_Filter_Config&)*value, *value_sz_value);
   }
-  else if (path == "::silk::ECEF_KF_Filter_Config")
+  else if (path == "::silk::KF_ECEF_Config")
   {
-    value.reset(new ::silk::ECEF_KF_Filter_Config());
-    return deserialize((::silk::ECEF_KF_Filter_Config&)*value, *value_sz_value);
+    value.reset(new ::silk::KF_ECEF_Config());
+    return deserialize((::silk::KF_ECEF_Config&)*value, *value_sz_value);
   }
-  else if (path == "::silk::LPF_Filter_Config")
+  else if (path == "::silk::ENU_Frame_System_Config")
   {
-    value.reset(new ::silk::LPF_Filter_Config());
-    return deserialize((::silk::LPF_Filter_Config&)*value, *value_sz_value);
+    value.reset(new ::silk::ENU_Frame_System_Config());
+    return deserialize((::silk::ENU_Frame_System_Config&)*value, *value_sz_value);
+  }
+  else if (path == "::silk::LPF_Config")
+  {
+    value.reset(new ::silk::LPF_Config());
+    return deserialize((::silk::LPF_Config&)*value, *value_sz_value);
   }
   else if (path == "::silk::MaxSonar_Config")
   {
@@ -10129,12 +10904,13 @@ ts::Result<void> deserialize(std::shared_ptr<::silk::Node_Config_Base>& value, t
     return deserialize((::silk::Vec3_Generator_Config&)*value, *value_sz_value);
   }
   else { return ts::Error("Cannot find type '" + path + "' when deserializing"); }
+  return ts::success;
 }
 ts::Result<ts::serialization::Value> serialize(std::shared_ptr<::silk::Node_Config_Base> const& value)
 {
   if (!value) { return ts::serialization::Value(ts::serialization::Value::Type::EMPTY); }
   ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
-  if (false) {} //this is here just to have the next items with 'else if'
+  if (false) { return ts::Error(""); } //this is here just to have the next items with 'else if'
   else if (typeid(*value) == typeid(::silk::ADC_Ammeter_Config))
   {
     sz_value.add_object_member("type", "::silk::ADC_Ammeter_Config");
@@ -10191,18 +10967,26 @@ ts::Result<ts::serialization::Value> serialize(std::shared_ptr<::silk::Node_Conf
     sz_value.add_object_member("value", result.extract_payload());
     return std::move(sz_value);
   }
-  else if (typeid(*value) == typeid(::silk::ECEF_KF_Filter_Config))
+  else if (typeid(*value) == typeid(::silk::KF_ECEF_Config))
   {
-    sz_value.add_object_member("type", "::silk::ECEF_KF_Filter_Config");
-    auto result = serialize((::silk::ECEF_KF_Filter_Config&)*value);
+    sz_value.add_object_member("type", "::silk::KF_ECEF_Config");
+    auto result = serialize((::silk::KF_ECEF_Config&)*value);
     if (result != ts::success) { return result; }
     sz_value.add_object_member("value", result.extract_payload());
     return std::move(sz_value);
   }
-  else if (typeid(*value) == typeid(::silk::LPF_Filter_Config))
+  else if (typeid(*value) == typeid(::silk::ENU_Frame_System_Config))
   {
-    sz_value.add_object_member("type", "::silk::LPF_Filter_Config");
-    auto result = serialize((::silk::LPF_Filter_Config&)*value);
+    sz_value.add_object_member("type", "::silk::ENU_Frame_System_Config");
+    auto result = serialize((::silk::ENU_Frame_System_Config&)*value);
+    if (result != ts::success) { return result; }
+    sz_value.add_object_member("value", result.extract_payload());
+    return std::move(sz_value);
+  }
+  else if (typeid(*value) == typeid(::silk::LPF_Config))
+  {
+    sz_value.add_object_member("type", "::silk::LPF_Config");
+    auto result = serialize((::silk::LPF_Config&)*value);
     if (result != ts::success) { return result; }
     sz_value.add_object_member("value", result.extract_payload());
     return std::move(sz_value);
@@ -10436,19 +11220,20 @@ ts::Result<void> deserialize(std::shared_ptr<::silk::UAV_Config_Base>& value, ts
   auto const* value_sz_value = sz_value.find_object_member_by_name("value");
   if (!value_sz_value) { return ts::Error("Expected 'value' when deserializing"); }
   std::string const& path = type_sz_value->get_as_string();
-  if (false) {} //this is here just to have the next items with 'else if'
+  if (false) { return ts::Error(""); } //this is here just to have the next items with 'else if'
   else if (path == "::silk::Multirotor_Config")
   {
     value.reset(new ::silk::Multirotor_Config());
     return deserialize((::silk::Multirotor_Config&)*value, *value_sz_value);
   }
   else { return ts::Error("Cannot find type '" + path + "' when deserializing"); }
+  return ts::success;
 }
 ts::Result<ts::serialization::Value> serialize(std::shared_ptr<::silk::UAV_Config_Base> const& value)
 {
   if (!value) { return ts::serialization::Value(ts::serialization::Value::Type::EMPTY); }
   ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
-  if (false) {} //this is here just to have the next items with 'else if'
+  if (false) { return ts::Error(""); } //this is here just to have the next items with 'else if'
   else if (typeid(*value) == typeid(::silk::Multirotor_Config))
   {
     sz_value.add_object_member("type", "::silk::Multirotor_Config");
@@ -10582,7 +11367,7 @@ ts::Result<void> deserialize(boost::variant<silk::Multirotor_Brain_Config::Horiz
   auto const* value_sz_value = sz_value.find_object_member_by_name("value");
   if (!value_sz_value) { return ts::Error("Expected 'value' when deserializing"); }
   std::string const& path = type_sz_value->get_as_string();
-  if (false) {} //this is here just to have the next items with 'else if'
+  if (false) { return ts::Error(""); } //this is here just to have the next items with 'else if'
   else if (path == "::silk::Multirotor_Brain_Config::Horizontal_Angle::Combined_XY_PIDs")
   {
     ::silk::Multirotor_Brain_Config::Horizontal_Angle::Combined_XY_PIDs v;
@@ -10598,11 +11383,12 @@ ts::Result<void> deserialize(boost::variant<silk::Multirotor_Brain_Config::Horiz
     value = v;
   }
   else { return ts::Error("Cannot find type '" + path + "' when deserializing"); }
+  return ts::success;
 }
 ts::Result<ts::serialization::Value> serialize(boost::variant<silk::Multirotor_Brain_Config::Horizontal_Angle::Combined_XY_PIDs,silk::Multirotor_Brain_Config::Horizontal_Angle::Separate_XY_PIDs> const& value)
 {
   ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
-  if (false) {} //this is here just to have the next items with 'else if'
+  if (false) { return ts::Error(""); } //this is here just to have the next items with 'else if'
   else if (auto* v = boost::get<::silk::Multirotor_Brain_Config::Horizontal_Angle::Combined_XY_PIDs>(&value))
   {
     sz_value.add_object_member("type", "::silk::Multirotor_Brain_Config::Horizontal_Angle::Combined_XY_PIDs");
@@ -10644,7 +11430,7 @@ ts::Result<ts::serialization::Value> serialize(std::vector<::silk::Oscillator_Co
   }
   return sz_value;
 }
-ts::Result<void> deserialize(std::vector<::silk::PCA9685_Config::Channel>& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(std::vector<::silk::PCA9685_Descriptor::Channel>& value, ts::serialization::Value const& sz_value)
 {
   value.clear();
   if (!sz_value.is_array()) { return ts::Error("Expected array value when deserializing"); }
@@ -10656,7 +11442,78 @@ ts::Result<void> deserialize(std::vector<::silk::PCA9685_Config::Channel>& value
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(std::vector<::silk::PCA9685_Config::Channel> const& value)
+ts::Result<ts::serialization::Value> serialize(std::vector<::silk::PCA9685_Descriptor::Channel> const& value)
+{
+  ts::serialization::Value sz_value(ts::serialization::Value::Type::ARRAY);
+  for (size_t i = 0; i < value.size(); i++)
+  {
+    auto result = serialize(value[i]);
+    if (result != ts::success) { return result; }
+    sz_value.add_array_element(result.extract_payload());
+  }
+  return sz_value;
+}
+ts::Result<void> deserialize(boost::variant<silk::PCA9685_Config::Servo_Channel,silk::PCA9685_Config::PWM_Channel>& value, ts::serialization::Value const& sz_value)
+{
+  if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  auto const* type_sz_value = sz_value.find_object_member_by_name("type");
+  if (!type_sz_value || !type_sz_value->is_string()) { return ts::Error("Expected 'type' string value when deserializing"); }
+  auto const* value_sz_value = sz_value.find_object_member_by_name("value");
+  if (!value_sz_value) { return ts::Error("Expected 'value' when deserializing"); }
+  std::string const& path = type_sz_value->get_as_string();
+  if (false) { return ts::Error(""); } //this is here just to have the next items with 'else if'
+  else if (path == "::silk::PCA9685_Config::Servo_Channel")
+  {
+    ::silk::PCA9685_Config::Servo_Channel v;
+    auto result = deserialize(boost::get<::silk::PCA9685_Config::Servo_Channel>(value), *value_sz_value);
+    if (result != ts::success) { return result; }
+    value = v;
+  }
+  else if (path == "::silk::PCA9685_Config::PWM_Channel")
+  {
+    ::silk::PCA9685_Config::PWM_Channel v;
+    auto result = deserialize(boost::get<::silk::PCA9685_Config::PWM_Channel>(value), *value_sz_value);
+    if (result != ts::success) { return result; }
+    value = v;
+  }
+  else { return ts::Error("Cannot find type '" + path + "' when deserializing"); }
+  return ts::success;
+}
+ts::Result<ts::serialization::Value> serialize(boost::variant<silk::PCA9685_Config::Servo_Channel,silk::PCA9685_Config::PWM_Channel> const& value)
+{
+  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  if (false) { return ts::Error(""); } //this is here just to have the next items with 'else if'
+  else if (auto* v = boost::get<::silk::PCA9685_Config::Servo_Channel>(&value))
+  {
+    sz_value.add_object_member("type", "::silk::PCA9685_Config::Servo_Channel");
+    auto result = serialize(*v);
+    if (result != ts::success) { return result; }
+    sz_value.add_object_member("value", result.extract_payload());
+    return std::move(sz_value);
+  }
+  else if (auto* v = boost::get<::silk::PCA9685_Config::PWM_Channel>(&value))
+  {
+    sz_value.add_object_member("type", "::silk::PCA9685_Config::PWM_Channel");
+    auto result = serialize(*v);
+    if (result != ts::success) { return result; }
+    sz_value.add_object_member("value", result.extract_payload());
+    return std::move(sz_value);
+  }
+  else { return ts::Error("Cannot serialize type"); }
+}
+ts::Result<void> deserialize(std::vector<boost::variant<silk::PCA9685_Config::Servo_Channel,silk::PCA9685_Config::PWM_Channel>>& value, ts::serialization::Value const& sz_value)
+{
+  value.clear();
+  if (!sz_value.is_array()) { return ts::Error("Expected array value when deserializing"); }
+  value.resize(sz_value.get_array_element_count());
+  for (size_t i = 0; i < value.size(); i++)
+  {
+    auto result = deserialize(value[i], sz_value.get_array_element_value(i));
+    if (result != ts::success) { return result; }
+  }
+  return ts::success;
+}
+ts::Result<ts::serialization::Value> serialize(std::vector<boost::variant<silk::PCA9685_Config::Servo_Channel,silk::PCA9685_Config::PWM_Channel>> const& value)
 {
   ts::serialization::Value sz_value(ts::serialization::Value::Type::ARRAY);
   for (size_t i = 0; i < value.size(); i++)
@@ -10675,7 +11532,7 @@ ts::Result<void> deserialize(boost::variant<silk::PIGPIO_Config::Servo_Channel,s
   auto const* value_sz_value = sz_value.find_object_member_by_name("value");
   if (!value_sz_value) { return ts::Error("Expected 'value' when deserializing"); }
   std::string const& path = type_sz_value->get_as_string();
-  if (false) {} //this is here just to have the next items with 'else if'
+  if (false) { return ts::Error(""); } //this is here just to have the next items with 'else if'
   else if (path == "::silk::PIGPIO_Config::Servo_Channel")
   {
     ::silk::PIGPIO_Config::Servo_Channel v;
@@ -10691,11 +11548,12 @@ ts::Result<void> deserialize(boost::variant<silk::PIGPIO_Config::Servo_Channel,s
     value = v;
   }
   else { return ts::Error("Cannot find type '" + path + "' when deserializing"); }
+  return ts::success;
 }
 ts::Result<ts::serialization::Value> serialize(boost::variant<silk::PIGPIO_Config::Servo_Channel,silk::PIGPIO_Config::PWM_Channel> const& value)
 {
   ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
-  if (false) {} //this is here just to have the next items with 'else if'
+  if (false) { return ts::Error(""); } //this is here just to have the next items with 'else if'
   else if (auto* v = boost::get<::silk::PIGPIO_Config::Servo_Channel>(&value))
   {
     sz_value.add_object_member("type", "::silk::PIGPIO_Config::Servo_Channel");
@@ -10722,7 +11580,7 @@ ts::Result<void> deserialize(boost::variant<silk::Rate_Controller_Config::Feedba
   auto const* value_sz_value = sz_value.find_object_member_by_name("value");
   if (!value_sz_value) { return ts::Error("Expected 'value' when deserializing"); }
   std::string const& path = type_sz_value->get_as_string();
-  if (false) {} //this is here just to have the next items with 'else if'
+  if (false) { return ts::Error(""); } //this is here just to have the next items with 'else if'
   else if (path == "::silk::Rate_Controller_Config::Feedback::Combined_XY_PIDs")
   {
     ::silk::Rate_Controller_Config::Feedback::Combined_XY_PIDs v;
@@ -10738,11 +11596,12 @@ ts::Result<void> deserialize(boost::variant<silk::Rate_Controller_Config::Feedba
     value = v;
   }
   else { return ts::Error("Cannot find type '" + path + "' when deserializing"); }
+  return ts::success;
 }
 ts::Result<ts::serialization::Value> serialize(boost::variant<silk::Rate_Controller_Config::Feedback::Combined_XY_PIDs,silk::Rate_Controller_Config::Feedback::Separate_XY_PIDs> const& value)
 {
   ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
-  if (false) {} //this is here just to have the next items with 'else if'
+  if (false) { return ts::Error(""); } //this is here just to have the next items with 'else if'
   else if (auto* v = boost::get<::silk::Rate_Controller_Config::Feedback::Combined_XY_PIDs>(&value))
   {
     sz_value.add_object_member("type", "::silk::Rate_Controller_Config::Feedback::Combined_XY_PIDs");

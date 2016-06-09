@@ -101,6 +101,7 @@ public:
 
   void set_motors(std::vector<::silk::Multirotor_Config::Motor> const& value);
   auto get_motors() const -> std::vector<::silk::Multirotor_Config::Motor> const&;
+  auto get_motors() -> std::vector<::silk::Multirotor_Config::Motor>&;
 
 
 private:
@@ -110,7 +111,7 @@ private:
   float m_moment_of_inertia = {0.000000f};
   float m_radius = {1.000000f};
   float m_height = {1.000000f};
-  float m_motor_z_torque = {0.000000f};
+  float m_motor_z_torque = {1.000000f};
   float m_motor_thrust = {1.000000f};
   float m_motor_acceleration = {10.000000f};
   float m_motor_deceleration = {10.000000f};
@@ -144,6 +145,7 @@ public:
 
   void set_descriptor(std::shared_ptr<::silk::Bus_Descriptor_Base> const& value);
   auto get_descriptor() const -> std::shared_ptr<::silk::Bus_Descriptor_Base> const&;
+  auto get_descriptor() -> std::shared_ptr<::silk::Bus_Descriptor_Base>&;
 
 
 private:
@@ -192,12 +194,15 @@ public:
 
   void set_descriptor(std::shared_ptr<::silk::Node_Descriptor_Base> const& value);
   auto get_descriptor() const -> std::shared_ptr<::silk::Node_Descriptor_Base> const&;
+  auto get_descriptor() -> std::shared_ptr<::silk::Node_Descriptor_Base>&;
 
   void set_config(std::shared_ptr<::silk::Node_Config_Base> const& value);
   auto get_config() const -> std::shared_ptr<::silk::Node_Config_Base> const&;
+  auto get_config() -> std::shared_ptr<::silk::Node_Config_Base>&;
 
   void set_input_paths(std::vector<std::string> const& value);
   auto get_input_paths() const -> std::vector<std::string> const&;
+  auto get_input_paths() -> std::vector<std::string>&;
 
 
 private:
@@ -218,12 +223,15 @@ public:
 
   void set_config(std::shared_ptr<::silk::UAV_Config_Base> const& value);
   auto get_config() const -> std::shared_ptr<::silk::UAV_Config_Base> const&;
+  auto get_config() -> std::shared_ptr<::silk::UAV_Config_Base>&;
 
   void set_buses(std::vector<::silk::Bus> const& value);
   auto get_buses() const -> std::vector<::silk::Bus> const&;
+  auto get_buses() -> std::vector<::silk::Bus>&;
 
   void set_nodes(std::vector<::silk::Node> const& value);
   auto get_nodes() const -> std::vector<::silk::Node> const&;
+  auto get_nodes() -> std::vector<::silk::Node>&;
 
 
 private:
@@ -237,20 +245,30 @@ struct UART_Linux_Descriptor : public ::silk::Bus_Descriptor_Base
 {
 public:
 
+  enum class baud_t
+  {
+    _9600 = 0,
+    _19200 = 1,
+    _38400 = 2,
+    _57600 = 3,
+    _115200 = 4,
+    _230400 = 5,
+  };
+
   UART_Linux_Descriptor() noexcept {};
   virtual ~UART_Linux_Descriptor() noexcept {};
 
   void set_dev(std::string const& value);
   auto get_dev() const -> std::string const&;
 
-  void set_baud(uint32_t const& value);
-  auto get_baud() const -> uint32_t const&;
+  void set_baud(baud_t const& value);
+  auto get_baud() const -> baud_t const&;
 
 
 private:
 
   std::string m_dev = {"/dev/ttyAMA0"};
-  uint32_t m_baud = {115200};
+  baud_t m_baud = {::silk::UART_Linux_Descriptor::baud_t::_115200};
 };
 
 struct UART_BBang_Descriptor : public ::silk::Bus_Descriptor_Base
@@ -287,10 +305,14 @@ public:
   void set_dev(uint32_t const& value);
   auto get_dev() const -> uint32_t const&;
 
+  void set_baud(uint32_t const& value);
+  auto get_baud() const -> uint32_t const&;
+
 
 private:
 
   uint32_t m_dev = {0};
+  uint32_t m_baud = {400000};
 };
 
 struct I2C_Linux_Descriptor : public ::silk::Bus_Descriptor_Base
@@ -325,12 +347,16 @@ public:
   void set_mode(uint32_t const& value);
   auto get_mode() const -> uint32_t const&;
 
+  void set_speed(uint32_t const& value);
+  auto get_speed() const -> uint32_t const&;
+
 
 private:
 
   uint32_t m_dev = {0};
   uint32_t m_baud = {1000000};
   uint32_t m_mode = {0};
+  uint32_t m_speed = {1000000};
 };
 
 struct SPI_Linux_Descriptor : public ::silk::Bus_Descriptor_Base
@@ -685,12 +711,12 @@ private:
 
 };
 
-struct ECEF_KF_Descriptor : public ::silk::Node_Descriptor_Base
+struct KF_ECEF_Descriptor : public ::silk::Node_Descriptor_Base
 {
 public:
 
-  ECEF_KF_Descriptor() noexcept {};
-  virtual ~ECEF_KF_Descriptor() noexcept {};
+  KF_ECEF_Descriptor() noexcept {};
+  virtual ~KF_ECEF_Descriptor() noexcept {};
 
   void set_rate(uint32_t const& value);
   auto get_rate() const -> uint32_t const&;
@@ -701,12 +727,12 @@ private:
   uint32_t m_rate = {1};
 };
 
-struct ECEF_KF_Filter_Config : public ::silk::Node_Config_Base
+struct KF_ECEF_Config : public ::silk::Node_Config_Base
 {
 public:
 
-  ECEF_KF_Filter_Config() noexcept {};
-  virtual ~ECEF_KF_Filter_Config() noexcept {};
+  KF_ECEF_Config() noexcept {};
+  virtual ~KF_ECEF_Config() noexcept {};
 
   void set_gps_position_lag(float const& value);
   auto get_gps_position_lag() const -> float const&;
@@ -737,6 +763,34 @@ private:
   float m_acceleration_accuracy = {2.000000f};
 };
 
+struct ENU_Frame_System_Descriptor : public ::silk::Node_Descriptor_Base
+{
+public:
+
+  ENU_Frame_System_Descriptor() noexcept {};
+  virtual ~ENU_Frame_System_Descriptor() noexcept {};
+
+  void set_rate(uint32_t const& value);
+  auto get_rate() const -> uint32_t const&;
+
+
+private:
+
+  uint32_t m_rate = {1};
+};
+
+struct ENU_Frame_System_Config : public ::silk::Node_Config_Base
+{
+public:
+
+  ENU_Frame_System_Config() noexcept {};
+  virtual ~ENU_Frame_System_Config() noexcept {};
+
+
+private:
+
+};
+
 struct LPF_Descriptor : public ::silk::Node_Descriptor_Base
 {
 public:
@@ -753,24 +807,24 @@ private:
   uint32_t m_rate = {1};
 };
 
-struct LPF_Filter_Config : public ::silk::Node_Config_Base
+struct LPF_Config : public ::silk::Node_Config_Base
 {
 public:
 
-  LPF_Filter_Config() noexcept {};
-  virtual ~LPF_Filter_Config() noexcept {};
+  LPF_Config() noexcept {};
+  virtual ~LPF_Config() noexcept {};
 
-  void set_lpf_poles(uint32_t const& value);
-  auto get_lpf_poles() const -> uint32_t const&;
+  void set_poles(uint32_t const& value);
+  auto get_poles() const -> uint32_t const&;
 
-  void set_lpf_cutoff_frequency(float const& value);
-  auto get_lpf_cutoff_frequency() const -> float const&;
+  void set_cutoff_frequency(float const& value);
+  auto get_cutoff_frequency() const -> float const&;
 
 
 private:
 
-  uint32_t m_lpf_poles = {1};
-  float m_lpf_cutoff_frequency = {1.000000f};
+  uint32_t m_poles = {1};
+  float m_cutoff_frequency = {1.000000f};
 };
 
 struct MaxSonar_Descriptor : public ::silk::Node_Descriptor_Base
@@ -813,7 +867,7 @@ public:
 private:
 
   math::vec3<float> m_direction = {0.000000f, 0.000000f, 0.000000f};
-  float m_max_distance = {6.000000f};
+  float m_max_distance = {10.000000f};
   float m_min_distance = {0.200000f};
 };
 
@@ -989,12 +1043,15 @@ public:
 
     void set_acceleration(std::vector<::silk::Acceleration_Calibration_Point> const& value);
     auto get_acceleration() const -> std::vector<::silk::Acceleration_Calibration_Point> const&;
+    auto get_acceleration() -> std::vector<::silk::Acceleration_Calibration_Point>&;
 
     void set_angular_velocity(std::vector<::silk::Angular_Velocity_Calibration_Point> const& value);
     auto get_angular_velocity() const -> std::vector<::silk::Angular_Velocity_Calibration_Point> const&;
+    auto get_angular_velocity() -> std::vector<::silk::Angular_Velocity_Calibration_Point>&;
 
     void set_magnetic_field(std::vector<::silk::Magnetic_Field_Calibration_Point> const& value);
     auto get_magnetic_field() const -> std::vector<::silk::Magnetic_Field_Calibration_Point> const&;
+    auto get_magnetic_field() -> std::vector<::silk::Magnetic_Field_Calibration_Point>&;
 
 
   private:
@@ -1012,6 +1069,7 @@ public:
 
   void set_calibration(Calibration const& value);
   auto get_calibration() const -> Calibration const&;
+  auto get_calibration() -> Calibration&;
 
 
 private:
@@ -1129,9 +1187,11 @@ public:
 
       void set_x_pid(::silk::PID_Controller_Descriptor const& value);
       auto get_x_pid() const -> ::silk::PID_Controller_Descriptor const&;
+      auto get_x_pid() -> ::silk::PID_Controller_Descriptor&;
 
       void set_y_pid(::silk::PID_Controller_Descriptor const& value);
       auto get_y_pid() const -> ::silk::PID_Controller_Descriptor const&;
+      auto get_y_pid() -> ::silk::PID_Controller_Descriptor&;
 
 
     private:
@@ -1148,6 +1208,7 @@ public:
 
     void set_xy_pids(boost::variant<Combined_XY_PIDs,Separate_XY_PIDs> const& value);
     auto get_xy_pids() const -> boost::variant<Combined_XY_PIDs,Separate_XY_PIDs> const&;
+    auto get_xy_pids() -> boost::variant<Combined_XY_PIDs,Separate_XY_PIDs>&;
 
 
   private:
@@ -1166,20 +1227,23 @@ public:
     void set_max_speed(float const& value);
     auto get_max_speed() const -> float const&;
 
-    void set_lpf(::silk::LPF_Filter_Config const& value);
-    auto get_lpf() const -> ::silk::LPF_Filter_Config const&;
+    void set_lpf(::silk::LPF_Config const& value);
+    auto get_lpf() const -> ::silk::LPF_Config const&;
+    auto get_lpf() -> ::silk::LPF_Config&;
 
     void set_velocity_pi(::silk::PI_Controller_Descriptor const& value);
     auto get_velocity_pi() const -> ::silk::PI_Controller_Descriptor const&;
+    auto get_velocity_pi() -> ::silk::PI_Controller_Descriptor&;
 
     void set_position_p(::silk::P_Controller_Descriptor const& value);
     auto get_position_p() const -> ::silk::P_Controller_Descriptor const&;
+    auto get_position_p() -> ::silk::P_Controller_Descriptor&;
 
 
   private:
 
     float m_max_speed = {2.000000f};
-    ::silk::LPF_Filter_Config m_lpf = {};
+    ::silk::LPF_Config m_lpf = {};
     ::silk::PI_Controller_Descriptor m_velocity_pi = {};
     ::silk::P_Controller_Descriptor m_position_p = {};
   };
@@ -1196,6 +1260,7 @@ public:
 
     void set_pid(::silk::PID_Controller_Descriptor const& value);
     auto get_pid() const -> ::silk::PID_Controller_Descriptor const&;
+    auto get_pid() -> ::silk::PID_Controller_Descriptor&;
 
 
   private:
@@ -1214,20 +1279,23 @@ public:
     void set_max_speed(float const& value);
     auto get_max_speed() const -> float const&;
 
-    void set_lpf(::silk::LPF_Filter_Config const& value);
-    auto get_lpf() const -> ::silk::LPF_Filter_Config const&;
+    void set_lpf(::silk::LPF_Config const& value);
+    auto get_lpf() const -> ::silk::LPF_Config const&;
+    auto get_lpf() -> ::silk::LPF_Config&;
 
     void set_speed_pi(::silk::PI_Controller_Descriptor const& value);
     auto get_speed_pi() const -> ::silk::PI_Controller_Descriptor const&;
+    auto get_speed_pi() -> ::silk::PI_Controller_Descriptor&;
 
     void set_position_p(::silk::P_Controller_Descriptor const& value);
     auto get_position_p() const -> ::silk::P_Controller_Descriptor const&;
+    auto get_position_p() -> ::silk::P_Controller_Descriptor&;
 
 
   private:
 
     float m_max_speed = {2.000000f};
-    ::silk::LPF_Filter_Config m_lpf = {};
+    ::silk::LPF_Config m_lpf = {};
     ::silk::PI_Controller_Descriptor m_speed_pi = {};
     ::silk::P_Controller_Descriptor m_position_p = {};
   };
@@ -1235,21 +1303,33 @@ public:
   Multirotor_Brain_Config() noexcept {};
   virtual ~Multirotor_Brain_Config() noexcept {};
 
+  void set_max_thrust(float const& value);
+  auto get_max_thrust() const -> float const&;
+
+  void set_min_thrust(float const& value);
+  auto get_min_thrust() const -> float const&;
+
   void set_horizontal_angle(Horizontal_Angle const& value);
   auto get_horizontal_angle() const -> Horizontal_Angle const&;
+  auto get_horizontal_angle() -> Horizontal_Angle&;
 
   void set_horizontal_position(Horizontal_Position const& value);
   auto get_horizontal_position() const -> Horizontal_Position const&;
+  auto get_horizontal_position() -> Horizontal_Position&;
 
   void set_yaw_angle(Yaw_Angle const& value);
   auto get_yaw_angle() const -> Yaw_Angle const&;
+  auto get_yaw_angle() -> Yaw_Angle&;
 
   void set_altitude(Altitude const& value);
   auto get_altitude() const -> Altitude const&;
+  auto get_altitude() -> Altitude&;
 
 
 private:
 
+  float m_max_thrust = {2.000000f};
+  float m_min_thrust = {1.000000f};
   Horizontal_Angle m_horizontal_angle = {};
   Horizontal_Position m_horizontal_position = {};
   Yaw_Angle m_yaw_angle = {};
@@ -1409,6 +1489,7 @@ public:
 
   void set_noise(Noise const& value);
   auto get_noise() const -> Noise const&;
+  auto get_noise() -> Noise&;
 
 
 private:
@@ -1479,6 +1560,7 @@ public:
 
   void set_components(std::vector<::silk::Oscillator_Config::Component> const& value);
   auto get_components() const -> std::vector<::silk::Oscillator_Config::Component> const&;
+  auto get_components() -> std::vector<::silk::Oscillator_Config::Component>&;
 
 
 private:
@@ -1492,6 +1574,26 @@ struct PCA9685_Descriptor : public ::silk::Node_Descriptor_Base
 {
 public:
 
+  struct Channel
+  {
+  public:
+
+    Channel() noexcept {};
+    virtual ~Channel() noexcept {};
+
+    void set_enabled(bool const& value);
+    auto get_enabled() const -> bool const&;
+
+    void set_servo_signal(bool const& value);
+    auto get_servo_signal() const -> bool const&;
+
+
+  private:
+
+    bool m_enabled = {false};
+    bool m_servo_signal = {false};
+  };
+
   PCA9685_Descriptor() noexcept {};
   virtual ~PCA9685_Descriptor() noexcept {};
 
@@ -1504,60 +1606,74 @@ public:
   void set_address(uint8_t const& value);
   auto get_address() const -> uint8_t const&;
 
+  void set_channels(std::vector<::silk::PCA9685_Descriptor::Channel> const& value);
+  auto get_channels() const -> std::vector<::silk::PCA9685_Descriptor::Channel> const&;
+  auto get_channels() -> std::vector<::silk::PCA9685_Descriptor::Channel>&;
+
 
 private:
 
   std::string m_bus = {};
   uint32_t m_rate = {30};
   uint8_t m_address = {64};
+  std::vector<::silk::PCA9685_Descriptor::Channel> m_channels = {};
 };
 
 struct PCA9685_Config : public ::silk::Node_Config_Base
 {
 public:
 
-  struct Channel
+  struct Servo_Channel
   {
   public:
 
-    Channel() noexcept {};
-    virtual ~Channel() noexcept {};
+    Servo_Channel() noexcept {};
+    virtual ~Servo_Channel() noexcept {};
 
-    void set_servo_signal(bool const& value);
-    auto get_servo_signal() const -> bool const&;
+    void set_min(float const& value);
+    auto get_min() const -> float const&;
 
-    void set_min_servo(float const& value);
-    auto get_min_servo() const -> float const&;
-
-    void set_max_servo(float const& value);
-    auto get_max_servo() const -> float const&;
-
-    void set_min_pwm(float const& value);
-    auto get_min_pwm() const -> float const&;
-
-    void set_max_pwm(float const& value);
-    auto get_max_pwm() const -> float const&;
+    void set_max(float const& value);
+    auto get_max() const -> float const&;
 
 
   private:
 
-    bool m_servo_signal = {false};
-    float m_min_servo = {1.000000f};
-    float m_max_servo = {2.000000f};
-    float m_min_pwm = {0.000000f};
-    float m_max_pwm = {1.000000f};
+    float m_min = {1.000000f};
+    float m_max = {2.000000f};
+  };
+
+  struct PWM_Channel
+  {
+  public:
+
+    PWM_Channel() noexcept {};
+    virtual ~PWM_Channel() noexcept {};
+
+    void set_min(float const& value);
+    auto get_min() const -> float const&;
+
+    void set_max(float const& value);
+    auto get_max() const -> float const&;
+
+
+  private:
+
+    float m_min = {0.000000f};
+    float m_max = {1.000000f};
   };
 
   PCA9685_Config() noexcept {};
   virtual ~PCA9685_Config() noexcept {};
 
-  void set_channels(std::vector<::silk::PCA9685_Config::Channel> const& value);
-  auto get_channels() const -> std::vector<::silk::PCA9685_Config::Channel> const&;
+  void set_channels(std::vector<boost::variant<Servo_Channel,PWM_Channel>> const& value);
+  auto get_channels() const -> std::vector<boost::variant<Servo_Channel,PWM_Channel>> const&;
+  auto get_channels() -> std::vector<boost::variant<Servo_Channel,PWM_Channel>>&;
 
 
 private:
 
-  std::vector<::silk::PCA9685_Config::Channel> m_channels = {};
+  std::vector<boost::variant<Servo_Channel,PWM_Channel>> m_channels = {};
 };
 
 struct PIGPIO_Descriptor : public ::silk::Node_Descriptor_Base
@@ -1593,81 +1709,107 @@ public:
 
   void set_gpio_2(Channel const& value);
   auto get_gpio_2() const -> Channel const&;
+  auto get_gpio_2() -> Channel&;
 
   void set_gpio_3(Channel const& value);
   auto get_gpio_3() const -> Channel const&;
+  auto get_gpio_3() -> Channel&;
 
   void set_gpio_4(Channel const& value);
   auto get_gpio_4() const -> Channel const&;
+  auto get_gpio_4() -> Channel&;
 
   void set_gpio_5(Channel const& value);
   auto get_gpio_5() const -> Channel const&;
+  auto get_gpio_5() -> Channel&;
 
   void set_gpio_6(Channel const& value);
   auto get_gpio_6() const -> Channel const&;
+  auto get_gpio_6() -> Channel&;
 
   void set_gpio_7(Channel const& value);
   auto get_gpio_7() const -> Channel const&;
+  auto get_gpio_7() -> Channel&;
 
   void set_gpio_8(Channel const& value);
   auto get_gpio_8() const -> Channel const&;
+  auto get_gpio_8() -> Channel&;
 
   void set_gpio_9(Channel const& value);
   auto get_gpio_9() const -> Channel const&;
+  auto get_gpio_9() -> Channel&;
 
   void set_gpio_10(Channel const& value);
   auto get_gpio_10() const -> Channel const&;
+  auto get_gpio_10() -> Channel&;
 
   void set_gpio_11(Channel const& value);
   auto get_gpio_11() const -> Channel const&;
+  auto get_gpio_11() -> Channel&;
 
   void set_gpio_12(Channel const& value);
   auto get_gpio_12() const -> Channel const&;
+  auto get_gpio_12() -> Channel&;
 
   void set_gpio_13(Channel const& value);
   auto get_gpio_13() const -> Channel const&;
+  auto get_gpio_13() -> Channel&;
 
   void set_gpio_14(Channel const& value);
   auto get_gpio_14() const -> Channel const&;
+  auto get_gpio_14() -> Channel&;
 
   void set_gpio_15(Channel const& value);
   auto get_gpio_15() const -> Channel const&;
+  auto get_gpio_15() -> Channel&;
 
   void set_gpio_16(Channel const& value);
   auto get_gpio_16() const -> Channel const&;
+  auto get_gpio_16() -> Channel&;
 
   void set_gpio_17(Channel const& value);
   auto get_gpio_17() const -> Channel const&;
+  auto get_gpio_17() -> Channel&;
 
   void set_gpio_18(Channel const& value);
   auto get_gpio_18() const -> Channel const&;
+  auto get_gpio_18() -> Channel&;
 
   void set_gpio_19(Channel const& value);
   auto get_gpio_19() const -> Channel const&;
+  auto get_gpio_19() -> Channel&;
 
   void set_gpio_20(Channel const& value);
   auto get_gpio_20() const -> Channel const&;
+  auto get_gpio_20() -> Channel&;
 
   void set_gpio_21(Channel const& value);
   auto get_gpio_21() const -> Channel const&;
+  auto get_gpio_21() -> Channel&;
 
   void set_gpio_22(Channel const& value);
   auto get_gpio_22() const -> Channel const&;
+  auto get_gpio_22() -> Channel&;
 
   void set_gpio_23(Channel const& value);
   auto get_gpio_23() const -> Channel const&;
+  auto get_gpio_23() -> Channel&;
 
   void set_gpio_24(Channel const& value);
   auto get_gpio_24() const -> Channel const&;
+  auto get_gpio_24() -> Channel&;
 
   void set_gpio_25(Channel const& value);
   auto get_gpio_25() const -> Channel const&;
+  auto get_gpio_25() -> Channel&;
 
   void set_gpio_26(Channel const& value);
   auto get_gpio_26() const -> Channel const&;
+  auto get_gpio_26() -> Channel&;
 
   void set_gpio_27(Channel const& value);
   auto get_gpio_27() const -> Channel const&;
+  auto get_gpio_27() -> Channel&;
 
 
 private:
@@ -1749,81 +1891,107 @@ public:
 
   void set_gpio_2(boost::variant<Servo_Channel,PWM_Channel> const& value);
   auto get_gpio_2() const -> boost::variant<Servo_Channel,PWM_Channel> const&;
+  auto get_gpio_2() -> boost::variant<Servo_Channel,PWM_Channel>&;
 
   void set_gpio_3(boost::variant<Servo_Channel,PWM_Channel> const& value);
   auto get_gpio_3() const -> boost::variant<Servo_Channel,PWM_Channel> const&;
+  auto get_gpio_3() -> boost::variant<Servo_Channel,PWM_Channel>&;
 
   void set_gpio_4(boost::variant<Servo_Channel,PWM_Channel> const& value);
   auto get_gpio_4() const -> boost::variant<Servo_Channel,PWM_Channel> const&;
+  auto get_gpio_4() -> boost::variant<Servo_Channel,PWM_Channel>&;
 
   void set_gpio_5(boost::variant<Servo_Channel,PWM_Channel> const& value);
   auto get_gpio_5() const -> boost::variant<Servo_Channel,PWM_Channel> const&;
+  auto get_gpio_5() -> boost::variant<Servo_Channel,PWM_Channel>&;
 
   void set_gpio_6(boost::variant<Servo_Channel,PWM_Channel> const& value);
   auto get_gpio_6() const -> boost::variant<Servo_Channel,PWM_Channel> const&;
+  auto get_gpio_6() -> boost::variant<Servo_Channel,PWM_Channel>&;
 
   void set_gpio_7(boost::variant<Servo_Channel,PWM_Channel> const& value);
   auto get_gpio_7() const -> boost::variant<Servo_Channel,PWM_Channel> const&;
+  auto get_gpio_7() -> boost::variant<Servo_Channel,PWM_Channel>&;
 
   void set_gpio_8(boost::variant<Servo_Channel,PWM_Channel> const& value);
   auto get_gpio_8() const -> boost::variant<Servo_Channel,PWM_Channel> const&;
+  auto get_gpio_8() -> boost::variant<Servo_Channel,PWM_Channel>&;
 
   void set_gpio_9(boost::variant<Servo_Channel,PWM_Channel> const& value);
   auto get_gpio_9() const -> boost::variant<Servo_Channel,PWM_Channel> const&;
+  auto get_gpio_9() -> boost::variant<Servo_Channel,PWM_Channel>&;
 
   void set_gpio_10(boost::variant<Servo_Channel,PWM_Channel> const& value);
   auto get_gpio_10() const -> boost::variant<Servo_Channel,PWM_Channel> const&;
+  auto get_gpio_10() -> boost::variant<Servo_Channel,PWM_Channel>&;
 
   void set_gpio_11(boost::variant<Servo_Channel,PWM_Channel> const& value);
   auto get_gpio_11() const -> boost::variant<Servo_Channel,PWM_Channel> const&;
+  auto get_gpio_11() -> boost::variant<Servo_Channel,PWM_Channel>&;
 
   void set_gpio_12(boost::variant<Servo_Channel,PWM_Channel> const& value);
   auto get_gpio_12() const -> boost::variant<Servo_Channel,PWM_Channel> const&;
+  auto get_gpio_12() -> boost::variant<Servo_Channel,PWM_Channel>&;
 
   void set_gpio_13(boost::variant<Servo_Channel,PWM_Channel> const& value);
   auto get_gpio_13() const -> boost::variant<Servo_Channel,PWM_Channel> const&;
+  auto get_gpio_13() -> boost::variant<Servo_Channel,PWM_Channel>&;
 
   void set_gpio_14(boost::variant<Servo_Channel,PWM_Channel> const& value);
   auto get_gpio_14() const -> boost::variant<Servo_Channel,PWM_Channel> const&;
+  auto get_gpio_14() -> boost::variant<Servo_Channel,PWM_Channel>&;
 
   void set_gpio_15(boost::variant<Servo_Channel,PWM_Channel> const& value);
   auto get_gpio_15() const -> boost::variant<Servo_Channel,PWM_Channel> const&;
+  auto get_gpio_15() -> boost::variant<Servo_Channel,PWM_Channel>&;
 
   void set_gpio_16(boost::variant<Servo_Channel,PWM_Channel> const& value);
   auto get_gpio_16() const -> boost::variant<Servo_Channel,PWM_Channel> const&;
+  auto get_gpio_16() -> boost::variant<Servo_Channel,PWM_Channel>&;
 
   void set_gpio_17(boost::variant<Servo_Channel,PWM_Channel> const& value);
   auto get_gpio_17() const -> boost::variant<Servo_Channel,PWM_Channel> const&;
+  auto get_gpio_17() -> boost::variant<Servo_Channel,PWM_Channel>&;
 
   void set_gpio_18(boost::variant<Servo_Channel,PWM_Channel> const& value);
   auto get_gpio_18() const -> boost::variant<Servo_Channel,PWM_Channel> const&;
+  auto get_gpio_18() -> boost::variant<Servo_Channel,PWM_Channel>&;
 
   void set_gpio_19(boost::variant<Servo_Channel,PWM_Channel> const& value);
   auto get_gpio_19() const -> boost::variant<Servo_Channel,PWM_Channel> const&;
+  auto get_gpio_19() -> boost::variant<Servo_Channel,PWM_Channel>&;
 
   void set_gpio_20(boost::variant<Servo_Channel,PWM_Channel> const& value);
   auto get_gpio_20() const -> boost::variant<Servo_Channel,PWM_Channel> const&;
+  auto get_gpio_20() -> boost::variant<Servo_Channel,PWM_Channel>&;
 
   void set_gpio_21(boost::variant<Servo_Channel,PWM_Channel> const& value);
   auto get_gpio_21() const -> boost::variant<Servo_Channel,PWM_Channel> const&;
+  auto get_gpio_21() -> boost::variant<Servo_Channel,PWM_Channel>&;
 
   void set_gpio_22(boost::variant<Servo_Channel,PWM_Channel> const& value);
   auto get_gpio_22() const -> boost::variant<Servo_Channel,PWM_Channel> const&;
+  auto get_gpio_22() -> boost::variant<Servo_Channel,PWM_Channel>&;
 
   void set_gpio_23(boost::variant<Servo_Channel,PWM_Channel> const& value);
   auto get_gpio_23() const -> boost::variant<Servo_Channel,PWM_Channel> const&;
+  auto get_gpio_23() -> boost::variant<Servo_Channel,PWM_Channel>&;
 
   void set_gpio_24(boost::variant<Servo_Channel,PWM_Channel> const& value);
   auto get_gpio_24() const -> boost::variant<Servo_Channel,PWM_Channel> const&;
+  auto get_gpio_24() -> boost::variant<Servo_Channel,PWM_Channel>&;
 
   void set_gpio_25(boost::variant<Servo_Channel,PWM_Channel> const& value);
   auto get_gpio_25() const -> boost::variant<Servo_Channel,PWM_Channel> const&;
+  auto get_gpio_25() -> boost::variant<Servo_Channel,PWM_Channel>&;
 
   void set_gpio_26(boost::variant<Servo_Channel,PWM_Channel> const& value);
   auto get_gpio_26() const -> boost::variant<Servo_Channel,PWM_Channel> const&;
+  auto get_gpio_26() -> boost::variant<Servo_Channel,PWM_Channel>&;
 
   void set_gpio_27(boost::variant<Servo_Channel,PWM_Channel> const& value);
   auto get_gpio_27() const -> boost::variant<Servo_Channel,PWM_Channel> const&;
+  auto get_gpio_27() -> boost::variant<Servo_Channel,PWM_Channel>&;
 
 
 private:
@@ -1981,9 +2149,11 @@ public:
 
       void set_x_pid(::silk::PID_Controller_Descriptor const& value);
       auto get_x_pid() const -> ::silk::PID_Controller_Descriptor const&;
+      auto get_x_pid() -> ::silk::PID_Controller_Descriptor&;
 
       void set_y_pid(::silk::PID_Controller_Descriptor const& value);
       auto get_y_pid() const -> ::silk::PID_Controller_Descriptor const&;
+      auto get_y_pid() -> ::silk::PID_Controller_Descriptor&;
 
 
     private:
@@ -2000,9 +2170,11 @@ public:
 
     void set_xy_pids(boost::variant<Combined_XY_PIDs,Separate_XY_PIDs> const& value);
     auto get_xy_pids() const -> boost::variant<Combined_XY_PIDs,Separate_XY_PIDs> const&;
+    auto get_xy_pids() -> boost::variant<Combined_XY_PIDs,Separate_XY_PIDs>&;
 
     void set_z_pid(::silk::PID_Controller_Descriptor const& value);
     auto get_z_pid() const -> ::silk::PID_Controller_Descriptor const&;
+    auto get_z_pid() -> ::silk::PID_Controller_Descriptor&;
 
 
   private:
@@ -2037,9 +2209,11 @@ public:
 
   void set_feedback(Feedback const& value);
   auto get_feedback() const -> Feedback const&;
+  auto get_feedback() -> Feedback&;
 
   void set_feedforward(Feedforward const& value);
   auto get_feedforward() const -> Feedforward const&;
+  auto get_feedforward() -> Feedforward&;
 
 
 private:
@@ -2080,12 +2254,15 @@ public:
 
   void set_streaming_low(Quality const& value);
   auto get_streaming_low() const -> Quality const&;
+  auto get_streaming_low() -> Quality&;
 
   void set_streaming_high(Quality const& value);
   auto get_streaming_high() const -> Quality const&;
+  auto get_streaming_high() -> Quality&;
 
   void set_recording(Quality const& value);
   auto get_recording() const -> Quality const&;
+  auto get_recording() -> Quality&;
 
 
 private:
@@ -2225,13 +2402,14 @@ public:
   Resampler_Config() noexcept {};
   virtual ~Resampler_Config() noexcept {};
 
-  void set_lpf(::silk::LPF_Filter_Config const& value);
-  auto get_lpf() const -> ::silk::LPF_Filter_Config const&;
+  void set_lpf(::silk::LPF_Config const& value);
+  auto get_lpf() const -> ::silk::LPF_Config const&;
+  auto get_lpf() -> ::silk::LPF_Config&;
 
 
 private:
 
-  ::silk::LPF_Filter_Config m_lpf = {};
+  ::silk::LPF_Config m_lpf = {};
 };
 
 struct Scalar_Generator_Descriptor : public ::silk::Node_Descriptor_Base
@@ -2323,12 +2501,15 @@ public:
 
   void set_x_channel(Channel const& value);
   auto get_x_channel() const -> Channel const&;
+  auto get_x_channel() -> Channel&;
 
   void set_y_channel(Channel const& value);
   auto get_y_channel() const -> Channel const&;
+  auto get_y_channel() -> Channel&;
 
   void set_z_channel(Channel const& value);
   auto get_z_channel() const -> Channel const&;
+  auto get_z_channel() -> Channel&;
 
 
 private:
@@ -2609,6 +2790,8 @@ ts::Result<void> deserialize(::silk::Node& value, ts::serialization::Value const
 ts::Result<ts::serialization::Value> serialize(::silk::Node const& value);
 ts::Result<void> deserialize(::silk::Settings& value, ts::serialization::Value const& sz_value);
 ts::Result<ts::serialization::Value> serialize(::silk::Settings const& value);
+ts::Result<void> deserialize(::silk::UART_Linux_Descriptor::baud_t& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(::silk::UART_Linux_Descriptor::baud_t const& value);
 ts::Result<void> deserialize(::silk::UART_Linux_Descriptor& value, ts::serialization::Value const& sz_value);
 ts::Result<ts::serialization::Value> serialize(::silk::UART_Linux_Descriptor const& value);
 ts::Result<void> deserialize(::silk::UART_BBang_Descriptor& value, ts::serialization::Value const& sz_value);
@@ -2657,14 +2840,18 @@ ts::Result<void> deserialize(::silk::Gravity_Filter_Descriptor& value, ts::seria
 ts::Result<ts::serialization::Value> serialize(::silk::Gravity_Filter_Descriptor const& value);
 ts::Result<void> deserialize(::silk::Gravity_Filter_Config& value, ts::serialization::Value const& sz_value);
 ts::Result<ts::serialization::Value> serialize(::silk::Gravity_Filter_Config const& value);
-ts::Result<void> deserialize(::silk::ECEF_KF_Descriptor& value, ts::serialization::Value const& sz_value);
-ts::Result<ts::serialization::Value> serialize(::silk::ECEF_KF_Descriptor const& value);
-ts::Result<void> deserialize(::silk::ECEF_KF_Filter_Config& value, ts::serialization::Value const& sz_value);
-ts::Result<ts::serialization::Value> serialize(::silk::ECEF_KF_Filter_Config const& value);
+ts::Result<void> deserialize(::silk::KF_ECEF_Descriptor& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(::silk::KF_ECEF_Descriptor const& value);
+ts::Result<void> deserialize(::silk::KF_ECEF_Config& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(::silk::KF_ECEF_Config const& value);
+ts::Result<void> deserialize(::silk::ENU_Frame_System_Descriptor& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(::silk::ENU_Frame_System_Descriptor const& value);
+ts::Result<void> deserialize(::silk::ENU_Frame_System_Config& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(::silk::ENU_Frame_System_Config const& value);
 ts::Result<void> deserialize(::silk::LPF_Descriptor& value, ts::serialization::Value const& sz_value);
 ts::Result<ts::serialization::Value> serialize(::silk::LPF_Descriptor const& value);
-ts::Result<void> deserialize(::silk::LPF_Filter_Config& value, ts::serialization::Value const& sz_value);
-ts::Result<ts::serialization::Value> serialize(::silk::LPF_Filter_Config const& value);
+ts::Result<void> deserialize(::silk::LPF_Config& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(::silk::LPF_Config const& value);
 ts::Result<void> deserialize(::silk::MaxSonar_Descriptor& value, ts::serialization::Value const& sz_value);
 ts::Result<ts::serialization::Value> serialize(::silk::MaxSonar_Descriptor const& value);
 ts::Result<void> deserialize(::silk::MaxSonar_Config& value, ts::serialization::Value const& sz_value);
@@ -2727,10 +2914,14 @@ ts::Result<void> deserialize(::silk::Oscillator_Config::Component& value, ts::se
 ts::Result<ts::serialization::Value> serialize(::silk::Oscillator_Config::Component const& value);
 ts::Result<void> deserialize(::silk::Oscillator_Config& value, ts::serialization::Value const& sz_value);
 ts::Result<ts::serialization::Value> serialize(::silk::Oscillator_Config const& value);
+ts::Result<void> deserialize(::silk::PCA9685_Descriptor::Channel& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(::silk::PCA9685_Descriptor::Channel const& value);
 ts::Result<void> deserialize(::silk::PCA9685_Descriptor& value, ts::serialization::Value const& sz_value);
 ts::Result<ts::serialization::Value> serialize(::silk::PCA9685_Descriptor const& value);
-ts::Result<void> deserialize(::silk::PCA9685_Config::Channel& value, ts::serialization::Value const& sz_value);
-ts::Result<ts::serialization::Value> serialize(::silk::PCA9685_Config::Channel const& value);
+ts::Result<void> deserialize(::silk::PCA9685_Config::Servo_Channel& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(::silk::PCA9685_Config::Servo_Channel const& value);
+ts::Result<void> deserialize(::silk::PCA9685_Config::PWM_Channel& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(::silk::PCA9685_Config::PWM_Channel const& value);
 ts::Result<void> deserialize(::silk::PCA9685_Config& value, ts::serialization::Value const& sz_value);
 ts::Result<ts::serialization::Value> serialize(::silk::PCA9685_Config const& value);
 ts::Result<void> deserialize(::silk::PIGPIO_Descriptor::Channel& value, ts::serialization::Value const& sz_value);
@@ -2839,8 +3030,12 @@ ts::Result<void> deserialize(boost::variant<silk::Multirotor_Brain_Config::Horiz
 ts::Result<ts::serialization::Value> serialize(boost::variant<silk::Multirotor_Brain_Config::Horizontal_Angle::Combined_XY_PIDs,silk::Multirotor_Brain_Config::Horizontal_Angle::Separate_XY_PIDs> const& value);
 ts::Result<void> deserialize(std::vector<::silk::Oscillator_Config::Component>& value, ts::serialization::Value const& sz_value);
 ts::Result<ts::serialization::Value> serialize(std::vector<::silk::Oscillator_Config::Component> const& value);
-ts::Result<void> deserialize(std::vector<::silk::PCA9685_Config::Channel>& value, ts::serialization::Value const& sz_value);
-ts::Result<ts::serialization::Value> serialize(std::vector<::silk::PCA9685_Config::Channel> const& value);
+ts::Result<void> deserialize(std::vector<::silk::PCA9685_Descriptor::Channel>& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(std::vector<::silk::PCA9685_Descriptor::Channel> const& value);
+ts::Result<void> deserialize(boost::variant<silk::PCA9685_Config::Servo_Channel,silk::PCA9685_Config::PWM_Channel>& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(boost::variant<silk::PCA9685_Config::Servo_Channel,silk::PCA9685_Config::PWM_Channel> const& value);
+ts::Result<void> deserialize(std::vector<boost::variant<silk::PCA9685_Config::Servo_Channel,silk::PCA9685_Config::PWM_Channel>>& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(std::vector<boost::variant<silk::PCA9685_Config::Servo_Channel,silk::PCA9685_Config::PWM_Channel>> const& value);
 ts::Result<void> deserialize(boost::variant<silk::PIGPIO_Config::Servo_Channel,silk::PIGPIO_Config::PWM_Channel>& value, ts::serialization::Value const& sz_value);
 ts::Result<ts::serialization::Value> serialize(boost::variant<silk::PIGPIO_Config::Servo_Channel,silk::PIGPIO_Config::PWM_Channel> const& value);
 ts::Result<void> deserialize(boost::variant<silk::Rate_Controller_Config::Feedback::Combined_XY_PIDs,silk::Rate_Controller_Config::Feedback::Separate_XY_PIDs>& value, ts::serialization::Value const& sz_value);
