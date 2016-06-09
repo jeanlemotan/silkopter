@@ -185,16 +185,16 @@ void Motor_Mixer::compute_throttles(Multirotor_Config const& multirotor_config, 
     float target_thrust = collective_thrust;
     if (target_thrust >= 0.01f)
     {
-        auto th = math::clamp(target_thrust / float(m_outputs.size()), m_config->armed_thrust, multirotor_config.motor_thrust);
+        auto th = math::clamp(target_thrust / float(m_outputs.size()), m_config->get_armed_thrust(), multirotor_config.get_motor_thrust());
         for (auto& out: m_outputs)
         {
             out->thrust = th; //take into account only motors that produce useful thrust
         }
 
-        float dyn_range = math::min(th - m_config->armed_thrust, multirotor_config.motor_thrust - th);
+        float dyn_range = math::min(th - m_config->get_armed_thrust(), multirotor_config.get_motor_thrust() - th);
         dyn_range *= DYN_RANGE_FACTOR;
-        min_thrust = math::max(th - dyn_range, m_config->armed_thrust);
-        max_thrust = math::min(th + dyn_range, multirotor_config.motor_thrust);
+        min_thrust = math::max(th - dyn_range, m_config->get_armed_thrust());
+        max_thrust = math::min(th + dyn_range, multirotor_config.get_motor_thrust());
     }
 
 
@@ -208,7 +208,7 @@ void Motor_Mixer::compute_throttles(Multirotor_Config const& multirotor_config, 
         math::vec3f crt;
         for (auto& out: m_outputs)
         {
-            float ratio = out->thrust / multirotor_config.motor_thrust;
+            float ratio = out->thrust / multirotor_config.get_motor_thrust();
             out->torque = out->config.max_torque * ratio;
             crt += out->torque;
         }
@@ -265,7 +265,7 @@ void Motor_Mixer::compute_throttles(Multirotor_Config const& multirotor_config, 
     //convert thrust to throttle and clip
     for (auto& out: m_outputs)
     {
-        out->throttle = compute_throttle_from_thrust(multirotor_config.motor_thrust, out->thrust);
+        out->throttle = compute_throttle_from_thrust(multirotor_config.get_motor_thrust(), out->thrust);
     }
 
 }
@@ -424,7 +424,7 @@ void Motor_Mixer::compute_throttles(Multirotor_Config const& multirotor_config, 
 
 void Motor_Mixer::set_input_stream_path(size_t idx, q::Path const& path)
 {
-    m_accumulator.set_stream_path(idx, path, m_descriptor->rate, m_uav);
+    m_accumulator.set_stream_path(idx, path, m_descriptor->get_rate(), m_uav);
 }
 
 auto Motor_Mixer::set_config(std::shared_ptr<Node_Config_Base> config) -> bool

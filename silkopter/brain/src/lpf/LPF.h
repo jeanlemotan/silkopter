@@ -7,8 +7,7 @@
 #include "Sample_Accumulator.h"
 #include "Basic_Output_Stream.h"
 
-//#include "sz_math.hpp"
-//#include "sz_LPF.hpp"
+#include "uav.def.h"
 
 namespace silk
 {
@@ -42,8 +41,8 @@ private:
 
     UAV& m_uav;
 
-    sz::LPF::Init_Params m_descriptor;
-    sz::LPF::Config m_config;
+    std::shared_ptr<LPF_Descriptor> m_descriptor;
+    std::shared_ptr<LPF_Config> m_config;
 
     Sample_Accumulator<Stream_t> m_accumulator;
 
@@ -81,21 +80,14 @@ auto LPF<Stream_t>::init(std::shared_ptr<Node_Descriptor_Base> descriptor) -> bo
 template<class Stream_t>
 auto LPF<Stream_t>::init() -> bool
 {
-    if (m_descriptor.rate == 0)
-    {
-        QLOGE("Bad rate: {}Hz", m_descriptor.rate);
-        return false;
-    }
-    m_output_stream->set_rate(m_descriptor.rate);
+    m_output_stream->set_rate(m_descriptor->get_rate());
     return true;
 }
 
 template<class Stream_t>
 auto LPF<Stream_t>::get_descriptor() const -> std::shared_ptr<Node_Descriptor_Base>
 {
-    rapidjson::Document json;
-    autojsoncxx::to_document(m_descriptor, json);
-    return std::move(json);
+    return m_descriptor;
 }
 
 template<class Stream_t>
@@ -107,26 +99,26 @@ void LPF<Stream_t>::set_input_stream_path(size_t idx, q::Path const& path)
 template<class Stream_t>
 auto LPF<Stream_t>::set_config(std::shared_ptr<Node_Config_Base> config) -> bool
 {
-    QLOG_TOPIC("lpf::set_config");
-    autojsoncxx::error::ErrorStack result;
-    if (!autojsoncxx::from_value(m_config, json, result))
+    QLOG_TOPIC("lpf::config");
+
+    auto specialized = std::dynamic_pointer_cast<LPF_Config>(config);
+    if (!specialized)
     {
-        std::ostringstream ss;
-        ss << result;
-        QLOGE("Cannot deserialize LPF config data: {}", ss.str());
+        QLOGE("Wrong config type");
         return false;
     }
+
+    *m_config = *specialized;
 
     float output_rate = static_cast<float>(m_output_stream->get_rate());
     float max_cutoff = output_rate / 2.f - output_rate / 100.f;
 
-    if (math::is_zero(m_config.cutoff_frequency))
+    if (math::is_zero(m_config->get_cutoff_frequency()))
     {
-        m_config.cutoff_frequency = max_cutoff;
+        m_config->set_cutoff_frequency(max_cutoff);
     }
-    m_config.cutoff_frequency = math::clamp(m_config.cutoff_frequency, 0.f, max_cutoff);
-    m_config.poles = math::max<uint32_t>(m_config.poles, 1);
-    if (!m_dsp.setup(m_config.poles, output_rate, m_config.cutoff_frequency))
+    m_config->set_cutoff_frequency(math::clamp(m_config->get_cutoff_frequency(), 0.1f, max_cutoff));
+    if (!m_dsp.setup(m_config->get_poles(), output_rate, m_config->get_cutoff_frequency()))
     {
         QLOGE("Cannot setup dsp filter.");
         return false;
@@ -143,9 +135,7 @@ auto LPF<Stream_t>::send_message(rapidjson::Value const& /*json*/) -> rapidjson:
 template<class Stream_t>
 auto LPF<Stream_t>::get_config() const -> std::shared_ptr<Node_Config_Base>
 {
-    rapidjson::Document json;
-    autojsoncxx::to_document(m_config, json);
-    return std::move(json);
+    return m_config;
 }
 
 template<class Stream_t>
@@ -160,7 +150,7 @@ auto LPF<Stream_t>::get_inputs() const -> std::vector<Input>
 {
     std::vector<Input> inputs =
     {{
-        { Stream_t::TYPE, m_descriptor.rate, "Input", m_accumulator.get_stream_path(0) }
+        { Stream_t::TYPE, m_descriptor->get_rate(), "Input", m_accumulator.get_stream_path(0) }
     }};
     return inputs;
 }
@@ -180,7 +170,7 @@ void LPF<Stream_t>::process()
 
     m_output_stream->clear();
 
-    if (m_config.cutoff_frequency == 0)
+    if (m_config->get_cutoff_frequency() == 0)
     {
         return;
     }

@@ -36,22 +36,7 @@ auto Multirotor_Pilot::init(std::shared_ptr<Node_Descriptor_Base> descriptor) ->
 
 auto Multirotor_Pilot::init() -> bool
 {
-    if (m_descriptor->commands_rate == 0)
-    {
-        QLOGE("Bad commands rate: {}Hz", m_descriptor->commands_rate);
-        return false;
-    }
-    if (m_descriptor->state_rate == 0)
-    {
-        QLOGE("Bad state rate: {}Hz", m_descriptor->state_rate);
-        return false;
-    }
-    if (m_descriptor->video_rate == 0)
-    {
-        QLOGE("Bad video rate: {}Hz", m_descriptor->video_rate);
-        return false;
-    }
-    m_output_stream->set_rate(m_descriptor->commands_rate);
+    m_output_stream->set_rate(m_descriptor->get_commands_rate());
     return true;
 }
 
@@ -65,8 +50,8 @@ auto Multirotor_Pilot::get_inputs() const -> std::vector<Input>
 {
     std::vector<Input> inputs =
     {{
-        { stream::IMultirotor_State::TYPE,  m_descriptor->state_rate, "State", m_state_accumulator.get_stream_path(0) },
-        { stream::IVideo::TYPE,        m_descriptor->video_rate, "Video", m_video_accumulator.get_stream_path(0) },
+        { stream::IMultirotor_State::TYPE,  m_descriptor->get_state_rate(), "State", m_state_accumulator.get_stream_path(0) },
+        { stream::IVideo::TYPE,        m_descriptor->get_video_rate(), "Video", m_video_accumulator.get_stream_path(0) },
     }};
     return inputs;
 }
@@ -126,11 +111,11 @@ void Multirotor_Pilot::set_input_stream_path(size_t idx, q::Path const& path)
 {
     if (idx == 0)
     {
-        m_state_accumulator.set_stream_path(0, path, m_descriptor->state_rate, m_uav);
+        m_state_accumulator.set_stream_path(0, path, m_descriptor->get_state_rate(), m_uav);
     }
     else
     {
-        m_video_accumulator.set_stream_path(0, path, m_descriptor->video_rate, m_uav);
+        m_video_accumulator.set_stream_path(0, path, m_descriptor->get_video_rate(), m_uav);
     }
 }
 

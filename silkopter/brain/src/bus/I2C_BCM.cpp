@@ -1,7 +1,5 @@
 #include "BrainStdAfx.h"
 #include "bus/I2C_BCM.h"
-#include "def_lang/Mapper.h"
-#include "def_lang/Type_System.h"
 
 #ifdef RASPBERRY_PI
 
@@ -12,6 +10,9 @@ extern "C"
 
 #endif
 
+#include "uav.def.h"
+
+
 namespace silk
 {
 namespace bus
@@ -20,52 +21,39 @@ namespace bus
 std::mutex I2C_BCM::s_mutex;
 
 
-
-I2C_BCM::I2C_BCM(ts::Type_System const& ts)
+I2C_BCM::I2C_BCM()
+    : m_descriptor(new I2C_BCM_Descriptor())
 {
-    m_descriptor = ts.create_value("::silk::I2C_BCM_Descriptor");
-    if (!m_descriptor)
-    {
-        QLOGE("Cannot create descriptor value");
-    }
 }
 
 I2C_BCM::~I2C_BCM()
 {
 }
 
-bool I2C_BCM::init(std::shared_ptr<ts::IValue> descriptor)
+bool I2C_BCM::init(std::shared_ptr<Bus_Descriptor_Base> descriptor)
 {
-    if (!descriptor || descriptor->get_type() != m_descriptor->get_type())
+    auto specialized = std::dynamic_pointer_cast<I2C_BCM_Descriptor>(descriptor);
+    if (!specialized)
     {
-        QLOGE("Bad descriptor!");
-        return false;
-    }
-    uint32_t dev = 0;
-
-    auto result = ts::mapper::get(*descriptor, "dev", dev);
-    if (result != ts::success)
-    {
-        QLOGE("{}", result.error().what());
+        QLOGE("Wrong descriptor type");
         return false;
     }
 
-    if (!init(dev))
+    if (!init(specialized->get_dev(), specialized->get_baud()))
     {
         return false;
     }
 
-    result = m_descriptor->copy_assign(*descriptor);
-    QASSERT(result == ts::success);
+    *m_descriptor = *specialized;
     return true;
 }
 
-std::shared_ptr<const ts::IValue> I2C_BCM::get_descriptor() const
+std::shared_ptr<const Bus_Descriptor_Base> I2C_BCM::get_descriptor() const
 {
     return m_descriptor;
 }
 
-bool I2C_BCM::init(uint32_t dev)
+bool I2C_BCM::init(uint32_t dev, uint32_t baud)
 {
     if (dev > 1)
     {
@@ -75,7 +63,7 @@ bool I2C_BCM::init(uint32_t dev)
 
 #ifdef RASPBERRY_PI
 
-    bcm2835_i2c_set_baudrate(400000);
+    bcm2835_i2c_set_baudrate(baud);
     bcm2835_i2c_begin();
 
 #endif

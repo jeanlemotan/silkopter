@@ -8,9 +8,7 @@
 #include "Sample_Accumulator.h"
 #include "Basic_Output_Stream.h"
 
-
-//#include "sz_math.hpp"
-//#include "sz_Resampler.hpp"
+#include "uav.def.h"
 
 namespace silk
 {
@@ -47,8 +45,8 @@ private:
 
     UAV& m_uav;
 
-    sz::Resampler::Init_Params m_descriptor;
-    sz::Resampler::Config m_config;
+    std::shared_ptr<Resampler_Descriptor> m_descriptor;
+    std::shared_ptr<Resampler_Config> m_config;
 
     Sample_Accumulator<Stream_t> m_accumulator;
 
@@ -135,19 +133,9 @@ auto Resampler<Stream_t>::init(std::shared_ptr<Node_Descriptor_Base> descriptor)
 template<class Stream_t>
 auto Resampler<Stream_t>::init() -> bool
 {
-    if (m_descriptor.rate == 0)
-    {
-        QLOGE("Bad rate: {}Hz", m_descriptor.rate);
-        return false;
-    }
-    if (m_descriptor.input_rate == 0)
-    {
-        QLOGE("Bad input rate: {}Hz", m_descriptor.input_rate);
-        return false;
-    }
-    m_output_stream->set_rate(m_descriptor.rate);
+    m_output_stream->set_rate(m_descriptor->get_output_rate());
 
-    m_input_stream_dt = std::chrono::microseconds(1000000 / m_descriptor.input_rate);
+    m_input_stream_dt = std::chrono::microseconds(1000000 / m_descriptor->get_input_rate());
 
     return true;
 }
@@ -155,15 +143,13 @@ auto Resampler<Stream_t>::init() -> bool
 template<class Stream_t>
 auto Resampler<Stream_t>::get_descriptor() const -> std::shared_ptr<Node_Descriptor_Base>
 {
-    rapidjson::Document json;
-    autojsoncxx::to_document(m_descriptor, json);
-    return std::move(json);
+    return m_descriptor;
 }
 
 template<class Stream_t>
 void Resampler<Stream_t>::set_input_stream_path(size_t idx, q::Path const& path)
 {
-    m_accumulator.set_stream_path(idx, path, m_descriptor.input_rate, m_uav);
+    m_accumulator.set_stream_path(idx, path, m_descriptor->get_input_rate(), m_uav);
 }
 
 template<class Stream_t>
@@ -171,28 +157,29 @@ auto Resampler<Stream_t>::set_config(std::shared_ptr<Node_Config_Base> config) -
 {
     QLOG_TOPIC("resampler::set_config");
 
-    autojsoncxx::error::ErrorStack result;
-    if (!autojsoncxx::from_value(m_config, json, result))
+    auto specialized = std::dynamic_pointer_cast<Resampler_Config>(config);
+    if (!specialized)
     {
-        std::ostringstream ss;
-        ss << result;
-        QLOGE("Cannot deserialize Resampler config data: {}", ss.str());
+        QLOGE("Wrong config type");
         return false;
     }
 
-    auto input_rate = m_descriptor.input_rate;
-    auto output_rate = m_descriptor.rate;
+    *m_config = *specialized;
+
+    auto input_rate = m_descriptor->get_input_rate();
+    auto output_rate = m_descriptor->get_output_rate();
 
     uint32_t filter_rate = math::max(output_rate, input_rate);
     float max_cutoff = math::min(output_rate / 2.f, input_rate / 2.f);
-    m_config.cutoff_frequency = m_config.cutoff_frequency > 0 ? m_config.cutoff_frequency : max_cutoff;
-    if (m_config.cutoff_frequency > max_cutoff)
+
+    LPF_Config& lpf_config = m_config->get_lpf();
+
+    if (math::is_zero(lpf_config.get_cutoff_frequency()))
     {
-        QLOGE("Cutoff frequency of {}Hz s too big for the resampler. Max cutoff is {}Hz.", m_config.cutoff_frequency, max_cutoff);
-        return false;
+        lpf_config.set_cutoff_frequency(max_cutoff);
     }
-    m_config.poles = math::max<uint32_t>(m_config.poles, 1);
-    if (!m_dsp.setup(m_config.poles, filter_rate, m_config.cutoff_frequency))
+    lpf_config.set_cutoff_frequency(math::clamp(lpf_config.get_cutoff_frequency(), 0.1f, max_cutoff));
+    if (!m_dsp.setup(lpf_config.get_poles(), filter_rate, lpf_config.get_cutoff_frequency()))
     {
         QLOGE("Cannot setup dsp filter.");
         return false;
@@ -209,9 +196,7 @@ auto Resampler<Stream_t>::send_message(rapidjson::Value const& /*json*/) -> rapi
 template<class Stream_t>
 auto Resampler<Stream_t>::get_config() const -> std::shared_ptr<Node_Config_Base>
 {
-    rapidjson::Document json;
-    autojsoncxx::to_document(m_config, json);
-    return std::move(json);
+    return m_config;
 }
 
 template<class Stream_t>
@@ -226,7 +211,7 @@ auto Resampler<Stream_t>::get_inputs() const -> std::vector<Input>
 {
     std::vector<Input> inputs =
     {{
-        { Stream_t::TYPE, m_descriptor.input_rate, "Input", m_accumulator.get_stream_path(0) }
+        { Stream_t::TYPE, m_descriptor->get_input_rate(), "Input", m_accumulator.get_stream_path(0) }
     }};
     return inputs;
 }
@@ -245,7 +230,7 @@ void Resampler<Stream_t>::process()
 
     m_output_stream->clear();
 
-    if (m_config.cutoff_frequency == 0)
+    if (m_config->get_lpf().get_cutoff_frequency() == 0)
     {
         return;
     }
@@ -286,7 +271,7 @@ void Resampler<Stream_t>::resample()
 //        }
 //    }
 
-    bool is_downsampling = m_descriptor.rate <= m_descriptor.input_rate;
+    bool is_downsampling = m_descriptor->get_output_rate() <= m_descriptor->get_input_rate();
 
     auto dt = m_output_stream->get_dt();
     size_t samples_needed = m_output_stream->compute_samples_needed();

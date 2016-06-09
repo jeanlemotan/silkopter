@@ -1,7 +1,5 @@
 #include "BrainStdAfx.h"
 #include "bus/UART_BBang.h"
-#include "def_lang/Mapper.h"
-#include "def_lang/Type_System.h"
 
 #ifdef RASPBERRY_PI
 extern "C"
@@ -10,18 +8,16 @@ extern "C"
 }
 #endif
 
+#include "uav.def.h"
+
 namespace silk
 {
 namespace bus
 {
 
-UART_BBang::UART_BBang(ts::Type_System const& ts)
+UART_BBang::UART_BBang()
+    : m_descriptor(new UART_BBang_Descriptor())
 {
-    m_descriptor = ts.create_value("::silk::UART_BBang_Descriptor");
-    if (!m_descriptor)
-    {
-        QLOGE("Cannot create descriptor value");
-    }
 }
 
 UART_BBang::~UART_BBang()
@@ -29,42 +25,30 @@ UART_BBang::~UART_BBang()
     close();
 }
 
-bool UART_BBang::init(std::shared_ptr<ts::IValue> descriptor)
+bool UART_BBang::init(std::shared_ptr<Bus_Descriptor_Base> descriptor)
 {
-    if (!descriptor || descriptor->get_type() != m_descriptor->get_type())
+    auto specialized = std::dynamic_pointer_cast<UART_BBang_Descriptor>(descriptor);
+    if (!specialized)
     {
-        QLOGE("Bad descriptor!");
-        return false;
-    }
-    uint32_t rx_pin = 0;
-    uint32_t baud = 0;
-    bool invert = false;
-
-    auto result = ts::mapper::get(*descriptor, "rx_pin", rx_pin) &
-                    ts::mapper::get(*descriptor, "baud", baud) &
-                    ts::mapper::get(*descriptor, "invert", invert);
-    if (result != ts::success)
-    {
-        QLOGE("{}", result.error().what());
+        QLOGE("Wrong descriptor type");
         return false;
     }
 
-    if (!init(rx_pin, baud, invert))
+    if (!init(specialized->get_rx_pin(), specialized->get_baud(), specialized->get_invert()))
     {
         return false;
     }
 
-    result = m_descriptor->copy_assign(*descriptor);
-    QASSERT(result == ts::success);
+    *m_descriptor = *specialized;
     return true;
 }
 
-std::shared_ptr<const ts::IValue> UART_BBang::get_descriptor() const
+std::shared_ptr<const Bus_Descriptor_Base> UART_BBang::get_descriptor() const
 {
     return m_descriptor;
 }
 
-auto UART_BBang::init(size_t rx_pin, size_t baud, bool invert) -> bool
+auto UART_BBang::init(uint32_t rx_pin, uint32_t baud, bool invert) -> bool
 {
     close();
 

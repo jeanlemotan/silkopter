@@ -41,8 +41,8 @@ private:
 
     UAV& m_uav;
 
-    sz::Scalar_Generator::Init_Params m_descriptor;
-    sz::Scalar_Generator::Config m_config;
+    std::shared_ptr<Scalar_Generator_Descriptor> m_descriptor;
+    std::shared_ptr<Scalar_Generator_Config> m_config;
 
     std::weak_ptr<stream::IFloat> m_modulation_stream;
     q::Path m_modulation_stream_path;
@@ -79,21 +79,14 @@ auto Scalar_Generator<Stream_t>::init(std::shared_ptr<Node_Descriptor_Base> desc
 template<class Stream_t>
 auto Scalar_Generator<Stream_t>::init() -> bool
 {
-    if (m_descriptor.rate == 0)
-    {
-        QLOGE("Bad rate: {}Hz", m_descriptor.rate);
-        return false;
-    }
-    m_output_stream->set_rate(m_descriptor.rate);
+    m_output_stream->set_rate(m_descriptor->get_rate());
     return true;
 }
 
 template<class Stream_t>
 auto Scalar_Generator<Stream_t>::get_descriptor() const -> std::shared_ptr<Node_Descriptor_Base>
 {
-    rapidjson::Document json;
-    autojsoncxx::to_document(m_descriptor, json);
-    return std::move(json);
+    return m_descriptor;
 }
 
 template<class Stream_t>
@@ -145,9 +138,7 @@ auto Scalar_Generator<Stream_t>::send_message(rapidjson::Value const& /*json*/) 
 template<class Stream_t>
 auto Scalar_Generator<Stream_t>::get_config() const -> std::shared_ptr<Node_Config_Base>
 {
-    rapidjson::Document json;
-    autojsoncxx::to_document(m_config, json);
-    return std::move(json);
+    return m_config;
 }
 
 template<class Stream_t>
@@ -155,7 +146,7 @@ auto Scalar_Generator<Stream_t>::get_inputs() const -> std::vector<Input>
 {
     std::vector<Input> inputs =
     {{
-        { stream::IFloat::TYPE, m_descriptor.rate, "Modulation", m_modulation_stream_path }
+        { stream::IFloat::TYPE, m_descriptor->get_rate(), "Modulation", m_modulation_stream_path }
     }};
     return inputs;
 }
@@ -183,7 +174,7 @@ void Scalar_Generator<Stream_t>::process()
         {
             if (s.is_healthy)
             {
-                m_output_stream->push_sample(m_config.value + s.value, true);
+                m_output_stream->push_sample(m_config->get_value() + s.value, true);
             }
             else
             {
@@ -196,7 +187,7 @@ void Scalar_Generator<Stream_t>::process()
         auto samples_needed = m_output_stream->compute_samples_needed();
         while (samples_needed > 0)
         {
-            m_output_stream->push_sample(m_config.value, true);
+            m_output_stream->push_sample(m_config->get_value(), true);
             samples_needed--;
         }
     }

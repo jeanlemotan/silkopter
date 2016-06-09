@@ -39,8 +39,8 @@ private:
 
     UAV& m_uav;
 
-    sz::Vec3_Generator::Init_Params m_descriptor;
-    sz::Vec3_Generator::Config m_config;
+    std::shared_ptr<Vec3_Generator_Descriptor> m_descriptor;
+    std::shared_ptr<Vec3_Generator_Config> m_config;
 
     std::array<q::Path, 3> m_modulation_stream_paths;
     std::array<std::weak_ptr<stream::IFloat>, 3> m_modulation_streams;
@@ -78,21 +78,14 @@ auto Vec3_Generator<Stream_t>::init(std::shared_ptr<Node_Descriptor_Base> descri
 template<class Stream_t>
 auto Vec3_Generator<Stream_t>::init() -> bool
 {
-    if (m_descriptor.rate == 0)
-    {
-        QLOGE("Bad rate: {}Hz", m_descriptor.rate);
-        return false;
-    }
-    m_output_stream->set_rate(m_descriptor.rate);
+    m_output_stream->set_rate(m_descriptor->get_rate());
     return true;
 }
 
 template<class Stream_t>
 auto Vec3_Generator<Stream_t>::get_descriptor() const -> std::shared_ptr<Node_Descriptor_Base>
 {
-    rapidjson::Document json;
-    autojsoncxx::to_document(m_descriptor, json);
-    return std::move(json);
+    return m_descriptor;
 }
 
 template<class Stream_t>
@@ -150,9 +143,7 @@ auto Vec3_Generator<Stream_t>::send_message(rapidjson::Value const& /*json*/) ->
 template<class Stream_t>
 auto Vec3_Generator<Stream_t>::get_config() const -> std::shared_ptr<Node_Config_Base>
 {
-    rapidjson::Document json;
-    autojsoncxx::to_document(m_config, json);
-    return std::move(json);
+    return m_config;
 }
 
 template<class Stream_t>
@@ -160,9 +151,9 @@ auto Vec3_Generator<Stream_t>::get_inputs() const -> std::vector<Input>
 {
     std::vector<Input> inputs =
     {{
-        { stream::IFloat::TYPE, m_descriptor.rate, "X Modulation", m_modulation_stream_paths[0] },
-        { stream::IFloat::TYPE, m_descriptor.rate, "Y Modulation", m_modulation_stream_paths[1] },
-        { stream::IFloat::TYPE, m_descriptor.rate, "Z Modulation", m_modulation_stream_paths[2] }
+        { stream::IFloat::TYPE, m_descriptor->get_rate(), "X Modulation", m_modulation_stream_paths[0] },
+        { stream::IFloat::TYPE, m_descriptor->get_rate(), "Y Modulation", m_modulation_stream_paths[1] },
+        { stream::IFloat::TYPE, m_descriptor->get_rate(), "Z Modulation", m_modulation_stream_paths[2] }
     }};
     return inputs;
 }
@@ -207,7 +198,7 @@ void Vec3_Generator<Stream_t>::process()
 
     for (size_t i = 0; i < count; i++)
     {
-        math::vec3f value = m_config.value;
+        math::vec3f value = m_config->get_value();
 
         if (m_modulation_samples[0].size() > i)
         {

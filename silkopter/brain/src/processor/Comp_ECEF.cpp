@@ -2,8 +2,7 @@
 #include "Comp_ECEF.h"
 
 #include "uav.def.h"
-//#include "sz_Comp_ECEF.hpp"
-
+/*
 namespace silk
 {
 namespace node
@@ -149,10 +148,11 @@ auto Comp_ECEF::get_descriptor() const -> std::shared_ptr<Node_Descriptor_Base>
     return m_descriptor;
 }
 
-auto Comp_ECEF::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document
+auto Comp_ECEF::send_message(rapidjson::Value const& json) -> rapidjson::Document
 {
     return rapidjson::Document();
 }
 
 }
 }
+*/

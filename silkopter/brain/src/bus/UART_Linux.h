@@ -4,17 +4,22 @@
 
 namespace silk
 {
+struct UART_Linux_Descriptor;
+}
+
+namespace silk
+{
 namespace bus
 {
 
 class UART_Linux : public IUART
 {
 public:
-    UART_Linux(ts::Type_System const& ts);
+    UART_Linux();
     ~UART_Linux();
 
-    bool init(std::shared_ptr<ts::IValue> descriptor) override;
-    std::shared_ptr<const ts::IValue> get_descriptor() const override;
+    bool init(std::shared_ptr<Bus_Descriptor_Base> descriptor) override;
+    std::shared_ptr<const Bus_Descriptor_Base> get_descriptor() const override;
 
     void lock();
     auto try_lock() -> bool;
@@ -26,10 +31,10 @@ public:
     void send_break();
 
 private:
-    bool init(std::string const& dev, uint32_t baud);
+    bool init(std::string const& dev, int baud_id);
     void close();
 
-    std::shared_ptr<ts::IValue> m_descriptor;
+    std::shared_ptr<UART_Linux_Descriptor> m_descriptor;
     std::string m_dev;
 
     int m_fd = -1;

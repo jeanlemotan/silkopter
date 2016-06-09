@@ -327,8 +327,6 @@ auto UBLOX::init() -> bool
     m_spi = m_uav.get_buses().find_by_name<bus::ISPI>(m_descriptor->get_bus());
     m_uart = m_uav.get_buses().find_by_name<bus::IUART>(m_descriptor->get_bus());
 
-    m_descriptor->rate = math::clamp<size_t>(m_descriptor->rate, 1, 10);
-
     m_position_stream->set_rate(m_descriptor->get_rate());
     m_velocity_stream->set_rate(m_descriptor->get_rate());
     m_gps_info_stream->set_rate(m_descriptor->get_rate());

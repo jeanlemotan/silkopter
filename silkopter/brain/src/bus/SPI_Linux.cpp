@@ -1,22 +1,18 @@
 #include "BrainStdAfx.h"
 #include "bus/SPI_Linux.h"
-#include "def_lang/Mapper.h"
-#include "def_lang/Type_System.h"
 
 #include <linux/spi/spidev.h>
+
+#include "uav.def.h"
 
 namespace silk
 {
 namespace bus
 {
 
-SPI_Linux::SPI_Linux(ts::Type_System const& ts)
+SPI_Linux::SPI_Linux()
+    : m_descriptor(new SPI_Linux_Descriptor())
 {
-    m_descriptor = ts.create_value("::silk::SPI_Linux_Descriptor");
-    if (!m_descriptor)
-    {
-        QLOGE("Cannot create descriptor value");
-    }
 }
 
 SPI_Linux::~SPI_Linux()
@@ -24,40 +20,30 @@ SPI_Linux::~SPI_Linux()
     close();
 }
 
-bool SPI_Linux::init(std::shared_ptr<ts::IValue> descriptor)
+bool SPI_Linux::init(std::shared_ptr<Bus_Descriptor_Base> descriptor)
 {
-    if (!descriptor || descriptor->get_type() != m_descriptor->get_type())
+    auto specialized = std::dynamic_pointer_cast<SPI_Linux_Descriptor>(descriptor);
+    if (!specialized)
     {
-        QLOGE("Bad descriptor!");
-        return false;
-    }
-    std::string dev;
-    uint32_t speed = 0;
-
-    auto result = ts::mapper::get(*descriptor, "dev", dev) &
-                    ts::mapper::get(*descriptor, "speed", speed);
-    if (result != ts::success)
-    {
-        QLOGE("{}", result.error().what());
+        QLOGE("Wrong descriptor type");
         return false;
     }
 
-    if (!open(dev, speed))
+    if (!open(specialized->get_dev(), specialized->get_speed()))
     {
         return false;
     }
 
-    result = m_descriptor->copy_assign(*descriptor);
-    QASSERT(result == ts::success);
+    *m_descriptor = *specialized;
     return true;
 }
 
-std::shared_ptr<const ts::IValue> SPI_Linux::get_descriptor() const
+std::shared_ptr<const Bus_Descriptor_Base> SPI_Linux::get_descriptor() const
 {
     return m_descriptor;
 }
 
-bool SPI_Linux::open(std::string const& dev, size_t speed)
+bool SPI_Linux::open(std::string const& dev, uint32_t speed)
 {
     QLOG_TOPIC("spi_linux::open");
 
@@ -109,7 +95,7 @@ void SPI_Linux::unlock()
 //    close();
 }
 
-auto SPI_Linux::do_transfer(uint8_t const* tx_data, uint8_t* rx_data, size_t size, size_t speed) -> bool
+auto SPI_Linux::do_transfer(uint8_t const* tx_data, uint8_t* rx_data, size_t size, uint32_t speed) -> bool
 {
     QASSERT(m_fd >= 0 && size > 0);
     if (m_fd < 0 || size == 0)
@@ -137,13 +123,13 @@ auto SPI_Linux::do_transfer(uint8_t const* tx_data, uint8_t* rx_data, size_t siz
     return true;
 }
 
-auto SPI_Linux::transfer(uint8_t const* tx_data, uint8_t* rx_data, size_t size, size_t speed) -> bool
+auto SPI_Linux::transfer(uint8_t const* tx_data, uint8_t* rx_data, size_t size, uint32_t speed) -> bool
 {
     QLOG_TOPIC("SPI_Linux::transfer");
     return do_transfer(tx_data, rx_data, size, speed);
 }
 
-auto SPI_Linux::transfer_register(uint8_t reg, uint8_t const* tx_data, uint8_t* rx_data, size_t size, size_t speed) -> bool
+auto SPI_Linux::transfer_register(uint8_t reg, uint8_t const* tx_data, uint8_t* rx_data, size_t size, uint32_t speed) -> bool
 {
     QLOG_TOPIC("SPI_Linux::transfer_register");
 

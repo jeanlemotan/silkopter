@@ -4,36 +4,41 @@
 
 namespace silk
 {
+struct SPI_Linux_Descriptor;
+}
+
+namespace silk
+{
 namespace bus
 {
 
 class SPI_Linux : public ISPI
 {
 public:
-    SPI_Linux(ts::Type_System const& ts);
+    SPI_Linux();
     ~SPI_Linux();
 
-    bool init(std::shared_ptr<ts::IValue> descriptor) override;
-    std::shared_ptr<const ts::IValue> get_descriptor() const override;
+    bool init(std::shared_ptr<Bus_Descriptor_Base> descriptor) override;
+    std::shared_ptr<const Bus_Descriptor_Base> get_descriptor() const override;
 
     void lock();
     auto try_lock() -> bool;
     void unlock();
 
-    virtual auto transfer(uint8_t const* tx_data, uint8_t* rx_data, size_t size, size_t speed = 0) -> bool override;
-    virtual auto transfer_register(uint8_t reg, uint8_t const* tx_data, uint8_t* rx_data, size_t size, size_t speed = 0) -> bool override;
+    virtual auto transfer(uint8_t const* tx_data, uint8_t* rx_data, size_t size, uint32_t speed = 0) -> bool override;
+    virtual auto transfer_register(uint8_t reg, uint8_t const* tx_data, uint8_t* rx_data, size_t size, uint32_t speed = 0) -> bool override;
 
 private:
-    bool init(std::string const& dev, size_t speed);
-    bool open(std::string const& dev, size_t speed);
+    bool init(std::string const& dev, uint32_t speed);
+    bool open(std::string const& dev, uint32_t speed);
     void close();
 
-    auto do_transfer(uint8_t const* tx_data, uint8_t* rx_data, size_t size, size_t speed) -> bool;
+    auto do_transfer(uint8_t const* tx_data, uint8_t* rx_data, size_t size, uint32_t speed) -> bool;
 
-    std::shared_ptr<ts::IValue> m_descriptor;
+    std::shared_ptr<SPI_Linux_Descriptor> m_descriptor;
 
     int m_fd = -1;
-    size_t m_speed = 100000;
+    uint32_t m_speed = 100000;
     std::vector<uint8_t> m_tx_buffer;
     std::vector<uint8_t> m_rx_buffer;
 };

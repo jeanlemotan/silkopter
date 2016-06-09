@@ -2,6 +2,12 @@
 
 namespace silk
 {
+struct Bus_Descriptor_Base;
+}
+
+
+namespace silk
+{
 namespace bus
 {
 
@@ -11,8 +17,8 @@ class IBus : q::util::Noncopyable
 public:
     virtual ~IBus() = default;
 
-    virtual bool init(std::shared_ptr<ts::IValue> descriptor) = 0;
-    virtual std::shared_ptr<const ts::IValue> get_descriptor() const = 0;
+    virtual bool init(std::shared_ptr<Bus_Descriptor_Base> descriptor) = 0;
+    virtual std::shared_ptr<const Bus_Descriptor_Base> get_descriptor() const = 0;
 };
 
 }

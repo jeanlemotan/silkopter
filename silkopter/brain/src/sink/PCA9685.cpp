@@ -231,56 +231,57 @@ void PCA9685::set_pwm_value(bus::II2C& i2c, size_t idx, boost::optional<float> _
 {
     QLOG_TOPIC("PCA9685::set_pwm_value");
 
-    auto& ch = m_pwm_channels[idx];
+    //todo - fix this
+//    auto& ch = m_pwm_channels[idx];
 
-    float value = 0;
-    if (_value)
-    {
-        value = math::clamp(*_value, 0.f, 1.f);
+//    float value = 0;
+//    if (_value)
+//    {
+//        value = math::clamp(*_value, 0.f, 1.f);
 
-        if (ch.config->servo_signal)
-        {
-            float period_ms = 1000.f / m_descriptor->get_rate();
-            float servo_ms = math::lerp(ch.config->min_servo, ch.config->max_servo, value);
-            value = servo_ms / period_ms;
-        }
-        else
-        {
-            value = math::lerp(ch.config->min_pwm, ch.config->max_pwm, value);
-        }
-    }
+//        if (ch.config->servo_signal)
+//        {
+//            float period_ms = 1000.f / m_descriptor->get_rate();
+//            float servo_ms = math::lerp(ch.config->min_servo, ch.config->max_servo, value);
+//            value = servo_ms / period_ms;
+//        }
+//        else
+//        {
+//            value = math::lerp(ch.config->min_pwm, ch.config->max_pwm, value);
+//        }
+//    }
 
-    int pulse = value * 4096;
+//    int pulse = value * 4096;
 
-    uint8_t data[4] = {0, 0, 0, 0};
-    constexpr uint8_t ON_L = 0;
-    constexpr uint8_t ON_H = 1;
-    constexpr uint8_t OFF_L = 2;
-    constexpr uint8_t OFF_H = 3;
+//    uint8_t data[4] = {0, 0, 0, 0};
+//    constexpr uint8_t ON_L = 0;
+//    constexpr uint8_t ON_H = 1;
+//    constexpr uint8_t OFF_L = 2;
+//    constexpr uint8_t OFF_H = 3;
 
-    if (pulse == 0)
-    {
-        data[OFF_H] = 0x10;
-    }
-    else if (pulse >= 4096)
-    {
-        data[ON_H] = 0x10;
-    }
-    else
-    {
-//        data[ON_L] = offset & 0xFF;
-//        data[ON_H] = offset >> 8;
-        data[OFF_L] = pulse & 0xFF;
-        data[OFF_H] = pulse >> 8;
-    }
+//    if (pulse == 0)
+//    {
+//        data[OFF_H] = 0x10;
+//    }
+//    else if (pulse >= 4096)
+//    {
+//        data[ON_H] = 0x10;
+//    }
+//    else
+//    {
+////        data[ON_L] = offset & 0xFF;
+////        data[ON_H] = offset >> 8;
+//        data[OFF_L] = pulse & 0xFF;
+//        data[OFF_H] = pulse >> 8;
+//    }
 
-    if (ch.last_data.pulse == pulse)
-    {
-        return;
-    }
-    ch.last_data.pulse = pulse;
+//    if (ch.last_data.pulse == pulse)
+//    {
+//        return;
+//    }
+//    ch.last_data.pulse = pulse;
 
-    i2c.write_register(m_descriptor->get_address(), PCA9685_RA_LED0_ON_L + 4 * idx, data, 4);
+//    i2c.write_register(m_descriptor->get_address(), PCA9685_RA_LED0_ON_L + 4 * idx, data, 4);
 }
 
 void PCA9685::process()

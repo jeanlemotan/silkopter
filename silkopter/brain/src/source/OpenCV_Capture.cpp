@@ -1,6 +1,6 @@
 #include "BrainStdAfx.h"
 #include "OpenCV_Capture.h"
-
+/*
 #include "uav.def.h"
 //#include "sz_OpenCV_Capture.hpp"
 
@@ -176,7 +176,7 @@ auto OpenCV_Capture::get_descriptor() const -> std::shared_ptr<Node_Descriptor_B
     return m_descriptor;
 }
 
-auto OpenCV_Capture::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document
+auto OpenCV_Capture::send_message(rapidjson::Value const& json) -> rapidjson::Document
 {
     return rapidjson::Document();
 }
@@ -386,3 +386,5 @@ void OpenCV_Capture::stop_recording()
 
 }
 }
+
+*/

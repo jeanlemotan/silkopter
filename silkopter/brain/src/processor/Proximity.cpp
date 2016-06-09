@@ -34,19 +34,8 @@ auto Proximity::init(std::shared_ptr<Node_Descriptor_Base> descriptor) -> bool
 }
 auto Proximity::init() -> bool
 {
-    if (m_descriptor->rate == 0)
-    {
-        QLOGE("Bad rate: {}Hz", m_descriptor->rate);
-        return false;
-    }
-    if (m_descriptor->channels == 0)
-    {
-        QLOGE("Need to have at least one channel");
-        return false;
-    }
-
-    m_accumulators.resize(m_descriptor->channels);
-    m_output_stream->set_rate(m_descriptor->rate);
+    m_accumulators.resize(m_descriptor->get_channel_count());
+    m_output_stream->set_rate(m_descriptor->get_rate());
 
     return true;
 }
@@ -59,10 +48,10 @@ auto Proximity::start(q::Clock::time_point tp) -> bool
 
 auto Proximity::get_inputs() const -> std::vector<Input>
 {
-    std::vector<Input> inputs(m_descriptor->channels);
-    for (size_t i = 0; i < m_descriptor->channels; i++)
+    std::vector<Input> inputs(m_descriptor->get_channel_count());
+    for (size_t i = 0; i < inputs.size(); i++)
     {
-        inputs[i] = { stream::IDistance::TYPE, m_descriptor->rate, q::util::format<std::string>("Distance {}", i), m_accumulators[i].get_stream_path(0) };
+        inputs[i] = { stream::IDistance::TYPE, m_descriptor->get_rate(), q::util::format<std::string>("Distance {}", i), m_accumulators[i].get_stream_path(0) };
     }
     return inputs;
 }
@@ -82,7 +71,7 @@ void Proximity::process()
     m_output_stream->clear();
     m_output_value.distances.clear();
 
-    for (size_t i = 0; i < m_descriptor->channels; i++)
+    for (size_t i = 0; i < m_accumulators.size(); i++)
     {
         m_accumulators[i].process([this, i](stream::IDistance::Sample const& i_sample)
         {

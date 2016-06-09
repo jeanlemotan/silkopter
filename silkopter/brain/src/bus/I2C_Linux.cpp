@@ -1,7 +1,5 @@
 #include "BrainStdAfx.h"
 #include "bus/I2C_Linux.h"
-#include "def_lang/Mapper.h"
-#include "def_lang/Type_System.h"
 
 #include <errno.h>
 #include <unistd.h>
@@ -10,6 +8,8 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+
+#include "uav.def.h"
 
 
 struct i2c_msg
@@ -33,13 +33,9 @@ namespace silk
 namespace bus
 {
 
-I2C_Linux::I2C_Linux(ts::Type_System const& ts)
+I2C_Linux::I2C_Linux()
+    : m_descriptor(new I2C_Linux_Descriptor())
 {
-    m_descriptor = ts.create_value("::silk::I2C_Linux_Descriptor");
-    if (!m_descriptor)
-    {
-        QLOGE("Cannot create descriptor value");
-    }
 }
 
 I2C_Linux::~I2C_Linux()
@@ -47,33 +43,25 @@ I2C_Linux::~I2C_Linux()
     close();
 }
 
-bool I2C_Linux::init(std::shared_ptr<ts::IValue> descriptor)
+bool I2C_Linux::init(std::shared_ptr<Bus_Descriptor_Base> descriptor)
 {
-    if (!descriptor || descriptor->get_type() != m_descriptor->get_type())
+    auto specialized = std::dynamic_pointer_cast<I2C_Linux_Descriptor>(descriptor);
+    if (!specialized)
     {
-        QLOGE("Bad descriptor!");
-        return false;
-    }
-    std::string dev;
-
-    auto result = ts::mapper::get(*descriptor, "dev", dev);
-    if (result != ts::success)
-    {
-        QLOGE("{}", result.error().what());
+        QLOGE("Wrong descriptor type");
         return false;
     }
 
-    if (!init(dev))
+    if (!init(specialized->get_dev()))
     {
         return false;
     }
 
-    result = m_descriptor->copy_assign(*descriptor);
-    QASSERT(result == ts::success);
+    *m_descriptor = *specialized;
     return true;
 }
 
-std::shared_ptr<const ts::IValue> I2C_Linux::get_descriptor() const
+std::shared_ptr<const Bus_Descriptor_Base> I2C_Linux::get_descriptor() const
 {
     return m_descriptor;
 }

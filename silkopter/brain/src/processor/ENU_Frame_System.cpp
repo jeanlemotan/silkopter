@@ -35,12 +35,7 @@ auto ENU_Frame_System::init(std::shared_ptr<Node_Descriptor_Base> descriptor) ->
 }
 auto ENU_Frame_System::init() -> bool
 {
-    if (m_descriptor->rate == 0)
-    {
-        QLOGE("Bad rate: {}Hz", m_descriptor->rate);
-        return false;
-    }
-    m_output_stream->set_rate(m_descriptor->rate);
+    m_output_stream->set_rate(m_descriptor->get_rate());
     return true;
 }
 
@@ -54,7 +49,7 @@ auto ENU_Frame_System::get_inputs() const -> std::vector<Input>
 {
     std::vector<Input> inputs =
     {{
-        { stream::IECEF_Position::TYPE, m_descriptor->rate, "Position (ecef)", m_accumulator.get_stream_path(0) }
+        { stream::IECEF_Position::TYPE, m_descriptor->get_rate(), "Position (ecef)", m_accumulator.get_stream_path(0) }
     }};
     return inputs;
 }

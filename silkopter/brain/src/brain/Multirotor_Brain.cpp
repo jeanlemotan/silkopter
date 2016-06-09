@@ -46,23 +46,16 @@ auto Multirotor_Brain::init() -> bool
         return false;
     }
 
-    if (m_descriptor->rate == 0)
-    {
-        QLOGE("Bad rate: {}Hz", m_descriptor->rate);
-        return false;
-    }
-    if (!m_battery.init(m_descriptor->rate))
+    if (!m_battery.init(m_descriptor->get_rate()))
     {
         QLOGE("Cannot initialize the battery");
         return false;
     }
-    m_state_output_stream->set_rate(m_descriptor->state_rate);
-    m_rate_output_stream->set_rate(m_descriptor->rate);
-    m_thrust_output_stream->set_rate(m_descriptor->rate);
+    m_state_output_stream->set_rate(m_descriptor->get_state_rate());
+    m_rate_output_stream->set_rate(m_descriptor->get_rate());
+    m_thrust_output_stream->set_rate(m_descriptor->get_rate());
 
     m_dts = std::chrono::duration<float>(m_thrust_output_stream->get_dt()).count();
-
-    m_config->altitude.lpf_cutoff_frequency = 1;
 
     return true;
 }
@@ -79,14 +72,14 @@ auto Multirotor_Brain::get_inputs() const -> std::vector<Input>
 {
     std::vector<Input> inputs =
     {{
-         { stream::IMultirotor_Commands::TYPE,    m_descriptor->commands_rate, "Commands", m_commands_accumulator.get_stream_path(0) },
-         { stream::IUAV_Frame::TYPE,         m_descriptor->rate, "UAV Frame", m_sensor_accumulator.get_stream_path(0) },
-         { stream::IECEF_Position::TYPE,     m_descriptor->rate, "Position (ecef)", m_sensor_accumulator.get_stream_path(1) },
-         { stream::IECEF_Velocity::TYPE,     m_descriptor->rate, "Velocity (ecef)", m_sensor_accumulator.get_stream_path(2) },
-         { stream::IECEF_Linear_Acceleration::TYPE, m_descriptor->rate, "Linear Acceleration (ecef)", m_sensor_accumulator.get_stream_path(3) },
-         { stream::IProximity::TYPE,         m_descriptor->rate, "Proximity", m_sensor_accumulator.get_stream_path(4) },
-         { stream::IVoltage::TYPE,           m_descriptor->rate, "Voltage", m_sensor_accumulator.get_stream_path(5) },
-         { stream::ICurrent::TYPE,           m_descriptor->rate, "Current", m_sensor_accumulator.get_stream_path(6) },
+         { stream::IMultirotor_Commands::TYPE,    m_descriptor->get_commands_rate(), "Commands", m_commands_accumulator.get_stream_path(0) },
+         { stream::IUAV_Frame::TYPE,         m_descriptor->get_rate(), "UAV Frame", m_sensor_accumulator.get_stream_path(0) },
+         { stream::IECEF_Position::TYPE,     m_descriptor->get_rate(), "Position (ecef)", m_sensor_accumulator.get_stream_path(1) },
+         { stream::IECEF_Velocity::TYPE,     m_descriptor->get_rate(), "Velocity (ecef)", m_sensor_accumulator.get_stream_path(2) },
+         { stream::IECEF_Linear_Acceleration::TYPE, m_descriptor->get_rate(), "Linear Acceleration (ecef)", m_sensor_accumulator.get_stream_path(3) },
+         { stream::IProximity::TYPE,         m_descriptor->get_rate(), "Proximity", m_sensor_accumulator.get_stream_path(4) },
+         { stream::IVoltage::TYPE,           m_descriptor->get_rate(), "Voltage", m_sensor_accumulator.get_stream_path(5) },
+         { stream::ICurrent::TYPE,           m_descriptor->get_rate(), "Current", m_sensor_accumulator.get_stream_path(6) },
      }};
     return inputs;
 }
@@ -129,7 +122,7 @@ void Multirotor_Brain::process_state_mode_idle()
 
 float Multirotor_Brain::compute_ff_thrust(float target_altitude)
 {
-    float mass = m_multirotor_config->mass;
+    float mass = m_multirotor_config->get_mass();
 
 
     float v0 = m_enu_velocity.z;
@@ -140,13 +133,13 @@ float Multirotor_Brain::compute_ff_thrust(float target_altitude)
 
     if (d > 0)
     {
-        a0 = m_config->max_thrust / mass - physics::constants::g;
-        a1 = m_config->min_thrust / mass - physics::constants::g;
+        a0 = m_config->get_max_thrust() / mass - physics::constants::g;
+        a1 = m_config->get_min_thrust() / mass - physics::constants::g;
     }
     else
     {
-        a1 = m_config->max_thrust / mass - physics::constants::g;
-        a0 = m_config->min_thrust / mass - physics::constants::g;
+        a1 = m_config->get_max_thrust() / mass - physics::constants::g;
+        a0 = m_config->get_min_thrust() / mass - physics::constants::g;
     }
 
     if (math::sgn(d) != math::sgn(v0))
@@ -180,7 +173,7 @@ math::vec2f Multirotor_Brain::compute_horizontal_rate_for_angle(math::vec2f cons
     float diff_x, diff_y, _;
     diff.get_as_euler_zxy(diff_x, diff_y, _);
 
-    float max_speed = math::radians(m_config->horizontal_angle.max_speed_deg);
+    float max_speed = math::radians(m_config->get_horizontal_angle().get_max_speed_deg());
 
     float rx = m_horizontal_angle_data.x_pid.process(-diff_x, 0.f);
     rx = math::clamp(rx, -max_speed, max_speed);
@@ -242,7 +235,7 @@ void Multirotor_Brain::state_mode_armed_apply_commands(const stream::IMultirotor
 
             //cascaded PIDS: position P(ID) -> speed PI(D)
             float speed_output = m_vertical_altitude_data.position_p.process(crt_alt, target_alt);
-            speed_output = math::clamp(speed_output, -m_config->altitude.max_speed, m_config->altitude.max_speed);
+            speed_output = math::clamp(speed_output, -m_config->get_altitude().get_max_speed(), m_config->get_altitude().get_max_speed());
 
             float output = m_vertical_altitude_data.speed_pi.process(m_enu_velocity.z, speed_output);
 
@@ -251,15 +244,15 @@ void Multirotor_Brain::state_mode_armed_apply_commands(const stream::IMultirotor
             output = math::clamp(output, -1.f, 1.f);
             m_vertical_altitude_data.dsp.process(output);
 
-            float hover_thrust = multirotor_config->mass * physics::constants::g;
-            float max_thrust_range = math::max(hover_thrust, m_config->max_thrust - hover_thrust);
+            float hover_thrust = multirotor_config->get_mass() * physics::constants::g;
+            float max_thrust_range = math::max(hover_thrust, m_config->get_max_thrust() - hover_thrust);
 
             thrust = output * max_thrust_range + hover_thrust;
         }
     }
 
     //clamp thrust
-    thrust = math::clamp(thrust, m_config->min_thrust, m_config->max_thrust);
+    thrust = math::clamp(thrust, m_config->get_min_thrust(), m_config->get_max_thrust());
 
     ////////////////////////////////////////////////////////////
     // Horizontals
@@ -289,9 +282,9 @@ void Multirotor_Brain::state_mode_armed_apply_commands(const stream::IMultirotor
 
             //cascaded PIDS: position P(ID) -> speed PI(D)
             math::vec2f velocity_output = m_horizontal_position_data.position_p.process(crt_pos, target_pos);
-            if (math::length(velocity_output) > m_config->horizontal_position.max_speed)
+            if (math::length(velocity_output) > m_config->get_horizontal_position().get_max_speed())
             {
-                velocity_output.set_length(m_config->horizontal_position.max_speed);
+                velocity_output.set_length(m_config->get_horizontal_position().get_max_speed());
             }
 
             math::vec2f output = m_horizontal_position_data.velocity_pi.process(math::vec2f(m_enu_velocity.x, m_enu_velocity.y), velocity_output);
@@ -341,7 +334,7 @@ void Multirotor_Brain::state_mode_armed_apply_commands(const stream::IMultirotor
         float _, diff_z;
         diff.get_as_euler_zxy(_, _, diff_z);
 
-        float max_speed = math::radians(m_config->yaw_angle.max_speed_deg);
+        float max_speed = math::radians(m_config->get_yaw_angle().get_max_speed_deg());
 
         float z = m_yaw_stable_angle_rate_data.pid.process(-diff_z, 0.f);
         z = math::clamp(z, -max_speed, max_speed);
@@ -598,38 +591,38 @@ void Multirotor_Brain::set_input_stream_path(size_t idx, q::Path const& path)
 {
     if (idx == 0)
     {
-        m_commands_accumulator.set_stream_path(0, path, m_descriptor->commands_rate, m_uav);
+        m_commands_accumulator.set_stream_path(0, path, m_descriptor->get_commands_rate(), m_uav);
     }
     else if (idx >= 1 && idx <= 7)
     {
-        m_sensor_accumulator.set_stream_path(idx - 1, path, m_descriptor->rate, m_uav);
+        m_sensor_accumulator.set_stream_path(idx - 1, path, m_descriptor->get_rate(), m_uav);
     }
 }
 
-template<class T>
-void fill_pid_params(T& dst, sz::PID const& src, size_t rate)
-{
-    dst.kp = src.kp;
-    dst.ki = src.ki;
-    dst.kd = src.kd;
-    dst.max_i = src.max_i;
-    dst.d_filter = src.d_filter;
-    dst.rate = rate;
-}
-template<class T>
-void fill_pi_params(T& dst, sz::PI const& src, size_t rate)
-{
-    dst.kp = src.kp;
-    dst.ki = src.ki;
-    dst.max_i = decltype(dst.max_i)(src.max_i);
-    dst.rate = rate;
-}
-template<class T>
-void fill_p_params(T& dst, sz::P const& src, size_t rate)
-{
-    dst.kp = src.kp;
-    dst.rate = rate;
-}
+//template<class T>
+//void fill_pid_params(T& dst, sz::PID const& src, size_t rate)
+//{
+//    dst.kp = src.kp;
+//    dst.ki = src.ki;
+//    dst.kd = src.kd;
+//    dst.max_i = src.max_i;
+//    dst.d_filter = src.d_filter;
+//    dst.rate = rate;
+//}
+//template<class T>
+//void fill_pi_params(T& dst, sz::PI const& src, size_t rate)
+//{
+//    dst.kp = src.kp;
+//    dst.ki = src.ki;
+//    dst.max_i = decltype(dst.max_i)(src.max_i);
+//    dst.rate = rate;
+//}
+//template<class T>
+//void fill_p_params(T& dst, sz::P const& src, size_t rate)
+//{
+//    dst.kp = src.kp;
+//    dst.rate = rate;
+//}
 
 auto Multirotor_Brain::set_config(std::shared_ptr<Node_Config_Base> config) -> bool
 {
@@ -646,96 +639,104 @@ auto Multirotor_Brain::set_config(std::shared_ptr<Node_Config_Base> config) -> b
 
     uint32_t output_rate = m_rate_output_stream->get_rate();
 
-    m_config->min_thrust = math::clamp(m_config->min_thrust, 0.f, m_multirotor_config->motor_thrust * m_multirotor_config->motors.size() * 0.5f);
-    m_config->max_thrust = math::clamp(m_config->max_thrust, m_config->min_thrust, m_multirotor_config->motor_thrust * m_multirotor_config->motors.size());
+    m_config->set_min_thrust(math::clamp(m_config->get_min_thrust(), 0.f, m_multirotor_config->get_motor_thrust() * m_multirotor_config->get_motors().size() * 0.5f));
+    m_config->set_max_thrust(math::clamp(m_config->get_max_thrust(), m_config->get_min_thrust(), m_multirotor_config->get_motor_thrust() * m_multirotor_config->get_motors().size()));
 
-    m_config->horizontal_angle.max_speed_deg = math::clamp(m_config->horizontal_angle.max_speed_deg, 10.f, 3000.f);
-    m_config->yaw_angle.max_speed_deg = math::clamp(m_config->yaw_angle.max_speed_deg, 10.f, 3000.f);
+    //m_config->horizontal_angle.max_speed_deg = math::clamp(m_config->horizontal_angle.max_speed_deg, 10.f, 3000.f);
+    //m_config->yaw_angle.max_speed_deg = math::clamp(m_config->yaw_angle.max_speed_deg, 10.f, 3000.f);
 
     {
-        PID::Params x_params, y_params;
-        if (m_config->horizontal_angle.combined_pids)
-        {
-            fill_pid_params(x_params, m_config->horizontal_angle.pids, output_rate);
-            fill_pid_params(y_params, m_config->horizontal_angle.pids, output_rate);
-        }
-        else
-        {
-            fill_pid_params(x_params, m_config->horizontal_angle.x_pid, output_rate);
-            fill_pid_params(y_params, m_config->horizontal_angle.y_pid, output_rate);
-        }
+        //todo - fix this
+//        PID::Params x_params, y_params;
+//        if (m_config->horizontal_angle.combined_pids)
+//        {
+//            fill_pid_params(x_params, m_config->horizontal_angle.pids, output_rate);
+//            fill_pid_params(y_params, m_config->horizontal_angle.pids, output_rate);
+//        }
+//        else
+//        {
+//            fill_pid_params(x_params, m_config->horizontal_angle.x_pid, output_rate);
+//            fill_pid_params(y_params, m_config->horizontal_angle.y_pid, output_rate);
+//        }
 
-        if (!m_horizontal_angle_data.x_pid.set_params(x_params) ||
-                !m_horizontal_angle_data.y_pid.set_params(y_params))
-        {
-            QLOGE("Bad horizontal PID params");
-            return false;
-        }
+//        if (!m_horizontal_angle_data.x_pid.set_params(x_params) ||
+//                !m_horizontal_angle_data.y_pid.set_params(y_params))
+//        {
+//            QLOGE("Bad horizontal PID params");
+//            return false;
+//        }
     }
 
     {
-        PID::Params params;
-        fill_pid_params(params, m_config->yaw_angle.pid, output_rate);
-        if (!m_yaw_stable_angle_rate_data.pid.set_params(params))
-        {
-            QLOGE("Bad yaw PID params");
-            return false;
-        }
+        //todo - fix this
+//        PID::Params params;
+//        fill_pid_params(params, m_config->yaw_angle.pid, output_rate);
+//        if (!m_yaw_stable_angle_rate_data.pid.set_params(params))
+//        {
+//            QLOGE("Bad yaw PID params");
+//            return false;
+//        }
     }
 
     //altitude
-    m_config->altitude.max_speed = math::clamp(m_config->altitude.max_speed, 0.f, 10.f);
+    //m_config->altitude.max_speed = math::clamp(m_config->altitude.max_speed, 0.f, 10.f);
     {
-        PID::Params speed_pi_params, position_p_params;
-        fill_pi_params(speed_pi_params, m_config->altitude.speed_pi, output_rate);
-        fill_p_params(position_p_params, m_config->altitude.position_p, output_rate);
-        if (!m_vertical_altitude_data.speed_pi.set_params(speed_pi_params))
-        {
-            QLOGE("Bad altitude PID params");
-            return false;
-        }
-        if (!m_vertical_altitude_data.position_p.set_params(position_p_params))
-        {
-            QLOGE("Bad altitude PID params");
-            return false;
-        }
+        //todo - fix this
+//        PID::Params speed_pi_params, position_p_params;
+//        fill_pi_params(speed_pi_params, m_config->altitude.speed_pi, output_rate);
+//        fill_p_params(position_p_params, m_config->altitude.position_p, output_rate);
+//        if (!m_vertical_altitude_data.speed_pi.set_params(speed_pi_params))
+//        {
+//            QLOGE("Bad altitude PID params");
+//            return false;
+//        }
+//        if (!m_vertical_altitude_data.position_p.set_params(position_p_params))
+//        {
+//            QLOGE("Bad altitude PID params");
+//            return false;
+//        }
     }
 
-    m_config->altitude.lpf_cutoff_frequency = math::clamp(m_config->altitude.lpf_cutoff_frequency, 0.1f, output_rate / 2.f);
-    m_config->altitude.lpf_poles = math::max<uint32_t>(m_config->altitude.lpf_poles, 1);
-    if (!m_vertical_altitude_data.dsp.setup(m_config->altitude.lpf_poles, output_rate, m_config->altitude.lpf_cutoff_frequency))
     {
-        QLOGE("Cannot setup dsp filter.");
-        return false;
+        LPF_Config& lpf_config = m_config->get_altitude().get_lpf();
+        lpf_config.set_cutoff_frequency(math::clamp(lpf_config.get_cutoff_frequency(), 0.1f, output_rate / 2.f));
+        if (!m_vertical_altitude_data.dsp.setup(lpf_config.get_poles(), output_rate, lpf_config.get_cutoff_frequency()))
+        {
+            QLOGE("Cannot setup dsp filter.");
+            return false;
+        }
+        m_vertical_altitude_data.dsp.reset();
     }
-    m_vertical_altitude_data.dsp.reset();
 
     //horizontal position
-    m_config->horizontal_position.max_speed = math::clamp(m_config->horizontal_position.max_speed, 0.f, 10.f);
+    //m_config->horizontal_position.max_speed = math::clamp(m_config->horizontal_position.max_speed, 0.f, 10.f);
     {
-        PID2::Params velocity_pi_params, position_p_params;
-        fill_pi_params(velocity_pi_params, m_config->horizontal_position.velocity_pi, output_rate);
-        fill_p_params(position_p_params, m_config->horizontal_position.position_p, output_rate);
-        if (!m_horizontal_position_data.velocity_pi.set_params(velocity_pi_params))
-        {
-            QLOGE("Bad horizontal position PID params");
-            return false;
-        }
-        if (!m_horizontal_position_data.position_p.set_params(position_p_params))
-        {
-            QLOGE("Bad horizontal position PID params");
-            return false;
-        }
+        //todo - fix this
+//        PID2::Params velocity_pi_params, position_p_params;
+//        fill_pi_params(velocity_pi_params, m_config->horizontal_position.velocity_pi, output_rate);
+//        fill_p_params(position_p_params, m_config->horizontal_position.position_p, output_rate);
+//        if (!m_horizontal_position_data.velocity_pi.set_params(velocity_pi_params))
+//        {
+//            QLOGE("Bad horizontal position PID params");
+//            return false;
+//        }
+//        if (!m_horizontal_position_data.position_p.set_params(position_p_params))
+//        {
+//            QLOGE("Bad horizontal position PID params");
+//            return false;
+//        }
     }
 
-    m_config->horizontal_position.lpf_cutoff_frequency = math::clamp(m_config->horizontal_position.lpf_cutoff_frequency, 0.1f, output_rate / 2.f);
-    m_config->horizontal_position.lpf_poles = math::max<uint32_t>(m_config->horizontal_position.lpf_poles, 1);
-    if (!m_horizontal_position_data.dsp.setup(m_config->horizontal_position.lpf_poles, output_rate, m_config->horizontal_position.lpf_cutoff_frequency))
     {
-        QLOGE("Cannot setup dsp filter.");
-        return false;
+        LPF_Config& lpf_config = m_config->get_horizontal_position().get_lpf();
+        lpf_config.set_cutoff_frequency(math::clamp(lpf_config.get_cutoff_frequency(), 0.1f, output_rate / 2.f));
+        if (!m_horizontal_position_data.dsp.setup(lpf_config.get_poles(), output_rate, lpf_config.get_cutoff_frequency()))
+        {
+            QLOGE("Cannot setup dsp filter.");
+            return false;
+        }
+        m_horizontal_position_data.dsp.reset();
     }
-    m_horizontal_position_data.dsp.reset();
 
     return true;
 }

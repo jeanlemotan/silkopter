@@ -944,9 +944,9 @@ auto get_calibration_scale(Calibration_Data const& points, float temperature) ->
     {
         return math::vec3f::one;
     }
-    auto it = std::upper_bound(points.begin(), points.end(), temperature, [](const typename Calibration_Data::value_type& a, float temperature)
+    auto it = std::upper_bound(points.begin(), points.end(), temperature, [](float temperature, const typename Calibration_Data::value_type& a)
     {
-        return a.get_temperature() < temperature;
+        return temperature < a.get_temperature();
     });
     if (it == points.end()) //temp is too big, use the last point
     {
@@ -971,9 +971,9 @@ auto get_calibration_bias(Calibration_Data const& points, float temperature) -> 
     {
         return math::vec3f::zero;
     }
-    auto it = std::upper_bound(points.begin(), points.end(), temperature, [](const typename Calibration_Data::value_type& a, float temperature)
+    auto it = std::upper_bound(points.begin(), points.end(), temperature, [](float temperature, const typename Calibration_Data::value_type& a)
     {
-        return a.get_temperature() < temperature;
+        return temperature < a.get_temperature();
     });
     if (it == points.end()) //temp is too big, use the last point
     {

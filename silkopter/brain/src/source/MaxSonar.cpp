@@ -17,7 +17,7 @@ MaxSonar::MaxSonar(UAV& uav)
     , m_descriptor(new MaxSonar_Descriptor())
     , m_config(new MaxSonar_Config())
 {
-    m_config->direction = math::vec3f(0, 0, -1); //pointing down
+    m_config->set_direction(math::vec3f(0, 0, -1)); //pointing down
 
     m_output_stream = std::make_shared<Output_Stream>();
 }
@@ -47,7 +47,7 @@ auto MaxSonar::init(std::shared_ptr<Node_Descriptor_Base> descriptor) -> bool
 
 auto MaxSonar::init() -> bool
 {
-    m_bus = m_uav.get_buses().find_by_name<bus::IUART>(m_descriptor->bus);
+    m_bus = m_uav.get_buses().find_by_name<bus::IUART>(m_descriptor->get_bus());
     auto bus = m_bus.lock();
     if (!bus)
     {
@@ -61,9 +61,7 @@ auto MaxSonar::init() -> bool
         bus->unlock();
     });
 
-    m_descriptor->rate = math::clamp<size_t>(m_descriptor->rate, 1, 15);
-
-    m_output_stream->set_rate(m_descriptor->rate);
+    m_output_stream->set_rate(m_descriptor->get_rate());
 
     return true;
 }
@@ -127,8 +125,8 @@ void MaxSonar::process()
 
         auto samples_needed = m_output_stream->compute_samples_needed();
 
-        float min_distance = m_config->min_distance;
-        float max_distance = m_config->max_distance;
+        float min_distance = m_config->get_min_distance();
+        float max_distance = m_config->get_max_distance();
 
         bool is_healthy = m_last_distance >= min_distance && m_last_distance <= max_distance &&
                         q::Clock::now() - m_last_reading_tp <= m_output_stream->get_dt() * k_max_sample_difference;
@@ -137,7 +135,7 @@ void MaxSonar::process()
             m_stats.added += samples_needed;
         }
 
-        math::vec3f value = m_config->direction * math::clamp(m_last_distance, min_distance, max_distance);
+        math::vec3f value = m_config->get_direction() * math::clamp(m_last_distance, min_distance, max_distance);
 
         while (samples_needed > 0)
         {
@@ -170,13 +168,11 @@ auto MaxSonar::set_config(std::shared_ptr<Node_Config_Base> config) -> bool
 
     *m_config = *specialized;
 
-//    m_config->min_distance = math::max(m_config->min_distance, 0.1f);
-//    m_config->max_distance = math::min(m_config->max_distance, 12.f);
-    if (math::is_zero(math::length(m_config->direction), math::epsilon<float>()))
+    if (math::is_zero(math::length(m_config->get_direction()), math::epsilon<float>()))
     {
-        m_config->direction = math::vec3f(0, 0, -1); //pointing down
+        m_config->set_direction(math::vec3f(0, 0, -1)); //pointing down
     }
-    m_config->direction.normalize<math::safe>();
+    m_config->set_direction(math::normalized(m_config->get_direction()));
 
     return true;
 }

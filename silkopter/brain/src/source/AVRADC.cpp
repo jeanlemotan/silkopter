@@ -56,7 +56,7 @@ auto AVRADC::init(std::shared_ptr<Node_Descriptor_Base> descriptor) -> bool
 
 auto AVRADC::init() -> bool
 {
-    m_i2c = m_uav.get_buses().find_by_name<bus::II2C>(m_descriptor->bus);
+    m_i2c = m_uav.get_buses().find_by_name<bus::II2C>(m_descriptor->get_bus());
 
     auto i2c = m_i2c.lock();
     if (!i2c)
@@ -72,10 +72,8 @@ auto AVRADC::init() -> bool
     });
 
 
-    m_descriptor->rate = math::clamp<size_t>(m_descriptor->rate, 1, 500);
-
-    m_adcs[0]->set_rate(m_descriptor->rate);
-    m_adcs[1]->set_rate(m_descriptor->rate);
+    m_adcs[0]->set_rate(m_descriptor->get_rate());
+    m_adcs[1]->set_rate(m_descriptor->get_rate());
 
     return true;
 }

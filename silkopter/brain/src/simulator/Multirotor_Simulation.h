@@ -1,7 +1,6 @@
 #pragma once
 
 #include "common/node/IMultirotor_Simulator.h"
-#include "common/config/Multirotor_Config.h"
 
 class btCylinderShapeZ;
 class btMotionState;

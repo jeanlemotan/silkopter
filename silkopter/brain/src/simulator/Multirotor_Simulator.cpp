@@ -45,42 +45,6 @@ auto Multirotor_Simulator::init(std::shared_ptr<Node_Descriptor_Base> descriptor
 }
 auto Multirotor_Simulator::init() -> bool
 {
-    if (m_descriptor->angular_velocity_rate == 0)
-    {
-        QLOGE("Bad angular velocity rate: {}Hz", m_descriptor->angular_velocity_rate);
-        return false;
-    }
-    if (m_descriptor->acceleration_rate == 0)
-    {
-        QLOGE("Bad acceleration rate: {}Hz", m_descriptor->acceleration_rate);
-        return false;
-    }
-    if (m_descriptor->magnetic_field_rate == 0)
-    {
-        QLOGE("Bad magnetic field rate: {}Hz", m_descriptor->magnetic_field_rate);
-        return false;
-    }
-    if (m_descriptor->pressure_rate == 0)
-    {
-        QLOGE("Bad pressure rate: {}Hz", m_descriptor->pressure_rate);
-        return false;
-    }
-    if (m_descriptor->temperature_rate == 0)
-    {
-        QLOGE("Bad temperature rate: {}Hz", m_descriptor->temperature_rate);
-        return false;
-    }
-    if (m_descriptor->distance_rate == 0)
-    {
-        QLOGE("Bad distance rate: {}Hz", m_descriptor->distance_rate);
-        return false;
-    }
-    if (m_descriptor->gps_rate == 0)
-    {
-        QLOGE("Bad gps rate: {}Hz", m_descriptor->gps_rate);
-        return false;
-    }
-
     std::shared_ptr<const Multirotor_Config> multirotor_config = m_uav.get_specialized_uav_config<Multirotor_Config>();
     if (!multirotor_config)
     {
@@ -98,34 +62,34 @@ auto Multirotor_Simulator::init() -> bool
         return false;
     }
 
-    m_input_throttle_streams.resize(multirotor_config->motors.size());
-    m_input_throttle_stream_paths.resize(multirotor_config->motors.size());
+    m_input_throttle_streams.resize(multirotor_config->get_motors().size());
+    m_input_throttle_stream_paths.resize(multirotor_config->get_motors().size());
 
-    m_angular_velocity_stream->rate = m_descriptor->angular_velocity_rate;
+    m_angular_velocity_stream->rate = m_descriptor->get_angular_velocity_rate();
     m_angular_velocity_stream->dt = std::chrono::microseconds(1000000 / m_angular_velocity_stream->rate);
 
-    m_acceleration_stream->rate = m_descriptor->acceleration_rate;
+    m_acceleration_stream->rate = m_descriptor->get_acceleration_rate();
     m_acceleration_stream->dt = std::chrono::microseconds(1000000 / m_acceleration_stream->rate);
 
-    m_magnetic_field_stream->rate = m_descriptor->magnetic_field_rate;
+    m_magnetic_field_stream->rate = m_descriptor->get_magnetic_field_rate();
     m_magnetic_field_stream->dt = std::chrono::microseconds(1000000 / m_magnetic_field_stream->rate);
 
-    m_pressure_stream->rate = m_descriptor->pressure_rate;
+    m_pressure_stream->rate = m_descriptor->get_pressure_rate();
     m_pressure_stream->dt = std::chrono::microseconds(1000000 / m_pressure_stream->rate);
 
-    m_temperature_stream->rate = m_descriptor->temperature_rate;
+    m_temperature_stream->rate = m_descriptor->get_temperature_rate();
     m_temperature_stream->dt = std::chrono::microseconds(1000000 / m_temperature_stream->rate);
 
-    m_distance_stream->rate = m_descriptor->distance_rate;
+    m_distance_stream->rate = m_descriptor->get_distance_rate();
     m_distance_stream->dt = std::chrono::microseconds(1000000 / m_distance_stream->rate);
 
-    m_gps_info_stream->rate = m_descriptor->gps_rate;
+    m_gps_info_stream->rate = m_descriptor->get_gps_rate();
     m_gps_info_stream->dt = std::chrono::microseconds(1000000 / m_gps_info_stream->rate);
 
-    m_ecef_position_stream->rate = m_descriptor->gps_rate;
+    m_ecef_position_stream->rate = m_descriptor->get_gps_rate();
     m_ecef_position_stream->dt = std::chrono::microseconds(1000000 / m_ecef_position_stream->rate);
 
-    m_ecef_velocity_stream->rate = m_descriptor->gps_rate;
+    m_ecef_velocity_stream->rate = m_descriptor->get_gps_rate();
     m_ecef_velocity_stream->dt = std::chrono::microseconds(1000000 / m_ecef_velocity_stream->rate);
 
 
@@ -144,7 +108,7 @@ auto Multirotor_Simulator::get_inputs() const -> std::vector<Input>
     for (size_t i = 0; i < m_input_throttle_streams.size(); i++)
     {
         inputs[i].type = stream::IThrottle::TYPE;
-        inputs[i].rate = m_descriptor->throttle_rate;
+        inputs[i].rate = m_descriptor->get_throttle_rate();
         inputs[i].name = q::util::format<std::string>("Throttle/[{}]", i);
         inputs[i].stream_path = m_input_throttle_stream_paths[i];
     }
@@ -330,9 +294,9 @@ void Multirotor_Simulator::set_input_stream_path(size_t idx, q::Path const& path
 {
     auto input_stream = m_uav.get_streams().find_by_name<stream::IThrottle>(path.get_as<std::string>());
     auto rate = input_stream ? input_stream->get_rate() : 0u;
-    if (rate != m_descriptor->throttle_rate)
+    if (rate != m_descriptor->get_throttle_rate())
     {
-        QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", path, m_descriptor->throttle_rate, rate);
+        QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", path, m_descriptor->get_throttle_rate(), rate);
         m_input_throttle_streams[idx].reset();
         m_input_throttle_stream_paths[idx].clear();
     }
@@ -381,42 +345,25 @@ auto Multirotor_Simulator::set_config(std::shared_ptr<Node_Config_Base> config) 
         return false;
     }
 
-    m_simulation.set_gravity_enabled(sz.gravity_enabled);
-    m_simulation.set_ground_enabled(sz.ground_enabled);
-    m_simulation.set_drag_enabled(sz.drag_enabled);
-    m_simulation.set_simulation_enabled(sz.simulation_enabled);
+    *m_config = *specialized;
 
-    *m_config = sz;
+    m_simulation.set_gravity_enabled(m_config->get_gravity_enabled());
+    m_simulation.set_ground_enabled(m_config->get_ground_enabled());
+    m_simulation.set_drag_enabled(m_config->get_drag_enabled());
+    m_simulation.set_simulation_enabled(m_config->get_simulation_enabled());
 
-    m_config->noise.gps_position = math::max(m_config->noise.gps_position, 0.f);
-    m_noise.gps_position = Noise::Distribution<float>(-m_config->noise.gps_position*0.5f, m_config->noise.gps_position*0.5f);
+    auto const& noise = m_config->get_noise();
 
-    m_config->noise.gps_velocity = math::max(m_config->noise.gps_velocity, 0.f);
-    m_noise.gps_velocity = Noise::Distribution<float>(-m_config->noise.gps_velocity*0.5f, m_config->noise.gps_velocity*0.5f);
-
-    m_config->noise.gps_pacc = math::max(m_config->noise.gps_pacc, 0.f);
-    m_noise.gps_pacc = Noise::Distribution<float>(-m_config->noise.gps_pacc*0.5f, m_config->noise.gps_pacc*0.5f);
-
-    m_config->noise.gps_vacc = math::max(m_config->noise.gps_vacc, 0.f);
-    m_noise.gps_vacc = Noise::Distribution<float>(-m_config->noise.gps_vacc*0.5f, m_config->noise.gps_vacc*0.5f);
-
-    m_config->noise.acceleration = math::max(m_config->noise.acceleration, 0.f);
-    m_noise.acceleration = Noise::Distribution<float>(-m_config->noise.acceleration*0.5f, m_config->noise.acceleration*0.5f);
-
-    m_config->noise.angular_velocity = math::max(m_config->noise.angular_velocity, 0.f);
-    m_noise.angular_velocity = Noise::Distribution<float>(-m_config->noise.angular_velocity*0.5f, m_config->noise.angular_velocity*0.5f);
-
-    m_config->noise.magnetic_field = math::max(m_config->noise.magnetic_field, 0.f);
-    m_noise.magnetic_field = Noise::Distribution<float>(-m_config->noise.magnetic_field*0.5f, m_config->noise.magnetic_field*0.5f);
-
-    m_config->noise.pressure = math::max(m_config->noise.pressure, 0.f);
-    m_noise.pressure = Noise::Distribution<float>(-m_config->noise.pressure*0.5f, m_config->noise.pressure*0.5f);
-
-    m_config->noise.temperature = math::max(m_config->noise.temperature, 0.f);
-    m_noise.temperature = Noise::Distribution<float>(-m_config->noise.temperature*0.5f, m_config->noise.temperature*0.5f);
-
-    m_config->noise.ground_distance = math::max(m_config->noise.ground_distance, 0.f);
-    m_noise.ground_distance = Noise::Distribution<float>(-m_config->noise.ground_distance*0.5f, m_config->noise.ground_distance*0.5f);
+    m_noise.gps_position = Noise::Distribution<float>(-noise.get_gps_position()*0.5f, noise.get_gps_position()*0.5f);
+    m_noise.gps_velocity = Noise::Distribution<float>(-noise.get_gps_velocity()*0.5f, noise.get_gps_velocity()*0.5f);
+    m_noise.gps_pacc = Noise::Distribution<float>(-noise.get_gps_pacc()*0.5f, noise.get_gps_pacc()*0.5f);
+    m_noise.gps_vacc = Noise::Distribution<float>(-noise.get_gps_vacc()*0.5f, noise.get_gps_vacc()*0.5f);
+    m_noise.acceleration = Noise::Distribution<float>(-noise.get_acceleration()*0.5f, noise.get_acceleration()*0.5f);
+    m_noise.angular_velocity = Noise::Distribution<float>(-noise.get_angular_velocity()*0.5f, noise.get_angular_velocity()*0.5f);
+    m_noise.magnetic_field = Noise::Distribution<float>(-noise.get_magnetic_field()*0.5f, noise.get_magnetic_field()*0.5f);
+    m_noise.pressure = Noise::Distribution<float>(-noise.get_pressure()*0.5f, noise.get_pressure()*0.5f);
+    m_noise.temperature = Noise::Distribution<float>(-noise.get_temperature()*0.5f, noise.get_temperature()*0.5f);
+    m_noise.ground_distance = Noise::Distribution<float>(-noise.get_ground_distance()*0.5f, noise.get_ground_distance()*0.5f);
 
     return true;
 }
@@ -433,36 +380,37 @@ auto Multirotor_Simulator::send_message(rapidjson::Value const& json) -> rapidjs
 {
     rapidjson::Document response;
 
-    auto* messagej = jsonutil::find_value(json, std::string("message"));
-    if (!messagej)
-    {
-        jsonutil::add_value(response, std::string("error"), rapidjson::Value("Message not found"), response.GetAllocator());
-    }
-    else if (!messagej->IsString())
-    {
-        jsonutil::add_value(response, std::string("error"), rapidjson::Value("Message has to be a string"), response.GetAllocator());
-    }
-    else
-    {
-        std::string message = messagej->GetString();
-        if (message == "reset")
-        {
-            m_simulation.reset();
-        }
-        else if (message == "stop motion")
-        {
-            m_simulation.stop_motion();
-        }
-        else if (message == "get state")
-        {
-            auto const& state = m_simulation.get_uav_state();
-            autojsoncxx::to_document(state, response);
-        }
-        else
-        {
-            jsonutil::add_value(response, std::string("error"), rapidjson::Value("Unknown message"), response.GetAllocator());
-        }
-    }
+    //todo - fix this
+//    auto* messagej = jsonutil::find_value(json, std::string("message"));
+//    if (!messagej)
+//    {
+//        jsonutil::add_value(response, std::string("error"), rapidjson::Value("Message not found"), response.GetAllocator());
+//    }
+//    else if (!messagej->IsString())
+//    {
+//        jsonutil::add_value(response, std::string("error"), rapidjson::Value("Message has to be a string"), response.GetAllocator());
+//    }
+//    else
+//    {
+//        std::string message = messagej->GetString();
+//        if (message == "reset")
+//        {
+//            m_simulation.reset();
+//        }
+//        else if (message == "stop motion")
+//        {
+//            m_simulation.stop_motion();
+//        }
+//        else if (message == "get state")
+//        {
+//            auto const& state = m_simulation.get_uav_state();
+//            autojsoncxx::to_document(state, response);
+//        }
+//        else
+//        {
+//            jsonutil::add_value(response, std::string("error"), rapidjson::Value("Unknown message"), response.GetAllocator());
+//        }
+//    }
     return std::move(response);
 }
 

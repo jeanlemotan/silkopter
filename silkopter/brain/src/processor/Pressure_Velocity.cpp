@@ -34,13 +34,7 @@ auto Pressure_Velocity::init(std::shared_ptr<Node_Descriptor_Base> descriptor) -
 }
 auto Pressure_Velocity::init() -> bool
 {
-    if (m_descriptor->rate == 0)
-    {
-        QLOGE("Bad rate: {}Hz", m_descriptor->rate);
-        return false;
-    }
-
-    m_output_stream->set_rate(m_descriptor->rate);
+    m_output_stream->set_rate(m_descriptor->get_rate());
 
     return true;
 }
@@ -55,7 +49,7 @@ auto Pressure_Velocity::get_inputs() const -> std::vector<Input>
 {
     std::vector<Input> inputs =
     {{
-        { stream::IPressure::TYPE, m_descriptor->rate, "Pressure", m_accumulator.get_stream_path(0) }
+        { stream::IPressure::TYPE, m_descriptor->get_rate(), "Pressure", m_accumulator.get_stream_path(0) }
     }};
     return inputs;
 }

@@ -96,13 +96,7 @@ auto Combiner<Stream_t>::init(std::shared_ptr<Node_Descriptor_Base> descriptor) 
 template<class Stream_t>
 auto Combiner<Stream_t>::init() -> bool
 {
-    if (m_descriptor->rate == 0)
-    {
-        QLOGE("Bad rate: {}Hz", m_descriptor->rate);
-        return false;
-    }
-
-    m_output_stream->set_rate(m_descriptor->rate);
+    m_output_stream->set_rate(m_descriptor->get_rate());
 
     return true;
 }
@@ -119,8 +113,8 @@ auto Combiner<Stream_t>::get_inputs() const -> std::vector<Input>
 {
     std::vector<Input> inputs =
     {{
-        { Stream_t::TYPE, m_descriptor->rate, "Input 1", m_accumulator.get_stream_path(0) },
-        { Stream_t::TYPE, m_descriptor->rate, "Input 2", m_accumulator.get_stream_path(1) }
+        { Stream_t::TYPE, m_descriptor->get_rate(), "Input 1", m_accumulator.get_stream_path(0) },
+        { Stream_t::TYPE, m_descriptor->get_rate(), "Input 2", m_accumulator.get_stream_path(1) }
     }};
     return inputs;
 }

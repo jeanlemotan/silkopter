@@ -4,17 +4,22 @@
 
 namespace silk
 {
+struct UART_BBang_Descriptor;
+}
+
+namespace silk
+{
 namespace bus
 {
 
 class UART_BBang : public IUART
 {
 public:
-    UART_BBang(ts::Type_System const& ts);
+    UART_BBang();
     ~UART_BBang();
 
-    bool init(std::shared_ptr<ts::IValue> descriptor) override;
-    std::shared_ptr<const ts::IValue> get_descriptor() const override;
+    bool init(std::shared_ptr<Bus_Descriptor_Base> descriptor) override;
+    std::shared_ptr<const Bus_Descriptor_Base> get_descriptor() const override;
 
     void lock();
     auto try_lock() -> bool;
@@ -26,10 +31,10 @@ public:
     void send_break();
 
 private:
-    bool init(size_t rx_pin, size_t baud, bool invert);
+    bool init(uint32_t rx_pin, uint32_t baud, bool invert);
     void close();
 
-    std::shared_ptr<ts::IValue> m_descriptor;
+    std::shared_ptr<UART_BBang_Descriptor> m_descriptor;
 
     std::recursive_mutex m_mutex;
 

@@ -33,24 +33,13 @@ auto Throttle_To_PWM::init(std::shared_ptr<Node_Descriptor_Base> descriptor) -> 
 }
 auto Throttle_To_PWM::init() -> bool
 {
-    if (m_descriptor->rate == 0)
-    {
-        QLOGE("Bad rate: {}Hz", m_descriptor->rate);
-        return false;
-    }
-    if (m_descriptor->channels == 0)
-    {
-        QLOGE("Need to have at least one channel");
-        return false;
-    }
-
-    m_accumulators.resize(m_descriptor->channels);
-    m_output_streams.resize(m_descriptor->channels);
+    m_accumulators.resize(m_descriptor->get_channel_count());
+    m_output_streams.resize(m_descriptor->get_channel_count());
 
     for (auto& o: m_output_streams)
     {
         o.reset(new Output_Stream);
-        o->set_rate(m_descriptor->rate);
+        o->set_rate(m_descriptor->get_rate());
     }
     return true;
 }
@@ -66,17 +55,17 @@ auto Throttle_To_PWM::start(q::Clock::time_point tp) -> bool
 
 auto Throttle_To_PWM::get_inputs() const -> std::vector<Input>
 {
-    std::vector<Input> inputs(m_descriptor->channels);
-    for (size_t i = 0; i < m_descriptor->channels; i++)
+    std::vector<Input> inputs(m_descriptor->get_channel_count());
+    for (size_t i = 0; i < inputs.size(); i++)
     {
-        inputs[i] = { stream::IThrottle::TYPE, m_descriptor->rate, q::util::format<std::string>("Throttle {}", i), m_accumulators[i].get_stream_path(0) };
+        inputs[i] = { stream::IThrottle::TYPE, m_descriptor->get_rate(), q::util::format<std::string>("Throttle {}", i), m_accumulators[i].get_stream_path(0) };
     }
     return inputs;
 }
 auto Throttle_To_PWM::get_outputs() const -> std::vector<Output>
 {
-    std::vector<Output> outputs(m_descriptor->channels);
-    for (size_t i = 0; i < m_descriptor->channels; i++)
+    std::vector<Output> outputs(m_descriptor->get_channel_count());
+    for (size_t i = 0; i < outputs.size(); i++)
     {
         outputs[i] = { q::util::format<std::string>("PWM {}", i), m_output_streams[i] };
     }
@@ -87,7 +76,7 @@ void Throttle_To_PWM::process()
 {
     QLOG_TOPIC("Throttle_To_PWM::process");
 
-    for (size_t i = 0; i < m_descriptor->channels; i++)
+    for (size_t i = 0; i < m_output_streams.size(); i++)
     {
         m_output_streams[i]->clear();
 

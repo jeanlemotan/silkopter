@@ -123,14 +123,9 @@ auto KF_ECEF::init(std::shared_ptr<Node_Descriptor_Base> descriptor) -> bool
 }
 auto KF_ECEF::init() -> bool
 {
-    if (m_descriptor->rate == 0)
-    {
-        QLOGE("Bad rate: {}Hz", m_descriptor->rate);
-        return false;
-    }
-    m_position_output_stream->set_rate(m_descriptor->rate);
-    m_velocity_output_stream->set_rate(m_descriptor->rate);
-    m_linear_acceleration_output_stream->set_rate(m_descriptor->rate);
+    m_position_output_stream->set_rate(m_descriptor->get_rate());
+    m_velocity_output_stream->set_rate(m_descriptor->get_rate());
+    m_linear_acceleration_output_stream->set_rate(m_descriptor->get_rate());
 
     m_dts = std::chrono::duration<double>(m_position_output_stream->get_dt()).count();
     double dt = m_dts;
@@ -172,9 +167,9 @@ auto KF_ECEF::get_inputs() const -> std::vector<Input>
 {
     std::vector<Input> inputs =
     {{
-        { stream::IECEF_Position::TYPE, m_descriptor->rate, "GPS Position (ecef)", m_accumulator.get_stream_path(0) },
-        { stream::IECEF_Velocity::TYPE, m_descriptor->rate, "GPS Velocity (ecef)", m_accumulator.get_stream_path(1) },
-        { stream::IENU_Linear_Acceleration::TYPE, m_descriptor->rate, "Linear Acceleration (enu)", m_accumulator.get_stream_path(2) },
+        { stream::IECEF_Position::TYPE, m_descriptor->get_rate(), "GPS Position (ecef)", m_accumulator.get_stream_path(0) },
+        { stream::IECEF_Velocity::TYPE, m_descriptor->get_rate(), "GPS Velocity (ecef)", m_accumulator.get_stream_path(1) },
+        { stream::IENU_Linear_Acceleration::TYPE, m_descriptor->get_rate(), "Linear Acceleration (enu)", m_accumulator.get_stream_path(2) },
     }};
     return inputs;
 }
@@ -263,7 +258,7 @@ void KF_ECEF::process()
 
 void KF_ECEF::set_input_stream_path(size_t idx, q::Path const& path)
 {
-    m_accumulator.set_stream_path(idx, path, m_descriptor->rate, m_uav);
+    m_accumulator.set_stream_path(idx, path, m_descriptor->get_rate(), m_uav);
 }
 
 auto KF_ECEF::set_config(std::shared_ptr<Node_Config_Base> config) -> bool
@@ -279,17 +274,9 @@ auto KF_ECEF::set_config(std::shared_ptr<Node_Config_Base> config) -> bool
 
     *m_config = *specialized;
 
-    m_config->gps_position_lag = math::max(m_config->gps_position_lag, 0.f);
-    m_config->gps_position_accuracy = math::max(m_config->gps_position_accuracy, 0.f);
-    m_config->gps_velocity_lag = math::max(m_config->gps_velocity_lag, 0.f);
-    m_config->gps_velocity_accuracy = math::max(m_config->gps_velocity_accuracy, 0.f);
-    m_config->acceleration_lag = math::max(m_config->acceleration_lag, 0.f);
-    m_config->acceleration_accuracy = math::max(m_config->acceleration_accuracy, 0.f);
-
-
-    double gps_pos_acu = math::square(m_config->gps_position_accuracy);
-    double gps_vel_acu = math::square(m_config->gps_velocity_accuracy);
-    double acc_acu = math::square(m_config->acceleration_accuracy);
+    double gps_pos_acu = math::square(m_config->get_gps_position_accuracy());
+    double gps_vel_acu = math::square(m_config->get_gps_velocity_accuracy());
+    double acc_acu = math::square(m_config->get_acceleration_accuracy());
 
     m_kf_x.R << gps_pos_acu,    0,              0,
                 0,              gps_vel_acu,    0,
@@ -298,9 +285,9 @@ auto KF_ECEF::set_config(std::shared_ptr<Node_Config_Base> config) -> bool
     m_kf_y.R = m_kf_x.R;
     m_kf_z.R = m_kf_x.R;
 
-    m_gps_position_delayer.init(m_dts, m_config->gps_position_lag);
-    m_gps_velocity_delayer.init(m_dts, m_config->gps_velocity_lag);
-    m_linear_acceleration_delayer.init(m_dts, m_config->acceleration_lag);
+    m_gps_position_delayer.init(m_dts, m_config->get_gps_position_lag());
+    m_gps_velocity_delayer.init(m_dts, m_config->get_gps_velocity_lag());
+    m_linear_acceleration_delayer.init(m_dts, m_config->get_acceleration_lag());
 
     return true;
 }

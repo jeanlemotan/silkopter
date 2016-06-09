@@ -1,22 +1,18 @@
 #include "BrainStdAfx.h"
 #include "bus/UART_Linux.h"
-#include "def_lang/Mapper.h"
-#include "def_lang/Type_System.h"
 
 #include <termios.h>
+
+#include "uav.def.h"
 
 namespace silk
 {
 namespace bus
 {
 
-UART_Linux::UART_Linux(ts::Type_System const& ts)
+UART_Linux::UART_Linux()
+    : m_descriptor(new UART_Linux_Descriptor())
 {
-    m_descriptor = ts.create_value("::silk::UART_Linux_Descriptor");
-    if (!m_descriptor)
-    {
-        QLOGE("Cannot create descriptor value");
-    }
 }
 
 UART_Linux::~UART_Linux()
@@ -24,59 +20,48 @@ UART_Linux::~UART_Linux()
     close();
 }
 
-bool UART_Linux::init(std::shared_ptr<ts::IValue> descriptor)
+bool UART_Linux::init(std::shared_ptr<Bus_Descriptor_Base> descriptor)
 {
-    if (!descriptor || descriptor->get_type() != m_descriptor->get_type())
+    auto specialized = std::dynamic_pointer_cast<UART_Linux_Descriptor>(descriptor);
+    if (!specialized)
     {
-        QLOGE("Bad descriptor!");
-        return false;
-    }
-    std::string dev;
-    uint32_t baud = 0;
-
-    auto result = ts::mapper::get(*descriptor, "dev", dev) &
-                    ts::mapper::get(*descriptor, "baud", baud);
-    if (result != ts::success)
-    {
-        QLOGE("{}", result.error().what());
+        QLOGE("Wrong descriptor type");
         return false;
     }
 
-    if (!init(dev, baud))
+    int baud_id = -1;
+    switch (specialized->get_baud())
+    {
+    case UART_Linux_Descriptor::baud_t::_9600: baud_id = B9600; break;
+    case UART_Linux_Descriptor::baud_t::_19200: baud_id = B19200; break;
+    case UART_Linux_Descriptor::baud_t::_38400: baud_id = B38400; break;
+    case UART_Linux_Descriptor::baud_t::_57600: baud_id = B57600; break;
+    case UART_Linux_Descriptor::baud_t::_115200: baud_id = B115200; break;
+    case UART_Linux_Descriptor::baud_t::_230400: baud_id = B230400; break;
+    }
+    if (baud_id < 0)
+    {
+        QLOGE("Invalid baud requested");
+        return false;
+    }
+
+    if (!init(specialized->get_dev(), baud_id))
     {
         return false;
     }
 
-    result = m_descriptor->copy_assign(*descriptor);
-    QASSERT(result == ts::success);
+    *m_descriptor = *specialized;
     return true;
 }
 
-std::shared_ptr<const ts::IValue> UART_Linux::get_descriptor() const
+std::shared_ptr<const Bus_Descriptor_Base> UART_Linux::get_descriptor() const
 {
     return m_descriptor;
 }
 
-auto UART_Linux::init(std::string const& dev, uint32_t baud) -> bool
+auto UART_Linux::init(std::string const& dev, int baud_id) -> bool
 {
     close();
-
-    int b = -1;
-    switch (baud)
-    {
-    case 9600: b = B9600; break;
-    case 19200: b = B19200; break;
-    case 38400: b = B38400; break;
-    case 57600: b = B57600; break;
-    case 115200: b = B115200; break;
-    case 230400: b = B230400; break;
-    }
-
-    if (b < 0)
-    {
-        QLOGE("Invalid baud requested: {}", baud);
-        return false;
-    }
 
     std::lock_guard<UART_Linux> lg(*this);
 
@@ -91,8 +76,8 @@ auto UART_Linux::init(std::string const& dev, uint32_t baud) -> bool
 
     struct termios options;
     tcgetattr(m_fd, &options);
-    cfsetispeed(&options, b);						// Set baud rate
-    cfsetospeed(&options, b);
+    cfsetispeed(&options, baud_id);						// Set baud rate
+    cfsetospeed(&options, baud_id);
 
     cfmakeraw(&options);
 

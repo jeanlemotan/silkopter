@@ -72,8 +72,6 @@ auto SRF01::init() -> bool
         bus->unlock();
     });
 
-    m_descriptor->rate = math::clamp<size_t>(m_descriptor->rate, 1, 10);
-
     QLOGI("Probing SRF01 on {}...", m_descriptor->get_bus());
 
     uint32_t tries = 0;

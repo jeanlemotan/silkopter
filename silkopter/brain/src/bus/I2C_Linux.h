@@ -4,17 +4,22 @@
 
 namespace silk
 {
+struct I2C_Linux_Descriptor;
+}
+
+namespace silk
+{
 namespace bus
 {
 
 class I2C_Linux : public II2C
 {
 public:
-    I2C_Linux(ts::Type_System const& ts);
+    I2C_Linux();
     ~I2C_Linux();
 
-    bool init(std::shared_ptr<ts::IValue> descriptor) override;
-    std::shared_ptr<const ts::IValue> get_descriptor() const override;
+    bool init(std::shared_ptr<Bus_Descriptor_Base> descriptor) override;
+    std::shared_ptr<const Bus_Descriptor_Base> get_descriptor() const override;
 
     void close();
 
@@ -31,7 +36,7 @@ public:
 private:
     bool init(std::string const& dev);
 
-    std::shared_ptr<ts::IValue> m_descriptor;
+    std::shared_ptr<I2C_Linux_Descriptor> m_descriptor;
 
     int m_fd = -1;
     std::recursive_mutex m_mutex;
