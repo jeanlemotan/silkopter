@@ -1,8 +1,8 @@
 #include "BrainStdAfx.h"
 #include "ADC_Voltmeter.h"
 
-#include "sz_math.hpp"
-#include "sz_ADC_Voltmeter.hpp"
+#include "uav.def.h"
+//#include "sz_ADC_Voltmeter.hpp"
 
 namespace silk
 {
@@ -11,36 +11,29 @@ namespace node
 
 ADC_Voltmeter::ADC_Voltmeter(UAV& uav)
     : m_uav(uav)
-    , m_init_params(new sz::ADC_Voltmeter::Init_Params())
-    , m_config(new sz::ADC_Voltmeter::Config())
+    , m_descriptor(new ADC_Voltmeter_Descriptor())
+    , m_config(new ADC_Voltmeter_Config())
 {
     m_output_stream = std::make_shared<Output_Stream>();
 }
 
-auto ADC_Voltmeter::init(rapidjson::Value const& init_params) -> bool
+auto ADC_Voltmeter::init(std::shared_ptr<Node_Descriptor_Base> descriptor) -> bool
 {
     QLOG_TOPIC("adc_voltmeter::init");
 
-    sz::ADC_Voltmeter::Init_Params sz;
-    autojsoncxx::error::ErrorStack result;
-    if (!autojsoncxx::from_value(sz, init_params, result))
+    auto specialized = std::dynamic_pointer_cast<ADC_Voltmeter_Descriptor>(descriptor);
+    if (!specialized)
     {
-        std::ostringstream ss;
-        ss << result;
-        QLOGE("Cannot deserialize ADC_Voltmeter data: {}", ss.str());
+        QLOGE("Wrong descriptor type");
         return false;
     }
-    *m_init_params = sz;
+
+    *m_descriptor = *specialized;
     return init();
 }
 auto ADC_Voltmeter::init() -> bool
 {
-    if (m_init_params->rate == 0)
-    {
-        QLOGE("Bad rate: {}Hz", m_init_params->rate);
-        return false;
-    }
-    m_output_stream->set_rate(m_init_params->rate);
+    m_output_stream->set_rate(m_descriptor->get_rate());
     return true;
 }
 
@@ -54,7 +47,7 @@ auto ADC_Voltmeter::get_inputs() const -> std::vector<Input>
 {
     std::vector<Input> inputs =
     {{
-        { stream::IADC::TYPE, m_init_params->rate, "ADC", m_accumulator.get_stream_path(0) }
+        { stream::IADC::TYPE, m_descriptor->get_rate(), "ADC", m_accumulator.get_stream_path(0) }
     }};
     return inputs;
 }
@@ -77,7 +70,7 @@ void ADC_Voltmeter::process()
     {
         if (i_sample.is_healthy)
         {
-            m_output_stream->push_sample(i_sample.value * m_config->scale + m_config->bias, true);
+            m_output_stream->push_sample(i_sample.value * m_config->get_scale() + m_config->get_bias(), true);
         }
         else
         {
@@ -91,36 +84,29 @@ void ADC_Voltmeter::set_input_stream_path(size_t idx, q::Path const& path)
     m_accumulator.set_stream_path(idx, path, m_output_stream->get_rate(), m_uav);
 }
 
-auto ADC_Voltmeter::set_config(rapidjson::Value const& json) -> bool
+auto ADC_Voltmeter::set_config(std::shared_ptr<Node_Config_Base> config) -> bool
 {
     QLOG_TOPIC("adc_voltmeter::set_config");
 
-    sz::ADC_Voltmeter::Config sz;
-    autojsoncxx::error::ErrorStack result;
-    if (!autojsoncxx::from_value(sz, json, result))
+    auto specialized = std::dynamic_pointer_cast<ADC_Voltmeter_Config>(config);
+    if (!specialized)
     {
-        std::ostringstream ss;
-        ss << result;
-        QLOGE("Cannot deserialize ADC_Voltmeter config data: {}", ss.str());
+        QLOGE("Wrong config type");
         return false;
     }
 
-    *m_config = sz;
+    *m_config = *specialized;
 
     return true;
 }
-auto ADC_Voltmeter::get_config() const -> rapidjson::Document
+auto ADC_Voltmeter::get_config() const -> std::shared_ptr<Node_Config_Base>
 {
-    rapidjson::Document json;
-    autojsoncxx::to_document(*m_config, json);
-    return std::move(json);
+    return m_config;
 }
 
-auto ADC_Voltmeter::get_init_params() const -> rapidjson::Document
+auto ADC_Voltmeter::get_descriptor() const -> std::shared_ptr<Node_Descriptor_Base>
 {
-    rapidjson::Document json;
-    autojsoncxx::to_document(*m_init_params, json);
-    return std::move(json);
+    return m_descriptor;
 }
 
 auto ADC_Voltmeter::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document

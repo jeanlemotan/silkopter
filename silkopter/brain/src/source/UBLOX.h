@@ -11,13 +11,11 @@
 
 #include "Basic_Output_Stream.h"
 
-namespace sz
+
+namespace silk
 {
-namespace UBLOX
-{
-struct Init_Params;
-struct Config;
-}
+struct UBLOX_Descriptor;
+struct UBLOX_Config;
 }
 
 
@@ -33,11 +31,11 @@ public:
     UBLOX(UAV& uav);
     ~UBLOX();
 
-    auto init(rapidjson::Value const& init_params) -> bool;
-    auto get_init_params() const -> rapidjson::Document;
+    bool init(std::shared_ptr<Node_Descriptor_Base> descriptor) override;
+    std::shared_ptr<Node_Descriptor_Base> get_descriptor() const override;
 
-    auto set_config(rapidjson::Value const& json) -> bool;
-    auto get_config() const -> rapidjson::Document;
+    bool set_config(std::shared_ptr<Node_Config_Base> config) override;
+    std::shared_ptr<Node_Config_Base> get_config() const override;
 
     auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
 
@@ -72,8 +70,8 @@ private:
     auto read(Buses& buses, uint8_t* data, size_t max_size) -> size_t;
     auto write(Buses& buses, uint8_t const* data, size_t size) -> bool;
 
-    std::shared_ptr<sz::UBLOX::Init_Params> m_init_params;
-    std::shared_ptr<sz::UBLOX::Config> m_config;
+    std::shared_ptr<UBLOX_Descriptor> m_descriptor;
+    std::shared_ptr<UBLOX_Config> m_config;
 
     struct Packet
     {

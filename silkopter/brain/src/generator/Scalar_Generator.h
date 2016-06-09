@@ -6,8 +6,8 @@
 
 #include "Basic_Output_Stream.h"
 
-#include "sz_math.hpp"
-#include "sz_Scalar_Generator.hpp"
+//#include "sz_math.hpp"
+//#include "sz_Scalar_Generator.hpp"
 
 namespace silk
 {
@@ -20,11 +20,11 @@ class Scalar_Generator : public IGenerator
 public:
     Scalar_Generator(UAV& uav);
 
-    auto init(rapidjson::Value const& init_params) -> bool;
-    auto get_init_params() const -> rapidjson::Document;
+    bool init(std::shared_ptr<Node_Descriptor_Base> descriptor) override;
+    std::shared_ptr<Node_Descriptor_Base> get_descriptor() const override;
 
-    auto set_config(rapidjson::Value const& json) -> bool;
-    auto get_config() const -> rapidjson::Document;
+    bool set_config(std::shared_ptr<Node_Config_Base> config) override;
+    std::shared_ptr<Node_Config_Base> get_config() const override;
 
     auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
 
@@ -41,7 +41,7 @@ private:
 
     UAV& m_uav;
 
-    sz::Scalar_Generator::Init_Params m_init_params;
+    sz::Scalar_Generator::Init_Params m_descriptor;
     sz::Scalar_Generator::Config m_config;
 
     std::weak_ptr<stream::IFloat> m_modulation_stream;
@@ -60,40 +60,39 @@ Scalar_Generator<Stream_t>::Scalar_Generator(UAV& uav)
 }
 
 template<class Stream_t>
-auto Scalar_Generator<Stream_t>::init(rapidjson::Value const& init_params) -> bool
+auto Scalar_Generator<Stream_t>::init(std::shared_ptr<Node_Descriptor_Base> descriptor) -> bool
 {
     QLOG_TOPIC("scalar_generator::init");
 
-    sz::Scalar_Generator::Init_Params sz;
-    autojsoncxx::error::ErrorStack result;
-    if (!autojsoncxx::from_value(sz, init_params, result))
+    auto specialized = std::dynamic_pointer_cast<Scalar_Generator_Descriptor>(descriptor);
+    if (!specialized)
     {
-        std::ostringstream ss;
-        ss << result;
-        QLOGE("Cannot deserialize Scalar_Generator data: {}", ss.str());
+        QLOGE("Wrong descriptor type");
         return false;
     }
-    m_init_params = sz;
+
+    *m_descriptor = *specialized;
+
     return init();
 }
 
 template<class Stream_t>
 auto Scalar_Generator<Stream_t>::init() -> bool
 {
-    if (m_init_params.rate == 0)
+    if (m_descriptor.rate == 0)
     {
-        QLOGE("Bad rate: {}Hz", m_init_params.rate);
+        QLOGE("Bad rate: {}Hz", m_descriptor.rate);
         return false;
     }
-    m_output_stream->set_rate(m_init_params.rate);
+    m_output_stream->set_rate(m_descriptor.rate);
     return true;
 }
 
 template<class Stream_t>
-auto Scalar_Generator<Stream_t>::get_init_params() const -> rapidjson::Document
+auto Scalar_Generator<Stream_t>::get_descriptor() const -> std::shared_ptr<Node_Descriptor_Base>
 {
     rapidjson::Document json;
-    autojsoncxx::to_document(m_init_params, json);
+    autojsoncxx::to_document(m_descriptor, json);
     return std::move(json);
 }
 
@@ -122,20 +121,18 @@ void Scalar_Generator<Stream_t>::set_input_stream_path(size_t idx, q::Path const
 }
 
 template<class Stream_t>
-auto Scalar_Generator<Stream_t>::set_config(rapidjson::Value const& json) -> bool
+auto Scalar_Generator<Stream_t>::set_config(std::shared_ptr<Node_Config_Base> config) -> bool
 {
     QLOG_TOPIC("scalar_generator::set_config");
-    sz::Scalar_Generator::Config sz;
-    autojsoncxx::error::ErrorStack result;
-    if (!autojsoncxx::from_value(sz, json, result))
+
+    auto specialized = std::dynamic_pointer_cast<Scalar_Generator_Config>(config);
+    if (!specialized)
     {
-        std::ostringstream ss;
-        ss << result;
-        QLOGE("Cannot deserialize Scalar_Generator config data: {}", ss.str());
+        QLOGE("Wrong config type");
         return false;
     }
 
-    m_config = sz;
+    *m_config = *specialized;
 
     return true;
 }
@@ -146,7 +143,7 @@ auto Scalar_Generator<Stream_t>::send_message(rapidjson::Value const& /*json*/) 
     return rapidjson::Document();
 }
 template<class Stream_t>
-auto Scalar_Generator<Stream_t>::get_config() const -> rapidjson::Document
+auto Scalar_Generator<Stream_t>::get_config() const -> std::shared_ptr<Node_Config_Base>
 {
     rapidjson::Document json;
     autojsoncxx::to_document(m_config, json);
@@ -158,7 +155,7 @@ auto Scalar_Generator<Stream_t>::get_inputs() const -> std::vector<Input>
 {
     std::vector<Input> inputs =
     {{
-        { stream::IFloat::TYPE, m_init_params.rate, "Modulation", m_modulation_stream_path }
+        { stream::IFloat::TYPE, m_descriptor.rate, "Modulation", m_modulation_stream_path }
     }};
     return inputs;
 }

@@ -1,8 +1,8 @@
 #include "BrainStdAfx.h"
 #include "Comp_AHRS.h"
 
-#include "sz_math.hpp"
-#include "sz_Comp_AHRS.hpp"
+#include "uav.def.h"
+//#include "sz_Comp_AHRS.hpp"
 
 namespace silk
 {
@@ -11,37 +11,31 @@ namespace node
 
 Comp_AHRS::Comp_AHRS(UAV& uav)
     : m_uav(uav)
-    , m_init_params(new sz::Comp_AHRS::Init_Params())
-    , m_config(new sz::Comp_AHRS::Config())
+    , m_descriptor(new Comp_AHRS_Descriptor())
+    , m_config(new Comp_AHRS_Config())
 {
     m_output_stream = std::make_shared<Output_Stream>();
 }
 
-auto Comp_AHRS::init(rapidjson::Value const& init_params) -> bool
+auto Comp_AHRS::init(std::shared_ptr<Node_Descriptor_Base> descriptor) -> bool
 {
     QLOG_TOPIC("comp_ahrs::init");
 
-    sz::Comp_AHRS::Init_Params sz;
-    autojsoncxx::error::ErrorStack result;
-    if (!autojsoncxx::from_value(sz, init_params, result))
+    auto specialized = std::dynamic_pointer_cast<Comp_AHRS_Descriptor>(descriptor);
+    if (!specialized)
     {
-        std::ostringstream ss;
-        ss << result;
-        QLOGE("Cannot deserialize Comp_AHRS data: {}", ss.str());
+        QLOGE("Wrong descriptor type");
         return false;
     }
-    *m_init_params = sz;
+
+    *m_descriptor = *specialized;
+
     return init();
 }
 
 auto Comp_AHRS::init() -> bool
 {
-    if (m_init_params->rate == 0)
-    {
-        QLOGE("Bad rate: {}Hz", m_init_params->rate);
-        return false;
-    }
-    m_output_stream->set_rate(m_init_params->rate);
+    m_output_stream->set_rate(m_descriptor->get_rate());
     return true;
 }
 
@@ -55,9 +49,9 @@ auto Comp_AHRS::get_inputs() const -> std::vector<Input>
 {
     std::vector<Input> inputs =
     {{
-        { stream::IAngular_Velocity::TYPE, m_init_params->rate, "Angular Velocity", m_accumulator.get_stream_path(0) },
-        { stream::IAcceleration::TYPE, m_init_params->rate, "Acceleration", m_accumulator.get_stream_path(1) },
-        { stream::IMagnetic_Field::TYPE, m_init_params->rate, "Magnetic Field", m_accumulator.get_stream_path(2) }
+        { stream::IAngular_Velocity::TYPE, m_descriptor->get_rate(), "Angular Velocity", m_accumulator.get_stream_path(0) },
+        { stream::IAcceleration::TYPE, m_descriptor->get_rate(), "Acceleration", m_accumulator.get_stream_path(1) },
+        { stream::IMagnetic_Field::TYPE, m_descriptor->get_rate(), "Magnetic Field", m_accumulator.get_stream_path(2) }
     }};
     return inputs;
 }
@@ -151,7 +145,7 @@ void Comp_AHRS::process()
             {
                 //take the rate of rotation into account here - the quicker the rotation the bigger the mu
                 //like this we compensate for gyro saturation errors
-                float mu = (dts + av_length) * m_config->drift_correction_factor;
+                float mu = (dts + av_length) * m_config->get_drift_correction_factor();
                 rot = math::nlerp<float, math::safe>(rot, noisy_quat, mu);
             }
             rot = math::normalized<float, math::safe>(rot);
@@ -166,38 +160,31 @@ void Comp_AHRS::set_input_stream_path(size_t idx, q::Path const& path)
     m_accumulator.set_stream_path(idx, path, m_output_stream->get_rate(), m_uav);
 }
 
-auto Comp_AHRS::set_config(rapidjson::Value const& json) -> bool
+auto Comp_AHRS::set_config(std::shared_ptr<Node_Config_Base> config) -> bool
 {
     QLOG_TOPIC("comp_ahrs::set_config");
 
-    sz::Comp_AHRS::Config sz;
-    autojsoncxx::error::ErrorStack result;
-    if (!autojsoncxx::from_value(sz, json, result))
+    auto specialized = std::dynamic_pointer_cast<Comp_AHRS_Config>(config);
+    if (!specialized)
     {
-        std::ostringstream ss;
-        ss << result;
-        QLOGE("Cannot deserialize Comp_AHRS config data: {}", ss.str());
+        QLOGE("Wrong config type");
         return false;
     }
 
-    *m_config = sz;
+    *m_config = *specialized;
 
-    m_config->drift_correction_factor = math::clamp(m_config->drift_correction_factor, 0.f, 1.f);
+    //m_config->drift_correction_factor = math::clamp(m_config->drift_correction_factor, 0.f, 1.f);
 
     return true;
 }
-auto Comp_AHRS::get_config() const -> rapidjson::Document
+auto Comp_AHRS::get_config() const -> std::shared_ptr<Node_Config_Base>
 {
-    rapidjson::Document json;
-    autojsoncxx::to_document(*m_config, json);
-    return std::move(json);
+    return m_config;
 }
 
-auto Comp_AHRS::get_init_params() const -> rapidjson::Document
+auto Comp_AHRS::get_descriptor() const -> std::shared_ptr<Node_Descriptor_Base>
 {
-    rapidjson::Document json;
-    autojsoncxx::to_document(*m_init_params, json);
-    return std::move(json);
+    return m_descriptor;
 }
 
 auto Comp_AHRS::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document

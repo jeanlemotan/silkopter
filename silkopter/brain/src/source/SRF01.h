@@ -7,13 +7,11 @@
 
 #include "Basic_Output_Stream.h"
 
-namespace sz
+
+namespace silk
 {
-namespace SRF01
-{
-struct Init_Params;
-struct Config;
-}
+struct SRF01_Descriptor;
+struct SRF01_Config;
 }
 
 
@@ -27,11 +25,11 @@ class SRF01 : public ISource
 public:
     SRF01(UAV& uav);
 
-    auto init(rapidjson::Value const& init_params) -> bool;
-    auto get_init_params() const -> rapidjson::Document;
+    bool init(std::shared_ptr<Node_Descriptor_Base> descriptor) override;
+    std::shared_ptr<Node_Descriptor_Base> get_descriptor() const override;
 
-    auto set_config(rapidjson::Value const& json) -> bool;
-    auto get_config() const -> rapidjson::Document;
+    bool set_config(std::shared_ptr<Node_Config_Base> config) override;
+    std::shared_ptr<Node_Config_Base> get_config() const override;
 
     auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
 
@@ -55,8 +53,8 @@ private:
 
     std::weak_ptr<bus::IUART> m_bus;
 
-    std::shared_ptr<sz::SRF01::Init_Params> m_init_params;
-    std::shared_ptr<sz::SRF01::Config> m_config;
+    std::shared_ptr<SRF01_Descriptor> m_descriptor;
+    std::shared_ptr<SRF01_Config> m_config;
 
     typedef Basic_Output_Stream<stream::IDistance> Output_Stream;
     mutable std::shared_ptr<Output_Stream> m_output_stream;

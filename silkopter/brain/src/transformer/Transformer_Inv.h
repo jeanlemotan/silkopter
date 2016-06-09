@@ -21,11 +21,11 @@ class Transformer_Inv : public ITransformer
 public:
     Transformer_Inv(UAV& uav);
 
-    auto init(rapidjson::Value const& init_params) -> bool;
-    auto get_init_params() const -> rapidjson::Document;
+    bool init(std::shared_ptr<Node_Descriptor_Base> descriptor) override;
+    std::shared_ptr<Node_Descriptor_Base> get_descriptor() const override;
 
-    auto set_config(rapidjson::Value const& json) -> bool;
-    auto get_config() const -> rapidjson::Document;
+    bool set_config(std::shared_ptr<Node_Config_Base> config) override;
+    std::shared_ptr<Node_Config_Base> get_config() const override;
 
     auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
 
@@ -42,7 +42,7 @@ private:
 
     UAV& m_uav;
 
-    sz::Transformer::Init_Params m_init_params;
+    sz::Transformer::Init_Params m_descriptor;
     sz::Transformer::Config m_config;
 
     Sample_Accumulator<In_Stream_t, Frame_Stream_t> m_accumulator;
@@ -64,40 +64,39 @@ Transformer_Inv<In_Stream_t, Out_Stream_t, Frame_Stream_t>::Transformer_Inv(UAV&
 }
 
 template<class In_Stream_t, class Out_Stream_t, class Frame_Stream_t>
-auto Transformer_Inv<In_Stream_t, Out_Stream_t, Frame_Stream_t>::init(rapidjson::Value const& init_params) -> bool
+auto Transformer_Inv<In_Stream_t, Out_Stream_t, Frame_Stream_t>::init(std::shared_ptr<Node_Descriptor_Base> descriptor) -> bool
 {
     QLOG_TOPIC("transformer_inv::init");
 
-    sz::Transformer::Init_Params sz;
-    autojsoncxx::error::ErrorStack result;
-    if (!autojsoncxx::from_value(sz, init_params, result))
+    auto specialized = std::dynamic_pointer_cast<Transformer_Inv_Descriptor>(descriptor);
+    if (!specialized)
     {
-        std::ostringstream ss;
-        ss << result;
-        QLOGE("Cannot deserialize Transformer_Inv data: {}", ss.str());
+        QLOGE("Wrong descriptor type");
         return false;
     }
-    m_init_params = sz;
+
+    *m_descriptor = *specialized;
+
     return init();
 }
 
 template<class In_Stream_t, class Out_Stream_t, class Frame_Stream_t>
 auto Transformer_Inv<In_Stream_t, Out_Stream_t, Frame_Stream_t>::init() -> bool
 {
-    if (m_init_params.rate == 0)
+    if (m_descriptor.rate == 0)
     {
-        QLOGE("Bad rate: {}Hz", m_init_params.rate);
+        QLOGE("Bad rate: {}Hz", m_descriptor.rate);
         return false;
     }
-    m_output_stream->set_rate(m_init_params.rate);
+    m_output_stream->set_rate(m_descriptor.rate);
     return true;
 }
 
 template<class In_Stream_t, class Out_Stream_t, class Frame_Stream_t>
-auto Transformer_Inv<In_Stream_t, Out_Stream_t, Frame_Stream_t>::get_init_params() const -> rapidjson::Document
+auto Transformer_Inv<In_Stream_t, Out_Stream_t, Frame_Stream_t>::get_descriptor() const -> std::shared_ptr<Node_Descriptor_Base>
 {
     rapidjson::Document json;
-    autojsoncxx::to_document(m_init_params, json);
+    autojsoncxx::to_document(m_descriptor, json);
     return std::move(json);
 }
 
@@ -108,20 +107,18 @@ void Transformer_Inv<In_Stream_t, Out_Stream_t, Frame_Stream_t>::set_input_strea
 }
 
 template<class In_Stream_t, class Out_Stream_t, class Frame_Stream_t>
-auto Transformer_Inv<In_Stream_t, Out_Stream_t, Frame_Stream_t>::set_config(rapidjson::Value const& json) -> bool
+auto Transformer_Inv<In_Stream_t, Out_Stream_t, Frame_Stream_t>::set_config(std::shared_ptr<Node_Config_Base> config) -> bool
 {
     QLOG_TOPIC("transformer_inv::set_config");
-    sz::Transformer::Config sz;
-    autojsoncxx::error::ErrorStack result;
-    if (!autojsoncxx::from_value(sz, json, result))
+
+    auto specialized = std::dynamic_pointer_cast<Transformer_Inv_Config>(config);
+    if (!specialized)
     {
-        std::ostringstream ss;
-        ss << result;
-        QLOGE("Cannot deserialize Transformer_Inv config data: {}", ss.str());
+        QLOGE("Wrong config type");
         return false;
     }
 
-    m_config = sz;
+    *m_config = *specialized;
 
     return true;
 }
@@ -131,7 +128,7 @@ auto Transformer_Inv<In_Stream_t, Out_Stream_t, Frame_Stream_t>::send_message(ra
     return rapidjson::Document();
 }
 template<class In_Stream_t, class Out_Stream_t, class Frame_Stream_t>
-auto Transformer_Inv<In_Stream_t, Out_Stream_t, Frame_Stream_t>::get_config() const -> rapidjson::Document
+auto Transformer_Inv<In_Stream_t, Out_Stream_t, Frame_Stream_t>::get_config() const -> std::shared_ptr<Node_Config_Base>
 {
     rapidjson::Document json;
     autojsoncxx::to_document(m_config, json);
@@ -150,8 +147,8 @@ auto Transformer_Inv<In_Stream_t, Out_Stream_t, Frame_Stream_t>::get_inputs() co
 {
     std::vector<Input> inputs =
     {{
-        { In_Stream_t::TYPE, m_init_params.rate, "Input", m_accumulator.get_stream_path(0) },
-        { Frame_Stream_t::TYPE, m_init_params.rate, "Frame", m_accumulator.get_stream_path(1) }
+        { In_Stream_t::TYPE, m_descriptor.rate, "Input", m_accumulator.get_stream_path(0) },
+        { Frame_Stream_t::TYPE, m_descriptor.rate, "Frame", m_accumulator.get_stream_path(1) }
     }};
     return inputs;
 }

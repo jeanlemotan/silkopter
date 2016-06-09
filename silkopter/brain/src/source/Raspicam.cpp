@@ -1,8 +1,8 @@
 #include "BrainStdAfx.h"
 #include "Raspicam.h"
 
-#include "sz_math.hpp"
-#include "sz_Raspicam.hpp"
+#include "uav.def.h"
+//#include "sz_Raspicam.hpp"
 
 //#undef RASPBERRY_PI
 
@@ -115,8 +115,8 @@ static bool set_connection_enabled(Connection_ptr const& connection, bool yes)
 
 Raspicam::Raspicam(UAV& uav)
     : m_uav(uav)
-    , m_init_params(new sz::Raspicam::Init_Params())
-    , m_config(new sz::Raspicam::Config())
+    , m_descriptor(new Raspicam_Descriptor())
+    , m_config(new Raspicam_Config())
 {
     QLOG_TOPIC("raspicam");
 #if defined RASPBERRY_PI
@@ -131,16 +131,20 @@ Raspicam::Raspicam(UAV& uav)
     m_impl->low.callback = std::bind(&Raspicam::streaming_callback, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4);
 #endif
 
-    m_init_params->fps = 30;
+    m_descriptor->set_fps(30);
 
-    m_init_params->low.resolution.set(320, 240);
-    m_init_params->low.bitrate = 100000;
+    Raspicam_Descriptor::Quality quality;
+    quality.set_resolution({ 320, 240 });
+    quality.set_bitrate(100000);
+    m_descriptor->set_streaming_low(quality);
 
-    m_init_params->high.resolution.set(640, 480);
-    m_init_params->high.bitrate = 2000000;
+    quality.set_resolution({ 640, 480 });
+    quality.set_bitrate(2000000);
+    m_descriptor->set_streaming_high(quality);
 
-    m_init_params->recording.resolution.set(1296, 972);
-    m_init_params->recording.bitrate = 8000000;
+    quality.set_resolution({ 1296, 972 });
+    quality.set_bitrate(8000000);
+    m_descriptor->set_recording(quality);
 
     m_stream = std::make_shared<Stream>();
 }
@@ -200,20 +204,18 @@ auto Raspicam::get_outputs() const -> std::vector<Output>
     return outputs;
 }
 
-auto Raspicam::init(rapidjson::Value const& init_params) -> bool
+auto Raspicam::init(std::shared_ptr<Node_Descriptor_Base> descriptor) -> bool
 {
     QLOG_TOPIC("raspicam::init");
 
-    sz::Raspicam::Init_Params sz;
-    autojsoncxx::error::ErrorStack result;
-    if (!autojsoncxx::from_value(sz, init_params, result))
+    auto specialized = std::dynamic_pointer_cast<Raspicam_Descriptor>(descriptor);
+    if (!specialized)
     {
-        std::ostringstream ss;
-        ss << result;
-        QLOGE("Cannot deserialize Raspicam data: {}", ss.str());
+        QLOGE("Wrong descriptor type");
         return false;
     }
-    *m_init_params = sz;
+
+    *m_descriptor = *specialized;
     return init();
 }
 auto Raspicam::init() -> bool
@@ -266,13 +268,13 @@ auto Raspicam::init() -> bool
 #endif
 
 
-    m_init_params->fps = math::clamp<size_t>(m_init_params->fps, 10, 60);
+    m_descriptor->fps = math::clamp<size_t>(m_descriptor->fps, 10, 60);
 
-    m_stream->rate = m_init_params->fps;
+    m_stream->rate = m_descriptor->fps;
 
-    m_impl->recording.quality = &m_init_params->recording;
-    m_impl->high.quality = &m_init_params->high;
-    m_impl->low.quality = &m_init_params->low;
+    m_impl->recording.quality = &m_descriptor->recording;
+    m_impl->high.quality = &m_descriptor->high;
+    m_impl->low.quality = &m_descriptor->low;
 
     if (!create_components())
     {
@@ -288,23 +290,22 @@ auto Raspicam::init() -> bool
 #endif
 }
 
-auto Raspicam::set_config(rapidjson::Value const& json) -> bool
+auto Raspicam::set_config(std::shared_ptr<Node_Config_Base> config) -> bool
 {
-    sz::Raspicam::Config sz;
-    autojsoncxx::error::ErrorStack result;
-    if (!autojsoncxx::from_value(sz, json, result))
+    QLOG_TOPIC("raspicam::set_config");
+
+    auto specialized = std::dynamic_pointer_cast<Raspicam_Config>(config);
+    if (!specialized)
     {
-        std::ostringstream ss;
-        ss << result;
-        QLOGE("Cannot deserialize Raspicam config data: {}", ss.str());
+        QLOGE("Wrong config type");
         return false;
     }
 
-    *m_config = sz;
+    *m_config = *specialized;
 
     activate_streams();
 
-    if (m_config->recording)
+    if (m_config->get_recording())
     {
         start_recording();
     }
@@ -314,7 +315,7 @@ auto Raspicam::set_config(rapidjson::Value const& json) -> bool
     }
 
 #if defined RASPBERRY_PI
-    m_config->shutter_speed = math::clamp(m_config->shutter_speed, 0.f, 1000.f / m_init_params->fps);
+    m_config->shutter_speed = math::clamp(m_config->shutter_speed, 0.f, 1000.f / m_descriptor->fps);
     raspicamcontrol_set_shutter_speed(m_impl->camera.get(), static_cast<uint32_t>(m_config->shutter_speed * 1000.f));
 
     raspicamcontrol_set_ISO(m_impl->camera.get(), m_config->iso);
@@ -341,18 +342,14 @@ auto Raspicam::set_config(rapidjson::Value const& json) -> bool
 
     return true;
 }
-auto Raspicam::get_config() const -> rapidjson::Document
+auto Raspicam::get_config() const -> std::shared_ptr<Node_Config_Base>
 {
-    rapidjson::Document json;
-    autojsoncxx::to_document(*m_config, json);
-    return std::move(json);
+    return m_config;
 }
 
-auto Raspicam::get_init_params() const -> rapidjson::Document
+auto Raspicam::get_descriptor() const -> std::shared_ptr<Node_Descriptor_Base>
 {
-    rapidjson::Document json;
-    autojsoncxx::to_document(*m_init_params, json);
-    return std::move(json);
+    return m_descriptor;
 }
 
 auto Raspicam::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document
@@ -1303,12 +1300,12 @@ auto Raspicam::create_components() -> bool
         MMAL_PARAMETER_CAMERA_CONFIG_T cam_config;
         cam_config.hdr.id = MMAL_PARAMETER_CAMERA_CONFIG;
         cam_config.hdr.size = sizeof(cam_config);
-        cam_config.max_stills_w = m_init_params->recording.resolution.x;
-        cam_config.max_stills_h = m_init_params->recording.resolution.y;
+        cam_config.max_stills_w = m_descriptor->recording.resolution.x;
+        cam_config.max_stills_h = m_descriptor->recording.resolution.y;
         cam_config.stills_yuv422 = 0;
         cam_config.one_shot_stills = 0;
-        cam_config.max_preview_video_w = m_init_params->recording.resolution.x;
-        cam_config.max_preview_video_h = m_init_params->recording.resolution.y;
+        cam_config.max_preview_video_w = m_descriptor->recording.resolution.x;
+        cam_config.max_preview_video_h = m_descriptor->recording.resolution.y;
         cam_config.num_preview_video_frames = 3;
         cam_config.stills_capture_circular_buffer_height = 0;
         cam_config.fast_preview_resume = 0;
@@ -1326,7 +1323,7 @@ auto Raspicam::create_components() -> bool
         auto* format = camera_preview_port->format;
         format->encoding = MMAL_ENCODING_I420;
         format->encoding_variant = MMAL_ENCODING_VARIANT_DEFAULT;
-        setup_video_format(format, m_init_params->recording.resolution, true, m_init_params->fps);
+        setup_video_format(format, m_descriptor->recording.resolution, true, m_descriptor->fps);
         MMAL_STATUS_T status = MMAL_CALL(mmal_port_format_commit(camera_preview_port));
         if (status != MMAL_SUCCESS)
         {
@@ -1340,7 +1337,7 @@ auto Raspicam::create_components() -> bool
         auto* format = camera_video_port->format;
         format->encoding = MMAL_ENCODING_OPAQUE;
         format->encoding_variant = MMAL_ENCODING_VARIANT_DEFAULT;
-        setup_video_format(format, m_init_params->recording.resolution, true, m_init_params->fps);
+        setup_video_format(format, m_descriptor->recording.resolution, true, m_descriptor->fps);
         MMAL_STATUS_T status = MMAL_CALL(mmal_port_format_commit(camera_video_port));
         if (status != MMAL_SUCCESS)
         {
@@ -1354,12 +1351,12 @@ auto Raspicam::create_components() -> bool
         auto* format = camera_capture_port->format;
         format->encoding = MMAL_ENCODING_I420;
         format->encoding_variant = MMAL_ENCODING_VARIANT_DEFAULT;
-        format->es->video.width = VCOS_ALIGN_UP(m_init_params->recording.resolution.x, 32);
-        format->es->video.height = VCOS_ALIGN_UP(m_init_params->recording.resolution.y, 16);
+        format->es->video.width = VCOS_ALIGN_UP(m_descriptor->recording.resolution.x, 32);
+        format->es->video.height = VCOS_ALIGN_UP(m_descriptor->recording.resolution.y, 16);
         format->es->video.crop.x = 0;
         format->es->video.crop.y = 0;
-        format->es->video.crop.width = m_init_params->recording.resolution.x;
-        format->es->video.crop.height = m_init_params->recording.resolution.y;
+        format->es->video.crop.width = m_descriptor->recording.resolution.x;
+        format->es->video.crop.height = m_descriptor->recording.resolution.y;
         format->es->video.frame_rate.num = 0;
         format->es->video.frame_rate.den = 1;
         format->es->video.par.num = 1;
@@ -1414,7 +1411,7 @@ auto Raspicam::create_components() -> bool
 
     //recording
     auto& recording = m_impl->recording;
-    recording.encoder = create_encoder_component_for_recording(camera_video_port, m_init_params->recording.resolution, m_init_params->recording.bitrate);
+    recording.encoder = create_encoder_component_for_recording(camera_video_port, m_descriptor->recording.resolution, m_descriptor->recording.bitrate);
     recording.encoder_connection = connect_ports(camera_video_port, recording.encoder->input[0]);
     if (!recording.encoder_connection || !set_connection_enabled(recording.encoder_connection, true))
     {
@@ -1431,14 +1428,14 @@ auto Raspicam::create_components() -> bool
 
     //high
     auto& high = m_impl->high;
-    high.resizer = create_resizer_component(m_impl->camera_splitter->output[1], m_init_params->high.resolution, m_init_params->fps);
+    high.resizer = create_resizer_component(m_impl->camera_splitter->output[1], m_descriptor->high.resolution, m_descriptor->fps);
     high.resizer_connection = connect_ports(m_impl->camera_splitter->output[1], high.resizer->input[0]);
     if (!high.resizer_connection)
     {
         QLOGE("Cannot create high bitrate resizer");
         return false;
     }
-    high.encoder = create_encoder_component_for_streaming(high.resizer->output[0], m_init_params->high.resolution, m_init_params->high.bitrate);
+    high.encoder = create_encoder_component_for_streaming(high.resizer->output[0], m_descriptor->high.resolution, m_descriptor->high.bitrate);
     high.encoder_connection = connect_ports(high.resizer->output[0], high.encoder->input[0]);
     if (!high.encoder_connection || !set_connection_enabled(high.encoder_connection, true))
     {
@@ -1454,14 +1451,14 @@ auto Raspicam::create_components() -> bool
 
     //low
     auto& low = m_impl->low;
-    low.resizer = create_resizer_component(m_impl->camera_splitter->output[2], m_init_params->low.resolution, m_init_params->fps);
+    low.resizer = create_resizer_component(m_impl->camera_splitter->output[2], m_descriptor->low.resolution, m_descriptor->fps);
     low.resizer_connection = connect_ports(m_impl->camera_splitter->output[2], low.resizer->input[0]);
     if (!low.resizer_connection)
     {
         QLOGE("Cannot create low bitrate resizer");
         return false;
     }
-    low.encoder = create_encoder_component_for_streaming(low.resizer->output[0], m_init_params->low.resolution, m_init_params->low.bitrate);
+    low.encoder = create_encoder_component_for_streaming(low.resizer->output[0], m_descriptor->low.resolution, m_descriptor->low.bitrate);
     low.encoder_connection = connect_ports(low.resizer->output[0], low.encoder->input[0]);
     if (!low.encoder_connection || !set_connection_enabled(low.encoder_connection, true))
     {

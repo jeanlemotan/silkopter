@@ -2,9 +2,10 @@
 
 #include "common/stream/IStream.h"
 
-namespace ts
+namespace silk
 {
-class IValue;
+struct Node_Descriptor_Base;
+struct Node_Config_Base;
 }
 
 namespace silk
@@ -60,18 +61,11 @@ public:
 
     virtual Type get_type() const = 0;
 
-    virtual bool init(std::shared_ptr<ts::IValue> descriptor) { return false; }
-    virtual std::shared_ptr<const ts::IValue> get_descriptor() const { return nullptr; }
+    virtual bool init(std::shared_ptr<Node_Descriptor_Base> descriptor) = 0;
+    virtual std::shared_ptr<Node_Descriptor_Base> get_descriptor() const = 0;
 
-    virtual bool set_config(std::shared_ptr<ts::IValue> config) { return false; }
-    virtual std::shared_ptr<const ts::IValue> get_config2() const  { return nullptr; }
-
-
-    virtual bool init(rapidjson::Value const& init_params) = 0;
-    virtual auto get_init_params() const -> rapidjson::Document = 0;
-
-    virtual auto set_config(rapidjson::Value const& json) -> bool = 0;
-    virtual auto get_config() const -> rapidjson::Document = 0;
+    virtual bool set_config(std::shared_ptr<Node_Config_Base> config) = 0;
+    virtual std::shared_ptr<Node_Config_Base> get_config() const = 0;
 
     virtual bool start(q::Clock::time_point tp) = 0;
 

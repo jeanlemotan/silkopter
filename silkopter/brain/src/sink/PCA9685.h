@@ -5,14 +5,11 @@
 #include "common/stream/IPWM.h"
 #include "common/bus/II2C.h"
 
-namespace sz
+
+namespace silk
 {
-namespace PCA9685
-{
-struct Init_Params;
-struct Config;
-struct PWM_Channel;
-}
+struct PCA9685_Descriptor;
+struct PCA9685_Config;
 }
 
 
@@ -29,11 +26,11 @@ public:
 
     static const size_t MAX_PWM_CHANNELS = 8;
 
-    auto init(rapidjson::Value const& init_params) -> bool;
-    auto get_init_params() const -> rapidjson::Document;
+    bool init(std::shared_ptr<Node_Descriptor_Base> descriptor) override;
+    std::shared_ptr<Node_Descriptor_Base> get_descriptor() const override;
 
-    auto set_config(rapidjson::Value const& json) -> bool;
-    auto get_config() const -> rapidjson::Document;
+    bool set_config(std::shared_ptr<Node_Config_Base> config) override;
+    std::shared_ptr<Node_Config_Base> get_config() const override;
 
     auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
 
@@ -59,12 +56,12 @@ private:
 
     std::weak_ptr<bus::II2C> m_i2c;
 
-    std::shared_ptr<sz::PCA9685::Init_Params> m_init_params;
-    std::shared_ptr<sz::PCA9685::Config> m_config;
+    std::shared_ptr<PCA9685_Descriptor> m_descriptor;
+    std::shared_ptr<PCA9685_Config> m_config;
 
     struct PWM_Channel
     {
-        sz::PCA9685::PWM_Channel* config = nullptr;
+        //sz::PCA9685::PWM_Channel* config = nullptr;
         std::weak_ptr<stream::IPWM> stream;
         struct Last_Data
         {

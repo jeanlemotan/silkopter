@@ -50,6 +50,7 @@ QMAKE_LFLAGS += -rdynamic
 
 INCLUDEPATH += /usr/include/bullet
 INCLUDEPATH += ../../src
+INCLUDEPATH += ../../def
 INCLUDEPATH += ../../autogen
 INCLUDEPATH += ../../../libs
 INCLUDEPATH += ../../../../def_lang/include
@@ -150,7 +151,8 @@ SOURCES += \
     ../../src/source/RaspiCamControl.cpp \
     ../../src/brain/LiPo_Battery.cpp \
     ../../src/pilot/Multirotor_Pilot.cpp \
-    ../../src/UAV.cpp
+    ../../src/UAV.cpp \
+    ../../def/uav.def.cpp
 
 HEADERS += \
     ../../src/BrainStdAfx.h \
@@ -301,7 +303,9 @@ HEADERS += \
     ../../src/pilot/Multirotor_Pilot.h \
     ../../../libs/common/node/IMultirotor_Simulator.h \
     ../../src/UAV.h \
-    ../../../libs/common/Math_Mappers.h
+    ../../../libs/common/Math_Mappers.h \
+    ../../def/gen_support.h \
+    ../../def/uav.def.h
 
 DISTFILES +=
 

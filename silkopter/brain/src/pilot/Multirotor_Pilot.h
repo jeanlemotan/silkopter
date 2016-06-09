@@ -13,13 +13,10 @@
 #include "Basic_Output_Stream.h"
 
 
-namespace sz
+namespace silk
 {
-namespace Multirotor_Pilot
-{
-struct Init_Params;
-struct Config;
-}
+struct Multirotor_Pilot_Descriptor;
+struct Multirotor_Pilot_Config;
 }
 
 namespace silk
@@ -32,11 +29,11 @@ class Multirotor_Pilot : public IPilot
 public:
     Multirotor_Pilot(UAV& uav, Comms& comms);
 
-    auto init(rapidjson::Value const& init_params) -> bool;
-    auto get_init_params() const -> rapidjson::Document;
+    bool init(std::shared_ptr<Node_Descriptor_Base> descriptor) override;
+    std::shared_ptr<Node_Descriptor_Base> get_descriptor() const override;
 
-    auto set_config(rapidjson::Value const& json) -> bool;
-    auto get_config() const -> rapidjson::Document;
+    bool set_config(std::shared_ptr<Node_Config_Base> config) override;
+    std::shared_ptr<Node_Config_Base> get_config() const override;
 
     auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
 
@@ -57,8 +54,8 @@ private:
     stream::IMultirotor_Commands::Value m_last_commands_value;
     q::Clock::time_point m_last_received_commands_value_tp = q::Clock::now();
 
-    std::shared_ptr<sz::Multirotor_Pilot::Init_Params> m_init_params;
-    std::shared_ptr<sz::Multirotor_Pilot::Config> m_config;
+    std::shared_ptr<Multirotor_Pilot_Descriptor> m_descriptor;
+    std::shared_ptr<Multirotor_Pilot_Config> m_config;
 
     Sample_Accumulator<stream::IMultirotor_State> m_state_accumulator;
     Sample_Accumulator<stream::IVideo> m_video_accumulator;

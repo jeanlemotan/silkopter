@@ -72,8 +72,8 @@
 //#include "common/node/IAHRS.h"
 
 #include "autojsoncxx/boost_types.hpp"
-#include "sz_math.hpp"
-#include "sz_Multirotor_Config.hpp"
+//#include "sz_math.hpp"
+//#include "sz_Multirotor_Config.hpp"
 
 #include "def_lang/Serialization.h"
 #include "def_lang/JSON_Serializer.h"

@@ -3,9 +3,9 @@
 
 #if !defined RASPBERRY_PI
 
-#include "sz_math.hpp"
-#include "sz_Multirotor_Simulator.hpp"
-#include "sz_Multirotor_Simulator_Structs.hpp"
+#include "uav.def.h"
+//#include "sz_Multirotor_Simulator.hpp"
+//#include "sz_Multirotor_Simulator_Structs.hpp"
 
 namespace silk
 {
@@ -14,8 +14,8 @@ namespace node
 
 Multirotor_Simulator::Multirotor_Simulator(UAV& uav)
     : m_uav(uav)
-    , m_init_params(new sz::Multirotor_Simulator::Init_Params())
-    , m_config(new sz::Multirotor_Simulator::Config())
+    , m_descriptor(new Multirotor_Simulator_Descriptor())
+    , m_config(new Multirotor_Simulator_Config())
 {
     m_angular_velocity_stream = std::make_shared<Angular_Velocity>();
     m_acceleration_stream = std::make_shared<Acceleration>();
@@ -28,57 +28,56 @@ Multirotor_Simulator::Multirotor_Simulator(UAV& uav)
     m_ecef_velocity_stream = std::make_shared<ECEF_Velocity>();
 }
 
-auto Multirotor_Simulator::init(rapidjson::Value const& init_params) -> bool
+auto Multirotor_Simulator::init(std::shared_ptr<Node_Descriptor_Base> descriptor) -> bool
 {
     QLOG_TOPIC("multirotor_simulator::init");
 
-    sz::Multirotor_Simulator::Init_Params sz;
-    autojsoncxx::error::ErrorStack result;
-    if (!autojsoncxx::from_value(sz, init_params, result))
+    auto specialized = std::dynamic_pointer_cast<Multirotor_Simulator_Descriptor>(descriptor);
+    if (!specialized)
     {
-        std::ostringstream ss;
-        ss << result;
-        QLOGE("Cannot deserialize Multirotor_Simulator data: {}", ss.str());
+        QLOGE("Wrong descriptor type");
         return false;
     }
-    *m_init_params = sz;
+
+    *m_descriptor = *specialized;
+
     return init();
 }
 auto Multirotor_Simulator::init() -> bool
 {
-    if (m_init_params->angular_velocity_rate == 0)
+    if (m_descriptor->angular_velocity_rate == 0)
     {
-        QLOGE("Bad angular velocity rate: {}Hz", m_init_params->angular_velocity_rate);
+        QLOGE("Bad angular velocity rate: {}Hz", m_descriptor->angular_velocity_rate);
         return false;
     }
-    if (m_init_params->acceleration_rate == 0)
+    if (m_descriptor->acceleration_rate == 0)
     {
-        QLOGE("Bad acceleration rate: {}Hz", m_init_params->acceleration_rate);
+        QLOGE("Bad acceleration rate: {}Hz", m_descriptor->acceleration_rate);
         return false;
     }
-    if (m_init_params->magnetic_field_rate == 0)
+    if (m_descriptor->magnetic_field_rate == 0)
     {
-        QLOGE("Bad magnetic field rate: {}Hz", m_init_params->magnetic_field_rate);
+        QLOGE("Bad magnetic field rate: {}Hz", m_descriptor->magnetic_field_rate);
         return false;
     }
-    if (m_init_params->pressure_rate == 0)
+    if (m_descriptor->pressure_rate == 0)
     {
-        QLOGE("Bad pressure rate: {}Hz", m_init_params->pressure_rate);
+        QLOGE("Bad pressure rate: {}Hz", m_descriptor->pressure_rate);
         return false;
     }
-    if (m_init_params->temperature_rate == 0)
+    if (m_descriptor->temperature_rate == 0)
     {
-        QLOGE("Bad temperature rate: {}Hz", m_init_params->temperature_rate);
+        QLOGE("Bad temperature rate: {}Hz", m_descriptor->temperature_rate);
         return false;
     }
-    if (m_init_params->distance_rate == 0)
+    if (m_descriptor->distance_rate == 0)
     {
-        QLOGE("Bad distance rate: {}Hz", m_init_params->distance_rate);
+        QLOGE("Bad distance rate: {}Hz", m_descriptor->distance_rate);
         return false;
     }
-    if (m_init_params->gps_rate == 0)
+    if (m_descriptor->gps_rate == 0)
     {
-        QLOGE("Bad gps rate: {}Hz", m_init_params->gps_rate);
+        QLOGE("Bad gps rate: {}Hz", m_descriptor->gps_rate);
         return false;
     }
 
@@ -102,31 +101,31 @@ auto Multirotor_Simulator::init() -> bool
     m_input_throttle_streams.resize(multirotor_config->motors.size());
     m_input_throttle_stream_paths.resize(multirotor_config->motors.size());
 
-    m_angular_velocity_stream->rate = m_init_params->angular_velocity_rate;
+    m_angular_velocity_stream->rate = m_descriptor->angular_velocity_rate;
     m_angular_velocity_stream->dt = std::chrono::microseconds(1000000 / m_angular_velocity_stream->rate);
 
-    m_acceleration_stream->rate = m_init_params->acceleration_rate;
+    m_acceleration_stream->rate = m_descriptor->acceleration_rate;
     m_acceleration_stream->dt = std::chrono::microseconds(1000000 / m_acceleration_stream->rate);
 
-    m_magnetic_field_stream->rate = m_init_params->magnetic_field_rate;
+    m_magnetic_field_stream->rate = m_descriptor->magnetic_field_rate;
     m_magnetic_field_stream->dt = std::chrono::microseconds(1000000 / m_magnetic_field_stream->rate);
 
-    m_pressure_stream->rate = m_init_params->pressure_rate;
+    m_pressure_stream->rate = m_descriptor->pressure_rate;
     m_pressure_stream->dt = std::chrono::microseconds(1000000 / m_pressure_stream->rate);
 
-    m_temperature_stream->rate = m_init_params->temperature_rate;
+    m_temperature_stream->rate = m_descriptor->temperature_rate;
     m_temperature_stream->dt = std::chrono::microseconds(1000000 / m_temperature_stream->rate);
 
-    m_distance_stream->rate = m_init_params->distance_rate;
+    m_distance_stream->rate = m_descriptor->distance_rate;
     m_distance_stream->dt = std::chrono::microseconds(1000000 / m_distance_stream->rate);
 
-    m_gps_info_stream->rate = m_init_params->gps_rate;
+    m_gps_info_stream->rate = m_descriptor->gps_rate;
     m_gps_info_stream->dt = std::chrono::microseconds(1000000 / m_gps_info_stream->rate);
 
-    m_ecef_position_stream->rate = m_init_params->gps_rate;
+    m_ecef_position_stream->rate = m_descriptor->gps_rate;
     m_ecef_position_stream->dt = std::chrono::microseconds(1000000 / m_ecef_position_stream->rate);
 
-    m_ecef_velocity_stream->rate = m_init_params->gps_rate;
+    m_ecef_velocity_stream->rate = m_descriptor->gps_rate;
     m_ecef_velocity_stream->dt = std::chrono::microseconds(1000000 / m_ecef_velocity_stream->rate);
 
 
@@ -145,7 +144,7 @@ auto Multirotor_Simulator::get_inputs() const -> std::vector<Input>
     for (size_t i = 0; i < m_input_throttle_streams.size(); i++)
     {
         inputs[i].type = stream::IThrottle::TYPE;
-        inputs[i].rate = m_init_params->throttle_rate;
+        inputs[i].rate = m_descriptor->throttle_rate;
         inputs[i].name = q::util::format<std::string>("Throttle/[{}]", i);
         inputs[i].stream_path = m_input_throttle_stream_paths[i];
     }
@@ -331,9 +330,9 @@ void Multirotor_Simulator::set_input_stream_path(size_t idx, q::Path const& path
 {
     auto input_stream = m_uav.get_streams().find_by_name<stream::IThrottle>(path.get_as<std::string>());
     auto rate = input_stream ? input_stream->get_rate() : 0u;
-    if (rate != m_init_params->throttle_rate)
+    if (rate != m_descriptor->throttle_rate)
     {
-        QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", path, m_init_params->throttle_rate, rate);
+        QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", path, m_descriptor->throttle_rate, rate);
         m_input_throttle_streams[idx].reset();
         m_input_throttle_stream_paths[idx].clear();
     }
@@ -344,17 +343,14 @@ void Multirotor_Simulator::set_input_stream_path(size_t idx, q::Path const& path
     }
 }
 
-auto Multirotor_Simulator::set_config(rapidjson::Value const& json) -> bool
+auto Multirotor_Simulator::set_config(std::shared_ptr<Node_Config_Base> config) -> bool
 {
     QLOG_TOPIC("multirotor_simulator::set_config");
 
-    sz::Multirotor_Simulator::Config sz;
-    autojsoncxx::error::ErrorStack result;
-    if (!autojsoncxx::from_value(sz, json, result))
+    auto specialized = std::dynamic_pointer_cast<Multirotor_Simulator_Config>(config);
+    if (!specialized)
     {
-        std::ostringstream ss;
-        ss << result;
-        QLOGE("Cannot deserialize Multirotor_Simulator config data: {}", ss.str());
+        QLOGE("Wrong config type");
         return false;
     }
 
@@ -424,18 +420,14 @@ auto Multirotor_Simulator::set_config(rapidjson::Value const& json) -> bool
 
     return true;
 }
-auto Multirotor_Simulator::get_config() const -> rapidjson::Document
+auto Multirotor_Simulator::get_config() const -> std::shared_ptr<Node_Config_Base>
 {
-    rapidjson::Document json;
-    autojsoncxx::to_document(*m_config, json);
-    return std::move(json);
+    return m_config;
 }
 
-auto Multirotor_Simulator::get_init_params() const -> rapidjson::Document
+auto Multirotor_Simulator::get_descriptor() const -> std::shared_ptr<Node_Descriptor_Base>
 {
-    rapidjson::Document json;
-    autojsoncxx::to_document(*m_init_params, json);
-    return std::move(json);
+    return m_descriptor;
 }
 auto Multirotor_Simulator::send_message(rapidjson::Value const& json) -> rapidjson::Document
 {

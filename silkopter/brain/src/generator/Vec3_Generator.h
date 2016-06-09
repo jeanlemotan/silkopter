@@ -4,8 +4,8 @@
 #include "common/node/IGenerator.h"
 #include "generator/Oscillator.h"
 
-#include "sz_math.hpp"
-#include "sz_Vec3_Generator.hpp"
+//#include "sz_math.hpp"
+//#include "sz_Vec3_Generator.hpp"
 
 namespace silk
 {
@@ -18,11 +18,11 @@ class Vec3_Generator : public IGenerator
 public:
     Vec3_Generator(UAV& uav);
 
-    auto init(rapidjson::Value const& init_params) -> bool;
-    auto get_init_params() const -> rapidjson::Document;
+    bool init(std::shared_ptr<Node_Descriptor_Base> descriptor) override;
+    std::shared_ptr<Node_Descriptor_Base> get_descriptor() const override;
 
-    auto set_config(rapidjson::Value const& json) -> bool;
-    auto get_config() const -> rapidjson::Document;
+    bool set_config(std::shared_ptr<Node_Config_Base> config) override;
+    std::shared_ptr<Node_Config_Base> get_config() const override;
 
     auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
 
@@ -39,7 +39,7 @@ private:
 
     UAV& m_uav;
 
-    sz::Vec3_Generator::Init_Params m_init_params;
+    sz::Vec3_Generator::Init_Params m_descriptor;
     sz::Vec3_Generator::Config m_config;
 
     std::array<q::Path, 3> m_modulation_stream_paths;
@@ -59,40 +59,39 @@ Vec3_Generator<Stream_t>::Vec3_Generator(UAV& uav)
 }
 
 template<class Stream_t>
-auto Vec3_Generator<Stream_t>::init(rapidjson::Value const& init_params) -> bool
+auto Vec3_Generator<Stream_t>::init(std::shared_ptr<Node_Descriptor_Base> descriptor) -> bool
 {
     QLOG_TOPIC("vec3_generator::init");
 
-    sz::Vec3_Generator::Init_Params sz;
-    autojsoncxx::error::ErrorStack result;
-    if (!autojsoncxx::from_value(sz, init_params, result))
+    auto specialized = std::dynamic_pointer_cast<Vec3_Generator_Descriptor>(descriptor);
+    if (!specialized)
     {
-        std::ostringstream ss;
-        ss << result;
-        QLOGE("Cannot deserialize Vec3_Generator data: {}", ss.str());
+        QLOGE("Wrong descriptor type");
         return false;
     }
-    m_init_params = sz;
+
+    *m_descriptor = *specialized;
+
     return init();
 }
 
 template<class Stream_t>
 auto Vec3_Generator<Stream_t>::init() -> bool
 {
-    if (m_init_params.rate == 0)
+    if (m_descriptor.rate == 0)
     {
-        QLOGE("Bad rate: {}Hz", m_init_params.rate);
+        QLOGE("Bad rate: {}Hz", m_descriptor.rate);
         return false;
     }
-    m_output_stream->set_rate(m_init_params.rate);
+    m_output_stream->set_rate(m_descriptor.rate);
     return true;
 }
 
 template<class Stream_t>
-auto Vec3_Generator<Stream_t>::get_init_params() const -> rapidjson::Document
+auto Vec3_Generator<Stream_t>::get_descriptor() const -> std::shared_ptr<Node_Descriptor_Base>
 {
     rapidjson::Document json;
-    autojsoncxx::to_document(m_init_params, json);
+    autojsoncxx::to_document(m_descriptor, json);
     return std::move(json);
 }
 
@@ -128,20 +127,18 @@ void Vec3_Generator<Stream_t>::set_input_stream_path(size_t idx, q::Path const& 
 }
 
 template<class Stream_t>
-auto Vec3_Generator<Stream_t>::set_config(rapidjson::Value const& json) -> bool
+auto Vec3_Generator<Stream_t>::set_config(std::shared_ptr<Node_Config_Base> config) -> bool
 {
     QLOG_TOPIC("vec3_generator::set_config");
-    sz::Vec3_Generator::Config sz;
-    autojsoncxx::error::ErrorStack result;
-    if (!autojsoncxx::from_value(sz, json, result))
+
+    auto specialized = std::dynamic_pointer_cast<Vec3_Generator_Config>(config);
+    if (!specialized)
     {
-        std::ostringstream ss;
-        ss << result;
-        QLOGE("Cannot deserialize Vec3_Generator config data: {}", ss.str());
+        QLOGE("Wrong config type");
         return false;
     }
 
-    m_config = sz;
+    *m_config = *specialized;
 
     return true;
 }
@@ -151,7 +148,7 @@ auto Vec3_Generator<Stream_t>::send_message(rapidjson::Value const& /*json*/) ->
     return rapidjson::Document();
 }
 template<class Stream_t>
-auto Vec3_Generator<Stream_t>::get_config() const -> rapidjson::Document
+auto Vec3_Generator<Stream_t>::get_config() const -> std::shared_ptr<Node_Config_Base>
 {
     rapidjson::Document json;
     autojsoncxx::to_document(m_config, json);
@@ -163,9 +160,9 @@ auto Vec3_Generator<Stream_t>::get_inputs() const -> std::vector<Input>
 {
     std::vector<Input> inputs =
     {{
-        { stream::IFloat::TYPE, m_init_params.rate, "X Modulation", m_modulation_stream_paths[0] },
-        { stream::IFloat::TYPE, m_init_params.rate, "Y Modulation", m_modulation_stream_paths[1] },
-        { stream::IFloat::TYPE, m_init_params.rate, "Z Modulation", m_modulation_stream_paths[2] }
+        { stream::IFloat::TYPE, m_descriptor.rate, "X Modulation", m_modulation_stream_paths[0] },
+        { stream::IFloat::TYPE, m_descriptor.rate, "Y Modulation", m_modulation_stream_paths[1] },
+        { stream::IFloat::TYPE, m_descriptor.rate, "Z Modulation", m_modulation_stream_paths[2] }
     }};
     return inputs;
 }

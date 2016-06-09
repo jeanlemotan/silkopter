@@ -3,9 +3,9 @@
 #include "physics/constants.h"
 #include "utils/Timed_Scope.h"
 
-#include "sz_math.hpp"
-#include "sz_Calibration_Data.hpp"
-#include "sz_MPU9250.hpp"
+#include "uav.def.h"
+//#include "sz_Calibration_Data.hpp"
+//#include "sz_MPU9250.hpp"
 
 #define USE_AK8963
 
@@ -306,8 +306,8 @@ constexpr size_t SENSOR_REGISTER_SPEED = 1000000;
 
 MPU9250::MPU9250(UAV& uav)
     : m_uav(uav)
-    , m_init_params(new sz::MPU9250::Init_Params())
-    , m_config(new sz::MPU9250::Config())
+    , m_descriptor(new MPU9250_Descriptor())
+    , m_config(new MPU9250_Config())
 {
     m_acceleration = std::make_shared<Acceleration_Stream>();
     m_angular_velocity = std::make_shared<Angular_Velocity_Stream>();
@@ -469,28 +469,27 @@ auto MPU9250::get_outputs() const -> std::vector<Output>
     outputs[3].stream = m_temperature;
     return outputs;
 }
-auto MPU9250::init(rapidjson::Value const& init_params) -> bool
+auto MPU9250::init(std::shared_ptr<Node_Descriptor_Base> descriptor) -> bool
 {
     QLOG_TOPIC("mpu9250::init");
 
-    sz::MPU9250::Init_Params sz;
-    autojsoncxx::error::ErrorStack result;
-    if (!autojsoncxx::from_value(sz, init_params, result))
+    auto specialized = std::dynamic_pointer_cast<MPU9250_Descriptor>(descriptor);
+    if (!specialized)
     {
-        std::ostringstream ss;
-        ss << result;
-        QLOGE("Cannot deserialize MPU9250 data: {}", ss.str());
+        QLOGE("Wrong descriptor type");
         return false;
     }
-    *m_init_params = sz;
+
+    *m_descriptor = *specialized;
+
     return init();
 }
 
 
 auto MPU9250::init() -> bool
 {
-    m_i2c = m_uav.get_buses().find_by_name<bus::II2C>(m_init_params->bus);
-    m_spi = m_uav.get_buses().find_by_name<bus::ISPI>(m_init_params->bus);
+    m_i2c = m_uav.get_buses().find_by_name<bus::II2C>(m_descriptor->get_bus());
+    m_spi = m_uav.get_buses().find_by_name<bus::ISPI>(m_descriptor->get_bus());
 
     Buses buses = { m_i2c.lock(), m_spi.lock() };
     if (!buses.i2c && !buses.spi)
@@ -506,91 +505,86 @@ auto MPU9250::init() -> bool
     });
 
 
-    std::vector<size_t> g_ranges = { 250, 500, 1000, 2000 };
-    std::vector<size_t> a_ranges = { 2, 4, 8, 16 };
-    std::vector<size_t> imu_rates = { 250, 500, 1000 };//, 8000 }; //8Khz has issues with the magnetometer and it fills the fifo too fast
+//    std::vector<size_t> g_ranges = { 250, 500, 1000, 2000 };
+//    std::vector<size_t> a_ranges = { 2, 4, 8, 16 };
+//    std::vector<size_t> imu_rates = { 250, 500, 1000 };//, 8000 }; //8Khz has issues with the magnetometer and it fills the fifo too fast
 
-    auto req_params = *m_init_params;
+//    auto req_params = *m_descriptor;
 
-    if (buses.i2c)
-    {
-        //max supported on a 400Khz i2c bus
-        m_init_params->acceleration_angular_velocity_rate = math::min<size_t>(m_init_params->acceleration_angular_velocity_rate, 1000);
-    }
-    m_init_params->magnetic_field_rate = math::clamp<size_t>(m_init_params->magnetic_field_rate, 10, 100);
-    m_init_params->temperature_rate = math::clamp<size_t>(m_init_params->temperature_rate, 10, 50);
+//    m_descriptor->set_magnetic_field_rate = math::clamp<size_t>(m_descriptor->magnetic_field_rate, 10, 100);
+//    m_descriptor->set_temperature_rate math::clamp<size_t>(m_descriptor->temperature_rate, 10, 50);
 
-    std::nth_element(g_ranges.begin(), g_ranges.begin(), g_ranges.end(), [&](size_t a, size_t b)
-    {
-        return math::abs(a - m_init_params->angular_velocity_range) < math::abs(b - m_init_params->angular_velocity_range);
-    });
-    m_init_params->angular_velocity_range = g_ranges.front();
+//    std::nth_element(g_ranges.begin(), g_ranges.begin(), g_ranges.end(), [&](size_t a, size_t b)
+//    {
+//        return math::abs(a - m_descriptor->get_angular_velocity_range()) < math::abs(b - m_descriptor->get_angular_velocity_range());
+//    });
+//    m_descriptor->set_angular_velocity_range(g_ranges.front());
 
-    std::nth_element(a_ranges.begin(), a_ranges.begin(), a_ranges.end(), [&](size_t a, size_t b)
-    {
-        return math::abs(a - m_init_params->acceleration_range) < math::abs(b - m_init_params->acceleration_range);
-    });
-    m_init_params->acceleration_range = a_ranges.front();
+//    std::nth_element(a_ranges.begin(), a_ranges.begin(), a_ranges.end(), [&](size_t a, size_t b)
+//    {
+//        return math::abs(a - m_descriptor->acceleration_range) < math::abs(b - m_descriptor->acceleration_range);
+//    });
+//    m_descriptor->acceleration_range = a_ranges.front();
 
-    std::nth_element(imu_rates.begin(), imu_rates.begin(), imu_rates.end(), [&](size_t a, size_t b)
-    {
-        return math::abs(a - m_init_params->acceleration_angular_velocity_rate) < math::abs(b - m_init_params->acceleration_angular_velocity_rate);
-    });
-    m_init_params->acceleration_angular_velocity_rate = imu_rates.front();
+//    std::nth_element(imu_rates.begin(), imu_rates.begin(), imu_rates.end(), [&](size_t a, size_t b)
+//    {
+//        return math::abs(a - m_descriptor->acceleration_angular_velocity_rate) < math::abs(b - m_descriptor->acceleration_angular_velocity_rate);
+//    });
+//    m_descriptor->acceleration_angular_velocity_rate = imu_rates.front();
 
-    QLOGI("Probing MPU9250 on {}", m_init_params->bus);
-    QLOGI("Angular Velocity range {} DPS (requested {} DPS)", m_init_params->angular_velocity_range, req_params.angular_velocity_range);
-    QLOGI("Acceleration range {}G (requested {}G)", m_init_params->acceleration_range, req_params.acceleration_range);
-    QLOGI("Acceleration & Angular Velocity Rate {}Hz (requested {}Hz)", m_init_params->acceleration_angular_velocity_rate, req_params.acceleration_angular_velocity_rate);
-    QLOGI("Magnetic Field Rate {}Hz (requested {}Hz)", m_init_params->magnetic_field_rate, req_params.magnetic_field_rate);
-    QLOGI("Temperature Rate {}Hz (requested {}Hz)", m_init_params->temperature_rate, req_params.temperature_rate);
+    QLOGI("Probing MPU9250 on {}", m_descriptor->get_bus());
+    QLOGI("Angular Velocity range {} DPS", (size_t)m_descriptor->get_angular_velocity_range());
+    QLOGI("Acceleration range {}G", m_descriptor->get_acceleration_range());
+    QLOGI("Acceleration & Angular Velocity Rate {}Hz", (size_t)m_descriptor->get_imu_rate());
+    QLOGI("Magnetic Field Rate {}Hz", m_descriptor->get_magnetometer_rate());
+    QLOGI("Temperature Rate {}Hz", m_descriptor->get_thermometer_rate());
 
     uint8_t gyro_range = MPU_BIT_GYRO_FS_SEL_1000_DPS;
-    switch (m_init_params->angular_velocity_range)
+    switch (m_descriptor->get_angular_velocity_range())
     {
-    case 250:
+    case MPU9250_Descriptor::angular_velocity_range_t::_250:
         gyro_range = MPU_BIT_GYRO_FS_SEL_250_DPS;
         m_angular_velocity_sensor_scale = math::radians(1.f) / (131.f);
         break;
-    case 500:
+    case MPU9250_Descriptor::angular_velocity_range_t::_500:
         gyro_range = MPU_BIT_GYRO_FS_SEL_500_DPS;
         m_angular_velocity_sensor_scale = math::radians(1.f) / (131.f / 2.f);
         break;
-    case 1000:
+    case MPU9250_Descriptor::angular_velocity_range_t::_1000:
         gyro_range = MPU_BIT_GYRO_FS_SEL_1000_DPS;
         m_angular_velocity_sensor_scale = math::radians(1.f) / (131.f / 4.f);
         break;
-    case 2000:
+    case MPU9250_Descriptor::angular_velocity_range_t::_2000:
         gyro_range = MPU_BIT_GYRO_FS_SEL_2000_DPS;
         m_angular_velocity_sensor_scale = math::radians(1.f) / (131.f / 8.f);
         break;
     default:
-        QLOGE("Invalid angular velocity range: {}", m_init_params->angular_velocity_range);
+        QLOGE("Invalid angular velocity range: {}", m_descriptor->get_angular_velocity_range());
         return false;
     }
 
 
     uint8_t accel_range = MPU_BIT_ACCEL_FS_SEL_8_G;
-    switch (m_init_params->acceleration_range)
+    switch (m_descriptor->get_acceleration_range())
     {
-    case 2:
+    case MPU9250_Descriptor::acceleration_range_t::_2:
         accel_range = MPU_BIT_ACCEL_FS_SEL_2_G;
         m_acceleration_sensor_scale = physics::constants::g / 16384.f;
         break;
-    case 4:
+    case MPU9250_Descriptor::acceleration_range_t::_4:
         accel_range = MPU_BIT_ACCEL_FS_SEL_4_G;
         m_acceleration_sensor_scale = physics::constants::g / 8192.f;
         break;
-    case 8:
+    case MPU9250_Descriptor::acceleration_range_t::_8:
         accel_range = MPU_BIT_ACCEL_FS_SEL_8_G;
         m_acceleration_sensor_scale = physics::constants::g / 4096.f;
         break;
-    case 16:
+    case MPU9250_Descriptor::acceleration_range_t::_16:
         accel_range = MPU_BIT_ACCEL_FS_SEL_16_G;
         m_acceleration_sensor_scale = physics::constants::g / 2048.f;
         break;
     default:
-        QLOGE("Invalid acceleration range: {}", m_init_params->acceleration_range);
+        QLOGE("Invalid acceleration range: {}", m_descriptor->get_acceleration_range());
         return false;
     }
 
@@ -652,17 +646,17 @@ auto MPU9250::init() -> bool
     uint8_t g_dlpf = 0;
     uint8_t a_dlpf = 0;
     uint8_t div = 0;
-    if (m_init_params->acceleration_angular_velocity_rate <= 1000)
+    if (m_descriptor->get_imu_rate() <= MPU9250_Descriptor::imu_rate_t::_1000)
     {
         g_dlpf = MPU_BIT_DLPF_CFG_184_1;
         a_dlpf = MPU_BIT_A_DLPF_CFG_460_1;
-        div = 1000 / m_init_params->acceleration_angular_velocity_rate - 1;
+        div = 1000 / (int)m_descriptor->get_imu_rate() - 1;
     }
     else
     {
         g_dlpf = MPU_BIT_DLPF_CFG_3600_8;
         a_dlpf = MPU_BIT_ACCEL_FCHOICE_B; //disable lpf - resulting in a 4KHz sample rate. This is unaffected by the sample_rate_div
-        div = 0;//8000 / m_init_params->acceleration_angular_velocity_rate - 1;
+        div = 0;//8000 / m_descriptor->acceleration_angular_velocity_rate - 1;
     }
 
     res &= mpu_write_u8(buses, MPU_REG_CONFIG, g_dlpf, CONFIG_REGISTER_SPEED);
@@ -719,10 +713,10 @@ auto MPU9250::init() -> bool
 
     reset_fifo(buses);
 
-    m_magnetic_field->set_rate(m_init_params->magnetic_field_rate);
-    m_acceleration->set_rate(m_init_params->acceleration_angular_velocity_rate);
-    m_angular_velocity->set_rate(m_init_params->acceleration_angular_velocity_rate);
-    m_temperature->set_rate(m_init_params->temperature_rate);
+    m_magnetic_field->set_rate(m_descriptor->get_magnetometer_rate());
+    m_acceleration->set_rate((size_t)m_descriptor->get_imu_rate());
+    m_angular_velocity->set_rate((size_t)m_descriptor->get_imu_rate());
+    m_temperature->set_rate(m_descriptor->get_thermometer_rate());
 
     return true;
 }
@@ -836,7 +830,7 @@ auto MPU9250::setup_magnetometer_spi(Buses& buses) -> bool
         std::this_thread::sleep_for(std::chrono::milliseconds(30));
 
         //how often to read the magnetometer
-        int delay = m_init_params->acceleration_angular_velocity_rate / m_init_params->magnetic_field_rate;
+        int delay = (size_t)m_descriptor->get_imu_rate() / m_descriptor->get_magnetometer_rate();
         delay = math::clamp(delay - 1, 0, 31);
 
         //i2c slave delay
@@ -950,26 +944,24 @@ auto get_calibration_scale(Calibration_Data const& points, float temperature) ->
     {
         return math::vec3f::one;
     }
-    typename Calibration_Data::value_type key;
-    key.temperature = temperature;
-    auto it = std::upper_bound(points.begin(), points.end(), key, [](const typename Calibration_Data::value_type& a, const typename Calibration_Data::value_type& b)
+    auto it = std::upper_bound(points.begin(), points.end(), temperature, [](const typename Calibration_Data::value_type& a, float temperature)
     {
-        return a.temperature < b.temperature;
+        return a.get_temperature() < temperature;
     });
     if (it == points.end()) //temp is too big, use the last point
     {
-        return points.back().scale;
+        return points.back().get_scale();
     }
     if (it == points.begin()) //temp is too small, use the first point
     {
-        return points.front().scale;
+        return points.front().get_scale();
     }
     auto const& prev = *(it - 1);
     auto const& next = *(it);
-    QASSERT(temperature >= prev.temperature && temperature < next.temperature);
-    float mu = (temperature - prev.temperature) / (next.temperature - prev.temperature);
+    QASSERT(temperature >= prev.get_temperature() && temperature < next.get_temperature());
+    float mu = (temperature - prev.get_temperature()) / (next.get_temperature() - prev.get_temperature());
     QASSERT(mu >= 0.f && mu < 1.f);
-    return math::lerp(prev.scale, next.scale, mu);
+    return math::lerp(prev.get_scale(), next.get_scale(), mu);
 }
 
 template<class Calibration_Data>
@@ -979,26 +971,24 @@ auto get_calibration_bias(Calibration_Data const& points, float temperature) -> 
     {
         return math::vec3f::zero;
     }
-    typename Calibration_Data::value_type key;
-    key.temperature = temperature;
-    auto it = std::upper_bound(points.begin(), points.end(), key, [](const typename Calibration_Data::value_type& a, const typename Calibration_Data::value_type& b)
+    auto it = std::upper_bound(points.begin(), points.end(), temperature, [](const typename Calibration_Data::value_type& a, float temperature)
     {
-        return a.temperature < b.temperature;
+        return a.get_temperature() < temperature;
     });
     if (it == points.end()) //temp is too big, use the last point
     {
-        return points.back().bias;
+        return points.back().get_bias();
     }
     if (it == points.begin()) //temp is too small, use the first point
     {
-        return points.front().bias;
+        return points.front().get_bias();
     }
     auto const& prev = *(it - 1);
     auto const& next = *(it);
-    QASSERT(temperature >= prev.temperature && temperature < next.temperature);
-    float mu = (temperature - prev.temperature) / (next.temperature - prev.temperature);
+    QASSERT(temperature >= prev.get_temperature() && temperature < next.get_temperature());
+    float mu = (temperature - prev.get_temperature()) / (next.get_temperature() - prev.get_temperature());
     QASSERT(mu >= 0.f && mu < 1.f);
-    return math::lerp(prev.bias, next.bias, mu);
+    return math::lerp(prev.get_bias(), next.get_bias(), mu);
 }
 
 void MPU9250::process()
@@ -1194,14 +1184,14 @@ void MPU9250::process_thermometer(Buses& buses)
             m_last_temperature_value = temp;
             m_last_temperature_tp = q::Clock::now();
 
-            m_acceleration_scale = get_calibration_scale(m_config->calibration.acceleration.points, temp);
-            m_acceleration_bias = get_calibration_bias(m_config->calibration.acceleration.points, temp) * m_acceleration_scale;
+            m_acceleration_scale = get_calibration_scale(m_config->get_calibration().get_acceleration(), temp);
+            m_acceleration_bias = get_calibration_bias(m_config->get_calibration().get_acceleration(), temp) * m_acceleration_scale;
             m_acceleration_scale *= m_acceleration_sensor_scale;
 
-            m_angular_velocity_bias = get_calibration_bias(m_config->calibration.angular_velocity.points, temp);
+            m_angular_velocity_bias = get_calibration_bias(m_config->get_calibration().get_angular_velocity(), temp);
 
-            m_magnetic_field_scale = get_calibration_scale(m_config->calibration.magnetic_field.points, temp);
-            m_magnetic_field_bias = get_calibration_bias(m_config->calibration.magnetic_field.points, temp) * m_magnetic_field_scale;
+            m_magnetic_field_scale = get_calibration_scale(m_config->get_calibration().get_magnetic_field(), temp);
+            m_magnetic_field_bias = get_calibration_bias(m_config->get_calibration().get_magnetic_field(), temp) * m_magnetic_field_scale;
             m_magnetic_field_scale *= m_magnetic_field_sensor_scale;
         }
         else
@@ -1330,45 +1320,54 @@ void MPU9250::process_magnetometer(Buses& buses)
 #endif
 }
 
-auto MPU9250::set_config(rapidjson::Value const& json) -> bool
+auto MPU9250::set_config(std::shared_ptr<Node_Config_Base> config) -> bool
 {
     QLOG_TOPIC("mpu9250::set_config");
 
-    sz::MPU9250::Config sz;
-    autojsoncxx::error::ErrorStack result;
-    if (!autojsoncxx::from_value(sz, json, result))
+    auto specialized = std::dynamic_pointer_cast<MPU9250_Config>(config);
+    if (!specialized)
     {
-        std::ostringstream ss;
-        ss << result;
-        QLOGE("Cannot deserialize MPU9250 config data: {}", ss.str());
+        QLOGE("Wrong config type");
         return false;
     }
 
-    *m_config = sz;
+    *m_config = *specialized;
+
+    MPU9250_Config::Calibration calibration = m_config->get_calibration();
 
     //sort so we can lower_bound search the point quickly
-    std::sort(m_config->calibration.acceleration.points.begin(), m_config->calibration.acceleration.points.end(),
-              [](const sz::calibration::Acceleration& a, const sz::calibration::Acceleration& b)
     {
-        return a.temperature < b.temperature;
-    });
+        auto points = calibration.get_acceleration();
+        std::sort(points.begin(), points.end(), [](const Acceleration_Calibration_Point& a, const Acceleration_Calibration_Point& b)
+        {
+            return a.get_temperature() < b.get_temperature();
+        });
+        calibration.set_acceleration(points);
+    }
 
-    std::sort(m_config->calibration.angular_velocity.points.begin(), m_config->calibration.angular_velocity.points.end(),
-              [](const sz::calibration::Angular_Velocity& a, const sz::calibration::Angular_Velocity& b)
     {
-        return a.temperature < b.temperature;
-    });
+        auto points = calibration.get_angular_velocity();
+        std::sort(points.begin(), points.end(), [](const Angular_Velocity_Calibration_Point& a, const Angular_Velocity_Calibration_Point& b)
+        {
+            return a.get_temperature() < b.get_temperature();
+        });
+        calibration.set_angular_velocity(points);
+    }
 
-    std::sort(m_config->calibration.magnetic_field.points.begin(), m_config->calibration.magnetic_field.points.end(),
-              [](const sz::calibration::Magnetic_Field& a, const sz::calibration::Magnetic_Field& b)
     {
-        return a.temperature < b.temperature;
-    });
+        auto points = calibration.get_magnetic_field();
+        std::sort(points.begin(), points.end(), [](const Magnetic_Field_Calibration_Point& a, const Magnetic_Field_Calibration_Point& b)
+        {
+            return a.get_temperature() < b.get_temperature();
+        });
+        calibration.set_magnetic_field(points);
+    }
 
+    m_config->set_calibration(calibration);
 
     //compute chip rotation
     math::quatf imu_rot;
-    imu_rot.set_from_euler_xyz(math::radians(m_config->rotation));
+    imu_rot.set_from_euler_xyz(math::radians(m_config->get_rotation()));
     m_imu_rotation = imu_rot.get_as_mat3();
 
     //change of axis according to the specs. By default the magnetometer has front X, right Y and down Z
@@ -1379,18 +1378,14 @@ auto MPU9250::set_config(rapidjson::Value const& json) -> bool
 
     return true;
 }
-auto MPU9250::get_config() const -> rapidjson::Document
+auto MPU9250::get_config() const -> std::shared_ptr<Node_Config_Base>
 {
-    rapidjson::Document json;
-    autojsoncxx::to_document(*m_config, json);
-    return std::move(json);
+    return m_config;
 }
 
-auto MPU9250::get_init_params() const -> rapidjson::Document
+auto MPU9250::get_descriptor() const -> std::shared_ptr<Node_Descriptor_Base>
 {
-    rapidjson::Document json;
-    autojsoncxx::to_document(*m_init_params, json);
-    return std::move(json);
+    return m_descriptor;
 }
 
 auto MPU9250::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document

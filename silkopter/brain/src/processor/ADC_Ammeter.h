@@ -8,13 +8,11 @@
 #include "Sample_Accumulator.h"
 #include "Basic_Output_Stream.h"
 
-namespace sz
+
+namespace silk
 {
-namespace ADC_Ammeter
-{
-struct Init_Params;
-struct Config;
-}
+struct ADC_Ammeter_Descriptor;
+struct ADC_Ammeter_Config;
 }
 
 namespace silk
@@ -27,11 +25,11 @@ class ADC_Ammeter : public IProcessor
 public:
     ADC_Ammeter(UAV& uav);
 
-    auto init(rapidjson::Value const& init_params) -> bool;
-    auto get_init_params() const -> rapidjson::Document;
+    bool init(std::shared_ptr<Node_Descriptor_Base> descriptor) override;
+    std::shared_ptr<Node_Descriptor_Base> get_descriptor() const override;
 
-    auto set_config(rapidjson::Value const& json) -> bool;
-    auto get_config() const -> rapidjson::Document;
+    bool set_config(std::shared_ptr<Node_Config_Base> config) override;
+    std::shared_ptr<Node_Config_Base> get_config() const override;
 
     auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
 
@@ -48,8 +46,8 @@ private:
 
     UAV& m_uav;
 
-    std::shared_ptr<sz::ADC_Ammeter::Init_Params> m_init_params;
-    std::shared_ptr<sz::ADC_Ammeter::Config> m_config;
+    std::shared_ptr<ADC_Ammeter_Descriptor> m_descriptor;
+    std::shared_ptr<ADC_Ammeter_Config> m_config;
 
     Sample_Accumulator<stream::IADC> m_accumulator;
 

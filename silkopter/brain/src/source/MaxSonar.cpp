@@ -3,8 +3,8 @@
 #include "physics/constants.h"
 #include "utils/Timed_Scope.h"
 
-#include "sz_math.hpp"
-#include "sz_MaxSonar.hpp"
+#include "uav.def.h"
+//#include "sz_MaxSonar.hpp"
 
 namespace silk
 {
@@ -14,8 +14,8 @@ namespace node
 
 MaxSonar::MaxSonar(UAV& uav)
     : m_uav(uav)
-    , m_init_params(new sz::MaxSonar::Init_Params())
-    , m_config(new sz::MaxSonar::Config())
+    , m_descriptor(new MaxSonar_Descriptor())
+    , m_config(new MaxSonar_Config())
 {
     m_config->direction = math::vec3f(0, 0, -1); //pointing down
 
@@ -29,26 +29,25 @@ auto MaxSonar::get_outputs() const -> std::vector<Output>
     outputs[0].stream = m_output_stream;
     return outputs;
 }
-auto MaxSonar::init(rapidjson::Value const& init_params) -> bool
+auto MaxSonar::init(std::shared_ptr<Node_Descriptor_Base> descriptor) -> bool
 {
     QLOG_TOPIC("MaxSonar::init");
 
-    sz::MaxSonar::Init_Params sz;
-    autojsoncxx::error::ErrorStack result;
-    if (!autojsoncxx::from_value(sz, init_params, result))
+    auto specialized = std::dynamic_pointer_cast<MaxSonar_Descriptor>(descriptor);
+    if (!specialized)
     {
-        std::ostringstream ss;
-        ss << result;
-        QLOGE("Cannot deserialize MaxSonar data: {}", ss.str());
+        QLOGE("Wrong descriptor type");
         return false;
     }
-    *m_init_params = sz;
+
+    *m_descriptor = *specialized;
+
     return init();
 }
 
 auto MaxSonar::init() -> bool
 {
-    m_bus = m_uav.get_buses().find_by_name<bus::IUART>(m_init_params->bus);
+    m_bus = m_uav.get_buses().find_by_name<bus::IUART>(m_descriptor->bus);
     auto bus = m_bus.lock();
     if (!bus)
     {
@@ -62,9 +61,9 @@ auto MaxSonar::init() -> bool
         bus->unlock();
     });
 
-    m_init_params->rate = math::clamp<size_t>(m_init_params->rate, 1, 15);
+    m_descriptor->rate = math::clamp<size_t>(m_descriptor->rate, 1, 15);
 
-    m_output_stream->set_rate(m_init_params->rate);
+    m_output_stream->set_rate(m_descriptor->rate);
 
     return true;
 }
@@ -158,23 +157,21 @@ void MaxSonar::process()
     }
 }
 
-auto MaxSonar::set_config(rapidjson::Value const& json) -> bool
+auto MaxSonar::set_config(std::shared_ptr<Node_Config_Base> config) -> bool
 {
     QLOG_TOPIC("MaxSonar::set_config");
 
-    sz::MaxSonar::Config sz;
-    autojsoncxx::error::ErrorStack result;
-    if (!autojsoncxx::from_value(sz, json, result))
+    auto specialized = std::dynamic_pointer_cast<MaxSonar_Config>(config);
+    if (!specialized)
     {
-        std::ostringstream ss;
-        ss << result;
-        QLOGE("Cannot deserialize MaxSonar config data: {}", ss.str());
+        QLOGE("Wrong config type");
         return false;
     }
 
-    *m_config = sz;
-    m_config->min_distance = math::max(m_config->min_distance, 0.1f);
-    m_config->max_distance = math::min(m_config->max_distance, 12.f);
+    *m_config = *specialized;
+
+//    m_config->min_distance = math::max(m_config->min_distance, 0.1f);
+//    m_config->max_distance = math::min(m_config->max_distance, 12.f);
     if (math::is_zero(math::length(m_config->direction), math::epsilon<float>()))
     {
         m_config->direction = math::vec3f(0, 0, -1); //pointing down
@@ -183,18 +180,14 @@ auto MaxSonar::set_config(rapidjson::Value const& json) -> bool
 
     return true;
 }
-auto MaxSonar::get_config() const -> rapidjson::Document
+auto MaxSonar::get_config() const -> std::shared_ptr<Node_Config_Base>
 {
-    rapidjson::Document json;
-    autojsoncxx::to_document(*m_config, json);
-    return std::move(json);
+    return m_config;
 }
 
-auto MaxSonar::get_init_params() const -> rapidjson::Document
+auto MaxSonar::get_descriptor() const -> std::shared_ptr<Node_Descriptor_Base>
 {
-    rapidjson::Document json;
-    autojsoncxx::to_document(*m_init_params, json);
-    return std::move(json);
+    return m_descriptor;
 }
 
 auto MaxSonar::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document

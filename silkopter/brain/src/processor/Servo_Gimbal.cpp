@@ -1,8 +1,8 @@
 #include "BrainStdAfx.h"
 #include "Servo_Gimbal.h"
 
-#include "sz_math.hpp"
-#include "sz_Servo_Gimbal.hpp"
+#include "uav.def.h"
+//#include "sz_Servo_Gimbal.hpp"
 
 namespace silk
 {
@@ -11,42 +11,35 @@ namespace node
 
 Servo_Gimbal::Servo_Gimbal(UAV& uav)
     : m_uav(uav)
-    , m_init_params(new sz::Servo_Gimbal::Init_Params())
-    , m_config(new sz::Servo_Gimbal::Config())
+    , m_descriptor(new Servo_Gimbal_Descriptor())
+    , m_config(new Servo_Gimbal_Config())
 {
     m_x_output_stream = std::make_shared<Output_Stream>();
     m_y_output_stream = std::make_shared<Output_Stream>();
     m_z_output_stream = std::make_shared<Output_Stream>();
 }
 
-auto Servo_Gimbal::init(rapidjson::Value const& init_params) -> bool
+auto Servo_Gimbal::init(std::shared_ptr<Node_Descriptor_Base> descriptor) -> bool
 {
     QLOG_TOPIC("servo_gimbal::init");
 
-    sz::Servo_Gimbal::Init_Params sz;
-    autojsoncxx::error::ErrorStack result;
-    if (!autojsoncxx::from_value(sz, init_params, result))
+    auto specialized = std::dynamic_pointer_cast<Servo_Gimbal_Descriptor>(descriptor);
+    if (!specialized)
     {
-        std::ostringstream ss;
-        ss << result;
-        QLOGE("Cannot deserialize Servo_Gimbal data: {}", ss.str());
+        QLOGE("Wrong descriptor type");
         return false;
     }
-    *m_init_params = sz;
+
+    *m_descriptor = *specialized;
+
     return init();
 }
 
 auto Servo_Gimbal::init() -> bool
 {
-    if (m_init_params->rate == 0)
-    {
-        QLOGE("Bad frame rate: {}Hz", m_init_params->rate);
-        return false;
-    }
-
-    m_x_output_stream->set_rate(m_init_params->rate);
-    m_y_output_stream->set_rate(m_init_params->rate);
-    m_z_output_stream->set_rate(m_init_params->rate);
+    m_x_output_stream->set_rate(m_descriptor->get_rate());
+    m_y_output_stream->set_rate(m_descriptor->get_rate());
+    m_z_output_stream->set_rate(m_descriptor->get_rate());
     return true;
 }
 
@@ -62,8 +55,8 @@ auto Servo_Gimbal::get_inputs() const -> std::vector<Input>
 {
     std::vector<Input> inputs =
     {{
-        { stream::IUAV_Frame::TYPE, m_init_params->rate, "UAV Frame", m_frame_accumulator.get_stream_path(0) },
-        { stream::IMultirotor_Commands::TYPE, m_init_params->commands_rate, "Commands", m_commands_accumulator.get_stream_path(0) }
+        { stream::IUAV_Frame::TYPE, m_descriptor->get_rate(), "UAV Frame", m_frame_accumulator.get_stream_path(0) },
+        { stream::IMultirotor_Commands::TYPE, m_descriptor->get_commands_rate(), "Commands", m_commands_accumulator.get_stream_path(0) }
     }};
     return inputs;
 }
@@ -113,7 +106,7 @@ void Servo_Gimbal::process()
             rotation.get_as_euler_xyz(rotation_euler.x, rotation_euler.y, rotation_euler.z);
 
             {
-                auto const& config = m_config->x_pwm;
+                auto const& config = m_config->get_x_channel();
 
                 math::anglef angle(rotation_euler.x);
                 angle.normalize();
@@ -122,22 +115,22 @@ void Servo_Gimbal::process()
                 {
                     a = a - math::anglef::_2pi;
                 }
-                auto min_a = math::radians(config.min_angle);
-                auto max_a = math::radians(config.max_angle);
+                auto min_a = math::radians(config.get_min_angle());
+                auto max_a = math::radians(config.get_max_angle());
                 auto mu = (a - min_a) / (max_a - min_a);
                 mu = math::clamp(mu, 0.f, 1.f);
 
-                m_x_output_stream->push_sample(mu * (config.max_pwm - config.min_pwm) + config.min_pwm, true);
+                m_x_output_stream->push_sample(mu * (config.get_max_pwm() - config.get_min_pwm()) + config.get_min_pwm(), true);
             }
             {
-                auto const& config = m_config->y_pwm;
+                auto const& config = m_config->get_y_channel();
                 float mu = 0;
-                m_y_output_stream->push_sample(mu * (config.max_pwm - config.min_pwm) + config.min_pwm, true);
+                m_y_output_stream->push_sample(mu * (config.get_max_pwm() - config.get_min_pwm()) + config.get_min_pwm(), true);
             }
             {
-                auto const& config = m_config->z_pwm;
+                auto const& config = m_config->get_z_channel();
                 float mu = 0;
-                m_z_output_stream->push_sample(mu * (config.max_pwm - config.min_pwm) + config.min_pwm, true);
+                m_z_output_stream->push_sample(mu * (config.get_max_pwm() - config.get_min_pwm()) + config.get_min_pwm(), true);
             }
         }
         else
@@ -154,44 +147,37 @@ void Servo_Gimbal::set_input_stream_path(size_t idx, q::Path const& path)
 {
     if (idx == 0)
     {
-        m_frame_accumulator.set_stream_path(0, path, m_init_params->rate, m_uav);
+        m_frame_accumulator.set_stream_path(0, path, m_descriptor->get_rate(), m_uav);
     }
     else if (idx == 1)
     {
-        m_commands_accumulator.set_stream_path(0, path, m_init_params->commands_rate, m_uav);
+        m_commands_accumulator.set_stream_path(0, path, m_descriptor->get_commands_rate(), m_uav);
     }
 }
 
-auto Servo_Gimbal::set_config(rapidjson::Value const& json) -> bool
+auto Servo_Gimbal::set_config(std::shared_ptr<Node_Config_Base> config) -> bool
 {
     QLOG_TOPIC("servo_gimbal::set_config");
 
-    sz::Servo_Gimbal::Config sz;
-    autojsoncxx::error::ErrorStack result;
-    if (!autojsoncxx::from_value(sz, json, result))
+    auto specialized = std::dynamic_pointer_cast<Servo_Gimbal_Config>(config);
+    if (!specialized)
     {
-        std::ostringstream ss;
-        ss << result;
-        QLOGE("Cannot deserialize Servo_Gimbal config data: {}", ss.str());
+        QLOGE("Wrong config type");
         return false;
     }
 
-    *m_config = sz;
+    *m_config = *specialized;
 
     return true;
 }
-auto Servo_Gimbal::get_config() const -> rapidjson::Document
+auto Servo_Gimbal::get_config() const -> std::shared_ptr<Node_Config_Base>
 {
-    rapidjson::Document json;
-    autojsoncxx::to_document(*m_config, json);
-    return std::move(json);
+    return m_config;
 }
 
-auto Servo_Gimbal::get_init_params() const -> rapidjson::Document
+auto Servo_Gimbal::get_descriptor() const -> std::shared_ptr<Node_Descriptor_Base>
 {
-    rapidjson::Document json;
-    autojsoncxx::to_document(*m_init_params, json);
-    return std::move(json);
+    return m_descriptor;
 }
 
 auto Servo_Gimbal::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document

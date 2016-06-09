@@ -1,8 +1,8 @@
 #include "BrainStdAfx.h"
 #include "PCA9685.h"
 
-#include "sz_math.hpp"
-#include "sz_PCA9685.hpp"
+#include "uav.def.h"
+//#include "sz_PCA9685.hpp"
 
 #ifdef RASPBERRY_PI
 extern "C"
@@ -52,8 +52,8 @@ size_t PCA9685::s_pwm_enabled_count = 0;
 
 PCA9685::PCA9685(UAV& uav)
     : m_uav(uav)
-    , m_init_params(new sz::PCA9685::Init_Params())
-    , m_config(new sz::PCA9685::Config())
+    , m_descriptor(new PCA9685_Descriptor())
+    , m_config(new PCA9685_Config())
 {
     m_pwm_channels.resize(16);
 }
@@ -67,47 +67,46 @@ auto PCA9685::get_inputs() const -> std::vector<Input>
 {
     std::vector<Input> inputs =
     {{
-        { stream::IPWM::TYPE, m_init_params->rate, "Channel 1", m_pwm_channels[0].stream_path },
-        { stream::IPWM::TYPE, m_init_params->rate, "Channel 2", m_pwm_channels[1].stream_path },
-        { stream::IPWM::TYPE, m_init_params->rate, "Channel 3", m_pwm_channels[2].stream_path },
-        { stream::IPWM::TYPE, m_init_params->rate, "Channel 4", m_pwm_channels[3].stream_path },
-        { stream::IPWM::TYPE, m_init_params->rate, "Channel 5", m_pwm_channels[4].stream_path },
-        { stream::IPWM::TYPE, m_init_params->rate, "Channel 6", m_pwm_channels[5].stream_path },
-        { stream::IPWM::TYPE, m_init_params->rate, "Channel 7", m_pwm_channels[6].stream_path },
-        { stream::IPWM::TYPE, m_init_params->rate, "Channel 8", m_pwm_channels[7].stream_path },
-        { stream::IPWM::TYPE, m_init_params->rate, "Channel 9", m_pwm_channels[8].stream_path },
-        { stream::IPWM::TYPE, m_init_params->rate, "Channel 10",m_pwm_channels[9].stream_path },
-        { stream::IPWM::TYPE, m_init_params->rate, "Channel 11",m_pwm_channels[10].stream_path },
-        { stream::IPWM::TYPE, m_init_params->rate, "Channel 12",m_pwm_channels[11].stream_path },
-        { stream::IPWM::TYPE, m_init_params->rate, "Channel 13",m_pwm_channels[12].stream_path },
-        { stream::IPWM::TYPE, m_init_params->rate, "Channel 14",m_pwm_channels[13].stream_path },
-        { stream::IPWM::TYPE, m_init_params->rate, "Channel 15",m_pwm_channels[14].stream_path },
-        { stream::IPWM::TYPE, m_init_params->rate, "Channel 16",m_pwm_channels[15].stream_path },
+        { stream::IPWM::TYPE, m_descriptor->get_rate(), "Channel 1", m_pwm_channels[0].stream_path },
+        { stream::IPWM::TYPE, m_descriptor->get_rate(), "Channel 2", m_pwm_channels[1].stream_path },
+        { stream::IPWM::TYPE, m_descriptor->get_rate(), "Channel 3", m_pwm_channels[2].stream_path },
+        { stream::IPWM::TYPE, m_descriptor->get_rate(), "Channel 4", m_pwm_channels[3].stream_path },
+        { stream::IPWM::TYPE, m_descriptor->get_rate(), "Channel 5", m_pwm_channels[4].stream_path },
+        { stream::IPWM::TYPE, m_descriptor->get_rate(), "Channel 6", m_pwm_channels[5].stream_path },
+        { stream::IPWM::TYPE, m_descriptor->get_rate(), "Channel 7", m_pwm_channels[6].stream_path },
+        { stream::IPWM::TYPE, m_descriptor->get_rate(), "Channel 8", m_pwm_channels[7].stream_path },
+        { stream::IPWM::TYPE, m_descriptor->get_rate(), "Channel 9", m_pwm_channels[8].stream_path },
+        { stream::IPWM::TYPE, m_descriptor->get_rate(), "Channel 10",m_pwm_channels[9].stream_path },
+        { stream::IPWM::TYPE, m_descriptor->get_rate(), "Channel 11",m_pwm_channels[10].stream_path },
+        { stream::IPWM::TYPE, m_descriptor->get_rate(), "Channel 12",m_pwm_channels[11].stream_path },
+        { stream::IPWM::TYPE, m_descriptor->get_rate(), "Channel 13",m_pwm_channels[12].stream_path },
+        { stream::IPWM::TYPE, m_descriptor->get_rate(), "Channel 14",m_pwm_channels[13].stream_path },
+        { stream::IPWM::TYPE, m_descriptor->get_rate(), "Channel 15",m_pwm_channels[14].stream_path },
+        { stream::IPWM::TYPE, m_descriptor->get_rate(), "Channel 16",m_pwm_channels[15].stream_path },
     }};
     return inputs;
 }
 
 
-auto PCA9685::init(rapidjson::Value const& init_params) -> bool
+auto PCA9685::init(std::shared_ptr<Node_Descriptor_Base> descriptor) -> bool
 {
     QLOG_TOPIC("PCA9685::init");
 
-    sz::PCA9685::Init_Params sz;
-    autojsoncxx::error::ErrorStack result;
-    if (!autojsoncxx::from_value(sz, init_params, result))
+    auto specialized = std::dynamic_pointer_cast<PCA9685_Descriptor>(descriptor);
+    if (!specialized)
     {
-        std::ostringstream ss;
-        ss << result;
-        QLOGE("Cannot deserialize PCA9685 data: {}", ss.str());
+        QLOGE("Wrong descriptor type");
         return false;
     }
-    *m_init_params = sz;
+
+    *m_descriptor = *specialized;
+
     return init();
 }
 
 auto PCA9685::init() -> bool
 {
-    m_i2c = m_uav.get_buses().find_by_name<bus::II2C>(m_init_params->bus);
+    m_i2c = m_uav.get_buses().find_by_name<bus::II2C>(m_descriptor->get_bus());
     auto i2c = m_i2c.lock();
     if (!i2c)
     {
@@ -115,68 +114,69 @@ auto PCA9685::init() -> bool
         return false;
     }
 
-    if (m_init_params->address > 127)
-    {
-        QLOGE("Invalid address {}", m_init_params->address);
-        return false;
-    }
+    //todo - fix this
+//    if (m_descriptor->address > 127)
+//    {
+//        QLOGE("Invalid address {}", m_descriptor->address);
+//        return false;
+//    }
 
-    //                            4     5     6     8    10   12   15   20   24   30   40   60   75  80, 100 120 150 200 240
-    std::vector<size_t> rates = { 1500, 1200, 1000, 750, 600, 500, 400, 300, 250, 200, 150, 100, 80, 75, 60, 50, 40, 30, 25 };
-    if (std::find(rates.begin(), rates.end(), m_init_params->rate) == rates.end())
-    {
-        QLOGE("Invalid rate {}. Supported are: {}", m_init_params->rate, rates);
-        return false;
-    }
+//    //                            4     5     6     8    10   12   15   20   24   30   40   60   75  80, 100 120 150 200 240
+//    std::vector<size_t> rates = { 1500, 1200, 1000, 750, 600, 500, 400, 300, 250, 200, 150, 100, 80, 75, 60, 50, 40, 30, 25 };
+//    if (std::find(rates.begin(), rates.end(), m_descriptor->rate) == rates.end())
+//    {
+//        QLOGE("Invalid rate {}. Supported are: {}", m_descriptor->rate, rates);
+//        return false;
+//    }
 
-    bool res = i2c->write_register_u8(m_init_params->address, PCA9685_RA_MODE1, PCA9685_MODE1_AI_BIT);
-    res &= restart(*i2c);
+//    bool res = i2c->write_register_u8(m_descriptor->address, PCA9685_RA_MODE1, PCA9685_MODE1_AI_BIT);
+//    res &= restart(*i2c);
 
-    uint8_t data;
-    res &= i2c->read_register_u8(m_init_params->address, PCA9685_RA_PRE_SCALE, data);
-    if (!res && data <= 3)
-    {
-        QLOGE("PCA9685 not found on {}, address {}", m_init_params->bus, m_init_params->address);
-        return false;
-    }
+//    uint8_t data;
+//    res &= i2c->read_register_u8(m_descriptor->address, PCA9685_RA_PRE_SCALE, data);
+//    if (!res && data <= 3)
+//    {
+//        QLOGE("PCA9685 not found on {}, address {}", m_descriptor->bus, m_descriptor->address);
+//        return false;
+//    }
 
-    //set sleep mode so we can change the prescaler
-    i2c->write_register_u8(m_init_params->address, PCA9685_RA_MODE1, PCA9685_MODE1_SLEEP_BIT);
-    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+//    //set sleep mode so we can change the prescaler
+//    i2c->write_register_u8(m_descriptor->address, PCA9685_RA_MODE1, PCA9685_MODE1_SLEEP_BIT);
+//    std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
-    uint8_t prescale = math::round(24576000.0 / 4096.0 / m_init_params->rate) - 1;
-    res &= i2c->write_register_u8(m_init_params->address, PCA9685_RA_PRE_SCALE, prescale);
+//    uint8_t prescale = math::round(24576000.0 / 4096.0 / m_descriptor->rate) - 1;
+//    res &= i2c->write_register_u8(m_descriptor->address, PCA9685_RA_PRE_SCALE, prescale);
 
-    //restart to activate the new prescaler
-    res &= restart(*i2c);
-    if (!res)
-    {
-        QLOGE("I2C error while setting rate {}, prescale {}", m_init_params->rate, prescale);
-        return false;
-    }
+//    //restart to activate the new prescaler
+//    res &= restart(*i2c);
+//    if (!res)
+//    {
+//        QLOGE("I2C error while setting rate {}, prescale {}", m_descriptor->rate, prescale);
+//        return false;
+//    }
 
-    m_pwm_channels[0].config = &m_config->channel_1;
-    m_pwm_channels[1].config = &m_config->channel_2;
-    m_pwm_channels[2].config = &m_config->channel_3;
-    m_pwm_channels[3].config = &m_config->channel_4;
-    m_pwm_channels[4].config = &m_config->channel_5;
-    m_pwm_channels[5].config = &m_config->channel_6;
-    m_pwm_channels[6].config = &m_config->channel_7;
-    m_pwm_channels[7].config = &m_config->channel_8;
-    m_pwm_channels[8].config = &m_config->channel_9;
-    m_pwm_channels[9].config = &m_config->channel_10;
-    m_pwm_channels[10].config = &m_config->channel_11;
-    m_pwm_channels[11].config = &m_config->channel_12;
-    m_pwm_channels[12].config = &m_config->channel_13;
-    m_pwm_channels[13].config = &m_config->channel_14;
-    m_pwm_channels[14].config = &m_config->channel_15;
-    m_pwm_channels[15].config = &m_config->channel_16;
+//    m_pwm_channels[0].config = &m_config->channel_1;
+//    m_pwm_channels[1].config = &m_config->channel_2;
+//    m_pwm_channels[2].config = &m_config->channel_3;
+//    m_pwm_channels[3].config = &m_config->channel_4;
+//    m_pwm_channels[4].config = &m_config->channel_5;
+//    m_pwm_channels[5].config = &m_config->channel_6;
+//    m_pwm_channels[6].config = &m_config->channel_7;
+//    m_pwm_channels[7].config = &m_config->channel_8;
+//    m_pwm_channels[8].config = &m_config->channel_9;
+//    m_pwm_channels[9].config = &m_config->channel_10;
+//    m_pwm_channels[10].config = &m_config->channel_11;
+//    m_pwm_channels[11].config = &m_config->channel_12;
+//    m_pwm_channels[12].config = &m_config->channel_13;
+//    m_pwm_channels[13].config = &m_config->channel_14;
+//    m_pwm_channels[14].config = &m_config->channel_15;
+//    m_pwm_channels[15].config = &m_config->channel_16;
 
-    //reseet all channels
-    for (size_t i = 0; i < m_pwm_channels.size(); i++)
-    {
-        set_pwm_value(*i2c, i, boost::none);
-    }
+//    //reseet all channels
+//    for (size_t i = 0; i < m_pwm_channels.size(); i++)
+//    {
+//        set_pwm_value(*i2c, i, boost::none);
+//    }
 
     return true;
 }
@@ -217,11 +217,11 @@ auto PCA9685::set_all_pwm_enabled(bool val) -> bool
 
 auto PCA9685::restart(bus::II2C& i2c) -> bool
 {
-    bool res = i2c.write_register_u8(m_init_params->address, PCA9685_RA_MODE1, PCA9685_MODE1_SLEEP_BIT);
+    bool res = i2c.write_register_u8(m_descriptor->get_address(), PCA9685_RA_MODE1, PCA9685_MODE1_SLEEP_BIT);
     std::this_thread::sleep_for(std::chrono::milliseconds(2));
-    res &= i2c.write_register_u8(m_init_params->address, PCA9685_RA_MODE1, PCA9685_MODE1_SLEEP_BIT | PCA9685_MODE1_EXTCLK_BIT);
+    res &= i2c.write_register_u8(m_descriptor->get_address(), PCA9685_RA_MODE1, PCA9685_MODE1_SLEEP_BIT | PCA9685_MODE1_EXTCLK_BIT);
     std::this_thread::sleep_for(std::chrono::milliseconds(2));
-    res &= i2c.write_register_u8(m_init_params->address, PCA9685_RA_MODE1, PCA9685_MODE1_RESTART_BIT | PCA9685_MODE1_EXTCLK_BIT | PCA9685_MODE1_AI_BIT);
+    res &= i2c.write_register_u8(m_descriptor->get_address(), PCA9685_RA_MODE1, PCA9685_MODE1_RESTART_BIT | PCA9685_MODE1_EXTCLK_BIT | PCA9685_MODE1_AI_BIT);
     std::this_thread::sleep_for(std::chrono::milliseconds(2));
     return res;
 }
@@ -240,7 +240,7 @@ void PCA9685::set_pwm_value(bus::II2C& i2c, size_t idx, boost::optional<float> _
 
         if (ch.config->servo_signal)
         {
-            float period_ms = 1000.f / m_init_params->rate;
+            float period_ms = 1000.f / m_descriptor->get_rate();
             float servo_ms = math::lerp(ch.config->min_servo, ch.config->max_servo, value);
             value = servo_ms / period_ms;
         }
@@ -249,7 +249,6 @@ void PCA9685::set_pwm_value(bus::II2C& i2c, size_t idx, boost::optional<float> _
             value = math::lerp(ch.config->min_pwm, ch.config->max_pwm, value);
         }
     }
-
 
     int pulse = value * 4096;
 
@@ -281,7 +280,7 @@ void PCA9685::set_pwm_value(bus::II2C& i2c, size_t idx, boost::optional<float> _
     }
     ch.last_data.pulse = pulse;
 
-    i2c.write_register(m_init_params->address, PCA9685_RA_LED0_ON_L + 4 * idx, data, 4);
+    i2c.write_register(m_descriptor->get_address(), PCA9685_RA_LED0_ON_L + 4 * idx, data, 4);
 }
 
 void PCA9685::process()
@@ -314,18 +313,18 @@ if (idx == CH)\
 {\
     auto input_stream = m_uav.get_streams().find_by_name<stream::IPWM>(path.get_as<std::string>());\
     auto rate = input_stream ? input_stream->get_rate() : 0u;\
-    if (rate != m_init_params->rate)\
+    if (rate != m_descriptor->get_rate())\
     {\
         if (input_stream)\
         {\
-            QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", path, m_init_params->rate, rate);\
+            QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", path, m_descriptor->get_rate(), rate);\
         }\
         m_pwm_channels[CH].stream.reset();\
         m_pwm_channels[CH].stream_path = q::Path();\
     }\
     else\
     {\
-        QLOGI("Input stream '{}'", path, m_init_params->rate, rate);\
+        QLOGI("Input stream '{}'", path, m_descriptor->get_rate(), rate);\
         m_pwm_channels[CH].stream = input_stream;\
         m_pwm_channels[CH].stream_path = path;\
     }\
@@ -364,90 +363,88 @@ void PCA9685::set_input_stream_path(size_t idx, q::Path const& path)
 constexpr float MIN_SERVO_MS = 0.5f;
 constexpr float MAX_SERVO_MS = 2.4f;
 
-auto PCA9685::set_config(rapidjson::Value const& json) -> bool
+auto PCA9685::set_config(std::shared_ptr<Node_Config_Base> config) -> bool
 {
     QLOG_TOPIC("PCA9685::set_config");
 
-    sz::PCA9685::Config sz;
-    autojsoncxx::error::ErrorStack result;
-    if (!autojsoncxx::from_value(sz, json, result))
+    auto specialized = std::dynamic_pointer_cast<PCA9685_Config>(config);
+    if (!specialized)
     {
-        std::ostringstream ss;
-        ss << result;
-        QLOGE("Cannot deserialize PCA9685 config data: {}", ss.str());
+        QLOGE("Wrong config type");
         return false;
     }
 
-    *m_config = sz;
+    *m_config = *specialized;
 
-    for (size_t i = 0; i < 16; i++)
-    {
-        if (m_pwm_channels[i].config->servo_signal)
-        {
-            m_pwm_channels[i].config->min_servo = math::clamp(m_pwm_channels[i].config->min_servo, MIN_SERVO_MS, MAX_SERVO_MS);
-            m_pwm_channels[i].config->max_servo = math::clamp(m_pwm_channels[i].config->max_servo, m_pwm_channels[i].config->min_servo, MAX_SERVO_MS);
-        }
-        else
-        {
-            m_pwm_channels[i].config->min_pwm = math::clamp(m_pwm_channels[i].config->min_pwm, 0.f, 1.f);
-            m_pwm_channels[i].config->max_pwm = math::clamp(m_pwm_channels[i].config->max_pwm, m_pwm_channels[i].config->min_pwm, 1.f);
-        }
-    }
+    //todo - fix this
+//    for (size_t i = 0; i < 16; i++)
+//    {
+//        if (m_pwm_channels[i].config->servo_signal)
+//        {
+//            m_pwm_channels[i].config->min_servo = math::clamp(m_pwm_channels[i].config->min_servo, MIN_SERVO_MS, MAX_SERVO_MS);
+//            m_pwm_channels[i].config->max_servo = math::clamp(m_pwm_channels[i].config->max_servo, m_pwm_channels[i].config->min_servo, MAX_SERVO_MS);
+//        }
+//        else
+//        {
+//            m_pwm_channels[i].config->min_pwm = math::clamp(m_pwm_channels[i].config->min_pwm, 0.f, 1.f);
+//            m_pwm_channels[i].config->max_pwm = math::clamp(m_pwm_channels[i].config->max_pwm, m_pwm_channels[i].config->min_pwm, 1.f);
+//        }
+//    }
 
     return true;
 }
 
 
 
-auto PCA9685::get_config() const -> rapidjson::Document
+auto PCA9685::get_config() const -> std::shared_ptr<Node_Config_Base>
 {
-    rapidjson::Document json;
-    autojsoncxx::to_document(*m_config, json);
+    //todo - fix this
+//    rapidjson::Document json;
+//    autojsoncxx::to_document(*m_config, json);
 
-    //rates lower than 50 and higher than 400Hz don't support servo signals
-    if (m_init_params->rate > 400 || m_init_params->rate < 50)
-    {
-        jsonutil::remove_value(json, q::Path("Channel 1/Servo Signal"));
-        jsonutil::remove_value(json, q::Path("Channel 2/Servo Signal"));
-        jsonutil::remove_value(json, q::Path("Channel 3/Servo Signal"));
-        jsonutil::remove_value(json, q::Path("Channel 4/Servo Signal"));
-        jsonutil::remove_value(json, q::Path("Channel 5/Servo Signal"));
-        jsonutil::remove_value(json, q::Path("Channel 6/Servo Signal"));
-        jsonutil::remove_value(json, q::Path("Channel 7/Servo Signal"));
-        jsonutil::remove_value(json, q::Path("Channel 8/Servo Signal"));
-        jsonutil::remove_value(json, q::Path("Channel 9/Servo Signal"));
-        jsonutil::remove_value(json, q::Path("Channel 10/Servo Signal"));
-        jsonutil::remove_value(json, q::Path("Channel 11/Servo Signal"));
-        jsonutil::remove_value(json, q::Path("Channel 12/Servo Signal"));
-        jsonutil::remove_value(json, q::Path("Channel 13/Servo Signal"));
-        jsonutil::remove_value(json, q::Path("Channel 14/Servo Signal"));
-        jsonutil::remove_value(json, q::Path("Channel 15/Servo Signal"));
-        jsonutil::remove_value(json, q::Path("Channel 16/Servo Signal"));
-    }
+//    //rates lower than 50 and higher than 400Hz don't support servo signals
+//    if (m_descriptor->rate > 400 || m_descriptor->rate < 50)
+//    {
+//        jsonutil::remove_value(json, q::Path("Channel 1/Servo Signal"));
+//        jsonutil::remove_value(json, q::Path("Channel 2/Servo Signal"));
+//        jsonutil::remove_value(json, q::Path("Channel 3/Servo Signal"));
+//        jsonutil::remove_value(json, q::Path("Channel 4/Servo Signal"));
+//        jsonutil::remove_value(json, q::Path("Channel 5/Servo Signal"));
+//        jsonutil::remove_value(json, q::Path("Channel 6/Servo Signal"));
+//        jsonutil::remove_value(json, q::Path("Channel 7/Servo Signal"));
+//        jsonutil::remove_value(json, q::Path("Channel 8/Servo Signal"));
+//        jsonutil::remove_value(json, q::Path("Channel 9/Servo Signal"));
+//        jsonutil::remove_value(json, q::Path("Channel 10/Servo Signal"));
+//        jsonutil::remove_value(json, q::Path("Channel 11/Servo Signal"));
+//        jsonutil::remove_value(json, q::Path("Channel 12/Servo Signal"));
+//        jsonutil::remove_value(json, q::Path("Channel 13/Servo Signal"));
+//        jsonutil::remove_value(json, q::Path("Channel 14/Servo Signal"));
+//        jsonutil::remove_value(json, q::Path("Channel 15/Servo Signal"));
+//        jsonutil::remove_value(json, q::Path("Channel 16/Servo Signal"));
+//    }
 
-    for (size_t i = 0; i < 16; i++)
-    {
-        if (m_pwm_channels[i].config->servo_signal)
-        {
-            jsonutil::remove_value(json, q::Path(q::util::format<q::String>("Channel {}/Min PWM", i + 1)));
-            jsonutil::remove_value(json, q::Path(q::util::format<q::String>("Channel {}/Max PWM", i + 1)));
-        }
-        else
-        {
-            jsonutil::remove_value(json, q::Path(q::util::format<q::String>("Channel {}/Min Servo (ms)", i + 1)));
-            jsonutil::remove_value(json, q::Path(q::util::format<q::String>("Channel {}/Max Servo (ms)", i + 1)));
-        }
-    }
+//    for (size_t i = 0; i < 16; i++)
+//    {
+//        if (m_pwm_channels[i].config->servo_signal)
+//        {
+//            jsonutil::remove_value(json, q::Path(q::util::format<q::String>("Channel {}/Min PWM", i + 1)));
+//            jsonutil::remove_value(json, q::Path(q::util::format<q::String>("Channel {}/Max PWM", i + 1)));
+//        }
+//        else
+//        {
+//            jsonutil::remove_value(json, q::Path(q::util::format<q::String>("Channel {}/Min Servo (ms)", i + 1)));
+//            jsonutil::remove_value(json, q::Path(q::util::format<q::String>("Channel {}/Max Servo (ms)", i + 1)));
+//        }
+//    }
 
 
-    return std::move(json);
+//    return std::move(json);
+    return m_config;
 }
 
-auto PCA9685::get_init_params() const -> rapidjson::Document
+auto PCA9685::get_descriptor() const -> std::shared_ptr<Node_Descriptor_Base>
 {
-    rapidjson::Document json;
-    autojsoncxx::to_document(*m_init_params, json);
-    return std::move(json);
+    return m_descriptor;
 }
 auto PCA9685::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document
 {

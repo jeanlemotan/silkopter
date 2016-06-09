@@ -38,9 +38,9 @@
 #include "utils/Channel.h"
 
 
-#include "sz_math.hpp"
+//#include "sz_math.hpp"
 //#include "sz_Comms_Source.hpp"
-#include "sz_Multirotor_Config.hpp"
+//#include "sz_Multirotor_Config.hpp"
 
 using namespace silk;
 using namespace boost::asio;
@@ -419,7 +419,8 @@ static void pack_node_def_data(Comms::Channels::Setup& channel, node::INode cons
 {
     pack_def_inputs(channel, node.get_inputs());
     pack_outputs(channel, node.get_outputs());
-    channel.pack_param(node.get_init_params());
+    //todo - fix this
+    //channel.pack_param(node.get_init_params());
 }
 
 static void pack_node_data(Comms::Channels::Setup& channel, node::INode const& node)
@@ -427,8 +428,9 @@ static void pack_node_data(Comms::Channels::Setup& channel, node::INode const& n
     channel.pack_param(node.get_type());
     pack_inputs(channel, node.get_inputs());
     pack_outputs(channel, node.get_outputs());
-    channel.pack_param(node.get_init_params());
-    channel.pack_param(node.get_config());
+    //todo - fix this
+    //channel.pack_param(node.get_init_params());
+    //channel.pack_param(node.get_config());
 }
 
 
@@ -477,53 +479,54 @@ void Comms::handle_uav_config()
 
     QLOGI("Req multirotor config");
 
-    bool has_config = false;
-    UAV_Config::Type type;
-    rapidjson::Document configj;
-    if (channel.unpack_param(has_config))
-    {
-        if (channel.unpack_param(type) && channel.unpack_param(configj))
-        {
-            std::shared_ptr<UAV_Config> config;
-            if (type == Multirotor_Config::TYPE)
-            {
-                config = std::make_shared<Multirotor_Config>();
-                autojsoncxx::error::ErrorStack result;
-                if (!autojsoncxx::from_value(static_cast<Multirotor_Config&>(*config), configj, result))
-                {
-                    std::ostringstream ss;
-                    ss << result;
-                    QLOGE("Req Id: {} - Cannot deserialize multirotor config: {}", ss.str());
-                }
-            }
-            if (config && m_uav.set_uav_config(config))
-            {
-                m_uav.save_settings();
-            }
-        }
-    }
-    else
-    {
-        if (m_uav.set_uav_config(std::shared_ptr<UAV_Config>()))
-        {
-            m_uav.save_settings();
-        }
-    }
+    //todo - fix this
+//    bool has_config = false;
+//    UAV_Config::Type type;
+//    rapidjson::Document configj;
+//    if (channel.unpack_param(has_config))
+//    {
+//        if (channel.unpack_param(type) && channel.unpack_param(configj))
+//        {
+//            std::shared_ptr<UAV_Config> config;
+//            if (type == Multirotor_Config::TYPE)
+//            {
+//                config = std::make_shared<Multirotor_Config>();
+//                autojsoncxx::error::ErrorStack result;
+//                if (!autojsoncxx::from_value(static_cast<Multirotor_Config&>(*config), configj, result))
+//                {
+//                    std::ostringstream ss;
+//                    ss << result;
+//                    QLOGE("Req Id: {} - Cannot deserialize multirotor config: {}", ss.str());
+//                }
+//            }
+//            if (config && m_uav.set_uav_config(config))
+//            {
+//                m_uav.save_settings();
+//            }
+//        }
+//    }
+//    else
+//    {
+//        if (m_uav.set_uav_config(std::shared_ptr<UAV_Config>()))
+//        {
+//            m_uav.save_settings();
+//        }
+//    }
 
-    channel.begin_pack(comms::Setup_Message::UAV_CONFIG);
+//    channel.begin_pack(comms::Setup_Message::UAV_CONFIG);
 
-    if (std::shared_ptr<const Multirotor_Config> config = m_uav.get_specialized_uav_config<Multirotor_Config>())
-    {
-        channel.pack_param(true);
-        configj.SetObject();
-        autojsoncxx::to_document(*config, configj);
-        channel.pack_param(config->get_type());
-        channel.pack_param(configj);
-    }
-    else
-    {
-        channel.pack_param(false);
-    }
+//    if (std::shared_ptr<const Multirotor_Config> config = m_uav.get_specialized_uav_config<Multirotor_Config>())
+//    {
+//        channel.pack_param(true);
+//        configj.SetObject();
+//        autojsoncxx::to_document(*config, configj);
+//        channel.pack_param(config->get_type());
+//        channel.pack_param(configj);
+//    }
+//    else
+//    {
+//        channel.pack_param(false);
+//    }
 
     channel.end_pack();
 }
@@ -622,16 +625,17 @@ void Comms::handle_node_config()
         return;
     }
 
-    rapidjson::Document config;
-    if (channel.unpack_param(config))
-    {
-        node->set_config(config);
-    }
-    m_uav.save_settings();
-
-    channel.begin_pack(comms::Setup_Message::NODE_CONFIG);
-    channel.pack_param(name);
-    channel.pack_param(node->get_config());
+    //todo - fix this
+//    rapidjson::Document config;
+//    if (channel.unpack_param(config))
+//    {
+//        node->set_config(config);
+//    }
+//    m_uav.save_settings();
+//
+//    channel.begin_pack(comms::Setup_Message::NODE_CONFIG);
+//    channel.pack_param(name);
+//    channel.pack_param(node->get_config());
     channel.end_pack();
 }
 

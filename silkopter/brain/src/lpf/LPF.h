@@ -7,8 +7,8 @@
 #include "Sample_Accumulator.h"
 #include "Basic_Output_Stream.h"
 
-#include "sz_math.hpp"
-#include "sz_LPF.hpp"
+//#include "sz_math.hpp"
+//#include "sz_LPF.hpp"
 
 namespace silk
 {
@@ -21,11 +21,11 @@ class LPF : public ILPF
 public:
     LPF(UAV& uav);
 
-    auto init(rapidjson::Value const& init_params) -> bool;
-    auto get_init_params() const -> rapidjson::Document;
+    bool init(std::shared_ptr<Node_Descriptor_Base> descriptor) override;
+    std::shared_ptr<Node_Descriptor_Base> get_descriptor() const override;
 
-    auto set_config(rapidjson::Value const& json) -> bool;
-    auto get_config() const -> rapidjson::Document;
+    bool set_config(std::shared_ptr<Node_Config_Base> config) override;
+    std::shared_ptr<Node_Config_Base> get_config() const override;
 
     auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
 
@@ -42,7 +42,7 @@ private:
 
     UAV& m_uav;
 
-    sz::LPF::Init_Params m_init_params;
+    sz::LPF::Init_Params m_descriptor;
     sz::LPF::Config m_config;
 
     Sample_Accumulator<Stream_t> m_accumulator;
@@ -62,40 +62,39 @@ LPF<Stream_t>::LPF(UAV& uav)
 }
 
 template<class Stream_t>
-auto LPF<Stream_t>::init(rapidjson::Value const& init_params) -> bool
+auto LPF<Stream_t>::init(std::shared_ptr<Node_Descriptor_Base> descriptor) -> bool
 {
     QLOG_TOPIC("lpf::init");
 
-    sz::LPF::Init_Params sz;
-    autojsoncxx::error::ErrorStack result;
-    if (!autojsoncxx::from_value(sz, init_params, result))
+    auto specialized = std::dynamic_pointer_cast<LPF_Descriptor>(descriptor);
+    if (!specialized)
     {
-        std::ostringstream ss;
-        ss << result;
-        QLOGE("Cannot deserialize LPF data: {}", ss.str());
+        QLOGE("Wrong descriptor type");
         return false;
     }
-    m_init_params = sz;
+
+    *m_descriptor = *specialized;
+
     return init();
 }
 
 template<class Stream_t>
 auto LPF<Stream_t>::init() -> bool
 {
-    if (m_init_params.rate == 0)
+    if (m_descriptor.rate == 0)
     {
-        QLOGE("Bad rate: {}Hz", m_init_params.rate);
+        QLOGE("Bad rate: {}Hz", m_descriptor.rate);
         return false;
     }
-    m_output_stream->set_rate(m_init_params.rate);
+    m_output_stream->set_rate(m_descriptor.rate);
     return true;
 }
 
 template<class Stream_t>
-auto LPF<Stream_t>::get_init_params() const -> rapidjson::Document
+auto LPF<Stream_t>::get_descriptor() const -> std::shared_ptr<Node_Descriptor_Base>
 {
     rapidjson::Document json;
-    autojsoncxx::to_document(m_init_params, json);
+    autojsoncxx::to_document(m_descriptor, json);
     return std::move(json);
 }
 
@@ -106,7 +105,7 @@ void LPF<Stream_t>::set_input_stream_path(size_t idx, q::Path const& path)
 }
 
 template<class Stream_t>
-auto LPF<Stream_t>::set_config(rapidjson::Value const& json) -> bool
+auto LPF<Stream_t>::set_config(std::shared_ptr<Node_Config_Base> config) -> bool
 {
     QLOG_TOPIC("lpf::set_config");
     autojsoncxx::error::ErrorStack result;
@@ -142,7 +141,7 @@ auto LPF<Stream_t>::send_message(rapidjson::Value const& /*json*/) -> rapidjson:
     return rapidjson::Document();
 }
 template<class Stream_t>
-auto LPF<Stream_t>::get_config() const -> rapidjson::Document
+auto LPF<Stream_t>::get_config() const -> std::shared_ptr<Node_Config_Base>
 {
     rapidjson::Document json;
     autojsoncxx::to_document(m_config, json);
@@ -161,7 +160,7 @@ auto LPF<Stream_t>::get_inputs() const -> std::vector<Input>
 {
     std::vector<Input> inputs =
     {{
-        { Stream_t::TYPE, m_init_params.rate, "Input", m_accumulator.get_stream_path(0) }
+        { Stream_t::TYPE, m_descriptor.rate, "Input", m_accumulator.get_stream_path(0) }
     }};
     return inputs;
 }

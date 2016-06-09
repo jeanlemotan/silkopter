@@ -8,13 +8,11 @@
 #include "Sample_Accumulator.h"
 #include "Basic_Output_Stream.h"
 
-namespace sz
+
+namespace silk
 {
-namespace Throttle_To_PWM
-{
-struct Init_Params;
-struct Config;
-}
+struct Throttle_To_PWM_Descriptor;
+struct Throttle_To_PWM_Config;
 }
 
 namespace silk
@@ -27,11 +25,11 @@ class Throttle_To_PWM : public IProcessor
 public:
     Throttle_To_PWM(UAV& uav);
 
-    auto init(rapidjson::Value const& init_params) -> bool;
-    auto get_init_params() const -> rapidjson::Document;
+    bool init(std::shared_ptr<Node_Descriptor_Base> descriptor) override;
+    std::shared_ptr<Node_Descriptor_Base> get_descriptor() const override;
 
-    auto set_config(rapidjson::Value const& json) -> bool;
-    auto get_config() const -> rapidjson::Document;
+    bool set_config(std::shared_ptr<Node_Config_Base> config) override;
+    std::shared_ptr<Node_Config_Base> get_config() const override;
 
     auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
 
@@ -48,8 +46,8 @@ private:
 
     UAV& m_uav;
 
-    std::shared_ptr<sz::Throttle_To_PWM::Init_Params> m_init_params;
-    std::shared_ptr<sz::Throttle_To_PWM::Config> m_config;
+    std::shared_ptr<Throttle_To_PWM_Descriptor> m_descriptor;
+    std::shared_ptr<Throttle_To_PWM_Config> m_config;
 
     std::vector<Sample_Accumulator<stream::IThrottle>> m_accumulators;
 

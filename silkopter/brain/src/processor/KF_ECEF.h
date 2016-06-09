@@ -15,13 +15,10 @@
 #include "Eigen/Core"
 
 
-namespace sz
+namespace silk
 {
-namespace KF_ECEF
-{
-struct Init_Params;
-struct Config;
-}
+struct KF_ECEF_Descriptor;
+struct KF_ECEF_Config;
 }
 
 
@@ -35,11 +32,11 @@ class KF_ECEF : public IProcessor
 public:
     KF_ECEF(UAV& uav);
 
-    auto init(rapidjson::Value const& init_params) -> bool;
-    auto get_init_params() const -> rapidjson::Document;
+    bool init(std::shared_ptr<Node_Descriptor_Base> descriptor) override;
+    std::shared_ptr<Node_Descriptor_Base> get_descriptor() const override;
 
-    auto set_config(rapidjson::Value const& json) -> bool;
-    auto get_config() const -> rapidjson::Document;
+    bool set_config(std::shared_ptr<Node_Config_Base> config) override;
+    std::shared_ptr<Node_Config_Base> get_config() const override;
 
     auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
 
@@ -56,8 +53,8 @@ private:
 
     UAV& m_uav;
 
-    std::shared_ptr<sz::KF_ECEF::Init_Params> m_init_params;
-    std::shared_ptr<sz::KF_ECEF::Config> m_config;
+    std::shared_ptr<KF_ECEF_Descriptor> m_descriptor;
+    std::shared_ptr<KF_ECEF_Config> m_config;
 
     q::Clock::duration m_dt = q::Clock::duration(0);
 

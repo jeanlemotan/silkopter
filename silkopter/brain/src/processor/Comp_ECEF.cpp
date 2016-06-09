@@ -1,8 +1,8 @@
 #include "BrainStdAfx.h"
 #include "Comp_ECEF.h"
 
-#include "sz_math.hpp"
-#include "sz_Comp_ECEF.hpp"
+#include "uav.def.h"
+//#include "sz_Comp_ECEF.hpp"
 
 namespace silk
 {
@@ -11,40 +11,39 @@ namespace node
 
 Comp_ECEF::Comp_ECEF(UAV& uav)
     : m_uav(uav)
-    , m_init_params(new sz::Comp_ECEF::Init_Params())
-    , m_config(new sz::Comp_ECEF::Config())
+    , m_descriptor(new Comp_ECEF_Descriptor())
+    , m_config(new Comp_ECEF_Config())
 {
     m_position_output_stream = std::make_shared<Position_Output_Stream>();
     m_velocity_output_stream = std::make_shared<Velocity_Output_Stream>();
 //    m_enu_frame_output_stream = std::make_shared<ENU_Frame_Stream>();
 }
 
-auto Comp_ECEF::init(rapidjson::Value const& init_params) -> bool
+auto Comp_ECEF::init(std::shared_ptr<Node_Descriptor_Base> descriptor) -> bool
 {
     QLOG_TOPIC("Comp_ECEF::init");
 
-    sz::Comp_ECEF::Init_Params sz;
-    autojsoncxx::error::ErrorStack result;
-    if (!autojsoncxx::from_value(sz, init_params, result))
+    auto specialized = std::dynamic_pointer_cast<Comp_ECEF_Descriptor>(descriptor);
+    if (!specialized)
     {
-        std::ostringstream ss;
-        ss << result;
-        QLOGE("Cannot deserialize Comp_ECEF data: {}", ss.str());
+        QLOGE("Wrong descriptor type");
         return false;
     }
-    *m_init_params = sz;
+
+    *m_descriptor = *specialized;
+
     return init();
 }
 
 auto Comp_ECEF::init() -> bool
 {
-    if (m_init_params->rate == 0)
+    if (m_descriptor->rate == 0)
     {
-        QLOGE("Bad rate: {}Hz", m_init_params->rate);
+        QLOGE("Bad rate: {}Hz", m_descriptor->rate);
         return false;
     }
-    m_position_output_stream->set_rate(m_init_params->rate);
-    m_velocity_output_stream->set_rate(m_init_params->rate);
+    m_position_output_stream->set_rate(m_descriptor->rate);
+    m_velocity_output_stream->set_rate(m_descriptor->rate);
     return true;
 }
 
@@ -59,10 +58,10 @@ auto Comp_ECEF::get_inputs() const -> std::vector<Input>
 {
     std::vector<Input> inputs =
     {{
-        { stream::IECEF_Position::TYPE, m_init_params->rate, "Position (ecef)", m_accumulator.get_stream_path(0) },
-        { stream::IECEF_Velocity::TYPE, m_init_params->rate, "Velocity (ecef)", m_accumulator.get_stream_path(1) },
-        { stream::IENU_Linear_Acceleration::TYPE, m_init_params->rate, "Linear Acceleration (enu)", m_accumulator.get_stream_path(2) },
-        { stream::IPressure::TYPE, m_init_params->rate, "Pressure", m_accumulator.get_stream_path(3) }
+        { stream::IECEF_Position::TYPE, m_descriptor->rate, "Position (ecef)", m_accumulator.get_stream_path(0) },
+        { stream::IECEF_Velocity::TYPE, m_descriptor->rate, "Velocity (ecef)", m_accumulator.get_stream_path(1) },
+        { stream::IENU_Linear_Acceleration::TYPE, m_descriptor->rate, "Linear Acceleration (enu)", m_accumulator.get_stream_path(2) },
+        { stream::IPressure::TYPE, m_descriptor->rate, "Pressure", m_accumulator.get_stream_path(3) }
     }};
     return inputs;
 }
@@ -122,39 +121,32 @@ void Comp_ECEF::process()
 
 void Comp_ECEF::set_input_stream_path(size_t idx, q::Path const& path)
 {
-    m_accumulator.set_stream_path(idx, path, m_init_params->rate, m_uav);
+    m_accumulator.set_stream_path(idx, path, m_descriptor->rate, m_uav);
 }
 
-auto Comp_ECEF::set_config(rapidjson::Value const& json) -> bool
+auto Comp_ECEF::set_config(std::shared_ptr<Node_Config_Base> config) -> bool
 {
     QLOG_TOPIC("Comp_ECEF::set_config");
 
-    sz::Comp_ECEF::Config sz;
-    autojsoncxx::error::ErrorStack result;
-    if (!autojsoncxx::from_value(sz, json, result))
+    auto specialized = std::dynamic_pointer_cast<Comp_ECEF_Config>(config);
+    if (!specialized)
     {
-        std::ostringstream ss;
-        ss << result;
-        QLOGE("Cannot deserialize config data: {}", ss.str());
+        QLOGE("Wrong config type");
         return false;
     }
 
-    *m_config = sz;
+    *m_config = *specialized;
 
     return true;
 }
-auto Comp_ECEF::get_config() const -> rapidjson::Document
+auto Comp_ECEF::get_config() const -> std::shared_ptr<Node_Config_Base>
 {
-    rapidjson::Document json;
-    autojsoncxx::to_document(*m_config, json);
-    return std::move(json);
+    return m_config;
 }
 
-auto Comp_ECEF::get_init_params() const -> rapidjson::Document
+auto Comp_ECEF::get_descriptor() const -> std::shared_ptr<Node_Descriptor_Base>
 {
-    rapidjson::Document json;
-    autojsoncxx::to_document(*m_init_params, json);
-    return std::move(json);
+    return m_descriptor;
 }
 
 auto Comp_ECEF::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document

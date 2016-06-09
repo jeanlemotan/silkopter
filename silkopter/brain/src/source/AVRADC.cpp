@@ -3,8 +3,8 @@
 #include "physics/constants.h"
 #include "utils/Timed_Scope.h"
 
-#include "sz_math.hpp"
-#include "sz_AVRADC.hpp"
+#include "uav.def.h"
+//#include "sz_AVRADC.hpp"
 
 namespace silk
 {
@@ -20,8 +20,8 @@ constexpr std::chrono::milliseconds MIN_CONVERSION_DURATION(5);
 
 AVRADC::AVRADC(UAV& uav)
     : m_uav(uav)
-    , m_init_params(new sz::AVRADC::Init_Params())
-    , m_config(new sz::AVRADC::Config())
+    , m_descriptor(new AVRADC_Descriptor())
+    , m_config(new AVRADC_Config())
 {
     for (auto& adc: m_adcs)
     {
@@ -38,26 +38,25 @@ auto AVRADC::get_outputs() const -> std::vector<Output>
      }};
     return outputs;
 }
-auto AVRADC::init(rapidjson::Value const& init_params) -> bool
+auto AVRADC::init(std::shared_ptr<Node_Descriptor_Base> descriptor) -> bool
 {
     QLOG_TOPIC("AVRADC::init");
 
-    sz::AVRADC::Init_Params sz;
-    autojsoncxx::error::ErrorStack result;
-    if (!autojsoncxx::from_value(sz, init_params, result))
+    auto specialized = std::dynamic_pointer_cast<AVRADC_Descriptor>(descriptor);
+    if (!specialized)
     {
-        std::ostringstream ss;
-        ss << result;
-        QLOGE("Cannot deserialize AVRADC data: {}", ss.str());
+        QLOGE("Wrong descriptor type");
         return false;
     }
-    *m_init_params = sz;
+
+    *m_descriptor = *specialized;
+
     return init();
 }
 
 auto AVRADC::init() -> bool
 {
-    m_i2c = m_uav.get_buses().find_by_name<bus::II2C>(m_init_params->bus);
+    m_i2c = m_uav.get_buses().find_by_name<bus::II2C>(m_descriptor->bus);
 
     auto i2c = m_i2c.lock();
     if (!i2c)
@@ -73,10 +72,10 @@ auto AVRADC::init() -> bool
     });
 
 
-    m_init_params->rate = math::clamp<size_t>(m_init_params->rate, 1, 500);
+    m_descriptor->rate = math::clamp<size_t>(m_descriptor->rate, 1, 500);
 
-    m_adcs[0]->set_rate(m_init_params->rate);
-    m_adcs[1]->set_rate(m_init_params->rate);
+    m_adcs[0]->set_rate(m_descriptor->rate);
+    m_adcs[1]->set_rate(m_descriptor->rate);
 
     return true;
 }
@@ -169,35 +168,29 @@ void AVRADC::process()
     }
 }
 
-auto AVRADC::set_config(rapidjson::Value const& json) -> bool
+auto AVRADC::set_config(std::shared_ptr<Node_Config_Base> config) -> bool
 {
     QLOG_TOPIC("AVRADC::set_config");
 
-    sz::AVRADC::Config sz;
-    autojsoncxx::error::ErrorStack result;
-    if (!autojsoncxx::from_value(sz, json, result))
+    auto specialized = std::dynamic_pointer_cast<AVRADC_Config>(config);
+    if (!specialized)
     {
-        std::ostringstream ss;
-        ss << result;
-        QLOGE("Cannot deserialize AVRADC config data: {}", ss.str());
+        QLOGE("Wrong config type");
         return false;
     }
 
-    *m_config = sz;
+    *m_config = *specialized;
+
     return true;
 }
-auto AVRADC::get_config() const -> rapidjson::Document
+auto AVRADC::get_config() const -> std::shared_ptr<Node_Config_Base>
 {
-    rapidjson::Document json;
-    autojsoncxx::to_document(*m_config, json);
-    return std::move(json);
+    return m_config;
 }
 
-auto AVRADC::get_init_params() const -> rapidjson::Document
+auto AVRADC::get_descriptor() const -> std::shared_ptr<Node_Descriptor_Base>
 {
-    rapidjson::Document json;
-    autojsoncxx::to_document(*m_init_params, json);
-    return std::move(json);
+    return m_descriptor;
 }
 
 auto AVRADC::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document

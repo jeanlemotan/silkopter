@@ -1,8 +1,7 @@
 #include "BrainStdAfx.h"
 #include "PIGPIO.h"
 
-#include "sz_math.hpp"
-#include "sz_PIGPIO.hpp"
+#include "uav.def.h"
 
 #ifdef RASPBERRY_PI
 extern "C"
@@ -28,8 +27,8 @@ namespace node
 
 PIGPIO::PIGPIO(UAV& uav)
     : m_uav(uav)
-    , m_init_params(new sz::PIGPIO::Init_Params())
-    , m_config(new sz::PIGPIO::Config())
+    , m_descriptor(new PIGPIO_Descriptor())
+    , m_config(new PIGPIO_Config())
 {
 }
 
@@ -49,20 +48,17 @@ auto PIGPIO::get_inputs() const -> std::vector<Input>
 }
 
 
-auto PIGPIO::init(rapidjson::Value const& init_params) -> bool
+auto PIGPIO::init(std::shared_ptr<Node_Descriptor_Base> descriptor) -> bool
 {
     QLOG_TOPIC("pigpio::init");
 
-    sz::PIGPIO::Init_Params sz;
-    autojsoncxx::error::ErrorStack result;
-    if (!autojsoncxx::from_value(sz, init_params, result))
+    auto specialized = std::dynamic_pointer_cast<PIGPIO_Descriptor>(descriptor);
+    if (specialized)
     {
-        std::ostringstream ss;
-        ss << result;
-        QLOGE("Cannot deserialize PIGPIO data: {}", ss.str());
+        QLOGE("Wrong descriptor type");
         return false;
     }
-    *m_init_params = sz;
+    *m_descriptor = *specialized;
     return init();
 }
 
@@ -70,7 +66,7 @@ auto PIGPIO::init() -> bool
 {
 #define SETUP_CHANNEL(GPIO)\
     {\
-        sz::PIGPIO::PWM_Channel* init_params = &m_init_params->gpio_##GPIO;\
+        sz::PIGPIO::PWM_Channel* init_params = &m_descriptor->gpio_##GPIO;\
         if (init_params->enabled)\
         {\
             PWM_Channel ch;\
@@ -82,32 +78,32 @@ auto PIGPIO::init() -> bool
         }\
     }
 
-    SETUP_CHANNEL(2);
-    SETUP_CHANNEL(3);
-    SETUP_CHANNEL(4);
-    SETUP_CHANNEL(5);
-    SETUP_CHANNEL(6);
-    SETUP_CHANNEL(7);
-    SETUP_CHANNEL(8);
-    SETUP_CHANNEL(9);
-    SETUP_CHANNEL(10);
-    SETUP_CHANNEL(11);
-    SETUP_CHANNEL(12);
-    SETUP_CHANNEL(13);
-    SETUP_CHANNEL(14);
-    SETUP_CHANNEL(15);
-    SETUP_CHANNEL(16);
-    SETUP_CHANNEL(17);
-    SETUP_CHANNEL(18);
-    SETUP_CHANNEL(19);
-    SETUP_CHANNEL(20);
-    SETUP_CHANNEL(21);
-    SETUP_CHANNEL(22);
-    SETUP_CHANNEL(23);
-    SETUP_CHANNEL(24);
-    SETUP_CHANNEL(25);
-    SETUP_CHANNEL(26);
-    SETUP_CHANNEL(27);
+//    SETUP_CHANNEL(2);
+//    SETUP_CHANNEL(3);
+//    SETUP_CHANNEL(4);
+//    SETUP_CHANNEL(5);
+//    SETUP_CHANNEL(6);
+//    SETUP_CHANNEL(7);
+//    SETUP_CHANNEL(8);
+//    SETUP_CHANNEL(9);
+//    SETUP_CHANNEL(10);
+//    SETUP_CHANNEL(11);
+//    SETUP_CHANNEL(12);
+//    SETUP_CHANNEL(13);
+//    SETUP_CHANNEL(14);
+//    SETUP_CHANNEL(15);
+//    SETUP_CHANNEL(16);
+//    SETUP_CHANNEL(17);
+//    SETUP_CHANNEL(18);
+//    SETUP_CHANNEL(19);
+//    SETUP_CHANNEL(20);
+//    SETUP_CHANNEL(21);
+//    SETUP_CHANNEL(22);
+//    SETUP_CHANNEL(23);
+//    SETUP_CHANNEL(24);
+//    SETUP_CHANNEL(25);
+//    SETUP_CHANNEL(26);
+//    SETUP_CHANNEL(27);
 #undef SETUP_CHANNEL
 
 
@@ -270,79 +266,77 @@ void PIGPIO::set_input_stream_path(size_t idx, q::Path const& path)
 }
 
 
-auto PIGPIO::set_config(rapidjson::Value const& json) -> bool
+auto PIGPIO::set_config(std::shared_ptr<Node_Config_Base> config) -> bool
 {
     QLOG_TOPIC("pigpio::set_config");
 
-    sz::PIGPIO::Config sz;
-    autojsoncxx::error::ErrorStack result;
-    if (!autojsoncxx::from_value(sz, json, result))
+    auto specialized = std::dynamic_pointer_cast<PIGPIO_Config>(config);
+    if (!specialized)
     {
-        std::ostringstream ss;
-        ss << result;
-        QLOGE("Cannot deserialize PIGPIO config data: {}", ss.str());
+        QLOGE("Wrong config type");
         return false;
     }
 
-    *m_config = sz;
+    *m_config = *specialized;
 
-    for (size_t i = 2; i <= 27; i++)
-    {
-        auto it = std::find_if(m_pwm_channels.begin(), m_pwm_channels.end(), [i](PWM_Channel const& channel) { return channel.gpio == i; });
-        if (it != m_pwm_channels.end())
-        {
-            PWM_Channel& channel = *it;
-            if (it->is_servo)
-            {
-                channel.config->min_servo = math::clamp(channel.config->min_servo, MIN_SERVO_MS, MAX_SERVO_MS);
-                channel.config->max_servo = math::clamp(channel.config->max_servo, channel.config->min_servo, MAX_SERVO_MS);
-            }
-            else
-            {
-                channel.config->min_pwm = math::clamp(channel.config->min_pwm, 0.f, 1.f);
-                channel.config->max_pwm = math::clamp(channel.config->max_pwm, channel.config->min_pwm, 1.f);
-            }
-        }
-    }
+    //todo - fix this
+//    for (size_t i = 2; i <= 27; i++)
+//    {
+//        auto it = std::find_if(m_pwm_channels.begin(), m_pwm_channels.end(), [i](PWM_Channel const& channel) { return channel.gpio == i; });
+//        if (it != m_pwm_channels.end())
+//        {
+//            PWM_Channel& channel = *it;
+//            if (it->is_servo)
+//            {
+//                channel.config->min_servo = math::clamp(channel.config->min_servo, MIN_SERVO_MS, MAX_SERVO_MS);
+//                channel.config->max_servo = math::clamp(channel.config->max_servo, channel.config->min_servo, MAX_SERVO_MS);
+//            }
+//            else
+//            {
+//                channel.config->min_pwm = math::clamp(channel.config->min_pwm, 0.f, 1.f);
+//                channel.config->max_pwm = math::clamp(channel.config->max_pwm, channel.config->min_pwm, 1.f);
+//            }
+//        }
+//    }
 
     return true;
 }
-auto PIGPIO::get_config() const -> rapidjson::Document
+auto PIGPIO::get_config() const -> std::shared_ptr<Node_Config_Base>
 {
-    rapidjson::Document json;
-    autojsoncxx::to_document(*m_config, json);
+    //todo - fix this
+//    rapidjson::Document json;
+//    autojsoncxx::to_document(*m_config, json);
 
-    for (size_t i = 2; i <= 27; i++)
-    {
-        auto it = std::find_if(m_pwm_channels.begin(), m_pwm_channels.end(), [i](PWM_Channel const& channel) { return channel.gpio == i; });
-        if (it != m_pwm_channels.end())
-        {
-            if (it->is_servo)
-            {
-                jsonutil::remove_value(json, q::Path(q::util::format<q::String>("GPIO {}/Min PWM", i)));
-                jsonutil::remove_value(json, q::Path(q::util::format<q::String>("GPIO {}/Max PWM", i)));
-            }
-            else
-            {
-                jsonutil::remove_value(json, q::Path(q::util::format<q::String>("GPIO {}/Min Servo (ms)", i)));
-                jsonutil::remove_value(json, q::Path(q::util::format<q::String>("GPIO {}/Max Servo (ms)", i)));
-            }
-        }
-        else
-        {
-            jsonutil::remove_value(json, q::Path(q::util::format<q::String>("GPIO {}", i)));
-        }
-    }
+//    for (size_t i = 2; i <= 27; i++)
+//    {
+//        auto it = std::find_if(m_pwm_channels.begin(), m_pwm_channels.end(), [i](PWM_Channel const& channel) { return channel.gpio == i; });
+//        if (it != m_pwm_channels.end())
+//        {
+//            if (it->is_servo)
+//            {
+//                jsonutil::remove_value(json, q::Path(q::util::format<q::String>("GPIO {}/Min PWM", i)));
+//                jsonutil::remove_value(json, q::Path(q::util::format<q::String>("GPIO {}/Max PWM", i)));
+//            }
+//            else
+//            {
+//                jsonutil::remove_value(json, q::Path(q::util::format<q::String>("GPIO {}/Min Servo (ms)", i)));
+//                jsonutil::remove_value(json, q::Path(q::util::format<q::String>("GPIO {}/Max Servo (ms)", i)));
+//            }
+//        }
+//        else
+//        {
+//            jsonutil::remove_value(json, q::Path(q::util::format<q::String>("GPIO {}", i)));
+//        }
+//    }
 
 
-    return std::move(json);
+//    return std::move(json);
+    return m_config;
 }
 
-auto PIGPIO::get_init_params() const -> rapidjson::Document
+auto PIGPIO::get_descriptor() const -> std::shared_ptr<Node_Descriptor_Base>
 {
-    rapidjson::Document json;
-    autojsoncxx::to_document(*m_init_params, json);
-    return std::move(json);
+    return m_descriptor;
 }
 auto PIGPIO::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document
 {

@@ -11,13 +11,11 @@
 
 #include "Basic_Output_Stream.h"
 
-namespace sz
+
+namespace silk
 {
-namespace MPU9250
-{
-struct Init_Params;
-struct Config;
-}
+struct MPU9250_Descriptor;
+struct MPU9250_Config;
 }
 
 
@@ -33,11 +31,11 @@ public:
     MPU9250(UAV& uav);
     ~MPU9250();
 
-    auto init(rapidjson::Value const& init_params) -> bool;
-    auto get_init_params() const -> rapidjson::Document;
+    bool init(std::shared_ptr<Node_Descriptor_Base> descriptor) override;
+    std::shared_ptr<Node_Descriptor_Base> get_descriptor() const override;
 
-    auto set_config(rapidjson::Value const& json) -> bool;
-    auto get_config() const -> rapidjson::Document;
+    bool set_config(std::shared_ptr<Node_Config_Base> config) override;
+    std::shared_ptr<Node_Config_Base> get_config() const override;
 
     auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
 
@@ -87,8 +85,8 @@ private:
 //    void set_bypass(Buses& buses, bool on);
     void process_magnetometer(Buses& buses);
 
-    std::shared_ptr<sz::MPU9250::Init_Params> m_init_params;
-    std::shared_ptr<sz::MPU9250::Config> m_config;
+    std::shared_ptr<MPU9250_Descriptor> m_descriptor;
+    std::shared_ptr<MPU9250_Config> m_config;
 
     mutable std::vector<uint8_t> m_fifo_buffer;
     size_t m_fifo_sample_size = 999999;

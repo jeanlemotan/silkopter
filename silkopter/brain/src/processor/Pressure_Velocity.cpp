@@ -1,8 +1,8 @@
 #include "BrainStdAfx.h"
 #include "Pressure_Velocity.h"
 
-#include "sz_math.hpp"
-#include "sz_Pressure_Velocity.hpp"
+#include "uav.def.h"
+//#include "sz_Pressure_Velocity.hpp"
 
 namespace silk
 {
@@ -11,37 +11,36 @@ namespace node
 
 Pressure_Velocity::Pressure_Velocity(UAV& uav)
     : m_uav(uav)
-    , m_init_params(new sz::Pressure_Velocity::Init_Params())
-    , m_config(new sz::Pressure_Velocity::Config())
+    , m_descriptor(new Pressure_Velocity_Descriptor())
+    , m_config(new Pressure_Velocity_Config())
 {
     m_output_stream = std::make_shared<Output_Stream>();
 }
 
-auto Pressure_Velocity::init(rapidjson::Value const& init_params) -> bool
+auto Pressure_Velocity::init(std::shared_ptr<Node_Descriptor_Base> descriptor) -> bool
 {
     QLOG_TOPIC("Pressure_Velocity::init");
 
-    sz::Pressure_Velocity::Init_Params sz;
-    autojsoncxx::error::ErrorStack result;
-    if (!autojsoncxx::from_value(sz, init_params, result))
+    auto specialized = std::dynamic_pointer_cast<Pressure_Velocity_Descriptor>(descriptor);
+    if (!specialized)
     {
-        std::ostringstream ss;
-        ss << result;
-        QLOGE("Cannot deserialize Pressure_Velocity data: {}", ss.str());
+        QLOGE("Wrong descriptor type");
         return false;
     }
-    *m_init_params = sz;
+
+    *m_descriptor = *specialized;
+
     return init();
 }
 auto Pressure_Velocity::init() -> bool
 {
-    if (m_init_params->rate == 0)
+    if (m_descriptor->rate == 0)
     {
-        QLOGE("Bad rate: {}Hz", m_init_params->rate);
+        QLOGE("Bad rate: {}Hz", m_descriptor->rate);
         return false;
     }
 
-    m_output_stream->set_rate(m_init_params->rate);
+    m_output_stream->set_rate(m_descriptor->rate);
 
     return true;
 }
@@ -56,7 +55,7 @@ auto Pressure_Velocity::get_inputs() const -> std::vector<Input>
 {
     std::vector<Input> inputs =
     {{
-        { stream::IPressure::TYPE, m_init_params->rate, "Pressure", m_accumulator.get_stream_path(0) }
+        { stream::IPressure::TYPE, m_descriptor->rate, "Pressure", m_accumulator.get_stream_path(0) }
     }};
     return inputs;
 }
@@ -101,36 +100,29 @@ void Pressure_Velocity::set_input_stream_path(size_t idx, q::Path const& path)
     m_accumulator.set_stream_path(idx, path, m_output_stream->get_rate(), m_uav);
 }
 
-auto Pressure_Velocity::set_config(rapidjson::Value const& json) -> bool
+auto Pressure_Velocity::set_config(std::shared_ptr<Node_Config_Base> config) -> bool
 {
     QLOG_TOPIC("Pressure_Velocity::set_config");
 
-    sz::Pressure_Velocity::Config sz;
-    autojsoncxx::error::ErrorStack result;
-    if (!autojsoncxx::from_value(sz, json, result))
+    auto specialized = std::dynamic_pointer_cast<Pressure_Velocity_Config>(config);
+    if (!specialized)
     {
-        std::ostringstream ss;
-        ss << result;
-        QLOGE("Cannot deserialize Pressure_Velocity config data: {}", ss.str());
+        QLOGE("Wrong config type");
         return false;
     }
 
-    *m_config = sz;
+    *m_config = *specialized;
 
     return true;
 }
-auto Pressure_Velocity::get_config() const -> rapidjson::Document
+auto Pressure_Velocity::get_config() const -> std::shared_ptr<Node_Config_Base>
 {
-    rapidjson::Document json;
-    autojsoncxx::to_document(*m_config, json);
-    return std::move(json);
+    return m_config;
 }
 
-auto Pressure_Velocity::get_init_params() const -> rapidjson::Document
+auto Pressure_Velocity::get_descriptor() const -> std::shared_ptr<Node_Descriptor_Base>
 {
-    rapidjson::Document json;
-    autojsoncxx::to_document(*m_init_params, json);
-    return std::move(json);
+    return m_descriptor;
 }
 auto Pressure_Velocity::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document
 {

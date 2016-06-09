@@ -1,8 +1,7 @@
 #include "BrainStdAfx.h"
 #include "UBLOX.h"
 
-#include "sz_math.hpp"
-#include "sz_UBLOX.hpp"
+#include "uav.def.h"
 
 
 namespace silk
@@ -246,8 +245,8 @@ struct MON_VER
 
 UBLOX::UBLOX(UAV& uav)
     : m_uav(uav)
-    , m_init_params(new sz::UBLOX::Init_Params())
-    , m_config(new sz::UBLOX::Config())
+    , m_descriptor(new UBLOX_Descriptor())
+    , m_config(new UBLOX_Config())
 {
     m_position_stream = std::make_shared<Position_Stream>();
     m_velocity_stream = std::make_shared<Velocity_Stream>();
@@ -307,33 +306,32 @@ auto UBLOX::get_outputs() const -> std::vector<Output>
     return outputs;
 }
 
-auto UBLOX::init(rapidjson::Value const& init_params) -> bool
+auto UBLOX::init(std::shared_ptr<Node_Descriptor_Base> descriptor) -> bool
 {
     QLOG_TOPIC("ublox::init");
 
-    sz::UBLOX::Init_Params sz;
-    autojsoncxx::error::ErrorStack result;
-    if (!autojsoncxx::from_value(sz, init_params, result))
+    auto specialized = std::dynamic_pointer_cast<UBLOX_Descriptor>(descriptor);
+    if (!specialized)
     {
-        std::ostringstream ss;
-        ss << result;
-        QLOGE("Cannot deserialize UBLOX data: {}", ss.str());
+        QLOGE("Wrong descriptor type");
         return false;
     }
-    *m_init_params = sz;
+
+    *m_descriptor = *specialized;
+
     return init();
 }
 auto UBLOX::init() -> bool
 {
-    m_i2c = m_uav.get_buses().find_by_name<bus::II2C>(m_init_params->bus);
-    m_spi = m_uav.get_buses().find_by_name<bus::ISPI>(m_init_params->bus);
-    m_uart = m_uav.get_buses().find_by_name<bus::IUART>(m_init_params->bus);
+    m_i2c = m_uav.get_buses().find_by_name<bus::II2C>(m_descriptor->get_bus());
+    m_spi = m_uav.get_buses().find_by_name<bus::ISPI>(m_descriptor->get_bus());
+    m_uart = m_uav.get_buses().find_by_name<bus::IUART>(m_descriptor->get_bus());
 
-    m_init_params->rate = math::clamp<size_t>(m_init_params->rate, 1, 10);
+    m_descriptor->rate = math::clamp<size_t>(m_descriptor->rate, 1, 10);
 
-    m_position_stream->set_rate(m_init_params->rate);
-    m_velocity_stream->set_rate(m_init_params->rate);
-    m_gps_info_stream->set_rate(m_init_params->rate);
+    m_position_stream->set_rate(m_descriptor->get_rate());
+    m_velocity_stream->set_rate(m_descriptor->get_rate());
+    m_gps_info_stream->set_rate(m_descriptor->get_rate());
 
     return setup();
 }
@@ -438,9 +436,9 @@ auto UBLOX::setup() -> bool
     }
 
     {
-        QLOGI("Configuring GPS rate to {}...", m_init_params->rate);
+        QLOGI("Configuring GPS rate to {}...", m_descriptor->get_rate());
         CFG_RATE data;
-        data.measRate = std::chrono::milliseconds(1000 / m_init_params->rate).count();
+        data.measRate = std::chrono::milliseconds(1000 / m_descriptor->get_rate()).count();
         data.timeRef = 0;//UTC time
         data.navRate = 1;
         if (!send_packet_with_retry(buses, MESSAGE_CFG_RATE, data, ACK_TIMEOUT, 2))
@@ -1152,35 +1150,29 @@ template<class T> auto UBLOX::send_packet_with_retry(Buses& buses, uint16_t msg,
 }
 
 
-auto UBLOX::set_config(rapidjson::Value const& json) -> bool
+auto UBLOX::set_config(std::shared_ptr<Node_Config_Base> config) -> bool
 {
     QLOG_TOPIC("ublox::set_config");
 
-    sz::UBLOX::Config sz;
-    autojsoncxx::error::ErrorStack result;
-    if (!autojsoncxx::from_value(sz, json, result))
+    auto specialized = std::dynamic_pointer_cast<UBLOX_Config>(config);
+    if (!specialized)
     {
-        std::ostringstream ss;
-        ss << result;
-        QLOGE("Cannot deserialize UBLOX config data: {}", ss.str());
+        QLOGE("Wrong config type");
         return false;
     }
 
-    *m_config = sz;
+    *m_config = *specialized;
+
     return true;
 }
-auto UBLOX::get_config() const -> rapidjson::Document
+auto UBLOX::get_config() const -> std::shared_ptr<Node_Config_Base>
 {
-    rapidjson::Document json;
-    autojsoncxx::to_document(*m_config, json);
-    return std::move(json);
+    return m_config;
 }
 
-auto UBLOX::get_init_params() const -> rapidjson::Document
+auto UBLOX::get_descriptor() const -> std::shared_ptr<Node_Descriptor_Base>
 {
-    rapidjson::Document json;
-    autojsoncxx::to_document(*m_init_params, json);
-    return std::move(json);
+    return m_descriptor;
 }
 
 auto UBLOX::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document

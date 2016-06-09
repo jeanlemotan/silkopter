@@ -3,8 +3,8 @@
 #include "physics/constants.h"
 #include "utils/Timed_Scope.h"
 
-#include "sz_math.hpp"
-#include "sz_ADS1115.hpp"
+#include "uav.def.h"
+//#include "sz_ADS1115.hpp"
 
 namespace silk
 {
@@ -101,8 +101,8 @@ constexpr std::chrono::milliseconds MIN_CONVERSION_DURATION(5);
 
 ADS1115::ADS1115(UAV& uav)
     : m_uav(uav)
-    , m_init_params(new sz::ADS1115::Init_Params())
-    , m_config(new sz::ADS1115::Config())
+    , m_descriptor(new ADS1115_Descriptor())
+    , m_config(new ADS1115_Config())
 {
     for (auto& adc: m_adcs)
     {
@@ -121,26 +121,25 @@ auto ADS1115::get_outputs() const -> std::vector<Output>
      }};
     return outputs;
 }
-auto ADS1115::init(rapidjson::Value const& init_params) -> bool
+auto ADS1115::init(std::shared_ptr<Node_Descriptor_Base> descriptor) -> bool
 {
     QLOG_TOPIC("ADS1115::init");
 
-    sz::ADS1115::Init_Params sz;
-    autojsoncxx::error::ErrorStack result;
-    if (!autojsoncxx::from_value(sz, init_params, result))
+    auto specialized = std::dynamic_pointer_cast<ADS1115_Descriptor>(descriptor);
+    if (!specialized)
     {
-        std::ostringstream ss;
-        ss << result;
-        QLOGE("Cannot deserialize ADS1115 data: {}", ss.str());
+        QLOGE("Wrong descriptor type");
         return false;
     }
-    *m_init_params = sz;
+
+    *m_descriptor = *specialized;
+
     return init();
 }
 
 auto ADS1115::init() -> bool
 {
-    m_i2c = m_uav.get_buses().find_by_name<bus::II2C>(m_init_params->bus);
+    m_i2c = m_uav.get_buses().find_by_name<bus::II2C>(m_descriptor->get_bus());
 
     auto i2c = m_i2c.lock();
     if (!i2c)
@@ -156,16 +155,16 @@ auto ADS1115::init() -> bool
     });
 
 
-    m_init_params->adc0_rate = math::clamp<size_t>(m_init_params->adc0_rate, 1, 500);
-    m_init_params->adc1_rate = math::clamp<size_t>(m_init_params->adc1_rate, 1, 500);
-    m_init_params->adc2_rate = math::clamp<size_t>(m_init_params->adc2_rate, 1, 500);
-    m_init_params->adc3_rate = math::clamp<size_t>(m_init_params->adc3_rate, 1, 500);
+//    m_descriptor->adc0_rate = math::clamp<size_t>(m_descriptor->adc0_rate, 1, 500);
+//    m_descriptor->adc1_rate = math::clamp<size_t>(m_descriptor->adc1_rate, 1, 500);
+//    m_descriptor->adc2_rate = math::clamp<size_t>(m_descriptor->adc2_rate, 1, 500);
+//    m_descriptor->adc3_rate = math::clamp<size_t>(m_descriptor->adc3_rate, 1, 500);
 
 
-    m_adcs[0]->set_rate(m_init_params->adc0_rate);
-    m_adcs[1]->set_rate(m_init_params->adc1_rate);
-    m_adcs[2]->set_rate(m_init_params->adc2_rate);
-    m_adcs[3]->set_rate(m_init_params->adc3_rate);
+    m_adcs[0]->set_rate(m_descriptor->get_adc0_rate());
+    m_adcs[1]->set_rate(m_descriptor->get_adc1_rate());
+    m_adcs[2]->set_rate(m_descriptor->get_adc2_rate());
+    m_adcs[3]->set_rate(m_descriptor->get_adc3_rate());
 
     m_config_register.gain = ADS1115_PGA_4096;
     m_config_register.mux = ADS1115_MUX_P0_NG;
@@ -316,35 +315,29 @@ void ADS1115::process()
     m_last_tp = now;
 }
 
-auto ADS1115::set_config(rapidjson::Value const& json) -> bool
+auto ADS1115::set_config(std::shared_ptr<Node_Config_Base> config) -> bool
 {
     QLOG_TOPIC("ADS1115::set_config");
 
-    sz::ADS1115::Config sz;
-    autojsoncxx::error::ErrorStack result;
-    if (!autojsoncxx::from_value(sz, json, result))
+    auto specialized = std::dynamic_pointer_cast<ADS1115_Config>(config);
+    if (!specialized)
     {
-        std::ostringstream ss;
-        ss << result;
-        QLOGE("Cannot deserialize ADS1115 config data: {}", ss.str());
+        QLOGE("Wrong config type");
         return false;
     }
 
-    *m_config = sz;
+    *m_config = *specialized;
+
     return true;
 }
-auto ADS1115::get_config() const -> rapidjson::Document
+auto ADS1115::get_config() const -> std::shared_ptr<Node_Config_Base>
 {
-    rapidjson::Document json;
-    autojsoncxx::to_document(*m_config, json);
-    return std::move(json);
+    return m_config;
 }
 
-auto ADS1115::get_init_params() const -> rapidjson::Document
+auto ADS1115::get_descriptor() const -> std::shared_ptr<Node_Descriptor_Base>
 {
-    rapidjson::Document json;
-    autojsoncxx::to_document(*m_init_params, json);
-    return std::move(json);
+    return m_descriptor;
 }
 
 auto ADS1115::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document

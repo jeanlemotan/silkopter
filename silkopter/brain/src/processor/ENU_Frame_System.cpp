@@ -2,8 +2,8 @@
 #include "ENU_Frame_System.h"
 #include "physics/constants.h"
 
-#include "sz_math.hpp"
-#include "sz_ENU_Frame_System.hpp"
+#include "uav.def.h"
+//#include "sz_ENU_Frame_System.hpp"
 
 namespace silk
 {
@@ -12,36 +12,35 @@ namespace node
 
 ENU_Frame_System::ENU_Frame_System(UAV& uav)
     : m_uav(uav)
-    , m_init_params(new sz::ENU_Frame_System::Init_Params())
-    , m_config(new sz::ENU_Frame_System::Config())
+    , m_descriptor(new ENU_Frame_System_Descriptor())
+    , m_config(new ENU_Frame_System_Config())
 {
     m_output_stream = std::make_shared<Output_Stream>();
 }
 
-auto ENU_Frame_System::init(rapidjson::Value const& init_params) -> bool
+auto ENU_Frame_System::init(std::shared_ptr<Node_Descriptor_Base> descriptor) -> bool
 {
     QLOG_TOPIC("ENU_Frame_System::init");
 
-    sz::ENU_Frame_System::Init_Params sz;
-    autojsoncxx::error::ErrorStack result;
-    if (!autojsoncxx::from_value(sz, init_params, result))
+    auto specialized = std::dynamic_pointer_cast<ENU_Frame_System_Descriptor>(descriptor);
+    if (!specialized)
     {
-        std::ostringstream ss;
-        ss << result;
-        QLOGE("Cannot deserialize ENU_Frame_System data: {}", ss.str());
+        QLOGE("Wrong descriptor type");
         return false;
     }
-    *m_init_params = sz;
+
+    *m_descriptor = *specialized;
+
     return init();
 }
 auto ENU_Frame_System::init() -> bool
 {
-    if (m_init_params->rate == 0)
+    if (m_descriptor->rate == 0)
     {
-        QLOGE("Bad rate: {}Hz", m_init_params->rate);
+        QLOGE("Bad rate: {}Hz", m_descriptor->rate);
         return false;
     }
-    m_output_stream->set_rate(m_init_params->rate);
+    m_output_stream->set_rate(m_descriptor->rate);
     return true;
 }
 
@@ -55,7 +54,7 @@ auto ENU_Frame_System::get_inputs() const -> std::vector<Input>
 {
     std::vector<Input> inputs =
     {{
-        { stream::IECEF_Position::TYPE, m_init_params->rate, "Position (ecef)", m_accumulator.get_stream_path(0) }
+        { stream::IECEF_Position::TYPE, m_descriptor->rate, "Position (ecef)", m_accumulator.get_stream_path(0) }
     }};
     return inputs;
 }
@@ -97,36 +96,29 @@ void ENU_Frame_System::set_input_stream_path(size_t idx, q::Path const& path)
     m_accumulator.set_stream_path(idx, path, m_output_stream->get_rate(), m_uav);
 }
 
-auto ENU_Frame_System::set_config(rapidjson::Value const& json) -> bool
+auto ENU_Frame_System::set_config(std::shared_ptr<Node_Config_Base> config) -> bool
 {
     QLOG_TOPIC("ENU_Frame_System::set_config");
 
-    sz::ENU_Frame_System::Config sz;
-    autojsoncxx::error::ErrorStack result;
-    if (!autojsoncxx::from_value(sz, json, result))
+    auto specialized = std::dynamic_pointer_cast<ENU_Frame_System_Config>(config);
+    if (!specialized)
     {
-        std::ostringstream ss;
-        ss << result;
-        QLOGE("Cannot deserialize ENU_Frame_System config data: {}", ss.str());
+        QLOGE("Wrong config type");
         return false;
     }
 
-    *m_config = sz;
+    *m_config = *specialized;
 
     return true;
 }
-auto ENU_Frame_System::get_config() const -> rapidjson::Document
+auto ENU_Frame_System::get_config() const -> std::shared_ptr<Node_Config_Base>
 {
-    rapidjson::Document json;
-    autojsoncxx::to_document(*m_config, json);
-    return std::move(json);
+    return m_config;
 }
 
-auto ENU_Frame_System::get_init_params() const -> rapidjson::Document
+auto ENU_Frame_System::get_descriptor() const -> std::shared_ptr<Node_Descriptor_Base>
 {
-    rapidjson::Document json;
-    autojsoncxx::to_document(*m_init_params, json);
-    return std::move(json);
+    return m_descriptor;
 }
 
 auto ENU_Frame_System::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document

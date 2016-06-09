@@ -14,6 +14,10 @@ class btCollisionShape;
 class btRigidBody;
 class btDiscreteDynamicsWorld;
 
+namespace silk
+{
+struct Multirotor_Config;
+}
 
 namespace silk
 {

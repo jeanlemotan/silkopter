@@ -6,13 +6,10 @@
 #include "common/stream/IVideo.h"
 
 
-namespace sz
+namespace silk
 {
-namespace Raspicam
-{
-struct Init_Params;
-struct Config;
-}
+struct Raspicam_Descriptor;
+struct Raspicam_Config;
 }
 
 
@@ -28,11 +25,11 @@ public:
     Raspicam(UAV& uav);
     ~Raspicam();
 
-    auto init(rapidjson::Value const& init_params) -> bool;
-    auto get_init_params() const -> rapidjson::Document;
+    bool init(std::shared_ptr<Node_Descriptor_Base> descriptor) override;
+    std::shared_ptr<Node_Descriptor_Base> get_descriptor() const override;
 
-    auto set_config(rapidjson::Value const& json) -> bool;
-    auto get_config() const -> rapidjson::Document;
+    bool set_config(std::shared_ptr<Node_Config_Base> config) override;
+    std::shared_ptr<Node_Config_Base> get_config() const override;
 
     auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
 
@@ -58,8 +55,8 @@ private:
 
     auto init() -> bool;
 
-    std::shared_ptr<sz::Raspicam::Init_Params> m_init_params;
-    std::shared_ptr<sz::Raspicam::Config> m_config;
+    std::shared_ptr<Raspicam_Descriptor> m_descriptor;
+    std::shared_ptr<Raspicam_Config> m_config;
 
     void activate_streams();
 

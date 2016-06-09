@@ -1,8 +1,8 @@
 #include "BrainStdAfx.h"
 #include "Throttle_To_PWM.h"
 
-#include "sz_math.hpp"
-#include "sz_Throttle_To_PWM.hpp"
+#include "uav.def.h"
+//#include "sz_Throttle_To_PWM.hpp"
 
 namespace silk
 {
@@ -11,47 +11,46 @@ namespace node
 
 Throttle_To_PWM::Throttle_To_PWM(UAV& uav)
     : m_uav(uav)
-    , m_init_params(new sz::Throttle_To_PWM::Init_Params())
-    , m_config(new sz::Throttle_To_PWM::Config())
+    , m_descriptor(new Throttle_To_PWM_Descriptor())
+    , m_config(new Throttle_To_PWM_Config())
 {
 }
 
-auto Throttle_To_PWM::init(rapidjson::Value const& init_params) -> bool
+auto Throttle_To_PWM::init(std::shared_ptr<Node_Descriptor_Base> descriptor) -> bool
 {
     QLOG_TOPIC("Throttle_To_PWM::init");
 
-    sz::Throttle_To_PWM::Init_Params sz;
-    autojsoncxx::error::ErrorStack result;
-    if (!autojsoncxx::from_value(sz, init_params, result))
+    auto specialized = std::dynamic_pointer_cast<Throttle_To_PWM_Descriptor>(descriptor);
+    if (!specialized)
     {
-        std::ostringstream ss;
-        ss << result;
-        QLOGE("Cannot deserialize Throttle_To_PWM data: {}", ss.str());
+        QLOGE("Wrong descriptor type");
         return false;
     }
-    *m_init_params = sz;
+
+    *m_descriptor = *specialized;
+
     return init();
 }
 auto Throttle_To_PWM::init() -> bool
 {
-    if (m_init_params->rate == 0)
+    if (m_descriptor->rate == 0)
     {
-        QLOGE("Bad rate: {}Hz", m_init_params->rate);
+        QLOGE("Bad rate: {}Hz", m_descriptor->rate);
         return false;
     }
-    if (m_init_params->channels == 0)
+    if (m_descriptor->channels == 0)
     {
         QLOGE("Need to have at least one channel");
         return false;
     }
 
-    m_accumulators.resize(m_init_params->channels);
-    m_output_streams.resize(m_init_params->channels);
+    m_accumulators.resize(m_descriptor->channels);
+    m_output_streams.resize(m_descriptor->channels);
 
     for (auto& o: m_output_streams)
     {
         o.reset(new Output_Stream);
-        o->set_rate(m_init_params->rate);
+        o->set_rate(m_descriptor->rate);
     }
     return true;
 }
@@ -67,17 +66,17 @@ auto Throttle_To_PWM::start(q::Clock::time_point tp) -> bool
 
 auto Throttle_To_PWM::get_inputs() const -> std::vector<Input>
 {
-    std::vector<Input> inputs(m_init_params->channels);
-    for (size_t i = 0; i < m_init_params->channels; i++)
+    std::vector<Input> inputs(m_descriptor->channels);
+    for (size_t i = 0; i < m_descriptor->channels; i++)
     {
-        inputs[i] = { stream::IThrottle::TYPE, m_init_params->rate, q::util::format<std::string>("Throttle {}", i), m_accumulators[i].get_stream_path(0) };
+        inputs[i] = { stream::IThrottle::TYPE, m_descriptor->rate, q::util::format<std::string>("Throttle {}", i), m_accumulators[i].get_stream_path(0) };
     }
     return inputs;
 }
 auto Throttle_To_PWM::get_outputs() const -> std::vector<Output>
 {
-    std::vector<Output> outputs(m_init_params->channels);
-    for (size_t i = 0; i < m_init_params->channels; i++)
+    std::vector<Output> outputs(m_descriptor->channels);
+    for (size_t i = 0; i < m_descriptor->channels; i++)
     {
         outputs[i] = { q::util::format<std::string>("PWM {}", i), m_output_streams[i] };
     }
@@ -88,7 +87,7 @@ void Throttle_To_PWM::process()
 {
     QLOG_TOPIC("Throttle_To_PWM::process");
 
-    for (size_t i = 0; i < m_init_params->channels; i++)
+    for (size_t i = 0; i < m_descriptor->channels; i++)
     {
         m_output_streams[i]->clear();
 
@@ -111,36 +110,29 @@ void Throttle_To_PWM::set_input_stream_path(size_t idx, q::Path const& path)
     m_accumulators[idx].set_stream_path(0, path, m_output_streams[0]->get_rate(), m_uav);
 }
 
-auto Throttle_To_PWM::set_config(rapidjson::Value const& json) -> bool
+auto Throttle_To_PWM::set_config(std::shared_ptr<Node_Config_Base> config) -> bool
 {
     QLOG_TOPIC("Throttle_To_PWM::set_config");
 
-    sz::Throttle_To_PWM::Config sz;
-    autojsoncxx::error::ErrorStack result;
-    if (!autojsoncxx::from_value(sz, json, result))
+    auto specialized = std::dynamic_pointer_cast<Throttle_To_PWM_Config>(config);
+    if (!specialized)
     {
-        std::ostringstream ss;
-        ss << result;
-        QLOGE("Cannot deserialize Throttle_To_PWM config data: {}", ss.str());
+        QLOGE("Wrong config type");
         return false;
     }
 
-    *m_config = sz;
+    *m_config = *specialized;
 
     return true;
 }
-auto Throttle_To_PWM::get_config() const -> rapidjson::Document
+auto Throttle_To_PWM::get_config() const -> std::shared_ptr<Node_Config_Base>
 {
-    rapidjson::Document json;
-    autojsoncxx::to_document(*m_config, json);
-    return std::move(json);
+    return m_config;
 }
 
-auto Throttle_To_PWM::get_init_params() const -> rapidjson::Document
+auto Throttle_To_PWM::get_descriptor() const -> std::shared_ptr<Node_Descriptor_Base>
 {
-    rapidjson::Document json;
-    autojsoncxx::to_document(*m_init_params, json);
-    return std::move(json);
+    return m_descriptor;
 }
 auto Throttle_To_PWM::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document
 {

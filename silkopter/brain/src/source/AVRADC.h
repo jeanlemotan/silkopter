@@ -7,13 +7,11 @@
 
 #include "Basic_Output_Stream.h"
 
-namespace sz
+
+namespace silk
 {
-namespace AVRADC
-{
-struct Init_Params;
-struct Config;
-}
+struct AVRADC_Descriptor;
+struct AVRADC_Config;
 }
 
 
@@ -28,11 +26,11 @@ class AVRADC : public ISource
 public:
     AVRADC(UAV& uav);
 
-    auto init(rapidjson::Value const& init_params) -> bool;
-    auto get_init_params() const -> rapidjson::Document;
+    bool init(std::shared_ptr<Node_Descriptor_Base> descriptor) override;
+    std::shared_ptr<Node_Descriptor_Base> get_descriptor() const override;
 
-    auto set_config(rapidjson::Value const& json) -> bool;
-    auto get_config() const -> rapidjson::Document;
+    bool set_config(std::shared_ptr<Node_Config_Base> config) override;
+    std::shared_ptr<Node_Config_Base> get_config() const override;
 
     auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
 
@@ -48,8 +46,8 @@ private:
     UAV& m_uav;
     std::weak_ptr<bus::II2C> m_i2c;
 
-    std::shared_ptr<sz::AVRADC::Init_Params> m_init_params;
-    std::shared_ptr<sz::AVRADC::Config> m_config;
+    std::shared_ptr<AVRADC_Descriptor> m_descriptor;
+    std::shared_ptr<AVRADC_Config> m_config;
 
     q::Clock::time_point m_last_process_tp = q::Clock::now();
     q::Clock::time_point m_last_reading_tp = q::Clock::now();

@@ -2,8 +2,8 @@
 #include "Gravity_Filter.h"
 #include "physics/constants.h"
 
-#include "sz_math.hpp"
-#include "sz_Gravity_Filter.hpp"
+#include "uav.def.h"
+//#include "sz_Gravity_Filter.hpp"
 
 namespace silk
 {
@@ -12,36 +12,30 @@ namespace node
 
 Gravity_Filter::Gravity_Filter(UAV& uav)
     : m_uav(uav)
-    , m_init_params(new sz::Gravity_Filter::Init_Params())
-    , m_config(new sz::Gravity_Filter::Config())
+    , m_descriptor(new Gravity_Filter_Descriptor())
+    , m_config(new Gravity_Filter_Config())
 {
     m_output_stream = std::make_shared<Output_Stream>();
 }
 
-auto Gravity_Filter::init(rapidjson::Value const& init_params) -> bool
+auto Gravity_Filter::init(std::shared_ptr<Node_Descriptor_Base> descriptor) -> bool
 {
     QLOG_TOPIC("gravity_filter::init");
 
-    sz::Gravity_Filter::Init_Params sz;
-    autojsoncxx::error::ErrorStack result;
-    if (!autojsoncxx::from_value(sz, init_params, result))
+    auto specialized = std::dynamic_pointer_cast<Gravity_Filter_Descriptor>(descriptor);
+    if (!specialized)
     {
-        std::ostringstream ss;
-        ss << result;
-        QLOGE("Cannot deserialize Gravity_Filter data: {}", ss.str());
+        QLOGE("Wrong descriptor type");
         return false;
     }
-    *m_init_params = sz;
+
+    *m_descriptor = *specialized;
+
     return init();
 }
 auto Gravity_Filter::init() -> bool
 {
-    if (m_init_params->rate == 0)
-    {
-        QLOGE("Bad rate: {}Hz", m_init_params->rate);
-        return false;
-    }
-    m_output_stream->set_rate(m_init_params->rate);
+    m_output_stream->set_rate(m_descriptor->get_rate());
     return true;
 }
 
@@ -55,8 +49,8 @@ auto Gravity_Filter::get_inputs() const -> std::vector<Input>
 {
     std::vector<Input> inputs =
     {{
-        { stream::IUAV_Frame::TYPE, m_init_params->rate, "UAV Frame", m_accumulator.get_stream_path(0) },
-        { stream::IAcceleration::TYPE, m_init_params->rate, "Acceleration", m_accumulator.get_stream_path(1) }
+        { stream::IUAV_Frame::TYPE, m_descriptor->get_rate(), "UAV Frame", m_accumulator.get_stream_path(0) },
+        { stream::IAcceleration::TYPE, m_descriptor->get_rate(), "Acceleration", m_accumulator.get_stream_path(1) }
     }};
     return inputs;
 }
@@ -96,36 +90,29 @@ void Gravity_Filter::set_input_stream_path(size_t idx, q::Path const& path)
     m_accumulator.set_stream_path(idx, path, m_output_stream->get_rate(), m_uav);
 }
 
-auto Gravity_Filter::set_config(rapidjson::Value const& json) -> bool
+auto Gravity_Filter::set_config(std::shared_ptr<Node_Config_Base> config) -> bool
 {
     QLOG_TOPIC("gravity_filter::set_config");
 
-    sz::Gravity_Filter::Config sz;
-    autojsoncxx::error::ErrorStack result;
-    if (!autojsoncxx::from_value(sz, json, result))
+    auto specialized = std::dynamic_pointer_cast<Gravity_Filter_Config>(config);
+    if (!specialized)
     {
-        std::ostringstream ss;
-        ss << result;
-        QLOGE("Cannot deserialize Gravity_Filter config data: {}", ss.str());
+        QLOGE("Wrong config type");
         return false;
     }
 
-    *m_config = sz;
+    *m_config = *specialized;
 
     return true;
 }
-auto Gravity_Filter::get_config() const -> rapidjson::Document
+auto Gravity_Filter::get_config() const -> std::shared_ptr<Node_Config_Base>
 {
-    rapidjson::Document json;
-    autojsoncxx::to_document(*m_config, json);
-    return std::move(json);
+    return m_config;
 }
 
-auto Gravity_Filter::get_init_params() const -> rapidjson::Document
+auto Gravity_Filter::get_descriptor() const -> std::shared_ptr<Node_Descriptor_Base>
 {
-    rapidjson::Document json;
-    autojsoncxx::to_document(*m_init_params, json);
-    return std::move(json);
+    return m_descriptor;
 }
 
 auto Gravity_Filter::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document

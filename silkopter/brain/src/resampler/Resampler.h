@@ -9,8 +9,8 @@
 #include "Basic_Output_Stream.h"
 
 
-#include "sz_math.hpp"
-#include "sz_Resampler.hpp"
+//#include "sz_math.hpp"
+//#include "sz_Resampler.hpp"
 
 namespace silk
 {
@@ -25,11 +25,11 @@ public:
 
     Resampler(UAV& uav);
 
-    auto init(rapidjson::Value const& init_params) -> bool;
-    auto get_init_params() const -> rapidjson::Document;
+    bool init(std::shared_ptr<Node_Descriptor_Base> descriptor) override;
+    std::shared_ptr<Node_Descriptor_Base> get_descriptor() const override;
 
-    auto set_config(rapidjson::Value const& json) -> bool;
-    auto get_config() const -> rapidjson::Document;
+    bool set_config(std::shared_ptr<Node_Config_Base> config) override;
+    std::shared_ptr<Node_Config_Base> get_config() const override;
 
     auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
 
@@ -47,7 +47,7 @@ private:
 
     UAV& m_uav;
 
-    sz::Resampler::Init_Params m_init_params;
+    sz::Resampler::Init_Params m_descriptor;
     sz::Resampler::Config m_config;
 
     Sample_Accumulator<Stream_t> m_accumulator;
@@ -117,58 +117,57 @@ Resampler<Stream_t>::Resampler(UAV& uav)
 }
 
 template<class Stream_t>
-auto Resampler<Stream_t>::init(rapidjson::Value const& init_params) -> bool
+auto Resampler<Stream_t>::init(std::shared_ptr<Node_Descriptor_Base> descriptor) -> bool
 {
     QLOG_TOPIC("resampler::init");
 
-    sz::Resampler::Init_Params sz;
-    autojsoncxx::error::ErrorStack result;
-    if (!autojsoncxx::from_value(sz, init_params, result))
+    auto specialized = std::dynamic_pointer_cast<Resampler_Descriptor>(descriptor);
+    if (!specialized)
     {
-        std::ostringstream ss;
-        ss << result;
-        QLOGE("Cannot deserialize Resampler data: {}", ss.str());
+        QLOGE("Wrong descriptor type");
         return false;
     }
-    m_init_params = sz;
+
+    *m_descriptor = *specialized;
+
     return init();
 }
 template<class Stream_t>
 auto Resampler<Stream_t>::init() -> bool
 {
-    if (m_init_params.rate == 0)
+    if (m_descriptor.rate == 0)
     {
-        QLOGE("Bad rate: {}Hz", m_init_params.rate);
+        QLOGE("Bad rate: {}Hz", m_descriptor.rate);
         return false;
     }
-    if (m_init_params.input_rate == 0)
+    if (m_descriptor.input_rate == 0)
     {
-        QLOGE("Bad input rate: {}Hz", m_init_params.input_rate);
+        QLOGE("Bad input rate: {}Hz", m_descriptor.input_rate);
         return false;
     }
-    m_output_stream->set_rate(m_init_params.rate);
+    m_output_stream->set_rate(m_descriptor.rate);
 
-    m_input_stream_dt = std::chrono::microseconds(1000000 / m_init_params.input_rate);
+    m_input_stream_dt = std::chrono::microseconds(1000000 / m_descriptor.input_rate);
 
     return true;
 }
 
 template<class Stream_t>
-auto Resampler<Stream_t>::get_init_params() const -> rapidjson::Document
+auto Resampler<Stream_t>::get_descriptor() const -> std::shared_ptr<Node_Descriptor_Base>
 {
     rapidjson::Document json;
-    autojsoncxx::to_document(m_init_params, json);
+    autojsoncxx::to_document(m_descriptor, json);
     return std::move(json);
 }
 
 template<class Stream_t>
 void Resampler<Stream_t>::set_input_stream_path(size_t idx, q::Path const& path)
 {
-    m_accumulator.set_stream_path(idx, path, m_init_params.input_rate, m_uav);
+    m_accumulator.set_stream_path(idx, path, m_descriptor.input_rate, m_uav);
 }
 
 template<class Stream_t>
-auto Resampler<Stream_t>::set_config(rapidjson::Value const& json) -> bool
+auto Resampler<Stream_t>::set_config(std::shared_ptr<Node_Config_Base> config) -> bool
 {
     QLOG_TOPIC("resampler::set_config");
 
@@ -181,8 +180,8 @@ auto Resampler<Stream_t>::set_config(rapidjson::Value const& json) -> bool
         return false;
     }
 
-    auto input_rate = m_init_params.input_rate;
-    auto output_rate = m_init_params.rate;
+    auto input_rate = m_descriptor.input_rate;
+    auto output_rate = m_descriptor.rate;
 
     uint32_t filter_rate = math::max(output_rate, input_rate);
     float max_cutoff = math::min(output_rate / 2.f, input_rate / 2.f);
@@ -208,7 +207,7 @@ auto Resampler<Stream_t>::send_message(rapidjson::Value const& /*json*/) -> rapi
     return rapidjson::Document();
 }
 template<class Stream_t>
-auto Resampler<Stream_t>::get_config() const -> rapidjson::Document
+auto Resampler<Stream_t>::get_config() const -> std::shared_ptr<Node_Config_Base>
 {
     rapidjson::Document json;
     autojsoncxx::to_document(m_config, json);
@@ -227,7 +226,7 @@ auto Resampler<Stream_t>::get_inputs() const -> std::vector<Input>
 {
     std::vector<Input> inputs =
     {{
-        { Stream_t::TYPE, m_init_params.input_rate, "Input", m_accumulator.get_stream_path(0) }
+        { Stream_t::TYPE, m_descriptor.input_rate, "Input", m_accumulator.get_stream_path(0) }
     }};
     return inputs;
 }
@@ -287,7 +286,7 @@ void Resampler<Stream_t>::resample()
 //        }
 //    }
 
-    bool is_downsampling = m_init_params.rate <= m_init_params.input_rate;
+    bool is_downsampling = m_descriptor.rate <= m_descriptor.input_rate;
 
     auto dt = m_output_stream->get_dt();
     size_t samples_needed = m_output_stream->compute_samples_needed();

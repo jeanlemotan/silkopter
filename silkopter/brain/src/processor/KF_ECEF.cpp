@@ -1,8 +1,8 @@
 #include "BrainStdAfx.h"
 #include "KF_ECEF.h"
 
-#include "sz_math.hpp"
-#include "sz_KF_ECEF.hpp"
+#include "uav.def.h"
+//#include "sz_KF_ECEF.hpp"
 
 #include "Eigen/Dense"
 
@@ -98,40 +98,39 @@ void KF_ECEF::Delayer<Value>::push_back(Value const& value)
 
 KF_ECEF::KF_ECEF(UAV& uav)
     : m_uav(uav)
-    , m_init_params(new sz::KF_ECEF::Init_Params())
-    , m_config(new sz::KF_ECEF::Config())
+    , m_descriptor(new KF_ECEF_Descriptor())
+    , m_config(new KF_ECEF_Config())
 {
     m_position_output_stream = std::make_shared<Position_Output_Stream>();
     m_velocity_output_stream = std::make_shared<Velocity_Output_Stream>();
     m_linear_acceleration_output_stream = std::make_shared<Linear_Acceleration_Output_Stream>();
 }
 
-auto KF_ECEF::init(rapidjson::Value const& init_params) -> bool
+auto KF_ECEF::init(std::shared_ptr<Node_Descriptor_Base> descriptor) -> bool
 {
     QLOG_TOPIC("KF_ECEF::init");
 
-    sz::KF_ECEF::Init_Params sz;
-    autojsoncxx::error::ErrorStack result;
-    if (!autojsoncxx::from_value(sz, init_params, result))
+    auto specialized = std::dynamic_pointer_cast<KF_ECEF_Descriptor>(descriptor);
+    if (!specialized)
     {
-        std::ostringstream ss;
-        ss << result;
-        QLOGE("Cannot deserialize KF_ECEF data: {}", ss.str());
+        QLOGE("Wrong descriptor type");
         return false;
     }
-    *m_init_params = sz;
+
+    *m_descriptor = *specialized;
+
     return init();
 }
 auto KF_ECEF::init() -> bool
 {
-    if (m_init_params->rate == 0)
+    if (m_descriptor->rate == 0)
     {
-        QLOGE("Bad rate: {}Hz", m_init_params->rate);
+        QLOGE("Bad rate: {}Hz", m_descriptor->rate);
         return false;
     }
-    m_position_output_stream->set_rate(m_init_params->rate);
-    m_velocity_output_stream->set_rate(m_init_params->rate);
-    m_linear_acceleration_output_stream->set_rate(m_init_params->rate);
+    m_position_output_stream->set_rate(m_descriptor->rate);
+    m_velocity_output_stream->set_rate(m_descriptor->rate);
+    m_linear_acceleration_output_stream->set_rate(m_descriptor->rate);
 
     m_dts = std::chrono::duration<double>(m_position_output_stream->get_dt()).count();
     double dt = m_dts;
@@ -173,9 +172,9 @@ auto KF_ECEF::get_inputs() const -> std::vector<Input>
 {
     std::vector<Input> inputs =
     {{
-        { stream::IECEF_Position::TYPE, m_init_params->rate, "GPS Position (ecef)", m_accumulator.get_stream_path(0) },
-        { stream::IECEF_Velocity::TYPE, m_init_params->rate, "GPS Velocity (ecef)", m_accumulator.get_stream_path(1) },
-        { stream::IENU_Linear_Acceleration::TYPE, m_init_params->rate, "Linear Acceleration (enu)", m_accumulator.get_stream_path(2) },
+        { stream::IECEF_Position::TYPE, m_descriptor->rate, "GPS Position (ecef)", m_accumulator.get_stream_path(0) },
+        { stream::IECEF_Velocity::TYPE, m_descriptor->rate, "GPS Velocity (ecef)", m_accumulator.get_stream_path(1) },
+        { stream::IENU_Linear_Acceleration::TYPE, m_descriptor->rate, "Linear Acceleration (enu)", m_accumulator.get_stream_path(2) },
     }};
     return inputs;
 }
@@ -264,24 +263,21 @@ void KF_ECEF::process()
 
 void KF_ECEF::set_input_stream_path(size_t idx, q::Path const& path)
 {
-    m_accumulator.set_stream_path(idx, path, m_init_params->rate, m_uav);
+    m_accumulator.set_stream_path(idx, path, m_descriptor->rate, m_uav);
 }
 
-auto KF_ECEF::set_config(rapidjson::Value const& json) -> bool
+auto KF_ECEF::set_config(std::shared_ptr<Node_Config_Base> config) -> bool
 {
     QLOG_TOPIC("KF_ECEF::set_config");
 
-    sz::KF_ECEF::Config sz;
-    autojsoncxx::error::ErrorStack result;
-    if (!autojsoncxx::from_value(sz, json, result))
+    auto specialized = std::dynamic_pointer_cast<KF_ECEF_Config>(config);
+    if (!specialized)
     {
-        std::ostringstream ss;
-        ss << result;
-        QLOGE("Cannot deserialize config data: {}", ss.str());
+        QLOGE("Wrong config type");
         return false;
     }
 
-    *m_config = sz;
+    *m_config = *specialized;
 
     m_config->gps_position_lag = math::max(m_config->gps_position_lag, 0.f);
     m_config->gps_position_accuracy = math::max(m_config->gps_position_accuracy, 0.f);
@@ -308,18 +304,14 @@ auto KF_ECEF::set_config(rapidjson::Value const& json) -> bool
 
     return true;
 }
-auto KF_ECEF::get_config() const -> rapidjson::Document
+auto KF_ECEF::get_config() const -> std::shared_ptr<Node_Config_Base>
 {
-    rapidjson::Document json;
-    autojsoncxx::to_document(*m_config, json);
-    return std::move(json);
+    return m_config;
 }
 
-auto KF_ECEF::get_init_params() const -> rapidjson::Document
+auto KF_ECEF::get_descriptor() const -> std::shared_ptr<Node_Descriptor_Base>
 {
-    rapidjson::Document json;
-    autojsoncxx::to_document(*m_init_params, json);
-    return std::move(json);
+    return m_descriptor;
 }
 
 auto KF_ECEF::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document

@@ -1,7 +1,8 @@
 #include "BrainStdAfx.h"
 #include "EHealth.h"
 
-#include "sz_math.hpp"
+/*
+//#include "sz_math.hpp"
 
 namespace silk
 {
@@ -26,7 +27,7 @@ auto EHealth::get_outputs() const -> std::vector<Output>
     return outputs;
 }
 
-auto EHealth::init(rapidjson::Value const& init_params) -> bool
+auto EHealth::init(std::shared_ptr<Node_Descriptor_Base> descriptor) -> bool
 {
     QLOG_TOPIC("EHealth::init");
 
@@ -117,25 +118,22 @@ void EHealth::process()
     }
 }
 
-auto EHealth::set_config(rapidjson::Value const& json) -> bool
+auto EHealth::set_config(std::shared_ptr<Node_Config_Base> config) -> bool
 {
     QLOG_TOPIC("EHealth::set_config");
 
     return true;
 }
-auto EHealth::get_config() const -> rapidjson::Document
+auto EHealth::get_config() const -> std::shared_ptr<Node_Config_Base>
 {
-    rapidjson::Document json;
-    return std::move(json);
+    return m_config;
 }
 
-auto EHealth::get_init_params() const -> rapidjson::Document
+auto EHealth::get_descriptor() const -> std::shared_ptr<Node_Descriptor_Base>
 {
-    rapidjson::Document json;
-    //autojsoncxx::to_document(*m_init_params, json);
-    return std::move(json);
+    return m_desc;
 }
-auto EHealth::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document
+auto EHealth::send_message(rapidjson::Value const& json) -> rapidjson::Document
 {
     return rapidjson::Document();
 }
@@ -144,3 +142,4 @@ auto EHealth::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Docum
 
 }
 }
+*/

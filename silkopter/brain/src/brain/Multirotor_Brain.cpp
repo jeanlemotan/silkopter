@@ -2,9 +2,9 @@
 #include "Multirotor_Brain.h"
 #include "physics/constants.h"
 
-#include "sz_math.hpp"
-#include "sz_PID.hpp"
-#include "sz_Multirotor_Brain.hpp"
+#include "uav.def.h"
+//#include "sz_PID.hpp"
+//#include "sz_Multirotor_Brain.hpp"
 
 namespace silk
 {
@@ -13,28 +13,27 @@ namespace node
 
 Multirotor_Brain::Multirotor_Brain(UAV& uav)
     : m_uav(uav)
-    , m_init_params(new sz::Multirotor_Brain::Init_Params())
-    , m_config(new sz::Multirotor_Brain::Config())
+    , m_descriptor(new Multirotor_Brain_Descriptor())
+    , m_config(new Multirotor_Brain_Config())
 {
     m_state_output_stream = std::make_shared<State_Output_Stream>();
     m_rate_output_stream = std::make_shared<Rate_Output_Stream>();
     m_thrust_output_stream = std::make_shared<Thrust_Output_Stream>();
 }
 
-auto Multirotor_Brain::init(rapidjson::Value const& init_params) -> bool
+auto Multirotor_Brain::init(std::shared_ptr<Node_Descriptor_Base> descriptor) -> bool
 {
     QLOG_TOPIC("Multirotor_Brain::init");
 
-    sz::Multirotor_Brain::Init_Params sz;
-    autojsoncxx::error::ErrorStack result;
-    if (!autojsoncxx::from_value(sz, init_params, result))
+    auto specialized = std::dynamic_pointer_cast<Multirotor_Brain_Descriptor>(descriptor);
+    if (!specialized)
     {
-        std::ostringstream ss;
-        ss << result;
-        QLOGE("Cannot deserialize Multirotor_Brain data: {}", ss.str());
+        QLOGE("Wrong descriptor type");
         return false;
     }
-    *m_init_params = sz;
+
+    *m_descriptor = *specialized;
+
     return init();
 }
 
@@ -47,19 +46,19 @@ auto Multirotor_Brain::init() -> bool
         return false;
     }
 
-    if (m_init_params->rate == 0)
+    if (m_descriptor->rate == 0)
     {
-        QLOGE("Bad rate: {}Hz", m_init_params->rate);
+        QLOGE("Bad rate: {}Hz", m_descriptor->rate);
         return false;
     }
-    if (!m_battery.init(m_init_params->rate))
+    if (!m_battery.init(m_descriptor->rate))
     {
         QLOGE("Cannot initialize the battery");
         return false;
     }
-    m_state_output_stream->set_rate(m_init_params->state_rate);
-    m_rate_output_stream->set_rate(m_init_params->rate);
-    m_thrust_output_stream->set_rate(m_init_params->rate);
+    m_state_output_stream->set_rate(m_descriptor->state_rate);
+    m_rate_output_stream->set_rate(m_descriptor->rate);
+    m_thrust_output_stream->set_rate(m_descriptor->rate);
 
     m_dts = std::chrono::duration<float>(m_thrust_output_stream->get_dt()).count();
 
@@ -80,14 +79,14 @@ auto Multirotor_Brain::get_inputs() const -> std::vector<Input>
 {
     std::vector<Input> inputs =
     {{
-         { stream::IMultirotor_Commands::TYPE,    m_init_params->commands_rate, "Commands", m_commands_accumulator.get_stream_path(0) },
-         { stream::IUAV_Frame::TYPE,         m_init_params->rate, "UAV Frame", m_sensor_accumulator.get_stream_path(0) },
-         { stream::IECEF_Position::TYPE,     m_init_params->rate, "Position (ecef)", m_sensor_accumulator.get_stream_path(1) },
-         { stream::IECEF_Velocity::TYPE,     m_init_params->rate, "Velocity (ecef)", m_sensor_accumulator.get_stream_path(2) },
-         { stream::IECEF_Linear_Acceleration::TYPE, m_init_params->rate, "Linear Acceleration (ecef)", m_sensor_accumulator.get_stream_path(3) },
-         { stream::IProximity::TYPE,         m_init_params->rate, "Proximity", m_sensor_accumulator.get_stream_path(4) },
-         { stream::IVoltage::TYPE,           m_init_params->rate, "Voltage", m_sensor_accumulator.get_stream_path(5) },
-         { stream::ICurrent::TYPE,           m_init_params->rate, "Current", m_sensor_accumulator.get_stream_path(6) },
+         { stream::IMultirotor_Commands::TYPE,    m_descriptor->commands_rate, "Commands", m_commands_accumulator.get_stream_path(0) },
+         { stream::IUAV_Frame::TYPE,         m_descriptor->rate, "UAV Frame", m_sensor_accumulator.get_stream_path(0) },
+         { stream::IECEF_Position::TYPE,     m_descriptor->rate, "Position (ecef)", m_sensor_accumulator.get_stream_path(1) },
+         { stream::IECEF_Velocity::TYPE,     m_descriptor->rate, "Velocity (ecef)", m_sensor_accumulator.get_stream_path(2) },
+         { stream::IECEF_Linear_Acceleration::TYPE, m_descriptor->rate, "Linear Acceleration (ecef)", m_sensor_accumulator.get_stream_path(3) },
+         { stream::IProximity::TYPE,         m_descriptor->rate, "Proximity", m_sensor_accumulator.get_stream_path(4) },
+         { stream::IVoltage::TYPE,           m_descriptor->rate, "Voltage", m_sensor_accumulator.get_stream_path(5) },
+         { stream::ICurrent::TYPE,           m_descriptor->rate, "Current", m_sensor_accumulator.get_stream_path(6) },
      }};
     return inputs;
 }
@@ -599,11 +598,11 @@ void Multirotor_Brain::set_input_stream_path(size_t idx, q::Path const& path)
 {
     if (idx == 0)
     {
-        m_commands_accumulator.set_stream_path(0, path, m_init_params->commands_rate, m_uav);
+        m_commands_accumulator.set_stream_path(0, path, m_descriptor->commands_rate, m_uav);
     }
     else if (idx >= 1 && idx <= 7)
     {
-        m_sensor_accumulator.set_stream_path(idx - 1, path, m_init_params->rate, m_uav);
+        m_sensor_accumulator.set_stream_path(idx - 1, path, m_descriptor->rate, m_uav);
     }
 }
 
@@ -632,21 +631,18 @@ void fill_p_params(T& dst, sz::P const& src, size_t rate)
     dst.rate = rate;
 }
 
-auto Multirotor_Brain::set_config(rapidjson::Value const& json) -> bool
+auto Multirotor_Brain::set_config(std::shared_ptr<Node_Config_Base> config) -> bool
 {
     QLOG_TOPIC("Multirotor_Brain::set_config");
 
-    sz::Multirotor_Brain::Config sz;
-    autojsoncxx::error::ErrorStack result;
-    if (!autojsoncxx::from_value(sz, json, result))
+    auto specialized = std::dynamic_pointer_cast<Multirotor_Brain_Config>(config);
+    if (!specialized)
     {
-        std::ostringstream ss;
-        ss << result;
-        QLOGE("Cannot deserialize Multirotor_Brain config data: {}", ss.str());
+        QLOGE("Wrong config type");
         return false;
     }
 
-    *m_config = sz;
+    *m_config = *specialized;
 
     uint32_t output_rate = m_rate_output_stream->get_rate();
 
@@ -743,29 +739,29 @@ auto Multirotor_Brain::set_config(rapidjson::Value const& json) -> bool
 
     return true;
 }
-auto Multirotor_Brain::get_config() const -> rapidjson::Document
+auto Multirotor_Brain::get_config() const -> std::shared_ptr<Node_Config_Base>
 {
-    rapidjson::Document json;
-    autojsoncxx::to_document(*m_config, json);
+    //todo - fix this;
+//    rapidjson::Document json;
+//    autojsoncxx::to_document(*m_config, json);
 
-    if (m_config->horizontal_angle.combined_pids)
-    {
-        jsonutil::remove_value(json, q::Path("Horizontal Angle/X PID"));
-        jsonutil::remove_value(json, q::Path("Horizontal Angle/Y PID"));
-    }
-    else
-    {
-        jsonutil::remove_value(json, q::Path("Horizontal Angle/PIDs"));
-    }
+//    if (m_config->horizontal_angle.combined_pids)
+//    {
+//        jsonutil::remove_value(json, q::Path("Horizontal Angle/X PID"));
+//        jsonutil::remove_value(json, q::Path("Horizontal Angle/Y PID"));
+//    }
+//    else
+//    {
+//        jsonutil::remove_value(json, q::Path("Horizontal Angle/PIDs"));
+//    }
 
-    return std::move(json);
+//    return std::move(json);
+    return m_config;
 }
 
-auto Multirotor_Brain::get_init_params() const -> rapidjson::Document
+auto Multirotor_Brain::get_descriptor() const -> std::shared_ptr<Node_Descriptor_Base>
 {
-    rapidjson::Document json;
-    autojsoncxx::to_document(*m_init_params, json);
-    return std::move(json);
+    return m_descriptor;
 }
 
 auto Multirotor_Brain::send_message(rapidjson::Value const& json) -> rapidjson::Document

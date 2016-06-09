@@ -3,8 +3,8 @@
 #include "physics/constants.h"
 #include "utils/Timed_Scope.h"
 
-#include "sz_math.hpp"
-#include "sz_RC5T619.hpp"
+#include "uav.def.h"
+//#include "sz_RC5T619.hpp"
 
 #if defined RASPBERRY_PI
 
@@ -125,8 +125,8 @@ constexpr uint8_t CONVERT_ADC1           = 0x16;
 
 RC5T619::RC5T619(UAV& uav)
     : m_uav(uav)
-    , m_init_params(new sz::RC5T619::Init_Params())
-    , m_config(new sz::RC5T619::Config())
+    , m_descriptor(new RC5T619_Descriptor())
+    , m_config(new RC5T619_Config())
 {
     m_adc[0] = std::make_shared<Stream>();
     m_adc[1] = std::make_shared<Stream>();
@@ -141,26 +141,24 @@ auto RC5T619::get_outputs() const -> std::vector<Output>
     outputs[1].stream = m_adc[1];
     return outputs;
 }
-auto RC5T619::init(rapidjson::Value const& init_params) -> bool
+auto RC5T619::init(std::shared_ptr<Node_Descriptor_Base> descriptor) -> bool
 {
     QLOG_TOPIC("rc5t619::init");
 
-    sz::RC5T619::Init_Params sz;
-    autojsoncxx::error::ErrorStack result;
-    if (!autojsoncxx::from_value(sz, init_params, result))
+    auto specialized = std::dynamic_pointer_cast<RC5T619_Descriptor>(descriptor);
+    if (!specialized)
     {
-        std::ostringstream ss;
-        ss << result;
-        QLOGE("Cannot deserialize RC5T619 data: {}", ss.str());
+        QLOGE("Wrong descriptor type");
         return false;
     }
-    *m_init_params = sz;
+
+    *m_descriptor = *specialized;
     return init();
 }
 
 auto RC5T619::init() -> bool
 {
-    m_i2c = m_uav.get_buses().find_by_name<bus::II2C>(m_init_params->bus);
+    m_i2c = m_uav.get_buses().find_by_name<bus::II2C>(m_descriptor->get_bus());
 
     auto i2c = m_i2c.lock();
     if (!i2c)
@@ -169,13 +167,13 @@ auto RC5T619::init() -> bool
         return false;
     }
 
-    m_init_params->adc0_rate = math::clamp<size_t>(m_init_params->adc0_rate, 1, 50);
-    m_init_params->adc1_rate_ratio = math::clamp<size_t>(m_init_params->adc1_rate_ratio, 1, 100);
+    //m_descriptor->adc0_rate = math::clamp<size_t>(m_descriptor->adc0_rate, 1, 50);
+    //m_descriptor->adc1_rate_ratio = math::clamp<size_t>(m_descriptor->adc1_rate_ratio, 1, 100);
 
-    m_adc[0]->rate = m_init_params->adc0_rate;
-    m_adc[1]->rate = m_init_params->adc0_rate / m_init_params->adc1_rate_ratio;
+    m_adc[0]->rate = m_descriptor->get_adc0_rate();
+    m_adc[1]->rate = m_descriptor->get_adc1_rate();
 
-    m_dt = std::chrono::milliseconds(1000 / m_init_params->adc0_rate);
+    m_dt = std::chrono::milliseconds(1000 / m_descriptor->get_adc0_rate());
 
     Mode_Guard mg;
 
@@ -289,49 +287,43 @@ void RC5T619::process()
         }
 
         //next
-        if (m_stage >= m_init_params->adc1_rate_ratio)
-        {
-            if (i2c->write_register_u8(ADDR, RC5T619_ADC_CNT3, CONVERT_ADC1)) //read voltage next
-            {
-                m_stage = 0;
-            }
-        }
-        else if (i2c->write_register_u8(ADDR, RC5T619_ADC_CNT3, CONVERT_ADC0)) //read current next
-        {
-            m_stage++;
-        }
+        //todo - fix this
+//        if (m_stage >= m_descriptor->adc1_rate_ratio)
+//        {
+//            if (i2c->write_register_u8(ADDR, RC5T619_ADC_CNT3, CONVERT_ADC1)) //read voltage next
+//            {
+//                m_stage = 0;
+//            }
+//        }
+//        else if (i2c->write_register_u8(ADDR, RC5T619_ADC_CNT3, CONVERT_ADC0)) //read current next
+//        {
+//            m_stage++;
+//        }
     }
 }
 
-auto RC5T619::set_config(rapidjson::Value const& json) -> bool
+auto RC5T619::set_config(std::shared_ptr<Node_Config_Base> config) -> bool
 {
     QLOG_TOPIC("rc5t619::set_config");
 
-    sz::RC5T619::Config sz;
-    autojsoncxx::error::ErrorStack result;
-    if (!autojsoncxx::from_value(sz, json, result))
+    auto specialized = std::dynamic_pointer_cast<RC5T619_Config>(config);
+    if (!specialized)
     {
-        std::ostringstream ss;
-        ss << result;
-        QLOGE("Cannot deserialize RC5T619 config data: {}", ss.str());
+        QLOGE("Wrong config type");
         return false;
     }
 
-    *m_config = sz;
+    *m_config = *specialized;
     return true;
 }
-auto RC5T619::get_config() const -> rapidjson::Document
+auto RC5T619::get_config() const -> std::shared_ptr<Node_Config_Base>
 {
-    rapidjson::Document json;
-    autojsoncxx::to_document(*m_config, json);
-    return std::move(json);
+    return m_config;
 }
 
-auto RC5T619::get_init_params() const -> rapidjson::Document
+auto RC5T619::get_descriptor() const -> std::shared_ptr<Node_Descriptor_Base>
 {
-    rapidjson::Document json;
-    autojsoncxx::to_document(*m_init_params, json);
-    return std::move(json);
+    return m_descriptor;
 }
 
 auto RC5T619::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document

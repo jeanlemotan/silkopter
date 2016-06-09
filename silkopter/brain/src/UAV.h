@@ -16,6 +16,9 @@
 namespace silk
 {
 
+struct UAV_Config_Base;
+struct Multirotor_Config;
+
 class UAV;
 
 template<class Base>
@@ -83,8 +86,8 @@ public:
     void save_settings();
     void save_settings2();
 
-    auto set_uav_config(std::shared_ptr<UAV_Config> config) -> bool;
-    auto get_uav_config() const   -> std::shared_ptr<const UAV_Config>;
+    auto set_uav_config(std::shared_ptr<UAV_Config_Base> config) -> bool;
+    auto get_uav_config() const   -> std::shared_ptr<const UAV_Config_Base>;
 
     template<class Config>
     auto get_specialized_uav_config() const   -> std::shared_ptr<const Config>;
@@ -135,7 +138,7 @@ private:
 
     void sort_nodes(std::shared_ptr<node::INode> first_node);
 
-    std::shared_ptr<UAV_Config> m_uav_config;
+    std::shared_ptr<UAV_Config_Base> m_uav_config;
 
     Registry<bus::IBus> m_buses;
     Registry<node::INode> m_nodes;
@@ -158,7 +161,7 @@ private:
 template<class Config>
 auto UAV::get_specialized_uav_config() const   -> std::shared_ptr<const Config>
 {
-    std::shared_ptr<const UAV_Config> config = get_uav_config();
+    std::shared_ptr<const UAV_Config_Base> config = get_uav_config();
     return std::dynamic_pointer_cast<const Config>(config);
 }
 

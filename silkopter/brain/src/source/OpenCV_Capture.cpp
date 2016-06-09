@@ -1,8 +1,8 @@
 #include "BrainStdAfx.h"
 #include "OpenCV_Capture.h"
 
-#include "sz_math.hpp"
-#include "sz_OpenCV_Capture.hpp"
+#include "uav.def.h"
+//#include "sz_OpenCV_Capture.hpp"
 
 //#undef RASPBERRY_PI
 
@@ -54,8 +54,8 @@ struct OpenCV_Capture::Impl
 
 OpenCV_Capture::OpenCV_Capture(UAV& uav)
     : m_uav(uav)
-    , m_init_params(new sz::OpenCV_Capture::Init_Params())
-    , m_config(new sz::OpenCV_Capture::Config())
+    , m_descriptor(new OpenCV_Capture_Descriptor())
+    , m_config(new OpenCV_Capture_Config())
 {
     QLOG_TOPIC("OpenCV_Capture");
 #if !defined RASPBERRY_PI
@@ -70,16 +70,16 @@ OpenCV_Capture::OpenCV_Capture(UAV& uav)
     m_impl->low.callback = std::bind(&OpenCV_Capture::streaming_callback, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4);
 #endif
 
-    m_init_params->fps = 30;
+    m_descriptor->fps = 30;
 
-    m_init_params->low.resolution.set(320, 240);
-    m_init_params->low.bitrate = 100000;
+    m_descriptor->low.resolution.set(320, 240);
+    m_descriptor->low.bitrate = 100000;
 
-    m_init_params->high.resolution.set(640, 480);
-    m_init_params->high.bitrate = 2000000;
+    m_descriptor->high.resolution.set(640, 480);
+    m_descriptor->high.bitrate = 2000000;
 
-    m_init_params->recording.resolution.set(1280, 960);
-    m_init_params->recording.bitrate = 8000000;
+    m_descriptor->recording.resolution.set(1280, 960);
+    m_descriptor->recording.bitrate = 8000000;
 }
 OpenCV_Capture::~OpenCV_Capture()
 {
@@ -100,20 +100,19 @@ auto OpenCV_Capture::get_outputs() const -> std::vector<Output>
     return outputs;
 }
 
-auto OpenCV_Capture::init(rapidjson::Value const& init_params) -> bool
+auto OpenCV_Capture::init(std::shared_ptr<Node_Descriptor_Base> descriptor) -> bool
 {
     QLOG_TOPIC("OpenCV_Capture::init");
 
-    sz::OpenCV_Capture::Init_Params sz;
-    autojsoncxx::error::ErrorStack result;
-    if (!autojsoncxx::from_value(sz, init_params, result))
+    auto specialized = std::dynamic_pointer_cast<OpenCV_Capture_Descriptor>(descriptor);
+    if (!specialized)
     {
-        std::ostringstream ss;
-        ss << result;
-        QLOGE("Cannot deserialize OpenCV_Capture data: {}", ss.str());
+        QLOGE("Wrong descriptor type");
         return false;
     }
-    *m_init_params = sz;
+
+    *m_descriptor = *specialized;
+
     return init();
 }
 auto OpenCV_Capture::init() -> bool
@@ -125,12 +124,12 @@ auto OpenCV_Capture::init() -> bool
         return true;
     }
 
-    m_init_params->fps = math::clamp<size_t>(m_init_params->fps, 10, 60);
-    m_stream->rate = m_init_params->fps;
+    m_descriptor->fps = math::clamp<size_t>(m_descriptor->fps, 10, 60);
+    m_stream->rate = m_descriptor->fps;
 
-    m_impl->recording.quality = &m_init_params->recording;
-    m_impl->high.quality = &m_init_params->high;
-    m_impl->low.quality = &m_init_params->low;
+    m_impl->recording.quality = &m_descriptor->recording;
+    m_impl->high.quality = &m_descriptor->high;
+    m_impl->low.quality = &m_descriptor->low;
 
     if (!create_components())
     {
@@ -152,36 +151,29 @@ auto OpenCV_Capture::start(q::Clock::time_point tp) -> bool
 }
 
 
-auto OpenCV_Capture::set_config(rapidjson::Value const& json) -> bool
+auto OpenCV_Capture::set_config(std::shared_ptr<Node_Config_Base> config) -> bool
 {
-    sz::OpenCV_Capture::Config sz;
-    autojsoncxx::error::ErrorStack result;
-    if (!autojsoncxx::from_value(sz, json, result))
+    auto specialized = std::dynamic_pointer_cast<OpenCV_Capture_Config>(config);
+    if (!specialized)
     {
-        std::ostringstream ss;
-        ss << result;
-        QLOGE("Cannot deserialize OpenCV_Capture config data: {}", ss.str());
+        QLOGE("Wrong config type");
         return false;
     }
 
-    *m_config = sz;
+    *m_config = *specialized;
 
     set_active_streams(false, m_config->quality);
 
     return true;
 }
-auto OpenCV_Capture::get_config() const -> rapidjson::Document
+auto OpenCV_Capture::get_config() const -> std::shared_ptr<Node_Config_Base>
 {
-    rapidjson::Document json;
-    autojsoncxx::to_document(*m_config, json);
-    return std::move(json);
+    return m_config;
 }
 
-auto OpenCV_Capture::get_init_params() const -> rapidjson::Document
+auto OpenCV_Capture::get_descriptor() const -> std::shared_ptr<Node_Descriptor_Base>
 {
-    rapidjson::Document json;
-    autojsoncxx::to_document(*m_init_params, json);
-    return std::move(json);
+    return m_descriptor;
 }
 
 auto OpenCV_Capture::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document
@@ -284,12 +276,12 @@ void OpenCV_Capture::set_active_streams(bool recording, uint32_t quality)
 
     QLOGI("activating streams recording {}, quality {}", recording, quality);
 
-    math::vec2u32 resolution = high ? m_init_params->high.resolution : m_init_params->low.resolution;
+    math::vec2u32 resolution = high ? m_descriptor->high.resolution : m_descriptor->low.resolution;
     bool res = m_impl->capture.set(CV_CAP_PROP_FRAME_WIDTH, resolution.x);
     res &= m_impl->capture.set(CV_CAP_PROP_FRAME_HEIGHT, resolution.y);
     if (!res)
     {
-        QLOGE("Failed to configure device {}.", m_init_params->device);
+        QLOGE("Failed to configure device {}.", m_descriptor->device);
         return;
     }
 
@@ -302,20 +294,20 @@ auto OpenCV_Capture::create_components() -> bool
 {
 #if !defined RASPBERRY_PI
 
-    m_impl->capture.open(m_init_params->device);
+    m_impl->capture.open(m_descriptor->device);
     if (!m_impl->capture.isOpened())
     {
-        QLOGE("Failed open device {}.", m_init_params->device);
+        QLOGE("Failed open device {}.", m_descriptor->device);
         return false;
     }
 
-    bool res = m_impl->capture.set(CV_CAP_PROP_FRAME_WIDTH, m_init_params->high.resolution.x);
-    res &= m_impl->capture.set(CV_CAP_PROP_FRAME_HEIGHT, m_init_params->high.resolution.y);
-    res &= m_impl->capture.set(CV_CAP_PROP_FPS, m_init_params->fps);
+    bool res = m_impl->capture.set(CV_CAP_PROP_FRAME_WIDTH, m_descriptor->high.resolution.x);
+    res &= m_impl->capture.set(CV_CAP_PROP_FRAME_HEIGHT, m_descriptor->high.resolution.y);
+    res &= m_impl->capture.set(CV_CAP_PROP_FPS, m_descriptor->fps);
 
     if (!res)
     {
-        QLOGE("Failed to configure device {}.", m_init_params->device);
+        QLOGE("Failed to configure device {}.", m_descriptor->device);
         return false;
     }
 

@@ -1,8 +1,8 @@
 #include "BrainStdAfx.h"
 #include "Proximity.h"
 
-#include "sz_math.hpp"
-#include "sz_Proximity.hpp"
+#include "uav.def.h"
+//#include "sz_Proximity.hpp"
 
 namespace silk
 {
@@ -11,43 +11,42 @@ namespace node
 
 Proximity::Proximity(UAV& uav)
     : m_uav(uav)
-    , m_init_params(new sz::Proximity::Init_Params())
-    , m_config(new sz::Proximity::Config())
+    , m_descriptor(new Proximity_Descriptor())
+    , m_config(new Proximity_Config())
 {
     m_output_stream = std::make_shared<Output_Stream>();
 }
 
-auto Proximity::init(rapidjson::Value const& init_params) -> bool
+auto Proximity::init(std::shared_ptr<Node_Descriptor_Base> descriptor) -> bool
 {
     QLOG_TOPIC("Proximity::init");
 
-    sz::Proximity::Init_Params sz;
-    autojsoncxx::error::ErrorStack result;
-    if (!autojsoncxx::from_value(sz, init_params, result))
+    auto specialized = std::dynamic_pointer_cast<Proximity_Descriptor>(descriptor);
+    if (!specialized)
     {
-        std::ostringstream ss;
-        ss << result;
-        QLOGE("Cannot deserialize Proximity data: {}", ss.str());
+        QLOGE("Wrong descriptor type");
         return false;
     }
-    *m_init_params = sz;
+
+    *m_descriptor = *specialized;
+
     return init();
 }
 auto Proximity::init() -> bool
 {
-    if (m_init_params->rate == 0)
+    if (m_descriptor->rate == 0)
     {
-        QLOGE("Bad rate: {}Hz", m_init_params->rate);
+        QLOGE("Bad rate: {}Hz", m_descriptor->rate);
         return false;
     }
-    if (m_init_params->channels == 0)
+    if (m_descriptor->channels == 0)
     {
         QLOGE("Need to have at least one channel");
         return false;
     }
 
-    m_accumulators.resize(m_init_params->channels);
-    m_output_stream->set_rate(m_init_params->rate);
+    m_accumulators.resize(m_descriptor->channels);
+    m_output_stream->set_rate(m_descriptor->rate);
 
     return true;
 }
@@ -60,10 +59,10 @@ auto Proximity::start(q::Clock::time_point tp) -> bool
 
 auto Proximity::get_inputs() const -> std::vector<Input>
 {
-    std::vector<Input> inputs(m_init_params->channels);
-    for (size_t i = 0; i < m_init_params->channels; i++)
+    std::vector<Input> inputs(m_descriptor->channels);
+    for (size_t i = 0; i < m_descriptor->channels; i++)
     {
-        inputs[i] = { stream::IDistance::TYPE, m_init_params->rate, q::util::format<std::string>("Distance {}", i), m_accumulators[i].get_stream_path(0) };
+        inputs[i] = { stream::IDistance::TYPE, m_descriptor->rate, q::util::format<std::string>("Distance {}", i), m_accumulators[i].get_stream_path(0) };
     }
     return inputs;
 }
@@ -83,7 +82,7 @@ void Proximity::process()
     m_output_stream->clear();
     m_output_value.distances.clear();
 
-    for (size_t i = 0; i < m_init_params->channels; i++)
+    for (size_t i = 0; i < m_descriptor->channels; i++)
     {
         m_accumulators[i].process([this, i](stream::IDistance::Sample const& i_sample)
         {
@@ -109,36 +108,29 @@ void Proximity::set_input_stream_path(size_t idx, q::Path const& path)
     m_accumulators[idx].set_stream_path(0, path, m_output_stream->get_rate(), m_uav);
 }
 
-auto Proximity::set_config(rapidjson::Value const& json) -> bool
+auto Proximity::set_config(std::shared_ptr<Node_Config_Base> config) -> bool
 {
     QLOG_TOPIC("Proximity::set_config");
 
-    sz::Proximity::Config sz;
-    autojsoncxx::error::ErrorStack result;
-    if (!autojsoncxx::from_value(sz, json, result))
+    auto specialized = std::dynamic_pointer_cast<Proximity_Config>(config);
+    if (!specialized)
     {
-        std::ostringstream ss;
-        ss << result;
-        QLOGE("Cannot deserialize Proximity config data: {}", ss.str());
+        QLOGE("Wrong config type");
         return false;
     }
 
-    *m_config = sz;
+    *m_config = *specialized;
 
     return true;
 }
-auto Proximity::get_config() const -> rapidjson::Document
+auto Proximity::get_config() const -> std::shared_ptr<Node_Config_Base>
 {
-    rapidjson::Document json;
-    autojsoncxx::to_document(*m_config, json);
-    return std::move(json);
+    return m_config;
 }
 
-auto Proximity::get_init_params() const -> rapidjson::Document
+auto Proximity::get_descriptor() const -> std::shared_ptr<Node_Descriptor_Base>
 {
-    rapidjson::Document json;
-    autojsoncxx::to_document(*m_init_params, json);
-    return std::move(json);
+    return m_descriptor;
 }
 auto Proximity::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document
 {

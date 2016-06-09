@@ -1,8 +1,8 @@
 #include "BrainStdAfx.h"
 #include "Motor_Mixer.h"
 
-#include "sz_math.hpp"
-#include "sz_Motor_Mixer.hpp"
+#include "uav.def.h"
+//#include "sz_Motor_Mixer.hpp"
 
 namespace silk
 {
@@ -11,35 +11,29 @@ namespace node
 
 Motor_Mixer::Motor_Mixer(UAV& uav)
     : m_uav(uav)
-    , m_init_params(new sz::Motor_Mixer::Init_Params())
-    , m_config(new sz::Motor_Mixer::Config())
+    , m_descriptor(new Motor_Mixer_Descriptor())
+    , m_config(new Motor_Mixer_Config())
 {
 }
 
-auto Motor_Mixer::init(rapidjson::Value const& init_params) -> bool
+auto Motor_Mixer::init(std::shared_ptr<Node_Descriptor_Base> descriptor) -> bool
 {
     QLOG_TOPIC("motor_mixer::init");
 
-    sz::Motor_Mixer::Init_Params sz;
-    autojsoncxx::error::ErrorStack result;
-    if (!autojsoncxx::from_value(sz, init_params, result))
+    auto specialized = std::dynamic_pointer_cast<Motor_Mixer_Descriptor>(descriptor);
+    if (!specialized)
     {
-        std::ostringstream ss;
-        ss << result;
-        QLOGE("Cannot deserialize Motor_Mixer data: {}", ss.str());
+        QLOGE("Wrong descriptor type");
         return false;
     }
-    *m_init_params = sz;
+
+    *m_descriptor = *specialized;
+
     return init();
 }
 
 auto Motor_Mixer::init() -> bool
 {
-    if (m_init_params->rate == 0)
-    {
-        QLOGE("Bad rate: {}Hz", m_init_params->rate);
-        return false;
-    }
     std::shared_ptr<const Multirotor_Config> multirotor_config = m_uav.get_specialized_uav_config<Multirotor_Config>();
     if (!multirotor_config)
     {
@@ -50,10 +44,10 @@ auto Motor_Mixer::init() -> bool
     //check symmetry
     math::vec3f center;
     math::vec3f torque;
-    for (auto& mc: multirotor_config->motors)
+    for (auto& mc: multirotor_config->get_motors())
     {
-        center += mc.position;
-        torque += math::cross(mc.position, mc.thrust_vector) + mc.thrust_vector*(multirotor_config->motor_z_torque * (mc.clockwise ? 1 : -1));
+        center += mc.get_position();
+        torque += math::cross(mc.get_position(), mc.get_thrust_vector()) + mc.get_thrust_vector()*(multirotor_config->get_motor_z_torque() * (mc.get_clockwise() ? 1 : -1));
     }
     if (!math::is_zero(center, 0.05f))
     {
@@ -66,11 +60,11 @@ auto Motor_Mixer::init() -> bool
         return false;
     }
 
-    m_outputs.resize(multirotor_config->motors.size());
+    m_outputs.resize(multirotor_config->get_motors().size());
     for (auto& os: m_outputs)
     {
         os = std::make_shared<Stream>();
-        os->rate = m_init_params->rate;
+        os->rate = m_descriptor->get_rate();
     }
 
     //m_config->output_streams.throttles.resize(multirotor_config->motors.size());
@@ -88,8 +82,8 @@ auto Motor_Mixer::get_inputs() const -> std::vector<Input>
 {
     std::vector<Input> inputs =
     {{
-        { stream::ITorque::TYPE, m_init_params->rate, "Torque", m_accumulator.get_stream_path(0) },
-        { stream::IFloat::TYPE, m_init_params->rate, "Collective Thrust", m_accumulator.get_stream_path(1) }
+        { stream::ITorque::TYPE, m_descriptor->get_rate(), "Torque", m_accumulator.get_stream_path(0) },
+        { stream::IFloat::TYPE, m_descriptor->get_rate(), "Collective Thrust", m_accumulator.get_stream_path(1) }
     }};
     return inputs;
 }
@@ -118,7 +112,7 @@ void Motor_Mixer::process()
     {
         return;
     }
-    if (multirotor_config->motors.size() != m_outputs.size())
+    if (multirotor_config->get_motors().size() != m_outputs.size())
     {
         QLOGE("Motor count changed since initialization!!!! Case not handled");
         return;
@@ -173,12 +167,12 @@ void Motor_Mixer::compute_throttles(Multirotor_Config const& multirotor_config, 
     //precalculate some data
     for (size_t i = 0; i < m_outputs.size(); i++)
     {
-        auto const& mc = multirotor_config.motors[i];
+        auto const& mc = multirotor_config.get_motors()[i];
         auto& out = m_outputs[i];
-        out->config.position = mc.position;
+        out->config.position = mc.get_position();
 
-        out->config.max_torque = math::cross(out->config.position, mc.thrust_vector * multirotor_config.motor_thrust);
-        out->config.max_torque += mc.thrust_vector * (multirotor_config.motor_z_torque * (mc.clockwise ? 1 : -1));
+        out->config.max_torque = math::cross(out->config.position, mc.get_thrust_vector() * multirotor_config.get_motor_thrust());
+        out->config.max_torque += mc.get_thrust_vector() * (multirotor_config.get_motor_z_torque() * (mc.get_clockwise() ? 1 : -1));
         out->config.torque_vector = math::normalized<float, math::safe>(out->config.max_torque);
 
         out->thrust = MIN_THRUST;
@@ -430,39 +424,32 @@ void Motor_Mixer::compute_throttles(Multirotor_Config const& multirotor_config, 
 
 void Motor_Mixer::set_input_stream_path(size_t idx, q::Path const& path)
 {
-    m_accumulator.set_stream_path(idx, path, m_init_params->rate, m_uav);
+    m_accumulator.set_stream_path(idx, path, m_descriptor->rate, m_uav);
 }
 
-auto Motor_Mixer::set_config(rapidjson::Value const& json) -> bool
+auto Motor_Mixer::set_config(std::shared_ptr<Node_Config_Base> config) -> bool
 {
     QLOG_TOPIC("motor_mixer::set_config");
 
-    sz::Motor_Mixer::Config sz;
-    autojsoncxx::error::ErrorStack result;
-    if (!autojsoncxx::from_value(sz, json, result))
+    auto specialized = std::dynamic_pointer_cast<Motor_Mixer_Config>(config);
+    if (!specialized)
     {
-        std::ostringstream ss;
-        ss << result;
-        QLOGE("Cannot deserialize Motor_Mixer config data: {}", ss.str());
+        QLOGE("Wrong config type");
         return false;
     }
 
-    *m_config = sz;
+    *m_config = *specialized;
 
     return true;
 }
-auto Motor_Mixer::get_config() const -> rapidjson::Document
+auto Motor_Mixer::get_config() const -> std::shared_ptr<Node_Config_Base>
 {
-    rapidjson::Document json;
-    autojsoncxx::to_document(*m_config, json);
-    return std::move(json);
+    return m_config;
 }
 
-auto Motor_Mixer::get_init_params() const -> rapidjson::Document
+auto Motor_Mixer::get_descriptor() const -> std::shared_ptr<Node_Descriptor_Base>
 {
-    rapidjson::Document json;
-    autojsoncxx::to_document(*m_init_params, json);
-    return std::move(json);
+    return m_descriptor;
 }
 auto Motor_Mixer::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document
 {

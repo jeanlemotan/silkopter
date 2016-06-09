@@ -1,8 +1,8 @@
 #include "BrainStdAfx.h"
 #include "Oscillator.h"
 
-#include "sz_math.hpp"
-#include "sz_Oscillator.hpp"
+#include "uav.def.h"
+//#include "sz_Oscillator.hpp"
 
 namespace silk
 {
@@ -11,44 +11,35 @@ namespace node
 
 Oscillator::Oscillator(UAV& uav)
     : m_uav(uav)
-    , m_init_params(new sz::Oscillator::Init_Params())
-    , m_config(new sz::Oscillator::Config())
+    , m_descriptor(new Oscillator_Descriptor())
+    , m_config(new Oscillator_Config())
     , m_rnd_distribution(0, 0)
 {
     m_output_stream = std::make_shared<Output_Stream>();
 }
 
-auto Oscillator::init(rapidjson::Value const& init_params) -> bool
+auto Oscillator::init(std::shared_ptr<Node_Descriptor_Base> descriptor) -> bool
 {
     QLOG_TOPIC("Oscillator::init");
 
-    sz::Oscillator::Init_Params sz;
-    autojsoncxx::error::ErrorStack result;
-    if (!autojsoncxx::from_value(sz, init_params, result))
+    auto specialized = std::dynamic_pointer_cast<Oscillator_Descriptor>(descriptor);
+    if (!specialized)
     {
-        std::ostringstream ss;
-        ss << result;
-        QLOGE("Cannot deserialize Oscillator data: {}", ss.str());
+        QLOGE("Wrong descriptor type");
         return false;
     }
-    *m_init_params = sz;
+
+    *m_descriptor = *specialized;
+
     return init();
 }
 auto Oscillator::init() -> bool
 {
-    if (m_init_params->rate == 0)
-    {
-        QLOGE("Bad rate: {}Hz", m_init_params->rate);
-        return false;
-    }
-    if (m_init_params->component_count == 0)
-    {
-        QLOGE("Needs at least one frequency component");
-        return false;
-    }
-    m_output_stream->set_rate(m_init_params->rate);
+    m_output_stream->set_rate(m_descriptor->get_rate());
 
-    m_config->components.resize(m_init_params->component_count);
+    auto components = m_config->get_components();
+    components.resize(m_descriptor->get_component_count());
+    m_config->set_components(components);
 
     return true;
 }
@@ -79,7 +70,7 @@ void Oscillator::process()
 
     m_output_stream->clear();
 
-    float amplitude = m_config->amplitude;
+    float amplitude = m_config->get_amplitude();
 
     constexpr size_t MAX_SAMPLES_NEEDED = 10000;
 
@@ -99,13 +90,15 @@ void Oscillator::process()
        m_period += period;
 
        float a = m_period * math::anglef::_2pi;
-       for (auto& c: m_config->components)
+       for (auto& c: m_config->get_components())
        {
-           value += math::sin(a * c.frequency) * 0.5f * c.amplitude;
-       }
-       if (m_config->square)
-       {
-           value = value < 0.f ? -0.5f : 0.5f;
+           float v = math::sin(a * c.get_frequency()) * 0.5f;
+           if (c.get_square())
+           {
+               v = v < 0.f ? -0.5f : 0.5f;
+           }
+
+           value += v * c.get_amplitude();
        }
        if (m_has_noise)
        {
@@ -124,39 +117,32 @@ void Oscillator::set_input_stream_path(size_t idx, q::Path const& path)
 {
 }
 
-auto Oscillator::set_config(rapidjson::Value const& json) -> bool
+auto Oscillator::set_config(std::shared_ptr<Node_Config_Base> config) -> bool
 {
     QLOG_TOPIC("Oscillator::set_config");
 
-    sz::Oscillator::Config sz;
-    autojsoncxx::error::ErrorStack result;
-    if (!autojsoncxx::from_value(sz, json, result))
+    auto specialized = std::dynamic_pointer_cast<Oscillator_Config>(config);
+    if (!specialized)
     {
-        std::ostringstream ss;
-        ss << result;
-        QLOGE("Cannot deserialize Oscillator config data: {}", ss.str());
+        QLOGE("Wrong config type");
         return false;
     }
 
-    *m_config = sz;
+    *m_config = *specialized;
 
-    m_rnd_distribution = std::uniform_real_distribution<float>(-m_config->noise*0.5f, m_config->noise*0.5f);
-    m_has_noise = !math::is_zero(m_config->noise, math::epsilon<float>());
+    m_rnd_distribution = std::uniform_real_distribution<float>(-m_config->get_noise()*0.5f, m_config->get_noise()*0.5f);
+    m_has_noise = !math::is_zero(m_config->get_noise(), math::epsilon<float>());
 
     return true;
 }
-auto Oscillator::get_config() const -> rapidjson::Document
+auto Oscillator::get_config() const -> std::shared_ptr<Node_Config_Base>
 {
-    rapidjson::Document json;
-    autojsoncxx::to_document(*m_config, json);
-    return std::move(json);
+    return m_config;
 }
 
-auto Oscillator::get_init_params() const -> rapidjson::Document
+auto Oscillator::get_descriptor() const -> std::shared_ptr<Node_Descriptor_Base>
 {
-    rapidjson::Document json;
-    autojsoncxx::to_document(*m_init_params, json);
-    return std::move(json);
+    return m_descriptor;
 }
 
 auto Oscillator::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document

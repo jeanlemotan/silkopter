@@ -3,8 +3,7 @@
 #include "physics/constants.h"
 #include "utils/Timed_Scope.h"
 
-#include "sz_math.hpp"
-#include "sz_SRF02.hpp"
+#include "uav.def.h"
 
 namespace silk
 {
@@ -38,10 +37,10 @@ constexpr std::chrono::milliseconds MAX_MEASUREMENT_DURATION(100);
 
 SRF02::SRF02(UAV& uav)
     : m_uav(uav)
-    , m_init_params(new sz::SRF02::Init_Params())
-    , m_config(new sz::SRF02::Config())
+    , m_descriptor(new SRF02_Descriptor())
+    , m_config(new SRF02_Config())
 {
-    m_config->direction = math::vec3f(0, 0, -1); //pointing down
+    m_config->set_direction(math::vec3f(0, 0, -1)); //pointing down
 
     m_output_stream = std::make_shared<Output_Stream>();
 }
@@ -53,26 +52,24 @@ auto SRF02::get_outputs() const -> std::vector<Output>
     outputs[0].stream = m_output_stream;
     return outputs;
 }
-auto SRF02::init(rapidjson::Value const& init_params) -> bool
+auto SRF02::init(std::shared_ptr<Node_Descriptor_Base> descriptor) -> bool
 {
     QLOG_TOPIC("srf02::init");
 
-    sz::SRF02::Init_Params sz;
-    autojsoncxx::error::ErrorStack result;
-    if (!autojsoncxx::from_value(sz, init_params, result))
+    auto specialized = std::dynamic_pointer_cast<SRF02_Descriptor>(descriptor);
+    if (!specialized)
     {
-        std::ostringstream ss;
-        ss << result;
-        QLOGE("Cannot deserialize SRF02 data: {}", ss.str());
+        QLOGE("Wrong descriptor type");
         return false;
     }
-    *m_init_params = sz;
+
+    *m_descriptor = *specialized;
     return init();
 }
 
 auto SRF02::init() -> bool
 {
-    m_bus = m_uav.get_buses().find_by_name<bus::II2C>(m_init_params->bus);
+    m_bus = m_uav.get_buses().find_by_name<bus::II2C>(m_descriptor->get_bus());
     auto bus = m_bus.lock();
     if (!bus)
     {
@@ -86,9 +83,9 @@ auto SRF02::init() -> bool
         bus->unlock();
     });
 
-    m_init_params->rate = math::clamp<size_t>(m_init_params->rate, 1, 10);
+    m_descriptor->set_rate(math::clamp<size_t>(m_descriptor->get_rate(), 1, 10));
 
-    QLOGI("Probing SRF02 on {}...", m_init_params->bus);
+    QLOGI("Probing SRF02 on {}...", m_descriptor->get_bus());
 
     uint32_t tries = 0;
     constexpr uint32_t max_tries = 10;
@@ -115,7 +112,7 @@ auto SRF02::init() -> bool
 
     trigger(*bus);
 
-    m_output_stream->set_rate(m_init_params->rate);
+    m_output_stream->set_rate(m_descriptor->get_rate());
 
     return true;
 }
@@ -177,9 +174,9 @@ void SRF02::process()
 
         float distance = static_cast<float>(d) / 100.f; //meters
 
-        float min_distance = math::max(m_config->min_distance, static_cast<float>(min_d) / 100.f); //meters
-        float max_distance = m_config->max_distance;
-        math::vec3f value = m_config->direction * math::clamp(distance, min_distance, max_distance);
+        float min_distance = math::max(m_config->get_min_distance(), static_cast<float>(min_d) / 100.f); //meters
+        float max_distance = m_config->get_max_distance();
+        math::vec3f value = m_config->get_direction() * math::clamp(distance, min_distance, max_distance);
         bool is_healthy = distance >= min_distance && distance <= max_distance;
 
         m_output_stream->clear();
@@ -192,43 +189,36 @@ void SRF02::process()
     }
 }
 
-auto SRF02::set_config(rapidjson::Value const& json) -> bool
+auto SRF02::set_config(std::shared_ptr<Node_Config_Base> config) -> bool
 {
     QLOG_TOPIC("srf02::set_config");
 
-    sz::SRF02::Config sz;
-    autojsoncxx::error::ErrorStack result;
-    if (!autojsoncxx::from_value(sz, json, result))
+    auto specialized = std::dynamic_pointer_cast<SRF02_Config>(config);
+    if (!specialized)
     {
-        std::ostringstream ss;
-        ss << result;
-        QLOGE("Cannot deserialize SRF02 config data: {}", ss.str());
+        QLOGE("Wrong descriptor type");
         return false;
     }
 
-    *m_config = sz;
-    m_config->min_distance = math::max(m_config->min_distance, 0.1f);
-    m_config->max_distance = math::min(m_config->max_distance, 12.f);
-    if (math::is_zero(math::length(m_config->direction), math::epsilon<float>()))
+    *m_config = *specialized;
+//    m_config->set_min_distance(math::max(m_config->get_min_distance(), 0.1f));
+//    m_config->set_max_distance(math::min(m_config->get_max_distance(), 12.f));
+    if (math::is_zero(math::length(m_config->get_direction()), math::epsilon<float>()))
     {
-        m_config->direction = math::vec3f(0, 0, -1); //pointing down
+        m_config->set_direction(math::vec3f(0, 0, -1)); //pointing down
     }
-    m_config->direction.normalize<math::safe>();
+    m_config->set_direction(math::normalized(m_config->get_direction()));
 
     return true;
 }
-auto SRF02::get_config() const -> rapidjson::Document
+auto SRF02::get_config() const -> std::shared_ptr<Node_Config_Base>
 {
-    rapidjson::Document json;
-    autojsoncxx::to_document(*m_config, json);
-    return std::move(json);
+    return m_config;
 }
 
-auto SRF02::get_init_params() const -> rapidjson::Document
+auto SRF02::get_descriptor() const -> std::shared_ptr<Node_Descriptor_Base>
 {
-    rapidjson::Document json;
-    autojsoncxx::to_document(*m_init_params, json);
-    return std::move(json);
+    return m_descriptor;
 }
 
 auto SRF02::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document

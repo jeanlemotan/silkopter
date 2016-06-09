@@ -1,8 +1,8 @@
 #include "BrainStdAfx.h"
 #include "Multirotor_Pilot.h"
 
-#include "sz_math.hpp"
-#include "sz_Multirotor_Pilot.hpp"
+#include "uav.def.h"
+//#include "sz_Multirotor_Pilot.hpp"
 
 namespace silk
 {
@@ -12,47 +12,46 @@ namespace node
 Multirotor_Pilot::Multirotor_Pilot(UAV& uav, Comms& comms)
     : m_uav(uav)
     , m_comms(comms)
-    , m_init_params(new sz::Multirotor_Pilot::Init_Params())
-    , m_config(new sz::Multirotor_Pilot::Config())
+    , m_descriptor(new Multirotor_Pilot_Descriptor())
+    , m_config(new Multirotor_Pilot_Config())
 {
     m_output_stream = std::make_shared<Output_Stream>();
 }
 
-auto Multirotor_Pilot::init(rapidjson::Value const& init_params) -> bool
+auto Multirotor_Pilot::init(std::shared_ptr<Node_Descriptor_Base> descriptor) -> bool
 {
     QLOG_TOPIC("Multirotor_Pilot::init");
 
-    sz::Multirotor_Pilot::Init_Params sz;
-    autojsoncxx::error::ErrorStack result;
-    if (!autojsoncxx::from_value(sz, init_params, result))
+    auto specialized = std::dynamic_pointer_cast<Multirotor_Pilot_Descriptor>(descriptor);
+    if (!specialized)
     {
-        std::ostringstream ss;
-        ss << result;
-        QLOGE("Cannot deserialize Multirotor_Pilot data: {}", ss.str());
+        QLOGE("Wrong descriptor type");
         return false;
     }
-    *m_init_params = sz;
+
+    *m_descriptor = *specialized;
+
     return init();
 }
 
 auto Multirotor_Pilot::init() -> bool
 {
-    if (m_init_params->commands_rate == 0)
+    if (m_descriptor->commands_rate == 0)
     {
-        QLOGE("Bad commands rate: {}Hz", m_init_params->commands_rate);
+        QLOGE("Bad commands rate: {}Hz", m_descriptor->commands_rate);
         return false;
     }
-    if (m_init_params->state_rate == 0)
+    if (m_descriptor->state_rate == 0)
     {
-        QLOGE("Bad state rate: {}Hz", m_init_params->state_rate);
+        QLOGE("Bad state rate: {}Hz", m_descriptor->state_rate);
         return false;
     }
-    if (m_init_params->video_rate == 0)
+    if (m_descriptor->video_rate == 0)
     {
-        QLOGE("Bad video rate: {}Hz", m_init_params->video_rate);
+        QLOGE("Bad video rate: {}Hz", m_descriptor->video_rate);
         return false;
     }
-    m_output_stream->set_rate(m_init_params->commands_rate);
+    m_output_stream->set_rate(m_descriptor->commands_rate);
     return true;
 }
 
@@ -66,8 +65,8 @@ auto Multirotor_Pilot::get_inputs() const -> std::vector<Input>
 {
     std::vector<Input> inputs =
     {{
-        { stream::IMultirotor_State::TYPE,  m_init_params->state_rate, "State", m_state_accumulator.get_stream_path(0) },
-        { stream::IVideo::TYPE,        m_init_params->video_rate, "Video", m_video_accumulator.get_stream_path(0) },
+        { stream::IMultirotor_State::TYPE,  m_descriptor->state_rate, "State", m_state_accumulator.get_stream_path(0) },
+        { stream::IVideo::TYPE,        m_descriptor->video_rate, "Video", m_video_accumulator.get_stream_path(0) },
     }};
     return inputs;
 }
@@ -127,44 +126,37 @@ void Multirotor_Pilot::set_input_stream_path(size_t idx, q::Path const& path)
 {
     if (idx == 0)
     {
-        m_state_accumulator.set_stream_path(0, path, m_init_params->state_rate, m_uav);
+        m_state_accumulator.set_stream_path(0, path, m_descriptor->state_rate, m_uav);
     }
     else
     {
-        m_video_accumulator.set_stream_path(0, path, m_init_params->video_rate, m_uav);
+        m_video_accumulator.set_stream_path(0, path, m_descriptor->video_rate, m_uav);
     }
 }
 
-auto Multirotor_Pilot::set_config(rapidjson::Value const& json) -> bool
+auto Multirotor_Pilot::set_config(std::shared_ptr<Node_Config_Base> config) -> bool
 {
     QLOG_TOPIC("Multirotor_Pilot::set_config");
 
-    sz::Multirotor_Pilot::Config sz;
-    autojsoncxx::error::ErrorStack result;
-    if (!autojsoncxx::from_value(sz, json, result))
+    auto specialized = std::dynamic_pointer_cast<Multirotor_Pilot_Config>(config);
+    if (!specialized)
     {
-        std::ostringstream ss;
-        ss << result;
-        QLOGE("Cannot deserialize Multirotor_Pilot config data: {}", ss.str());
+        QLOGE("Wrong config type");
         return false;
     }
 
-    *m_config = sz;
+    *m_config = *specialized;
 
     return true;
 }
-auto Multirotor_Pilot::get_config() const -> rapidjson::Document
+auto Multirotor_Pilot::get_config() const -> std::shared_ptr<Node_Config_Base>
 {
-    rapidjson::Document json;
-    autojsoncxx::to_document(*m_config, json);
-    return std::move(json);
+    return m_config;
 }
 
-auto Multirotor_Pilot::get_init_params() const -> rapidjson::Document
+auto Multirotor_Pilot::get_descriptor() const -> std::shared_ptr<Node_Descriptor_Base>
 {
-    rapidjson::Document json;
-    autojsoncxx::to_document(*m_init_params, json);
-    return std::move(json);
+    return m_descriptor;
 }
 
 auto Multirotor_Pilot::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document

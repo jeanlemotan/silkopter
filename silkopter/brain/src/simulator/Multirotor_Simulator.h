@@ -16,13 +16,10 @@
 #include "Multirotor_Simulation.h"
 
 
-namespace sz
+namespace silk
 {
-namespace Multirotor_Simulator
-{
-struct Init_Params;
-struct Config;
-}
+struct Multirotor_Simulator_Descriptor;
+struct Multirotor_Simulator_Config;
 }
 
 namespace silk
@@ -35,11 +32,11 @@ class Multirotor_Simulator : public IMultirotor_Simulator
 public:
     Multirotor_Simulator(UAV& uav);
 
-    auto init(rapidjson::Value const& init_params) -> bool;
-    auto get_init_params() const -> rapidjson::Document;
+    bool init(std::shared_ptr<Node_Descriptor_Base> descriptor) override;
+    std::shared_ptr<Node_Descriptor_Base> get_descriptor() const override;
 
-    auto set_config(rapidjson::Value const& json) -> bool;
-    auto get_config() const -> rapidjson::Document;
+    bool set_config(std::shared_ptr<Node_Config_Base> config) override;
+    std::shared_ptr<Node_Config_Base> get_config() const override;
 
     auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
 
@@ -56,8 +53,8 @@ private:
 
     UAV& m_uav;
 
-    std::shared_ptr<sz::Multirotor_Simulator::Init_Params> m_init_params;
-    std::shared_ptr<sz::Multirotor_Simulator::Config> m_config;
+    std::shared_ptr<Multirotor_Simulator_Descriptor> m_descriptor;
+    std::shared_ptr<Multirotor_Simulator_Config> m_config;
 
     q::Clock::time_point m_last_tp = q::Clock::now();
 

@@ -6,13 +6,10 @@
 #include "common/bus/II2C.h"
 
 
-namespace sz
+namespace silk
 {
-namespace RC5T619
-{
-struct Init_Params;
-struct Config;
-}
+struct RC5T619_Descriptor;
+struct RC5T619_Config;
 }
 
 
@@ -27,11 +24,11 @@ class RC5T619 : public ISource
 public:
     RC5T619(UAV& uav);
 
-    auto init(rapidjson::Value const& init_params) -> bool;
-    auto get_init_params() const -> rapidjson::Document;
+    bool init(std::shared_ptr<Node_Descriptor_Base> descriptor) override;
+    std::shared_ptr<Node_Descriptor_Base> get_descriptor() const override;
 
-    auto set_config(rapidjson::Value const& json) -> bool;
-    auto get_config() const -> rapidjson::Document;
+    bool set_config(std::shared_ptr<Node_Config_Base> config) override;
+    std::shared_ptr<Node_Config_Base> get_config() const override;
 
     auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
 
@@ -47,8 +44,8 @@ private:
     UAV& m_uav;
     std::weak_ptr<bus::II2C> m_i2c;
 
-    std::shared_ptr<sz::RC5T619::Init_Params> m_init_params;
-    std::shared_ptr<sz::RC5T619::Config> m_config;
+    std::shared_ptr<RC5T619_Descriptor> m_descriptor;
+    std::shared_ptr<RC5T619_Config> m_config;
 
     q::Clock::time_point m_last_tp = q::Clock::now();
     q::Clock::duration m_dt;

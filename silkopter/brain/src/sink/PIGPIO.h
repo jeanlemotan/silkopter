@@ -4,15 +4,13 @@
 #include "common/node/ISink.h"
 #include "common/stream/IPWM.h"
 
-namespace sz
+namespace silk
 {
-namespace PIGPIO
-{
-struct Init_Params;
-struct Config;
-struct PWM_Channel;
-struct PWM_Config;
-}
+struct Node_Descriptor_Base;
+struct PIGPIO_Descriptor;
+
+struct Node_Config_Base;
+struct PIGPIO_Config;
 }
 
 
@@ -29,11 +27,11 @@ public:
 
     static const size_t MAX_PWM_CHANNELS = 8;
 
-    auto init(rapidjson::Value const& init_params) -> bool;
-    auto get_init_params() const -> rapidjson::Document;
+    bool init(std::shared_ptr<Node_Descriptor_Base> descriptor) override;
+    std::shared_ptr<Node_Descriptor_Base> get_descriptor() const override;
 
-    auto set_config(rapidjson::Value const& json) -> bool;
-    auto get_config() const -> rapidjson::Document;
+    bool set_config(std::shared_ptr<Node_Config_Base> config) override;
+    std::shared_ptr<Node_Config_Base> get_config() const override;
 
     auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
 
@@ -49,14 +47,14 @@ private:
 
     UAV& m_uav;
 
-    std::shared_ptr<sz::PIGPIO::Init_Params> m_init_params;
-    std::shared_ptr<sz::PIGPIO::Config> m_config;
+    std::shared_ptr<PIGPIO_Descriptor> m_descriptor;
+    std::shared_ptr<PIGPIO_Config> m_config;
 
     struct PWM_Channel
     {
         bool is_servo = false;
         uint32_t rate = 0;
-        sz::PIGPIO::PWM_Config* config = nullptr;
+        //sz::PIGPIO::PWM_Config* config = nullptr;
         uint32_t gpio = 0;
         q::Path stream_path;
         std::weak_ptr<stream::IPWM> stream;

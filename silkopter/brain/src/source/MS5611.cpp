@@ -1,8 +1,8 @@
 #include "BrainStdAfx.h"
 #include "MS5611.h"
 
-#include "sz_math.hpp"
-#include "sz_MS5611.hpp"
+#include "uav.def.h"
+//#include "sz_MS5611.hpp"
 
 namespace silk
 {
@@ -38,8 +38,8 @@ constexpr uint8_t ADDR_MS5611 = 0x77;
 
 MS5611::MS5611(UAV& uav)
     : m_uav(uav)
-    , m_init_params(new sz::MS5611::Init_Params())
-    , m_config(new sz::MS5611::Config())
+    , m_descriptor(new MS5611_Descriptor())
+    , m_config(new MS5611_Config())
 {
     m_pressure = std::make_shared<Pressure_Stream>();
     m_temperature = std::make_shared<Temperature_Stream>();
@@ -117,26 +117,24 @@ auto MS5611::get_outputs() const -> std::vector<Output>
     outputs[1].stream = m_temperature;
     return outputs;
 }
-auto MS5611::init(rapidjson::Value const& init_params) -> bool
+auto MS5611::init(std::shared_ptr<Node_Descriptor_Base> descriptor) -> bool
 {
     QLOG_TOPIC("ms5611::init");
 
-    sz::MS5611::Init_Params sz;
-    autojsoncxx::error::ErrorStack result;
-    if (!autojsoncxx::from_value(sz, init_params, result))
+    auto specialized = std::dynamic_pointer_cast<MS5611_Descriptor>(descriptor);
+    if (!specialized)
     {
-        std::ostringstream ss;
-        ss << result;
-        QLOGE("Cannot deserialize MS5611 data: {}", ss.str());
+        QLOGE("Wrong descriptor type");
         return false;
     }
-    *m_init_params = sz;
+
+    *m_descriptor = *specialized;
     return init();
 }
 auto MS5611::init() -> bool
 {
-    m_i2c = m_uav.get_buses().find_by_name<bus::II2C>(m_init_params->bus);
-    m_spi = m_uav.get_buses().find_by_name<bus::ISPI>(m_init_params->bus);
+    m_i2c = m_uav.get_buses().find_by_name<bus::II2C>(m_descriptor->get_bus());
+    m_spi = m_uav.get_buses().find_by_name<bus::ISPI>(m_descriptor->get_bus());
 
     Buses buses = { m_i2c.lock(), m_spi.lock() };
     if (!buses.i2c && !buses.spi)
@@ -151,10 +149,10 @@ auto MS5611::init() -> bool
         unlock(buses);
     });
 
-    m_init_params->pressure_rate = math::clamp<size_t>(m_init_params->pressure_rate, 10, 100);
-    m_init_params->temperature_rate_ratio = math::clamp<size_t>(m_init_params->temperature_rate_ratio, 1, 10);
+//    m_descriptor->pressure_rate = math::clamp<size_t>(m_descriptor->pressure_rate, 10, 100);
+//    m_descriptor->temperature_rate_ratio = math::clamp<size_t>(m_descriptor->temperature_rate_ratio, 1, 10);
 
-    QLOGI("Probing MS5611 on {}", m_init_params->bus);
+    QLOGI("Probing MS5611 on {}", m_descriptor->get_bus());
 
     std::this_thread::sleep_for(std::chrono::milliseconds(120));
 
@@ -203,8 +201,8 @@ auto MS5611::init() -> bool
 #endif
     }
 
-    m_pressure->set_rate(m_init_params->pressure_rate);
-    m_temperature->set_rate(m_init_params->pressure_rate / m_init_params->temperature_rate_ratio);
+    m_pressure->set_rate(m_descriptor->get_pressure_rate());
+    m_temperature->set_rate(m_descriptor->get_temperature_rate());
 
     return true;
 }
@@ -281,25 +279,26 @@ void MS5611::process()
         }
 
         //next
-        if (m_stage >= m_init_params->temperature_rate_ratio)
-        {
-            if (bus_write(buses, CMD_CONVERT_D2_OSR256)) //read temp next
-            {
-                m_stage = 0;
-            }
-            else
-            {
-                m_stats.bus_failures++;
-            }
-        }
-        else if (bus_write(buses, CMD_CONVERT_D1_OSR256)) //read pressure next
-        {
-            m_stage++;
-        }
-        else
-        {
-            m_stats.bus_failures++;
-        }
+        //todo - implement the pressure_rate and temperature_rate instead of the ratio
+//        if (m_stage >= m_descriptor->temperature_rate_ratio)
+//        {
+//            if (bus_write(buses, CMD_CONVERT_D2_OSR256)) //read temp next
+//            {
+//                m_stage = 0;
+//            }
+//            else
+//            {
+//                m_stats.bus_failures++;
+//            }
+//        }
+//        else if (bus_write(buses, CMD_CONVERT_D1_OSR256)) //read pressure next
+//        {
+//            m_stage++;
+//        }
+//        else
+//        {
+//            m_stats.bus_failures++;
+//        }
     }
 
     {
@@ -371,35 +370,28 @@ void MS5611::process()
     }
 }
 
-auto MS5611::set_config(rapidjson::Value const& json) -> bool
+auto MS5611::set_config(std::shared_ptr<Node_Config_Base> config) -> bool
 {
     QLOG_TOPIC("ms5611::set_config");
 
-    sz::MS5611::Config sz;
-    autojsoncxx::error::ErrorStack result;
-    if (!autojsoncxx::from_value(sz, json, result))
+    auto specialized = std::dynamic_pointer_cast<MS5611_Config>(config);
+    if (!specialized)
     {
-        std::ostringstream ss;
-        ss << result;
-        QLOGE("Cannot deserialize MS5611 config data: {}", ss.str());
+        QLOGE("Wrong config type");
         return false;
     }
 
-    *m_config = sz;
+    *m_config = *specialized;
     return true;
 }
-auto MS5611::get_config() const -> rapidjson::Document
+auto MS5611::get_config() const -> std::shared_ptr<Node_Config_Base>
 {
-    rapidjson::Document json;
-    autojsoncxx::to_document(*m_config, json);
-    return std::move(json);
+    return m_config;
 }
 
-auto MS5611::get_init_params() const -> rapidjson::Document
+auto MS5611::get_descriptor() const -> std::shared_ptr<Node_Descriptor_Base>
 {
-    rapidjson::Document json;
-    autojsoncxx::to_document(*m_init_params, json);
-    return std::move(json);
+    return m_descriptor;
 }
 
 auto MS5611::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document
