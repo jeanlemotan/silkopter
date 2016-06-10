@@ -178,11 +178,11 @@ void UAV::save_settings()
 
     settings.set_uav_descriptor(m_uav_descriptor);
 
-    std::vector<Node_Data> node_datas = settings.get_nodes();
+    std::vector<Settings::Node_Data> node_datas = settings.get_nodes();
     auto const& nodes = get_nodes().get_all();
     for (auto const& n: nodes)
     {
-        Node_Data node_data;
+        Settings::Node_Data node_data;
 
         node_data.set_name(n.name);
         node_data.set_type(n.type);
@@ -197,11 +197,11 @@ void UAV::save_settings()
         node_datas.push_back(node_data);
     }
 
-    std::vector<Bus_Data> bus_datas = settings.get_buses();
+    std::vector<Settings::Bus_Data> bus_datas = settings.get_buses();
     auto const& buses = get_buses().get_all();
     for (auto const& b: buses)
     {
-        Bus_Data bus_data;
+        Settings::Bus_Data bus_data;
 
         bus_data.set_name(b.name);
         bus_data.set_type(b.type);
@@ -977,7 +977,7 @@ auto UAV::init(Comms& comms) -> bool
         }
     }
 
-    for (Bus_Data const& data: settings.get_buses())
+    for (Settings::Bus_Data const& data: settings.get_buses())
     {
         if (!create_bus(data.get_type(), data.get_name(), data.get_descriptor()))
         {
@@ -985,7 +985,7 @@ auto UAV::init(Comms& comms) -> bool
             return false;
         }
     }
-    for (Node_Data const& data: settings.get_nodes())
+    for (Settings::Node_Data const& data: settings.get_nodes())
     {
         if (!create_node(data.get_type(), data.get_name(), data.get_descriptor()))
         {
@@ -995,7 +995,7 @@ auto UAV::init(Comms& comms) -> bool
     }
 
     //set input paths and configs
-    for (Node_Data const& data: settings.get_nodes())
+    for (Settings::Node_Data const& data: settings.get_nodes())
     {
         std::shared_ptr<node::INode> node = m_nodes.find_by_name<node::INode>(data.get_name());
         if (!node)

@@ -77,69 +77,69 @@ private:
 
 };
 
-struct Bus_Data
-{
-public:
-
-  Bus_Data() noexcept {};
-  virtual ~Bus_Data() noexcept {};
-
-  void set_name(std::string const& value);
-  auto get_name() const -> std::string const&;
-
-  void set_type(std::string const& value);
-  auto get_type() const -> std::string const&;
-
-  void set_descriptor(std::shared_ptr<::silk::IBus_Descriptor> const& value);
-  auto get_descriptor() const -> std::shared_ptr<::silk::IBus_Descriptor> const&;
-  auto get_descriptor() -> std::shared_ptr<::silk::IBus_Descriptor>&;
-
-
-private:
-
-  std::string m_name = {};
-  std::string m_type = {};
-  std::shared_ptr<::silk::IBus_Descriptor> m_descriptor = {};
-};
-
-struct Node_Data
-{
-public:
-
-  Node_Data() noexcept {};
-  virtual ~Node_Data() noexcept {};
-
-  void set_name(std::string const& value);
-  auto get_name() const -> std::string const&;
-
-  void set_type(std::string const& value);
-  auto get_type() const -> std::string const&;
-
-  void set_descriptor(std::shared_ptr<::silk::INode_Descriptor> const& value);
-  auto get_descriptor() const -> std::shared_ptr<::silk::INode_Descriptor> const&;
-  auto get_descriptor() -> std::shared_ptr<::silk::INode_Descriptor>&;
-
-  void set_config(std::shared_ptr<::silk::INode_Config> const& value);
-  auto get_config() const -> std::shared_ptr<::silk::INode_Config> const&;
-  auto get_config() -> std::shared_ptr<::silk::INode_Config>&;
-
-  void set_input_paths(std::vector<std::string> const& value);
-  auto get_input_paths() const -> std::vector<std::string> const&;
-  auto get_input_paths() -> std::vector<std::string>&;
-
-
-private:
-
-  std::string m_name = {};
-  std::string m_type = {};
-  std::shared_ptr<::silk::INode_Descriptor> m_descriptor = {};
-  std::shared_ptr<::silk::INode_Config> m_config = {};
-  std::vector<std::string> m_input_paths = {};
-};
-
 struct Settings
 {
 public:
+
+  struct Bus_Data
+  {
+  public:
+
+    Bus_Data() noexcept {};
+    virtual ~Bus_Data() noexcept {};
+
+    void set_name(std::string const& value);
+    auto get_name() const -> std::string const&;
+
+    void set_type(std::string const& value);
+    auto get_type() const -> std::string const&;
+
+    void set_descriptor(std::shared_ptr<::silk::IBus_Descriptor> const& value);
+    auto get_descriptor() const -> std::shared_ptr<::silk::IBus_Descriptor> const&;
+    auto get_descriptor() -> std::shared_ptr<::silk::IBus_Descriptor>&;
+
+
+  private:
+
+    std::string m_name = {};
+    std::string m_type = {};
+    std::shared_ptr<::silk::IBus_Descriptor> m_descriptor = {};
+  };
+
+  struct Node_Data
+  {
+  public:
+
+    Node_Data() noexcept {};
+    virtual ~Node_Data() noexcept {};
+
+    void set_name(std::string const& value);
+    auto get_name() const -> std::string const&;
+
+    void set_type(std::string const& value);
+    auto get_type() const -> std::string const&;
+
+    void set_descriptor(std::shared_ptr<::silk::INode_Descriptor> const& value);
+    auto get_descriptor() const -> std::shared_ptr<::silk::INode_Descriptor> const&;
+    auto get_descriptor() -> std::shared_ptr<::silk::INode_Descriptor>&;
+
+    void set_config(std::shared_ptr<::silk::INode_Config> const& value);
+    auto get_config() const -> std::shared_ptr<::silk::INode_Config> const&;
+    auto get_config() -> std::shared_ptr<::silk::INode_Config>&;
+
+    void set_input_paths(std::vector<std::string> const& value);
+    auto get_input_paths() const -> std::vector<std::string> const&;
+    auto get_input_paths() -> std::vector<std::string>&;
+
+
+  private:
+
+    std::string m_name = {};
+    std::string m_type = {};
+    std::shared_ptr<::silk::INode_Descriptor> m_descriptor = {};
+    std::shared_ptr<::silk::INode_Config> m_config = {};
+    std::vector<std::string> m_input_paths = {};
+  };
 
   Settings() noexcept {};
   virtual ~Settings() noexcept {};
@@ -148,20 +148,20 @@ public:
   auto get_uav_descriptor() const -> std::shared_ptr<::silk::IUAV_Descriptor> const&;
   auto get_uav_descriptor() -> std::shared_ptr<::silk::IUAV_Descriptor>&;
 
-  void set_buses(std::vector<::silk::Bus_Data> const& value);
-  auto get_buses() const -> std::vector<::silk::Bus_Data> const&;
-  auto get_buses() -> std::vector<::silk::Bus_Data>&;
+  void set_buses(std::vector<::silk::Settings::Bus_Data> const& value);
+  auto get_buses() const -> std::vector<::silk::Settings::Bus_Data> const&;
+  auto get_buses() -> std::vector<::silk::Settings::Bus_Data>&;
 
-  void set_nodes(std::vector<::silk::Node_Data> const& value);
-  auto get_nodes() const -> std::vector<::silk::Node_Data> const&;
-  auto get_nodes() -> std::vector<::silk::Node_Data>&;
+  void set_nodes(std::vector<::silk::Settings::Node_Data> const& value);
+  auto get_nodes() const -> std::vector<::silk::Settings::Node_Data> const&;
+  auto get_nodes() -> std::vector<::silk::Settings::Node_Data>&;
 
 
 private:
 
   std::shared_ptr<::silk::IUAV_Descriptor> m_uav_descriptor = {};
-  std::vector<::silk::Bus_Data> m_buses = {};
-  std::vector<::silk::Node_Data> m_nodes = {};
+  std::vector<::silk::Settings::Bus_Data> m_buses = {};
+  std::vector<::silk::Settings::Node_Data> m_nodes = {};
 };
 
 struct Multirotor_Descriptor : public ::silk::IUAV_Descriptor
@@ -2780,10 +2780,10 @@ ts::Result<void> deserialize(::silk::INode_Descriptor& value, ts::serialization:
 ts::Result<ts::serialization::Value> serialize(::silk::INode_Descriptor const& value);
 ts::Result<void> deserialize(::silk::INode_Config& value, ts::serialization::Value const& sz_value);
 ts::Result<ts::serialization::Value> serialize(::silk::INode_Config const& value);
-ts::Result<void> deserialize(::silk::Bus_Data& value, ts::serialization::Value const& sz_value);
-ts::Result<ts::serialization::Value> serialize(::silk::Bus_Data const& value);
-ts::Result<void> deserialize(::silk::Node_Data& value, ts::serialization::Value const& sz_value);
-ts::Result<ts::serialization::Value> serialize(::silk::Node_Data const& value);
+ts::Result<void> deserialize(::silk::Settings::Bus_Data& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(::silk::Settings::Bus_Data const& value);
+ts::Result<void> deserialize(::silk::Settings::Node_Data& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(::silk::Settings::Node_Data const& value);
 ts::Result<void> deserialize(::silk::Settings& value, ts::serialization::Value const& sz_value);
 ts::Result<ts::serialization::Value> serialize(::silk::Settings const& value);
 ts::Result<void> deserialize(::silk::Multirotor_Descriptor::Motor& value, ts::serialization::Value const& sz_value);
@@ -3014,10 +3014,10 @@ ts::Result<void> deserialize(std::vector<std::string>& value, ts::serialization:
 ts::Result<ts::serialization::Value> serialize(std::vector<std::string> const& value);
 ts::Result<void> deserialize(std::shared_ptr<::silk::IUAV_Descriptor>& value, ts::serialization::Value const& sz_value);
 ts::Result<ts::serialization::Value> serialize(std::shared_ptr<::silk::IUAV_Descriptor> const& value);
-ts::Result<void> deserialize(std::vector<::silk::Bus_Data>& value, ts::serialization::Value const& sz_value);
-ts::Result<ts::serialization::Value> serialize(std::vector<::silk::Bus_Data> const& value);
-ts::Result<void> deserialize(std::vector<::silk::Node_Data>& value, ts::serialization::Value const& sz_value);
-ts::Result<ts::serialization::Value> serialize(std::vector<::silk::Node_Data> const& value);
+ts::Result<void> deserialize(std::vector<::silk::Settings::Bus_Data>& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(std::vector<::silk::Settings::Bus_Data> const& value);
+ts::Result<void> deserialize(std::vector<::silk::Settings::Node_Data>& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(std::vector<::silk::Settings::Node_Data> const& value);
 ts::Result<void> deserialize(std::vector<::silk::Multirotor_Descriptor::Motor>& value, ts::serialization::Value const& sz_value);
 ts::Result<ts::serialization::Value> serialize(std::vector<::silk::Multirotor_Descriptor::Motor> const& value);
 ts::Result<void> deserialize(std::vector<::silk::Acceleration_Calibration_Point>& value, ts::serialization::Value const& sz_value);
