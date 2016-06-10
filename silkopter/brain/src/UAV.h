@@ -77,7 +77,6 @@ public:
     void shutdown();
 
     void save_settings();
-    void save_settings2();
 
     auto set_uav_descriptor(std::shared_ptr<IUAV_Descriptor> descriptor) -> bool;
     auto get_uav_descriptor() const   -> std::shared_ptr<const IUAV_Descriptor>;
@@ -117,15 +116,8 @@ private:
 
     void generate_settings_file();
 
-//    auto create_bus(std::string const& type,
-//                    std::string const& name,
-//                    rapidjson::Value const& init_params) -> std::shared_ptr<bus::IBus>;
-//    auto create_buses(rapidjson::Value& json) -> bool;
-
-//    auto create_node(std::string const& type,
-//                     std::string const& name,
-//                     rapidjson::Value const& init_params) -> std::shared_ptr<node::INode>;
-//    auto create_nodes(rapidjson::Value& json) -> bool;
+    auto create_bus(std::string const& type, std::string const& name, std::shared_ptr<IBus_Descriptor> descriptor) -> std::shared_ptr<bus::IBus>;
+    auto create_node(std::string const& type, std::string const& name, std::shared_ptr<INode_Descriptor> descriptor) -> std::shared_ptr<node::INode>;
 
     auto remove_node(std::shared_ptr<node::INode> node) -> bool;
 

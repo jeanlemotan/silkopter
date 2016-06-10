@@ -170,105 +170,6 @@ UAV::~UAV()
 {
 }
 
-void UAV::save_settings2()
-{
-    TIMED_FUNCTION();
-
-//    std::shared_ptr<ts::IValue> settings_value = m_type_system.create_value("::silk::Settings");
-//    QASSERT(settings_value);
-
-//    std::shared_ptr<ts::IValue> config_value;
-
-//    std::shared_ptr<const Multirotor_Config> multirotor_config = get_specialized_uav_descriptor<Multirotor_Config>();
-//    if (multirotor_config)
-//    {
-//        config_value = m_type_system.create_value("::silk::Multirotor_Config");
-//        if (!config_value)
-//        {
-//            QLOGE("Cannot create a silk::Multirotor_Config value.");
-//            return;
-//        }
-
-//        auto result = ts::mapper::set(*config_value, *multirotor_config);
-//        if (result != ts::success)
-//        {
-//            QLOGE("Cannot map/set the config: {}", result.error().what());
-//            return;
-//        }
-//    }
-
-//    std::shared_ptr<ts::IPoly_Value> settings_config_value = settings_value->select_specialized<ts::IPoly_Value>("config");
-//    QASSERT(settings_config_value);
-//    auto result = settings_config_value->set_value(config_value);
-//    if (result != ts::success)
-//    {
-//        QLOGE("Cannot set multirotor config value: {}", result.error().what());
-//        return;
-//    }
-
-//    {
-//        std::shared_ptr<ts::IVector_Value> settings_buses_value = settings_value->select_specialized<ts::IVector_Value>("buses");
-//        QASSERT(settings_buses_value);
-//        settings_buses_value->clear();
-
-//        std::vector<Registry<bus::IBus>::Item> const& buses = get_buses().get_all();
-//        for (Registry<bus::IBus>::Item const& bus: buses)
-//        {
-//            auto insert_result = settings_buses_value->insert_default_value(settings_buses_value->get_value_count());
-//            if (insert_result != ts::success)
-//            {
-//                QLOGE("Failed to create bus value: {}", insert_result.error().what());
-//                return;
-//            }
-//            std::shared_ptr<ts::IValue> value = insert_result.payload();
-//            auto result = ts::mapper::set(*value, "name", bus.name) &
-//                    ts::mapper::set(*value, "type", bus.type) &
-//                    ts::mapper::set(*value, "descriptor", *bus.ptr->get_descriptor());
-//            if (result != ts::success)
-//            {
-//                QLOGE("Failed to set bus value: {}", result.error().what());
-//                return;
-//            }
-//        }
-//    }
-
-
-//    silk::async(std::function<void()>([=]()
-//    {
-//        TIMED_FUNCTION();
-
-//        auto result = settings_value->serialize();
-//        if (result != ts::success)
-//        {
-//            QLOGE("Failed to serialize settings: {}", result.error().what());
-//            return;
-//        }
-
-//        std::string json = ts::serialization::to_json(result.payload());
-
-//        q::data::File_Sink fs(k_settings_path);
-//        if (fs.is_open())
-//        {
-//            fs.write(reinterpret_cast<uint8_t const*>(json.data()), json.size());
-//        }
-//        else
-//        {
-//            QLOGE("Cannot open '{}' to save settings.", k_settings_path);
-//        }
-//    }));
-
-
-//        auto* configj = jsonutil::get_or_add_value(*settingsj, q::Path("uav/multirotor_config"), rapidjson::kObjectType, allocator);
-//        if (!configj)
-//        {
-//            QLOGE("Cannot create multirotor config node.");
-//            return;
-//        }
-//        rapidjson::Document json;
-//        autojsoncxx::to_document(*multirotor_config, json);
-//        jsonutil::clone_value(*configj, json, allocator);
-}
-
 void UAV::save_settings()
 {
     TIMED_FUNCTION();
@@ -302,6 +203,7 @@ void UAV::save_settings()
     {
         Bus_Data bus_data;
 
+        bus_data.set_name(b.name);
         bus_data.set_type(b.type);
         bus_data.set_descriptor(b.ptr->get_descriptor());
 
@@ -463,6 +365,7 @@ auto UAV::set_uav_descriptor(std::shared_ptr<IUAV_Descriptor> descriptor) -> boo
 {
     if (!descriptor)
     {
+        QLOGE("Null descriptor");
         return false;
     }
 
@@ -471,6 +374,8 @@ auto UAV::set_uav_descriptor(std::shared_ptr<IUAV_Descriptor> descriptor) -> boo
     {
         return set_multirotor_descriptor(multirotor_descriptor);
     }
+
+    QLOGE("Unrecognized UAV descriptor");
     return false;
 }
 auto UAV::set_multirotor_descriptor(std::shared_ptr<Multirotor_Descriptor> descriptor) -> bool
@@ -534,55 +439,49 @@ void write_gnu_plot(std::string const& name, std::vector<T> const& samples)
     }
 }
 
-//auto UAV::create_bus(
-//        std::string const& type,
-//        std::string const& name,
-//        rapidjson::Value const& init_params) -> std::shared_ptr<bus::IBus>
-//{
-//    if (m_buses.find_by_name<bus::IBus>(name))
-//    {
-//        QLOGE("Bus '{}' already exist", name);
-//        return std::shared_ptr<bus::IBus>();
-//    }
-//    auto node = m_bus_factory.create(type);
-////    if (node && node->init(init_params))
-////    {
-////        auto res = m_buses.add(name, type, node); //this has to succeed since we already tested for duplicate names
-////        QASSERT(res);
-////        return node;
-////    }
-//    return std::shared_ptr<bus::IBus>();
-//}
-//auto UAV::create_node(
-//        std::string const& type,
-//        std::string const& name,
-//        rapidjson::Value const& init_params) -> std::shared_ptr<node::INode>
-//{
-//    if (m_nodes.find_by_name<node::INode>(name))
-//    {
-//        QLOGE("Node '{}' already exist", name);
-//        return std::shared_ptr<node::INode>();
-//    }
-////    auto node = m_node_factory.create(type);
-////    if (node && node->init(init_params))
-////    {
-////        node->set_config(node->get_config());//apply default config
-////        auto res = m_nodes.add(name, type, node); //this has to succeed since we already tested for duplicate names
-////        QASSERT(res);
-////        auto outputs = node->get_outputs();
-////        for (auto const& x: outputs)
-////        {
-////            std::string stream_name = q::util::format<std::string>("{}/{}", name, x.name);
-////            if (!m_streams.add(stream_name, std::string(), x.stream))
-////            {
-////                QLOGE("Cannot add stream '{}'", stream_name);
-////                return std::shared_ptr<node::INode>();
-////            }
-////        }
-////        return node;
-////    }
-//    return std::shared_ptr<node::INode>();
-//}
+auto UAV::create_bus(std::string const& type, std::string const& name, std::shared_ptr<IBus_Descriptor> descriptor) -> std::shared_ptr<bus::IBus>
+{
+    if (m_buses.find_by_name<bus::IBus>(name))
+    {
+        QLOGE("Bus '{}' already exist", name);
+        return std::shared_ptr<bus::IBus>();
+    }
+    auto node = m_bus_factory.create(type);
+    if (node && node->init(descriptor))
+    {
+        auto res = m_buses.add(name, type, node); //this has to succeed since we already tested for duplicate names
+        QASSERT(res);
+        return node;
+    }
+    return std::shared_ptr<bus::IBus>();
+}
+auto UAV::create_node(std::string const& type, std::string const& name, std::shared_ptr<INode_Descriptor> descriptor) -> std::shared_ptr<node::INode>
+{
+    if (m_nodes.find_by_name<node::INode>(name))
+    {
+        QLOGE("Node '{}' already exist", name);
+        return std::shared_ptr<node::INode>();
+    }
+    auto node = m_node_factory.create(type);
+    if (node && node->init(descriptor))
+    {
+        node->set_config(node->get_config());//apply default config
+        auto res = m_nodes.add(name, type, node); //this has to succeed since we already tested for duplicate names
+        QASSERT(res);
+        auto outputs = node->get_outputs();
+        for (auto const& x: outputs)
+        {
+            std::string stream_name = q::util::format<std::string>("{}/{}", name, x.name);
+            if (!m_streams.add(stream_name, std::string(), x.stream))
+            {
+                QLOGE("Cannot add stream '{}'", stream_name);
+                return std::shared_ptr<node::INode>();
+            }
+        }
+        return node;
+    }
+    return std::shared_ptr<node::INode>();
+}
 
 //auto UAV::create_buses(rapidjson::Value& json) -> bool
 //{
@@ -1070,61 +969,54 @@ auto UAV::init(Comms& comms) -> bool
         return false;
     }
 
-    set_uav_descriptor(settings.get_uav_descriptor());
-
-/*
-    rapidjson::Document settingsj;
-    if (settingsj.Parse(data.c_str()).HasParseError())
+    if (settings.get_uav_descriptor() != nullptr)
     {
-        QLOGE("Failed to load '{}': {}:{}", k_settings_path, settingsj.GetParseError(), settingsj.GetErrorOffset());
-        return false;
-    }
-
-    //read the UAV config
-    auto* configj = jsonutil::find_value(static_cast<rapidjson::Value&>(settingsj), q::Path("uav/multirotor_config"));
-    if (configj)
-    {
-        std::shared_ptr<Multirotor_Config> config = std::make_shared<Multirotor_Config>();
-        autojsoncxx::error::ErrorStack result;
-        if (!autojsoncxx::from_value(*config, *configj, result))
-        {
-            std::ostringstream ss;
-            ss << result;
-            QLOGE("Cannot deserialize multirotor config: {}", ss.str());
-            return false;
-        }
-        if (!set_multirotor_config(config))
+        if (!set_uav_descriptor(settings.get_uav_descriptor()))
         {
             return false;
         }
     }
 
-
-    //create buses and nodes
-    auto* busesj = jsonutil::find_value(static_cast<rapidjson::Value&>(settingsj), q::Path("uav/buses"));
-    auto* nodesj = jsonutil::find_value(static_cast<rapidjson::Value&>(settingsj), q::Path("uav/nodes"));
-
-    if ((busesj && !create_buses(*busesj)) ||
-        (nodesj && !create_nodes(*nodesj)))
+    for (Bus_Data const& data: settings.get_buses())
     {
-        return false;
+        if (!create_bus(data.get_type(), data.get_name(), data.get_descriptor()))
+        {
+            QLOGE("Failed to create bus {} of type '{}'", data.get_name(), data.get_type());
+            return false;
+        }
+    }
+    for (Node_Data const& data: settings.get_nodes())
+    {
+        if (!create_node(data.get_type(), data.get_name(), data.get_descriptor()))
+        {
+            QLOGE("Failed to create node {} of type '{}'", data.get_name(), data.get_type());
+            return false;
+        }
     }
 
-//    auto* first_nodej = jsonutil::find_value(static_cast<rapidjson::Value&>(settingsj), q::Path("uav/first_node"));
-//    if (!first_nodej || first_nodej->GetType() != rapidjson::kStringType)
-//    {
-//        QLOGE("Json value uav/first_node has to be a string");
-//        return false;
-//    }
-//    std::shared_ptr<node::INode> first_node = m_nodes.find_by_name<node::INode>(std::string(first_nodej->GetString()));
-//    if (!first_node)
-//    {
-//        QLOGE("First node '{}' not found", first_nodej->GetString());
-//        return false;
-//    }
+    //set input paths and configs
+    for (Node_Data const& data: settings.get_nodes())
+    {
+        std::shared_ptr<node::INode> node = m_nodes.find_by_name<node::INode>(data.get_name());
+        if (!node)
+        {
+            QLOGE("Internal inconsistency, cannot find node {} of type '{}'", data.get_name(), data.get_type());
+            return false;
+        }
 
-    //sort_nodes(first_node);
-*/
+        size_t idx = 0;
+        for (std::string const& input_path: data.get_input_paths())
+        {
+            node->set_input_stream_path(idx++, q::Path(input_path));
+        }
+
+        if (!node->set_config(data.get_config()))
+        {
+            QLOGE("Failed to set config for node {} of type '{}'", data.get_name(), data.get_type());
+            return false;
+        }
+    }
+
     //start the system
     auto now = q::Clock::now();
     for (auto const& n: m_nodes.get_all())

@@ -48,6 +48,7 @@ struct INode_Config
 
 struct Bus_Data
 {
+    string name;
     string type;
     poly<IBus_Descriptor> descriptor;
 };

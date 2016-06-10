@@ -84,6 +84,9 @@ public:
   Bus_Data() noexcept {};
   virtual ~Bus_Data() noexcept {};
 
+  void set_name(std::string const& value);
+  auto get_name() const -> std::string const&;
+
   void set_type(std::string const& value);
   auto get_type() const -> std::string const&;
 
@@ -94,6 +97,7 @@ public:
 
 private:
 
+  std::string m_name = {};
   std::string m_type = {};
   std::shared_ptr<::silk::IBus_Descriptor> m_descriptor = {};
 };
