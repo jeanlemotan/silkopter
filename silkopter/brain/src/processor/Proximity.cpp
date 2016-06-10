@@ -17,7 +17,7 @@ Proximity::Proximity(UAV& uav)
     m_output_stream = std::make_shared<Output_Stream>();
 }
 
-auto Proximity::init(std::shared_ptr<Node_Descriptor_Base> descriptor) -> bool
+auto Proximity::init(std::shared_ptr<INode_Descriptor> descriptor) -> bool
 {
     QLOG_TOPIC("Proximity::init");
 
@@ -97,7 +97,7 @@ void Proximity::set_input_stream_path(size_t idx, q::Path const& path)
     m_accumulators[idx].set_stream_path(0, path, m_output_stream->get_rate(), m_uav);
 }
 
-auto Proximity::set_config(std::shared_ptr<Node_Config_Base> config) -> bool
+auto Proximity::set_config(std::shared_ptr<INode_Config> config) -> bool
 {
     QLOG_TOPIC("Proximity::set_config");
 
@@ -112,19 +112,19 @@ auto Proximity::set_config(std::shared_ptr<Node_Config_Base> config) -> bool
 
     return true;
 }
-auto Proximity::get_config() const -> std::shared_ptr<Node_Config_Base>
+auto Proximity::get_config() const -> std::shared_ptr<INode_Config>
 {
     return m_config;
 }
 
-auto Proximity::get_descriptor() const -> std::shared_ptr<Node_Descriptor_Base>
+auto Proximity::get_descriptor() const -> std::shared_ptr<INode_Descriptor>
 {
     return m_descriptor;
 }
-auto Proximity::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document
-{
-    return rapidjson::Document();
-}
+//auto Proximity::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document
+//{
+//    return rapidjson::Document();
+//}
 
 
 }

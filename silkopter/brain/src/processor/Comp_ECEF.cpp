@@ -18,7 +18,7 @@ Comp_ECEF::Comp_ECEF(UAV& uav)
 //    m_enu_frame_output_stream = std::make_shared<ENU_Frame_Stream>();
 }
 
-auto Comp_ECEF::init(std::shared_ptr<Node_Descriptor_Base> descriptor) -> bool
+auto Comp_ECEF::init(std::shared_ptr<INode_Descriptor> descriptor) -> bool
 {
     QLOG_TOPIC("Comp_ECEF::init");
 
@@ -123,7 +123,7 @@ void Comp_ECEF::set_input_stream_path(size_t idx, q::Path const& path)
     m_accumulator.set_stream_path(idx, path, m_descriptor->rate, m_uav);
 }
 
-auto Comp_ECEF::set_config(std::shared_ptr<Node_Config_Base> config) -> bool
+auto Comp_ECEF::set_config(std::shared_ptr<INode_Config> config) -> bool
 {
     QLOG_TOPIC("Comp_ECEF::set_config");
 
@@ -138,12 +138,12 @@ auto Comp_ECEF::set_config(std::shared_ptr<Node_Config_Base> config) -> bool
 
     return true;
 }
-auto Comp_ECEF::get_config() const -> std::shared_ptr<Node_Config_Base>
+auto Comp_ECEF::get_config() const -> std::shared_ptr<INode_Config>
 {
     return m_config;
 }
 
-auto Comp_ECEF::get_descriptor() const -> std::shared_ptr<Node_Descriptor_Base>
+auto Comp_ECEF::get_descriptor() const -> std::shared_ptr<INode_Descriptor>
 {
     return m_descriptor;
 }

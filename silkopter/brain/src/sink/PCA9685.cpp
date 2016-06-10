@@ -88,7 +88,7 @@ auto PCA9685::get_inputs() const -> std::vector<Input>
 }
 
 
-auto PCA9685::init(std::shared_ptr<Node_Descriptor_Base> descriptor) -> bool
+auto PCA9685::init(std::shared_ptr<INode_Descriptor> descriptor) -> bool
 {
     QLOG_TOPIC("PCA9685::init");
 
@@ -364,7 +364,7 @@ void PCA9685::set_input_stream_path(size_t idx, q::Path const& path)
 constexpr float MIN_SERVO_MS = 0.5f;
 constexpr float MAX_SERVO_MS = 2.4f;
 
-auto PCA9685::set_config(std::shared_ptr<Node_Config_Base> config) -> bool
+auto PCA9685::set_config(std::shared_ptr<INode_Config> config) -> bool
 {
     QLOG_TOPIC("PCA9685::set_config");
 
@@ -397,7 +397,7 @@ auto PCA9685::set_config(std::shared_ptr<Node_Config_Base> config) -> bool
 
 
 
-auto PCA9685::get_config() const -> std::shared_ptr<Node_Config_Base>
+auto PCA9685::get_config() const -> std::shared_ptr<INode_Config>
 {
     //todo - fix this
 //    rapidjson::Document json;
@@ -443,14 +443,14 @@ auto PCA9685::get_config() const -> std::shared_ptr<Node_Config_Base>
     return m_config;
 }
 
-auto PCA9685::get_descriptor() const -> std::shared_ptr<Node_Descriptor_Base>
+auto PCA9685::get_descriptor() const -> std::shared_ptr<INode_Descriptor>
 {
     return m_descriptor;
 }
-auto PCA9685::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document
-{
-    return rapidjson::Document();
-}
+//auto PCA9685::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document
+//{
+//    return rapidjson::Document();
+//}
 
 
 }

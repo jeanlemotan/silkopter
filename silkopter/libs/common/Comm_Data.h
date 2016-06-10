@@ -24,7 +24,7 @@ enum class Setup_Message : uint8_t
 {
     CLOCK,
 
-    UAV_CONFIG,
+    UAV_DESCRIPTOR,
 
     ENUMERATE_NODE_DEFS,
     ENUMERATE_NODES,

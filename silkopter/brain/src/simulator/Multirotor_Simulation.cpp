@@ -89,30 +89,14 @@ auto Multirotor_Simulation::init(uint32_t rate) -> bool
     return true;
 }
 
-auto Multirotor_Simulation::init_uav(std::shared_ptr<const Multirotor_Config> config) -> bool
+auto Multirotor_Simulation::init_uav(std::shared_ptr<const Multirotor_Descriptor> multirotor_descriptor) -> bool
 {
-    if (math::is_zero(config->get_mass(), math::epsilon<float>()))
-    {
-        QLOGE("Bad mass: {}g", config->get_mass());
-        return false;
-    }
-    if (math::is_zero(config->get_height(), math::epsilon<float>()))
-    {
-        QLOGE("Bad height: {}g", config->get_height());
-        return false;
-    }
-    if (math::is_zero(config->get_radius(), math::epsilon<float>()))
-    {
-        QLOGE("Bad radius: {}g", config->get_radius());
-        return false;
-    }
+    m_uav.descriptor = multirotor_descriptor;
 
-    m_uav.config = config;
-
-    if (m_uav.state.motors.size() != m_uav.config->get_motors().size())
+    if (m_uav.state.motors.size() != m_uav.descriptor->get_motors().size())
     {
         m_uav.state.motors.clear();
-        m_uav.state.motors.resize(m_uav.config->get_motors().size());
+        m_uav.state.motors.resize(m_uav.descriptor->get_motors().size());
         q::util::Rand rnd;
         for (auto& m: m_uav.state.motors)
         {
@@ -128,11 +112,11 @@ auto Multirotor_Simulation::init_uav(std::shared_ptr<const Multirotor_Config> co
     m_uav.motion_state.reset();
     m_uav.shape.reset();
 
-    m_uav.shape.reset(new btCylinderShapeZ(btVector3(m_uav.config->get_radius(), m_uav.config->get_radius(), m_uav.config->get_height()*0.5f)));
+    m_uav.shape.reset(new btCylinderShapeZ(btVector3(m_uav.descriptor->get_radius(), m_uav.descriptor->get_radius(), m_uav.descriptor->get_height()*0.5f)));
 
     if (m_is_ground_enabled)
     {
-        m_uav.state.enu_position.z = math::max(m_uav.state.enu_position.z, m_uav.config->get_height()*0.5f);
+        m_uav.state.enu_position.z = math::max(m_uav.state.enu_position.z, m_uav.descriptor->get_height()*0.5f);
     }
 
     btTransform transform;
@@ -141,11 +125,11 @@ auto Multirotor_Simulation::init_uav(std::shared_ptr<const Multirotor_Config> co
     transform.setRotation(quatf_to_bt(m_uav.state.local_to_enu_rotation));
 
     btVector3 local_inertia(0, 0, 0);
-    m_uav.shape->calculateLocalInertia(m_uav.config->get_mass(), local_inertia);
+    m_uav.shape->calculateLocalInertia(m_uav.descriptor->get_mass(), local_inertia);
 
     //using motionstate is recommended, it provides interpolation capabilities, and only synchronizes 'active' objects
     m_uav.motion_state.reset(new btDefaultMotionState(transform));
-    btRigidBody::btRigidBodyConstructionInfo rbInfo(m_uav.config->get_mass(), m_uav.motion_state.get(), m_uav.shape.get(), local_inertia);
+    btRigidBody::btRigidBodyConstructionInfo rbInfo(m_uav.descriptor->get_mass(), m_uav.motion_state.get(), m_uav.shape.get(), local_inertia);
     m_uav.body.reset(new btRigidBody(rbInfo));
     m_uav.body->setActivationState(DISABLE_DEACTIVATION);
     m_uav.body->setDamping(0.01f, 0.05f); //simulate air resistance
@@ -162,7 +146,7 @@ void Multirotor_Simulation::reset()
 {
     btTransform trans;
     trans.setIdentity();
-    trans.setOrigin(btVector3(0, 0, m_uav.config->get_height()/2.f));
+    trans.setOrigin(btVector3(0, 0, m_uav.descriptor->get_height()/2.f));
     m_uav.body->setWorldTransform(trans);
     m_uav.body->setAngularVelocity(btVector3(0, 0, 0));
     m_uav.body->setLinearVelocity(btVector3(0, 0, 0));
@@ -337,20 +321,20 @@ void Multirotor_Simulation::process_uav(q::Clock::duration dt)
         for (size_t i = 0; i < m_uav.state.motors.size(); i++)
         {
             auto& m = m_uav.state.motors[i];
-            auto& mc = m_uav.config->get_motors()[i];
+            auto& mc = m_uav.descriptor->get_motors()[i];
 
             {
-                auto target_thrust = math::square(m.throttle) * m_uav.config->get_motor_thrust();
+                auto target_thrust = math::square(m.throttle) * m_uav.descriptor->get_motor_thrust();
                 if (!math::equals(m.thrust, target_thrust))
                 {
-                    auto delta = (target_thrust - m.thrust) / m_uav.config->get_motor_thrust();
-                    float acc = delta > 0 ? 1.f / m_uav.config->get_motor_acceleration() : 1.f / m_uav.config->get_motor_deceleration();
+                    auto delta = (target_thrust - m.thrust) / m_uav.descriptor->get_motor_thrust();
+                    float acc = delta > 0 ? 1.f / m_uav.descriptor->get_motor_acceleration() : 1.f / m_uav.descriptor->get_motor_deceleration();
                     float d = math::min(math::abs(delta), acc * std::chrono::duration<float>(dt).count());
-                    m.thrust += math::sgn(delta) * d * m_uav.config->get_motor_thrust();
-                    m.thrust = math::clamp(m.thrust, 0.f, m_uav.config->get_motor_thrust());
+                    m.thrust += math::sgn(delta) * d * m_uav.descriptor->get_motor_thrust();
+                    m.thrust = math::clamp(m.thrust, 0.f, m_uav.descriptor->get_motor_thrust());
                 }
             }
-            z_torque += mc.get_thrust_vector() * m_uav.config->get_motor_z_torque() * (mc.get_clockwise() ? 1 : -1) * (m.thrust / m_uav.config->get_motor_thrust());
+            z_torque += mc.get_thrust_vector() * m_uav.descriptor->get_motor_z_torque() * (mc.get_clockwise() ? 1 : -1) * (m.thrust / m_uav.descriptor->get_motor_thrust());
 
 //            total_rpm += m.rpm * (mc.clockwise ? 1.f : -1.f);
 
@@ -390,7 +374,7 @@ void Multirotor_Simulation::process_uav(q::Clock::duration dt)
         for (size_t i = 0; i < m_uav.state.motors.size(); i++)
         {
             auto& m = m_uav.state.motors[i];
-            auto& mc = m_uav.config->get_motors()[i];
+            auto& mc = m_uav.descriptor->get_motors()[i];
 
             float intensity = -math::dot(local_to_enu_trans.get_axis_z(), velocity_normalized);
             float drag = intensity * m.drag_factor;

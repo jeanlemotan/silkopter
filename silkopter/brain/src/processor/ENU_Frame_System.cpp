@@ -18,7 +18,7 @@ ENU_Frame_System::ENU_Frame_System(UAV& uav)
     m_output_stream = std::make_shared<Output_Stream>();
 }
 
-auto ENU_Frame_System::init(std::shared_ptr<Node_Descriptor_Base> descriptor) -> bool
+auto ENU_Frame_System::init(std::shared_ptr<INode_Descriptor> descriptor) -> bool
 {
     QLOG_TOPIC("ENU_Frame_System::init");
 
@@ -91,7 +91,7 @@ void ENU_Frame_System::set_input_stream_path(size_t idx, q::Path const& path)
     m_accumulator.set_stream_path(idx, path, m_output_stream->get_rate(), m_uav);
 }
 
-auto ENU_Frame_System::set_config(std::shared_ptr<Node_Config_Base> config) -> bool
+auto ENU_Frame_System::set_config(std::shared_ptr<INode_Config> config) -> bool
 {
     QLOG_TOPIC("ENU_Frame_System::set_config");
 
@@ -106,20 +106,20 @@ auto ENU_Frame_System::set_config(std::shared_ptr<Node_Config_Base> config) -> b
 
     return true;
 }
-auto ENU_Frame_System::get_config() const -> std::shared_ptr<Node_Config_Base>
+auto ENU_Frame_System::get_config() const -> std::shared_ptr<INode_Config>
 {
     return m_config;
 }
 
-auto ENU_Frame_System::get_descriptor() const -> std::shared_ptr<Node_Descriptor_Base>
+auto ENU_Frame_System::get_descriptor() const -> std::shared_ptr<INode_Descriptor>
 {
     return m_descriptor;
 }
 
-auto ENU_Frame_System::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document
-{
-    return rapidjson::Document();
-}
+//auto ENU_Frame_System::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document
+//{
+//    return rapidjson::Document();
+//}
 
 }
 }

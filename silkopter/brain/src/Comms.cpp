@@ -1,7 +1,6 @@
 #include "BrainStdAfx.h"
 #include "Comms.h"
 #include "utils/Timed_Scope.h"
-#include "utils/Json_Util.h"
 
 #include "common/stream/IAcceleration.h"
 #include "common/stream/IAngular_Velocity.h"
@@ -36,11 +35,6 @@
 #include "utils/RCP_UDP_Socket.h"
 #include "utils/RCP_RFMON_Socket.h"
 #include "utils/Channel.h"
-
-
-//#include "sz_math.hpp"
-//#include "sz_Comms_Source.hpp"
-//#include "sz_Multirotor_Config.hpp"
 
 using namespace silk;
 using namespace boost::asio;
@@ -403,17 +397,17 @@ void pack_inputs(Comms::Channels::Setup& channel, std::vector<T> const& io)
         channel.pack_param(i.stream_path.template get_as<std::string>());
     }
 }
-auto parse_json(std::string const& str) -> std::unique_ptr<rapidjson::Document>
-{
-    std::unique_ptr<rapidjson::Document> json(new rapidjson::Document);
-    json->SetObject();
-    if (!str.empty() && json->Parse(str.c_str()).HasParseError())
-    {
-//            QLOGE("Failed to parse config: {}:{}", name, node->config.GetParseError(), node->config.GetErrorOffset());
-        return nullptr;
-    }
-    return std::move(json);
-}
+//auto parse_json(std::string const& str) -> std::unique_ptr<rapidjson::Document>
+//{
+//    std::unique_ptr<rapidjson::Document> json(new rapidjson::Document);
+//    json->SetObject();
+//    if (!str.empty() && json->Parse(str.c_str()).HasParseError())
+//    {
+////            QLOGE("Failed to parse config: {}:{}", name, node->config.GetParseError(), node->config.GetErrorOffset());
+//        return nullptr;
+//    }
+//    return std::move(json);
+//}
 
 static void pack_node_def_data(Comms::Channels::Setup& channel, node::INode const& node)
 {
@@ -472,7 +466,7 @@ void Comms::handle_clock()
     channel.pack_all(comms::Setup_Message::CLOCK, tp);
 }
 
-void Comms::handle_uav_config()
+void Comms::handle_uav_descriptor()
 {
     auto& channel = m_channels->setup;
     channel.begin_unpack();
@@ -659,17 +653,17 @@ void Comms::handle_node_message()
         return;
     }
 
-    rapidjson::Document message;
-    if (!channel.unpack_param(message))
-    {
-        QLOGE("Cannot unpack node '{}' message", name);
-        return;
-    }
-    auto response = node->send_message(message);
+//    rapidjson::Document message;
+//    if (!channel.unpack_param(message))
+//    {
+//        QLOGE("Cannot unpack node '{}' message", name);
+//        return;
+//    }
+//    auto response = node->send_message(message);
 
-    channel.begin_pack(comms::Setup_Message::NODE_MESSAGE);
-    channel.pack_param(name);
-    channel.pack_param(response);
+//    channel.begin_pack(comms::Setup_Message::NODE_MESSAGE);
+//    channel.pack_param(name);
+//    channel.pack_param(response);
     channel.end_pack();
 }
 
@@ -720,33 +714,33 @@ void Comms::handle_add_node()
 {
     auto& channel = m_channels->setup;
 
-    std::string def_name, name;
-    rapidjson::Document init_paramsj;
-    if (!channel.begin_unpack() ||
-        !channel.unpack_param(def_name) ||
-        !channel.unpack_param(name) ||
-        !channel.unpack_param(init_paramsj))
-    {
-        QLOGE("Error in unpacking add node request");
-        return;
-    }
+//    std::string def_name, name;
+//    rapidjson::Document init_paramsj;
+//    if (!channel.begin_unpack() ||
+//        !channel.unpack_param(def_name) ||
+//        !channel.unpack_param(name) ||
+//        !channel.unpack_param(init_paramsj))
+//    {
+//        QLOGE("Error in unpacking add node request");
+//        return;
+//    }
 
-    QLOGI("Add node");
-    QLOGI("\tAdd node {} of type {}", name, def_name);
+//    QLOGI("Add node");
+//    QLOGI("\tAdd node {} of type {}", name, def_name);
 
-    auto node = m_uav.create_node(def_name, name, std::move(init_paramsj));
-    if (!node)
-    {
-        channel.end_pack();
-        return;
-    }
-    m_uav.save_settings();
+//    auto node = m_uav.create_node(def_name, name, std::move(init_paramsj));
+//    if (!node)
+//    {
+//        channel.end_pack();
+//        return;
+//    }
+//    m_uav.save_settings();
 
-    //reply
-    channel.begin_pack(comms::Setup_Message::ADD_NODE);
-    channel.pack_param(name);
-    pack_node_data(channel, *node);
-    channel.end_pack();
+//    //reply
+//    channel.begin_pack(comms::Setup_Message::ADD_NODE);
+//    channel.pack_param(name);
+//    pack_node_data(channel, *node);
+//    channel.end_pack();
 }
 
 void Comms::handle_remove_node()
@@ -911,7 +905,7 @@ void Comms::process()
         {
         case comms::Setup_Message::CLOCK: handle_clock(); break;
 
-        case comms::Setup_Message::UAV_CONFIG: handle_uav_config(); break;
+        case comms::Setup_Message::UAV_DESCRIPTOR: handle_uav_descriptor(); break;
 
         case comms::Setup_Message::ENUMERATE_NODE_DEFS: handle_enumerate_node_defs(); break;
         case comms::Setup_Message::ENUMERATE_NODES: handle_enumerate_nodes(); break;

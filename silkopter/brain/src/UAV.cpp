@@ -2,14 +2,7 @@
 
 #include "UAV.h"
 #include "Comms.h"
-#include "utils/Json_Util.h"
 #include "utils/Timed_Scope.h"
-
-/////////////////////////////////////////////////////////////////////////////////////
-
-#include "def_lang/Type_System.h"
-#include "ast/Builder.h"
-#include "def_lang/Mapper.h"
 
 /////////////////////////////////////////////////////////////////////////////////////
 
@@ -39,7 +32,7 @@
 #include "processor/ADC_Ammeter.h"
 #include "processor/Gravity_Filter.h"
 #include "processor/Comp_AHRS.h"
-#include "processor/Comp_ECEF.h"
+//#include "processor/Comp_ECEF.h"
 #include "processor/KF_ECEF.h"
 #include "processor/Motor_Mixer.h"
 #include "processor/Servo_Gimbal.h"
@@ -70,10 +63,6 @@
 //#include "source/EHealth.h"
 
 //#include "common/node/IAHRS.h"
-
-#include "autojsoncxx/boost_types.hpp"
-//#include "sz_math.hpp"
-//#include "sz_Multirotor_Config.hpp"
 
 #include "def_lang/Serialization.h"
 #include "def_lang/JSON_Serializer.h"
@@ -181,117 +170,92 @@ UAV::~UAV()
 {
 }
 
-void UAV::load_type_system()
-{
-    TIMED_FUNCTION();
-
-    m_type_system = ts::Type_System();
-
-    ast::Builder builder;
-
-    auto parse_result = builder.parse("uav.def");
-    if (parse_result != ts::success)
-    {
-        QLOGE("Error parsing uav.def: {}", parse_result.error().what());
-        return;
-    }
-
-    m_type_system.populate_builtin_types();
-
-    auto compile_result = builder.compile(m_type_system);
-    if (compile_result != ts::success)
-    {
-        QLOGE("Error compiling uav.def: {}", compile_result.error().what());
-        return;
-    }
-}
-
 void UAV::save_settings2()
 {
     TIMED_FUNCTION();
 
-    std::shared_ptr<ts::IValue> settings_value = m_type_system.create_value("::silk::Settings");
-    QASSERT(settings_value);
+//    std::shared_ptr<ts::IValue> settings_value = m_type_system.create_value("::silk::Settings");
+//    QASSERT(settings_value);
 
-    std::shared_ptr<ts::IValue> config_value;
+//    std::shared_ptr<ts::IValue> config_value;
 
-    std::shared_ptr<const Multirotor_Config> multirotor_config = get_specialized_uav_config<Multirotor_Config>();
-    if (multirotor_config)
-    {
-        config_value = m_type_system.create_value("::silk::Multirotor_Config");
-        if (!config_value)
-        {
-            QLOGE("Cannot create a silk::Multirotor_Config value.");
-            return;
-        }
+//    std::shared_ptr<const Multirotor_Config> multirotor_config = get_specialized_uav_descriptor<Multirotor_Config>();
+//    if (multirotor_config)
+//    {
+//        config_value = m_type_system.create_value("::silk::Multirotor_Config");
+//        if (!config_value)
+//        {
+//            QLOGE("Cannot create a silk::Multirotor_Config value.");
+//            return;
+//        }
 
-        auto result = ts::mapper::set(*config_value, *multirotor_config);
-        if (result != ts::success)
-        {
-            QLOGE("Cannot map/set the config: {}", result.error().what());
-            return;
-        }
-    }
+//        auto result = ts::mapper::set(*config_value, *multirotor_config);
+//        if (result != ts::success)
+//        {
+//            QLOGE("Cannot map/set the config: {}", result.error().what());
+//            return;
+//        }
+//    }
 
-    std::shared_ptr<ts::IPoly_Value> settings_config_value = settings_value->select_specialized<ts::IPoly_Value>("config");
-    QASSERT(settings_config_value);
-    auto result = settings_config_value->set_value(config_value);
-    if (result != ts::success)
-    {
-        QLOGE("Cannot set multirotor config value: {}", result.error().what());
-        return;
-    }
+//    std::shared_ptr<ts::IPoly_Value> settings_config_value = settings_value->select_specialized<ts::IPoly_Value>("config");
+//    QASSERT(settings_config_value);
+//    auto result = settings_config_value->set_value(config_value);
+//    if (result != ts::success)
+//    {
+//        QLOGE("Cannot set multirotor config value: {}", result.error().what());
+//        return;
+//    }
 
-    {
-        std::shared_ptr<ts::IVector_Value> settings_buses_value = settings_value->select_specialized<ts::IVector_Value>("buses");
-        QASSERT(settings_buses_value);
-        settings_buses_value->clear();
+//    {
+//        std::shared_ptr<ts::IVector_Value> settings_buses_value = settings_value->select_specialized<ts::IVector_Value>("buses");
+//        QASSERT(settings_buses_value);
+//        settings_buses_value->clear();
 
-        std::vector<Registry<bus::IBus>::Item> const& buses = get_buses().get_all();
-        for (Registry<bus::IBus>::Item const& bus: buses)
-        {
-            auto insert_result = settings_buses_value->insert_default_value(settings_buses_value->get_value_count());
-            if (insert_result != ts::success)
-            {
-                QLOGE("Failed to create bus value: {}", insert_result.error().what());
-                return;
-            }
-            std::shared_ptr<ts::IValue> value = insert_result.payload();
-            auto result = ts::mapper::set(*value, "name", bus.name) &
-                    ts::mapper::set(*value, "type", bus.type) &
-                    ts::mapper::set(*value, "descriptor", *bus.ptr->get_descriptor());
-            if (result != ts::success)
-            {
-                QLOGE("Failed to set bus value: {}", result.error().what());
-                return;
-            }
-        }
-    }
+//        std::vector<Registry<bus::IBus>::Item> const& buses = get_buses().get_all();
+//        for (Registry<bus::IBus>::Item const& bus: buses)
+//        {
+//            auto insert_result = settings_buses_value->insert_default_value(settings_buses_value->get_value_count());
+//            if (insert_result != ts::success)
+//            {
+//                QLOGE("Failed to create bus value: {}", insert_result.error().what());
+//                return;
+//            }
+//            std::shared_ptr<ts::IValue> value = insert_result.payload();
+//            auto result = ts::mapper::set(*value, "name", bus.name) &
+//                    ts::mapper::set(*value, "type", bus.type) &
+//                    ts::mapper::set(*value, "descriptor", *bus.ptr->get_descriptor());
+//            if (result != ts::success)
+//            {
+//                QLOGE("Failed to set bus value: {}", result.error().what());
+//                return;
+//            }
+//        }
+//    }
 
 
-    silk::async(std::function<void()>([=]()
-    {
-        TIMED_FUNCTION();
+//    silk::async(std::function<void()>([=]()
+//    {
+//        TIMED_FUNCTION();
 
-        auto result = settings_value->serialize();
-        if (result != ts::success)
-        {
-            QLOGE("Failed to serialize settings: {}", result.error().what());
-            return;
-        }
+//        auto result = settings_value->serialize();
+//        if (result != ts::success)
+//        {
+//            QLOGE("Failed to serialize settings: {}", result.error().what());
+//            return;
+//        }
 
-        std::string json = ts::serialization::to_json(result.payload());
+//        std::string json = ts::serialization::to_json(result.payload());
 
-        q::data::File_Sink fs(k_settings_path);
-        if (fs.is_open())
-        {
-            fs.write(reinterpret_cast<uint8_t const*>(json.data()), json.size());
-        }
-        else
-        {
-            QLOGE("Cannot open '{}' to save settings.", k_settings_path);
-        }
-    }));
+//        q::data::File_Sink fs(k_settings_path);
+//        if (fs.is_open())
+//        {
+//            fs.write(reinterpret_cast<uint8_t const*>(json.data()), json.size());
+//        }
+//        else
+//        {
+//            QLOGE("Cannot open '{}' to save settings.", k_settings_path);
+//        }
+//    }));
 
 
 //        auto* configj = jsonutil::get_or_add_value(*settingsj, q::Path("uav/multirotor_config"), rapidjson::kObjectType, allocator);
@@ -309,98 +273,159 @@ void UAV::save_settings()
 {
     TIMED_FUNCTION();
 
-    auto settingsj = std::make_shared<rapidjson::Document>();
-    settingsj->SetObject();
+    Settings settings;
 
-    auto& allocator = settingsj->GetAllocator();
+    settings.set_uav_descriptor(m_uav_descriptor);
 
-    std::shared_ptr<const Multirotor_Config> multirotor_config = get_specialized_uav_config<Multirotor_Config>();
-    if (multirotor_config)
+    std::vector<Node_Data> node_datas = settings.get_nodes();
+    auto const& nodes = get_nodes().get_all();
+    for (auto const& n: nodes)
     {
-        auto* configj = jsonutil::get_or_add_value(*settingsj, q::Path("uav/multirotor_config"), rapidjson::kObjectType, allocator);
-        if (!configj)
+        Node_Data node_data;
+
+        node_data.set_name(n.name);
+        node_data.set_type(n.type);
+        node_data.set_descriptor(n.ptr->get_descriptor());
+        node_data.set_config(n.ptr->get_config());
+
+        for (auto const& si: n.ptr->get_inputs())
         {
-            QLOGE("Cannot create multirotor config node.");
-            return;
+            node_data.get_input_paths().push_back(si.stream_path.get_as<std::string>());
         }
-        rapidjson::Document json;
-        autojsoncxx::to_document(*multirotor_config, json);
-        jsonutil::clone_value(*configj, json, allocator);
+
+        node_datas.push_back(node_data);
     }
 
+    std::vector<Bus_Data> bus_datas = settings.get_buses();
+    auto const& buses = get_buses().get_all();
+    for (auto const& b: buses)
     {
-        auto busesj = jsonutil::get_or_add_value(*settingsj, q::Path("uav/buses"), rapidjson::kObjectType, allocator);
-        if (!busesj)
-        {
-            QLOGE("Cannot create buses settings node.");
-            return;
-        }
-//        auto const& nodes = get_buses().get_all();
-//        for (auto const& n: nodes)
-//        {
-//            if (!jsonutil::add_value(*busesj, q::Path(n.name + "/type"), rapidjson::Value(n.type.c_str(), n.type.size(), allocator), allocator) ||
-//                !jsonutil::add_value(*busesj, q::Path(n.name + "/init_params"), jsonutil::clone_value(n.ptr->get_init_params(), allocator), allocator) ||
-//                !jsonutil::add_value(*busesj, q::Path(n.name + "/config"), jsonutil::clone_value(n.ptr->get_config(), allocator), allocator))
-//            {
-//                QLOGE("Cannot create settings node.");
-//                return;
-//            }
-//        }
-    }
-    {
-        auto nodesj = jsonutil::get_or_add_value(*settingsj, q::Path("uav/nodes"), rapidjson::kArrayType, allocator);
-        if (!nodesj)
-        {
-            QLOGE("Cannot create nodes settings node.");
-            return;
-        }
-        auto const& nodes = get_nodes().get_all();
-        for (auto const& n: nodes)
-        {
-            rapidjson::Value nodej;
-            nodej.SetObject();
+        Bus_Data bus_data;
 
-            rapidjson::Value input_pathsj;
-            {
-                auto inputs = n.ptr->get_inputs();
-                input_pathsj.SetArray();
-                for (auto const& si: inputs)
-                {
-                    input_pathsj.PushBack(rapidjson::Value(si.stream_path.get_as<std::string>(), allocator), allocator);
-                }
-            }
+        bus_data.set_type(b.type);
+        bus_data.set_descriptor(b.ptr->get_descriptor());
 
-            if (!jsonutil::add_value(nodej, std::string("name"), rapidjson::Value(n.name.c_str(), n.name.size(), allocator), allocator) ||
-                !jsonutil::add_value(nodej, std::string("type"), rapidjson::Value(n.type.c_str(), n.type.size(), allocator), allocator) ||
-                !jsonutil::add_value(nodej, std::string("init_params"), jsonutil::clone_value(n.ptr->get_init_params(), allocator), allocator) ||
-                !jsonutil::add_value(nodej, std::string("config"), jsonutil::clone_value(n.ptr->get_config(), allocator), allocator) ||
-                !jsonutil::add_value(nodej, std::string("input_paths"), std::move(input_pathsj), allocator))
-            {
-                QLOGE("Cannot create settings node.");
-                return;
-            }
-
-            nodesj->PushBack(nodej, allocator);
-        }
+        bus_datas.push_back(bus_data);
     }
 
     silk::async(std::function<void()>([=]()
     {
         TIMED_FUNCTION();
 
-        rapidjson::StringBuffer s;
-        rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(s);
-        settingsj->Accept(writer);    // Accept() traverses the DOM and generates Handler events.
+        auto result = serialize(settings);
+        if (result != ts::success)
+        {
+            QLOGE("Cannot serialize settings: {}.", result.error().what());
+            return;
+        }
+
+        std::string json = ts::serialization::to_json(result.payload(), true);
+
         q::data::File_Sink fs(k_settings_path);
         if (fs.is_open())
         {
-            fs.write(reinterpret_cast<uint8_t const*>(s.GetString()), s.GetSize());
+            fs.write(reinterpret_cast<uint8_t const*>(json.data()), json.size());
         }
         else
         {
             QLOGE("Cannot open '{}' to save settings.", k_settings_path);
         }
     }));
+
+
+
+//    auto settingsj = std::make_shared<rapidjson::Document>();
+//    settingsj->SetObject();
+
+//    auto& allocator = settingsj->GetAllocator();
+
+//    std::shared_ptr<const Multirotor_Config> multirotor_config = get_specialized_uav_descriptor<Multirotor_Config>();
+//    if (multirotor_config)
+//    {
+//        auto* configj = jsonutil::get_or_add_value(*settingsj, q::Path("uav/multirotor_config"), rapidjson::kObjectType, allocator);
+//        if (!configj)
+//        {
+//            QLOGE("Cannot create multirotor config node.");
+//            return;
+//        }
+//        rapidjson::Document json;
+//        autojsoncxx::to_document(*multirotor_config, json);
+//        jsonutil::clone_value(*configj, json, allocator);
+//    }
+
+//    {
+//        auto busesj = jsonutil::get_or_add_value(*settingsj, q::Path("uav/buses"), rapidjson::kObjectType, allocator);
+//        if (!busesj)
+//        {
+//            QLOGE("Cannot create buses settings node.");
+//            return;
+//        }
+////        auto const& nodes = get_buses().get_all();
+////        for (auto const& n: nodes)
+////        {
+////            if (!jsonutil::add_value(*busesj, q::Path(n.name + "/type"), rapidjson::Value(n.type.c_str(), n.type.size(), allocator), allocator) ||
+////                !jsonutil::add_value(*busesj, q::Path(n.name + "/init_params"), jsonutil::clone_value(n.ptr->get_init_params(), allocator), allocator) ||
+////                !jsonutil::add_value(*busesj, q::Path(n.name + "/config"), jsonutil::clone_value(n.ptr->get_config(), allocator), allocator))
+////            {
+////                QLOGE("Cannot create settings node.");
+////                return;
+////            }
+////        }
+//    }
+//    {
+//        auto nodesj = jsonutil::get_or_add_value(*settingsj, q::Path("uav/nodes"), rapidjson::kArrayType, allocator);
+//        if (!nodesj)
+//        {
+//            QLOGE("Cannot create nodes settings node.");
+//            return;
+//        }
+//        auto const& nodes = get_nodes().get_all();
+//        for (auto const& n: nodes)
+//        {
+//            rapidjson::Value nodej;
+//            nodej.SetObject();
+
+//            rapidjson::Value input_pathsj;
+//            {
+//                auto inputs = n.ptr->get_inputs();
+//                input_pathsj.SetArray();
+//                for (auto const& si: inputs)
+//                {
+//                    input_pathsj.PushBack(rapidjson::Value(si.stream_path.get_as<std::string>(), allocator), allocator);
+//                }
+//            }
+
+////            if (!jsonutil::add_value(nodej, std::string("name"), rapidjson::Value(n.name.c_str(), n.name.size(), allocator), allocator) ||
+////                !jsonutil::add_value(nodej, std::string("type"), rapidjson::Value(n.type.c_str(), n.type.size(), allocator), allocator) ||
+////                !jsonutil::add_value(nodej, std::string("init_params"), jsonutil::clone_value(n.ptr->get_init_params(), allocator), allocator) ||
+////                !jsonutil::add_value(nodej, std::string("config"), jsonutil::clone_value(n.ptr->get_config(), allocator), allocator) ||
+////                !jsonutil::add_value(nodej, std::string("input_paths"), std::move(input_pathsj), allocator))
+////            {
+////                QLOGE("Cannot create settings node.");
+////                return;
+////            }
+
+//            nodesj->PushBack(nodej, allocator);
+//        }
+//    }
+
+//    silk::async(std::function<void()>([=]()
+//    {
+//        TIMED_FUNCTION();
+
+////        rapidjson::StringBuffer s;
+////        rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(s);
+////        settingsj->Accept(writer);    // Accept() traverses the DOM and generates Handler events.
+////        q::data::File_Sink fs(k_settings_path);
+////        if (fs.is_open())
+////        {
+////            fs.write(reinterpret_cast<uint8_t const*>(s.GetString()), s.GetSize());
+////        }
+////        else
+////        {
+////            QLOGE("Cannot open '{}' to save settings.", k_settings_path);
+////        }
+//    }));
 
     //autojsoncxx::to_pretty_json_file("sensors_pi.cfg", config);
 }
@@ -430,82 +455,56 @@ auto UAV::get_streams()  -> const Registry<stream::IStream>&
 {
     return m_streams;
 }
-auto UAV::get_uav_config() const -> std::shared_ptr<const UAV_Config>
+auto UAV::get_uav_descriptor() const -> std::shared_ptr<const IUAV_Descriptor>
 {
-    return m_uav_config;
+    return m_uav_descriptor;
 }
-auto UAV::set_uav_config(std::shared_ptr<UAV_Config> config) -> bool
+auto UAV::set_uav_descriptor(std::shared_ptr<IUAV_Descriptor> descriptor) -> bool
 {
-    if (!config)
+    if (!descriptor)
     {
         return false;
     }
 
-    if (config->get_type() == Multirotor_Config::TYPE)
+    auto multirotor_descriptor = std::dynamic_pointer_cast<Multirotor_Descriptor>(descriptor);
+    if (multirotor_descriptor)
     {
-        return set_multirotor_config(std::dynamic_pointer_cast<Multirotor_Config>(config));
+        return set_multirotor_descriptor(multirotor_descriptor);
     }
     return false;
 }
-auto UAV::set_multirotor_config(std::shared_ptr<Multirotor_Config> config) -> bool
+auto UAV::set_multirotor_descriptor(std::shared_ptr<Multirotor_Descriptor> descriptor) -> bool
 {
-    QLOG_TOPIC("uav::set_multirotor_config");
+    QLOG_TOPIC("uav::set_multirotor_descriptor");
 
-    QASSERT(config);
-    if (!config)
+    QASSERT(descriptor);
+    if (!descriptor)
     {
         return false;
     }
 
-    if (config->motors.size() < 2)
+    if (descriptor->get_motors().size() < 2)
     {
-        QLOGE("Bad motor count: {}", config->motors.size());
+        QLOGE("Bad motor count: {}", descriptor->get_motors().size());
         return false;
     }
-    if (config->height < math::epsilon<float>())
+    for (auto const& m: descriptor->get_motors())
     {
-        QLOGE("Bad height: {}", config->height);
-        return false;
-    }
-    if (config->radius < math::epsilon<float>())
-    {
-        QLOGE("Bad radius: {}", config->radius);
-        return false;
-    }
-    if (config->mass < math::epsilon<float>())
-    {
-        QLOGE("Bad mass: {}", config->mass);
-        return false;
-    }
-    if (config->motor_thrust < math::epsilon<float>())
-    {
-        QLOGE("Bad motor thrust thrust: {}", config->motor_thrust);
-        return false;
-    }
-    if (config->motor_acceleration < math::epsilon<float>())
-    {
-        QLOGE("Bad acceleration: {}", config->motor_acceleration);
-        return false;
-    }
-    if (config->motor_deceleration < math::epsilon<float>())
-    {
-        QLOGE("Bad deceleration: {}", config->motor_deceleration);
-        return false;
-    }
-    for (auto const& m: config->motors)
-    {
-        if (math::is_zero(m.position, math::epsilon<float>()))
+        if (math::is_zero(m.get_position(), math::epsilon<float>()))
         {
-            QLOGE("Bad motor position: {}", m.position);
+            QLOGE("Bad motor position: {}", m.get_position());
             return false;
         }
     }
 
     //http://en.wikipedia.org/wiki/List_of_moments_of_inertia
-    m_uav_config = config;
-    config->moment_of_inertia = (1.f / 12.f) * config->mass * (3.f * math::square(config->radius) + math::square(config->height));
+    m_uav_descriptor = descriptor;
+    if (math::is_zero(descriptor->get_moment_of_inertia(), math::epsilon<float>()))
+    {
+        descriptor->set_moment_of_inertia((1.f / 12.f) * descriptor->get_mass() * (3.f * math::square(descriptor->get_radius()) + math::square(descriptor->get_height())));
+    }
 
-    config_changed_signal.execute(*this);
+    descriptor_changed_signal.execute(*this);
 
     return true;
 }
@@ -535,177 +534,177 @@ void write_gnu_plot(std::string const& name, std::vector<T> const& samples)
     }
 }
 
-auto UAV::create_bus(
-        std::string const& type,
-        std::string const& name,
-        rapidjson::Value const& init_params) -> std::shared_ptr<bus::IBus>
-{
-    if (m_buses.find_by_name<bus::IBus>(name))
-    {
-        QLOGE("Bus '{}' already exist", name);
-        return std::shared_ptr<bus::IBus>();
-    }
-    auto node = m_bus_factory.create(type);
-//    if (node && node->init(init_params))
+//auto UAV::create_bus(
+//        std::string const& type,
+//        std::string const& name,
+//        rapidjson::Value const& init_params) -> std::shared_ptr<bus::IBus>
+//{
+//    if (m_buses.find_by_name<bus::IBus>(name))
 //    {
-//        auto res = m_buses.add(name, type, node); //this has to succeed since we already tested for duplicate names
-//        QASSERT(res);
-//        return node;
+//        QLOGE("Bus '{}' already exist", name);
+//        return std::shared_ptr<bus::IBus>();
 //    }
-    return std::shared_ptr<bus::IBus>();
-}
-auto UAV::create_node(
-        std::string const& type,
-        std::string const& name,
-        rapidjson::Value const& init_params) -> std::shared_ptr<node::INode>
-{
-    if (m_nodes.find_by_name<node::INode>(name))
-    {
-        QLOGE("Node '{}' already exist", name);
-        return std::shared_ptr<node::INode>();
-    }
-    auto node = m_node_factory.create(type);
-    if (node && node->init(init_params))
-    {
-        node->set_config(node->get_config());//apply default config
-        auto res = m_nodes.add(name, type, node); //this has to succeed since we already tested for duplicate names
-        QASSERT(res);
-        auto outputs = node->get_outputs();
-        for (auto const& x: outputs)
-        {
-            std::string stream_name = q::util::format<std::string>("{}/{}", name, x.name);
-            if (!m_streams.add(stream_name, std::string(), x.stream))
-            {
-                QLOGE("Cannot add stream '{}'", stream_name);
-                return std::shared_ptr<node::INode>();
-            }
-        }
-        return node;
-    }
-    return std::shared_ptr<node::INode>();
-}
+//    auto node = m_bus_factory.create(type);
+////    if (node && node->init(init_params))
+////    {
+////        auto res = m_buses.add(name, type, node); //this has to succeed since we already tested for duplicate names
+////        QASSERT(res);
+////        return node;
+////    }
+//    return std::shared_ptr<bus::IBus>();
+//}
+//auto UAV::create_node(
+//        std::string const& type,
+//        std::string const& name,
+//        rapidjson::Value const& init_params) -> std::shared_ptr<node::INode>
+//{
+//    if (m_nodes.find_by_name<node::INode>(name))
+//    {
+//        QLOGE("Node '{}' already exist", name);
+//        return std::shared_ptr<node::INode>();
+//    }
+////    auto node = m_node_factory.create(type);
+////    if (node && node->init(init_params))
+////    {
+////        node->set_config(node->get_config());//apply default config
+////        auto res = m_nodes.add(name, type, node); //this has to succeed since we already tested for duplicate names
+////        QASSERT(res);
+////        auto outputs = node->get_outputs();
+////        for (auto const& x: outputs)
+////        {
+////            std::string stream_name = q::util::format<std::string>("{}/{}", name, x.name);
+////            if (!m_streams.add(stream_name, std::string(), x.stream))
+////            {
+////                QLOGE("Cannot add stream '{}'", stream_name);
+////                return std::shared_ptr<node::INode>();
+////            }
+////        }
+////        return node;
+////    }
+//    return std::shared_ptr<node::INode>();
+//}
 
-auto UAV::create_buses(rapidjson::Value& json) -> bool
-{
-    if (!json.IsObject())
-    {
-        QLOGE("Wrong json type: {}", json.GetType());
-        return false;
-    }
-    auto it = json.MemberBegin();
-    for (; it != json.MemberEnd(); ++it)
-    {
-        std::string name(it->name.GetString());
-        auto* typej = jsonutil::find_value(it->value, std::string("type"));
-        if (!typej || typej->GetType() != rapidjson::kStringType)
-        {
-            QLOGE("Node {} is missing the type", name);
-            return false;
-        }
-        std::string type(typej->GetString());
-        auto* init_paramsj = jsonutil::find_value(it->value, std::string("init_params"));
-        if (!init_paramsj)
-        {
-            QLOGE("Node {} of type {} is missing the init_params", name, type);
-            return false;
-        }
-        auto node = create_bus(type, name, *init_paramsj);
-        if (!node)
-        {
-            QLOGE("Failed to create node {} of type '{}'", name, type);
-            return false;
-        }
-    }
-    return true;
-}
+//auto UAV::create_buses(rapidjson::Value& json) -> bool
+//{
+//    if (!json.IsObject())
+//    {
+//        QLOGE("Wrong json type: {}", json.GetType());
+//        return false;
+//    }
+//    auto it = json.MemberBegin();
+//    for (; it != json.MemberEnd(); ++it)
+//    {
+//        std::string name(it->name.GetString());
+//        auto* typej = jsonutil::find_value(it->value, std::string("type"));
+//        if (!typej || typej->GetType() != rapidjson::kStringType)
+//        {
+//            QLOGE("Node {} is missing the type", name);
+//            return false;
+//        }
+//        std::string type(typej->GetString());
+//        auto* init_paramsj = jsonutil::find_value(it->value, std::string("init_params"));
+//        if (!init_paramsj)
+//        {
+//            QLOGE("Node {} of type {} is missing the init_params", name, type);
+//            return false;
+//        }
+//        auto node = create_bus(type, name, *init_paramsj);
+//        if (!node)
+//        {
+//            QLOGE("Failed to create node {} of type '{}'", name, type);
+//            return false;
+//        }
+//    }
+//    return true;
+//}
 
-static bool read_input_stream_paths(std::string const& node_name, silk::node::INode& node, rapidjson::Value const& value)
-{
-    auto* input_pathsj = jsonutil::find_value(value, std::string("input_paths"));
-    if (!input_pathsj || !input_pathsj->IsArray())
-    {
-        QLOGE("Node {} is missing the stream input paths", node_name);
-        return false;
-    }
-    size_t input_idx = 0;
-    for (auto it = input_pathsj->Begin(); it != input_pathsj->End(); ++it, input_idx++)
-    {
-        if (!it->IsString())
-        {
-            QLOGE("Node {} has a bad stream input paths", node_name);
-            return false;
-        }
-        node.set_input_stream_path(input_idx, q::Path(it->GetString()));
-    }
-    return true;
-}
+//static bool read_input_stream_paths(std::string const& node_name, silk::node::INode& node, rapidjson::Value const& value)
+//{
+//    auto* input_pathsj = jsonutil::find_value(value, std::string("input_paths"));
+//    if (!input_pathsj || !input_pathsj->IsArray())
+//    {
+//        QLOGE("Node {} is missing the stream input paths", node_name);
+//        return false;
+//    }
+//    size_t input_idx = 0;
+//    for (auto it = input_pathsj->Begin(); it != input_pathsj->End(); ++it, input_idx++)
+//    {
+//        if (!it->IsString())
+//        {
+//            QLOGE("Node {} has a bad stream input paths", node_name);
+//            return false;
+//        }
+//        node.set_input_stream_path(input_idx, q::Path(it->GetString()));
+//    }
+//    return true;
+//}
 
-auto UAV::create_nodes(rapidjson::Value& json) -> bool
-{
-    if (!json.IsArray())
-    {
-        QLOGE("Wrong json type: {}", json.GetType());
-        return false;
-    }
-    for (auto it = json.Begin(); it != json.End(); ++it)
-    {
-        auto* namej = jsonutil::find_value(*it, std::string("name"));
-        if (!namej || namej->GetType() != rapidjson::kStringType)
-        {
-            QLOGE("Node is missing the name");
-            return false;
-        }
-        std::string name(namej->GetString());
+//auto UAV::create_nodes(rapidjson::Value& json) -> bool
+//{
+//    if (!json.IsArray())
+//    {
+//        QLOGE("Wrong json type: {}", json.GetType());
+//        return false;
+//    }
+//    for (auto it = json.Begin(); it != json.End(); ++it)
+//    {
+//        auto* namej = jsonutil::find_value(*it, std::string("name"));
+//        if (!namej || namej->GetType() != rapidjson::kStringType)
+//        {
+//            QLOGE("Node is missing the name");
+//            return false;
+//        }
+//        std::string name(namej->GetString());
 
-        auto* typej = jsonutil::find_value(*it, std::string("type"));
-        if (!typej || typej->GetType() != rapidjson::kStringType)
-        {
-            QLOGE("Node {} is missing the type", name);
-            return false;
-        }
-        std::string type(typej->GetString());
+//        auto* typej = jsonutil::find_value(*it, std::string("type"));
+//        if (!typej || typej->GetType() != rapidjson::kStringType)
+//        {
+//            QLOGE("Node {} is missing the type", name);
+//            return false;
+//        }
+//        std::string type(typej->GetString());
 
-        auto* init_paramsj = jsonutil::find_value(*it, std::string("init_params"));
-        if (!init_paramsj)
-        {
-            QLOGE("Node {} of type {} is missing the init_params", name, type);
-            return false;
-        }
-        auto node = create_node(type, name, *init_paramsj);
-        if (!node)
-        {
-            QLOGE("Failed to create node {} of type '{}'", name, type);
-            return false;
-        }
-    }
+//        auto* init_paramsj = jsonutil::find_value(*it, std::string("init_params"));
+//        if (!init_paramsj)
+//        {
+//            QLOGE("Node {} of type {} is missing the init_params", name, type);
+//            return false;
+//        }
+//        auto node = create_node(type, name, *init_paramsj);
+//        if (!node)
+//        {
+//            QLOGE("Failed to create node {} of type '{}'", name, type);
+//            return false;
+//        }
+//    }
 
-    auto nodes = m_nodes.get_all();
-    for (auto it = json.Begin(); it != json.End(); ++it)
-    {
-        const auto& item = nodes[std::distance(json.Begin(), it)];
-        const std::string& name = item.name;
-        std::shared_ptr<node::INode> node = item.ptr;
-        QASSERT(node);
+//    auto nodes = m_nodes.get_all();
+//    for (auto it = json.Begin(); it != json.End(); ++it)
+//    {
+//        const auto& item = nodes[std::distance(json.Begin(), it)];
+//        const std::string& name = item.name;
+//        std::shared_ptr<node::INode> node = item.ptr;
+//        QASSERT(node);
 
-        if (!read_input_stream_paths(name, *node, *it))
-        {
-            return false;
-        }
+//        if (!read_input_stream_paths(name, *node, *it))
+//        {
+//            return false;
+//        }
 
-        auto* configj = jsonutil::find_value(*it, std::string("config"));
-        if (!configj)
-        {
-            QLOGE("Node {} is missing the config", name);
-            return false;
-        }
-        if (!node->set_config(*configj))
-        {
-            QLOGE("Failed to set config for node '{}'", name);
-            return false;
-        }
-    }
-    return true;
-}
+//        auto* configj = jsonutil::find_value(*it, std::string("config"));
+//        if (!configj)
+//        {
+//            QLOGE("Node {} is missing the config", name);
+//            return false;
+//        }
+////        if (!node->set_config(*configj))
+////        {
+////            QLOGE("Failed to set config for node '{}'", name);
+////            return false;
+////        }
+//    }
+//    return true;
+//}
 
 void UAV::sort_nodes(std::shared_ptr<node::INode> first_node)
 {
@@ -814,14 +813,12 @@ auto UAV::init(Comms& comms) -> bool
     }
 #endif
 
-    load_type_system();
-
-    m_bus_factory.add<bus::UART_Linux>("UART Linux", m_type_system);
-    m_bus_factory.add<bus::UART_BBang>("UART BBang", m_type_system);
-    m_bus_factory.add<bus::I2C_Linux>("I2C Linux", m_type_system);
-    m_bus_factory.add<bus::SPI_Linux>("SPI Linux", m_type_system);
-    m_bus_factory.add<bus::I2C_BCM>("I2C BCM", m_type_system);
-    m_bus_factory.add<bus::SPI_BCM>("SPI BCM", m_type_system);
+    m_bus_factory.add<bus::UART_Linux>("UART Linux");
+    m_bus_factory.add<bus::UART_BBang>("UART BBang");
+    m_bus_factory.add<bus::I2C_Linux>("I2C Linux");
+    m_bus_factory.add<bus::SPI_Linux>("SPI Linux");
+    m_bus_factory.add<bus::I2C_BCM>("I2C BCM");
+    m_bus_factory.add<bus::SPI_BCM>("SPI BCM");
 
 #if !defined RASPBERRY_PI
     m_node_factory.add<Multirotor_Simulator>("Multirotor Simulator", *this);
@@ -849,7 +846,7 @@ auto UAV::init(Comms& comms) -> bool
     m_node_factory.add<ADC_Ammeter>("ADC Ammeter", *this);
     m_node_factory.add<ADC_Voltmeter>("ADC Voltmeter", *this);
     m_node_factory.add<Comp_AHRS>("Comp AHRS", *this);
-    m_node_factory.add<Comp_ECEF>("Comp ECEF", *this);
+//    m_node_factory.add<Comp_ECEF>("Comp ECEF", *this);
     m_node_factory.add<KF_ECEF>("EKF ECEF", *this);
     m_node_factory.add<Gravity_Filter>("Gravity Filter", *this);
     m_node_factory.add<Throttle_To_PWM>("Throttle To PWM", *this);
@@ -1058,37 +1055,22 @@ auto UAV::init(Comms& comms) -> bool
 
     std::string data = q::data::read_whole_source_as_string<std::string>(fs);
 
-    ts::Result<ts::serialization::Value> result = ts::serialization::from_json(data);
-    if (result != ts::success)
+    ts::Result<ts::serialization::Value> json_result = ts::serialization::from_json(data);
+    if (json_result != ts::success)
     {
-        QLOGE("Failed to load '{}': {}", k_settings_path, result.error().what());
+        QLOGE("Failed to load '{}': {}", k_settings_path, json_result.error().what());
         return false;
     }
 
-    std::shared_ptr<ts::IValue> settings_value = m_type_system.create_value("::silk::Settings");
-    QASSERT(settings_value);
-
-    auto deserialization_result = settings_value->deserialize(result.payload());
-    if (deserialization_result != ts::success)
+    Settings settings;
+    auto reserialize_result = deserialize(settings, json_result.payload());
+    if (reserialize_result != ts::success)
     {
-        QLOGE("Failed to deserialize settings: {}", deserialization_result.error().what());
+        QLOGE("Failed to deserialize settings: {}", reserialize_result.error().what());
         return false;
     }
 
-    std::shared_ptr<ts::IPoly_Value> config_value = settings_value->select_specialized<ts::IPoly_Value>("config");
-    QASSERT(config_value);
-
-    if (config_value->get_value() && config_value->get_value()->get_type()->get_symbol_path() == ts::Symbol_Path("::silk::Multirotor_Config"))
-    {
-        silk::Multirotor_Config config;
-        auto result = ts::mapper::get(*config_value->get_value(), config);
-        if (result != ts::success)
-        {
-            QLOGE("Failed to map/get Multirotor_Config: {}", result.error().what());
-            return false;
-        }
-        set_multirotor_config(std::make_shared<silk::Multirotor_Config>(config));
-    }
+    set_uav_descriptor(settings.get_uav_descriptor());
 
 /*
     rapidjson::Document settingsj;

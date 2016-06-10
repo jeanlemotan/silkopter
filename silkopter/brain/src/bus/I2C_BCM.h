@@ -18,8 +18,8 @@ public:
     I2C_BCM();
     ~I2C_BCM();
 
-    bool init(std::shared_ptr<Bus_Descriptor_Base> descriptor) override;
-    std::shared_ptr<const Bus_Descriptor_Base> get_descriptor() const override;
+    bool init(std::shared_ptr<IBus_Descriptor> descriptor) override;
+    std::shared_ptr<IBus_Descriptor> get_descriptor() const override;
 
     void lock();
     auto try_lock() -> bool;

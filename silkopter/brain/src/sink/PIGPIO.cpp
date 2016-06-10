@@ -48,7 +48,7 @@ auto PIGPIO::get_inputs() const -> std::vector<Input>
 }
 
 
-auto PIGPIO::init(std::shared_ptr<Node_Descriptor_Base> descriptor) -> bool
+auto PIGPIO::init(std::shared_ptr<INode_Descriptor> descriptor) -> bool
 {
     QLOG_TOPIC("pigpio::init");
 
@@ -266,7 +266,7 @@ void PIGPIO::set_input_stream_path(size_t idx, q::Path const& path)
 }
 
 
-auto PIGPIO::set_config(std::shared_ptr<Node_Config_Base> config) -> bool
+auto PIGPIO::set_config(std::shared_ptr<INode_Config> config) -> bool
 {
     QLOG_TOPIC("pigpio::set_config");
 
@@ -301,7 +301,7 @@ auto PIGPIO::set_config(std::shared_ptr<Node_Config_Base> config) -> bool
 
     return true;
 }
-auto PIGPIO::get_config() const -> std::shared_ptr<Node_Config_Base>
+auto PIGPIO::get_config() const -> std::shared_ptr<INode_Config>
 {
     //todo - fix this
 //    rapidjson::Document json;
@@ -334,14 +334,14 @@ auto PIGPIO::get_config() const -> std::shared_ptr<Node_Config_Base>
     return m_config;
 }
 
-auto PIGPIO::get_descriptor() const -> std::shared_ptr<Node_Descriptor_Base>
+auto PIGPIO::get_descriptor() const -> std::shared_ptr<INode_Descriptor>
 {
     return m_descriptor;
 }
-auto PIGPIO::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document
-{
-    return rapidjson::Document();
-}
+//auto PIGPIO::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document
+//{
+//    return rapidjson::Document();
+//}
 
 
 }

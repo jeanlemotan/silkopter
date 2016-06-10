@@ -17,12 +17,12 @@ namespace math
 namespace silk
 {
 
-struct UAV_Config_Base
+struct IUAV_Descriptor
 {
 public:
 
-  UAV_Config_Base() noexcept {};
-  virtual ~UAV_Config_Base() noexcept {};
+  IUAV_Descriptor() noexcept {};
+  virtual ~IUAV_Descriptor() noexcept {};
 
   void set_name(std::string const& value);
   auto get_name() const -> std::string const&;
@@ -41,7 +41,126 @@ private:
   float m_moment_of_inertia = {0.000000f};
 };
 
-struct Multirotor_Config : public ::silk::UAV_Config_Base
+struct IBus_Descriptor
+{
+public:
+
+  IBus_Descriptor() noexcept {};
+  virtual ~IBus_Descriptor() noexcept {};
+
+
+private:
+
+};
+
+struct INode_Descriptor
+{
+public:
+
+  INode_Descriptor() noexcept {};
+  virtual ~INode_Descriptor() noexcept {};
+
+
+private:
+
+};
+
+struct INode_Config
+{
+public:
+
+  INode_Config() noexcept {};
+  virtual ~INode_Config() noexcept {};
+
+
+private:
+
+};
+
+struct Bus_Data
+{
+public:
+
+  Bus_Data() noexcept {};
+  virtual ~Bus_Data() noexcept {};
+
+  void set_type(std::string const& value);
+  auto get_type() const -> std::string const&;
+
+  void set_descriptor(std::shared_ptr<::silk::IBus_Descriptor> const& value);
+  auto get_descriptor() const -> std::shared_ptr<::silk::IBus_Descriptor> const&;
+  auto get_descriptor() -> std::shared_ptr<::silk::IBus_Descriptor>&;
+
+
+private:
+
+  std::string m_type = {};
+  std::shared_ptr<::silk::IBus_Descriptor> m_descriptor = {};
+};
+
+struct Node_Data
+{
+public:
+
+  Node_Data() noexcept {};
+  virtual ~Node_Data() noexcept {};
+
+  void set_name(std::string const& value);
+  auto get_name() const -> std::string const&;
+
+  void set_type(std::string const& value);
+  auto get_type() const -> std::string const&;
+
+  void set_descriptor(std::shared_ptr<::silk::INode_Descriptor> const& value);
+  auto get_descriptor() const -> std::shared_ptr<::silk::INode_Descriptor> const&;
+  auto get_descriptor() -> std::shared_ptr<::silk::INode_Descriptor>&;
+
+  void set_config(std::shared_ptr<::silk::INode_Config> const& value);
+  auto get_config() const -> std::shared_ptr<::silk::INode_Config> const&;
+  auto get_config() -> std::shared_ptr<::silk::INode_Config>&;
+
+  void set_input_paths(std::vector<std::string> const& value);
+  auto get_input_paths() const -> std::vector<std::string> const&;
+  auto get_input_paths() -> std::vector<std::string>&;
+
+
+private:
+
+  std::string m_name = {};
+  std::string m_type = {};
+  std::shared_ptr<::silk::INode_Descriptor> m_descriptor = {};
+  std::shared_ptr<::silk::INode_Config> m_config = {};
+  std::vector<std::string> m_input_paths = {};
+};
+
+struct Settings
+{
+public:
+
+  Settings() noexcept {};
+  virtual ~Settings() noexcept {};
+
+  void set_uav_descriptor(std::shared_ptr<::silk::IUAV_Descriptor> const& value);
+  auto get_uav_descriptor() const -> std::shared_ptr<::silk::IUAV_Descriptor> const&;
+  auto get_uav_descriptor() -> std::shared_ptr<::silk::IUAV_Descriptor>&;
+
+  void set_buses(std::vector<::silk::Bus_Data> const& value);
+  auto get_buses() const -> std::vector<::silk::Bus_Data> const&;
+  auto get_buses() -> std::vector<::silk::Bus_Data>&;
+
+  void set_nodes(std::vector<::silk::Node_Data> const& value);
+  auto get_nodes() const -> std::vector<::silk::Node_Data> const&;
+  auto get_nodes() -> std::vector<::silk::Node_Data>&;
+
+
+private:
+
+  std::shared_ptr<::silk::IUAV_Descriptor> m_uav_descriptor = {};
+  std::vector<::silk::Bus_Data> m_buses = {};
+  std::vector<::silk::Node_Data> m_nodes = {};
+};
+
+struct Multirotor_Descriptor : public ::silk::IUAV_Descriptor
 {
 public:
 
@@ -69,8 +188,8 @@ public:
     bool m_clockwise = {false};
   };
 
-  Multirotor_Config() noexcept {};
-  virtual ~Multirotor_Config() noexcept {};
+  Multirotor_Descriptor() noexcept {};
+  virtual ~Multirotor_Descriptor() noexcept {};
 
   void set_name(std::string const& value);
   auto get_name() const -> std::string const&;
@@ -99,9 +218,9 @@ public:
   void set_motor_deceleration(float const& value);
   auto get_motor_deceleration() const -> float const&;
 
-  void set_motors(std::vector<::silk::Multirotor_Config::Motor> const& value);
-  auto get_motors() const -> std::vector<::silk::Multirotor_Config::Motor> const&;
-  auto get_motors() -> std::vector<::silk::Multirotor_Config::Motor>&;
+  void set_motors(std::vector<::silk::Multirotor_Descriptor::Motor> const& value);
+  auto get_motors() const -> std::vector<::silk::Multirotor_Descriptor::Motor> const&;
+  auto get_motors() -> std::vector<::silk::Multirotor_Descriptor::Motor>&;
 
 
 private:
@@ -115,133 +234,10 @@ private:
   float m_motor_thrust = {1.000000f};
   float m_motor_acceleration = {10.000000f};
   float m_motor_deceleration = {10.000000f};
-  std::vector<::silk::Multirotor_Config::Motor> m_motors = {};
+  std::vector<::silk::Multirotor_Descriptor::Motor> m_motors = {};
 };
 
-struct Bus_Descriptor_Base
-{
-public:
-
-  Bus_Descriptor_Base() noexcept {};
-  virtual ~Bus_Descriptor_Base() noexcept {};
-
-
-private:
-
-};
-
-struct Bus
-{
-public:
-
-  Bus() noexcept {};
-  virtual ~Bus() noexcept {};
-
-  void set_name(std::string const& value);
-  auto get_name() const -> std::string const&;
-
-  void set_type(std::string const& value);
-  auto get_type() const -> std::string const&;
-
-  void set_descriptor(std::shared_ptr<::silk::Bus_Descriptor_Base> const& value);
-  auto get_descriptor() const -> std::shared_ptr<::silk::Bus_Descriptor_Base> const&;
-  auto get_descriptor() -> std::shared_ptr<::silk::Bus_Descriptor_Base>&;
-
-
-private:
-
-  std::string m_name = {};
-  std::string m_type = {};
-  std::shared_ptr<::silk::Bus_Descriptor_Base> m_descriptor = {};
-};
-
-struct Node_Descriptor_Base
-{
-public:
-
-  Node_Descriptor_Base() noexcept {};
-  virtual ~Node_Descriptor_Base() noexcept {};
-
-
-private:
-
-};
-
-struct Node_Config_Base
-{
-public:
-
-  Node_Config_Base() noexcept {};
-  virtual ~Node_Config_Base() noexcept {};
-
-
-private:
-
-};
-
-struct Node
-{
-public:
-
-  Node() noexcept {};
-  virtual ~Node() noexcept {};
-
-  void set_name(std::string const& value);
-  auto get_name() const -> std::string const&;
-
-  void set_type(std::string const& value);
-  auto get_type() const -> std::string const&;
-
-  void set_descriptor(std::shared_ptr<::silk::Node_Descriptor_Base> const& value);
-  auto get_descriptor() const -> std::shared_ptr<::silk::Node_Descriptor_Base> const&;
-  auto get_descriptor() -> std::shared_ptr<::silk::Node_Descriptor_Base>&;
-
-  void set_config(std::shared_ptr<::silk::Node_Config_Base> const& value);
-  auto get_config() const -> std::shared_ptr<::silk::Node_Config_Base> const&;
-  auto get_config() -> std::shared_ptr<::silk::Node_Config_Base>&;
-
-  void set_input_paths(std::vector<std::string> const& value);
-  auto get_input_paths() const -> std::vector<std::string> const&;
-  auto get_input_paths() -> std::vector<std::string>&;
-
-
-private:
-
-  std::string m_name = {};
-  std::string m_type = {};
-  std::shared_ptr<::silk::Node_Descriptor_Base> m_descriptor = {};
-  std::shared_ptr<::silk::Node_Config_Base> m_config = {};
-  std::vector<std::string> m_input_paths = {};
-};
-
-struct Settings
-{
-public:
-
-  Settings() noexcept {};
-  virtual ~Settings() noexcept {};
-
-  void set_config(std::shared_ptr<::silk::UAV_Config_Base> const& value);
-  auto get_config() const -> std::shared_ptr<::silk::UAV_Config_Base> const&;
-  auto get_config() -> std::shared_ptr<::silk::UAV_Config_Base>&;
-
-  void set_buses(std::vector<::silk::Bus> const& value);
-  auto get_buses() const -> std::vector<::silk::Bus> const&;
-  auto get_buses() -> std::vector<::silk::Bus>&;
-
-  void set_nodes(std::vector<::silk::Node> const& value);
-  auto get_nodes() const -> std::vector<::silk::Node> const&;
-  auto get_nodes() -> std::vector<::silk::Node>&;
-
-
-private:
-
-  std::shared_ptr<::silk::UAV_Config_Base> m_config = {};
-  std::vector<::silk::Bus> m_buses = {};
-  std::vector<::silk::Node> m_nodes = {};
-};
-
-struct UART_Linux_Descriptor : public ::silk::Bus_Descriptor_Base
+struct UART_Linux_Descriptor : public ::silk::IBus_Descriptor
 {
 public:
 
@@ -271,7 +267,7 @@ private:
   baud_t m_baud = {::silk::UART_Linux_Descriptor::baud_t::_115200};
 };
 
-struct UART_BBang_Descriptor : public ::silk::Bus_Descriptor_Base
+struct UART_BBang_Descriptor : public ::silk::IBus_Descriptor
 {
 public:
 
@@ -295,7 +291,7 @@ private:
   bool m_invert = {false};
 };
 
-struct I2C_BCM_Descriptor : public ::silk::Bus_Descriptor_Base
+struct I2C_BCM_Descriptor : public ::silk::IBus_Descriptor
 {
 public:
 
@@ -315,7 +311,7 @@ private:
   uint32_t m_baud = {400000};
 };
 
-struct I2C_Linux_Descriptor : public ::silk::Bus_Descriptor_Base
+struct I2C_Linux_Descriptor : public ::silk::IBus_Descriptor
 {
 public:
 
@@ -331,7 +327,7 @@ private:
   std::string m_dev = {"/dev/i2c0"};
 };
 
-struct SPI_BCM_Descriptor : public ::silk::Bus_Descriptor_Base
+struct SPI_BCM_Descriptor : public ::silk::IBus_Descriptor
 {
 public:
 
@@ -359,7 +355,7 @@ private:
   uint32_t m_speed = {1000000};
 };
 
-struct SPI_Linux_Descriptor : public ::silk::Bus_Descriptor_Base
+struct SPI_Linux_Descriptor : public ::silk::IBus_Descriptor
 {
 public:
 
@@ -475,7 +471,7 @@ private:
   float m_max_i = {0.000000f};
 };
 
-struct ADC_Ammeter_Descriptor : public ::silk::Node_Descriptor_Base
+struct ADC_Ammeter_Descriptor : public ::silk::INode_Descriptor
 {
 public:
 
@@ -491,7 +487,7 @@ private:
   uint32_t m_rate = {100};
 };
 
-struct ADC_Ammeter_Config : public ::silk::Node_Config_Base
+struct ADC_Ammeter_Config : public ::silk::INode_Config
 {
 public:
 
@@ -511,7 +507,7 @@ private:
   float m_bias = {0.000000f};
 };
 
-struct ADC_Voltmeter_Descriptor : public ::silk::Node_Descriptor_Base
+struct ADC_Voltmeter_Descriptor : public ::silk::INode_Descriptor
 {
 public:
 
@@ -527,7 +523,7 @@ private:
   uint32_t m_rate = {100};
 };
 
-struct ADC_Voltmeter_Config : public ::silk::Node_Config_Base
+struct ADC_Voltmeter_Config : public ::silk::INode_Config
 {
 public:
 
@@ -547,7 +543,7 @@ private:
   float m_bias = {0.000000f};
 };
 
-struct ADS1115_Descriptor : public ::silk::Node_Descriptor_Base
+struct ADS1115_Descriptor : public ::silk::INode_Descriptor
 {
 public:
 
@@ -579,7 +575,7 @@ private:
   uint32_t m_adc3_rate = {200};
 };
 
-struct ADS1115_Config : public ::silk::Node_Config_Base
+struct ADS1115_Config : public ::silk::INode_Config
 {
 public:
 
@@ -591,7 +587,7 @@ private:
 
 };
 
-struct AVRADC_Descriptor : public ::silk::Node_Descriptor_Base
+struct AVRADC_Descriptor : public ::silk::INode_Descriptor
 {
 public:
 
@@ -611,7 +607,7 @@ private:
   uint32_t m_rate = {200};
 };
 
-struct AVRADC_Config : public ::silk::Node_Config_Base
+struct AVRADC_Config : public ::silk::INode_Config
 {
 public:
 
@@ -623,7 +619,7 @@ private:
 
 };
 
-struct Comp_AHRS_Descriptor : public ::silk::Node_Descriptor_Base
+struct Comp_AHRS_Descriptor : public ::silk::INode_Descriptor
 {
 public:
 
@@ -639,7 +635,7 @@ private:
   uint32_t m_rate = {200};
 };
 
-struct Comp_AHRS_Config : public ::silk::Node_Config_Base
+struct Comp_AHRS_Config : public ::silk::INode_Config
 {
 public:
 
@@ -655,7 +651,7 @@ private:
   float m_drift_correction_factor = {0.300000f};
 };
 
-struct Combiner_Descriptor : public ::silk::Node_Descriptor_Base
+struct Combiner_Descriptor : public ::silk::INode_Descriptor
 {
 public:
 
@@ -671,7 +667,7 @@ private:
   uint32_t m_rate = {200};
 };
 
-struct Combiner_Config : public ::silk::Node_Config_Base
+struct Combiner_Config : public ::silk::INode_Config
 {
 public:
 
@@ -683,7 +679,7 @@ private:
 
 };
 
-struct Gravity_Filter_Descriptor : public ::silk::Node_Descriptor_Base
+struct Gravity_Filter_Descriptor : public ::silk::INode_Descriptor
 {
 public:
 
@@ -699,7 +695,7 @@ private:
   uint32_t m_rate = {1};
 };
 
-struct Gravity_Filter_Config : public ::silk::Node_Config_Base
+struct Gravity_Filter_Config : public ::silk::INode_Config
 {
 public:
 
@@ -711,7 +707,7 @@ private:
 
 };
 
-struct KF_ECEF_Descriptor : public ::silk::Node_Descriptor_Base
+struct KF_ECEF_Descriptor : public ::silk::INode_Descriptor
 {
 public:
 
@@ -727,7 +723,7 @@ private:
   uint32_t m_rate = {1};
 };
 
-struct KF_ECEF_Config : public ::silk::Node_Config_Base
+struct KF_ECEF_Config : public ::silk::INode_Config
 {
 public:
 
@@ -763,7 +759,7 @@ private:
   float m_acceleration_accuracy = {2.000000f};
 };
 
-struct ENU_Frame_System_Descriptor : public ::silk::Node_Descriptor_Base
+struct ENU_Frame_System_Descriptor : public ::silk::INode_Descriptor
 {
 public:
 
@@ -779,7 +775,7 @@ private:
   uint32_t m_rate = {1};
 };
 
-struct ENU_Frame_System_Config : public ::silk::Node_Config_Base
+struct ENU_Frame_System_Config : public ::silk::INode_Config
 {
 public:
 
@@ -791,7 +787,7 @@ private:
 
 };
 
-struct LPF_Descriptor : public ::silk::Node_Descriptor_Base
+struct LPF_Descriptor : public ::silk::INode_Descriptor
 {
 public:
 
@@ -807,7 +803,7 @@ private:
   uint32_t m_rate = {1};
 };
 
-struct LPF_Config : public ::silk::Node_Config_Base
+struct LPF_Config : public ::silk::INode_Config
 {
 public:
 
@@ -827,7 +823,7 @@ private:
   float m_cutoff_frequency = {1.000000f};
 };
 
-struct MaxSonar_Descriptor : public ::silk::Node_Descriptor_Base
+struct MaxSonar_Descriptor : public ::silk::INode_Descriptor
 {
 public:
 
@@ -847,7 +843,7 @@ private:
   uint32_t m_rate = {1};
 };
 
-struct MaxSonar_Config : public ::silk::Node_Config_Base
+struct MaxSonar_Config : public ::silk::INode_Config
 {
 public:
 
@@ -871,7 +867,7 @@ private:
   float m_min_distance = {0.200000f};
 };
 
-struct Motor_Mixer_Descriptor : public ::silk::Node_Descriptor_Base
+struct Motor_Mixer_Descriptor : public ::silk::INode_Descriptor
 {
 public:
 
@@ -887,7 +883,7 @@ private:
   uint32_t m_rate = {1};
 };
 
-struct Motor_Mixer_Config : public ::silk::Node_Config_Base
+struct Motor_Mixer_Config : public ::silk::INode_Config
 {
 public:
 
@@ -971,7 +967,7 @@ private:
   math::vec3<float> m_scale = {1.000000f, 1.000000f, 1.000000f};
 };
 
-struct MPU9250_Descriptor : public ::silk::Node_Descriptor_Base
+struct MPU9250_Descriptor : public ::silk::INode_Descriptor
 {
 public:
 
@@ -1030,7 +1026,7 @@ private:
   angular_velocity_range_t m_angular_velocity_range = {::silk::MPU9250_Descriptor::angular_velocity_range_t::_500};
 };
 
-struct MPU9250_Config : public ::silk::Node_Config_Base
+struct MPU9250_Config : public ::silk::INode_Config
 {
 public:
 
@@ -1078,7 +1074,7 @@ private:
   Calibration m_calibration = {};
 };
 
-struct MS5611_Descriptor : public ::silk::Node_Descriptor_Base
+struct MS5611_Descriptor : public ::silk::INode_Descriptor
 {
 public:
 
@@ -1102,7 +1098,7 @@ private:
   uint32_t m_temperature_rate = {10};
 };
 
-struct MS5611_Config : public ::silk::Node_Config_Base
+struct MS5611_Config : public ::silk::INode_Config
 {
 public:
 
@@ -1114,7 +1110,7 @@ private:
 
 };
 
-struct Multirotor_Brain_Descriptor : public ::silk::Node_Descriptor_Base
+struct Multirotor_Brain_Descriptor : public ::silk::INode_Descriptor
 {
 public:
 
@@ -1138,7 +1134,7 @@ private:
   uint32_t m_state_rate = {30};
 };
 
-struct Multirotor_Brain_Config : public ::silk::Node_Config_Base
+struct Multirotor_Brain_Config : public ::silk::INode_Config
 {
 public:
 
@@ -1336,7 +1332,7 @@ private:
   Altitude m_altitude = {};
 };
 
-struct Multirotor_Pilot_Descriptor : public ::silk::Node_Descriptor_Base
+struct Multirotor_Pilot_Descriptor : public ::silk::INode_Descriptor
 {
 public:
 
@@ -1360,7 +1356,7 @@ private:
   uint32_t m_video_rate = {30};
 };
 
-struct Multirotor_Pilot_Config : public ::silk::Node_Config_Base
+struct Multirotor_Pilot_Config : public ::silk::INode_Config
 {
 public:
 
@@ -1372,7 +1368,7 @@ private:
 
 };
 
-struct Multirotor_Simulator_Descriptor : public ::silk::Node_Descriptor_Base
+struct Multirotor_Simulator_Descriptor : public ::silk::INode_Descriptor
 {
 public:
 
@@ -1416,7 +1412,7 @@ private:
   uint32_t m_gps_rate = {5};
 };
 
-struct Multirotor_Simulator_Config : public ::silk::Node_Config_Base
+struct Multirotor_Simulator_Config : public ::silk::INode_Config
 {
 public:
 
@@ -1501,7 +1497,7 @@ private:
   Noise m_noise = {};
 };
 
-struct Oscillator_Descriptor : public ::silk::Node_Descriptor_Base
+struct Oscillator_Descriptor : public ::silk::INode_Descriptor
 {
 public:
 
@@ -1521,7 +1517,7 @@ private:
   int32_t m_component_count = {1};
 };
 
-struct Oscillator_Config : public ::silk::Node_Config_Base
+struct Oscillator_Config : public ::silk::INode_Config
 {
 public:
 
@@ -1570,7 +1566,7 @@ private:
   std::vector<::silk::Oscillator_Config::Component> m_components = {};
 };
 
-struct PCA9685_Descriptor : public ::silk::Node_Descriptor_Base
+struct PCA9685_Descriptor : public ::silk::INode_Descriptor
 {
 public:
 
@@ -1619,7 +1615,7 @@ private:
   std::vector<::silk::PCA9685_Descriptor::Channel> m_channels = {};
 };
 
-struct PCA9685_Config : public ::silk::Node_Config_Base
+struct PCA9685_Config : public ::silk::INode_Config
 {
 public:
 
@@ -1676,7 +1672,7 @@ private:
   std::vector<boost::variant<Servo_Channel,PWM_Channel>> m_channels = {};
 };
 
-struct PIGPIO_Descriptor : public ::silk::Node_Descriptor_Base
+struct PIGPIO_Descriptor : public ::silk::INode_Descriptor
 {
 public:
 
@@ -1842,7 +1838,7 @@ private:
   Channel m_gpio_27 = {};
 };
 
-struct PIGPIO_Config : public ::silk::Node_Config_Base
+struct PIGPIO_Config : public ::silk::INode_Config
 {
 public:
 
@@ -2024,7 +2020,7 @@ private:
   boost::variant<Servo_Channel,PWM_Channel> m_gpio_27 = {};
 };
 
-struct Pressure_Velocity_Descriptor : public ::silk::Node_Descriptor_Base
+struct Pressure_Velocity_Descriptor : public ::silk::INode_Descriptor
 {
 public:
 
@@ -2040,7 +2036,7 @@ private:
   uint32_t m_rate = {1};
 };
 
-struct Pressure_Velocity_Config : public ::silk::Node_Config_Base
+struct Pressure_Velocity_Config : public ::silk::INode_Config
 {
 public:
 
@@ -2052,7 +2048,7 @@ private:
 
 };
 
-struct Proximity_Descriptor : public ::silk::Node_Descriptor_Base
+struct Proximity_Descriptor : public ::silk::INode_Descriptor
 {
 public:
 
@@ -2072,7 +2068,7 @@ private:
   int32_t m_channel_count = {1};
 };
 
-struct Proximity_Config : public ::silk::Node_Config_Base
+struct Proximity_Config : public ::silk::INode_Config
 {
 public:
 
@@ -2084,7 +2080,7 @@ private:
 
 };
 
-struct Rate_Controller_Descriptor : public ::silk::Node_Descriptor_Base
+struct Rate_Controller_Descriptor : public ::silk::INode_Descriptor
 {
 public:
 
@@ -2100,7 +2096,7 @@ private:
   uint32_t m_rate = {1};
 };
 
-struct Rate_Controller_Config : public ::silk::Node_Config_Base
+struct Rate_Controller_Config : public ::silk::INode_Config
 {
 public:
 
@@ -2222,7 +2218,7 @@ private:
   Feedforward m_feedforward = {};
 };
 
-struct Raspicam_Descriptor : public ::silk::Node_Descriptor_Base
+struct Raspicam_Descriptor : public ::silk::INode_Descriptor
 {
 public:
 
@@ -2273,7 +2269,7 @@ private:
   Quality m_recording = {};
 };
 
-struct Raspicam_Config : public ::silk::Node_Config_Base
+struct Raspicam_Config : public ::silk::INode_Config
 {
 public:
 
@@ -2339,7 +2335,7 @@ private:
   bool m_recording = {false};
 };
 
-struct RC5T619_Descriptor : public ::silk::Node_Descriptor_Base
+struct RC5T619_Descriptor : public ::silk::INode_Descriptor
 {
 public:
 
@@ -2363,7 +2359,7 @@ private:
   uint32_t m_adc1_rate = {5};
 };
 
-struct RC5T619_Config : public ::silk::Node_Config_Base
+struct RC5T619_Config : public ::silk::INode_Config
 {
 public:
 
@@ -2375,7 +2371,7 @@ private:
 
 };
 
-struct Resampler_Descriptor : public ::silk::Node_Descriptor_Base
+struct Resampler_Descriptor : public ::silk::INode_Descriptor
 {
 public:
 
@@ -2395,7 +2391,7 @@ private:
   uint32_t m_output_rate = {1};
 };
 
-struct Resampler_Config : public ::silk::Node_Config_Base
+struct Resampler_Config : public ::silk::INode_Config
 {
 public:
 
@@ -2412,7 +2408,7 @@ private:
   ::silk::LPF_Config m_lpf = {};
 };
 
-struct Scalar_Generator_Descriptor : public ::silk::Node_Descriptor_Base
+struct Scalar_Generator_Descriptor : public ::silk::INode_Descriptor
 {
 public:
 
@@ -2428,7 +2424,7 @@ private:
   uint32_t m_rate = {1};
 };
 
-struct Scalar_Generator_Config : public ::silk::Node_Config_Base
+struct Scalar_Generator_Config : public ::silk::INode_Config
 {
 public:
 
@@ -2444,7 +2440,7 @@ private:
   float m_value = {0.000000f};
 };
 
-struct Servo_Gimbal_Descriptor : public ::silk::Node_Descriptor_Base
+struct Servo_Gimbal_Descriptor : public ::silk::INode_Descriptor
 {
 public:
 
@@ -2464,7 +2460,7 @@ private:
   uint32_t m_commands_rate = {1};
 };
 
-struct Servo_Gimbal_Config : public ::silk::Node_Config_Base
+struct Servo_Gimbal_Config : public ::silk::INode_Config
 {
 public:
 
@@ -2519,7 +2515,7 @@ private:
   Channel m_z_channel = {};
 };
 
-struct SRF01_Descriptor : public ::silk::Node_Descriptor_Base
+struct SRF01_Descriptor : public ::silk::INode_Descriptor
 {
 public:
 
@@ -2539,7 +2535,7 @@ private:
   uint32_t m_rate = {1};
 };
 
-struct SRF01_Config : public ::silk::Node_Config_Base
+struct SRF01_Config : public ::silk::INode_Config
 {
 public:
 
@@ -2563,7 +2559,7 @@ private:
   float m_min_distance = {0.200000f};
 };
 
-struct SRF02_Descriptor : public ::silk::Node_Descriptor_Base
+struct SRF02_Descriptor : public ::silk::INode_Descriptor
 {
 public:
 
@@ -2583,7 +2579,7 @@ private:
   uint32_t m_rate = {1};
 };
 
-struct SRF02_Config : public ::silk::Node_Config_Base
+struct SRF02_Config : public ::silk::INode_Config
 {
 public:
 
@@ -2607,7 +2603,7 @@ private:
   float m_min_distance = {0.200000f};
 };
 
-struct Throttle_To_PWM_Descriptor : public ::silk::Node_Descriptor_Base
+struct Throttle_To_PWM_Descriptor : public ::silk::INode_Descriptor
 {
 public:
 
@@ -2627,7 +2623,7 @@ private:
   int32_t m_channel_count = {1};
 };
 
-struct Throttle_To_PWM_Config : public ::silk::Node_Config_Base
+struct Throttle_To_PWM_Config : public ::silk::INode_Config
 {
 public:
 
@@ -2639,7 +2635,7 @@ private:
 
 };
 
-struct Transformer_Descriptor : public ::silk::Node_Descriptor_Base
+struct Transformer_Descriptor : public ::silk::INode_Descriptor
 {
 public:
 
@@ -2655,7 +2651,7 @@ private:
   uint32_t m_rate = {1};
 };
 
-struct Transformer_Config : public ::silk::Node_Config_Base
+struct Transformer_Config : public ::silk::INode_Config
 {
 public:
 
@@ -2667,7 +2663,7 @@ private:
 
 };
 
-struct UBLOX_Descriptor : public ::silk::Node_Descriptor_Base
+struct UBLOX_Descriptor : public ::silk::INode_Descriptor
 {
 public:
 
@@ -2687,7 +2683,7 @@ private:
   uint32_t m_rate = {1};
 };
 
-struct UBLOX_Config : public ::silk::Node_Config_Base
+struct UBLOX_Config : public ::silk::INode_Config
 {
 public:
 
@@ -2699,7 +2695,7 @@ private:
 
 };
 
-struct Vec3_Generator_Descriptor : public ::silk::Node_Descriptor_Base
+struct Vec3_Generator_Descriptor : public ::silk::INode_Descriptor
 {
 public:
 
@@ -2715,7 +2711,7 @@ private:
   uint32_t m_rate = {1};
 };
 
-struct Vec3_Generator_Config : public ::silk::Node_Config_Base
+struct Vec3_Generator_Config : public ::silk::INode_Config
 {
 public:
 
@@ -2772,24 +2768,24 @@ ts::Result<void> deserialize(int32_t& value, ts::serialization::Value const& sz_
 ts::Result<ts::serialization::Value> serialize(int32_t const& value);
 ts::Result<void> deserialize(uint32_t& value, ts::serialization::Value const& sz_value);
 ts::Result<ts::serialization::Value> serialize(uint32_t const& value);
-ts::Result<void> deserialize(::silk::UAV_Config_Base& value, ts::serialization::Value const& sz_value);
-ts::Result<ts::serialization::Value> serialize(::silk::UAV_Config_Base const& value);
-ts::Result<void> deserialize(::silk::Multirotor_Config::Motor& value, ts::serialization::Value const& sz_value);
-ts::Result<ts::serialization::Value> serialize(::silk::Multirotor_Config::Motor const& value);
-ts::Result<void> deserialize(::silk::Multirotor_Config& value, ts::serialization::Value const& sz_value);
-ts::Result<ts::serialization::Value> serialize(::silk::Multirotor_Config const& value);
-ts::Result<void> deserialize(::silk::Bus_Descriptor_Base& value, ts::serialization::Value const& sz_value);
-ts::Result<ts::serialization::Value> serialize(::silk::Bus_Descriptor_Base const& value);
-ts::Result<void> deserialize(::silk::Bus& value, ts::serialization::Value const& sz_value);
-ts::Result<ts::serialization::Value> serialize(::silk::Bus const& value);
-ts::Result<void> deserialize(::silk::Node_Descriptor_Base& value, ts::serialization::Value const& sz_value);
-ts::Result<ts::serialization::Value> serialize(::silk::Node_Descriptor_Base const& value);
-ts::Result<void> deserialize(::silk::Node_Config_Base& value, ts::serialization::Value const& sz_value);
-ts::Result<ts::serialization::Value> serialize(::silk::Node_Config_Base const& value);
-ts::Result<void> deserialize(::silk::Node& value, ts::serialization::Value const& sz_value);
-ts::Result<ts::serialization::Value> serialize(::silk::Node const& value);
+ts::Result<void> deserialize(::silk::IUAV_Descriptor& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(::silk::IUAV_Descriptor const& value);
+ts::Result<void> deserialize(::silk::IBus_Descriptor& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(::silk::IBus_Descriptor const& value);
+ts::Result<void> deserialize(::silk::INode_Descriptor& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(::silk::INode_Descriptor const& value);
+ts::Result<void> deserialize(::silk::INode_Config& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(::silk::INode_Config const& value);
+ts::Result<void> deserialize(::silk::Bus_Data& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(::silk::Bus_Data const& value);
+ts::Result<void> deserialize(::silk::Node_Data& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(::silk::Node_Data const& value);
 ts::Result<void> deserialize(::silk::Settings& value, ts::serialization::Value const& sz_value);
 ts::Result<ts::serialization::Value> serialize(::silk::Settings const& value);
+ts::Result<void> deserialize(::silk::Multirotor_Descriptor::Motor& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(::silk::Multirotor_Descriptor::Motor const& value);
+ts::Result<void> deserialize(::silk::Multirotor_Descriptor& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(::silk::Multirotor_Descriptor const& value);
 ts::Result<void> deserialize(::silk::UART_Linux_Descriptor::baud_t& value, ts::serialization::Value const& sz_value);
 ts::Result<ts::serialization::Value> serialize(::silk::UART_Linux_Descriptor::baud_t const& value);
 ts::Result<void> deserialize(::silk::UART_Linux_Descriptor& value, ts::serialization::Value const& sz_value);
@@ -3004,22 +3000,22 @@ ts::Result<void> deserialize(::silk::Vec3_Generator_Descriptor& value, ts::seria
 ts::Result<ts::serialization::Value> serialize(::silk::Vec3_Generator_Descriptor const& value);
 ts::Result<void> deserialize(::silk::Vec3_Generator_Config& value, ts::serialization::Value const& sz_value);
 ts::Result<ts::serialization::Value> serialize(::silk::Vec3_Generator_Config const& value);
-ts::Result<void> deserialize(std::vector<::silk::Multirotor_Config::Motor>& value, ts::serialization::Value const& sz_value);
-ts::Result<ts::serialization::Value> serialize(std::vector<::silk::Multirotor_Config::Motor> const& value);
-ts::Result<void> deserialize(std::shared_ptr<::silk::Bus_Descriptor_Base>& value, ts::serialization::Value const& sz_value);
-ts::Result<ts::serialization::Value> serialize(std::shared_ptr<::silk::Bus_Descriptor_Base> const& value);
-ts::Result<void> deserialize(std::shared_ptr<::silk::Node_Descriptor_Base>& value, ts::serialization::Value const& sz_value);
-ts::Result<ts::serialization::Value> serialize(std::shared_ptr<::silk::Node_Descriptor_Base> const& value);
-ts::Result<void> deserialize(std::shared_ptr<::silk::Node_Config_Base>& value, ts::serialization::Value const& sz_value);
-ts::Result<ts::serialization::Value> serialize(std::shared_ptr<::silk::Node_Config_Base> const& value);
+ts::Result<void> deserialize(std::shared_ptr<::silk::IBus_Descriptor>& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(std::shared_ptr<::silk::IBus_Descriptor> const& value);
+ts::Result<void> deserialize(std::shared_ptr<::silk::INode_Descriptor>& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(std::shared_ptr<::silk::INode_Descriptor> const& value);
+ts::Result<void> deserialize(std::shared_ptr<::silk::INode_Config>& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(std::shared_ptr<::silk::INode_Config> const& value);
 ts::Result<void> deserialize(std::vector<std::string>& value, ts::serialization::Value const& sz_value);
 ts::Result<ts::serialization::Value> serialize(std::vector<std::string> const& value);
-ts::Result<void> deserialize(std::shared_ptr<::silk::UAV_Config_Base>& value, ts::serialization::Value const& sz_value);
-ts::Result<ts::serialization::Value> serialize(std::shared_ptr<::silk::UAV_Config_Base> const& value);
-ts::Result<void> deserialize(std::vector<::silk::Bus>& value, ts::serialization::Value const& sz_value);
-ts::Result<ts::serialization::Value> serialize(std::vector<::silk::Bus> const& value);
-ts::Result<void> deserialize(std::vector<::silk::Node>& value, ts::serialization::Value const& sz_value);
-ts::Result<ts::serialization::Value> serialize(std::vector<::silk::Node> const& value);
+ts::Result<void> deserialize(std::shared_ptr<::silk::IUAV_Descriptor>& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(std::shared_ptr<::silk::IUAV_Descriptor> const& value);
+ts::Result<void> deserialize(std::vector<::silk::Bus_Data>& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(std::vector<::silk::Bus_Data> const& value);
+ts::Result<void> deserialize(std::vector<::silk::Node_Data>& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(std::vector<::silk::Node_Data> const& value);
+ts::Result<void> deserialize(std::vector<::silk::Multirotor_Descriptor::Motor>& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(std::vector<::silk::Multirotor_Descriptor::Motor> const& value);
 ts::Result<void> deserialize(std::vector<::silk::Acceleration_Calibration_Point>& value, ts::serialization::Value const& sz_value);
 ts::Result<ts::serialization::Value> serialize(std::vector<::silk::Acceleration_Calibration_Point> const& value);
 ts::Result<void> deserialize(std::vector<::silk::Angular_Velocity_Calibration_Point>& value, ts::serialization::Value const& sz_value);

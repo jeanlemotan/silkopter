@@ -38,7 +38,7 @@ auto AVRADC::get_outputs() const -> std::vector<Output>
      }};
     return outputs;
 }
-auto AVRADC::init(std::shared_ptr<Node_Descriptor_Base> descriptor) -> bool
+auto AVRADC::init(std::shared_ptr<INode_Descriptor> descriptor) -> bool
 {
     QLOG_TOPIC("AVRADC::init");
 
@@ -166,7 +166,7 @@ void AVRADC::process()
     }
 }
 
-auto AVRADC::set_config(std::shared_ptr<Node_Config_Base> config) -> bool
+auto AVRADC::set_config(std::shared_ptr<INode_Config> config) -> bool
 {
     QLOG_TOPIC("AVRADC::set_config");
 
@@ -181,20 +181,20 @@ auto AVRADC::set_config(std::shared_ptr<Node_Config_Base> config) -> bool
 
     return true;
 }
-auto AVRADC::get_config() const -> std::shared_ptr<Node_Config_Base>
+auto AVRADC::get_config() const -> std::shared_ptr<INode_Config>
 {
     return m_config;
 }
 
-auto AVRADC::get_descriptor() const -> std::shared_ptr<Node_Descriptor_Base>
+auto AVRADC::get_descriptor() const -> std::shared_ptr<INode_Descriptor>
 {
     return m_descriptor;
 }
 
-auto AVRADC::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document
-{
-    return rapidjson::Document();
-}
+//auto AVRADC::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document
+//{
+//    return rapidjson::Document();
+//}
 
 }
 }

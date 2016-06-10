@@ -25,7 +25,7 @@ UART_BBang::~UART_BBang()
     close();
 }
 
-bool UART_BBang::init(std::shared_ptr<Bus_Descriptor_Base> descriptor)
+bool UART_BBang::init(std::shared_ptr<IBus_Descriptor> descriptor)
 {
     auto specialized = std::dynamic_pointer_cast<UART_BBang_Descriptor>(descriptor);
     if (!specialized)
@@ -43,7 +43,7 @@ bool UART_BBang::init(std::shared_ptr<Bus_Descriptor_Base> descriptor)
     return true;
 }
 
-std::shared_ptr<const Bus_Descriptor_Base> UART_BBang::get_descriptor() const
+std::shared_ptr<IBus_Descriptor> UART_BBang::get_descriptor() const
 {
     return m_descriptor;
 }

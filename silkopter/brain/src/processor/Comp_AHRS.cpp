@@ -17,7 +17,7 @@ Comp_AHRS::Comp_AHRS(UAV& uav)
     m_output_stream = std::make_shared<Output_Stream>();
 }
 
-auto Comp_AHRS::init(std::shared_ptr<Node_Descriptor_Base> descriptor) -> bool
+auto Comp_AHRS::init(std::shared_ptr<INode_Descriptor> descriptor) -> bool
 {
     QLOG_TOPIC("comp_ahrs::init");
 
@@ -160,7 +160,7 @@ void Comp_AHRS::set_input_stream_path(size_t idx, q::Path const& path)
     m_accumulator.set_stream_path(idx, path, m_output_stream->get_rate(), m_uav);
 }
 
-auto Comp_AHRS::set_config(std::shared_ptr<Node_Config_Base> config) -> bool
+auto Comp_AHRS::set_config(std::shared_ptr<INode_Config> config) -> bool
 {
     QLOG_TOPIC("comp_ahrs::set_config");
 
@@ -177,20 +177,20 @@ auto Comp_AHRS::set_config(std::shared_ptr<Node_Config_Base> config) -> bool
 
     return true;
 }
-auto Comp_AHRS::get_config() const -> std::shared_ptr<Node_Config_Base>
+auto Comp_AHRS::get_config() const -> std::shared_ptr<INode_Config>
 {
     return m_config;
 }
 
-auto Comp_AHRS::get_descriptor() const -> std::shared_ptr<Node_Descriptor_Base>
+auto Comp_AHRS::get_descriptor() const -> std::shared_ptr<INode_Descriptor>
 {
     return m_descriptor;
 }
 
-auto Comp_AHRS::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document
-{
-    return rapidjson::Document();
-}
+//auto Comp_AHRS::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document
+//{
+//    return rapidjson::Document();
+//}
 
 }
 }

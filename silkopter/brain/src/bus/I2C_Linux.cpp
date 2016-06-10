@@ -43,7 +43,7 @@ I2C_Linux::~I2C_Linux()
     close();
 }
 
-bool I2C_Linux::init(std::shared_ptr<Bus_Descriptor_Base> descriptor)
+bool I2C_Linux::init(std::shared_ptr<IBus_Descriptor> descriptor)
 {
     auto specialized = std::dynamic_pointer_cast<I2C_Linux_Descriptor>(descriptor);
     if (!specialized)
@@ -61,7 +61,7 @@ bool I2C_Linux::init(std::shared_ptr<Bus_Descriptor_Base> descriptor)
     return true;
 }
 
-std::shared_ptr<const Bus_Descriptor_Base> I2C_Linux::get_descriptor() const
+std::shared_ptr<IBus_Descriptor> I2C_Linux::get_descriptor() const
 {
     return m_descriptor;
 }

@@ -28,7 +28,7 @@ Multirotor_Simulator::Multirotor_Simulator(UAV& uav)
     m_ecef_velocity_stream = std::make_shared<ECEF_Velocity>();
 }
 
-auto Multirotor_Simulator::init(std::shared_ptr<Node_Descriptor_Base> descriptor) -> bool
+auto Multirotor_Simulator::init(std::shared_ptr<INode_Descriptor> descriptor) -> bool
 {
     QLOG_TOPIC("multirotor_simulator::init");
 
@@ -45,10 +45,10 @@ auto Multirotor_Simulator::init(std::shared_ptr<Node_Descriptor_Base> descriptor
 }
 auto Multirotor_Simulator::init() -> bool
 {
-    std::shared_ptr<const Multirotor_Config> multirotor_config = m_uav.get_specialized_uav_config<Multirotor_Config>();
-    if (!multirotor_config)
+    std::shared_ptr<const Multirotor_Descriptor> multirotor_descriptor = m_uav.get_specialized_uav_descriptor<Multirotor_Descriptor>();
+    if (!multirotor_descriptor)
     {
-        QLOGE("No multi config found");
+        QLOGE("No multi descriptor found");
         return false;
     }
 
@@ -57,13 +57,13 @@ auto Multirotor_Simulator::init() -> bool
         return false;
     }
 
-    if (!m_simulation.init_uav(multirotor_config))
+    if (!m_simulation.init_uav(multirotor_descriptor))
     {
         return false;
     }
 
-    m_input_throttle_streams.resize(multirotor_config->get_motors().size());
-    m_input_throttle_stream_paths.resize(multirotor_config->get_motors().size());
+    m_input_throttle_streams.resize(multirotor_descriptor->get_motors().size());
+    m_input_throttle_stream_paths.resize(multirotor_descriptor->get_motors().size());
 
     m_angular_velocity_stream->rate = m_descriptor->get_angular_velocity_rate();
     m_angular_velocity_stream->dt = std::chrono::microseconds(1000000 / m_angular_velocity_stream->rate);
@@ -307,7 +307,7 @@ void Multirotor_Simulator::set_input_stream_path(size_t idx, q::Path const& path
     }
 }
 
-auto Multirotor_Simulator::set_config(std::shared_ptr<Node_Config_Base> config) -> bool
+auto Multirotor_Simulator::set_config(std::shared_ptr<INode_Config> config) -> bool
 {
     QLOG_TOPIC("multirotor_simulator::set_config");
 
@@ -333,14 +333,14 @@ auto Multirotor_Simulator::set_config(std::shared_ptr<Node_Config_Base> config) 
 //        uav_config.motors[i].deceleration = sz.motors[i].deceleration;
 //    }
 
-    std::shared_ptr<const Multirotor_Config> multirotor_config = m_uav.get_specialized_uav_config<Multirotor_Config>();
-    if (!multirotor_config)
+    std::shared_ptr<const Multirotor_Descriptor> multirotor_descriptor = m_uav.get_specialized_uav_descriptor<Multirotor_Descriptor>();
+    if (!multirotor_descriptor)
     {
-        QLOGE("No multi config found");
+        QLOGE("No multi descriptor found");
         return false;
     }
 
-    if (!m_simulation.init_uav(multirotor_config))
+    if (!m_simulation.init_uav(multirotor_descriptor))
     {
         return false;
     }
@@ -367,52 +367,52 @@ auto Multirotor_Simulator::set_config(std::shared_ptr<Node_Config_Base> config) 
 
     return true;
 }
-auto Multirotor_Simulator::get_config() const -> std::shared_ptr<Node_Config_Base>
+auto Multirotor_Simulator::get_config() const -> std::shared_ptr<INode_Config>
 {
     return m_config;
 }
 
-auto Multirotor_Simulator::get_descriptor() const -> std::shared_ptr<Node_Descriptor_Base>
+auto Multirotor_Simulator::get_descriptor() const -> std::shared_ptr<INode_Descriptor>
 {
     return m_descriptor;
 }
-auto Multirotor_Simulator::send_message(rapidjson::Value const& json) -> rapidjson::Document
-{
-    rapidjson::Document response;
+//auto Multirotor_Simulator::send_message(rapidjson::Value const& json) -> rapidjson::Document
+//{
+//    rapidjson::Document response;
 
-    //todo - fix this
-//    auto* messagej = jsonutil::find_value(json, std::string("message"));
-//    if (!messagej)
-//    {
-//        jsonutil::add_value(response, std::string("error"), rapidjson::Value("Message not found"), response.GetAllocator());
-//    }
-//    else if (!messagej->IsString())
-//    {
-//        jsonutil::add_value(response, std::string("error"), rapidjson::Value("Message has to be a string"), response.GetAllocator());
-//    }
-//    else
-//    {
-//        std::string message = messagej->GetString();
-//        if (message == "reset")
-//        {
-//            m_simulation.reset();
-//        }
-//        else if (message == "stop motion")
-//        {
-//            m_simulation.stop_motion();
-//        }
-//        else if (message == "get state")
-//        {
-//            auto const& state = m_simulation.get_uav_state();
-//            autojsoncxx::to_document(state, response);
-//        }
-//        else
-//        {
-//            jsonutil::add_value(response, std::string("error"), rapidjson::Value("Unknown message"), response.GetAllocator());
-//        }
-//    }
-    return std::move(response);
-}
+//    //todo - fix this
+////    auto* messagej = jsonutil::find_value(json, std::string("message"));
+////    if (!messagej)
+////    {
+////        jsonutil::add_value(response, std::string("error"), rapidjson::Value("Message not found"), response.GetAllocator());
+////    }
+////    else if (!messagej->IsString())
+////    {
+////        jsonutil::add_value(response, std::string("error"), rapidjson::Value("Message has to be a string"), response.GetAllocator());
+////    }
+////    else
+////    {
+////        std::string message = messagej->GetString();
+////        if (message == "reset")
+////        {
+////            m_simulation.reset();
+////        }
+////        else if (message == "stop motion")
+////        {
+////            m_simulation.stop_motion();
+////        }
+////        else if (message == "get state")
+////        {
+////            auto const& state = m_simulation.get_uav_state();
+////            autojsoncxx::to_document(state, response);
+////        }
+////        else
+////        {
+////            jsonutil::add_value(response, std::string("error"), rapidjson::Value("Unknown message"), response.GetAllocator());
+////        }
+////    }
+//    return std::move(response);
+//}
 
 
 }

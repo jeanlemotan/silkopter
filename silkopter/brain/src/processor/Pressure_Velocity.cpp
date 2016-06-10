@@ -17,7 +17,7 @@ Pressure_Velocity::Pressure_Velocity(UAV& uav)
     m_output_stream = std::make_shared<Output_Stream>();
 }
 
-auto Pressure_Velocity::init(std::shared_ptr<Node_Descriptor_Base> descriptor) -> bool
+auto Pressure_Velocity::init(std::shared_ptr<INode_Descriptor> descriptor) -> bool
 {
     QLOG_TOPIC("Pressure_Velocity::init");
 
@@ -94,7 +94,7 @@ void Pressure_Velocity::set_input_stream_path(size_t idx, q::Path const& path)
     m_accumulator.set_stream_path(idx, path, m_output_stream->get_rate(), m_uav);
 }
 
-auto Pressure_Velocity::set_config(std::shared_ptr<Node_Config_Base> config) -> bool
+auto Pressure_Velocity::set_config(std::shared_ptr<INode_Config> config) -> bool
 {
     QLOG_TOPIC("Pressure_Velocity::set_config");
 
@@ -109,19 +109,19 @@ auto Pressure_Velocity::set_config(std::shared_ptr<Node_Config_Base> config) -> 
 
     return true;
 }
-auto Pressure_Velocity::get_config() const -> std::shared_ptr<Node_Config_Base>
+auto Pressure_Velocity::get_config() const -> std::shared_ptr<INode_Config>
 {
     return m_config;
 }
 
-auto Pressure_Velocity::get_descriptor() const -> std::shared_ptr<Node_Descriptor_Base>
+auto Pressure_Velocity::get_descriptor() const -> std::shared_ptr<INode_Descriptor>
 {
     return m_descriptor;
 }
-auto Pressure_Velocity::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document
-{
-    return rapidjson::Document();
-}
+//auto Pressure_Velocity::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document
+//{
+//    return rapidjson::Document();
+//}
 
 
 }

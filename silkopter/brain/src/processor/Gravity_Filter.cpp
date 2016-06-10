@@ -18,7 +18,7 @@ Gravity_Filter::Gravity_Filter(UAV& uav)
     m_output_stream = std::make_shared<Output_Stream>();
 }
 
-auto Gravity_Filter::init(std::shared_ptr<Node_Descriptor_Base> descriptor) -> bool
+auto Gravity_Filter::init(std::shared_ptr<INode_Descriptor> descriptor) -> bool
 {
     QLOG_TOPIC("gravity_filter::init");
 
@@ -90,7 +90,7 @@ void Gravity_Filter::set_input_stream_path(size_t idx, q::Path const& path)
     m_accumulator.set_stream_path(idx, path, m_output_stream->get_rate(), m_uav);
 }
 
-auto Gravity_Filter::set_config(std::shared_ptr<Node_Config_Base> config) -> bool
+auto Gravity_Filter::set_config(std::shared_ptr<INode_Config> config) -> bool
 {
     QLOG_TOPIC("gravity_filter::set_config");
 
@@ -105,20 +105,20 @@ auto Gravity_Filter::set_config(std::shared_ptr<Node_Config_Base> config) -> boo
 
     return true;
 }
-auto Gravity_Filter::get_config() const -> std::shared_ptr<Node_Config_Base>
+auto Gravity_Filter::get_config() const -> std::shared_ptr<INode_Config>
 {
     return m_config;
 }
 
-auto Gravity_Filter::get_descriptor() const -> std::shared_ptr<Node_Descriptor_Base>
+auto Gravity_Filter::get_descriptor() const -> std::shared_ptr<INode_Descriptor>
 {
     return m_descriptor;
 }
 
-auto Gravity_Filter::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document
-{
-    return rapidjson::Document();
-}
+//auto Gravity_Filter::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document
+//{
+//    return rapidjson::Document();
+//}
 
 }
 }

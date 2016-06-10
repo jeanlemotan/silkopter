@@ -20,7 +20,7 @@ SPI_Linux::~SPI_Linux()
     close();
 }
 
-bool SPI_Linux::init(std::shared_ptr<Bus_Descriptor_Base> descriptor)
+bool SPI_Linux::init(std::shared_ptr<IBus_Descriptor> descriptor)
 {
     auto specialized = std::dynamic_pointer_cast<SPI_Linux_Descriptor>(descriptor);
     if (!specialized)
@@ -38,7 +38,7 @@ bool SPI_Linux::init(std::shared_ptr<Bus_Descriptor_Base> descriptor)
     return true;
 }
 
-std::shared_ptr<const Bus_Descriptor_Base> SPI_Linux::get_descriptor() const
+std::shared_ptr<IBus_Descriptor> SPI_Linux::get_descriptor() const
 {
     return m_descriptor;
 }

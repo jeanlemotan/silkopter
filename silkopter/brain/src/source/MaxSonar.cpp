@@ -29,7 +29,7 @@ auto MaxSonar::get_outputs() const -> std::vector<Output>
     outputs[0].stream = m_output_stream;
     return outputs;
 }
-auto MaxSonar::init(std::shared_ptr<Node_Descriptor_Base> descriptor) -> bool
+auto MaxSonar::init(std::shared_ptr<INode_Descriptor> descriptor) -> bool
 {
     QLOG_TOPIC("MaxSonar::init");
 
@@ -155,7 +155,7 @@ void MaxSonar::process()
     }
 }
 
-auto MaxSonar::set_config(std::shared_ptr<Node_Config_Base> config) -> bool
+auto MaxSonar::set_config(std::shared_ptr<INode_Config> config) -> bool
 {
     QLOG_TOPIC("MaxSonar::set_config");
 
@@ -176,20 +176,20 @@ auto MaxSonar::set_config(std::shared_ptr<Node_Config_Base> config) -> bool
 
     return true;
 }
-auto MaxSonar::get_config() const -> std::shared_ptr<Node_Config_Base>
+auto MaxSonar::get_config() const -> std::shared_ptr<INode_Config>
 {
     return m_config;
 }
 
-auto MaxSonar::get_descriptor() const -> std::shared_ptr<Node_Descriptor_Base>
+auto MaxSonar::get_descriptor() const -> std::shared_ptr<INode_Descriptor>
 {
     return m_descriptor;
 }
 
-auto MaxSonar::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document
-{
-    return rapidjson::Document();
-}
+//auto MaxSonar::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document
+//{
+//    return rapidjson::Document();
+//}
 
 }
 }

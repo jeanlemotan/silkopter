@@ -117,7 +117,7 @@ auto MS5611::get_outputs() const -> std::vector<Output>
     outputs[1].stream = m_temperature;
     return outputs;
 }
-auto MS5611::init(std::shared_ptr<Node_Descriptor_Base> descriptor) -> bool
+auto MS5611::init(std::shared_ptr<INode_Descriptor> descriptor) -> bool
 {
     QLOG_TOPIC("ms5611::init");
 
@@ -370,7 +370,7 @@ void MS5611::process()
     }
 }
 
-auto MS5611::set_config(std::shared_ptr<Node_Config_Base> config) -> bool
+auto MS5611::set_config(std::shared_ptr<INode_Config> config) -> bool
 {
     QLOG_TOPIC("ms5611::set_config");
 
@@ -384,20 +384,20 @@ auto MS5611::set_config(std::shared_ptr<Node_Config_Base> config) -> bool
     *m_config = *specialized;
     return true;
 }
-auto MS5611::get_config() const -> std::shared_ptr<Node_Config_Base>
+auto MS5611::get_config() const -> std::shared_ptr<INode_Config>
 {
     return m_config;
 }
 
-auto MS5611::get_descriptor() const -> std::shared_ptr<Node_Descriptor_Base>
+auto MS5611::get_descriptor() const -> std::shared_ptr<INode_Descriptor>
 {
     return m_descriptor;
 }
 
-auto MS5611::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document
-{
-    return rapidjson::Document();
-}
+//auto MS5611::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document
+//{
+//    return rapidjson::Document();
+//}
 
 }
 }

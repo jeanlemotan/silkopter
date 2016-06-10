@@ -21,7 +21,7 @@ Multirotor_Brain::Multirotor_Brain(UAV& uav)
     m_thrust_output_stream = std::make_shared<Thrust_Output_Stream>();
 }
 
-auto Multirotor_Brain::init(std::shared_ptr<Node_Descriptor_Base> descriptor) -> bool
+auto Multirotor_Brain::init(std::shared_ptr<INode_Descriptor> descriptor) -> bool
 {
     QLOG_TOPIC("Multirotor_Brain::init");
 
@@ -39,10 +39,10 @@ auto Multirotor_Brain::init(std::shared_ptr<Node_Descriptor_Base> descriptor) ->
 
 auto Multirotor_Brain::init() -> bool
 {
-    m_multirotor_config = m_uav.get_specialized_uav_config<Multirotor_Config>();
-    if (!m_multirotor_config)
+    m_multirotor_descriptor = m_uav.get_specialized_uav_descriptor<Multirotor_Descriptor>();
+    if (!m_multirotor_descriptor)
     {
-        QLOGE("No multi config found");
+        QLOGE("No multi descriptor found");
         return false;
     }
 
@@ -122,7 +122,7 @@ void Multirotor_Brain::process_state_mode_idle()
 
 float Multirotor_Brain::compute_ff_thrust(float target_altitude)
 {
-    float mass = m_multirotor_config->get_mass();
+    float mass = m_multirotor_descriptor->get_mass();
 
 
     float v0 = m_enu_velocity.z;
@@ -185,7 +185,7 @@ math::vec2f Multirotor_Brain::compute_horizontal_rate_for_angle(math::vec2f cons
 
 void Multirotor_Brain::state_mode_armed_apply_commands(const stream::IMultirotor_Commands::Value& prev_commands, stream::IMultirotor_Commands::Value& commands)
 {
-    std::shared_ptr<const Multirotor_Config> multirotor_config = m_uav.get_specialized_uav_config<Multirotor_Config>();
+    std::shared_ptr<const Multirotor_Descriptor> multirotor_descriptor = m_uav.get_specialized_uav_descriptor<Multirotor_Descriptor>();
 
     QASSERT(commands.mode.get() == stream::IMultirotor_Commands::Mode::ARMED);
 
@@ -244,7 +244,7 @@ void Multirotor_Brain::state_mode_armed_apply_commands(const stream::IMultirotor
             output = math::clamp(output, -1.f, 1.f);
             m_vertical_altitude_data.dsp.process(output);
 
-            float hover_thrust = multirotor_config->get_mass() * physics::constants::g;
+            float hover_thrust = multirotor_descriptor->get_mass() * physics::constants::g;
             float max_thrust_range = math::max(hover_thrust, m_config->get_max_thrust() - hover_thrust);
 
             thrust = output * max_thrust_range + hover_thrust;
@@ -624,7 +624,7 @@ void Multirotor_Brain::set_input_stream_path(size_t idx, q::Path const& path)
 //    dst.rate = rate;
 //}
 
-auto Multirotor_Brain::set_config(std::shared_ptr<Node_Config_Base> config) -> bool
+auto Multirotor_Brain::set_config(std::shared_ptr<INode_Config> config) -> bool
 {
     QLOG_TOPIC("Multirotor_Brain::set_config");
 
@@ -639,8 +639,8 @@ auto Multirotor_Brain::set_config(std::shared_ptr<Node_Config_Base> config) -> b
 
     uint32_t output_rate = m_rate_output_stream->get_rate();
 
-    m_config->set_min_thrust(math::clamp(m_config->get_min_thrust(), 0.f, m_multirotor_config->get_motor_thrust() * m_multirotor_config->get_motors().size() * 0.5f));
-    m_config->set_max_thrust(math::clamp(m_config->get_max_thrust(), m_config->get_min_thrust(), m_multirotor_config->get_motor_thrust() * m_multirotor_config->get_motors().size()));
+    m_config->set_min_thrust(math::clamp(m_config->get_min_thrust(), 0.f, m_multirotor_descriptor->get_motor_thrust() * m_multirotor_descriptor->get_motors().size() * 0.5f));
+    m_config->set_max_thrust(math::clamp(m_config->get_max_thrust(), m_config->get_min_thrust(), m_multirotor_descriptor->get_motor_thrust() * m_multirotor_descriptor->get_motors().size()));
 
     //m_config->horizontal_angle.max_speed_deg = math::clamp(m_config->horizontal_angle.max_speed_deg, 10.f, 3000.f);
     //m_config->yaw_angle.max_speed_deg = math::clamp(m_config->yaw_angle.max_speed_deg, 10.f, 3000.f);
@@ -740,7 +740,7 @@ auto Multirotor_Brain::set_config(std::shared_ptr<Node_Config_Base> config) -> b
 
     return true;
 }
-auto Multirotor_Brain::get_config() const -> std::shared_ptr<Node_Config_Base>
+auto Multirotor_Brain::get_config() const -> std::shared_ptr<INode_Config>
 {
     //todo - fix this;
 //    rapidjson::Document json;
@@ -760,47 +760,47 @@ auto Multirotor_Brain::get_config() const -> std::shared_ptr<Node_Config_Base>
     return m_config;
 }
 
-auto Multirotor_Brain::get_descriptor() const -> std::shared_ptr<Node_Descriptor_Base>
+auto Multirotor_Brain::get_descriptor() const -> std::shared_ptr<INode_Descriptor>
 {
     return m_descriptor;
 }
 
-auto Multirotor_Brain::send_message(rapidjson::Value const& json) -> rapidjson::Document
-{
-    rapidjson::Document response;
+//auto Multirotor_Brain::send_message(rapidjson::Value const& json) -> rapidjson::Document
+//{
+//    rapidjson::Document response;
 
-    auto* messagej = jsonutil::find_value(json, std::string("message"));
-    if (!messagej && messagej->IsString())
-    {
-        jsonutil::add_value(response, std::string("error"), rapidjson::Value("Message not found"), response.GetAllocator());
-        return std::move(response);
-    }
+//    auto* messagej = jsonutil::find_value(json, std::string("message"));
+//    if (!messagej && messagej->IsString())
+//    {
+//        jsonutil::add_value(response, std::string("error"), rapidjson::Value("Message not found"), response.GetAllocator());
+//        return std::move(response);
+//    }
 
-    std::string message = messagej->GetString();
-    if (message == "reset battery")
-    {
-        m_battery.reset();
-    }
-    else if (message == "battery capacity")
-    {
-        auto* capacityj = jsonutil::find_value(json, std::string("capacity"));
-        if (!capacityj || capacityj->IsNumber())
-        {
-            jsonutil::add_value(response, std::string("error"), rapidjson::Value("Capacity not found"), response.GetAllocator());
-            return std::move(response);
-        }
+//    std::string message = messagej->GetString();
+//    if (message == "reset battery")
+//    {
+//        m_battery.reset();
+//    }
+//    else if (message == "battery capacity")
+//    {
+//        auto* capacityj = jsonutil::find_value(json, std::string("capacity"));
+//        if (!capacityj || capacityj->IsNumber())
+//        {
+//            jsonutil::add_value(response, std::string("error"), rapidjson::Value("Capacity not found"), response.GetAllocator());
+//            return std::move(response);
+//        }
 
-        LiPo_Battery::Config config;
-        config.full_charge = capacityj->GetDouble();
-        m_battery.set_config(config);
-    }
-    else
-    {
-        jsonutil::add_value(response, std::string("error"), rapidjson::Value("Unknown command"), response.GetAllocator());
-    }
+//        LiPo_Battery::Config config;
+//        config.full_charge = capacityj->GetDouble();
+//        m_battery.set_config(config);
+//    }
+//    else
+//    {
+//        jsonutil::add_value(response, std::string("error"), rapidjson::Value("Unknown command"), response.GetAllocator());
+//    }
 
-    return std::move(response);
-}
+//    return std::move(response);
+//}
 
 }
 }

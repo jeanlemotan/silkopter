@@ -16,7 +16,7 @@ Motor_Mixer::Motor_Mixer(UAV& uav)
 {
 }
 
-auto Motor_Mixer::init(std::shared_ptr<Node_Descriptor_Base> descriptor) -> bool
+auto Motor_Mixer::init(std::shared_ptr<INode_Descriptor> descriptor) -> bool
 {
     QLOG_TOPIC("motor_mixer::init");
 
@@ -34,20 +34,20 @@ auto Motor_Mixer::init(std::shared_ptr<Node_Descriptor_Base> descriptor) -> bool
 
 auto Motor_Mixer::init() -> bool
 {
-    std::shared_ptr<const Multirotor_Config> multirotor_config = m_uav.get_specialized_uav_config<Multirotor_Config>();
-    if (!multirotor_config)
+    std::shared_ptr<const Multirotor_Descriptor> multirotor_descriptor = m_uav.get_specialized_uav_descriptor<Multirotor_Descriptor>();
+    if (!multirotor_descriptor)
     {
-        QLOGE("No multirotor config found");
+        QLOGE("No multirotor descriptor found");
         return false;
     }
 
     //check symmetry
     math::vec3f center;
     math::vec3f torque;
-    for (auto& mc: multirotor_config->get_motors())
+    for (auto& mc: multirotor_descriptor->get_motors())
     {
         center += mc.get_position();
-        torque += math::cross(mc.get_position(), mc.get_thrust_vector()) + mc.get_thrust_vector()*(multirotor_config->get_motor_z_torque() * (mc.get_clockwise() ? 1 : -1));
+        torque += math::cross(mc.get_position(), mc.get_thrust_vector()) + mc.get_thrust_vector()*(multirotor_descriptor->get_motor_z_torque() * (mc.get_clockwise() ? 1 : -1));
     }
     if (!math::is_zero(center, 0.05f))
     {
@@ -60,14 +60,14 @@ auto Motor_Mixer::init() -> bool
         return false;
     }
 
-    m_outputs.resize(multirotor_config->get_motors().size());
+    m_outputs.resize(multirotor_descriptor->get_motors().size());
     for (auto& os: m_outputs)
     {
         os = std::make_shared<Stream>();
         os->rate = m_descriptor->get_rate();
     }
 
-    //m_config->output_streams.throttles.resize(multirotor_config->motors.size());
+    //m_config->output_streams.throttles.resize(multirotor_descriptor->motors.size());
 
     return true;
 }
@@ -107,12 +107,12 @@ void Motor_Mixer::process()
         os->samples.clear();
     }
 
-    std::shared_ptr<const Multirotor_Config> multirotor_config = m_uav.get_specialized_uav_config<Multirotor_Config>();
-    if (!multirotor_config)
+    std::shared_ptr<const Multirotor_Descriptor> multirotor_descriptor = m_uav.get_specialized_uav_descriptor<Multirotor_Descriptor>();
+    if (!multirotor_descriptor)
     {
         return;
     }
-    if (multirotor_config->get_motors().size() != m_outputs.size())
+    if (multirotor_descriptor->get_motors().size() != m_outputs.size())
     {
         QLOGE("Motor count changed since initialization!!!! Case not handled");
         return;
@@ -123,10 +123,10 @@ void Motor_Mixer::process()
 //        os->samples.resize(count);
 //    }
 
-    m_accumulator.process([this, &multirotor_config](stream::ITorque::Sample const& t_sample,
+    m_accumulator.process([this, &multirotor_descriptor](stream::ITorque::Sample const& t_sample,
                                                 stream::IFloat::Sample const& f_sample)
     {
-        compute_throttles(*multirotor_config, f_sample.value, t_sample.value);
+        compute_throttles(*multirotor_descriptor, f_sample.value, t_sample.value);
 
         for (size_t mi = 0; mi < m_outputs.size(); mi++)
         {
@@ -160,19 +160,19 @@ constexpr float MIN_THRUST = 0.f;
 constexpr float DYN_RANGE_FACTOR = 1.1f;//allow a bit more dyn range than normal to get better torque resolution at the expense of collective force
 
 
-void Motor_Mixer::compute_throttles(Multirotor_Config const& multirotor_config, stream::IFloat::Value const& collective_thrust, stream::ITorque::Value const& _target)
+void Motor_Mixer::compute_throttles(Multirotor_Descriptor const& multirotor_descriptor, stream::IFloat::Value const& collective_thrust, stream::ITorque::Value const& _target)
 {
     auto target = _target;
 
     //precalculate some data
     for (size_t i = 0; i < m_outputs.size(); i++)
     {
-        auto const& mc = multirotor_config.get_motors()[i];
+        auto const& mc = multirotor_descriptor.get_motors()[i];
         auto& out = m_outputs[i];
         out->config.position = mc.get_position();
 
-        out->config.max_torque = math::cross(out->config.position, mc.get_thrust_vector() * multirotor_config.get_motor_thrust());
-        out->config.max_torque += mc.get_thrust_vector() * (multirotor_config.get_motor_z_torque() * (mc.get_clockwise() ? 1 : -1));
+        out->config.max_torque = math::cross(out->config.position, mc.get_thrust_vector() * multirotor_descriptor.get_motor_thrust());
+        out->config.max_torque += mc.get_thrust_vector() * (multirotor_descriptor.get_motor_z_torque() * (mc.get_clockwise() ? 1 : -1));
         out->config.torque_vector = math::normalized<float, math::safe>(out->config.max_torque);
 
         out->thrust = MIN_THRUST;
@@ -185,16 +185,16 @@ void Motor_Mixer::compute_throttles(Multirotor_Config const& multirotor_config, 
     float target_thrust = collective_thrust;
     if (target_thrust >= 0.01f)
     {
-        auto th = math::clamp(target_thrust / float(m_outputs.size()), m_config->get_armed_thrust(), multirotor_config.get_motor_thrust());
+        auto th = math::clamp(target_thrust / float(m_outputs.size()), m_config->get_armed_thrust(), multirotor_descriptor.get_motor_thrust());
         for (auto& out: m_outputs)
         {
             out->thrust = th; //take into account only motors that produce useful thrust
         }
 
-        float dyn_range = math::min(th - m_config->get_armed_thrust(), multirotor_config.get_motor_thrust() - th);
+        float dyn_range = math::min(th - m_config->get_armed_thrust(), multirotor_descriptor.get_motor_thrust() - th);
         dyn_range *= DYN_RANGE_FACTOR;
         min_thrust = math::max(th - dyn_range, m_config->get_armed_thrust());
-        max_thrust = math::min(th + dyn_range, multirotor_config.get_motor_thrust());
+        max_thrust = math::min(th + dyn_range, multirotor_descriptor.get_motor_thrust());
     }
 
 
@@ -208,7 +208,7 @@ void Motor_Mixer::compute_throttles(Multirotor_Config const& multirotor_config, 
         math::vec3f crt;
         for (auto& out: m_outputs)
         {
-            float ratio = out->thrust / multirotor_config.get_motor_thrust();
+            float ratio = out->thrust / multirotor_descriptor.get_motor_thrust();
             out->torque = out->config.max_torque * ratio;
             crt += out->torque;
         }
@@ -265,11 +265,11 @@ void Motor_Mixer::compute_throttles(Multirotor_Config const& multirotor_config, 
     //convert thrust to throttle and clip
     for (auto& out: m_outputs)
     {
-        out->throttle = compute_throttle_from_thrust(multirotor_config.get_motor_thrust(), out->thrust);
+        out->throttle = compute_throttle_from_thrust(multirotor_descriptor.get_motor_thrust(), out->thrust);
     }
 
 }
-//void Motor_Mixer::compute_throttles(config::Multirotor const& multirotor_config, stream::IFloat::Value const& collective_thrust, stream::ITorque::Value const& _target)
+//void Motor_Mixer::compute_throttles(config::Multirotor const& multirotor_descriptor, stream::IFloat::Value const& collective_thrust, stream::ITorque::Value const& _target)
 //{
 ////    auto max_throttle = m_config->max_throttle;
 ////    auto min_throttle = m_config->min_throttle;
@@ -279,7 +279,7 @@ void Motor_Mixer::compute_throttles(Multirotor_Config const& multirotor_config, 
 //    //precalculate some data
 //    for (size_t i = 0; i < m_outputs.size(); i++)
 //    {
-//        auto const& mc = multirotor_config.motors[i];
+//        auto const& mc = multirotor_descriptor.motors[i];
 //        auto& out = m_outputs[i];
 //        out->config.position = mc.position;
 //        out->config.max_thrust = mc.max_thrust;
@@ -427,7 +427,7 @@ void Motor_Mixer::set_input_stream_path(size_t idx, q::Path const& path)
     m_accumulator.set_stream_path(idx, path, m_descriptor->get_rate(), m_uav);
 }
 
-auto Motor_Mixer::set_config(std::shared_ptr<Node_Config_Base> config) -> bool
+auto Motor_Mixer::set_config(std::shared_ptr<INode_Config> config) -> bool
 {
     QLOG_TOPIC("motor_mixer::set_config");
 
@@ -442,19 +442,19 @@ auto Motor_Mixer::set_config(std::shared_ptr<Node_Config_Base> config) -> bool
 
     return true;
 }
-auto Motor_Mixer::get_config() const -> std::shared_ptr<Node_Config_Base>
+auto Motor_Mixer::get_config() const -> std::shared_ptr<INode_Config>
 {
     return m_config;
 }
 
-auto Motor_Mixer::get_descriptor() const -> std::shared_ptr<Node_Descriptor_Base>
+auto Motor_Mixer::get_descriptor() const -> std::shared_ptr<INode_Descriptor>
 {
     return m_descriptor;
 }
-auto Motor_Mixer::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document
-{
-    return rapidjson::Document();
-}
+//auto Motor_Mixer::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document
+//{
+//    return rapidjson::Document();
+//}
 
 
 }

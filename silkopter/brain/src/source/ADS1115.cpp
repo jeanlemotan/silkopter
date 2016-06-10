@@ -121,7 +121,7 @@ auto ADS1115::get_outputs() const -> std::vector<Output>
      }};
     return outputs;
 }
-auto ADS1115::init(std::shared_ptr<Node_Descriptor_Base> descriptor) -> bool
+auto ADS1115::init(std::shared_ptr<INode_Descriptor> descriptor) -> bool
 {
     QLOG_TOPIC("ADS1115::init");
 
@@ -315,7 +315,7 @@ void ADS1115::process()
     m_last_tp = now;
 }
 
-auto ADS1115::set_config(std::shared_ptr<Node_Config_Base> config) -> bool
+auto ADS1115::set_config(std::shared_ptr<INode_Config> config) -> bool
 {
     QLOG_TOPIC("ADS1115::set_config");
 
@@ -330,20 +330,20 @@ auto ADS1115::set_config(std::shared_ptr<Node_Config_Base> config) -> bool
 
     return true;
 }
-auto ADS1115::get_config() const -> std::shared_ptr<Node_Config_Base>
+auto ADS1115::get_config() const -> std::shared_ptr<INode_Config>
 {
     return m_config;
 }
 
-auto ADS1115::get_descriptor() const -> std::shared_ptr<Node_Descriptor_Base>
+auto ADS1115::get_descriptor() const -> std::shared_ptr<INode_Descriptor>
 {
     return m_descriptor;
 }
 
-auto ADS1115::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document
-{
-    return rapidjson::Document();
-}
+//auto ADS1115::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document
+//{
+//    return rapidjson::Document();
+//}
 
 }
 }

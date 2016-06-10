@@ -15,7 +15,7 @@ class btDiscreteDynamicsWorld;
 
 namespace silk
 {
-struct Multirotor_Config;
+struct Multirotor_Descriptor;
 }
 
 namespace silk
@@ -32,7 +32,7 @@ public:
 
     auto init(uint32_t rate) -> bool;
 
-    auto init_uav(std::shared_ptr<const Multirotor_Config> config) -> bool;
+    auto init_uav(std::shared_ptr<const Multirotor_Descriptor> multirotor_descriptor) -> bool;
 
     void reset();
     void stop_motion();
@@ -61,7 +61,7 @@ private:
 
     struct UAV
     {
-        std::shared_ptr<const Multirotor_Config> config;
+        std::shared_ptr<const Multirotor_Descriptor> descriptor;
         std::shared_ptr<btCylinderShapeZ> shape;
         std::shared_ptr<btMotionState> motion_state;
         std::shared_ptr<btRigidBody> body;

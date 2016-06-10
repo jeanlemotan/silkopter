@@ -4,8 +4,8 @@
 
 namespace silk
 {
-struct Node_Descriptor_Base;
-struct Node_Config_Base;
+struct INode_Descriptor;
+struct INode_Config;
 }
 
 namespace silk
@@ -61,15 +61,15 @@ public:
 
     virtual Type get_type() const = 0;
 
-    virtual bool init(std::shared_ptr<Node_Descriptor_Base> descriptor) = 0;
-    virtual std::shared_ptr<Node_Descriptor_Base> get_descriptor() const = 0;
+    virtual bool init(std::shared_ptr<INode_Descriptor> descriptor) = 0;
+    virtual std::shared_ptr<INode_Descriptor> get_descriptor() const = 0;
 
-    virtual bool set_config(std::shared_ptr<Node_Config_Base> config) = 0;
-    virtual std::shared_ptr<Node_Config_Base> get_config() const = 0;
+    virtual bool set_config(std::shared_ptr<INode_Config> config) = 0;
+    virtual std::shared_ptr<INode_Config> get_config() const = 0;
 
     virtual bool start(q::Clock::time_point tp) = 0;
 
-    virtual auto send_message(rapidjson::Value const& json) -> rapidjson::Document = 0;
+    //virtual auto send_message(rapidjson::Value const& json) -> rapidjson::Document = 0;
 
     struct Input
     {

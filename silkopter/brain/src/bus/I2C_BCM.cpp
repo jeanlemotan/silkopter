@@ -30,7 +30,7 @@ I2C_BCM::~I2C_BCM()
 {
 }
 
-bool I2C_BCM::init(std::shared_ptr<Bus_Descriptor_Base> descriptor)
+bool I2C_BCM::init(std::shared_ptr<IBus_Descriptor> descriptor)
 {
     auto specialized = std::dynamic_pointer_cast<I2C_BCM_Descriptor>(descriptor);
     if (!specialized)
@@ -48,7 +48,7 @@ bool I2C_BCM::init(std::shared_ptr<Bus_Descriptor_Base> descriptor)
     return true;
 }
 
-std::shared_ptr<const Bus_Descriptor_Base> I2C_BCM::get_descriptor() const
+std::shared_ptr<IBus_Descriptor> I2C_BCM::get_descriptor() const
 {
     return m_descriptor;
 }

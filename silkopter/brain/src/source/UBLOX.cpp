@@ -306,7 +306,7 @@ auto UBLOX::get_outputs() const -> std::vector<Output>
     return outputs;
 }
 
-auto UBLOX::init(std::shared_ptr<Node_Descriptor_Base> descriptor) -> bool
+auto UBLOX::init(std::shared_ptr<INode_Descriptor> descriptor) -> bool
 {
     QLOG_TOPIC("ublox::init");
 
@@ -1148,7 +1148,7 @@ template<class T> auto UBLOX::send_packet_with_retry(Buses& buses, uint16_t msg,
 }
 
 
-auto UBLOX::set_config(std::shared_ptr<Node_Config_Base> config) -> bool
+auto UBLOX::set_config(std::shared_ptr<INode_Config> config) -> bool
 {
     QLOG_TOPIC("ublox::set_config");
 
@@ -1163,20 +1163,20 @@ auto UBLOX::set_config(std::shared_ptr<Node_Config_Base> config) -> bool
 
     return true;
 }
-auto UBLOX::get_config() const -> std::shared_ptr<Node_Config_Base>
+auto UBLOX::get_config() const -> std::shared_ptr<INode_Config>
 {
     return m_config;
 }
 
-auto UBLOX::get_descriptor() const -> std::shared_ptr<Node_Descriptor_Base>
+auto UBLOX::get_descriptor() const -> std::shared_ptr<INode_Descriptor>
 {
     return m_descriptor;
 }
 
-auto UBLOX::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document
-{
-    return rapidjson::Document();
-}
+//auto UBLOX::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document
+//{
+//    return rapidjson::Document();
+//}
 
 
 }

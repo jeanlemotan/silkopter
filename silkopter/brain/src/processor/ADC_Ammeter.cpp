@@ -17,7 +17,7 @@ ADC_Ammeter::ADC_Ammeter(UAV& uav)
     m_output_stream = std::make_shared<Output_Stream>();
 }
 
-auto ADC_Ammeter::init(std::shared_ptr<Node_Descriptor_Base> descriptor) -> bool
+auto ADC_Ammeter::init(std::shared_ptr<INode_Descriptor> descriptor) -> bool
 {
     QLOG_TOPIC("adc_ammeter::init");
 
@@ -85,7 +85,7 @@ void ADC_Ammeter::set_input_stream_path(size_t idx, q::Path const& path)
     m_accumulator.set_stream_path(idx, path, m_output_stream->get_rate(), m_uav);
 }
 
-auto ADC_Ammeter::set_config(std::shared_ptr<Node_Config_Base> config) -> bool
+auto ADC_Ammeter::set_config(std::shared_ptr<INode_Config> config) -> bool
 {
     QLOG_TOPIC("adc_ammeter::set_config");
 
@@ -100,19 +100,19 @@ auto ADC_Ammeter::set_config(std::shared_ptr<Node_Config_Base> config) -> bool
 
     return true;
 }
-auto ADC_Ammeter::get_config() const -> std::shared_ptr<Node_Config_Base>
+auto ADC_Ammeter::get_config() const -> std::shared_ptr<INode_Config>
 {
     return m_config;
 }
 
-auto ADC_Ammeter::get_descriptor() const -> std::shared_ptr<Node_Descriptor_Base>
+auto ADC_Ammeter::get_descriptor() const -> std::shared_ptr<INode_Descriptor>
 {
     return m_descriptor;
 }
-auto ADC_Ammeter::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document
-{
-    return rapidjson::Document();
-}
+//auto ADC_Ammeter::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document
+//{
+//    return rapidjson::Document();
+//}
 
 
 }

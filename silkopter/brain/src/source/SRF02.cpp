@@ -52,7 +52,7 @@ auto SRF02::get_outputs() const -> std::vector<Output>
     outputs[0].stream = m_output_stream;
     return outputs;
 }
-auto SRF02::init(std::shared_ptr<Node_Descriptor_Base> descriptor) -> bool
+auto SRF02::init(std::shared_ptr<INode_Descriptor> descriptor) -> bool
 {
     QLOG_TOPIC("srf02::init");
 
@@ -189,7 +189,7 @@ void SRF02::process()
     }
 }
 
-auto SRF02::set_config(std::shared_ptr<Node_Config_Base> config) -> bool
+auto SRF02::set_config(std::shared_ptr<INode_Config> config) -> bool
 {
     QLOG_TOPIC("srf02::set_config");
 
@@ -211,20 +211,20 @@ auto SRF02::set_config(std::shared_ptr<Node_Config_Base> config) -> bool
 
     return true;
 }
-auto SRF02::get_config() const -> std::shared_ptr<Node_Config_Base>
+auto SRF02::get_config() const -> std::shared_ptr<INode_Config>
 {
     return m_config;
 }
 
-auto SRF02::get_descriptor() const -> std::shared_ptr<Node_Descriptor_Base>
+auto SRF02::get_descriptor() const -> std::shared_ptr<INode_Descriptor>
 {
     return m_descriptor;
 }
 
-auto SRF02::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document
-{
-    return rapidjson::Document();
-}
+//auto SRF02::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document
+//{
+//    return rapidjson::Document();
+//}
 
 }
 }

@@ -100,7 +100,7 @@ auto OpenCV_Capture::get_outputs() const -> std::vector<Output>
     return outputs;
 }
 
-auto OpenCV_Capture::init(std::shared_ptr<Node_Descriptor_Base> descriptor) -> bool
+auto OpenCV_Capture::init(std::shared_ptr<INode_Descriptor> descriptor) -> bool
 {
     QLOG_TOPIC("OpenCV_Capture::init");
 
@@ -151,7 +151,7 @@ auto OpenCV_Capture::start(q::Clock::time_point tp) -> bool
 }
 
 
-auto OpenCV_Capture::set_config(std::shared_ptr<Node_Config_Base> config) -> bool
+auto OpenCV_Capture::set_config(std::shared_ptr<INode_Config> config) -> bool
 {
     auto specialized = std::dynamic_pointer_cast<OpenCV_Capture_Config>(config);
     if (!specialized)
@@ -166,12 +166,12 @@ auto OpenCV_Capture::set_config(std::shared_ptr<Node_Config_Base> config) -> boo
 
     return true;
 }
-auto OpenCV_Capture::get_config() const -> std::shared_ptr<Node_Config_Base>
+auto OpenCV_Capture::get_config() const -> std::shared_ptr<INode_Config>
 {
     return m_config;
 }
 
-auto OpenCV_Capture::get_descriptor() const -> std::shared_ptr<Node_Descriptor_Base>
+auto OpenCV_Capture::get_descriptor() const -> std::shared_ptr<INode_Descriptor>
 {
     return m_descriptor;
 }

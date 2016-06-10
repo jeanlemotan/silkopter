@@ -77,7 +77,7 @@ private:
     void handle_add_node();
     void handle_remove_node();
 
-    void handle_uav_config();
+    void handle_uav_descriptor();
     void handle_multirotor_commands();
 
     void handle_streams_telemetry_active();

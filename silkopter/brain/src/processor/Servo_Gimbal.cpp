@@ -19,7 +19,7 @@ Servo_Gimbal::Servo_Gimbal(UAV& uav)
     m_z_output_stream = std::make_shared<Output_Stream>();
 }
 
-auto Servo_Gimbal::init(std::shared_ptr<Node_Descriptor_Base> descriptor) -> bool
+auto Servo_Gimbal::init(std::shared_ptr<INode_Descriptor> descriptor) -> bool
 {
     QLOG_TOPIC("servo_gimbal::init");
 
@@ -155,7 +155,7 @@ void Servo_Gimbal::set_input_stream_path(size_t idx, q::Path const& path)
     }
 }
 
-auto Servo_Gimbal::set_config(std::shared_ptr<Node_Config_Base> config) -> bool
+auto Servo_Gimbal::set_config(std::shared_ptr<INode_Config> config) -> bool
 {
     QLOG_TOPIC("servo_gimbal::set_config");
 
@@ -170,20 +170,20 @@ auto Servo_Gimbal::set_config(std::shared_ptr<Node_Config_Base> config) -> bool
 
     return true;
 }
-auto Servo_Gimbal::get_config() const -> std::shared_ptr<Node_Config_Base>
+auto Servo_Gimbal::get_config() const -> std::shared_ptr<INode_Config>
 {
     return m_config;
 }
 
-auto Servo_Gimbal::get_descriptor() const -> std::shared_ptr<Node_Descriptor_Base>
+auto Servo_Gimbal::get_descriptor() const -> std::shared_ptr<INode_Descriptor>
 {
     return m_descriptor;
 }
 
-auto Servo_Gimbal::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document
-{
-    return rapidjson::Document();
-}
+//auto Servo_Gimbal::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document
+//{
+//    return rapidjson::Document();
+//}
 
 }
 }

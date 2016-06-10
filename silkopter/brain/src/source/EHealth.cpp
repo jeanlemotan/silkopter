@@ -27,7 +27,7 @@ auto EHealth::get_outputs() const -> std::vector<Output>
     return outputs;
 }
 
-auto EHealth::init(std::shared_ptr<Node_Descriptor_Base> descriptor) -> bool
+auto EHealth::init(std::shared_ptr<INode_Descriptor> descriptor) -> bool
 {
     QLOG_TOPIC("EHealth::init");
 
@@ -118,18 +118,18 @@ void EHealth::process()
     }
 }
 
-auto EHealth::set_config(std::shared_ptr<Node_Config_Base> config) -> bool
+auto EHealth::set_config(std::shared_ptr<INode_Config> config) -> bool
 {
     QLOG_TOPIC("EHealth::set_config");
 
     return true;
 }
-auto EHealth::get_config() const -> std::shared_ptr<Node_Config_Base>
+auto EHealth::get_config() const -> std::shared_ptr<INode_Config>
 {
     return m_config;
 }
 
-auto EHealth::get_descriptor() const -> std::shared_ptr<Node_Descriptor_Base>
+auto EHealth::get_descriptor() const -> std::shared_ptr<INode_Descriptor>
 {
     return m_desc;
 }

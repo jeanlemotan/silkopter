@@ -141,7 +141,7 @@ auto RC5T619::get_outputs() const -> std::vector<Output>
     outputs[1].stream = m_adc[1];
     return outputs;
 }
-auto RC5T619::init(std::shared_ptr<Node_Descriptor_Base> descriptor) -> bool
+auto RC5T619::init(std::shared_ptr<INode_Descriptor> descriptor) -> bool
 {
     QLOG_TOPIC("rc5t619::init");
 
@@ -302,7 +302,7 @@ void RC5T619::process()
     }
 }
 
-auto RC5T619::set_config(std::shared_ptr<Node_Config_Base> config) -> bool
+auto RC5T619::set_config(std::shared_ptr<INode_Config> config) -> bool
 {
     QLOG_TOPIC("rc5t619::set_config");
 
@@ -316,20 +316,20 @@ auto RC5T619::set_config(std::shared_ptr<Node_Config_Base> config) -> bool
     *m_config = *specialized;
     return true;
 }
-auto RC5T619::get_config() const -> std::shared_ptr<Node_Config_Base>
+auto RC5T619::get_config() const -> std::shared_ptr<INode_Config>
 {
     return m_config;
 }
 
-auto RC5T619::get_descriptor() const -> std::shared_ptr<Node_Descriptor_Base>
+auto RC5T619::get_descriptor() const -> std::shared_ptr<INode_Descriptor>
 {
     return m_descriptor;
 }
 
-auto RC5T619::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document
-{
-    return rapidjson::Document();
-}
+//auto RC5T619::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document
+//{
+//    return rapidjson::Document();
+//}
 
 }
 }

@@ -18,7 +18,7 @@ Rate_Controller::Rate_Controller(UAV& uav)
     m_output_stream = std::make_shared<Output_Stream>();
 }
 
-auto Rate_Controller::init(std::shared_ptr<Node_Descriptor_Base> descriptor) -> bool
+auto Rate_Controller::init(std::shared_ptr<INode_Descriptor> descriptor) -> bool
 {
     QLOG_TOPIC("rate_controller::init");
 
@@ -69,18 +69,18 @@ void Rate_Controller::process()
 
     m_output_stream->clear();
 
-    std::shared_ptr<const Multirotor_Config> multirotor_config = m_uav.get_specialized_uav_config<Multirotor_Config>();
-    if (!multirotor_config)
+    std::shared_ptr<const Multirotor_Descriptor> multirotor_descriptor = m_uav.get_specialized_uav_descriptor<Multirotor_Descriptor>();
+    if (!multirotor_descriptor)
     {
         return;
     }
 
-    m_accumulator.process([this, &multirotor_config](stream::IAngular_Velocity::Sample const& i_sample,
+    m_accumulator.process([this, &multirotor_descriptor](stream::IAngular_Velocity::Sample const& i_sample,
                                                 stream::IAngular_Velocity::Sample const& t_sample)
     {
         if (i_sample.is_healthy & t_sample.is_healthy)
         {
-            math::vec3f ff = compute_feedforward(*multirotor_config, i_sample.value, t_sample.value);
+            math::vec3f ff = compute_feedforward(*multirotor_descriptor, i_sample.value, t_sample.value);
             math::vec3f fb = compute_feedback(i_sample.value, t_sample.value);
 
             Output_Stream::Value value(ff * m_config->get_feedforward().get_weight() + fb * m_config->get_feedback().get_weight());
@@ -95,15 +95,15 @@ void Rate_Controller::process()
 }
 
 
-math::vec3f Rate_Controller::compute_feedforward(Multirotor_Config const& config, stream::IAngular_Velocity::Value const& input, stream::IAngular_Velocity::Value const& target)
+math::vec3f Rate_Controller::compute_feedforward(Multirotor_Descriptor const& multirotor_descriptor, stream::IAngular_Velocity::Value const& input, stream::IAngular_Velocity::Value const& target)
 {
     math::vec3f v = target - input;
-    float vm = math::length(v) * config.get_moment_of_inertia();
+    float vm = math::length(v) * multirotor_descriptor.get_moment_of_inertia();
 
     float max_T = m_config->get_feedforward().get_max_torque();
 
-    float A = config.get_motor_acceleration();
-    float C = config.get_motor_deceleration();
+    float A = multirotor_descriptor.get_motor_acceleration();
+    float C = multirotor_descriptor.get_motor_deceleration();
 
     float x_sq = vm / ((A + C) * max_T / 2.f);
     float x = math::min(1.f, math::sqrt(x_sq));
@@ -123,7 +123,7 @@ void Rate_Controller::set_input_stream_path(size_t idx, q::Path const& path)
     m_accumulator.set_stream_path(idx, path, m_output_stream->get_rate(), m_uav);
 }
 
-auto Rate_Controller::set_config(std::shared_ptr<Node_Config_Base> config) -> bool
+auto Rate_Controller::set_config(std::shared_ptr<INode_Config> config) -> bool
 {
     QLOG_TOPIC("rate_controller::set_config");
 
@@ -137,11 +137,6 @@ auto Rate_Controller::set_config(std::shared_ptr<Node_Config_Base> config) -> bo
     *m_config = *specialized;
 
     //todo - fix this
-//    m_config->feedback.weight = math::clamp(m_config->feedback.weight, 0.f, 1.f);
-//    m_config->feedforward.weight = math::clamp(m_config->feedforward.weight, 0.f, 1.f);
-
-//    m_config->feedforward.max_torque = math::max(m_config->feedforward.max_torque, 0.01f);
-
 //    auto fill_params = [this](PID::Params& dst, sz::PID const& src)
 //    {
 //        dst.kp = src.kp;
@@ -175,7 +170,7 @@ auto Rate_Controller::set_config(std::shared_ptr<Node_Config_Base> config) -> bo
 
     return true;
 }
-auto Rate_Controller::get_config() const -> std::shared_ptr<Node_Config_Base>
+auto Rate_Controller::get_config() const -> std::shared_ptr<INode_Config>
 {
     //todo - fix this
 //    rapidjson::Document json;
@@ -193,15 +188,15 @@ auto Rate_Controller::get_config() const -> std::shared_ptr<Node_Config_Base>
     return m_config;
 }
 
-auto Rate_Controller::get_descriptor() const -> std::shared_ptr<Node_Descriptor_Base>
+auto Rate_Controller::get_descriptor() const -> std::shared_ptr<INode_Descriptor>
 {
     return m_descriptor;
 }
 
-auto Rate_Controller::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document
-{
-    return rapidjson::Document();
-}
+//auto Rate_Controller::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document
+//{
+//    return rapidjson::Document();
+//}
 
 }
 }

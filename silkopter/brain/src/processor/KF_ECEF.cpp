@@ -106,7 +106,7 @@ KF_ECEF::KF_ECEF(UAV& uav)
     m_linear_acceleration_output_stream = std::make_shared<Linear_Acceleration_Output_Stream>();
 }
 
-auto KF_ECEF::init(std::shared_ptr<Node_Descriptor_Base> descriptor) -> bool
+auto KF_ECEF::init(std::shared_ptr<INode_Descriptor> descriptor) -> bool
 {
     QLOG_TOPIC("KF_ECEF::init");
 
@@ -261,7 +261,7 @@ void KF_ECEF::set_input_stream_path(size_t idx, q::Path const& path)
     m_accumulator.set_stream_path(idx, path, m_descriptor->get_rate(), m_uav);
 }
 
-auto KF_ECEF::set_config(std::shared_ptr<Node_Config_Base> config) -> bool
+auto KF_ECEF::set_config(std::shared_ptr<INode_Config> config) -> bool
 {
     QLOG_TOPIC("KF_ECEF::set_config");
 
@@ -291,20 +291,20 @@ auto KF_ECEF::set_config(std::shared_ptr<Node_Config_Base> config) -> bool
 
     return true;
 }
-auto KF_ECEF::get_config() const -> std::shared_ptr<Node_Config_Base>
+auto KF_ECEF::get_config() const -> std::shared_ptr<INode_Config>
 {
     return m_config;
 }
 
-auto KF_ECEF::get_descriptor() const -> std::shared_ptr<Node_Descriptor_Base>
+auto KF_ECEF::get_descriptor() const -> std::shared_ptr<INode_Descriptor>
 {
     return m_descriptor;
 }
 
-auto KF_ECEF::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document
-{
-    return rapidjson::Document();
-}
+//auto KF_ECEF::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document
+//{
+//    return rapidjson::Document();
+//}
 
 }
 }

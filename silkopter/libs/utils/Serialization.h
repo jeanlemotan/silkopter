@@ -1,8 +1,8 @@
 #pragma once
 
-#include "rapidjson/document.h"
-#include "rapidjson/stringbuffer.h"
-#include "rapidjson/writer.h"
+//#include "rapidjson/document.h"
+//#include "rapidjson/stringbuffer.h"
+//#include "rapidjson/writer.h"
 #include "utils/Serialization.h"
 
 namespace util
@@ -58,21 +58,21 @@ template<class T> inline auto deserialize(Buffer_t const& buffer, math::quat<T>&
            deserialize(buffer, val.z, off) &&
            deserialize(buffer, val.w, off);
 }
-template<> inline auto deserialize(Buffer_t const& buffer, rapidjson::Document& json, size_t& off) -> bool
-{
-    std::string str;
-    if (!deserialize(buffer, str, off))
-    {
-        return false;
-    }
-    json.SetObject();
-    if (!str.empty() && json.Parse(str.c_str()).HasParseError())
-    {
-        QLOGE("Failed to parse json: {}:{}", json.GetParseError(), json.GetErrorOffset());
-        return false;
-    }
-    return true;
-}
+//template<> inline auto deserialize(Buffer_t const& buffer, rapidjson::Document& json, size_t& off) -> bool
+//{
+//    std::string str;
+//    if (!deserialize(buffer, str, off))
+//    {
+//        return false;
+//    }
+//    json.SetObject();
+//    if (!str.empty() && json.Parse(str.c_str()).HasParseError())
+//    {
+//        QLOGE("Failed to parse json: {}:{}", json.GetParseError(), json.GetErrorOffset());
+//        return false;
+//    }
+//    return true;
+//}
 template<class T> inline auto deserialize(Buffer_t const& buffer, std::vector<T>& val, size_t& off) -> bool
 {
     val.clear();
@@ -134,14 +134,14 @@ template<class T> inline void serialize(Buffer_t& buffer, math::quat<T> const& v
     serialize(buffer, val.z, off);
     serialize(buffer, val.w, off);
 }
-template<> inline void serialize(Buffer_t& buffer, rapidjson::Document const& json, size_t& off)
-{
-    rapidjson::StringBuffer str_buf;
-    rapidjson::Writer<rapidjson::StringBuffer> writer(str_buf);
-    json.Accept(writer);
-    std::string str(str_buf.GetString(), str_buf.GetSize());
-    serialize(buffer, str, off);
-}
+//template<> inline void serialize(Buffer_t& buffer, rapidjson::Document const& json, size_t& off)
+//{
+//    rapidjson::StringBuffer str_buf;
+//    rapidjson::Writer<rapidjson::StringBuffer> writer(str_buf);
+//    json.Accept(writer);
+//    std::string str(str_buf.GetString(), str_buf.GetSize());
+//    serialize(buffer, str, off);
+//}
 template<class T> inline void serialize(Buffer_t& buffer, std::vector<T> const& val, size_t& off)
 {
     serialize(buffer, static_cast<uint32_t>(val.size()), off);

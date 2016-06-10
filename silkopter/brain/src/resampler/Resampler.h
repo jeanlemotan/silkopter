@@ -23,13 +23,13 @@ public:
 
     Resampler(UAV& uav);
 
-    bool init(std::shared_ptr<Node_Descriptor_Base> descriptor) override;
-    std::shared_ptr<Node_Descriptor_Base> get_descriptor() const override;
+    bool init(std::shared_ptr<INode_Descriptor> descriptor) override;
+    std::shared_ptr<INode_Descriptor> get_descriptor() const override;
 
-    bool set_config(std::shared_ptr<Node_Config_Base> config) override;
-    std::shared_ptr<Node_Config_Base> get_config() const override;
+    bool set_config(std::shared_ptr<INode_Config> config) override;
+    std::shared_ptr<INode_Config> get_config() const override;
 
-    auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
+    //auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
 
     auto start(q::Clock::time_point tp) -> bool override;
 
@@ -115,7 +115,7 @@ Resampler<Stream_t>::Resampler(UAV& uav)
 }
 
 template<class Stream_t>
-auto Resampler<Stream_t>::init(std::shared_ptr<Node_Descriptor_Base> descriptor) -> bool
+auto Resampler<Stream_t>::init(std::shared_ptr<INode_Descriptor> descriptor) -> bool
 {
     QLOG_TOPIC("resampler::init");
 
@@ -141,7 +141,7 @@ auto Resampler<Stream_t>::init() -> bool
 }
 
 template<class Stream_t>
-auto Resampler<Stream_t>::get_descriptor() const -> std::shared_ptr<Node_Descriptor_Base>
+auto Resampler<Stream_t>::get_descriptor() const -> std::shared_ptr<INode_Descriptor>
 {
     return m_descriptor;
 }
@@ -153,7 +153,7 @@ void Resampler<Stream_t>::set_input_stream_path(size_t idx, q::Path const& path)
 }
 
 template<class Stream_t>
-auto Resampler<Stream_t>::set_config(std::shared_ptr<Node_Config_Base> config) -> bool
+auto Resampler<Stream_t>::set_config(std::shared_ptr<INode_Config> config) -> bool
 {
     QLOG_TOPIC("resampler::set_config");
 
@@ -188,13 +188,13 @@ auto Resampler<Stream_t>::set_config(std::shared_ptr<Node_Config_Base> config) -
 
     return true;
 }
+//template<class Stream_t>
+//auto Resampler<Stream_t>::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document
+//{
+//    return rapidjson::Document();
+//}
 template<class Stream_t>
-auto Resampler<Stream_t>::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document
-{
-    return rapidjson::Document();
-}
-template<class Stream_t>
-auto Resampler<Stream_t>::get_config() const -> std::shared_ptr<Node_Config_Base>
+auto Resampler<Stream_t>::get_config() const -> std::shared_ptr<INode_Config>
 {
     return m_config;
 }

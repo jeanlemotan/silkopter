@@ -18,7 +18,7 @@ Oscillator::Oscillator(UAV& uav)
     m_output_stream = std::make_shared<Output_Stream>();
 }
 
-auto Oscillator::init(std::shared_ptr<Node_Descriptor_Base> descriptor) -> bool
+auto Oscillator::init(std::shared_ptr<INode_Descriptor> descriptor) -> bool
 {
     QLOG_TOPIC("Oscillator::init");
 
@@ -117,7 +117,7 @@ void Oscillator::set_input_stream_path(size_t idx, q::Path const& path)
 {
 }
 
-auto Oscillator::set_config(std::shared_ptr<Node_Config_Base> config) -> bool
+auto Oscillator::set_config(std::shared_ptr<INode_Config> config) -> bool
 {
     QLOG_TOPIC("Oscillator::set_config");
 
@@ -135,20 +135,20 @@ auto Oscillator::set_config(std::shared_ptr<Node_Config_Base> config) -> bool
 
     return true;
 }
-auto Oscillator::get_config() const -> std::shared_ptr<Node_Config_Base>
+auto Oscillator::get_config() const -> std::shared_ptr<INode_Config>
 {
     return m_config;
 }
 
-auto Oscillator::get_descriptor() const -> std::shared_ptr<Node_Descriptor_Base>
+auto Oscillator::get_descriptor() const -> std::shared_ptr<INode_Descriptor>
 {
     return m_descriptor;
 }
 
-auto Oscillator::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document
-{
-    return rapidjson::Document();
-}
+//auto Oscillator::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document
+//{
+//    return rapidjson::Document();
+//}
 
 
 }

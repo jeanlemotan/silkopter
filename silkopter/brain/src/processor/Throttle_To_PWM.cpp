@@ -16,7 +16,7 @@ Throttle_To_PWM::Throttle_To_PWM(UAV& uav)
 {
 }
 
-auto Throttle_To_PWM::init(std::shared_ptr<Node_Descriptor_Base> descriptor) -> bool
+auto Throttle_To_PWM::init(std::shared_ptr<INode_Descriptor> descriptor) -> bool
 {
     QLOG_TOPIC("Throttle_To_PWM::init");
 
@@ -99,7 +99,7 @@ void Throttle_To_PWM::set_input_stream_path(size_t idx, q::Path const& path)
     m_accumulators[idx].set_stream_path(0, path, m_output_streams[0]->get_rate(), m_uav);
 }
 
-auto Throttle_To_PWM::set_config(std::shared_ptr<Node_Config_Base> config) -> bool
+auto Throttle_To_PWM::set_config(std::shared_ptr<INode_Config> config) -> bool
 {
     QLOG_TOPIC("Throttle_To_PWM::set_config");
 
@@ -114,19 +114,19 @@ auto Throttle_To_PWM::set_config(std::shared_ptr<Node_Config_Base> config) -> bo
 
     return true;
 }
-auto Throttle_To_PWM::get_config() const -> std::shared_ptr<Node_Config_Base>
+auto Throttle_To_PWM::get_config() const -> std::shared_ptr<INode_Config>
 {
     return m_config;
 }
 
-auto Throttle_To_PWM::get_descriptor() const -> std::shared_ptr<Node_Descriptor_Base>
+auto Throttle_To_PWM::get_descriptor() const -> std::shared_ptr<INode_Descriptor>
 {
     return m_descriptor;
 }
-auto Throttle_To_PWM::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document
-{
-    return rapidjson::Document();
-}
+//auto Throttle_To_PWM::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document
+//{
+//    return rapidjson::Document();
+//}
 
 
 }

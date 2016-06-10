@@ -204,7 +204,7 @@ auto Raspicam::get_outputs() const -> std::vector<Output>
     return outputs;
 }
 
-auto Raspicam::init(std::shared_ptr<Node_Descriptor_Base> descriptor) -> bool
+auto Raspicam::init(std::shared_ptr<INode_Descriptor> descriptor) -> bool
 {
     QLOG_TOPIC("raspicam::init");
 
@@ -290,7 +290,7 @@ auto Raspicam::init() -> bool
 #endif
 }
 
-auto Raspicam::set_config(std::shared_ptr<Node_Config_Base> config) -> bool
+auto Raspicam::set_config(std::shared_ptr<INode_Config> config) -> bool
 {
     QLOG_TOPIC("raspicam::set_config");
 
@@ -342,20 +342,20 @@ auto Raspicam::set_config(std::shared_ptr<Node_Config_Base> config) -> bool
 
     return true;
 }
-auto Raspicam::get_config() const -> std::shared_ptr<Node_Config_Base>
+auto Raspicam::get_config() const -> std::shared_ptr<INode_Config>
 {
     return m_config;
 }
 
-auto Raspicam::get_descriptor() const -> std::shared_ptr<Node_Descriptor_Base>
+auto Raspicam::get_descriptor() const -> std::shared_ptr<INode_Descriptor>
 {
     return m_descriptor;
 }
 
-auto Raspicam::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document
-{
-    return rapidjson::Document();
-}
+//auto Raspicam::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document
+//{
+//    return rapidjson::Document();
+//}
 
 void Raspicam::shutdown()
 {

@@ -19,7 +19,7 @@ alias euler3_t = math::vec3f : [ min = {-180.f, -180.f, -180.f}, max = {180.f, 1
 alias servo_signal_t = float : [ min = 1.f, max = 2.f ];
 alias pwm_signal_t = float : [ min = 0.f, max = 1.f ];
 
-struct UAV_Config_Base
+struct IUAV_Descriptor
 {
     alias mass_t = float : [ min = 0.01f, max = 100.f ];
 
@@ -28,7 +28,54 @@ struct UAV_Config_Base
     ufloat moment_of_inertia : [ui_name = "Moment Of Inertia"];
 };
 
-struct Multirotor_Config : public UAV_Config_Base
+struct IBus_Descriptor
+{
+};
+
+struct INode_Descriptor
+{
+};
+
+struct INode_Config
+{
+};
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Settings
+
+struct Bus_Data
+{
+    string type;
+    poly<IBus_Descriptor> descriptor;
+};
+
+struct Node_Data
+{
+    string name;
+    string type;
+    poly<INode_Descriptor> descriptor;
+    poly<INode_Config> config;
+    vector<string> input_paths;
+};
+
+struct Settings
+{
+    poly<IUAV_Descriptor> uav_descriptor;
+
+    vector<Bus_Data> buses;
+    vector<Node_Data> nodes;
+};
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Configs
+
+struct Multirotor_Descriptor : public IUAV_Descriptor
 {
     alias height_t = float : [ min = 0.01f, max = 100.f ];
     alias radius_t = float : [ min = 0.01f, max = 100.f ];
@@ -52,44 +99,12 @@ struct Multirotor_Config : public UAV_Config_Base
     vector<Motor> motors;
 };
 
-struct Bus_Descriptor_Base
-{
-};
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Buses
 
-struct Bus
-{
-    string name;
-    string type;
-    poly<Bus_Descriptor_Base> descriptor;
-};
-
-struct Node_Descriptor_Base
-{
-};
-
-struct Node_Config_Base
-{
-};
-
-struct Node
-{
-    string name;
-    string type;
-    poly<Node_Descriptor_Base> descriptor;
-    poly<Node_Config_Base> config;
-    vector<string> input_paths;
-};
-
-struct Settings
-{
-    poly<UAV_Config_Base> config;
-
-    vector<Bus> buses;
-    vector<Node> nodes;
-};
-
-
-struct UART_Linux_Descriptor : public Bus_Descriptor_Base
+struct UART_Linux_Descriptor : public IBus_Descriptor
 {
     enum baud_t
     {
@@ -104,14 +119,14 @@ struct UART_Linux_Descriptor : public Bus_Descriptor_Base
     string dev = "/dev/ttyAMA0";
     baud_t baud = baud_t::_115200;
 };
-struct UART_BBang_Descriptor : public Bus_Descriptor_Base
+struct UART_BBang_Descriptor : public IBus_Descriptor
 {
     uint32_t rx_pin = 0;
     uint32_t baud = 115200;
     bool invert = false;
 };
 
-struct I2C_BCM_Descriptor : public Bus_Descriptor_Base
+struct I2C_BCM_Descriptor : public IBus_Descriptor
 {
     alias dev_t = uint32_t : [ min = 0, max = 1 ];
     alias baud_t = uint32_t : [ min = 10000, max = 1000000 ];
@@ -119,12 +134,12 @@ struct I2C_BCM_Descriptor : public Bus_Descriptor_Base
     dev_t dev = 0;
     baud_t baud = 400000;
 };
-struct I2C_Linux_Descriptor : public Bus_Descriptor_Base
+struct I2C_Linux_Descriptor : public IBus_Descriptor
 {
     string dev = "/dev/i2c0";
 };
 
-struct SPI_BCM_Descriptor : public Bus_Descriptor_Base
+struct SPI_BCM_Descriptor : public IBus_Descriptor
 {
     alias dev_t = uint32_t : [ min = 0, max = 1 ];
     alias mode_t = uint32_t : [max = 3];
@@ -135,13 +150,23 @@ struct SPI_BCM_Descriptor : public Bus_Descriptor_Base
     mode_t mode = 0;
     speed_t speed = 1000000;
 };
-struct SPI_Linux_Descriptor : public Bus_Descriptor_Base
+struct SPI_Linux_Descriptor : public IBus_Descriptor
 {
     alias speed_t = uint32_t : [ min = 1000 ];
 
     string dev = "/dev/ttyAMA0";
     speed_t speed = 1000000;
 };
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Nodes
+
+
+//////////////////////////////////////////////////////////////
+// Support structures
 
 struct P_Controller_Descriptor
 {
@@ -168,14 +193,14 @@ struct PID_Controller_Descriptor : public PD_Controller_Descriptor
 
 //////////////////////////////////////////////////////////////
 
-struct ADC_Ammeter_Descriptor : public Node_Descriptor_Base
+struct ADC_Ammeter_Descriptor : public INode_Descriptor
 {
     alias rate_t = int : [ min = 1, max = 10000, native_type = "uint32_t" ];
 
     rate_t rate = 100 : [ ui_name = "Rate (Hz)" ];
 };
 
-struct ADC_Ammeter_Config : public Node_Config_Base
+struct ADC_Ammeter_Config : public INode_Config
 {
     float scale = 1.f : [ ui_name = "Scale" ];
     float bias = 0.f : [ ui_name = "Scale" ];
@@ -183,14 +208,14 @@ struct ADC_Ammeter_Config : public Node_Config_Base
 
 //////////////////////////////////////////////////////////////
 
-struct ADC_Voltmeter_Descriptor : public Node_Descriptor_Base
+struct ADC_Voltmeter_Descriptor : public INode_Descriptor
 {
     alias rate_t = int : [ min = 1, max = 10000, native_type = "uint32_t" ];
 
     rate_t rate = 100 : [ ui_name = "Rate (Hz)" ];
 };
 
-struct ADC_Voltmeter_Config : public Node_Config_Base
+struct ADC_Voltmeter_Config : public INode_Config
 {
     float scale = 1.f : [ ui_name = "Scale" ];
     float bias = 0.f : [ ui_name = "Scale" ];
@@ -198,7 +223,7 @@ struct ADC_Voltmeter_Config : public Node_Config_Base
 
 //////////////////////////////////////////////////////////////
 
-struct ADS1115_Descriptor : public Node_Descriptor_Base
+struct ADS1115_Descriptor : public INode_Descriptor
 {
     alias rate_t = int : [ min = 1, max = 200, native_type = "uint32_t" ];
 
@@ -209,13 +234,13 @@ struct ADS1115_Descriptor : public Node_Descriptor_Base
     rate_t adc3_rate = 200 : [ ui_name = "ADC3 Rate (Hz)" ];
 };
 
-struct ADS1115_Config : public Node_Config_Base
+struct ADS1115_Config : public INode_Config
 {
 };
 
 //////////////////////////////////////////////////////////////
 
-struct AVRADC_Descriptor : public Node_Descriptor_Base
+struct AVRADC_Descriptor : public INode_Descriptor
 {
     alias rate_t = int : [ min = 1, max = 500, native_type = "uint32_t" ];
 
@@ -223,60 +248,60 @@ struct AVRADC_Descriptor : public Node_Descriptor_Base
     rate_t rate = 200 : [ ui_name = "Rate (Hz)" ];
 };
 
-struct AVRADC_Config : public Node_Config_Base
+struct AVRADC_Config : public INode_Config
 {
 };
 
 //////////////////////////////////////////////////////////////
 
-struct Comp_AHRS_Descriptor : public Node_Descriptor_Base
+struct Comp_AHRS_Descriptor : public INode_Descriptor
 {
     alias rate_t = int : [ min = 1, max = 10000, native_type = "uint32_t" ];
 
     rate_t rate = 200 : [ ui_name = "Rate (Hz)" ];
 };
 
-struct Comp_AHRS_Config : public Node_Config_Base
+struct Comp_AHRS_Config : public INode_Config
 {
     muf_t drift_correction_factor = 0.3f : [ ui_name = "Drift Correction Factor" ];
 };
 
 //////////////////////////////////////////////////////////////
 
-struct Combiner_Descriptor : public Node_Descriptor_Base
+struct Combiner_Descriptor : public INode_Descriptor
 {
     alias rate_t = int : [ min = 1, max = 10000, native_type = "uint32_t" ];
 
     rate_t rate = 200 : [ ui_name = "Rate (Hz)" ];
 };
 
-struct Combiner_Config : public Node_Config_Base
+struct Combiner_Config : public INode_Config
 {
 };
 
 //////////////////////////////////////////////////////////////
 
-struct Gravity_Filter_Descriptor : public Node_Descriptor_Base
+struct Gravity_Filter_Descriptor : public INode_Descriptor
 {
     alias rate_t = int : [ min = 1, max = 10000, native_type = "uint32_t" ];
 
     rate_t rate = 1 : [ ui_name = "Rate (Hz)" ];
 };
 
-struct Gravity_Filter_Config : public Node_Config_Base
+struct Gravity_Filter_Config : public INode_Config
 {
 };
 
 //////////////////////////////////////////////////////////////
 
-struct KF_ECEF_Descriptor : public Node_Descriptor_Base
+struct KF_ECEF_Descriptor : public INode_Descriptor
 {
     alias rate_t = int : [ min = 1, max = 10000, native_type = "uint32_t" ];
 
     rate_t rate = 1 : [ ui_name = "Rate (Hz)" ];
 };
 
-struct KF_ECEF_Config : public Node_Config_Base
+struct KF_ECEF_Config : public INode_Config
 {
     ufloat gps_position_lag = 0.f : [ ui_name = "GPS Position Lag (s)" ];
     ufloat gps_position_accuracy = 2.f : [ ui_name = "GPS Position Accuracy (CEP m)" ];
@@ -288,27 +313,27 @@ struct KF_ECEF_Config : public Node_Config_Base
 
 //////////////////////////////////////////////////////////////
 
-struct ENU_Frame_System_Descriptor : public Node_Descriptor_Base
+struct ENU_Frame_System_Descriptor : public INode_Descriptor
 {
     alias rate_t = int : [ min = 1, max = 10000, native_type = "uint32_t" ];
 
     rate_t rate = 1 : [ ui_name = "Rate (Hz)" ];
 };
 
-struct ENU_Frame_System_Config : public Node_Config_Base
+struct ENU_Frame_System_Config : public INode_Config
 {
 };
 
 //////////////////////////////////////////////////////////////
 
-struct LPF_Descriptor : public Node_Descriptor_Base
+struct LPF_Descriptor : public INode_Descriptor
 {
     alias rate_t = int : [ min = 1, max = 10000, native_type = "uint32_t" ];
 
     rate_t rate = 1 : [ ui_name = "Rate (Hz)" ];
 };
 
-struct LPF_Config : public Node_Config_Base
+struct LPF_Config : public INode_Config
 {
     alias poles_t = uint32_t : [ max = 6 ];
 
@@ -318,7 +343,7 @@ struct LPF_Config : public Node_Config_Base
 
 //////////////////////////////////////////////////////////////
 
-struct MaxSonar_Descriptor : public Node_Descriptor_Base
+struct MaxSonar_Descriptor : public INode_Descriptor
 {
     alias rate_t = int : [ min = 1, max = 15, native_type = "uint32_t" ];
 
@@ -326,7 +351,7 @@ struct MaxSonar_Descriptor : public Node_Descriptor_Base
     rate_t rate = 1 : [ ui_name = "Rate (Hz)" ];
 };
 
-struct MaxSonar_Config : public Node_Config_Base
+struct MaxSonar_Config : public INode_Config
 {
     direction_t direction : [ui_name = "Direction" ];
     ufloat max_distance = 10.f : [ui_name = "Maximum Distance (m)"];
@@ -335,14 +360,14 @@ struct MaxSonar_Config : public Node_Config_Base
 
 //////////////////////////////////////////////////////////////
 
-struct Motor_Mixer_Descriptor : public Node_Descriptor_Base
+struct Motor_Mixer_Descriptor : public INode_Descriptor
 {
     alias rate_t = int : [ min = 1, max = 10000, native_type = "uint32_t" ];
 
     rate_t rate = 1 : [ ui_name = "Rate (Hz)" ];
 };
 
-struct Motor_Mixer_Config : public Node_Config_Base
+struct Motor_Mixer_Config : public INode_Config
 {
     ufloat armed_thrust = 0.f : [ui_name = "Armed Thrust (N)"];
 };
@@ -367,7 +392,7 @@ struct Magnetic_Field_Calibration_Point
     math::vec3f scale = { 1.f, 1.f, 1.f } : [ ui_name = "Scale" ];
 };
 
-struct MPU9250_Descriptor : public Node_Descriptor_Base
+struct MPU9250_Descriptor : public INode_Descriptor
 {
     alias rate_t = int : [ min = 1, max = 100, native_type = "uint32_t" ];
 
@@ -402,7 +427,7 @@ struct MPU9250_Descriptor : public Node_Descriptor_Base
     angular_velocity_range_t angular_velocity_range = angular_velocity_range_t::_500 : [ ui_name = "Angular Velocity Range (DPS)" ];
 };
 
-struct MPU9250_Config : public Node_Config_Base
+struct MPU9250_Config : public INode_Config
 {
     struct Calibration
     {
@@ -417,7 +442,7 @@ struct MPU9250_Config : public Node_Config_Base
 
 //////////////////////////////////////////////////////////////
 
-struct MS5611_Descriptor : public Node_Descriptor_Base
+struct MS5611_Descriptor : public INode_Descriptor
 {
     alias rate_t = int : [ min = 1, max = 100, native_type = "uint32_t" ];
 
@@ -426,13 +451,13 @@ struct MS5611_Descriptor : public Node_Descriptor_Base
     rate_t temperature_rate = 10 : [ ui_name = "Temperature Rate (Hz)" ];
 };
 
-struct MS5611_Config : public Node_Config_Base
+struct MS5611_Config : public INode_Config
 {
 };
 
 //////////////////////////////////////////////////////////////
 
-struct Multirotor_Brain_Descriptor : public Node_Descriptor_Base
+struct Multirotor_Brain_Descriptor : public INode_Descriptor
 {
     alias rate_t = int : [ min = 1, max = 10000, native_type = "uint32_t" ];
 
@@ -441,7 +466,7 @@ struct Multirotor_Brain_Descriptor : public Node_Descriptor_Base
     rate_t state_rate = 30 : [ ui_name = "Commands Rate (Hz)" ];
 };
 
-struct Multirotor_Brain_Config : public Node_Config_Base
+struct Multirotor_Brain_Config : public INode_Config
 {
     struct Horizontal_Angle
     {
@@ -495,7 +520,7 @@ struct Multirotor_Brain_Config : public Node_Config_Base
 
 //////////////////////////////////////////////////////////////
 
-struct Multirotor_Pilot_Descriptor : public Node_Descriptor_Base
+struct Multirotor_Pilot_Descriptor : public INode_Descriptor
 {
     alias rate_t = int : [ min = 1, max = 10000, native_type = "uint32_t" ];
 
@@ -504,13 +529,13 @@ struct Multirotor_Pilot_Descriptor : public Node_Descriptor_Base
     rate_t video_rate = 30 : [ ui_name = "Video Rate (Hz)" ];
 };
 
-struct Multirotor_Pilot_Config : public Node_Config_Base
+struct Multirotor_Pilot_Config : public INode_Config
 {
 };
 
 //////////////////////////////////////////////////////////////
 
-struct Multirotor_Simulator_Descriptor : public Node_Descriptor_Base
+struct Multirotor_Simulator_Descriptor : public INode_Descriptor
 {
     alias rate_t = int : [ min = 1, max = 10000, native_type = "uint32_t" ];
 
@@ -524,7 +549,7 @@ struct Multirotor_Simulator_Descriptor : public Node_Descriptor_Base
     rate_t gps_rate = 5 : [ ui_name = "GPS Rate (Hz)" ];
 };
 
-struct Multirotor_Simulator_Config : public Node_Config_Base
+struct Multirotor_Simulator_Config : public INode_Config
 {
     struct Noise
     {
@@ -549,7 +574,7 @@ struct Multirotor_Simulator_Config : public Node_Config_Base
 
 //////////////////////////////////////////////////////////////
 
-struct Oscillator_Descriptor : public Node_Descriptor_Base
+struct Oscillator_Descriptor : public INode_Descriptor
 {
     alias rate_t = int : [ min = 1, max = 10000, native_type = "uint32_t" ];
     alias component_count_t = int32_t : [ min = 1, max = 32 ];
@@ -558,7 +583,7 @@ struct Oscillator_Descriptor : public Node_Descriptor_Base
     component_count_t component_count = 1 : [ ui_name = "Components" ];
 };
 
-struct Oscillator_Config : public Node_Config_Base
+struct Oscillator_Config : public INode_Config
 {
     struct Component
     {
@@ -574,7 +599,7 @@ struct Oscillator_Config : public Node_Config_Base
 
 //////////////////////////////////////////////////////////////
 
-struct PCA9685_Descriptor : public Node_Descriptor_Base
+struct PCA9685_Descriptor : public INode_Descriptor
 {
     alias rate_t = int : [ min = 1, max = 8000, native_type = "uint32_t" ];
 
@@ -591,7 +616,7 @@ struct PCA9685_Descriptor : public Node_Descriptor_Base
     vector<Channel> channels : [ ui_name = "Channels" ];
 };
 
-struct PCA9685_Config : public Node_Config_Base
+struct PCA9685_Config : public INode_Config
 {
     struct Servo_Channel
     {
@@ -609,7 +634,7 @@ struct PCA9685_Config : public Node_Config_Base
 
 //////////////////////////////////////////////////////////////
 
-struct PIGPIO_Descriptor : public Node_Descriptor_Base
+struct PIGPIO_Descriptor : public INode_Descriptor
 {
     alias rate_t = int : [ min = 1, max = 8000, native_type = "uint32_t" ];
 
@@ -648,7 +673,7 @@ struct PIGPIO_Descriptor : public Node_Descriptor_Base
     Channel gpio_27 : [ ui_name = "GPIO 27" ];
 };
 
-struct PIGPIO_Config : public Node_Config_Base
+struct PIGPIO_Config : public INode_Config
 {
     struct Servo_Channel
     {
@@ -691,20 +716,20 @@ struct PIGPIO_Config : public Node_Config_Base
 
 //////////////////////////////////////////////////////////////
 
-struct Pressure_Velocity_Descriptor : public Node_Descriptor_Base
+struct Pressure_Velocity_Descriptor : public INode_Descriptor
 {
     alias rate_t = int : [ min = 1, max = 10000, native_type = "uint32_t" ];
 
     rate_t rate = 1 : [ ui_name = "Rate (Hz)" ];
 };
 
-struct Pressure_Velocity_Config : public Node_Config_Base
+struct Pressure_Velocity_Config : public INode_Config
 {
 };
 
 //////////////////////////////////////////////////////////////
 
-struct Proximity_Descriptor : public Node_Descriptor_Base
+struct Proximity_Descriptor : public INode_Descriptor
 {
     alias rate_t = int : [ min = 1, max = 10000, native_type = "uint32_t" ];
     alias channel_count_t = int32_t : [ min = 1, max = 128 ];
@@ -713,20 +738,20 @@ struct Proximity_Descriptor : public Node_Descriptor_Base
     channel_count_t channel_count = 1 : [ ui_name = "Channel Count" ];
 };
 
-struct Proximity_Config : public Node_Config_Base
+struct Proximity_Config : public INode_Config
 {
 };
 
 //////////////////////////////////////////////////////////////
 
-struct Rate_Controller_Descriptor : public Node_Descriptor_Base
+struct Rate_Controller_Descriptor : public INode_Descriptor
 {
     alias rate_t = int : [ min = 1, max = 10000, native_type = "uint32_t" ];
 
     rate_t rate = 1 : [ ui_name = "Rate (Hz)" ];
 };
 
-struct Rate_Controller_Config : public Node_Config_Base
+struct Rate_Controller_Config : public INode_Config
 {
     struct Feedback
     {
@@ -744,8 +769,10 @@ struct Rate_Controller_Config : public Node_Config_Base
     };
     struct Feedforward
     {
+        alias torque_t = float : [ min = 0.01f ];
+
         muf_t weight = 0.f : [ ui_name = "Weight" ];
-        ufloat max_torque = 1.f : [ ui_name = "Max Torque (N)" ];
+        torque_t max_torque = 1.f : [ ui_name = "Max Torque (N)" ];
     };
 
     Feedback feedback : [ ui_name = "Feedback" ];
@@ -754,7 +781,7 @@ struct Rate_Controller_Config : public Node_Config_Base
 
 //////////////////////////////////////////////////////////////
 
-struct Raspicam_Descriptor : public Node_Descriptor_Base
+struct Raspicam_Descriptor : public INode_Descriptor
 {
     struct Quality
     {
@@ -773,7 +800,7 @@ struct Raspicam_Descriptor : public Node_Descriptor_Base
     Quality recording : [ ui_name = "Recording" ];
 };
 
-struct Raspicam_Config : public Node_Config_Base
+struct Raspicam_Config : public INode_Config
 {
     alias iso_t = int32_t : [ min = 0, max = 1600 ];
     alias shutter_speed_t = float : [ min = 0.f, max = 1000.f ];
@@ -812,7 +839,7 @@ struct Raspicam_Config : public Node_Config_Base
 
 //////////////////////////////////////////////////////////////
 
-struct RC5T619_Descriptor : public Node_Descriptor_Base
+struct RC5T619_Descriptor : public INode_Descriptor
 {
     alias rate_t = int : [ min = 1, max = 200, native_type = "uint32_t" ];
 
@@ -821,13 +848,13 @@ struct RC5T619_Descriptor : public Node_Descriptor_Base
     rate_t adc1_rate = 5 : [ ui_name = "ADC1 Rate (Hz)" ];
 };
 
-struct RC5T619_Config : public Node_Config_Base
+struct RC5T619_Config : public INode_Config
 {
 };
 
 //////////////////////////////////////////////////////////////
 
-struct Resampler_Descriptor : public Node_Descriptor_Base
+struct Resampler_Descriptor : public INode_Descriptor
 {
     alias rate_t = int : [ min = 1, max = 10000, native_type = "uint32_t" ];
 
@@ -835,28 +862,28 @@ struct Resampler_Descriptor : public Node_Descriptor_Base
     rate_t output_rate = 1 : [ ui_name = "Output Rate (Hz)" ];
 };
 
-struct Resampler_Config : public Node_Config_Base
+struct Resampler_Config : public INode_Config
 {
     LPF_Config lpf : [ ui_name = "LPF" ];
 };
 
 //////////////////////////////////////////////////////////////
 
-struct Scalar_Generator_Descriptor : public Node_Descriptor_Base
+struct Scalar_Generator_Descriptor : public INode_Descriptor
 {
     alias rate_t = int : [ min = 1, max = 10000, native_type = "uint32_t" ];
 
     rate_t rate = 1 : [ ui_name = "Rate (Hz)" ];
 };
 
-struct Scalar_Generator_Config : public Node_Config_Base
+struct Scalar_Generator_Config : public INode_Config
 {
     float value = 0.f : [ ui_name = "Value" ];
 };
 
 //////////////////////////////////////////////////////////////
 
-struct Servo_Gimbal_Descriptor : public Node_Descriptor_Base
+struct Servo_Gimbal_Descriptor : public INode_Descriptor
 {
     alias rate_t = int : [ min = 1, max = 10000, native_type = "uint32_t" ];
 
@@ -864,7 +891,7 @@ struct Servo_Gimbal_Descriptor : public Node_Descriptor_Base
     rate_t commands_rate = 1 : [ ui_name = "Commands Rate (Hz)" ];
 };
 
-struct Servo_Gimbal_Config : public Node_Config_Base
+struct Servo_Gimbal_Config : public INode_Config
 {
     struct Channel
     {
@@ -881,7 +908,7 @@ struct Servo_Gimbal_Config : public Node_Config_Base
 
 //////////////////////////////////////////////////////////////
 
-struct SRF01_Descriptor : public Node_Descriptor_Base
+struct SRF01_Descriptor : public INode_Descriptor
 {
     alias rate_t = int : [ min = 1, max = 10, native_type = "uint32_t" ];
 
@@ -889,7 +916,7 @@ struct SRF01_Descriptor : public Node_Descriptor_Base
     rate_t rate = 1 : [ ui_name = "Rate (Hz)" ];
 };
 
-struct SRF01_Config : public Node_Config_Base
+struct SRF01_Config : public INode_Config
 {
     direction_t direction : [ui_name = "Direction" ];
     ufloat max_distance = 6.f : [ui_name = "Maximum Distance (m)"];
@@ -898,7 +925,7 @@ struct SRF01_Config : public Node_Config_Base
 
 //////////////////////////////////////////////////////////////
 
-struct SRF02_Descriptor : public Node_Descriptor_Base
+struct SRF02_Descriptor : public INode_Descriptor
 {
     alias rate_t = int : [ min = 1, max = 10, native_type = "uint32_t" ];
 
@@ -906,7 +933,7 @@ struct SRF02_Descriptor : public Node_Descriptor_Base
     rate_t rate = 1 : [ ui_name = "Rate (Hz)" ];
 };
 
-struct SRF02_Config : public Node_Config_Base
+struct SRF02_Config : public INode_Config
 {
     direction_t direction : [ui_name = "Direction" ];
     ufloat max_distance = 6.f : [ui_name = "Maximum Distance (m)"];
@@ -915,7 +942,7 @@ struct SRF02_Config : public Node_Config_Base
 
 //////////////////////////////////////////////////////////////
 
-struct Throttle_To_PWM_Descriptor : public Node_Descriptor_Base
+struct Throttle_To_PWM_Descriptor : public INode_Descriptor
 {
     alias rate_t = int : [ min = 1, max = 10000, native_type = "uint32_t" ];
     alias channel_count_t = int32_t : [ min = 1, max = 128 ];
@@ -924,26 +951,26 @@ struct Throttle_To_PWM_Descriptor : public Node_Descriptor_Base
     channel_count_t channel_count = 1 : [ ui_name = "Channel Count" ];
 };
 
-struct Throttle_To_PWM_Config : public Node_Config_Base
+struct Throttle_To_PWM_Config : public INode_Config
 {
 };
 
 //////////////////////////////////////////////////////////////
 
-struct Transformer_Descriptor : public Node_Descriptor_Base
+struct Transformer_Descriptor : public INode_Descriptor
 {
     alias rate_t = int : [ min = 1, max = 10000, native_type = "uint32_t" ];
 
     rate_t rate = 1 : [ ui_name = "Rate (Hz)" ];
 };
 
-struct Transformer_Config : public Node_Config_Base
+struct Transformer_Config : public INode_Config
 {
 };
 
 //////////////////////////////////////////////////////////////
 
-struct UBLOX_Descriptor : public Node_Descriptor_Base
+struct UBLOX_Descriptor : public INode_Descriptor
 {
     alias rate_t = int : [ min = 1, max = 10, native_type = "uint32_t" ];
 
@@ -951,20 +978,20 @@ struct UBLOX_Descriptor : public Node_Descriptor_Base
     rate_t rate = 1 : [ ui_name = "Rate (Hz)" ];
 };
 
-struct UBLOX_Config : public Node_Config_Base
+struct UBLOX_Config : public INode_Config
 {
 };
 
 //////////////////////////////////////////////////////////////
 
-struct Vec3_Generator_Descriptor : public Node_Descriptor_Base
+struct Vec3_Generator_Descriptor : public INode_Descriptor
 {
     alias rate_t = int : [ min = 1, max = 10000, native_type = "uint32_t" ];
 
     rate_t rate = 1 : [ ui_name = "Rate (Hz)" ];
 };
 
-struct Vec3_Generator_Config : public Node_Config_Base
+struct Vec3_Generator_Config : public INode_Config
 {
     math::vec3f value : [ ui_name = "Value" ];
 };

@@ -28,13 +28,13 @@ class Rate_Controller : public IController
 public:
     Rate_Controller(UAV& uav);
 
-    bool init(std::shared_ptr<Node_Descriptor_Base> descriptor) override;
-    std::shared_ptr<Node_Descriptor_Base> get_descriptor() const override;
+    bool init(std::shared_ptr<INode_Descriptor> descriptor) override;
+    std::shared_ptr<INode_Descriptor> get_descriptor() const override;
 
-    bool set_config(std::shared_ptr<Node_Config_Base> config) override;
-    std::shared_ptr<Node_Config_Base> get_config() const override;
+    bool set_config(std::shared_ptr<INode_Config> config) override;
+    std::shared_ptr<INode_Config> get_config() const override;
 
-    auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
+    //auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
 
     auto start(q::Clock::time_point tp) -> bool override;
 
@@ -54,7 +54,7 @@ private:
 
     Sample_Accumulator<stream::IAngular_Velocity, stream::IAngular_Velocity> m_accumulator;
 
-    math::vec3f compute_feedforward(const Multirotor_Config& config, stream::IAngular_Velocity::Value const& input, stream::IAngular_Velocity::Value const& target);
+    math::vec3f compute_feedforward(const Multirotor_Descriptor& multirotor_descriptor, stream::IAngular_Velocity::Value const& input, stream::IAngular_Velocity::Value const& target);
     math::vec3f compute_feedback(stream::IAngular_Velocity::Value const& input, stream::IAngular_Velocity::Value const& target);
 
     typedef util::PID<float, float, float> PID;

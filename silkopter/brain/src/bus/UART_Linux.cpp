@@ -20,7 +20,7 @@ UART_Linux::~UART_Linux()
     close();
 }
 
-bool UART_Linux::init(std::shared_ptr<Bus_Descriptor_Base> descriptor)
+bool UART_Linux::init(std::shared_ptr<IBus_Descriptor> descriptor)
 {
     auto specialized = std::dynamic_pointer_cast<UART_Linux_Descriptor>(descriptor);
     if (!specialized)
@@ -54,7 +54,7 @@ bool UART_Linux::init(std::shared_ptr<Bus_Descriptor_Base> descriptor)
     return true;
 }
 
-std::shared_ptr<const Bus_Descriptor_Base> UART_Linux::get_descriptor() const
+std::shared_ptr<IBus_Descriptor> UART_Linux::get_descriptor() const
 {
     return m_descriptor;
 }

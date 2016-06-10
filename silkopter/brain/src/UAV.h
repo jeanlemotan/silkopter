@@ -2,22 +2,17 @@
 
 #include <memory>
 
-#include "rapidjson/document.h"
 #include "common/bus/IBus.h"
 #include "common/node/INode.h"
 #include "common/stream/IStream.h"
-#include "common/config/Multirotor_Config.h"
 
 #include "MPL_Helper.h"
-
-#include "def_lang/Type_System.h"
-
 
 namespace silk
 {
 
-struct UAV_Config_Base;
-struct Multirotor_Config;
+struct IUAV_Descriptor;
+struct Multirotor_Descriptor;
 
 class UAV;
 
@@ -27,8 +22,8 @@ class Factory : q::util::Noncopyable
 public:
     template <class T, typename... Params> void add(std::string const& class_name, Params&&... params);
     auto create(std::string const& class_name) -> std::shared_ptr<Base>;
-    auto get_default_config(std::string const& class_name) -> boost::optional<rapidjson::Document const&>;
-    auto get_default_init_params(std::string const& class_name) -> boost::optional<rapidjson::Document const&>;
+//    auto get_default_config(std::string const& class_name) -> boost::optional<rapidjson::Document const&>;
+//    auto get_default_init_params(std::string const& class_name) -> boost::optional<rapidjson::Document const&>;
 
     struct Info
     {
@@ -81,18 +76,16 @@ public:
     void process();
     void shutdown();
 
-    void load_type_system();
-
     void save_settings();
     void save_settings2();
 
-    auto set_uav_config(std::shared_ptr<UAV_Config_Base> config) -> bool;
-    auto get_uav_config() const   -> std::shared_ptr<const UAV_Config_Base>;
+    auto set_uav_descriptor(std::shared_ptr<IUAV_Descriptor> descriptor) -> bool;
+    auto get_uav_descriptor() const   -> std::shared_ptr<const IUAV_Descriptor>;
 
-    template<class Config>
-    auto get_specialized_uav_config() const   -> std::shared_ptr<const Config>;
+    template<class Descriptor>
+    auto get_specialized_uav_descriptor() const   -> std::shared_ptr<const Descriptor>;
 
-    q::util::Signal<void(UAV&)> config_changed_signal;
+    q::util::Signal<void(UAV&)> descriptor_changed_signal;
 
     auto get_bus_factory()          -> const Factory<bus::IBus>&;
     auto get_node_factory()         -> const Factory<node::INode>&;
@@ -120,25 +113,25 @@ protected:
     auto get_telemetry_data() const -> Telemetry_Data const&;
 
 private:
-    auto set_multirotor_config(std::shared_ptr<Multirotor_Config> config) -> bool;
+    auto set_multirotor_descriptor(std::shared_ptr<Multirotor_Descriptor> descriptor) -> bool;
 
     void generate_settings_file();
 
-    auto create_bus(std::string const& type,
-                    std::string const& name,
-                    rapidjson::Value const& init_params) -> std::shared_ptr<bus::IBus>;
-    auto create_buses(rapidjson::Value& json) -> bool;
+//    auto create_bus(std::string const& type,
+//                    std::string const& name,
+//                    rapidjson::Value const& init_params) -> std::shared_ptr<bus::IBus>;
+//    auto create_buses(rapidjson::Value& json) -> bool;
 
-    auto create_node(std::string const& type,
-                     std::string const& name,
-                     rapidjson::Value const& init_params) -> std::shared_ptr<node::INode>;
-    auto create_nodes(rapidjson::Value& json) -> bool;
+//    auto create_node(std::string const& type,
+//                     std::string const& name,
+//                     rapidjson::Value const& init_params) -> std::shared_ptr<node::INode>;
+//    auto create_nodes(rapidjson::Value& json) -> bool;
 
     auto remove_node(std::shared_ptr<node::INode> node) -> bool;
 
     void sort_nodes(std::shared_ptr<node::INode> first_node);
 
-    std::shared_ptr<UAV_Config_Base> m_uav_config;
+    std::shared_ptr<IUAV_Descriptor> m_uav_descriptor;
 
     Registry<bus::IBus> m_buses;
     Registry<node::INode> m_nodes;
@@ -151,18 +144,16 @@ private:
 
 
     Telemetry_Data m_telemetry_data;
-
-    ts::Type_System m_type_system;
 };
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
-template<class Config>
-auto UAV::get_specialized_uav_config() const   -> std::shared_ptr<const Config>
+template<class Descriptor>
+auto UAV::get_specialized_uav_descriptor() const   -> std::shared_ptr<const Descriptor>
 {
-    std::shared_ptr<const UAV_Config_Base> config = get_uav_config();
-    return std::dynamic_pointer_cast<const Config>(config);
+    std::shared_ptr<const IUAV_Descriptor> descriptor = get_uav_descriptor();
+    return std::dynamic_pointer_cast<const Descriptor>(descriptor);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
@@ -252,26 +243,26 @@ auto Factory<Base>::create(std::string const& class_name) -> std::shared_ptr<Bas
     auto it = m_name_registry.find(class_name);
     return std::shared_ptr<Base>(it == m_name_registry.end() ? nullptr : reinterpret_cast<Base*>(it->second.ctor->create()));
 }
-template<class Base>
-auto Factory<Base>::get_default_config(std::string const& class_name) -> boost::optional<rapidjson::Document const&>
-{
-    auto it = m_name_registry.find(class_name);
-    if (it != m_name_registry.end())
-    {
-        return it->second.config;
-    }
-    return boost::none;
-}
-template<class Base>
-auto Factory<Base>::get_default_init_params(std::string const& class_name) -> boost::optional<rapidjson::Document const&>
-{
-    auto it = m_name_registry.find(class_name);
-    if (it != m_name_registry.end())
-    {
-        return it->second.init_params;
-    }
-    return boost::none;
-}
+//template<class Base>
+//auto Factory<Base>::get_default_config(std::string const& class_name) -> boost::optional<rapidjson::Document const&>
+//{
+//    auto it = m_name_registry.find(class_name);
+//    if (it != m_name_registry.end())
+//    {
+//        return it->second.config;
+//    }
+//    return boost::none;
+//}
+//template<class Base>
+//auto Factory<Base>::get_default_init_params(std::string const& class_name) -> boost::optional<rapidjson::Document const&>
+//{
+//    auto it = m_name_registry.find(class_name);
+//    if (it != m_name_registry.end())
+//    {
+//        return it->second.init_params;
+//    }
+//    return boost::none;
+//}
 
 template<class Base>
 auto Factory<Base>::create_all() const -> std::vector<Info>

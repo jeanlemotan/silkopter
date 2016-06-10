@@ -18,7 +18,7 @@ Multirotor_Pilot::Multirotor_Pilot(UAV& uav, Comms& comms)
     m_output_stream = std::make_shared<Output_Stream>();
 }
 
-auto Multirotor_Pilot::init(std::shared_ptr<Node_Descriptor_Base> descriptor) -> bool
+auto Multirotor_Pilot::init(std::shared_ptr<INode_Descriptor> descriptor) -> bool
 {
     QLOG_TOPIC("Multirotor_Pilot::init");
 
@@ -119,7 +119,7 @@ void Multirotor_Pilot::set_input_stream_path(size_t idx, q::Path const& path)
     }
 }
 
-auto Multirotor_Pilot::set_config(std::shared_ptr<Node_Config_Base> config) -> bool
+auto Multirotor_Pilot::set_config(std::shared_ptr<INode_Config> config) -> bool
 {
     QLOG_TOPIC("Multirotor_Pilot::set_config");
 
@@ -134,20 +134,20 @@ auto Multirotor_Pilot::set_config(std::shared_ptr<Node_Config_Base> config) -> b
 
     return true;
 }
-auto Multirotor_Pilot::get_config() const -> std::shared_ptr<Node_Config_Base>
+auto Multirotor_Pilot::get_config() const -> std::shared_ptr<INode_Config>
 {
     return m_config;
 }
 
-auto Multirotor_Pilot::get_descriptor() const -> std::shared_ptr<Node_Descriptor_Base>
+auto Multirotor_Pilot::get_descriptor() const -> std::shared_ptr<INode_Descriptor>
 {
     return m_descriptor;
 }
 
-auto Multirotor_Pilot::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document
-{
-    return rapidjson::Document();
-}
+//auto Multirotor_Pilot::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document
+//{
+//    return rapidjson::Document();
+//}
 
 }
 }

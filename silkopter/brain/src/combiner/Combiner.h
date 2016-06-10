@@ -30,13 +30,13 @@ class Combiner : public ICombiner
 public:
     Combiner(UAV& uav);
 
-    bool init(std::shared_ptr<Node_Descriptor_Base> descriptor) override;
-    std::shared_ptr<Node_Descriptor_Base> get_descriptor() const override;
+    bool init(std::shared_ptr<INode_Descriptor> descriptor) override;
+    std::shared_ptr<INode_Descriptor> get_descriptor() const override;
 
-    bool set_config(std::shared_ptr<Node_Config_Base> config) override;
-    std::shared_ptr<Node_Config_Base> get_config() const override;
+    bool set_config(std::shared_ptr<INode_Config> config) override;
+    std::shared_ptr<INode_Config> get_config() const override;
 
-    auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
+    //auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
 
     auto start(q::Clock::time_point tp) -> bool override;
 
@@ -77,7 +77,7 @@ Combiner<Stream_t>::Combiner(UAV& uav)
 }
 
 template<class Stream_t>
-auto Combiner<Stream_t>::init(std::shared_ptr<Node_Descriptor_Base> descriptor) -> bool
+auto Combiner<Stream_t>::init(std::shared_ptr<INode_Descriptor> descriptor) -> bool
 {
     QLOG_TOPIC("Combiner::init");
 
@@ -169,7 +169,7 @@ void Combiner<Stream_t>::set_input_stream_path(size_t idx, q::Path const& path)
 }
 
 template<class Stream_t>
-auto Combiner<Stream_t>::set_config(std::shared_ptr<Node_Config_Base> config) -> bool
+auto Combiner<Stream_t>::set_config(std::shared_ptr<INode_Config> config) -> bool
 {
     QLOG_TOPIC("Combiner::set_config");
 
@@ -186,22 +186,22 @@ auto Combiner<Stream_t>::set_config(std::shared_ptr<Node_Config_Base> config) ->
 }
 
 template<class Stream_t>
-auto Combiner<Stream_t>::get_config() const -> std::shared_ptr<Node_Config_Base>
+auto Combiner<Stream_t>::get_config() const -> std::shared_ptr<INode_Config>
 {
     return m_config;
 }
 
 template<class Stream_t>
-auto Combiner<Stream_t>::get_descriptor() const -> std::shared_ptr<Node_Descriptor_Base>
+auto Combiner<Stream_t>::get_descriptor() const -> std::shared_ptr<INode_Descriptor>
 {
     return m_descriptor;
 }
 
-template<class Stream_t>
-auto Combiner<Stream_t>::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document
-{
-    return rapidjson::Document();
-}
+//template<class Stream_t>
+//auto Combiner<Stream_t>::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document
+//{
+//    return rapidjson::Document();
+//}
 
 
 }

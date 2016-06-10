@@ -57,8 +57,6 @@ INCLUDEPATH += ../../../../def_lang/include
 INCLUDEPATH += ../../../../qbase/include
 INCLUDEPATH += ../../../../qdata/include
 INCLUDEPATH += ../../../../qmath/include
-INCLUDEPATH += ../../../../autojsoncxx/include
-INCLUDEPATH += ../../../../autojsoncxx/rapidjson/include
 INCLUDEPATH += ../../../../eigen
 
 LIBS += -L=/opt/vc/lib/
@@ -208,20 +206,6 @@ HEADERS += \
     ../../../libs/common/node/IConfig.h \
     ../../src/processor/Servo_Gimbal.h \
     ../../src/processor/Motor_Mixer.h \
-    ../../../../autojsoncxx/rapidjson/include/rapidjson/allocators.h \
-    ../../../../autojsoncxx/rapidjson/include/rapidjson/document.h \
-    ../../../../autojsoncxx/rapidjson/include/rapidjson/encodedstream.h \
-    ../../../../autojsoncxx/rapidjson/include/rapidjson/encodings.h \
-    ../../../../autojsoncxx/rapidjson/include/rapidjson/filereadstream.h \
-    ../../../../autojsoncxx/rapidjson/include/rapidjson/filestream.h \
-    ../../../../autojsoncxx/rapidjson/include/rapidjson/filewritestream.h \
-    ../../../../autojsoncxx/rapidjson/include/rapidjson/memorybuffer.h \
-    ../../../../autojsoncxx/rapidjson/include/rapidjson/memorystream.h \
-    ../../../../autojsoncxx/rapidjson/include/rapidjson/prettywriter.h \
-    ../../../../autojsoncxx/rapidjson/include/rapidjson/rapidjson.h \
-    ../../../../autojsoncxx/rapidjson/include/rapidjson/reader.h \
-    ../../../../autojsoncxx/rapidjson/include/rapidjson/stringbuffer.h \
-    ../../../../autojsoncxx/rapidjson/include/rapidjson/writer.h \
     ../../src/source/ADS1115.h \
     ../../src/sink/PCA9685.h \
     ../../src/generator/Oscillator.h \
@@ -298,12 +282,9 @@ HEADERS += \
     ../../src/processor/ENU_Frame_System.h \
     ../../src/source/RaspiCamControl.h \
     ../../src/brain/LiPo_Battery.h \
-    ../../../libs/common/config/Multirotor_Config.h \
-    ../../../libs/common/config/UAV_Config.h \
     ../../src/pilot/Multirotor_Pilot.h \
     ../../../libs/common/node/IMultirotor_Simulator.h \
     ../../src/UAV.h \
-    ../../../libs/common/Math_Mappers.h \
     ../../def/gen_support.h \
     ../../def/uav.def.h
 

@@ -469,7 +469,7 @@ auto MPU9250::get_outputs() const -> std::vector<Output>
     outputs[3].stream = m_temperature;
     return outputs;
 }
-auto MPU9250::init(std::shared_ptr<Node_Descriptor_Base> descriptor) -> bool
+auto MPU9250::init(std::shared_ptr<INode_Descriptor> descriptor) -> bool
 {
     QLOG_TOPIC("mpu9250::init");
 
@@ -1320,7 +1320,7 @@ void MPU9250::process_magnetometer(Buses& buses)
 #endif
 }
 
-auto MPU9250::set_config(std::shared_ptr<Node_Config_Base> config) -> bool
+auto MPU9250::set_config(std::shared_ptr<INode_Config> config) -> bool
 {
     QLOG_TOPIC("mpu9250::set_config");
 
@@ -1378,20 +1378,20 @@ auto MPU9250::set_config(std::shared_ptr<Node_Config_Base> config) -> bool
 
     return true;
 }
-auto MPU9250::get_config() const -> std::shared_ptr<Node_Config_Base>
+auto MPU9250::get_config() const -> std::shared_ptr<INode_Config>
 {
     return m_config;
 }
 
-auto MPU9250::get_descriptor() const -> std::shared_ptr<Node_Descriptor_Base>
+auto MPU9250::get_descriptor() const -> std::shared_ptr<INode_Descriptor>
 {
     return m_descriptor;
 }
 
-auto MPU9250::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document
-{
-    return rapidjson::Document();
-}
+//auto MPU9250::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document
+//{
+//    return rapidjson::Document();
+//}
 
 }
 }
