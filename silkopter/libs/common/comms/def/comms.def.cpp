@@ -4,6 +4,16 @@ T clamp(T v, T min, T max)
 {
   return std::min(std::max(v, min), max);
 }
+template <typename T>
+T min(T v, T min)
+{
+  return std::min(v, min);
+}
+template <typename T>
+T max(T v, T max)
+{
+  return std::max(v, max);
+}
 namespace silk
 {
 

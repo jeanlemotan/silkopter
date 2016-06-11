@@ -54,7 +54,7 @@ static ts::Result<void> generate_code(Context& context, ts::ast::Node const& ast
 static ts::Symbol_Path s_namespace;
 static std::string s_extra_include;
 static bool s_enum_hashes = false;
-static std::string s_json_name;
+static bool s_generate_ast_json = false;
 
 
 int main(int argc, char **argv)
@@ -70,7 +70,7 @@ int main(int argc, char **argv)
         ("ast", "Print the AST")
         ("nice", "Format the AST JSON nicely")
         ("namespace", po::value<std::string>(), "The namespace where to put it all")
-        ("json-name", po::value<std::string>(), "Name of the function that returns the ast json string")
+        ("ast", po::value<bool>(), "Generate an AST json string")
         ("xheader", po::value<std::string>(), "A custom support header that will be included in the generated code files")
         ("enum-hashes", po::value<bool>(), "Serialize enums as hashes instead of strings")
         ("def", po::value<std::string>(&def_filename), "Definition file")
@@ -115,7 +115,7 @@ int main(int argc, char **argv)
     bool show_ast = vm.count("ast") != 0;
     bool nice_json = vm.count("nice") != 0;
     s_namespace = vm.count("namespace") ? ts::Symbol_Path(vm["namespace"].as<std::string>()) : ts::Symbol_Path();
-    s_json_name = vm.count("json-name") ? vm["json-name"].as<std::string>() : std::string();
+    s_generate_ast_json = vm.count("ast") ? vm["ast"].as<bool>() : false;
     s_extra_include = vm.count("xheader") ? vm["xheader"].as<std::string>() : std::string();
     s_enum_hashes = vm.count("enum-hashes") ? vm["enum-hashes"].as<bool>() : false;
 
@@ -165,9 +165,9 @@ int main(int argc, char **argv)
 static void generate_ast_code(Context& context, std::string const& ast_json)
 {
     context.h_file += context.ident_str + "// Returns the ast json from which a ast root node can be serialized\n";
-    context.h_file += context.ident_str + "std::string const& " + s_json_name + "();\n";
+    context.h_file += context.ident_str + "std::string const& get_ast_json();\n";
 
-    context.cpp_file += context.ident_str + "std::string const& " + s_json_name + "()\n";
+    context.cpp_file += context.ident_str + "std::string const& get_ast_json()\n";
     context.cpp_file += context.ident_str + "{\n";
     context.cpp_file += context.ident_str + "  static const std::string s_json = R\"xxx(";
     context.cpp_file += context.ident_str + ast_json;
@@ -352,11 +352,11 @@ static std::string generate_scalar_type_clamping_code(Context& context, T const&
     }
     if (type.get_min_value() == std::numeric_limits<Native>::lowest())
     {
-        return "min(value, " + native_type_str + "(" + to_string(type.get_max_value()) + "));";
+        return "min(value, " + native_type_str + "(" + to_string(type.get_max_value()) + "))";
     }
     if (type.get_max_value() == std::numeric_limits<Native>::max())
     {
-        return "max(value, " + native_type_str + "(" + to_string(type.get_min_value()) + "));";
+        return "max(value, " + native_type_str + "(" + to_string(type.get_min_value()) + "))";
     }
     return "clamp(value, " + native_type_str + "(" + to_string(type.get_min_value()) + "), " + native_type_str + "(" + to_string(type.get_max_value()) + "))";
 }
@@ -1239,7 +1239,7 @@ static ts::Result<void> generate_code(Context& context, ts::ast::Node const& ast
         }
     }
 
-    if (!s_json_name.empty())
+    if (s_generate_ast_json)
     {
         std::string ast_json = ts::serialization::to_json(serialize_result.payload(), false);
         generate_ast_code(context, ast_json);
