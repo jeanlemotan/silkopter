@@ -1,0 +1,173 @@
+//import "types.def"
+
+alias int8_t = int : [ min = -128, max = 127, native_type = "int8_t" ];
+alias uint8_t = int : [ min = 0, max = 255, native_type = "uint8_t" ];
+alias int16_t = int : [ min = -32768, max = 32767, native_type = "int16_t" ];
+alias uint16_t = int : [ min = 0, max = 65535, native_type = "uint16_t" ];
+alias int32_t = int : [ min = -2147483648, max = 2147483647, native_type = "int32_t" ];
+alias uint32_t = int : [ min = 0, max = 4294967295, native_type = "uint32_t" ];
+alias int64_t = int ;
+alias ufloat = float : [ min = 0.f ];
+
+
+namespace silk
+{
+namespace comms
+{
+
+alias time_ms_t = int64_t;
+alias serialized_data = string;
+
+////////////////////////////////////////////////////////////////
+
+struct Set_Clock_Req
+{
+    time_ms_t time;
+};
+struct Set_Clock_Res
+{
+    time_ms_t time;
+};
+
+////////////////////////////////////////////////////////////////
+
+struct Set_UAV_Descriptor_Req
+{
+    serialized_data data;
+};
+struct Set_UAV_Descriptor_Res
+{
+    serialized_data data;
+};
+
+////////////////////////////////////////////////////////////////
+
+struct Get_UAV_Descriptor_Req
+{
+};
+struct Get_UAV_Descriptor_Res
+{
+    serialized_data data;
+};
+
+////////////////////////////////////////////////////////////////
+
+struct Node_Def_Data
+{
+    struct Input
+    {
+        string name;
+        string type;
+        uint32_t rate = 0;
+    };
+    struct Output
+    {
+        string name;
+        string type;
+        uint32_t rate = 0;
+    };
+
+    string name;
+    string type;
+    vector<Input> inputs;
+    vector<Output> outputs;
+    serialized_data descriptor_data;
+};
+
+struct Get_Node_Defs_Req
+{
+};
+struct Get_Node_Defs_Res
+{
+    vector<Node_Def_Data> node_def_datas;
+};
+
+////////////////////////////////////////////////////////////////
+
+struct Node_Data
+{
+    struct Input
+    {
+        string name;
+        string type;
+        uint32_t rate = 0;
+        string stream_path;
+    };
+    struct Output
+    {
+        string name;
+        string type;
+        uint32_t rate = 0;
+    };
+
+    string name;
+    string type;
+    vector<Input> inputs;
+    vector<Output> outputs;
+    serialized_data descriptor_data;
+    serialized_data config_data;
+};
+
+struct Get_Nodes_Req
+{
+    string name; //if empty, all nodes
+};
+struct Get_Nodes_Res
+{
+    vector<Node_Data> node_datas;
+};
+
+////////////////////////////////////////////////////////////////
+
+struct Set_Node_Input_Stream_Path_Req
+{
+    string node_name;
+    string input_name;
+    string stream_path;
+};
+struct Set_Node_Input_Stream_Path_Res
+{
+    struct Error
+    {
+        string message;
+    };
+
+    variant<Node_Data, Error> result;
+};
+
+////////////////////////////////////////////////////////////////
+
+struct Add_Node_Req
+{
+    string def_name;
+    string name;
+    serialized_data descriptor_data;
+};
+struct Add_Node_Res
+{
+    struct Error
+    {
+        string message;
+    };
+
+    variant<Node_Data, Error> result;
+};
+
+////////////////////////////////////////////////////////////////
+
+struct Remove_Node_Req
+{
+    string name;
+};
+struct Remove_Node_Res
+{
+    struct Error
+    {
+        string message;
+    };
+
+    optional<Error> error;
+};
+
+}
+}

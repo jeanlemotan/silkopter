@@ -1,0 +1,4 @@
+#ifndef OPTIONAL_TYPE_H
+#define OPTIONAL_TYPE_H
+
+#endif // OPTIONAL_TYPE_H

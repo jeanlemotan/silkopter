@@ -1,0 +1,4 @@
+#ifndef OPTIONAL_VALUE_H
+#define OPTIONAL_VALUE_H
+
+#endif // OPTIONAL_VALUE_H

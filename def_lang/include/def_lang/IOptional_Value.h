@@ -1,0 +1,4 @@
+#ifndef IOPTIONAL_VALUE_H
+#define IOPTIONAL_VALUE_H
+
+#endif // IOPTIONAL_VALUE_H

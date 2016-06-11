@@ -1,0 +1,4 @@
+#ifndef IOPTIONAL_TYPE_H
+#define IOPTIONAL_TYPE_H
+
+#endif // IOPTIONAL_TYPE_H
