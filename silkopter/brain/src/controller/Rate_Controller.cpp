@@ -123,6 +123,17 @@ void Rate_Controller::set_input_stream_path(size_t idx, q::Path const& path)
     m_accumulator.set_stream_path(idx, path, m_output_stream->get_rate(), m_uav);
 }
 
+template<class T, class PID>
+void fill_pid_params(T& dst, PID const& src, size_t rate)
+{
+    dst.kp = src.get_kp();
+    dst.ki = src.get_ki();
+    dst.kd = src.get_kd();
+    dst.max_i = src.get_max_i();
+    dst.d_filter = src.get_d_filter();
+    dst.rate = rate;
+}
+
 auto Rate_Controller::set_config(std::shared_ptr<INode_Config> config) -> bool
 {
     QLOG_TOPIC("rate_controller::set_config");
@@ -136,55 +147,36 @@ auto Rate_Controller::set_config(std::shared_ptr<INode_Config> config) -> bool
 
     *m_config = *specialized;
 
-    //todo - fix this
-//    auto fill_params = [this](PID::Params& dst, sz::PID const& src)
-//    {
-//        dst.kp = src.kp;
-//        dst.ki = src.ki;
-//        dst.kd = src.kd;
-//        dst.max_i = src.max_i;
-//        dst.d_filter = src.d_filter;
-//        dst.rate = m_output_stream->get_rate();
-//    };
+    uint32_t output_rate = m_output_stream->get_rate();
 
-//    PID::Params x_params, y_params, z_params;
-//    if (m_config->feedback.combined_xy_pid)
-//    {
-//        fill_params(x_params, m_config->feedback.xy_pid);
-//        fill_params(y_params, m_config->feedback.xy_pid);
-//    }
-//    else
-//    {
-//        fill_params(x_params, m_config->feedback.x_pid);
-//        fill_params(y_params, m_config->feedback.y_pid);
-//    }
-//    fill_params(z_params, m_config->feedback.z_pid);
+    Rate_Controller_Config::Feedback const& descriptor = m_config->get_feedback();
+    PID::Params x_params, y_params, z_params;
+    if (auto combined_pids = boost::get<Rate_Controller_Config::Feedback::Combined_XY_PIDs>(&descriptor.get_xy_pids()))
+    {
+        fill_pid_params(x_params, *combined_pids, output_rate);
+        fill_pid_params(y_params, *combined_pids, output_rate);
+    }
+    else
+    {
+        auto separate_pids = boost::get<Rate_Controller_Config::Feedback::Separate_XY_PIDs>(&descriptor.get_xy_pids());
+        fill_pid_params(x_params, separate_pids->get_x_pid(), output_rate);
+        fill_pid_params(y_params, separate_pids->get_y_pid(), output_rate);
+    }
 
-//    if (!m_x_pid.set_params(x_params) ||
-//        !m_y_pid.set_params(y_params) ||
-//        !m_z_pid.set_params(z_params))
-//    {
-//        QLOGE("Bad PID params");
-//        return false;
-//    }
+    fill_pid_params(z_params, descriptor.get_z_pid(), output_rate);
+
+    if (!m_x_pid.set_params(x_params) ||
+        !m_y_pid.set_params(y_params) ||
+        !m_z_pid.set_params(z_params))
+    {
+        QLOGE("Bad PID params");
+        return false;
+    }
 
     return true;
 }
 auto Rate_Controller::get_config() const -> std::shared_ptr<INode_Config>
 {
-    //todo - fix this
-//    rapidjson::Document json;
-//    autojsoncxx::to_document(*m_config, json);
-//    if (m_config->feedback.combined_xy_pid)
-//    {
-//        jsonutil::remove_value(json, q::Path("Feedback/X PID"));
-//        jsonutil::remove_value(json, q::Path("Feedback/Y PID"));
-//    }
-//    else
-//    {
-//        jsonutil::remove_value(json, q::Path("Feedback/XY PID"));
-//    }
-//    return std::move(json);
     return m_config;
 }
 

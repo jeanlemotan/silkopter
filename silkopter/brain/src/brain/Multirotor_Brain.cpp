@@ -599,30 +599,30 @@ void Multirotor_Brain::set_input_stream_path(size_t idx, q::Path const& path)
     }
 }
 
-//template<class T>
-//void fill_pid_params(T& dst, sz::PID const& src, size_t rate)
-//{
-//    dst.kp = src.kp;
-//    dst.ki = src.ki;
-//    dst.kd = src.kd;
-//    dst.max_i = src.max_i;
-//    dst.d_filter = src.d_filter;
-//    dst.rate = rate;
-//}
-//template<class T>
-//void fill_pi_params(T& dst, sz::PI const& src, size_t rate)
-//{
-//    dst.kp = src.kp;
-//    dst.ki = src.ki;
-//    dst.max_i = decltype(dst.max_i)(src.max_i);
-//    dst.rate = rate;
-//}
-//template<class T>
-//void fill_p_params(T& dst, sz::P const& src, size_t rate)
-//{
-//    dst.kp = src.kp;
-//    dst.rate = rate;
-//}
+template<class T, class PID>
+void fill_pid_params(T& dst, PID const& src, size_t rate)
+{
+    dst.kp = src.get_kp();
+    dst.ki = src.get_ki();
+    dst.kd = src.get_kd();
+    dst.max_i = src.get_max_i();
+    dst.d_filter = src.get_d_filter();
+    dst.rate = rate;
+}
+template<class T, class PI>
+void fill_pi_params(T& dst, PI const& src, size_t rate)
+{
+    dst.kp = src.get_kp();
+    dst.ki = src.get_ki();
+    dst.max_i = decltype(dst.max_i)(src.get_max_i());
+    dst.rate = rate;
+}
+template<class T, class P>
+void fill_p_params(T& dst, P const& src, size_t rate)
+{
+    dst.kp = src.get_kp();
+    dst.rate = rate;
+}
 
 auto Multirotor_Brain::set_config(std::shared_ptr<INode_Config> config) -> bool
 {
@@ -642,59 +642,54 @@ auto Multirotor_Brain::set_config(std::shared_ptr<INode_Config> config) -> bool
     m_config->set_min_thrust(math::clamp(m_config->get_min_thrust(), 0.f, m_multirotor_descriptor->get_motor_thrust() * m_multirotor_descriptor->get_motors().size() * 0.5f));
     m_config->set_max_thrust(math::clamp(m_config->get_max_thrust(), m_config->get_min_thrust(), m_multirotor_descriptor->get_motor_thrust() * m_multirotor_descriptor->get_motors().size()));
 
-    //m_config->horizontal_angle.max_speed_deg = math::clamp(m_config->horizontal_angle.max_speed_deg, 10.f, 3000.f);
-    //m_config->yaw_angle.max_speed_deg = math::clamp(m_config->yaw_angle.max_speed_deg, 10.f, 3000.f);
-
     {
-        //todo - fix this
-//        PID::Params x_params, y_params;
-//        if (m_config->horizontal_angle.combined_pids)
-//        {
-//            fill_pid_params(x_params, m_config->horizontal_angle.pids, output_rate);
-//            fill_pid_params(y_params, m_config->horizontal_angle.pids, output_rate);
-//        }
-//        else
-//        {
-//            fill_pid_params(x_params, m_config->horizontal_angle.x_pid, output_rate);
-//            fill_pid_params(y_params, m_config->horizontal_angle.y_pid, output_rate);
-//        }
+        Multirotor_Brain_Config::Horizontal_Angle const& descriptor = m_config->get_horizontal_angle();
+        PID::Params x_params, y_params;
+        if (auto combined_pids = boost::get<Multirotor_Brain_Config::Horizontal_Angle::Combined_XY_PIDs>(&descriptor.get_xy_pids()))
+        {
+            fill_pid_params(x_params, *combined_pids, output_rate);
+            fill_pid_params(y_params, *combined_pids, output_rate);
+        }
+        else
+        {
+            auto separate_pids = boost::get<Multirotor_Brain_Config::Horizontal_Angle::Separate_XY_PIDs>(&descriptor.get_xy_pids());
+            fill_pid_params(x_params, separate_pids->get_x_pid(), output_rate);
+            fill_pid_params(y_params, separate_pids->get_y_pid(), output_rate);
+        }
 
-//        if (!m_horizontal_angle_data.x_pid.set_params(x_params) ||
-//                !m_horizontal_angle_data.y_pid.set_params(y_params))
-//        {
-//            QLOGE("Bad horizontal PID params");
-//            return false;
-//        }
+        if (!m_horizontal_angle_data.x_pid.set_params(x_params) ||
+                !m_horizontal_angle_data.y_pid.set_params(y_params))
+        {
+            QLOGE("Bad horizontal PID params");
+            return false;
+        }
     }
 
     {
-        //todo - fix this
-//        PID::Params params;
-//        fill_pid_params(params, m_config->yaw_angle.pid, output_rate);
-//        if (!m_yaw_stable_angle_rate_data.pid.set_params(params))
-//        {
-//            QLOGE("Bad yaw PID params");
-//            return false;
-//        }
+        PID::Params params;
+        fill_pid_params(params, m_config->get_yaw_angle().get_pid(), output_rate);
+        if (!m_yaw_stable_angle_rate_data.pid.set_params(params))
+        {
+            QLOGE("Bad yaw PID params");
+            return false;
+        }
     }
 
     //altitude
-    //m_config->altitude.max_speed = math::clamp(m_config->altitude.max_speed, 0.f, 10.f);
     {
-        //todo - fix this
-//        PID::Params speed_pi_params, position_p_params;
-//        fill_pi_params(speed_pi_params, m_config->altitude.speed_pi, output_rate);
-//        fill_p_params(position_p_params, m_config->altitude.position_p, output_rate);
-//        if (!m_vertical_altitude_data.speed_pi.set_params(speed_pi_params))
-//        {
-//            QLOGE("Bad altitude PID params");
-//            return false;
-//        }
-//        if (!m_vertical_altitude_data.position_p.set_params(position_p_params))
-//        {
-//            QLOGE("Bad altitude PID params");
-//            return false;
-//        }
+        PID::Params speed_pi_params, position_p_params;
+        fill_pi_params(speed_pi_params, m_config->get_altitude().get_speed_pi(), output_rate);
+        fill_p_params(position_p_params, m_config->get_altitude().get_position_p(), output_rate);
+        if (!m_vertical_altitude_data.speed_pi.set_params(speed_pi_params))
+        {
+            QLOGE("Bad altitude PID params");
+            return false;
+        }
+        if (!m_vertical_altitude_data.position_p.set_params(position_p_params))
+        {
+            QLOGE("Bad altitude PID params");
+            return false;
+        }
     }
 
     {
@@ -709,22 +704,20 @@ auto Multirotor_Brain::set_config(std::shared_ptr<INode_Config> config) -> bool
     }
 
     //horizontal position
-    //m_config->horizontal_position.max_speed = math::clamp(m_config->horizontal_position.max_speed, 0.f, 10.f);
     {
-        //todo - fix this
-//        PID2::Params velocity_pi_params, position_p_params;
-//        fill_pi_params(velocity_pi_params, m_config->horizontal_position.velocity_pi, output_rate);
-//        fill_p_params(position_p_params, m_config->horizontal_position.position_p, output_rate);
-//        if (!m_horizontal_position_data.velocity_pi.set_params(velocity_pi_params))
-//        {
-//            QLOGE("Bad horizontal position PID params");
-//            return false;
-//        }
-//        if (!m_horizontal_position_data.position_p.set_params(position_p_params))
-//        {
-//            QLOGE("Bad horizontal position PID params");
-//            return false;
-//        }
+        PID2::Params velocity_pi_params, position_p_params;
+        fill_pi_params(velocity_pi_params, m_config->get_horizontal_position().get_velocity_pi(), output_rate);
+        fill_p_params(position_p_params, m_config->get_horizontal_position().get_position_p(), output_rate);
+        if (!m_horizontal_position_data.velocity_pi.set_params(velocity_pi_params))
+        {
+            QLOGE("Bad horizontal position PID params");
+            return false;
+        }
+        if (!m_horizontal_position_data.position_p.set_params(position_p_params))
+        {
+            QLOGE("Bad horizontal position PID params");
+            return false;
+        }
     }
 
     {
@@ -742,21 +735,6 @@ auto Multirotor_Brain::set_config(std::shared_ptr<INode_Config> config) -> bool
 }
 auto Multirotor_Brain::get_config() const -> std::shared_ptr<INode_Config>
 {
-    //todo - fix this;
-//    rapidjson::Document json;
-//    autojsoncxx::to_document(*m_config, json);
-
-//    if (m_config->horizontal_angle.combined_pids)
-//    {
-//        jsonutil::remove_value(json, q::Path("Horizontal Angle/X PID"));
-//        jsonutil::remove_value(json, q::Path("Horizontal Angle/Y PID"));
-//    }
-//    else
-//    {
-//        jsonutil::remove_value(json, q::Path("Horizontal Angle/PIDs"));
-//    }
-
-//    return std::move(json);
     return m_config;
 }
 
