@@ -1623,7 +1623,19 @@ struct PCA9685_Config : public ::silk::INode_Config
 {
 public:
 
-  struct Servo_Channel
+  struct IChannel
+  {
+  public:
+
+    IChannel() noexcept {};
+    virtual ~IChannel() noexcept {};
+
+
+  private:
+
+  };
+
+  struct Servo_Channel : public ::silk::PCA9685_Config::IChannel
   {
   public:
 
@@ -1643,7 +1655,7 @@ public:
     float m_max = {2.000000f};
   };
 
-  struct PWM_Channel
+  struct PWM_Channel : public ::silk::PCA9685_Config::IChannel
   {
   public:
 
@@ -1666,14 +1678,14 @@ public:
   PCA9685_Config() noexcept {};
   virtual ~PCA9685_Config() noexcept {};
 
-  void set_channels(std::vector<boost::variant<Servo_Channel,PWM_Channel>> const& value);
-  auto get_channels() const -> std::vector<boost::variant<Servo_Channel,PWM_Channel>> const&;
-  auto get_channels() -> std::vector<boost::variant<Servo_Channel,PWM_Channel>>&;
+  void set_channels(std::vector<std::shared_ptr<::silk::PCA9685_Config::IChannel>> const& value);
+  auto get_channels() const -> std::vector<std::shared_ptr<::silk::PCA9685_Config::IChannel>> const&;
+  auto get_channels() -> std::vector<std::shared_ptr<::silk::PCA9685_Config::IChannel>>&;
 
 
 private:
 
-  std::vector<boost::variant<Servo_Channel,PWM_Channel>> m_channels = {};
+  std::vector<std::shared_ptr<::silk::PCA9685_Config::IChannel>> m_channels = {};
 };
 
 struct PIGPIO_Descriptor : public ::silk::INode_Descriptor
@@ -1846,7 +1858,19 @@ struct PIGPIO_Config : public ::silk::INode_Config
 {
 public:
 
-  struct Servo_Channel
+  struct IChannel
+  {
+  public:
+
+    IChannel() noexcept {};
+    virtual ~IChannel() noexcept {};
+
+
+  private:
+
+  };
+
+  struct Servo_Channel : public ::silk::PIGPIO_Config::IChannel
   {
   public:
 
@@ -1866,7 +1890,7 @@ public:
     float m_max = {2.000000f};
   };
 
-  struct PWM_Channel
+  struct PWM_Channel : public ::silk::PIGPIO_Config::IChannel
   {
   public:
 
@@ -1889,139 +1913,139 @@ public:
   PIGPIO_Config() noexcept {};
   virtual ~PIGPIO_Config() noexcept {};
 
-  void set_gpio_2(boost::variant<Servo_Channel,PWM_Channel> const& value);
-  auto get_gpio_2() const -> boost::variant<Servo_Channel,PWM_Channel> const&;
-  auto get_gpio_2() -> boost::variant<Servo_Channel,PWM_Channel>&;
+  void set_gpio_2(std::shared_ptr<::silk::PIGPIO_Config::IChannel> const& value);
+  auto get_gpio_2() const -> std::shared_ptr<::silk::PIGPIO_Config::IChannel> const&;
+  auto get_gpio_2() -> std::shared_ptr<::silk::PIGPIO_Config::IChannel>&;
 
-  void set_gpio_3(boost::variant<Servo_Channel,PWM_Channel> const& value);
-  auto get_gpio_3() const -> boost::variant<Servo_Channel,PWM_Channel> const&;
-  auto get_gpio_3() -> boost::variant<Servo_Channel,PWM_Channel>&;
+  void set_gpio_3(std::shared_ptr<::silk::PIGPIO_Config::IChannel> const& value);
+  auto get_gpio_3() const -> std::shared_ptr<::silk::PIGPIO_Config::IChannel> const&;
+  auto get_gpio_3() -> std::shared_ptr<::silk::PIGPIO_Config::IChannel>&;
 
-  void set_gpio_4(boost::variant<Servo_Channel,PWM_Channel> const& value);
-  auto get_gpio_4() const -> boost::variant<Servo_Channel,PWM_Channel> const&;
-  auto get_gpio_4() -> boost::variant<Servo_Channel,PWM_Channel>&;
+  void set_gpio_4(std::shared_ptr<::silk::PIGPIO_Config::IChannel> const& value);
+  auto get_gpio_4() const -> std::shared_ptr<::silk::PIGPIO_Config::IChannel> const&;
+  auto get_gpio_4() -> std::shared_ptr<::silk::PIGPIO_Config::IChannel>&;
 
-  void set_gpio_5(boost::variant<Servo_Channel,PWM_Channel> const& value);
-  auto get_gpio_5() const -> boost::variant<Servo_Channel,PWM_Channel> const&;
-  auto get_gpio_5() -> boost::variant<Servo_Channel,PWM_Channel>&;
+  void set_gpio_5(std::shared_ptr<::silk::PIGPIO_Config::IChannel> const& value);
+  auto get_gpio_5() const -> std::shared_ptr<::silk::PIGPIO_Config::IChannel> const&;
+  auto get_gpio_5() -> std::shared_ptr<::silk::PIGPIO_Config::IChannel>&;
 
-  void set_gpio_6(boost::variant<Servo_Channel,PWM_Channel> const& value);
-  auto get_gpio_6() const -> boost::variant<Servo_Channel,PWM_Channel> const&;
-  auto get_gpio_6() -> boost::variant<Servo_Channel,PWM_Channel>&;
+  void set_gpio_6(std::shared_ptr<::silk::PIGPIO_Config::IChannel> const& value);
+  auto get_gpio_6() const -> std::shared_ptr<::silk::PIGPIO_Config::IChannel> const&;
+  auto get_gpio_6() -> std::shared_ptr<::silk::PIGPIO_Config::IChannel>&;
 
-  void set_gpio_7(boost::variant<Servo_Channel,PWM_Channel> const& value);
-  auto get_gpio_7() const -> boost::variant<Servo_Channel,PWM_Channel> const&;
-  auto get_gpio_7() -> boost::variant<Servo_Channel,PWM_Channel>&;
+  void set_gpio_7(std::shared_ptr<::silk::PIGPIO_Config::IChannel> const& value);
+  auto get_gpio_7() const -> std::shared_ptr<::silk::PIGPIO_Config::IChannel> const&;
+  auto get_gpio_7() -> std::shared_ptr<::silk::PIGPIO_Config::IChannel>&;
 
-  void set_gpio_8(boost::variant<Servo_Channel,PWM_Channel> const& value);
-  auto get_gpio_8() const -> boost::variant<Servo_Channel,PWM_Channel> const&;
-  auto get_gpio_8() -> boost::variant<Servo_Channel,PWM_Channel>&;
+  void set_gpio_8(std::shared_ptr<::silk::PIGPIO_Config::IChannel> const& value);
+  auto get_gpio_8() const -> std::shared_ptr<::silk::PIGPIO_Config::IChannel> const&;
+  auto get_gpio_8() -> std::shared_ptr<::silk::PIGPIO_Config::IChannel>&;
 
-  void set_gpio_9(boost::variant<Servo_Channel,PWM_Channel> const& value);
-  auto get_gpio_9() const -> boost::variant<Servo_Channel,PWM_Channel> const&;
-  auto get_gpio_9() -> boost::variant<Servo_Channel,PWM_Channel>&;
+  void set_gpio_9(std::shared_ptr<::silk::PIGPIO_Config::IChannel> const& value);
+  auto get_gpio_9() const -> std::shared_ptr<::silk::PIGPIO_Config::IChannel> const&;
+  auto get_gpio_9() -> std::shared_ptr<::silk::PIGPIO_Config::IChannel>&;
 
-  void set_gpio_10(boost::variant<Servo_Channel,PWM_Channel> const& value);
-  auto get_gpio_10() const -> boost::variant<Servo_Channel,PWM_Channel> const&;
-  auto get_gpio_10() -> boost::variant<Servo_Channel,PWM_Channel>&;
+  void set_gpio_10(std::shared_ptr<::silk::PIGPIO_Config::IChannel> const& value);
+  auto get_gpio_10() const -> std::shared_ptr<::silk::PIGPIO_Config::IChannel> const&;
+  auto get_gpio_10() -> std::shared_ptr<::silk::PIGPIO_Config::IChannel>&;
 
-  void set_gpio_11(boost::variant<Servo_Channel,PWM_Channel> const& value);
-  auto get_gpio_11() const -> boost::variant<Servo_Channel,PWM_Channel> const&;
-  auto get_gpio_11() -> boost::variant<Servo_Channel,PWM_Channel>&;
+  void set_gpio_11(std::shared_ptr<::silk::PIGPIO_Config::IChannel> const& value);
+  auto get_gpio_11() const -> std::shared_ptr<::silk::PIGPIO_Config::IChannel> const&;
+  auto get_gpio_11() -> std::shared_ptr<::silk::PIGPIO_Config::IChannel>&;
 
-  void set_gpio_12(boost::variant<Servo_Channel,PWM_Channel> const& value);
-  auto get_gpio_12() const -> boost::variant<Servo_Channel,PWM_Channel> const&;
-  auto get_gpio_12() -> boost::variant<Servo_Channel,PWM_Channel>&;
+  void set_gpio_12(std::shared_ptr<::silk::PIGPIO_Config::IChannel> const& value);
+  auto get_gpio_12() const -> std::shared_ptr<::silk::PIGPIO_Config::IChannel> const&;
+  auto get_gpio_12() -> std::shared_ptr<::silk::PIGPIO_Config::IChannel>&;
 
-  void set_gpio_13(boost::variant<Servo_Channel,PWM_Channel> const& value);
-  auto get_gpio_13() const -> boost::variant<Servo_Channel,PWM_Channel> const&;
-  auto get_gpio_13() -> boost::variant<Servo_Channel,PWM_Channel>&;
+  void set_gpio_13(std::shared_ptr<::silk::PIGPIO_Config::IChannel> const& value);
+  auto get_gpio_13() const -> std::shared_ptr<::silk::PIGPIO_Config::IChannel> const&;
+  auto get_gpio_13() -> std::shared_ptr<::silk::PIGPIO_Config::IChannel>&;
 
-  void set_gpio_14(boost::variant<Servo_Channel,PWM_Channel> const& value);
-  auto get_gpio_14() const -> boost::variant<Servo_Channel,PWM_Channel> const&;
-  auto get_gpio_14() -> boost::variant<Servo_Channel,PWM_Channel>&;
+  void set_gpio_14(std::shared_ptr<::silk::PIGPIO_Config::IChannel> const& value);
+  auto get_gpio_14() const -> std::shared_ptr<::silk::PIGPIO_Config::IChannel> const&;
+  auto get_gpio_14() -> std::shared_ptr<::silk::PIGPIO_Config::IChannel>&;
 
-  void set_gpio_15(boost::variant<Servo_Channel,PWM_Channel> const& value);
-  auto get_gpio_15() const -> boost::variant<Servo_Channel,PWM_Channel> const&;
-  auto get_gpio_15() -> boost::variant<Servo_Channel,PWM_Channel>&;
+  void set_gpio_15(std::shared_ptr<::silk::PIGPIO_Config::IChannel> const& value);
+  auto get_gpio_15() const -> std::shared_ptr<::silk::PIGPIO_Config::IChannel> const&;
+  auto get_gpio_15() -> std::shared_ptr<::silk::PIGPIO_Config::IChannel>&;
 
-  void set_gpio_16(boost::variant<Servo_Channel,PWM_Channel> const& value);
-  auto get_gpio_16() const -> boost::variant<Servo_Channel,PWM_Channel> const&;
-  auto get_gpio_16() -> boost::variant<Servo_Channel,PWM_Channel>&;
+  void set_gpio_16(std::shared_ptr<::silk::PIGPIO_Config::IChannel> const& value);
+  auto get_gpio_16() const -> std::shared_ptr<::silk::PIGPIO_Config::IChannel> const&;
+  auto get_gpio_16() -> std::shared_ptr<::silk::PIGPIO_Config::IChannel>&;
 
-  void set_gpio_17(boost::variant<Servo_Channel,PWM_Channel> const& value);
-  auto get_gpio_17() const -> boost::variant<Servo_Channel,PWM_Channel> const&;
-  auto get_gpio_17() -> boost::variant<Servo_Channel,PWM_Channel>&;
+  void set_gpio_17(std::shared_ptr<::silk::PIGPIO_Config::IChannel> const& value);
+  auto get_gpio_17() const -> std::shared_ptr<::silk::PIGPIO_Config::IChannel> const&;
+  auto get_gpio_17() -> std::shared_ptr<::silk::PIGPIO_Config::IChannel>&;
 
-  void set_gpio_18(boost::variant<Servo_Channel,PWM_Channel> const& value);
-  auto get_gpio_18() const -> boost::variant<Servo_Channel,PWM_Channel> const&;
-  auto get_gpio_18() -> boost::variant<Servo_Channel,PWM_Channel>&;
+  void set_gpio_18(std::shared_ptr<::silk::PIGPIO_Config::IChannel> const& value);
+  auto get_gpio_18() const -> std::shared_ptr<::silk::PIGPIO_Config::IChannel> const&;
+  auto get_gpio_18() -> std::shared_ptr<::silk::PIGPIO_Config::IChannel>&;
 
-  void set_gpio_19(boost::variant<Servo_Channel,PWM_Channel> const& value);
-  auto get_gpio_19() const -> boost::variant<Servo_Channel,PWM_Channel> const&;
-  auto get_gpio_19() -> boost::variant<Servo_Channel,PWM_Channel>&;
+  void set_gpio_19(std::shared_ptr<::silk::PIGPIO_Config::IChannel> const& value);
+  auto get_gpio_19() const -> std::shared_ptr<::silk::PIGPIO_Config::IChannel> const&;
+  auto get_gpio_19() -> std::shared_ptr<::silk::PIGPIO_Config::IChannel>&;
 
-  void set_gpio_20(boost::variant<Servo_Channel,PWM_Channel> const& value);
-  auto get_gpio_20() const -> boost::variant<Servo_Channel,PWM_Channel> const&;
-  auto get_gpio_20() -> boost::variant<Servo_Channel,PWM_Channel>&;
+  void set_gpio_20(std::shared_ptr<::silk::PIGPIO_Config::IChannel> const& value);
+  auto get_gpio_20() const -> std::shared_ptr<::silk::PIGPIO_Config::IChannel> const&;
+  auto get_gpio_20() -> std::shared_ptr<::silk::PIGPIO_Config::IChannel>&;
 
-  void set_gpio_21(boost::variant<Servo_Channel,PWM_Channel> const& value);
-  auto get_gpio_21() const -> boost::variant<Servo_Channel,PWM_Channel> const&;
-  auto get_gpio_21() -> boost::variant<Servo_Channel,PWM_Channel>&;
+  void set_gpio_21(std::shared_ptr<::silk::PIGPIO_Config::IChannel> const& value);
+  auto get_gpio_21() const -> std::shared_ptr<::silk::PIGPIO_Config::IChannel> const&;
+  auto get_gpio_21() -> std::shared_ptr<::silk::PIGPIO_Config::IChannel>&;
 
-  void set_gpio_22(boost::variant<Servo_Channel,PWM_Channel> const& value);
-  auto get_gpio_22() const -> boost::variant<Servo_Channel,PWM_Channel> const&;
-  auto get_gpio_22() -> boost::variant<Servo_Channel,PWM_Channel>&;
+  void set_gpio_22(std::shared_ptr<::silk::PIGPIO_Config::IChannel> const& value);
+  auto get_gpio_22() const -> std::shared_ptr<::silk::PIGPIO_Config::IChannel> const&;
+  auto get_gpio_22() -> std::shared_ptr<::silk::PIGPIO_Config::IChannel>&;
 
-  void set_gpio_23(boost::variant<Servo_Channel,PWM_Channel> const& value);
-  auto get_gpio_23() const -> boost::variant<Servo_Channel,PWM_Channel> const&;
-  auto get_gpio_23() -> boost::variant<Servo_Channel,PWM_Channel>&;
+  void set_gpio_23(std::shared_ptr<::silk::PIGPIO_Config::IChannel> const& value);
+  auto get_gpio_23() const -> std::shared_ptr<::silk::PIGPIO_Config::IChannel> const&;
+  auto get_gpio_23() -> std::shared_ptr<::silk::PIGPIO_Config::IChannel>&;
 
-  void set_gpio_24(boost::variant<Servo_Channel,PWM_Channel> const& value);
-  auto get_gpio_24() const -> boost::variant<Servo_Channel,PWM_Channel> const&;
-  auto get_gpio_24() -> boost::variant<Servo_Channel,PWM_Channel>&;
+  void set_gpio_24(std::shared_ptr<::silk::PIGPIO_Config::IChannel> const& value);
+  auto get_gpio_24() const -> std::shared_ptr<::silk::PIGPIO_Config::IChannel> const&;
+  auto get_gpio_24() -> std::shared_ptr<::silk::PIGPIO_Config::IChannel>&;
 
-  void set_gpio_25(boost::variant<Servo_Channel,PWM_Channel> const& value);
-  auto get_gpio_25() const -> boost::variant<Servo_Channel,PWM_Channel> const&;
-  auto get_gpio_25() -> boost::variant<Servo_Channel,PWM_Channel>&;
+  void set_gpio_25(std::shared_ptr<::silk::PIGPIO_Config::IChannel> const& value);
+  auto get_gpio_25() const -> std::shared_ptr<::silk::PIGPIO_Config::IChannel> const&;
+  auto get_gpio_25() -> std::shared_ptr<::silk::PIGPIO_Config::IChannel>&;
 
-  void set_gpio_26(boost::variant<Servo_Channel,PWM_Channel> const& value);
-  auto get_gpio_26() const -> boost::variant<Servo_Channel,PWM_Channel> const&;
-  auto get_gpio_26() -> boost::variant<Servo_Channel,PWM_Channel>&;
+  void set_gpio_26(std::shared_ptr<::silk::PIGPIO_Config::IChannel> const& value);
+  auto get_gpio_26() const -> std::shared_ptr<::silk::PIGPIO_Config::IChannel> const&;
+  auto get_gpio_26() -> std::shared_ptr<::silk::PIGPIO_Config::IChannel>&;
 
-  void set_gpio_27(boost::variant<Servo_Channel,PWM_Channel> const& value);
-  auto get_gpio_27() const -> boost::variant<Servo_Channel,PWM_Channel> const&;
-  auto get_gpio_27() -> boost::variant<Servo_Channel,PWM_Channel>&;
+  void set_gpio_27(std::shared_ptr<::silk::PIGPIO_Config::IChannel> const& value);
+  auto get_gpio_27() const -> std::shared_ptr<::silk::PIGPIO_Config::IChannel> const&;
+  auto get_gpio_27() -> std::shared_ptr<::silk::PIGPIO_Config::IChannel>&;
 
 
 private:
 
-  boost::variant<Servo_Channel,PWM_Channel> m_gpio_2 = {};
-  boost::variant<Servo_Channel,PWM_Channel> m_gpio_3 = {};
-  boost::variant<Servo_Channel,PWM_Channel> m_gpio_4 = {};
-  boost::variant<Servo_Channel,PWM_Channel> m_gpio_5 = {};
-  boost::variant<Servo_Channel,PWM_Channel> m_gpio_6 = {};
-  boost::variant<Servo_Channel,PWM_Channel> m_gpio_7 = {};
-  boost::variant<Servo_Channel,PWM_Channel> m_gpio_8 = {};
-  boost::variant<Servo_Channel,PWM_Channel> m_gpio_9 = {};
-  boost::variant<Servo_Channel,PWM_Channel> m_gpio_10 = {};
-  boost::variant<Servo_Channel,PWM_Channel> m_gpio_11 = {};
-  boost::variant<Servo_Channel,PWM_Channel> m_gpio_12 = {};
-  boost::variant<Servo_Channel,PWM_Channel> m_gpio_13 = {};
-  boost::variant<Servo_Channel,PWM_Channel> m_gpio_14 = {};
-  boost::variant<Servo_Channel,PWM_Channel> m_gpio_15 = {};
-  boost::variant<Servo_Channel,PWM_Channel> m_gpio_16 = {};
-  boost::variant<Servo_Channel,PWM_Channel> m_gpio_17 = {};
-  boost::variant<Servo_Channel,PWM_Channel> m_gpio_18 = {};
-  boost::variant<Servo_Channel,PWM_Channel> m_gpio_19 = {};
-  boost::variant<Servo_Channel,PWM_Channel> m_gpio_20 = {};
-  boost::variant<Servo_Channel,PWM_Channel> m_gpio_21 = {};
-  boost::variant<Servo_Channel,PWM_Channel> m_gpio_22 = {};
-  boost::variant<Servo_Channel,PWM_Channel> m_gpio_23 = {};
-  boost::variant<Servo_Channel,PWM_Channel> m_gpio_24 = {};
-  boost::variant<Servo_Channel,PWM_Channel> m_gpio_25 = {};
-  boost::variant<Servo_Channel,PWM_Channel> m_gpio_26 = {};
-  boost::variant<Servo_Channel,PWM_Channel> m_gpio_27 = {};
+  std::shared_ptr<::silk::PIGPIO_Config::IChannel> m_gpio_2 = {};
+  std::shared_ptr<::silk::PIGPIO_Config::IChannel> m_gpio_3 = {};
+  std::shared_ptr<::silk::PIGPIO_Config::IChannel> m_gpio_4 = {};
+  std::shared_ptr<::silk::PIGPIO_Config::IChannel> m_gpio_5 = {};
+  std::shared_ptr<::silk::PIGPIO_Config::IChannel> m_gpio_6 = {};
+  std::shared_ptr<::silk::PIGPIO_Config::IChannel> m_gpio_7 = {};
+  std::shared_ptr<::silk::PIGPIO_Config::IChannel> m_gpio_8 = {};
+  std::shared_ptr<::silk::PIGPIO_Config::IChannel> m_gpio_9 = {};
+  std::shared_ptr<::silk::PIGPIO_Config::IChannel> m_gpio_10 = {};
+  std::shared_ptr<::silk::PIGPIO_Config::IChannel> m_gpio_11 = {};
+  std::shared_ptr<::silk::PIGPIO_Config::IChannel> m_gpio_12 = {};
+  std::shared_ptr<::silk::PIGPIO_Config::IChannel> m_gpio_13 = {};
+  std::shared_ptr<::silk::PIGPIO_Config::IChannel> m_gpio_14 = {};
+  std::shared_ptr<::silk::PIGPIO_Config::IChannel> m_gpio_15 = {};
+  std::shared_ptr<::silk::PIGPIO_Config::IChannel> m_gpio_16 = {};
+  std::shared_ptr<::silk::PIGPIO_Config::IChannel> m_gpio_17 = {};
+  std::shared_ptr<::silk::PIGPIO_Config::IChannel> m_gpio_18 = {};
+  std::shared_ptr<::silk::PIGPIO_Config::IChannel> m_gpio_19 = {};
+  std::shared_ptr<::silk::PIGPIO_Config::IChannel> m_gpio_20 = {};
+  std::shared_ptr<::silk::PIGPIO_Config::IChannel> m_gpio_21 = {};
+  std::shared_ptr<::silk::PIGPIO_Config::IChannel> m_gpio_22 = {};
+  std::shared_ptr<::silk::PIGPIO_Config::IChannel> m_gpio_23 = {};
+  std::shared_ptr<::silk::PIGPIO_Config::IChannel> m_gpio_24 = {};
+  std::shared_ptr<::silk::PIGPIO_Config::IChannel> m_gpio_25 = {};
+  std::shared_ptr<::silk::PIGPIO_Config::IChannel> m_gpio_26 = {};
+  std::shared_ptr<::silk::PIGPIO_Config::IChannel> m_gpio_27 = {};
 };
 
 struct Pressure_Velocity_Descriptor : public ::silk::INode_Descriptor
@@ -2918,6 +2942,8 @@ ts::Result<void> deserialize(::silk::PCA9685_Descriptor::Channel& value, ts::ser
 ts::Result<ts::serialization::Value> serialize(::silk::PCA9685_Descriptor::Channel const& value);
 ts::Result<void> deserialize(::silk::PCA9685_Descriptor& value, ts::serialization::Value const& sz_value);
 ts::Result<ts::serialization::Value> serialize(::silk::PCA9685_Descriptor const& value);
+ts::Result<void> deserialize(::silk::PCA9685_Config::IChannel& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(::silk::PCA9685_Config::IChannel const& value);
 ts::Result<void> deserialize(::silk::PCA9685_Config::Servo_Channel& value, ts::serialization::Value const& sz_value);
 ts::Result<ts::serialization::Value> serialize(::silk::PCA9685_Config::Servo_Channel const& value);
 ts::Result<void> deserialize(::silk::PCA9685_Config::PWM_Channel& value, ts::serialization::Value const& sz_value);
@@ -2928,6 +2954,8 @@ ts::Result<void> deserialize(::silk::PIGPIO_Descriptor::Channel& value, ts::seri
 ts::Result<ts::serialization::Value> serialize(::silk::PIGPIO_Descriptor::Channel const& value);
 ts::Result<void> deserialize(::silk::PIGPIO_Descriptor& value, ts::serialization::Value const& sz_value);
 ts::Result<ts::serialization::Value> serialize(::silk::PIGPIO_Descriptor const& value);
+ts::Result<void> deserialize(::silk::PIGPIO_Config::IChannel& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(::silk::PIGPIO_Config::IChannel const& value);
 ts::Result<void> deserialize(::silk::PIGPIO_Config::Servo_Channel& value, ts::serialization::Value const& sz_value);
 ts::Result<ts::serialization::Value> serialize(::silk::PIGPIO_Config::Servo_Channel const& value);
 ts::Result<void> deserialize(::silk::PIGPIO_Config::PWM_Channel& value, ts::serialization::Value const& sz_value);
@@ -3032,11 +3060,11 @@ ts::Result<void> deserialize(std::vector<::silk::Oscillator_Config::Component>& 
 ts::Result<ts::serialization::Value> serialize(std::vector<::silk::Oscillator_Config::Component> const& value);
 ts::Result<void> deserialize(std::vector<::silk::PCA9685_Descriptor::Channel>& value, ts::serialization::Value const& sz_value);
 ts::Result<ts::serialization::Value> serialize(std::vector<::silk::PCA9685_Descriptor::Channel> const& value);
-ts::Result<void> deserialize(boost::variant<silk::PCA9685_Config::Servo_Channel,silk::PCA9685_Config::PWM_Channel>& value, ts::serialization::Value const& sz_value);
-ts::Result<ts::serialization::Value> serialize(boost::variant<silk::PCA9685_Config::Servo_Channel,silk::PCA9685_Config::PWM_Channel> const& value);
-ts::Result<void> deserialize(std::vector<boost::variant<silk::PCA9685_Config::Servo_Channel,silk::PCA9685_Config::PWM_Channel>>& value, ts::serialization::Value const& sz_value);
-ts::Result<ts::serialization::Value> serialize(std::vector<boost::variant<silk::PCA9685_Config::Servo_Channel,silk::PCA9685_Config::PWM_Channel>> const& value);
-ts::Result<void> deserialize(boost::variant<silk::PIGPIO_Config::Servo_Channel,silk::PIGPIO_Config::PWM_Channel>& value, ts::serialization::Value const& sz_value);
-ts::Result<ts::serialization::Value> serialize(boost::variant<silk::PIGPIO_Config::Servo_Channel,silk::PIGPIO_Config::PWM_Channel> const& value);
+ts::Result<void> deserialize(std::shared_ptr<::silk::PCA9685_Config::IChannel>& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(std::shared_ptr<::silk::PCA9685_Config::IChannel> const& value);
+ts::Result<void> deserialize(std::vector<std::shared_ptr<::silk::PCA9685_Config::IChannel>>& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(std::vector<std::shared_ptr<::silk::PCA9685_Config::IChannel>> const& value);
+ts::Result<void> deserialize(std::shared_ptr<::silk::PIGPIO_Config::IChannel>& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(std::shared_ptr<::silk::PIGPIO_Config::IChannel> const& value);
 ts::Result<void> deserialize(boost::variant<silk::Rate_Controller_Config::Feedback::Combined_XY_PIDs,silk::Rate_Controller_Config::Feedback::Separate_XY_PIDs>& value, ts::serialization::Value const& sz_value);
 ts::Result<ts::serialization::Value> serialize(boost::variant<silk::Rate_Controller_Config::Feedback::Combined_XY_PIDs,silk::Rate_Controller_Config::Feedback::Separate_XY_PIDs> const& value);

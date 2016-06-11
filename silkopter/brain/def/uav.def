@@ -619,18 +619,22 @@ struct PCA9685_Descriptor : public INode_Descriptor
 
 struct PCA9685_Config : public INode_Config
 {
-    struct Servo_Channel
+    struct IChannel
+    {
+    };
+
+    struct Servo_Channel : public IChannel
     {
         servo_signal_t min = 1.f : [ ui_name = "Min (ms)" ];
         servo_signal_t max = 2.f : [ ui_name = "Max (ms)" ];
     };
-    struct PWM_Channel
+    struct PWM_Channel : public IChannel
     {
         pwm_signal_t min = 0.f : [ ui_name = "Min" ];
         pwm_signal_t max = 1.f : [ ui_name = "Max" ];
     };
 
-    vector<variant<Servo_Channel, PWM_Channel>> channels : [ ui_name = "Channels" ];
+    vector<poly<IChannel>> channels : [ ui_name = "Channels" ];
 };
 
 //////////////////////////////////////////////////////////////
@@ -676,43 +680,47 @@ struct PIGPIO_Descriptor : public INode_Descriptor
 
 struct PIGPIO_Config : public INode_Config
 {
-    struct Servo_Channel
+    struct IChannel
+    {
+    };
+
+    struct Servo_Channel : public IChannel
     {
         servo_signal_t min = 1.f : [ ui_name = "Min (ms)" ];
         servo_signal_t max = 2.f : [ ui_name = "Max (ms)" ];
     };
-    struct PWM_Channel
+    struct PWM_Channel : public IChannel
     {
         pwm_signal_t min = 0.f : [ ui_name = "Min" ];
         pwm_signal_t max = 1.f : [ ui_name = "Max" ];
     };
 
-    variant<Servo_Channel, PWM_Channel> gpio_2 : [ ui_name = "GPIO 2" ];
-    variant<Servo_Channel, PWM_Channel> gpio_3 : [ ui_name = "GPIO 3" ];
-    variant<Servo_Channel, PWM_Channel> gpio_4 : [ ui_name = "GPIO 4" ];
-    variant<Servo_Channel, PWM_Channel> gpio_5 : [ ui_name = "GPIO 5" ];
-    variant<Servo_Channel, PWM_Channel> gpio_6 : [ ui_name = "GPIO 6" ];
-    variant<Servo_Channel, PWM_Channel> gpio_7 : [ ui_name = "GPIO 7" ];
-    variant<Servo_Channel, PWM_Channel> gpio_8 : [ ui_name = "GPIO 8" ];
-    variant<Servo_Channel, PWM_Channel> gpio_9 : [ ui_name = "GPIO 9" ];
-    variant<Servo_Channel, PWM_Channel> gpio_10 : [ ui_name = "GPIO 10" ];
-    variant<Servo_Channel, PWM_Channel> gpio_11 : [ ui_name = "GPIO 11" ];
-    variant<Servo_Channel, PWM_Channel> gpio_12 : [ ui_name = "GPIO 12" ];
-    variant<Servo_Channel, PWM_Channel> gpio_13 : [ ui_name = "GPIO 13" ];
-    variant<Servo_Channel, PWM_Channel> gpio_14 : [ ui_name = "GPIO 14" ];
-    variant<Servo_Channel, PWM_Channel> gpio_15 : [ ui_name = "GPIO 15" ];
-    variant<Servo_Channel, PWM_Channel> gpio_16 : [ ui_name = "GPIO 16" ];
-    variant<Servo_Channel, PWM_Channel> gpio_17 : [ ui_name = "GPIO 17" ];
-    variant<Servo_Channel, PWM_Channel> gpio_18 : [ ui_name = "GPIO 18" ];
-    variant<Servo_Channel, PWM_Channel> gpio_19 : [ ui_name = "GPIO 19" ];
-    variant<Servo_Channel, PWM_Channel> gpio_20 : [ ui_name = "GPIO 20" ];
-    variant<Servo_Channel, PWM_Channel> gpio_21 : [ ui_name = "GPIO 21" ];
-    variant<Servo_Channel, PWM_Channel> gpio_22 : [ ui_name = "GPIO 22" ];
-    variant<Servo_Channel, PWM_Channel> gpio_23 : [ ui_name = "GPIO 23" ];
-    variant<Servo_Channel, PWM_Channel> gpio_24 : [ ui_name = "GPIO 24" ];
-    variant<Servo_Channel, PWM_Channel> gpio_25 : [ ui_name = "GPIO 25" ];
-    variant<Servo_Channel, PWM_Channel> gpio_26 : [ ui_name = "GPIO 26" ];
-    variant<Servo_Channel, PWM_Channel> gpio_27 : [ ui_name = "GPIO 27" ];
+    poly<IChannel> gpio_2 : [ ui_name = "GPIO 2" ];
+    poly<IChannel> gpio_3 : [ ui_name = "GPIO 3" ];
+    poly<IChannel> gpio_4 : [ ui_name = "GPIO 4" ];
+    poly<IChannel> gpio_5 : [ ui_name = "GPIO 5" ];
+    poly<IChannel> gpio_6 : [ ui_name = "GPIO 6" ];
+    poly<IChannel> gpio_7 : [ ui_name = "GPIO 7" ];
+    poly<IChannel> gpio_8 : [ ui_name = "GPIO 8" ];
+    poly<IChannel> gpio_9 : [ ui_name = "GPIO 9" ];
+    poly<IChannel> gpio_10 : [ ui_name = "GPIO 10" ];
+    poly<IChannel> gpio_11 : [ ui_name = "GPIO 11" ];
+    poly<IChannel> gpio_12 : [ ui_name = "GPIO 12" ];
+    poly<IChannel> gpio_13 : [ ui_name = "GPIO 13" ];
+    poly<IChannel> gpio_14 : [ ui_name = "GPIO 14" ];
+    poly<IChannel> gpio_15 : [ ui_name = "GPIO 15" ];
+    poly<IChannel> gpio_16 : [ ui_name = "GPIO 16" ];
+    poly<IChannel> gpio_17 : [ ui_name = "GPIO 17" ];
+    poly<IChannel> gpio_18 : [ ui_name = "GPIO 18" ];
+    poly<IChannel> gpio_19 : [ ui_name = "GPIO 19" ];
+    poly<IChannel> gpio_20 : [ ui_name = "GPIO 20" ];
+    poly<IChannel> gpio_21 : [ ui_name = "GPIO 21" ];
+    poly<IChannel> gpio_22 : [ ui_name = "GPIO 22" ];
+    poly<IChannel> gpio_23 : [ ui_name = "GPIO 23" ];
+    poly<IChannel> gpio_24 : [ ui_name = "GPIO 24" ];
+    poly<IChannel> gpio_25 : [ ui_name = "GPIO 25" ];
+    poly<IChannel> gpio_26 : [ ui_name = "GPIO 26" ];
+    poly<IChannel> gpio_27 : [ ui_name = "GPIO 27" ];
 };
 
 //////////////////////////////////////////////////////////////
