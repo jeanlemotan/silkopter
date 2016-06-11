@@ -67,7 +67,7 @@ int main(int argc, char **argv)
     po::options_description desc("Options");
     desc.add_options()
         ("help", "This help message")
-        ("ast", "Print the AST")
+        ("print-ast", "Print the AST")
         ("nice", "Format the AST JSON nicely")
         ("namespace", po::value<std::string>(), "The namespace where to put it all")
         ("ast", po::value<bool>(), "Generate an AST json string")
@@ -112,7 +112,7 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    bool show_ast = vm.count("ast") != 0;
+    bool print_ast = vm.count("print-ast") != 0;
     bool nice_json = vm.count("nice") != 0;
     s_namespace = vm.count("namespace") ? ts::Symbol_Path(vm["namespace"].as<std::string>()) : ts::Symbol_Path();
     s_generate_ast_json = vm.count("ast") ? vm["ast"].as<bool>() : false;
@@ -129,7 +129,7 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    if (show_ast)
+    if (print_ast)
     {
         std::cout << builder.get_ast_root_node().to_string(0, true) << std::endl;
         std::cout.flush();
@@ -1225,8 +1225,6 @@ static ts::Result<void> generate_code(Context& context, ts::ast::Node const& ast
 
     context.cpp_file += "#include \"" + context.h_filename + "\"\n";
 
-    generate_aux_functions(context);
-
     if (!s_namespace.empty())
     {
         for (size_t i = 0; i < s_namespace.get_count(); i++)
@@ -1238,6 +1236,8 @@ static ts::Result<void> generate_code(Context& context, ts::ast::Node const& ast
                           "{\n\n";
         }
     }
+
+    generate_aux_functions(context);
 
     if (s_generate_ast_json)
     {

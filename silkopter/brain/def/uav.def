@@ -10,9 +10,9 @@ alias ufloat = float : [ min = 0.f ];
 
 
 alias muf_t = float : [ min = 0.f, max = 1.f ];
-alias direction_t = math::vec3f;// : [ normalized = true ];
+alias direction_t = vec3f;// : [ normalized = true ];
 alias euler_t = float : [ min = -180.f, max = 180.f ];
-alias euler3_t = math::vec3f : [ min = {-180.f, -180.f, -180.f}, max = {180.f, 180.f, 180.f} ];
+alias euler3_t = vec3f : [ min = {-180.f, -180.f, -180.f}, max = {180.f, 180.f, 180.f} ];
 alias servo_signal_t = float : [ min = 1.f, max = 2.f ];
 alias pwm_signal_t = float : [ min = 0.f, max = 1.f ];
 
@@ -83,7 +83,7 @@ struct Multirotor_Descriptor : public IUAV_Descriptor
 
     struct Motor
     {
-        math::vec3f position;
+        vec3f position;
         direction_t thrust_vector = {0.f, 0.f, 1.f};
         bool clockwise = false;
     };
@@ -375,19 +375,19 @@ struct Motor_Mixer_Config : public INode_Config
 struct Acceleration_Calibration_Point
 {
     float temperature : [ ui_name = "Temperature" ];
-    math::vec3f bias : [ ui_name = "Bias" ];
-    math::vec3f scale = { 1.f, 1.f, 1.f } : [ ui_name = "Scale" ];
+    vec3f bias : [ ui_name = "Bias" ];
+    vec3f scale = { 1.f, 1.f, 1.f } : [ ui_name = "Scale" ];
 };
 struct Angular_Velocity_Calibration_Point
 {
     float temperature : [ ui_name = "Temperature" ];
-    math::vec3f bias : [ ui_name = "Bias" ];
+    vec3f bias : [ ui_name = "Bias" ];
 };
 struct Magnetic_Field_Calibration_Point
 {
     float temperature : [ ui_name = "Temperature" ];
-    math::vec3f bias : [ ui_name = "Bias" ];
-    math::vec3f scale = { 1.f, 1.f, 1.f } : [ ui_name = "Scale" ];
+    vec3f bias : [ ui_name = "Bias" ];
+    vec3f scale = { 1.f, 1.f, 1.f } : [ ui_name = "Scale" ];
 };
 
 struct MPU9250_Descriptor : public INode_Descriptor
@@ -791,7 +791,7 @@ struct Raspicam_Descriptor : public INode_Descriptor
 {
     struct Quality
     {
-        alias resolution_t = math::vec2i : [ min = { 8, 8 }, max = { 1980, 1080 } ];
+        alias resolution_t = vec2i : [ min = { 8, 8 }, max = { 1980, 1080 } ];
         alias bitrate_t = int32_t : [ min = 10000, max = 32000000 ];
 
         resolution_t resolution : [ ui_name = "Resolution" ];
@@ -999,7 +999,7 @@ struct Vec3_Generator_Descriptor : public INode_Descriptor
 
 struct Vec3_Generator_Config : public INode_Config
 {
-    math::vec3f value : [ ui_name = "Value" ];
+    vec3f value : [ ui_name = "Value" ];
 };
 
 

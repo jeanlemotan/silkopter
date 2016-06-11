@@ -15,11 +15,7 @@ namespace uav
 {
 
 // Returns the ast json from which a ast root node can be serialized
-std::string const& get_uav_def_ast_json();
-namespace math
-{
-
-}
+std::string const& get_ast_json();
 struct IUAV_Descriptor
 {
 public:
@@ -178,11 +174,11 @@ public:
     Motor() noexcept {};
     virtual ~Motor() noexcept {};
 
-    void set_position(::math::vec3<float> const& value);
-    auto get_position() const -> ::math::vec3<float> const&;
+    void set_position(vec3f const& value);
+    auto get_position() const -> vec3f const&;
 
-    void set_thrust_vector(::math::vec3<float> const& value);
-    auto get_thrust_vector() const -> ::math::vec3<float> const&;
+    void set_thrust_vector(vec3f const& value);
+    auto get_thrust_vector() const -> vec3f const&;
 
     void set_clockwise(bool const& value);
     auto get_clockwise() const -> bool const&;
@@ -190,8 +186,8 @@ public:
 
   private:
 
-    ::math::vec3<float> m_position = {0.000000f, 0.000000f, 0.000000f};
-    ::math::vec3<float> m_thrust_vector = {0.000000f, 0.000000f, 1.000000f};
+    vec3f m_position = {0.000000f, 0.000000f, 0.000000f};
+    vec3f m_thrust_vector = {0.000000f, 0.000000f, 1.000000f};
     bool m_clockwise = {false};
   };
 
@@ -857,8 +853,8 @@ public:
   MaxSonar_Config() noexcept {};
   virtual ~MaxSonar_Config() noexcept {};
 
-  void set_direction(::math::vec3<float> const& value);
-  auto get_direction() const -> ::math::vec3<float> const&;
+  void set_direction(vec3f const& value);
+  auto get_direction() const -> vec3f const&;
 
   void set_max_distance(float const& value);
   auto get_max_distance() const -> float const&;
@@ -869,7 +865,7 @@ public:
 
 private:
 
-  ::math::vec3<float> m_direction = {0.000000f, 0.000000f, 0.000000f};
+  vec3f m_direction = {0.000000f, 0.000000f, 0.000000f};
   float m_max_distance = {10.000000f};
   float m_min_distance = {0.200000f};
 };
@@ -916,18 +912,18 @@ public:
   void set_temperature(float const& value);
   auto get_temperature() const -> float const&;
 
-  void set_bias(::math::vec3<float> const& value);
-  auto get_bias() const -> ::math::vec3<float> const&;
+  void set_bias(vec3f const& value);
+  auto get_bias() const -> vec3f const&;
 
-  void set_scale(::math::vec3<float> const& value);
-  auto get_scale() const -> ::math::vec3<float> const&;
+  void set_scale(vec3f const& value);
+  auto get_scale() const -> vec3f const&;
 
 
 private:
 
   float m_temperature = {0.000000f};
-  ::math::vec3<float> m_bias = {0.000000f, 0.000000f, 0.000000f};
-  ::math::vec3<float> m_scale = {1.000000f, 1.000000f, 1.000000f};
+  vec3f m_bias = {0.000000f, 0.000000f, 0.000000f};
+  vec3f m_scale = {1.000000f, 1.000000f, 1.000000f};
 };
 
 struct Angular_Velocity_Calibration_Point
@@ -940,14 +936,14 @@ public:
   void set_temperature(float const& value);
   auto get_temperature() const -> float const&;
 
-  void set_bias(::math::vec3<float> const& value);
-  auto get_bias() const -> ::math::vec3<float> const&;
+  void set_bias(vec3f const& value);
+  auto get_bias() const -> vec3f const&;
 
 
 private:
 
   float m_temperature = {0.000000f};
-  ::math::vec3<float> m_bias = {0.000000f, 0.000000f, 0.000000f};
+  vec3f m_bias = {0.000000f, 0.000000f, 0.000000f};
 };
 
 struct Magnetic_Field_Calibration_Point
@@ -960,18 +956,18 @@ public:
   void set_temperature(float const& value);
   auto get_temperature() const -> float const&;
 
-  void set_bias(::math::vec3<float> const& value);
-  auto get_bias() const -> ::math::vec3<float> const&;
+  void set_bias(vec3f const& value);
+  auto get_bias() const -> vec3f const&;
 
-  void set_scale(::math::vec3<float> const& value);
-  auto get_scale() const -> ::math::vec3<float> const&;
+  void set_scale(vec3f const& value);
+  auto get_scale() const -> vec3f const&;
 
 
 private:
 
   float m_temperature = {0.000000f};
-  ::math::vec3<float> m_bias = {0.000000f, 0.000000f, 0.000000f};
-  ::math::vec3<float> m_scale = {1.000000f, 1.000000f, 1.000000f};
+  vec3f m_bias = {0.000000f, 0.000000f, 0.000000f};
+  vec3f m_scale = {1.000000f, 1.000000f, 1.000000f};
 };
 
 struct MPU9250_Descriptor : public INode_Descriptor
@@ -1067,8 +1063,8 @@ public:
   MPU9250_Config() noexcept {};
   virtual ~MPU9250_Config() noexcept {};
 
-  void set_rotation(::math::vec3<float> const& value);
-  auto get_rotation() const -> ::math::vec3<float> const&;
+  void set_rotation(vec3f const& value);
+  auto get_rotation() const -> vec3f const&;
 
   void set_calibration(Calibration const& value);
   auto get_calibration() const -> Calibration const&;
@@ -1077,7 +1073,7 @@ public:
 
 private:
 
-  ::math::vec3<float> m_rotation = {0.000000f, 0.000000f, 0.000000f};
+  vec3f m_rotation = {0.000000f, 0.000000f, 0.000000f};
   Calibration m_calibration = {};
 };
 
@@ -2260,8 +2256,8 @@ public:
     Quality() noexcept {};
     virtual ~Quality() noexcept {};
 
-    void set_resolution(::math::vec2<int64_t> const& value);
-    auto get_resolution() const -> ::math::vec2<int64_t> const&;
+    void set_resolution(vec2i const& value);
+    auto get_resolution() const -> vec2i const&;
 
     void set_bitrate(int32_t const& value);
     auto get_bitrate() const -> int32_t const&;
@@ -2269,7 +2265,7 @@ public:
 
   private:
 
-    ::math::vec2<int64_t> m_resolution = {0LL, 0LL};
+    vec2i m_resolution = {0LL, 0LL};
     int32_t m_bitrate = {0LL};
   };
 
@@ -2573,8 +2569,8 @@ public:
   SRF01_Config() noexcept {};
   virtual ~SRF01_Config() noexcept {};
 
-  void set_direction(::math::vec3<float> const& value);
-  auto get_direction() const -> ::math::vec3<float> const&;
+  void set_direction(vec3f const& value);
+  auto get_direction() const -> vec3f const&;
 
   void set_max_distance(float const& value);
   auto get_max_distance() const -> float const&;
@@ -2585,7 +2581,7 @@ public:
 
 private:
 
-  ::math::vec3<float> m_direction = {0.000000f, 0.000000f, 0.000000f};
+  vec3f m_direction = {0.000000f, 0.000000f, 0.000000f};
   float m_max_distance = {6.000000f};
   float m_min_distance = {0.200000f};
 };
@@ -2617,8 +2613,8 @@ public:
   SRF02_Config() noexcept {};
   virtual ~SRF02_Config() noexcept {};
 
-  void set_direction(::math::vec3<float> const& value);
-  auto get_direction() const -> ::math::vec3<float> const&;
+  void set_direction(vec3f const& value);
+  auto get_direction() const -> vec3f const&;
 
   void set_max_distance(float const& value);
   auto get_max_distance() const -> float const&;
@@ -2629,7 +2625,7 @@ public:
 
 private:
 
-  ::math::vec3<float> m_direction = {0.000000f, 0.000000f, 0.000000f};
+  vec3f m_direction = {0.000000f, 0.000000f, 0.000000f};
   float m_max_distance = {6.000000f};
   float m_min_distance = {0.200000f};
 };
@@ -2749,13 +2745,13 @@ public:
   Vec3_Generator_Config() noexcept {};
   virtual ~Vec3_Generator_Config() noexcept {};
 
-  void set_value(::math::vec3<float> const& value);
-  auto get_value() const -> ::math::vec3<float> const&;
+  void set_value(vec3f const& value);
+  auto get_value() const -> vec3f const&;
 
 
 private:
 
-  ::math::vec3<float> m_value = {0.000000f, 0.000000f, 0.000000f};
+  vec3f m_value = {0.000000f, 0.000000f, 0.000000f};
 };
 
 ts::Result<void> deserialize(bool& value, ts::serialization::Value const& sz_value);
@@ -2768,24 +2764,24 @@ ts::Result<void> deserialize(float& value, ts::serialization::Value const& sz_va
 ts::Result<ts::serialization::Value> serialize(float const& value);
 ts::Result<void> deserialize(double& value, ts::serialization::Value const& sz_value);
 ts::Result<ts::serialization::Value> serialize(double const& value);
-ts::Result<void> deserialize(::math::vec2<float>& value, ts::serialization::Value const& sz_value);
-ts::Result<ts::serialization::Value> serialize(::math::vec2<float> const& value);
-ts::Result<void> deserialize(::math::vec2<double>& value, ts::serialization::Value const& sz_value);
-ts::Result<ts::serialization::Value> serialize(::math::vec2<double> const& value);
-ts::Result<void> deserialize(::math::vec2<int64_t>& value, ts::serialization::Value const& sz_value);
-ts::Result<ts::serialization::Value> serialize(::math::vec2<int64_t> const& value);
-ts::Result<void> deserialize(::math::vec3<float>& value, ts::serialization::Value const& sz_value);
-ts::Result<ts::serialization::Value> serialize(::math::vec3<float> const& value);
-ts::Result<void> deserialize(::math::vec3<double>& value, ts::serialization::Value const& sz_value);
-ts::Result<ts::serialization::Value> serialize(::math::vec3<double> const& value);
-ts::Result<void> deserialize(::math::vec3<int64_t>& value, ts::serialization::Value const& sz_value);
-ts::Result<ts::serialization::Value> serialize(::math::vec3<int64_t> const& value);
-ts::Result<void> deserialize(::math::vec4<float>& value, ts::serialization::Value const& sz_value);
-ts::Result<ts::serialization::Value> serialize(::math::vec4<float> const& value);
-ts::Result<void> deserialize(::math::vec4<double>& value, ts::serialization::Value const& sz_value);
-ts::Result<ts::serialization::Value> serialize(::math::vec4<double> const& value);
-ts::Result<void> deserialize(::math::vec4<int64_t>& value, ts::serialization::Value const& sz_value);
-ts::Result<ts::serialization::Value> serialize(::math::vec4<int64_t> const& value);
+ts::Result<void> deserialize(vec2f& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(vec2f const& value);
+ts::Result<void> deserialize(vec2d& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(vec2d const& value);
+ts::Result<void> deserialize(vec2i& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(vec2i const& value);
+ts::Result<void> deserialize(vec3f& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(vec3f const& value);
+ts::Result<void> deserialize(vec3d& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(vec3d const& value);
+ts::Result<void> deserialize(vec3i& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(vec3i const& value);
+ts::Result<void> deserialize(vec4f& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(vec4f const& value);
+ts::Result<void> deserialize(vec4d& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(vec4d const& value);
+ts::Result<void> deserialize(vec4i& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(vec4i const& value);
 ts::Result<void> deserialize(int8_t& value, ts::serialization::Value const& sz_value);
 ts::Result<ts::serialization::Value> serialize(int8_t const& value);
 ts::Result<void> deserialize(uint8_t& value, ts::serialization::Value const& sz_value);

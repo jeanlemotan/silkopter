@@ -1,4 +1,10 @@
 #include "comms.def.h"
+namespace silk
+{
+
+namespace comms
+{
+
 template <typename T>
 T clamp(T v, T min, T max)
 {
@@ -13,16 +19,6 @@ template <typename T>
 T max(T v, T max)
 {
   return std::max(v, max);
-}
-namespace silk
-{
-
-namespace comms
-{
-
-namespace math
-{
-
 }
 namespace setup
 {
@@ -663,7 +659,7 @@ ts::Result<ts::serialization::Value> serialize(double const& value)
 {
   return ts::serialization::Value(value);
 }
-ts::Result<void> deserialize(::math::vec2<float>& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(vec2f& value, ts::serialization::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -680,7 +676,7 @@ ts::Result<void> deserialize(::math::vec2<float>& value, ts::serialization::Valu
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(::math::vec2<float> const& value)
+ts::Result<ts::serialization::Value> serialize(vec2f const& value)
 {
   ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
   {
@@ -695,7 +691,7 @@ ts::Result<ts::serialization::Value> serialize(::math::vec2<float> const& value)
   }
   return sz_value;
 }
-ts::Result<void> deserialize(::math::vec2<double>& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(vec2d& value, ts::serialization::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -712,7 +708,7 @@ ts::Result<void> deserialize(::math::vec2<double>& value, ts::serialization::Val
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(::math::vec2<double> const& value)
+ts::Result<ts::serialization::Value> serialize(vec2d const& value)
 {
   ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
   {
@@ -727,7 +723,7 @@ ts::Result<ts::serialization::Value> serialize(::math::vec2<double> const& value
   }
   return sz_value;
 }
-ts::Result<void> deserialize(::math::vec2<int64_t>& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(vec2i& value, ts::serialization::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -744,7 +740,7 @@ ts::Result<void> deserialize(::math::vec2<int64_t>& value, ts::serialization::Va
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(::math::vec2<int64_t> const& value)
+ts::Result<ts::serialization::Value> serialize(vec2i const& value)
 {
   ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
   {
@@ -759,50 +755,7 @@ ts::Result<ts::serialization::Value> serialize(::math::vec2<int64_t> const& valu
   }
   return sz_value;
 }
-ts::Result<void> deserialize(::math::vec3<float>& value, ts::serialization::Value const& sz_value)
-{
-  if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
-  {
-    auto const* sz_v = sz_value.find_object_member_by_name("x");
-    if (!sz_v) { return ts::Error("Cannot find component 'x'"); }
-    auto result = deserialize(value.x, *sz_v);
-    if (result != ts::success) { return result; }
-  }
-  {
-    auto const* sz_v = sz_value.find_object_member_by_name("y");
-    if (!sz_v) { return ts::Error("Cannot find component 'y'"); }
-    auto result = deserialize(value.y, *sz_v);
-    if (result != ts::success) { return result; }
-  }
-  {
-    auto const* sz_v = sz_value.find_object_member_by_name("z");
-    if (!sz_v) { return ts::Error("Cannot find component 'z'"); }
-    auto result = deserialize(value.z, *sz_v);
-    if (result != ts::success) { return result; }
-  }
-  return ts::success;
-}
-ts::Result<ts::serialization::Value> serialize(::math::vec3<float> const& value)
-{
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
-  {
-    auto result = serialize(value.x);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("x", result.extract_payload());
-  }
-  {
-    auto result = serialize(value.y);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("y", result.extract_payload());
-  }
-  {
-    auto result = serialize(value.z);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("z", result.extract_payload());
-  }
-  return sz_value;
-}
-ts::Result<void> deserialize(::math::vec3<double>& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(vec3f& value, ts::serialization::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -825,7 +778,7 @@ ts::Result<void> deserialize(::math::vec3<double>& value, ts::serialization::Val
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(::math::vec3<double> const& value)
+ts::Result<ts::serialization::Value> serialize(vec3f const& value)
 {
   ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
   {
@@ -845,7 +798,7 @@ ts::Result<ts::serialization::Value> serialize(::math::vec3<double> const& value
   }
   return sz_value;
 }
-ts::Result<void> deserialize(::math::vec3<int64_t>& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(vec3d& value, ts::serialization::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -868,7 +821,7 @@ ts::Result<void> deserialize(::math::vec3<int64_t>& value, ts::serialization::Va
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(::math::vec3<int64_t> const& value)
+ts::Result<ts::serialization::Value> serialize(vec3d const& value)
 {
   ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
   {
@@ -888,7 +841,50 @@ ts::Result<ts::serialization::Value> serialize(::math::vec3<int64_t> const& valu
   }
   return sz_value;
 }
-ts::Result<void> deserialize(::math::vec4<float>& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(vec3i& value, ts::serialization::Value const& sz_value)
+{
+  if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  {
+    auto const* sz_v = sz_value.find_object_member_by_name("x");
+    if (!sz_v) { return ts::Error("Cannot find component 'x'"); }
+    auto result = deserialize(value.x, *sz_v);
+    if (result != ts::success) { return result; }
+  }
+  {
+    auto const* sz_v = sz_value.find_object_member_by_name("y");
+    if (!sz_v) { return ts::Error("Cannot find component 'y'"); }
+    auto result = deserialize(value.y, *sz_v);
+    if (result != ts::success) { return result; }
+  }
+  {
+    auto const* sz_v = sz_value.find_object_member_by_name("z");
+    if (!sz_v) { return ts::Error("Cannot find component 'z'"); }
+    auto result = deserialize(value.z, *sz_v);
+    if (result != ts::success) { return result; }
+  }
+  return ts::success;
+}
+ts::Result<ts::serialization::Value> serialize(vec3i const& value)
+{
+  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  {
+    auto result = serialize(value.x);
+    if (result != ts::success) { return result; }
+    sz_value.add_object_member("x", result.extract_payload());
+  }
+  {
+    auto result = serialize(value.y);
+    if (result != ts::success) { return result; }
+    sz_value.add_object_member("y", result.extract_payload());
+  }
+  {
+    auto result = serialize(value.z);
+    if (result != ts::success) { return result; }
+    sz_value.add_object_member("z", result.extract_payload());
+  }
+  return sz_value;
+}
+ts::Result<void> deserialize(vec4f& value, ts::serialization::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -917,7 +913,7 @@ ts::Result<void> deserialize(::math::vec4<float>& value, ts::serialization::Valu
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(::math::vec4<float> const& value)
+ts::Result<ts::serialization::Value> serialize(vec4f const& value)
 {
   ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
   {
@@ -942,7 +938,7 @@ ts::Result<ts::serialization::Value> serialize(::math::vec4<float> const& value)
   }
   return sz_value;
 }
-ts::Result<void> deserialize(::math::vec4<double>& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(vec4d& value, ts::serialization::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -971,7 +967,7 @@ ts::Result<void> deserialize(::math::vec4<double>& value, ts::serialization::Val
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(::math::vec4<double> const& value)
+ts::Result<ts::serialization::Value> serialize(vec4d const& value)
 {
   ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
   {
@@ -996,7 +992,7 @@ ts::Result<ts::serialization::Value> serialize(::math::vec4<double> const& value
   }
   return sz_value;
 }
-ts::Result<void> deserialize(::math::vec4<int64_t>& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(vec4i& value, ts::serialization::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -1025,7 +1021,7 @@ ts::Result<void> deserialize(::math::vec4<int64_t>& value, ts::serialization::Va
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(::math::vec4<int64_t> const& value)
+ts::Result<ts::serialization::Value> serialize(vec4i const& value)
 {
   ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
   {

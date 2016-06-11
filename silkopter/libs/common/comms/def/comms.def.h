@@ -14,10 +14,6 @@ namespace silk
 namespace comms
 {
 
-namespace math
-{
-
-}
 namespace setup
 {
 
@@ -521,24 +517,24 @@ ts::Result<void> deserialize(float& value, ts::serialization::Value const& sz_va
 ts::Result<ts::serialization::Value> serialize(float const& value);
 ts::Result<void> deserialize(double& value, ts::serialization::Value const& sz_value);
 ts::Result<ts::serialization::Value> serialize(double const& value);
-ts::Result<void> deserialize(::math::vec2<float>& value, ts::serialization::Value const& sz_value);
-ts::Result<ts::serialization::Value> serialize(::math::vec2<float> const& value);
-ts::Result<void> deserialize(::math::vec2<double>& value, ts::serialization::Value const& sz_value);
-ts::Result<ts::serialization::Value> serialize(::math::vec2<double> const& value);
-ts::Result<void> deserialize(::math::vec2<int64_t>& value, ts::serialization::Value const& sz_value);
-ts::Result<ts::serialization::Value> serialize(::math::vec2<int64_t> const& value);
-ts::Result<void> deserialize(::math::vec3<float>& value, ts::serialization::Value const& sz_value);
-ts::Result<ts::serialization::Value> serialize(::math::vec3<float> const& value);
-ts::Result<void> deserialize(::math::vec3<double>& value, ts::serialization::Value const& sz_value);
-ts::Result<ts::serialization::Value> serialize(::math::vec3<double> const& value);
-ts::Result<void> deserialize(::math::vec3<int64_t>& value, ts::serialization::Value const& sz_value);
-ts::Result<ts::serialization::Value> serialize(::math::vec3<int64_t> const& value);
-ts::Result<void> deserialize(::math::vec4<float>& value, ts::serialization::Value const& sz_value);
-ts::Result<ts::serialization::Value> serialize(::math::vec4<float> const& value);
-ts::Result<void> deserialize(::math::vec4<double>& value, ts::serialization::Value const& sz_value);
-ts::Result<ts::serialization::Value> serialize(::math::vec4<double> const& value);
-ts::Result<void> deserialize(::math::vec4<int64_t>& value, ts::serialization::Value const& sz_value);
-ts::Result<ts::serialization::Value> serialize(::math::vec4<int64_t> const& value);
+ts::Result<void> deserialize(vec2f& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(vec2f const& value);
+ts::Result<void> deserialize(vec2d& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(vec2d const& value);
+ts::Result<void> deserialize(vec2i& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(vec2i const& value);
+ts::Result<void> deserialize(vec3f& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(vec3f const& value);
+ts::Result<void> deserialize(vec3d& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(vec3d const& value);
+ts::Result<void> deserialize(vec3i& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(vec3i const& value);
+ts::Result<void> deserialize(vec4f& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(vec4f const& value);
+ts::Result<void> deserialize(vec4d& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(vec4d const& value);
+ts::Result<void> deserialize(vec4i& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(vec4i const& value);
 ts::Result<void> deserialize(int8_t& value, ts::serialization::Value const& sz_value);
 ts::Result<ts::serialization::Value> serialize(int8_t const& value);
 ts::Result<void> deserialize(uint8_t& value, ts::serialization::Value const& sz_value);
