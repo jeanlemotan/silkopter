@@ -306,8 +306,8 @@ constexpr size_t SENSOR_REGISTER_SPEED = 1000000;
 
 MPU9250::MPU9250(UAV& uav)
     : m_uav(uav)
-    , m_descriptor(new MPU9250_Descriptor())
-    , m_config(new MPU9250_Config())
+    , m_descriptor(new uav::MPU9250_Descriptor())
+    , m_config(new uav::MPU9250_Config())
 {
     m_acceleration = std::make_shared<Acceleration_Stream>();
     m_angular_velocity = std::make_shared<Angular_Velocity_Stream>();
@@ -469,11 +469,11 @@ auto MPU9250::get_outputs() const -> std::vector<Output>
     outputs[3].stream = m_temperature;
     return outputs;
 }
-auto MPU9250::init(std::shared_ptr<INode_Descriptor> descriptor) -> bool
+auto MPU9250::init(std::shared_ptr<uav::INode_Descriptor> descriptor) -> bool
 {
     QLOG_TOPIC("mpu9250::init");
 
-    auto specialized = std::dynamic_pointer_cast<MPU9250_Descriptor>(descriptor);
+    auto specialized = std::dynamic_pointer_cast<uav::MPU9250_Descriptor>(descriptor);
     if (!specialized)
     {
         QLOGE("Wrong descriptor type");
@@ -542,19 +542,19 @@ auto MPU9250::init() -> bool
     uint8_t gyro_range = MPU_BIT_GYRO_FS_SEL_1000_DPS;
     switch (m_descriptor->get_angular_velocity_range())
     {
-    case MPU9250_Descriptor::angular_velocity_range_t::_250:
+    case uav::MPU9250_Descriptor::angular_velocity_range_t::_250:
         gyro_range = MPU_BIT_GYRO_FS_SEL_250_DPS;
         m_angular_velocity_sensor_scale = math::radians(1.f) / (131.f);
         break;
-    case MPU9250_Descriptor::angular_velocity_range_t::_500:
+    case uav::MPU9250_Descriptor::angular_velocity_range_t::_500:
         gyro_range = MPU_BIT_GYRO_FS_SEL_500_DPS;
         m_angular_velocity_sensor_scale = math::radians(1.f) / (131.f / 2.f);
         break;
-    case MPU9250_Descriptor::angular_velocity_range_t::_1000:
+    case uav::MPU9250_Descriptor::angular_velocity_range_t::_1000:
         gyro_range = MPU_BIT_GYRO_FS_SEL_1000_DPS;
         m_angular_velocity_sensor_scale = math::radians(1.f) / (131.f / 4.f);
         break;
-    case MPU9250_Descriptor::angular_velocity_range_t::_2000:
+    case uav::MPU9250_Descriptor::angular_velocity_range_t::_2000:
         gyro_range = MPU_BIT_GYRO_FS_SEL_2000_DPS;
         m_angular_velocity_sensor_scale = math::radians(1.f) / (131.f / 8.f);
         break;
@@ -567,19 +567,19 @@ auto MPU9250::init() -> bool
     uint8_t accel_range = MPU_BIT_ACCEL_FS_SEL_8_G;
     switch (m_descriptor->get_acceleration_range())
     {
-    case MPU9250_Descriptor::acceleration_range_t::_2:
+    case uav::MPU9250_Descriptor::acceleration_range_t::_2:
         accel_range = MPU_BIT_ACCEL_FS_SEL_2_G;
         m_acceleration_sensor_scale = physics::constants::g / 16384.f;
         break;
-    case MPU9250_Descriptor::acceleration_range_t::_4:
+    case uav::MPU9250_Descriptor::acceleration_range_t::_4:
         accel_range = MPU_BIT_ACCEL_FS_SEL_4_G;
         m_acceleration_sensor_scale = physics::constants::g / 8192.f;
         break;
-    case MPU9250_Descriptor::acceleration_range_t::_8:
+    case uav::MPU9250_Descriptor::acceleration_range_t::_8:
         accel_range = MPU_BIT_ACCEL_FS_SEL_8_G;
         m_acceleration_sensor_scale = physics::constants::g / 4096.f;
         break;
-    case MPU9250_Descriptor::acceleration_range_t::_16:
+    case uav::MPU9250_Descriptor::acceleration_range_t::_16:
         accel_range = MPU_BIT_ACCEL_FS_SEL_16_G;
         m_acceleration_sensor_scale = physics::constants::g / 2048.f;
         break;
@@ -646,7 +646,7 @@ auto MPU9250::init() -> bool
     uint8_t g_dlpf = 0;
     uint8_t a_dlpf = 0;
     uint8_t div = 0;
-    if (m_descriptor->get_imu_rate() <= MPU9250_Descriptor::imu_rate_t::_1000)
+    if (m_descriptor->get_imu_rate() <= uav::MPU9250_Descriptor::imu_rate_t::_1000)
     {
         g_dlpf = MPU_BIT_DLPF_CFG_184_1;
         a_dlpf = MPU_BIT_A_DLPF_CFG_460_1;
@@ -1320,11 +1320,11 @@ void MPU9250::process_magnetometer(Buses& buses)
 #endif
 }
 
-auto MPU9250::set_config(std::shared_ptr<INode_Config> config) -> bool
+auto MPU9250::set_config(std::shared_ptr<uav::INode_Config> config) -> bool
 {
     QLOG_TOPIC("mpu9250::set_config");
 
-    auto specialized = std::dynamic_pointer_cast<MPU9250_Config>(config);
+    auto specialized = std::dynamic_pointer_cast<uav::MPU9250_Config>(config);
     if (!specialized)
     {
         QLOGE("Wrong config type");
@@ -1333,12 +1333,12 @@ auto MPU9250::set_config(std::shared_ptr<INode_Config> config) -> bool
 
     *m_config = *specialized;
 
-    MPU9250_Config::Calibration calibration = m_config->get_calibration();
+    uav::MPU9250_Config::Calibration calibration = m_config->get_calibration();
 
     //sort so we can lower_bound search the point quickly
     {
         auto points = calibration.get_acceleration();
-        std::sort(points.begin(), points.end(), [](const Acceleration_Calibration_Point& a, const Acceleration_Calibration_Point& b)
+        std::sort(points.begin(), points.end(), [](const uav::Acceleration_Calibration_Point& a, const uav::Acceleration_Calibration_Point& b)
         {
             return a.get_temperature() < b.get_temperature();
         });
@@ -1347,7 +1347,7 @@ auto MPU9250::set_config(std::shared_ptr<INode_Config> config) -> bool
 
     {
         auto points = calibration.get_angular_velocity();
-        std::sort(points.begin(), points.end(), [](const Angular_Velocity_Calibration_Point& a, const Angular_Velocity_Calibration_Point& b)
+        std::sort(points.begin(), points.end(), [](const uav::Angular_Velocity_Calibration_Point& a, const uav::Angular_Velocity_Calibration_Point& b)
         {
             return a.get_temperature() < b.get_temperature();
         });
@@ -1356,7 +1356,7 @@ auto MPU9250::set_config(std::shared_ptr<INode_Config> config) -> bool
 
     {
         auto points = calibration.get_magnetic_field();
-        std::sort(points.begin(), points.end(), [](const Magnetic_Field_Calibration_Point& a, const Magnetic_Field_Calibration_Point& b)
+        std::sort(points.begin(), points.end(), [](const uav::Magnetic_Field_Calibration_Point& a, const uav::Magnetic_Field_Calibration_Point& b)
         {
             return a.get_temperature() < b.get_temperature();
         });
@@ -1378,12 +1378,12 @@ auto MPU9250::set_config(std::shared_ptr<INode_Config> config) -> bool
 
     return true;
 }
-auto MPU9250::get_config() const -> std::shared_ptr<INode_Config>
+auto MPU9250::get_config() const -> std::shared_ptr<uav::INode_Config>
 {
     return m_config;
 }
 
-auto MPU9250::get_descriptor() const -> std::shared_ptr<INode_Descriptor>
+auto MPU9250::get_descriptor() const -> std::shared_ptr<uav::INode_Descriptor>
 {
     return m_descriptor;
 }

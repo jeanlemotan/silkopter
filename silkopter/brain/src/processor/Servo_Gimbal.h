@@ -13,8 +13,11 @@
 
 namespace silk
 {
+namespace uav
+{
 struct Servo_Gimbal_Descriptor;
 struct Servo_Gimbal_Config;
+}
 }
 
 
@@ -29,11 +32,11 @@ class Servo_Gimbal : public IProcessor
 public:
     Servo_Gimbal(UAV& uav);
 
-    bool init(std::shared_ptr<INode_Descriptor> descriptor) override;
-    std::shared_ptr<INode_Descriptor> get_descriptor() const override;
+    bool init(std::shared_ptr<uav::INode_Descriptor> descriptor) override;
+    std::shared_ptr<uav::INode_Descriptor> get_descriptor() const override;
 
-    bool set_config(std::shared_ptr<INode_Config> config) override;
-    std::shared_ptr<INode_Config> get_config() const override;
+    bool set_config(std::shared_ptr<uav::INode_Config> config) override;
+    std::shared_ptr<uav::INode_Config> get_config() const override;
 
     //auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
 
@@ -50,8 +53,8 @@ private:
 
     UAV& m_uav;
 
-    std::shared_ptr<Servo_Gimbal_Descriptor> m_descriptor;
-    std::shared_ptr<Servo_Gimbal_Config> m_config;
+    std::shared_ptr<uav::Servo_Gimbal_Descriptor> m_descriptor;
+    std::shared_ptr<uav::Servo_Gimbal_Config> m_config;
 
     Sample_Accumulator<stream::IUAV_Frame> m_frame_accumulator;
     Sample_Accumulator<stream::IMultirotor_Commands> m_commands_accumulator;

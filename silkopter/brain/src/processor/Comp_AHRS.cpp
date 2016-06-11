@@ -11,17 +11,17 @@ namespace node
 
 Comp_AHRS::Comp_AHRS(UAV& uav)
     : m_uav(uav)
-    , m_descriptor(new Comp_AHRS_Descriptor())
-    , m_config(new Comp_AHRS_Config())
+    , m_descriptor(new uav::Comp_AHRS_Descriptor())
+    , m_config(new uav::Comp_AHRS_Config())
 {
     m_output_stream = std::make_shared<Output_Stream>();
 }
 
-auto Comp_AHRS::init(std::shared_ptr<INode_Descriptor> descriptor) -> bool
+auto Comp_AHRS::init(std::shared_ptr<uav::INode_Descriptor> descriptor) -> bool
 {
     QLOG_TOPIC("comp_ahrs::init");
 
-    auto specialized = std::dynamic_pointer_cast<Comp_AHRS_Descriptor>(descriptor);
+    auto specialized = std::dynamic_pointer_cast<uav::Comp_AHRS_Descriptor>(descriptor);
     if (!specialized)
     {
         QLOGE("Wrong descriptor type");
@@ -160,11 +160,11 @@ void Comp_AHRS::set_input_stream_path(size_t idx, q::Path const& path)
     m_accumulator.set_stream_path(idx, path, m_output_stream->get_rate(), m_uav);
 }
 
-auto Comp_AHRS::set_config(std::shared_ptr<INode_Config> config) -> bool
+auto Comp_AHRS::set_config(std::shared_ptr<uav::INode_Config> config) -> bool
 {
     QLOG_TOPIC("comp_ahrs::set_config");
 
-    auto specialized = std::dynamic_pointer_cast<Comp_AHRS_Config>(config);
+    auto specialized = std::dynamic_pointer_cast<uav::Comp_AHRS_Config>(config);
     if (!specialized)
     {
         QLOGE("Wrong config type");
@@ -177,12 +177,12 @@ auto Comp_AHRS::set_config(std::shared_ptr<INode_Config> config) -> bool
 
     return true;
 }
-auto Comp_AHRS::get_config() const -> std::shared_ptr<INode_Config>
+auto Comp_AHRS::get_config() const -> std::shared_ptr<uav::INode_Config>
 {
     return m_config;
 }
 
-auto Comp_AHRS::get_descriptor() const -> std::shared_ptr<INode_Descriptor>
+auto Comp_AHRS::get_descriptor() const -> std::shared_ptr<uav::INode_Descriptor>
 {
     return m_descriptor;
 }

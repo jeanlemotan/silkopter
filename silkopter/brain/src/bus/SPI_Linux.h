@@ -4,7 +4,10 @@
 
 namespace silk
 {
+namespace uav
+{
 struct SPI_Linux_Descriptor;
+}
 }
 
 namespace silk
@@ -18,8 +21,8 @@ public:
     SPI_Linux();
     ~SPI_Linux();
 
-    bool init(std::shared_ptr<IBus_Descriptor> descriptor) override;
-    std::shared_ptr<IBus_Descriptor> get_descriptor() const override;
+    bool init(std::shared_ptr<uav::IBus_Descriptor> descriptor) override;
+    std::shared_ptr<uav::IBus_Descriptor> get_descriptor() const override;
 
     void lock();
     auto try_lock() -> bool;
@@ -35,7 +38,7 @@ private:
 
     auto do_transfer(uint8_t const* tx_data, uint8_t* rx_data, size_t size, uint32_t speed) -> bool;
 
-    std::shared_ptr<SPI_Linux_Descriptor> m_descriptor;
+    std::shared_ptr<uav::SPI_Linux_Descriptor> m_descriptor;
 
     int m_fd = -1;
     uint32_t m_speed = 100000;

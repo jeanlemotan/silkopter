@@ -20,11 +20,11 @@ class Scalar_Generator : public IGenerator
 public:
     Scalar_Generator(UAV& uav);
 
-    bool init(std::shared_ptr<INode_Descriptor> descriptor) override;
-    std::shared_ptr<INode_Descriptor> get_descriptor() const override;
+    bool init(std::shared_ptr<uav::INode_Descriptor> descriptor) override;
+    std::shared_ptr<uav::INode_Descriptor> get_descriptor() const override;
 
-    bool set_config(std::shared_ptr<INode_Config> config) override;
-    std::shared_ptr<INode_Config> get_config() const override;
+    bool set_config(std::shared_ptr<uav::INode_Config> config) override;
+    std::shared_ptr<uav::INode_Config> get_config() const override;
 
     //auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
 
@@ -41,8 +41,8 @@ private:
 
     UAV& m_uav;
 
-    std::shared_ptr<Scalar_Generator_Descriptor> m_descriptor;
-    std::shared_ptr<Scalar_Generator_Config> m_config;
+    std::shared_ptr<uav::Scalar_Generator_Descriptor> m_descriptor;
+    std::shared_ptr<uav::Scalar_Generator_Config> m_config;
 
     std::weak_ptr<stream::IFloat> m_modulation_stream;
     q::Path m_modulation_stream_path;
@@ -60,11 +60,11 @@ Scalar_Generator<Stream_t>::Scalar_Generator(UAV& uav)
 }
 
 template<class Stream_t>
-auto Scalar_Generator<Stream_t>::init(std::shared_ptr<INode_Descriptor> descriptor) -> bool
+auto Scalar_Generator<Stream_t>::init(std::shared_ptr<uav::INode_Descriptor> descriptor) -> bool
 {
     QLOG_TOPIC("scalar_generator::init");
 
-    auto specialized = std::dynamic_pointer_cast<Scalar_Generator_Descriptor>(descriptor);
+    auto specialized = std::dynamic_pointer_cast<uav::Scalar_Generator_Descriptor>(descriptor);
     if (!specialized)
     {
         QLOGE("Wrong descriptor type");
@@ -84,7 +84,7 @@ auto Scalar_Generator<Stream_t>::init() -> bool
 }
 
 template<class Stream_t>
-auto Scalar_Generator<Stream_t>::get_descriptor() const -> std::shared_ptr<INode_Descriptor>
+auto Scalar_Generator<Stream_t>::get_descriptor() const -> std::shared_ptr<uav::INode_Descriptor>
 {
     return m_descriptor;
 }
@@ -114,11 +114,11 @@ void Scalar_Generator<Stream_t>::set_input_stream_path(size_t idx, q::Path const
 }
 
 template<class Stream_t>
-auto Scalar_Generator<Stream_t>::set_config(std::shared_ptr<INode_Config> config) -> bool
+auto Scalar_Generator<Stream_t>::set_config(std::shared_ptr<uav::INode_Config> config) -> bool
 {
     QLOG_TOPIC("scalar_generator::set_config");
 
-    auto specialized = std::dynamic_pointer_cast<Scalar_Generator_Config>(config);
+    auto specialized = std::dynamic_pointer_cast<uav::Scalar_Generator_Config>(config);
     if (!specialized)
     {
         QLOGE("Wrong config type");
@@ -136,7 +136,7 @@ auto Scalar_Generator<Stream_t>::set_config(std::shared_ptr<INode_Config> config
 //    return rapidjson::Document();
 //}
 template<class Stream_t>
-auto Scalar_Generator<Stream_t>::get_config() const -> std::shared_ptr<INode_Config>
+auto Scalar_Generator<Stream_t>::get_config() const -> std::shared_ptr<uav::INode_Config>
 {
     return m_config;
 }

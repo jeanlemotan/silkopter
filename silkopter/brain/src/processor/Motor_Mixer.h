@@ -12,8 +12,11 @@
 
 namespace silk
 {
+namespace uav
+{
 struct Motor_Mixer_Descriptor;
 struct Motor_Mixer_Config;
+}
 }
 
 
@@ -27,11 +30,11 @@ class Motor_Mixer : public IProcessor
 public:
     Motor_Mixer(UAV& uav);
 
-    bool init(std::shared_ptr<INode_Descriptor> descriptor) override;
-    std::shared_ptr<INode_Descriptor> get_descriptor() const override;
+    bool init(std::shared_ptr<uav::INode_Descriptor> descriptor) override;
+    std::shared_ptr<uav::INode_Descriptor> get_descriptor() const override;
 
-    bool set_config(std::shared_ptr<INode_Config> config) override;
-    std::shared_ptr<INode_Config> get_config() const override;
+    bool set_config(std::shared_ptr<uav::INode_Config> config) override;
+    std::shared_ptr<uav::INode_Config> get_config() const override;
 
     //auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
 
@@ -48,13 +51,13 @@ public:
 private:
     auto init() -> bool;
 
-    void compute_throttles(Multirotor_Descriptor const& multirotor_descriptor, stream::IFloat::Value const& collective_thrust, stream::ITorque::Value const& torque);
+    void compute_throttles(uav::Multirotor_Descriptor const& multirotor_descriptor, stream::IFloat::Value const& collective_thrust, stream::ITorque::Value const& torque);
 
 
     UAV& m_uav;
 
-    std::shared_ptr<Motor_Mixer_Descriptor> m_descriptor;
-    std::shared_ptr<Motor_Mixer_Config> m_config;
+    std::shared_ptr<uav::Motor_Mixer_Descriptor> m_descriptor;
+    std::shared_ptr<uav::Motor_Mixer_Config> m_config;
 
     Sample_Accumulator<stream::ITorque, stream::IFloat> m_accumulator;
 

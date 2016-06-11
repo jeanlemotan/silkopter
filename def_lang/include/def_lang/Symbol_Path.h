@@ -21,6 +21,7 @@ public:
     Symbol_Path operator+(Symbol_Path const& other) const;
 
     Symbol_Path parent() const;
+    Symbol_Path to_relative() const;
 
     bool is_absolute() const;
 

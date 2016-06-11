@@ -8,16 +8,17 @@
 #include <def_lang/Result.h>
 #include <def_lang/Serialization.h>
 #include "gen_support.h"
-// Returns the ast json from which a ast root node can be serialized
-std::string const& get_ast_json();
-namespace math
-{
-
-}
 namespace silk
 {
 
 namespace comms
+{
+
+namespace math
+{
+
+}
+namespace setup
 {
 
 struct Set_Clock_Req
@@ -33,7 +34,7 @@ public:
 
 private:
 
-  int64_t m_time = {0};
+  int64_t m_time = {0LL};
 };
 
 struct Set_Clock_Res
@@ -49,7 +50,7 @@ public:
 
 private:
 
-  int64_t m_time = {0};
+  int64_t m_time = {0LL};
 };
 
 struct Set_UAV_Descriptor_Req
@@ -137,7 +138,7 @@ public:
 
     std::string m_name = {};
     std::string m_type = {};
-    uint32_t m_rate = {0};
+    uint32_t m_rate = {0LL};
   };
 
   struct Output
@@ -161,7 +162,7 @@ public:
 
     std::string m_name = {};
     std::string m_type = {};
-    uint32_t m_rate = {0};
+    uint32_t m_rate = {0LL};
   };
 
   Node_Def_Data() noexcept {};
@@ -173,13 +174,13 @@ public:
   void set_type(std::string const& value);
   auto get_type() const -> std::string const&;
 
-  void set_inputs(std::vector<::silk::comms::Node_Def_Data::Input> const& value);
-  auto get_inputs() const -> std::vector<::silk::comms::Node_Def_Data::Input> const&;
-  auto get_inputs() -> std::vector<::silk::comms::Node_Def_Data::Input>&;
+  void set_inputs(std::vector<setup::Node_Def_Data::Input> const& value);
+  auto get_inputs() const -> std::vector<setup::Node_Def_Data::Input> const&;
+  auto get_inputs() -> std::vector<setup::Node_Def_Data::Input>&;
 
-  void set_outputs(std::vector<::silk::comms::Node_Def_Data::Output> const& value);
-  auto get_outputs() const -> std::vector<::silk::comms::Node_Def_Data::Output> const&;
-  auto get_outputs() -> std::vector<::silk::comms::Node_Def_Data::Output>&;
+  void set_outputs(std::vector<setup::Node_Def_Data::Output> const& value);
+  auto get_outputs() const -> std::vector<setup::Node_Def_Data::Output> const&;
+  auto get_outputs() -> std::vector<setup::Node_Def_Data::Output>&;
 
   void set_descriptor_data(std::string const& value);
   auto get_descriptor_data() const -> std::string const&;
@@ -189,8 +190,8 @@ private:
 
   std::string m_name = {};
   std::string m_type = {};
-  std::vector<::silk::comms::Node_Def_Data::Input> m_inputs = {};
-  std::vector<::silk::comms::Node_Def_Data::Output> m_outputs = {};
+  std::vector<setup::Node_Def_Data::Input> m_inputs = {};
+  std::vector<setup::Node_Def_Data::Output> m_outputs = {};
   std::string m_descriptor_data = {};
 };
 
@@ -213,14 +214,14 @@ public:
   Get_Node_Defs_Res() noexcept {};
   virtual ~Get_Node_Defs_Res() noexcept {};
 
-  void set_node_def_datas(std::vector<::silk::comms::Node_Def_Data> const& value);
-  auto get_node_def_datas() const -> std::vector<::silk::comms::Node_Def_Data> const&;
-  auto get_node_def_datas() -> std::vector<::silk::comms::Node_Def_Data>&;
+  void set_node_def_datas(std::vector<setup::Node_Def_Data> const& value);
+  auto get_node_def_datas() const -> std::vector<setup::Node_Def_Data> const&;
+  auto get_node_def_datas() -> std::vector<setup::Node_Def_Data>&;
 
 
 private:
 
-  std::vector<::silk::comms::Node_Def_Data> m_node_def_datas = {};
+  std::vector<setup::Node_Def_Data> m_node_def_datas = {};
 };
 
 struct Node_Data
@@ -251,7 +252,7 @@ public:
 
     std::string m_name = {};
     std::string m_type = {};
-    uint32_t m_rate = {0};
+    uint32_t m_rate = {0LL};
     std::string m_stream_path = {};
   };
 
@@ -276,7 +277,7 @@ public:
 
     std::string m_name = {};
     std::string m_type = {};
-    uint32_t m_rate = {0};
+    uint32_t m_rate = {0LL};
   };
 
   Node_Data() noexcept {};
@@ -288,13 +289,13 @@ public:
   void set_type(std::string const& value);
   auto get_type() const -> std::string const&;
 
-  void set_inputs(std::vector<::silk::comms::Node_Data::Input> const& value);
-  auto get_inputs() const -> std::vector<::silk::comms::Node_Data::Input> const&;
-  auto get_inputs() -> std::vector<::silk::comms::Node_Data::Input>&;
+  void set_inputs(std::vector<setup::Node_Data::Input> const& value);
+  auto get_inputs() const -> std::vector<setup::Node_Data::Input> const&;
+  auto get_inputs() -> std::vector<setup::Node_Data::Input>&;
 
-  void set_outputs(std::vector<::silk::comms::Node_Data::Output> const& value);
-  auto get_outputs() const -> std::vector<::silk::comms::Node_Data::Output> const&;
-  auto get_outputs() -> std::vector<::silk::comms::Node_Data::Output>&;
+  void set_outputs(std::vector<setup::Node_Data::Output> const& value);
+  auto get_outputs() const -> std::vector<setup::Node_Data::Output> const&;
+  auto get_outputs() -> std::vector<setup::Node_Data::Output>&;
 
   void set_descriptor_data(std::string const& value);
   auto get_descriptor_data() const -> std::string const&;
@@ -307,8 +308,8 @@ private:
 
   std::string m_name = {};
   std::string m_type = {};
-  std::vector<::silk::comms::Node_Data::Input> m_inputs = {};
-  std::vector<::silk::comms::Node_Data::Output> m_outputs = {};
+  std::vector<setup::Node_Data::Input> m_inputs = {};
+  std::vector<setup::Node_Data::Output> m_outputs = {};
   std::string m_descriptor_data = {};
   std::string m_config_data = {};
 };
@@ -336,14 +337,14 @@ public:
   Get_Nodes_Res() noexcept {};
   virtual ~Get_Nodes_Res() noexcept {};
 
-  void set_node_datas(std::vector<::silk::comms::Node_Data> const& value);
-  auto get_node_datas() const -> std::vector<::silk::comms::Node_Data> const&;
-  auto get_node_datas() -> std::vector<::silk::comms::Node_Data>&;
+  void set_node_datas(std::vector<setup::Node_Data> const& value);
+  auto get_node_datas() const -> std::vector<setup::Node_Data> const&;
+  auto get_node_datas() -> std::vector<setup::Node_Data>&;
 
 
 private:
 
-  std::vector<::silk::comms::Node_Data> m_node_datas = {};
+  std::vector<setup::Node_Data> m_node_datas = {};
 };
 
 struct Set_Node_Input_Stream_Path_Req
@@ -393,14 +394,14 @@ public:
   Set_Node_Input_Stream_Path_Res() noexcept {};
   virtual ~Set_Node_Input_Stream_Path_Res() noexcept {};
 
-  void set_result(boost::variant<::silk::comms::Node_Data,Error> const& value);
-  auto get_result() const -> boost::variant<::silk::comms::Node_Data,Error> const&;
-  auto get_result() -> boost::variant<::silk::comms::Node_Data,Error>&;
+  void set_result(boost::variant<setup::Node_Data,Error> const& value);
+  auto get_result() const -> boost::variant<setup::Node_Data,Error> const&;
+  auto get_result() -> boost::variant<setup::Node_Data,Error>&;
 
 
 private:
 
-  boost::variant<::silk::comms::Node_Data,Error> m_result = {};
+  boost::variant<setup::Node_Data,Error> m_result = {};
 };
 
 struct Add_Node_Req
@@ -450,14 +451,14 @@ public:
   Add_Node_Res() noexcept {};
   virtual ~Add_Node_Res() noexcept {};
 
-  void set_result(boost::variant<::silk::comms::Node_Data,Error> const& value);
-  auto get_result() const -> boost::variant<::silk::comms::Node_Data,Error> const&;
-  auto get_result() -> boost::variant<::silk::comms::Node_Data,Error>&;
+  void set_result(boost::variant<setup::Node_Data,Error> const& value);
+  auto get_result() const -> boost::variant<setup::Node_Data,Error> const&;
+  auto get_result() -> boost::variant<setup::Node_Data,Error>&;
 
 
 private:
 
-  boost::variant<::silk::comms::Node_Data,Error> m_result = {};
+  boost::variant<setup::Node_Data,Error> m_result = {};
 };
 
 struct Remove_Node_Req
@@ -510,7 +511,6 @@ private:
 };
 
 }
-}
 ts::Result<void> deserialize(bool& value, ts::serialization::Value const& sz_value);
 ts::Result<ts::serialization::Value> serialize(bool const& value);
 ts::Result<void> deserialize(std::string& value, ts::serialization::Value const& sz_value);
@@ -521,24 +521,24 @@ ts::Result<void> deserialize(float& value, ts::serialization::Value const& sz_va
 ts::Result<ts::serialization::Value> serialize(float const& value);
 ts::Result<void> deserialize(double& value, ts::serialization::Value const& sz_value);
 ts::Result<ts::serialization::Value> serialize(double const& value);
-ts::Result<void> deserialize(math::vec2<float>& value, ts::serialization::Value const& sz_value);
-ts::Result<ts::serialization::Value> serialize(math::vec2<float> const& value);
-ts::Result<void> deserialize(math::vec2<double>& value, ts::serialization::Value const& sz_value);
-ts::Result<ts::serialization::Value> serialize(math::vec2<double> const& value);
-ts::Result<void> deserialize(math::vec2<int64_t>& value, ts::serialization::Value const& sz_value);
-ts::Result<ts::serialization::Value> serialize(math::vec2<int64_t> const& value);
-ts::Result<void> deserialize(math::vec3<float>& value, ts::serialization::Value const& sz_value);
-ts::Result<ts::serialization::Value> serialize(math::vec3<float> const& value);
-ts::Result<void> deserialize(math::vec3<double>& value, ts::serialization::Value const& sz_value);
-ts::Result<ts::serialization::Value> serialize(math::vec3<double> const& value);
-ts::Result<void> deserialize(math::vec3<int64_t>& value, ts::serialization::Value const& sz_value);
-ts::Result<ts::serialization::Value> serialize(math::vec3<int64_t> const& value);
-ts::Result<void> deserialize(math::vec4<float>& value, ts::serialization::Value const& sz_value);
-ts::Result<ts::serialization::Value> serialize(math::vec4<float> const& value);
-ts::Result<void> deserialize(math::vec4<double>& value, ts::serialization::Value const& sz_value);
-ts::Result<ts::serialization::Value> serialize(math::vec4<double> const& value);
-ts::Result<void> deserialize(math::vec4<int64_t>& value, ts::serialization::Value const& sz_value);
-ts::Result<ts::serialization::Value> serialize(math::vec4<int64_t> const& value);
+ts::Result<void> deserialize(::math::vec2<float>& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(::math::vec2<float> const& value);
+ts::Result<void> deserialize(::math::vec2<double>& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(::math::vec2<double> const& value);
+ts::Result<void> deserialize(::math::vec2<int64_t>& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(::math::vec2<int64_t> const& value);
+ts::Result<void> deserialize(::math::vec3<float>& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(::math::vec3<float> const& value);
+ts::Result<void> deserialize(::math::vec3<double>& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(::math::vec3<double> const& value);
+ts::Result<void> deserialize(::math::vec3<int64_t>& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(::math::vec3<int64_t> const& value);
+ts::Result<void> deserialize(::math::vec4<float>& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(::math::vec4<float> const& value);
+ts::Result<void> deserialize(::math::vec4<double>& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(::math::vec4<double> const& value);
+ts::Result<void> deserialize(::math::vec4<int64_t>& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(::math::vec4<int64_t> const& value);
 ts::Result<void> deserialize(int8_t& value, ts::serialization::Value const& sz_value);
 ts::Result<ts::serialization::Value> serialize(int8_t const& value);
 ts::Result<void> deserialize(uint8_t& value, ts::serialization::Value const& sz_value);
@@ -551,71 +551,73 @@ ts::Result<void> deserialize(int32_t& value, ts::serialization::Value const& sz_
 ts::Result<ts::serialization::Value> serialize(int32_t const& value);
 ts::Result<void> deserialize(uint32_t& value, ts::serialization::Value const& sz_value);
 ts::Result<ts::serialization::Value> serialize(uint32_t const& value);
-ts::Result<void> deserialize(::silk::comms::Set_Clock_Req& value, ts::serialization::Value const& sz_value);
-ts::Result<ts::serialization::Value> serialize(::silk::comms::Set_Clock_Req const& value);
-ts::Result<void> deserialize(::silk::comms::Set_Clock_Res& value, ts::serialization::Value const& sz_value);
-ts::Result<ts::serialization::Value> serialize(::silk::comms::Set_Clock_Res const& value);
-ts::Result<void> deserialize(::silk::comms::Set_UAV_Descriptor_Req& value, ts::serialization::Value const& sz_value);
-ts::Result<ts::serialization::Value> serialize(::silk::comms::Set_UAV_Descriptor_Req const& value);
-ts::Result<void> deserialize(::silk::comms::Set_UAV_Descriptor_Res& value, ts::serialization::Value const& sz_value);
-ts::Result<ts::serialization::Value> serialize(::silk::comms::Set_UAV_Descriptor_Res const& value);
-ts::Result<void> deserialize(::silk::comms::Get_UAV_Descriptor_Req& value, ts::serialization::Value const& sz_value);
-ts::Result<ts::serialization::Value> serialize(::silk::comms::Get_UAV_Descriptor_Req const& value);
-ts::Result<void> deserialize(::silk::comms::Get_UAV_Descriptor_Res& value, ts::serialization::Value const& sz_value);
-ts::Result<ts::serialization::Value> serialize(::silk::comms::Get_UAV_Descriptor_Res const& value);
-ts::Result<void> deserialize(::silk::comms::Node_Def_Data::Input& value, ts::serialization::Value const& sz_value);
-ts::Result<ts::serialization::Value> serialize(::silk::comms::Node_Def_Data::Input const& value);
-ts::Result<void> deserialize(::silk::comms::Node_Def_Data::Output& value, ts::serialization::Value const& sz_value);
-ts::Result<ts::serialization::Value> serialize(::silk::comms::Node_Def_Data::Output const& value);
-ts::Result<void> deserialize(::silk::comms::Node_Def_Data& value, ts::serialization::Value const& sz_value);
-ts::Result<ts::serialization::Value> serialize(::silk::comms::Node_Def_Data const& value);
-ts::Result<void> deserialize(::silk::comms::Get_Node_Defs_Req& value, ts::serialization::Value const& sz_value);
-ts::Result<ts::serialization::Value> serialize(::silk::comms::Get_Node_Defs_Req const& value);
-ts::Result<void> deserialize(::silk::comms::Get_Node_Defs_Res& value, ts::serialization::Value const& sz_value);
-ts::Result<ts::serialization::Value> serialize(::silk::comms::Get_Node_Defs_Res const& value);
-ts::Result<void> deserialize(::silk::comms::Node_Data::Input& value, ts::serialization::Value const& sz_value);
-ts::Result<ts::serialization::Value> serialize(::silk::comms::Node_Data::Input const& value);
-ts::Result<void> deserialize(::silk::comms::Node_Data::Output& value, ts::serialization::Value const& sz_value);
-ts::Result<ts::serialization::Value> serialize(::silk::comms::Node_Data::Output const& value);
-ts::Result<void> deserialize(::silk::comms::Node_Data& value, ts::serialization::Value const& sz_value);
-ts::Result<ts::serialization::Value> serialize(::silk::comms::Node_Data const& value);
-ts::Result<void> deserialize(::silk::comms::Get_Nodes_Req& value, ts::serialization::Value const& sz_value);
-ts::Result<ts::serialization::Value> serialize(::silk::comms::Get_Nodes_Req const& value);
-ts::Result<void> deserialize(::silk::comms::Get_Nodes_Res& value, ts::serialization::Value const& sz_value);
-ts::Result<ts::serialization::Value> serialize(::silk::comms::Get_Nodes_Res const& value);
-ts::Result<void> deserialize(::silk::comms::Set_Node_Input_Stream_Path_Req& value, ts::serialization::Value const& sz_value);
-ts::Result<ts::serialization::Value> serialize(::silk::comms::Set_Node_Input_Stream_Path_Req const& value);
-ts::Result<void> deserialize(::silk::comms::Set_Node_Input_Stream_Path_Res::Error& value, ts::serialization::Value const& sz_value);
-ts::Result<ts::serialization::Value> serialize(::silk::comms::Set_Node_Input_Stream_Path_Res::Error const& value);
-ts::Result<void> deserialize(::silk::comms::Set_Node_Input_Stream_Path_Res& value, ts::serialization::Value const& sz_value);
-ts::Result<ts::serialization::Value> serialize(::silk::comms::Set_Node_Input_Stream_Path_Res const& value);
-ts::Result<void> deserialize(::silk::comms::Add_Node_Req& value, ts::serialization::Value const& sz_value);
-ts::Result<ts::serialization::Value> serialize(::silk::comms::Add_Node_Req const& value);
-ts::Result<void> deserialize(::silk::comms::Add_Node_Res::Error& value, ts::serialization::Value const& sz_value);
-ts::Result<ts::serialization::Value> serialize(::silk::comms::Add_Node_Res::Error const& value);
-ts::Result<void> deserialize(::silk::comms::Add_Node_Res& value, ts::serialization::Value const& sz_value);
-ts::Result<ts::serialization::Value> serialize(::silk::comms::Add_Node_Res const& value);
-ts::Result<void> deserialize(::silk::comms::Remove_Node_Req& value, ts::serialization::Value const& sz_value);
-ts::Result<ts::serialization::Value> serialize(::silk::comms::Remove_Node_Req const& value);
-ts::Result<void> deserialize(::silk::comms::Remove_Node_Res::Error& value, ts::serialization::Value const& sz_value);
-ts::Result<ts::serialization::Value> serialize(::silk::comms::Remove_Node_Res::Error const& value);
-ts::Result<void> deserialize(::silk::comms::Remove_Node_Res& value, ts::serialization::Value const& sz_value);
-ts::Result<ts::serialization::Value> serialize(::silk::comms::Remove_Node_Res const& value);
-ts::Result<void> deserialize(std::vector<::silk::comms::Node_Def_Data::Input>& value, ts::serialization::Value const& sz_value);
-ts::Result<ts::serialization::Value> serialize(std::vector<::silk::comms::Node_Def_Data::Input> const& value);
-ts::Result<void> deserialize(std::vector<::silk::comms::Node_Def_Data::Output>& value, ts::serialization::Value const& sz_value);
-ts::Result<ts::serialization::Value> serialize(std::vector<::silk::comms::Node_Def_Data::Output> const& value);
-ts::Result<void> deserialize(std::vector<::silk::comms::Node_Def_Data>& value, ts::serialization::Value const& sz_value);
-ts::Result<ts::serialization::Value> serialize(std::vector<::silk::comms::Node_Def_Data> const& value);
-ts::Result<void> deserialize(std::vector<::silk::comms::Node_Data::Input>& value, ts::serialization::Value const& sz_value);
-ts::Result<ts::serialization::Value> serialize(std::vector<::silk::comms::Node_Data::Input> const& value);
-ts::Result<void> deserialize(std::vector<::silk::comms::Node_Data::Output>& value, ts::serialization::Value const& sz_value);
-ts::Result<ts::serialization::Value> serialize(std::vector<::silk::comms::Node_Data::Output> const& value);
-ts::Result<void> deserialize(std::vector<::silk::comms::Node_Data>& value, ts::serialization::Value const& sz_value);
-ts::Result<ts::serialization::Value> serialize(std::vector<::silk::comms::Node_Data> const& value);
-ts::Result<void> deserialize(boost::variant<silk::comms::Node_Data,silk::comms::Set_Node_Input_Stream_Path_Res::Error>& value, ts::serialization::Value const& sz_value);
-ts::Result<ts::serialization::Value> serialize(boost::variant<silk::comms::Node_Data,silk::comms::Set_Node_Input_Stream_Path_Res::Error> const& value);
-ts::Result<void> deserialize(boost::variant<silk::comms::Node_Data,silk::comms::Add_Node_Res::Error>& value, ts::serialization::Value const& sz_value);
-ts::Result<ts::serialization::Value> serialize(boost::variant<silk::comms::Node_Data,silk::comms::Add_Node_Res::Error> const& value);
-ts::Result<void> deserialize(boost::optional<silk::comms::Remove_Node_Res::Error>& value, ts::serialization::Value const& sz_value);
-ts::Result<ts::serialization::Value> serialize(boost::optional<silk::comms::Remove_Node_Res::Error> const& value);
+ts::Result<void> deserialize(setup::Set_Clock_Req& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(setup::Set_Clock_Req const& value);
+ts::Result<void> deserialize(setup::Set_Clock_Res& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(setup::Set_Clock_Res const& value);
+ts::Result<void> deserialize(setup::Set_UAV_Descriptor_Req& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(setup::Set_UAV_Descriptor_Req const& value);
+ts::Result<void> deserialize(setup::Set_UAV_Descriptor_Res& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(setup::Set_UAV_Descriptor_Res const& value);
+ts::Result<void> deserialize(setup::Get_UAV_Descriptor_Req& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(setup::Get_UAV_Descriptor_Req const& value);
+ts::Result<void> deserialize(setup::Get_UAV_Descriptor_Res& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(setup::Get_UAV_Descriptor_Res const& value);
+ts::Result<void> deserialize(setup::Node_Def_Data::Input& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(setup::Node_Def_Data::Input const& value);
+ts::Result<void> deserialize(setup::Node_Def_Data::Output& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(setup::Node_Def_Data::Output const& value);
+ts::Result<void> deserialize(setup::Node_Def_Data& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(setup::Node_Def_Data const& value);
+ts::Result<void> deserialize(setup::Get_Node_Defs_Req& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(setup::Get_Node_Defs_Req const& value);
+ts::Result<void> deserialize(setup::Get_Node_Defs_Res& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(setup::Get_Node_Defs_Res const& value);
+ts::Result<void> deserialize(setup::Node_Data::Input& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(setup::Node_Data::Input const& value);
+ts::Result<void> deserialize(setup::Node_Data::Output& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(setup::Node_Data::Output const& value);
+ts::Result<void> deserialize(setup::Node_Data& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(setup::Node_Data const& value);
+ts::Result<void> deserialize(setup::Get_Nodes_Req& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(setup::Get_Nodes_Req const& value);
+ts::Result<void> deserialize(setup::Get_Nodes_Res& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(setup::Get_Nodes_Res const& value);
+ts::Result<void> deserialize(setup::Set_Node_Input_Stream_Path_Req& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(setup::Set_Node_Input_Stream_Path_Req const& value);
+ts::Result<void> deserialize(setup::Set_Node_Input_Stream_Path_Res::Error& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(setup::Set_Node_Input_Stream_Path_Res::Error const& value);
+ts::Result<void> deserialize(setup::Set_Node_Input_Stream_Path_Res& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(setup::Set_Node_Input_Stream_Path_Res const& value);
+ts::Result<void> deserialize(setup::Add_Node_Req& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(setup::Add_Node_Req const& value);
+ts::Result<void> deserialize(setup::Add_Node_Res::Error& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(setup::Add_Node_Res::Error const& value);
+ts::Result<void> deserialize(setup::Add_Node_Res& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(setup::Add_Node_Res const& value);
+ts::Result<void> deserialize(setup::Remove_Node_Req& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(setup::Remove_Node_Req const& value);
+ts::Result<void> deserialize(setup::Remove_Node_Res::Error& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(setup::Remove_Node_Res::Error const& value);
+ts::Result<void> deserialize(setup::Remove_Node_Res& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(setup::Remove_Node_Res const& value);
+ts::Result<void> deserialize(std::vector<setup::Node_Def_Data::Input>& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(std::vector<setup::Node_Def_Data::Input> const& value);
+ts::Result<void> deserialize(std::vector<setup::Node_Def_Data::Output>& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(std::vector<setup::Node_Def_Data::Output> const& value);
+ts::Result<void> deserialize(std::vector<setup::Node_Def_Data>& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(std::vector<setup::Node_Def_Data> const& value);
+ts::Result<void> deserialize(std::vector<setup::Node_Data::Input>& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(std::vector<setup::Node_Data::Input> const& value);
+ts::Result<void> deserialize(std::vector<setup::Node_Data::Output>& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(std::vector<setup::Node_Data::Output> const& value);
+ts::Result<void> deserialize(std::vector<setup::Node_Data>& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(std::vector<setup::Node_Data> const& value);
+ts::Result<void> deserialize(boost::variant<setup::Node_Data,setup::Set_Node_Input_Stream_Path_Res::Error>& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(boost::variant<setup::Node_Data,setup::Set_Node_Input_Stream_Path_Res::Error> const& value);
+ts::Result<void> deserialize(boost::variant<setup::Node_Data,setup::Add_Node_Res::Error>& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(boost::variant<setup::Node_Data,setup::Add_Node_Res::Error> const& value);
+ts::Result<void> deserialize(boost::optional<setup::Remove_Node_Res::Error>& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(boost::optional<setup::Remove_Node_Res::Error> const& value);
+}
+}

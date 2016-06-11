@@ -12,17 +12,17 @@ namespace node
 
 Gravity_Filter::Gravity_Filter(UAV& uav)
     : m_uav(uav)
-    , m_descriptor(new Gravity_Filter_Descriptor())
-    , m_config(new Gravity_Filter_Config())
+    , m_descriptor(new uav::Gravity_Filter_Descriptor())
+    , m_config(new uav::Gravity_Filter_Config())
 {
     m_output_stream = std::make_shared<Output_Stream>();
 }
 
-auto Gravity_Filter::init(std::shared_ptr<INode_Descriptor> descriptor) -> bool
+auto Gravity_Filter::init(std::shared_ptr<uav::INode_Descriptor> descriptor) -> bool
 {
     QLOG_TOPIC("gravity_filter::init");
 
-    auto specialized = std::dynamic_pointer_cast<Gravity_Filter_Descriptor>(descriptor);
+    auto specialized = std::dynamic_pointer_cast<uav::Gravity_Filter_Descriptor>(descriptor);
     if (!specialized)
     {
         QLOGE("Wrong descriptor type");
@@ -90,11 +90,11 @@ void Gravity_Filter::set_input_stream_path(size_t idx, q::Path const& path)
     m_accumulator.set_stream_path(idx, path, m_output_stream->get_rate(), m_uav);
 }
 
-auto Gravity_Filter::set_config(std::shared_ptr<INode_Config> config) -> bool
+auto Gravity_Filter::set_config(std::shared_ptr<uav::INode_Config> config) -> bool
 {
     QLOG_TOPIC("gravity_filter::set_config");
 
-    auto specialized = std::dynamic_pointer_cast<Gravity_Filter_Config>(config);
+    auto specialized = std::dynamic_pointer_cast<uav::Gravity_Filter_Config>(config);
     if (!specialized)
     {
         QLOGE("Wrong config type");
@@ -105,12 +105,12 @@ auto Gravity_Filter::set_config(std::shared_ptr<INode_Config> config) -> bool
 
     return true;
 }
-auto Gravity_Filter::get_config() const -> std::shared_ptr<INode_Config>
+auto Gravity_Filter::get_config() const -> std::shared_ptr<uav::INode_Config>
 {
     return m_config;
 }
 
-auto Gravity_Filter::get_descriptor() const -> std::shared_ptr<INode_Descriptor>
+auto Gravity_Filter::get_descriptor() const -> std::shared_ptr<uav::INode_Descriptor>
 {
     return m_descriptor;
 }

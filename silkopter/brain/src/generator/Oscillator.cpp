@@ -11,18 +11,18 @@ namespace node
 
 Oscillator::Oscillator(UAV& uav)
     : m_uav(uav)
-    , m_descriptor(new Oscillator_Descriptor())
-    , m_config(new Oscillator_Config())
+    , m_descriptor(new uav::Oscillator_Descriptor())
+    , m_config(new uav::Oscillator_Config())
     , m_rnd_distribution(0, 0)
 {
     m_output_stream = std::make_shared<Output_Stream>();
 }
 
-auto Oscillator::init(std::shared_ptr<INode_Descriptor> descriptor) -> bool
+auto Oscillator::init(std::shared_ptr<uav::INode_Descriptor> descriptor) -> bool
 {
     QLOG_TOPIC("Oscillator::init");
 
-    auto specialized = std::dynamic_pointer_cast<Oscillator_Descriptor>(descriptor);
+    auto specialized = std::dynamic_pointer_cast<uav::Oscillator_Descriptor>(descriptor);
     if (!specialized)
     {
         QLOGE("Wrong descriptor type");
@@ -117,11 +117,11 @@ void Oscillator::set_input_stream_path(size_t idx, q::Path const& path)
 {
 }
 
-auto Oscillator::set_config(std::shared_ptr<INode_Config> config) -> bool
+auto Oscillator::set_config(std::shared_ptr<uav::INode_Config> config) -> bool
 {
     QLOG_TOPIC("Oscillator::set_config");
 
-    auto specialized = std::dynamic_pointer_cast<Oscillator_Config>(config);
+    auto specialized = std::dynamic_pointer_cast<uav::Oscillator_Config>(config);
     if (!specialized)
     {
         QLOGE("Wrong config type");
@@ -135,12 +135,12 @@ auto Oscillator::set_config(std::shared_ptr<INode_Config> config) -> bool
 
     return true;
 }
-auto Oscillator::get_config() const -> std::shared_ptr<INode_Config>
+auto Oscillator::get_config() const -> std::shared_ptr<uav::INode_Config>
 {
     return m_config;
 }
 
-auto Oscillator::get_descriptor() const -> std::shared_ptr<INode_Descriptor>
+auto Oscillator::get_descriptor() const -> std::shared_ptr<uav::INode_Descriptor>
 {
     return m_descriptor;
 }

@@ -89,7 +89,7 @@ auto Multirotor_Simulation::init(uint32_t rate) -> bool
     return true;
 }
 
-auto Multirotor_Simulation::init_uav(std::shared_ptr<const Multirotor_Descriptor> multirotor_descriptor) -> bool
+auto Multirotor_Simulation::init_uav(std::shared_ptr<const uav::Multirotor_Descriptor> multirotor_descriptor) -> bool
 {
     m_uav.descriptor = multirotor_descriptor;
 

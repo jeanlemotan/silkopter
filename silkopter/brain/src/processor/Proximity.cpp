@@ -11,17 +11,17 @@ namespace node
 
 Proximity::Proximity(UAV& uav)
     : m_uav(uav)
-    , m_descriptor(new Proximity_Descriptor())
-    , m_config(new Proximity_Config())
+    , m_descriptor(new uav::Proximity_Descriptor())
+    , m_config(new uav::Proximity_Config())
 {
     m_output_stream = std::make_shared<Output_Stream>();
 }
 
-auto Proximity::init(std::shared_ptr<INode_Descriptor> descriptor) -> bool
+auto Proximity::init(std::shared_ptr<uav::INode_Descriptor> descriptor) -> bool
 {
     QLOG_TOPIC("Proximity::init");
 
-    auto specialized = std::dynamic_pointer_cast<Proximity_Descriptor>(descriptor);
+    auto specialized = std::dynamic_pointer_cast<uav::Proximity_Descriptor>(descriptor);
     if (!specialized)
     {
         QLOGE("Wrong descriptor type");
@@ -97,11 +97,11 @@ void Proximity::set_input_stream_path(size_t idx, q::Path const& path)
     m_accumulators[idx].set_stream_path(0, path, m_output_stream->get_rate(), m_uav);
 }
 
-auto Proximity::set_config(std::shared_ptr<INode_Config> config) -> bool
+auto Proximity::set_config(std::shared_ptr<uav::INode_Config> config) -> bool
 {
     QLOG_TOPIC("Proximity::set_config");
 
-    auto specialized = std::dynamic_pointer_cast<Proximity_Config>(config);
+    auto specialized = std::dynamic_pointer_cast<uav::Proximity_Config>(config);
     if (!specialized)
     {
         QLOGE("Wrong config type");
@@ -112,12 +112,12 @@ auto Proximity::set_config(std::shared_ptr<INode_Config> config) -> bool
 
     return true;
 }
-auto Proximity::get_config() const -> std::shared_ptr<INode_Config>
+auto Proximity::get_config() const -> std::shared_ptr<uav::INode_Config>
 {
     return m_config;
 }
 
-auto Proximity::get_descriptor() const -> std::shared_ptr<INode_Descriptor>
+auto Proximity::get_descriptor() const -> std::shared_ptr<uav::INode_Descriptor>
 {
     return m_descriptor;
 }

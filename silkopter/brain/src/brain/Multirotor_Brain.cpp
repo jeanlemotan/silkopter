@@ -13,19 +13,19 @@ namespace node
 
 Multirotor_Brain::Multirotor_Brain(UAV& uav)
     : m_uav(uav)
-    , m_descriptor(new Multirotor_Brain_Descriptor())
-    , m_config(new Multirotor_Brain_Config())
+    , m_descriptor(new uav::Multirotor_Brain_Descriptor())
+    , m_config(new uav::Multirotor_Brain_Config())
 {
     m_state_output_stream = std::make_shared<State_Output_Stream>();
     m_rate_output_stream = std::make_shared<Rate_Output_Stream>();
     m_thrust_output_stream = std::make_shared<Thrust_Output_Stream>();
 }
 
-auto Multirotor_Brain::init(std::shared_ptr<INode_Descriptor> descriptor) -> bool
+auto Multirotor_Brain::init(std::shared_ptr<uav::INode_Descriptor> descriptor) -> bool
 {
     QLOG_TOPIC("Multirotor_Brain::init");
 
-    auto specialized = std::dynamic_pointer_cast<Multirotor_Brain_Descriptor>(descriptor);
+    auto specialized = std::dynamic_pointer_cast<uav::Multirotor_Brain_Descriptor>(descriptor);
     if (!specialized)
     {
         QLOGE("Wrong descriptor type");
@@ -39,7 +39,7 @@ auto Multirotor_Brain::init(std::shared_ptr<INode_Descriptor> descriptor) -> boo
 
 auto Multirotor_Brain::init() -> bool
 {
-    m_multirotor_descriptor = m_uav.get_specialized_uav_descriptor<Multirotor_Descriptor>();
+    m_multirotor_descriptor = m_uav.get_specialized_uav_descriptor<uav::Multirotor_Descriptor>();
     if (!m_multirotor_descriptor)
     {
         QLOGE("No multi descriptor found");
@@ -185,7 +185,7 @@ math::vec2f Multirotor_Brain::compute_horizontal_rate_for_angle(math::vec2f cons
 
 void Multirotor_Brain::state_mode_armed_apply_commands(const stream::IMultirotor_Commands::Value& prev_commands, stream::IMultirotor_Commands::Value& commands)
 {
-    std::shared_ptr<const Multirotor_Descriptor> multirotor_descriptor = m_uav.get_specialized_uav_descriptor<Multirotor_Descriptor>();
+    std::shared_ptr<const uav::Multirotor_Descriptor> multirotor_descriptor = m_uav.get_specialized_uav_descriptor<uav::Multirotor_Descriptor>();
 
     QASSERT(commands.mode.get() == stream::IMultirotor_Commands::Mode::ARMED);
 
@@ -624,11 +624,11 @@ void fill_p_params(T& dst, P const& src, size_t rate)
     dst.rate = rate;
 }
 
-auto Multirotor_Brain::set_config(std::shared_ptr<INode_Config> config) -> bool
+auto Multirotor_Brain::set_config(std::shared_ptr<uav::INode_Config> config) -> bool
 {
     QLOG_TOPIC("Multirotor_Brain::set_config");
 
-    auto specialized = std::dynamic_pointer_cast<Multirotor_Brain_Config>(config);
+    auto specialized = std::dynamic_pointer_cast<uav::Multirotor_Brain_Config>(config);
     if (!specialized)
     {
         QLOGE("Wrong config type");
@@ -643,16 +643,16 @@ auto Multirotor_Brain::set_config(std::shared_ptr<INode_Config> config) -> bool
     m_config->set_max_thrust(math::clamp(m_config->get_max_thrust(), m_config->get_min_thrust(), m_multirotor_descriptor->get_motor_thrust() * m_multirotor_descriptor->get_motors().size()));
 
     {
-        Multirotor_Brain_Config::Horizontal_Angle const& descriptor = m_config->get_horizontal_angle();
+        uav::Multirotor_Brain_Config::Horizontal_Angle const& descriptor = m_config->get_horizontal_angle();
         PID::Params x_params, y_params;
-        if (auto combined_pids = boost::get<Multirotor_Brain_Config::Horizontal_Angle::Combined_XY_PIDs>(&descriptor.get_xy_pids()))
+        if (auto combined_pids = boost::get<uav::Multirotor_Brain_Config::Horizontal_Angle::Combined_XY_PIDs>(&descriptor.get_xy_pids()))
         {
             fill_pid_params(x_params, *combined_pids, output_rate);
             fill_pid_params(y_params, *combined_pids, output_rate);
         }
         else
         {
-            auto separate_pids = boost::get<Multirotor_Brain_Config::Horizontal_Angle::Separate_XY_PIDs>(&descriptor.get_xy_pids());
+            auto separate_pids = boost::get<uav::Multirotor_Brain_Config::Horizontal_Angle::Separate_XY_PIDs>(&descriptor.get_xy_pids());
             fill_pid_params(x_params, separate_pids->get_x_pid(), output_rate);
             fill_pid_params(y_params, separate_pids->get_y_pid(), output_rate);
         }
@@ -693,7 +693,7 @@ auto Multirotor_Brain::set_config(std::shared_ptr<INode_Config> config) -> bool
     }
 
     {
-        LPF_Config& lpf_config = m_config->get_altitude().get_lpf();
+        uav::LPF_Config& lpf_config = m_config->get_altitude().get_lpf();
         lpf_config.set_cutoff_frequency(math::clamp(lpf_config.get_cutoff_frequency(), 0.1f, output_rate / 2.f));
         if (!m_vertical_altitude_data.dsp.setup(lpf_config.get_poles(), output_rate, lpf_config.get_cutoff_frequency()))
         {
@@ -721,7 +721,7 @@ auto Multirotor_Brain::set_config(std::shared_ptr<INode_Config> config) -> bool
     }
 
     {
-        LPF_Config& lpf_config = m_config->get_horizontal_position().get_lpf();
+        uav::LPF_Config& lpf_config = m_config->get_horizontal_position().get_lpf();
         lpf_config.set_cutoff_frequency(math::clamp(lpf_config.get_cutoff_frequency(), 0.1f, output_rate / 2.f));
         if (!m_horizontal_position_data.dsp.setup(lpf_config.get_poles(), output_rate, lpf_config.get_cutoff_frequency()))
         {
@@ -733,12 +733,12 @@ auto Multirotor_Brain::set_config(std::shared_ptr<INode_Config> config) -> bool
 
     return true;
 }
-auto Multirotor_Brain::get_config() const -> std::shared_ptr<INode_Config>
+auto Multirotor_Brain::get_config() const -> std::shared_ptr<uav::INode_Config>
 {
     return m_config;
 }
 
-auto Multirotor_Brain::get_descriptor() const -> std::shared_ptr<INode_Descriptor>
+auto Multirotor_Brain::get_descriptor() const -> std::shared_ptr<uav::INode_Descriptor>
 {
     return m_descriptor;
 }

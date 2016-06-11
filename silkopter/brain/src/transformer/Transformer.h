@@ -20,11 +20,11 @@ class Transformer : public ITransformer
 public:
     Transformer(UAV& uav);
 
-    bool init(std::shared_ptr<INode_Descriptor> descriptor) override;
-    std::shared_ptr<INode_Descriptor> get_descriptor() const override;
+    bool init(std::shared_ptr<uav::INode_Descriptor> descriptor) override;
+    std::shared_ptr<uav::INode_Descriptor> get_descriptor() const override;
 
-    bool set_config(std::shared_ptr<INode_Config> config) override;
-    std::shared_ptr<INode_Config> get_config() const override;
+    bool set_config(std::shared_ptr<uav::INode_Config> config) override;
+    std::shared_ptr<uav::INode_Config> get_config() const override;
 
     //auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
 
@@ -41,8 +41,8 @@ private:
 
     UAV& m_uav;
 
-    std::shared_ptr<Transformer_Descriptor> m_descriptor;
-    std::shared_ptr<Transformer_Config> m_config;
+    std::shared_ptr<uav::Transformer_Descriptor> m_descriptor;
+    std::shared_ptr<uav::Transformer_Config> m_config;
 
     Sample_Accumulator<In_Stream_t, Frame_Stream_t> m_accumulator;
 
@@ -63,11 +63,11 @@ Transformer<In_Stream_t, Out_Stream_t, Frame_Stream_t>::Transformer(UAV& uav)
 }
 
 template<class In_Stream_t, class Out_Stream_t, class Frame_Stream_t>
-auto Transformer<In_Stream_t, Out_Stream_t, Frame_Stream_t>::init(std::shared_ptr<INode_Descriptor> descriptor) -> bool
+auto Transformer<In_Stream_t, Out_Stream_t, Frame_Stream_t>::init(std::shared_ptr<uav::INode_Descriptor> descriptor) -> bool
 {
     QLOG_TOPIC("transformer::init");
 
-    auto specialized = std::dynamic_pointer_cast<Transformer_Descriptor>(descriptor);
+    auto specialized = std::dynamic_pointer_cast<uav::Transformer_Descriptor>(descriptor);
     if (!specialized)
     {
         QLOGE("Wrong descriptor type");
@@ -87,7 +87,7 @@ auto Transformer<In_Stream_t, Out_Stream_t, Frame_Stream_t>::init() -> bool
 }
 
 template<class In_Stream_t, class Out_Stream_t, class Frame_Stream_t>
-auto Transformer<In_Stream_t, Out_Stream_t, Frame_Stream_t>::get_descriptor() const -> std::shared_ptr<INode_Descriptor>
+auto Transformer<In_Stream_t, Out_Stream_t, Frame_Stream_t>::get_descriptor() const -> std::shared_ptr<uav::INode_Descriptor>
 {
     return m_descriptor;
 }
@@ -99,11 +99,11 @@ void Transformer<In_Stream_t, Out_Stream_t, Frame_Stream_t>::set_input_stream_pa
 }
 
 template<class In_Stream_t, class Out_Stream_t, class Frame_Stream_t>
-auto Transformer<In_Stream_t, Out_Stream_t, Frame_Stream_t>::set_config(std::shared_ptr<INode_Config> config) -> bool
+auto Transformer<In_Stream_t, Out_Stream_t, Frame_Stream_t>::set_config(std::shared_ptr<uav::INode_Config> config) -> bool
 {
     QLOG_TOPIC("transformer::set_config");
 
-    auto specialized = std::dynamic_pointer_cast<Transformer_Config>(config);
+    auto specialized = std::dynamic_pointer_cast<uav::Transformer_Config>(config);
     if (!specialized)
     {
         QLOGE("Wrong config type");
@@ -120,7 +120,7 @@ auto Transformer<In_Stream_t, Out_Stream_t, Frame_Stream_t>::set_config(std::sha
 //    return rapidjson::Document();
 //}
 template<class In_Stream_t, class Out_Stream_t, class Frame_Stream_t>
-auto Transformer<In_Stream_t, Out_Stream_t, Frame_Stream_t>::get_config() const -> std::shared_ptr<INode_Config>
+auto Transformer<In_Stream_t, Out_Stream_t, Frame_Stream_t>::get_config() const -> std::shared_ptr<uav::INode_Config>
 {
     return m_config;
 }

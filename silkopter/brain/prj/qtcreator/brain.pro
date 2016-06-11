@@ -53,6 +53,7 @@ INCLUDEPATH += ../../src
 INCLUDEPATH += ../../def
 INCLUDEPATH += ../../autogen
 INCLUDEPATH += ../../../libs
+INCLUDEPATH += ../../../libs/common/comms/def
 INCLUDEPATH += ../../../../def_lang/include
 INCLUDEPATH += ../../../../qbase/include
 INCLUDEPATH += ../../../../qdata/include
@@ -150,7 +151,8 @@ SOURCES += \
     ../../src/brain/LiPo_Battery.cpp \
     ../../src/pilot/Multirotor_Pilot.cpp \
     ../../src/UAV.cpp \
-    ../../def/uav.def.cpp
+    ../../def/uav.def.cpp \
+    ../../../libs/common/comms/def/comms.def.cpp
 
 HEADERS += \
     ../../src/BrainStdAfx.h \
@@ -285,7 +287,8 @@ HEADERS += \
     ../../../libs/common/node/IMultirotor_Simulator.h \
     ../../src/UAV.h \
     ../../def/gen_support.h \
-    ../../def/uav.def.h
+    ../../def/uav.def.h \
+    ../../../libs/common/comms/def/comms.def.h
 
 DISTFILES +=
 

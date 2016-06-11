@@ -52,8 +52,8 @@ size_t PCA9685::s_pwm_enabled_count = 0;
 
 PCA9685::PCA9685(UAV& uav)
     : m_uav(uav)
-    , m_descriptor(new PCA9685_Descriptor())
-    , m_config(new PCA9685_Config())
+    , m_descriptor(new uav::PCA9685_Descriptor())
+    , m_config(new uav::PCA9685_Config())
 {
     m_pwm_channels.resize(16);
 }
@@ -88,11 +88,11 @@ auto PCA9685::get_inputs() const -> std::vector<Input>
 }
 
 
-auto PCA9685::init(std::shared_ptr<INode_Descriptor> descriptor) -> bool
+auto PCA9685::init(std::shared_ptr<uav::INode_Descriptor> descriptor) -> bool
 {
     QLOG_TOPIC("PCA9685::init");
 
-    auto specialized = std::dynamic_pointer_cast<PCA9685_Descriptor>(descriptor);
+    auto specialized = std::dynamic_pointer_cast<uav::PCA9685_Descriptor>(descriptor);
     if (!specialized)
     {
         QLOGE("Wrong descriptor type");
@@ -364,11 +364,11 @@ void PCA9685::set_input_stream_path(size_t idx, q::Path const& path)
 constexpr float MIN_SERVO_MS = 0.5f;
 constexpr float MAX_SERVO_MS = 2.4f;
 
-auto PCA9685::set_config(std::shared_ptr<INode_Config> config) -> bool
+auto PCA9685::set_config(std::shared_ptr<uav::INode_Config> config) -> bool
 {
     QLOG_TOPIC("PCA9685::set_config");
 
-    auto specialized = std::dynamic_pointer_cast<PCA9685_Config>(config);
+    auto specialized = std::dynamic_pointer_cast<uav::PCA9685_Config>(config);
     if (!specialized)
     {
         QLOGE("Wrong config type");
@@ -397,7 +397,7 @@ auto PCA9685::set_config(std::shared_ptr<INode_Config> config) -> bool
 
 
 
-auto PCA9685::get_config() const -> std::shared_ptr<INode_Config>
+auto PCA9685::get_config() const -> std::shared_ptr<uav::INode_Config>
 {
     //todo - fix this
 //    rapidjson::Document json;
@@ -443,7 +443,7 @@ auto PCA9685::get_config() const -> std::shared_ptr<INode_Config>
     return m_config;
 }
 
-auto PCA9685::get_descriptor() const -> std::shared_ptr<INode_Descriptor>
+auto PCA9685::get_descriptor() const -> std::shared_ptr<uav::INode_Descriptor>
 {
     return m_descriptor;
 }

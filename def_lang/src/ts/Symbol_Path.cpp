@@ -51,6 +51,16 @@ Symbol_Path Symbol_Path::parent() const
     return res;
 }
 
+Symbol_Path Symbol_Path::to_relative() const
+{
+    Symbol_Path res = *this;
+    if (res.is_absolute())
+    {
+        res.m_is_absolute = false;
+    }
+    return res;
+}
+
 bool Symbol_Path::operator==(Symbol_Path const& other) const
 {
     return m_is_absolute == other.m_is_absolute &&

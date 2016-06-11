@@ -25,8 +25,8 @@ constexpr std::chrono::milliseconds MAX_MEASUREMENT_DURATION(75);
 
 SRF01::SRF01(UAV& uav)
     : m_uav(uav)
-    , m_descriptor(new SRF01_Descriptor())
-    , m_config(new SRF01_Config())
+    , m_descriptor(new uav::SRF01_Descriptor())
+    , m_config(new uav::SRF01_Config())
 {
     m_config->set_direction(math::vec3f(0, 0, -1)); //pointing down
 
@@ -40,11 +40,11 @@ auto SRF01::get_outputs() const -> std::vector<Output>
     outputs[0].stream = m_output_stream;
     return outputs;
 }
-auto SRF01::init(std::shared_ptr<INode_Descriptor> descriptor) -> bool
+auto SRF01::init(std::shared_ptr<uav::INode_Descriptor> descriptor) -> bool
 {
     QLOG_TOPIC("SRF01::init");
 
-    auto specialized = std::dynamic_pointer_cast<SRF01_Descriptor>(descriptor);
+    auto specialized = std::dynamic_pointer_cast<uav::SRF01_Descriptor>(descriptor);
     if (!specialized)
     {
         QLOGE("Wrong descriptor type");
@@ -234,11 +234,11 @@ void SRF01::process()
     }
 }
 
-auto SRF01::set_config(std::shared_ptr<INode_Config> config) -> bool
+auto SRF01::set_config(std::shared_ptr<uav::INode_Config> config) -> bool
 {
     QLOG_TOPIC("SRF01::set_config");
 
-    auto specialized = std::dynamic_pointer_cast<SRF01_Config>(config);
+    auto specialized = std::dynamic_pointer_cast<uav::SRF01_Config>(config);
     if (!specialized)
     {
         QLOGE("Wrong config type");
@@ -257,12 +257,12 @@ auto SRF01::set_config(std::shared_ptr<INode_Config> config) -> bool
 
     return true;
 }
-auto SRF01::get_config() const -> std::shared_ptr<INode_Config>
+auto SRF01::get_config() const -> std::shared_ptr<uav::INode_Config>
 {
     return m_config;
 }
 
-auto SRF01::get_descriptor() const -> std::shared_ptr<INode_Descriptor>
+auto SRF01::get_descriptor() const -> std::shared_ptr<uav::INode_Descriptor>
 {
     return m_descriptor;
 }

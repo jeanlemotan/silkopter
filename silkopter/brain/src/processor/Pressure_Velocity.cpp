@@ -11,17 +11,17 @@ namespace node
 
 Pressure_Velocity::Pressure_Velocity(UAV& uav)
     : m_uav(uav)
-    , m_descriptor(new Pressure_Velocity_Descriptor())
-    , m_config(new Pressure_Velocity_Config())
+    , m_descriptor(new uav::Pressure_Velocity_Descriptor())
+    , m_config(new uav::Pressure_Velocity_Config())
 {
     m_output_stream = std::make_shared<Output_Stream>();
 }
 
-auto Pressure_Velocity::init(std::shared_ptr<INode_Descriptor> descriptor) -> bool
+auto Pressure_Velocity::init(std::shared_ptr<uav::INode_Descriptor> descriptor) -> bool
 {
     QLOG_TOPIC("Pressure_Velocity::init");
 
-    auto specialized = std::dynamic_pointer_cast<Pressure_Velocity_Descriptor>(descriptor);
+    auto specialized = std::dynamic_pointer_cast<uav::Pressure_Velocity_Descriptor>(descriptor);
     if (!specialized)
     {
         QLOGE("Wrong descriptor type");
@@ -94,11 +94,11 @@ void Pressure_Velocity::set_input_stream_path(size_t idx, q::Path const& path)
     m_accumulator.set_stream_path(idx, path, m_output_stream->get_rate(), m_uav);
 }
 
-auto Pressure_Velocity::set_config(std::shared_ptr<INode_Config> config) -> bool
+auto Pressure_Velocity::set_config(std::shared_ptr<uav::INode_Config> config) -> bool
 {
     QLOG_TOPIC("Pressure_Velocity::set_config");
 
-    auto specialized = std::dynamic_pointer_cast<Pressure_Velocity_Config>(config);
+    auto specialized = std::dynamic_pointer_cast<uav::Pressure_Velocity_Config>(config);
     if (!specialized)
     {
         QLOGE("Wrong config type");
@@ -109,12 +109,12 @@ auto Pressure_Velocity::set_config(std::shared_ptr<INode_Config> config) -> bool
 
     return true;
 }
-auto Pressure_Velocity::get_config() const -> std::shared_ptr<INode_Config>
+auto Pressure_Velocity::get_config() const -> std::shared_ptr<uav::INode_Config>
 {
     return m_config;
 }
 
-auto Pressure_Velocity::get_descriptor() const -> std::shared_ptr<INode_Descriptor>
+auto Pressure_Velocity::get_descriptor() const -> std::shared_ptr<uav::INode_Descriptor>
 {
     return m_descriptor;
 }

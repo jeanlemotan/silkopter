@@ -11,7 +11,7 @@ namespace bus
 {
 
 UART_Linux::UART_Linux()
-    : m_descriptor(new UART_Linux_Descriptor())
+    : m_descriptor(new uav::UART_Linux_Descriptor())
 {
 }
 
@@ -20,9 +20,9 @@ UART_Linux::~UART_Linux()
     close();
 }
 
-bool UART_Linux::init(std::shared_ptr<IBus_Descriptor> descriptor)
+bool UART_Linux::init(std::shared_ptr<uav::IBus_Descriptor> descriptor)
 {
-    auto specialized = std::dynamic_pointer_cast<UART_Linux_Descriptor>(descriptor);
+    auto specialized = std::dynamic_pointer_cast<uav::UART_Linux_Descriptor>(descriptor);
     if (!specialized)
     {
         QLOGE("Wrong descriptor type");
@@ -32,12 +32,12 @@ bool UART_Linux::init(std::shared_ptr<IBus_Descriptor> descriptor)
     int baud_id = -1;
     switch (specialized->get_baud())
     {
-    case UART_Linux_Descriptor::baud_t::_9600: baud_id = B9600; break;
-    case UART_Linux_Descriptor::baud_t::_19200: baud_id = B19200; break;
-    case UART_Linux_Descriptor::baud_t::_38400: baud_id = B38400; break;
-    case UART_Linux_Descriptor::baud_t::_57600: baud_id = B57600; break;
-    case UART_Linux_Descriptor::baud_t::_115200: baud_id = B115200; break;
-    case UART_Linux_Descriptor::baud_t::_230400: baud_id = B230400; break;
+    case uav::UART_Linux_Descriptor::baud_t::_9600: baud_id = B9600; break;
+    case uav::UART_Linux_Descriptor::baud_t::_19200: baud_id = B19200; break;
+    case uav::UART_Linux_Descriptor::baud_t::_38400: baud_id = B38400; break;
+    case uav::UART_Linux_Descriptor::baud_t::_57600: baud_id = B57600; break;
+    case uav::UART_Linux_Descriptor::baud_t::_115200: baud_id = B115200; break;
+    case uav::UART_Linux_Descriptor::baud_t::_230400: baud_id = B230400; break;
     }
     if (baud_id < 0)
     {
@@ -54,7 +54,7 @@ bool UART_Linux::init(std::shared_ptr<IBus_Descriptor> descriptor)
     return true;
 }
 
-std::shared_ptr<IBus_Descriptor> UART_Linux::get_descriptor() const
+std::shared_ptr<uav::IBus_Descriptor> UART_Linux::get_descriptor() const
 {
     return m_descriptor;
 }

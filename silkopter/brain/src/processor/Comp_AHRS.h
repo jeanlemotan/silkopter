@@ -13,8 +13,11 @@
 
 namespace silk
 {
+namespace uav
+{
 struct Comp_AHRS_Descriptor;
 struct Comp_AHRS_Config;
+}
 }
 
 
@@ -29,11 +32,11 @@ class Comp_AHRS : public IProcessor
 public:
     Comp_AHRS(UAV& uav);
 
-    bool init(std::shared_ptr<INode_Descriptor> descriptor) override;
-    std::shared_ptr<INode_Descriptor> get_descriptor() const override;
+    bool init(std::shared_ptr<uav::INode_Descriptor> descriptor) override;
+    std::shared_ptr<uav::INode_Descriptor> get_descriptor() const override;
 
-    bool set_config(std::shared_ptr<INode_Config> config) override;
-    std::shared_ptr<INode_Config> get_config() const override;
+    bool set_config(std::shared_ptr<uav::INode_Config> config) override;
+    std::shared_ptr<uav::INode_Config> get_config() const override;
 
     //auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
 
@@ -50,8 +53,8 @@ private:
 
     UAV& m_uav;
 
-    std::shared_ptr<Comp_AHRS_Descriptor> m_descriptor;
-    std::shared_ptr<Comp_AHRS_Config> m_config;
+    std::shared_ptr<uav::Comp_AHRS_Descriptor> m_descriptor;
+    std::shared_ptr<uav::Comp_AHRS_Config> m_config;
 
     Sample_Accumulator<stream::IAngular_Velocity, stream::IAcceleration, stream::IMagnetic_Field> m_accumulator;
 

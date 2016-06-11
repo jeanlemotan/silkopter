@@ -18,11 +18,11 @@ class Vec3_Generator : public IGenerator
 public:
     Vec3_Generator(UAV& uav);
 
-    bool init(std::shared_ptr<INode_Descriptor> descriptor) override;
-    std::shared_ptr<INode_Descriptor> get_descriptor() const override;
+    bool init(std::shared_ptr<uav::INode_Descriptor> descriptor) override;
+    std::shared_ptr<uav::INode_Descriptor> get_descriptor() const override;
 
-    bool set_config(std::shared_ptr<INode_Config> config) override;
-    std::shared_ptr<INode_Config> get_config() const override;
+    bool set_config(std::shared_ptr<uav::INode_Config> config) override;
+    std::shared_ptr<uav::INode_Config> get_config() const override;
 
     //auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
 
@@ -39,8 +39,8 @@ private:
 
     UAV& m_uav;
 
-    std::shared_ptr<Vec3_Generator_Descriptor> m_descriptor;
-    std::shared_ptr<Vec3_Generator_Config> m_config;
+    std::shared_ptr<uav::Vec3_Generator_Descriptor> m_descriptor;
+    std::shared_ptr<uav::Vec3_Generator_Config> m_config;
 
     std::array<q::Path, 3> m_modulation_stream_paths;
     std::array<std::weak_ptr<stream::IFloat>, 3> m_modulation_streams;
@@ -59,11 +59,11 @@ Vec3_Generator<Stream_t>::Vec3_Generator(UAV& uav)
 }
 
 template<class Stream_t>
-auto Vec3_Generator<Stream_t>::init(std::shared_ptr<INode_Descriptor> descriptor) -> bool
+auto Vec3_Generator<Stream_t>::init(std::shared_ptr<uav::INode_Descriptor> descriptor) -> bool
 {
     QLOG_TOPIC("vec3_generator::init");
 
-    auto specialized = std::dynamic_pointer_cast<Vec3_Generator_Descriptor>(descriptor);
+    auto specialized = std::dynamic_pointer_cast<uav::Vec3_Generator_Descriptor>(descriptor);
     if (!specialized)
     {
         QLOGE("Wrong descriptor type");
@@ -83,7 +83,7 @@ auto Vec3_Generator<Stream_t>::init() -> bool
 }
 
 template<class Stream_t>
-auto Vec3_Generator<Stream_t>::get_descriptor() const -> std::shared_ptr<INode_Descriptor>
+auto Vec3_Generator<Stream_t>::get_descriptor() const -> std::shared_ptr<uav::INode_Descriptor>
 {
     return m_descriptor;
 }
@@ -120,11 +120,11 @@ void Vec3_Generator<Stream_t>::set_input_stream_path(size_t idx, q::Path const& 
 }
 
 template<class Stream_t>
-auto Vec3_Generator<Stream_t>::set_config(std::shared_ptr<INode_Config> config) -> bool
+auto Vec3_Generator<Stream_t>::set_config(std::shared_ptr<uav::INode_Config> config) -> bool
 {
     QLOG_TOPIC("vec3_generator::set_config");
 
-    auto specialized = std::dynamic_pointer_cast<Vec3_Generator_Config>(config);
+    auto specialized = std::dynamic_pointer_cast<uav::Vec3_Generator_Config>(config);
     if (!specialized)
     {
         QLOGE("Wrong config type");
@@ -141,7 +141,7 @@ auto Vec3_Generator<Stream_t>::set_config(std::shared_ptr<INode_Config> config) 
 //    return rapidjson::Document();
 //}
 template<class Stream_t>
-auto Vec3_Generator<Stream_t>::get_config() const -> std::shared_ptr<INode_Config>
+auto Vec3_Generator<Stream_t>::get_config() const -> std::shared_ptr<uav::INode_Config>
 {
     return m_config;
 }

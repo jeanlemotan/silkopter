@@ -10,9 +10,11 @@
 
 namespace silk
 {
-
+namespace uav
+{
 struct IUAV_Descriptor;
 struct Multirotor_Descriptor;
+}
 
 class UAV;
 
@@ -78,8 +80,8 @@ public:
 
     void save_settings();
 
-    auto set_uav_descriptor(std::shared_ptr<IUAV_Descriptor> descriptor) -> bool;
-    auto get_uav_descriptor() const   -> std::shared_ptr<const IUAV_Descriptor>;
+    auto set_uav_descriptor(std::shared_ptr<uav::IUAV_Descriptor> descriptor) -> bool;
+    auto get_uav_descriptor() const   -> std::shared_ptr<const uav::IUAV_Descriptor>;
 
     template<class Descriptor>
     auto get_specialized_uav_descriptor() const   -> std::shared_ptr<const Descriptor>;
@@ -112,18 +114,18 @@ protected:
     auto get_telemetry_data() const -> Telemetry_Data const&;
 
 private:
-    auto set_multirotor_descriptor(std::shared_ptr<Multirotor_Descriptor> descriptor) -> bool;
+    auto set_multirotor_descriptor(std::shared_ptr<uav::Multirotor_Descriptor> descriptor) -> bool;
 
     void generate_settings_file();
 
-    auto create_bus(std::string const& type, std::string const& name, std::shared_ptr<IBus_Descriptor> descriptor) -> std::shared_ptr<bus::IBus>;
-    auto create_node(std::string const& type, std::string const& name, std::shared_ptr<INode_Descriptor> descriptor) -> std::shared_ptr<node::INode>;
+    auto create_bus(std::string const& type, std::string const& name, std::shared_ptr<uav::IBus_Descriptor> descriptor) -> std::shared_ptr<bus::IBus>;
+    auto create_node(std::string const& type, std::string const& name, std::shared_ptr<uav::INode_Descriptor> descriptor) -> std::shared_ptr<node::INode>;
 
     auto remove_node(std::shared_ptr<node::INode> node) -> bool;
 
     void sort_nodes(std::shared_ptr<node::INode> first_node);
 
-    std::shared_ptr<IUAV_Descriptor> m_uav_descriptor;
+    std::shared_ptr<uav::IUAV_Descriptor> m_uav_descriptor;
 
     Registry<bus::IBus> m_buses;
     Registry<node::INode> m_nodes;
@@ -144,7 +146,7 @@ private:
 template<class Descriptor>
 auto UAV::get_specialized_uav_descriptor() const   -> std::shared_ptr<const Descriptor>
 {
-    std::shared_ptr<const IUAV_Descriptor> descriptor = get_uav_descriptor();
+    std::shared_ptr<const uav::IUAV_Descriptor> descriptor = get_uav_descriptor();
     return std::dynamic_pointer_cast<const Descriptor>(descriptor);
 }
 

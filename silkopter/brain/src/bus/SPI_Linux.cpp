@@ -11,7 +11,7 @@ namespace bus
 {
 
 SPI_Linux::SPI_Linux()
-    : m_descriptor(new SPI_Linux_Descriptor())
+    : m_descriptor(new uav::SPI_Linux_Descriptor())
 {
 }
 
@@ -20,9 +20,9 @@ SPI_Linux::~SPI_Linux()
     close();
 }
 
-bool SPI_Linux::init(std::shared_ptr<IBus_Descriptor> descriptor)
+bool SPI_Linux::init(std::shared_ptr<uav::IBus_Descriptor> descriptor)
 {
-    auto specialized = std::dynamic_pointer_cast<SPI_Linux_Descriptor>(descriptor);
+    auto specialized = std::dynamic_pointer_cast<uav::SPI_Linux_Descriptor>(descriptor);
     if (!specialized)
     {
         QLOGE("Wrong descriptor type");
@@ -38,7 +38,7 @@ bool SPI_Linux::init(std::shared_ptr<IBus_Descriptor> descriptor)
     return true;
 }
 
-std::shared_ptr<IBus_Descriptor> SPI_Linux::get_descriptor() const
+std::shared_ptr<uav::IBus_Descriptor> SPI_Linux::get_descriptor() const
 {
     return m_descriptor;
 }

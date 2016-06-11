@@ -10,8 +10,11 @@
 
 namespace silk
 {
+namespace uav
+{
 struct AVRADC_Descriptor;
 struct AVRADC_Config;
+}
 }
 
 
@@ -26,11 +29,11 @@ class AVRADC : public ISource
 public:
     AVRADC(UAV& uav);
 
-    bool init(std::shared_ptr<INode_Descriptor> descriptor) override;
-    std::shared_ptr<INode_Descriptor> get_descriptor() const override;
+    bool init(std::shared_ptr<uav::INode_Descriptor> descriptor) override;
+    std::shared_ptr<uav::INode_Descriptor> get_descriptor() const override;
 
-    bool set_config(std::shared_ptr<INode_Config> config) override;
-    std::shared_ptr<INode_Config> get_config() const override;
+    bool set_config(std::shared_ptr<uav::INode_Config> config) override;
+    std::shared_ptr<uav::INode_Config> get_config() const override;
 
     //auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
 
@@ -46,8 +49,8 @@ private:
     UAV& m_uav;
     std::weak_ptr<bus::II2C> m_i2c;
 
-    std::shared_ptr<AVRADC_Descriptor> m_descriptor;
-    std::shared_ptr<AVRADC_Config> m_config;
+    std::shared_ptr<uav::AVRADC_Descriptor> m_descriptor;
+    std::shared_ptr<uav::AVRADC_Config> m_config;
 
     q::Clock::time_point m_last_process_tp = q::Clock::now();
     q::Clock::time_point m_last_reading_tp = q::Clock::now();

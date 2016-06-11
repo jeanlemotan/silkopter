@@ -115,8 +115,8 @@ static bool set_connection_enabled(Connection_ptr const& connection, bool yes)
 
 Raspicam::Raspicam(UAV& uav)
     : m_uav(uav)
-    , m_descriptor(new Raspicam_Descriptor())
-    , m_config(new Raspicam_Config())
+    , m_descriptor(new uav::Raspicam_Descriptor())
+    , m_config(new uav::Raspicam_Config())
 {
     QLOG_TOPIC("raspicam");
 #if defined RASPBERRY_PI
@@ -133,7 +133,7 @@ Raspicam::Raspicam(UAV& uav)
 
     m_descriptor->set_fps(30);
 
-    Raspicam_Descriptor::Quality quality;
+    uav::Raspicam_Descriptor::Quality quality;
     quality.set_resolution({ 320, 240 });
     quality.set_bitrate(100000);
     m_descriptor->set_streaming_low(quality);
@@ -204,11 +204,11 @@ auto Raspicam::get_outputs() const -> std::vector<Output>
     return outputs;
 }
 
-auto Raspicam::init(std::shared_ptr<INode_Descriptor> descriptor) -> bool
+auto Raspicam::init(std::shared_ptr<uav::INode_Descriptor> descriptor) -> bool
 {
     QLOG_TOPIC("raspicam::init");
 
-    auto specialized = std::dynamic_pointer_cast<Raspicam_Descriptor>(descriptor);
+    auto specialized = std::dynamic_pointer_cast<uav::Raspicam_Descriptor>(descriptor);
     if (!specialized)
     {
         QLOGE("Wrong descriptor type");
@@ -290,11 +290,11 @@ auto Raspicam::init() -> bool
 #endif
 }
 
-auto Raspicam::set_config(std::shared_ptr<INode_Config> config) -> bool
+auto Raspicam::set_config(std::shared_ptr<uav::INode_Config> config) -> bool
 {
     QLOG_TOPIC("raspicam::set_config");
 
-    auto specialized = std::dynamic_pointer_cast<Raspicam_Config>(config);
+    auto specialized = std::dynamic_pointer_cast<uav::Raspicam_Config>(config);
     if (!specialized)
     {
         QLOGE("Wrong config type");
@@ -342,12 +342,12 @@ auto Raspicam::set_config(std::shared_ptr<INode_Config> config) -> bool
 
     return true;
 }
-auto Raspicam::get_config() const -> std::shared_ptr<INode_Config>
+auto Raspicam::get_config() const -> std::shared_ptr<uav::INode_Config>
 {
     return m_config;
 }
 
-auto Raspicam::get_descriptor() const -> std::shared_ptr<INode_Descriptor>
+auto Raspicam::get_descriptor() const -> std::shared_ptr<uav::INode_Descriptor>
 {
     return m_descriptor;
 }

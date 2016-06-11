@@ -10,8 +10,11 @@
 
 namespace silk
 {
+namespace uav
+{
 struct ENU_Frame_System_Descriptor;
 struct ENU_Frame_System_Config;
+}
 }
 
 
@@ -25,11 +28,11 @@ class ENU_Frame_System : public IProcessor
 public:
     ENU_Frame_System(UAV& uav);
 
-    bool init(std::shared_ptr<INode_Descriptor> descriptor) override;
-    std::shared_ptr<INode_Descriptor> get_descriptor() const override;
+    bool init(std::shared_ptr<uav::INode_Descriptor> descriptor) override;
+    std::shared_ptr<uav::INode_Descriptor> get_descriptor() const override;
 
-    bool set_config(std::shared_ptr<INode_Config> config) override;
-    std::shared_ptr<INode_Config> get_config() const override;
+    bool set_config(std::shared_ptr<uav::INode_Config> config) override;
+    std::shared_ptr<uav::INode_Config> get_config() const override;
 
     //auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
 
@@ -46,8 +49,8 @@ private:
 
     UAV& m_uav;
 
-    std::shared_ptr<ENU_Frame_System_Descriptor> m_descriptor;
-    std::shared_ptr<ENU_Frame_System_Config> m_config;
+    std::shared_ptr<uav::ENU_Frame_System_Descriptor> m_descriptor;
+    std::shared_ptr<uav::ENU_Frame_System_Config> m_config;
 
     Sample_Accumulator<stream::IECEF_Position> m_accumulator;
 

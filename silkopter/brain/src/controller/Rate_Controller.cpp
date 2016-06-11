@@ -12,17 +12,17 @@ namespace node
 
 Rate_Controller::Rate_Controller(UAV& uav)
     : m_uav(uav)
-    , m_descriptor(new Rate_Controller_Descriptor())
-    , m_config(new Rate_Controller_Config())
+    , m_descriptor(new uav::Rate_Controller_Descriptor())
+    , m_config(new uav::Rate_Controller_Config())
 {
     m_output_stream = std::make_shared<Output_Stream>();
 }
 
-auto Rate_Controller::init(std::shared_ptr<INode_Descriptor> descriptor) -> bool
+auto Rate_Controller::init(std::shared_ptr<uav::INode_Descriptor> descriptor) -> bool
 {
     QLOG_TOPIC("rate_controller::init");
 
-    auto specialized = std::dynamic_pointer_cast<Rate_Controller_Descriptor>(descriptor);
+    auto specialized = std::dynamic_pointer_cast<uav::Rate_Controller_Descriptor>(descriptor);
     if (!specialized)
     {
         QLOGE("Wrong descriptor type");
@@ -69,7 +69,7 @@ void Rate_Controller::process()
 
     m_output_stream->clear();
 
-    std::shared_ptr<const Multirotor_Descriptor> multirotor_descriptor = m_uav.get_specialized_uav_descriptor<Multirotor_Descriptor>();
+    std::shared_ptr<const uav::Multirotor_Descriptor> multirotor_descriptor = m_uav.get_specialized_uav_descriptor<uav::Multirotor_Descriptor>();
     if (!multirotor_descriptor)
     {
         return;
@@ -95,7 +95,7 @@ void Rate_Controller::process()
 }
 
 
-math::vec3f Rate_Controller::compute_feedforward(Multirotor_Descriptor const& multirotor_descriptor, stream::IAngular_Velocity::Value const& input, stream::IAngular_Velocity::Value const& target)
+math::vec3f Rate_Controller::compute_feedforward(uav::Multirotor_Descriptor const& multirotor_descriptor, stream::IAngular_Velocity::Value const& input, stream::IAngular_Velocity::Value const& target)
 {
     math::vec3f v = target - input;
     float vm = math::length(v) * multirotor_descriptor.get_moment_of_inertia();
@@ -134,11 +134,11 @@ void fill_pid_params(T& dst, PID const& src, size_t rate)
     dst.rate = rate;
 }
 
-auto Rate_Controller::set_config(std::shared_ptr<INode_Config> config) -> bool
+auto Rate_Controller::set_config(std::shared_ptr<uav::INode_Config> config) -> bool
 {
     QLOG_TOPIC("rate_controller::set_config");
 
-    auto specialized = std::dynamic_pointer_cast<Rate_Controller_Config>(config);
+    auto specialized = std::dynamic_pointer_cast<uav::Rate_Controller_Config>(config);
     if (!specialized)
     {
         QLOGE("Wrong config type");
@@ -149,16 +149,16 @@ auto Rate_Controller::set_config(std::shared_ptr<INode_Config> config) -> bool
 
     uint32_t output_rate = m_output_stream->get_rate();
 
-    Rate_Controller_Config::Feedback const& descriptor = m_config->get_feedback();
+    uav::Rate_Controller_Config::Feedback const& descriptor = m_config->get_feedback();
     PID::Params x_params, y_params, z_params;
-    if (auto combined_pids = boost::get<Rate_Controller_Config::Feedback::Combined_XY_PIDs>(&descriptor.get_xy_pids()))
+    if (auto combined_pids = boost::get<uav::Rate_Controller_Config::Feedback::Combined_XY_PIDs>(&descriptor.get_xy_pids()))
     {
         fill_pid_params(x_params, *combined_pids, output_rate);
         fill_pid_params(y_params, *combined_pids, output_rate);
     }
     else
     {
-        auto separate_pids = boost::get<Rate_Controller_Config::Feedback::Separate_XY_PIDs>(&descriptor.get_xy_pids());
+        auto separate_pids = boost::get<uav::Rate_Controller_Config::Feedback::Separate_XY_PIDs>(&descriptor.get_xy_pids());
         fill_pid_params(x_params, separate_pids->get_x_pid(), output_rate);
         fill_pid_params(y_params, separate_pids->get_y_pid(), output_rate);
     }
@@ -175,12 +175,12 @@ auto Rate_Controller::set_config(std::shared_ptr<INode_Config> config) -> bool
 
     return true;
 }
-auto Rate_Controller::get_config() const -> std::shared_ptr<INode_Config>
+auto Rate_Controller::get_config() const -> std::shared_ptr<uav::INode_Config>
 {
     return m_config;
 }
 
-auto Rate_Controller::get_descriptor() const -> std::shared_ptr<INode_Descriptor>
+auto Rate_Controller::get_descriptor() const -> std::shared_ptr<uav::INode_Descriptor>
 {
     return m_descriptor;
 }

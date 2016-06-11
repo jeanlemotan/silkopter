@@ -174,15 +174,15 @@ void UAV::save_settings()
 {
     TIMED_FUNCTION();
 
-    Settings settings;
+    uav::Settings settings;
 
     settings.set_uav_descriptor(m_uav_descriptor);
 
-    std::vector<Settings::Node_Data> node_datas = settings.get_nodes();
+    std::vector<uav::Settings::Node_Data> node_datas = settings.get_nodes();
     auto const& nodes = get_nodes().get_all();
     for (auto const& n: nodes)
     {
-        Settings::Node_Data node_data;
+        uav::Settings::Node_Data node_data;
 
         node_data.set_name(n.name);
         node_data.set_type(n.type);
@@ -197,11 +197,11 @@ void UAV::save_settings()
         node_datas.push_back(node_data);
     }
 
-    std::vector<Settings::Bus_Data> bus_datas = settings.get_buses();
+    std::vector<uav::Settings::Bus_Data> bus_datas = settings.get_buses();
     auto const& buses = get_buses().get_all();
     for (auto const& b: buses)
     {
-        Settings::Bus_Data bus_data;
+        uav::Settings::Bus_Data bus_data;
 
         bus_data.set_name(b.name);
         bus_data.set_type(b.type);
@@ -214,7 +214,7 @@ void UAV::save_settings()
     {
         TIMED_FUNCTION();
 
-        auto result = serialize(settings);
+        auto result = uav::serialize(settings);
         if (result != ts::success)
         {
             QLOGE("Cannot serialize settings: {}.", result.error().what());
@@ -357,11 +357,11 @@ auto UAV::get_streams()  -> const Registry<stream::IStream>&
 {
     return m_streams;
 }
-auto UAV::get_uav_descriptor() const -> std::shared_ptr<const IUAV_Descriptor>
+auto UAV::get_uav_descriptor() const -> std::shared_ptr<const uav::IUAV_Descriptor>
 {
     return m_uav_descriptor;
 }
-auto UAV::set_uav_descriptor(std::shared_ptr<IUAV_Descriptor> descriptor) -> bool
+auto UAV::set_uav_descriptor(std::shared_ptr<uav::IUAV_Descriptor> descriptor) -> bool
 {
     if (!descriptor)
     {
@@ -369,7 +369,7 @@ auto UAV::set_uav_descriptor(std::shared_ptr<IUAV_Descriptor> descriptor) -> boo
         return false;
     }
 
-    auto multirotor_descriptor = std::dynamic_pointer_cast<Multirotor_Descriptor>(descriptor);
+    auto multirotor_descriptor = std::dynamic_pointer_cast<uav::Multirotor_Descriptor>(descriptor);
     if (multirotor_descriptor)
     {
         return set_multirotor_descriptor(multirotor_descriptor);
@@ -378,7 +378,7 @@ auto UAV::set_uav_descriptor(std::shared_ptr<IUAV_Descriptor> descriptor) -> boo
     QLOGE("Unrecognized UAV descriptor");
     return false;
 }
-auto UAV::set_multirotor_descriptor(std::shared_ptr<Multirotor_Descriptor> descriptor) -> bool
+auto UAV::set_multirotor_descriptor(std::shared_ptr<uav::Multirotor_Descriptor> descriptor) -> bool
 {
     QLOG_TOPIC("uav::set_multirotor_descriptor");
 
@@ -439,7 +439,7 @@ void write_gnu_plot(std::string const& name, std::vector<T> const& samples)
     }
 }
 
-auto UAV::create_bus(std::string const& type, std::string const& name, std::shared_ptr<IBus_Descriptor> descriptor) -> std::shared_ptr<bus::IBus>
+auto UAV::create_bus(std::string const& type, std::string const& name, std::shared_ptr<uav::IBus_Descriptor> descriptor) -> std::shared_ptr<bus::IBus>
 {
     if (m_buses.find_by_name<bus::IBus>(name))
     {
@@ -455,7 +455,7 @@ auto UAV::create_bus(std::string const& type, std::string const& name, std::shar
     }
     return std::shared_ptr<bus::IBus>();
 }
-auto UAV::create_node(std::string const& type, std::string const& name, std::shared_ptr<INode_Descriptor> descriptor) -> std::shared_ptr<node::INode>
+auto UAV::create_node(std::string const& type, std::string const& name, std::shared_ptr<uav::INode_Descriptor> descriptor) -> std::shared_ptr<node::INode>
 {
     if (m_nodes.find_by_name<node::INode>(name))
     {
@@ -961,8 +961,8 @@ auto UAV::init(Comms& comms) -> bool
         return false;
     }
 
-    Settings settings;
-    auto reserialize_result = deserialize(settings, json_result.payload());
+    uav::Settings settings;
+    auto reserialize_result = uav::deserialize(settings, json_result.payload());
     if (reserialize_result != ts::success)
     {
         QLOGE("Failed to deserialize settings: {}", reserialize_result.error().what());
@@ -977,7 +977,7 @@ auto UAV::init(Comms& comms) -> bool
         }
     }
 
-    for (Settings::Bus_Data const& data: settings.get_buses())
+    for (uav::Settings::Bus_Data const& data: settings.get_buses())
     {
         if (!create_bus(data.get_type(), data.get_name(), data.get_descriptor()))
         {
@@ -985,7 +985,7 @@ auto UAV::init(Comms& comms) -> bool
             return false;
         }
     }
-    for (Settings::Node_Data const& data: settings.get_nodes())
+    for (uav::Settings::Node_Data const& data: settings.get_nodes())
     {
         if (!create_node(data.get_type(), data.get_name(), data.get_descriptor()))
         {
@@ -995,7 +995,7 @@ auto UAV::init(Comms& comms) -> bool
     }
 
     //set input paths and configs
-    for (Settings::Node_Data const& data: settings.get_nodes())
+    for (uav::Settings::Node_Data const& data: settings.get_nodes())
     {
         std::shared_ptr<node::INode> node = m_nodes.find_by_name<node::INode>(data.get_name());
         if (!node)

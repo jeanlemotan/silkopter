@@ -34,7 +34,7 @@ namespace bus
 {
 
 I2C_Linux::I2C_Linux()
-    : m_descriptor(new I2C_Linux_Descriptor())
+    : m_descriptor(new uav::I2C_Linux_Descriptor())
 {
 }
 
@@ -43,9 +43,9 @@ I2C_Linux::~I2C_Linux()
     close();
 }
 
-bool I2C_Linux::init(std::shared_ptr<IBus_Descriptor> descriptor)
+bool I2C_Linux::init(std::shared_ptr<uav::IBus_Descriptor> descriptor)
 {
-    auto specialized = std::dynamic_pointer_cast<I2C_Linux_Descriptor>(descriptor);
+    auto specialized = std::dynamic_pointer_cast<uav::I2C_Linux_Descriptor>(descriptor);
     if (!specialized)
     {
         QLOGE("Wrong descriptor type");
@@ -61,7 +61,7 @@ bool I2C_Linux::init(std::shared_ptr<IBus_Descriptor> descriptor)
     return true;
 }
 
-std::shared_ptr<IBus_Descriptor> I2C_Linux::get_descriptor() const
+std::shared_ptr<uav::IBus_Descriptor> I2C_Linux::get_descriptor() const
 {
     return m_descriptor;
 }

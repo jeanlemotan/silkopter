@@ -11,16 +11,16 @@ namespace node
 
 Motor_Mixer::Motor_Mixer(UAV& uav)
     : m_uav(uav)
-    , m_descriptor(new Motor_Mixer_Descriptor())
-    , m_config(new Motor_Mixer_Config())
+    , m_descriptor(new uav::Motor_Mixer_Descriptor())
+    , m_config(new uav::Motor_Mixer_Config())
 {
 }
 
-auto Motor_Mixer::init(std::shared_ptr<INode_Descriptor> descriptor) -> bool
+auto Motor_Mixer::init(std::shared_ptr<uav::INode_Descriptor> descriptor) -> bool
 {
     QLOG_TOPIC("motor_mixer::init");
 
-    auto specialized = std::dynamic_pointer_cast<Motor_Mixer_Descriptor>(descriptor);
+    auto specialized = std::dynamic_pointer_cast<uav::Motor_Mixer_Descriptor>(descriptor);
     if (!specialized)
     {
         QLOGE("Wrong descriptor type");
@@ -34,7 +34,7 @@ auto Motor_Mixer::init(std::shared_ptr<INode_Descriptor> descriptor) -> bool
 
 auto Motor_Mixer::init() -> bool
 {
-    std::shared_ptr<const Multirotor_Descriptor> multirotor_descriptor = m_uav.get_specialized_uav_descriptor<Multirotor_Descriptor>();
+    std::shared_ptr<const uav::Multirotor_Descriptor> multirotor_descriptor = m_uav.get_specialized_uav_descriptor<uav::Multirotor_Descriptor>();
     if (!multirotor_descriptor)
     {
         QLOGE("No multirotor descriptor found");
@@ -107,7 +107,7 @@ void Motor_Mixer::process()
         os->samples.clear();
     }
 
-    std::shared_ptr<const Multirotor_Descriptor> multirotor_descriptor = m_uav.get_specialized_uav_descriptor<Multirotor_Descriptor>();
+    std::shared_ptr<const uav::Multirotor_Descriptor> multirotor_descriptor = m_uav.get_specialized_uav_descriptor<uav::Multirotor_Descriptor>();
     if (!multirotor_descriptor)
     {
         return;
@@ -160,7 +160,7 @@ constexpr float MIN_THRUST = 0.f;
 constexpr float DYN_RANGE_FACTOR = 1.1f;//allow a bit more dyn range than normal to get better torque resolution at the expense of collective force
 
 
-void Motor_Mixer::compute_throttles(Multirotor_Descriptor const& multirotor_descriptor, stream::IFloat::Value const& collective_thrust, stream::ITorque::Value const& _target)
+void Motor_Mixer::compute_throttles(uav::Multirotor_Descriptor const& multirotor_descriptor, stream::IFloat::Value const& collective_thrust, stream::ITorque::Value const& _target)
 {
     auto target = _target;
 
@@ -427,11 +427,11 @@ void Motor_Mixer::set_input_stream_path(size_t idx, q::Path const& path)
     m_accumulator.set_stream_path(idx, path, m_descriptor->get_rate(), m_uav);
 }
 
-auto Motor_Mixer::set_config(std::shared_ptr<INode_Config> config) -> bool
+auto Motor_Mixer::set_config(std::shared_ptr<uav::INode_Config> config) -> bool
 {
     QLOG_TOPIC("motor_mixer::set_config");
 
-    auto specialized = std::dynamic_pointer_cast<Motor_Mixer_Config>(config);
+    auto specialized = std::dynamic_pointer_cast<uav::Motor_Mixer_Config>(config);
     if (!specialized)
     {
         QLOGE("Wrong config type");
@@ -442,12 +442,12 @@ auto Motor_Mixer::set_config(std::shared_ptr<INode_Config> config) -> bool
 
     return true;
 }
-auto Motor_Mixer::get_config() const -> std::shared_ptr<INode_Config>
+auto Motor_Mixer::get_config() const -> std::shared_ptr<uav::INode_Config>
 {
     return m_config;
 }
 
-auto Motor_Mixer::get_descriptor() const -> std::shared_ptr<INode_Descriptor>
+auto Motor_Mixer::get_descriptor() const -> std::shared_ptr<uav::INode_Descriptor>
 {
     return m_descriptor;
 }

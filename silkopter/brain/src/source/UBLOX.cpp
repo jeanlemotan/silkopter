@@ -245,8 +245,8 @@ struct MON_VER
 
 UBLOX::UBLOX(UAV& uav)
     : m_uav(uav)
-    , m_descriptor(new UBLOX_Descriptor())
-    , m_config(new UBLOX_Config())
+    , m_descriptor(new uav::UBLOX_Descriptor())
+    , m_config(new uav::UBLOX_Config())
 {
     m_position_stream = std::make_shared<Position_Stream>();
     m_velocity_stream = std::make_shared<Velocity_Stream>();
@@ -306,11 +306,11 @@ auto UBLOX::get_outputs() const -> std::vector<Output>
     return outputs;
 }
 
-auto UBLOX::init(std::shared_ptr<INode_Descriptor> descriptor) -> bool
+auto UBLOX::init(std::shared_ptr<uav::INode_Descriptor> descriptor) -> bool
 {
     QLOG_TOPIC("ublox::init");
 
-    auto specialized = std::dynamic_pointer_cast<UBLOX_Descriptor>(descriptor);
+    auto specialized = std::dynamic_pointer_cast<uav::UBLOX_Descriptor>(descriptor);
     if (!specialized)
     {
         QLOGE("Wrong descriptor type");
@@ -1148,11 +1148,11 @@ template<class T> auto UBLOX::send_packet_with_retry(Buses& buses, uint16_t msg,
 }
 
 
-auto UBLOX::set_config(std::shared_ptr<INode_Config> config) -> bool
+auto UBLOX::set_config(std::shared_ptr<uav::INode_Config> config) -> bool
 {
     QLOG_TOPIC("ublox::set_config");
 
-    auto specialized = std::dynamic_pointer_cast<UBLOX_Config>(config);
+    auto specialized = std::dynamic_pointer_cast<uav::UBLOX_Config>(config);
     if (!specialized)
     {
         QLOGE("Wrong config type");
@@ -1163,12 +1163,12 @@ auto UBLOX::set_config(std::shared_ptr<INode_Config> config) -> bool
 
     return true;
 }
-auto UBLOX::get_config() const -> std::shared_ptr<INode_Config>
+auto UBLOX::get_config() const -> std::shared_ptr<uav::INode_Config>
 {
     return m_config;
 }
 
-auto UBLOX::get_descriptor() const -> std::shared_ptr<INode_Descriptor>
+auto UBLOX::get_descriptor() const -> std::shared_ptr<uav::INode_Descriptor>
 {
     return m_descriptor;
 }

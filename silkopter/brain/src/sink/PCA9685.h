@@ -8,8 +8,11 @@
 
 namespace silk
 {
+namespace uav
+{
 struct PCA9685_Descriptor;
 struct PCA9685_Config;
+}
 }
 
 
@@ -26,11 +29,11 @@ public:
 
     static const size_t MAX_PWM_CHANNELS = 8;
 
-    bool init(std::shared_ptr<INode_Descriptor> descriptor) override;
-    std::shared_ptr<INode_Descriptor> get_descriptor() const override;
+    bool init(std::shared_ptr<uav::INode_Descriptor> descriptor) override;
+    std::shared_ptr<uav::INode_Descriptor> get_descriptor() const override;
 
-    bool set_config(std::shared_ptr<INode_Config> config) override;
-    std::shared_ptr<INode_Config> get_config() const override;
+    bool set_config(std::shared_ptr<uav::INode_Config> config) override;
+    std::shared_ptr<uav::INode_Config> get_config() const override;
 
     //auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
 
@@ -56,8 +59,8 @@ private:
 
     std::weak_ptr<bus::II2C> m_i2c;
 
-    std::shared_ptr<PCA9685_Descriptor> m_descriptor;
-    std::shared_ptr<PCA9685_Config> m_config;
+    std::shared_ptr<uav::PCA9685_Descriptor> m_descriptor;
+    std::shared_ptr<uav::PCA9685_Config> m_config;
 
     struct PWM_Channel
     {

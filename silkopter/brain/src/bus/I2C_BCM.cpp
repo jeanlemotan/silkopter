@@ -22,7 +22,7 @@ std::mutex I2C_BCM::s_mutex;
 
 
 I2C_BCM::I2C_BCM()
-    : m_descriptor(new I2C_BCM_Descriptor())
+    : m_descriptor(new uav::I2C_BCM_Descriptor())
 {
 }
 
@@ -30,9 +30,9 @@ I2C_BCM::~I2C_BCM()
 {
 }
 
-bool I2C_BCM::init(std::shared_ptr<IBus_Descriptor> descriptor)
+bool I2C_BCM::init(std::shared_ptr<uav::IBus_Descriptor> descriptor)
 {
-    auto specialized = std::dynamic_pointer_cast<I2C_BCM_Descriptor>(descriptor);
+    auto specialized = std::dynamic_pointer_cast<uav::I2C_BCM_Descriptor>(descriptor);
     if (!specialized)
     {
         QLOGE("Wrong descriptor type");
@@ -48,7 +48,7 @@ bool I2C_BCM::init(std::shared_ptr<IBus_Descriptor> descriptor)
     return true;
 }
 
-std::shared_ptr<IBus_Descriptor> I2C_BCM::get_descriptor() const
+std::shared_ptr<uav::IBus_Descriptor> I2C_BCM::get_descriptor() const
 {
     return m_descriptor;
 }

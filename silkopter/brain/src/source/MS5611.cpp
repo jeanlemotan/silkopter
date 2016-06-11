@@ -38,8 +38,8 @@ constexpr uint8_t ADDR_MS5611 = 0x77;
 
 MS5611::MS5611(UAV& uav)
     : m_uav(uav)
-    , m_descriptor(new MS5611_Descriptor())
-    , m_config(new MS5611_Config())
+    , m_descriptor(new uav::MS5611_Descriptor())
+    , m_config(new uav::MS5611_Config())
 {
     m_pressure = std::make_shared<Pressure_Stream>();
     m_temperature = std::make_shared<Temperature_Stream>();
@@ -117,11 +117,11 @@ auto MS5611::get_outputs() const -> std::vector<Output>
     outputs[1].stream = m_temperature;
     return outputs;
 }
-auto MS5611::init(std::shared_ptr<INode_Descriptor> descriptor) -> bool
+auto MS5611::init(std::shared_ptr<uav::INode_Descriptor> descriptor) -> bool
 {
     QLOG_TOPIC("ms5611::init");
 
-    auto specialized = std::dynamic_pointer_cast<MS5611_Descriptor>(descriptor);
+    auto specialized = std::dynamic_pointer_cast<uav::MS5611_Descriptor>(descriptor);
     if (!specialized)
     {
         QLOGE("Wrong descriptor type");
@@ -370,11 +370,11 @@ void MS5611::process()
     }
 }
 
-auto MS5611::set_config(std::shared_ptr<INode_Config> config) -> bool
+auto MS5611::set_config(std::shared_ptr<uav::INode_Config> config) -> bool
 {
     QLOG_TOPIC("ms5611::set_config");
 
-    auto specialized = std::dynamic_pointer_cast<MS5611_Config>(config);
+    auto specialized = std::dynamic_pointer_cast<uav::MS5611_Config>(config);
     if (!specialized)
     {
         QLOGE("Wrong config type");
@@ -384,12 +384,12 @@ auto MS5611::set_config(std::shared_ptr<INode_Config> config) -> bool
     *m_config = *specialized;
     return true;
 }
-auto MS5611::get_config() const -> std::shared_ptr<INode_Config>
+auto MS5611::get_config() const -> std::shared_ptr<uav::INode_Config>
 {
     return m_config;
 }
 
-auto MS5611::get_descriptor() const -> std::shared_ptr<INode_Descriptor>
+auto MS5611::get_descriptor() const -> std::shared_ptr<uav::INode_Descriptor>
 {
     return m_descriptor;
 }

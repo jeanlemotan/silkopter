@@ -11,8 +11,11 @@
 
 namespace silk
 {
+namespace uav
+{
 struct Throttle_To_PWM_Descriptor;
 struct Throttle_To_PWM_Config;
+}
 }
 
 namespace silk
@@ -25,11 +28,11 @@ class Throttle_To_PWM : public IProcessor
 public:
     Throttle_To_PWM(UAV& uav);
 
-    bool init(std::shared_ptr<INode_Descriptor> descriptor) override;
-    std::shared_ptr<INode_Descriptor> get_descriptor() const override;
+    bool init(std::shared_ptr<uav::INode_Descriptor> descriptor) override;
+    std::shared_ptr<uav::INode_Descriptor> get_descriptor() const override;
 
-    bool set_config(std::shared_ptr<INode_Config> config) override;
-    std::shared_ptr<INode_Config> get_config() const override;
+    bool set_config(std::shared_ptr<uav::INode_Config> config) override;
+    std::shared_ptr<uav::INode_Config> get_config() const override;
 
     //auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
 
@@ -46,8 +49,8 @@ private:
 
     UAV& m_uav;
 
-    std::shared_ptr<Throttle_To_PWM_Descriptor> m_descriptor;
-    std::shared_ptr<Throttle_To_PWM_Config> m_config;
+    std::shared_ptr<uav::Throttle_To_PWM_Descriptor> m_descriptor;
+    std::shared_ptr<uav::Throttle_To_PWM_Config> m_config;
 
     std::vector<Sample_Accumulator<stream::IThrottle>> m_accumulators;
 

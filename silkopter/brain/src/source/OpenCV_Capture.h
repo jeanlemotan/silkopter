@@ -8,8 +8,11 @@
 
 namespace silk
 {
+namespace uav
+{
 struct OpenCV_Capture_Descriptor;
 struct OpenCV_Capture_Config;
+}
 }
 
 
@@ -25,11 +28,11 @@ public:
     OpenCV_Capture(UAV& uav);
     ~OpenCV_Capture();
 
-    bool init(std::shared_ptr<INode_Descriptor> descriptor) override;
-    std::shared_ptr<INode_Descriptor> get_descriptor() const override;
+    bool init(std::shared_ptr<uav::INode_Descriptor> descriptor) override;
+    std::shared_ptr<uav::INode_Descriptor> get_descriptor() const override;
 
-    bool set_config(std::shared_ptr<INode_Config> config) override;
-    std::shared_ptr<INode_Config> get_config() const override;
+    bool set_config(std::shared_ptr<uav::INode_Config> config) override;
+    std::shared_ptr<uav::INode_Config> get_config() const override;
 
     //auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
 
@@ -55,8 +58,8 @@ private:
 
     auto init() -> bool;
 
-    std::shared_ptr<OpenCV_Capture_Descriptor> m_descriptor;
-    std::shared_ptr<OpenCV_Capture_Config> m_config;
+    std::shared_ptr<uav::OpenCV_Capture_Descriptor> m_descriptor;
+    std::shared_ptr<uav::OpenCV_Capture_Config> m_config;
 
     void set_active_streams(bool recording, uint32_t quality);
 

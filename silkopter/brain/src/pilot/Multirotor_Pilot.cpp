@@ -12,17 +12,17 @@ namespace node
 Multirotor_Pilot::Multirotor_Pilot(UAV& uav, Comms& comms)
     : m_uav(uav)
     , m_comms(comms)
-    , m_descriptor(new Multirotor_Pilot_Descriptor())
-    , m_config(new Multirotor_Pilot_Config())
+    , m_descriptor(new uav::Multirotor_Pilot_Descriptor())
+    , m_config(new uav::Multirotor_Pilot_Config())
 {
     m_output_stream = std::make_shared<Output_Stream>();
 }
 
-auto Multirotor_Pilot::init(std::shared_ptr<INode_Descriptor> descriptor) -> bool
+auto Multirotor_Pilot::init(std::shared_ptr<uav::INode_Descriptor> descriptor) -> bool
 {
     QLOG_TOPIC("Multirotor_Pilot::init");
 
-    auto specialized = std::dynamic_pointer_cast<Multirotor_Pilot_Descriptor>(descriptor);
+    auto specialized = std::dynamic_pointer_cast<uav::Multirotor_Pilot_Descriptor>(descriptor);
     if (!specialized)
     {
         QLOGE("Wrong descriptor type");
@@ -119,11 +119,11 @@ void Multirotor_Pilot::set_input_stream_path(size_t idx, q::Path const& path)
     }
 }
 
-auto Multirotor_Pilot::set_config(std::shared_ptr<INode_Config> config) -> bool
+auto Multirotor_Pilot::set_config(std::shared_ptr<uav::INode_Config> config) -> bool
 {
     QLOG_TOPIC("Multirotor_Pilot::set_config");
 
-    auto specialized = std::dynamic_pointer_cast<Multirotor_Pilot_Config>(config);
+    auto specialized = std::dynamic_pointer_cast<uav::Multirotor_Pilot_Config>(config);
     if (!specialized)
     {
         QLOGE("Wrong config type");
@@ -134,12 +134,12 @@ auto Multirotor_Pilot::set_config(std::shared_ptr<INode_Config> config) -> bool
 
     return true;
 }
-auto Multirotor_Pilot::get_config() const -> std::shared_ptr<INode_Config>
+auto Multirotor_Pilot::get_config() const -> std::shared_ptr<uav::INode_Config>
 {
     return m_config;
 }
 
-auto Multirotor_Pilot::get_descriptor() const -> std::shared_ptr<INode_Descriptor>
+auto Multirotor_Pilot::get_descriptor() const -> std::shared_ptr<uav::INode_Descriptor>
 {
     return m_descriptor;
 }

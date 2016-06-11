@@ -54,6 +54,7 @@ static ts::Result<void> generate_code(Context& context, ts::ast::Node const& ast
 static ts::Symbol_Path s_namespace;
 static std::string s_extra_include;
 static bool s_enum_hashes = false;
+static std::string s_json_name;
 
 
 int main(int argc, char **argv)
@@ -69,6 +70,7 @@ int main(int argc, char **argv)
         ("ast", "Print the AST")
         ("nice", "Format the AST JSON nicely")
         ("namespace", po::value<std::string>(), "The namespace where to put it all")
+        ("json-name", po::value<std::string>(), "Name of the function that returns the ast json string")
         ("xheader", po::value<std::string>(), "A custom support header that will be included in the generated code files")
         ("enum-hashes", po::value<bool>(), "Serialize enums as hashes instead of strings")
         ("def", po::value<std::string>(&def_filename), "Definition file")
@@ -113,6 +115,7 @@ int main(int argc, char **argv)
     bool show_ast = vm.count("ast") != 0;
     bool nice_json = vm.count("nice") != 0;
     s_namespace = vm.count("namespace") ? ts::Symbol_Path(vm["namespace"].as<std::string>()) : ts::Symbol_Path();
+    s_json_name = vm.count("json-name") ? vm["json-name"].as<std::string>() : std::string();
     s_extra_include = vm.count("xheader") ? vm["xheader"].as<std::string>() : std::string();
     s_enum_hashes = vm.count("enum-hashes") ? vm["enum-hashes"].as<bool>() : false;
 
@@ -162,9 +165,9 @@ int main(int argc, char **argv)
 static void generate_ast_code(Context& context, std::string const& ast_json)
 {
     context.h_file += context.ident_str + "// Returns the ast json from which a ast root node can be serialized\n";
-    context.h_file += context.ident_str + "std::string const& get_ast_json();\n";
+    context.h_file += context.ident_str + "std::string const& " + s_json_name + "();\n";
 
-    context.cpp_file += context.ident_str + "std::string const& get_ast_json()\n";
+    context.cpp_file += context.ident_str + "std::string const& " + s_json_name + "()\n";
     context.cpp_file += context.ident_str + "{\n";
     context.cpp_file += context.ident_str + "  static const std::string s_json = R\"xxx(";
     context.cpp_file += context.ident_str + ast_json;
@@ -180,6 +183,16 @@ static void generate_aux_functions(Context& context)
     context.cpp_file += context.ident_str + "{\n";
     context.cpp_file += context.ident_str + "  return std::min(std::max(v, min), max);\n";
     context.cpp_file += context.ident_str + "}\n";
+    context.cpp_file += context.ident_str + "template <typename T>\n";
+    context.cpp_file += context.ident_str + "T min(T v, T min)\n";
+    context.cpp_file += context.ident_str + "{\n";
+    context.cpp_file += context.ident_str + "  return std::min(v, min);\n";
+    context.cpp_file += context.ident_str + "}\n";
+    context.cpp_file += context.ident_str + "template <typename T>\n";
+    context.cpp_file += context.ident_str + "T max(T v, T max)\n";
+    context.cpp_file += context.ident_str + "{\n";
+    context.cpp_file += context.ident_str + "  return std::max(v, max);\n";
+    context.cpp_file += context.ident_str + "}\n";
 }
 
 static ts::Result<void> generate_declaration_scope_code(Context& context, ts::IDeclaration_Scope const& ds);
@@ -188,33 +201,39 @@ static ts::Symbol_Path get_type_relative_scope_path(ts::IDeclaration_Scope const
 
 static ts::Symbol_Path get_native_type(ts::IDeclaration_Scope const& scope, ts::IType const& type)
 {
-    if (ts::IVariant_Type const* v = dynamic_cast<ts::IVariant_Type const*>(&type))
+    if (ts::IVariant_Type const* t = dynamic_cast<ts::IVariant_Type const*>(&type))
     {
         std::string str = "boost::variant<";
-        for (size_t i = 0; i < v->get_inner_type_count(); i++)
+        for (size_t i = 0; i < t->get_inner_type_count(); i++)
         {
-            std::shared_ptr<const ts::IType> const& inner_type = v->get_inner_type(i);
+            std::shared_ptr<const ts::IType> const& inner_type = t->get_inner_type(i);
             str += scope.get_symbol_path().get_path_to(get_native_type(scope, *inner_type)).to_string() + ",";
         }
         str.pop_back();
         str += ">";
         return ts::Symbol_Path(str);
     }
-    else if (ts::IOptional_Type const* v = dynamic_cast<ts::IOptional_Type const*>(&type))
+    else if (ts::IOptional_Type const* t = dynamic_cast<ts::IOptional_Type const*>(&type))
     {
         std::string str = "boost::optional<";
-        std::shared_ptr<const ts::IType> const& inner_type = v->get_inner_type();
+        std::shared_ptr<const ts::IType> const& inner_type = t->get_inner_type();
         str += scope.get_symbol_path().get_path_to(get_native_type(scope, *inner_type)).to_string();
         str += ">";
         return ts::Symbol_Path(str);
     }
-    else if (ts::IVector_Type const* v = dynamic_cast<ts::IVector_Type const*>(&type))
+    else if (ts::IVector_Type const* t = dynamic_cast<ts::IVector_Type const*>(&type))
     {
-        return ts::Symbol_Path("std::vector<" + get_native_type(scope, *v->get_inner_type()).to_string() + ">");
+        return ts::Symbol_Path("std::vector<" + get_native_type(scope, *t->get_inner_type()).to_string() + ">");
     }
-    else if (ts::IPoly_Type const* v = dynamic_cast<ts::IPoly_Type const*>(&type))
+    else if (ts::IPoly_Type const* t = dynamic_cast<ts::IPoly_Type const*>(&type))
     {
-        return ts::Symbol_Path("std::shared_ptr<" + get_native_type(scope, *v->get_inner_type()).to_string() + ">");
+        return ts::Symbol_Path("std::shared_ptr<" + get_native_type(scope, *t->get_inner_type()).to_string() + ">");
+    }
+    else if (dynamic_cast<ts::IStruct_Type const*>(&type) ||
+             dynamic_cast<ts::IEnum_Type const*>(&type))
+    {
+        //these are defined locally, within s_namespace so make sure they don't have absolute paths
+        return type.get_native_type().to_relative();
     }
 
     return type.get_native_type();
@@ -229,7 +248,7 @@ static ts::Symbol_Path get_type_relative_scope_path(ts::IDeclaration_Scope const
 }
 
 static std::string to_string(bool v) { return v ? "true" : "false"; }
-static std::string to_string(int64_t v) { return std::to_string(v); }
+static std::string to_string(int64_t v) { return std::to_string(v) + "LL"; }
 static std::string to_string(float v) { return std::to_string(v) + "f"; }
 static std::string to_string(double v) { return std::to_string(v); }
 static std::string to_string(ts::vec2f const& v) { return to_string(v.x) + ", " + to_string(v.y); }
@@ -242,7 +261,7 @@ static std::string to_string(ts::vec4f const& v) { return to_string(v.x) + ", " 
 static std::string to_string(ts::vec4d const& v) { return to_string(v.x) + ", " + to_string(v.y) + ", " + to_string(v.z) + ", " + to_string(v.w); }
 static std::string to_string(ts::vec4<int64_t> const& v) { return to_string(v.x) + ", " + to_string(v.y) + ", " + to_string(v.z) + ", " + to_string(v.w); }
 static std::string to_string(std::string const& v) { return v.empty() ? v : "\"" + v + "\""; }
-static std::string to_string(ts::IEnum_Item const& v) { return v.get_symbol_path().to_string(); }
+static std::string to_string(ts::IEnum_Item const& v) { return v.get_symbol_path().to_relative().to_string(); }
 
 
 static std::string to_string(ts::IValue const& value)
@@ -323,20 +342,39 @@ static void generate_member_def_declaration_code(Context& context, ts::IMember_D
             "};\n";
 }
 
+template <typename T, typename Native>
+static std::string generate_scalar_type_clamping_code(Context& context, T const& type)
+{
+    std::string native_type_str = get_type_relative_scope_path(context.parent_scope, type).to_string();
+    if (type.get_min_value() == std::numeric_limits<Native>::lowest() && type.get_max_value() == std::numeric_limits<Native>::max())
+    {
+        return "value";
+    }
+    if (type.get_min_value() == std::numeric_limits<Native>::lowest())
+    {
+        return "min(value, " + native_type_str + "(" + to_string(type.get_max_value()) + "));";
+    }
+    if (type.get_max_value() == std::numeric_limits<Native>::max())
+    {
+        return "max(value, " + native_type_str + "(" + to_string(type.get_min_value()) + "));";
+    }
+    return "clamp(value, " + native_type_str + "(" + to_string(type.get_min_value()) + "), " + native_type_str + "(" + to_string(type.get_max_value()) + "))";
+}
+
 static std::string generate_numeric_type_clamping_code(Context& context, ts::IType const& _type)
 {
     std::string native_type_str = get_type_relative_scope_path(context.parent_scope, _type).to_string();
     if (ts::IInt_Type const* type = dynamic_cast<ts::IInt_Type const*>(&_type))
     {
-        return "clamp(value, " + native_type_str + "(" + to_string(type->get_min_value()) + "), " + native_type_str + "(" + to_string(type->get_max_value()) + "))";
+        return generate_scalar_type_clamping_code<ts::IInt_Type, int64_t>(context, *type);
     }
     if (ts::IFloat_Type const* type = dynamic_cast<ts::IFloat_Type const*>(&_type))
     {
-        return "clamp(value, " + native_type_str + "(" + to_string(type->get_min_value()) + "), " + native_type_str + "(" + to_string(type->get_max_value()) + "))";
+        return generate_scalar_type_clamping_code<ts::IFloat_Type, float>(context, *type);
     }
     if (ts::IDouble_Type const* type = dynamic_cast<ts::IDouble_Type const*>(&_type))
     {
-        return "clamp(value, " + native_type_str + "(" + to_string(type->get_min_value()) + "), " + native_type_str + "(" + to_string(type->get_max_value()) + "))";
+        return generate_scalar_type_clamping_code<ts::IDouble_Type, double>(context, *type);
     }
     if (ts::IVec2f_Type const* type = dynamic_cast<ts::IVec2f_Type const*>(&_type))
     {
@@ -574,9 +612,9 @@ static ts::Result<void> generate_enum_type_serialization_code(Context& context, 
 
         context.serialization_section_h += "ts::Result<ts::serialization::Value> serialize(" + native_type_str + " const& value);\n";
         context.serialization_section_cpp += "ts::Result<ts::serialization::Value> serialize(" + native_type_str + " const& value)\n"
-                                                                                                                   "{\n"
-                                                                                                                   "  typedef " + native_type_str + " _etype;\n"
-                                                                                                                                                    "  static std::map<_etype, uint32_t> s_map = {\n";
+                                             "{\n"
+                                             "  typedef " + native_type_str + " _etype;\n"
+                                                                                                                                                "  static std::map<_etype, uint32_t> s_map = {\n";
         for (size_t i = 0; i < type.get_item_count(); i++)
         {
             std::string const& item_str = type.get_item(i)->get_name();
@@ -830,7 +868,7 @@ static ts::Result<void> generate_optional_type_code(Context& context, ts::IOptio
     context.serialization_section_h += "ts::Result<ts::serialization::Value> serialize(" + native_type_str + " const& value);\n";
     context.serialization_section_cpp += "ts::Result<ts::serialization::Value> serialize(" + native_type_str + " const& value)\n"
                                          "{\n"
-                                         "  if (!value) { return ts::serialization::Value sz_value(ts::serialization::Value::Type::EMPTY); }\n"
+                                         "  if (!value) { return ts::serialization::Value(ts::serialization::Value::Type::EMPTY); }\n"
                                          "  return serialize(*value);\n"
                                          "}\n";
     return ts::success;
@@ -1201,8 +1239,11 @@ static ts::Result<void> generate_code(Context& context, ts::ast::Node const& ast
         }
     }
 
-    std::string ast_json = ts::serialization::to_json(serialize_result.payload(), false);
-    generate_ast_code(context, ast_json);
+    if (!s_json_name.empty())
+    {
+        std::string ast_json = ts::serialization::to_json(serialize_result.payload(), false);
+        generate_ast_code(context, ast_json);
+    }
 
     auto result = generate_declaration_scope_code(context, ts);
     if (result != ts::success)
@@ -1213,7 +1254,7 @@ static ts::Result<void> generate_code(Context& context, ts::ast::Node const& ast
     context.h_file += context.serialization_section_h;
     context.cpp_file += context.serialization_section_cpp;
 
-    if (!s_namespace.empty())
+    for (size_t i = 0; i < s_namespace.get_count(); i++)
     {
         context.h_file += "}\n";
         context.cpp_file += "}\n";

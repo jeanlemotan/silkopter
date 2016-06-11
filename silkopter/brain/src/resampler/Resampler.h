@@ -23,11 +23,11 @@ public:
 
     Resampler(UAV& uav);
 
-    bool init(std::shared_ptr<INode_Descriptor> descriptor) override;
-    std::shared_ptr<INode_Descriptor> get_descriptor() const override;
+    bool init(std::shared_ptr<uav::INode_Descriptor> descriptor) override;
+    std::shared_ptr<uav::INode_Descriptor> get_descriptor() const override;
 
-    bool set_config(std::shared_ptr<INode_Config> config) override;
-    std::shared_ptr<INode_Config> get_config() const override;
+    bool set_config(std::shared_ptr<uav::INode_Config> config) override;
+    std::shared_ptr<uav::INode_Config> get_config() const override;
 
     //auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
 
@@ -45,8 +45,8 @@ private:
 
     UAV& m_uav;
 
-    std::shared_ptr<Resampler_Descriptor> m_descriptor;
-    std::shared_ptr<Resampler_Config> m_config;
+    std::shared_ptr<uav::Resampler_Descriptor> m_descriptor;
+    std::shared_ptr<uav::Resampler_Config> m_config;
 
     Sample_Accumulator<Stream_t> m_accumulator;
 
@@ -115,11 +115,11 @@ Resampler<Stream_t>::Resampler(UAV& uav)
 }
 
 template<class Stream_t>
-auto Resampler<Stream_t>::init(std::shared_ptr<INode_Descriptor> descriptor) -> bool
+auto Resampler<Stream_t>::init(std::shared_ptr<uav::INode_Descriptor> descriptor) -> bool
 {
     QLOG_TOPIC("resampler::init");
 
-    auto specialized = std::dynamic_pointer_cast<Resampler_Descriptor>(descriptor);
+    auto specialized = std::dynamic_pointer_cast<uav::Resampler_Descriptor>(descriptor);
     if (!specialized)
     {
         QLOGE("Wrong descriptor type");
@@ -141,7 +141,7 @@ auto Resampler<Stream_t>::init() -> bool
 }
 
 template<class Stream_t>
-auto Resampler<Stream_t>::get_descriptor() const -> std::shared_ptr<INode_Descriptor>
+auto Resampler<Stream_t>::get_descriptor() const -> std::shared_ptr<uav::INode_Descriptor>
 {
     return m_descriptor;
 }
@@ -153,11 +153,11 @@ void Resampler<Stream_t>::set_input_stream_path(size_t idx, q::Path const& path)
 }
 
 template<class Stream_t>
-auto Resampler<Stream_t>::set_config(std::shared_ptr<INode_Config> config) -> bool
+auto Resampler<Stream_t>::set_config(std::shared_ptr<uav::INode_Config> config) -> bool
 {
     QLOG_TOPIC("resampler::set_config");
 
-    auto specialized = std::dynamic_pointer_cast<Resampler_Config>(config);
+    auto specialized = std::dynamic_pointer_cast<uav::Resampler_Config>(config);
     if (!specialized)
     {
         QLOGE("Wrong config type");
@@ -172,7 +172,7 @@ auto Resampler<Stream_t>::set_config(std::shared_ptr<INode_Config> config) -> bo
     uint32_t filter_rate = math::max(output_rate, input_rate);
     float max_cutoff = math::min(output_rate / 2.f, input_rate / 2.f);
 
-    LPF_Config& lpf_config = m_config->get_lpf();
+    uav::LPF_Config& lpf_config = m_config->get_lpf();
 
     if (math::is_zero(lpf_config.get_cutoff_frequency()))
     {
@@ -194,7 +194,7 @@ auto Resampler<Stream_t>::set_config(std::shared_ptr<INode_Config> config) -> bo
 //    return rapidjson::Document();
 //}
 template<class Stream_t>
-auto Resampler<Stream_t>::get_config() const -> std::shared_ptr<INode_Config>
+auto Resampler<Stream_t>::get_config() const -> std::shared_ptr<uav::INode_Config>
 {
     return m_config;
 }

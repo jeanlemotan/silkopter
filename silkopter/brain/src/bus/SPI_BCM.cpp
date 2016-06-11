@@ -23,7 +23,7 @@ std::mutex SPI_BCM::s_mutex;
 
 
 SPI_BCM::SPI_BCM()
-    : m_descriptor(new SPI_BCM_Descriptor())
+    : m_descriptor(new uav::SPI_BCM_Descriptor())
 {
 }
 
@@ -31,9 +31,9 @@ SPI_BCM::~SPI_BCM()
 {
 }
 
-bool SPI_BCM::init(std::shared_ptr<IBus_Descriptor> descriptor)
+bool SPI_BCM::init(std::shared_ptr<uav::IBus_Descriptor> descriptor)
 {
-    auto specialized = std::dynamic_pointer_cast<SPI_BCM_Descriptor>(descriptor);
+    auto specialized = std::dynamic_pointer_cast<uav::SPI_BCM_Descriptor>(descriptor);
     if (!specialized)
     {
         QLOGE("Wrong descriptor type");
@@ -49,7 +49,7 @@ bool SPI_BCM::init(std::shared_ptr<IBus_Descriptor> descriptor)
     return true;
 }
 
-std::shared_ptr<IBus_Descriptor> SPI_BCM::get_descriptor() const
+std::shared_ptr<uav::IBus_Descriptor> SPI_BCM::get_descriptor() const
 {
     return m_descriptor;
 }

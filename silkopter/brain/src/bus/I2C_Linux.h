@@ -4,7 +4,10 @@
 
 namespace silk
 {
+namespace uav
+{
 struct I2C_Linux_Descriptor;
+}
 }
 
 namespace silk
@@ -18,8 +21,8 @@ public:
     I2C_Linux();
     ~I2C_Linux();
 
-    bool init(std::shared_ptr<IBus_Descriptor> descriptor) override;
-    std::shared_ptr<IBus_Descriptor> get_descriptor() const override;
+    bool init(std::shared_ptr<uav::IBus_Descriptor> descriptor) override;
+    std::shared_ptr<uav::IBus_Descriptor> get_descriptor() const override;
 
     void close();
 
@@ -36,7 +39,7 @@ public:
 private:
     bool init(std::string const& dev);
 
-    std::shared_ptr<I2C_Linux_Descriptor> m_descriptor;
+    std::shared_ptr<uav::I2C_Linux_Descriptor> m_descriptor;
 
     int m_fd = -1;
     std::recursive_mutex m_mutex;

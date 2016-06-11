@@ -9,9 +9,6 @@ alias uint32_t = int : [ min = 0, max = 4294967295, native_type = "uint32_t" ];
 alias ufloat = float : [ min = 0.f ];
 
 
-namespace silk
-{
-
 alias muf_t = float : [ min = 0.f, max = 1.f ];
 alias direction_t = math::vec3f;// : [ normalized = true ];
 alias euler_t = float : [ min = -180.f, max = 180.f ];
@@ -1005,5 +1002,4 @@ struct Vec3_Generator_Config : public INode_Config
     math::vec3f value : [ ui_name = "Value" ];
 };
 
-}
 

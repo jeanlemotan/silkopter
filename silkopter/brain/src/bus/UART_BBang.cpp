@@ -16,7 +16,7 @@ namespace bus
 {
 
 UART_BBang::UART_BBang()
-    : m_descriptor(new UART_BBang_Descriptor())
+    : m_descriptor(new uav::UART_BBang_Descriptor())
 {
 }
 
@@ -25,9 +25,9 @@ UART_BBang::~UART_BBang()
     close();
 }
 
-bool UART_BBang::init(std::shared_ptr<IBus_Descriptor> descriptor)
+bool UART_BBang::init(std::shared_ptr<uav::IBus_Descriptor> descriptor)
 {
-    auto specialized = std::dynamic_pointer_cast<UART_BBang_Descriptor>(descriptor);
+    auto specialized = std::dynamic_pointer_cast<uav::UART_BBang_Descriptor>(descriptor);
     if (!specialized)
     {
         QLOGE("Wrong descriptor type");
@@ -43,7 +43,7 @@ bool UART_BBang::init(std::shared_ptr<IBus_Descriptor> descriptor)
     return true;
 }
 
-std::shared_ptr<IBus_Descriptor> UART_BBang::get_descriptor() const
+std::shared_ptr<uav::IBus_Descriptor> UART_BBang::get_descriptor() const
 {
     return m_descriptor;
 }

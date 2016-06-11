@@ -125,8 +125,8 @@ constexpr uint8_t CONVERT_ADC1           = 0x16;
 
 RC5T619::RC5T619(UAV& uav)
     : m_uav(uav)
-    , m_descriptor(new RC5T619_Descriptor())
-    , m_config(new RC5T619_Config())
+    , m_descriptor(new uav::RC5T619_Descriptor())
+    , m_config(new uav::RC5T619_Config())
 {
     m_adc[0] = std::make_shared<Stream>();
     m_adc[1] = std::make_shared<Stream>();
@@ -141,11 +141,11 @@ auto RC5T619::get_outputs() const -> std::vector<Output>
     outputs[1].stream = m_adc[1];
     return outputs;
 }
-auto RC5T619::init(std::shared_ptr<INode_Descriptor> descriptor) -> bool
+auto RC5T619::init(std::shared_ptr<uav::INode_Descriptor> descriptor) -> bool
 {
     QLOG_TOPIC("rc5t619::init");
 
-    auto specialized = std::dynamic_pointer_cast<RC5T619_Descriptor>(descriptor);
+    auto specialized = std::dynamic_pointer_cast<uav::RC5T619_Descriptor>(descriptor);
     if (!specialized)
     {
         QLOGE("Wrong descriptor type");
@@ -302,11 +302,11 @@ void RC5T619::process()
     }
 }
 
-auto RC5T619::set_config(std::shared_ptr<INode_Config> config) -> bool
+auto RC5T619::set_config(std::shared_ptr<uav::INode_Config> config) -> bool
 {
     QLOG_TOPIC("rc5t619::set_config");
 
-    auto specialized = std::dynamic_pointer_cast<RC5T619_Config>(config);
+    auto specialized = std::dynamic_pointer_cast<uav::RC5T619_Config>(config);
     if (!specialized)
     {
         QLOGE("Wrong config type");
@@ -316,12 +316,12 @@ auto RC5T619::set_config(std::shared_ptr<INode_Config> config) -> bool
     *m_config = *specialized;
     return true;
 }
-auto RC5T619::get_config() const -> std::shared_ptr<INode_Config>
+auto RC5T619::get_config() const -> std::shared_ptr<uav::INode_Config>
 {
     return m_config;
 }
 
-auto RC5T619::get_descriptor() const -> std::shared_ptr<INode_Descriptor>
+auto RC5T619::get_descriptor() const -> std::shared_ptr<uav::INode_Descriptor>
 {
     return m_descriptor;
 }

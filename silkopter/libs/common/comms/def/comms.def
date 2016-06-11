@@ -1,5 +1,3 @@
-//import "types.def"
-
 alias int8_t = int : [ min = -128, max = 127, native_type = "int8_t" ];
 alias uint8_t = int : [ min = 0, max = 255, native_type = "uint8_t" ];
 alias int16_t = int : [ min = -32768, max = 32767, native_type = "int16_t" ];
@@ -10,9 +8,7 @@ alias int64_t = int ;
 alias ufloat = float : [ min = 0.f ];
 
 
-namespace silk
-{
-namespace comms
+namespace setup
 {
 
 alias time_ms_t = int64_t;
@@ -170,4 +166,4 @@ struct Remove_Node_Res
 };
 
 }
-}
+

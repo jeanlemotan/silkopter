@@ -12,8 +12,11 @@
 
 namespace silk
 {
+namespace uav
+{
 struct Rate_Controller_Descriptor;
 struct Rate_Controller_Config;
+}
 }
 
 
@@ -28,11 +31,11 @@ class Rate_Controller : public IController
 public:
     Rate_Controller(UAV& uav);
 
-    bool init(std::shared_ptr<INode_Descriptor> descriptor) override;
-    std::shared_ptr<INode_Descriptor> get_descriptor() const override;
+    bool init(std::shared_ptr<uav::INode_Descriptor> descriptor) override;
+    std::shared_ptr<uav::INode_Descriptor> get_descriptor() const override;
 
-    bool set_config(std::shared_ptr<INode_Config> config) override;
-    std::shared_ptr<INode_Config> get_config() const override;
+    bool set_config(std::shared_ptr<uav::INode_Config> config) override;
+    std::shared_ptr<uav::INode_Config> get_config() const override;
 
     //auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
 
@@ -49,12 +52,12 @@ private:
 
     UAV& m_uav;
 
-    std::shared_ptr<Rate_Controller_Descriptor> m_descriptor;
-    std::shared_ptr<Rate_Controller_Config> m_config;
+    std::shared_ptr<uav::Rate_Controller_Descriptor> m_descriptor;
+    std::shared_ptr<uav::Rate_Controller_Config> m_config;
 
     Sample_Accumulator<stream::IAngular_Velocity, stream::IAngular_Velocity> m_accumulator;
 
-    math::vec3f compute_feedforward(const Multirotor_Descriptor& multirotor_descriptor, stream::IAngular_Velocity::Value const& input, stream::IAngular_Velocity::Value const& target);
+    math::vec3f compute_feedforward(const uav::Multirotor_Descriptor& multirotor_descriptor, stream::IAngular_Velocity::Value const& input, stream::IAngular_Velocity::Value const& target);
     math::vec3f compute_feedback(stream::IAngular_Velocity::Value const& input, stream::IAngular_Velocity::Value const& target);
 
     typedef util::PID<float, float, float> PID;

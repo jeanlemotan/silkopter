@@ -54,8 +54,8 @@ struct OpenCV_Capture::Impl
 
 OpenCV_Capture::OpenCV_Capture(UAV& uav)
     : m_uav(uav)
-    , m_descriptor(new OpenCV_Capture_Descriptor())
-    , m_config(new OpenCV_Capture_Config())
+    , m_descriptor(new uav::OpenCV_Capture_Descriptor())
+    , m_config(new uav::OpenCV_Capture_Config())
 {
     QLOG_TOPIC("OpenCV_Capture");
 #if !defined RASPBERRY_PI
@@ -100,11 +100,11 @@ auto OpenCV_Capture::get_outputs() const -> std::vector<Output>
     return outputs;
 }
 
-auto OpenCV_Capture::init(std::shared_ptr<INode_Descriptor> descriptor) -> bool
+auto OpenCV_Capture::init(std::shared_ptr<uav::INode_Descriptor> descriptor) -> bool
 {
     QLOG_TOPIC("OpenCV_Capture::init");
 
-    auto specialized = std::dynamic_pointer_cast<OpenCV_Capture_Descriptor>(descriptor);
+    auto specialized = std::dynamic_pointer_cast<uav::OpenCV_Capture_Descriptor>(descriptor);
     if (!specialized)
     {
         QLOGE("Wrong descriptor type");
@@ -151,9 +151,9 @@ auto OpenCV_Capture::start(q::Clock::time_point tp) -> bool
 }
 
 
-auto OpenCV_Capture::set_config(std::shared_ptr<INode_Config> config) -> bool
+auto OpenCV_Capture::set_config(std::shared_ptr<uav::INode_Config> config) -> bool
 {
-    auto specialized = std::dynamic_pointer_cast<OpenCV_Capture_Config>(config);
+    auto specialized = std::dynamic_pointer_cast<uav::OpenCV_Capture_Config>(config);
     if (!specialized)
     {
         QLOGE("Wrong config type");
@@ -166,12 +166,12 @@ auto OpenCV_Capture::set_config(std::shared_ptr<INode_Config> config) -> bool
 
     return true;
 }
-auto OpenCV_Capture::get_config() const -> std::shared_ptr<INode_Config>
+auto OpenCV_Capture::get_config() const -> std::shared_ptr<uav::INode_Config>
 {
     return m_config;
 }
 
-auto OpenCV_Capture::get_descriptor() const -> std::shared_ptr<INode_Descriptor>
+auto OpenCV_Capture::get_descriptor() const -> std::shared_ptr<uav::INode_Descriptor>
 {
     return m_descriptor;
 }

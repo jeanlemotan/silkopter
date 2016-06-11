@@ -27,7 +27,7 @@ namespace node
 
 struct PIGPIO::Channel
 {
-    std::shared_ptr<const PIGPIO_Config::IChannel> config;
+    std::shared_ptr<const uav::PIGPIO_Config::IChannel> config;
     bool is_servo = false;
     uint32_t rate = 0;
     uint32_t gpio = 0;
@@ -38,8 +38,8 @@ struct PIGPIO::Channel
 
 PIGPIO::PIGPIO(UAV& uav)
     : m_uav(uav)
-    , m_descriptor(new PIGPIO_Descriptor())
-    , m_config(new PIGPIO_Config())
+    , m_descriptor(new uav::PIGPIO_Descriptor())
+    , m_config(new uav::PIGPIO_Config())
 {
 }
 
@@ -59,11 +59,11 @@ auto PIGPIO::get_inputs() const -> std::vector<Input>
 }
 
 
-auto PIGPIO::init(std::shared_ptr<INode_Descriptor> descriptor) -> bool
+auto PIGPIO::init(std::shared_ptr<uav::INode_Descriptor> descriptor) -> bool
 {
     QLOG_TOPIC("pigpio::init");
 
-    auto specialized = std::dynamic_pointer_cast<PIGPIO_Descriptor>(descriptor);
+    auto specialized = std::dynamic_pointer_cast<uav::PIGPIO_Descriptor>(descriptor);
     if (specialized)
     {
         QLOGE("Wrong descriptor type");
@@ -77,7 +77,7 @@ auto PIGPIO::init() -> bool
 {
 #define SETUP_CHANNEL(GPIO)\
     {\
-        PIGPIO_Descriptor::Channel const& channel_descriptor = m_descriptor->get_gpio_##GPIO();\
+        uav::PIGPIO_Descriptor::Channel const& channel_descriptor = m_descriptor->get_gpio_##GPIO();\
         if (channel_descriptor.get_enabled())\
         {\
             Channel ch;\
@@ -86,11 +86,11 @@ auto PIGPIO::init() -> bool
             ch.gpio = GPIO;\
             if (ch.is_servo)\
             {\
-                m_config->set_gpio_##GPIO(std::shared_ptr<PIGPIO_Config::IChannel>(new PIGPIO_Config::Servo_Channel));\
+                m_config->set_gpio_##GPIO(std::shared_ptr<uav::PIGPIO_Config::IChannel>(new uav::PIGPIO_Config::Servo_Channel));\
             }\
             else\
             {\
-                m_config->set_gpio_##GPIO(std::shared_ptr<PIGPIO_Config::IChannel>(new PIGPIO_Config::PWM_Channel));\
+                m_config->set_gpio_##GPIO(std::shared_ptr<uav::PIGPIO_Config::IChannel>(new uav::PIGPIO_Config::PWM_Channel));\
             }\
             ch.config = m_config->get_gpio_##GPIO();\
             m_channels.emplace_back(new Channel(ch));\
@@ -290,11 +290,11 @@ void PIGPIO::set_input_stream_path(size_t idx, q::Path const& path)
 }
 
 
-auto PIGPIO::set_config(std::shared_ptr<INode_Config> config) -> bool
+auto PIGPIO::set_config(std::shared_ptr<uav::INode_Config> config) -> bool
 {
     QLOG_TOPIC("pigpio::set_config");
 
-    auto specialized = std::dynamic_pointer_cast<PIGPIO_Config>(config);
+    auto specialized = std::dynamic_pointer_cast<uav::PIGPIO_Config>(config);
     if (!specialized)
     {
         QLOGE("Wrong config type");
@@ -305,12 +305,12 @@ auto PIGPIO::set_config(std::shared_ptr<INode_Config> config) -> bool
 
     return true;
 }
-auto PIGPIO::get_config() const -> std::shared_ptr<INode_Config>
+auto PIGPIO::get_config() const -> std::shared_ptr<uav::INode_Config>
 {
     return m_config;
 }
 
-auto PIGPIO::get_descriptor() const -> std::shared_ptr<INode_Descriptor>
+auto PIGPIO::get_descriptor() const -> std::shared_ptr<uav::INode_Descriptor>
 {
     return m_descriptor;
 }

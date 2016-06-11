@@ -12,8 +12,11 @@
 
 namespace silk
 {
+namespace uav
+{
 struct MS5611_Descriptor;
 struct MS5611_Config;
+}
 }
 
 
@@ -27,11 +30,11 @@ class MS5611 : public ISource
 public:
     MS5611(UAV& uav);
 
-    bool init(std::shared_ptr<INode_Descriptor> descriptor) override;
-    std::shared_ptr<INode_Descriptor> get_descriptor() const override;
+    bool init(std::shared_ptr<uav::INode_Descriptor> descriptor) override;
+    std::shared_ptr<uav::INode_Descriptor> get_descriptor() const override;
 
-    bool set_config(std::shared_ptr<INode_Config> config) override;
-    std::shared_ptr<INode_Config> get_config() const override;
+    bool set_config(std::shared_ptr<uav::INode_Config> config) override;
+    std::shared_ptr<uav::INode_Config> get_config() const override;
 
     //auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
 
@@ -61,8 +64,8 @@ private:
     auto bus_read_u16(Buses& buses, uint8_t reg, uint16_t& dst) -> bool;
     auto bus_write(Buses& buses, uint8_t data) -> bool;
 
-    std::shared_ptr<MS5611_Descriptor> m_descriptor;
-    std::shared_ptr<MS5611_Config> m_config;
+    std::shared_ptr<uav::MS5611_Descriptor> m_descriptor;
+    std::shared_ptr<uav::MS5611_Config> m_config;
 
     template<class Base>
     struct Common : public Base

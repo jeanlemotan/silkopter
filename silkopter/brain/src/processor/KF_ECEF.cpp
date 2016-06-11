@@ -98,19 +98,19 @@ void KF_ECEF::Delayer<Value>::push_back(Value const& value)
 
 KF_ECEF::KF_ECEF(UAV& uav)
     : m_uav(uav)
-    , m_descriptor(new KF_ECEF_Descriptor())
-    , m_config(new KF_ECEF_Config())
+    , m_descriptor(new uav::KF_ECEF_Descriptor())
+    , m_config(new uav::KF_ECEF_Config())
 {
     m_position_output_stream = std::make_shared<Position_Output_Stream>();
     m_velocity_output_stream = std::make_shared<Velocity_Output_Stream>();
     m_linear_acceleration_output_stream = std::make_shared<Linear_Acceleration_Output_Stream>();
 }
 
-auto KF_ECEF::init(std::shared_ptr<INode_Descriptor> descriptor) -> bool
+auto KF_ECEF::init(std::shared_ptr<uav::INode_Descriptor> descriptor) -> bool
 {
     QLOG_TOPIC("KF_ECEF::init");
 
-    auto specialized = std::dynamic_pointer_cast<KF_ECEF_Descriptor>(descriptor);
+    auto specialized = std::dynamic_pointer_cast<uav::KF_ECEF_Descriptor>(descriptor);
     if (!specialized)
     {
         QLOGE("Wrong descriptor type");
@@ -261,11 +261,11 @@ void KF_ECEF::set_input_stream_path(size_t idx, q::Path const& path)
     m_accumulator.set_stream_path(idx, path, m_descriptor->get_rate(), m_uav);
 }
 
-auto KF_ECEF::set_config(std::shared_ptr<INode_Config> config) -> bool
+auto KF_ECEF::set_config(std::shared_ptr<uav::INode_Config> config) -> bool
 {
     QLOG_TOPIC("KF_ECEF::set_config");
 
-    auto specialized = std::dynamic_pointer_cast<KF_ECEF_Config>(config);
+    auto specialized = std::dynamic_pointer_cast<uav::KF_ECEF_Config>(config);
     if (!specialized)
     {
         QLOGE("Wrong config type");
@@ -291,12 +291,12 @@ auto KF_ECEF::set_config(std::shared_ptr<INode_Config> config) -> bool
 
     return true;
 }
-auto KF_ECEF::get_config() const -> std::shared_ptr<INode_Config>
+auto KF_ECEF::get_config() const -> std::shared_ptr<uav::INode_Config>
 {
     return m_config;
 }
 
-auto KF_ECEF::get_descriptor() const -> std::shared_ptr<INode_Descriptor>
+auto KF_ECEF::get_descriptor() const -> std::shared_ptr<uav::INode_Descriptor>
 {
     return m_descriptor;
 }

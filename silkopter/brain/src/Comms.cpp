@@ -30,11 +30,12 @@
 
 #include "common/node/IBrain.h"
 
-
 #include "utils/RCP.h"
 #include "utils/RCP_UDP_Socket.h"
 #include "utils/RCP_RFMON_Socket.h"
 #include "utils/Channel.h"
+
+#include "comms.def.h"
 
 using namespace silk;
 using namespace boost::asio;

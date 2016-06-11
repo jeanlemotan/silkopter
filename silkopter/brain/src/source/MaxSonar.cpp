@@ -14,8 +14,8 @@ namespace node
 
 MaxSonar::MaxSonar(UAV& uav)
     : m_uav(uav)
-    , m_descriptor(new MaxSonar_Descriptor())
-    , m_config(new MaxSonar_Config())
+    , m_descriptor(new uav::MaxSonar_Descriptor())
+    , m_config(new uav::MaxSonar_Config())
 {
     m_config->set_direction(math::vec3f(0, 0, -1)); //pointing down
 
@@ -29,11 +29,11 @@ auto MaxSonar::get_outputs() const -> std::vector<Output>
     outputs[0].stream = m_output_stream;
     return outputs;
 }
-auto MaxSonar::init(std::shared_ptr<INode_Descriptor> descriptor) -> bool
+auto MaxSonar::init(std::shared_ptr<uav::INode_Descriptor> descriptor) -> bool
 {
     QLOG_TOPIC("MaxSonar::init");
 
-    auto specialized = std::dynamic_pointer_cast<MaxSonar_Descriptor>(descriptor);
+    auto specialized = std::dynamic_pointer_cast<uav::MaxSonar_Descriptor>(descriptor);
     if (!specialized)
     {
         QLOGE("Wrong descriptor type");
@@ -155,11 +155,11 @@ void MaxSonar::process()
     }
 }
 
-auto MaxSonar::set_config(std::shared_ptr<INode_Config> config) -> bool
+auto MaxSonar::set_config(std::shared_ptr<uav::INode_Config> config) -> bool
 {
     QLOG_TOPIC("MaxSonar::set_config");
 
-    auto specialized = std::dynamic_pointer_cast<MaxSonar_Config>(config);
+    auto specialized = std::dynamic_pointer_cast<uav::MaxSonar_Config>(config);
     if (!specialized)
     {
         QLOGE("Wrong config type");
@@ -176,12 +176,12 @@ auto MaxSonar::set_config(std::shared_ptr<INode_Config> config) -> bool
 
     return true;
 }
-auto MaxSonar::get_config() const -> std::shared_ptr<INode_Config>
+auto MaxSonar::get_config() const -> std::shared_ptr<uav::INode_Config>
 {
     return m_config;
 }
 
-auto MaxSonar::get_descriptor() const -> std::shared_ptr<INode_Descriptor>
+auto MaxSonar::get_descriptor() const -> std::shared_ptr<uav::INode_Descriptor>
 {
     return m_descriptor;
 }

@@ -4,25 +4,22 @@ T clamp(T v, T min, T max)
 {
   return std::min(std::max(v, min), max);
 }
-std::string const& get_ast_json()
-{
-  static const std::string s_json = R"xxx({"type":1,"children":[{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"int8_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"int"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":-128}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":127}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"native_type"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"int8_t"}]}]}]}]},{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"uint8_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"int"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":0}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":255}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"native_type"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"uint8_t"}]}]}]}]},{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"int16_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"int"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":-32768}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":32767}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"native_type"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"int16_t"}]}]}]}]},{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"uint16_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"int"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":0}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":65535}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"native_type"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"uint16_t"}]}]}]}]},{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"int32_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"int"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":-2147483648}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":2147483647}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"native_type"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"int32_t"}]}]}]}]},{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"uint32_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"int"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":0}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"max"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":4294967295}]}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"native_type"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":0,"value":"uint32_t"}]}]}]}]},{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"int64_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"int"}]}]}]},{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"ufloat"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"float"}]}]},{"type":21,"children":[{"type":6,"attributes":[{"type":0,"value":"min"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":3,"value":0.000000}]}]}]}]},{"type":10,"children":[{"type":6,"attributes":[{"type":0,"value":"silk"}]},{"type":11,"children":[{"type":10,"children":[{"type":6,"attributes":[{"type":0,"value":"comms"}]},{"type":11,"children":[{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"time_ms_t"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"int64_t"}]}]}]},{"type":12,"children":[{"type":6,"attributes":[{"type":0,"value":"serialized_data"}]},{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"string"}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Set_Clock_Req"}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"time_ms_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"time"}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Set_Clock_Res"}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"time_ms_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"time"}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Set_UAV_Descriptor_Req"}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"serialized_data"}]}]},{"type":6,"attributes":[{"type":0,"value":"data"}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Set_UAV_Descriptor_Res"}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"serialized_data"}]}]},{"type":6,"attributes":[{"type":0,"value":"data"}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Get_UAV_Descriptor_Req"}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Get_UAV_Descriptor_Res"}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"serialized_data"}]}]},{"type":6,"attributes":[{"type":0,"value":"data"}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Def_Data"}]},{"type":14,"children":[{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Input"}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"string"}]}]},{"type":6,"attributes":[{"type":0,"value":"name"}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"string"}]}]},{"type":6,"attributes":[{"type":0,"value":"type"}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"uint32_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"rate"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":0}]}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Output"}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"string"}]}]},{"type":6,"attributes":[{"type":0,"value":"name"}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"string"}]}]},{"type":6,"attributes":[{"type":0,"value":"type"}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"uint32_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"rate"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":0}]}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"string"}]}]},{"type":6,"attributes":[{"type":0,"value":"name"}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"string"}]}]},{"type":6,"attributes":[{"type":0,"value":"type"}]}]},{"type":18,"children":[{"type":3,"children":[{"type":8,"children":[{"type":6,"attributes":[{"type":0,"value":"vector"}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Input"}]}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"inputs"}]}]},{"type":18,"children":[{"type":3,"children":[{"type":8,"children":[{"type":6,"attributes":[{"type":0,"value":"vector"}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Output"}]}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"outputs"}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"serialized_data"}]}]},{"type":6,"attributes":[{"type":0,"value":"descriptor_data"}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Get_Node_Defs_Req"}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Get_Node_Defs_Res"}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":8,"children":[{"type":6,"attributes":[{"type":0,"value":"vector"}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Def_Data"}]}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"node_def_datas"}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Data"}]},{"type":14,"children":[{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Input"}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"string"}]}]},{"type":6,"attributes":[{"type":0,"value":"name"}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"string"}]}]},{"type":6,"attributes":[{"type":0,"value":"type"}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"uint32_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"rate"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":0}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"string"}]}]},{"type":6,"attributes":[{"type":0,"value":"stream_path"}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Output"}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"string"}]}]},{"type":6,"attributes":[{"type":0,"value":"name"}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"string"}]}]},{"type":6,"attributes":[{"type":0,"value":"type"}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"uint32_t"}]}]},{"type":6,"attributes":[{"type":0,"value":"rate"}]},{"type":20,"children":[{"type":4,"attributes":[{"type":2,"value":0}]}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"string"}]}]},{"type":6,"attributes":[{"type":0,"value":"name"}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"string"}]}]},{"type":6,"attributes":[{"type":0,"value":"type"}]}]},{"type":18,"children":[{"type":3,"children":[{"type":8,"children":[{"type":6,"attributes":[{"type":0,"value":"vector"}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Input"}]}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"inputs"}]}]},{"type":18,"children":[{"type":3,"children":[{"type":8,"children":[{"type":6,"attributes":[{"type":0,"value":"vector"}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Output"}]}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"outputs"}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"serialized_data"}]}]},{"type":6,"attributes":[{"type":0,"value":"descriptor_data"}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"serialized_data"}]}]},{"type":6,"attributes":[{"type":0,"value":"config_data"}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Get_Nodes_Req"}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"string"}]}]},{"type":6,"attributes":[{"type":0,"value":"name"}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Get_Nodes_Res"}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":8,"children":[{"type":6,"attributes":[{"type":0,"value":"vector"}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Data"}]}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"node_datas"}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Set_Node_Input_Stream_Path_Req"}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"string"}]}]},{"type":6,"attributes":[{"type":0,"value":"node_name"}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"string"}]}]},{"type":6,"attributes":[{"type":0,"value":"input_name"}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"string"}]}]},{"type":6,"attributes":[{"type":0,"value":"stream_path"}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Set_Node_Input_Stream_Path_Res"}]},{"type":14,"children":[{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Error"}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"string"}]}]},{"type":6,"attributes":[{"type":0,"value":"message"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":8,"children":[{"type":6,"attributes":[{"type":0,"value":"variant"}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Data"}]}]}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Error"}]}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"result"}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Add_Node_Req"}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"string"}]}]},{"type":6,"attributes":[{"type":0,"value":"def_name"}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"string"}]}]},{"type":6,"attributes":[{"type":0,"value":"name"}]}]},{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"serialized_data"}]}]},{"type":6,"attributes":[{"type":0,"value":"descriptor_data"}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Add_Node_Res"}]},{"type":14,"children":[{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Error"}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"string"}]}]},{"type":6,"attributes":[{"type":0,"value":"message"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":8,"children":[{"type":6,"attributes":[{"type":0,"value":"variant"}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Node_Data"}]}]}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Error"}]}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"result"}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Remove_Node_Req"}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"string"}]}]},{"type":6,"attributes":[{"type":0,"value":"name"}]}]}]}]},{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Remove_Node_Res"}]},{"type":14,"children":[{"type":13,"children":[{"type":6,"attributes":[{"type":0,"value":"Error"}]},{"type":14,"children":[{"type":18,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"string"}]}]},{"type":6,"attributes":[{"type":0,"value":"message"}]}]}]}]},{"type":18,"children":[{"type":3,"children":[{"type":8,"children":[{"type":6,"attributes":[{"type":0,"value":"optional"}]},{"type":9,"children":[{"type":3,"children":[{"type":6,"attributes":[{"type":0,"value":"Error"}]}]}]}]}]},{"type":6,"attributes":[{"type":0,"value":"error"}]}]}]}]}]}]}]}]}]})xxx";
-  return s_json;
-}
-
-namespace math
-{
-
-}
 namespace silk
 {
 
 namespace comms
 {
 
+namespace math
+{
+
+}
+namespace setup
+{
+
   void Set_Clock_Req::set_time(int64_t const& value)
   {
-    m_time = clamp(value, int64_t(-9223372036854775808), int64_t(9223372036854775807));
+    m_time = value;
   }
   auto Set_Clock_Req::get_time() const -> int64_t const& 
   {
@@ -34,7 +31,7 @@ namespace comms
 
   void Set_Clock_Res::set_time(int64_t const& value)
   {
-    m_time = clamp(value, int64_t(-9223372036854775808), int64_t(9223372036854775807));
+    m_time = value;
   }
   auto Set_Clock_Res::get_time() const -> int64_t const& 
   {
@@ -106,7 +103,7 @@ namespace comms
 
     void Node_Def_Data::Input::set_rate(uint32_t const& value)
     {
-      m_rate = clamp(value, uint32_t(0), uint32_t(4294967295));
+      m_rate = clamp(value, uint32_t(0LL), uint32_t(4294967295LL));
     }
     auto Node_Def_Data::Input::get_rate() const -> uint32_t const& 
     {
@@ -142,7 +139,7 @@ namespace comms
 
     void Node_Def_Data::Output::set_rate(uint32_t const& value)
     {
-      m_rate = clamp(value, uint32_t(0), uint32_t(4294967295));
+      m_rate = clamp(value, uint32_t(0LL), uint32_t(4294967295LL));
     }
     auto Node_Def_Data::Output::get_rate() const -> uint32_t const& 
     {
@@ -176,16 +173,16 @@ namespace comms
 
 ////////////////////////////////////////////////////////////
 
-  void Node_Def_Data::set_inputs(std::vector<::silk::comms::Node_Def_Data::Input> const& value)
+  void Node_Def_Data::set_inputs(std::vector<setup::Node_Def_Data::Input> const& value)
   {
     m_inputs = value;
   }
-  auto Node_Def_Data::get_inputs() const -> std::vector<::silk::comms::Node_Def_Data::Input> const& 
+  auto Node_Def_Data::get_inputs() const -> std::vector<setup::Node_Def_Data::Input> const& 
   {
     return m_inputs;
   }
 
-  auto Node_Def_Data::get_inputs() -> std::vector<::silk::comms::Node_Def_Data::Input>& 
+  auto Node_Def_Data::get_inputs() -> std::vector<setup::Node_Def_Data::Input>& 
   {
     return m_inputs;
   }
@@ -193,16 +190,16 @@ namespace comms
 
 ////////////////////////////////////////////////////////////
 
-  void Node_Def_Data::set_outputs(std::vector<::silk::comms::Node_Def_Data::Output> const& value)
+  void Node_Def_Data::set_outputs(std::vector<setup::Node_Def_Data::Output> const& value)
   {
     m_outputs = value;
   }
-  auto Node_Def_Data::get_outputs() const -> std::vector<::silk::comms::Node_Def_Data::Output> const& 
+  auto Node_Def_Data::get_outputs() const -> std::vector<setup::Node_Def_Data::Output> const& 
   {
     return m_outputs;
   }
 
-  auto Node_Def_Data::get_outputs() -> std::vector<::silk::comms::Node_Def_Data::Output>& 
+  auto Node_Def_Data::get_outputs() -> std::vector<setup::Node_Def_Data::Output>& 
   {
     return m_outputs;
   }
@@ -222,16 +219,16 @@ namespace comms
 
 ////////////////////////////////////////////////////////////
 
-  void Get_Node_Defs_Res::set_node_def_datas(std::vector<::silk::comms::Node_Def_Data> const& value)
+  void Get_Node_Defs_Res::set_node_def_datas(std::vector<setup::Node_Def_Data> const& value)
   {
     m_node_def_datas = value;
   }
-  auto Get_Node_Defs_Res::get_node_def_datas() const -> std::vector<::silk::comms::Node_Def_Data> const& 
+  auto Get_Node_Defs_Res::get_node_def_datas() const -> std::vector<setup::Node_Def_Data> const& 
   {
     return m_node_def_datas;
   }
 
-  auto Get_Node_Defs_Res::get_node_def_datas() -> std::vector<::silk::comms::Node_Def_Data>& 
+  auto Get_Node_Defs_Res::get_node_def_datas() -> std::vector<setup::Node_Def_Data>& 
   {
     return m_node_def_datas;
   }
@@ -265,7 +262,7 @@ namespace comms
 
     void Node_Data::Input::set_rate(uint32_t const& value)
     {
-      m_rate = clamp(value, uint32_t(0), uint32_t(4294967295));
+      m_rate = clamp(value, uint32_t(0LL), uint32_t(4294967295LL));
     }
     auto Node_Data::Input::get_rate() const -> uint32_t const& 
     {
@@ -313,7 +310,7 @@ namespace comms
 
     void Node_Data::Output::set_rate(uint32_t const& value)
     {
-      m_rate = clamp(value, uint32_t(0), uint32_t(4294967295));
+      m_rate = clamp(value, uint32_t(0LL), uint32_t(4294967295LL));
     }
     auto Node_Data::Output::get_rate() const -> uint32_t const& 
     {
@@ -347,16 +344,16 @@ namespace comms
 
 ////////////////////////////////////////////////////////////
 
-  void Node_Data::set_inputs(std::vector<::silk::comms::Node_Data::Input> const& value)
+  void Node_Data::set_inputs(std::vector<setup::Node_Data::Input> const& value)
   {
     m_inputs = value;
   }
-  auto Node_Data::get_inputs() const -> std::vector<::silk::comms::Node_Data::Input> const& 
+  auto Node_Data::get_inputs() const -> std::vector<setup::Node_Data::Input> const& 
   {
     return m_inputs;
   }
 
-  auto Node_Data::get_inputs() -> std::vector<::silk::comms::Node_Data::Input>& 
+  auto Node_Data::get_inputs() -> std::vector<setup::Node_Data::Input>& 
   {
     return m_inputs;
   }
@@ -364,16 +361,16 @@ namespace comms
 
 ////////////////////////////////////////////////////////////
 
-  void Node_Data::set_outputs(std::vector<::silk::comms::Node_Data::Output> const& value)
+  void Node_Data::set_outputs(std::vector<setup::Node_Data::Output> const& value)
   {
     m_outputs = value;
   }
-  auto Node_Data::get_outputs() const -> std::vector<::silk::comms::Node_Data::Output> const& 
+  auto Node_Data::get_outputs() const -> std::vector<setup::Node_Data::Output> const& 
   {
     return m_outputs;
   }
 
-  auto Node_Data::get_outputs() -> std::vector<::silk::comms::Node_Data::Output>& 
+  auto Node_Data::get_outputs() -> std::vector<setup::Node_Data::Output>& 
   {
     return m_outputs;
   }
@@ -417,16 +414,16 @@ namespace comms
 
 ////////////////////////////////////////////////////////////
 
-  void Get_Nodes_Res::set_node_datas(std::vector<::silk::comms::Node_Data> const& value)
+  void Get_Nodes_Res::set_node_datas(std::vector<setup::Node_Data> const& value)
   {
     m_node_datas = value;
   }
-  auto Get_Nodes_Res::get_node_datas() const -> std::vector<::silk::comms::Node_Data> const& 
+  auto Get_Nodes_Res::get_node_datas() const -> std::vector<setup::Node_Data> const& 
   {
     return m_node_datas;
   }
 
-  auto Get_Nodes_Res::get_node_datas() -> std::vector<::silk::comms::Node_Data>& 
+  auto Get_Nodes_Res::get_node_datas() -> std::vector<setup::Node_Data>& 
   {
     return m_node_datas;
   }
@@ -482,16 +479,16 @@ namespace comms
 
 ////////////////////////////////////////////////////////////
 
-  void Set_Node_Input_Stream_Path_Res::set_result(boost::variant<::silk::comms::Node_Data,Error> const& value)
+  void Set_Node_Input_Stream_Path_Res::set_result(boost::variant<setup::Node_Data,Error> const& value)
   {
     m_result = value;
   }
-  auto Set_Node_Input_Stream_Path_Res::get_result() const -> boost::variant<::silk::comms::Node_Data,Error> const& 
+  auto Set_Node_Input_Stream_Path_Res::get_result() const -> boost::variant<setup::Node_Data,Error> const& 
   {
     return m_result;
   }
 
-  auto Set_Node_Input_Stream_Path_Res::get_result() -> boost::variant<::silk::comms::Node_Data,Error>& 
+  auto Set_Node_Input_Stream_Path_Res::get_result() -> boost::variant<setup::Node_Data,Error>& 
   {
     return m_result;
   }
@@ -547,16 +544,16 @@ namespace comms
 
 ////////////////////////////////////////////////////////////
 
-  void Add_Node_Res::set_result(boost::variant<::silk::comms::Node_Data,Error> const& value)
+  void Add_Node_Res::set_result(boost::variant<setup::Node_Data,Error> const& value)
   {
     m_result = value;
   }
-  auto Add_Node_Res::get_result() const -> boost::variant<::silk::comms::Node_Data,Error> const& 
+  auto Add_Node_Res::get_result() const -> boost::variant<setup::Node_Data,Error> const& 
   {
     return m_result;
   }
 
-  auto Add_Node_Res::get_result() -> boost::variant<::silk::comms::Node_Data,Error>& 
+  auto Add_Node_Res::get_result() -> boost::variant<setup::Node_Data,Error>& 
   {
     return m_result;
   }
@@ -605,7 +602,6 @@ namespace comms
 
 ////////////////////////////////////////////////////////////
 
-}
 }
 ts::Result<void> deserialize(bool& value, ts::serialization::Value const& sz_value)
 {
@@ -657,7 +653,7 @@ ts::Result<ts::serialization::Value> serialize(double const& value)
 {
   return ts::serialization::Value(value);
 }
-ts::Result<void> deserialize(math::vec2<float>& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(::math::vec2<float>& value, ts::serialization::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -674,7 +670,7 @@ ts::Result<void> deserialize(math::vec2<float>& value, ts::serialization::Value 
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(math::vec2<float> const& value)
+ts::Result<ts::serialization::Value> serialize(::math::vec2<float> const& value)
 {
   ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
   {
@@ -689,7 +685,7 @@ ts::Result<ts::serialization::Value> serialize(math::vec2<float> const& value)
   }
   return sz_value;
 }
-ts::Result<void> deserialize(math::vec2<double>& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(::math::vec2<double>& value, ts::serialization::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -706,7 +702,7 @@ ts::Result<void> deserialize(math::vec2<double>& value, ts::serialization::Value
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(math::vec2<double> const& value)
+ts::Result<ts::serialization::Value> serialize(::math::vec2<double> const& value)
 {
   ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
   {
@@ -721,7 +717,7 @@ ts::Result<ts::serialization::Value> serialize(math::vec2<double> const& value)
   }
   return sz_value;
 }
-ts::Result<void> deserialize(math::vec2<int64_t>& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(::math::vec2<int64_t>& value, ts::serialization::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -738,7 +734,7 @@ ts::Result<void> deserialize(math::vec2<int64_t>& value, ts::serialization::Valu
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(math::vec2<int64_t> const& value)
+ts::Result<ts::serialization::Value> serialize(::math::vec2<int64_t> const& value)
 {
   ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
   {
@@ -753,50 +749,7 @@ ts::Result<ts::serialization::Value> serialize(math::vec2<int64_t> const& value)
   }
   return sz_value;
 }
-ts::Result<void> deserialize(math::vec3<float>& value, ts::serialization::Value const& sz_value)
-{
-  if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
-  {
-    auto const* sz_v = sz_value.find_object_member_by_name("x");
-    if (!sz_v) { return ts::Error("Cannot find component 'x'"); }
-    auto result = deserialize(value.x, *sz_v);
-    if (result != ts::success) { return result; }
-  }
-  {
-    auto const* sz_v = sz_value.find_object_member_by_name("y");
-    if (!sz_v) { return ts::Error("Cannot find component 'y'"); }
-    auto result = deserialize(value.y, *sz_v);
-    if (result != ts::success) { return result; }
-  }
-  {
-    auto const* sz_v = sz_value.find_object_member_by_name("z");
-    if (!sz_v) { return ts::Error("Cannot find component 'z'"); }
-    auto result = deserialize(value.z, *sz_v);
-    if (result != ts::success) { return result; }
-  }
-  return ts::success;
-}
-ts::Result<ts::serialization::Value> serialize(math::vec3<float> const& value)
-{
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
-  {
-    auto result = serialize(value.x);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("x", result.extract_payload());
-  }
-  {
-    auto result = serialize(value.y);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("y", result.extract_payload());
-  }
-  {
-    auto result = serialize(value.z);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("z", result.extract_payload());
-  }
-  return sz_value;
-}
-ts::Result<void> deserialize(math::vec3<double>& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(::math::vec3<float>& value, ts::serialization::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -819,7 +772,7 @@ ts::Result<void> deserialize(math::vec3<double>& value, ts::serialization::Value
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(math::vec3<double> const& value)
+ts::Result<ts::serialization::Value> serialize(::math::vec3<float> const& value)
 {
   ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
   {
@@ -839,7 +792,7 @@ ts::Result<ts::serialization::Value> serialize(math::vec3<double> const& value)
   }
   return sz_value;
 }
-ts::Result<void> deserialize(math::vec3<int64_t>& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(::math::vec3<double>& value, ts::serialization::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -862,7 +815,7 @@ ts::Result<void> deserialize(math::vec3<int64_t>& value, ts::serialization::Valu
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(math::vec3<int64_t> const& value)
+ts::Result<ts::serialization::Value> serialize(::math::vec3<double> const& value)
 {
   ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
   {
@@ -882,7 +835,50 @@ ts::Result<ts::serialization::Value> serialize(math::vec3<int64_t> const& value)
   }
   return sz_value;
 }
-ts::Result<void> deserialize(math::vec4<float>& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(::math::vec3<int64_t>& value, ts::serialization::Value const& sz_value)
+{
+  if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  {
+    auto const* sz_v = sz_value.find_object_member_by_name("x");
+    if (!sz_v) { return ts::Error("Cannot find component 'x'"); }
+    auto result = deserialize(value.x, *sz_v);
+    if (result != ts::success) { return result; }
+  }
+  {
+    auto const* sz_v = sz_value.find_object_member_by_name("y");
+    if (!sz_v) { return ts::Error("Cannot find component 'y'"); }
+    auto result = deserialize(value.y, *sz_v);
+    if (result != ts::success) { return result; }
+  }
+  {
+    auto const* sz_v = sz_value.find_object_member_by_name("z");
+    if (!sz_v) { return ts::Error("Cannot find component 'z'"); }
+    auto result = deserialize(value.z, *sz_v);
+    if (result != ts::success) { return result; }
+  }
+  return ts::success;
+}
+ts::Result<ts::serialization::Value> serialize(::math::vec3<int64_t> const& value)
+{
+  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  {
+    auto result = serialize(value.x);
+    if (result != ts::success) { return result; }
+    sz_value.add_object_member("x", result.extract_payload());
+  }
+  {
+    auto result = serialize(value.y);
+    if (result != ts::success) { return result; }
+    sz_value.add_object_member("y", result.extract_payload());
+  }
+  {
+    auto result = serialize(value.z);
+    if (result != ts::success) { return result; }
+    sz_value.add_object_member("z", result.extract_payload());
+  }
+  return sz_value;
+}
+ts::Result<void> deserialize(::math::vec4<float>& value, ts::serialization::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -911,7 +907,7 @@ ts::Result<void> deserialize(math::vec4<float>& value, ts::serialization::Value 
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(math::vec4<float> const& value)
+ts::Result<ts::serialization::Value> serialize(::math::vec4<float> const& value)
 {
   ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
   {
@@ -936,7 +932,7 @@ ts::Result<ts::serialization::Value> serialize(math::vec4<float> const& value)
   }
   return sz_value;
 }
-ts::Result<void> deserialize(math::vec4<double>& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(::math::vec4<double>& value, ts::serialization::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -965,7 +961,7 @@ ts::Result<void> deserialize(math::vec4<double>& value, ts::serialization::Value
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(math::vec4<double> const& value)
+ts::Result<ts::serialization::Value> serialize(::math::vec4<double> const& value)
 {
   ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
   {
@@ -990,7 +986,7 @@ ts::Result<ts::serialization::Value> serialize(math::vec4<double> const& value)
   }
   return sz_value;
 }
-ts::Result<void> deserialize(math::vec4<int64_t>& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(::math::vec4<int64_t>& value, ts::serialization::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -1019,7 +1015,7 @@ ts::Result<void> deserialize(math::vec4<int64_t>& value, ts::serialization::Valu
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(math::vec4<int64_t> const& value)
+ts::Result<ts::serialization::Value> serialize(::math::vec4<int64_t> const& value)
 {
   ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
   {
@@ -1104,7 +1100,7 @@ ts::Result<ts::serialization::Value> serialize(uint32_t const& value)
 {
   return ts::serialization::Value(value);
 }
-ts::Result<void> deserialize(::silk::comms::Set_Clock_Req& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(setup::Set_Clock_Req& value, ts::serialization::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -1117,7 +1113,7 @@ ts::Result<void> deserialize(::silk::comms::Set_Clock_Req& value, ts::serializat
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(::silk::comms::Set_Clock_Req const& value)
+ts::Result<ts::serialization::Value> serialize(setup::Set_Clock_Req const& value)
 {
   ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
   {
@@ -1127,7 +1123,7 @@ ts::Result<ts::serialization::Value> serialize(::silk::comms::Set_Clock_Req cons
   }
   return sz_value;
 }
-ts::Result<void> deserialize(::silk::comms::Set_Clock_Res& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(setup::Set_Clock_Res& value, ts::serialization::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -1140,7 +1136,7 @@ ts::Result<void> deserialize(::silk::comms::Set_Clock_Res& value, ts::serializat
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(::silk::comms::Set_Clock_Res const& value)
+ts::Result<ts::serialization::Value> serialize(setup::Set_Clock_Res const& value)
 {
   ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
   {
@@ -1150,7 +1146,7 @@ ts::Result<ts::serialization::Value> serialize(::silk::comms::Set_Clock_Res cons
   }
   return sz_value;
 }
-ts::Result<void> deserialize(::silk::comms::Set_UAV_Descriptor_Req& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(setup::Set_UAV_Descriptor_Req& value, ts::serialization::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -1163,7 +1159,7 @@ ts::Result<void> deserialize(::silk::comms::Set_UAV_Descriptor_Req& value, ts::s
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(::silk::comms::Set_UAV_Descriptor_Req const& value)
+ts::Result<ts::serialization::Value> serialize(setup::Set_UAV_Descriptor_Req const& value)
 {
   ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
   {
@@ -1173,7 +1169,7 @@ ts::Result<ts::serialization::Value> serialize(::silk::comms::Set_UAV_Descriptor
   }
   return sz_value;
 }
-ts::Result<void> deserialize(::silk::comms::Set_UAV_Descriptor_Res& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(setup::Set_UAV_Descriptor_Res& value, ts::serialization::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -1186,7 +1182,7 @@ ts::Result<void> deserialize(::silk::comms::Set_UAV_Descriptor_Res& value, ts::s
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(::silk::comms::Set_UAV_Descriptor_Res const& value)
+ts::Result<ts::serialization::Value> serialize(setup::Set_UAV_Descriptor_Res const& value)
 {
   ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
   {
@@ -1196,17 +1192,17 @@ ts::Result<ts::serialization::Value> serialize(::silk::comms::Set_UAV_Descriptor
   }
   return sz_value;
 }
-ts::Result<void> deserialize(::silk::comms::Get_UAV_Descriptor_Req& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(setup::Get_UAV_Descriptor_Req& value, ts::serialization::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(::silk::comms::Get_UAV_Descriptor_Req const& value)
+ts::Result<ts::serialization::Value> serialize(setup::Get_UAV_Descriptor_Req const& value)
 {
   ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
   return sz_value;
 }
-ts::Result<void> deserialize(::silk::comms::Get_UAV_Descriptor_Res& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(setup::Get_UAV_Descriptor_Res& value, ts::serialization::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -1219,7 +1215,7 @@ ts::Result<void> deserialize(::silk::comms::Get_UAV_Descriptor_Res& value, ts::s
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(::silk::comms::Get_UAV_Descriptor_Res const& value)
+ts::Result<ts::serialization::Value> serialize(setup::Get_UAV_Descriptor_Res const& value)
 {
   ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
   {
@@ -1229,7 +1225,7 @@ ts::Result<ts::serialization::Value> serialize(::silk::comms::Get_UAV_Descriptor
   }
   return sz_value;
 }
-ts::Result<void> deserialize(::silk::comms::Node_Def_Data::Input& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(setup::Node_Def_Data::Input& value, ts::serialization::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -1258,7 +1254,7 @@ ts::Result<void> deserialize(::silk::comms::Node_Def_Data::Input& value, ts::ser
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(::silk::comms::Node_Def_Data::Input const& value)
+ts::Result<ts::serialization::Value> serialize(setup::Node_Def_Data::Input const& value)
 {
   ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
   {
@@ -1278,7 +1274,7 @@ ts::Result<ts::serialization::Value> serialize(::silk::comms::Node_Def_Data::Inp
   }
   return sz_value;
 }
-ts::Result<void> deserialize(::silk::comms::Node_Def_Data::Output& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(setup::Node_Def_Data::Output& value, ts::serialization::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -1307,7 +1303,7 @@ ts::Result<void> deserialize(::silk::comms::Node_Def_Data::Output& value, ts::se
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(::silk::comms::Node_Def_Data::Output const& value)
+ts::Result<ts::serialization::Value> serialize(setup::Node_Def_Data::Output const& value)
 {
   ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
   {
@@ -1327,7 +1323,7 @@ ts::Result<ts::serialization::Value> serialize(::silk::comms::Node_Def_Data::Out
   }
   return sz_value;
 }
-ts::Result<void> deserialize(::silk::comms::Node_Def_Data& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(setup::Node_Def_Data& value, ts::serialization::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -1372,7 +1368,7 @@ ts::Result<void> deserialize(::silk::comms::Node_Def_Data& value, ts::serializat
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(::silk::comms::Node_Def_Data const& value)
+ts::Result<ts::serialization::Value> serialize(setup::Node_Def_Data const& value)
 {
   ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
   {
@@ -1402,17 +1398,17 @@ ts::Result<ts::serialization::Value> serialize(::silk::comms::Node_Def_Data cons
   }
   return sz_value;
 }
-ts::Result<void> deserialize(::silk::comms::Get_Node_Defs_Req& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(setup::Get_Node_Defs_Req& value, ts::serialization::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(::silk::comms::Get_Node_Defs_Req const& value)
+ts::Result<ts::serialization::Value> serialize(setup::Get_Node_Defs_Req const& value)
 {
   ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
   return sz_value;
 }
-ts::Result<void> deserialize(::silk::comms::Get_Node_Defs_Res& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(setup::Get_Node_Defs_Res& value, ts::serialization::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -1425,7 +1421,7 @@ ts::Result<void> deserialize(::silk::comms::Get_Node_Defs_Res& value, ts::serial
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(::silk::comms::Get_Node_Defs_Res const& value)
+ts::Result<ts::serialization::Value> serialize(setup::Get_Node_Defs_Res const& value)
 {
   ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
   {
@@ -1435,7 +1431,7 @@ ts::Result<ts::serialization::Value> serialize(::silk::comms::Get_Node_Defs_Res 
   }
   return sz_value;
 }
-ts::Result<void> deserialize(::silk::comms::Node_Data::Input& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(setup::Node_Data::Input& value, ts::serialization::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -1472,7 +1468,7 @@ ts::Result<void> deserialize(::silk::comms::Node_Data::Input& value, ts::seriali
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(::silk::comms::Node_Data::Input const& value)
+ts::Result<ts::serialization::Value> serialize(setup::Node_Data::Input const& value)
 {
   ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
   {
@@ -1497,7 +1493,7 @@ ts::Result<ts::serialization::Value> serialize(::silk::comms::Node_Data::Input c
   }
   return sz_value;
 }
-ts::Result<void> deserialize(::silk::comms::Node_Data::Output& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(setup::Node_Data::Output& value, ts::serialization::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -1526,7 +1522,7 @@ ts::Result<void> deserialize(::silk::comms::Node_Data::Output& value, ts::serial
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(::silk::comms::Node_Data::Output const& value)
+ts::Result<ts::serialization::Value> serialize(setup::Node_Data::Output const& value)
 {
   ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
   {
@@ -1546,7 +1542,7 @@ ts::Result<ts::serialization::Value> serialize(::silk::comms::Node_Data::Output 
   }
   return sz_value;
 }
-ts::Result<void> deserialize(::silk::comms::Node_Data& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(setup::Node_Data& value, ts::serialization::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -1599,7 +1595,7 @@ ts::Result<void> deserialize(::silk::comms::Node_Data& value, ts::serialization:
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(::silk::comms::Node_Data const& value)
+ts::Result<ts::serialization::Value> serialize(setup::Node_Data const& value)
 {
   ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
   {
@@ -1634,7 +1630,7 @@ ts::Result<ts::serialization::Value> serialize(::silk::comms::Node_Data const& v
   }
   return sz_value;
 }
-ts::Result<void> deserialize(::silk::comms::Get_Nodes_Req& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(setup::Get_Nodes_Req& value, ts::serialization::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -1647,7 +1643,7 @@ ts::Result<void> deserialize(::silk::comms::Get_Nodes_Req& value, ts::serializat
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(::silk::comms::Get_Nodes_Req const& value)
+ts::Result<ts::serialization::Value> serialize(setup::Get_Nodes_Req const& value)
 {
   ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
   {
@@ -1657,7 +1653,7 @@ ts::Result<ts::serialization::Value> serialize(::silk::comms::Get_Nodes_Req cons
   }
   return sz_value;
 }
-ts::Result<void> deserialize(::silk::comms::Get_Nodes_Res& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(setup::Get_Nodes_Res& value, ts::serialization::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -1670,7 +1666,7 @@ ts::Result<void> deserialize(::silk::comms::Get_Nodes_Res& value, ts::serializat
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(::silk::comms::Get_Nodes_Res const& value)
+ts::Result<ts::serialization::Value> serialize(setup::Get_Nodes_Res const& value)
 {
   ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
   {
@@ -1680,7 +1676,7 @@ ts::Result<ts::serialization::Value> serialize(::silk::comms::Get_Nodes_Res cons
   }
   return sz_value;
 }
-ts::Result<void> deserialize(::silk::comms::Set_Node_Input_Stream_Path_Req& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(setup::Set_Node_Input_Stream_Path_Req& value, ts::serialization::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -1709,7 +1705,7 @@ ts::Result<void> deserialize(::silk::comms::Set_Node_Input_Stream_Path_Req& valu
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(::silk::comms::Set_Node_Input_Stream_Path_Req const& value)
+ts::Result<ts::serialization::Value> serialize(setup::Set_Node_Input_Stream_Path_Req const& value)
 {
   ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
   {
@@ -1729,7 +1725,7 @@ ts::Result<ts::serialization::Value> serialize(::silk::comms::Set_Node_Input_Str
   }
   return sz_value;
 }
-ts::Result<void> deserialize(::silk::comms::Set_Node_Input_Stream_Path_Res::Error& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(setup::Set_Node_Input_Stream_Path_Res::Error& value, ts::serialization::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -1742,7 +1738,7 @@ ts::Result<void> deserialize(::silk::comms::Set_Node_Input_Stream_Path_Res::Erro
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(::silk::comms::Set_Node_Input_Stream_Path_Res::Error const& value)
+ts::Result<ts::serialization::Value> serialize(setup::Set_Node_Input_Stream_Path_Res::Error const& value)
 {
   ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
   {
@@ -1752,7 +1748,7 @@ ts::Result<ts::serialization::Value> serialize(::silk::comms::Set_Node_Input_Str
   }
   return sz_value;
 }
-ts::Result<void> deserialize(::silk::comms::Set_Node_Input_Stream_Path_Res& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(setup::Set_Node_Input_Stream_Path_Res& value, ts::serialization::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -1765,7 +1761,7 @@ ts::Result<void> deserialize(::silk::comms::Set_Node_Input_Stream_Path_Res& valu
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(::silk::comms::Set_Node_Input_Stream_Path_Res const& value)
+ts::Result<ts::serialization::Value> serialize(setup::Set_Node_Input_Stream_Path_Res const& value)
 {
   ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
   {
@@ -1775,7 +1771,7 @@ ts::Result<ts::serialization::Value> serialize(::silk::comms::Set_Node_Input_Str
   }
   return sz_value;
 }
-ts::Result<void> deserialize(::silk::comms::Add_Node_Req& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(setup::Add_Node_Req& value, ts::serialization::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -1804,7 +1800,7 @@ ts::Result<void> deserialize(::silk::comms::Add_Node_Req& value, ts::serializati
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(::silk::comms::Add_Node_Req const& value)
+ts::Result<ts::serialization::Value> serialize(setup::Add_Node_Req const& value)
 {
   ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
   {
@@ -1824,7 +1820,7 @@ ts::Result<ts::serialization::Value> serialize(::silk::comms::Add_Node_Req const
   }
   return sz_value;
 }
-ts::Result<void> deserialize(::silk::comms::Add_Node_Res::Error& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(setup::Add_Node_Res::Error& value, ts::serialization::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -1837,7 +1833,7 @@ ts::Result<void> deserialize(::silk::comms::Add_Node_Res::Error& value, ts::seri
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(::silk::comms::Add_Node_Res::Error const& value)
+ts::Result<ts::serialization::Value> serialize(setup::Add_Node_Res::Error const& value)
 {
   ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
   {
@@ -1847,7 +1843,7 @@ ts::Result<ts::serialization::Value> serialize(::silk::comms::Add_Node_Res::Erro
   }
   return sz_value;
 }
-ts::Result<void> deserialize(::silk::comms::Add_Node_Res& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(setup::Add_Node_Res& value, ts::serialization::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -1860,7 +1856,7 @@ ts::Result<void> deserialize(::silk::comms::Add_Node_Res& value, ts::serializati
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(::silk::comms::Add_Node_Res const& value)
+ts::Result<ts::serialization::Value> serialize(setup::Add_Node_Res const& value)
 {
   ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
   {
@@ -1870,7 +1866,7 @@ ts::Result<ts::serialization::Value> serialize(::silk::comms::Add_Node_Res const
   }
   return sz_value;
 }
-ts::Result<void> deserialize(::silk::comms::Remove_Node_Req& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(setup::Remove_Node_Req& value, ts::serialization::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -1883,7 +1879,7 @@ ts::Result<void> deserialize(::silk::comms::Remove_Node_Req& value, ts::serializ
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(::silk::comms::Remove_Node_Req const& value)
+ts::Result<ts::serialization::Value> serialize(setup::Remove_Node_Req const& value)
 {
   ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
   {
@@ -1893,7 +1889,7 @@ ts::Result<ts::serialization::Value> serialize(::silk::comms::Remove_Node_Req co
   }
   return sz_value;
 }
-ts::Result<void> deserialize(::silk::comms::Remove_Node_Res::Error& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(setup::Remove_Node_Res::Error& value, ts::serialization::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -1906,7 +1902,7 @@ ts::Result<void> deserialize(::silk::comms::Remove_Node_Res::Error& value, ts::s
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(::silk::comms::Remove_Node_Res::Error const& value)
+ts::Result<ts::serialization::Value> serialize(setup::Remove_Node_Res::Error const& value)
 {
   ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
   {
@@ -1916,7 +1912,7 @@ ts::Result<ts::serialization::Value> serialize(::silk::comms::Remove_Node_Res::E
   }
   return sz_value;
 }
-ts::Result<void> deserialize(::silk::comms::Remove_Node_Res& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(setup::Remove_Node_Res& value, ts::serialization::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -1929,7 +1925,7 @@ ts::Result<void> deserialize(::silk::comms::Remove_Node_Res& value, ts::serializ
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(::silk::comms::Remove_Node_Res const& value)
+ts::Result<ts::serialization::Value> serialize(setup::Remove_Node_Res const& value)
 {
   ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
   {
@@ -1939,7 +1935,7 @@ ts::Result<ts::serialization::Value> serialize(::silk::comms::Remove_Node_Res co
   }
   return sz_value;
 }
-ts::Result<void> deserialize(std::vector<::silk::comms::Node_Def_Data::Input>& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(std::vector<setup::Node_Def_Data::Input>& value, ts::serialization::Value const& sz_value)
 {
   value.clear();
   if (!sz_value.is_array()) { return ts::Error("Expected array value when deserializing"); }
@@ -1951,7 +1947,7 @@ ts::Result<void> deserialize(std::vector<::silk::comms::Node_Def_Data::Input>& v
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(std::vector<::silk::comms::Node_Def_Data::Input> const& value)
+ts::Result<ts::serialization::Value> serialize(std::vector<setup::Node_Def_Data::Input> const& value)
 {
   ts::serialization::Value sz_value(ts::serialization::Value::Type::ARRAY);
   for (size_t i = 0; i < value.size(); i++)
@@ -1962,7 +1958,7 @@ ts::Result<ts::serialization::Value> serialize(std::vector<::silk::comms::Node_D
   }
   return sz_value;
 }
-ts::Result<void> deserialize(std::vector<::silk::comms::Node_Def_Data::Output>& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(std::vector<setup::Node_Def_Data::Output>& value, ts::serialization::Value const& sz_value)
 {
   value.clear();
   if (!sz_value.is_array()) { return ts::Error("Expected array value when deserializing"); }
@@ -1974,7 +1970,7 @@ ts::Result<void> deserialize(std::vector<::silk::comms::Node_Def_Data::Output>& 
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(std::vector<::silk::comms::Node_Def_Data::Output> const& value)
+ts::Result<ts::serialization::Value> serialize(std::vector<setup::Node_Def_Data::Output> const& value)
 {
   ts::serialization::Value sz_value(ts::serialization::Value::Type::ARRAY);
   for (size_t i = 0; i < value.size(); i++)
@@ -1985,7 +1981,7 @@ ts::Result<ts::serialization::Value> serialize(std::vector<::silk::comms::Node_D
   }
   return sz_value;
 }
-ts::Result<void> deserialize(std::vector<::silk::comms::Node_Def_Data>& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(std::vector<setup::Node_Def_Data>& value, ts::serialization::Value const& sz_value)
 {
   value.clear();
   if (!sz_value.is_array()) { return ts::Error("Expected array value when deserializing"); }
@@ -1997,7 +1993,7 @@ ts::Result<void> deserialize(std::vector<::silk::comms::Node_Def_Data>& value, t
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(std::vector<::silk::comms::Node_Def_Data> const& value)
+ts::Result<ts::serialization::Value> serialize(std::vector<setup::Node_Def_Data> const& value)
 {
   ts::serialization::Value sz_value(ts::serialization::Value::Type::ARRAY);
   for (size_t i = 0; i < value.size(); i++)
@@ -2008,7 +2004,7 @@ ts::Result<ts::serialization::Value> serialize(std::vector<::silk::comms::Node_D
   }
   return sz_value;
 }
-ts::Result<void> deserialize(std::vector<::silk::comms::Node_Data::Input>& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(std::vector<setup::Node_Data::Input>& value, ts::serialization::Value const& sz_value)
 {
   value.clear();
   if (!sz_value.is_array()) { return ts::Error("Expected array value when deserializing"); }
@@ -2020,7 +2016,7 @@ ts::Result<void> deserialize(std::vector<::silk::comms::Node_Data::Input>& value
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(std::vector<::silk::comms::Node_Data::Input> const& value)
+ts::Result<ts::serialization::Value> serialize(std::vector<setup::Node_Data::Input> const& value)
 {
   ts::serialization::Value sz_value(ts::serialization::Value::Type::ARRAY);
   for (size_t i = 0; i < value.size(); i++)
@@ -2031,7 +2027,7 @@ ts::Result<ts::serialization::Value> serialize(std::vector<::silk::comms::Node_D
   }
   return sz_value;
 }
-ts::Result<void> deserialize(std::vector<::silk::comms::Node_Data::Output>& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(std::vector<setup::Node_Data::Output>& value, ts::serialization::Value const& sz_value)
 {
   value.clear();
   if (!sz_value.is_array()) { return ts::Error("Expected array value when deserializing"); }
@@ -2043,7 +2039,7 @@ ts::Result<void> deserialize(std::vector<::silk::comms::Node_Data::Output>& valu
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(std::vector<::silk::comms::Node_Data::Output> const& value)
+ts::Result<ts::serialization::Value> serialize(std::vector<setup::Node_Data::Output> const& value)
 {
   ts::serialization::Value sz_value(ts::serialization::Value::Type::ARRAY);
   for (size_t i = 0; i < value.size(); i++)
@@ -2054,7 +2050,7 @@ ts::Result<ts::serialization::Value> serialize(std::vector<::silk::comms::Node_D
   }
   return sz_value;
 }
-ts::Result<void> deserialize(std::vector<::silk::comms::Node_Data>& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(std::vector<setup::Node_Data>& value, ts::serialization::Value const& sz_value)
 {
   value.clear();
   if (!sz_value.is_array()) { return ts::Error("Expected array value when deserializing"); }
@@ -2066,7 +2062,7 @@ ts::Result<void> deserialize(std::vector<::silk::comms::Node_Data>& value, ts::s
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(std::vector<::silk::comms::Node_Data> const& value)
+ts::Result<ts::serialization::Value> serialize(std::vector<setup::Node_Data> const& value)
 {
   ts::serialization::Value sz_value(ts::serialization::Value::Type::ARRAY);
   for (size_t i = 0; i < value.size(); i++)
@@ -2077,7 +2073,7 @@ ts::Result<ts::serialization::Value> serialize(std::vector<::silk::comms::Node_D
   }
   return sz_value;
 }
-ts::Result<void> deserialize(boost::variant<silk::comms::Node_Data,silk::comms::Set_Node_Input_Stream_Path_Res::Error>& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(boost::variant<setup::Node_Data,setup::Set_Node_Input_Stream_Path_Res::Error>& value, ts::serialization::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   auto const* type_sz_value = sz_value.find_object_member_by_name("type");
@@ -2086,38 +2082,38 @@ ts::Result<void> deserialize(boost::variant<silk::comms::Node_Data,silk::comms::
   if (!value_sz_value) { return ts::Error("Expected 'value' when deserializing"); }
   std::string const& path = type_sz_value->get_as_string();
   if (false) { return ts::Error(""); } //this is here just to have the next items with 'else if'
-  else if (path == "::silk::comms::Node_Data")
+  else if (path == "::setup::Node_Data")
   {
-    ::silk::comms::Node_Data v;
-    auto result = deserialize(boost::get<::silk::comms::Node_Data>(value), *value_sz_value);
+    setup::Node_Data v;
+    auto result = deserialize(boost::get<setup::Node_Data>(value), *value_sz_value);
     if (result != ts::success) { return result; }
     value = v;
   }
-  else if (path == "::silk::comms::Set_Node_Input_Stream_Path_Res::Error")
+  else if (path == "::setup::Set_Node_Input_Stream_Path_Res::Error")
   {
-    ::silk::comms::Set_Node_Input_Stream_Path_Res::Error v;
-    auto result = deserialize(boost::get<::silk::comms::Set_Node_Input_Stream_Path_Res::Error>(value), *value_sz_value);
+    setup::Set_Node_Input_Stream_Path_Res::Error v;
+    auto result = deserialize(boost::get<setup::Set_Node_Input_Stream_Path_Res::Error>(value), *value_sz_value);
     if (result != ts::success) { return result; }
     value = v;
   }
   else { return ts::Error("Cannot find type '" + path + "' when deserializing"); }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(boost::variant<silk::comms::Node_Data,silk::comms::Set_Node_Input_Stream_Path_Res::Error> const& value)
+ts::Result<ts::serialization::Value> serialize(boost::variant<setup::Node_Data,setup::Set_Node_Input_Stream_Path_Res::Error> const& value)
 {
   ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
   if (false) { return ts::Error(""); } //this is here just to have the next items with 'else if'
-  else if (auto* v = boost::get<::silk::comms::Node_Data>(&value))
+  else if (auto* v = boost::get<setup::Node_Data>(&value))
   {
-    sz_value.add_object_member("type", "::silk::comms::Node_Data");
+    sz_value.add_object_member("type", "setup::Node_Data");
     auto result = serialize(*v);
     if (result != ts::success) { return result; }
     sz_value.add_object_member("value", result.extract_payload());
     return std::move(sz_value);
   }
-  else if (auto* v = boost::get<::silk::comms::Set_Node_Input_Stream_Path_Res::Error>(&value))
+  else if (auto* v = boost::get<setup::Set_Node_Input_Stream_Path_Res::Error>(&value))
   {
-    sz_value.add_object_member("type", "::silk::comms::Set_Node_Input_Stream_Path_Res::Error");
+    sz_value.add_object_member("type", "setup::Set_Node_Input_Stream_Path_Res::Error");
     auto result = serialize(*v);
     if (result != ts::success) { return result; }
     sz_value.add_object_member("value", result.extract_payload());
@@ -2125,7 +2121,7 @@ ts::Result<ts::serialization::Value> serialize(boost::variant<silk::comms::Node_
   }
   else { return ts::Error("Cannot serialize type"); }
 }
-ts::Result<void> deserialize(boost::variant<silk::comms::Node_Data,silk::comms::Add_Node_Res::Error>& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(boost::variant<setup::Node_Data,setup::Add_Node_Res::Error>& value, ts::serialization::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   auto const* type_sz_value = sz_value.find_object_member_by_name("type");
@@ -2134,38 +2130,38 @@ ts::Result<void> deserialize(boost::variant<silk::comms::Node_Data,silk::comms::
   if (!value_sz_value) { return ts::Error("Expected 'value' when deserializing"); }
   std::string const& path = type_sz_value->get_as_string();
   if (false) { return ts::Error(""); } //this is here just to have the next items with 'else if'
-  else if (path == "::silk::comms::Node_Data")
+  else if (path == "::setup::Node_Data")
   {
-    ::silk::comms::Node_Data v;
-    auto result = deserialize(boost::get<::silk::comms::Node_Data>(value), *value_sz_value);
+    setup::Node_Data v;
+    auto result = deserialize(boost::get<setup::Node_Data>(value), *value_sz_value);
     if (result != ts::success) { return result; }
     value = v;
   }
-  else if (path == "::silk::comms::Add_Node_Res::Error")
+  else if (path == "::setup::Add_Node_Res::Error")
   {
-    ::silk::comms::Add_Node_Res::Error v;
-    auto result = deserialize(boost::get<::silk::comms::Add_Node_Res::Error>(value), *value_sz_value);
+    setup::Add_Node_Res::Error v;
+    auto result = deserialize(boost::get<setup::Add_Node_Res::Error>(value), *value_sz_value);
     if (result != ts::success) { return result; }
     value = v;
   }
   else { return ts::Error("Cannot find type '" + path + "' when deserializing"); }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(boost::variant<silk::comms::Node_Data,silk::comms::Add_Node_Res::Error> const& value)
+ts::Result<ts::serialization::Value> serialize(boost::variant<setup::Node_Data,setup::Add_Node_Res::Error> const& value)
 {
   ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
   if (false) { return ts::Error(""); } //this is here just to have the next items with 'else if'
-  else if (auto* v = boost::get<::silk::comms::Node_Data>(&value))
+  else if (auto* v = boost::get<setup::Node_Data>(&value))
   {
-    sz_value.add_object_member("type", "::silk::comms::Node_Data");
+    sz_value.add_object_member("type", "setup::Node_Data");
     auto result = serialize(*v);
     if (result != ts::success) { return result; }
     sz_value.add_object_member("value", result.extract_payload());
     return std::move(sz_value);
   }
-  else if (auto* v = boost::get<::silk::comms::Add_Node_Res::Error>(&value))
+  else if (auto* v = boost::get<setup::Add_Node_Res::Error>(&value))
   {
-    sz_value.add_object_member("type", "::silk::comms::Add_Node_Res::Error");
+    sz_value.add_object_member("type", "setup::Add_Node_Res::Error");
     auto result = serialize(*v);
     if (result != ts::success) { return result; }
     sz_value.add_object_member("value", result.extract_payload());
@@ -2173,14 +2169,16 @@ ts::Result<ts::serialization::Value> serialize(boost::variant<silk::comms::Node_
   }
   else { return ts::Error("Cannot serialize type"); }
 }
-ts::Result<void> deserialize(boost::optional<silk::comms::Remove_Node_Res::Error>& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(boost::optional<setup::Remove_Node_Res::Error>& value, ts::serialization::Value const& sz_value)
 {
   if (sz_value.is_empty()) { value = boost::none; return ts::success; }
-  value = ::silk::comms::Remove_Node_Res::Error();
+  value = setup::Remove_Node_Res::Error();
   return deserialize(*value, sz_value);
 }
-ts::Result<ts::serialization::Value> serialize(boost::optional<silk::comms::Remove_Node_Res::Error> const& value)
+ts::Result<ts::serialization::Value> serialize(boost::optional<setup::Remove_Node_Res::Error> const& value)
 {
-  if (!value) { return ts::serialization::Value sz_value(ts::serialization::Value::Type::EMPTY); }
+  if (!value) { return ts::serialization::Value(ts::serialization::Value::Type::EMPTY); }
   return serialize(*value);
+}
+}
 }

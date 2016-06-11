@@ -14,8 +14,8 @@ namespace node
 
 Multirotor_Simulator::Multirotor_Simulator(UAV& uav)
     : m_uav(uav)
-    , m_descriptor(new Multirotor_Simulator_Descriptor())
-    , m_config(new Multirotor_Simulator_Config())
+    , m_descriptor(new uav::Multirotor_Simulator_Descriptor())
+    , m_config(new uav::Multirotor_Simulator_Config())
 {
     m_angular_velocity_stream = std::make_shared<Angular_Velocity>();
     m_acceleration_stream = std::make_shared<Acceleration>();
@@ -28,11 +28,11 @@ Multirotor_Simulator::Multirotor_Simulator(UAV& uav)
     m_ecef_velocity_stream = std::make_shared<ECEF_Velocity>();
 }
 
-auto Multirotor_Simulator::init(std::shared_ptr<INode_Descriptor> descriptor) -> bool
+auto Multirotor_Simulator::init(std::shared_ptr<uav::INode_Descriptor> descriptor) -> bool
 {
     QLOG_TOPIC("multirotor_simulator::init");
 
-    auto specialized = std::dynamic_pointer_cast<Multirotor_Simulator_Descriptor>(descriptor);
+    auto specialized = std::dynamic_pointer_cast<uav::Multirotor_Simulator_Descriptor>(descriptor);
     if (!specialized)
     {
         QLOGE("Wrong descriptor type");
@@ -45,7 +45,7 @@ auto Multirotor_Simulator::init(std::shared_ptr<INode_Descriptor> descriptor) ->
 }
 auto Multirotor_Simulator::init() -> bool
 {
-    std::shared_ptr<const Multirotor_Descriptor> multirotor_descriptor = m_uav.get_specialized_uav_descriptor<Multirotor_Descriptor>();
+    std::shared_ptr<const uav::Multirotor_Descriptor> multirotor_descriptor = m_uav.get_specialized_uav_descriptor<uav::Multirotor_Descriptor>();
     if (!multirotor_descriptor)
     {
         QLOGE("No multi descriptor found");
@@ -307,11 +307,11 @@ void Multirotor_Simulator::set_input_stream_path(size_t idx, q::Path const& path
     }
 }
 
-auto Multirotor_Simulator::set_config(std::shared_ptr<INode_Config> config) -> bool
+auto Multirotor_Simulator::set_config(std::shared_ptr<uav::INode_Config> config) -> bool
 {
     QLOG_TOPIC("multirotor_simulator::set_config");
 
-    auto specialized = std::dynamic_pointer_cast<Multirotor_Simulator_Config>(config);
+    auto specialized = std::dynamic_pointer_cast<uav::Multirotor_Simulator_Config>(config);
     if (!specialized)
     {
         QLOGE("Wrong config type");
@@ -333,7 +333,7 @@ auto Multirotor_Simulator::set_config(std::shared_ptr<INode_Config> config) -> b
 //        uav_config.motors[i].deceleration = sz.motors[i].deceleration;
 //    }
 
-    std::shared_ptr<const Multirotor_Descriptor> multirotor_descriptor = m_uav.get_specialized_uav_descriptor<Multirotor_Descriptor>();
+    std::shared_ptr<const uav::Multirotor_Descriptor> multirotor_descriptor = m_uav.get_specialized_uav_descriptor<uav::Multirotor_Descriptor>();
     if (!multirotor_descriptor)
     {
         QLOGE("No multi descriptor found");
@@ -367,12 +367,12 @@ auto Multirotor_Simulator::set_config(std::shared_ptr<INode_Config> config) -> b
 
     return true;
 }
-auto Multirotor_Simulator::get_config() const -> std::shared_ptr<INode_Config>
+auto Multirotor_Simulator::get_config() const -> std::shared_ptr<uav::INode_Config>
 {
     return m_config;
 }
 
-auto Multirotor_Simulator::get_descriptor() const -> std::shared_ptr<INode_Descriptor>
+auto Multirotor_Simulator::get_descriptor() const -> std::shared_ptr<uav::INode_Descriptor>
 {
     return m_descriptor;
 }

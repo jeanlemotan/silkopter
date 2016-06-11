@@ -4,7 +4,10 @@
 
 namespace silk
 {
+namespace uav
+{
 struct UART_BBang_Descriptor;
+}
 }
 
 namespace silk
@@ -18,8 +21,8 @@ public:
     UART_BBang();
     ~UART_BBang();
 
-    bool init(std::shared_ptr<IBus_Descriptor> descriptor) override;
-    std::shared_ptr<IBus_Descriptor> get_descriptor() const override;
+    bool init(std::shared_ptr<uav::IBus_Descriptor> descriptor) override;
+    std::shared_ptr<uav::IBus_Descriptor> get_descriptor() const override;
 
     void lock();
     auto try_lock() -> bool;
@@ -34,7 +37,7 @@ private:
     bool init(uint32_t rx_pin, uint32_t baud, bool invert);
     void close();
 
-    std::shared_ptr<UART_BBang_Descriptor> m_descriptor;
+    std::shared_ptr<uav::UART_BBang_Descriptor> m_descriptor;
 
     std::recursive_mutex m_mutex;
 

@@ -17,8 +17,11 @@
 
 namespace silk
 {
+namespace uav
+{
 struct KF_ECEF_Descriptor;
 struct KF_ECEF_Config;
+}
 }
 
 
@@ -32,11 +35,11 @@ class KF_ECEF : public IProcessor
 public:
     KF_ECEF(UAV& uav);
 
-    bool init(std::shared_ptr<INode_Descriptor> descriptor) override;
-    std::shared_ptr<INode_Descriptor> get_descriptor() const override;
+    bool init(std::shared_ptr<uav::INode_Descriptor> descriptor) override;
+    std::shared_ptr<uav::INode_Descriptor> get_descriptor() const override;
 
-    bool set_config(std::shared_ptr<INode_Config> config) override;
-    std::shared_ptr<INode_Config> get_config() const override;
+    bool set_config(std::shared_ptr<uav::INode_Config> config) override;
+    std::shared_ptr<uav::INode_Config> get_config() const override;
 
     //auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
 
@@ -53,8 +56,8 @@ private:
 
     UAV& m_uav;
 
-    std::shared_ptr<KF_ECEF_Descriptor> m_descriptor;
-    std::shared_ptr<KF_ECEF_Config> m_config;
+    std::shared_ptr<uav::KF_ECEF_Descriptor> m_descriptor;
+    std::shared_ptr<uav::KF_ECEF_Config> m_config;
 
     q::Clock::duration m_dt = q::Clock::duration(0);
 
