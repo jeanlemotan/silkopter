@@ -50,17 +50,9 @@ private:
     std::shared_ptr<PIGPIO_Descriptor> m_descriptor;
     std::shared_ptr<PIGPIO_Config> m_config;
 
-    struct PWM_Channel
-    {
-        bool is_servo = false;
-        uint32_t rate = 0;
-        //sz::PIGPIO::PWM_Config* config = nullptr;
-        uint32_t gpio = 0;
-        q::Path stream_path;
-        std::weak_ptr<stream::IPWM> stream;
-    };
+    struct Channel;
 
-    std::vector<PWM_Channel> m_pwm_channels;
+    std::vector<std::unique_ptr<Channel>> m_channels;
 
     void set_pwm_value(size_t idx, float value);
 };

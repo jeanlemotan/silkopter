@@ -25,6 +25,17 @@ namespace silk
 namespace node
 {
 
+struct PIGPIO::Channel
+{
+    std::shared_ptr<const PIGPIO_Config::IChannel> config;
+    bool is_servo = false;
+    uint32_t rate = 0;
+    uint32_t gpio = 0;
+    q::Path stream_path;
+    std::weak_ptr<stream::IPWM> stream;
+};
+
+
 PIGPIO::PIGPIO(UAV& uav)
     : m_uav(uav)
     , m_descriptor(new PIGPIO_Descriptor())
@@ -40,9 +51,9 @@ PIGPIO::~PIGPIO()
 auto PIGPIO::get_inputs() const -> std::vector<Input>
 {
     std::vector<Input> inputs;
-    for (PWM_Channel const& channel: m_pwm_channels)
+    for (std::unique_ptr<Channel> const& channel: m_channels)
     {
-        inputs.push_back({stream::IPWM::TYPE, channel.rate, q::util::format<std::string>("GPIO {}", channel.gpio), channel.stream_path});
+        inputs.push_back({stream::IPWM::TYPE, channel->rate, q::util::format<std::string>("GPIO {}", channel->gpio), channel->stream_path});
     }
     return inputs;
 }
@@ -66,44 +77,52 @@ auto PIGPIO::init() -> bool
 {
 #define SETUP_CHANNEL(GPIO)\
     {\
-        sz::PIGPIO::PWM_Channel* init_params = &m_descriptor->gpio_##GPIO;\
-        if (init_params->enabled)\
+        PIGPIO_Descriptor::Channel const& channel_descriptor = m_descriptor->get_gpio_##GPIO();\
+        if (channel_descriptor.get_enabled())\
         {\
-            PWM_Channel ch;\
-            ch.is_servo = init_params->servo;\
-            ch.rate = init_params->rate;\
+            Channel ch;\
+            ch.is_servo = channel_descriptor.get_servo_signal();\
+            ch.rate = channel_descriptor.get_rate();\
             ch.gpio = GPIO;\
-            ch.config = &m_config->gpio_##GPIO;\
-            m_pwm_channels.push_back(ch);\
+            if (ch.is_servo)\
+            {\
+                m_config->set_gpio_##GPIO(std::shared_ptr<PIGPIO_Config::IChannel>(new PIGPIO_Config::Servo_Channel));\
+            }\
+            else\
+            {\
+                m_config->set_gpio_##GPIO(std::shared_ptr<PIGPIO_Config::IChannel>(new PIGPIO_Config::PWM_Channel));\
+            }\
+            ch.config = m_config->get_gpio_##GPIO();\
+            m_channels.emplace_back(new Channel(ch));\
         }\
     }
 
-//    SETUP_CHANNEL(2);
-//    SETUP_CHANNEL(3);
-//    SETUP_CHANNEL(4);
-//    SETUP_CHANNEL(5);
-//    SETUP_CHANNEL(6);
-//    SETUP_CHANNEL(7);
-//    SETUP_CHANNEL(8);
-//    SETUP_CHANNEL(9);
-//    SETUP_CHANNEL(10);
-//    SETUP_CHANNEL(11);
-//    SETUP_CHANNEL(12);
-//    SETUP_CHANNEL(13);
-//    SETUP_CHANNEL(14);
-//    SETUP_CHANNEL(15);
-//    SETUP_CHANNEL(16);
-//    SETUP_CHANNEL(17);
-//    SETUP_CHANNEL(18);
-//    SETUP_CHANNEL(19);
-//    SETUP_CHANNEL(20);
-//    SETUP_CHANNEL(21);
-//    SETUP_CHANNEL(22);
-//    SETUP_CHANNEL(23);
-//    SETUP_CHANNEL(24);
-//    SETUP_CHANNEL(25);
-//    SETUP_CHANNEL(26);
-//    SETUP_CHANNEL(27);
+    SETUP_CHANNEL(2);
+    SETUP_CHANNEL(3);
+    SETUP_CHANNEL(4);
+    SETUP_CHANNEL(5);
+    SETUP_CHANNEL(6);
+    SETUP_CHANNEL(7);
+    SETUP_CHANNEL(8);
+    SETUP_CHANNEL(9);
+    SETUP_CHANNEL(10);
+    SETUP_CHANNEL(11);
+    SETUP_CHANNEL(12);
+    SETUP_CHANNEL(13);
+    SETUP_CHANNEL(14);
+    SETUP_CHANNEL(15);
+    SETUP_CHANNEL(16);
+    SETUP_CHANNEL(17);
+    SETUP_CHANNEL(18);
+    SETUP_CHANNEL(19);
+    SETUP_CHANNEL(20);
+    SETUP_CHANNEL(21);
+    SETUP_CHANNEL(22);
+    SETUP_CHANNEL(23);
+    SETUP_CHANNEL(24);
+    SETUP_CHANNEL(25);
+    SETUP_CHANNEL(26);
+    SETUP_CHANNEL(27);
 #undef SETUP_CHANNEL
 
 
@@ -118,9 +137,9 @@ auto PIGPIO::init() -> bool
     }
 
     //first validate
-    for (size_t i = 0; i < m_pwm_channels.size(); i++)
+    for (size_t i = 0; i < m_channels.size(); i++)
     {
-        auto const& channel = m_pwm_channels[i];
+        Channel const& channel = *m_channels[i];
         if (channel.is_servo && channel.rate > 400)
         {
             QLOGE("channel {} on GPIO {}: max rate for servo channels is 400Hz", i, channel.gpio);
@@ -146,9 +165,9 @@ auto PIGPIO::init() -> bool
 
     //first of all turn on the pull-down to that if the board is reset of powerred off the motors don't start spinning
     //after a restart the GPIO pins are configured as inputs so their state is floating. Most of the time this results in a high pin
-    for (size_t i = 0; i < m_pwm_channels.size(); i++)
+    for (size_t i = 0; i < m_channels.size(); i++)
     {
-        auto const& channel = m_pwm_channels[i];
+        Channel const& channel = *m_channels[i];
         if (gpioSetPullUpDown(channel.gpio, PI_PUD_DOWN) < 0)
         {
             QLOGE("channel {} on GPIO {}: Cannot set pull down mode", i, channel.gpio);
@@ -162,9 +181,9 @@ auto PIGPIO::init() -> bool
      }
 
     //now configure the pin for PWM or servo
-    for (size_t i = 0; i < m_pwm_channels.size(); i++)
+    for (size_t i = 0; i < m_channels.size(); i++)
     {
-        auto const& channel = m_pwm_channels[i];
+        Channel const& channel = *m_channels[i];
         auto f = gpioSetPWMfrequency(channel.gpio, channel.rate);
         if (f < 0)
         {
@@ -204,13 +223,17 @@ void PIGPIO::set_pwm_value(size_t idx, float value)
     QLOG_TOPIC("pigpio::set_pwm_value");
 
 #if defined RASPBERRY_PI
-    auto const& channel = m_pwm_channels[idx];
+    Channel const& channel = *m_channels[idx];
     if (channel.is_servo)
     {
-        auto const& config = *m_pwm_channels[idx].config;
+        PIGPIO_Config::Servo_Channel const& config = *(PIGPIO_Config::Servo_Channel const*)m_channels[idx].config.get();
         value = math::clamp(value, 0.f, 1.f);
-        float pulse = value * (config.max_servo - config.min_servo);
-        gpioPWM(m_pwm_channels[idx].gpio, (config.min_servo + pulse) * 1000);
+        float pulse = value * (config.max - config.min);
+        gpioPWM(channel.gpio, (config.min + pulse) * 1000);
+    }
+    else
+    {
+        QASSERT(0);
     }
 #else
     QUNUSED(idx);
@@ -223,10 +246,10 @@ void PIGPIO::process()
 {
     QLOG_TOPIC("pigpio::process");
 
-    for (size_t i = 0; i < m_pwm_channels.size(); i++)
+    for (size_t i = 0; i < m_channels.size(); i++)
     {
-        auto& ch = m_pwm_channels[i];
-        auto stream = ch.stream.lock();
+        std::unique_ptr<Channel> const& ch = m_channels[i];
+        auto stream = ch->stream.lock();
         if (stream)
         {
             auto const& samples = stream->get_samples();
@@ -249,19 +272,20 @@ void PIGPIO::set_input_stream_path(size_t idx, q::Path const& path)
 {
     auto input_stream = m_uav.get_streams().find_by_name<stream::IPWM>(path.get_as<std::string>());
     auto rate = input_stream ? input_stream->get_rate() : 0u;
-    if (rate != m_pwm_channels[idx].rate)
+    std::unique_ptr<Channel>& channel = m_channels[idx];
+    if (rate != channel->rate)
     {
         if (input_stream)
         {
-            QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", path, m_pwm_channels[idx].rate, rate);
+            QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", path, channel->rate, rate);
         }
-        m_pwm_channels[idx].stream.reset();
-        m_pwm_channels[idx].stream_path = q::Path();
+        channel->stream.reset();
+        channel->stream_path = q::Path();
     }
     else
     {
-        m_pwm_channels[idx].stream = input_stream;
-        m_pwm_channels[idx].stream_path = path;
+        channel->stream = input_stream;
+        channel->stream_path = path;
     }
 }
 
@@ -279,58 +303,10 @@ auto PIGPIO::set_config(std::shared_ptr<INode_Config> config) -> bool
 
     *m_config = *specialized;
 
-    //todo - fix this
-//    for (size_t i = 2; i <= 27; i++)
-//    {
-//        auto it = std::find_if(m_pwm_channels.begin(), m_pwm_channels.end(), [i](PWM_Channel const& channel) { return channel.gpio == i; });
-//        if (it != m_pwm_channels.end())
-//        {
-//            PWM_Channel& channel = *it;
-//            if (it->is_servo)
-//            {
-//                channel.config->min_servo = math::clamp(channel.config->min_servo, MIN_SERVO_MS, MAX_SERVO_MS);
-//                channel.config->max_servo = math::clamp(channel.config->max_servo, channel.config->min_servo, MAX_SERVO_MS);
-//            }
-//            else
-//            {
-//                channel.config->min_pwm = math::clamp(channel.config->min_pwm, 0.f, 1.f);
-//                channel.config->max_pwm = math::clamp(channel.config->max_pwm, channel.config->min_pwm, 1.f);
-//            }
-//        }
-//    }
-
     return true;
 }
 auto PIGPIO::get_config() const -> std::shared_ptr<INode_Config>
 {
-    //todo - fix this
-//    rapidjson::Document json;
-//    autojsoncxx::to_document(*m_config, json);
-
-//    for (size_t i = 2; i <= 27; i++)
-//    {
-//        auto it = std::find_if(m_pwm_channels.begin(), m_pwm_channels.end(), [i](PWM_Channel const& channel) { return channel.gpio == i; });
-//        if (it != m_pwm_channels.end())
-//        {
-//            if (it->is_servo)
-//            {
-//                jsonutil::remove_value(json, q::Path(q::util::format<q::String>("GPIO {}/Min PWM", i)));
-//                jsonutil::remove_value(json, q::Path(q::util::format<q::String>("GPIO {}/Max PWM", i)));
-//            }
-//            else
-//            {
-//                jsonutil::remove_value(json, q::Path(q::util::format<q::String>("GPIO {}/Min Servo (ms)", i)));
-//                jsonutil::remove_value(json, q::Path(q::util::format<q::String>("GPIO {}/Max Servo (ms)", i)));
-//            }
-//        }
-//        else
-//        {
-//            jsonutil::remove_value(json, q::Path(q::util::format<q::String>("GPIO {}", i)));
-//        }
-//    }
-
-
-//    return std::move(json);
     return m_config;
 }
 
