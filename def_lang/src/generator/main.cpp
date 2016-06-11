@@ -4,6 +4,7 @@
 #include "def_lang/IMember_Def.h"
 #include "def_lang/IVector_Type.h"
 #include "def_lang/IVariant_Type.h"
+#include "def_lang/IOptional_Type.h"
 #include "def_lang/IPoly_Type.h"
 #include "def_lang/IEnum_Type.h"
 #include "def_lang/IEnum_Value.h"
@@ -19,6 +20,8 @@
 #include "def_lang/impl/Initializer_List.h"
 #include "def_lang/Mapper.h"
 #include "def_lang/JSON_Serializer.h"
+
+#include "MurmurHash2.h"
 
 #include <chrono>
 #include <set>
@@ -50,6 +53,7 @@ static ts::Result<void> generate_code(Context& context, ts::ast::Node const& ast
 
 static ts::Symbol_Path s_namespace;
 static std::string s_extra_include;
+static bool s_enum_hashes = false;
 
 
 int main(int argc, char **argv)
@@ -66,6 +70,7 @@ int main(int argc, char **argv)
         ("nice", "Format the AST JSON nicely")
         ("namespace", po::value<std::string>(), "The namespace where to put it all")
         ("xheader", po::value<std::string>(), "A custom support header that will be included in the generated code files")
+        ("enum-hashes", po::value<bool>(), "Serialize enums as hashes instead of strings")
         ("def", po::value<std::string>(&def_filename), "Definition file")
         ("out", po::value<std::string>(&out_filename), "Output file");
 
@@ -109,6 +114,7 @@ int main(int argc, char **argv)
     bool nice_json = vm.count("nice") != 0;
     s_namespace = vm.count("namespace") ? ts::Symbol_Path(vm["namespace"].as<std::string>()) : ts::Symbol_Path();
     s_extra_include = vm.count("xheader") ? vm["xheader"].as<std::string>() : std::string();
+    s_enum_hashes = vm.count("enum-hashes") ? vm["enum-hashes"].as<bool>() : false;
 
     ts::ast::Builder builder;
 
@@ -191,6 +197,14 @@ static ts::Symbol_Path get_native_type(ts::IDeclaration_Scope const& scope, ts::
             str += scope.get_symbol_path().get_path_to(get_native_type(scope, *inner_type)).to_string() + ",";
         }
         str.pop_back();
+        str += ">";
+        return ts::Symbol_Path(str);
+    }
+    else if (ts::IOptional_Type const* v = dynamic_cast<ts::IOptional_Type const*>(&type))
+    {
+        std::string str = "boost::optional<";
+        std::shared_ptr<const ts::IType> const& inner_type = v->get_inner_type();
+        str += scope.get_symbol_path().get_path_to(get_native_type(scope, *inner_type)).to_string();
         str += ">";
         return ts::Symbol_Path(str);
     }
@@ -381,6 +395,7 @@ static void generate_member_def_setter_getter_code(Context& context, ts::IStruct
     bool has_mutable_getter = std::dynamic_pointer_cast<const ts::IStruct_Type>(member_def.get_type()) != nullptr ||
                                 std::dynamic_pointer_cast<const ts::IVector_Type>(member_def.get_type()) != nullptr ||
                                 std::dynamic_pointer_cast<const ts::IVariant_Type>(member_def.get_type()) != nullptr ||
+                                std::dynamic_pointer_cast<const ts::IOptional_Type>(member_def.get_type()) != nullptr ||
                                 std::dynamic_pointer_cast<const ts::IPoly_Type>(member_def.get_type()) != nullptr;
 
     if (has_mutable_getter)
@@ -518,40 +533,99 @@ static ts::Result<void> generate_enum_type_serialization_code(Context& context, 
     }
     context.serialization_code_generated.insert(native_type_str);
 
-    context.serialization_section_h += "ts::Result<void> deserialize(" + native_type_str + "& value, ts::serialization::Value const& sz_value);\n";
-    context.serialization_section_cpp += "ts::Result<void> deserialize(" + native_type_str + "& value, ts::serialization::Value const& sz_value)\n"
-                                           "{\n"
-                                           "  if (!sz_value.is_string()) { return ts::Error(\"Expected string or null value when deserializing\"); }\n"
-                                           "  std::string const& str = sz_value.get_as_string();\n"
-                                           "  if (false) { return ts::Error(\"\"); } //this is here just to have the next items with 'else if'\n";
-
-    for (size_t i = 0; i < type.get_item_count(); i++)
+    if (s_enum_hashes)
     {
-        std::string item_str = type.get_item(i)->get_name();
-        context.serialization_section_cpp += "  else if (str == \"" + item_str + "\")\n"
-                                             "  {\n"
-                                             "    value = " + native_type_str + "::" + item_str + ";\n"
-                                             "  }\n";
+        std::vector<uint32_t> hashes;
+        {
+            std::map<uint32_t, std::string> mm;
+            for (size_t i = 0; i < type.get_item_count(); i++)
+            {
+                std::string const& item_str = type.get_item(i)->get_name();
+                uint32_t hash = MurmurHash2(item_str.data(), static_cast<int>(item_str.size()), 0);
+                auto it = mm.find(hash);
+                if (it != mm.end())
+                {
+                    return ts::Error("Enum items '" + item_str + "' and '" + it->second + "' have the same murmur hash: " + std::to_string(hash));
+                }
+                mm.emplace(hash, item_str);
+                hashes.push_back(hash);
+            }
+        }
+
+        context.serialization_section_h += "ts::Result<void> deserialize(" + native_type_str + "& value, ts::serialization::Value const& sz_value);\n";
+        context.serialization_section_cpp += "ts::Result<void> deserialize(" + native_type_str + "& value, ts::serialization::Value const& sz_value)\n"
+                                                "{\n"
+                                                "  if (!sz_value.is_integral_number()) { return ts::Error(\"Expected integral number value when deserializing\"); }\n"
+                                                "  uint32_t key = static_cast<uint32_t>(sz_value.get_as_integral_number());\n"
+                                                "  typedef " + native_type_str + " _etype;\n"
+                                                "  static std::map<uint32_t, _etype> s_map = {\n";
+        for (size_t i = 0; i < type.get_item_count(); i++)
+        {
+            std::string const& item_str = type.get_item(i)->get_name();
+            uint32_t hash = hashes[i];
+            context.serialization_section_cpp += "    { " + std::to_string(hash) + ", _etype::" + item_str + " },\n";
+        }
+        context.serialization_section_cpp +=   "  };\n"
+                                               "  auto it = s_map.find(key);\n"
+                                               "  if (it == s_map.end()) { return ts::Error(\"Cannot find item \" + std::to_string(key) + \" when deserializing\"); }\n"
+                                               "  value = it->second;\n"
+                                               "  return ts::success;\n"
+                                               "}\n";
+
+        context.serialization_section_h += "ts::Result<ts::serialization::Value> serialize(" + native_type_str + " const& value);\n";
+        context.serialization_section_cpp += "ts::Result<ts::serialization::Value> serialize(" + native_type_str + " const& value)\n"
+                                                                                                                   "{\n"
+                                                                                                                   "  typedef " + native_type_str + " _etype;\n"
+                                                                                                                                                    "  static std::map<_etype, uint32_t> s_map = {\n";
+        for (size_t i = 0; i < type.get_item_count(); i++)
+        {
+            std::string const& item_str = type.get_item(i)->get_name();
+            uint32_t hash = hashes[i];
+            context.serialization_section_cpp += "    { _etype::" + item_str + ", " + std::to_string(hash) + " },\n";
+        }
+        context.serialization_section_cpp += "  };\n"
+                                             "  auto it = s_map.find(value);\n"
+                                             "  if (it == s_map.end()) { return ts::Error(\"Cannot serialize type\"); }\n"
+                                             "  return ts::serialization::Value(it->second);\n"
+                                             "}\n";
     }
-    context.serialization_section_cpp += "  else { return ts::Error(\"Cannot find item '\" + str + \"' when deserializing\"); }\n"
-                                         "  return ts::success;\n"
-                                         "}\n";
-
-    context.serialization_section_h += "ts::Result<ts::serialization::Value> serialize(" + native_type_str + " const& value);\n";
-    context.serialization_section_cpp += "ts::Result<ts::serialization::Value> serialize(" + native_type_str + " const& value)\n"
-                                         "{\n"
-                                         "  if (false) { return ts::Error(\"\"); } //this is here just to have the next items with 'else if'\n";
-
-    for (size_t i = 0; i < type.get_item_count(); i++)
+    else
     {
-        std::string item_str = type.get_item(i)->get_name();
-        context.serialization_section_cpp += "  else if (value == " + native_type_str + "::" + item_str + ")\n"
-                                             "  {\n"
-                                             "    return ts::serialization::Value(\"" + item_str + "\");\n"
-                                             "  }\n";
+        context.serialization_section_h += "ts::Result<void> deserialize(" + native_type_str + "& value, ts::serialization::Value const& sz_value);\n";
+        context.serialization_section_cpp += "ts::Result<void> deserialize(" + native_type_str + "& value, ts::serialization::Value const& sz_value)\n"
+                                               "{\n"
+                                               "  if (!sz_value.is_string()) { return ts::Error(\"Expected string value when deserializing\"); }\n"
+                                               "  std::string const& key = sz_value.get_as_string();\n"
+                                               "  typedef " + native_type_str + " _etype;\n"
+                                               "  static std::map<std::string, _etype> s_map = {\n";
+        for (size_t i = 0; i < type.get_item_count(); i++)
+        {
+            std::string const& item_str = type.get_item(i)->get_name();
+            context.serialization_section_cpp += "    { \"" + item_str + "\", _etype::" + item_str + " },\n";
+        }
+        context.serialization_section_cpp +=   "  };\n"
+                                               "  auto it = s_map.find(key);\n"
+                                               "  if (it == s_map.end()) { return ts::Error(\"Cannot find item \" + key + \" when deserializing\"); }\n"
+                                               "  value = it->second;\n"
+                                               "  return ts::success;\n"
+                                               "}\n";
+
+        context.serialization_section_h += "ts::Result<ts::serialization::Value> serialize(" + native_type_str + " const& value);\n";
+        context.serialization_section_cpp += "ts::Result<ts::serialization::Value> serialize(" + native_type_str + " const& value)\n"
+                                             "{\n"
+                                             "  typedef " + native_type_str + " _etype;\n"
+                                             "  static std::map<_etype, std::string> s_map = {\n";
+        for (size_t i = 0; i < type.get_item_count(); i++)
+        {
+            std::string const& item_str = type.get_item(i)->get_name();
+            context.serialization_section_cpp += "    { _etype::" + item_str + ", \"" +  item_str + "\" },\n";
+        }
+        context.serialization_section_cpp += "  };\n"
+                                             "  auto it = s_map.find(value);\n"
+                                             "  if (it == s_map.end()) { return ts::Error(\"Cannot serialize type\"); }\n"
+                                             "  return ts::serialization::Value(it->second);\n"
+                                             "}\n";
     }
-    context.serialization_section_cpp += "  else { return ts::Error(\"Cannot serialize type\"); }\n"
-                                         "}\n";
     return ts::success;
 }
 
@@ -586,11 +660,7 @@ static ts::Result<void> generate_poly_type_code(Context& context, ts::IPoly_Type
     context.serialization_section_h += "ts::Result<void> deserialize(" + native_type_str + "& value, ts::serialization::Value const& sz_value);\n";
     context.serialization_section_cpp += "ts::Result<void> deserialize(" + native_type_str + "& value, ts::serialization::Value const& sz_value)\n"
                                            "{\n"
-                                           "  if (sz_value.is_empty())\n"
-                                           "  {\n"
-                                           "    value = nullptr;"
-                                           "    return ts::success;\n"
-                                           "  }\n"
+                                           "  if (sz_value.is_empty()) { value = nullptr; return ts::success; }\n"
                                            "  if (!sz_value.is_object()) { return ts::Error(\"Expected object or null value when deserializing\"); }\n"
                                            "  auto const* type_sz_value = sz_value.find_object_member_by_name(\"type\");\n"
                                            "  if (!type_sz_value || !type_sz_value->is_string()) { return ts::Error(\"Expected 'type' string value when deserializing\"); }\n"
@@ -735,6 +805,33 @@ static ts::Result<void> generate_variant_type_code(Context& context, ts::IVarian
                                              "  }\n";
     }
     context.serialization_section_cpp += "  else { return ts::Error(\"Cannot serialize type\"); }\n"
+                                         "}\n";
+    return ts::success;
+}
+static ts::Result<void> generate_optional_type_code(Context& context, ts::IOptional_Type const& type)
+{
+    std::string native_type_str = get_native_type(context.parent_scope, type).to_string();
+    if (context.serialization_code_generated.find(native_type_str) != context.serialization_code_generated.end())
+    {
+        return ts::success;
+    }
+    context.serialization_code_generated.insert(native_type_str);
+
+    std::string native_inner_type_str = get_native_type(context.parent_scope, *type.get_inner_type()).to_string();
+
+    context.serialization_section_h += "ts::Result<void> deserialize(" + native_type_str + "& value, ts::serialization::Value const& sz_value);\n";
+    context.serialization_section_cpp += "ts::Result<void> deserialize(" + native_type_str + "& value, ts::serialization::Value const& sz_value)\n"
+                                           "{\n"
+                                           "  if (sz_value.is_empty()) { value = boost::none; return ts::success; }\n"
+                                           "  value = " + native_inner_type_str + "();\n"
+                                           "  return deserialize(*value, sz_value);\n"
+                                           "}\n";
+
+    context.serialization_section_h += "ts::Result<ts::serialization::Value> serialize(" + native_type_str + " const& value);\n";
+    context.serialization_section_cpp += "ts::Result<ts::serialization::Value> serialize(" + native_type_str + " const& value)\n"
+                                         "{\n"
+                                         "  if (!value) { return ts::serialization::Value sz_value(ts::serialization::Value::Type::EMPTY); }\n"
+                                         "  return serialize(*value);\n"
                                          "}\n";
     return ts::success;
 }
@@ -956,6 +1053,10 @@ static ts::Result<void> generate_type_code(Context& context, ts::IType const& _t
     else if (ts::IVariant_Type const* type = dynamic_cast<ts::IVariant_Type const*>(&_type))
     {
         return generate_variant_type_code(context, *type);
+    }
+    else if (ts::IOptional_Type const* type = dynamic_cast<ts::IOptional_Type const*>(&_type))
+    {
+        return generate_optional_type_code(context, *type);
     }
     else if (ts::IVector_Type const* type = dynamic_cast<ts::IVector_Type const*>(&_type))
     {

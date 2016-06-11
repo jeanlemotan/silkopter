@@ -49,7 +49,9 @@ LIBS += -L../../lib/$${DEST_FOLDER} -ldef_lang
 LIBS += -lboost_program_options
 
 HEADERS += \
+    ../../src/generator/MurmurHash2.h
 
 SOURCES += \
-    ../../src/generator/main.cpp
+    ../../src/generator/main.cpp \
+    ../../src/generator/MurmurHash2.cpp
 

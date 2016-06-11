@@ -11,6 +11,7 @@
 #include "def_lang/impl/Vector_Type.h"
 #include "def_lang/impl/Poly_Type.h"
 #include "def_lang/impl/Variant_Type.h"
+#include "def_lang/impl/Optional_Type.h"
 
 namespace ts
 {
@@ -158,6 +159,10 @@ Result<std::shared_ptr<const ITemplated_Type>> Type_System::instantiate_template
     else if (name == "variant")
     {
         type = std::make_shared<ts::Variant_Type>(instanced_name);
+    }
+    else if (name == "optional")
+    {
+        type = std::make_shared<ts::Optional_Type>(instanced_name);
     }
     else
     {

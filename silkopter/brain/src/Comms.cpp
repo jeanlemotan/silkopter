@@ -427,9 +427,6 @@ static void pack_node_data(Comms::Channels::Setup& channel, node::INode const& n
     //channel.pack_param(node.get_config());
 }
 
-
-
-
 void Comms::handle_clock()
 {
     auto& channel = m_channels->setup;
