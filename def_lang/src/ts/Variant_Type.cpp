@@ -3,6 +3,7 @@
 #include "def_lang/IAttribute.h"
 #include "def_lang/impl/UI_Name_Attribute.h"
 #include "def_lang/impl/Native_Type_Attribute.h"
+#include "def_lang/Qualified_Type.h"
 
 namespace ts
 {
@@ -32,7 +33,7 @@ Result<void> Variant_Type::init(std::vector<std::shared_ptr<const ITemplate_Argu
 
     for (std::shared_ptr<const ITemplate_Argument> argument: arguments)
     {
-        std::shared_ptr<const IType> inner_type = std::dynamic_pointer_cast<const IType>(argument);
+        std::shared_ptr<const Qualified_Type> inner_type = std::dynamic_pointer_cast<const Qualified_Type>(argument);
         if (!inner_type)
         {
             return Error("Invalid template argument. Expected type");
@@ -86,24 +87,19 @@ std::shared_ptr<const IType> Variant_Type::get_aliased_type() const
     return m_aliased_type;
 }
 
-std::string Variant_Type::get_template_instantiation_string() const
-{
-    return get_symbol_path().to_string();
-}
-
-size_t Variant_Type::get_inner_type_count() const
+size_t Variant_Type::get_inner_qualified_type_count() const
 {
     return m_inner_types.size();
 }
 
-std::shared_ptr<const IType> Variant_Type::get_inner_type(size_t idx) const
+std::shared_ptr<const Qualified_Type> Variant_Type::get_inner_qualified_type(size_t idx) const
 {
     return m_inner_types[idx];
 }
 
-boost::optional<size_t> Variant_Type::find_inner_type_idx(std::shared_ptr<const IType> type) const
+boost::optional<size_t> Variant_Type::find_inner_qualified_type_idx(std::shared_ptr<const IType> type) const
 {
-    auto it = std::find_if(m_inner_types.begin(), m_inner_types.end(), [&](std::shared_ptr<const IType> const& t) { return t == type; });
+    auto it = std::find_if(m_inner_types.begin(), m_inner_types.end(), [&](std::shared_ptr<const Qualified_Type> const& t) { return t->get_type() == type; });
     return it != m_inner_types.end() ? std::distance(m_inner_types.begin(), it) : boost::optional<size_t>();
 }
 

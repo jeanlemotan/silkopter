@@ -17,17 +17,16 @@ ADC_Ammeter::ADC_Ammeter(UAV& uav)
     m_output_stream = std::make_shared<Output_Stream>();
 }
 
-auto ADC_Ammeter::init(std::shared_ptr<uav::INode_Descriptor> descriptor) -> bool
+auto ADC_Ammeter::init(uav::INode_Descriptor const& descriptor) -> bool
 {
     QLOG_TOPIC("adc_ammeter::init");
 
-    auto specialized = std::dynamic_pointer_cast<uav::ADC_Ammeter_Descriptor>(descriptor);
+    auto specialized = dynamic_cast<uav::ADC_Ammeter_Descriptor const*>(&descriptor);
     if (!specialized)
     {
         QLOGE("Wrong descriptor type");
         return false;
     }
-
     *m_descriptor = *specialized;
 
     return init();
@@ -85,27 +84,26 @@ void ADC_Ammeter::set_input_stream_path(size_t idx, q::Path const& path)
     m_accumulator.set_stream_path(idx, path, m_output_stream->get_rate(), m_uav);
 }
 
-auto ADC_Ammeter::set_config(std::shared_ptr<uav::INode_Config> config) -> bool
+auto ADC_Ammeter::set_config(uav::INode_Config const& config) -> bool
 {
     QLOG_TOPIC("adc_ammeter::set_config");
 
-    auto specialized = std::dynamic_pointer_cast<uav::ADC_Ammeter_Config>(config);
+    auto specialized = dynamic_cast<uav::ADC_Ammeter_Config const*>(&config);
     if (!specialized)
     {
         QLOGE("Wrong config type");
         return false;
     }
-
     *m_config = *specialized;
 
     return true;
 }
-auto ADC_Ammeter::get_config() const -> std::shared_ptr<uav::INode_Config>
+auto ADC_Ammeter::get_config() const -> std::shared_ptr<const uav::INode_Config>
 {
     return m_config;
 }
 
-auto ADC_Ammeter::get_descriptor() const -> std::shared_ptr<uav::INode_Descriptor>
+auto ADC_Ammeter::get_descriptor() const -> std::shared_ptr<const uav::INode_Descriptor>
 {
     return m_descriptor;
 }

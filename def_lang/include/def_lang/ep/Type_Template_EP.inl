@@ -17,12 +17,6 @@ Type_Template_EP<Traits>::Type_Template_EP(Type_Template_EP<Traits> const& other
 }
 
 template<typename Traits>
-std::string Type_Template_EP<Traits>::get_template_instantiation_string() const
-{
-    return get_symbol_path().to_string();
-}
-
-template<typename Traits>
 std::string const& Type_Template_EP<Traits>::get_ui_name() const
 {
     return m_ui_name.empty() ? get_name() : m_ui_name;

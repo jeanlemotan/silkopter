@@ -80,7 +80,7 @@ public:
 
     void save_settings();
 
-    auto set_uav_descriptor(std::shared_ptr<uav::IUAV_Descriptor> descriptor) -> bool;
+    auto set_uav_descriptor(uav::IUAV_Descriptor const& descriptor) -> bool;
     auto get_uav_descriptor() const   -> std::shared_ptr<const uav::IUAV_Descriptor>;
 
     template<class Descriptor>
@@ -114,12 +114,12 @@ protected:
     auto get_telemetry_data() const -> Telemetry_Data const&;
 
 private:
-    auto set_multirotor_descriptor(std::shared_ptr<uav::Multirotor_Descriptor> descriptor) -> bool;
+    auto set_multirotor_descriptor(uav::Multirotor_Descriptor const& descriptor) -> bool;
 
     void generate_settings_file();
 
-    auto create_bus(std::string const& type, std::string const& name, std::shared_ptr<uav::IBus_Descriptor> descriptor) -> std::shared_ptr<bus::IBus>;
-    auto create_node(std::string const& type, std::string const& name, std::shared_ptr<uav::INode_Descriptor> descriptor) -> std::shared_ptr<node::INode>;
+    auto create_bus(std::string const& type, std::string const& name, uav::IBus_Descriptor const& descriptor) -> std::shared_ptr<bus::IBus>;
+    auto create_node(std::string const& type, std::string const& name, uav::INode_Descriptor const& descriptor) -> std::shared_ptr<node::INode>;
 
     auto remove_node(std::shared_ptr<node::INode> node) -> bool;
 

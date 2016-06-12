@@ -32,11 +32,11 @@ class Multirotor_Pilot : public IPilot
 public:
     Multirotor_Pilot(UAV& uav, Comms& comms);
 
-    bool init(std::shared_ptr<uav::INode_Descriptor> descriptor) override;
-    std::shared_ptr<uav::INode_Descriptor> get_descriptor() const override;
+    bool init(uav::INode_Descriptor const& descriptor) override;
+    std::shared_ptr<const uav::INode_Descriptor> get_descriptor() const override;
 
-    bool set_config(std::shared_ptr<uav::INode_Config> config) override;
-    std::shared_ptr<uav::INode_Config> get_config() const override;
+    bool set_config(uav::INode_Config const& config) override;
+    std::shared_ptr<const uav::INode_Config> get_config() const override;
 
     //auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
 

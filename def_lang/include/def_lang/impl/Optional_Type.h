@@ -24,18 +24,16 @@ public:
     std::string const& get_ui_name() const override;
     Symbol_Path get_native_type() const override;
 
-    std::string get_template_instantiation_string() const override;
-
     std::shared_ptr<IValue> create_value() const override;
     std::shared_ptr<IOptional_Value> create_specialized_value() const override;
 
-    std::shared_ptr<const IType> get_inner_type() const override;
+    std::shared_ptr<const Qualified_Type> get_inner_qualified_type() const override;
 
 protected:
     Result<void> validate_attribute(IAttribute const& attribute) override;
 
 private:
-    std::shared_ptr<const IType> m_inner_type;
+    std::shared_ptr<const Qualified_Type> m_inner_qualified_type;
     std::shared_ptr<const IType> m_aliased_type;
     std::string m_ui_name;
     Symbol_Path m_native_type;

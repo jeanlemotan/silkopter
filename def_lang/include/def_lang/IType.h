@@ -9,7 +9,7 @@ namespace ts
 
 class IValue;
 
-class IType : virtual public ISymbol, virtual public IAttribute_Container, virtual public ITemplate_Argument
+class IType : virtual public ISymbol, virtual public IAttribute_Container
 {
 public:
     virtual ~IType() = default;

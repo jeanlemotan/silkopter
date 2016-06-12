@@ -14,6 +14,28 @@ namespace silk
 namespace uav
 {
 
+template<class T>
+struct Poly
+{
+  Poly() = default;
+  explicit Poly(T* ptr) : ptr(ptr) {}
+  explicit Poly(std::shared_ptr<T> ptr) : ptr(ptr) {}
+  Poly(Poly const& other) = default;
+  template <class U> Poly(Poly<U> const& other) : ptr(std::dynamic_pointer_cast<U>(other.ptr)) {}
+  Poly(Poly&& other) = default;
+  Poly& operator=(Poly const& other) = default;
+  Poly& operator=(Poly&& other) = default;
+  explicit operator bool() const { return ptr != nullptr; }
+  T* operator->() { return ptr.get(); }
+  T const* operator->() const { return ptr.get(); }
+  T& operator*() { return *ptr; }
+  T const& operator*() const { return *ptr; }
+  T* get() { return ptr.get(); }
+  T const* get() const { return ptr.get(); }
+private:
+  template<class U> friend class Poly;
+  std::shared_ptr<T> ptr;
+};
 // Returns the ast json from which a ast root node can be serialized
 std::string const& get_ast_json();
 typedef int8_t int8_t;
@@ -107,16 +129,16 @@ public:
     void set_type(std::string const& value);
     auto get_type() const -> std::string const&;
 
-    void set_descriptor(std::shared_ptr<IBus_Descriptor> const& value);
-    auto get_descriptor() const -> std::shared_ptr<IBus_Descriptor> const&;
-    auto get_descriptor() -> std::shared_ptr<IBus_Descriptor>&;
+    void set_descriptor(Poly<const IBus_Descriptor> const& value);
+    auto get_descriptor() const -> Poly<const IBus_Descriptor> const&;
+    auto get_descriptor() -> Poly<const IBus_Descriptor>&;
 
 
   private:
 
     std::string m_name = {};
     std::string m_type = {};
-    std::shared_ptr<IBus_Descriptor> m_descriptor = {};
+    Poly<const IBus_Descriptor> m_descriptor = {};
   };
 
   struct Node_Data
@@ -132,13 +154,13 @@ public:
     void set_type(std::string const& value);
     auto get_type() const -> std::string const&;
 
-    void set_descriptor(std::shared_ptr<INode_Descriptor> const& value);
-    auto get_descriptor() const -> std::shared_ptr<INode_Descriptor> const&;
-    auto get_descriptor() -> std::shared_ptr<INode_Descriptor>&;
+    void set_descriptor(Poly<const INode_Descriptor> const& value);
+    auto get_descriptor() const -> Poly<const INode_Descriptor> const&;
+    auto get_descriptor() -> Poly<const INode_Descriptor>&;
 
-    void set_config(std::shared_ptr<INode_Config> const& value);
-    auto get_config() const -> std::shared_ptr<INode_Config> const&;
-    auto get_config() -> std::shared_ptr<INode_Config>&;
+    void set_config(Poly<const INode_Config> const& value);
+    auto get_config() const -> Poly<const INode_Config> const&;
+    auto get_config() -> Poly<const INode_Config>&;
 
     void set_input_paths(std::vector<std::string> const& value);
     auto get_input_paths() const -> std::vector<std::string> const&;
@@ -149,17 +171,17 @@ public:
 
     std::string m_name = {};
     std::string m_type = {};
-    std::shared_ptr<INode_Descriptor> m_descriptor = {};
-    std::shared_ptr<INode_Config> m_config = {};
+    Poly<const INode_Descriptor> m_descriptor = {};
+    Poly<const INode_Config> m_config = {};
     std::vector<std::string> m_input_paths = {};
   };
 
   Settings() noexcept {};
   virtual ~Settings() noexcept {};
 
-  void set_uav_descriptor(std::shared_ptr<IUAV_Descriptor> const& value);
-  auto get_uav_descriptor() const -> std::shared_ptr<IUAV_Descriptor> const&;
-  auto get_uav_descriptor() -> std::shared_ptr<IUAV_Descriptor>&;
+  void set_uav_descriptor(Poly<const IUAV_Descriptor> const& value);
+  auto get_uav_descriptor() const -> Poly<const IUAV_Descriptor> const&;
+  auto get_uav_descriptor() -> Poly<const IUAV_Descriptor>&;
 
   void set_buses(std::vector<Settings::Bus_Data> const& value);
   auto get_buses() const -> std::vector<Settings::Bus_Data> const&;
@@ -172,7 +194,7 @@ public:
 
 private:
 
-  std::shared_ptr<IUAV_Descriptor> m_uav_descriptor = {};
+  Poly<const IUAV_Descriptor> m_uav_descriptor = {};
   std::vector<Settings::Bus_Data> m_buses = {};
   std::vector<Settings::Node_Data> m_nodes = {};
 };
@@ -1696,14 +1718,14 @@ public:
   PCA9685_Config() noexcept {};
   virtual ~PCA9685_Config() noexcept {};
 
-  void set_channels(std::vector<std::shared_ptr<PCA9685_Config::IChannel>> const& value);
-  auto get_channels() const -> std::vector<std::shared_ptr<PCA9685_Config::IChannel>> const&;
-  auto get_channels() -> std::vector<std::shared_ptr<PCA9685_Config::IChannel>>&;
+  void set_channels(std::vector<Poly<PCA9685_Config::IChannel>> const& value);
+  auto get_channels() const -> std::vector<Poly<PCA9685_Config::IChannel>> const&;
+  auto get_channels() -> std::vector<Poly<PCA9685_Config::IChannel>>&;
 
 
 private:
 
-  std::vector<std::shared_ptr<PCA9685_Config::IChannel>> m_channels = {};
+  std::vector<Poly<PCA9685_Config::IChannel>> m_channels = {};
 };
 
 struct PIGPIO_Descriptor : public INode_Descriptor
@@ -1932,139 +1954,139 @@ public:
   PIGPIO_Config() noexcept {};
   virtual ~PIGPIO_Config() noexcept {};
 
-  void set_gpio_2(std::shared_ptr<PIGPIO_Config::IChannel> const& value);
-  auto get_gpio_2() const -> std::shared_ptr<PIGPIO_Config::IChannel> const&;
-  auto get_gpio_2() -> std::shared_ptr<PIGPIO_Config::IChannel>&;
+  void set_gpio_2(Poly<PIGPIO_Config::IChannel> const& value);
+  auto get_gpio_2() const -> Poly<PIGPIO_Config::IChannel> const&;
+  auto get_gpio_2() -> Poly<PIGPIO_Config::IChannel>&;
 
-  void set_gpio_3(std::shared_ptr<PIGPIO_Config::IChannel> const& value);
-  auto get_gpio_3() const -> std::shared_ptr<PIGPIO_Config::IChannel> const&;
-  auto get_gpio_3() -> std::shared_ptr<PIGPIO_Config::IChannel>&;
+  void set_gpio_3(Poly<PIGPIO_Config::IChannel> const& value);
+  auto get_gpio_3() const -> Poly<PIGPIO_Config::IChannel> const&;
+  auto get_gpio_3() -> Poly<PIGPIO_Config::IChannel>&;
 
-  void set_gpio_4(std::shared_ptr<PIGPIO_Config::IChannel> const& value);
-  auto get_gpio_4() const -> std::shared_ptr<PIGPIO_Config::IChannel> const&;
-  auto get_gpio_4() -> std::shared_ptr<PIGPIO_Config::IChannel>&;
+  void set_gpio_4(Poly<PIGPIO_Config::IChannel> const& value);
+  auto get_gpio_4() const -> Poly<PIGPIO_Config::IChannel> const&;
+  auto get_gpio_4() -> Poly<PIGPIO_Config::IChannel>&;
 
-  void set_gpio_5(std::shared_ptr<PIGPIO_Config::IChannel> const& value);
-  auto get_gpio_5() const -> std::shared_ptr<PIGPIO_Config::IChannel> const&;
-  auto get_gpio_5() -> std::shared_ptr<PIGPIO_Config::IChannel>&;
+  void set_gpio_5(Poly<PIGPIO_Config::IChannel> const& value);
+  auto get_gpio_5() const -> Poly<PIGPIO_Config::IChannel> const&;
+  auto get_gpio_5() -> Poly<PIGPIO_Config::IChannel>&;
 
-  void set_gpio_6(std::shared_ptr<PIGPIO_Config::IChannel> const& value);
-  auto get_gpio_6() const -> std::shared_ptr<PIGPIO_Config::IChannel> const&;
-  auto get_gpio_6() -> std::shared_ptr<PIGPIO_Config::IChannel>&;
+  void set_gpio_6(Poly<PIGPIO_Config::IChannel> const& value);
+  auto get_gpio_6() const -> Poly<PIGPIO_Config::IChannel> const&;
+  auto get_gpio_6() -> Poly<PIGPIO_Config::IChannel>&;
 
-  void set_gpio_7(std::shared_ptr<PIGPIO_Config::IChannel> const& value);
-  auto get_gpio_7() const -> std::shared_ptr<PIGPIO_Config::IChannel> const&;
-  auto get_gpio_7() -> std::shared_ptr<PIGPIO_Config::IChannel>&;
+  void set_gpio_7(Poly<PIGPIO_Config::IChannel> const& value);
+  auto get_gpio_7() const -> Poly<PIGPIO_Config::IChannel> const&;
+  auto get_gpio_7() -> Poly<PIGPIO_Config::IChannel>&;
 
-  void set_gpio_8(std::shared_ptr<PIGPIO_Config::IChannel> const& value);
-  auto get_gpio_8() const -> std::shared_ptr<PIGPIO_Config::IChannel> const&;
-  auto get_gpio_8() -> std::shared_ptr<PIGPIO_Config::IChannel>&;
+  void set_gpio_8(Poly<PIGPIO_Config::IChannel> const& value);
+  auto get_gpio_8() const -> Poly<PIGPIO_Config::IChannel> const&;
+  auto get_gpio_8() -> Poly<PIGPIO_Config::IChannel>&;
 
-  void set_gpio_9(std::shared_ptr<PIGPIO_Config::IChannel> const& value);
-  auto get_gpio_9() const -> std::shared_ptr<PIGPIO_Config::IChannel> const&;
-  auto get_gpio_9() -> std::shared_ptr<PIGPIO_Config::IChannel>&;
+  void set_gpio_9(Poly<PIGPIO_Config::IChannel> const& value);
+  auto get_gpio_9() const -> Poly<PIGPIO_Config::IChannel> const&;
+  auto get_gpio_9() -> Poly<PIGPIO_Config::IChannel>&;
 
-  void set_gpio_10(std::shared_ptr<PIGPIO_Config::IChannel> const& value);
-  auto get_gpio_10() const -> std::shared_ptr<PIGPIO_Config::IChannel> const&;
-  auto get_gpio_10() -> std::shared_ptr<PIGPIO_Config::IChannel>&;
+  void set_gpio_10(Poly<PIGPIO_Config::IChannel> const& value);
+  auto get_gpio_10() const -> Poly<PIGPIO_Config::IChannel> const&;
+  auto get_gpio_10() -> Poly<PIGPIO_Config::IChannel>&;
 
-  void set_gpio_11(std::shared_ptr<PIGPIO_Config::IChannel> const& value);
-  auto get_gpio_11() const -> std::shared_ptr<PIGPIO_Config::IChannel> const&;
-  auto get_gpio_11() -> std::shared_ptr<PIGPIO_Config::IChannel>&;
+  void set_gpio_11(Poly<PIGPIO_Config::IChannel> const& value);
+  auto get_gpio_11() const -> Poly<PIGPIO_Config::IChannel> const&;
+  auto get_gpio_11() -> Poly<PIGPIO_Config::IChannel>&;
 
-  void set_gpio_12(std::shared_ptr<PIGPIO_Config::IChannel> const& value);
-  auto get_gpio_12() const -> std::shared_ptr<PIGPIO_Config::IChannel> const&;
-  auto get_gpio_12() -> std::shared_ptr<PIGPIO_Config::IChannel>&;
+  void set_gpio_12(Poly<PIGPIO_Config::IChannel> const& value);
+  auto get_gpio_12() const -> Poly<PIGPIO_Config::IChannel> const&;
+  auto get_gpio_12() -> Poly<PIGPIO_Config::IChannel>&;
 
-  void set_gpio_13(std::shared_ptr<PIGPIO_Config::IChannel> const& value);
-  auto get_gpio_13() const -> std::shared_ptr<PIGPIO_Config::IChannel> const&;
-  auto get_gpio_13() -> std::shared_ptr<PIGPIO_Config::IChannel>&;
+  void set_gpio_13(Poly<PIGPIO_Config::IChannel> const& value);
+  auto get_gpio_13() const -> Poly<PIGPIO_Config::IChannel> const&;
+  auto get_gpio_13() -> Poly<PIGPIO_Config::IChannel>&;
 
-  void set_gpio_14(std::shared_ptr<PIGPIO_Config::IChannel> const& value);
-  auto get_gpio_14() const -> std::shared_ptr<PIGPIO_Config::IChannel> const&;
-  auto get_gpio_14() -> std::shared_ptr<PIGPIO_Config::IChannel>&;
+  void set_gpio_14(Poly<PIGPIO_Config::IChannel> const& value);
+  auto get_gpio_14() const -> Poly<PIGPIO_Config::IChannel> const&;
+  auto get_gpio_14() -> Poly<PIGPIO_Config::IChannel>&;
 
-  void set_gpio_15(std::shared_ptr<PIGPIO_Config::IChannel> const& value);
-  auto get_gpio_15() const -> std::shared_ptr<PIGPIO_Config::IChannel> const&;
-  auto get_gpio_15() -> std::shared_ptr<PIGPIO_Config::IChannel>&;
+  void set_gpio_15(Poly<PIGPIO_Config::IChannel> const& value);
+  auto get_gpio_15() const -> Poly<PIGPIO_Config::IChannel> const&;
+  auto get_gpio_15() -> Poly<PIGPIO_Config::IChannel>&;
 
-  void set_gpio_16(std::shared_ptr<PIGPIO_Config::IChannel> const& value);
-  auto get_gpio_16() const -> std::shared_ptr<PIGPIO_Config::IChannel> const&;
-  auto get_gpio_16() -> std::shared_ptr<PIGPIO_Config::IChannel>&;
+  void set_gpio_16(Poly<PIGPIO_Config::IChannel> const& value);
+  auto get_gpio_16() const -> Poly<PIGPIO_Config::IChannel> const&;
+  auto get_gpio_16() -> Poly<PIGPIO_Config::IChannel>&;
 
-  void set_gpio_17(std::shared_ptr<PIGPIO_Config::IChannel> const& value);
-  auto get_gpio_17() const -> std::shared_ptr<PIGPIO_Config::IChannel> const&;
-  auto get_gpio_17() -> std::shared_ptr<PIGPIO_Config::IChannel>&;
+  void set_gpio_17(Poly<PIGPIO_Config::IChannel> const& value);
+  auto get_gpio_17() const -> Poly<PIGPIO_Config::IChannel> const&;
+  auto get_gpio_17() -> Poly<PIGPIO_Config::IChannel>&;
 
-  void set_gpio_18(std::shared_ptr<PIGPIO_Config::IChannel> const& value);
-  auto get_gpio_18() const -> std::shared_ptr<PIGPIO_Config::IChannel> const&;
-  auto get_gpio_18() -> std::shared_ptr<PIGPIO_Config::IChannel>&;
+  void set_gpio_18(Poly<PIGPIO_Config::IChannel> const& value);
+  auto get_gpio_18() const -> Poly<PIGPIO_Config::IChannel> const&;
+  auto get_gpio_18() -> Poly<PIGPIO_Config::IChannel>&;
 
-  void set_gpio_19(std::shared_ptr<PIGPIO_Config::IChannel> const& value);
-  auto get_gpio_19() const -> std::shared_ptr<PIGPIO_Config::IChannel> const&;
-  auto get_gpio_19() -> std::shared_ptr<PIGPIO_Config::IChannel>&;
+  void set_gpio_19(Poly<PIGPIO_Config::IChannel> const& value);
+  auto get_gpio_19() const -> Poly<PIGPIO_Config::IChannel> const&;
+  auto get_gpio_19() -> Poly<PIGPIO_Config::IChannel>&;
 
-  void set_gpio_20(std::shared_ptr<PIGPIO_Config::IChannel> const& value);
-  auto get_gpio_20() const -> std::shared_ptr<PIGPIO_Config::IChannel> const&;
-  auto get_gpio_20() -> std::shared_ptr<PIGPIO_Config::IChannel>&;
+  void set_gpio_20(Poly<PIGPIO_Config::IChannel> const& value);
+  auto get_gpio_20() const -> Poly<PIGPIO_Config::IChannel> const&;
+  auto get_gpio_20() -> Poly<PIGPIO_Config::IChannel>&;
 
-  void set_gpio_21(std::shared_ptr<PIGPIO_Config::IChannel> const& value);
-  auto get_gpio_21() const -> std::shared_ptr<PIGPIO_Config::IChannel> const&;
-  auto get_gpio_21() -> std::shared_ptr<PIGPIO_Config::IChannel>&;
+  void set_gpio_21(Poly<PIGPIO_Config::IChannel> const& value);
+  auto get_gpio_21() const -> Poly<PIGPIO_Config::IChannel> const&;
+  auto get_gpio_21() -> Poly<PIGPIO_Config::IChannel>&;
 
-  void set_gpio_22(std::shared_ptr<PIGPIO_Config::IChannel> const& value);
-  auto get_gpio_22() const -> std::shared_ptr<PIGPIO_Config::IChannel> const&;
-  auto get_gpio_22() -> std::shared_ptr<PIGPIO_Config::IChannel>&;
+  void set_gpio_22(Poly<PIGPIO_Config::IChannel> const& value);
+  auto get_gpio_22() const -> Poly<PIGPIO_Config::IChannel> const&;
+  auto get_gpio_22() -> Poly<PIGPIO_Config::IChannel>&;
 
-  void set_gpio_23(std::shared_ptr<PIGPIO_Config::IChannel> const& value);
-  auto get_gpio_23() const -> std::shared_ptr<PIGPIO_Config::IChannel> const&;
-  auto get_gpio_23() -> std::shared_ptr<PIGPIO_Config::IChannel>&;
+  void set_gpio_23(Poly<PIGPIO_Config::IChannel> const& value);
+  auto get_gpio_23() const -> Poly<PIGPIO_Config::IChannel> const&;
+  auto get_gpio_23() -> Poly<PIGPIO_Config::IChannel>&;
 
-  void set_gpio_24(std::shared_ptr<PIGPIO_Config::IChannel> const& value);
-  auto get_gpio_24() const -> std::shared_ptr<PIGPIO_Config::IChannel> const&;
-  auto get_gpio_24() -> std::shared_ptr<PIGPIO_Config::IChannel>&;
+  void set_gpio_24(Poly<PIGPIO_Config::IChannel> const& value);
+  auto get_gpio_24() const -> Poly<PIGPIO_Config::IChannel> const&;
+  auto get_gpio_24() -> Poly<PIGPIO_Config::IChannel>&;
 
-  void set_gpio_25(std::shared_ptr<PIGPIO_Config::IChannel> const& value);
-  auto get_gpio_25() const -> std::shared_ptr<PIGPIO_Config::IChannel> const&;
-  auto get_gpio_25() -> std::shared_ptr<PIGPIO_Config::IChannel>&;
+  void set_gpio_25(Poly<PIGPIO_Config::IChannel> const& value);
+  auto get_gpio_25() const -> Poly<PIGPIO_Config::IChannel> const&;
+  auto get_gpio_25() -> Poly<PIGPIO_Config::IChannel>&;
 
-  void set_gpio_26(std::shared_ptr<PIGPIO_Config::IChannel> const& value);
-  auto get_gpio_26() const -> std::shared_ptr<PIGPIO_Config::IChannel> const&;
-  auto get_gpio_26() -> std::shared_ptr<PIGPIO_Config::IChannel>&;
+  void set_gpio_26(Poly<PIGPIO_Config::IChannel> const& value);
+  auto get_gpio_26() const -> Poly<PIGPIO_Config::IChannel> const&;
+  auto get_gpio_26() -> Poly<PIGPIO_Config::IChannel>&;
 
-  void set_gpio_27(std::shared_ptr<PIGPIO_Config::IChannel> const& value);
-  auto get_gpio_27() const -> std::shared_ptr<PIGPIO_Config::IChannel> const&;
-  auto get_gpio_27() -> std::shared_ptr<PIGPIO_Config::IChannel>&;
+  void set_gpio_27(Poly<PIGPIO_Config::IChannel> const& value);
+  auto get_gpio_27() const -> Poly<PIGPIO_Config::IChannel> const&;
+  auto get_gpio_27() -> Poly<PIGPIO_Config::IChannel>&;
 
 
 private:
 
-  std::shared_ptr<PIGPIO_Config::IChannel> m_gpio_2 = {};
-  std::shared_ptr<PIGPIO_Config::IChannel> m_gpio_3 = {};
-  std::shared_ptr<PIGPIO_Config::IChannel> m_gpio_4 = {};
-  std::shared_ptr<PIGPIO_Config::IChannel> m_gpio_5 = {};
-  std::shared_ptr<PIGPIO_Config::IChannel> m_gpio_6 = {};
-  std::shared_ptr<PIGPIO_Config::IChannel> m_gpio_7 = {};
-  std::shared_ptr<PIGPIO_Config::IChannel> m_gpio_8 = {};
-  std::shared_ptr<PIGPIO_Config::IChannel> m_gpio_9 = {};
-  std::shared_ptr<PIGPIO_Config::IChannel> m_gpio_10 = {};
-  std::shared_ptr<PIGPIO_Config::IChannel> m_gpio_11 = {};
-  std::shared_ptr<PIGPIO_Config::IChannel> m_gpio_12 = {};
-  std::shared_ptr<PIGPIO_Config::IChannel> m_gpio_13 = {};
-  std::shared_ptr<PIGPIO_Config::IChannel> m_gpio_14 = {};
-  std::shared_ptr<PIGPIO_Config::IChannel> m_gpio_15 = {};
-  std::shared_ptr<PIGPIO_Config::IChannel> m_gpio_16 = {};
-  std::shared_ptr<PIGPIO_Config::IChannel> m_gpio_17 = {};
-  std::shared_ptr<PIGPIO_Config::IChannel> m_gpio_18 = {};
-  std::shared_ptr<PIGPIO_Config::IChannel> m_gpio_19 = {};
-  std::shared_ptr<PIGPIO_Config::IChannel> m_gpio_20 = {};
-  std::shared_ptr<PIGPIO_Config::IChannel> m_gpio_21 = {};
-  std::shared_ptr<PIGPIO_Config::IChannel> m_gpio_22 = {};
-  std::shared_ptr<PIGPIO_Config::IChannel> m_gpio_23 = {};
-  std::shared_ptr<PIGPIO_Config::IChannel> m_gpio_24 = {};
-  std::shared_ptr<PIGPIO_Config::IChannel> m_gpio_25 = {};
-  std::shared_ptr<PIGPIO_Config::IChannel> m_gpio_26 = {};
-  std::shared_ptr<PIGPIO_Config::IChannel> m_gpio_27 = {};
+  Poly<PIGPIO_Config::IChannel> m_gpio_2 = {};
+  Poly<PIGPIO_Config::IChannel> m_gpio_3 = {};
+  Poly<PIGPIO_Config::IChannel> m_gpio_4 = {};
+  Poly<PIGPIO_Config::IChannel> m_gpio_5 = {};
+  Poly<PIGPIO_Config::IChannel> m_gpio_6 = {};
+  Poly<PIGPIO_Config::IChannel> m_gpio_7 = {};
+  Poly<PIGPIO_Config::IChannel> m_gpio_8 = {};
+  Poly<PIGPIO_Config::IChannel> m_gpio_9 = {};
+  Poly<PIGPIO_Config::IChannel> m_gpio_10 = {};
+  Poly<PIGPIO_Config::IChannel> m_gpio_11 = {};
+  Poly<PIGPIO_Config::IChannel> m_gpio_12 = {};
+  Poly<PIGPIO_Config::IChannel> m_gpio_13 = {};
+  Poly<PIGPIO_Config::IChannel> m_gpio_14 = {};
+  Poly<PIGPIO_Config::IChannel> m_gpio_15 = {};
+  Poly<PIGPIO_Config::IChannel> m_gpio_16 = {};
+  Poly<PIGPIO_Config::IChannel> m_gpio_17 = {};
+  Poly<PIGPIO_Config::IChannel> m_gpio_18 = {};
+  Poly<PIGPIO_Config::IChannel> m_gpio_19 = {};
+  Poly<PIGPIO_Config::IChannel> m_gpio_20 = {};
+  Poly<PIGPIO_Config::IChannel> m_gpio_21 = {};
+  Poly<PIGPIO_Config::IChannel> m_gpio_22 = {};
+  Poly<PIGPIO_Config::IChannel> m_gpio_23 = {};
+  Poly<PIGPIO_Config::IChannel> m_gpio_24 = {};
+  Poly<PIGPIO_Config::IChannel> m_gpio_25 = {};
+  Poly<PIGPIO_Config::IChannel> m_gpio_26 = {};
+  Poly<PIGPIO_Config::IChannel> m_gpio_27 = {};
 };
 
 struct Pressure_Velocity_Descriptor : public INode_Descriptor
@@ -2824,16 +2846,16 @@ ts::Result<void> deserialize(Settings::Node_Data& value, ts::serialization::Valu
 ts::Result<ts::serialization::Value> serialize(Settings::Node_Data const& value);
 ts::Result<void> deserialize(Settings& value, ts::serialization::Value const& sz_value);
 ts::Result<ts::serialization::Value> serialize(Settings const& value);
-ts::Result<void> deserialize(std::shared_ptr<IBus_Descriptor>& value, ts::serialization::Value const& sz_value);
-ts::Result<ts::serialization::Value> serialize(std::shared_ptr<IBus_Descriptor> const& value);
-ts::Result<void> deserialize(std::shared_ptr<INode_Descriptor>& value, ts::serialization::Value const& sz_value);
-ts::Result<ts::serialization::Value> serialize(std::shared_ptr<INode_Descriptor> const& value);
-ts::Result<void> deserialize(std::shared_ptr<INode_Config>& value, ts::serialization::Value const& sz_value);
-ts::Result<ts::serialization::Value> serialize(std::shared_ptr<INode_Config> const& value);
+ts::Result<void> deserialize(Poly<const IBus_Descriptor>& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(Poly<const IBus_Descriptor> const& value);
+ts::Result<void> deserialize(Poly<const INode_Descriptor>& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(Poly<const INode_Descriptor> const& value);
+ts::Result<void> deserialize(Poly<const INode_Config>& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(Poly<const INode_Config> const& value);
 ts::Result<void> deserialize(std::vector<std::string>& value, ts::serialization::Value const& sz_value);
 ts::Result<ts::serialization::Value> serialize(std::vector<std::string> const& value);
-ts::Result<void> deserialize(std::shared_ptr<IUAV_Descriptor>& value, ts::serialization::Value const& sz_value);
-ts::Result<ts::serialization::Value> serialize(std::shared_ptr<IUAV_Descriptor> const& value);
+ts::Result<void> deserialize(Poly<const IUAV_Descriptor>& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(Poly<const IUAV_Descriptor> const& value);
 ts::Result<void> deserialize(std::vector<Settings::Bus_Data>& value, ts::serialization::Value const& sz_value);
 ts::Result<ts::serialization::Value> serialize(std::vector<Settings::Bus_Data> const& value);
 ts::Result<void> deserialize(std::vector<Settings::Node_Data>& value, ts::serialization::Value const& sz_value);
@@ -2990,10 +3012,10 @@ ts::Result<void> deserialize(PCA9685_Config::PWM_Channel& value, ts::serializati
 ts::Result<ts::serialization::Value> serialize(PCA9685_Config::PWM_Channel const& value);
 ts::Result<void> deserialize(PCA9685_Config& value, ts::serialization::Value const& sz_value);
 ts::Result<ts::serialization::Value> serialize(PCA9685_Config const& value);
-ts::Result<void> deserialize(std::shared_ptr<PCA9685_Config::IChannel>& value, ts::serialization::Value const& sz_value);
-ts::Result<ts::serialization::Value> serialize(std::shared_ptr<PCA9685_Config::IChannel> const& value);
-ts::Result<void> deserialize(std::vector<std::shared_ptr<PCA9685_Config::IChannel>>& value, ts::serialization::Value const& sz_value);
-ts::Result<ts::serialization::Value> serialize(std::vector<std::shared_ptr<PCA9685_Config::IChannel>> const& value);
+ts::Result<void> deserialize(Poly<PCA9685_Config::IChannel>& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(Poly<PCA9685_Config::IChannel> const& value);
+ts::Result<void> deserialize(std::vector<Poly<PCA9685_Config::IChannel>>& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(std::vector<Poly<PCA9685_Config::IChannel>> const& value);
 ts::Result<void> deserialize(PIGPIO_Descriptor::Channel& value, ts::serialization::Value const& sz_value);
 ts::Result<ts::serialization::Value> serialize(PIGPIO_Descriptor::Channel const& value);
 ts::Result<void> deserialize(PIGPIO_Descriptor& value, ts::serialization::Value const& sz_value);
@@ -3006,8 +3028,8 @@ ts::Result<void> deserialize(PIGPIO_Config::PWM_Channel& value, ts::serializatio
 ts::Result<ts::serialization::Value> serialize(PIGPIO_Config::PWM_Channel const& value);
 ts::Result<void> deserialize(PIGPIO_Config& value, ts::serialization::Value const& sz_value);
 ts::Result<ts::serialization::Value> serialize(PIGPIO_Config const& value);
-ts::Result<void> deserialize(std::shared_ptr<PIGPIO_Config::IChannel>& value, ts::serialization::Value const& sz_value);
-ts::Result<ts::serialization::Value> serialize(std::shared_ptr<PIGPIO_Config::IChannel> const& value);
+ts::Result<void> deserialize(Poly<PIGPIO_Config::IChannel>& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(Poly<PIGPIO_Config::IChannel> const& value);
 ts::Result<void> deserialize(Pressure_Velocity_Descriptor& value, ts::serialization::Value const& sz_value);
 ts::Result<ts::serialization::Value> serialize(Pressure_Velocity_Descriptor const& value);
 ts::Result<void> deserialize(Pressure_Velocity_Config& value, ts::serialization::Value const& sz_value);

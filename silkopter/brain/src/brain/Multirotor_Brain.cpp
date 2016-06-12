@@ -21,17 +21,16 @@ Multirotor_Brain::Multirotor_Brain(UAV& uav)
     m_thrust_output_stream = std::make_shared<Thrust_Output_Stream>();
 }
 
-auto Multirotor_Brain::init(std::shared_ptr<uav::INode_Descriptor> descriptor) -> bool
+auto Multirotor_Brain::init(uav::INode_Descriptor const& descriptor) -> bool
 {
     QLOG_TOPIC("Multirotor_Brain::init");
 
-    auto specialized = std::dynamic_pointer_cast<uav::Multirotor_Brain_Descriptor>(descriptor);
+    auto specialized = dynamic_cast<uav::Multirotor_Brain_Descriptor const*>(&descriptor);
     if (!specialized)
     {
         QLOGE("Wrong descriptor type");
         return false;
     }
-
     *m_descriptor = *specialized;
 
     return init();
@@ -624,17 +623,16 @@ void fill_p_params(T& dst, P const& src, size_t rate)
     dst.rate = rate;
 }
 
-auto Multirotor_Brain::set_config(std::shared_ptr<uav::INode_Config> config) -> bool
+auto Multirotor_Brain::set_config(uav::INode_Config const& config) -> bool
 {
     QLOG_TOPIC("Multirotor_Brain::set_config");
 
-    auto specialized = std::dynamic_pointer_cast<uav::Multirotor_Brain_Config>(config);
+    auto specialized = dynamic_cast<uav::Multirotor_Brain_Config const*>(&config);
     if (!specialized)
     {
         QLOGE("Wrong config type");
         return false;
     }
-
     *m_config = *specialized;
 
     uint32_t output_rate = m_rate_output_stream->get_rate();
@@ -733,12 +731,12 @@ auto Multirotor_Brain::set_config(std::shared_ptr<uav::INode_Config> config) -> 
 
     return true;
 }
-auto Multirotor_Brain::get_config() const -> std::shared_ptr<uav::INode_Config>
+auto Multirotor_Brain::get_config() const -> std::shared_ptr<const uav::INode_Config>
 {
     return m_config;
 }
 
-auto Multirotor_Brain::get_descriptor() const -> std::shared_ptr<uav::INode_Descriptor>
+auto Multirotor_Brain::get_descriptor() const -> std::shared_ptr<const uav::INode_Descriptor>
 {
     return m_descriptor;
 }

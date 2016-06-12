@@ -49,19 +49,19 @@ struct Settings
     {
         string name;
         string type;
-        poly<IBus_Descriptor> descriptor;
+        poly<const IBus_Descriptor> descriptor;
     };
 
     struct Node_Data
     {
         string name;
         string type;
-        poly<INode_Descriptor> descriptor;
-        poly<INode_Config> config;
+        poly<const INode_Descriptor> descriptor;
+        poly<const INode_Config> config;
         vector<string> input_paths;
     };
 
-    poly<IUAV_Descriptor> uav_descriptor;
+    poly<const IUAV_Descriptor> uav_descriptor;
 
     vector<Bus_Data> buses;
     vector<Node_Data> nodes;

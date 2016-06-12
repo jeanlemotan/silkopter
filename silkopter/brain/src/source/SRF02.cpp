@@ -52,18 +52,18 @@ auto SRF02::get_outputs() const -> std::vector<Output>
     outputs[0].stream = m_output_stream;
     return outputs;
 }
-auto SRF02::init(std::shared_ptr<uav::INode_Descriptor> descriptor) -> bool
+auto SRF02::init(uav::INode_Descriptor const& descriptor) -> bool
 {
     QLOG_TOPIC("srf02::init");
 
-    auto specialized = std::dynamic_pointer_cast<uav::SRF02_Descriptor>(descriptor);
+    auto specialized = dynamic_cast<uav::SRF02_Descriptor const*>(&descriptor);
     if (!specialized)
     {
         QLOGE("Wrong descriptor type");
         return false;
     }
-
     *m_descriptor = *specialized;
+
     return init();
 }
 
@@ -189,19 +189,19 @@ void SRF02::process()
     }
 }
 
-auto SRF02::set_config(std::shared_ptr<uav::INode_Config> config) -> bool
+auto SRF02::set_config(uav::INode_Config const& config) -> bool
 {
     QLOG_TOPIC("srf02::set_config");
 
-    auto specialized = std::dynamic_pointer_cast<uav::SRF02_Config>(config);
+    auto specialized = dynamic_cast<uav::SRF02_Config const*>(&config);
     if (!specialized)
     {
         QLOGE("Wrong descriptor type");
         return false;
     }
-
     *m_config = *specialized;
-//    m_config->set_min_distance(math::max(m_config->get_min_distance(), 0.1f));
+
+    //    m_config->set_min_distance(math::max(m_config->get_min_distance(), 0.1f));
 //    m_config->set_max_distance(math::min(m_config->get_max_distance(), 12.f));
     if (math::is_zero(math::length(m_config->get_direction()), math::epsilon<float>()))
     {
@@ -211,12 +211,12 @@ auto SRF02::set_config(std::shared_ptr<uav::INode_Config> config) -> bool
 
     return true;
 }
-auto SRF02::get_config() const -> std::shared_ptr<uav::INode_Config>
+auto SRF02::get_config() const -> std::shared_ptr<const uav::INode_Config>
 {
     return m_config;
 }
 
-auto SRF02::get_descriptor() const -> std::shared_ptr<uav::INode_Descriptor>
+auto SRF02::get_descriptor() const -> std::shared_ptr<const uav::INode_Descriptor>
 {
     return m_descriptor;
 }

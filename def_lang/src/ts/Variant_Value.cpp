@@ -3,6 +3,7 @@
 #include "def_lang/Serialization.h"
 #include "def_lang/IDeclaration_Scope.h"
 #include "def_lang/impl/Initializer_List.h"
+#include "def_lang/Qualified_Type.h"
 
 namespace ts
 {
@@ -55,7 +56,7 @@ Result<void> Variant_Value::construct(IInitializer_List const& initializer_list)
         return Error("Not supported");
     }
 
-    std::shared_ptr<IValue> value = m_type->get_inner_type(0)->create_value();
+    std::shared_ptr<IValue> value = m_type->get_inner_qualified_type(0)->get_type()->create_value();
     auto result = value->construct();
     if (result != success)
     {
@@ -170,7 +171,7 @@ Result<serialization::Value> Variant_Value::serialize() const
     }
     serialization::Value svalue(serialization::Value::Type::OBJECT);
 
-    svalue.add_object_member("type", serialization::Value(m_type->get_inner_type(get_value_type_index())->get_symbol_path().to_string()));
+    svalue.add_object_member("type", serialization::Value(m_type->get_inner_qualified_type(get_value_type_index())->get_type()->get_symbol_path().to_string()));
 
     auto result = get_value()->serialize();
     if (result != success)
@@ -229,6 +230,11 @@ std::shared_ptr<const IValue> Variant_Value::get_value() const
 }
 std::shared_ptr<IValue> Variant_Value::get_value()
 {
+    if (get_specialized_type()->get_inner_qualified_type(get_value_type_index())->is_const())
+    {
+        return nullptr;
+    }
+
     TS_ASSERT(is_constructed());
     return m_value;
 }
@@ -245,7 +251,7 @@ Result<void> Variant_Value::set_value(std::shared_ptr<const IValue> value)
         return Error("Unconstructed value");
     }
 
-    boost::optional<size_t> idx = m_type->find_inner_type_idx(value->get_type());
+    boost::optional<size_t> idx = m_type->find_inner_qualified_type_idx(value->get_type());
     if (idx == boost::none)
     {
         return Error("Type '" + value->get_type()->get_symbol_path().to_string() + "' not allowed in variant '" + m_type->get_symbol_path().to_string() + "'");
@@ -283,13 +289,13 @@ Result<void> Variant_Value::set_value_type_index(size_t idx)
         TS_ASSERT(false);
         return Error("Unconstructed value");
     }
-    return set_value(m_type->get_inner_type(idx)->create_value());
+    return set_value(m_type->get_inner_qualified_type(idx)->get_type()->create_value());
 }
 
 size_t Variant_Value::get_value_type_index() const
 {
     TS_ASSERT(is_constructed());
-    boost::optional<size_t> idx = m_type->find_inner_type_idx(m_value->get_type());
+    boost::optional<size_t> idx = m_type->find_inner_qualified_type_idx(m_value->get_type());
     if (idx == boost::none)
     {
         TS_ASSERT(false);

@@ -515,5 +515,13 @@ Result<Value> from_json(std::string const& json)
     return parse_value(json, offset);
 }
 
+Result<Value> from_json(void* data, size_t size)
+{
+    //todo - optimize this to avoid the temp string
+    size_t offset = 0;
+    std::string json(reinterpret_cast<char const*>(data), size);
+    return parse_value(json, offset);
+}
+
 }
 }

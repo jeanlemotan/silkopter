@@ -38,17 +38,16 @@ auto AVRADC::get_outputs() const -> std::vector<Output>
      }};
     return outputs;
 }
-auto AVRADC::init(std::shared_ptr<uav::INode_Descriptor> descriptor) -> bool
+auto AVRADC::init(uav::INode_Descriptor const& descriptor) -> bool
 {
     QLOG_TOPIC("AVRADC::init");
 
-    auto specialized = std::dynamic_pointer_cast<uav::AVRADC_Descriptor>(descriptor);
+    auto specialized = dynamic_cast<uav::AVRADC_Descriptor const*>(&descriptor);
     if (!specialized)
     {
         QLOGE("Wrong descriptor type");
         return false;
     }
-
     *m_descriptor = *specialized;
 
     return init();
@@ -166,27 +165,26 @@ void AVRADC::process()
     }
 }
 
-auto AVRADC::set_config(std::shared_ptr<uav::INode_Config> config) -> bool
+auto AVRADC::set_config(uav::INode_Config const& config) -> bool
 {
     QLOG_TOPIC("AVRADC::set_config");
 
-    auto specialized = std::dynamic_pointer_cast<uav::AVRADC_Config>(config);
+    auto specialized = dynamic_cast<uav::AVRADC_Config const*>(&config);
     if (!specialized)
     {
         QLOGE("Wrong config type");
         return false;
     }
-
     *m_config = *specialized;
 
     return true;
 }
-auto AVRADC::get_config() const -> std::shared_ptr<uav::INode_Config>
+auto AVRADC::get_config() const -> std::shared_ptr<const uav::INode_Config>
 {
     return m_config;
 }
 
-auto AVRADC::get_descriptor() const -> std::shared_ptr<uav::INode_Descriptor>
+auto AVRADC::get_descriptor() const -> std::shared_ptr<const uav::INode_Descriptor>
 {
     return m_descriptor;
 }

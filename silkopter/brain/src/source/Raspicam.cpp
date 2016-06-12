@@ -204,18 +204,18 @@ auto Raspicam::get_outputs() const -> std::vector<Output>
     return outputs;
 }
 
-auto Raspicam::init(std::shared_ptr<uav::INode_Descriptor> descriptor) -> bool
+auto Raspicam::init(uav::INode_Descriptor const& descriptor) -> bool
 {
     QLOG_TOPIC("raspicam::init");
 
-    auto specialized = std::dynamic_pointer_cast<uav::Raspicam_Descriptor>(descriptor);
+    auto specialized = dynamic_cast<uav::Raspicam_Descriptor const*>(&descriptor);
     if (!specialized)
     {
         QLOGE("Wrong descriptor type");
         return false;
     }
-
     *m_descriptor = *specialized;
+
     return init();
 }
 auto Raspicam::init() -> bool
@@ -290,17 +290,16 @@ auto Raspicam::init() -> bool
 #endif
 }
 
-auto Raspicam::set_config(std::shared_ptr<uav::INode_Config> config) -> bool
+auto Raspicam::set_config(uav::INode_Config const& config) -> bool
 {
     QLOG_TOPIC("raspicam::set_config");
 
-    auto specialized = std::dynamic_pointer_cast<uav::Raspicam_Config>(config);
+    auto specialized = dynamic_cast<uav::Raspicam_Config const*>(&config);
     if (!specialized)
     {
         QLOGE("Wrong config type");
         return false;
     }
-
     *m_config = *specialized;
 
     activate_streams();
@@ -342,12 +341,12 @@ auto Raspicam::set_config(std::shared_ptr<uav::INode_Config> config) -> bool
 
     return true;
 }
-auto Raspicam::get_config() const -> std::shared_ptr<uav::INode_Config>
+auto Raspicam::get_config() const -> std::shared_ptr<const uav::INode_Config>
 {
     return m_config;
 }
 
-auto Raspicam::get_descriptor() const -> std::shared_ptr<uav::INode_Descriptor>
+auto Raspicam::get_descriptor() const -> std::shared_ptr<const uav::INode_Descriptor>
 {
     return m_descriptor;
 }

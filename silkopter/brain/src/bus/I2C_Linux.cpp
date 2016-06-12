@@ -43,25 +43,25 @@ I2C_Linux::~I2C_Linux()
     close();
 }
 
-bool I2C_Linux::init(std::shared_ptr<uav::IBus_Descriptor> descriptor)
+bool I2C_Linux::init(uav::IBus_Descriptor const& descriptor)
 {
-    auto specialized = std::dynamic_pointer_cast<uav::I2C_Linux_Descriptor>(descriptor);
+    auto specialized = dynamic_cast<uav::I2C_Linux_Descriptor const*>(&descriptor);
     if (!specialized)
     {
         QLOGE("Wrong descriptor type");
         return false;
     }
+    *m_descriptor = *specialized;
 
-    if (!init(specialized->get_dev()))
+    if (!init(m_descriptor->get_dev()))
     {
         return false;
     }
 
-    *m_descriptor = *specialized;
     return true;
 }
 
-std::shared_ptr<uav::IBus_Descriptor> I2C_Linux::get_descriptor() const
+std::shared_ptr<const uav::IBus_Descriptor> I2C_Linux::get_descriptor() const
 {
     return m_descriptor;
 }

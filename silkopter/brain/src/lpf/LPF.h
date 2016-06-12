@@ -20,11 +20,11 @@ class LPF : public ILPF
 public:
     LPF(UAV& uav);
 
-    bool init(std::shared_ptr<uav::INode_Descriptor> descriptor) override;
-    std::shared_ptr<uav::INode_Descriptor> get_descriptor() const override;
+    bool init(uav::INode_Descriptor const& descriptor) override;
+    std::shared_ptr<const uav::INode_Descriptor> get_descriptor() const override;
 
-    bool set_config(std::shared_ptr<uav::INode_Config> config) override;
-    std::shared_ptr<uav::INode_Config> get_config() const override;
+    bool set_config(uav::INode_Config const& config) override;
+    std::shared_ptr<const uav::INode_Config> get_config() const override;
 
     //auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
 
@@ -61,17 +61,16 @@ LPF<Stream_t>::LPF(UAV& uav)
 }
 
 template<class Stream_t>
-auto LPF<Stream_t>::init(std::shared_ptr<uav::INode_Descriptor> descriptor) -> bool
+auto LPF<Stream_t>::init(uav::INode_Descriptor const& descriptor) -> bool
 {
     QLOG_TOPIC("lpf::init");
 
-    auto specialized = std::dynamic_pointer_cast<uav::LPF_Descriptor>(descriptor);
+    auto specialized = dynamic_cast<uav::LPF_Descriptor const*>(&descriptor);
     if (!specialized)
     {
         QLOGE("Wrong descriptor type");
         return false;
     }
-
     *m_descriptor = *specialized;
 
     return init();
@@ -85,7 +84,7 @@ auto LPF<Stream_t>::init() -> bool
 }
 
 template<class Stream_t>
-auto LPF<Stream_t>::get_descriptor() const -> std::shared_ptr<uav::INode_Descriptor>
+auto LPF<Stream_t>::get_descriptor() const -> std::shared_ptr<const uav::INode_Descriptor>
 {
     return m_descriptor;
 }
@@ -97,17 +96,16 @@ void LPF<Stream_t>::set_input_stream_path(size_t idx, q::Path const& path)
 }
 
 template<class Stream_t>
-auto LPF<Stream_t>::set_config(std::shared_ptr<uav::INode_Config> config) -> bool
+auto LPF<Stream_t>::set_config(uav::INode_Config const& config) -> bool
 {
     QLOG_TOPIC("lpf::config");
 
-    auto specialized = std::dynamic_pointer_cast<uav::LPF_Config>(config);
+    auto specialized = dynamic_cast<uav::LPF_Config const*>(&config);
     if (!specialized)
     {
         QLOGE("Wrong config type");
         return false;
     }
-
     *m_config = *specialized;
 
     float output_rate = static_cast<float>(m_output_stream->get_rate());
@@ -133,7 +131,7 @@ auto LPF<Stream_t>::set_config(std::shared_ptr<uav::INode_Config> config) -> boo
 //    return rapidjson::Document();
 //}
 template<class Stream_t>
-auto LPF<Stream_t>::get_config() const -> std::shared_ptr<uav::INode_Config>
+auto LPF<Stream_t>::get_config() const -> std::shared_ptr<const uav::INode_Config>
 {
     return m_config;
 }

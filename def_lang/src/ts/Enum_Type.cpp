@@ -41,11 +41,6 @@ std::shared_ptr<const IType> Enum_Type::get_aliased_type() const
     return m_aliased_type;
 }
 
-std::string Enum_Type::get_template_instantiation_string() const
-{
-    return get_symbol_path().to_string();
-}
-
 std::string const& Enum_Type::get_ui_name() const
 {
     return m_ui_name;

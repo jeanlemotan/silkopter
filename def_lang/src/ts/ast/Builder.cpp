@@ -16,6 +16,7 @@
 #include "def_lang/IBool_Value.h"
 #include "def_lang/All_INumeric_Types.h"
 #include "def_lang/All_INumeric_Values.h"
+#include "def_lang/Qualified_Type.h"
 
 #include "def_lang/impl/Namespace.h"
 #include "def_lang/impl/Struct_Type.h"
@@ -224,6 +225,8 @@ static Result<std::shared_ptr<const IType>> find_type_or_instantiate_templated_t
 
         for (Node const& node: template_argument_nodes)
         {
+            Attribute const* const_attribute = node.find_first_attribute_by_name("const");
+
             auto instantiate_result = find_type_or_instantiate_templated_type(ts, scope, node);
             if (instantiate_result != success)
             {
@@ -235,7 +238,7 @@ static Result<std::shared_ptr<const IType>> find_type_or_instantiate_templated_t
             }
 
             std::shared_ptr<const IType> template_argument = instantiate_result.payload();
-            template_arguments.push_back(template_argument);
+            template_arguments.emplace_back(new ts::Qualified_Type(template_argument, const_attribute != nullptr));
         }
 
         auto instantiate_result = ts.instantiate_template(type_name, template_arguments);

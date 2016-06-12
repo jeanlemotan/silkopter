@@ -22,8 +22,6 @@ public:
     std::string const& get_ui_name() const override;
     Symbol_Path get_native_type() const override;
 
-    std::string get_template_instantiation_string() const override;
-
     std::shared_ptr<IValue> create_value() const override;
     std::shared_ptr<IEnum_Value> create_specialized_value() const override;
 

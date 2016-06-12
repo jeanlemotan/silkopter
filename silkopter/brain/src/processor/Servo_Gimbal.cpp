@@ -19,17 +19,16 @@ Servo_Gimbal::Servo_Gimbal(UAV& uav)
     m_z_output_stream = std::make_shared<Output_Stream>();
 }
 
-auto Servo_Gimbal::init(std::shared_ptr<uav::INode_Descriptor> descriptor) -> bool
+auto Servo_Gimbal::init(uav::INode_Descriptor const& descriptor) -> bool
 {
     QLOG_TOPIC("servo_gimbal::init");
 
-    auto specialized = std::dynamic_pointer_cast<uav::Servo_Gimbal_Descriptor>(descriptor);
+    auto specialized = dynamic_cast<uav::Servo_Gimbal_Descriptor const*>(&descriptor);
     if (!specialized)
     {
         QLOGE("Wrong descriptor type");
         return false;
     }
-
     *m_descriptor = *specialized;
 
     return init();
@@ -155,27 +154,26 @@ void Servo_Gimbal::set_input_stream_path(size_t idx, q::Path const& path)
     }
 }
 
-auto Servo_Gimbal::set_config(std::shared_ptr<uav::INode_Config> config) -> bool
+auto Servo_Gimbal::set_config(uav::INode_Config const& config) -> bool
 {
     QLOG_TOPIC("servo_gimbal::set_config");
 
-    auto specialized = std::dynamic_pointer_cast<uav::Servo_Gimbal_Config>(config);
+    auto specialized = dynamic_cast<uav::Servo_Gimbal_Config const*>(&config);
     if (!specialized)
     {
         QLOGE("Wrong config type");
         return false;
     }
-
     *m_config = *specialized;
 
     return true;
 }
-auto Servo_Gimbal::get_config() const -> std::shared_ptr<uav::INode_Config>
+auto Servo_Gimbal::get_config() const -> std::shared_ptr<const uav::INode_Config>
 {
     return m_config;
 }
 
-auto Servo_Gimbal::get_descriptor() const -> std::shared_ptr<uav::INode_Descriptor>
+auto Servo_Gimbal::get_descriptor() const -> std::shared_ptr<const uav::INode_Descriptor>
 {
     return m_descriptor;
 }

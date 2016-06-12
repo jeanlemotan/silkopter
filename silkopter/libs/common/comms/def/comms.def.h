@@ -14,6 +14,28 @@ namespace silk
 namespace comms
 {
 
+template<class T>
+struct Poly
+{
+  Poly() = default;
+  explicit Poly(T* ptr) : ptr(ptr) {}
+  explicit Poly(std::shared_ptr<T> ptr) : ptr(ptr) {}
+  Poly(Poly const& other) = default;
+  template <class U> Poly(Poly<U> const& other) : ptr(std::dynamic_pointer_cast<U>(other.ptr)) {}
+  Poly(Poly&& other) = default;
+  Poly& operator=(Poly const& other) = default;
+  Poly& operator=(Poly&& other) = default;
+  explicit operator bool() const { return ptr != nullptr; }
+  T* operator->() { return ptr.get(); }
+  T const* operator->() const { return ptr.get(); }
+  T& operator*() { return *ptr; }
+  T const& operator*() const { return *ptr; }
+  T* get() { return ptr.get(); }
+  T const* get() const { return ptr.get(); }
+private:
+  template<class U> friend class Poly;
+  std::shared_ptr<T> ptr;
+};
 typedef int8_t int8_t;
 typedef uint8_t uint8_t;
 typedef int16_t int16_t;
@@ -40,7 +62,7 @@ public:
 
 private:
 
-  setup::time_ms_t m_time = {0LL};
+  setup::time_ms_t m_time = {-9223372036854775808LL};
 };
 
 struct Set_Clock_Res
@@ -56,7 +78,7 @@ public:
 
 private:
 
-  setup::time_ms_t m_time = {0LL};
+  setup::time_ms_t m_time = {-9223372036854775808LL};
 };
 
 struct Set_UAV_Descriptor_Req

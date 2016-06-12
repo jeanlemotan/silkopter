@@ -3,6 +3,7 @@
 #include "def_lang/Serialization.h"
 #include "def_lang/IDeclaration_Scope.h"
 #include "def_lang/impl/Initializer_List.h"
+#include "def_lang/Qualified_Type.h"
 
 namespace ts
 {
@@ -196,7 +197,7 @@ Result<void> Optional_Value::deserialize(serialization::Value const& sz_value)
 
 Result<void> Optional_Value::create_value()
 {
-    std::shared_ptr<IValue> value = m_type->get_inner_type()->create_value();
+    std::shared_ptr<IValue> value = m_type->get_inner_qualified_type()->get_type()->create_value();
     auto result = value->construct();
     if (result != success)
     {
@@ -220,6 +221,10 @@ std::shared_ptr<const IValue> Optional_Value::get_value() const
 }
 std::shared_ptr<IValue> Optional_Value::get_value()
 {
+    if (get_specialized_type()->get_inner_qualified_type()->is_const())
+    {
+        return nullptr;
+    }
     TS_ASSERT(is_constructed());
     return m_is_set ? m_value : std::shared_ptr<IValue>();
 }
@@ -236,7 +241,7 @@ Result<void> Optional_Value::set_value(std::shared_ptr<const IValue> value)
         return Error("Unconstructed value");
     }
 
-    if (value->get_type() != m_type->get_inner_type())
+    if (value->get_type() != m_type->get_inner_qualified_type()->get_type())
     {
         return Error("Type '" + value->get_type()->get_symbol_path().to_string() + "' not allowed in optional '" + m_type->get_symbol_path().to_string() + "'");
     }

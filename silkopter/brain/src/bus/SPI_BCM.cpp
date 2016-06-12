@@ -31,25 +31,25 @@ SPI_BCM::~SPI_BCM()
 {
 }
 
-bool SPI_BCM::init(std::shared_ptr<uav::IBus_Descriptor> descriptor)
+bool SPI_BCM::init(uav::IBus_Descriptor const& descriptor)
 {
-    auto specialized = std::dynamic_pointer_cast<uav::SPI_BCM_Descriptor>(descriptor);
+    auto specialized = dynamic_cast<uav::SPI_BCM_Descriptor const*>(&descriptor);
     if (!specialized)
     {
         QLOGE("Wrong descriptor type");
         return false;
     }
+    *m_descriptor = *specialized;
 
     if (!open(specialized->get_dev(), specialized->get_speed(), specialized->get_mode()))
     {
         return false;
     }
 
-    *m_descriptor = *specialized;
     return true;
 }
 
-std::shared_ptr<uav::IBus_Descriptor> SPI_BCM::get_descriptor() const
+std::shared_ptr<const uav::IBus_Descriptor> SPI_BCM::get_descriptor() const
 {
     return m_descriptor;
 }

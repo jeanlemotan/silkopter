@@ -21,8 +21,8 @@ public:
     SPI_BCM();
     ~SPI_BCM();
 
-    bool init(std::shared_ptr<uav::IBus_Descriptor> descriptor) override;
-    std::shared_ptr<uav::IBus_Descriptor> get_descriptor() const override;
+    bool init(uav::IBus_Descriptor const& descriptor) override;
+    std::shared_ptr<const uav::IBus_Descriptor> get_descriptor() const override;
 
     void lock();
     auto try_lock() -> bool;

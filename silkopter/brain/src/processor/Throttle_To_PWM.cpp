@@ -16,17 +16,16 @@ Throttle_To_PWM::Throttle_To_PWM(UAV& uav)
 {
 }
 
-auto Throttle_To_PWM::init(std::shared_ptr<uav::INode_Descriptor> descriptor) -> bool
+auto Throttle_To_PWM::init(uav::INode_Descriptor const& descriptor) -> bool
 {
     QLOG_TOPIC("Throttle_To_PWM::init");
 
-    auto specialized = std::dynamic_pointer_cast<uav::Throttle_To_PWM_Descriptor>(descriptor);
+    auto specialized = dynamic_cast<uav::Throttle_To_PWM_Descriptor const*>(&descriptor);
     if (!specialized)
     {
         QLOGE("Wrong descriptor type");
         return false;
     }
-
     *m_descriptor = *specialized;
 
     return init();
@@ -99,27 +98,26 @@ void Throttle_To_PWM::set_input_stream_path(size_t idx, q::Path const& path)
     m_accumulators[idx].set_stream_path(0, path, m_output_streams[0]->get_rate(), m_uav);
 }
 
-auto Throttle_To_PWM::set_config(std::shared_ptr<uav::INode_Config> config) -> bool
+auto Throttle_To_PWM::set_config(uav::INode_Config const& config) -> bool
 {
     QLOG_TOPIC("Throttle_To_PWM::set_config");
 
-    auto specialized = std::dynamic_pointer_cast<uav::Throttle_To_PWM_Config>(config);
+    auto specialized = dynamic_cast<uav::Throttle_To_PWM_Config const*>(&config);
     if (!specialized)
     {
         QLOGE("Wrong config type");
         return false;
     }
-
     *m_config = *specialized;
 
     return true;
 }
-auto Throttle_To_PWM::get_config() const -> std::shared_ptr<uav::INode_Config>
+auto Throttle_To_PWM::get_config() const -> std::shared_ptr<const uav::INode_Config>
 {
     return m_config;
 }
 
-auto Throttle_To_PWM::get_descriptor() const -> std::shared_ptr<uav::INode_Descriptor>
+auto Throttle_To_PWM::get_descriptor() const -> std::shared_ptr<const uav::INode_Descriptor>
 {
     return m_descriptor;
 }

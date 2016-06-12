@@ -176,7 +176,7 @@ void UAV::save_settings()
 
     uav::Settings settings;
 
-    settings.set_uav_descriptor(m_uav_descriptor);
+    settings.set_uav_descriptor(uav::Poly<uav::IUAV_Descriptor>(m_uav_descriptor));
 
     std::vector<uav::Settings::Node_Data> node_datas = settings.get_nodes();
     auto const& nodes = get_nodes().get_all();
@@ -186,8 +186,8 @@ void UAV::save_settings()
 
         node_data.set_name(n.name);
         node_data.set_type(n.type);
-        node_data.set_descriptor(n.ptr->get_descriptor());
-        node_data.set_config(n.ptr->get_config());
+        node_data.set_descriptor(uav::Poly<const uav::INode_Descriptor>(n.ptr->get_descriptor()));
+        node_data.set_config(uav::Poly<const uav::INode_Config>(n.ptr->get_config()));
 
         for (auto const& si: n.ptr->get_inputs())
         {
@@ -205,23 +205,25 @@ void UAV::save_settings()
 
         bus_data.set_name(b.name);
         bus_data.set_type(b.type);
-        bus_data.set_descriptor(b.ptr->get_descriptor());
+        bus_data.set_descriptor(uav::Poly<const uav::IBus_Descriptor>(b.ptr->get_descriptor()));
 
         bus_datas.push_back(bus_data);
     }
+
+    auto result = uav::serialize(settings);
+    if (result != ts::success)
+    {
+        QLOGE("Cannot serialize settings: {}.", result.error().what());
+        return;
+    }
+
+    ts::serialization::Value serialized_value = result.extract_payload();
 
     silk::async(std::function<void()>([=]()
     {
         TIMED_FUNCTION();
 
-        auto result = uav::serialize(settings);
-        if (result != ts::success)
-        {
-            QLOGE("Cannot serialize settings: {}.", result.error().what());
-            return;
-        }
-
-        std::string json = ts::serialization::to_json(result.payload(), true);
+        std::string json = ts::serialization::to_json(serialized_value, true);
 
         q::data::File_Sink fs(k_settings_path);
         if (fs.is_open())
@@ -361,39 +363,27 @@ auto UAV::get_uav_descriptor() const -> std::shared_ptr<const uav::IUAV_Descript
 {
     return m_uav_descriptor;
 }
-auto UAV::set_uav_descriptor(std::shared_ptr<uav::IUAV_Descriptor> descriptor) -> bool
+auto UAV::set_uav_descriptor(uav::IUAV_Descriptor const& descriptor) -> bool
 {
-    if (!descriptor)
-    {
-        QLOGE("Null descriptor");
-        return false;
-    }
-
-    auto multirotor_descriptor = std::dynamic_pointer_cast<uav::Multirotor_Descriptor>(descriptor);
+    auto multirotor_descriptor = dynamic_cast<uav::Multirotor_Descriptor const*>(&descriptor);
     if (multirotor_descriptor)
     {
-        return set_multirotor_descriptor(multirotor_descriptor);
+        return set_multirotor_descriptor(*multirotor_descriptor);
     }
 
     QLOGE("Unrecognized UAV descriptor");
     return false;
 }
-auto UAV::set_multirotor_descriptor(std::shared_ptr<uav::Multirotor_Descriptor> descriptor) -> bool
+auto UAV::set_multirotor_descriptor(uav::Multirotor_Descriptor const& descriptor) -> bool
 {
     QLOG_TOPIC("uav::set_multirotor_descriptor");
 
-    QASSERT(descriptor);
-    if (!descriptor)
+    if (descriptor.get_motors().size() < 2)
     {
+        QLOGE("Bad motor count: {}", descriptor.get_motors().size());
         return false;
     }
-
-    if (descriptor->get_motors().size() < 2)
-    {
-        QLOGE("Bad motor count: {}", descriptor->get_motors().size());
-        return false;
-    }
-    for (auto const& m: descriptor->get_motors())
+    for (auto const& m: descriptor.get_motors())
     {
         if (math::is_zero(m.get_position(), math::epsilon<float>()))
         {
@@ -403,10 +393,10 @@ auto UAV::set_multirotor_descriptor(std::shared_ptr<uav::Multirotor_Descriptor> 
     }
 
     //http://en.wikipedia.org/wiki/List_of_moments_of_inertia
-    m_uav_descriptor = descriptor;
-    if (math::is_zero(descriptor->get_moment_of_inertia(), math::epsilon<float>()))
+    m_uav_descriptor.reset(new uav::Multirotor_Descriptor(descriptor)); //make a copy
+    if (math::is_zero(descriptor.get_moment_of_inertia(), math::epsilon<float>()))
     {
-        descriptor->set_moment_of_inertia((1.f / 12.f) * descriptor->get_mass() * (3.f * math::square(descriptor->get_radius()) + math::square(descriptor->get_height())));
+        m_uav_descriptor->set_moment_of_inertia((1.f / 12.f) * descriptor.get_mass() * (3.f * math::square(descriptor.get_radius()) + math::square(descriptor.get_height())));
     }
 
     descriptor_changed_signal.execute(*this);
@@ -439,7 +429,7 @@ void write_gnu_plot(std::string const& name, std::vector<T> const& samples)
     }
 }
 
-auto UAV::create_bus(std::string const& type, std::string const& name, std::shared_ptr<uav::IBus_Descriptor> descriptor) -> std::shared_ptr<bus::IBus>
+auto UAV::create_bus(std::string const& type, std::string const& name, uav::IBus_Descriptor const& descriptor) -> std::shared_ptr<bus::IBus>
 {
     if (m_buses.find_by_name<bus::IBus>(name))
     {
@@ -455,7 +445,7 @@ auto UAV::create_bus(std::string const& type, std::string const& name, std::shar
     }
     return std::shared_ptr<bus::IBus>();
 }
-auto UAV::create_node(std::string const& type, std::string const& name, std::shared_ptr<uav::INode_Descriptor> descriptor) -> std::shared_ptr<node::INode>
+auto UAV::create_node(std::string const& type, std::string const& name, uav::INode_Descriptor const& descriptor) -> std::shared_ptr<node::INode>
 {
     if (m_nodes.find_by_name<node::INode>(name))
     {
@@ -465,7 +455,7 @@ auto UAV::create_node(std::string const& type, std::string const& name, std::sha
     auto node = m_node_factory.create(type);
     if (node && node->init(descriptor))
     {
-        node->set_config(node->get_config());//apply default config
+        node->set_config(*node->get_config());//apply default config
         auto res = m_nodes.add(name, type, node); //this has to succeed since we already tested for duplicate names
         QASSERT(res);
         auto outputs = node->get_outputs();
@@ -969,17 +959,14 @@ auto UAV::init(Comms& comms) -> bool
         return false;
     }
 
-    if (settings.get_uav_descriptor() != nullptr)
+    if (!set_uav_descriptor(*settings.get_uav_descriptor()))
     {
-        if (!set_uav_descriptor(settings.get_uav_descriptor()))
-        {
-            return false;
-        }
+        return false;
     }
 
     for (uav::Settings::Bus_Data const& data: settings.get_buses())
     {
-        if (!create_bus(data.get_type(), data.get_name(), data.get_descriptor()))
+        if (!create_bus(data.get_type(), data.get_name(), *data.get_descriptor()))
         {
             QLOGE("Failed to create bus {} of type '{}'", data.get_name(), data.get_type());
             return false;
@@ -987,7 +974,7 @@ auto UAV::init(Comms& comms) -> bool
     }
     for (uav::Settings::Node_Data const& data: settings.get_nodes())
     {
-        if (!create_node(data.get_type(), data.get_name(), data.get_descriptor()))
+        if (!create_node(data.get_type(), data.get_name(), *data.get_descriptor()))
         {
             QLOGE("Failed to create node {} of type '{}'", data.get_name(), data.get_type());
             return false;
@@ -1010,7 +997,7 @@ auto UAV::init(Comms& comms) -> bool
             node->set_input_stream_path(idx++, q::Path(input_path));
         }
 
-        if (!node->set_config(data.get_config()))
+        if (!node->set_config(*data.get_config()))
         {
             QLOGE("Failed to set config for node {} of type '{}'", data.get_name(), data.get_type());
             return false;

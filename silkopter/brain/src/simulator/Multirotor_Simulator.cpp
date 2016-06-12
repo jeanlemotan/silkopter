@@ -28,17 +28,16 @@ Multirotor_Simulator::Multirotor_Simulator(UAV& uav)
     m_ecef_velocity_stream = std::make_shared<ECEF_Velocity>();
 }
 
-auto Multirotor_Simulator::init(std::shared_ptr<uav::INode_Descriptor> descriptor) -> bool
+auto Multirotor_Simulator::init(uav::INode_Descriptor const& descriptor) -> bool
 {
     QLOG_TOPIC("multirotor_simulator::init");
 
-    auto specialized = std::dynamic_pointer_cast<uav::Multirotor_Simulator_Descriptor>(descriptor);
+    auto specialized = dynamic_cast<uav::Multirotor_Simulator_Descriptor const*>(&descriptor);
     if (!specialized)
     {
         QLOGE("Wrong descriptor type");
         return false;
     }
-
     *m_descriptor = *specialized;
 
     return init();
@@ -307,11 +306,11 @@ void Multirotor_Simulator::set_input_stream_path(size_t idx, q::Path const& path
     }
 }
 
-auto Multirotor_Simulator::set_config(std::shared_ptr<uav::INode_Config> config) -> bool
+auto Multirotor_Simulator::set_config(uav::INode_Config const& config) -> bool
 {
     QLOG_TOPIC("multirotor_simulator::set_config");
 
-    auto specialized = std::dynamic_pointer_cast<uav::Multirotor_Simulator_Config>(config);
+    auto specialized = dynamic_cast<uav::Multirotor_Simulator_Config const*>(&config);
     if (!specialized)
     {
         QLOGE("Wrong config type");
@@ -344,7 +343,6 @@ auto Multirotor_Simulator::set_config(std::shared_ptr<uav::INode_Config> config)
     {
         return false;
     }
-
     *m_config = *specialized;
 
     m_simulation.set_gravity_enabled(m_config->get_gravity_enabled());
@@ -367,12 +365,12 @@ auto Multirotor_Simulator::set_config(std::shared_ptr<uav::INode_Config> config)
 
     return true;
 }
-auto Multirotor_Simulator::get_config() const -> std::shared_ptr<uav::INode_Config>
+auto Multirotor_Simulator::get_config() const -> std::shared_ptr<const uav::INode_Config>
 {
     return m_config;
 }
 
-auto Multirotor_Simulator::get_descriptor() const -> std::shared_ptr<uav::INode_Descriptor>
+auto Multirotor_Simulator::get_descriptor() const -> std::shared_ptr<const uav::INode_Descriptor>
 {
     return m_descriptor;
 }

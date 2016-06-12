@@ -544,6 +544,11 @@ template_argument   : type
                         $$ = ts::ast::Node(ts::ast::Node::Type::TEMPLATE_ARGUMENT, builder.get_location());
                         $$.add_child($1);
                     }
+                    | TCONST type
+                    {
+                        $$ = ts::ast::Node(ts::ast::Node::Type::TEMPLATE_ARGUMENT, builder.get_location());
+                        $$.add_child($2).add_attribute(ts::ast::Attribute("const", true));
+                    }
                     | TTRUE
                     {
                         $$ = ts::ast::Node(ts::ast::Node::Type::TEMPLATE_ARGUMENT, builder.get_location());

@@ -8,6 +8,7 @@ namespace ts
 class IStruct_Type;
 class IPoly_Value;
 class IPoly_Type;
+class Qualified_Type;
 
 struct IPtr_Traits
 {
@@ -25,8 +26,8 @@ public:
 
     virtual std::shared_ptr<traits::value_interface> create_specialized_value() const = 0;
 
-    virtual std::shared_ptr<const IStruct_Type> get_inner_type() const = 0;
-    virtual std::vector<std::shared_ptr<const IStruct_Type>> get_all_inner_types() const = 0;
+    virtual std::shared_ptr<const Qualified_Type> get_inner_qualified_type() const = 0;
+    virtual std::vector<std::shared_ptr<const Qualified_Type>> get_all_inner_qualified_types() const = 0;
 };
 
 }

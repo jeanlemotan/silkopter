@@ -18,17 +18,16 @@ Comp_ECEF::Comp_ECEF(UAV& uav)
 //    m_enu_frame_output_stream = std::make_shared<ENU_Frame_Stream>();
 }
 
-auto Comp_ECEF::init(std::shared_ptr<uav::INode_Descriptor> descriptor) -> bool
+auto Comp_ECEF::init(uav::INode_Descriptor const& descriptor) -> bool
 {
     QLOG_TOPIC("Comp_ECEF::init");
 
-    auto specialized = std::dynamic_pointer_cast<uav::Comp_ECEF_Descriptor>(descriptor);
+    auto specialized = dynamic_cast<uav::Comp_ECEF_Descriptor const*>(&descriptor);
     if (!specialized)
     {
         QLOGE("Wrong descriptor type");
         return false;
     }
-
     *m_descriptor = *specialized;
 
     return init();
@@ -123,27 +122,26 @@ void Comp_ECEF::set_input_stream_path(size_t idx, q::Path const& path)
     m_accumulator.set_stream_path(idx, path, m_descriptor->rate, m_uav);
 }
 
-auto Comp_ECEF::set_config(std::shared_ptr<uav::INode_Config> config) -> bool
+auto Comp_ECEF::set_config(uav::INode_Config const& config) -> bool
 {
     QLOG_TOPIC("Comp_ECEF::set_config");
 
-    auto specialized = std::dynamic_pointer_cast<uav::Comp_ECEF_Config>(config);
+    auto specialized = dynamic_cast<uav::Comp_ECEF_Config const*>(&config);
     if (!specialized)
     {
         QLOGE("Wrong config type");
         return false;
     }
-
     *m_config = *specialized;
 
     return true;
 }
-auto Comp_ECEF::get_config() const -> std::shared_ptr<uav::INode_Config>
+auto Comp_ECEF::get_config() const -> std::shared_ptr<const uav::INode_Config>
 {
     return m_config;
 }
 
-auto Comp_ECEF::get_descriptor() const -> std::shared_ptr<uav::INode_Descriptor>
+auto Comp_ECEF::get_descriptor() const -> std::shared_ptr<const uav::INode_Descriptor>
 {
     return m_descriptor;
 }

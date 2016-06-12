@@ -121,17 +121,16 @@ auto ADS1115::get_outputs() const -> std::vector<Output>
      }};
     return outputs;
 }
-auto ADS1115::init(std::shared_ptr<uav::INode_Descriptor> descriptor) -> bool
+auto ADS1115::init(uav::INode_Descriptor const& descriptor) -> bool
 {
     QLOG_TOPIC("ADS1115::init");
 
-    auto specialized = std::dynamic_pointer_cast<uav::ADS1115_Descriptor>(descriptor);
+    auto specialized = dynamic_cast<uav::ADS1115_Descriptor const*>(&descriptor);
     if (!specialized)
     {
         QLOGE("Wrong descriptor type");
         return false;
     }
-
     *m_descriptor = *specialized;
 
     return init();
@@ -315,27 +314,26 @@ void ADS1115::process()
     m_last_tp = now;
 }
 
-auto ADS1115::set_config(std::shared_ptr<uav::INode_Config> config) -> bool
+auto ADS1115::set_config(uav::INode_Config const& config) -> bool
 {
     QLOG_TOPIC("ADS1115::set_config");
 
-    auto specialized = std::dynamic_pointer_cast<uav::ADS1115_Config>(config);
+    auto specialized = dynamic_cast<uav::ADS1115_Config const*>(&config);
     if (!specialized)
     {
         QLOGE("Wrong config type");
         return false;
     }
-
     *m_config = *specialized;
 
     return true;
 }
-auto ADS1115::get_config() const -> std::shared_ptr<uav::INode_Config>
+auto ADS1115::get_config() const -> std::shared_ptr<const uav::INode_Config>
 {
     return m_config;
 }
 
-auto ADS1115::get_descriptor() const -> std::shared_ptr<uav::INode_Descriptor>
+auto ADS1115::get_descriptor() const -> std::shared_ptr<const uav::INode_Descriptor>
 {
     return m_descriptor;
 }

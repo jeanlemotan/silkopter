@@ -3,6 +3,7 @@
 #include "def_lang/IAttribute.h"
 #include "def_lang/impl/UI_Name_Attribute.h"
 #include "def_lang/impl/Native_Type_Attribute.h"
+#include "def_lang/Qualified_Type.h"
 
 namespace ts
 {
@@ -16,7 +17,7 @@ Optional_Type::Optional_Type(std::string const& name)
 Optional_Type::Optional_Type(Optional_Type const& other, std::string const& name)
     : Symbol_EP(other, name)
     , Attribute_Container_EP(other)
-    , m_inner_type(other.m_inner_type)
+    , m_inner_qualified_type(other.m_inner_qualified_type)
     , m_ui_name(name)
     , m_native_type(other.m_ui_name)
 {
@@ -30,12 +31,12 @@ Result<void> Optional_Type::init(std::vector<std::shared_ptr<const ITemplate_Arg
         return Error("Expected one template argument, got " + std::to_string(arguments.size()));
     }
 
-    std::shared_ptr<const IType> inner_type = std::dynamic_pointer_cast<const IType>(arguments.front());
-    if (!inner_type)
+    std::shared_ptr<const Qualified_Type> qtype = std::dynamic_pointer_cast<const Qualified_Type>(arguments[0]);
+    if (!qtype)
     {
         return Error("Invalid template argument. Expected type");
     }
-    m_inner_type = inner_type;
+    m_inner_qualified_type = qtype;
 
     return success;
 }
@@ -83,14 +84,9 @@ std::shared_ptr<const IType> Optional_Type::get_aliased_type() const
     return m_aliased_type;
 }
 
-std::string Optional_Type::get_template_instantiation_string() const
+std::shared_ptr<const Qualified_Type> Optional_Type::get_inner_qualified_type() const
 {
-    return get_symbol_path().to_string();
-}
-
-std::shared_ptr<const IType> Optional_Type::get_inner_type() const
-{
-    return m_inner_type;
+    return m_inner_qualified_type;
 }
 
 std::shared_ptr<IValue> Optional_Type::create_value() const

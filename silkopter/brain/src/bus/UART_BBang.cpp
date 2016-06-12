@@ -25,25 +25,25 @@ UART_BBang::~UART_BBang()
     close();
 }
 
-bool UART_BBang::init(std::shared_ptr<uav::IBus_Descriptor> descriptor)
+bool UART_BBang::init(uav::IBus_Descriptor const& descriptor)
 {
-    auto specialized = std::dynamic_pointer_cast<uav::UART_BBang_Descriptor>(descriptor);
+    auto specialized = dynamic_cast<uav::UART_BBang_Descriptor const*>(&descriptor);
     if (!specialized)
     {
         QLOGE("Wrong descriptor type");
         return false;
     }
+    *m_descriptor = *specialized;
 
     if (!init(specialized->get_rx_pin(), specialized->get_baud(), specialized->get_invert()))
     {
         return false;
     }
 
-    *m_descriptor = *specialized;
     return true;
 }
 
-std::shared_ptr<uav::IBus_Descriptor> UART_BBang::get_descriptor() const
+std::shared_ptr<const uav::IBus_Descriptor> UART_BBang::get_descriptor() const
 {
     return m_descriptor;
 }

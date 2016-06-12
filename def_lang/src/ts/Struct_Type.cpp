@@ -106,11 +106,6 @@ std::shared_ptr<const IType> Struct_Type::get_aliased_type() const
     return m_aliased_type;
 }
 
-std::string Struct_Type::get_template_instantiation_string() const
-{
-    return get_symbol_path().to_string();
-}
-
 std::shared_ptr<IValue> Struct_Type::create_value() const
 {
     return create_specialized_value();

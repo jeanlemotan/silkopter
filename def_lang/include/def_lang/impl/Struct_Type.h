@@ -23,8 +23,6 @@ public:
     std::shared_ptr<IType> alias(std::string const& name) const override;
     std::shared_ptr<const IType> get_aliased_type() const override;
 
-    std::string get_template_instantiation_string() const override;
-
     size_t get_first_noninhereted_member_def_index() const override;
     size_t get_noninherited_member_def_count() const override;
     std::shared_ptr<IMember_Def const> get_noninherited_member_def(size_t idx) const override;

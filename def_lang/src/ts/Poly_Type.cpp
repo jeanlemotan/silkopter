@@ -20,6 +20,7 @@ Poly_Type::Poly_Type(Poly_Type const& other, std::string const& name)
     : Symbol_EP(other, name)
     , Attribute_Container_EP(other)
     , m_inner_type(other.m_inner_type)
+    , m_inner_qualified_type(other.m_inner_qualified_type)
     , m_ui_name(name)
     , m_native_type(other.m_ui_name)
 {
@@ -32,11 +33,19 @@ Result<void> Poly_Type::init(std::vector<std::shared_ptr<const ITemplate_Argumen
         return Error("Expected only one template argument, got " + std::to_string(arguments.size()));
     }
 
-    m_inner_type = std::dynamic_pointer_cast<const IStruct_Type>(arguments[0]);
+    std::shared_ptr<const Qualified_Type> qtype = std::dynamic_pointer_cast<const Qualified_Type>(arguments[0]);
+    if (!qtype)
+    {
+        return Error("Invalid template argument. Expected type");
+    }
+
+    m_inner_type = std::dynamic_pointer_cast<const IStruct_Type>(qtype->get_type());
     if (!m_inner_type)
     {
         return Error("Invalid template argument. Expected struct type");
     }
+
+    m_inner_qualified_type = qtype;
 
     return success;
 }
@@ -85,16 +94,11 @@ std::shared_ptr<const IType> Poly_Type::get_aliased_type() const
     return m_aliased_type;
 }
 
-std::string Poly_Type::get_template_instantiation_string() const
+std::shared_ptr<const Qualified_Type> Poly_Type::get_inner_qualified_type() const
 {
-    return get_symbol_path().to_string();
+    return m_inner_qualified_type;
 }
-
-std::shared_ptr<const IStruct_Type> Poly_Type::get_inner_type() const
-{
-    return m_inner_type;
-}
-std::vector<std::shared_ptr<const IStruct_Type>> Poly_Type::get_all_inner_types() const
+std::vector<std::shared_ptr<const Qualified_Type>> Poly_Type::get_all_inner_qualified_types() const
 {
     IDeclaration_Scope const* top_scope = get_parent_scope();
     if (!top_scope)
@@ -106,7 +110,7 @@ std::vector<std::shared_ptr<const IStruct_Type>> Poly_Type::get_all_inner_types(
         top_scope = top_scope->get_parent_scope();
     }
 
-    std::vector<std::shared_ptr<const IStruct_Type>> results;
+    std::vector<std::shared_ptr<const Qualified_Type>> results;
 
     std::deque<const IDeclaration_Scope*> stack{ top_scope };
     while (!stack.empty())
@@ -121,7 +125,7 @@ std::vector<std::shared_ptr<const IStruct_Type>> Poly_Type::get_all_inner_types(
             {
                 if (m_inner_type->is_base_of(*struct_type))
                 {
-                    results.push_back(struct_type);
+                    results.emplace_back(new Qualified_Type(struct_type, m_inner_qualified_type->is_const()));
                 }
             }
 

@@ -106,17 +106,16 @@ KF_ECEF::KF_ECEF(UAV& uav)
     m_linear_acceleration_output_stream = std::make_shared<Linear_Acceleration_Output_Stream>();
 }
 
-auto KF_ECEF::init(std::shared_ptr<uav::INode_Descriptor> descriptor) -> bool
+auto KF_ECEF::init(uav::INode_Descriptor const& descriptor) -> bool
 {
     QLOG_TOPIC("KF_ECEF::init");
 
-    auto specialized = std::dynamic_pointer_cast<uav::KF_ECEF_Descriptor>(descriptor);
+    auto specialized = dynamic_cast<uav::KF_ECEF_Descriptor const*>(&descriptor);
     if (!specialized)
     {
         QLOGE("Wrong descriptor type");
         return false;
     }
-
     *m_descriptor = *specialized;
 
     return init();
@@ -261,17 +260,16 @@ void KF_ECEF::set_input_stream_path(size_t idx, q::Path const& path)
     m_accumulator.set_stream_path(idx, path, m_descriptor->get_rate(), m_uav);
 }
 
-auto KF_ECEF::set_config(std::shared_ptr<uav::INode_Config> config) -> bool
+auto KF_ECEF::set_config(uav::INode_Config const& config) -> bool
 {
     QLOG_TOPIC("KF_ECEF::set_config");
 
-    auto specialized = std::dynamic_pointer_cast<uav::KF_ECEF_Config>(config);
+    auto specialized = dynamic_cast<uav::KF_ECEF_Config const*>(&config);
     if (!specialized)
     {
         QLOGE("Wrong config type");
         return false;
     }
-
     *m_config = *specialized;
 
     double gps_pos_acu = math::square(m_config->get_gps_position_accuracy());
@@ -291,12 +289,12 @@ auto KF_ECEF::set_config(std::shared_ptr<uav::INode_Config> config) -> bool
 
     return true;
 }
-auto KF_ECEF::get_config() const -> std::shared_ptr<uav::INode_Config>
+auto KF_ECEF::get_config() const -> std::shared_ptr<const uav::INode_Config>
 {
     return m_config;
 }
 
-auto KF_ECEF::get_descriptor() const -> std::shared_ptr<uav::INode_Descriptor>
+auto KF_ECEF::get_descriptor() const -> std::shared_ptr<const uav::INode_Descriptor>
 {
     return m_descriptor;
 }

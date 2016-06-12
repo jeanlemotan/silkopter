@@ -19,6 +19,7 @@
 #include "def_lang/Value_Selector.h"
 #include "def_lang/impl/Initializer_List.h"
 #include "def_lang/Mapper.h"
+#include "def_lang/Qualified_Type.h"
 #include "def_lang/JSON_Serializer.h"
 
 #include "MurmurHash2.h"
@@ -193,6 +194,29 @@ static void generate_aux_functions(Context& context)
     context.cpp_file += context.ident_str + "{\n";
     context.cpp_file += context.ident_str + "  return std::max(v, max);\n";
     context.cpp_file += context.ident_str + "}\n";
+
+    context.h_file += context.ident_str + "template<class T>\n";
+    context.h_file += context.ident_str + "struct Poly\n";
+    context.h_file += context.ident_str + "{\n";
+    context.h_file += context.ident_str + "  Poly() = default;\n";
+    context.h_file += context.ident_str + "  explicit Poly(T* ptr) : ptr(ptr) {}\n";
+    context.h_file += context.ident_str + "  explicit Poly(std::shared_ptr<T> ptr) : ptr(ptr) {}\n";
+    context.h_file += context.ident_str + "  Poly(Poly const& other) = default;\n";
+    context.h_file += context.ident_str + "  template <class U> Poly(Poly<U> const& other) : ptr(std::dynamic_pointer_cast<U>(other.ptr)) {}\n";
+    context.h_file += context.ident_str + "  Poly(Poly&& other) = default;\n";
+    context.h_file += context.ident_str + "  Poly& operator=(Poly const& other) = default;\n";
+    context.h_file += context.ident_str + "  Poly& operator=(Poly&& other) = default;\n";
+    context.h_file += context.ident_str + "  explicit operator bool() const { return ptr != nullptr; }\n";
+    context.h_file += context.ident_str + "  T* operator->() { return ptr.get(); }\n";
+    context.h_file += context.ident_str + "  T const* operator->() const { return ptr.get(); }\n";
+    context.h_file += context.ident_str + "  T& operator*() { return *ptr; }\n";
+    context.h_file += context.ident_str + "  T const& operator*() const { return *ptr; }\n";
+    context.h_file += context.ident_str + "  T* get() { return ptr.get(); }\n";
+    context.h_file += context.ident_str + "  T const* get() const { return ptr.get(); }\n";
+    context.h_file += context.ident_str + "private:\n";
+    context.h_file += context.ident_str + "  template<class U> friend class Poly;\n";
+    context.h_file += context.ident_str + "  std::shared_ptr<T> ptr;\n";
+    context.h_file += context.ident_str + "};\n";
 }
 
 static ts::Result<void> generate_declaration_scope_code(Context& context, ts::IDeclaration_Scope const& ds);
@@ -216,10 +240,14 @@ static ts::Symbol_Path get_native_type(ts::IDeclaration_Scope const& scope, ts::
     if (ts::IVariant_Type const* t = dynamic_cast<ts::IVariant_Type const*>(&type))
     {
         std::string str = "boost::variant<";
-        for (size_t i = 0; i < t->get_inner_type_count(); i++)
+        for (size_t i = 0; i < t->get_inner_qualified_type_count(); i++)
         {
-            std::shared_ptr<const ts::IType> const& inner_type = t->get_inner_type(i);
-            str += scope.get_symbol_path().get_path_to(get_native_type(scope, *inner_type)).to_string() + ",";
+            std::shared_ptr<const ts::Qualified_Type> const& inner_type = t->get_inner_qualified_type(i);
+            if (inner_type->is_const())
+            {
+                str += "const ";
+            }
+            str += scope.get_symbol_path().get_path_to(get_native_type(scope, *inner_type->get_type())).to_string() + ",";
         }
         str.pop_back();
         str += ">";
@@ -227,19 +255,31 @@ static ts::Symbol_Path get_native_type(ts::IDeclaration_Scope const& scope, ts::
     }
     else if (ts::IOptional_Type const* t = dynamic_cast<ts::IOptional_Type const*>(&type))
     {
+        std::shared_ptr<const ts::Qualified_Type> inner_type = t->get_inner_qualified_type();
         std::string str = "boost::optional<";
-        std::shared_ptr<const ts::IType> const& inner_type = t->get_inner_type();
-        str += scope.get_symbol_path().get_path_to(get_native_type(scope, *inner_type)).to_string();
+        if (inner_type->is_const())
+        {
+            str += "const ";
+        }
+        str += scope.get_symbol_path().get_path_to(get_native_type(scope, *inner_type->get_type())).to_string();
         str += ">";
         return ts::Symbol_Path(str);
     }
     else if (ts::IVector_Type const* t = dynamic_cast<ts::IVector_Type const*>(&type))
     {
-        return ts::Symbol_Path("std::vector<" + get_native_type(scope, *t->get_inner_type()).to_string() + ">");
+        return ts::Symbol_Path("std::vector<" + get_native_type(scope, *t->get_inner_qualified_type()->get_type()).to_string() + ">");
     }
     else if (ts::IPoly_Type const* t = dynamic_cast<ts::IPoly_Type const*>(&type))
     {
-        return ts::Symbol_Path("std::shared_ptr<" + get_native_type(scope, *t->get_inner_type()).to_string() + ">");
+        std::shared_ptr<const ts::Qualified_Type> inner_type = t->get_inner_qualified_type();
+        if (inner_type->is_const())
+        {
+            return ts::Symbol_Path("Poly<const " + get_native_type(scope, *inner_type->get_type()).to_string() + ">");
+        }
+        else
+        {
+            return ts::Symbol_Path("Poly<" + get_native_type(scope, *inner_type->get_type()).to_string() + ">");
+        }
     }
     else if (dynamic_cast<ts::IStruct_Type const*>(&type) ||
              dynamic_cast<ts::IEnum_Type const*>(&type))
@@ -735,12 +775,12 @@ static ts::Result<void> generate_poly_type_code(Context& context, ts::IPoly_Type
 
     std::string native_type_str = get_native_type(context.parent_scope, type).to_string();
 
-    std::vector<std::shared_ptr<const ts::IStruct_Type>> inner_types = type.get_all_inner_types();
+    std::vector<std::shared_ptr<const ts::Qualified_Type>> inner_types = type.get_all_inner_qualified_types();
 
     context.serialization_section_h += "ts::Result<void> deserialize(" + native_type_str + "& value, ts::serialization::Value const& sz_value);\n";
     context.serialization_section_cpp += "ts::Result<void> deserialize(" + native_type_str + "& value, ts::serialization::Value const& sz_value)\n"
                                            "{\n"
-                                           "  if (sz_value.is_empty()) { value = nullptr; return ts::success; }\n"
+                                           "  if (sz_value.is_empty()) { value = " + native_type_str + "(); return ts::success; }\n"
                                            "  if (!sz_value.is_object()) { return ts::Error(\"Expected object or null value when deserializing\"); }\n"
                                            "  auto const* type_sz_value = sz_value.find_object_member_by_name(\"type\");\n"
                                            "  if (!type_sz_value || !type_sz_value->is_string()) { return ts::Error(\"Expected 'type' string value when deserializing\"); }\n"
@@ -749,12 +789,12 @@ static ts::Result<void> generate_poly_type_code(Context& context, ts::IPoly_Type
                                            "  std::string const& path = type_sz_value->get_as_string();\n"
                                            "  if (false) { return ts::Error(\"\"); } //this is here just to have the next items with 'else if'\n";
 
-    for (std::shared_ptr<const ts::IStruct_Type> inner_type: inner_types)
+    for (std::shared_ptr<const ts::Qualified_Type> inner_type: inner_types)
     {
-        std::string native_inner_type_str = get_native_type(context.parent_scope, *inner_type).to_string();
-        context.serialization_section_cpp += "  else if (path == \"" + inner_type->get_symbol_path().to_string() + "\")\n"
+        std::string native_inner_type_str = get_native_type(context.parent_scope, *inner_type->get_type()).to_string();
+        context.serialization_section_cpp += "  else if (path == \"" + inner_type->get_type()->get_symbol_path().to_string() + "\")\n"
                                          "  {\n"
-                                         "    value.reset(new " + native_inner_type_str + "());\n"
+                                         "    value = " + native_type_str + "(new " + native_inner_type_str + "());\n"
                                          "    return deserialize((" + native_inner_type_str + "&)*value, *value_sz_value);\n"
                                          "  }\n";
     }
@@ -769,9 +809,9 @@ static ts::Result<void> generate_poly_type_code(Context& context, ts::IPoly_Type
                                            "  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);\n"
                                            "  if (false) { return ts::Error(\"\"); } //this is here just to have the next items with 'else if'\n";
 
-    for (std::shared_ptr<const ts::IStruct_Type> inner_type: inner_types)
+    for (std::shared_ptr<const ts::Qualified_Type> inner_type: inner_types)
     {
-        std::string native_inner_type_str = get_native_type(context.parent_scope, *inner_type).to_string();
+        std::string native_inner_type_str = get_native_type(context.parent_scope, *inner_type->get_type()).to_string();
         context.serialization_section_cpp += "  else if (typeid(*value) == typeid(" + native_inner_type_str + "))\n"
                                          "  {\n"
                                          "    sz_value.add_object_member(\"type\", \"" + native_inner_type_str + "\");\n"
@@ -857,10 +897,10 @@ static ts::Result<void> generate_variant_type_code(Context& context, ts::IVarian
                                            "  std::string const& path = type_sz_value->get_as_string();\n"
                                            "  if (false) { return ts::Error(\"\"); } //this is here just to have the next items with 'else if'\n";
 
-    for (size_t i = 0; i < type.get_inner_type_count(); i++)
+    for (size_t i = 0; i < type.get_inner_qualified_type_count(); i++)
     {
-        std::string native_inner_type_str = get_native_type(context.parent_scope, *type.get_inner_type(i)).to_string();
-        context.serialization_section_cpp += "  else if (path == \"" + type.get_inner_type(i)->get_symbol_path().to_string() + "\")\n"
+        std::string native_inner_type_str = get_native_type(context.parent_scope, *type.get_inner_qualified_type(i)->get_type()).to_string();
+        context.serialization_section_cpp += "  else if (path == \"" + type.get_inner_qualified_type(i)->get_type()->get_symbol_path().to_string() + "\")\n"
                                              "  {\n"
                                              "    " + native_inner_type_str + " v;\n"
                                              "    auto result = deserialize(boost::get<" + native_inner_type_str + ">(value), *value_sz_value);\n"
@@ -878,9 +918,9 @@ static ts::Result<void> generate_variant_type_code(Context& context, ts::IVarian
                                          "  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);\n"
                                          "  if (false) { return ts::Error(\"\"); } //this is here just to have the next items with 'else if'\n";
 
-    for (size_t i = 0; i < type.get_inner_type_count(); i++)
+    for (size_t i = 0; i < type.get_inner_qualified_type_count(); i++)
     {
-        std::string native_inner_type_str = get_native_type(context.parent_scope, *type.get_inner_type(i)).to_string();
+        std::string native_inner_type_str = get_native_type(context.parent_scope, *type.get_inner_qualified_type(i)->get_type()).to_string();
         context.serialization_section_cpp += "  else if (auto* v = boost::get<" + native_inner_type_str + ">(&value))\n"
                                              "  {\n"
                                              "    sz_value.add_object_member(\"type\", \"" + native_inner_type_str + "\");\n"
@@ -905,7 +945,7 @@ static ts::Result<void> generate_optional_type_code(Context& context, ts::IOptio
 
     std::string native_type_str = get_native_type(context.parent_scope, type).to_string();
 
-    std::string native_inner_type_str = get_native_type(context.parent_scope, *type.get_inner_type()).to_string();
+    std::string native_inner_type_str = get_native_type(context.parent_scope, *type.get_inner_qualified_type()->get_type()).to_string();
 
     context.serialization_section_h += "ts::Result<void> deserialize(" + native_type_str + "& value, ts::serialization::Value const& sz_value);\n";
     context.serialization_section_cpp += "ts::Result<void> deserialize(" + native_type_str + "& value, ts::serialization::Value const& sz_value)\n"

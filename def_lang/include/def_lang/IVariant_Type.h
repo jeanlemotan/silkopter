@@ -6,6 +6,7 @@ namespace ts
 {
 
 class IVariant_Value;
+class Qualified_Type;
 
 class IVariant_Type: virtual public ITemplated_Type
 {
@@ -14,9 +15,9 @@ public:
 
     typedef IVariant_Value value_type;
 
-    virtual size_t get_inner_type_count() const = 0;
-    virtual std::shared_ptr<const IType> get_inner_type(size_t idx) const = 0;
-    virtual boost::optional<size_t> find_inner_type_idx(std::shared_ptr<const IType> type) const = 0;
+    virtual size_t get_inner_qualified_type_count() const = 0;
+    virtual std::shared_ptr<const Qualified_Type> get_inner_qualified_type(size_t idx) const = 0;
+    virtual boost::optional<size_t> find_inner_qualified_type_idx(std::shared_ptr<const IType> type) const = 0;
 
     virtual std::shared_ptr<IVariant_Value> create_specialized_value() const = 0;
 };

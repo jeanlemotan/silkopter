@@ -64,11 +64,11 @@ public:
 
     virtual Type get_type() const = 0;
 
-    virtual bool init(std::shared_ptr<uav::INode_Descriptor> descriptor) = 0;
-    virtual std::shared_ptr<uav::INode_Descriptor> get_descriptor() const = 0;
+    virtual bool init(uav::INode_Descriptor const& descriptor) = 0;
+    virtual std::shared_ptr<const uav::INode_Descriptor> get_descriptor() const = 0;
 
-    virtual bool set_config(std::shared_ptr<uav::INode_Config> config) = 0;
-    virtual std::shared_ptr<uav::INode_Config> get_config() const = 0;
+    virtual bool set_config(uav::INode_Config const& config) = 0;
+    virtual std::shared_ptr<const uav::INode_Config> get_config() const = 0;
 
     virtual bool start(q::Clock::time_point tp) = 0;
 

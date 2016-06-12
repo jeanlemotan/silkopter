@@ -469,17 +469,16 @@ auto MPU9250::get_outputs() const -> std::vector<Output>
     outputs[3].stream = m_temperature;
     return outputs;
 }
-auto MPU9250::init(std::shared_ptr<uav::INode_Descriptor> descriptor) -> bool
+auto MPU9250::init(uav::INode_Descriptor const& descriptor) -> bool
 {
     QLOG_TOPIC("mpu9250::init");
 
-    auto specialized = std::dynamic_pointer_cast<uav::MPU9250_Descriptor>(descriptor);
+    auto specialized = dynamic_cast<uav::MPU9250_Descriptor const*>(&descriptor);
     if (!specialized)
     {
         QLOGE("Wrong descriptor type");
         return false;
     }
-
     *m_descriptor = *specialized;
 
     return init();
@@ -1320,17 +1319,16 @@ void MPU9250::process_magnetometer(Buses& buses)
 #endif
 }
 
-auto MPU9250::set_config(std::shared_ptr<uav::INode_Config> config) -> bool
+auto MPU9250::set_config(uav::INode_Config const& config) -> bool
 {
     QLOG_TOPIC("mpu9250::set_config");
 
-    auto specialized = std::dynamic_pointer_cast<uav::MPU9250_Config>(config);
+    auto specialized = dynamic_cast<uav::MPU9250_Config const*>(&config);
     if (!specialized)
     {
         QLOGE("Wrong config type");
         return false;
     }
-
     *m_config = *specialized;
 
     uav::MPU9250_Config::Calibration calibration = m_config->get_calibration();
@@ -1378,12 +1376,12 @@ auto MPU9250::set_config(std::shared_ptr<uav::INode_Config> config) -> bool
 
     return true;
 }
-auto MPU9250::get_config() const -> std::shared_ptr<uav::INode_Config>
+auto MPU9250::get_config() const -> std::shared_ptr<const uav::INode_Config>
 {
     return m_config;
 }
 
-auto MPU9250::get_descriptor() const -> std::shared_ptr<uav::INode_Descriptor>
+auto MPU9250::get_descriptor() const -> std::shared_ptr<const uav::INode_Descriptor>
 {
     return m_descriptor;
 }

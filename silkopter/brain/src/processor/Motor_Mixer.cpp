@@ -16,17 +16,16 @@ Motor_Mixer::Motor_Mixer(UAV& uav)
 {
 }
 
-auto Motor_Mixer::init(std::shared_ptr<uav::INode_Descriptor> descriptor) -> bool
+auto Motor_Mixer::init(uav::INode_Descriptor const& descriptor) -> bool
 {
     QLOG_TOPIC("motor_mixer::init");
 
-    auto specialized = std::dynamic_pointer_cast<uav::Motor_Mixer_Descriptor>(descriptor);
+    auto specialized = dynamic_cast<uav::Motor_Mixer_Descriptor const*>(&descriptor);
     if (!specialized)
     {
         QLOGE("Wrong descriptor type");
         return false;
     }
-
     *m_descriptor = *specialized;
 
     return init();
@@ -427,27 +426,26 @@ void Motor_Mixer::set_input_stream_path(size_t idx, q::Path const& path)
     m_accumulator.set_stream_path(idx, path, m_descriptor->get_rate(), m_uav);
 }
 
-auto Motor_Mixer::set_config(std::shared_ptr<uav::INode_Config> config) -> bool
+auto Motor_Mixer::set_config(uav::INode_Config const& config) -> bool
 {
     QLOG_TOPIC("motor_mixer::set_config");
 
-    auto specialized = std::dynamic_pointer_cast<uav::Motor_Mixer_Config>(config);
+    auto specialized = dynamic_cast<uav::Motor_Mixer_Config const*>(&config);
     if (!specialized)
     {
         QLOGE("Wrong config type");
         return false;
     }
-
     *m_config = *specialized;
 
     return true;
 }
-auto Motor_Mixer::get_config() const -> std::shared_ptr<uav::INode_Config>
+auto Motor_Mixer::get_config() const -> std::shared_ptr<const uav::INode_Config>
 {
     return m_config;
 }
 
-auto Motor_Mixer::get_descriptor() const -> std::shared_ptr<uav::INode_Descriptor>
+auto Motor_Mixer::get_descriptor() const -> std::shared_ptr<const uav::INode_Descriptor>
 {
     return m_descriptor;
 }

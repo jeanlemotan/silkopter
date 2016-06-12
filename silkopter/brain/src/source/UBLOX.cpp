@@ -306,17 +306,16 @@ auto UBLOX::get_outputs() const -> std::vector<Output>
     return outputs;
 }
 
-auto UBLOX::init(std::shared_ptr<uav::INode_Descriptor> descriptor) -> bool
+auto UBLOX::init(uav::INode_Descriptor const& descriptor) -> bool
 {
     QLOG_TOPIC("ublox::init");
 
-    auto specialized = std::dynamic_pointer_cast<uav::UBLOX_Descriptor>(descriptor);
+    auto specialized = dynamic_cast<uav::UBLOX_Descriptor const*>(&descriptor);
     if (!specialized)
     {
         QLOGE("Wrong descriptor type");
         return false;
     }
-
     *m_descriptor = *specialized;
 
     return init();
@@ -1148,27 +1147,26 @@ template<class T> auto UBLOX::send_packet_with_retry(Buses& buses, uint16_t msg,
 }
 
 
-auto UBLOX::set_config(std::shared_ptr<uav::INode_Config> config) -> bool
+auto UBLOX::set_config(uav::INode_Config const& config) -> bool
 {
     QLOG_TOPIC("ublox::set_config");
 
-    auto specialized = std::dynamic_pointer_cast<uav::UBLOX_Config>(config);
+    auto specialized = dynamic_cast<uav::UBLOX_Config const*>(&config);
     if (!specialized)
     {
         QLOGE("Wrong config type");
         return false;
     }
-
     *m_config = *specialized;
 
     return true;
 }
-auto UBLOX::get_config() const -> std::shared_ptr<uav::INode_Config>
+auto UBLOX::get_config() const -> std::shared_ptr<const uav::INode_Config>
 {
     return m_config;
 }
 
-auto UBLOX::get_descriptor() const -> std::shared_ptr<uav::INode_Descriptor>
+auto UBLOX::get_descriptor() const -> std::shared_ptr<const uav::INode_Descriptor>
 {
     return m_descriptor;
 }

@@ -36,6 +36,7 @@
 #include "utils/Channel.h"
 
 #include "comms.def.h"
+#include "def_lang/JSON_Serializer.h"
 
 using namespace silk;
 using namespace boost::asio;
@@ -901,34 +902,47 @@ void Comms::process()
 
     while (m_rcp->receive(SETUP_CHANNEL, m_channels->setup_buffer))
     {
-//        silk::comms::Bra
-//        silk::comms::deserialize()
-    }
-
-    while (auto msg = m_channels->setup.get_next_message(*m_rcp))
-    {
-        switch (msg.get())
+        auto parse_result = ts::serialization::from_json(m_channels->setup_buffer.data(), m_channels->setup_buffer.size());
+        if (parse_result != ts::success)
         {
-        case comms::Setup_Message::CLOCK: handle_clock(); break;
-
-        case comms::Setup_Message::UAV_DESCRIPTOR: handle_uav_descriptor(); break;
-
-        case comms::Setup_Message::ENUMERATE_NODE_DEFS: handle_enumerate_node_defs(); break;
-        case comms::Setup_Message::ENUMERATE_NODES: handle_enumerate_nodes(); break;
-        case comms::Setup_Message::GET_NODE_DATA: handle_get_node_data(); break;
-
-        case comms::Setup_Message::ADD_NODE: handle_add_node(); break;
-        case comms::Setup_Message::REMOVE_NODE: handle_remove_node(); break;
-        case comms::Setup_Message::NODE_CONFIG: handle_node_config(); break;
-        case comms::Setup_Message::NODE_MESSAGE: handle_node_message(); break;
-        case comms::Setup_Message::NODE_INPUT_STREAM_PATH: handle_node_input_stream_path(); break;
-
-        case comms::Setup_Message::STREAM_TELEMETRY_ACTIVE: handle_streams_telemetry_active(); break;
-        case comms::Setup_Message::UAV_TELEMETRY_ACTIVE: handle_uav_telemetry_active(); break;
-
-        default: QLOGE("Received unrecognised setup message: {}", static_cast<int>(msg.get())); break;
+            QLOGE("Cannot parse setup message: {}", parse_result.error().what());
         }
+        else
+        {
+            silk::comms::setup::Brain_Message message;
+            auto result = silk::comms::deserialize(message, parse_result.payload());
+            if (result != ts::success)
+            {
+                QLOGE("Cannot deserialize setup message: {}", result.error().what());
+            }
+        }
+        m_channels->setup_buffer.clear();
     }
+
+//    while (auto msg = m_channels->setup.get_next_message(*m_rcp))
+//    {
+//        switch (msg.get())
+//        {
+//        case comms::Setup_Message::CLOCK: handle_clock(); break;
+
+//        case comms::Setup_Message::UAV_DESCRIPTOR: handle_uav_descriptor(); break;
+
+//        case comms::Setup_Message::ENUMERATE_NODE_DEFS: handle_enumerate_node_defs(); break;
+//        case comms::Setup_Message::ENUMERATE_NODES: handle_enumerate_nodes(); break;
+//        case comms::Setup_Message::GET_NODE_DATA: handle_get_node_data(); break;
+
+//        case comms::Setup_Message::ADD_NODE: handle_add_node(); break;
+//        case comms::Setup_Message::REMOVE_NODE: handle_remove_node(); break;
+//        case comms::Setup_Message::NODE_CONFIG: handle_node_config(); break;
+//        case comms::Setup_Message::NODE_MESSAGE: handle_node_message(); break;
+//        case comms::Setup_Message::NODE_INPUT_STREAM_PATH: handle_node_input_stream_path(); break;
+
+//        case comms::Setup_Message::STREAM_TELEMETRY_ACTIVE: handle_streams_telemetry_active(); break;
+//        case comms::Setup_Message::UAV_TELEMETRY_ACTIVE: handle_uav_telemetry_active(); break;
+
+//        default: QLOGE("Received unrecognised setup message: {}", static_cast<int>(msg.get())); break;
+//        }
+//    }
 
     gather_telemetry_data();
 

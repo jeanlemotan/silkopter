@@ -3,6 +3,7 @@
 #include "def_lang/Serialization.h"
 #include "def_lang/IStruct_Type.h"
 #include "def_lang/impl/Initializer_List.h"
+#include "def_lang/Qualified_Type.h"
 
 namespace ts
 {
@@ -35,7 +36,7 @@ Result<bool> Poly_Value::is_equal(IValue const& other) const
         return Error("incompatible types");
     }
 
-    if (get_specialized_type()->get_inner_type() != v->get_specialized_type()->get_inner_type())
+    if (get_specialized_type()->get_inner_qualified_type() != v->get_specialized_type()->get_inner_qualified_type())
     {
         return Error("incompatible inner types");
     }
@@ -98,9 +99,9 @@ Result<void> Poly_Value::copy_assign(IValue const& other)
         return Error("incompatible types");
     }
 
-    if (!is_type_allowed(*v->get_specialized_type()->get_inner_type()))
+    if (!is_type_allowed(*v->get_specialized_type()->get_inner_qualified_type()->get_type()))
     {
-        return Error("Cannot point to type " + v->get_specialized_type()->get_inner_type()->get_symbol_path().to_string());
+        return Error("Cannot point to type " + v->get_specialized_type()->get_inner_qualified_type()->get_type()->get_symbol_path().to_string());
     }
 
     if (get_value() == nullptr)
@@ -276,6 +277,10 @@ std::shared_ptr<const IValue> Poly_Value::get_value() const
 }
 std::shared_ptr<IValue> Poly_Value::get_value()
 {
+    if (get_specialized_type()->get_inner_qualified_type()->is_const())
+    {
+        return nullptr;
+    }
     TS_ASSERT(is_constructed());
     return m_value;
 }
@@ -291,7 +296,8 @@ Result<void> Poly_Value::set_value(std::shared_ptr<IValue> value)
         TS_ASSERT(false);
         return Error("Unconstructed value");
     }
-//    if (!value)
+
+    //    if (!value)
 //    {
 //        m_value = nullptr;
 //        return success;
@@ -313,22 +319,23 @@ bool Poly_Value::is_type_allowed(IType const& type) const
         TS_ASSERT(false);
         return false;
     }
-    if (get_specialized_type()->get_inner_type().get() == &type)
+
+    IType const* inner_type = get_specialized_type()->get_inner_qualified_type()->get_type().get();
+    if (inner_type == &type)
     {
         return true;
     }
 
-    IStruct_Type const* inner_type = dynamic_cast<IStruct_Type const*>(get_specialized_type()->get_inner_type().get());
-    IStruct_Type const* other_type = dynamic_cast<IStruct_Type const*>(&type);
+    IStruct_Type const* struct_inner_type = dynamic_cast<IStruct_Type const*>(inner_type);
+    IStruct_Type const* struct_other_type = dynamic_cast<IStruct_Type const*>(&type);
 
-    if (inner_type && other_type)
+    if (struct_inner_type && struct_other_type)
     {
-        return inner_type->is_base_of(*other_type);
+        return struct_inner_type->is_base_of(*struct_other_type);
     }
 
     return false;
 }
-
 
 
 }

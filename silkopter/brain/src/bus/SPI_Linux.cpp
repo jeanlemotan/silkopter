@@ -20,25 +20,25 @@ SPI_Linux::~SPI_Linux()
     close();
 }
 
-bool SPI_Linux::init(std::shared_ptr<uav::IBus_Descriptor> descriptor)
+bool SPI_Linux::init(uav::IBus_Descriptor const& descriptor)
 {
-    auto specialized = std::dynamic_pointer_cast<uav::SPI_Linux_Descriptor>(descriptor);
+    auto specialized = dynamic_cast<uav::SPI_Linux_Descriptor const*>(&descriptor);
     if (!specialized)
     {
         QLOGE("Wrong descriptor type");
         return false;
     }
+    *m_descriptor = *specialized;
 
-    if (!open(specialized->get_dev(), specialized->get_speed()))
+    if (!open(m_descriptor->get_dev(), m_descriptor->get_speed()))
     {
         return false;
     }
 
-    *m_descriptor = *specialized;
     return true;
 }
 
-std::shared_ptr<uav::IBus_Descriptor> SPI_Linux::get_descriptor() const
+std::shared_ptr<const uav::IBus_Descriptor> SPI_Linux::get_descriptor() const
 {
     return m_descriptor;
 }

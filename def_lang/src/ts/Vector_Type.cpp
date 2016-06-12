@@ -3,6 +3,7 @@
 #include "def_lang/IAttribute.h"
 #include "def_lang/impl/UI_Name_Attribute.h"
 #include "def_lang/impl/Native_Type_Attribute.h"
+#include "def_lang/Qualified_Type.h"
 
 namespace ts
 {
@@ -29,11 +30,18 @@ Result<void> Vector_Type::init(std::vector<std::shared_ptr<const ITemplate_Argum
         return Error("Expected only one template argument, got " + std::to_string(arguments.size()));
     }
 
-    m_inner_type = std::dynamic_pointer_cast<const IType>(arguments[0]);
-    if (!m_inner_type)
+    std::shared_ptr<const Qualified_Type> inner_type = std::dynamic_pointer_cast<const Qualified_Type>(arguments[0]);
+    if (!inner_type)
     {
         return Error("Invalid template argument. Expected type");
     }
+
+    if (inner_type->is_const())
+    {
+        return Error("Invalid template argument. vectors don't support const types");
+    }
+
+    m_inner_type = inner_type;
 
     return success;
 }
@@ -81,12 +89,7 @@ std::shared_ptr<const IType> Vector_Type::get_aliased_type() const
     return m_aliased_type;
 }
 
-std::string Vector_Type::get_template_instantiation_string() const
-{
-    return get_symbol_path().to_string();
-}
-
-std::shared_ptr<const IType> Vector_Type::get_inner_type() const
+std::shared_ptr<const Qualified_Type> Vector_Type::get_inner_qualified_type() const
 {
     return m_inner_type;
 }
