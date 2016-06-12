@@ -17,13 +17,18 @@ Result<void> Numeric_Value_Template<Traits>::construct(IInitializer_List const& 
         return Error("Already constructed value");
     }
 
+    typename Traits::fundamental_type value;
+
     if (initializer_list.get_initializer_count() == 0)
     {
         this->set_constructed(true);
-        return set_value(get_specialized_type()->get_min_value());
+        typename Traits::fundamental_type min_value = get_specialized_type()->get_min_value();
+        for (size_t i = 0; i < Traits::component_count; i++)
+        {
+            detail::set_component(value, std::max(detail::get_component(min_value, i), (typename Traits::component_type)0), i);
+        }
+        return set_value(value);
     }
-
-    typename Traits::fundamental_type value;
 
     if (initializer_list.get_initializer_count() > Traits::component_count)
     {
