@@ -6,7 +6,6 @@ template<typename Traits>
 Numeric_Value_Template<Traits>::Numeric_Value_Template(std::shared_ptr<typename Traits::type_interface const> type)
     : Value_Template_EP<Traits>(type)
 {
-
 }
 
 template<typename Traits>
@@ -21,7 +20,7 @@ Result<void> Numeric_Value_Template<Traits>::construct(IInitializer_List const& 
     if (initializer_list.get_initializer_count() == 0)
     {
         this->set_constructed(true);
-        return success;
+        return set_value(get_specialized_type()->get_min_value());
     }
 
     typename Traits::fundamental_type value;

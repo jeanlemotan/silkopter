@@ -749,7 +749,7 @@ static Result<void> create_alias(Type_System& ts, IDeclaration_Scope& scope, Nod
 
     std::shared_ptr<const IType> type = type_result.extract_payload();
 
-    std::shared_ptr<IType> aliased_type = type->clone(name);
+    std::shared_ptr<IType> aliased_type = type->alias(name);
 
     auto create_result = create_type_attributes(ts, *aliased_type, node);
     if (create_result != success)

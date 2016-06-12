@@ -64,7 +64,7 @@ std::string const& Struct_Type::get_ui_name() const
 }
 Symbol_Path Struct_Type::get_native_type() const
 {
-    return m_native_type.empty() ? get_symbol_path() : m_native_type;
+    return m_native_type;
 }
 
 Result<void> Struct_Type::validate_symbol(std::shared_ptr<const ISymbol> symbol)
@@ -93,6 +93,17 @@ Result<void> Struct_Type::validate_attribute(IAttribute const& attribute)
 std::shared_ptr<IType> Struct_Type::clone(std::string const& name) const
 {
     return std::make_shared<Struct_Type>(*this, name);
+}
+std::shared_ptr<IType> Struct_Type::alias(std::string const& name) const
+{
+    std::shared_ptr<Struct_Type> alias = std::make_shared<Struct_Type>(*this, name);
+    alias->m_native_type = Symbol_Path(); //clear the native type as this is an alias
+    alias->m_aliased_type = this->shared_from_this();
+    return alias;
+}
+std::shared_ptr<const IType> Struct_Type::get_aliased_type() const
+{
+    return m_aliased_type;
 }
 
 std::string Struct_Type::get_template_instantiation_string() const

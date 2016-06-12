@@ -40,6 +40,21 @@ std::shared_ptr<IType> Type_Template_EP<Traits>::clone(std::string const& name) 
 }
 
 template<typename Traits>
+std::shared_ptr<IType> Type_Template_EP<Traits>::alias(std::string const& name) const
+{
+    std::shared_ptr<type_implementation> alias = std::make_shared<type_implementation>(static_cast<const type_implementation&>(*this), name);
+    alias->m_native_type = Symbol_Path(); //clear the native type as this is an alias
+    alias->m_aliased_type = this->shared_from_this();
+    return alias;
+}
+
+template<typename Traits>
+std::shared_ptr<const IType> Type_Template_EP<Traits>::get_aliased_type() const
+{
+    return m_aliased_type;
+}
+
+template<typename Traits>
 std::shared_ptr<IValue> Type_Template_EP<Traits>::create_value() const
 {
     return create_specialized_value();

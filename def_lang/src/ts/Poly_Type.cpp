@@ -73,6 +73,17 @@ std::shared_ptr<IType> Poly_Type::clone(std::string const& name) const
 {
     return std::make_shared<Poly_Type>(*this, name);
 }
+std::shared_ptr<IType> Poly_Type::alias(std::string const& name) const
+{
+    std::shared_ptr<Poly_Type> alias = std::make_shared<Poly_Type>(*this, name);
+    alias->m_native_type = Symbol_Path(); //clear the native type as this is an alias
+    alias->m_aliased_type = this->shared_from_this();
+    return alias;
+}
+std::shared_ptr<const IType> Poly_Type::get_aliased_type() const
+{
+    return m_aliased_type;
+}
 
 std::string Poly_Type::get_template_instantiation_string() const
 {

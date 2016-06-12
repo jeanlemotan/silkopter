@@ -16,28 +16,42 @@ namespace uav
 
 // Returns the ast json from which a ast root node can be serialized
 std::string const& get_ast_json();
+typedef int8_t int8_t;
+typedef uint8_t uint8_t;
+typedef int16_t int16_t;
+typedef uint16_t uint16_t;
+typedef int32_t int32_t;
+typedef uint32_t uint32_t;
+typedef float ufloat;
+typedef float muf_t;
+typedef vec3f direction_t;
+typedef float euler_t;
+typedef vec3f euler3_t;
+typedef float servo_signal_t;
+typedef float pwm_signal_t;
 struct IUAV_Descriptor
 {
 public:
 
+  typedef float mass_t;
   IUAV_Descriptor() noexcept {};
   virtual ~IUAV_Descriptor() noexcept {};
 
   void set_name(std::string const& value);
   auto get_name() const -> std::string const&;
 
-  void set_mass(float const& value);
-  auto get_mass() const -> float const&;
+  void set_mass(mass_t const& value);
+  auto get_mass() const -> mass_t const&;
 
-  void set_moment_of_inertia(float const& value);
-  auto get_moment_of_inertia() const -> float const&;
+  void set_moment_of_inertia(ufloat const& value);
+  auto get_moment_of_inertia() const -> ufloat const&;
 
 
 private:
 
   std::string m_name = {};
-  float m_mass = {0.000000f};
-  float m_moment_of_inertia = {0.000000f};
+  mass_t m_mass = {0.010000f};
+  ufloat m_moment_of_inertia = {0.000000f};
 };
 
 struct IBus_Descriptor
@@ -167,6 +181,11 @@ struct Multirotor_Descriptor : public IUAV_Descriptor
 {
 public:
 
+  typedef float height_t;
+  typedef float radius_t;
+  typedef float torque_t;
+  typedef float thrust_t;
+  typedef float acceleration_t;
   struct Motor
   {
   public:
@@ -177,8 +196,8 @@ public:
     void set_position(vec3f const& value);
     auto get_position() const -> vec3f const&;
 
-    void set_thrust_vector(vec3f const& value);
-    auto get_thrust_vector() const -> vec3f const&;
+    void set_thrust_vector(direction_t const& value);
+    auto get_thrust_vector() const -> direction_t const&;
 
     void set_clockwise(bool const& value);
     auto get_clockwise() const -> bool const&;
@@ -186,8 +205,8 @@ public:
 
   private:
 
-    vec3f m_position = {0.000000f, 0.000000f, 0.000000f};
-    vec3f m_thrust_vector = {0.000000f, 0.000000f, 1.000000f};
+    vec3f m_position = {-340282346638528859811704183484516925440.000000f, -340282346638528859811704183484516925440.000000f, -340282346638528859811704183484516925440.000000f};
+    direction_t m_thrust_vector = {0.000000f, 0.000000f, 1.000000f};
     bool m_clockwise = {false};
   };
 
@@ -197,29 +216,29 @@ public:
   void set_name(std::string const& value);
   auto get_name() const -> std::string const&;
 
-  void set_mass(float const& value);
-  auto get_mass() const -> float const&;
+  void set_mass(IUAV_Descriptor::mass_t const& value);
+  auto get_mass() const -> IUAV_Descriptor::mass_t const&;
 
-  void set_moment_of_inertia(float const& value);
-  auto get_moment_of_inertia() const -> float const&;
+  void set_moment_of_inertia(ufloat const& value);
+  auto get_moment_of_inertia() const -> ufloat const&;
 
-  void set_radius(float const& value);
-  auto get_radius() const -> float const&;
+  void set_radius(radius_t const& value);
+  auto get_radius() const -> radius_t const&;
 
-  void set_height(float const& value);
-  auto get_height() const -> float const&;
+  void set_height(height_t const& value);
+  auto get_height() const -> height_t const&;
 
-  void set_motor_z_torque(float const& value);
-  auto get_motor_z_torque() const -> float const&;
+  void set_motor_z_torque(torque_t const& value);
+  auto get_motor_z_torque() const -> torque_t const&;
 
-  void set_motor_thrust(float const& value);
-  auto get_motor_thrust() const -> float const&;
+  void set_motor_thrust(thrust_t const& value);
+  auto get_motor_thrust() const -> thrust_t const&;
 
-  void set_motor_acceleration(float const& value);
-  auto get_motor_acceleration() const -> float const&;
+  void set_motor_acceleration(acceleration_t const& value);
+  auto get_motor_acceleration() const -> acceleration_t const&;
 
-  void set_motor_deceleration(float const& value);
-  auto get_motor_deceleration() const -> float const&;
+  void set_motor_deceleration(acceleration_t const& value);
+  auto get_motor_deceleration() const -> acceleration_t const&;
 
   void set_motors(std::vector<Multirotor_Descriptor::Motor> const& value);
   auto get_motors() const -> std::vector<Multirotor_Descriptor::Motor> const&;
@@ -229,14 +248,14 @@ public:
 private:
 
   std::string m_name = {};
-  float m_mass = {0.000000f};
-  float m_moment_of_inertia = {0.000000f};
-  float m_radius = {1.000000f};
-  float m_height = {1.000000f};
-  float m_motor_z_torque = {1.000000f};
-  float m_motor_thrust = {1.000000f};
-  float m_motor_acceleration = {10.000000f};
-  float m_motor_deceleration = {10.000000f};
+  IUAV_Descriptor::mass_t m_mass = {0.010000f};
+  ufloat m_moment_of_inertia = {0.000000f};
+  radius_t m_radius = {1.000000f};
+  height_t m_height = {1.000000f};
+  torque_t m_motor_z_torque = {1.000000f};
+  thrust_t m_motor_thrust = {1.000000f};
+  acceleration_t m_motor_acceleration = {10.000000f};
+  acceleration_t m_motor_deceleration = {10.000000f};
   std::vector<Multirotor_Descriptor::Motor> m_motors = {};
 };
 
@@ -298,20 +317,22 @@ struct I2C_BCM_Descriptor : public IBus_Descriptor
 {
 public:
 
+  typedef uint32_t dev_t;
+  typedef uint32_t baud_t;
   I2C_BCM_Descriptor() noexcept {};
   virtual ~I2C_BCM_Descriptor() noexcept {};
 
-  void set_dev(uint32_t const& value);
-  auto get_dev() const -> uint32_t const&;
+  void set_dev(dev_t const& value);
+  auto get_dev() const -> dev_t const&;
 
-  void set_baud(uint32_t const& value);
-  auto get_baud() const -> uint32_t const&;
+  void set_baud(baud_t const& value);
+  auto get_baud() const -> baud_t const&;
 
 
 private:
 
-  uint32_t m_dev = {0LL};
-  uint32_t m_baud = {400000LL};
+  dev_t m_dev = {0LL};
+  baud_t m_baud = {400000LL};
 };
 
 struct I2C_Linux_Descriptor : public IBus_Descriptor
@@ -334,48 +355,52 @@ struct SPI_BCM_Descriptor : public IBus_Descriptor
 {
 public:
 
+  typedef uint32_t dev_t;
+  typedef uint32_t mode_t;
+  typedef uint32_t speed_t;
   SPI_BCM_Descriptor() noexcept {};
   virtual ~SPI_BCM_Descriptor() noexcept {};
 
-  void set_dev(uint32_t const& value);
-  auto get_dev() const -> uint32_t const&;
+  void set_dev(dev_t const& value);
+  auto get_dev() const -> dev_t const&;
 
   void set_baud(uint32_t const& value);
   auto get_baud() const -> uint32_t const&;
 
-  void set_mode(uint32_t const& value);
-  auto get_mode() const -> uint32_t const&;
+  void set_mode(mode_t const& value);
+  auto get_mode() const -> mode_t const&;
 
-  void set_speed(uint32_t const& value);
-  auto get_speed() const -> uint32_t const&;
+  void set_speed(speed_t const& value);
+  auto get_speed() const -> speed_t const&;
 
 
 private:
 
-  uint32_t m_dev = {0LL};
+  dev_t m_dev = {0LL};
   uint32_t m_baud = {1000000LL};
-  uint32_t m_mode = {0LL};
-  uint32_t m_speed = {1000000LL};
+  mode_t m_mode = {0LL};
+  speed_t m_speed = {1000000LL};
 };
 
 struct SPI_Linux_Descriptor : public IBus_Descriptor
 {
 public:
 
+  typedef uint32_t speed_t;
   SPI_Linux_Descriptor() noexcept {};
   virtual ~SPI_Linux_Descriptor() noexcept {};
 
   void set_dev(std::string const& value);
   auto get_dev() const -> std::string const&;
 
-  void set_speed(uint32_t const& value);
-  auto get_speed() const -> uint32_t const&;
+  void set_speed(speed_t const& value);
+  auto get_speed() const -> speed_t const&;
 
 
 private:
 
   std::string m_dev = {"/dev/ttyAMA0"};
-  uint32_t m_speed = {1000000LL};
+  speed_t m_speed = {1000000LL};
 };
 
 struct P_Controller_Descriptor
@@ -385,13 +410,13 @@ public:
   P_Controller_Descriptor() noexcept {};
   virtual ~P_Controller_Descriptor() noexcept {};
 
-  void set_kp(float const& value);
-  auto get_kp() const -> float const&;
+  void set_kp(ufloat const& value);
+  auto get_kp() const -> ufloat const&;
 
 
 private:
 
-  float m_kp = {0.000000f};
+  ufloat m_kp = {0.000000f};
 };
 
 struct PI_Controller_Descriptor : public P_Controller_Descriptor
@@ -401,21 +426,21 @@ public:
   PI_Controller_Descriptor() noexcept {};
   virtual ~PI_Controller_Descriptor() noexcept {};
 
-  void set_kp(float const& value);
-  auto get_kp() const -> float const&;
+  void set_kp(ufloat const& value);
+  auto get_kp() const -> ufloat const&;
 
-  void set_ki(float const& value);
-  auto get_ki() const -> float const&;
+  void set_ki(ufloat const& value);
+  auto get_ki() const -> ufloat const&;
 
-  void set_max_i(float const& value);
-  auto get_max_i() const -> float const&;
+  void set_max_i(ufloat const& value);
+  auto get_max_i() const -> ufloat const&;
 
 
 private:
 
-  float m_kp = {0.000000f};
-  float m_ki = {0.000000f};
-  float m_max_i = {0.000000f};
+  ufloat m_kp = {0.000000f};
+  ufloat m_ki = {0.000000f};
+  ufloat m_max_i = {0.000000f};
 };
 
 struct PD_Controller_Descriptor : public P_Controller_Descriptor
@@ -425,21 +450,21 @@ public:
   PD_Controller_Descriptor() noexcept {};
   virtual ~PD_Controller_Descriptor() noexcept {};
 
-  void set_kp(float const& value);
-  auto get_kp() const -> float const&;
+  void set_kp(ufloat const& value);
+  auto get_kp() const -> ufloat const&;
 
-  void set_kd(float const& value);
-  auto get_kd() const -> float const&;
+  void set_kd(ufloat const& value);
+  auto get_kd() const -> ufloat const&;
 
-  void set_d_filter(float const& value);
-  auto get_d_filter() const -> float const&;
+  void set_d_filter(muf_t const& value);
+  auto get_d_filter() const -> muf_t const&;
 
 
 private:
 
-  float m_kp = {0.000000f};
-  float m_kd = {0.000000f};
-  float m_d_filter = {0.000000f};
+  ufloat m_kp = {0.000000f};
+  ufloat m_kd = {0.000000f};
+  muf_t m_d_filter = {0.000000f};
 };
 
 struct PID_Controller_Descriptor : public PD_Controller_Descriptor
@@ -449,35 +474,36 @@ public:
   PID_Controller_Descriptor() noexcept {};
   virtual ~PID_Controller_Descriptor() noexcept {};
 
-  void set_kp(float const& value);
-  auto get_kp() const -> float const&;
+  void set_kp(ufloat const& value);
+  auto get_kp() const -> ufloat const&;
 
-  void set_kd(float const& value);
-  auto get_kd() const -> float const&;
+  void set_kd(ufloat const& value);
+  auto get_kd() const -> ufloat const&;
 
-  void set_d_filter(float const& value);
-  auto get_d_filter() const -> float const&;
+  void set_d_filter(muf_t const& value);
+  auto get_d_filter() const -> muf_t const&;
 
-  void set_ki(float const& value);
-  auto get_ki() const -> float const&;
+  void set_ki(ufloat const& value);
+  auto get_ki() const -> ufloat const&;
 
-  void set_max_i(float const& value);
-  auto get_max_i() const -> float const&;
+  void set_max_i(ufloat const& value);
+  auto get_max_i() const -> ufloat const&;
 
 
 private:
 
-  float m_kp = {0.000000f};
-  float m_kd = {0.000000f};
-  float m_d_filter = {0.000000f};
-  float m_ki = {0.000000f};
-  float m_max_i = {0.000000f};
+  ufloat m_kp = {0.000000f};
+  ufloat m_kd = {0.000000f};
+  muf_t m_d_filter = {0.000000f};
+  ufloat m_ki = {0.000000f};
+  ufloat m_max_i = {0.000000f};
 };
 
 struct ADC_Ammeter_Descriptor : public INode_Descriptor
 {
 public:
 
+  typedef uint32_t rate_t;
   ADC_Ammeter_Descriptor() noexcept {};
   virtual ~ADC_Ammeter_Descriptor() noexcept {};
 
@@ -514,6 +540,7 @@ struct ADC_Voltmeter_Descriptor : public INode_Descriptor
 {
 public:
 
+  typedef uint32_t rate_t;
   ADC_Voltmeter_Descriptor() noexcept {};
   virtual ~ADC_Voltmeter_Descriptor() noexcept {};
 
@@ -550,6 +577,7 @@ struct ADS1115_Descriptor : public INode_Descriptor
 {
 public:
 
+  typedef uint32_t rate_t;
   ADS1115_Descriptor() noexcept {};
   virtual ~ADS1115_Descriptor() noexcept {};
 
@@ -594,6 +622,7 @@ struct AVRADC_Descriptor : public INode_Descriptor
 {
 public:
 
+  typedef uint32_t rate_t;
   AVRADC_Descriptor() noexcept {};
   virtual ~AVRADC_Descriptor() noexcept {};
 
@@ -626,6 +655,7 @@ struct Comp_AHRS_Descriptor : public INode_Descriptor
 {
 public:
 
+  typedef uint32_t rate_t;
   Comp_AHRS_Descriptor() noexcept {};
   virtual ~Comp_AHRS_Descriptor() noexcept {};
 
@@ -645,19 +675,20 @@ public:
   Comp_AHRS_Config() noexcept {};
   virtual ~Comp_AHRS_Config() noexcept {};
 
-  void set_drift_correction_factor(float const& value);
-  auto get_drift_correction_factor() const -> float const&;
+  void set_drift_correction_factor(muf_t const& value);
+  auto get_drift_correction_factor() const -> muf_t const&;
 
 
 private:
 
-  float m_drift_correction_factor = {0.300000f};
+  muf_t m_drift_correction_factor = {0.300000f};
 };
 
 struct Combiner_Descriptor : public INode_Descriptor
 {
 public:
 
+  typedef uint32_t rate_t;
   Combiner_Descriptor() noexcept {};
   virtual ~Combiner_Descriptor() noexcept {};
 
@@ -686,6 +717,7 @@ struct Gravity_Filter_Descriptor : public INode_Descriptor
 {
 public:
 
+  typedef uint32_t rate_t;
   Gravity_Filter_Descriptor() noexcept {};
   virtual ~Gravity_Filter_Descriptor() noexcept {};
 
@@ -714,6 +746,7 @@ struct KF_ECEF_Descriptor : public INode_Descriptor
 {
 public:
 
+  typedef uint32_t rate_t;
   KF_ECEF_Descriptor() noexcept {};
   virtual ~KF_ECEF_Descriptor() noexcept {};
 
@@ -733,39 +766,40 @@ public:
   KF_ECEF_Config() noexcept {};
   virtual ~KF_ECEF_Config() noexcept {};
 
-  void set_gps_position_lag(float const& value);
-  auto get_gps_position_lag() const -> float const&;
+  void set_gps_position_lag(ufloat const& value);
+  auto get_gps_position_lag() const -> ufloat const&;
 
-  void set_gps_position_accuracy(float const& value);
-  auto get_gps_position_accuracy() const -> float const&;
+  void set_gps_position_accuracy(ufloat const& value);
+  auto get_gps_position_accuracy() const -> ufloat const&;
 
-  void set_gps_velocity_lag(float const& value);
-  auto get_gps_velocity_lag() const -> float const&;
+  void set_gps_velocity_lag(ufloat const& value);
+  auto get_gps_velocity_lag() const -> ufloat const&;
 
-  void set_gps_velocity_accuracy(float const& value);
-  auto get_gps_velocity_accuracy() const -> float const&;
+  void set_gps_velocity_accuracy(ufloat const& value);
+  auto get_gps_velocity_accuracy() const -> ufloat const&;
 
-  void set_acceleration_lag(float const& value);
-  auto get_acceleration_lag() const -> float const&;
+  void set_acceleration_lag(ufloat const& value);
+  auto get_acceleration_lag() const -> ufloat const&;
 
-  void set_acceleration_accuracy(float const& value);
-  auto get_acceleration_accuracy() const -> float const&;
+  void set_acceleration_accuracy(ufloat const& value);
+  auto get_acceleration_accuracy() const -> ufloat const&;
 
 
 private:
 
-  float m_gps_position_lag = {0.000000f};
-  float m_gps_position_accuracy = {2.000000f};
-  float m_gps_velocity_lag = {0.000000f};
-  float m_gps_velocity_accuracy = {0.200000f};
-  float m_acceleration_lag = {0.000000f};
-  float m_acceleration_accuracy = {2.000000f};
+  ufloat m_gps_position_lag = {0.000000f};
+  ufloat m_gps_position_accuracy = {2.000000f};
+  ufloat m_gps_velocity_lag = {0.000000f};
+  ufloat m_gps_velocity_accuracy = {0.200000f};
+  ufloat m_acceleration_lag = {0.000000f};
+  ufloat m_acceleration_accuracy = {2.000000f};
 };
 
 struct ENU_Frame_System_Descriptor : public INode_Descriptor
 {
 public:
 
+  typedef uint32_t rate_t;
   ENU_Frame_System_Descriptor() noexcept {};
   virtual ~ENU_Frame_System_Descriptor() noexcept {};
 
@@ -794,6 +828,7 @@ struct LPF_Descriptor : public INode_Descriptor
 {
 public:
 
+  typedef uint32_t rate_t;
   LPF_Descriptor() noexcept {};
   virtual ~LPF_Descriptor() noexcept {};
 
@@ -810,26 +845,28 @@ struct LPF_Config : public INode_Config
 {
 public:
 
+  typedef uint32_t poles_t;
   LPF_Config() noexcept {};
   virtual ~LPF_Config() noexcept {};
 
-  void set_poles(uint32_t const& value);
-  auto get_poles() const -> uint32_t const&;
+  void set_poles(poles_t const& value);
+  auto get_poles() const -> poles_t const&;
 
-  void set_cutoff_frequency(float const& value);
-  auto get_cutoff_frequency() const -> float const&;
+  void set_cutoff_frequency(ufloat const& value);
+  auto get_cutoff_frequency() const -> ufloat const&;
 
 
 private:
 
-  uint32_t m_poles = {1LL};
-  float m_cutoff_frequency = {1.000000f};
+  poles_t m_poles = {1LL};
+  ufloat m_cutoff_frequency = {1.000000f};
 };
 
 struct MaxSonar_Descriptor : public INode_Descriptor
 {
 public:
 
+  typedef uint32_t rate_t;
   MaxSonar_Descriptor() noexcept {};
   virtual ~MaxSonar_Descriptor() noexcept {};
 
@@ -853,27 +890,28 @@ public:
   MaxSonar_Config() noexcept {};
   virtual ~MaxSonar_Config() noexcept {};
 
-  void set_direction(vec3f const& value);
-  auto get_direction() const -> vec3f const&;
+  void set_direction(direction_t const& value);
+  auto get_direction() const -> direction_t const&;
 
-  void set_max_distance(float const& value);
-  auto get_max_distance() const -> float const&;
+  void set_max_distance(ufloat const& value);
+  auto get_max_distance() const -> ufloat const&;
 
-  void set_min_distance(float const& value);
-  auto get_min_distance() const -> float const&;
+  void set_min_distance(ufloat const& value);
+  auto get_min_distance() const -> ufloat const&;
 
 
 private:
 
-  vec3f m_direction = {0.000000f, 0.000000f, 0.000000f};
-  float m_max_distance = {10.000000f};
-  float m_min_distance = {0.200000f};
+  direction_t m_direction = {-340282346638528859811704183484516925440.000000f, -340282346638528859811704183484516925440.000000f, -340282346638528859811704183484516925440.000000f};
+  ufloat m_max_distance = {10.000000f};
+  ufloat m_min_distance = {0.200000f};
 };
 
 struct Motor_Mixer_Descriptor : public INode_Descriptor
 {
 public:
 
+  typedef uint32_t rate_t;
   Motor_Mixer_Descriptor() noexcept {};
   virtual ~Motor_Mixer_Descriptor() noexcept {};
 
@@ -893,13 +931,13 @@ public:
   Motor_Mixer_Config() noexcept {};
   virtual ~Motor_Mixer_Config() noexcept {};
 
-  void set_armed_thrust(float const& value);
-  auto get_armed_thrust() const -> float const&;
+  void set_armed_thrust(ufloat const& value);
+  auto get_armed_thrust() const -> ufloat const&;
 
 
 private:
 
-  float m_armed_thrust = {0.000000f};
+  ufloat m_armed_thrust = {0.000000f};
 };
 
 struct Acceleration_Calibration_Point
@@ -921,8 +959,8 @@ public:
 
 private:
 
-  float m_temperature = {0.000000f};
-  vec3f m_bias = {0.000000f, 0.000000f, 0.000000f};
+  float m_temperature = {-340282346638528859811704183484516925440.000000f};
+  vec3f m_bias = {-340282346638528859811704183484516925440.000000f, -340282346638528859811704183484516925440.000000f, -340282346638528859811704183484516925440.000000f};
   vec3f m_scale = {1.000000f, 1.000000f, 1.000000f};
 };
 
@@ -942,8 +980,8 @@ public:
 
 private:
 
-  float m_temperature = {0.000000f};
-  vec3f m_bias = {0.000000f, 0.000000f, 0.000000f};
+  float m_temperature = {-340282346638528859811704183484516925440.000000f};
+  vec3f m_bias = {-340282346638528859811704183484516925440.000000f, -340282346638528859811704183484516925440.000000f, -340282346638528859811704183484516925440.000000f};
 };
 
 struct Magnetic_Field_Calibration_Point
@@ -965,8 +1003,8 @@ public:
 
 private:
 
-  float m_temperature = {0.000000f};
-  vec3f m_bias = {0.000000f, 0.000000f, 0.000000f};
+  float m_temperature = {-340282346638528859811704183484516925440.000000f};
+  vec3f m_bias = {-340282346638528859811704183484516925440.000000f, -340282346638528859811704183484516925440.000000f, -340282346638528859811704183484516925440.000000f};
   vec3f m_scale = {1.000000f, 1.000000f, 1.000000f};
 };
 
@@ -974,6 +1012,7 @@ struct MPU9250_Descriptor : public INode_Descriptor
 {
 public:
 
+  typedef uint32_t rate_t;
   enum class imu_rate_t
   {
     _250 = 250,
@@ -1063,8 +1102,8 @@ public:
   MPU9250_Config() noexcept {};
   virtual ~MPU9250_Config() noexcept {};
 
-  void set_rotation(vec3f const& value);
-  auto get_rotation() const -> vec3f const&;
+  void set_rotation(euler3_t const& value);
+  auto get_rotation() const -> euler3_t const&;
 
   void set_calibration(Calibration const& value);
   auto get_calibration() const -> Calibration const&;
@@ -1073,7 +1112,7 @@ public:
 
 private:
 
-  vec3f m_rotation = {0.000000f, 0.000000f, 0.000000f};
+  euler3_t m_rotation = {-180.000000f, -180.000000f, -180.000000f};
   Calibration m_calibration = {};
 };
 
@@ -1081,6 +1120,7 @@ struct MS5611_Descriptor : public INode_Descriptor
 {
 public:
 
+  typedef uint32_t rate_t;
   MS5611_Descriptor() noexcept {};
   virtual ~MS5611_Descriptor() noexcept {};
 
@@ -1117,6 +1157,7 @@ struct Multirotor_Brain_Descriptor : public INode_Descriptor
 {
 public:
 
+  typedef uint32_t rate_t;
   Multirotor_Brain_Descriptor() noexcept {};
   virtual ~Multirotor_Brain_Descriptor() noexcept {};
 
@@ -1145,38 +1186,8 @@ public:
   {
   public:
 
-    struct Combined_XY_PIDs : public PD_Controller_Descriptor
-    {
-    public:
-
-      Combined_XY_PIDs() noexcept {};
-      virtual ~Combined_XY_PIDs() noexcept {};
-
-      void set_kp(float const& value);
-      auto get_kp() const -> float const&;
-
-      void set_kd(float const& value);
-      auto get_kd() const -> float const&;
-
-      void set_d_filter(float const& value);
-      auto get_d_filter() const -> float const&;
-
-      void set_ki(float const& value);
-      auto get_ki() const -> float const&;
-
-      void set_max_i(float const& value);
-      auto get_max_i() const -> float const&;
-
-
-    private:
-
-      float m_kp = {0.000000f};
-      float m_kd = {0.000000f};
-      float m_d_filter = {0.000000f};
-      float m_ki = {0.000000f};
-      float m_max_i = {0.000000f};
-    };
-
+    typedef float speed_deg_t;
+    typedef PID_Controller_Descriptor Combined_XY_PIDs;
     struct Separate_XY_PIDs
     {
     public:
@@ -1202,8 +1213,8 @@ public:
     Horizontal_Angle() noexcept {};
     virtual ~Horizontal_Angle() noexcept {};
 
-    void set_max_speed_deg(float const& value);
-    auto get_max_speed_deg() const -> float const&;
+    void set_max_speed_deg(speed_deg_t const& value);
+    auto get_max_speed_deg() const -> speed_deg_t const&;
 
     void set_xy_pids(boost::variant<Combined_XY_PIDs,Separate_XY_PIDs> const& value);
     auto get_xy_pids() const -> boost::variant<Combined_XY_PIDs,Separate_XY_PIDs> const&;
@@ -1212,7 +1223,7 @@ public:
 
   private:
 
-    float m_max_speed_deg = {180.000000f};
+    speed_deg_t m_max_speed_deg = {180.000000f};
     boost::variant<Combined_XY_PIDs,Separate_XY_PIDs> m_xy_pids = {};
   };
 
@@ -1220,11 +1231,12 @@ public:
   {
   public:
 
+    typedef float speed_t;
     Horizontal_Position() noexcept {};
     virtual ~Horizontal_Position() noexcept {};
 
-    void set_max_speed(float const& value);
-    auto get_max_speed() const -> float const&;
+    void set_max_speed(speed_t const& value);
+    auto get_max_speed() const -> speed_t const&;
 
     void set_lpf(LPF_Config const& value);
     auto get_lpf() const -> LPF_Config const&;
@@ -1241,7 +1253,7 @@ public:
 
   private:
 
-    float m_max_speed = {2.000000f};
+    speed_t m_max_speed = {2.000000f};
     LPF_Config m_lpf = {};
     PI_Controller_Descriptor m_velocity_pi = {};
     P_Controller_Descriptor m_position_p = {};
@@ -1251,11 +1263,12 @@ public:
   {
   public:
 
+    typedef float speed_deg_t;
     Yaw_Angle() noexcept {};
     virtual ~Yaw_Angle() noexcept {};
 
-    void set_max_speed_deg(float const& value);
-    auto get_max_speed_deg() const -> float const&;
+    void set_max_speed_deg(speed_deg_t const& value);
+    auto get_max_speed_deg() const -> speed_deg_t const&;
 
     void set_pid(PID_Controller_Descriptor const& value);
     auto get_pid() const -> PID_Controller_Descriptor const&;
@@ -1264,7 +1277,7 @@ public:
 
   private:
 
-    float m_max_speed_deg = {180.000000f};
+    speed_deg_t m_max_speed_deg = {180.000000f};
     PID_Controller_Descriptor m_pid = {};
   };
 
@@ -1272,11 +1285,12 @@ public:
   {
   public:
 
+    typedef float speed_t;
     Altitude() noexcept {};
     virtual ~Altitude() noexcept {};
 
-    void set_max_speed(float const& value);
-    auto get_max_speed() const -> float const&;
+    void set_max_speed(speed_t const& value);
+    auto get_max_speed() const -> speed_t const&;
 
     void set_lpf(LPF_Config const& value);
     auto get_lpf() const -> LPF_Config const&;
@@ -1293,7 +1307,7 @@ public:
 
   private:
 
-    float m_max_speed = {2.000000f};
+    speed_t m_max_speed = {2.000000f};
     LPF_Config m_lpf = {};
     PI_Controller_Descriptor m_speed_pi = {};
     P_Controller_Descriptor m_position_p = {};
@@ -1302,11 +1316,11 @@ public:
   Multirotor_Brain_Config() noexcept {};
   virtual ~Multirotor_Brain_Config() noexcept {};
 
-  void set_max_thrust(float const& value);
-  auto get_max_thrust() const -> float const&;
+  void set_max_thrust(ufloat const& value);
+  auto get_max_thrust() const -> ufloat const&;
 
-  void set_min_thrust(float const& value);
-  auto get_min_thrust() const -> float const&;
+  void set_min_thrust(ufloat const& value);
+  auto get_min_thrust() const -> ufloat const&;
 
   void set_horizontal_angle(Horizontal_Angle const& value);
   auto get_horizontal_angle() const -> Horizontal_Angle const&;
@@ -1327,8 +1341,8 @@ public:
 
 private:
 
-  float m_max_thrust = {2.000000f};
-  float m_min_thrust = {1.000000f};
+  ufloat m_max_thrust = {2.000000f};
+  ufloat m_min_thrust = {1.000000f};
   Horizontal_Angle m_horizontal_angle = {};
   Horizontal_Position m_horizontal_position = {};
   Yaw_Angle m_yaw_angle = {};
@@ -1339,6 +1353,7 @@ struct Multirotor_Pilot_Descriptor : public INode_Descriptor
 {
 public:
 
+  typedef uint32_t rate_t;
   Multirotor_Pilot_Descriptor() noexcept {};
   virtual ~Multirotor_Pilot_Descriptor() noexcept {};
 
@@ -1375,6 +1390,7 @@ struct Multirotor_Simulator_Descriptor : public INode_Descriptor
 {
 public:
 
+  typedef uint32_t rate_t;
   Multirotor_Simulator_Descriptor() noexcept {};
   virtual ~Multirotor_Simulator_Descriptor() noexcept {};
 
@@ -1426,49 +1442,49 @@ public:
     Noise() noexcept {};
     virtual ~Noise() noexcept {};
 
-    void set_gps_position(float const& value);
-    auto get_gps_position() const -> float const&;
+    void set_gps_position(ufloat const& value);
+    auto get_gps_position() const -> ufloat const&;
 
-    void set_gps_velocity(float const& value);
-    auto get_gps_velocity() const -> float const&;
+    void set_gps_velocity(ufloat const& value);
+    auto get_gps_velocity() const -> ufloat const&;
 
-    void set_gps_pacc(float const& value);
-    auto get_gps_pacc() const -> float const&;
+    void set_gps_pacc(ufloat const& value);
+    auto get_gps_pacc() const -> ufloat const&;
 
-    void set_gps_vacc(float const& value);
-    auto get_gps_vacc() const -> float const&;
+    void set_gps_vacc(ufloat const& value);
+    auto get_gps_vacc() const -> ufloat const&;
 
-    void set_acceleration(float const& value);
-    auto get_acceleration() const -> float const&;
+    void set_acceleration(ufloat const& value);
+    auto get_acceleration() const -> ufloat const&;
 
-    void set_angular_velocity(float const& value);
-    auto get_angular_velocity() const -> float const&;
+    void set_angular_velocity(ufloat const& value);
+    auto get_angular_velocity() const -> ufloat const&;
 
-    void set_magnetic_field(float const& value);
-    auto get_magnetic_field() const -> float const&;
+    void set_magnetic_field(ufloat const& value);
+    auto get_magnetic_field() const -> ufloat const&;
 
-    void set_pressure(float const& value);
-    auto get_pressure() const -> float const&;
+    void set_pressure(ufloat const& value);
+    auto get_pressure() const -> ufloat const&;
 
-    void set_temperature(float const& value);
-    auto get_temperature() const -> float const&;
+    void set_temperature(ufloat const& value);
+    auto get_temperature() const -> ufloat const&;
 
-    void set_ground_distance(float const& value);
-    auto get_ground_distance() const -> float const&;
+    void set_ground_distance(ufloat const& value);
+    auto get_ground_distance() const -> ufloat const&;
 
 
   private:
 
-    float m_gps_position = {2.000000f};
-    float m_gps_velocity = {0.200000f};
-    float m_gps_pacc = {0.500000f};
-    float m_gps_vacc = {0.100000f};
-    float m_acceleration = {0.010000f};
-    float m_angular_velocity = {0.010000f};
-    float m_magnetic_field = {0.100000f};
-    float m_pressure = {0.100000f};
-    float m_temperature = {0.100000f};
-    float m_ground_distance = {0.010000f};
+    ufloat m_gps_position = {2.000000f};
+    ufloat m_gps_velocity = {0.200000f};
+    ufloat m_gps_pacc = {0.500000f};
+    ufloat m_gps_vacc = {0.100000f};
+    ufloat m_acceleration = {0.010000f};
+    ufloat m_angular_velocity = {0.010000f};
+    ufloat m_magnetic_field = {0.100000f};
+    ufloat m_pressure = {0.100000f};
+    ufloat m_temperature = {0.100000f};
+    ufloat m_ground_distance = {0.010000f};
   };
 
   Multirotor_Simulator_Config() noexcept {};
@@ -1504,20 +1520,22 @@ struct Oscillator_Descriptor : public INode_Descriptor
 {
 public:
 
+  typedef uint32_t rate_t;
+  typedef int32_t component_count_t;
   Oscillator_Descriptor() noexcept {};
   virtual ~Oscillator_Descriptor() noexcept {};
 
   void set_rate(uint32_t const& value);
   auto get_rate() const -> uint32_t const&;
 
-  void set_component_count(int32_t const& value);
-  auto get_component_count() const -> int32_t const&;
+  void set_component_count(component_count_t const& value);
+  auto get_component_count() const -> component_count_t const&;
 
 
 private:
 
   uint32_t m_rate = {30LL};
-  int32_t m_component_count = {1LL};
+  component_count_t m_component_count = {1LL};
 };
 
 struct Oscillator_Config : public INode_Config
@@ -1531,11 +1549,11 @@ public:
     Component() noexcept {};
     virtual ~Component() noexcept {};
 
-    void set_frequency(float const& value);
-    auto get_frequency() const -> float const&;
+    void set_frequency(ufloat const& value);
+    auto get_frequency() const -> ufloat const&;
 
-    void set_amplitude(float const& value);
-    auto get_amplitude() const -> float const&;
+    void set_amplitude(ufloat const& value);
+    auto get_amplitude() const -> ufloat const&;
 
     void set_square(bool const& value);
     auto get_square() const -> bool const&;
@@ -1543,19 +1561,19 @@ public:
 
   private:
 
-    float m_frequency = {1.000000f};
-    float m_amplitude = {1.000000f};
+    ufloat m_frequency = {1.000000f};
+    ufloat m_amplitude = {1.000000f};
     bool m_square = {false};
   };
 
   Oscillator_Config() noexcept {};
   virtual ~Oscillator_Config() noexcept {};
 
-  void set_amplitude(float const& value);
-  auto get_amplitude() const -> float const&;
+  void set_amplitude(ufloat const& value);
+  auto get_amplitude() const -> ufloat const&;
 
-  void set_noise(float const& value);
-  auto get_noise() const -> float const&;
+  void set_noise(ufloat const& value);
+  auto get_noise() const -> ufloat const&;
 
   void set_components(std::vector<Oscillator_Config::Component> const& value);
   auto get_components() const -> std::vector<Oscillator_Config::Component> const&;
@@ -1564,8 +1582,8 @@ public:
 
 private:
 
-  float m_amplitude = {1.000000f};
-  float m_noise = {0.000000f};
+  ufloat m_amplitude = {1.000000f};
+  ufloat m_noise = {0.000000f};
   std::vector<Oscillator_Config::Component> m_components = {};
 };
 
@@ -1573,6 +1591,7 @@ struct PCA9685_Descriptor : public INode_Descriptor
 {
 public:
 
+  typedef uint32_t rate_t;
   struct Channel
   {
   public:
@@ -1641,17 +1660,17 @@ public:
     Servo_Channel() noexcept {};
     virtual ~Servo_Channel() noexcept {};
 
-    void set_min(float const& value);
-    auto get_min() const -> float const&;
+    void set_min(servo_signal_t const& value);
+    auto get_min() const -> servo_signal_t const&;
 
-    void set_max(float const& value);
-    auto get_max() const -> float const&;
+    void set_max(servo_signal_t const& value);
+    auto get_max() const -> servo_signal_t const&;
 
 
   private:
 
-    float m_min = {1.000000f};
-    float m_max = {2.000000f};
+    servo_signal_t m_min = {1.000000f};
+    servo_signal_t m_max = {2.000000f};
   };
 
   struct PWM_Channel : public PCA9685_Config::IChannel
@@ -1661,17 +1680,17 @@ public:
     PWM_Channel() noexcept {};
     virtual ~PWM_Channel() noexcept {};
 
-    void set_min(float const& value);
-    auto get_min() const -> float const&;
+    void set_min(pwm_signal_t const& value);
+    auto get_min() const -> pwm_signal_t const&;
 
-    void set_max(float const& value);
-    auto get_max() const -> float const&;
+    void set_max(pwm_signal_t const& value);
+    auto get_max() const -> pwm_signal_t const&;
 
 
   private:
 
-    float m_min = {0.000000f};
-    float m_max = {1.000000f};
+    pwm_signal_t m_min = {0.000000f};
+    pwm_signal_t m_max = {1.000000f};
   };
 
   PCA9685_Config() noexcept {};
@@ -1691,6 +1710,7 @@ struct PIGPIO_Descriptor : public INode_Descriptor
 {
 public:
 
+  typedef uint32_t rate_t;
   struct Channel
   {
   public:
@@ -1876,17 +1896,17 @@ public:
     Servo_Channel() noexcept {};
     virtual ~Servo_Channel() noexcept {};
 
-    void set_min(float const& value);
-    auto get_min() const -> float const&;
+    void set_min(servo_signal_t const& value);
+    auto get_min() const -> servo_signal_t const&;
 
-    void set_max(float const& value);
-    auto get_max() const -> float const&;
+    void set_max(servo_signal_t const& value);
+    auto get_max() const -> servo_signal_t const&;
 
 
   private:
 
-    float m_min = {1.000000f};
-    float m_max = {2.000000f};
+    servo_signal_t m_min = {1.000000f};
+    servo_signal_t m_max = {2.000000f};
   };
 
   struct PWM_Channel : public PIGPIO_Config::IChannel
@@ -1896,17 +1916,17 @@ public:
     PWM_Channel() noexcept {};
     virtual ~PWM_Channel() noexcept {};
 
-    void set_min(float const& value);
-    auto get_min() const -> float const&;
+    void set_min(pwm_signal_t const& value);
+    auto get_min() const -> pwm_signal_t const&;
 
-    void set_max(float const& value);
-    auto get_max() const -> float const&;
+    void set_max(pwm_signal_t const& value);
+    auto get_max() const -> pwm_signal_t const&;
 
 
   private:
 
-    float m_min = {0.000000f};
-    float m_max = {1.000000f};
+    pwm_signal_t m_min = {0.000000f};
+    pwm_signal_t m_max = {1.000000f};
   };
 
   PIGPIO_Config() noexcept {};
@@ -2051,6 +2071,7 @@ struct Pressure_Velocity_Descriptor : public INode_Descriptor
 {
 public:
 
+  typedef uint32_t rate_t;
   Pressure_Velocity_Descriptor() noexcept {};
   virtual ~Pressure_Velocity_Descriptor() noexcept {};
 
@@ -2079,20 +2100,22 @@ struct Proximity_Descriptor : public INode_Descriptor
 {
 public:
 
+  typedef uint32_t rate_t;
+  typedef int32_t channel_count_t;
   Proximity_Descriptor() noexcept {};
   virtual ~Proximity_Descriptor() noexcept {};
 
   void set_rate(uint32_t const& value);
   auto get_rate() const -> uint32_t const&;
 
-  void set_channel_count(int32_t const& value);
-  auto get_channel_count() const -> int32_t const&;
+  void set_channel_count(channel_count_t const& value);
+  auto get_channel_count() const -> channel_count_t const&;
 
 
 private:
 
   uint32_t m_rate = {1LL};
-  int32_t m_channel_count = {1LL};
+  channel_count_t m_channel_count = {1LL};
 };
 
 struct Proximity_Config : public INode_Config
@@ -2111,6 +2134,7 @@ struct Rate_Controller_Descriptor : public INode_Descriptor
 {
 public:
 
+  typedef uint32_t rate_t;
   Rate_Controller_Descriptor() noexcept {};
   virtual ~Rate_Controller_Descriptor() noexcept {};
 
@@ -2131,38 +2155,7 @@ public:
   {
   public:
 
-    struct Combined_XY_PIDs : public PD_Controller_Descriptor
-    {
-    public:
-
-      Combined_XY_PIDs() noexcept {};
-      virtual ~Combined_XY_PIDs() noexcept {};
-
-      void set_kp(float const& value);
-      auto get_kp() const -> float const&;
-
-      void set_kd(float const& value);
-      auto get_kd() const -> float const&;
-
-      void set_d_filter(float const& value);
-      auto get_d_filter() const -> float const&;
-
-      void set_ki(float const& value);
-      auto get_ki() const -> float const&;
-
-      void set_max_i(float const& value);
-      auto get_max_i() const -> float const&;
-
-
-    private:
-
-      float m_kp = {0.000000f};
-      float m_kd = {0.000000f};
-      float m_d_filter = {0.000000f};
-      float m_ki = {0.000000f};
-      float m_max_i = {0.000000f};
-    };
-
+    typedef PID_Controller_Descriptor Combined_XY_PIDs;
     struct Separate_XY_PIDs
     {
     public:
@@ -2188,8 +2181,8 @@ public:
     Feedback() noexcept {};
     virtual ~Feedback() noexcept {};
 
-    void set_weight(float const& value);
-    auto get_weight() const -> float const&;
+    void set_weight(muf_t const& value);
+    auto get_weight() const -> muf_t const&;
 
     void set_xy_pids(boost::variant<Combined_XY_PIDs,Separate_XY_PIDs> const& value);
     auto get_xy_pids() const -> boost::variant<Combined_XY_PIDs,Separate_XY_PIDs> const&;
@@ -2202,7 +2195,7 @@ public:
 
   private:
 
-    float m_weight = {1.000000f};
+    muf_t m_weight = {1.000000f};
     boost::variant<Combined_XY_PIDs,Separate_XY_PIDs> m_xy_pids = {};
     PID_Controller_Descriptor m_z_pid = {};
   };
@@ -2211,20 +2204,21 @@ public:
   {
   public:
 
+    typedef float torque_t;
     Feedforward() noexcept {};
     virtual ~Feedforward() noexcept {};
 
-    void set_weight(float const& value);
-    auto get_weight() const -> float const&;
+    void set_weight(muf_t const& value);
+    auto get_weight() const -> muf_t const&;
 
-    void set_max_torque(float const& value);
-    auto get_max_torque() const -> float const&;
+    void set_max_torque(torque_t const& value);
+    auto get_max_torque() const -> torque_t const&;
 
 
   private:
 
-    float m_weight = {0.000000f};
-    float m_max_torque = {1.000000f};
+    muf_t m_weight = {0.000000f};
+    torque_t m_max_torque = {1.000000f};
   };
 
   Rate_Controller_Config() noexcept {};
@@ -2253,27 +2247,30 @@ public:
   {
   public:
 
+    typedef vec2i resolution_t;
+    typedef uint32_t bitrate_t;
     Quality() noexcept {};
     virtual ~Quality() noexcept {};
 
-    void set_resolution(vec2i const& value);
-    auto get_resolution() const -> vec2i const&;
+    void set_resolution(resolution_t const& value);
+    auto get_resolution() const -> resolution_t const&;
 
-    void set_bitrate(int32_t const& value);
-    auto get_bitrate() const -> int32_t const&;
+    void set_bitrate(bitrate_t const& value);
+    auto get_bitrate() const -> bitrate_t const&;
 
 
   private:
 
-    vec2i m_resolution = {0LL, 0LL};
-    int32_t m_bitrate = {0LL};
+    resolution_t m_resolution = {8LL, 8LL};
+    bitrate_t m_bitrate = {10000LL};
   };
 
+  typedef int32_t fps_t;
   Raspicam_Descriptor() noexcept {};
   virtual ~Raspicam_Descriptor() noexcept {};
 
-  void set_fps(int32_t const& value);
-  auto get_fps() const -> int32_t const&;
+  void set_fps(fps_t const& value);
+  auto get_fps() const -> fps_t const&;
 
   void set_streaming_low(Quality const& value);
   auto get_streaming_low() const -> Quality const&;
@@ -2290,7 +2287,7 @@ public:
 
 private:
 
-  int32_t m_fps = {0LL};
+  fps_t m_fps = {10LL};
   Quality m_streaming_low = {};
   Quality m_streaming_high = {};
   Quality m_recording = {};
@@ -2300,6 +2297,14 @@ struct Raspicam_Config : public INode_Config
 {
 public:
 
+  typedef int32_t iso_t;
+  typedef float shutter_speed_t;
+  typedef int32_t ev_t;
+  typedef int32_t sharpness_t;
+  typedef int32_t contrast_t;
+  typedef int32_t brightness_t;
+  typedef int32_t saturation_t;
+  typedef int32_t quality_t;
   enum class awb_mode_t
   {
     OFF = 0,
@@ -2317,32 +2322,32 @@ public:
   Raspicam_Config() noexcept {};
   virtual ~Raspicam_Config() noexcept {};
 
-  void set_iso(int32_t const& value);
-  auto get_iso() const -> int32_t const&;
+  void set_iso(iso_t const& value);
+  auto get_iso() const -> iso_t const&;
 
-  void set_shutter_speed(float const& value);
-  auto get_shutter_speed() const -> float const&;
+  void set_shutter_speed(shutter_speed_t const& value);
+  auto get_shutter_speed() const -> shutter_speed_t const&;
 
-  void set_ev(int32_t const& value);
-  auto get_ev() const -> int32_t const&;
+  void set_ev(ev_t const& value);
+  auto get_ev() const -> ev_t const&;
 
-  void set_sharpness(int32_t const& value);
-  auto get_sharpness() const -> int32_t const&;
+  void set_sharpness(sharpness_t const& value);
+  auto get_sharpness() const -> sharpness_t const&;
 
-  void set_contrast(int32_t const& value);
-  auto get_contrast() const -> int32_t const&;
+  void set_contrast(contrast_t const& value);
+  auto get_contrast() const -> contrast_t const&;
 
-  void set_brightness(int32_t const& value);
-  auto get_brightness() const -> int32_t const&;
+  void set_brightness(brightness_t const& value);
+  auto get_brightness() const -> brightness_t const&;
 
-  void set_saturation(int32_t const& value);
-  auto get_saturation() const -> int32_t const&;
+  void set_saturation(saturation_t const& value);
+  auto get_saturation() const -> saturation_t const&;
 
   void set_awb_mode(awb_mode_t const& value);
   auto get_awb_mode() const -> awb_mode_t const&;
 
-  void set_quality(int32_t const& value);
-  auto get_quality() const -> int32_t const&;
+  void set_quality(quality_t const& value);
+  auto get_quality() const -> quality_t const&;
 
   void set_recording(bool const& value);
   auto get_recording() const -> bool const&;
@@ -2350,15 +2355,15 @@ public:
 
 private:
 
-  int32_t m_iso = {0LL};
-  float m_shutter_speed = {0.000000f};
-  int32_t m_ev = {0LL};
-  int32_t m_sharpness = {0LL};
-  int32_t m_contrast = {0LL};
-  int32_t m_brightness = {0LL};
-  int32_t m_saturation = {0LL};
+  iso_t m_iso = {0LL};
+  shutter_speed_t m_shutter_speed = {0.000000f};
+  ev_t m_ev = {-10LL};
+  sharpness_t m_sharpness = {0LL};
+  contrast_t m_contrast = {0LL};
+  brightness_t m_brightness = {0LL};
+  saturation_t m_saturation = {0LL};
   awb_mode_t m_awb_mode = {Raspicam_Config::awb_mode_t::AUTO};
-  int32_t m_quality = {0LL};
+  quality_t m_quality = {0LL};
   bool m_recording = {false};
 };
 
@@ -2366,6 +2371,7 @@ struct RC5T619_Descriptor : public INode_Descriptor
 {
 public:
 
+  typedef uint32_t rate_t;
   RC5T619_Descriptor() noexcept {};
   virtual ~RC5T619_Descriptor() noexcept {};
 
@@ -2402,6 +2408,7 @@ struct Resampler_Descriptor : public INode_Descriptor
 {
 public:
 
+  typedef uint32_t rate_t;
   Resampler_Descriptor() noexcept {};
   virtual ~Resampler_Descriptor() noexcept {};
 
@@ -2439,6 +2446,7 @@ struct Scalar_Generator_Descriptor : public INode_Descriptor
 {
 public:
 
+  typedef uint32_t rate_t;
   Scalar_Generator_Descriptor() noexcept {};
   virtual ~Scalar_Generator_Descriptor() noexcept {};
 
@@ -2471,6 +2479,7 @@ struct Servo_Gimbal_Descriptor : public INode_Descriptor
 {
 public:
 
+  typedef uint32_t rate_t;
   Servo_Gimbal_Descriptor() noexcept {};
   virtual ~Servo_Gimbal_Descriptor() noexcept {};
 
@@ -2498,25 +2507,25 @@ public:
     Channel() noexcept {};
     virtual ~Channel() noexcept {};
 
-    void set_min_angle(float const& value);
-    auto get_min_angle() const -> float const&;
+    void set_min_angle(euler_t const& value);
+    auto get_min_angle() const -> euler_t const&;
 
-    void set_max_angle(float const& value);
-    auto get_max_angle() const -> float const&;
+    void set_max_angle(euler_t const& value);
+    auto get_max_angle() const -> euler_t const&;
 
-    void set_min_pwm(float const& value);
-    auto get_min_pwm() const -> float const&;
+    void set_min_pwm(pwm_signal_t const& value);
+    auto get_min_pwm() const -> pwm_signal_t const&;
 
-    void set_max_pwm(float const& value);
-    auto get_max_pwm() const -> float const&;
+    void set_max_pwm(pwm_signal_t const& value);
+    auto get_max_pwm() const -> pwm_signal_t const&;
 
 
   private:
 
-    float m_min_angle = {-180.000000f};
-    float m_max_angle = {180.000000f};
-    float m_min_pwm = {0.000000f};
-    float m_max_pwm = {1.000000f};
+    euler_t m_min_angle = {-180.000000f};
+    euler_t m_max_angle = {180.000000f};
+    pwm_signal_t m_min_pwm = {0.000000f};
+    pwm_signal_t m_max_pwm = {1.000000f};
   };
 
   Servo_Gimbal_Config() noexcept {};
@@ -2546,6 +2555,7 @@ struct SRF01_Descriptor : public INode_Descriptor
 {
 public:
 
+  typedef uint32_t rate_t;
   SRF01_Descriptor() noexcept {};
   virtual ~SRF01_Descriptor() noexcept {};
 
@@ -2569,27 +2579,28 @@ public:
   SRF01_Config() noexcept {};
   virtual ~SRF01_Config() noexcept {};
 
-  void set_direction(vec3f const& value);
-  auto get_direction() const -> vec3f const&;
+  void set_direction(direction_t const& value);
+  auto get_direction() const -> direction_t const&;
 
-  void set_max_distance(float const& value);
-  auto get_max_distance() const -> float const&;
+  void set_max_distance(ufloat const& value);
+  auto get_max_distance() const -> ufloat const&;
 
-  void set_min_distance(float const& value);
-  auto get_min_distance() const -> float const&;
+  void set_min_distance(ufloat const& value);
+  auto get_min_distance() const -> ufloat const&;
 
 
 private:
 
-  vec3f m_direction = {0.000000f, 0.000000f, 0.000000f};
-  float m_max_distance = {6.000000f};
-  float m_min_distance = {0.200000f};
+  direction_t m_direction = {-340282346638528859811704183484516925440.000000f, -340282346638528859811704183484516925440.000000f, -340282346638528859811704183484516925440.000000f};
+  ufloat m_max_distance = {6.000000f};
+  ufloat m_min_distance = {0.200000f};
 };
 
 struct SRF02_Descriptor : public INode_Descriptor
 {
 public:
 
+  typedef uint32_t rate_t;
   SRF02_Descriptor() noexcept {};
   virtual ~SRF02_Descriptor() noexcept {};
 
@@ -2613,41 +2624,43 @@ public:
   SRF02_Config() noexcept {};
   virtual ~SRF02_Config() noexcept {};
 
-  void set_direction(vec3f const& value);
-  auto get_direction() const -> vec3f const&;
+  void set_direction(direction_t const& value);
+  auto get_direction() const -> direction_t const&;
 
-  void set_max_distance(float const& value);
-  auto get_max_distance() const -> float const&;
+  void set_max_distance(ufloat const& value);
+  auto get_max_distance() const -> ufloat const&;
 
-  void set_min_distance(float const& value);
-  auto get_min_distance() const -> float const&;
+  void set_min_distance(ufloat const& value);
+  auto get_min_distance() const -> ufloat const&;
 
 
 private:
 
-  vec3f m_direction = {0.000000f, 0.000000f, 0.000000f};
-  float m_max_distance = {6.000000f};
-  float m_min_distance = {0.200000f};
+  direction_t m_direction = {-340282346638528859811704183484516925440.000000f, -340282346638528859811704183484516925440.000000f, -340282346638528859811704183484516925440.000000f};
+  ufloat m_max_distance = {6.000000f};
+  ufloat m_min_distance = {0.200000f};
 };
 
 struct Throttle_To_PWM_Descriptor : public INode_Descriptor
 {
 public:
 
+  typedef uint32_t rate_t;
+  typedef int32_t channel_count_t;
   Throttle_To_PWM_Descriptor() noexcept {};
   virtual ~Throttle_To_PWM_Descriptor() noexcept {};
 
   void set_rate(uint32_t const& value);
   auto get_rate() const -> uint32_t const&;
 
-  void set_channel_count(int32_t const& value);
-  auto get_channel_count() const -> int32_t const&;
+  void set_channel_count(channel_count_t const& value);
+  auto get_channel_count() const -> channel_count_t const&;
 
 
 private:
 
   uint32_t m_rate = {1LL};
-  int32_t m_channel_count = {1LL};
+  channel_count_t m_channel_count = {1LL};
 };
 
 struct Throttle_To_PWM_Config : public INode_Config
@@ -2666,6 +2679,7 @@ struct Transformer_Descriptor : public INode_Descriptor
 {
 public:
 
+  typedef uint32_t rate_t;
   Transformer_Descriptor() noexcept {};
   virtual ~Transformer_Descriptor() noexcept {};
 
@@ -2694,6 +2708,7 @@ struct UBLOX_Descriptor : public INode_Descriptor
 {
 public:
 
+  typedef uint32_t rate_t;
   UBLOX_Descriptor() noexcept {};
   virtual ~UBLOX_Descriptor() noexcept {};
 
@@ -2726,6 +2741,7 @@ struct Vec3_Generator_Descriptor : public INode_Descriptor
 {
 public:
 
+  typedef uint32_t rate_t;
   Vec3_Generator_Descriptor() noexcept {};
   virtual ~Vec3_Generator_Descriptor() noexcept {};
 
@@ -2751,7 +2767,7 @@ public:
 
 private:
 
-  vec3f m_value = {0.000000f, 0.000000f, 0.000000f};
+  vec3f m_value = {-340282346638528859811704183484516925440.000000f, -340282346638528859811704183484516925440.000000f, -340282346638528859811704183484516925440.000000f};
 };
 
 ts::Result<void> deserialize(bool& value, ts::serialization::Value const& sz_value);
@@ -2928,8 +2944,6 @@ ts::Result<void> deserialize(MS5611_Config& value, ts::serialization::Value cons
 ts::Result<ts::serialization::Value> serialize(MS5611_Config const& value);
 ts::Result<void> deserialize(Multirotor_Brain_Descriptor& value, ts::serialization::Value const& sz_value);
 ts::Result<ts::serialization::Value> serialize(Multirotor_Brain_Descriptor const& value);
-ts::Result<void> deserialize(Multirotor_Brain_Config::Horizontal_Angle::Combined_XY_PIDs& value, ts::serialization::Value const& sz_value);
-ts::Result<ts::serialization::Value> serialize(Multirotor_Brain_Config::Horizontal_Angle::Combined_XY_PIDs const& value);
 ts::Result<void> deserialize(Multirotor_Brain_Config::Horizontal_Angle::Separate_XY_PIDs& value, ts::serialization::Value const& sz_value);
 ts::Result<ts::serialization::Value> serialize(Multirotor_Brain_Config::Horizontal_Angle::Separate_XY_PIDs const& value);
 ts::Result<void> deserialize(Multirotor_Brain_Config::Horizontal_Angle& value, ts::serialization::Value const& sz_value);
@@ -3004,8 +3018,6 @@ ts::Result<void> deserialize(Proximity_Config& value, ts::serialization::Value c
 ts::Result<ts::serialization::Value> serialize(Proximity_Config const& value);
 ts::Result<void> deserialize(Rate_Controller_Descriptor& value, ts::serialization::Value const& sz_value);
 ts::Result<ts::serialization::Value> serialize(Rate_Controller_Descriptor const& value);
-ts::Result<void> deserialize(Rate_Controller_Config::Feedback::Combined_XY_PIDs& value, ts::serialization::Value const& sz_value);
-ts::Result<ts::serialization::Value> serialize(Rate_Controller_Config::Feedback::Combined_XY_PIDs const& value);
 ts::Result<void> deserialize(Rate_Controller_Config::Feedback::Separate_XY_PIDs& value, ts::serialization::Value const& sz_value);
 ts::Result<ts::serialization::Value> serialize(Rate_Controller_Config::Feedback::Separate_XY_PIDs const& value);
 ts::Result<void> deserialize(Rate_Controller_Config::Feedback& value, ts::serialization::Value const& sz_value);

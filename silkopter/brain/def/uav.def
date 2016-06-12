@@ -193,7 +193,7 @@ struct PID_Controller_Descriptor : public PD_Controller_Descriptor
 
 struct ADC_Ammeter_Descriptor : public INode_Descriptor
 {
-    alias rate_t = int : [ min = 1, max = 10000, native_type = "uint32_t" ];
+    alias rate_t = uint32_t : [ min = 1, max = 10000, native_type = "uint32_t" ];
 
     rate_t rate = 100 : [ ui_name = "Rate (Hz)" ];
 };
@@ -208,7 +208,7 @@ struct ADC_Ammeter_Config : public INode_Config
 
 struct ADC_Voltmeter_Descriptor : public INode_Descriptor
 {
-    alias rate_t = int : [ min = 1, max = 10000, native_type = "uint32_t" ];
+    alias rate_t = uint32_t : [ min = 1, max = 10000, native_type = "uint32_t" ];
 
     rate_t rate = 100 : [ ui_name = "Rate (Hz)" ];
 };
@@ -223,7 +223,7 @@ struct ADC_Voltmeter_Config : public INode_Config
 
 struct ADS1115_Descriptor : public INode_Descriptor
 {
-    alias rate_t = int : [ min = 1, max = 200, native_type = "uint32_t" ];
+    alias rate_t = uint32_t : [ min = 1, max = 200, native_type = "uint32_t" ];
 
     string bus : [ ui_name = "Bus" ];
     rate_t adc0_rate = 200 : [ ui_name = "ADC0 Rate (Hz)" ];
@@ -240,7 +240,7 @@ struct ADS1115_Config : public INode_Config
 
 struct AVRADC_Descriptor : public INode_Descriptor
 {
-    alias rate_t = int : [ min = 1, max = 500, native_type = "uint32_t" ];
+    alias rate_t = uint32_t : [ min = 1, max = 500, native_type = "uint32_t" ];
 
     string bus : [ ui_name = "Bus" ];
     rate_t rate = 200 : [ ui_name = "Rate (Hz)" ];
@@ -254,7 +254,7 @@ struct AVRADC_Config : public INode_Config
 
 struct Comp_AHRS_Descriptor : public INode_Descriptor
 {
-    alias rate_t = int : [ min = 1, max = 10000, native_type = "uint32_t" ];
+    alias rate_t = uint32_t : [ min = 1, max = 10000, native_type = "uint32_t" ];
 
     rate_t rate = 200 : [ ui_name = "Rate (Hz)" ];
 };
@@ -268,7 +268,7 @@ struct Comp_AHRS_Config : public INode_Config
 
 struct Combiner_Descriptor : public INode_Descriptor
 {
-    alias rate_t = int : [ min = 1, max = 10000, native_type = "uint32_t" ];
+    alias rate_t = uint32_t : [ min = 1, max = 10000, native_type = "uint32_t" ];
 
     rate_t rate = 200 : [ ui_name = "Rate (Hz)" ];
 };
@@ -281,7 +281,7 @@ struct Combiner_Config : public INode_Config
 
 struct Gravity_Filter_Descriptor : public INode_Descriptor
 {
-    alias rate_t = int : [ min = 1, max = 10000, native_type = "uint32_t" ];
+    alias rate_t = uint32_t : [ min = 1, max = 10000, native_type = "uint32_t" ];
 
     rate_t rate = 1 : [ ui_name = "Rate (Hz)" ];
 };
@@ -294,7 +294,7 @@ struct Gravity_Filter_Config : public INode_Config
 
 struct KF_ECEF_Descriptor : public INode_Descriptor
 {
-    alias rate_t = int : [ min = 1, max = 10000, native_type = "uint32_t" ];
+    alias rate_t = uint32_t : [ min = 1, max = 10000, native_type = "uint32_t" ];
 
     rate_t rate = 1 : [ ui_name = "Rate (Hz)" ];
 };
@@ -313,7 +313,7 @@ struct KF_ECEF_Config : public INode_Config
 
 struct ENU_Frame_System_Descriptor : public INode_Descriptor
 {
-    alias rate_t = int : [ min = 1, max = 10000, native_type = "uint32_t" ];
+    alias rate_t = uint32_t : [ min = 1, max = 10000, native_type = "uint32_t" ];
 
     rate_t rate = 1 : [ ui_name = "Rate (Hz)" ];
 };
@@ -326,7 +326,7 @@ struct ENU_Frame_System_Config : public INode_Config
 
 struct LPF_Descriptor : public INode_Descriptor
 {
-    alias rate_t = int : [ min = 1, max = 10000, native_type = "uint32_t" ];
+    alias rate_t = uint32_t : [ min = 1, max = 10000, native_type = "uint32_t" ];
 
     rate_t rate = 1 : [ ui_name = "Rate (Hz)" ];
 };
@@ -343,7 +343,7 @@ struct LPF_Config : public INode_Config
 
 struct MaxSonar_Descriptor : public INode_Descriptor
 {
-    alias rate_t = int : [ min = 1, max = 15, native_type = "uint32_t" ];
+    alias rate_t = uint32_t : [ min = 1, max = 15, native_type = "uint32_t" ];
 
     string bus : [ ui_name = "Bus" ];
     rate_t rate = 1 : [ ui_name = "Rate (Hz)" ];
@@ -360,7 +360,7 @@ struct MaxSonar_Config : public INode_Config
 
 struct Motor_Mixer_Descriptor : public INode_Descriptor
 {
-    alias rate_t = int : [ min = 1, max = 10000, native_type = "uint32_t" ];
+    alias rate_t = uint32_t : [ min = 1, max = 10000, native_type = "uint32_t" ];
 
     rate_t rate = 1 : [ ui_name = "Rate (Hz)" ];
 };
@@ -392,7 +392,7 @@ struct Magnetic_Field_Calibration_Point
 
 struct MPU9250_Descriptor : public INode_Descriptor
 {
-    alias rate_t = int : [ min = 1, max = 100, native_type = "uint32_t" ];
+    alias rate_t = uint32_t : [ min = 1, max = 100, native_type = "uint32_t" ];
 
     enum imu_rate_t
     {
@@ -442,7 +442,7 @@ struct MPU9250_Config : public INode_Config
 
 struct MS5611_Descriptor : public INode_Descriptor
 {
-    alias rate_t = int : [ min = 1, max = 100, native_type = "uint32_t" ];
+    alias rate_t = uint32_t : [ min = 1, max = 100, native_type = "uint32_t" ];
 
     string bus : [ ui_name = "Bus" ];
     rate_t pressure_rate = 100 : [ ui_name = "Pressure Rate (Hz)" ];
@@ -457,7 +457,7 @@ struct MS5611_Config : public INode_Config
 
 struct Multirotor_Brain_Descriptor : public INode_Descriptor
 {
-    alias rate_t = int : [ min = 1, max = 10000, native_type = "uint32_t" ];
+    alias rate_t = uint32_t : [ min = 1, max = 10000, native_type = "uint32_t" ];
 
     rate_t rate = 100 : [ ui_name = "Rate (Hz)" ];
     rate_t commands_rate = 30 : [ ui_name = "Commands Rate (Hz)" ];
@@ -520,7 +520,7 @@ struct Multirotor_Brain_Config : public INode_Config
 
 struct Multirotor_Pilot_Descriptor : public INode_Descriptor
 {
-    alias rate_t = int : [ min = 1, max = 10000, native_type = "uint32_t" ];
+    alias rate_t = uint32_t : [ min = 1, max = 10000, native_type = "uint32_t" ];
 
     rate_t commands_rate = 30 : [ ui_name = "Commands Rate (Hz)" ];
     rate_t state_rate = 30 : [ ui_name = "State Rate (Hz)" ];
@@ -535,7 +535,7 @@ struct Multirotor_Pilot_Config : public INode_Config
 
 struct Multirotor_Simulator_Descriptor : public INode_Descriptor
 {
-    alias rate_t = int : [ min = 1, max = 10000, native_type = "uint32_t" ];
+    alias rate_t = uint32_t : [ min = 1, max = 10000, native_type = "uint32_t" ];
 
     rate_t throttle_rate = 100 : [ ui_name = "Throttle Rate (Hz)" ];
     rate_t acceleration_rate = 1000 : [ ui_name = "Acceleration Rate (Hz)" ];
@@ -574,7 +574,7 @@ struct Multirotor_Simulator_Config : public INode_Config
 
 struct Oscillator_Descriptor : public INode_Descriptor
 {
-    alias rate_t = int : [ min = 1, max = 10000, native_type = "uint32_t" ];
+    alias rate_t = uint32_t : [ min = 1, max = 10000, native_type = "uint32_t" ];
     alias component_count_t = int32_t : [ min = 1, max = 32 ];
 
     rate_t rate = 30 : [ ui_name = "Rate (Hz)" ];
@@ -599,7 +599,7 @@ struct Oscillator_Config : public INode_Config
 
 struct PCA9685_Descriptor : public INode_Descriptor
 {
-    alias rate_t = int : [ min = 1, max = 8000, native_type = "uint32_t" ];
+    alias rate_t = uint32_t : [ min = 1, max = 8000, native_type = "uint32_t" ];
 
     string bus : [ ui_name = "Bus" ];
     rate_t rate = 30 : [ ui_name = "Rate (Hz)" ];
@@ -638,7 +638,7 @@ struct PCA9685_Config : public INode_Config
 
 struct PIGPIO_Descriptor : public INode_Descriptor
 {
-    alias rate_t = int : [ min = 1, max = 8000, native_type = "uint32_t" ];
+    alias rate_t = uint32_t : [ min = 1, max = 8000, native_type = "uint32_t" ];
 
     struct Channel
     {
@@ -724,7 +724,7 @@ struct PIGPIO_Config : public INode_Config
 
 struct Pressure_Velocity_Descriptor : public INode_Descriptor
 {
-    alias rate_t = int : [ min = 1, max = 10000, native_type = "uint32_t" ];
+    alias rate_t = uint32_t : [ min = 1, max = 10000, native_type = "uint32_t" ];
 
     rate_t rate = 1 : [ ui_name = "Rate (Hz)" ];
 };
@@ -737,7 +737,7 @@ struct Pressure_Velocity_Config : public INode_Config
 
 struct Proximity_Descriptor : public INode_Descriptor
 {
-    alias rate_t = int : [ min = 1, max = 10000, native_type = "uint32_t" ];
+    alias rate_t = uint32_t : [ min = 1, max = 10000, native_type = "uint32_t" ];
     alias channel_count_t = int32_t : [ min = 1, max = 128 ];
 
     rate_t rate = 1 : [ ui_name = "Rate (Hz)" ];
@@ -752,7 +752,7 @@ struct Proximity_Config : public INode_Config
 
 struct Rate_Controller_Descriptor : public INode_Descriptor
 {
-    alias rate_t = int : [ min = 1, max = 10000, native_type = "uint32_t" ];
+    alias rate_t = uint32_t : [ min = 1, max = 10000, native_type = "uint32_t" ];
 
     rate_t rate = 1 : [ ui_name = "Rate (Hz)" ];
 };
@@ -792,7 +792,7 @@ struct Raspicam_Descriptor : public INode_Descriptor
     struct Quality
     {
         alias resolution_t = vec2i : [ min = { 8, 8 }, max = { 1980, 1080 } ];
-        alias bitrate_t = int32_t : [ min = 10000, max = 32000000 ];
+        alias bitrate_t = uint32_t : [ min = 10000, max = 32000000 ];
 
         resolution_t resolution : [ ui_name = "Resolution" ];
         bitrate_t bitrate : [ ui_name = "Bitrate" ];
@@ -847,7 +847,7 @@ struct Raspicam_Config : public INode_Config
 
 struct RC5T619_Descriptor : public INode_Descriptor
 {
-    alias rate_t = int : [ min = 1, max = 200, native_type = "uint32_t" ];
+    alias rate_t = uint32_t : [ min = 1, max = 200, native_type = "uint32_t" ];
 
     string bus : [ ui_name = "Bus" ];
     rate_t adc0_rate = 50 : [ ui_name = "ADC0 Rate (Hz)" ];
@@ -862,7 +862,7 @@ struct RC5T619_Config : public INode_Config
 
 struct Resampler_Descriptor : public INode_Descriptor
 {
-    alias rate_t = int : [ min = 1, max = 10000, native_type = "uint32_t" ];
+    alias rate_t = uint32_t : [ min = 1, max = 10000, native_type = "uint32_t" ];
 
     rate_t input_rate = 1 : [ ui_name = "Input Rate (Hz)" ];
     rate_t output_rate = 1 : [ ui_name = "Output Rate (Hz)" ];
@@ -877,7 +877,7 @@ struct Resampler_Config : public INode_Config
 
 struct Scalar_Generator_Descriptor : public INode_Descriptor
 {
-    alias rate_t = int : [ min = 1, max = 10000, native_type = "uint32_t" ];
+    alias rate_t = uint32_t : [ min = 1, max = 10000, native_type = "uint32_t" ];
 
     rate_t rate = 1 : [ ui_name = "Rate (Hz)" ];
 };
@@ -891,7 +891,7 @@ struct Scalar_Generator_Config : public INode_Config
 
 struct Servo_Gimbal_Descriptor : public INode_Descriptor
 {
-    alias rate_t = int : [ min = 1, max = 10000, native_type = "uint32_t" ];
+    alias rate_t = uint32_t : [ min = 1, max = 10000, native_type = "uint32_t" ];
 
     rate_t rate = 1 : [ ui_name = "Rate (Hz)" ];
     rate_t commands_rate = 1 : [ ui_name = "Commands Rate (Hz)" ];
@@ -916,7 +916,7 @@ struct Servo_Gimbal_Config : public INode_Config
 
 struct SRF01_Descriptor : public INode_Descriptor
 {
-    alias rate_t = int : [ min = 1, max = 10, native_type = "uint32_t" ];
+    alias rate_t = uint32_t : [ min = 1, max = 10, native_type = "uint32_t" ];
 
     string bus : [ ui_name = "Bus" ];
     rate_t rate = 1 : [ ui_name = "Rate (Hz)" ];
@@ -933,7 +933,7 @@ struct SRF01_Config : public INode_Config
 
 struct SRF02_Descriptor : public INode_Descriptor
 {
-    alias rate_t = int : [ min = 1, max = 10, native_type = "uint32_t" ];
+    alias rate_t = uint32_t : [ min = 1, max = 10, native_type = "uint32_t" ];
 
     string bus : [ ui_name = "Bus" ];
     rate_t rate = 1 : [ ui_name = "Rate (Hz)" ];
@@ -950,7 +950,7 @@ struct SRF02_Config : public INode_Config
 
 struct Throttle_To_PWM_Descriptor : public INode_Descriptor
 {
-    alias rate_t = int : [ min = 1, max = 10000, native_type = "uint32_t" ];
+    alias rate_t = uint32_t : [ min = 1, max = 10000, native_type = "uint32_t" ];
     alias channel_count_t = int32_t : [ min = 1, max = 128 ];
 
     rate_t rate = 1 : [ ui_name = "Rate (Hz)" ];
@@ -965,7 +965,7 @@ struct Throttle_To_PWM_Config : public INode_Config
 
 struct Transformer_Descriptor : public INode_Descriptor
 {
-    alias rate_t = int : [ min = 1, max = 10000, native_type = "uint32_t" ];
+    alias rate_t = uint32_t : [ min = 1, max = 10000, native_type = "uint32_t" ];
 
     rate_t rate = 1 : [ ui_name = "Rate (Hz)" ];
 };
@@ -978,7 +978,7 @@ struct Transformer_Config : public INode_Config
 
 struct UBLOX_Descriptor : public INode_Descriptor
 {
-    alias rate_t = int : [ min = 1, max = 10, native_type = "uint32_t" ];
+    alias rate_t = uint32_t : [ min = 1, max = 10, native_type = "uint32_t" ];
 
     string bus : [ ui_name = "Bus" ];
     rate_t rate = 1 : [ ui_name = "Rate (Hz)" ];
@@ -992,7 +992,7 @@ struct UBLOX_Config : public INode_Config
 
 struct Vec3_Generator_Descriptor : public INode_Descriptor
 {
-    alias rate_t = int : [ min = 1, max = 10000, native_type = "uint32_t" ];
+    alias rate_t = uint32_t : [ min = 1, max = 10000, native_type = "uint32_t" ];
 
     rate_t rate = 1 : [ ui_name = "Rate (Hz)" ];
 };

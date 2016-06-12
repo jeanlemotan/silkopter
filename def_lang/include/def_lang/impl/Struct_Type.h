@@ -20,6 +20,8 @@ public:
     Symbol_Path get_native_type() const override;
 
     std::shared_ptr<IType> clone(std::string const& name) const override;
+    std::shared_ptr<IType> alias(std::string const& name) const override;
+    std::shared_ptr<const IType> get_aliased_type() const override;
 
     std::string get_template_instantiation_string() const override;
 
@@ -41,6 +43,7 @@ private:
     void replicate_base_struct();
 
     std::shared_ptr<const IStruct_Type> m_base_struct;
+    std::shared_ptr<const IType> m_aliased_type;
     std::string m_ui_name;
     Symbol_Path m_native_type;
     size_t m_first_noninherited_member_def_index = 0;

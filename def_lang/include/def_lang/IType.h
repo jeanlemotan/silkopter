@@ -18,6 +18,9 @@ public:
     virtual Symbol_Path get_native_type() const = 0;
 
     virtual std::shared_ptr<IType> clone(std::string const& name) const = 0;
+    virtual std::shared_ptr<IType> alias(std::string const& name) const = 0;
+
+    virtual std::shared_ptr<const IType> get_aliased_type() const = 0;
 
     virtual std::shared_ptr<IValue> create_value() const = 0;
 };

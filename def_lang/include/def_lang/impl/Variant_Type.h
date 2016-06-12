@@ -18,6 +18,8 @@ public:
     Result<void> init(std::vector<std::shared_ptr<const ITemplate_Argument>> const& arguments) override;
 
     std::shared_ptr<IType> clone(std::string const& name) const override;
+    std::shared_ptr<IType> alias(std::string const& name) const override;
+    std::shared_ptr<const IType> get_aliased_type() const override;
 
     std::string const& get_ui_name() const override;
     Symbol_Path get_native_type() const override;
@@ -36,6 +38,7 @@ protected:
 
 private:
     std::vector<std::shared_ptr<const IType>> m_inner_types;
+    std::shared_ptr<const IType> m_aliased_type;
     std::string m_ui_name;
     Symbol_Path m_native_type;
 };

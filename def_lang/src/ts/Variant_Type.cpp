@@ -74,6 +74,17 @@ std::shared_ptr<IType> Variant_Type::clone(std::string const& name) const
 {
     return std::make_shared<Variant_Type>(*this, name);
 }
+std::shared_ptr<IType> Variant_Type::alias(std::string const& name) const
+{
+    std::shared_ptr<Variant_Type> alias = std::make_shared<Variant_Type>(*this, name);
+    alias->m_native_type = Symbol_Path(); //clear the native type as this is an alias
+    alias->m_aliased_type = this->shared_from_this();
+    return alias;
+}
+std::shared_ptr<const IType> Variant_Type::get_aliased_type() const
+{
+    return m_aliased_type;
+}
 
 std::string Variant_Type::get_template_instantiation_string() const
 {

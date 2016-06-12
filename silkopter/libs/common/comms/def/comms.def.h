@@ -14,9 +14,19 @@ namespace silk
 namespace comms
 {
 
+typedef int8_t int8_t;
+typedef uint8_t uint8_t;
+typedef int16_t int16_t;
+typedef uint16_t uint16_t;
+typedef int32_t int32_t;
+typedef uint32_t uint32_t;
+typedef int64_t int64_t;
+typedef float ufloat;
 namespace setup
 {
 
+typedef int64_t time_ms_t;
+typedef std::string serialized_data;
 struct Set_Clock_Req
 {
 public:
@@ -24,13 +34,13 @@ public:
   Set_Clock_Req() noexcept {};
   virtual ~Set_Clock_Req() noexcept {};
 
-  void set_time(int64_t const& value);
-  auto get_time() const -> int64_t const&;
+  void set_time(setup::time_ms_t const& value);
+  auto get_time() const -> setup::time_ms_t const&;
 
 
 private:
 
-  int64_t m_time = {0LL};
+  setup::time_ms_t m_time = {0LL};
 };
 
 struct Set_Clock_Res
@@ -40,13 +50,13 @@ public:
   Set_Clock_Res() noexcept {};
   virtual ~Set_Clock_Res() noexcept {};
 
-  void set_time(int64_t const& value);
-  auto get_time() const -> int64_t const&;
+  void set_time(setup::time_ms_t const& value);
+  auto get_time() const -> setup::time_ms_t const&;
 
 
 private:
 
-  int64_t m_time = {0LL};
+  setup::time_ms_t m_time = {0LL};
 };
 
 struct Set_UAV_Descriptor_Req
@@ -56,13 +66,13 @@ public:
   Set_UAV_Descriptor_Req() noexcept {};
   virtual ~Set_UAV_Descriptor_Req() noexcept {};
 
-  void set_data(std::string const& value);
-  auto get_data() const -> std::string const&;
+  void set_data(setup::serialized_data const& value);
+  auto get_data() const -> setup::serialized_data const&;
 
 
 private:
 
-  std::string m_data = {};
+  setup::serialized_data m_data = {};
 };
 
 struct Set_UAV_Descriptor_Res
@@ -72,13 +82,13 @@ public:
   Set_UAV_Descriptor_Res() noexcept {};
   virtual ~Set_UAV_Descriptor_Res() noexcept {};
 
-  void set_data(std::string const& value);
-  auto get_data() const -> std::string const&;
+  void set_data(setup::serialized_data const& value);
+  auto get_data() const -> setup::serialized_data const&;
 
 
 private:
 
-  std::string m_data = {};
+  setup::serialized_data m_data = {};
 };
 
 struct Get_UAV_Descriptor_Req
@@ -100,13 +110,13 @@ public:
   Get_UAV_Descriptor_Res() noexcept {};
   virtual ~Get_UAV_Descriptor_Res() noexcept {};
 
-  void set_data(std::string const& value);
-  auto get_data() const -> std::string const&;
+  void set_data(setup::serialized_data const& value);
+  auto get_data() const -> setup::serialized_data const&;
 
 
 private:
 
-  std::string m_data = {};
+  setup::serialized_data m_data = {};
 };
 
 struct Node_Def_Data
@@ -178,8 +188,8 @@ public:
   auto get_outputs() const -> std::vector<setup::Node_Def_Data::Output> const&;
   auto get_outputs() -> std::vector<setup::Node_Def_Data::Output>&;
 
-  void set_descriptor_data(std::string const& value);
-  auto get_descriptor_data() const -> std::string const&;
+  void set_descriptor_data(setup::serialized_data const& value);
+  auto get_descriptor_data() const -> setup::serialized_data const&;
 
 
 private:
@@ -188,7 +198,7 @@ private:
   std::string m_type = {};
   std::vector<setup::Node_Def_Data::Input> m_inputs = {};
   std::vector<setup::Node_Def_Data::Output> m_outputs = {};
-  std::string m_descriptor_data = {};
+  setup::serialized_data m_descriptor_data = {};
 };
 
 struct Get_Node_Defs_Req
@@ -293,11 +303,11 @@ public:
   auto get_outputs() const -> std::vector<setup::Node_Data::Output> const&;
   auto get_outputs() -> std::vector<setup::Node_Data::Output>&;
 
-  void set_descriptor_data(std::string const& value);
-  auto get_descriptor_data() const -> std::string const&;
+  void set_descriptor_data(setup::serialized_data const& value);
+  auto get_descriptor_data() const -> setup::serialized_data const&;
 
-  void set_config_data(std::string const& value);
-  auto get_config_data() const -> std::string const&;
+  void set_config_data(setup::serialized_data const& value);
+  auto get_config_data() const -> setup::serialized_data const&;
 
 
 private:
@@ -306,8 +316,8 @@ private:
   std::string m_type = {};
   std::vector<setup::Node_Data::Input> m_inputs = {};
   std::vector<setup::Node_Data::Output> m_outputs = {};
-  std::string m_descriptor_data = {};
-  std::string m_config_data = {};
+  setup::serialized_data m_descriptor_data = {};
+  setup::serialized_data m_config_data = {};
 };
 
 struct Get_Nodes_Req
@@ -413,15 +423,15 @@ public:
   void set_name(std::string const& value);
   auto get_name() const -> std::string const&;
 
-  void set_descriptor_data(std::string const& value);
-  auto get_descriptor_data() const -> std::string const&;
+  void set_descriptor_data(setup::serialized_data const& value);
+  auto get_descriptor_data() const -> setup::serialized_data const&;
 
 
 private:
 
   std::string m_def_name = {};
   std::string m_name = {};
-  std::string m_descriptor_data = {};
+  setup::serialized_data m_descriptor_data = {};
 };
 
 struct Add_Node_Res
@@ -506,6 +516,7 @@ private:
   boost::optional<Error> m_error = {};
 };
 
+typedef boost::variant<setup::Set_Clock_Req,setup::Set_UAV_Descriptor_Req,setup::Get_UAV_Descriptor_Req,setup::Get_Node_Defs_Req,setup::Remove_Node_Req,setup::Add_Node_Req,setup::Set_Node_Input_Stream_Path_Req> Brain_Message;
 }
 ts::Result<void> deserialize(bool& value, ts::serialization::Value const& sz_value);
 ts::Result<ts::serialization::Value> serialize(bool const& value);
@@ -597,6 +608,8 @@ ts::Result<void> deserialize(setup::Remove_Node_Res::Error& value, ts::serializa
 ts::Result<ts::serialization::Value> serialize(setup::Remove_Node_Res::Error const& value);
 ts::Result<void> deserialize(setup::Remove_Node_Res& value, ts::serialization::Value const& sz_value);
 ts::Result<ts::serialization::Value> serialize(setup::Remove_Node_Res const& value);
+ts::Result<void> deserialize(setup::Brain_Message& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(setup::Brain_Message const& value);
 ts::Result<void> deserialize(std::vector<setup::Node_Def_Data::Input>& value, ts::serialization::Value const& sz_value);
 ts::Result<ts::serialization::Value> serialize(std::vector<setup::Node_Def_Data::Input> const& value);
 ts::Result<void> deserialize(std::vector<setup::Node_Def_Data::Output>& value, ts::serialization::Value const& sz_value);

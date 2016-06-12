@@ -65,6 +65,8 @@ struct Comms::Channels
     Pilot pilot;
     Telemetry telemetry;
     Video video;
+
+    std::vector<uint8_t> setup_buffer;
 };
 
 Comms::Comms(UAV& uav)
@@ -884,18 +886,24 @@ void Comms::process()
         return;
     }
 
-    m_multirotor_commands_values.clear();
+//    m_multirotor_commands_values.clear();
 
-    while (auto msg = m_channels->pilot.get_next_message(*m_rcp))
+//    while (auto msg = m_channels->pilot.get_next_message(*m_rcp))
+//    {
+//        switch (msg.get())
+//        {
+//        case comms::Pilot_Message::MULTIROTOR_COMMANDS: handle_multirotor_commands(); break;
+
+//        default: QLOGE("Received unrecognised pilot message: {}", static_cast<int>(msg.get())); break;
+//        }
+//    }
+
+
+    while (m_rcp->receive(SETUP_CHANNEL, m_channels->setup_buffer))
     {
-        switch (msg.get())
-        {
-        case comms::Pilot_Message::MULTIROTOR_COMMANDS: handle_multirotor_commands(); break;
-
-        default: QLOGE("Received unrecognised pilot message: {}", static_cast<int>(msg.get())); break;
-        }
+//        silk::comms::Bra
+//        silk::comms::deserialize()
     }
-
 
     while (auto msg = m_channels->setup.get_next_message(*m_rcp))
     {
