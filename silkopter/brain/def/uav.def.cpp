@@ -35,9 +35,7 @@ std::string const& get_ast_json()
     return m_name;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void IUAV_Descriptor::set_mass(mass_t const& value)
   {
     m_mass = clamp(value, mass_t(0.010000f), mass_t(100.000000f));
@@ -47,21 +45,17 @@ std::string const& get_ast_json()
     return m_mass;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void IUAV_Descriptor::set_moment_of_inertia(ufloat const& value)
   {
-    m_moment_of_inertia = max(value, ufloat(0.000000f));
+    m_moment_of_inertia = max(value, ufloat(0));
   }
   auto IUAV_Descriptor::get_moment_of_inertia() const -> ufloat const& 
   {
     return m_moment_of_inertia;
   }
 
-
 ////////////////////////////////////////////////////////////
-
     void Settings::Bus_Data::set_name(std::string const& value)
     {
       m_name = value;
@@ -71,9 +65,7 @@ std::string const& get_ast_json()
       return m_name;
     }
 
-
 ////////////////////////////////////////////////////////////
-
     void Settings::Bus_Data::set_type(std::string const& value)
     {
       m_type = value;
@@ -83,9 +75,7 @@ std::string const& get_ast_json()
       return m_type;
     }
 
-
 ////////////////////////////////////////////////////////////
-
     void Settings::Bus_Data::set_descriptor(Poly<const IBus_Descriptor> const& value)
     {
       m_descriptor = value;
@@ -100,9 +90,7 @@ std::string const& get_ast_json()
       return m_descriptor;
     }
 
-
 ////////////////////////////////////////////////////////////
-
     void Settings::Node_Data::set_name(std::string const& value)
     {
       m_name = value;
@@ -112,9 +100,7 @@ std::string const& get_ast_json()
       return m_name;
     }
 
-
 ////////////////////////////////////////////////////////////
-
     void Settings::Node_Data::set_type(std::string const& value)
     {
       m_type = value;
@@ -124,9 +110,7 @@ std::string const& get_ast_json()
       return m_type;
     }
 
-
 ////////////////////////////////////////////////////////////
-
     void Settings::Node_Data::set_descriptor(Poly<const INode_Descriptor> const& value)
     {
       m_descriptor = value;
@@ -141,9 +125,7 @@ std::string const& get_ast_json()
       return m_descriptor;
     }
 
-
 ////////////////////////////////////////////////////////////
-
     void Settings::Node_Data::set_config(Poly<const INode_Config> const& value)
     {
       m_config = value;
@@ -158,9 +140,7 @@ std::string const& get_ast_json()
       return m_config;
     }
 
-
 ////////////////////////////////////////////////////////////
-
     void Settings::Node_Data::set_input_paths(std::vector<std::string> const& value)
     {
       m_input_paths = value;
@@ -175,9 +155,7 @@ std::string const& get_ast_json()
       return m_input_paths;
     }
 
-
 ////////////////////////////////////////////////////////////
-
   void Settings::set_uav_descriptor(Poly<const IUAV_Descriptor> const& value)
   {
     m_uav_descriptor = value;
@@ -192,9 +170,7 @@ std::string const& get_ast_json()
     return m_uav_descriptor;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void Settings::set_buses(std::vector<Settings::Bus_Data> const& value)
   {
     m_buses = value;
@@ -209,9 +185,7 @@ std::string const& get_ast_json()
     return m_buses;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void Settings::set_nodes(std::vector<Settings::Node_Data> const& value)
   {
     m_nodes = value;
@@ -226,33 +200,27 @@ std::string const& get_ast_json()
     return m_nodes;
   }
 
-
 ////////////////////////////////////////////////////////////
-
     void Multirotor_Descriptor::Motor::set_position(vec3f const& value)
     {
-      m_position = clamp(value, vec3f(-340282346638528859811704183484516925440.000000f, -340282346638528859811704183484516925440.000000f, -340282346638528859811704183484516925440.000000f), vec3f(340282346638528859811704183484516925440.000000f, 340282346638528859811704183484516925440.000000f, 340282346638528859811704183484516925440.000000f));
+      m_position = clamp(value, vec3f(-FLT_MAX, -FLT_MAX, -FLT_MAX), vec3f(FLT_MAX, FLT_MAX, FLT_MAX));
     }
     auto Multirotor_Descriptor::Motor::get_position() const -> vec3f const& 
     {
       return m_position;
     }
 
-
 ////////////////////////////////////////////////////////////
-
     void Multirotor_Descriptor::Motor::set_thrust_vector(direction_t const& value)
     {
-      m_thrust_vector = clamp(value, direction_t(-340282346638528859811704183484516925440.000000f, -340282346638528859811704183484516925440.000000f, -340282346638528859811704183484516925440.000000f), direction_t(340282346638528859811704183484516925440.000000f, 340282346638528859811704183484516925440.000000f, 340282346638528859811704183484516925440.000000f));
+      m_thrust_vector = clamp(value, direction_t(-FLT_MAX, -FLT_MAX, -FLT_MAX), direction_t(FLT_MAX, FLT_MAX, FLT_MAX));
     }
     auto Multirotor_Descriptor::Motor::get_thrust_vector() const -> direction_t const& 
     {
       return m_thrust_vector;
     }
 
-
 ////////////////////////////////////////////////////////////
-
     void Multirotor_Descriptor::Motor::set_clockwise(bool const& value)
     {
       m_clockwise = value;
@@ -262,9 +230,7 @@ std::string const& get_ast_json()
       return m_clockwise;
     }
 
-
 ////////////////////////////////////////////////////////////
-
   void Multirotor_Descriptor::set_name(std::string const& value)
   {
     m_name = value;
@@ -274,9 +240,7 @@ std::string const& get_ast_json()
     return m_name;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void Multirotor_Descriptor::set_mass(IUAV_Descriptor::mass_t const& value)
   {
     m_mass = clamp(value, IUAV_Descriptor::mass_t(0.010000f), IUAV_Descriptor::mass_t(100.000000f));
@@ -286,21 +250,17 @@ std::string const& get_ast_json()
     return m_mass;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void Multirotor_Descriptor::set_moment_of_inertia(ufloat const& value)
   {
-    m_moment_of_inertia = max(value, ufloat(0.000000f));
+    m_moment_of_inertia = max(value, ufloat(0));
   }
   auto Multirotor_Descriptor::get_moment_of_inertia() const -> ufloat const& 
   {
     return m_moment_of_inertia;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void Multirotor_Descriptor::set_radius(radius_t const& value)
   {
     m_radius = clamp(value, radius_t(0.010000f), radius_t(100.000000f));
@@ -310,9 +270,7 @@ std::string const& get_ast_json()
     return m_radius;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void Multirotor_Descriptor::set_height(height_t const& value)
   {
     m_height = clamp(value, height_t(0.010000f), height_t(100.000000f));
@@ -322,9 +280,7 @@ std::string const& get_ast_json()
     return m_height;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void Multirotor_Descriptor::set_motor_z_torque(torque_t const& value)
   {
     m_motor_z_torque = clamp(value, torque_t(0.010000f), torque_t(1000.000000f));
@@ -334,9 +290,7 @@ std::string const& get_ast_json()
     return m_motor_z_torque;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void Multirotor_Descriptor::set_motor_thrust(thrust_t const& value)
   {
     m_motor_thrust = clamp(value, thrust_t(0.010000f), thrust_t(1000.000000f));
@@ -346,9 +300,7 @@ std::string const& get_ast_json()
     return m_motor_thrust;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void Multirotor_Descriptor::set_motor_acceleration(acceleration_t const& value)
   {
     m_motor_acceleration = max(value, acceleration_t(0.100000f));
@@ -358,9 +310,7 @@ std::string const& get_ast_json()
     return m_motor_acceleration;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void Multirotor_Descriptor::set_motor_deceleration(acceleration_t const& value)
   {
     m_motor_deceleration = max(value, acceleration_t(0.100000f));
@@ -370,9 +320,7 @@ std::string const& get_ast_json()
     return m_motor_deceleration;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void Multirotor_Descriptor::set_motors(std::vector<Multirotor_Descriptor::Motor> const& value)
   {
     m_motors = value;
@@ -387,9 +335,7 @@ std::string const& get_ast_json()
     return m_motors;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void UART_Linux_Descriptor::set_dev(std::string const& value)
   {
     m_dev = value;
@@ -399,9 +345,7 @@ std::string const& get_ast_json()
     return m_dev;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void UART_Linux_Descriptor::set_baud(baud_t const& value)
   {
     m_baud = value;
@@ -411,33 +355,27 @@ std::string const& get_ast_json()
     return m_baud;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void UART_BBang_Descriptor::set_rx_pin(uint32_t const& value)
   {
-    m_rx_pin = clamp(value, uint32_t(0LL), uint32_t(4294967295LL));
+    m_rx_pin = clamp(value, uint32_t(0), uint32_t(4294967295LL));
   }
   auto UART_BBang_Descriptor::get_rx_pin() const -> uint32_t const& 
   {
     return m_rx_pin;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void UART_BBang_Descriptor::set_baud(uint32_t const& value)
   {
-    m_baud = clamp(value, uint32_t(0LL), uint32_t(4294967295LL));
+    m_baud = clamp(value, uint32_t(0), uint32_t(4294967295LL));
   }
   auto UART_BBang_Descriptor::get_baud() const -> uint32_t const& 
   {
     return m_baud;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void UART_BBang_Descriptor::set_invert(bool const& value)
   {
     m_invert = value;
@@ -447,33 +385,27 @@ std::string const& get_ast_json()
     return m_invert;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void I2C_BCM_Descriptor::set_dev(dev_t const& value)
   {
-    m_dev = clamp(value, dev_t(0LL), dev_t(1LL));
+    m_dev = clamp(value, dev_t(0), dev_t(1));
   }
   auto I2C_BCM_Descriptor::get_dev() const -> dev_t const& 
   {
     return m_dev;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void I2C_BCM_Descriptor::set_baud(baud_t const& value)
   {
-    m_baud = clamp(value, baud_t(10000LL), baud_t(1000000LL));
+    m_baud = clamp(value, baud_t(10000), baud_t(1000000));
   }
   auto I2C_BCM_Descriptor::get_baud() const -> baud_t const& 
   {
     return m_baud;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void I2C_Linux_Descriptor::set_dev(std::string const& value)
   {
     m_dev = value;
@@ -483,57 +415,47 @@ std::string const& get_ast_json()
     return m_dev;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void SPI_BCM_Descriptor::set_dev(dev_t const& value)
   {
-    m_dev = clamp(value, dev_t(0LL), dev_t(1LL));
+    m_dev = clamp(value, dev_t(0), dev_t(1));
   }
   auto SPI_BCM_Descriptor::get_dev() const -> dev_t const& 
   {
     return m_dev;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void SPI_BCM_Descriptor::set_baud(uint32_t const& value)
   {
-    m_baud = clamp(value, uint32_t(0LL), uint32_t(4294967295LL));
+    m_baud = clamp(value, uint32_t(0), uint32_t(4294967295LL));
   }
   auto SPI_BCM_Descriptor::get_baud() const -> uint32_t const& 
   {
     return m_baud;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void SPI_BCM_Descriptor::set_mode(mode_t const& value)
   {
-    m_mode = clamp(value, mode_t(0LL), mode_t(3LL));
+    m_mode = clamp(value, mode_t(0), mode_t(3));
   }
   auto SPI_BCM_Descriptor::get_mode() const -> mode_t const& 
   {
     return m_mode;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void SPI_BCM_Descriptor::set_speed(speed_t const& value)
   {
-    m_speed = clamp(value, speed_t(1000LL), speed_t(4294967295LL));
+    m_speed = clamp(value, speed_t(1000), speed_t(4294967295LL));
   }
   auto SPI_BCM_Descriptor::get_speed() const -> speed_t const& 
   {
     return m_speed;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void SPI_Linux_Descriptor::set_dev(std::string const& value)
   {
     m_dev = value;
@@ -543,177 +465,147 @@ std::string const& get_ast_json()
     return m_dev;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void SPI_Linux_Descriptor::set_speed(speed_t const& value)
   {
-    m_speed = clamp(value, speed_t(1000LL), speed_t(4294967295LL));
+    m_speed = clamp(value, speed_t(1000), speed_t(4294967295LL));
   }
   auto SPI_Linux_Descriptor::get_speed() const -> speed_t const& 
   {
     return m_speed;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void P_Controller_Descriptor::set_kp(ufloat const& value)
   {
-    m_kp = max(value, ufloat(0.000000f));
+    m_kp = max(value, ufloat(0));
   }
   auto P_Controller_Descriptor::get_kp() const -> ufloat const& 
   {
     return m_kp;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void PI_Controller_Descriptor::set_kp(ufloat const& value)
   {
-    m_kp = max(value, ufloat(0.000000f));
+    m_kp = max(value, ufloat(0));
   }
   auto PI_Controller_Descriptor::get_kp() const -> ufloat const& 
   {
     return m_kp;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void PI_Controller_Descriptor::set_ki(ufloat const& value)
   {
-    m_ki = max(value, ufloat(0.000000f));
+    m_ki = max(value, ufloat(0));
   }
   auto PI_Controller_Descriptor::get_ki() const -> ufloat const& 
   {
     return m_ki;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void PI_Controller_Descriptor::set_max_i(ufloat const& value)
   {
-    m_max_i = max(value, ufloat(0.000000f));
+    m_max_i = max(value, ufloat(0));
   }
   auto PI_Controller_Descriptor::get_max_i() const -> ufloat const& 
   {
     return m_max_i;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void PD_Controller_Descriptor::set_kp(ufloat const& value)
   {
-    m_kp = max(value, ufloat(0.000000f));
+    m_kp = max(value, ufloat(0));
   }
   auto PD_Controller_Descriptor::get_kp() const -> ufloat const& 
   {
     return m_kp;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void PD_Controller_Descriptor::set_kd(ufloat const& value)
   {
-    m_kd = max(value, ufloat(0.000000f));
+    m_kd = max(value, ufloat(0));
   }
   auto PD_Controller_Descriptor::get_kd() const -> ufloat const& 
   {
     return m_kd;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void PD_Controller_Descriptor::set_d_filter(muf_t const& value)
   {
-    m_d_filter = clamp(value, muf_t(0.000000f), muf_t(1.000000f));
+    m_d_filter = clamp(value, muf_t(0), muf_t(1.000000f));
   }
   auto PD_Controller_Descriptor::get_d_filter() const -> muf_t const& 
   {
     return m_d_filter;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void PID_Controller_Descriptor::set_kp(ufloat const& value)
   {
-    m_kp = max(value, ufloat(0.000000f));
+    m_kp = max(value, ufloat(0));
   }
   auto PID_Controller_Descriptor::get_kp() const -> ufloat const& 
   {
     return m_kp;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void PID_Controller_Descriptor::set_kd(ufloat const& value)
   {
-    m_kd = max(value, ufloat(0.000000f));
+    m_kd = max(value, ufloat(0));
   }
   auto PID_Controller_Descriptor::get_kd() const -> ufloat const& 
   {
     return m_kd;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void PID_Controller_Descriptor::set_d_filter(muf_t const& value)
   {
-    m_d_filter = clamp(value, muf_t(0.000000f), muf_t(1.000000f));
+    m_d_filter = clamp(value, muf_t(0), muf_t(1.000000f));
   }
   auto PID_Controller_Descriptor::get_d_filter() const -> muf_t const& 
   {
     return m_d_filter;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void PID_Controller_Descriptor::set_ki(ufloat const& value)
   {
-    m_ki = max(value, ufloat(0.000000f));
+    m_ki = max(value, ufloat(0));
   }
   auto PID_Controller_Descriptor::get_ki() const -> ufloat const& 
   {
     return m_ki;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void PID_Controller_Descriptor::set_max_i(ufloat const& value)
   {
-    m_max_i = max(value, ufloat(0.000000f));
+    m_max_i = max(value, ufloat(0));
   }
   auto PID_Controller_Descriptor::get_max_i() const -> ufloat const& 
   {
     return m_max_i;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void ADC_Ammeter_Descriptor::set_rate(uint32_t const& value)
   {
-    m_rate = clamp(value, uint32_t(1LL), uint32_t(10000LL));
+    m_rate = clamp(value, uint32_t(1), uint32_t(10000));
   }
   auto ADC_Ammeter_Descriptor::get_rate() const -> uint32_t const& 
   {
     return m_rate;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void ADC_Ammeter_Config::set_scale(float const& value)
   {
     m_scale = value;
@@ -723,9 +615,7 @@ std::string const& get_ast_json()
     return m_scale;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void ADC_Ammeter_Config::set_bias(float const& value)
   {
     m_bias = value;
@@ -735,21 +625,17 @@ std::string const& get_ast_json()
     return m_bias;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void ADC_Voltmeter_Descriptor::set_rate(uint32_t const& value)
   {
-    m_rate = clamp(value, uint32_t(1LL), uint32_t(10000LL));
+    m_rate = clamp(value, uint32_t(1), uint32_t(10000));
   }
   auto ADC_Voltmeter_Descriptor::get_rate() const -> uint32_t const& 
   {
     return m_rate;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void ADC_Voltmeter_Config::set_scale(float const& value)
   {
     m_scale = value;
@@ -759,9 +645,7 @@ std::string const& get_ast_json()
     return m_scale;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void ADC_Voltmeter_Config::set_bias(float const& value)
   {
     m_bias = value;
@@ -771,9 +655,7 @@ std::string const& get_ast_json()
     return m_bias;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void ADS1115_Descriptor::set_bus(std::string const& value)
   {
     m_bus = value;
@@ -783,57 +665,47 @@ std::string const& get_ast_json()
     return m_bus;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void ADS1115_Descriptor::set_adc0_rate(uint32_t const& value)
   {
-    m_adc0_rate = clamp(value, uint32_t(1LL), uint32_t(200LL));
+    m_adc0_rate = clamp(value, uint32_t(1), uint32_t(200));
   }
   auto ADS1115_Descriptor::get_adc0_rate() const -> uint32_t const& 
   {
     return m_adc0_rate;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void ADS1115_Descriptor::set_adc1_rate(uint32_t const& value)
   {
-    m_adc1_rate = clamp(value, uint32_t(1LL), uint32_t(200LL));
+    m_adc1_rate = clamp(value, uint32_t(1), uint32_t(200));
   }
   auto ADS1115_Descriptor::get_adc1_rate() const -> uint32_t const& 
   {
     return m_adc1_rate;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void ADS1115_Descriptor::set_adc2_rate(uint32_t const& value)
   {
-    m_adc2_rate = clamp(value, uint32_t(1LL), uint32_t(200LL));
+    m_adc2_rate = clamp(value, uint32_t(1), uint32_t(200));
   }
   auto ADS1115_Descriptor::get_adc2_rate() const -> uint32_t const& 
   {
     return m_adc2_rate;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void ADS1115_Descriptor::set_adc3_rate(uint32_t const& value)
   {
-    m_adc3_rate = clamp(value, uint32_t(1LL), uint32_t(200LL));
+    m_adc3_rate = clamp(value, uint32_t(1), uint32_t(200));
   }
   auto ADS1115_Descriptor::get_adc3_rate() const -> uint32_t const& 
   {
     return m_adc3_rate;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void AVRADC_Descriptor::set_bus(std::string const& value)
   {
     m_bus = value;
@@ -843,201 +715,167 @@ std::string const& get_ast_json()
     return m_bus;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void AVRADC_Descriptor::set_rate(uint32_t const& value)
   {
-    m_rate = clamp(value, uint32_t(1LL), uint32_t(500LL));
+    m_rate = clamp(value, uint32_t(1), uint32_t(500));
   }
   auto AVRADC_Descriptor::get_rate() const -> uint32_t const& 
   {
     return m_rate;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void Comp_AHRS_Descriptor::set_rate(uint32_t const& value)
   {
-    m_rate = clamp(value, uint32_t(1LL), uint32_t(10000LL));
+    m_rate = clamp(value, uint32_t(1), uint32_t(10000));
   }
   auto Comp_AHRS_Descriptor::get_rate() const -> uint32_t const& 
   {
     return m_rate;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void Comp_AHRS_Config::set_drift_correction_factor(muf_t const& value)
   {
-    m_drift_correction_factor = clamp(value, muf_t(0.000000f), muf_t(1.000000f));
+    m_drift_correction_factor = clamp(value, muf_t(0), muf_t(1.000000f));
   }
   auto Comp_AHRS_Config::get_drift_correction_factor() const -> muf_t const& 
   {
     return m_drift_correction_factor;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void Combiner_Descriptor::set_rate(uint32_t const& value)
   {
-    m_rate = clamp(value, uint32_t(1LL), uint32_t(10000LL));
+    m_rate = clamp(value, uint32_t(1), uint32_t(10000));
   }
   auto Combiner_Descriptor::get_rate() const -> uint32_t const& 
   {
     return m_rate;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void Gravity_Filter_Descriptor::set_rate(uint32_t const& value)
   {
-    m_rate = clamp(value, uint32_t(1LL), uint32_t(10000LL));
+    m_rate = clamp(value, uint32_t(1), uint32_t(10000));
   }
   auto Gravity_Filter_Descriptor::get_rate() const -> uint32_t const& 
   {
     return m_rate;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void KF_ECEF_Descriptor::set_rate(uint32_t const& value)
   {
-    m_rate = clamp(value, uint32_t(1LL), uint32_t(10000LL));
+    m_rate = clamp(value, uint32_t(1), uint32_t(10000));
   }
   auto KF_ECEF_Descriptor::get_rate() const -> uint32_t const& 
   {
     return m_rate;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void KF_ECEF_Config::set_gps_position_lag(ufloat const& value)
   {
-    m_gps_position_lag = max(value, ufloat(0.000000f));
+    m_gps_position_lag = max(value, ufloat(0));
   }
   auto KF_ECEF_Config::get_gps_position_lag() const -> ufloat const& 
   {
     return m_gps_position_lag;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void KF_ECEF_Config::set_gps_position_accuracy(ufloat const& value)
   {
-    m_gps_position_accuracy = max(value, ufloat(0.000000f));
+    m_gps_position_accuracy = max(value, ufloat(0));
   }
   auto KF_ECEF_Config::get_gps_position_accuracy() const -> ufloat const& 
   {
     return m_gps_position_accuracy;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void KF_ECEF_Config::set_gps_velocity_lag(ufloat const& value)
   {
-    m_gps_velocity_lag = max(value, ufloat(0.000000f));
+    m_gps_velocity_lag = max(value, ufloat(0));
   }
   auto KF_ECEF_Config::get_gps_velocity_lag() const -> ufloat const& 
   {
     return m_gps_velocity_lag;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void KF_ECEF_Config::set_gps_velocity_accuracy(ufloat const& value)
   {
-    m_gps_velocity_accuracy = max(value, ufloat(0.000000f));
+    m_gps_velocity_accuracy = max(value, ufloat(0));
   }
   auto KF_ECEF_Config::get_gps_velocity_accuracy() const -> ufloat const& 
   {
     return m_gps_velocity_accuracy;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void KF_ECEF_Config::set_acceleration_lag(ufloat const& value)
   {
-    m_acceleration_lag = max(value, ufloat(0.000000f));
+    m_acceleration_lag = max(value, ufloat(0));
   }
   auto KF_ECEF_Config::get_acceleration_lag() const -> ufloat const& 
   {
     return m_acceleration_lag;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void KF_ECEF_Config::set_acceleration_accuracy(ufloat const& value)
   {
-    m_acceleration_accuracy = max(value, ufloat(0.000000f));
+    m_acceleration_accuracy = max(value, ufloat(0));
   }
   auto KF_ECEF_Config::get_acceleration_accuracy() const -> ufloat const& 
   {
     return m_acceleration_accuracy;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void ENU_Frame_System_Descriptor::set_rate(uint32_t const& value)
   {
-    m_rate = clamp(value, uint32_t(1LL), uint32_t(10000LL));
+    m_rate = clamp(value, uint32_t(1), uint32_t(10000));
   }
   auto ENU_Frame_System_Descriptor::get_rate() const -> uint32_t const& 
   {
     return m_rate;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void LPF_Descriptor::set_rate(uint32_t const& value)
   {
-    m_rate = clamp(value, uint32_t(1LL), uint32_t(10000LL));
+    m_rate = clamp(value, uint32_t(1), uint32_t(10000));
   }
   auto LPF_Descriptor::get_rate() const -> uint32_t const& 
   {
     return m_rate;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void LPF_Config::set_poles(poles_t const& value)
   {
-    m_poles = clamp(value, poles_t(0LL), poles_t(6LL));
+    m_poles = clamp(value, poles_t(0), poles_t(6));
   }
   auto LPF_Config::get_poles() const -> poles_t const& 
   {
     return m_poles;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void LPF_Config::set_cutoff_frequency(ufloat const& value)
   {
-    m_cutoff_frequency = max(value, ufloat(0.000000f));
+    m_cutoff_frequency = max(value, ufloat(0));
   }
   auto LPF_Config::get_cutoff_frequency() const -> ufloat const& 
   {
     return m_cutoff_frequency;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void MaxSonar_Descriptor::set_bus(std::string const& value)
   {
     m_bus = value;
@@ -1047,81 +885,67 @@ std::string const& get_ast_json()
     return m_bus;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void MaxSonar_Descriptor::set_rate(uint32_t const& value)
   {
-    m_rate = clamp(value, uint32_t(1LL), uint32_t(15LL));
+    m_rate = clamp(value, uint32_t(1), uint32_t(15));
   }
   auto MaxSonar_Descriptor::get_rate() const -> uint32_t const& 
   {
     return m_rate;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void MaxSonar_Config::set_direction(direction_t const& value)
   {
-    m_direction = clamp(value, direction_t(-340282346638528859811704183484516925440.000000f, -340282346638528859811704183484516925440.000000f, -340282346638528859811704183484516925440.000000f), direction_t(340282346638528859811704183484516925440.000000f, 340282346638528859811704183484516925440.000000f, 340282346638528859811704183484516925440.000000f));
+    m_direction = clamp(value, direction_t(-FLT_MAX, -FLT_MAX, -FLT_MAX), direction_t(FLT_MAX, FLT_MAX, FLT_MAX));
   }
   auto MaxSonar_Config::get_direction() const -> direction_t const& 
   {
     return m_direction;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void MaxSonar_Config::set_max_distance(ufloat const& value)
   {
-    m_max_distance = max(value, ufloat(0.000000f));
+    m_max_distance = max(value, ufloat(0));
   }
   auto MaxSonar_Config::get_max_distance() const -> ufloat const& 
   {
     return m_max_distance;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void MaxSonar_Config::set_min_distance(ufloat const& value)
   {
-    m_min_distance = max(value, ufloat(0.000000f));
+    m_min_distance = max(value, ufloat(0));
   }
   auto MaxSonar_Config::get_min_distance() const -> ufloat const& 
   {
     return m_min_distance;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void Motor_Mixer_Descriptor::set_rate(uint32_t const& value)
   {
-    m_rate = clamp(value, uint32_t(1LL), uint32_t(10000LL));
+    m_rate = clamp(value, uint32_t(1), uint32_t(10000));
   }
   auto Motor_Mixer_Descriptor::get_rate() const -> uint32_t const& 
   {
     return m_rate;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void Motor_Mixer_Config::set_armed_thrust(ufloat const& value)
   {
-    m_armed_thrust = max(value, ufloat(0.000000f));
+    m_armed_thrust = max(value, ufloat(0));
   }
   auto Motor_Mixer_Config::get_armed_thrust() const -> ufloat const& 
   {
     return m_armed_thrust;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void Acceleration_Calibration_Point::set_temperature(float const& value)
   {
     m_temperature = value;
@@ -1131,33 +955,27 @@ std::string const& get_ast_json()
     return m_temperature;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void Acceleration_Calibration_Point::set_bias(vec3f const& value)
   {
-    m_bias = clamp(value, vec3f(-340282346638528859811704183484516925440.000000f, -340282346638528859811704183484516925440.000000f, -340282346638528859811704183484516925440.000000f), vec3f(340282346638528859811704183484516925440.000000f, 340282346638528859811704183484516925440.000000f, 340282346638528859811704183484516925440.000000f));
+    m_bias = clamp(value, vec3f(-FLT_MAX, -FLT_MAX, -FLT_MAX), vec3f(FLT_MAX, FLT_MAX, FLT_MAX));
   }
   auto Acceleration_Calibration_Point::get_bias() const -> vec3f const& 
   {
     return m_bias;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void Acceleration_Calibration_Point::set_scale(vec3f const& value)
   {
-    m_scale = clamp(value, vec3f(-340282346638528859811704183484516925440.000000f, -340282346638528859811704183484516925440.000000f, -340282346638528859811704183484516925440.000000f), vec3f(340282346638528859811704183484516925440.000000f, 340282346638528859811704183484516925440.000000f, 340282346638528859811704183484516925440.000000f));
+    m_scale = clamp(value, vec3f(-FLT_MAX, -FLT_MAX, -FLT_MAX), vec3f(FLT_MAX, FLT_MAX, FLT_MAX));
   }
   auto Acceleration_Calibration_Point::get_scale() const -> vec3f const& 
   {
     return m_scale;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void Angular_Velocity_Calibration_Point::set_temperature(float const& value)
   {
     m_temperature = value;
@@ -1167,21 +985,17 @@ std::string const& get_ast_json()
     return m_temperature;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void Angular_Velocity_Calibration_Point::set_bias(vec3f const& value)
   {
-    m_bias = clamp(value, vec3f(-340282346638528859811704183484516925440.000000f, -340282346638528859811704183484516925440.000000f, -340282346638528859811704183484516925440.000000f), vec3f(340282346638528859811704183484516925440.000000f, 340282346638528859811704183484516925440.000000f, 340282346638528859811704183484516925440.000000f));
+    m_bias = clamp(value, vec3f(-FLT_MAX, -FLT_MAX, -FLT_MAX), vec3f(FLT_MAX, FLT_MAX, FLT_MAX));
   }
   auto Angular_Velocity_Calibration_Point::get_bias() const -> vec3f const& 
   {
     return m_bias;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void Magnetic_Field_Calibration_Point::set_temperature(float const& value)
   {
     m_temperature = value;
@@ -1191,33 +1005,27 @@ std::string const& get_ast_json()
     return m_temperature;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void Magnetic_Field_Calibration_Point::set_bias(vec3f const& value)
   {
-    m_bias = clamp(value, vec3f(-340282346638528859811704183484516925440.000000f, -340282346638528859811704183484516925440.000000f, -340282346638528859811704183484516925440.000000f), vec3f(340282346638528859811704183484516925440.000000f, 340282346638528859811704183484516925440.000000f, 340282346638528859811704183484516925440.000000f));
+    m_bias = clamp(value, vec3f(-FLT_MAX, -FLT_MAX, -FLT_MAX), vec3f(FLT_MAX, FLT_MAX, FLT_MAX));
   }
   auto Magnetic_Field_Calibration_Point::get_bias() const -> vec3f const& 
   {
     return m_bias;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void Magnetic_Field_Calibration_Point::set_scale(vec3f const& value)
   {
-    m_scale = clamp(value, vec3f(-340282346638528859811704183484516925440.000000f, -340282346638528859811704183484516925440.000000f, -340282346638528859811704183484516925440.000000f), vec3f(340282346638528859811704183484516925440.000000f, 340282346638528859811704183484516925440.000000f, 340282346638528859811704183484516925440.000000f));
+    m_scale = clamp(value, vec3f(-FLT_MAX, -FLT_MAX, -FLT_MAX), vec3f(FLT_MAX, FLT_MAX, FLT_MAX));
   }
   auto Magnetic_Field_Calibration_Point::get_scale() const -> vec3f const& 
   {
     return m_scale;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void MPU9250_Descriptor::set_bus(std::string const& value)
   {
     m_bus = value;
@@ -1227,9 +1035,7 @@ std::string const& get_ast_json()
     return m_bus;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void MPU9250_Descriptor::set_imu_rate(imu_rate_t const& value)
   {
     m_imu_rate = value;
@@ -1239,33 +1045,27 @@ std::string const& get_ast_json()
     return m_imu_rate;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void MPU9250_Descriptor::set_magnetometer_rate(uint32_t const& value)
   {
-    m_magnetometer_rate = clamp(value, uint32_t(1LL), uint32_t(100LL));
+    m_magnetometer_rate = clamp(value, uint32_t(1), uint32_t(100));
   }
   auto MPU9250_Descriptor::get_magnetometer_rate() const -> uint32_t const& 
   {
     return m_magnetometer_rate;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void MPU9250_Descriptor::set_thermometer_rate(uint32_t const& value)
   {
-    m_thermometer_rate = clamp(value, uint32_t(1LL), uint32_t(100LL));
+    m_thermometer_rate = clamp(value, uint32_t(1), uint32_t(100));
   }
   auto MPU9250_Descriptor::get_thermometer_rate() const -> uint32_t const& 
   {
     return m_thermometer_rate;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void MPU9250_Descriptor::set_acceleration_range(acceleration_range_t const& value)
   {
     m_acceleration_range = value;
@@ -1275,9 +1075,7 @@ std::string const& get_ast_json()
     return m_acceleration_range;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void MPU9250_Descriptor::set_angular_velocity_range(angular_velocity_range_t const& value)
   {
     m_angular_velocity_range = value;
@@ -1287,9 +1085,7 @@ std::string const& get_ast_json()
     return m_angular_velocity_range;
   }
 
-
 ////////////////////////////////////////////////////////////
-
     void MPU9250_Config::Calibration::set_acceleration(std::vector<Acceleration_Calibration_Point> const& value)
     {
       m_acceleration = value;
@@ -1304,9 +1100,7 @@ std::string const& get_ast_json()
       return m_acceleration;
     }
 
-
 ////////////////////////////////////////////////////////////
-
     void MPU9250_Config::Calibration::set_angular_velocity(std::vector<Angular_Velocity_Calibration_Point> const& value)
     {
       m_angular_velocity = value;
@@ -1321,9 +1115,7 @@ std::string const& get_ast_json()
       return m_angular_velocity;
     }
 
-
 ////////////////////////////////////////////////////////////
-
     void MPU9250_Config::Calibration::set_magnetic_field(std::vector<Magnetic_Field_Calibration_Point> const& value)
     {
       m_magnetic_field = value;
@@ -1338,9 +1130,7 @@ std::string const& get_ast_json()
       return m_magnetic_field;
     }
 
-
 ////////////////////////////////////////////////////////////
-
   void MPU9250_Config::set_rotation(euler3_t const& value)
   {
     m_rotation = clamp(value, euler3_t(-180.000000f, -180.000000f, -180.000000f), euler3_t(180.000000f, 180.000000f, 180.000000f));
@@ -1350,9 +1140,7 @@ std::string const& get_ast_json()
     return m_rotation;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void MPU9250_Config::set_calibration(Calibration const& value)
   {
     m_calibration = value;
@@ -1367,9 +1155,7 @@ std::string const& get_ast_json()
     return m_calibration;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void MS5611_Descriptor::set_bus(std::string const& value)
   {
     m_bus = value;
@@ -1379,69 +1165,57 @@ std::string const& get_ast_json()
     return m_bus;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void MS5611_Descriptor::set_pressure_rate(uint32_t const& value)
   {
-    m_pressure_rate = clamp(value, uint32_t(1LL), uint32_t(100LL));
+    m_pressure_rate = clamp(value, uint32_t(1), uint32_t(100));
   }
   auto MS5611_Descriptor::get_pressure_rate() const -> uint32_t const& 
   {
     return m_pressure_rate;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void MS5611_Descriptor::set_temperature_rate(uint32_t const& value)
   {
-    m_temperature_rate = clamp(value, uint32_t(1LL), uint32_t(100LL));
+    m_temperature_rate = clamp(value, uint32_t(1), uint32_t(100));
   }
   auto MS5611_Descriptor::get_temperature_rate() const -> uint32_t const& 
   {
     return m_temperature_rate;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void Multirotor_Brain_Descriptor::set_rate(uint32_t const& value)
   {
-    m_rate = clamp(value, uint32_t(1LL), uint32_t(10000LL));
+    m_rate = clamp(value, uint32_t(1), uint32_t(10000));
   }
   auto Multirotor_Brain_Descriptor::get_rate() const -> uint32_t const& 
   {
     return m_rate;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void Multirotor_Brain_Descriptor::set_commands_rate(uint32_t const& value)
   {
-    m_commands_rate = clamp(value, uint32_t(1LL), uint32_t(10000LL));
+    m_commands_rate = clamp(value, uint32_t(1), uint32_t(10000));
   }
   auto Multirotor_Brain_Descriptor::get_commands_rate() const -> uint32_t const& 
   {
     return m_commands_rate;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void Multirotor_Brain_Descriptor::set_state_rate(uint32_t const& value)
   {
-    m_state_rate = clamp(value, uint32_t(1LL), uint32_t(10000LL));
+    m_state_rate = clamp(value, uint32_t(1), uint32_t(10000));
   }
   auto Multirotor_Brain_Descriptor::get_state_rate() const -> uint32_t const& 
   {
     return m_state_rate;
   }
 
-
 ////////////////////////////////////////////////////////////
-
       void Multirotor_Brain_Config::Horizontal_Angle::Separate_XY_PIDs::set_x_pid(PID_Controller_Descriptor const& value)
       {
         m_x_pid = value;
@@ -1456,9 +1230,7 @@ std::string const& get_ast_json()
         return m_x_pid;
       }
 
-
 ////////////////////////////////////////////////////////////
-
       void Multirotor_Brain_Config::Horizontal_Angle::Separate_XY_PIDs::set_y_pid(PID_Controller_Descriptor const& value)
       {
         m_y_pid = value;
@@ -1473,9 +1245,7 @@ std::string const& get_ast_json()
         return m_y_pid;
       }
 
-
 ////////////////////////////////////////////////////////////
-
     void Multirotor_Brain_Config::Horizontal_Angle::set_max_speed_deg(speed_deg_t const& value)
     {
       m_max_speed_deg = clamp(value, speed_deg_t(10.000000f), speed_deg_t(3000.000000f));
@@ -1485,9 +1255,7 @@ std::string const& get_ast_json()
       return m_max_speed_deg;
     }
 
-
 ////////////////////////////////////////////////////////////
-
     void Multirotor_Brain_Config::Horizontal_Angle::set_xy_pids(boost::variant<Combined_XY_PIDs,Separate_XY_PIDs> const& value)
     {
       m_xy_pids = value;
@@ -1502,21 +1270,17 @@ std::string const& get_ast_json()
       return m_xy_pids;
     }
 
-
 ////////////////////////////////////////////////////////////
-
     void Multirotor_Brain_Config::Horizontal_Position::set_max_speed(speed_t const& value)
     {
-      m_max_speed = clamp(value, speed_t(0.000000f), speed_t(10.000000f));
+      m_max_speed = clamp(value, speed_t(0), speed_t(10.000000f));
     }
     auto Multirotor_Brain_Config::Horizontal_Position::get_max_speed() const -> speed_t const& 
     {
       return m_max_speed;
     }
 
-
 ////////////////////////////////////////////////////////////
-
     void Multirotor_Brain_Config::Horizontal_Position::set_lpf(LPF_Config const& value)
     {
       m_lpf = value;
@@ -1531,9 +1295,7 @@ std::string const& get_ast_json()
       return m_lpf;
     }
 
-
 ////////////////////////////////////////////////////////////
-
     void Multirotor_Brain_Config::Horizontal_Position::set_velocity_pi(PI_Controller_Descriptor const& value)
     {
       m_velocity_pi = value;
@@ -1548,9 +1310,7 @@ std::string const& get_ast_json()
       return m_velocity_pi;
     }
 
-
 ////////////////////////////////////////////////////////////
-
     void Multirotor_Brain_Config::Horizontal_Position::set_position_p(P_Controller_Descriptor const& value)
     {
       m_position_p = value;
@@ -1565,9 +1325,7 @@ std::string const& get_ast_json()
       return m_position_p;
     }
 
-
 ////////////////////////////////////////////////////////////
-
     void Multirotor_Brain_Config::Yaw_Angle::set_max_speed_deg(speed_deg_t const& value)
     {
       m_max_speed_deg = clamp(value, speed_deg_t(10.000000f), speed_deg_t(3000.000000f));
@@ -1577,9 +1335,7 @@ std::string const& get_ast_json()
       return m_max_speed_deg;
     }
 
-
 ////////////////////////////////////////////////////////////
-
     void Multirotor_Brain_Config::Yaw_Angle::set_pid(PID_Controller_Descriptor const& value)
     {
       m_pid = value;
@@ -1594,21 +1350,17 @@ std::string const& get_ast_json()
       return m_pid;
     }
 
-
 ////////////////////////////////////////////////////////////
-
     void Multirotor_Brain_Config::Altitude::set_max_speed(speed_t const& value)
     {
-      m_max_speed = clamp(value, speed_t(0.000000f), speed_t(10.000000f));
+      m_max_speed = clamp(value, speed_t(0), speed_t(10.000000f));
     }
     auto Multirotor_Brain_Config::Altitude::get_max_speed() const -> speed_t const& 
     {
       return m_max_speed;
     }
 
-
 ////////////////////////////////////////////////////////////
-
     void Multirotor_Brain_Config::Altitude::set_lpf(LPF_Config const& value)
     {
       m_lpf = value;
@@ -1623,9 +1375,7 @@ std::string const& get_ast_json()
       return m_lpf;
     }
 
-
 ////////////////////////////////////////////////////////////
-
     void Multirotor_Brain_Config::Altitude::set_speed_pi(PI_Controller_Descriptor const& value)
     {
       m_speed_pi = value;
@@ -1640,9 +1390,7 @@ std::string const& get_ast_json()
       return m_speed_pi;
     }
 
-
 ////////////////////////////////////////////////////////////
-
     void Multirotor_Brain_Config::Altitude::set_position_p(P_Controller_Descriptor const& value)
     {
       m_position_p = value;
@@ -1657,33 +1405,27 @@ std::string const& get_ast_json()
       return m_position_p;
     }
 
-
 ////////////////////////////////////////////////////////////
-
   void Multirotor_Brain_Config::set_max_thrust(ufloat const& value)
   {
-    m_max_thrust = max(value, ufloat(0.000000f));
+    m_max_thrust = max(value, ufloat(0));
   }
   auto Multirotor_Brain_Config::get_max_thrust() const -> ufloat const& 
   {
     return m_max_thrust;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void Multirotor_Brain_Config::set_min_thrust(ufloat const& value)
   {
-    m_min_thrust = max(value, ufloat(0.000000f));
+    m_min_thrust = max(value, ufloat(0));
   }
   auto Multirotor_Brain_Config::get_min_thrust() const -> ufloat const& 
   {
     return m_min_thrust;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void Multirotor_Brain_Config::set_horizontal_angle(Horizontal_Angle const& value)
   {
     m_horizontal_angle = value;
@@ -1698,9 +1440,7 @@ std::string const& get_ast_json()
     return m_horizontal_angle;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void Multirotor_Brain_Config::set_horizontal_position(Horizontal_Position const& value)
   {
     m_horizontal_position = value;
@@ -1715,9 +1455,7 @@ std::string const& get_ast_json()
     return m_horizontal_position;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void Multirotor_Brain_Config::set_yaw_angle(Yaw_Angle const& value)
   {
     m_yaw_angle = value;
@@ -1732,9 +1470,7 @@ std::string const& get_ast_json()
     return m_yaw_angle;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void Multirotor_Brain_Config::set_altitude(Altitude const& value)
   {
     m_altitude = value;
@@ -1749,261 +1485,217 @@ std::string const& get_ast_json()
     return m_altitude;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void Multirotor_Pilot_Descriptor::set_commands_rate(uint32_t const& value)
   {
-    m_commands_rate = clamp(value, uint32_t(1LL), uint32_t(10000LL));
+    m_commands_rate = clamp(value, uint32_t(1), uint32_t(10000));
   }
   auto Multirotor_Pilot_Descriptor::get_commands_rate() const -> uint32_t const& 
   {
     return m_commands_rate;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void Multirotor_Pilot_Descriptor::set_state_rate(uint32_t const& value)
   {
-    m_state_rate = clamp(value, uint32_t(1LL), uint32_t(10000LL));
+    m_state_rate = clamp(value, uint32_t(1), uint32_t(10000));
   }
   auto Multirotor_Pilot_Descriptor::get_state_rate() const -> uint32_t const& 
   {
     return m_state_rate;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void Multirotor_Pilot_Descriptor::set_video_rate(uint32_t const& value)
   {
-    m_video_rate = clamp(value, uint32_t(1LL), uint32_t(10000LL));
+    m_video_rate = clamp(value, uint32_t(1), uint32_t(10000));
   }
   auto Multirotor_Pilot_Descriptor::get_video_rate() const -> uint32_t const& 
   {
     return m_video_rate;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void Multirotor_Simulator_Descriptor::set_throttle_rate(uint32_t const& value)
   {
-    m_throttle_rate = clamp(value, uint32_t(1LL), uint32_t(10000LL));
+    m_throttle_rate = clamp(value, uint32_t(1), uint32_t(10000));
   }
   auto Multirotor_Simulator_Descriptor::get_throttle_rate() const -> uint32_t const& 
   {
     return m_throttle_rate;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void Multirotor_Simulator_Descriptor::set_acceleration_rate(uint32_t const& value)
   {
-    m_acceleration_rate = clamp(value, uint32_t(1LL), uint32_t(10000LL));
+    m_acceleration_rate = clamp(value, uint32_t(1), uint32_t(10000));
   }
   auto Multirotor_Simulator_Descriptor::get_acceleration_rate() const -> uint32_t const& 
   {
     return m_acceleration_rate;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void Multirotor_Simulator_Descriptor::set_angular_velocity_rate(uint32_t const& value)
   {
-    m_angular_velocity_rate = clamp(value, uint32_t(1LL), uint32_t(10000LL));
+    m_angular_velocity_rate = clamp(value, uint32_t(1), uint32_t(10000));
   }
   auto Multirotor_Simulator_Descriptor::get_angular_velocity_rate() const -> uint32_t const& 
   {
     return m_angular_velocity_rate;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void Multirotor_Simulator_Descriptor::set_magnetic_field_rate(uint32_t const& value)
   {
-    m_magnetic_field_rate = clamp(value, uint32_t(1LL), uint32_t(10000LL));
+    m_magnetic_field_rate = clamp(value, uint32_t(1), uint32_t(10000));
   }
   auto Multirotor_Simulator_Descriptor::get_magnetic_field_rate() const -> uint32_t const& 
   {
     return m_magnetic_field_rate;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void Multirotor_Simulator_Descriptor::set_pressure_rate(uint32_t const& value)
   {
-    m_pressure_rate = clamp(value, uint32_t(1LL), uint32_t(10000LL));
+    m_pressure_rate = clamp(value, uint32_t(1), uint32_t(10000));
   }
   auto Multirotor_Simulator_Descriptor::get_pressure_rate() const -> uint32_t const& 
   {
     return m_pressure_rate;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void Multirotor_Simulator_Descriptor::set_temperature_rate(uint32_t const& value)
   {
-    m_temperature_rate = clamp(value, uint32_t(1LL), uint32_t(10000LL));
+    m_temperature_rate = clamp(value, uint32_t(1), uint32_t(10000));
   }
   auto Multirotor_Simulator_Descriptor::get_temperature_rate() const -> uint32_t const& 
   {
     return m_temperature_rate;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void Multirotor_Simulator_Descriptor::set_distance_rate(uint32_t const& value)
   {
-    m_distance_rate = clamp(value, uint32_t(1LL), uint32_t(10000LL));
+    m_distance_rate = clamp(value, uint32_t(1), uint32_t(10000));
   }
   auto Multirotor_Simulator_Descriptor::get_distance_rate() const -> uint32_t const& 
   {
     return m_distance_rate;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void Multirotor_Simulator_Descriptor::set_gps_rate(uint32_t const& value)
   {
-    m_gps_rate = clamp(value, uint32_t(1LL), uint32_t(10000LL));
+    m_gps_rate = clamp(value, uint32_t(1), uint32_t(10000));
   }
   auto Multirotor_Simulator_Descriptor::get_gps_rate() const -> uint32_t const& 
   {
     return m_gps_rate;
   }
 
-
 ////////////////////////////////////////////////////////////
-
     void Multirotor_Simulator_Config::Noise::set_gps_position(ufloat const& value)
     {
-      m_gps_position = max(value, ufloat(0.000000f));
+      m_gps_position = max(value, ufloat(0));
     }
     auto Multirotor_Simulator_Config::Noise::get_gps_position() const -> ufloat const& 
     {
       return m_gps_position;
     }
 
-
 ////////////////////////////////////////////////////////////
-
     void Multirotor_Simulator_Config::Noise::set_gps_velocity(ufloat const& value)
     {
-      m_gps_velocity = max(value, ufloat(0.000000f));
+      m_gps_velocity = max(value, ufloat(0));
     }
     auto Multirotor_Simulator_Config::Noise::get_gps_velocity() const -> ufloat const& 
     {
       return m_gps_velocity;
     }
 
-
 ////////////////////////////////////////////////////////////
-
     void Multirotor_Simulator_Config::Noise::set_gps_pacc(ufloat const& value)
     {
-      m_gps_pacc = max(value, ufloat(0.000000f));
+      m_gps_pacc = max(value, ufloat(0));
     }
     auto Multirotor_Simulator_Config::Noise::get_gps_pacc() const -> ufloat const& 
     {
       return m_gps_pacc;
     }
 
-
 ////////////////////////////////////////////////////////////
-
     void Multirotor_Simulator_Config::Noise::set_gps_vacc(ufloat const& value)
     {
-      m_gps_vacc = max(value, ufloat(0.000000f));
+      m_gps_vacc = max(value, ufloat(0));
     }
     auto Multirotor_Simulator_Config::Noise::get_gps_vacc() const -> ufloat const& 
     {
       return m_gps_vacc;
     }
 
-
 ////////////////////////////////////////////////////////////
-
     void Multirotor_Simulator_Config::Noise::set_acceleration(ufloat const& value)
     {
-      m_acceleration = max(value, ufloat(0.000000f));
+      m_acceleration = max(value, ufloat(0));
     }
     auto Multirotor_Simulator_Config::Noise::get_acceleration() const -> ufloat const& 
     {
       return m_acceleration;
     }
 
-
 ////////////////////////////////////////////////////////////
-
     void Multirotor_Simulator_Config::Noise::set_angular_velocity(ufloat const& value)
     {
-      m_angular_velocity = max(value, ufloat(0.000000f));
+      m_angular_velocity = max(value, ufloat(0));
     }
     auto Multirotor_Simulator_Config::Noise::get_angular_velocity() const -> ufloat const& 
     {
       return m_angular_velocity;
     }
 
-
 ////////////////////////////////////////////////////////////
-
     void Multirotor_Simulator_Config::Noise::set_magnetic_field(ufloat const& value)
     {
-      m_magnetic_field = max(value, ufloat(0.000000f));
+      m_magnetic_field = max(value, ufloat(0));
     }
     auto Multirotor_Simulator_Config::Noise::get_magnetic_field() const -> ufloat const& 
     {
       return m_magnetic_field;
     }
 
-
 ////////////////////////////////////////////////////////////
-
     void Multirotor_Simulator_Config::Noise::set_pressure(ufloat const& value)
     {
-      m_pressure = max(value, ufloat(0.000000f));
+      m_pressure = max(value, ufloat(0));
     }
     auto Multirotor_Simulator_Config::Noise::get_pressure() const -> ufloat const& 
     {
       return m_pressure;
     }
 
-
 ////////////////////////////////////////////////////////////
-
     void Multirotor_Simulator_Config::Noise::set_temperature(ufloat const& value)
     {
-      m_temperature = max(value, ufloat(0.000000f));
+      m_temperature = max(value, ufloat(0));
     }
     auto Multirotor_Simulator_Config::Noise::get_temperature() const -> ufloat const& 
     {
       return m_temperature;
     }
 
-
 ////////////////////////////////////////////////////////////
-
     void Multirotor_Simulator_Config::Noise::set_ground_distance(ufloat const& value)
     {
-      m_ground_distance = max(value, ufloat(0.000000f));
+      m_ground_distance = max(value, ufloat(0));
     }
     auto Multirotor_Simulator_Config::Noise::get_ground_distance() const -> ufloat const& 
     {
       return m_ground_distance;
     }
 
-
 ////////////////////////////////////////////////////////////
-
   void Multirotor_Simulator_Config::set_simulation_enabled(bool const& value)
   {
     m_simulation_enabled = value;
@@ -2013,9 +1705,7 @@ std::string const& get_ast_json()
     return m_simulation_enabled;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void Multirotor_Simulator_Config::set_drag_enabled(bool const& value)
   {
     m_drag_enabled = value;
@@ -2025,9 +1715,7 @@ std::string const& get_ast_json()
     return m_drag_enabled;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void Multirotor_Simulator_Config::set_ground_enabled(bool const& value)
   {
     m_ground_enabled = value;
@@ -2037,9 +1725,7 @@ std::string const& get_ast_json()
     return m_ground_enabled;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void Multirotor_Simulator_Config::set_gravity_enabled(bool const& value)
   {
     m_gravity_enabled = value;
@@ -2049,9 +1735,7 @@ std::string const& get_ast_json()
     return m_gravity_enabled;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void Multirotor_Simulator_Config::set_noise(Noise const& value)
   {
     m_noise = value;
@@ -2066,57 +1750,47 @@ std::string const& get_ast_json()
     return m_noise;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void Oscillator_Descriptor::set_rate(uint32_t const& value)
   {
-    m_rate = clamp(value, uint32_t(1LL), uint32_t(10000LL));
+    m_rate = clamp(value, uint32_t(1), uint32_t(10000));
   }
   auto Oscillator_Descriptor::get_rate() const -> uint32_t const& 
   {
     return m_rate;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void Oscillator_Descriptor::set_component_count(component_count_t const& value)
   {
-    m_component_count = clamp(value, component_count_t(1LL), component_count_t(32LL));
+    m_component_count = clamp(value, component_count_t(1), component_count_t(32));
   }
   auto Oscillator_Descriptor::get_component_count() const -> component_count_t const& 
   {
     return m_component_count;
   }
 
-
 ////////////////////////////////////////////////////////////
-
     void Oscillator_Config::Component::set_frequency(ufloat const& value)
     {
-      m_frequency = max(value, ufloat(0.000000f));
+      m_frequency = max(value, ufloat(0));
     }
     auto Oscillator_Config::Component::get_frequency() const -> ufloat const& 
     {
       return m_frequency;
     }
 
-
 ////////////////////////////////////////////////////////////
-
     void Oscillator_Config::Component::set_amplitude(ufloat const& value)
     {
-      m_amplitude = max(value, ufloat(0.000000f));
+      m_amplitude = max(value, ufloat(0));
     }
     auto Oscillator_Config::Component::get_amplitude() const -> ufloat const& 
     {
       return m_amplitude;
     }
 
-
 ////////////////////////////////////////////////////////////
-
     void Oscillator_Config::Component::set_square(bool const& value)
     {
       m_square = value;
@@ -2126,33 +1800,27 @@ std::string const& get_ast_json()
       return m_square;
     }
 
-
 ////////////////////////////////////////////////////////////
-
   void Oscillator_Config::set_amplitude(ufloat const& value)
   {
-    m_amplitude = max(value, ufloat(0.000000f));
+    m_amplitude = max(value, ufloat(0));
   }
   auto Oscillator_Config::get_amplitude() const -> ufloat const& 
   {
     return m_amplitude;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void Oscillator_Config::set_noise(ufloat const& value)
   {
-    m_noise = max(value, ufloat(0.000000f));
+    m_noise = max(value, ufloat(0));
   }
   auto Oscillator_Config::get_noise() const -> ufloat const& 
   {
     return m_noise;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void Oscillator_Config::set_components(std::vector<Oscillator_Config::Component> const& value)
   {
     m_components = value;
@@ -2167,9 +1835,7 @@ std::string const& get_ast_json()
     return m_components;
   }
 
-
 ////////////////////////////////////////////////////////////
-
     void PCA9685_Descriptor::Channel::set_enabled(bool const& value)
     {
       m_enabled = value;
@@ -2179,9 +1845,7 @@ std::string const& get_ast_json()
       return m_enabled;
     }
 
-
 ////////////////////////////////////////////////////////////
-
     void PCA9685_Descriptor::Channel::set_servo_signal(bool const& value)
     {
       m_servo_signal = value;
@@ -2191,9 +1855,7 @@ std::string const& get_ast_json()
       return m_servo_signal;
     }
 
-
 ////////////////////////////////////////////////////////////
-
   void PCA9685_Descriptor::set_bus(std::string const& value)
   {
     m_bus = value;
@@ -2203,33 +1865,27 @@ std::string const& get_ast_json()
     return m_bus;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void PCA9685_Descriptor::set_rate(uint32_t const& value)
   {
-    m_rate = clamp(value, uint32_t(1LL), uint32_t(8000LL));
+    m_rate = clamp(value, uint32_t(1), uint32_t(8000));
   }
   auto PCA9685_Descriptor::get_rate() const -> uint32_t const& 
   {
     return m_rate;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void PCA9685_Descriptor::set_address(uint8_t const& value)
   {
-    m_address = clamp(value, uint8_t(0LL), uint8_t(255LL));
+    m_address = clamp(value, uint8_t(0), uint8_t(255));
   }
   auto PCA9685_Descriptor::get_address() const -> uint8_t const& 
   {
     return m_address;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void PCA9685_Descriptor::set_channels(std::vector<PCA9685_Descriptor::Channel> const& value)
   {
     m_channels = value;
@@ -2244,9 +1900,7 @@ std::string const& get_ast_json()
     return m_channels;
   }
 
-
 ////////////////////////////////////////////////////////////
-
     void PCA9685_Config::Servo_Channel::set_min(servo_signal_t const& value)
     {
       m_min = clamp(value, servo_signal_t(1.000000f), servo_signal_t(2.000000f));
@@ -2256,9 +1910,7 @@ std::string const& get_ast_json()
       return m_min;
     }
 
-
 ////////////////////////////////////////////////////////////
-
     void PCA9685_Config::Servo_Channel::set_max(servo_signal_t const& value)
     {
       m_max = clamp(value, servo_signal_t(1.000000f), servo_signal_t(2.000000f));
@@ -2268,33 +1920,27 @@ std::string const& get_ast_json()
       return m_max;
     }
 
-
 ////////////////////////////////////////////////////////////
-
     void PCA9685_Config::PWM_Channel::set_min(pwm_signal_t const& value)
     {
-      m_min = clamp(value, pwm_signal_t(0.000000f), pwm_signal_t(1.000000f));
+      m_min = clamp(value, pwm_signal_t(0), pwm_signal_t(1.000000f));
     }
     auto PCA9685_Config::PWM_Channel::get_min() const -> pwm_signal_t const& 
     {
       return m_min;
     }
 
-
 ////////////////////////////////////////////////////////////
-
     void PCA9685_Config::PWM_Channel::set_max(pwm_signal_t const& value)
     {
-      m_max = clamp(value, pwm_signal_t(0.000000f), pwm_signal_t(1.000000f));
+      m_max = clamp(value, pwm_signal_t(0), pwm_signal_t(1.000000f));
     }
     auto PCA9685_Config::PWM_Channel::get_max() const -> pwm_signal_t const& 
     {
       return m_max;
     }
 
-
 ////////////////////////////////////////////////////////////
-
   void PCA9685_Config::set_channels(std::vector<Poly<PCA9685_Config::IChannel>> const& value)
   {
     m_channels = value;
@@ -2309,9 +1955,7 @@ std::string const& get_ast_json()
     return m_channels;
   }
 
-
 ////////////////////////////////////////////////////////////
-
     void PIGPIO_Descriptor::Channel::set_enabled(bool const& value)
     {
       m_enabled = value;
@@ -2321,9 +1965,7 @@ std::string const& get_ast_json()
       return m_enabled;
     }
 
-
 ////////////////////////////////////////////////////////////
-
     void PIGPIO_Descriptor::Channel::set_servo_signal(bool const& value)
     {
       m_servo_signal = value;
@@ -2333,21 +1975,17 @@ std::string const& get_ast_json()
       return m_servo_signal;
     }
 
-
 ////////////////////////////////////////////////////////////
-
     void PIGPIO_Descriptor::Channel::set_rate(uint32_t const& value)
     {
-      m_rate = clamp(value, uint32_t(1LL), uint32_t(8000LL));
+      m_rate = clamp(value, uint32_t(1), uint32_t(8000));
     }
     auto PIGPIO_Descriptor::Channel::get_rate() const -> uint32_t const& 
     {
       return m_rate;
     }
 
-
 ////////////////////////////////////////////////////////////
-
   void PIGPIO_Descriptor::set_gpio_2(Channel const& value)
   {
     m_gpio_2 = value;
@@ -2362,9 +2000,7 @@ std::string const& get_ast_json()
     return m_gpio_2;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void PIGPIO_Descriptor::set_gpio_3(Channel const& value)
   {
     m_gpio_3 = value;
@@ -2379,9 +2015,7 @@ std::string const& get_ast_json()
     return m_gpio_3;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void PIGPIO_Descriptor::set_gpio_4(Channel const& value)
   {
     m_gpio_4 = value;
@@ -2396,9 +2030,7 @@ std::string const& get_ast_json()
     return m_gpio_4;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void PIGPIO_Descriptor::set_gpio_5(Channel const& value)
   {
     m_gpio_5 = value;
@@ -2413,9 +2045,7 @@ std::string const& get_ast_json()
     return m_gpio_5;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void PIGPIO_Descriptor::set_gpio_6(Channel const& value)
   {
     m_gpio_6 = value;
@@ -2430,9 +2060,7 @@ std::string const& get_ast_json()
     return m_gpio_6;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void PIGPIO_Descriptor::set_gpio_7(Channel const& value)
   {
     m_gpio_7 = value;
@@ -2447,9 +2075,7 @@ std::string const& get_ast_json()
     return m_gpio_7;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void PIGPIO_Descriptor::set_gpio_8(Channel const& value)
   {
     m_gpio_8 = value;
@@ -2464,9 +2090,7 @@ std::string const& get_ast_json()
     return m_gpio_8;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void PIGPIO_Descriptor::set_gpio_9(Channel const& value)
   {
     m_gpio_9 = value;
@@ -2481,9 +2105,7 @@ std::string const& get_ast_json()
     return m_gpio_9;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void PIGPIO_Descriptor::set_gpio_10(Channel const& value)
   {
     m_gpio_10 = value;
@@ -2498,9 +2120,7 @@ std::string const& get_ast_json()
     return m_gpio_10;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void PIGPIO_Descriptor::set_gpio_11(Channel const& value)
   {
     m_gpio_11 = value;
@@ -2515,9 +2135,7 @@ std::string const& get_ast_json()
     return m_gpio_11;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void PIGPIO_Descriptor::set_gpio_12(Channel const& value)
   {
     m_gpio_12 = value;
@@ -2532,9 +2150,7 @@ std::string const& get_ast_json()
     return m_gpio_12;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void PIGPIO_Descriptor::set_gpio_13(Channel const& value)
   {
     m_gpio_13 = value;
@@ -2549,9 +2165,7 @@ std::string const& get_ast_json()
     return m_gpio_13;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void PIGPIO_Descriptor::set_gpio_14(Channel const& value)
   {
     m_gpio_14 = value;
@@ -2566,9 +2180,7 @@ std::string const& get_ast_json()
     return m_gpio_14;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void PIGPIO_Descriptor::set_gpio_15(Channel const& value)
   {
     m_gpio_15 = value;
@@ -2583,9 +2195,7 @@ std::string const& get_ast_json()
     return m_gpio_15;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void PIGPIO_Descriptor::set_gpio_16(Channel const& value)
   {
     m_gpio_16 = value;
@@ -2600,9 +2210,7 @@ std::string const& get_ast_json()
     return m_gpio_16;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void PIGPIO_Descriptor::set_gpio_17(Channel const& value)
   {
     m_gpio_17 = value;
@@ -2617,9 +2225,7 @@ std::string const& get_ast_json()
     return m_gpio_17;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void PIGPIO_Descriptor::set_gpio_18(Channel const& value)
   {
     m_gpio_18 = value;
@@ -2634,9 +2240,7 @@ std::string const& get_ast_json()
     return m_gpio_18;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void PIGPIO_Descriptor::set_gpio_19(Channel const& value)
   {
     m_gpio_19 = value;
@@ -2651,9 +2255,7 @@ std::string const& get_ast_json()
     return m_gpio_19;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void PIGPIO_Descriptor::set_gpio_20(Channel const& value)
   {
     m_gpio_20 = value;
@@ -2668,9 +2270,7 @@ std::string const& get_ast_json()
     return m_gpio_20;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void PIGPIO_Descriptor::set_gpio_21(Channel const& value)
   {
     m_gpio_21 = value;
@@ -2685,9 +2285,7 @@ std::string const& get_ast_json()
     return m_gpio_21;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void PIGPIO_Descriptor::set_gpio_22(Channel const& value)
   {
     m_gpio_22 = value;
@@ -2702,9 +2300,7 @@ std::string const& get_ast_json()
     return m_gpio_22;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void PIGPIO_Descriptor::set_gpio_23(Channel const& value)
   {
     m_gpio_23 = value;
@@ -2719,9 +2315,7 @@ std::string const& get_ast_json()
     return m_gpio_23;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void PIGPIO_Descriptor::set_gpio_24(Channel const& value)
   {
     m_gpio_24 = value;
@@ -2736,9 +2330,7 @@ std::string const& get_ast_json()
     return m_gpio_24;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void PIGPIO_Descriptor::set_gpio_25(Channel const& value)
   {
     m_gpio_25 = value;
@@ -2753,9 +2345,7 @@ std::string const& get_ast_json()
     return m_gpio_25;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void PIGPIO_Descriptor::set_gpio_26(Channel const& value)
   {
     m_gpio_26 = value;
@@ -2770,9 +2360,7 @@ std::string const& get_ast_json()
     return m_gpio_26;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void PIGPIO_Descriptor::set_gpio_27(Channel const& value)
   {
     m_gpio_27 = value;
@@ -2787,9 +2375,7 @@ std::string const& get_ast_json()
     return m_gpio_27;
   }
 
-
 ////////////////////////////////////////////////////////////
-
     void PIGPIO_Config::Servo_Channel::set_min(servo_signal_t const& value)
     {
       m_min = clamp(value, servo_signal_t(1.000000f), servo_signal_t(2.000000f));
@@ -2799,9 +2385,7 @@ std::string const& get_ast_json()
       return m_min;
     }
 
-
 ////////////////////////////////////////////////////////////
-
     void PIGPIO_Config::Servo_Channel::set_max(servo_signal_t const& value)
     {
       m_max = clamp(value, servo_signal_t(1.000000f), servo_signal_t(2.000000f));
@@ -2811,33 +2395,27 @@ std::string const& get_ast_json()
       return m_max;
     }
 
-
 ////////////////////////////////////////////////////////////
-
     void PIGPIO_Config::PWM_Channel::set_min(pwm_signal_t const& value)
     {
-      m_min = clamp(value, pwm_signal_t(0.000000f), pwm_signal_t(1.000000f));
+      m_min = clamp(value, pwm_signal_t(0), pwm_signal_t(1.000000f));
     }
     auto PIGPIO_Config::PWM_Channel::get_min() const -> pwm_signal_t const& 
     {
       return m_min;
     }
 
-
 ////////////////////////////////////////////////////////////
-
     void PIGPIO_Config::PWM_Channel::set_max(pwm_signal_t const& value)
     {
-      m_max = clamp(value, pwm_signal_t(0.000000f), pwm_signal_t(1.000000f));
+      m_max = clamp(value, pwm_signal_t(0), pwm_signal_t(1.000000f));
     }
     auto PIGPIO_Config::PWM_Channel::get_max() const -> pwm_signal_t const& 
     {
       return m_max;
     }
 
-
 ////////////////////////////////////////////////////////////
-
   void PIGPIO_Config::set_gpio_2(Poly<PIGPIO_Config::IChannel> const& value)
   {
     m_gpio_2 = value;
@@ -2852,9 +2430,7 @@ std::string const& get_ast_json()
     return m_gpio_2;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void PIGPIO_Config::set_gpio_3(Poly<PIGPIO_Config::IChannel> const& value)
   {
     m_gpio_3 = value;
@@ -2869,9 +2445,7 @@ std::string const& get_ast_json()
     return m_gpio_3;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void PIGPIO_Config::set_gpio_4(Poly<PIGPIO_Config::IChannel> const& value)
   {
     m_gpio_4 = value;
@@ -2886,9 +2460,7 @@ std::string const& get_ast_json()
     return m_gpio_4;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void PIGPIO_Config::set_gpio_5(Poly<PIGPIO_Config::IChannel> const& value)
   {
     m_gpio_5 = value;
@@ -2903,9 +2475,7 @@ std::string const& get_ast_json()
     return m_gpio_5;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void PIGPIO_Config::set_gpio_6(Poly<PIGPIO_Config::IChannel> const& value)
   {
     m_gpio_6 = value;
@@ -2920,9 +2490,7 @@ std::string const& get_ast_json()
     return m_gpio_6;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void PIGPIO_Config::set_gpio_7(Poly<PIGPIO_Config::IChannel> const& value)
   {
     m_gpio_7 = value;
@@ -2937,9 +2505,7 @@ std::string const& get_ast_json()
     return m_gpio_7;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void PIGPIO_Config::set_gpio_8(Poly<PIGPIO_Config::IChannel> const& value)
   {
     m_gpio_8 = value;
@@ -2954,9 +2520,7 @@ std::string const& get_ast_json()
     return m_gpio_8;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void PIGPIO_Config::set_gpio_9(Poly<PIGPIO_Config::IChannel> const& value)
   {
     m_gpio_9 = value;
@@ -2971,9 +2535,7 @@ std::string const& get_ast_json()
     return m_gpio_9;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void PIGPIO_Config::set_gpio_10(Poly<PIGPIO_Config::IChannel> const& value)
   {
     m_gpio_10 = value;
@@ -2988,9 +2550,7 @@ std::string const& get_ast_json()
     return m_gpio_10;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void PIGPIO_Config::set_gpio_11(Poly<PIGPIO_Config::IChannel> const& value)
   {
     m_gpio_11 = value;
@@ -3005,9 +2565,7 @@ std::string const& get_ast_json()
     return m_gpio_11;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void PIGPIO_Config::set_gpio_12(Poly<PIGPIO_Config::IChannel> const& value)
   {
     m_gpio_12 = value;
@@ -3022,9 +2580,7 @@ std::string const& get_ast_json()
     return m_gpio_12;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void PIGPIO_Config::set_gpio_13(Poly<PIGPIO_Config::IChannel> const& value)
   {
     m_gpio_13 = value;
@@ -3039,9 +2595,7 @@ std::string const& get_ast_json()
     return m_gpio_13;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void PIGPIO_Config::set_gpio_14(Poly<PIGPIO_Config::IChannel> const& value)
   {
     m_gpio_14 = value;
@@ -3056,9 +2610,7 @@ std::string const& get_ast_json()
     return m_gpio_14;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void PIGPIO_Config::set_gpio_15(Poly<PIGPIO_Config::IChannel> const& value)
   {
     m_gpio_15 = value;
@@ -3073,9 +2625,7 @@ std::string const& get_ast_json()
     return m_gpio_15;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void PIGPIO_Config::set_gpio_16(Poly<PIGPIO_Config::IChannel> const& value)
   {
     m_gpio_16 = value;
@@ -3090,9 +2640,7 @@ std::string const& get_ast_json()
     return m_gpio_16;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void PIGPIO_Config::set_gpio_17(Poly<PIGPIO_Config::IChannel> const& value)
   {
     m_gpio_17 = value;
@@ -3107,9 +2655,7 @@ std::string const& get_ast_json()
     return m_gpio_17;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void PIGPIO_Config::set_gpio_18(Poly<PIGPIO_Config::IChannel> const& value)
   {
     m_gpio_18 = value;
@@ -3124,9 +2670,7 @@ std::string const& get_ast_json()
     return m_gpio_18;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void PIGPIO_Config::set_gpio_19(Poly<PIGPIO_Config::IChannel> const& value)
   {
     m_gpio_19 = value;
@@ -3141,9 +2685,7 @@ std::string const& get_ast_json()
     return m_gpio_19;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void PIGPIO_Config::set_gpio_20(Poly<PIGPIO_Config::IChannel> const& value)
   {
     m_gpio_20 = value;
@@ -3158,9 +2700,7 @@ std::string const& get_ast_json()
     return m_gpio_20;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void PIGPIO_Config::set_gpio_21(Poly<PIGPIO_Config::IChannel> const& value)
   {
     m_gpio_21 = value;
@@ -3175,9 +2715,7 @@ std::string const& get_ast_json()
     return m_gpio_21;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void PIGPIO_Config::set_gpio_22(Poly<PIGPIO_Config::IChannel> const& value)
   {
     m_gpio_22 = value;
@@ -3192,9 +2730,7 @@ std::string const& get_ast_json()
     return m_gpio_22;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void PIGPIO_Config::set_gpio_23(Poly<PIGPIO_Config::IChannel> const& value)
   {
     m_gpio_23 = value;
@@ -3209,9 +2745,7 @@ std::string const& get_ast_json()
     return m_gpio_23;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void PIGPIO_Config::set_gpio_24(Poly<PIGPIO_Config::IChannel> const& value)
   {
     m_gpio_24 = value;
@@ -3226,9 +2760,7 @@ std::string const& get_ast_json()
     return m_gpio_24;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void PIGPIO_Config::set_gpio_25(Poly<PIGPIO_Config::IChannel> const& value)
   {
     m_gpio_25 = value;
@@ -3243,9 +2775,7 @@ std::string const& get_ast_json()
     return m_gpio_25;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void PIGPIO_Config::set_gpio_26(Poly<PIGPIO_Config::IChannel> const& value)
   {
     m_gpio_26 = value;
@@ -3260,9 +2790,7 @@ std::string const& get_ast_json()
     return m_gpio_26;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void PIGPIO_Config::set_gpio_27(Poly<PIGPIO_Config::IChannel> const& value)
   {
     m_gpio_27 = value;
@@ -3277,57 +2805,47 @@ std::string const& get_ast_json()
     return m_gpio_27;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void Pressure_Velocity_Descriptor::set_rate(uint32_t const& value)
   {
-    m_rate = clamp(value, uint32_t(1LL), uint32_t(10000LL));
+    m_rate = clamp(value, uint32_t(1), uint32_t(10000));
   }
   auto Pressure_Velocity_Descriptor::get_rate() const -> uint32_t const& 
   {
     return m_rate;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void Proximity_Descriptor::set_rate(uint32_t const& value)
   {
-    m_rate = clamp(value, uint32_t(1LL), uint32_t(10000LL));
+    m_rate = clamp(value, uint32_t(1), uint32_t(10000));
   }
   auto Proximity_Descriptor::get_rate() const -> uint32_t const& 
   {
     return m_rate;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void Proximity_Descriptor::set_channel_count(channel_count_t const& value)
   {
-    m_channel_count = clamp(value, channel_count_t(1LL), channel_count_t(128LL));
+    m_channel_count = clamp(value, channel_count_t(1), channel_count_t(128));
   }
   auto Proximity_Descriptor::get_channel_count() const -> channel_count_t const& 
   {
     return m_channel_count;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void Rate_Controller_Descriptor::set_rate(uint32_t const& value)
   {
-    m_rate = clamp(value, uint32_t(1LL), uint32_t(10000LL));
+    m_rate = clamp(value, uint32_t(1), uint32_t(10000));
   }
   auto Rate_Controller_Descriptor::get_rate() const -> uint32_t const& 
   {
     return m_rate;
   }
 
-
 ////////////////////////////////////////////////////////////
-
       void Rate_Controller_Config::Feedback::Separate_XY_PIDs::set_x_pid(PID_Controller_Descriptor const& value)
       {
         m_x_pid = value;
@@ -3342,9 +2860,7 @@ std::string const& get_ast_json()
         return m_x_pid;
       }
 
-
 ////////////////////////////////////////////////////////////
-
       void Rate_Controller_Config::Feedback::Separate_XY_PIDs::set_y_pid(PID_Controller_Descriptor const& value)
       {
         m_y_pid = value;
@@ -3359,21 +2875,17 @@ std::string const& get_ast_json()
         return m_y_pid;
       }
 
-
 ////////////////////////////////////////////////////////////
-
     void Rate_Controller_Config::Feedback::set_weight(muf_t const& value)
     {
-      m_weight = clamp(value, muf_t(0.000000f), muf_t(1.000000f));
+      m_weight = clamp(value, muf_t(0), muf_t(1.000000f));
     }
     auto Rate_Controller_Config::Feedback::get_weight() const -> muf_t const& 
     {
       return m_weight;
     }
 
-
 ////////////////////////////////////////////////////////////
-
     void Rate_Controller_Config::Feedback::set_xy_pids(boost::variant<Combined_XY_PIDs,Separate_XY_PIDs> const& value)
     {
       m_xy_pids = value;
@@ -3388,9 +2900,7 @@ std::string const& get_ast_json()
       return m_xy_pids;
     }
 
-
 ////////////////////////////////////////////////////////////
-
     void Rate_Controller_Config::Feedback::set_z_pid(PID_Controller_Descriptor const& value)
     {
       m_z_pid = value;
@@ -3405,21 +2915,17 @@ std::string const& get_ast_json()
       return m_z_pid;
     }
 
-
 ////////////////////////////////////////////////////////////
-
     void Rate_Controller_Config::Feedforward::set_weight(muf_t const& value)
     {
-      m_weight = clamp(value, muf_t(0.000000f), muf_t(1.000000f));
+      m_weight = clamp(value, muf_t(0), muf_t(1.000000f));
     }
     auto Rate_Controller_Config::Feedforward::get_weight() const -> muf_t const& 
     {
       return m_weight;
     }
 
-
 ////////////////////////////////////////////////////////////
-
     void Rate_Controller_Config::Feedforward::set_max_torque(torque_t const& value)
     {
       m_max_torque = max(value, torque_t(0.010000f));
@@ -3429,9 +2935,7 @@ std::string const& get_ast_json()
       return m_max_torque;
     }
 
-
 ////////////////////////////////////////////////////////////
-
   void Rate_Controller_Config::set_feedback(Feedback const& value)
   {
     m_feedback = value;
@@ -3446,9 +2950,7 @@ std::string const& get_ast_json()
     return m_feedback;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void Rate_Controller_Config::set_feedforward(Feedforward const& value)
   {
     m_feedforward = value;
@@ -3463,45 +2965,37 @@ std::string const& get_ast_json()
     return m_feedforward;
   }
 
-
 ////////////////////////////////////////////////////////////
-
     void Raspicam_Descriptor::Quality::set_resolution(resolution_t const& value)
     {
-      m_resolution = clamp(value, resolution_t(8LL, 8LL), resolution_t(1980LL, 1080LL));
+      m_resolution = clamp(value, resolution_t(8, 8), resolution_t(1980, 1080));
     }
     auto Raspicam_Descriptor::Quality::get_resolution() const -> resolution_t const& 
     {
       return m_resolution;
     }
 
-
 ////////////////////////////////////////////////////////////
-
     void Raspicam_Descriptor::Quality::set_bitrate(bitrate_t const& value)
     {
-      m_bitrate = clamp(value, bitrate_t(10000LL), bitrate_t(32000000LL));
+      m_bitrate = clamp(value, bitrate_t(10000), bitrate_t(32000000));
     }
     auto Raspicam_Descriptor::Quality::get_bitrate() const -> bitrate_t const& 
     {
       return m_bitrate;
     }
 
-
 ////////////////////////////////////////////////////////////
-
   void Raspicam_Descriptor::set_fps(fps_t const& value)
   {
-    m_fps = clamp(value, fps_t(10LL), fps_t(60LL));
+    m_fps = clamp(value, fps_t(10), fps_t(60));
   }
   auto Raspicam_Descriptor::get_fps() const -> fps_t const& 
   {
     return m_fps;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void Raspicam_Descriptor::set_streaming_low(Quality const& value)
   {
     m_streaming_low = value;
@@ -3516,9 +3010,7 @@ std::string const& get_ast_json()
     return m_streaming_low;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void Raspicam_Descriptor::set_streaming_high(Quality const& value)
   {
     m_streaming_high = value;
@@ -3533,9 +3025,7 @@ std::string const& get_ast_json()
     return m_streaming_high;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void Raspicam_Descriptor::set_recording(Quality const& value)
   {
     m_recording = value;
@@ -3550,93 +3040,77 @@ std::string const& get_ast_json()
     return m_recording;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void Raspicam_Config::set_iso(iso_t const& value)
   {
-    m_iso = clamp(value, iso_t(0LL), iso_t(1600LL));
+    m_iso = clamp(value, iso_t(0), iso_t(1600));
   }
   auto Raspicam_Config::get_iso() const -> iso_t const& 
   {
     return m_iso;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void Raspicam_Config::set_shutter_speed(shutter_speed_t const& value)
   {
-    m_shutter_speed = clamp(value, shutter_speed_t(0.000000f), shutter_speed_t(1000.000000f));
+    m_shutter_speed = clamp(value, shutter_speed_t(0), shutter_speed_t(1000.000000f));
   }
   auto Raspicam_Config::get_shutter_speed() const -> shutter_speed_t const& 
   {
     return m_shutter_speed;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void Raspicam_Config::set_ev(ev_t const& value)
   {
-    m_ev = clamp(value, ev_t(-10LL), ev_t(10LL));
+    m_ev = clamp(value, ev_t(-10), ev_t(10));
   }
   auto Raspicam_Config::get_ev() const -> ev_t const& 
   {
     return m_ev;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void Raspicam_Config::set_sharpness(sharpness_t const& value)
   {
-    m_sharpness = clamp(value, sharpness_t(0LL), sharpness_t(100LL));
+    m_sharpness = clamp(value, sharpness_t(0), sharpness_t(100));
   }
   auto Raspicam_Config::get_sharpness() const -> sharpness_t const& 
   {
     return m_sharpness;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void Raspicam_Config::set_contrast(contrast_t const& value)
   {
-    m_contrast = clamp(value, contrast_t(0LL), contrast_t(100LL));
+    m_contrast = clamp(value, contrast_t(0), contrast_t(100));
   }
   auto Raspicam_Config::get_contrast() const -> contrast_t const& 
   {
     return m_contrast;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void Raspicam_Config::set_brightness(brightness_t const& value)
   {
-    m_brightness = clamp(value, brightness_t(0LL), brightness_t(100LL));
+    m_brightness = clamp(value, brightness_t(0), brightness_t(100));
   }
   auto Raspicam_Config::get_brightness() const -> brightness_t const& 
   {
     return m_brightness;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void Raspicam_Config::set_saturation(saturation_t const& value)
   {
-    m_saturation = clamp(value, saturation_t(0LL), saturation_t(100LL));
+    m_saturation = clamp(value, saturation_t(0), saturation_t(100));
   }
   auto Raspicam_Config::get_saturation() const -> saturation_t const& 
   {
     return m_saturation;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void Raspicam_Config::set_awb_mode(awb_mode_t const& value)
   {
     m_awb_mode = value;
@@ -3646,21 +3120,17 @@ std::string const& get_ast_json()
     return m_awb_mode;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void Raspicam_Config::set_quality(quality_t const& value)
   {
-    m_quality = clamp(value, quality_t(0LL), quality_t(1LL));
+    m_quality = clamp(value, quality_t(0), quality_t(1));
   }
   auto Raspicam_Config::get_quality() const -> quality_t const& 
   {
     return m_quality;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void Raspicam_Config::set_recording(bool const& value)
   {
     m_recording = value;
@@ -3670,9 +3140,7 @@ std::string const& get_ast_json()
     return m_recording;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void RC5T619_Descriptor::set_bus(std::string const& value)
   {
     m_bus = value;
@@ -3682,57 +3150,47 @@ std::string const& get_ast_json()
     return m_bus;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void RC5T619_Descriptor::set_adc0_rate(uint32_t const& value)
   {
-    m_adc0_rate = clamp(value, uint32_t(1LL), uint32_t(200LL));
+    m_adc0_rate = clamp(value, uint32_t(1), uint32_t(200));
   }
   auto RC5T619_Descriptor::get_adc0_rate() const -> uint32_t const& 
   {
     return m_adc0_rate;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void RC5T619_Descriptor::set_adc1_rate(uint32_t const& value)
   {
-    m_adc1_rate = clamp(value, uint32_t(1LL), uint32_t(200LL));
+    m_adc1_rate = clamp(value, uint32_t(1), uint32_t(200));
   }
   auto RC5T619_Descriptor::get_adc1_rate() const -> uint32_t const& 
   {
     return m_adc1_rate;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void Resampler_Descriptor::set_input_rate(uint32_t const& value)
   {
-    m_input_rate = clamp(value, uint32_t(1LL), uint32_t(10000LL));
+    m_input_rate = clamp(value, uint32_t(1), uint32_t(10000));
   }
   auto Resampler_Descriptor::get_input_rate() const -> uint32_t const& 
   {
     return m_input_rate;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void Resampler_Descriptor::set_output_rate(uint32_t const& value)
   {
-    m_output_rate = clamp(value, uint32_t(1LL), uint32_t(10000LL));
+    m_output_rate = clamp(value, uint32_t(1), uint32_t(10000));
   }
   auto Resampler_Descriptor::get_output_rate() const -> uint32_t const& 
   {
     return m_output_rate;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void Resampler_Config::set_lpf(LPF_Config const& value)
   {
     m_lpf = value;
@@ -3747,21 +3205,17 @@ std::string const& get_ast_json()
     return m_lpf;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void Scalar_Generator_Descriptor::set_rate(uint32_t const& value)
   {
-    m_rate = clamp(value, uint32_t(1LL), uint32_t(10000LL));
+    m_rate = clamp(value, uint32_t(1), uint32_t(10000));
   }
   auto Scalar_Generator_Descriptor::get_rate() const -> uint32_t const& 
   {
     return m_rate;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void Scalar_Generator_Config::set_value(float const& value)
   {
     m_value = value;
@@ -3771,33 +3225,27 @@ std::string const& get_ast_json()
     return m_value;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void Servo_Gimbal_Descriptor::set_rate(uint32_t const& value)
   {
-    m_rate = clamp(value, uint32_t(1LL), uint32_t(10000LL));
+    m_rate = clamp(value, uint32_t(1), uint32_t(10000));
   }
   auto Servo_Gimbal_Descriptor::get_rate() const -> uint32_t const& 
   {
     return m_rate;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void Servo_Gimbal_Descriptor::set_commands_rate(uint32_t const& value)
   {
-    m_commands_rate = clamp(value, uint32_t(1LL), uint32_t(10000LL));
+    m_commands_rate = clamp(value, uint32_t(1), uint32_t(10000));
   }
   auto Servo_Gimbal_Descriptor::get_commands_rate() const -> uint32_t const& 
   {
     return m_commands_rate;
   }
 
-
 ////////////////////////////////////////////////////////////
-
     void Servo_Gimbal_Config::Channel::set_min_angle(euler_t const& value)
     {
       m_min_angle = clamp(value, euler_t(-180.000000f), euler_t(180.000000f));
@@ -3807,9 +3255,7 @@ std::string const& get_ast_json()
       return m_min_angle;
     }
 
-
 ////////////////////////////////////////////////////////////
-
     void Servo_Gimbal_Config::Channel::set_max_angle(euler_t const& value)
     {
       m_max_angle = clamp(value, euler_t(-180.000000f), euler_t(180.000000f));
@@ -3819,33 +3265,27 @@ std::string const& get_ast_json()
       return m_max_angle;
     }
 
-
 ////////////////////////////////////////////////////////////
-
     void Servo_Gimbal_Config::Channel::set_min_pwm(pwm_signal_t const& value)
     {
-      m_min_pwm = clamp(value, pwm_signal_t(0.000000f), pwm_signal_t(1.000000f));
+      m_min_pwm = clamp(value, pwm_signal_t(0), pwm_signal_t(1.000000f));
     }
     auto Servo_Gimbal_Config::Channel::get_min_pwm() const -> pwm_signal_t const& 
     {
       return m_min_pwm;
     }
 
-
 ////////////////////////////////////////////////////////////
-
     void Servo_Gimbal_Config::Channel::set_max_pwm(pwm_signal_t const& value)
     {
-      m_max_pwm = clamp(value, pwm_signal_t(0.000000f), pwm_signal_t(1.000000f));
+      m_max_pwm = clamp(value, pwm_signal_t(0), pwm_signal_t(1.000000f));
     }
     auto Servo_Gimbal_Config::Channel::get_max_pwm() const -> pwm_signal_t const& 
     {
       return m_max_pwm;
     }
 
-
 ////////////////////////////////////////////////////////////
-
   void Servo_Gimbal_Config::set_x_channel(Channel const& value)
   {
     m_x_channel = value;
@@ -3860,9 +3300,7 @@ std::string const& get_ast_json()
     return m_x_channel;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void Servo_Gimbal_Config::set_y_channel(Channel const& value)
   {
     m_y_channel = value;
@@ -3877,9 +3315,7 @@ std::string const& get_ast_json()
     return m_y_channel;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void Servo_Gimbal_Config::set_z_channel(Channel const& value)
   {
     m_z_channel = value;
@@ -3894,9 +3330,7 @@ std::string const& get_ast_json()
     return m_z_channel;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void SRF01_Descriptor::set_bus(std::string const& value)
   {
     m_bus = value;
@@ -3906,57 +3340,47 @@ std::string const& get_ast_json()
     return m_bus;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void SRF01_Descriptor::set_rate(uint32_t const& value)
   {
-    m_rate = clamp(value, uint32_t(1LL), uint32_t(10LL));
+    m_rate = clamp(value, uint32_t(1), uint32_t(10));
   }
   auto SRF01_Descriptor::get_rate() const -> uint32_t const& 
   {
     return m_rate;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void SRF01_Config::set_direction(direction_t const& value)
   {
-    m_direction = clamp(value, direction_t(-340282346638528859811704183484516925440.000000f, -340282346638528859811704183484516925440.000000f, -340282346638528859811704183484516925440.000000f), direction_t(340282346638528859811704183484516925440.000000f, 340282346638528859811704183484516925440.000000f, 340282346638528859811704183484516925440.000000f));
+    m_direction = clamp(value, direction_t(-FLT_MAX, -FLT_MAX, -FLT_MAX), direction_t(FLT_MAX, FLT_MAX, FLT_MAX));
   }
   auto SRF01_Config::get_direction() const -> direction_t const& 
   {
     return m_direction;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void SRF01_Config::set_max_distance(ufloat const& value)
   {
-    m_max_distance = max(value, ufloat(0.000000f));
+    m_max_distance = max(value, ufloat(0));
   }
   auto SRF01_Config::get_max_distance() const -> ufloat const& 
   {
     return m_max_distance;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void SRF01_Config::set_min_distance(ufloat const& value)
   {
-    m_min_distance = max(value, ufloat(0.000000f));
+    m_min_distance = max(value, ufloat(0));
   }
   auto SRF01_Config::get_min_distance() const -> ufloat const& 
   {
     return m_min_distance;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void SRF02_Descriptor::set_bus(std::string const& value)
   {
     m_bus = value;
@@ -3966,93 +3390,77 @@ std::string const& get_ast_json()
     return m_bus;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void SRF02_Descriptor::set_rate(uint32_t const& value)
   {
-    m_rate = clamp(value, uint32_t(1LL), uint32_t(10LL));
+    m_rate = clamp(value, uint32_t(1), uint32_t(10));
   }
   auto SRF02_Descriptor::get_rate() const -> uint32_t const& 
   {
     return m_rate;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void SRF02_Config::set_direction(direction_t const& value)
   {
-    m_direction = clamp(value, direction_t(-340282346638528859811704183484516925440.000000f, -340282346638528859811704183484516925440.000000f, -340282346638528859811704183484516925440.000000f), direction_t(340282346638528859811704183484516925440.000000f, 340282346638528859811704183484516925440.000000f, 340282346638528859811704183484516925440.000000f));
+    m_direction = clamp(value, direction_t(-FLT_MAX, -FLT_MAX, -FLT_MAX), direction_t(FLT_MAX, FLT_MAX, FLT_MAX));
   }
   auto SRF02_Config::get_direction() const -> direction_t const& 
   {
     return m_direction;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void SRF02_Config::set_max_distance(ufloat const& value)
   {
-    m_max_distance = max(value, ufloat(0.000000f));
+    m_max_distance = max(value, ufloat(0));
   }
   auto SRF02_Config::get_max_distance() const -> ufloat const& 
   {
     return m_max_distance;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void SRF02_Config::set_min_distance(ufloat const& value)
   {
-    m_min_distance = max(value, ufloat(0.000000f));
+    m_min_distance = max(value, ufloat(0));
   }
   auto SRF02_Config::get_min_distance() const -> ufloat const& 
   {
     return m_min_distance;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void Throttle_To_PWM_Descriptor::set_rate(uint32_t const& value)
   {
-    m_rate = clamp(value, uint32_t(1LL), uint32_t(10000LL));
+    m_rate = clamp(value, uint32_t(1), uint32_t(10000));
   }
   auto Throttle_To_PWM_Descriptor::get_rate() const -> uint32_t const& 
   {
     return m_rate;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void Throttle_To_PWM_Descriptor::set_channel_count(channel_count_t const& value)
   {
-    m_channel_count = clamp(value, channel_count_t(1LL), channel_count_t(128LL));
+    m_channel_count = clamp(value, channel_count_t(1), channel_count_t(128));
   }
   auto Throttle_To_PWM_Descriptor::get_channel_count() const -> channel_count_t const& 
   {
     return m_channel_count;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void Transformer_Descriptor::set_rate(uint32_t const& value)
   {
-    m_rate = clamp(value, uint32_t(1LL), uint32_t(10000LL));
+    m_rate = clamp(value, uint32_t(1), uint32_t(10000));
   }
   auto Transformer_Descriptor::get_rate() const -> uint32_t const& 
   {
     return m_rate;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void UBLOX_Descriptor::set_bus(std::string const& value)
   {
     m_bus = value;
@@ -4062,45 +3470,37 @@ std::string const& get_ast_json()
     return m_bus;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void UBLOX_Descriptor::set_rate(uint32_t const& value)
   {
-    m_rate = clamp(value, uint32_t(1LL), uint32_t(10LL));
+    m_rate = clamp(value, uint32_t(1), uint32_t(10));
   }
   auto UBLOX_Descriptor::get_rate() const -> uint32_t const& 
   {
     return m_rate;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void Vec3_Generator_Descriptor::set_rate(uint32_t const& value)
   {
-    m_rate = clamp(value, uint32_t(1LL), uint32_t(10000LL));
+    m_rate = clamp(value, uint32_t(1), uint32_t(10000));
   }
   auto Vec3_Generator_Descriptor::get_rate() const -> uint32_t const& 
   {
     return m_rate;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void Vec3_Generator_Config::set_value(vec3f const& value)
   {
-    m_value = clamp(value, vec3f(-340282346638528859811704183484516925440.000000f, -340282346638528859811704183484516925440.000000f, -340282346638528859811704183484516925440.000000f), vec3f(340282346638528859811704183484516925440.000000f, 340282346638528859811704183484516925440.000000f, 340282346638528859811704183484516925440.000000f));
+    m_value = clamp(value, vec3f(-FLT_MAX, -FLT_MAX, -FLT_MAX), vec3f(FLT_MAX, FLT_MAX, FLT_MAX));
   }
   auto Vec3_Generator_Config::get_value() const -> vec3f const& 
   {
     return m_value;
   }
 
-
 ////////////////////////////////////////////////////////////
-
 ts::Result<void> deserialize(bool& value, ts::serialization::Value const& sz_value)
 {
   if (!sz_value.is_bool()) { return ts::Error("Expected bool value when deserializing"); }

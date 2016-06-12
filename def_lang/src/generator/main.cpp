@@ -318,9 +318,28 @@ static ts::Symbol_Path get_type_relative_scope_path(ts::IDeclaration_Scope const
 }
 
 static std::string to_string(bool v) { return v ? "true" : "false"; }
-static std::string to_string(int64_t v) { return std::to_string(v) + "LL"; }
-static std::string to_string(float v) { return std::to_string(v) + "f"; }
-static std::string to_string(double v) { return std::to_string(v); }
+static std::string to_string(int64_t v)
+{
+    if (v <= std::numeric_limits<int32_t>::max() && v >= std::numeric_limits<int32_t>::lowest()) { return std::to_string(v); }
+    //workaround for issue "warning: integer constant is so large that it is unsigned"
+    if (v == INT64_MIN) { return "INT64_MIN"; }
+    if (v == INT64_MAX) { return "INT64_MAX"; }
+    return std::to_string(v) + "LL";
+}
+static std::string to_string(float v)
+{
+    if (v == 0.f) { return "0"; }
+    if (v <= -FLT_MAX) { return "-FLT_MAX"; }
+    if (v >= FLT_MAX) { return "FLT_MAX"; }
+    return std::to_string(v) + "f";
+}
+static std::string to_string(double v)
+{
+    if (v == 0.0) { return "0"; }
+    if (v <= -DBL_MAX) { return "-DBL_MAX"; }
+    if (v >= DBL_MAX) { return "DBL_MAX"; }
+    return std::to_string(v);
+}
 static std::string to_string(ts::vec2f const& v) { return to_string(v.x) + ", " + to_string(v.y); }
 static std::string to_string(ts::vec2d const& v) { return to_string(v.x) + ", " + to_string(v.y); }
 static std::string to_string(ts::vec2<int64_t> const& v) { return to_string(v.x) + ", " + to_string(v.y); }
@@ -396,20 +415,31 @@ static std::string to_string(ts::IValue const& value)
     {
         return to_string(*v->get_value());
     }
-    return "";
+    return std::string();
 }
 
 static void generate_member_def_declaration_code(Context& context, ts::IMember_Def const& member_def)
 {
     std::string native_type_str = get_type_relative_scope_path(context.parent_scope, *member_def.get_type()).to_string();
 
-    context.h_file += context.ident_str +
-            native_type_str +
-            " m_" +
-            member_def.get_name() +
-            " = {" +
-            to_string(*member_def.get_default_value()) +
-            "};\n";
+    std::string default_value_str = to_string(*member_def.get_default_value());
+    if (default_value_str.empty())
+    {
+        context.h_file += context.ident_str +
+                native_type_str +
+                " m_" +
+                member_def.get_name() + ";\n";
+    }
+    else
+    {
+        context.h_file += context.ident_str +
+                native_type_str +
+                " m_" +
+                member_def.get_name() +
+                " = {" +
+                default_value_str +
+                "};\n";
+    }
 }
 
 template <typename T, typename Native>
@@ -597,7 +627,7 @@ static ts::Result<void> generate_struct_type_code(Context& context, ts::IStruct_
         }
         context.h_file += "\n";
         context.h_file += context.ident_str +  "{\n";
-        context.h_file += context.ident_str + "public:\n\n";
+        context.h_file += context.ident_str + "public:\n";
 
         Context c(context.h_file, context.cpp_file, struct_type, context.type_system);
         c.serialization_code_generated = context.serialization_code_generated;
@@ -613,18 +643,17 @@ static ts::Result<void> generate_struct_type_code(Context& context, ts::IStruct_
         context.serialization_section_cpp += c.serialization_section_cpp;
         context.serialization_section_h += c.serialization_section_h;
 
-        context.h_file += c.ident_str + struct_name + "() noexcept {};\n";
-        context.h_file += c.ident_str + "virtual ~" + struct_name + "() noexcept {};\n\n";
+        //context.h_file += c.ident_str + struct_name + "() {};\n";
+        context.h_file += c.ident_str + "virtual ~" + struct_name + "() = default;\n";
 
         for (size_t i = 0; i < struct_type.get_noninherited_member_def_count(); i++)
         {
             generate_member_def_setter_getter_code(c, struct_type, *struct_type.get_noninherited_member_def(i));
             context.h_file += "\n";
-            context.cpp_file += "\n////////////////////////////////////////////////////////////\n\n";
+            context.cpp_file += "////////////////////////////////////////////////////////////\n";
         }
 
-        context.h_file += "\n";
-        context.h_file += context.ident_str + "private:\n\n";
+        context.h_file += context.ident_str + "private:\n";
 
         for (size_t i = 0; i < struct_type.get_noninherited_member_def_count(); i++)
         {
@@ -1342,6 +1371,7 @@ static ts::Result<void> generate_code(Context& context, ts::ast::Node const& ast
     context.h_file += "#include <string>\n";
     context.h_file += "#include <vector>\n";
     context.h_file += "#include <memory>\n";
+    context.h_file += "#include <cfloat>\n";
     context.h_file += "#include <boost/variant.hpp>\n";
     context.h_file += "#include <def_lang/Result.h>\n";
     context.h_file += "#include <def_lang/Serialization.h>\n";

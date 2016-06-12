@@ -32,9 +32,7 @@ namespace setup
     return m_time;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void Set_Clock_Res::set_time(setup::time_ms_t const& value)
   {
     m_time = value;
@@ -44,9 +42,7 @@ namespace setup
     return m_time;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void Set_UAV_Descriptor_Req::set_data(setup::serialized_data const& value)
   {
     m_data = value;
@@ -56,9 +52,7 @@ namespace setup
     return m_data;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void Set_UAV_Descriptor_Res::set_data(setup::serialized_data const& value)
   {
     m_data = value;
@@ -68,9 +62,7 @@ namespace setup
     return m_data;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void Get_UAV_Descriptor_Res::set_data(setup::serialized_data const& value)
   {
     m_data = value;
@@ -80,9 +72,7 @@ namespace setup
     return m_data;
   }
 
-
 ////////////////////////////////////////////////////////////
-
     void Node_Def_Data::Input::set_name(std::string const& value)
     {
       m_name = value;
@@ -92,9 +82,7 @@ namespace setup
       return m_name;
     }
 
-
 ////////////////////////////////////////////////////////////
-
     void Node_Def_Data::Input::set_type(std::string const& value)
     {
       m_type = value;
@@ -104,21 +92,17 @@ namespace setup
       return m_type;
     }
 
-
 ////////////////////////////////////////////////////////////
-
     void Node_Def_Data::Input::set_rate(uint32_t const& value)
     {
-      m_rate = clamp(value, uint32_t(0LL), uint32_t(4294967295LL));
+      m_rate = clamp(value, uint32_t(0), uint32_t(4294967295LL));
     }
     auto Node_Def_Data::Input::get_rate() const -> uint32_t const& 
     {
       return m_rate;
     }
 
-
 ////////////////////////////////////////////////////////////
-
     void Node_Def_Data::Output::set_name(std::string const& value)
     {
       m_name = value;
@@ -128,9 +112,7 @@ namespace setup
       return m_name;
     }
 
-
 ////////////////////////////////////////////////////////////
-
     void Node_Def_Data::Output::set_type(std::string const& value)
     {
       m_type = value;
@@ -140,21 +122,17 @@ namespace setup
       return m_type;
     }
 
-
 ////////////////////////////////////////////////////////////
-
     void Node_Def_Data::Output::set_rate(uint32_t const& value)
     {
-      m_rate = clamp(value, uint32_t(0LL), uint32_t(4294967295LL));
+      m_rate = clamp(value, uint32_t(0), uint32_t(4294967295LL));
     }
     auto Node_Def_Data::Output::get_rate() const -> uint32_t const& 
     {
       return m_rate;
     }
 
-
 ////////////////////////////////////////////////////////////
-
   void Node_Def_Data::set_name(std::string const& value)
   {
     m_name = value;
@@ -164,9 +142,7 @@ namespace setup
     return m_name;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void Node_Def_Data::set_type(std::string const& value)
   {
     m_type = value;
@@ -176,9 +152,7 @@ namespace setup
     return m_type;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void Node_Def_Data::set_inputs(std::vector<setup::Node_Def_Data::Input> const& value)
   {
     m_inputs = value;
@@ -193,9 +167,7 @@ namespace setup
     return m_inputs;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void Node_Def_Data::set_outputs(std::vector<setup::Node_Def_Data::Output> const& value)
   {
     m_outputs = value;
@@ -210,9 +182,7 @@ namespace setup
     return m_outputs;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void Node_Def_Data::set_descriptor_data(setup::serialized_data const& value)
   {
     m_descriptor_data = value;
@@ -222,9 +192,7 @@ namespace setup
     return m_descriptor_data;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void Get_Node_Defs_Res::set_node_def_datas(std::vector<setup::Node_Def_Data> const& value)
   {
     m_node_def_datas = value;
@@ -239,9 +207,7 @@ namespace setup
     return m_node_def_datas;
   }
 
-
 ////////////////////////////////////////////////////////////
-
     void Node_Data::Input::set_name(std::string const& value)
     {
       m_name = value;
@@ -251,9 +217,7 @@ namespace setup
       return m_name;
     }
 
-
 ////////////////////////////////////////////////////////////
-
     void Node_Data::Input::set_type(std::string const& value)
     {
       m_type = value;
@@ -263,21 +227,17 @@ namespace setup
       return m_type;
     }
 
-
 ////////////////////////////////////////////////////////////
-
     void Node_Data::Input::set_rate(uint32_t const& value)
     {
-      m_rate = clamp(value, uint32_t(0LL), uint32_t(4294967295LL));
+      m_rate = clamp(value, uint32_t(0), uint32_t(4294967295LL));
     }
     auto Node_Data::Input::get_rate() const -> uint32_t const& 
     {
       return m_rate;
     }
 
-
 ////////////////////////////////////////////////////////////
-
     void Node_Data::Input::set_stream_path(std::string const& value)
     {
       m_stream_path = value;
@@ -287,9 +247,7 @@ namespace setup
       return m_stream_path;
     }
 
-
 ////////////////////////////////////////////////////////////
-
     void Node_Data::Output::set_name(std::string const& value)
     {
       m_name = value;
@@ -299,9 +257,7 @@ namespace setup
       return m_name;
     }
 
-
 ////////////////////////////////////////////////////////////
-
     void Node_Data::Output::set_type(std::string const& value)
     {
       m_type = value;
@@ -311,21 +267,17 @@ namespace setup
       return m_type;
     }
 
-
 ////////////////////////////////////////////////////////////
-
     void Node_Data::Output::set_rate(uint32_t const& value)
     {
-      m_rate = clamp(value, uint32_t(0LL), uint32_t(4294967295LL));
+      m_rate = clamp(value, uint32_t(0), uint32_t(4294967295LL));
     }
     auto Node_Data::Output::get_rate() const -> uint32_t const& 
     {
       return m_rate;
     }
 
-
 ////////////////////////////////////////////////////////////
-
   void Node_Data::set_name(std::string const& value)
   {
     m_name = value;
@@ -335,9 +287,7 @@ namespace setup
     return m_name;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void Node_Data::set_type(std::string const& value)
   {
     m_type = value;
@@ -347,9 +297,7 @@ namespace setup
     return m_type;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void Node_Data::set_inputs(std::vector<setup::Node_Data::Input> const& value)
   {
     m_inputs = value;
@@ -364,9 +312,7 @@ namespace setup
     return m_inputs;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void Node_Data::set_outputs(std::vector<setup::Node_Data::Output> const& value)
   {
     m_outputs = value;
@@ -381,9 +327,7 @@ namespace setup
     return m_outputs;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void Node_Data::set_descriptor_data(setup::serialized_data const& value)
   {
     m_descriptor_data = value;
@@ -393,9 +337,7 @@ namespace setup
     return m_descriptor_data;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void Node_Data::set_config_data(setup::serialized_data const& value)
   {
     m_config_data = value;
@@ -405,9 +347,7 @@ namespace setup
     return m_config_data;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void Get_Nodes_Req::set_name(std::string const& value)
   {
     m_name = value;
@@ -417,9 +357,7 @@ namespace setup
     return m_name;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void Get_Nodes_Res::set_node_datas(std::vector<setup::Node_Data> const& value)
   {
     m_node_datas = value;
@@ -434,9 +372,7 @@ namespace setup
     return m_node_datas;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void Set_Node_Input_Stream_Path_Req::set_node_name(std::string const& value)
   {
     m_node_name = value;
@@ -446,9 +382,7 @@ namespace setup
     return m_node_name;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void Set_Node_Input_Stream_Path_Req::set_input_name(std::string const& value)
   {
     m_input_name = value;
@@ -458,9 +392,7 @@ namespace setup
     return m_input_name;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void Set_Node_Input_Stream_Path_Req::set_stream_path(std::string const& value)
   {
     m_stream_path = value;
@@ -470,9 +402,7 @@ namespace setup
     return m_stream_path;
   }
 
-
 ////////////////////////////////////////////////////////////
-
     void Set_Node_Input_Stream_Path_Res::Error::set_message(std::string const& value)
     {
       m_message = value;
@@ -482,9 +412,7 @@ namespace setup
       return m_message;
     }
 
-
 ////////////////////////////////////////////////////////////
-
   void Set_Node_Input_Stream_Path_Res::set_result(boost::variant<setup::Node_Data,Error> const& value)
   {
     m_result = value;
@@ -499,9 +427,7 @@ namespace setup
     return m_result;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void Add_Node_Req::set_def_name(std::string const& value)
   {
     m_def_name = value;
@@ -511,9 +437,7 @@ namespace setup
     return m_def_name;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void Add_Node_Req::set_name(std::string const& value)
   {
     m_name = value;
@@ -523,9 +447,7 @@ namespace setup
     return m_name;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void Add_Node_Req::set_descriptor_data(setup::serialized_data const& value)
   {
     m_descriptor_data = value;
@@ -535,9 +457,7 @@ namespace setup
     return m_descriptor_data;
   }
 
-
 ////////////////////////////////////////////////////////////
-
     void Add_Node_Res::Error::set_message(std::string const& value)
     {
       m_message = value;
@@ -547,9 +467,7 @@ namespace setup
       return m_message;
     }
 
-
 ////////////////////////////////////////////////////////////
-
   void Add_Node_Res::set_result(boost::variant<setup::Node_Data,Error> const& value)
   {
     m_result = value;
@@ -564,9 +482,7 @@ namespace setup
     return m_result;
   }
 
-
 ////////////////////////////////////////////////////////////
-
   void Remove_Node_Req::set_name(std::string const& value)
   {
     m_name = value;
@@ -576,9 +492,7 @@ namespace setup
     return m_name;
   }
 
-
 ////////////////////////////////////////////////////////////
-
     void Remove_Node_Res::Error::set_message(std::string const& value)
     {
       m_message = value;
@@ -588,9 +502,7 @@ namespace setup
       return m_message;
     }
 
-
 ////////////////////////////////////////////////////////////
-
   void Remove_Node_Res::set_error(boost::optional<Error> const& value)
   {
     m_error = value;
@@ -605,9 +517,7 @@ namespace setup
     return m_error;
   }
 
-
 ////////////////////////////////////////////////////////////
-
 }
 ts::Result<void> deserialize(bool& value, ts::serialization::Value const& sz_value)
 {

@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <cfloat>
 #include <boost/variant.hpp>
 #include <def_lang/Result.h>
 #include <def_lang/Serialization.h>
@@ -52,106 +53,72 @@ typedef std::string serialized_data;
 struct Set_Clock_Req
 {
 public:
-
-  Set_Clock_Req() noexcept {};
-  virtual ~Set_Clock_Req() noexcept {};
-
+  virtual ~Set_Clock_Req() = default;
   void set_time(setup::time_ms_t const& value);
   auto get_time() const -> setup::time_ms_t const&;
 
-
 private:
-
-  setup::time_ms_t m_time = {-9223372036854775808LL};
+  setup::time_ms_t m_time = {0};
 };
 
 struct Set_Clock_Res
 {
 public:
-
-  Set_Clock_Res() noexcept {};
-  virtual ~Set_Clock_Res() noexcept {};
-
+  virtual ~Set_Clock_Res() = default;
   void set_time(setup::time_ms_t const& value);
   auto get_time() const -> setup::time_ms_t const&;
 
-
 private:
-
-  setup::time_ms_t m_time = {-9223372036854775808LL};
+  setup::time_ms_t m_time = {0};
 };
 
 struct Set_UAV_Descriptor_Req
 {
 public:
-
-  Set_UAV_Descriptor_Req() noexcept {};
-  virtual ~Set_UAV_Descriptor_Req() noexcept {};
-
+  virtual ~Set_UAV_Descriptor_Req() = default;
   void set_data(setup::serialized_data const& value);
   auto get_data() const -> setup::serialized_data const&;
 
-
 private:
-
-  setup::serialized_data m_data = {};
+  setup::serialized_data m_data;
 };
 
 struct Set_UAV_Descriptor_Res
 {
 public:
-
-  Set_UAV_Descriptor_Res() noexcept {};
-  virtual ~Set_UAV_Descriptor_Res() noexcept {};
-
+  virtual ~Set_UAV_Descriptor_Res() = default;
   void set_data(setup::serialized_data const& value);
   auto get_data() const -> setup::serialized_data const&;
 
-
 private:
-
-  setup::serialized_data m_data = {};
+  setup::serialized_data m_data;
 };
 
 struct Get_UAV_Descriptor_Req
 {
 public:
-
-  Get_UAV_Descriptor_Req() noexcept {};
-  virtual ~Get_UAV_Descriptor_Req() noexcept {};
-
-
+  virtual ~Get_UAV_Descriptor_Req() = default;
 private:
-
 };
 
 struct Get_UAV_Descriptor_Res
 {
 public:
-
-  Get_UAV_Descriptor_Res() noexcept {};
-  virtual ~Get_UAV_Descriptor_Res() noexcept {};
-
+  virtual ~Get_UAV_Descriptor_Res() = default;
   void set_data(setup::serialized_data const& value);
   auto get_data() const -> setup::serialized_data const&;
 
-
 private:
-
-  setup::serialized_data m_data = {};
+  setup::serialized_data m_data;
 };
 
 struct Node_Def_Data
 {
 public:
-
   struct Input
   {
   public:
-
-    Input() noexcept {};
-    virtual ~Input() noexcept {};
-
+    virtual ~Input() = default;
     void set_name(std::string const& value);
     auto get_name() const -> std::string const&;
 
@@ -161,21 +128,16 @@ public:
     void set_rate(uint32_t const& value);
     auto get_rate() const -> uint32_t const&;
 
-
   private:
-
-    std::string m_name = {};
-    std::string m_type = {};
-    uint32_t m_rate = {0LL};
+    std::string m_name;
+    std::string m_type;
+    uint32_t m_rate = {0};
   };
 
   struct Output
   {
   public:
-
-    Output() noexcept {};
-    virtual ~Output() noexcept {};
-
+    virtual ~Output() = default;
     void set_name(std::string const& value);
     auto get_name() const -> std::string const&;
 
@@ -185,17 +147,13 @@ public:
     void set_rate(uint32_t const& value);
     auto get_rate() const -> uint32_t const&;
 
-
   private:
-
-    std::string m_name = {};
-    std::string m_type = {};
-    uint32_t m_rate = {0LL};
+    std::string m_name;
+    std::string m_type;
+    uint32_t m_rate = {0};
   };
 
-  Node_Def_Data() noexcept {};
-  virtual ~Node_Def_Data() noexcept {};
-
+  virtual ~Node_Def_Data() = default;
   void set_name(std::string const& value);
   auto get_name() const -> std::string const&;
 
@@ -213,56 +171,40 @@ public:
   void set_descriptor_data(setup::serialized_data const& value);
   auto get_descriptor_data() const -> setup::serialized_data const&;
 
-
 private:
-
-  std::string m_name = {};
-  std::string m_type = {};
-  std::vector<setup::Node_Def_Data::Input> m_inputs = {};
-  std::vector<setup::Node_Def_Data::Output> m_outputs = {};
-  setup::serialized_data m_descriptor_data = {};
+  std::string m_name;
+  std::string m_type;
+  std::vector<setup::Node_Def_Data::Input> m_inputs;
+  std::vector<setup::Node_Def_Data::Output> m_outputs;
+  setup::serialized_data m_descriptor_data;
 };
 
 struct Get_Node_Defs_Req
 {
 public:
-
-  Get_Node_Defs_Req() noexcept {};
-  virtual ~Get_Node_Defs_Req() noexcept {};
-
-
+  virtual ~Get_Node_Defs_Req() = default;
 private:
-
 };
 
 struct Get_Node_Defs_Res
 {
 public:
-
-  Get_Node_Defs_Res() noexcept {};
-  virtual ~Get_Node_Defs_Res() noexcept {};
-
+  virtual ~Get_Node_Defs_Res() = default;
   void set_node_def_datas(std::vector<setup::Node_Def_Data> const& value);
   auto get_node_def_datas() const -> std::vector<setup::Node_Def_Data> const&;
   auto get_node_def_datas() -> std::vector<setup::Node_Def_Data>&;
 
-
 private:
-
-  std::vector<setup::Node_Def_Data> m_node_def_datas = {};
+  std::vector<setup::Node_Def_Data> m_node_def_datas;
 };
 
 struct Node_Data
 {
 public:
-
   struct Input
   {
   public:
-
-    Input() noexcept {};
-    virtual ~Input() noexcept {};
-
+    virtual ~Input() = default;
     void set_name(std::string const& value);
     auto get_name() const -> std::string const&;
 
@@ -275,22 +217,17 @@ public:
     void set_stream_path(std::string const& value);
     auto get_stream_path() const -> std::string const&;
 
-
   private:
-
-    std::string m_name = {};
-    std::string m_type = {};
-    uint32_t m_rate = {0LL};
-    std::string m_stream_path = {};
+    std::string m_name;
+    std::string m_type;
+    uint32_t m_rate = {0};
+    std::string m_stream_path;
   };
 
   struct Output
   {
   public:
-
-    Output() noexcept {};
-    virtual ~Output() noexcept {};
-
+    virtual ~Output() = default;
     void set_name(std::string const& value);
     auto get_name() const -> std::string const&;
 
@@ -300,17 +237,13 @@ public:
     void set_rate(uint32_t const& value);
     auto get_rate() const -> uint32_t const&;
 
-
   private:
-
-    std::string m_name = {};
-    std::string m_type = {};
-    uint32_t m_rate = {0LL};
+    std::string m_name;
+    std::string m_type;
+    uint32_t m_rate = {0};
   };
 
-  Node_Data() noexcept {};
-  virtual ~Node_Data() noexcept {};
-
+  virtual ~Node_Data() = default;
   void set_name(std::string const& value);
   auto get_name() const -> std::string const&;
 
@@ -331,57 +264,42 @@ public:
   void set_config_data(setup::serialized_data const& value);
   auto get_config_data() const -> setup::serialized_data const&;
 
-
 private:
-
-  std::string m_name = {};
-  std::string m_type = {};
-  std::vector<setup::Node_Data::Input> m_inputs = {};
-  std::vector<setup::Node_Data::Output> m_outputs = {};
-  setup::serialized_data m_descriptor_data = {};
-  setup::serialized_data m_config_data = {};
+  std::string m_name;
+  std::string m_type;
+  std::vector<setup::Node_Data::Input> m_inputs;
+  std::vector<setup::Node_Data::Output> m_outputs;
+  setup::serialized_data m_descriptor_data;
+  setup::serialized_data m_config_data;
 };
 
 struct Get_Nodes_Req
 {
 public:
-
-  Get_Nodes_Req() noexcept {};
-  virtual ~Get_Nodes_Req() noexcept {};
-
+  virtual ~Get_Nodes_Req() = default;
   void set_name(std::string const& value);
   auto get_name() const -> std::string const&;
 
-
 private:
-
-  std::string m_name = {};
+  std::string m_name;
 };
 
 struct Get_Nodes_Res
 {
 public:
-
-  Get_Nodes_Res() noexcept {};
-  virtual ~Get_Nodes_Res() noexcept {};
-
+  virtual ~Get_Nodes_Res() = default;
   void set_node_datas(std::vector<setup::Node_Data> const& value);
   auto get_node_datas() const -> std::vector<setup::Node_Data> const&;
   auto get_node_datas() -> std::vector<setup::Node_Data>&;
 
-
 private:
-
-  std::vector<setup::Node_Data> m_node_datas = {};
+  std::vector<setup::Node_Data> m_node_datas;
 };
 
 struct Set_Node_Input_Stream_Path_Req
 {
 public:
-
-  Set_Node_Input_Stream_Path_Req() noexcept {};
-  virtual ~Set_Node_Input_Stream_Path_Req() noexcept {};
-
+  virtual ~Set_Node_Input_Stream_Path_Req() = default;
   void set_node_name(std::string const& value);
   auto get_node_name() const -> std::string const&;
 
@@ -391,54 +309,39 @@ public:
   void set_stream_path(std::string const& value);
   auto get_stream_path() const -> std::string const&;
 
-
 private:
-
-  std::string m_node_name = {};
-  std::string m_input_name = {};
-  std::string m_stream_path = {};
+  std::string m_node_name;
+  std::string m_input_name;
+  std::string m_stream_path;
 };
 
 struct Set_Node_Input_Stream_Path_Res
 {
 public:
-
   struct Error
   {
   public:
-
-    Error() noexcept {};
-    virtual ~Error() noexcept {};
-
+    virtual ~Error() = default;
     void set_message(std::string const& value);
     auto get_message() const -> std::string const&;
 
-
   private:
-
-    std::string m_message = {};
+    std::string m_message;
   };
 
-  Set_Node_Input_Stream_Path_Res() noexcept {};
-  virtual ~Set_Node_Input_Stream_Path_Res() noexcept {};
-
+  virtual ~Set_Node_Input_Stream_Path_Res() = default;
   void set_result(boost::variant<setup::Node_Data,Error> const& value);
   auto get_result() const -> boost::variant<setup::Node_Data,Error> const&;
   auto get_result() -> boost::variant<setup::Node_Data,Error>&;
 
-
 private:
-
-  boost::variant<setup::Node_Data,Error> m_result = {};
+  boost::variant<setup::Node_Data,Error> m_result;
 };
 
 struct Add_Node_Req
 {
 public:
-
-  Add_Node_Req() noexcept {};
-  virtual ~Add_Node_Req() noexcept {};
-
+  virtual ~Add_Node_Req() = default;
   void set_def_name(std::string const& value);
   auto get_def_name() const -> std::string const&;
 
@@ -448,94 +351,67 @@ public:
   void set_descriptor_data(setup::serialized_data const& value);
   auto get_descriptor_data() const -> setup::serialized_data const&;
 
-
 private:
-
-  std::string m_def_name = {};
-  std::string m_name = {};
-  setup::serialized_data m_descriptor_data = {};
+  std::string m_def_name;
+  std::string m_name;
+  setup::serialized_data m_descriptor_data;
 };
 
 struct Add_Node_Res
 {
 public:
-
   struct Error
   {
   public:
-
-    Error() noexcept {};
-    virtual ~Error() noexcept {};
-
+    virtual ~Error() = default;
     void set_message(std::string const& value);
     auto get_message() const -> std::string const&;
 
-
   private:
-
-    std::string m_message = {};
+    std::string m_message;
   };
 
-  Add_Node_Res() noexcept {};
-  virtual ~Add_Node_Res() noexcept {};
-
+  virtual ~Add_Node_Res() = default;
   void set_result(boost::variant<setup::Node_Data,Error> const& value);
   auto get_result() const -> boost::variant<setup::Node_Data,Error> const&;
   auto get_result() -> boost::variant<setup::Node_Data,Error>&;
 
-
 private:
-
-  boost::variant<setup::Node_Data,Error> m_result = {};
+  boost::variant<setup::Node_Data,Error> m_result;
 };
 
 struct Remove_Node_Req
 {
 public:
-
-  Remove_Node_Req() noexcept {};
-  virtual ~Remove_Node_Req() noexcept {};
-
+  virtual ~Remove_Node_Req() = default;
   void set_name(std::string const& value);
   auto get_name() const -> std::string const&;
 
-
 private:
-
-  std::string m_name = {};
+  std::string m_name;
 };
 
 struct Remove_Node_Res
 {
 public:
-
   struct Error
   {
   public:
-
-    Error() noexcept {};
-    virtual ~Error() noexcept {};
-
+    virtual ~Error() = default;
     void set_message(std::string const& value);
     auto get_message() const -> std::string const&;
 
-
   private:
-
-    std::string m_message = {};
+    std::string m_message;
   };
 
-  Remove_Node_Res() noexcept {};
-  virtual ~Remove_Node_Res() noexcept {};
-
+  virtual ~Remove_Node_Res() = default;
   void set_error(boost::optional<Error> const& value);
   auto get_error() const -> boost::optional<Error> const&;
   auto get_error() -> boost::optional<Error>&;
 
-
 private:
-
-  boost::optional<Error> m_error = {};
+  boost::optional<Error> m_error;
 };
 
 typedef boost::variant<setup::Set_Clock_Req,setup::Set_UAV_Descriptor_Req,setup::Get_UAV_Descriptor_Req,setup::Get_Node_Defs_Req,setup::Remove_Node_Req,setup::Add_Node_Req,setup::Set_Node_Input_Stream_Path_Req> Brain_Message;
