@@ -940,41 +940,54 @@ void Comms::handle_message(comms::setup::Set_UAV_Descriptor_Req const& message)
 
     QLOGI("Req uav descriptor");
 
+    comms::setup::Error error;
     comms::setup::Set_UAV_Descriptor_Res res;
 
     comms::setup::serialized_data_t const& serialized_data = message.get_data();
 
     auto json_result = ts::serialization::from_json(serialized_data.data(), serialized_data.size());
-    if (json_result != ts::success)
+    if (json_result == ts::success)
     {
-        std::string msg = q::util::format<std::string>("Cannot deserialize uav descriptor data: {}", json_result.error().what());
-        QLOGE("{}", msg);
-        res.get_result() = { msg };
-        serialize_and_send(SETUP_CHANNEL, res);
-        return;
+        uav::Poly<const uav::IUAV_Descriptor> uav_descriptor;
+        auto deserialize_result = uav::deserialize(uav_descriptor, json_result.payload());
+        if (deserialize_result == ts::success)
+        {
+            if (m_uav.set_uav_descriptor(*uav_descriptor))
+            {
+                m_uav.save_settings();
+
+                auto serialize_result = uav::serialize(uav::Poly<const uav::IUAV_Descriptor>(m_uav.get_uav_descriptor()));
+                if (serialize_result == ts::success)
+                {
+                    std::string json = ts::serialization::to_json(serialize_result.payload(), true);
+                    res.get_result() = comms::setup::serialized_data_t(json);
+                }
+                else
+                {
+                    error.set_message(q::util::format<std::string>("Cannot serialize uav descriptor json: {}", serialize_result.error().what()));
+                }
+            }
+            else
+            {
+                error.set_message(q::util::format<std::string>("Cannot set uav descriptor: {}", "N/A"));
+            }
+        }
+        else
+        {
+            error.set_message(q::util::format<std::string>("Cannot deserialize uav descriptor json: {}", deserialize_result.error().what()));
+        }
+    }
+    else
+    {
+        error.set_message(q::util::format<std::string>("Cannot deserialize uav descriptor data: {}", json_result.error().what()));
     }
 
-    uav::Poly<const uav::IUAV_Descriptor> uav_descriptor;
-    auto result = uav::deserialize(uav_descriptor, json_result.payload());
-    if (result != ts::success)
+    if (!error.get_message().empty())
     {
-        std::string msg = q::util::format<std::string>("Cannot deserialize uav descriptor json: {}", result.error().what());
-        QLOGE("{}", msg);
-        res.get_result() = { msg };
-        serialize_and_send(SETUP_CHANNEL, res);
-        return;
+        res.get_result() = error;
     }
 
-   if (!m_uav.set_uav_descriptor(*uav_descriptor))
-   {
-       std::string msg = q::util::format<std::string>("Cannot set uav descriptor: {}", "N/A");
-       QLOGE("{}", msg);
-       res.get_result() = { msg };
-       serialize_and_send(SETUP_CHANNEL, res);
-       return;
-   }
-   m_uav.save_settings();
-
+    serialize_and_send(SETUP_CHANNEL, res);
 }
 
 void Comms::handle_message(comms::setup::Get_UAV_Descriptor_Req const& message)
