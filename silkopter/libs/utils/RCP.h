@@ -53,7 +53,7 @@ public:
     std::function<void(uint8_t* data, size_t size)> receive_callback;
     std::function<void(Result)> send_callback;
 
-    virtual void async_send(uint8_t const* data, size_t size) = 0;
+    virtual void async_send(void const* data, size_t size) = 0;
 
     virtual auto get_mtu() const -> size_t = 0;
 
@@ -96,12 +96,12 @@ public:
     void set_global_receive_params(Receive_Params const& params);
 
     //sending with default params
-    auto send(uint8_t channel_idx, uint8_t const* data, size_t size) -> bool;
-    auto try_sending(uint8_t channel_idx, uint8_t const* data, size_t size) -> bool;
+    auto send(uint8_t channel_idx, void const* data, size_t size) -> bool;
+    auto try_sending(uint8_t channel_idx, void const* data, size_t size) -> bool;
 
     //sending with overriden params
-    auto send(uint8_t channel_idx, Send_Params const& params, uint8_t const* data, size_t size) -> bool;
-    auto try_sending(uint8_t channel_idx, Send_Params const& params, uint8_t const* data, size_t size) -> bool;
+    auto send(uint8_t channel_idx, Send_Params const& params, void const* data, size_t size) -> bool;
+    auto try_sending(uint8_t channel_idx, Send_Params const& params, void const* data, size_t size) -> bool;
 
     auto receive(uint8_t channel_idx, std::vector<uint8_t>& data) -> bool;
 
@@ -109,7 +109,7 @@ public:
 
 private:
 
-    auto _send_locked(uint8_t channel_idx, Send_Params const& params, uint8_t const* data, size_t size) -> bool;
+    auto _send_locked(uint8_t channel_idx, Send_Params const& params, void const* data, size_t size) -> bool;
 
     static const uint8_t VERSION = 1;
     const q::Clock::duration RECONNECT_BEACON_TIMEOUT = std::chrono::milliseconds(500);
@@ -367,10 +367,10 @@ private:
     std::array<Receive_Params, MAX_CHANNELS> m_receive_params;
     Receive_Params m_global_receive_params;
 
-    template<class H> static auto get_header(uint8_t const* data) -> H const&;
+    template<class H> static auto get_header(void const* data) -> H const&;
     template<class H> static auto get_header(uint8_t* data) -> H&;
-    static auto get_header_size(uint8_t const* data_ptr, size_t data_size) -> size_t;
-    auto compute_crc(uint8_t const* data, size_t size) -> uint32_t;
+    static auto get_header_size(void const* data_ptr, size_t data_size) -> size_t;
+    auto compute_crc(void const* data, size_t size) -> uint32_t;
     //to avoid popping front in vectors
     //Note - I use a vector instead of a deque because the deque is too slow at iterating.
     //The pop_front can be implemented optimally for vectors if order need not be preserved.

@@ -584,11 +584,13 @@ void RCP_RFMON_Socket::unlock()
     m_send_in_progress = false;
 }
 
-void RCP_RFMON_Socket::async_send(uint8_t const* data, size_t size)
+void RCP_RFMON_Socket::async_send(void const* _data, size_t size)
 {
     QASSERT(m_send_in_progress == true);
 
     QASSERT(size <= MAX_USER_PACKET_SIZE);
+
+    uint8_t const* data = reinterpret_cast<uint8_t const*>(_data);
 
     {
         std::unique_lock<std::mutex> lg(m_impl->tx_buffer_mutex);

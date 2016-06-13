@@ -17,6 +17,24 @@ class RCP_Socket;
 
 namespace silk
 {
+namespace comms
+{
+namespace setup
+{
+class Set_Clock_Req;
+class Set_UAV_Descriptor_Req;
+class Get_UAV_Descriptor_Req;
+class Get_Node_Defs_Req;
+class Remove_Node_Req;
+class Add_Node_Req;
+class Set_Node_Input_Stream_Path_Req;
+}
+}
+}
+
+
+namespace silk
+{
 
 class Comms : q::util::Noncopyable
 {
@@ -83,6 +101,19 @@ private:
     void handle_streams_telemetry_active();
     void handle_uav_telemetry_active();
 
+    template<typename T>
+    void serialize_and_send(size_t channel_idx, T const& message);
+
+    class Dispatch_Message_Visitor;
+    friend class Dispatch_Message_Visitor;
+
+    void handle_message(comms::setup::Set_Clock_Req const& message);
+    void handle_message(comms::setup::Set_UAV_Descriptor_Req const& message);
+    void handle_message(comms::setup::Get_UAV_Descriptor_Req const& message);
+    void handle_message(comms::setup::Get_Node_Defs_Req const& message);
+    void handle_message(comms::setup::Remove_Node_Req const& message);
+    void handle_message(comms::setup::Add_Node_Req const& message);
+    void handle_message(comms::setup::Set_Node_Input_Stream_Path_Req const& message);
 
     UAV& m_uav;
     q::Clock::time_point m_uav_sent_tp = q::Clock::now();

@@ -35,6 +35,7 @@
 #include "utils/RCP_RFMON_Socket.h"
 #include "utils/Channel.h"
 
+#include "uav.def.h"
 #include "comms.def.h"
 #include "def_lang/JSON_Serializer.h"
 
@@ -880,6 +881,142 @@ void Comms::handle_multirotor_commands()
     m_multirotor_commands_values.push_back(value);
 }
 
+
+template<typename T>
+void Comms::serialize_and_send(size_t channel_idx, T const& message)
+{
+    if (m_rcp->is_connected())
+    {
+        auto result = silk::comms::serialize(message);
+        if (result != ts::success)
+        {
+            QLOGE("Failed to serialize message: {}", result.error().what());
+            return;
+        }
+        std::string json = ts::serialization::to_json(result.payload(), true);
+        if (!m_rcp->send(channel_idx, json.data(), json.size()))
+        {
+            QLOGE("Failed to send message");
+            return;
+        }
+    }
+}
+
+
+void Comms::handle_message(comms::setup::Set_Clock_Req const& message)
+{
+    auto& channel = m_channels->setup;
+    QLOGI("Req clock");
+
+    int64_t time_t_data = message.get_time();
+#ifdef RASPBERRY_PI
+    time_t t = time_t_data / 1000;
+    if (stime(&t) == 0)
+    {
+        char mbstr[256] = {0};
+        std::time_t t = std::time(nullptr);
+        if (!std::strftime(mbstr, 100, "%e-%m-%Y-%H-%M-%S", std::localtime(&t)))
+        {
+            strcpy(mbstr, "<cannot format>");
+        }
+        QLOGI("Clock set, current time is: {}", mbstr);
+    }
+    else
+    {
+        QLOGE("Failed to set time: {}", strerror(errno));
+    }
+#endif
+
+    comms::setup::Set_Clock_Res res;
+    res.set_time(static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::milliseconds>(q::Clock::now().time_since_epoch()).count()));
+
+    serialize_and_send(SETUP_CHANNEL, res);
+}
+
+void Comms::handle_message(comms::setup::Set_UAV_Descriptor_Req const& message)
+{
+    auto& channel = m_channels->setup;
+    channel.begin_unpack();
+
+    QLOGI("Req uav descriptor");
+
+    comms::setup::Set_UAV_Descriptor_Res res;
+
+    comms::setup::serialized_data_t const& serialized_data = message.get_data();
+
+    auto json_result = ts::serialization::from_json(serialized_data.data(), serialized_data.size());
+    if (json_result != ts::success)
+    {
+        std::string msg = q::util::format<std::string>("Cannot deserialize uav descriptor data: {}", json_result.error().what());
+        QLOGE("{}", msg);
+        res.get_result() = { msg };
+        serialize_and_send(SETUP_CHANNEL, res);
+        return;
+    }
+
+    uav::Poly<const uav::IUAV_Descriptor> uav_descriptor;
+    auto result = uav::deserialize(uav_descriptor, json_result.payload());
+    if (result != ts::success)
+    {
+        std::string msg = q::util::format<std::string>("Cannot deserialize uav descriptor json: {}", result.error().what());
+        QLOGE("{}", msg);
+        res.get_result() = { msg };
+        serialize_and_send(SETUP_CHANNEL, res);
+        return;
+    }
+
+   if (!m_uav.set_uav_descriptor(*uav_descriptor))
+   {
+       std::string msg = q::util::format<std::string>("Cannot set uav descriptor: {}", "N/A");
+       QLOGE("{}", msg);
+       res.get_result() = { msg };
+       serialize_and_send(SETUP_CHANNEL, res);
+       return;
+   }
+   m_uav.save_settings();
+
+}
+
+void Comms::handle_message(comms::setup::Get_UAV_Descriptor_Req const& message)
+{
+
+}
+
+void Comms::handle_message(comms::setup::Get_Node_Defs_Req const& message)
+{
+
+}
+
+void Comms::handle_message(comms::setup::Remove_Node_Req const& message)
+{
+
+}
+
+void Comms::handle_message(comms::setup::Add_Node_Req const& message)
+{
+
+}
+
+void Comms::handle_message(comms::setup::Set_Node_Input_Stream_Path_Req const& message)
+{
+
+}
+
+
+struct Comms::Dispatch_Message_Visitor : boost::static_visitor<void>
+{
+    Dispatch_Message_Visitor(Comms& comms) : m_comms(comms) {}
+
+    template <typename T>
+    void operator()(T const& t) const
+    {
+        m_comms.handle_message(t);
+    }
+
+private:
+    Comms& m_comms;
+};
+
 void Comms::process()
 {
     if (!is_connected())
@@ -900,6 +1037,7 @@ void Comms::process()
 //    }
 
 
+    Dispatch_Message_Visitor dispatcher(*this);
     while (m_rcp->receive(SETUP_CHANNEL, m_channels->setup_buffer))
     {
         auto parse_result = ts::serialization::from_json(m_channels->setup_buffer.data(), m_channels->setup_buffer.size());
@@ -915,6 +1053,7 @@ void Comms::process()
             {
                 QLOGE("Cannot deserialize setup message: {}", result.error().what());
             }
+            boost::apply_visitor(dispatcher, message);
         }
         m_channels->setup_buffer.clear();
     }

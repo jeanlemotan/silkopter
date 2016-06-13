@@ -217,28 +217,27 @@ Result<void> Numeric_Value_Template<Traits>::deserialize(serialization::Value co
         for (size_t i = 0; i < Traits::component_count; i++)
         {
             const char* name = Traits::component_names[i];
-            if (sz_value.get_object_member_name(i) != name)
+            serialization::Value const* component_sz_value = sz_value.find_object_member_by_name(name);
+            if (!component_sz_value)
             {
-                return Error("Unexpected member: '" + sz_value.get_object_member_name(i) + "'. Expected: '" + name + "'");
+                return Error("Cannot find member: '" + std::string(name) + "'");
             }
-
-            serialization::Value const& sz_member_value = sz_value.get_object_member_value(i);
 
             if (Traits::supports_decimals_attribute)
             {
-                if (!sz_member_value.is_number())
+                if (!component_sz_value->is_number())
                 {
                     return Error("Expected number");
                 }
-                detail::set_component(value, static_cast<typename Traits::component_type>(sz_member_value.get_as_number()), i);
+                detail::set_component(value, static_cast<typename Traits::component_type>(component_sz_value->get_as_number()), i);
             }
             else
             {
-                if (!sz_member_value.is_integral_number())
+                if (!component_sz_value->is_integral_number())
                 {
                     return Error("Expected integral number");
                 }
-                detail::set_component(value, static_cast<typename Traits::component_type>(sz_member_value.get_as_integral_number()), i);
+                detail::set_component(value, static_cast<typename Traits::component_type>(component_sz_value->get_as_integral_number()), i);
             }
         }
 

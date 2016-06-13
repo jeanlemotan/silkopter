@@ -25,7 +25,7 @@ public:
     void unlock() override;
 
 private:
-    void async_send(uint8_t const* data, size_t size) override;
+    void async_send(void const* data, size_t size) override;
 
     void handle_receive(const boost::system::error_code& error, std::size_t bytes_transferred);
     void handle_send(const boost::system::error_code& error, std::size_t bytes_transferred);

@@ -17,7 +17,7 @@ public:
 
     auto start() -> bool;
 
-    void async_send(uint8_t const* data, size_t size);
+    void async_send(void const* data, size_t size);
 
     auto get_mtu() const -> size_t;
 

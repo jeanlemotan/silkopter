@@ -82,11 +82,13 @@ void RCP_UDP_Socket::unlock()
     m_send_in_progress = false;
 }
 
-void RCP_UDP_Socket::async_send(uint8_t const* data, size_t size)
+void RCP_UDP_Socket::async_send(void const* _data, size_t size)
 {
     QASSERT(m_send_in_progress == true);
 
     std::lock_guard<std::mutex> lg(m_tx_buffer_mutex);
+
+    uint8_t const* data = reinterpret_cast<uint8_t const*>(_data);
 
     auto buffer = acquire_tx_buffer_locked(size + 1);
 

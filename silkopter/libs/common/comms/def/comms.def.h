@@ -49,7 +49,18 @@ namespace setup
 {
 
 typedef int64_t time_ms_t;
-typedef std::string serialized_data;
+typedef std::string serialized_data_t;
+struct Error
+{
+public:
+  virtual ~Error() = default;
+  void set_message(std::string const& value);
+  auto get_message() const -> std::string const&;
+
+private:
+  std::string m_message;
+};
+
 struct Set_Clock_Req
 {
 public:
@@ -68,30 +79,36 @@ public:
   void set_time(setup::time_ms_t const& value);
   auto get_time() const -> setup::time_ms_t const&;
 
+  void set_error(boost::optional<setup::Error> const& value);
+  auto get_error() const -> boost::optional<setup::Error> const&;
+  auto get_error() -> boost::optional<setup::Error>&;
+
 private:
   setup::time_ms_t m_time = {0};
+  boost::optional<setup::Error> m_error;
 };
 
 struct Set_UAV_Descriptor_Req
 {
 public:
   virtual ~Set_UAV_Descriptor_Req() = default;
-  void set_data(setup::serialized_data const& value);
-  auto get_data() const -> setup::serialized_data const&;
+  void set_data(setup::serialized_data_t const& value);
+  auto get_data() const -> setup::serialized_data_t const&;
 
 private:
-  setup::serialized_data m_data;
+  setup::serialized_data_t m_data;
 };
 
 struct Set_UAV_Descriptor_Res
 {
 public:
   virtual ~Set_UAV_Descriptor_Res() = default;
-  void set_data(setup::serialized_data const& value);
-  auto get_data() const -> setup::serialized_data const&;
+  void set_result(boost::variant<setup::serialized_data_t,setup::Error> const& value);
+  auto get_result() const -> boost::variant<setup::serialized_data_t,setup::Error> const&;
+  auto get_result() -> boost::variant<setup::serialized_data_t,setup::Error>&;
 
 private:
-  setup::serialized_data m_data;
+  boost::variant<setup::serialized_data_t,setup::Error> m_result;
 };
 
 struct Get_UAV_Descriptor_Req
@@ -105,11 +122,11 @@ struct Get_UAV_Descriptor_Res
 {
 public:
   virtual ~Get_UAV_Descriptor_Res() = default;
-  void set_data(setup::serialized_data const& value);
-  auto get_data() const -> setup::serialized_data const&;
+  void set_data(setup::serialized_data_t const& value);
+  auto get_data() const -> setup::serialized_data_t const&;
 
 private:
-  setup::serialized_data m_data;
+  setup::serialized_data_t m_data;
 };
 
 struct Node_Def_Data
@@ -168,15 +185,15 @@ public:
   auto get_outputs() const -> std::vector<setup::Node_Def_Data::Output> const&;
   auto get_outputs() -> std::vector<setup::Node_Def_Data::Output>&;
 
-  void set_descriptor_data(setup::serialized_data const& value);
-  auto get_descriptor_data() const -> setup::serialized_data const&;
+  void set_descriptor_data(setup::serialized_data_t const& value);
+  auto get_descriptor_data() const -> setup::serialized_data_t const&;
 
 private:
   std::string m_name;
   std::string m_type;
   std::vector<setup::Node_Def_Data::Input> m_inputs;
   std::vector<setup::Node_Def_Data::Output> m_outputs;
-  setup::serialized_data m_descriptor_data;
+  setup::serialized_data_t m_descriptor_data;
 };
 
 struct Get_Node_Defs_Req
@@ -258,19 +275,19 @@ public:
   auto get_outputs() const -> std::vector<setup::Node_Data::Output> const&;
   auto get_outputs() -> std::vector<setup::Node_Data::Output>&;
 
-  void set_descriptor_data(setup::serialized_data const& value);
-  auto get_descriptor_data() const -> setup::serialized_data const&;
+  void set_descriptor_data(setup::serialized_data_t const& value);
+  auto get_descriptor_data() const -> setup::serialized_data_t const&;
 
-  void set_config_data(setup::serialized_data const& value);
-  auto get_config_data() const -> setup::serialized_data const&;
+  void set_config_data(setup::serialized_data_t const& value);
+  auto get_config_data() const -> setup::serialized_data_t const&;
 
 private:
   std::string m_name;
   std::string m_type;
   std::vector<setup::Node_Data::Input> m_inputs;
   std::vector<setup::Node_Data::Output> m_outputs;
-  setup::serialized_data m_descriptor_data;
-  setup::serialized_data m_config_data;
+  setup::serialized_data_t m_descriptor_data;
+  setup::serialized_data_t m_config_data;
 };
 
 struct Get_Nodes_Req
@@ -318,24 +335,13 @@ private:
 struct Set_Node_Input_Stream_Path_Res
 {
 public:
-  struct Error
-  {
-  public:
-    virtual ~Error() = default;
-    void set_message(std::string const& value);
-    auto get_message() const -> std::string const&;
-
-  private:
-    std::string m_message;
-  };
-
   virtual ~Set_Node_Input_Stream_Path_Res() = default;
-  void set_result(boost::variant<setup::Node_Data,Error> const& value);
-  auto get_result() const -> boost::variant<setup::Node_Data,Error> const&;
-  auto get_result() -> boost::variant<setup::Node_Data,Error>&;
+  void set_result(boost::variant<setup::Node_Data,setup::Error> const& value);
+  auto get_result() const -> boost::variant<setup::Node_Data,setup::Error> const&;
+  auto get_result() -> boost::variant<setup::Node_Data,setup::Error>&;
 
 private:
-  boost::variant<setup::Node_Data,Error> m_result;
+  boost::variant<setup::Node_Data,setup::Error> m_result;
 };
 
 struct Add_Node_Req
@@ -348,13 +354,13 @@ public:
   void set_name(std::string const& value);
   auto get_name() const -> std::string const&;
 
-  void set_descriptor_data(setup::serialized_data const& value);
-  auto get_descriptor_data() const -> setup::serialized_data const&;
+  void set_descriptor_data(setup::serialized_data_t const& value);
+  auto get_descriptor_data() const -> setup::serialized_data_t const&;
 
 private:
   std::string m_def_name;
   std::string m_name;
-  setup::serialized_data m_descriptor_data;
+  setup::serialized_data_t m_descriptor_data;
 };
 
 struct Add_Node_Res
@@ -456,6 +462,8 @@ ts::Result<void> deserialize(int32_t& value, ts::serialization::Value const& sz_
 ts::Result<ts::serialization::Value> serialize(int32_t const& value);
 ts::Result<void> deserialize(uint32_t& value, ts::serialization::Value const& sz_value);
 ts::Result<ts::serialization::Value> serialize(uint32_t const& value);
+ts::Result<void> deserialize(setup::Error& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(setup::Error const& value);
 ts::Result<void> deserialize(setup::Set_Clock_Req& value, ts::serialization::Value const& sz_value);
 ts::Result<ts::serialization::Value> serialize(setup::Set_Clock_Req const& value);
 ts::Result<void> deserialize(setup::Set_Clock_Res& value, ts::serialization::Value const& sz_value);
@@ -490,8 +498,6 @@ ts::Result<void> deserialize(setup::Get_Nodes_Res& value, ts::serialization::Val
 ts::Result<ts::serialization::Value> serialize(setup::Get_Nodes_Res const& value);
 ts::Result<void> deserialize(setup::Set_Node_Input_Stream_Path_Req& value, ts::serialization::Value const& sz_value);
 ts::Result<ts::serialization::Value> serialize(setup::Set_Node_Input_Stream_Path_Req const& value);
-ts::Result<void> deserialize(setup::Set_Node_Input_Stream_Path_Res::Error& value, ts::serialization::Value const& sz_value);
-ts::Result<ts::serialization::Value> serialize(setup::Set_Node_Input_Stream_Path_Res::Error const& value);
 ts::Result<void> deserialize(setup::Set_Node_Input_Stream_Path_Res& value, ts::serialization::Value const& sz_value);
 ts::Result<ts::serialization::Value> serialize(setup::Set_Node_Input_Stream_Path_Res const& value);
 ts::Result<void> deserialize(setup::Add_Node_Req& value, ts::serialization::Value const& sz_value);
@@ -508,6 +514,10 @@ ts::Result<void> deserialize(setup::Remove_Node_Res& value, ts::serialization::V
 ts::Result<ts::serialization::Value> serialize(setup::Remove_Node_Res const& value);
 ts::Result<void> deserialize(setup::Brain_Message& value, ts::serialization::Value const& sz_value);
 ts::Result<ts::serialization::Value> serialize(setup::Brain_Message const& value);
+ts::Result<void> deserialize(boost::optional<setup::Error>& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(boost::optional<setup::Error> const& value);
+ts::Result<void> deserialize(boost::variant<setup::serialized_data_t,setup::Error>& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(boost::variant<setup::serialized_data_t,setup::Error> const& value);
 ts::Result<void> deserialize(std::vector<setup::Node_Def_Data::Input>& value, ts::serialization::Value const& sz_value);
 ts::Result<ts::serialization::Value> serialize(std::vector<setup::Node_Def_Data::Input> const& value);
 ts::Result<void> deserialize(std::vector<setup::Node_Def_Data::Output>& value, ts::serialization::Value const& sz_value);
@@ -520,8 +530,8 @@ ts::Result<void> deserialize(std::vector<setup::Node_Data::Output>& value, ts::s
 ts::Result<ts::serialization::Value> serialize(std::vector<setup::Node_Data::Output> const& value);
 ts::Result<void> deserialize(std::vector<setup::Node_Data>& value, ts::serialization::Value const& sz_value);
 ts::Result<ts::serialization::Value> serialize(std::vector<setup::Node_Data> const& value);
-ts::Result<void> deserialize(boost::variant<setup::Node_Data,setup::Set_Node_Input_Stream_Path_Res::Error>& value, ts::serialization::Value const& sz_value);
-ts::Result<ts::serialization::Value> serialize(boost::variant<setup::Node_Data,setup::Set_Node_Input_Stream_Path_Res::Error> const& value);
+ts::Result<void> deserialize(boost::variant<setup::Node_Data,setup::Error>& value, ts::serialization::Value const& sz_value);
+ts::Result<ts::serialization::Value> serialize(boost::variant<setup::Node_Data,setup::Error> const& value);
 ts::Result<void> deserialize(boost::variant<setup::Node_Data,setup::Add_Node_Res::Error>& value, ts::serialization::Value const& sz_value);
 ts::Result<ts::serialization::Value> serialize(boost::variant<setup::Node_Data,setup::Add_Node_Res::Error> const& value);
 ts::Result<void> deserialize(boost::optional<setup::Remove_Node_Res::Error>& value, ts::serialization::Value const& sz_value);

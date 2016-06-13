@@ -46,7 +46,7 @@ auto RCP::RX::acquire_packet() -> RCP::RX::Packet_ptr
     return packet;
 }
 
-template<class H> auto RCP::get_header(uint8_t const* data) -> H const&
+template<class H> auto RCP::get_header(void const* data) -> H const&
 {
     QASSERT(data);
     auto const& h = *reinterpret_cast<H const*>(data);
@@ -59,7 +59,7 @@ template<class H> auto RCP::get_header(uint8_t* data) -> H&
     return h;
 }
 
-auto RCP::get_header_size(uint8_t const* data_ptr, size_t data_size) -> size_t
+auto RCP::get_header_size(void const* data_ptr, size_t data_size) -> size_t
 {
     if (data_size < sizeof(Header))
     {
@@ -80,7 +80,7 @@ auto RCP::get_header_size(uint8_t const* data_ptr, size_t data_size) -> size_t
     return 0;
 }
 
-auto RCP::compute_crc(uint8_t const* data, size_t size) -> uint32_t
+auto RCP::compute_crc(void const* data, size_t size) -> uint32_t
 {
     auto crc = q::util::compute_murmur_hash32(data, size, 0);
     return crc;
@@ -220,18 +220,18 @@ auto RCP::is_connected() const -> bool
     }
     return is_connected;
 }
-auto RCP::send(uint8_t channel_idx, uint8_t const* data, size_t size) -> bool
+auto RCP::send(uint8_t channel_idx, void const* data, size_t size) -> bool
 {
     auto const& params = m_send_params[channel_idx];
     return send(channel_idx, params, data, size);
 }
-auto RCP::try_sending(uint8_t channel_idx, uint8_t const* data, size_t size) -> bool
+auto RCP::try_sending(uint8_t channel_idx, void const* data, size_t size) -> bool
 {
     auto const& params = m_send_params[channel_idx];
     return try_sending(channel_idx, params, data, size);
 }
 
-auto RCP::send(uint8_t channel_idx, Send_Params const& params, uint8_t const* data, size_t size) -> bool
+auto RCP::send(uint8_t channel_idx, Send_Params const& params, void const* data, size_t size) -> bool
 {
     QLOG_TOPIC("RCP::send");
     if (!data || size == 0 || channel_idx >= MAX_CHANNELS)
@@ -250,7 +250,7 @@ auto RCP::send(uint8_t channel_idx, Send_Params const& params, uint8_t const* da
 
     return _send_locked(channel_idx, params, data, size);
 }
-auto RCP::try_sending(uint8_t channel_idx, Send_Params const& params, uint8_t const* data, size_t size) -> bool
+auto RCP::try_sending(uint8_t channel_idx, Send_Params const& params, void const* data, size_t size) -> bool
 {
     QLOG_TOPIC("RCP::try_sending");
     if (!data || size == 0 || channel_idx >= MAX_CHANNELS)
@@ -275,7 +275,7 @@ auto RCP::try_sending(uint8_t channel_idx, Send_Params const& params, uint8_t co
     return false;
 }
 
-auto RCP::_send_locked(uint8_t channel_idx, Send_Params const& params, uint8_t const* data, size_t size) -> bool
+auto RCP::_send_locked(uint8_t channel_idx, Send_Params const& params, void const* _data, size_t size) -> bool
 {
     //The send mutex should be locked here!!!
     if (size >= (1 << 24))
@@ -283,6 +283,8 @@ auto RCP::_send_locked(uint8_t channel_idx, Send_Params const& params, uint8_t c
         QLOGE("Packet too big: {}.", size);
         return false;
     }
+
+    uint8_t const* data = reinterpret_cast<uint8_t const*>(_data);
 
     TX::Channel_Data& channel_data = m_tx.channel_data[channel_idx];
 

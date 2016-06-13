@@ -254,15 +254,17 @@ Result<void> Struct_Value::deserialize(serialization::Value const& sz_value)
         return Error("Expected object value when deserializing");
     }
 
-    for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
+    for (size_t i = 0; i < get_member_count(); i++)
     {
-        std::string const& name = sz_value.get_object_member_name(i);
-        std::shared_ptr<IMember> member = find_member_by_name(name);
-        if (!member)
+        std::string const& name = get_specialized_type()->get_member_def(i)->get_name();
+        serialization::Value const* member_sz_value = sz_value.find_object_member_by_name(name);
+        if (!member_sz_value)
         {
             return Error("Cannot find member name '" + name + "'");
         }
-        auto result = member->get_value()->deserialize(sz_value.get_object_member_value(i));
+
+        std::shared_ptr<IMember> member = get_member(i);
+        auto result = member->get_value()->deserialize(*member_sz_value);
         if (result != ts::success)
         {
             return result;
