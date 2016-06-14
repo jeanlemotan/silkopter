@@ -70,8 +70,8 @@ public:
 
     std::string to_string(size_t ident, bool deep) const;
 
-    Result<serialization::Value> serialize() const;
-    Result<void> deserialize(serialization::Value const& value);
+    Result<sz::Value> serialize() const;
+    Result<void> deserialize(sz::Value const& value);
 
 private:
     Type m_type = Type::NONE;

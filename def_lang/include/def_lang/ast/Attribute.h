@@ -40,7 +40,7 @@ public:
 
     std::string to_string() const;
 
-    Result<serialization::Value> serialize() const;
+    Result<sz::Value> serialize() const;
 
 private:
     Type m_type;

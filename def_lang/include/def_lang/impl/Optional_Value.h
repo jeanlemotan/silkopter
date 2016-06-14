@@ -30,8 +30,8 @@ public:
     std::shared_ptr<const IValue> select(Value_Selector&& selector) const override;
     std::shared_ptr<IValue> select(Value_Selector&& selector) override;
 
-    Result<serialization::Value> serialize() const override;
-    Result<void> deserialize(serialization::Value const&) override;
+    Result<sz::Value> serialize() const override;
+    Result<void> deserialize(sz::Value const&) override;
 
     std::shared_ptr<IOptional_Type const> get_specialized_type() const override;
 

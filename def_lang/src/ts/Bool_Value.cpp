@@ -63,7 +63,7 @@ Result<void> Bool_Value::copy_assign(IInitializer_List const& initializer_list)
     return copy_assign(*initializer->get_literal()->get_value());
 }
 
-Result<serialization::Value> Bool_Value::serialize() const
+Result<sz::Value> Bool_Value::serialize() const
 {
     if (!is_constructed())
     {
@@ -71,10 +71,10 @@ Result<serialization::Value> Bool_Value::serialize() const
         return Error("Unconstructed value");
     }
 
-    return serialization::Value(get_value());
+    return sz::Value(get_value());
 }
 
-Result<void> Bool_Value::deserialize(serialization::Value const& sz_value)
+Result<void> Bool_Value::deserialize(sz::Value const& sz_value)
 {
     if (!is_constructed())
     {

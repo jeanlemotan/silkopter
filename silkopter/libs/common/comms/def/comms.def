@@ -39,7 +39,7 @@ struct Set_UAV_Descriptor_Req
 };
 struct Set_UAV_Descriptor_Res
 {
-    variant<serialized_data_t, Error> result;
+    serialized_data_t data;
 };
 
 ////////////////////////////////////////////////////////////////
@@ -129,7 +129,7 @@ struct Set_Node_Input_Stream_Path_Req
 };
 struct Set_Node_Input_Stream_Path_Res
 {
-    variant<Node_Data, Error> result;
+    Node_Data node_data;
 };
 
 ////////////////////////////////////////////////////////////////
@@ -142,12 +142,7 @@ struct Add_Node_Req
 };
 struct Add_Node_Res
 {
-    struct Error
-    {
-        string message;
-    };
-
-    variant<Node_Data, Error> result;
+    Node_Data node_data;
 };
 
 ////////////////////////////////////////////////////////////////
@@ -158,19 +153,15 @@ struct Remove_Node_Req
 };
 struct Remove_Node_Res
 {
-    struct Error
-    {
-        string message;
-    };
-
-    optional<Error> error;
 };
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-alias Brain_Message = variant<Set_Clock_Req, Set_UAV_Descriptor_Req, Get_UAV_Descriptor_Req, Get_Node_Defs_Req, Remove_Node_Req, Add_Node_Req, Set_Node_Input_Stream_Path_Req>;
+alias Brain_Req = variant<Set_Clock_Req, Set_UAV_Descriptor_Req, Get_UAV_Descriptor_Req, Get_Node_Defs_Req, Remove_Node_Req, Add_Node_Req, Get_Nodes_Req, Set_Node_Input_Stream_Path_Req>;
+
+alias Brain_Res = variant<Set_Clock_Res, Set_UAV_Descriptor_Res, Get_UAV_Descriptor_Res, Get_Node_Defs_Res, Remove_Node_Res, Add_Node_Res, Get_Nodes_Res, Set_Node_Input_Stream_Path_Res, Error>;
 
 }
 

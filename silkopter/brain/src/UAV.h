@@ -88,12 +88,20 @@ public:
 
     q::util::Signal<void(UAV&)> descriptor_changed_signal;
 
-    auto get_bus_factory()          -> const Factory<bus::IBus>&;
-    auto get_node_factory()         -> const Factory<node::INode>&;
+    typedef Factory<bus::IBus> Bus_Factory;
+    Bus_Factory const& get_bus_factory() const;
 
-    auto get_buses()        -> const Registry<bus::IBus>&;
-    auto get_nodes()        -> const Registry<node::INode>&;
-    auto get_streams()      -> const Registry<stream::IStream>&;
+    typedef Factory<node::INode> Node_Factory;
+    Node_Factory const& get_node_factory() const;
+
+    typedef Registry<bus::IBus> Bus_Registry;
+    Bus_Registry const& get_buses() const;
+
+    typedef Registry<node::INode> Node_Registry;
+    Node_Registry const& get_nodes() const;
+
+    typedef Registry<stream::IStream> Stream_Registry;
+    Stream_Registry const& get_streams() const;
 
     void remove_add_nodes();
 
@@ -127,12 +135,12 @@ private:
 
     std::shared_ptr<uav::IUAV_Descriptor> m_uav_descriptor;
 
-    Registry<bus::IBus> m_buses;
-    Registry<node::INode> m_nodes;
-    Registry<stream::IStream> m_streams;
+    Bus_Registry m_buses;
+    Node_Registry m_nodes;
+    Stream_Registry m_streams;
 
-    Factory<bus::IBus> m_bus_factory;
-    Factory<node::INode> m_node_factory;
+    Bus_Factory m_bus_factory;
+    Node_Factory m_node_factory;
 
     q::Clock::time_point m_last_process_tp = q::Clock::now();
 

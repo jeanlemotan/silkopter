@@ -35,8 +35,8 @@ public:
     virtual std::shared_ptr<const IValue> select(Value_Selector&& selector) const = 0;
     virtual std::shared_ptr<IValue> select(Value_Selector&& selector) = 0;
 
-    virtual Result<serialization::Value> serialize() const = 0;
-    virtual Result<void> deserialize(serialization::Value const&) = 0;
+    virtual Result<sz::Value> serialize() const = 0;
+    virtual Result<void> deserialize(sz::Value const&) = 0;
 
     template<typename T>
     std::shared_ptr<const T> select_specialized(Value_Selector&& selector) const;

@@ -26,6 +26,7 @@ class Set_UAV_Descriptor_Req;
 class Get_UAV_Descriptor_Req;
 class Get_Node_Defs_Req;
 class Remove_Node_Req;
+class Get_Nodes_Req;
 class Add_Node_Req;
 class Set_Node_Input_Stream_Path_Req;
 }
@@ -102,18 +103,19 @@ private:
     void handle_uav_telemetry_active();
 
     template<typename T>
-    void serialize_and_send(size_t channel_idx, T const& message);
+    void serialize_and_send(size_t channel_idx, T const& res);
 
-    class Dispatch_Message_Visitor;
-    friend class Dispatch_Message_Visitor;
+    class Dispatch_Req_Visitor;
+    friend class Dispatch_Req_Visitor;
 
-    void handle_message(comms::setup::Set_Clock_Req const& message);
-    void handle_message(comms::setup::Set_UAV_Descriptor_Req const& message);
-    void handle_message(comms::setup::Get_UAV_Descriptor_Req const& message);
-    void handle_message(comms::setup::Get_Node_Defs_Req const& message);
-    void handle_message(comms::setup::Remove_Node_Req const& message);
-    void handle_message(comms::setup::Add_Node_Req const& message);
-    void handle_message(comms::setup::Set_Node_Input_Stream_Path_Req const& message);
+    void handle_req(comms::setup::Set_Clock_Req const& req);
+    void handle_req(comms::setup::Set_UAV_Descriptor_Req const& req);
+    void handle_req(comms::setup::Get_UAV_Descriptor_Req const& req);
+    void handle_req(comms::setup::Get_Node_Defs_Req const& req);
+    void handle_req(comms::setup::Remove_Node_Req const& req);
+    void handle_req(comms::setup::Get_Nodes_Req const& req);
+    void handle_req(comms::setup::Add_Node_Req const& req);
+    void handle_req(comms::setup::Set_Node_Input_Stream_Path_Req const& req);
 
     UAV& m_uav;
     q::Clock::time_point m_uav_sent_tp = q::Clock::now();

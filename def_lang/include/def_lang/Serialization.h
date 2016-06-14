@@ -8,7 +8,7 @@
 
 namespace ts
 {
-namespace serialization
+namespace sz
 {
 struct Value final
 {
@@ -35,6 +35,7 @@ struct Value final
 
     ~Value();
 
+    Value() noexcept; //EMPTY
     Value(Type      type) noexcept;
     Value(bool      value) noexcept;
     Value(int8_t    value) noexcept;

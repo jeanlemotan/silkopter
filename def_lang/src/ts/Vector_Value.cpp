@@ -224,14 +224,14 @@ std::shared_ptr<IVector_Type const> Vector_Value::get_specialized_type() const
     return m_type;
 }
 
-Result<serialization::Value> Vector_Value::serialize() const
+Result<sz::Value> Vector_Value::serialize() const
 {
     if (!is_constructed())
     {
         TS_ASSERT(false);
         return Error("Unconstructed value");
     }
-    serialization::Value svalue(serialization::Value::Type::ARRAY);
+    sz::Value svalue(sz::Value::Type::ARRAY);
 
     for (size_t i = 0; i < get_value_count(); i++)
     {
@@ -246,7 +246,7 @@ Result<serialization::Value> Vector_Value::serialize() const
     return std::move(svalue);
 }
 
-Result<void> Vector_Value::deserialize(serialization::Value const& sz_value)
+Result<void> Vector_Value::deserialize(sz::Value const& sz_value)
 {
     if (!is_constructed())
     {

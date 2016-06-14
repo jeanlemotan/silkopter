@@ -162,16 +162,16 @@ std::shared_ptr<IVariant_Type const> Variant_Value::get_specialized_type() const
     return m_type;
 }
 
-Result<serialization::Value> Variant_Value::serialize() const
+Result<sz::Value> Variant_Value::serialize() const
 {
     if (!is_constructed())
     {
         TS_ASSERT(false);
         return Error("Unconstructed value");
     }
-    serialization::Value svalue(serialization::Value::Type::OBJECT);
+    sz::Value svalue(sz::Value::Type::OBJECT);
 
-    svalue.add_object_member("type", serialization::Value(m_type->get_inner_qualified_type(get_value_type_index())->get_type()->get_symbol_path().to_string()));
+    svalue.add_object_member("type", sz::Value(m_type->get_inner_qualified_type(get_value_type_index())->get_type()->get_symbol_path().to_string()));
 
     auto result = get_value()->serialize();
     if (result != success)
@@ -183,7 +183,7 @@ Result<serialization::Value> Variant_Value::serialize() const
     return std::move(svalue);
 }
 
-Result<void> Variant_Value::deserialize(serialization::Value const& sz_value)
+Result<void> Variant_Value::deserialize(sz::Value const& sz_value)
 {
     if (!is_constructed())
     {
@@ -196,7 +196,7 @@ Result<void> Variant_Value::deserialize(serialization::Value const& sz_value)
     }
 
 
-    serialization::Value const* type_sz_value = sz_value.find_object_member_by_name("type");
+    sz::Value const* type_sz_value = sz_value.find_object_member_by_name("type");
     if (!type_sz_value || !type_sz_value->is_string())
     {
         return Error("Expected 'type' string value when deserializing");
@@ -214,7 +214,7 @@ Result<void> Variant_Value::deserialize(serialization::Value const& sz_value)
         return Error("Cannot create type '" + type->get_symbol_path().to_string() + "' when deserializing: " + result.error().what());
     }
 
-    serialization::Value const* value_sz_value = sz_value.find_object_member_by_name("value");
+    sz::Value const* value_sz_value = sz_value.find_object_member_by_name("value");
     if (!value_sz_value)
     {
         return Error("Expected 'value' when deserializing");

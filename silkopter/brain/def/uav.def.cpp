@@ -3501,89 +3501,57 @@ std::string const& get_ast_json()
   }
 
 ////////////////////////////////////////////////////////////
-ts::Result<void> deserialize(bool& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(bool& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_bool()) { return ts::Error("Expected bool value when deserializing"); }
   value = sz_value.get_as_bool();
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(bool const& value)
+ts::sz::Value serialize(bool const& value)
 {
-  return ts::serialization::Value(value);
+  return ts::sz::Value(value);
 }
-ts::Result<void> deserialize(std::string& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(std::string& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_string()) { return ts::Error("Expected string value when deserializing"); }
   value = sz_value.get_as_string();
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(std::string const& value)
+ts::sz::Value serialize(std::string const& value)
 {
-  return ts::serialization::Value(value);
+  return ts::sz::Value(value);
 }
-ts::Result<void> deserialize(int64_t& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(int64_t& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_integral_number()) { return ts::Error("Expected integral number value when deserializing"); }
   value = sz_value.get_as_integral_number();
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(int64_t const& value)
+ts::sz::Value serialize(int64_t const& value)
 {
-  return ts::serialization::Value(value);
+  return ts::sz::Value(value);
 }
-ts::Result<void> deserialize(float& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(float& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_real_number()) { return ts::Error("Expected real number value when deserializing"); }
   value = (float)sz_value.get_as_real_number();
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(float const& value)
+ts::sz::Value serialize(float const& value)
 {
-  return ts::serialization::Value(value);
+  return ts::sz::Value(value);
 }
-ts::Result<void> deserialize(double& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(double& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_real_number()) { return ts::Error("Expected real number value when deserializing"); }
   value = sz_value.get_as_real_number();
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(double const& value)
+ts::sz::Value serialize(double const& value)
 {
-  return ts::serialization::Value(value);
+  return ts::sz::Value(value);
 }
-ts::Result<void> deserialize(vec2f& value, ts::serialization::Value const& sz_value)
-{
-  if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
-  {
-    auto const* sz_v = sz_value.find_object_member_by_name("x");
-    if (!sz_v) { return ts::Error("Cannot find component 'x'"); }
-    auto result = deserialize(value.x, *sz_v);
-    if (result != ts::success) { return result; }
-  }
-  {
-    auto const* sz_v = sz_value.find_object_member_by_name("y");
-    if (!sz_v) { return ts::Error("Cannot find component 'y'"); }
-    auto result = deserialize(value.y, *sz_v);
-    if (result != ts::success) { return result; }
-  }
-  return ts::success;
-}
-ts::Result<ts::serialization::Value> serialize(vec2f const& value)
-{
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
-  {
-    auto result = serialize(value.x);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("x", result.extract_payload());
-  }
-  {
-    auto result = serialize(value.y);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("y", result.extract_payload());
-  }
-  return sz_value;
-}
-ts::Result<void> deserialize(vec2d& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(vec2f& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -3600,22 +3568,20 @@ ts::Result<void> deserialize(vec2d& value, ts::serialization::Value const& sz_va
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(vec2d const& value)
+ts::sz::Value serialize(vec2f const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.x);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("x", result.extract_payload());
+    sz_value.add_object_member("x", std::move(result));
   }
   {
     auto result = serialize(value.y);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("y", result.extract_payload());
+    sz_value.add_object_member("y", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(vec2i& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(vec2d& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -3632,22 +3598,20 @@ ts::Result<void> deserialize(vec2i& value, ts::serialization::Value const& sz_va
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(vec2i const& value)
+ts::sz::Value serialize(vec2d const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.x);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("x", result.extract_payload());
+    sz_value.add_object_member("x", std::move(result));
   }
   {
     auto result = serialize(value.y);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("y", result.extract_payload());
+    sz_value.add_object_member("y", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(vec3f& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(vec2i& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -3662,35 +3626,22 @@ ts::Result<void> deserialize(vec3f& value, ts::serialization::Value const& sz_va
     auto result = deserialize(value.y, *sz_v);
     if (result != ts::success) { return result; }
   }
-  {
-    auto const* sz_v = sz_value.find_object_member_by_name("z");
-    if (!sz_v) { return ts::Error("Cannot find component 'z'"); }
-    auto result = deserialize(value.z, *sz_v);
-    if (result != ts::success) { return result; }
-  }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(vec3f const& value)
+ts::sz::Value serialize(vec2i const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.x);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("x", result.extract_payload());
+    sz_value.add_object_member("x", std::move(result));
   }
   {
     auto result = serialize(value.y);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("y", result.extract_payload());
-  }
-  {
-    auto result = serialize(value.z);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("z", result.extract_payload());
+    sz_value.add_object_member("y", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(vec3d& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(vec3f& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -3713,27 +3664,24 @@ ts::Result<void> deserialize(vec3d& value, ts::serialization::Value const& sz_va
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(vec3d const& value)
+ts::sz::Value serialize(vec3f const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.x);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("x", result.extract_payload());
+    sz_value.add_object_member("x", std::move(result));
   }
   {
     auto result = serialize(value.y);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("y", result.extract_payload());
+    sz_value.add_object_member("y", std::move(result));
   }
   {
     auto result = serialize(value.z);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("z", result.extract_payload());
+    sz_value.add_object_member("z", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(vec3i& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(vec3d& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -3756,27 +3704,64 @@ ts::Result<void> deserialize(vec3i& value, ts::serialization::Value const& sz_va
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(vec3i const& value)
+ts::sz::Value serialize(vec3d const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.x);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("x", result.extract_payload());
+    sz_value.add_object_member("x", std::move(result));
   }
   {
     auto result = serialize(value.y);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("y", result.extract_payload());
+    sz_value.add_object_member("y", std::move(result));
   }
   {
     auto result = serialize(value.z);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("z", result.extract_payload());
+    sz_value.add_object_member("z", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(vec4f& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(vec3i& value, ts::sz::Value const& sz_value)
+{
+  if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  {
+    auto const* sz_v = sz_value.find_object_member_by_name("x");
+    if (!sz_v) { return ts::Error("Cannot find component 'x'"); }
+    auto result = deserialize(value.x, *sz_v);
+    if (result != ts::success) { return result; }
+  }
+  {
+    auto const* sz_v = sz_value.find_object_member_by_name("y");
+    if (!sz_v) { return ts::Error("Cannot find component 'y'"); }
+    auto result = deserialize(value.y, *sz_v);
+    if (result != ts::success) { return result; }
+  }
+  {
+    auto const* sz_v = sz_value.find_object_member_by_name("z");
+    if (!sz_v) { return ts::Error("Cannot find component 'z'"); }
+    auto result = deserialize(value.z, *sz_v);
+    if (result != ts::success) { return result; }
+  }
+  return ts::success;
+}
+ts::sz::Value serialize(vec3i const& value)
+{
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
+  {
+    auto result = serialize(value.x);
+    sz_value.add_object_member("x", std::move(result));
+  }
+  {
+    auto result = serialize(value.y);
+    sz_value.add_object_member("y", std::move(result));
+  }
+  {
+    auto result = serialize(value.z);
+    sz_value.add_object_member("z", std::move(result));
+  }
+  return sz_value;
+}
+ts::Result<void> deserialize(vec4f& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -3805,32 +3790,28 @@ ts::Result<void> deserialize(vec4f& value, ts::serialization::Value const& sz_va
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(vec4f const& value)
+ts::sz::Value serialize(vec4f const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.x);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("x", result.extract_payload());
+    sz_value.add_object_member("x", std::move(result));
   }
   {
     auto result = serialize(value.y);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("y", result.extract_payload());
+    sz_value.add_object_member("y", std::move(result));
   }
   {
     auto result = serialize(value.z);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("z", result.extract_payload());
+    sz_value.add_object_member("z", std::move(result));
   }
   {
     auto result = serialize(value.w);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("w", result.extract_payload());
+    sz_value.add_object_member("w", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(vec4d& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(vec4d& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -3859,32 +3840,28 @@ ts::Result<void> deserialize(vec4d& value, ts::serialization::Value const& sz_va
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(vec4d const& value)
+ts::sz::Value serialize(vec4d const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.x);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("x", result.extract_payload());
+    sz_value.add_object_member("x", std::move(result));
   }
   {
     auto result = serialize(value.y);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("y", result.extract_payload());
+    sz_value.add_object_member("y", std::move(result));
   }
   {
     auto result = serialize(value.z);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("z", result.extract_payload());
+    sz_value.add_object_member("z", std::move(result));
   }
   {
     auto result = serialize(value.w);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("w", result.extract_payload());
+    sz_value.add_object_member("w", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(vec4i& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(vec4i& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -3913,92 +3890,88 @@ ts::Result<void> deserialize(vec4i& value, ts::serialization::Value const& sz_va
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(vec4i const& value)
+ts::sz::Value serialize(vec4i const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.x);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("x", result.extract_payload());
+    sz_value.add_object_member("x", std::move(result));
   }
   {
     auto result = serialize(value.y);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("y", result.extract_payload());
+    sz_value.add_object_member("y", std::move(result));
   }
   {
     auto result = serialize(value.z);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("z", result.extract_payload());
+    sz_value.add_object_member("z", std::move(result));
   }
   {
     auto result = serialize(value.w);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("w", result.extract_payload());
+    sz_value.add_object_member("w", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(int8_t& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(int8_t& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_integral_number()) { return ts::Error("Expected integral number value when deserializing"); }
   value = sz_value.get_as_integral_number();
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(int8_t const& value)
+ts::sz::Value serialize(int8_t const& value)
 {
-  return ts::serialization::Value(value);
+  return ts::sz::Value(value);
 }
-ts::Result<void> deserialize(uint8_t& value, ts::serialization::Value const& sz_value)
-{
-  if (!sz_value.is_integral_number()) { return ts::Error("Expected integral number value when deserializing"); }
-  value = sz_value.get_as_integral_number();
-  return ts::success;
-}
-ts::Result<ts::serialization::Value> serialize(uint8_t const& value)
-{
-  return ts::serialization::Value(value);
-}
-ts::Result<void> deserialize(int16_t& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(uint8_t& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_integral_number()) { return ts::Error("Expected integral number value when deserializing"); }
   value = sz_value.get_as_integral_number();
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(int16_t const& value)
+ts::sz::Value serialize(uint8_t const& value)
 {
-  return ts::serialization::Value(value);
+  return ts::sz::Value(value);
 }
-ts::Result<void> deserialize(uint16_t& value, ts::serialization::Value const& sz_value)
-{
-  if (!sz_value.is_integral_number()) { return ts::Error("Expected integral number value when deserializing"); }
-  value = sz_value.get_as_integral_number();
-  return ts::success;
-}
-ts::Result<ts::serialization::Value> serialize(uint16_t const& value)
-{
-  return ts::serialization::Value(value);
-}
-ts::Result<void> deserialize(int32_t& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(int16_t& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_integral_number()) { return ts::Error("Expected integral number value when deserializing"); }
   value = sz_value.get_as_integral_number();
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(int32_t const& value)
+ts::sz::Value serialize(int16_t const& value)
 {
-  return ts::serialization::Value(value);
+  return ts::sz::Value(value);
 }
-ts::Result<void> deserialize(uint32_t& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(uint16_t& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_integral_number()) { return ts::Error("Expected integral number value when deserializing"); }
   value = sz_value.get_as_integral_number();
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(uint32_t const& value)
+ts::sz::Value serialize(uint16_t const& value)
 {
-  return ts::serialization::Value(value);
+  return ts::sz::Value(value);
 }
-ts::Result<void> deserialize(IUAV_Descriptor& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(int32_t& value, ts::sz::Value const& sz_value)
+{
+  if (!sz_value.is_integral_number()) { return ts::Error("Expected integral number value when deserializing"); }
+  value = sz_value.get_as_integral_number();
+  return ts::success;
+}
+ts::sz::Value serialize(int32_t const& value)
+{
+  return ts::sz::Value(value);
+}
+ts::Result<void> deserialize(uint32_t& value, ts::sz::Value const& sz_value)
+{
+  if (!sz_value.is_integral_number()) { return ts::Error("Expected integral number value when deserializing"); }
+  value = sz_value.get_as_integral_number();
+  return ts::success;
+}
+ts::sz::Value serialize(uint32_t const& value)
+{
+  return ts::sz::Value(value);
+}
+ts::Result<void> deserialize(IUAV_Descriptor& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -4027,57 +4000,54 @@ ts::Result<void> deserialize(IUAV_Descriptor& value, ts::serialization::Value co
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(IUAV_Descriptor const& value)
+ts::sz::Value serialize(IUAV_Descriptor const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_name());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("name", result.extract_payload());
+    sz_value.add_object_member("name", std::move(result));
   }
   {
     auto result = serialize(value.get_mass());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("mass", result.extract_payload());
+    sz_value.add_object_member("mass", std::move(result));
   }
   {
     auto result = serialize(value.get_moment_of_inertia());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("moment_of_inertia", result.extract_payload());
+    sz_value.add_object_member("moment_of_inertia", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(IBus_Descriptor& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(IBus_Descriptor& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(IBus_Descriptor const& value)
+ts::sz::Value serialize(IBus_Descriptor const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   return sz_value;
 }
-ts::Result<void> deserialize(INode_Descriptor& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(INode_Descriptor& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(INode_Descriptor const& value)
+ts::sz::Value serialize(INode_Descriptor const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   return sz_value;
 }
-ts::Result<void> deserialize(INode_Config& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(INode_Config& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(INode_Config const& value)
+ts::sz::Value serialize(INode_Config const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   return sz_value;
 }
-ts::Result<void> deserialize(Settings::Bus_Data& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(Settings::Bus_Data& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -4106,27 +4076,24 @@ ts::Result<void> deserialize(Settings::Bus_Data& value, ts::serialization::Value
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(Settings::Bus_Data const& value)
+ts::sz::Value serialize(Settings::Bus_Data const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_name());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("name", result.extract_payload());
+    sz_value.add_object_member("name", std::move(result));
   }
   {
     auto result = serialize(value.get_type());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("type", result.extract_payload());
+    sz_value.add_object_member("type", std::move(result));
   }
   {
     auto result = serialize(value.get_descriptor());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("descriptor", result.extract_payload());
+    sz_value.add_object_member("descriptor", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(Settings::Node_Data& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(Settings::Node_Data& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -4171,37 +4138,32 @@ ts::Result<void> deserialize(Settings::Node_Data& value, ts::serialization::Valu
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(Settings::Node_Data const& value)
+ts::sz::Value serialize(Settings::Node_Data const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_name());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("name", result.extract_payload());
+    sz_value.add_object_member("name", std::move(result));
   }
   {
     auto result = serialize(value.get_type());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("type", result.extract_payload());
+    sz_value.add_object_member("type", std::move(result));
   }
   {
     auto result = serialize(value.get_descriptor());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("descriptor", result.extract_payload());
+    sz_value.add_object_member("descriptor", std::move(result));
   }
   {
     auto result = serialize(value.get_config());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("config", result.extract_payload());
+    sz_value.add_object_member("config", std::move(result));
   }
   {
     auto result = serialize(value.get_input_paths());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("input_paths", result.extract_payload());
+    sz_value.add_object_member("input_paths", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(Settings& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(Settings& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -4230,27 +4192,24 @@ ts::Result<void> deserialize(Settings& value, ts::serialization::Value const& sz
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(Settings const& value)
+ts::sz::Value serialize(Settings const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_uav_descriptor());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("uav_descriptor", result.extract_payload());
+    sz_value.add_object_member("uav_descriptor", std::move(result));
   }
   {
     auto result = serialize(value.get_buses());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("buses", result.extract_payload());
+    sz_value.add_object_member("buses", std::move(result));
   }
   {
     auto result = serialize(value.get_nodes());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("nodes", result.extract_payload());
+    sz_value.add_object_member("nodes", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(Poly<const IBus_Descriptor>& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(Poly<const IBus_Descriptor>& value, ts::sz::Value const& sz_value)
 {
   if (sz_value.is_empty()) { value = Poly<const IBus_Descriptor>(); return ts::success; }
   if (!sz_value.is_object()) { return ts::Error("Expected object or null value when deserializing"); }
@@ -4293,62 +4252,56 @@ ts::Result<void> deserialize(Poly<const IBus_Descriptor>& value, ts::serializati
   else { return ts::Error("Cannot find type '" + path + "' when deserializing"); }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(Poly<const IBus_Descriptor> const& value)
+ts::sz::Value serialize(Poly<const IBus_Descriptor> const& value)
 {
-  if (!value) { return ts::serialization::Value(ts::serialization::Value::Type::EMPTY); }
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
-  if (false) { return ts::Error(""); } //this is here just to have the next items with 'else if'
+  if (!value) { return ts::sz::Value(); }
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
+  if (false) { return ts::sz::Value(); } //this is here just to have the next items with 'else if'
   else if (typeid(*value) == typeid(UART_Linux_Descriptor))
   {
     sz_value.add_object_member("type", "UART_Linux_Descriptor");
     auto result = serialize((UART_Linux_Descriptor&)*value);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("value", result.extract_payload());
+    sz_value.add_object_member("value", std::move(result));
     return std::move(sz_value);
   }
   else if (typeid(*value) == typeid(UART_BBang_Descriptor))
   {
     sz_value.add_object_member("type", "UART_BBang_Descriptor");
     auto result = serialize((UART_BBang_Descriptor&)*value);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("value", result.extract_payload());
+    sz_value.add_object_member("value", std::move(result));
     return std::move(sz_value);
   }
   else if (typeid(*value) == typeid(I2C_BCM_Descriptor))
   {
     sz_value.add_object_member("type", "I2C_BCM_Descriptor");
     auto result = serialize((I2C_BCM_Descriptor&)*value);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("value", result.extract_payload());
+    sz_value.add_object_member("value", std::move(result));
     return std::move(sz_value);
   }
   else if (typeid(*value) == typeid(I2C_Linux_Descriptor))
   {
     sz_value.add_object_member("type", "I2C_Linux_Descriptor");
     auto result = serialize((I2C_Linux_Descriptor&)*value);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("value", result.extract_payload());
+    sz_value.add_object_member("value", std::move(result));
     return std::move(sz_value);
   }
   else if (typeid(*value) == typeid(SPI_BCM_Descriptor))
   {
     sz_value.add_object_member("type", "SPI_BCM_Descriptor");
     auto result = serialize((SPI_BCM_Descriptor&)*value);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("value", result.extract_payload());
+    sz_value.add_object_member("value", std::move(result));
     return std::move(sz_value);
   }
   else if (typeid(*value) == typeid(SPI_Linux_Descriptor))
   {
     sz_value.add_object_member("type", "SPI_Linux_Descriptor");
     auto result = serialize((SPI_Linux_Descriptor&)*value);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("value", result.extract_payload());
+    sz_value.add_object_member("value", std::move(result));
     return std::move(sz_value);
   }
-  else { return ts::Error("Cannot serialize type"); }
+  else { TS_ASSERT(false); return ts::sz::Value(); }
 }
-ts::Result<void> deserialize(Poly<const INode_Descriptor>& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(Poly<const INode_Descriptor>& value, ts::sz::Value const& sz_value)
 {
   if (sz_value.is_empty()) { value = Poly<const INode_Descriptor>(); return ts::success; }
   if (!sz_value.is_object()) { return ts::Error("Expected object or null value when deserializing"); }
@@ -4531,286 +4484,252 @@ ts::Result<void> deserialize(Poly<const INode_Descriptor>& value, ts::serializat
   else { return ts::Error("Cannot find type '" + path + "' when deserializing"); }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(Poly<const INode_Descriptor> const& value)
+ts::sz::Value serialize(Poly<const INode_Descriptor> const& value)
 {
-  if (!value) { return ts::serialization::Value(ts::serialization::Value::Type::EMPTY); }
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
-  if (false) { return ts::Error(""); } //this is here just to have the next items with 'else if'
+  if (!value) { return ts::sz::Value(); }
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
+  if (false) { return ts::sz::Value(); } //this is here just to have the next items with 'else if'
   else if (typeid(*value) == typeid(ADC_Ammeter_Descriptor))
   {
     sz_value.add_object_member("type", "ADC_Ammeter_Descriptor");
     auto result = serialize((ADC_Ammeter_Descriptor&)*value);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("value", result.extract_payload());
+    sz_value.add_object_member("value", std::move(result));
     return std::move(sz_value);
   }
   else if (typeid(*value) == typeid(ADC_Voltmeter_Descriptor))
   {
     sz_value.add_object_member("type", "ADC_Voltmeter_Descriptor");
     auto result = serialize((ADC_Voltmeter_Descriptor&)*value);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("value", result.extract_payload());
+    sz_value.add_object_member("value", std::move(result));
     return std::move(sz_value);
   }
   else if (typeid(*value) == typeid(ADS1115_Descriptor))
   {
     sz_value.add_object_member("type", "ADS1115_Descriptor");
     auto result = serialize((ADS1115_Descriptor&)*value);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("value", result.extract_payload());
+    sz_value.add_object_member("value", std::move(result));
     return std::move(sz_value);
   }
   else if (typeid(*value) == typeid(AVRADC_Descriptor))
   {
     sz_value.add_object_member("type", "AVRADC_Descriptor");
     auto result = serialize((AVRADC_Descriptor&)*value);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("value", result.extract_payload());
+    sz_value.add_object_member("value", std::move(result));
     return std::move(sz_value);
   }
   else if (typeid(*value) == typeid(Comp_AHRS_Descriptor))
   {
     sz_value.add_object_member("type", "Comp_AHRS_Descriptor");
     auto result = serialize((Comp_AHRS_Descriptor&)*value);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("value", result.extract_payload());
+    sz_value.add_object_member("value", std::move(result));
     return std::move(sz_value);
   }
   else if (typeid(*value) == typeid(Combiner_Descriptor))
   {
     sz_value.add_object_member("type", "Combiner_Descriptor");
     auto result = serialize((Combiner_Descriptor&)*value);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("value", result.extract_payload());
+    sz_value.add_object_member("value", std::move(result));
     return std::move(sz_value);
   }
   else if (typeid(*value) == typeid(Gravity_Filter_Descriptor))
   {
     sz_value.add_object_member("type", "Gravity_Filter_Descriptor");
     auto result = serialize((Gravity_Filter_Descriptor&)*value);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("value", result.extract_payload());
+    sz_value.add_object_member("value", std::move(result));
     return std::move(sz_value);
   }
   else if (typeid(*value) == typeid(KF_ECEF_Descriptor))
   {
     sz_value.add_object_member("type", "KF_ECEF_Descriptor");
     auto result = serialize((KF_ECEF_Descriptor&)*value);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("value", result.extract_payload());
+    sz_value.add_object_member("value", std::move(result));
     return std::move(sz_value);
   }
   else if (typeid(*value) == typeid(ENU_Frame_System_Descriptor))
   {
     sz_value.add_object_member("type", "ENU_Frame_System_Descriptor");
     auto result = serialize((ENU_Frame_System_Descriptor&)*value);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("value", result.extract_payload());
+    sz_value.add_object_member("value", std::move(result));
     return std::move(sz_value);
   }
   else if (typeid(*value) == typeid(LPF_Descriptor))
   {
     sz_value.add_object_member("type", "LPF_Descriptor");
     auto result = serialize((LPF_Descriptor&)*value);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("value", result.extract_payload());
+    sz_value.add_object_member("value", std::move(result));
     return std::move(sz_value);
   }
   else if (typeid(*value) == typeid(MaxSonar_Descriptor))
   {
     sz_value.add_object_member("type", "MaxSonar_Descriptor");
     auto result = serialize((MaxSonar_Descriptor&)*value);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("value", result.extract_payload());
+    sz_value.add_object_member("value", std::move(result));
     return std::move(sz_value);
   }
   else if (typeid(*value) == typeid(Motor_Mixer_Descriptor))
   {
     sz_value.add_object_member("type", "Motor_Mixer_Descriptor");
     auto result = serialize((Motor_Mixer_Descriptor&)*value);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("value", result.extract_payload());
+    sz_value.add_object_member("value", std::move(result));
     return std::move(sz_value);
   }
   else if (typeid(*value) == typeid(MPU9250_Descriptor))
   {
     sz_value.add_object_member("type", "MPU9250_Descriptor");
     auto result = serialize((MPU9250_Descriptor&)*value);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("value", result.extract_payload());
+    sz_value.add_object_member("value", std::move(result));
     return std::move(sz_value);
   }
   else if (typeid(*value) == typeid(MS5611_Descriptor))
   {
     sz_value.add_object_member("type", "MS5611_Descriptor");
     auto result = serialize((MS5611_Descriptor&)*value);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("value", result.extract_payload());
+    sz_value.add_object_member("value", std::move(result));
     return std::move(sz_value);
   }
   else if (typeid(*value) == typeid(Multirotor_Brain_Descriptor))
   {
     sz_value.add_object_member("type", "Multirotor_Brain_Descriptor");
     auto result = serialize((Multirotor_Brain_Descriptor&)*value);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("value", result.extract_payload());
+    sz_value.add_object_member("value", std::move(result));
     return std::move(sz_value);
   }
   else if (typeid(*value) == typeid(Multirotor_Pilot_Descriptor))
   {
     sz_value.add_object_member("type", "Multirotor_Pilot_Descriptor");
     auto result = serialize((Multirotor_Pilot_Descriptor&)*value);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("value", result.extract_payload());
+    sz_value.add_object_member("value", std::move(result));
     return std::move(sz_value);
   }
   else if (typeid(*value) == typeid(Multirotor_Simulator_Descriptor))
   {
     sz_value.add_object_member("type", "Multirotor_Simulator_Descriptor");
     auto result = serialize((Multirotor_Simulator_Descriptor&)*value);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("value", result.extract_payload());
+    sz_value.add_object_member("value", std::move(result));
     return std::move(sz_value);
   }
   else if (typeid(*value) == typeid(Oscillator_Descriptor))
   {
     sz_value.add_object_member("type", "Oscillator_Descriptor");
     auto result = serialize((Oscillator_Descriptor&)*value);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("value", result.extract_payload());
+    sz_value.add_object_member("value", std::move(result));
     return std::move(sz_value);
   }
   else if (typeid(*value) == typeid(PCA9685_Descriptor))
   {
     sz_value.add_object_member("type", "PCA9685_Descriptor");
     auto result = serialize((PCA9685_Descriptor&)*value);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("value", result.extract_payload());
+    sz_value.add_object_member("value", std::move(result));
     return std::move(sz_value);
   }
   else if (typeid(*value) == typeid(PIGPIO_Descriptor))
   {
     sz_value.add_object_member("type", "PIGPIO_Descriptor");
     auto result = serialize((PIGPIO_Descriptor&)*value);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("value", result.extract_payload());
+    sz_value.add_object_member("value", std::move(result));
     return std::move(sz_value);
   }
   else if (typeid(*value) == typeid(Pressure_Velocity_Descriptor))
   {
     sz_value.add_object_member("type", "Pressure_Velocity_Descriptor");
     auto result = serialize((Pressure_Velocity_Descriptor&)*value);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("value", result.extract_payload());
+    sz_value.add_object_member("value", std::move(result));
     return std::move(sz_value);
   }
   else if (typeid(*value) == typeid(Proximity_Descriptor))
   {
     sz_value.add_object_member("type", "Proximity_Descriptor");
     auto result = serialize((Proximity_Descriptor&)*value);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("value", result.extract_payload());
+    sz_value.add_object_member("value", std::move(result));
     return std::move(sz_value);
   }
   else if (typeid(*value) == typeid(Rate_Controller_Descriptor))
   {
     sz_value.add_object_member("type", "Rate_Controller_Descriptor");
     auto result = serialize((Rate_Controller_Descriptor&)*value);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("value", result.extract_payload());
+    sz_value.add_object_member("value", std::move(result));
     return std::move(sz_value);
   }
   else if (typeid(*value) == typeid(Raspicam_Descriptor))
   {
     sz_value.add_object_member("type", "Raspicam_Descriptor");
     auto result = serialize((Raspicam_Descriptor&)*value);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("value", result.extract_payload());
+    sz_value.add_object_member("value", std::move(result));
     return std::move(sz_value);
   }
   else if (typeid(*value) == typeid(RC5T619_Descriptor))
   {
     sz_value.add_object_member("type", "RC5T619_Descriptor");
     auto result = serialize((RC5T619_Descriptor&)*value);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("value", result.extract_payload());
+    sz_value.add_object_member("value", std::move(result));
     return std::move(sz_value);
   }
   else if (typeid(*value) == typeid(Resampler_Descriptor))
   {
     sz_value.add_object_member("type", "Resampler_Descriptor");
     auto result = serialize((Resampler_Descriptor&)*value);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("value", result.extract_payload());
+    sz_value.add_object_member("value", std::move(result));
     return std::move(sz_value);
   }
   else if (typeid(*value) == typeid(Scalar_Generator_Descriptor))
   {
     sz_value.add_object_member("type", "Scalar_Generator_Descriptor");
     auto result = serialize((Scalar_Generator_Descriptor&)*value);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("value", result.extract_payload());
+    sz_value.add_object_member("value", std::move(result));
     return std::move(sz_value);
   }
   else if (typeid(*value) == typeid(Servo_Gimbal_Descriptor))
   {
     sz_value.add_object_member("type", "Servo_Gimbal_Descriptor");
     auto result = serialize((Servo_Gimbal_Descriptor&)*value);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("value", result.extract_payload());
+    sz_value.add_object_member("value", std::move(result));
     return std::move(sz_value);
   }
   else if (typeid(*value) == typeid(SRF01_Descriptor))
   {
     sz_value.add_object_member("type", "SRF01_Descriptor");
     auto result = serialize((SRF01_Descriptor&)*value);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("value", result.extract_payload());
+    sz_value.add_object_member("value", std::move(result));
     return std::move(sz_value);
   }
   else if (typeid(*value) == typeid(SRF02_Descriptor))
   {
     sz_value.add_object_member("type", "SRF02_Descriptor");
     auto result = serialize((SRF02_Descriptor&)*value);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("value", result.extract_payload());
+    sz_value.add_object_member("value", std::move(result));
     return std::move(sz_value);
   }
   else if (typeid(*value) == typeid(Throttle_To_PWM_Descriptor))
   {
     sz_value.add_object_member("type", "Throttle_To_PWM_Descriptor");
     auto result = serialize((Throttle_To_PWM_Descriptor&)*value);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("value", result.extract_payload());
+    sz_value.add_object_member("value", std::move(result));
     return std::move(sz_value);
   }
   else if (typeid(*value) == typeid(Transformer_Descriptor))
   {
     sz_value.add_object_member("type", "Transformer_Descriptor");
     auto result = serialize((Transformer_Descriptor&)*value);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("value", result.extract_payload());
+    sz_value.add_object_member("value", std::move(result));
     return std::move(sz_value);
   }
   else if (typeid(*value) == typeid(UBLOX_Descriptor))
   {
     sz_value.add_object_member("type", "UBLOX_Descriptor");
     auto result = serialize((UBLOX_Descriptor&)*value);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("value", result.extract_payload());
+    sz_value.add_object_member("value", std::move(result));
     return std::move(sz_value);
   }
   else if (typeid(*value) == typeid(Vec3_Generator_Descriptor))
   {
     sz_value.add_object_member("type", "Vec3_Generator_Descriptor");
     auto result = serialize((Vec3_Generator_Descriptor&)*value);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("value", result.extract_payload());
+    sz_value.add_object_member("value", std::move(result));
     return std::move(sz_value);
   }
-  else { return ts::Error("Cannot serialize type"); }
+  else { TS_ASSERT(false); return ts::sz::Value(); }
 }
-ts::Result<void> deserialize(Poly<const INode_Config>& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(Poly<const INode_Config>& value, ts::sz::Value const& sz_value)
 {
   if (sz_value.is_empty()) { value = Poly<const INode_Config>(); return ts::success; }
   if (!sz_value.is_object()) { return ts::Error("Expected object or null value when deserializing"); }
@@ -4993,286 +4912,252 @@ ts::Result<void> deserialize(Poly<const INode_Config>& value, ts::serialization:
   else { return ts::Error("Cannot find type '" + path + "' when deserializing"); }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(Poly<const INode_Config> const& value)
+ts::sz::Value serialize(Poly<const INode_Config> const& value)
 {
-  if (!value) { return ts::serialization::Value(ts::serialization::Value::Type::EMPTY); }
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
-  if (false) { return ts::Error(""); } //this is here just to have the next items with 'else if'
+  if (!value) { return ts::sz::Value(); }
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
+  if (false) { return ts::sz::Value(); } //this is here just to have the next items with 'else if'
   else if (typeid(*value) == typeid(ADC_Ammeter_Config))
   {
     sz_value.add_object_member("type", "ADC_Ammeter_Config");
     auto result = serialize((ADC_Ammeter_Config&)*value);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("value", result.extract_payload());
+    sz_value.add_object_member("value", std::move(result));
     return std::move(sz_value);
   }
   else if (typeid(*value) == typeid(ADC_Voltmeter_Config))
   {
     sz_value.add_object_member("type", "ADC_Voltmeter_Config");
     auto result = serialize((ADC_Voltmeter_Config&)*value);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("value", result.extract_payload());
+    sz_value.add_object_member("value", std::move(result));
     return std::move(sz_value);
   }
   else if (typeid(*value) == typeid(ADS1115_Config))
   {
     sz_value.add_object_member("type", "ADS1115_Config");
     auto result = serialize((ADS1115_Config&)*value);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("value", result.extract_payload());
+    sz_value.add_object_member("value", std::move(result));
     return std::move(sz_value);
   }
   else if (typeid(*value) == typeid(AVRADC_Config))
   {
     sz_value.add_object_member("type", "AVRADC_Config");
     auto result = serialize((AVRADC_Config&)*value);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("value", result.extract_payload());
+    sz_value.add_object_member("value", std::move(result));
     return std::move(sz_value);
   }
   else if (typeid(*value) == typeid(Comp_AHRS_Config))
   {
     sz_value.add_object_member("type", "Comp_AHRS_Config");
     auto result = serialize((Comp_AHRS_Config&)*value);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("value", result.extract_payload());
+    sz_value.add_object_member("value", std::move(result));
     return std::move(sz_value);
   }
   else if (typeid(*value) == typeid(Combiner_Config))
   {
     sz_value.add_object_member("type", "Combiner_Config");
     auto result = serialize((Combiner_Config&)*value);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("value", result.extract_payload());
+    sz_value.add_object_member("value", std::move(result));
     return std::move(sz_value);
   }
   else if (typeid(*value) == typeid(Gravity_Filter_Config))
   {
     sz_value.add_object_member("type", "Gravity_Filter_Config");
     auto result = serialize((Gravity_Filter_Config&)*value);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("value", result.extract_payload());
+    sz_value.add_object_member("value", std::move(result));
     return std::move(sz_value);
   }
   else if (typeid(*value) == typeid(KF_ECEF_Config))
   {
     sz_value.add_object_member("type", "KF_ECEF_Config");
     auto result = serialize((KF_ECEF_Config&)*value);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("value", result.extract_payload());
+    sz_value.add_object_member("value", std::move(result));
     return std::move(sz_value);
   }
   else if (typeid(*value) == typeid(ENU_Frame_System_Config))
   {
     sz_value.add_object_member("type", "ENU_Frame_System_Config");
     auto result = serialize((ENU_Frame_System_Config&)*value);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("value", result.extract_payload());
+    sz_value.add_object_member("value", std::move(result));
     return std::move(sz_value);
   }
   else if (typeid(*value) == typeid(LPF_Config))
   {
     sz_value.add_object_member("type", "LPF_Config");
     auto result = serialize((LPF_Config&)*value);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("value", result.extract_payload());
+    sz_value.add_object_member("value", std::move(result));
     return std::move(sz_value);
   }
   else if (typeid(*value) == typeid(MaxSonar_Config))
   {
     sz_value.add_object_member("type", "MaxSonar_Config");
     auto result = serialize((MaxSonar_Config&)*value);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("value", result.extract_payload());
+    sz_value.add_object_member("value", std::move(result));
     return std::move(sz_value);
   }
   else if (typeid(*value) == typeid(Motor_Mixer_Config))
   {
     sz_value.add_object_member("type", "Motor_Mixer_Config");
     auto result = serialize((Motor_Mixer_Config&)*value);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("value", result.extract_payload());
+    sz_value.add_object_member("value", std::move(result));
     return std::move(sz_value);
   }
   else if (typeid(*value) == typeid(MPU9250_Config))
   {
     sz_value.add_object_member("type", "MPU9250_Config");
     auto result = serialize((MPU9250_Config&)*value);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("value", result.extract_payload());
+    sz_value.add_object_member("value", std::move(result));
     return std::move(sz_value);
   }
   else if (typeid(*value) == typeid(MS5611_Config))
   {
     sz_value.add_object_member("type", "MS5611_Config");
     auto result = serialize((MS5611_Config&)*value);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("value", result.extract_payload());
+    sz_value.add_object_member("value", std::move(result));
     return std::move(sz_value);
   }
   else if (typeid(*value) == typeid(Multirotor_Brain_Config))
   {
     sz_value.add_object_member("type", "Multirotor_Brain_Config");
     auto result = serialize((Multirotor_Brain_Config&)*value);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("value", result.extract_payload());
+    sz_value.add_object_member("value", std::move(result));
     return std::move(sz_value);
   }
   else if (typeid(*value) == typeid(Multirotor_Pilot_Config))
   {
     sz_value.add_object_member("type", "Multirotor_Pilot_Config");
     auto result = serialize((Multirotor_Pilot_Config&)*value);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("value", result.extract_payload());
+    sz_value.add_object_member("value", std::move(result));
     return std::move(sz_value);
   }
   else if (typeid(*value) == typeid(Multirotor_Simulator_Config))
   {
     sz_value.add_object_member("type", "Multirotor_Simulator_Config");
     auto result = serialize((Multirotor_Simulator_Config&)*value);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("value", result.extract_payload());
+    sz_value.add_object_member("value", std::move(result));
     return std::move(sz_value);
   }
   else if (typeid(*value) == typeid(Oscillator_Config))
   {
     sz_value.add_object_member("type", "Oscillator_Config");
     auto result = serialize((Oscillator_Config&)*value);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("value", result.extract_payload());
+    sz_value.add_object_member("value", std::move(result));
     return std::move(sz_value);
   }
   else if (typeid(*value) == typeid(PCA9685_Config))
   {
     sz_value.add_object_member("type", "PCA9685_Config");
     auto result = serialize((PCA9685_Config&)*value);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("value", result.extract_payload());
+    sz_value.add_object_member("value", std::move(result));
     return std::move(sz_value);
   }
   else if (typeid(*value) == typeid(PIGPIO_Config))
   {
     sz_value.add_object_member("type", "PIGPIO_Config");
     auto result = serialize((PIGPIO_Config&)*value);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("value", result.extract_payload());
+    sz_value.add_object_member("value", std::move(result));
     return std::move(sz_value);
   }
   else if (typeid(*value) == typeid(Pressure_Velocity_Config))
   {
     sz_value.add_object_member("type", "Pressure_Velocity_Config");
     auto result = serialize((Pressure_Velocity_Config&)*value);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("value", result.extract_payload());
+    sz_value.add_object_member("value", std::move(result));
     return std::move(sz_value);
   }
   else if (typeid(*value) == typeid(Proximity_Config))
   {
     sz_value.add_object_member("type", "Proximity_Config");
     auto result = serialize((Proximity_Config&)*value);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("value", result.extract_payload());
+    sz_value.add_object_member("value", std::move(result));
     return std::move(sz_value);
   }
   else if (typeid(*value) == typeid(Rate_Controller_Config))
   {
     sz_value.add_object_member("type", "Rate_Controller_Config");
     auto result = serialize((Rate_Controller_Config&)*value);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("value", result.extract_payload());
+    sz_value.add_object_member("value", std::move(result));
     return std::move(sz_value);
   }
   else if (typeid(*value) == typeid(Raspicam_Config))
   {
     sz_value.add_object_member("type", "Raspicam_Config");
     auto result = serialize((Raspicam_Config&)*value);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("value", result.extract_payload());
+    sz_value.add_object_member("value", std::move(result));
     return std::move(sz_value);
   }
   else if (typeid(*value) == typeid(RC5T619_Config))
   {
     sz_value.add_object_member("type", "RC5T619_Config");
     auto result = serialize((RC5T619_Config&)*value);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("value", result.extract_payload());
+    sz_value.add_object_member("value", std::move(result));
     return std::move(sz_value);
   }
   else if (typeid(*value) == typeid(Resampler_Config))
   {
     sz_value.add_object_member("type", "Resampler_Config");
     auto result = serialize((Resampler_Config&)*value);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("value", result.extract_payload());
+    sz_value.add_object_member("value", std::move(result));
     return std::move(sz_value);
   }
   else if (typeid(*value) == typeid(Scalar_Generator_Config))
   {
     sz_value.add_object_member("type", "Scalar_Generator_Config");
     auto result = serialize((Scalar_Generator_Config&)*value);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("value", result.extract_payload());
+    sz_value.add_object_member("value", std::move(result));
     return std::move(sz_value);
   }
   else if (typeid(*value) == typeid(Servo_Gimbal_Config))
   {
     sz_value.add_object_member("type", "Servo_Gimbal_Config");
     auto result = serialize((Servo_Gimbal_Config&)*value);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("value", result.extract_payload());
+    sz_value.add_object_member("value", std::move(result));
     return std::move(sz_value);
   }
   else if (typeid(*value) == typeid(SRF01_Config))
   {
     sz_value.add_object_member("type", "SRF01_Config");
     auto result = serialize((SRF01_Config&)*value);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("value", result.extract_payload());
+    sz_value.add_object_member("value", std::move(result));
     return std::move(sz_value);
   }
   else if (typeid(*value) == typeid(SRF02_Config))
   {
     sz_value.add_object_member("type", "SRF02_Config");
     auto result = serialize((SRF02_Config&)*value);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("value", result.extract_payload());
+    sz_value.add_object_member("value", std::move(result));
     return std::move(sz_value);
   }
   else if (typeid(*value) == typeid(Throttle_To_PWM_Config))
   {
     sz_value.add_object_member("type", "Throttle_To_PWM_Config");
     auto result = serialize((Throttle_To_PWM_Config&)*value);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("value", result.extract_payload());
+    sz_value.add_object_member("value", std::move(result));
     return std::move(sz_value);
   }
   else if (typeid(*value) == typeid(Transformer_Config))
   {
     sz_value.add_object_member("type", "Transformer_Config");
     auto result = serialize((Transformer_Config&)*value);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("value", result.extract_payload());
+    sz_value.add_object_member("value", std::move(result));
     return std::move(sz_value);
   }
   else if (typeid(*value) == typeid(UBLOX_Config))
   {
     sz_value.add_object_member("type", "UBLOX_Config");
     auto result = serialize((UBLOX_Config&)*value);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("value", result.extract_payload());
+    sz_value.add_object_member("value", std::move(result));
     return std::move(sz_value);
   }
   else if (typeid(*value) == typeid(Vec3_Generator_Config))
   {
     sz_value.add_object_member("type", "Vec3_Generator_Config");
     auto result = serialize((Vec3_Generator_Config&)*value);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("value", result.extract_payload());
+    sz_value.add_object_member("value", std::move(result));
     return std::move(sz_value);
   }
-  else { return ts::Error("Cannot serialize type"); }
+  else { TS_ASSERT(false); return ts::sz::Value(); }
 }
-ts::Result<void> deserialize(std::vector<std::string>& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(std::vector<std::string>& value, ts::sz::Value const& sz_value)
 {
   value.clear();
   if (!sz_value.is_array()) { return ts::Error("Expected array value when deserializing"); }
@@ -5284,18 +5169,17 @@ ts::Result<void> deserialize(std::vector<std::string>& value, ts::serialization:
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(std::vector<std::string> const& value)
+ts::sz::Value serialize(std::vector<std::string> const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::ARRAY);
+  ts::sz::Value sz_value(ts::sz::Value::Type::ARRAY);
   for (size_t i = 0; i < value.size(); i++)
   {
     auto result = serialize(value[i]);
-    if (result != ts::success) { return result; }
-    sz_value.add_array_element(result.extract_payload());
+    sz_value.add_array_element(std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(Poly<const IUAV_Descriptor>& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(Poly<const IUAV_Descriptor>& value, ts::sz::Value const& sz_value)
 {
   if (sz_value.is_empty()) { value = Poly<const IUAV_Descriptor>(); return ts::success; }
   if (!sz_value.is_object()) { return ts::Error("Expected object or null value when deserializing"); }
@@ -5313,22 +5197,21 @@ ts::Result<void> deserialize(Poly<const IUAV_Descriptor>& value, ts::serializati
   else { return ts::Error("Cannot find type '" + path + "' when deserializing"); }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(Poly<const IUAV_Descriptor> const& value)
+ts::sz::Value serialize(Poly<const IUAV_Descriptor> const& value)
 {
-  if (!value) { return ts::serialization::Value(ts::serialization::Value::Type::EMPTY); }
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
-  if (false) { return ts::Error(""); } //this is here just to have the next items with 'else if'
+  if (!value) { return ts::sz::Value(); }
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
+  if (false) { return ts::sz::Value(); } //this is here just to have the next items with 'else if'
   else if (typeid(*value) == typeid(Multirotor_Descriptor))
   {
     sz_value.add_object_member("type", "Multirotor_Descriptor");
     auto result = serialize((Multirotor_Descriptor&)*value);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("value", result.extract_payload());
+    sz_value.add_object_member("value", std::move(result));
     return std::move(sz_value);
   }
-  else { return ts::Error("Cannot serialize type"); }
+  else { TS_ASSERT(false); return ts::sz::Value(); }
 }
-ts::Result<void> deserialize(std::vector<Settings::Bus_Data>& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(std::vector<Settings::Bus_Data>& value, ts::sz::Value const& sz_value)
 {
   value.clear();
   if (!sz_value.is_array()) { return ts::Error("Expected array value when deserializing"); }
@@ -5340,18 +5223,17 @@ ts::Result<void> deserialize(std::vector<Settings::Bus_Data>& value, ts::seriali
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(std::vector<Settings::Bus_Data> const& value)
+ts::sz::Value serialize(std::vector<Settings::Bus_Data> const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::ARRAY);
+  ts::sz::Value sz_value(ts::sz::Value::Type::ARRAY);
   for (size_t i = 0; i < value.size(); i++)
   {
     auto result = serialize(value[i]);
-    if (result != ts::success) { return result; }
-    sz_value.add_array_element(result.extract_payload());
+    sz_value.add_array_element(std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(std::vector<Settings::Node_Data>& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(std::vector<Settings::Node_Data>& value, ts::sz::Value const& sz_value)
 {
   value.clear();
   if (!sz_value.is_array()) { return ts::Error("Expected array value when deserializing"); }
@@ -5363,18 +5245,17 @@ ts::Result<void> deserialize(std::vector<Settings::Node_Data>& value, ts::serial
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(std::vector<Settings::Node_Data> const& value)
+ts::sz::Value serialize(std::vector<Settings::Node_Data> const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::ARRAY);
+  ts::sz::Value sz_value(ts::sz::Value::Type::ARRAY);
   for (size_t i = 0; i < value.size(); i++)
   {
     auto result = serialize(value[i]);
-    if (result != ts::success) { return result; }
-    sz_value.add_array_element(result.extract_payload());
+    sz_value.add_array_element(std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(Multirotor_Descriptor::Motor& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(Multirotor_Descriptor::Motor& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -5403,27 +5284,24 @@ ts::Result<void> deserialize(Multirotor_Descriptor::Motor& value, ts::serializat
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(Multirotor_Descriptor::Motor const& value)
+ts::sz::Value serialize(Multirotor_Descriptor::Motor const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_position());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("position", result.extract_payload());
+    sz_value.add_object_member("position", std::move(result));
   }
   {
     auto result = serialize(value.get_thrust_vector());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("thrust_vector", result.extract_payload());
+    sz_value.add_object_member("thrust_vector", std::move(result));
   }
   {
     auto result = serialize(value.get_clockwise());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("clockwise", result.extract_payload());
+    sz_value.add_object_member("clockwise", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(Multirotor_Descriptor& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(Multirotor_Descriptor& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -5508,62 +5386,52 @@ ts::Result<void> deserialize(Multirotor_Descriptor& value, ts::serialization::Va
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(Multirotor_Descriptor const& value)
+ts::sz::Value serialize(Multirotor_Descriptor const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_name());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("name", result.extract_payload());
+    sz_value.add_object_member("name", std::move(result));
   }
   {
     auto result = serialize(value.get_mass());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("mass", result.extract_payload());
+    sz_value.add_object_member("mass", std::move(result));
   }
   {
     auto result = serialize(value.get_moment_of_inertia());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("moment_of_inertia", result.extract_payload());
+    sz_value.add_object_member("moment_of_inertia", std::move(result));
   }
   {
     auto result = serialize(value.get_radius());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("radius", result.extract_payload());
+    sz_value.add_object_member("radius", std::move(result));
   }
   {
     auto result = serialize(value.get_height());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("height", result.extract_payload());
+    sz_value.add_object_member("height", std::move(result));
   }
   {
     auto result = serialize(value.get_motor_z_torque());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("motor_z_torque", result.extract_payload());
+    sz_value.add_object_member("motor_z_torque", std::move(result));
   }
   {
     auto result = serialize(value.get_motor_thrust());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("motor_thrust", result.extract_payload());
+    sz_value.add_object_member("motor_thrust", std::move(result));
   }
   {
     auto result = serialize(value.get_motor_acceleration());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("motor_acceleration", result.extract_payload());
+    sz_value.add_object_member("motor_acceleration", std::move(result));
   }
   {
     auto result = serialize(value.get_motor_deceleration());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("motor_deceleration", result.extract_payload());
+    sz_value.add_object_member("motor_deceleration", std::move(result));
   }
   {
     auto result = serialize(value.get_motors());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("motors", result.extract_payload());
+    sz_value.add_object_member("motors", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(std::vector<Multirotor_Descriptor::Motor>& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(std::vector<Multirotor_Descriptor::Motor>& value, ts::sz::Value const& sz_value)
 {
   value.clear();
   if (!sz_value.is_array()) { return ts::Error("Expected array value when deserializing"); }
@@ -5575,18 +5443,17 @@ ts::Result<void> deserialize(std::vector<Multirotor_Descriptor::Motor>& value, t
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(std::vector<Multirotor_Descriptor::Motor> const& value)
+ts::sz::Value serialize(std::vector<Multirotor_Descriptor::Motor> const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::ARRAY);
+  ts::sz::Value sz_value(ts::sz::Value::Type::ARRAY);
   for (size_t i = 0; i < value.size(); i++)
   {
     auto result = serialize(value[i]);
-    if (result != ts::success) { return result; }
-    sz_value.add_array_element(result.extract_payload());
+    sz_value.add_array_element(std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(UART_Linux_Descriptor::baud_t& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(UART_Linux_Descriptor::baud_t& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_string()) { return ts::Error("Expected string value when deserializing"); }
   std::string const& key = sz_value.get_as_string();
@@ -5604,7 +5471,7 @@ ts::Result<void> deserialize(UART_Linux_Descriptor::baud_t& value, ts::serializa
   value = it->second;
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(UART_Linux_Descriptor::baud_t const& value)
+ts::sz::Value serialize(UART_Linux_Descriptor::baud_t const& value)
 {
   typedef UART_Linux_Descriptor::baud_t _etype;
   static std::map<_etype, std::string> s_map = {
@@ -5616,10 +5483,10 @@ ts::Result<ts::serialization::Value> serialize(UART_Linux_Descriptor::baud_t con
     { _etype::_230400, "_230400" },
   };
   auto it = s_map.find(value);
-  if (it == s_map.end()) { return ts::Error("Cannot serialize type"); }
-  return ts::serialization::Value(it->second);
+  if (it == s_map.end()) { TS_ASSERT(false); return ts::sz::Value(); }
+  return ts::sz::Value(it->second);
 }
-ts::Result<void> deserialize(UART_Linux_Descriptor& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(UART_Linux_Descriptor& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -5640,22 +5507,20 @@ ts::Result<void> deserialize(UART_Linux_Descriptor& value, ts::serialization::Va
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(UART_Linux_Descriptor const& value)
+ts::sz::Value serialize(UART_Linux_Descriptor const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_dev());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("dev", result.extract_payload());
+    sz_value.add_object_member("dev", std::move(result));
   }
   {
     auto result = serialize(value.get_baud());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("baud", result.extract_payload());
+    sz_value.add_object_member("baud", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(UART_BBang_Descriptor& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(UART_BBang_Descriptor& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -5684,27 +5549,24 @@ ts::Result<void> deserialize(UART_BBang_Descriptor& value, ts::serialization::Va
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(UART_BBang_Descriptor const& value)
+ts::sz::Value serialize(UART_BBang_Descriptor const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_rx_pin());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("rx_pin", result.extract_payload());
+    sz_value.add_object_member("rx_pin", std::move(result));
   }
   {
     auto result = serialize(value.get_baud());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("baud", result.extract_payload());
+    sz_value.add_object_member("baud", std::move(result));
   }
   {
     auto result = serialize(value.get_invert());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("invert", result.extract_payload());
+    sz_value.add_object_member("invert", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(I2C_BCM_Descriptor& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(I2C_BCM_Descriptor& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -5725,22 +5587,20 @@ ts::Result<void> deserialize(I2C_BCM_Descriptor& value, ts::serialization::Value
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(I2C_BCM_Descriptor const& value)
+ts::sz::Value serialize(I2C_BCM_Descriptor const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_dev());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("dev", result.extract_payload());
+    sz_value.add_object_member("dev", std::move(result));
   }
   {
     auto result = serialize(value.get_baud());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("baud", result.extract_payload());
+    sz_value.add_object_member("baud", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(I2C_Linux_Descriptor& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(I2C_Linux_Descriptor& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -5753,17 +5613,16 @@ ts::Result<void> deserialize(I2C_Linux_Descriptor& value, ts::serialization::Val
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(I2C_Linux_Descriptor const& value)
+ts::sz::Value serialize(I2C_Linux_Descriptor const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_dev());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("dev", result.extract_payload());
+    sz_value.add_object_member("dev", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(SPI_BCM_Descriptor& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(SPI_BCM_Descriptor& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -5800,32 +5659,28 @@ ts::Result<void> deserialize(SPI_BCM_Descriptor& value, ts::serialization::Value
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(SPI_BCM_Descriptor const& value)
+ts::sz::Value serialize(SPI_BCM_Descriptor const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_dev());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("dev", result.extract_payload());
+    sz_value.add_object_member("dev", std::move(result));
   }
   {
     auto result = serialize(value.get_baud());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("baud", result.extract_payload());
+    sz_value.add_object_member("baud", std::move(result));
   }
   {
     auto result = serialize(value.get_mode());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("mode", result.extract_payload());
+    sz_value.add_object_member("mode", std::move(result));
   }
   {
     auto result = serialize(value.get_speed());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("speed", result.extract_payload());
+    sz_value.add_object_member("speed", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(SPI_Linux_Descriptor& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(SPI_Linux_Descriptor& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -5846,22 +5701,20 @@ ts::Result<void> deserialize(SPI_Linux_Descriptor& value, ts::serialization::Val
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(SPI_Linux_Descriptor const& value)
+ts::sz::Value serialize(SPI_Linux_Descriptor const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_dev());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("dev", result.extract_payload());
+    sz_value.add_object_member("dev", std::move(result));
   }
   {
     auto result = serialize(value.get_speed());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("speed", result.extract_payload());
+    sz_value.add_object_member("speed", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(P_Controller_Descriptor& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(P_Controller_Descriptor& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -5874,17 +5727,16 @@ ts::Result<void> deserialize(P_Controller_Descriptor& value, ts::serialization::
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(P_Controller_Descriptor const& value)
+ts::sz::Value serialize(P_Controller_Descriptor const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_kp());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("kp", result.extract_payload());
+    sz_value.add_object_member("kp", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(PI_Controller_Descriptor& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(PI_Controller_Descriptor& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -5913,27 +5765,24 @@ ts::Result<void> deserialize(PI_Controller_Descriptor& value, ts::serialization:
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(PI_Controller_Descriptor const& value)
+ts::sz::Value serialize(PI_Controller_Descriptor const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_kp());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("kp", result.extract_payload());
+    sz_value.add_object_member("kp", std::move(result));
   }
   {
     auto result = serialize(value.get_ki());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("ki", result.extract_payload());
+    sz_value.add_object_member("ki", std::move(result));
   }
   {
     auto result = serialize(value.get_max_i());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("max_i", result.extract_payload());
+    sz_value.add_object_member("max_i", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(PD_Controller_Descriptor& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(PD_Controller_Descriptor& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -5962,27 +5811,24 @@ ts::Result<void> deserialize(PD_Controller_Descriptor& value, ts::serialization:
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(PD_Controller_Descriptor const& value)
+ts::sz::Value serialize(PD_Controller_Descriptor const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_kp());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("kp", result.extract_payload());
+    sz_value.add_object_member("kp", std::move(result));
   }
   {
     auto result = serialize(value.get_kd());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("kd", result.extract_payload());
+    sz_value.add_object_member("kd", std::move(result));
   }
   {
     auto result = serialize(value.get_d_filter());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("d_filter", result.extract_payload());
+    sz_value.add_object_member("d_filter", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(PID_Controller_Descriptor& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(PID_Controller_Descriptor& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -6027,37 +5873,32 @@ ts::Result<void> deserialize(PID_Controller_Descriptor& value, ts::serialization
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(PID_Controller_Descriptor const& value)
+ts::sz::Value serialize(PID_Controller_Descriptor const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_kp());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("kp", result.extract_payload());
+    sz_value.add_object_member("kp", std::move(result));
   }
   {
     auto result = serialize(value.get_kd());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("kd", result.extract_payload());
+    sz_value.add_object_member("kd", std::move(result));
   }
   {
     auto result = serialize(value.get_d_filter());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("d_filter", result.extract_payload());
+    sz_value.add_object_member("d_filter", std::move(result));
   }
   {
     auto result = serialize(value.get_ki());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("ki", result.extract_payload());
+    sz_value.add_object_member("ki", std::move(result));
   }
   {
     auto result = serialize(value.get_max_i());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("max_i", result.extract_payload());
+    sz_value.add_object_member("max_i", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(ADC_Ammeter_Descriptor& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(ADC_Ammeter_Descriptor& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -6070,17 +5911,16 @@ ts::Result<void> deserialize(ADC_Ammeter_Descriptor& value, ts::serialization::V
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(ADC_Ammeter_Descriptor const& value)
+ts::sz::Value serialize(ADC_Ammeter_Descriptor const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_rate());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("rate", result.extract_payload());
+    sz_value.add_object_member("rate", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(ADC_Ammeter_Config& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(ADC_Ammeter_Config& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -6101,22 +5941,20 @@ ts::Result<void> deserialize(ADC_Ammeter_Config& value, ts::serialization::Value
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(ADC_Ammeter_Config const& value)
+ts::sz::Value serialize(ADC_Ammeter_Config const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_scale());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("scale", result.extract_payload());
+    sz_value.add_object_member("scale", std::move(result));
   }
   {
     auto result = serialize(value.get_bias());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("bias", result.extract_payload());
+    sz_value.add_object_member("bias", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(ADC_Voltmeter_Descriptor& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(ADC_Voltmeter_Descriptor& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -6129,17 +5967,16 @@ ts::Result<void> deserialize(ADC_Voltmeter_Descriptor& value, ts::serialization:
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(ADC_Voltmeter_Descriptor const& value)
+ts::sz::Value serialize(ADC_Voltmeter_Descriptor const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_rate());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("rate", result.extract_payload());
+    sz_value.add_object_member("rate", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(ADC_Voltmeter_Config& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(ADC_Voltmeter_Config& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -6160,22 +5997,20 @@ ts::Result<void> deserialize(ADC_Voltmeter_Config& value, ts::serialization::Val
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(ADC_Voltmeter_Config const& value)
+ts::sz::Value serialize(ADC_Voltmeter_Config const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_scale());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("scale", result.extract_payload());
+    sz_value.add_object_member("scale", std::move(result));
   }
   {
     auto result = serialize(value.get_bias());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("bias", result.extract_payload());
+    sz_value.add_object_member("bias", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(ADS1115_Descriptor& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(ADS1115_Descriptor& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -6220,47 +6055,42 @@ ts::Result<void> deserialize(ADS1115_Descriptor& value, ts::serialization::Value
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(ADS1115_Descriptor const& value)
+ts::sz::Value serialize(ADS1115_Descriptor const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_bus());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("bus", result.extract_payload());
+    sz_value.add_object_member("bus", std::move(result));
   }
   {
     auto result = serialize(value.get_adc0_rate());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("adc0_rate", result.extract_payload());
+    sz_value.add_object_member("adc0_rate", std::move(result));
   }
   {
     auto result = serialize(value.get_adc1_rate());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("adc1_rate", result.extract_payload());
+    sz_value.add_object_member("adc1_rate", std::move(result));
   }
   {
     auto result = serialize(value.get_adc2_rate());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("adc2_rate", result.extract_payload());
+    sz_value.add_object_member("adc2_rate", std::move(result));
   }
   {
     auto result = serialize(value.get_adc3_rate());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("adc3_rate", result.extract_payload());
+    sz_value.add_object_member("adc3_rate", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(ADS1115_Config& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(ADS1115_Config& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(ADS1115_Config const& value)
+ts::sz::Value serialize(ADS1115_Config const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   return sz_value;
 }
-ts::Result<void> deserialize(AVRADC_Descriptor& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(AVRADC_Descriptor& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -6281,32 +6111,30 @@ ts::Result<void> deserialize(AVRADC_Descriptor& value, ts::serialization::Value 
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(AVRADC_Descriptor const& value)
+ts::sz::Value serialize(AVRADC_Descriptor const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_bus());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("bus", result.extract_payload());
+    sz_value.add_object_member("bus", std::move(result));
   }
   {
     auto result = serialize(value.get_rate());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("rate", result.extract_payload());
+    sz_value.add_object_member("rate", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(AVRADC_Config& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(AVRADC_Config& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(AVRADC_Config const& value)
+ts::sz::Value serialize(AVRADC_Config const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   return sz_value;
 }
-ts::Result<void> deserialize(Comp_AHRS_Descriptor& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(Comp_AHRS_Descriptor& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -6319,17 +6147,16 @@ ts::Result<void> deserialize(Comp_AHRS_Descriptor& value, ts::serialization::Val
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(Comp_AHRS_Descriptor const& value)
+ts::sz::Value serialize(Comp_AHRS_Descriptor const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_rate());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("rate", result.extract_payload());
+    sz_value.add_object_member("rate", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(Comp_AHRS_Config& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(Comp_AHRS_Config& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -6342,17 +6169,16 @@ ts::Result<void> deserialize(Comp_AHRS_Config& value, ts::serialization::Value c
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(Comp_AHRS_Config const& value)
+ts::sz::Value serialize(Comp_AHRS_Config const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_drift_correction_factor());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("drift_correction_factor", result.extract_payload());
+    sz_value.add_object_member("drift_correction_factor", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(Combiner_Descriptor& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(Combiner_Descriptor& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -6365,27 +6191,26 @@ ts::Result<void> deserialize(Combiner_Descriptor& value, ts::serialization::Valu
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(Combiner_Descriptor const& value)
+ts::sz::Value serialize(Combiner_Descriptor const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_rate());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("rate", result.extract_payload());
+    sz_value.add_object_member("rate", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(Combiner_Config& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(Combiner_Config& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(Combiner_Config const& value)
+ts::sz::Value serialize(Combiner_Config const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   return sz_value;
 }
-ts::Result<void> deserialize(Gravity_Filter_Descriptor& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(Gravity_Filter_Descriptor& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -6398,27 +6223,26 @@ ts::Result<void> deserialize(Gravity_Filter_Descriptor& value, ts::serialization
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(Gravity_Filter_Descriptor const& value)
+ts::sz::Value serialize(Gravity_Filter_Descriptor const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_rate());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("rate", result.extract_payload());
+    sz_value.add_object_member("rate", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(Gravity_Filter_Config& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(Gravity_Filter_Config& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(Gravity_Filter_Config const& value)
+ts::sz::Value serialize(Gravity_Filter_Config const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   return sz_value;
 }
-ts::Result<void> deserialize(KF_ECEF_Descriptor& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(KF_ECEF_Descriptor& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -6431,17 +6255,16 @@ ts::Result<void> deserialize(KF_ECEF_Descriptor& value, ts::serialization::Value
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(KF_ECEF_Descriptor const& value)
+ts::sz::Value serialize(KF_ECEF_Descriptor const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_rate());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("rate", result.extract_payload());
+    sz_value.add_object_member("rate", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(KF_ECEF_Config& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(KF_ECEF_Config& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -6494,42 +6317,36 @@ ts::Result<void> deserialize(KF_ECEF_Config& value, ts::serialization::Value con
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(KF_ECEF_Config const& value)
+ts::sz::Value serialize(KF_ECEF_Config const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_gps_position_lag());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("gps_position_lag", result.extract_payload());
+    sz_value.add_object_member("gps_position_lag", std::move(result));
   }
   {
     auto result = serialize(value.get_gps_position_accuracy());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("gps_position_accuracy", result.extract_payload());
+    sz_value.add_object_member("gps_position_accuracy", std::move(result));
   }
   {
     auto result = serialize(value.get_gps_velocity_lag());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("gps_velocity_lag", result.extract_payload());
+    sz_value.add_object_member("gps_velocity_lag", std::move(result));
   }
   {
     auto result = serialize(value.get_gps_velocity_accuracy());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("gps_velocity_accuracy", result.extract_payload());
+    sz_value.add_object_member("gps_velocity_accuracy", std::move(result));
   }
   {
     auto result = serialize(value.get_acceleration_lag());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("acceleration_lag", result.extract_payload());
+    sz_value.add_object_member("acceleration_lag", std::move(result));
   }
   {
     auto result = serialize(value.get_acceleration_accuracy());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("acceleration_accuracy", result.extract_payload());
+    sz_value.add_object_member("acceleration_accuracy", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(ENU_Frame_System_Descriptor& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(ENU_Frame_System_Descriptor& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -6542,27 +6359,26 @@ ts::Result<void> deserialize(ENU_Frame_System_Descriptor& value, ts::serializati
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(ENU_Frame_System_Descriptor const& value)
+ts::sz::Value serialize(ENU_Frame_System_Descriptor const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_rate());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("rate", result.extract_payload());
+    sz_value.add_object_member("rate", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(ENU_Frame_System_Config& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(ENU_Frame_System_Config& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(ENU_Frame_System_Config const& value)
+ts::sz::Value serialize(ENU_Frame_System_Config const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   return sz_value;
 }
-ts::Result<void> deserialize(LPF_Descriptor& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(LPF_Descriptor& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -6575,17 +6391,16 @@ ts::Result<void> deserialize(LPF_Descriptor& value, ts::serialization::Value con
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(LPF_Descriptor const& value)
+ts::sz::Value serialize(LPF_Descriptor const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_rate());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("rate", result.extract_payload());
+    sz_value.add_object_member("rate", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(LPF_Config& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(LPF_Config& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -6606,22 +6421,20 @@ ts::Result<void> deserialize(LPF_Config& value, ts::serialization::Value const& 
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(LPF_Config const& value)
+ts::sz::Value serialize(LPF_Config const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_poles());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("poles", result.extract_payload());
+    sz_value.add_object_member("poles", std::move(result));
   }
   {
     auto result = serialize(value.get_cutoff_frequency());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("cutoff_frequency", result.extract_payload());
+    sz_value.add_object_member("cutoff_frequency", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(MaxSonar_Descriptor& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(MaxSonar_Descriptor& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -6642,22 +6455,20 @@ ts::Result<void> deserialize(MaxSonar_Descriptor& value, ts::serialization::Valu
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(MaxSonar_Descriptor const& value)
+ts::sz::Value serialize(MaxSonar_Descriptor const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_bus());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("bus", result.extract_payload());
+    sz_value.add_object_member("bus", std::move(result));
   }
   {
     auto result = serialize(value.get_rate());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("rate", result.extract_payload());
+    sz_value.add_object_member("rate", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(MaxSonar_Config& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(MaxSonar_Config& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -6686,27 +6497,24 @@ ts::Result<void> deserialize(MaxSonar_Config& value, ts::serialization::Value co
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(MaxSonar_Config const& value)
+ts::sz::Value serialize(MaxSonar_Config const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_direction());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("direction", result.extract_payload());
+    sz_value.add_object_member("direction", std::move(result));
   }
   {
     auto result = serialize(value.get_max_distance());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("max_distance", result.extract_payload());
+    sz_value.add_object_member("max_distance", std::move(result));
   }
   {
     auto result = serialize(value.get_min_distance());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("min_distance", result.extract_payload());
+    sz_value.add_object_member("min_distance", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(Motor_Mixer_Descriptor& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(Motor_Mixer_Descriptor& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -6719,17 +6527,16 @@ ts::Result<void> deserialize(Motor_Mixer_Descriptor& value, ts::serialization::V
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(Motor_Mixer_Descriptor const& value)
+ts::sz::Value serialize(Motor_Mixer_Descriptor const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_rate());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("rate", result.extract_payload());
+    sz_value.add_object_member("rate", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(Motor_Mixer_Config& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(Motor_Mixer_Config& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -6742,17 +6549,16 @@ ts::Result<void> deserialize(Motor_Mixer_Config& value, ts::serialization::Value
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(Motor_Mixer_Config const& value)
+ts::sz::Value serialize(Motor_Mixer_Config const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_armed_thrust());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("armed_thrust", result.extract_payload());
+    sz_value.add_object_member("armed_thrust", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(Acceleration_Calibration_Point& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(Acceleration_Calibration_Point& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -6781,27 +6587,24 @@ ts::Result<void> deserialize(Acceleration_Calibration_Point& value, ts::serializ
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(Acceleration_Calibration_Point const& value)
+ts::sz::Value serialize(Acceleration_Calibration_Point const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_temperature());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("temperature", result.extract_payload());
+    sz_value.add_object_member("temperature", std::move(result));
   }
   {
     auto result = serialize(value.get_bias());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("bias", result.extract_payload());
+    sz_value.add_object_member("bias", std::move(result));
   }
   {
     auto result = serialize(value.get_scale());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("scale", result.extract_payload());
+    sz_value.add_object_member("scale", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(Angular_Velocity_Calibration_Point& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(Angular_Velocity_Calibration_Point& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -6822,22 +6625,20 @@ ts::Result<void> deserialize(Angular_Velocity_Calibration_Point& value, ts::seri
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(Angular_Velocity_Calibration_Point const& value)
+ts::sz::Value serialize(Angular_Velocity_Calibration_Point const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_temperature());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("temperature", result.extract_payload());
+    sz_value.add_object_member("temperature", std::move(result));
   }
   {
     auto result = serialize(value.get_bias());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("bias", result.extract_payload());
+    sz_value.add_object_member("bias", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(Magnetic_Field_Calibration_Point& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(Magnetic_Field_Calibration_Point& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -6866,27 +6667,24 @@ ts::Result<void> deserialize(Magnetic_Field_Calibration_Point& value, ts::serial
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(Magnetic_Field_Calibration_Point const& value)
+ts::sz::Value serialize(Magnetic_Field_Calibration_Point const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_temperature());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("temperature", result.extract_payload());
+    sz_value.add_object_member("temperature", std::move(result));
   }
   {
     auto result = serialize(value.get_bias());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("bias", result.extract_payload());
+    sz_value.add_object_member("bias", std::move(result));
   }
   {
     auto result = serialize(value.get_scale());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("scale", result.extract_payload());
+    sz_value.add_object_member("scale", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(MPU9250_Descriptor::imu_rate_t& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(MPU9250_Descriptor::imu_rate_t& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_string()) { return ts::Error("Expected string value when deserializing"); }
   std::string const& key = sz_value.get_as_string();
@@ -6901,7 +6699,7 @@ ts::Result<void> deserialize(MPU9250_Descriptor::imu_rate_t& value, ts::serializ
   value = it->second;
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(MPU9250_Descriptor::imu_rate_t const& value)
+ts::sz::Value serialize(MPU9250_Descriptor::imu_rate_t const& value)
 {
   typedef MPU9250_Descriptor::imu_rate_t _etype;
   static std::map<_etype, std::string> s_map = {
@@ -6910,10 +6708,10 @@ ts::Result<ts::serialization::Value> serialize(MPU9250_Descriptor::imu_rate_t co
     { _etype::_1000, "_1000" },
   };
   auto it = s_map.find(value);
-  if (it == s_map.end()) { return ts::Error("Cannot serialize type"); }
-  return ts::serialization::Value(it->second);
+  if (it == s_map.end()) { TS_ASSERT(false); return ts::sz::Value(); }
+  return ts::sz::Value(it->second);
 }
-ts::Result<void> deserialize(MPU9250_Descriptor::acceleration_range_t& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(MPU9250_Descriptor::acceleration_range_t& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_string()) { return ts::Error("Expected string value when deserializing"); }
   std::string const& key = sz_value.get_as_string();
@@ -6929,7 +6727,7 @@ ts::Result<void> deserialize(MPU9250_Descriptor::acceleration_range_t& value, ts
   value = it->second;
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(MPU9250_Descriptor::acceleration_range_t const& value)
+ts::sz::Value serialize(MPU9250_Descriptor::acceleration_range_t const& value)
 {
   typedef MPU9250_Descriptor::acceleration_range_t _etype;
   static std::map<_etype, std::string> s_map = {
@@ -6939,10 +6737,10 @@ ts::Result<ts::serialization::Value> serialize(MPU9250_Descriptor::acceleration_
     { _etype::_16, "_16" },
   };
   auto it = s_map.find(value);
-  if (it == s_map.end()) { return ts::Error("Cannot serialize type"); }
-  return ts::serialization::Value(it->second);
+  if (it == s_map.end()) { TS_ASSERT(false); return ts::sz::Value(); }
+  return ts::sz::Value(it->second);
 }
-ts::Result<void> deserialize(MPU9250_Descriptor::angular_velocity_range_t& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(MPU9250_Descriptor::angular_velocity_range_t& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_string()) { return ts::Error("Expected string value when deserializing"); }
   std::string const& key = sz_value.get_as_string();
@@ -6958,7 +6756,7 @@ ts::Result<void> deserialize(MPU9250_Descriptor::angular_velocity_range_t& value
   value = it->second;
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(MPU9250_Descriptor::angular_velocity_range_t const& value)
+ts::sz::Value serialize(MPU9250_Descriptor::angular_velocity_range_t const& value)
 {
   typedef MPU9250_Descriptor::angular_velocity_range_t _etype;
   static std::map<_etype, std::string> s_map = {
@@ -6968,10 +6766,10 @@ ts::Result<ts::serialization::Value> serialize(MPU9250_Descriptor::angular_veloc
     { _etype::_2000, "_2000" },
   };
   auto it = s_map.find(value);
-  if (it == s_map.end()) { return ts::Error("Cannot serialize type"); }
-  return ts::serialization::Value(it->second);
+  if (it == s_map.end()) { TS_ASSERT(false); return ts::sz::Value(); }
+  return ts::sz::Value(it->second);
 }
-ts::Result<void> deserialize(MPU9250_Descriptor& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(MPU9250_Descriptor& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -7024,42 +6822,36 @@ ts::Result<void> deserialize(MPU9250_Descriptor& value, ts::serialization::Value
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(MPU9250_Descriptor const& value)
+ts::sz::Value serialize(MPU9250_Descriptor const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_bus());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("bus", result.extract_payload());
+    sz_value.add_object_member("bus", std::move(result));
   }
   {
     auto result = serialize(value.get_imu_rate());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("imu_rate", result.extract_payload());
+    sz_value.add_object_member("imu_rate", std::move(result));
   }
   {
     auto result = serialize(value.get_magnetometer_rate());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("magnetometer_rate", result.extract_payload());
+    sz_value.add_object_member("magnetometer_rate", std::move(result));
   }
   {
     auto result = serialize(value.get_thermometer_rate());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("thermometer_rate", result.extract_payload());
+    sz_value.add_object_member("thermometer_rate", std::move(result));
   }
   {
     auto result = serialize(value.get_acceleration_range());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("acceleration_range", result.extract_payload());
+    sz_value.add_object_member("acceleration_range", std::move(result));
   }
   {
     auto result = serialize(value.get_angular_velocity_range());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("angular_velocity_range", result.extract_payload());
+    sz_value.add_object_member("angular_velocity_range", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(MPU9250_Config::Calibration& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(MPU9250_Config::Calibration& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -7088,27 +6880,24 @@ ts::Result<void> deserialize(MPU9250_Config::Calibration& value, ts::serializati
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(MPU9250_Config::Calibration const& value)
+ts::sz::Value serialize(MPU9250_Config::Calibration const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_acceleration());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("acceleration", result.extract_payload());
+    sz_value.add_object_member("acceleration", std::move(result));
   }
   {
     auto result = serialize(value.get_angular_velocity());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("angular_velocity", result.extract_payload());
+    sz_value.add_object_member("angular_velocity", std::move(result));
   }
   {
     auto result = serialize(value.get_magnetic_field());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("magnetic_field", result.extract_payload());
+    sz_value.add_object_member("magnetic_field", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(MPU9250_Config& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(MPU9250_Config& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -7129,22 +6918,20 @@ ts::Result<void> deserialize(MPU9250_Config& value, ts::serialization::Value con
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(MPU9250_Config const& value)
+ts::sz::Value serialize(MPU9250_Config const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_rotation());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("rotation", result.extract_payload());
+    sz_value.add_object_member("rotation", std::move(result));
   }
   {
     auto result = serialize(value.get_calibration());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("calibration", result.extract_payload());
+    sz_value.add_object_member("calibration", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(std::vector<Acceleration_Calibration_Point>& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(std::vector<Acceleration_Calibration_Point>& value, ts::sz::Value const& sz_value)
 {
   value.clear();
   if (!sz_value.is_array()) { return ts::Error("Expected array value when deserializing"); }
@@ -7156,18 +6943,17 @@ ts::Result<void> deserialize(std::vector<Acceleration_Calibration_Point>& value,
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(std::vector<Acceleration_Calibration_Point> const& value)
+ts::sz::Value serialize(std::vector<Acceleration_Calibration_Point> const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::ARRAY);
+  ts::sz::Value sz_value(ts::sz::Value::Type::ARRAY);
   for (size_t i = 0; i < value.size(); i++)
   {
     auto result = serialize(value[i]);
-    if (result != ts::success) { return result; }
-    sz_value.add_array_element(result.extract_payload());
+    sz_value.add_array_element(std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(std::vector<Angular_Velocity_Calibration_Point>& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(std::vector<Angular_Velocity_Calibration_Point>& value, ts::sz::Value const& sz_value)
 {
   value.clear();
   if (!sz_value.is_array()) { return ts::Error("Expected array value when deserializing"); }
@@ -7179,18 +6965,17 @@ ts::Result<void> deserialize(std::vector<Angular_Velocity_Calibration_Point>& va
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(std::vector<Angular_Velocity_Calibration_Point> const& value)
+ts::sz::Value serialize(std::vector<Angular_Velocity_Calibration_Point> const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::ARRAY);
+  ts::sz::Value sz_value(ts::sz::Value::Type::ARRAY);
   for (size_t i = 0; i < value.size(); i++)
   {
     auto result = serialize(value[i]);
-    if (result != ts::success) { return result; }
-    sz_value.add_array_element(result.extract_payload());
+    sz_value.add_array_element(std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(std::vector<Magnetic_Field_Calibration_Point>& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(std::vector<Magnetic_Field_Calibration_Point>& value, ts::sz::Value const& sz_value)
 {
   value.clear();
   if (!sz_value.is_array()) { return ts::Error("Expected array value when deserializing"); }
@@ -7202,18 +6987,17 @@ ts::Result<void> deserialize(std::vector<Magnetic_Field_Calibration_Point>& valu
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(std::vector<Magnetic_Field_Calibration_Point> const& value)
+ts::sz::Value serialize(std::vector<Magnetic_Field_Calibration_Point> const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::ARRAY);
+  ts::sz::Value sz_value(ts::sz::Value::Type::ARRAY);
   for (size_t i = 0; i < value.size(); i++)
   {
     auto result = serialize(value[i]);
-    if (result != ts::success) { return result; }
-    sz_value.add_array_element(result.extract_payload());
+    sz_value.add_array_element(std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(MS5611_Descriptor& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(MS5611_Descriptor& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -7242,37 +7026,34 @@ ts::Result<void> deserialize(MS5611_Descriptor& value, ts::serialization::Value 
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(MS5611_Descriptor const& value)
+ts::sz::Value serialize(MS5611_Descriptor const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_bus());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("bus", result.extract_payload());
+    sz_value.add_object_member("bus", std::move(result));
   }
   {
     auto result = serialize(value.get_pressure_rate());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("pressure_rate", result.extract_payload());
+    sz_value.add_object_member("pressure_rate", std::move(result));
   }
   {
     auto result = serialize(value.get_temperature_rate());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("temperature_rate", result.extract_payload());
+    sz_value.add_object_member("temperature_rate", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(MS5611_Config& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(MS5611_Config& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(MS5611_Config const& value)
+ts::sz::Value serialize(MS5611_Config const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   return sz_value;
 }
-ts::Result<void> deserialize(Multirotor_Brain_Descriptor& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(Multirotor_Brain_Descriptor& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -7301,27 +7082,24 @@ ts::Result<void> deserialize(Multirotor_Brain_Descriptor& value, ts::serializati
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(Multirotor_Brain_Descriptor const& value)
+ts::sz::Value serialize(Multirotor_Brain_Descriptor const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_rate());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("rate", result.extract_payload());
+    sz_value.add_object_member("rate", std::move(result));
   }
   {
     auto result = serialize(value.get_commands_rate());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("commands_rate", result.extract_payload());
+    sz_value.add_object_member("commands_rate", std::move(result));
   }
   {
     auto result = serialize(value.get_state_rate());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("state_rate", result.extract_payload());
+    sz_value.add_object_member("state_rate", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(Multirotor_Brain_Config::Horizontal_Angle::Separate_XY_PIDs& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(Multirotor_Brain_Config::Horizontal_Angle::Separate_XY_PIDs& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -7342,22 +7120,20 @@ ts::Result<void> deserialize(Multirotor_Brain_Config::Horizontal_Angle::Separate
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(Multirotor_Brain_Config::Horizontal_Angle::Separate_XY_PIDs const& value)
+ts::sz::Value serialize(Multirotor_Brain_Config::Horizontal_Angle::Separate_XY_PIDs const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_x_pid());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("x_pid", result.extract_payload());
+    sz_value.add_object_member("x_pid", std::move(result));
   }
   {
     auto result = serialize(value.get_y_pid());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("y_pid", result.extract_payload());
+    sz_value.add_object_member("y_pid", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(Multirotor_Brain_Config::Horizontal_Angle& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(Multirotor_Brain_Config::Horizontal_Angle& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -7378,22 +7154,20 @@ ts::Result<void> deserialize(Multirotor_Brain_Config::Horizontal_Angle& value, t
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(Multirotor_Brain_Config::Horizontal_Angle const& value)
+ts::sz::Value serialize(Multirotor_Brain_Config::Horizontal_Angle const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_max_speed_deg());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("max_speed_deg", result.extract_payload());
+    sz_value.add_object_member("max_speed_deg", std::move(result));
   }
   {
     auto result = serialize(value.get_xy_pids());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("xy_pids", result.extract_payload());
+    sz_value.add_object_member("xy_pids", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(Multirotor_Brain_Config::Horizontal_Position& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(Multirotor_Brain_Config::Horizontal_Position& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -7430,32 +7204,28 @@ ts::Result<void> deserialize(Multirotor_Brain_Config::Horizontal_Position& value
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(Multirotor_Brain_Config::Horizontal_Position const& value)
+ts::sz::Value serialize(Multirotor_Brain_Config::Horizontal_Position const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_max_speed());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("max_speed", result.extract_payload());
+    sz_value.add_object_member("max_speed", std::move(result));
   }
   {
     auto result = serialize(value.get_lpf());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("lpf", result.extract_payload());
+    sz_value.add_object_member("lpf", std::move(result));
   }
   {
     auto result = serialize(value.get_velocity_pi());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("velocity_pi", result.extract_payload());
+    sz_value.add_object_member("velocity_pi", std::move(result));
   }
   {
     auto result = serialize(value.get_position_p());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("position_p", result.extract_payload());
+    sz_value.add_object_member("position_p", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(Multirotor_Brain_Config::Yaw_Angle& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(Multirotor_Brain_Config::Yaw_Angle& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -7476,22 +7246,20 @@ ts::Result<void> deserialize(Multirotor_Brain_Config::Yaw_Angle& value, ts::seri
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(Multirotor_Brain_Config::Yaw_Angle const& value)
+ts::sz::Value serialize(Multirotor_Brain_Config::Yaw_Angle const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_max_speed_deg());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("max_speed_deg", result.extract_payload());
+    sz_value.add_object_member("max_speed_deg", std::move(result));
   }
   {
     auto result = serialize(value.get_pid());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("pid", result.extract_payload());
+    sz_value.add_object_member("pid", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(Multirotor_Brain_Config::Altitude& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(Multirotor_Brain_Config::Altitude& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -7528,32 +7296,28 @@ ts::Result<void> deserialize(Multirotor_Brain_Config::Altitude& value, ts::seria
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(Multirotor_Brain_Config::Altitude const& value)
+ts::sz::Value serialize(Multirotor_Brain_Config::Altitude const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_max_speed());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("max_speed", result.extract_payload());
+    sz_value.add_object_member("max_speed", std::move(result));
   }
   {
     auto result = serialize(value.get_lpf());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("lpf", result.extract_payload());
+    sz_value.add_object_member("lpf", std::move(result));
   }
   {
     auto result = serialize(value.get_speed_pi());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("speed_pi", result.extract_payload());
+    sz_value.add_object_member("speed_pi", std::move(result));
   }
   {
     auto result = serialize(value.get_position_p());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("position_p", result.extract_payload());
+    sz_value.add_object_member("position_p", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(Multirotor_Brain_Config& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(Multirotor_Brain_Config& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -7606,42 +7370,36 @@ ts::Result<void> deserialize(Multirotor_Brain_Config& value, ts::serialization::
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(Multirotor_Brain_Config const& value)
+ts::sz::Value serialize(Multirotor_Brain_Config const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_max_thrust());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("max_thrust", result.extract_payload());
+    sz_value.add_object_member("max_thrust", std::move(result));
   }
   {
     auto result = serialize(value.get_min_thrust());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("min_thrust", result.extract_payload());
+    sz_value.add_object_member("min_thrust", std::move(result));
   }
   {
     auto result = serialize(value.get_horizontal_angle());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("horizontal_angle", result.extract_payload());
+    sz_value.add_object_member("horizontal_angle", std::move(result));
   }
   {
     auto result = serialize(value.get_horizontal_position());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("horizontal_position", result.extract_payload());
+    sz_value.add_object_member("horizontal_position", std::move(result));
   }
   {
     auto result = serialize(value.get_yaw_angle());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("yaw_angle", result.extract_payload());
+    sz_value.add_object_member("yaw_angle", std::move(result));
   }
   {
     auto result = serialize(value.get_altitude());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("altitude", result.extract_payload());
+    sz_value.add_object_member("altitude", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(boost::variant<Multirotor_Brain_Config::Horizontal_Angle::Combined_XY_PIDs,Multirotor_Brain_Config::Horizontal_Angle::Separate_XY_PIDs>& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(boost::variant<Multirotor_Brain_Config::Horizontal_Angle::Combined_XY_PIDs,Multirotor_Brain_Config::Horizontal_Angle::Separate_XY_PIDs>& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   auto const* type_sz_value = sz_value.find_object_member_by_name("type");
@@ -7667,29 +7425,27 @@ ts::Result<void> deserialize(boost::variant<Multirotor_Brain_Config::Horizontal_
   else { return ts::Error("Cannot find type '" + path + "' when deserializing"); }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(boost::variant<Multirotor_Brain_Config::Horizontal_Angle::Combined_XY_PIDs,Multirotor_Brain_Config::Horizontal_Angle::Separate_XY_PIDs> const& value)
+ts::sz::Value serialize(boost::variant<Multirotor_Brain_Config::Horizontal_Angle::Combined_XY_PIDs,Multirotor_Brain_Config::Horizontal_Angle::Separate_XY_PIDs> const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
-  if (false) { return ts::Error(""); } //this is here just to have the next items with 'else if'
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
+  if (false) { return ts::sz::Value(); } //this is here just to have the next items with 'else if'
   else if (auto* v = boost::get<Multirotor_Brain_Config::Horizontal_Angle::Combined_XY_PIDs>(&value))
   {
     sz_value.add_object_member("type", "Multirotor_Brain_Config::Horizontal_Angle::Combined_XY_PIDs");
     auto result = serialize(*v);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("value", result.extract_payload());
+    sz_value.add_object_member("value", std::move(result));
     return std::move(sz_value);
   }
   else if (auto* v = boost::get<Multirotor_Brain_Config::Horizontal_Angle::Separate_XY_PIDs>(&value))
   {
     sz_value.add_object_member("type", "Multirotor_Brain_Config::Horizontal_Angle::Separate_XY_PIDs");
     auto result = serialize(*v);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("value", result.extract_payload());
+    sz_value.add_object_member("value", std::move(result));
     return std::move(sz_value);
   }
-  else { return ts::Error("Cannot serialize type"); }
+  else { TS_ASSERT(false); return ts::sz::Value(); }
 }
-ts::Result<void> deserialize(Multirotor_Pilot_Descriptor& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(Multirotor_Pilot_Descriptor& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -7718,37 +7474,34 @@ ts::Result<void> deserialize(Multirotor_Pilot_Descriptor& value, ts::serializati
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(Multirotor_Pilot_Descriptor const& value)
+ts::sz::Value serialize(Multirotor_Pilot_Descriptor const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_commands_rate());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("commands_rate", result.extract_payload());
+    sz_value.add_object_member("commands_rate", std::move(result));
   }
   {
     auto result = serialize(value.get_state_rate());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("state_rate", result.extract_payload());
+    sz_value.add_object_member("state_rate", std::move(result));
   }
   {
     auto result = serialize(value.get_video_rate());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("video_rate", result.extract_payload());
+    sz_value.add_object_member("video_rate", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(Multirotor_Pilot_Config& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(Multirotor_Pilot_Config& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(Multirotor_Pilot_Config const& value)
+ts::sz::Value serialize(Multirotor_Pilot_Config const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   return sz_value;
 }
-ts::Result<void> deserialize(Multirotor_Simulator_Descriptor& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(Multirotor_Simulator_Descriptor& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -7817,52 +7570,44 @@ ts::Result<void> deserialize(Multirotor_Simulator_Descriptor& value, ts::seriali
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(Multirotor_Simulator_Descriptor const& value)
+ts::sz::Value serialize(Multirotor_Simulator_Descriptor const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_throttle_rate());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("throttle_rate", result.extract_payload());
+    sz_value.add_object_member("throttle_rate", std::move(result));
   }
   {
     auto result = serialize(value.get_acceleration_rate());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("acceleration_rate", result.extract_payload());
+    sz_value.add_object_member("acceleration_rate", std::move(result));
   }
   {
     auto result = serialize(value.get_angular_velocity_rate());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("angular_velocity_rate", result.extract_payload());
+    sz_value.add_object_member("angular_velocity_rate", std::move(result));
   }
   {
     auto result = serialize(value.get_magnetic_field_rate());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("magnetic_field_rate", result.extract_payload());
+    sz_value.add_object_member("magnetic_field_rate", std::move(result));
   }
   {
     auto result = serialize(value.get_pressure_rate());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("pressure_rate", result.extract_payload());
+    sz_value.add_object_member("pressure_rate", std::move(result));
   }
   {
     auto result = serialize(value.get_temperature_rate());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("temperature_rate", result.extract_payload());
+    sz_value.add_object_member("temperature_rate", std::move(result));
   }
   {
     auto result = serialize(value.get_distance_rate());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("distance_rate", result.extract_payload());
+    sz_value.add_object_member("distance_rate", std::move(result));
   }
   {
     auto result = serialize(value.get_gps_rate());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("gps_rate", result.extract_payload());
+    sz_value.add_object_member("gps_rate", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(Multirotor_Simulator_Config::Noise& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(Multirotor_Simulator_Config::Noise& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -7947,62 +7692,52 @@ ts::Result<void> deserialize(Multirotor_Simulator_Config::Noise& value, ts::seri
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(Multirotor_Simulator_Config::Noise const& value)
+ts::sz::Value serialize(Multirotor_Simulator_Config::Noise const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_gps_position());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("gps_position", result.extract_payload());
+    sz_value.add_object_member("gps_position", std::move(result));
   }
   {
     auto result = serialize(value.get_gps_velocity());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("gps_velocity", result.extract_payload());
+    sz_value.add_object_member("gps_velocity", std::move(result));
   }
   {
     auto result = serialize(value.get_gps_pacc());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("gps_pacc", result.extract_payload());
+    sz_value.add_object_member("gps_pacc", std::move(result));
   }
   {
     auto result = serialize(value.get_gps_vacc());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("gps_vacc", result.extract_payload());
+    sz_value.add_object_member("gps_vacc", std::move(result));
   }
   {
     auto result = serialize(value.get_acceleration());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("acceleration", result.extract_payload());
+    sz_value.add_object_member("acceleration", std::move(result));
   }
   {
     auto result = serialize(value.get_angular_velocity());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("angular_velocity", result.extract_payload());
+    sz_value.add_object_member("angular_velocity", std::move(result));
   }
   {
     auto result = serialize(value.get_magnetic_field());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("magnetic_field", result.extract_payload());
+    sz_value.add_object_member("magnetic_field", std::move(result));
   }
   {
     auto result = serialize(value.get_pressure());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("pressure", result.extract_payload());
+    sz_value.add_object_member("pressure", std::move(result));
   }
   {
     auto result = serialize(value.get_temperature());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("temperature", result.extract_payload());
+    sz_value.add_object_member("temperature", std::move(result));
   }
   {
     auto result = serialize(value.get_ground_distance());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("ground_distance", result.extract_payload());
+    sz_value.add_object_member("ground_distance", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(Multirotor_Simulator_Config& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(Multirotor_Simulator_Config& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -8047,37 +7782,32 @@ ts::Result<void> deserialize(Multirotor_Simulator_Config& value, ts::serializati
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(Multirotor_Simulator_Config const& value)
+ts::sz::Value serialize(Multirotor_Simulator_Config const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_simulation_enabled());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("simulation_enabled", result.extract_payload());
+    sz_value.add_object_member("simulation_enabled", std::move(result));
   }
   {
     auto result = serialize(value.get_drag_enabled());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("drag_enabled", result.extract_payload());
+    sz_value.add_object_member("drag_enabled", std::move(result));
   }
   {
     auto result = serialize(value.get_ground_enabled());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("ground_enabled", result.extract_payload());
+    sz_value.add_object_member("ground_enabled", std::move(result));
   }
   {
     auto result = serialize(value.get_gravity_enabled());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("gravity_enabled", result.extract_payload());
+    sz_value.add_object_member("gravity_enabled", std::move(result));
   }
   {
     auto result = serialize(value.get_noise());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("noise", result.extract_payload());
+    sz_value.add_object_member("noise", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(Oscillator_Descriptor& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(Oscillator_Descriptor& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -8098,22 +7828,20 @@ ts::Result<void> deserialize(Oscillator_Descriptor& value, ts::serialization::Va
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(Oscillator_Descriptor const& value)
+ts::sz::Value serialize(Oscillator_Descriptor const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_rate());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("rate", result.extract_payload());
+    sz_value.add_object_member("rate", std::move(result));
   }
   {
     auto result = serialize(value.get_component_count());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("component_count", result.extract_payload());
+    sz_value.add_object_member("component_count", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(Oscillator_Config::Component& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(Oscillator_Config::Component& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -8142,27 +7870,24 @@ ts::Result<void> deserialize(Oscillator_Config::Component& value, ts::serializat
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(Oscillator_Config::Component const& value)
+ts::sz::Value serialize(Oscillator_Config::Component const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_frequency());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("frequency", result.extract_payload());
+    sz_value.add_object_member("frequency", std::move(result));
   }
   {
     auto result = serialize(value.get_amplitude());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("amplitude", result.extract_payload());
+    sz_value.add_object_member("amplitude", std::move(result));
   }
   {
     auto result = serialize(value.get_square());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("square", result.extract_payload());
+    sz_value.add_object_member("square", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(Oscillator_Config& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(Oscillator_Config& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -8191,27 +7916,24 @@ ts::Result<void> deserialize(Oscillator_Config& value, ts::serialization::Value 
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(Oscillator_Config const& value)
+ts::sz::Value serialize(Oscillator_Config const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_amplitude());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("amplitude", result.extract_payload());
+    sz_value.add_object_member("amplitude", std::move(result));
   }
   {
     auto result = serialize(value.get_noise());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("noise", result.extract_payload());
+    sz_value.add_object_member("noise", std::move(result));
   }
   {
     auto result = serialize(value.get_components());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("components", result.extract_payload());
+    sz_value.add_object_member("components", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(std::vector<Oscillator_Config::Component>& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(std::vector<Oscillator_Config::Component>& value, ts::sz::Value const& sz_value)
 {
   value.clear();
   if (!sz_value.is_array()) { return ts::Error("Expected array value when deserializing"); }
@@ -8223,18 +7945,17 @@ ts::Result<void> deserialize(std::vector<Oscillator_Config::Component>& value, t
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(std::vector<Oscillator_Config::Component> const& value)
+ts::sz::Value serialize(std::vector<Oscillator_Config::Component> const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::ARRAY);
+  ts::sz::Value sz_value(ts::sz::Value::Type::ARRAY);
   for (size_t i = 0; i < value.size(); i++)
   {
     auto result = serialize(value[i]);
-    if (result != ts::success) { return result; }
-    sz_value.add_array_element(result.extract_payload());
+    sz_value.add_array_element(std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(PCA9685_Descriptor::Channel& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(PCA9685_Descriptor::Channel& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -8255,22 +7976,20 @@ ts::Result<void> deserialize(PCA9685_Descriptor::Channel& value, ts::serializati
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(PCA9685_Descriptor::Channel const& value)
+ts::sz::Value serialize(PCA9685_Descriptor::Channel const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_enabled());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("enabled", result.extract_payload());
+    sz_value.add_object_member("enabled", std::move(result));
   }
   {
     auto result = serialize(value.get_servo_signal());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("servo_signal", result.extract_payload());
+    sz_value.add_object_member("servo_signal", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(PCA9685_Descriptor& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(PCA9685_Descriptor& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -8307,32 +8026,28 @@ ts::Result<void> deserialize(PCA9685_Descriptor& value, ts::serialization::Value
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(PCA9685_Descriptor const& value)
+ts::sz::Value serialize(PCA9685_Descriptor const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_bus());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("bus", result.extract_payload());
+    sz_value.add_object_member("bus", std::move(result));
   }
   {
     auto result = serialize(value.get_rate());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("rate", result.extract_payload());
+    sz_value.add_object_member("rate", std::move(result));
   }
   {
     auto result = serialize(value.get_address());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("address", result.extract_payload());
+    sz_value.add_object_member("address", std::move(result));
   }
   {
     auto result = serialize(value.get_channels());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("channels", result.extract_payload());
+    sz_value.add_object_member("channels", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(std::vector<PCA9685_Descriptor::Channel>& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(std::vector<PCA9685_Descriptor::Channel>& value, ts::sz::Value const& sz_value)
 {
   value.clear();
   if (!sz_value.is_array()) { return ts::Error("Expected array value when deserializing"); }
@@ -8344,64 +8059,27 @@ ts::Result<void> deserialize(std::vector<PCA9685_Descriptor::Channel>& value, ts
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(std::vector<PCA9685_Descriptor::Channel> const& value)
+ts::sz::Value serialize(std::vector<PCA9685_Descriptor::Channel> const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::ARRAY);
+  ts::sz::Value sz_value(ts::sz::Value::Type::ARRAY);
   for (size_t i = 0; i < value.size(); i++)
   {
     auto result = serialize(value[i]);
-    if (result != ts::success) { return result; }
-    sz_value.add_array_element(result.extract_payload());
+    sz_value.add_array_element(std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(PCA9685_Config::IChannel& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(PCA9685_Config::IChannel& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(PCA9685_Config::IChannel const& value)
+ts::sz::Value serialize(PCA9685_Config::IChannel const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   return sz_value;
 }
-ts::Result<void> deserialize(PCA9685_Config::Servo_Channel& value, ts::serialization::Value const& sz_value)
-{
-  if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("min");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'min'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_min())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_min(v);
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("max");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'max'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_max())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_max(v);
-  }
-  return ts::success;
-}
-ts::Result<ts::serialization::Value> serialize(PCA9685_Config::Servo_Channel const& value)
-{
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
-  {
-    auto result = serialize(value.get_min());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("min", result.extract_payload());
-  }
-  {
-    auto result = serialize(value.get_max());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("max", result.extract_payload());
-  }
-  return sz_value;
-}
-ts::Result<void> deserialize(PCA9685_Config::PWM_Channel& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(PCA9685_Config::Servo_Channel& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -8422,22 +8100,54 @@ ts::Result<void> deserialize(PCA9685_Config::PWM_Channel& value, ts::serializati
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(PCA9685_Config::PWM_Channel const& value)
+ts::sz::Value serialize(PCA9685_Config::Servo_Channel const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_min());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("min", result.extract_payload());
+    sz_value.add_object_member("min", std::move(result));
   }
   {
     auto result = serialize(value.get_max());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("max", result.extract_payload());
+    sz_value.add_object_member("max", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(PCA9685_Config& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(PCA9685_Config::PWM_Channel& value, ts::sz::Value const& sz_value)
+{
+  if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  {
+    auto const* member_sz_value = sz_value.find_object_member_by_name("min");
+    if (!member_sz_value) { return ts::Error("Cannot find member value 'min'"); }
+    std::remove_cv<std::remove_reference<decltype(value.get_min())>::type>::type v;
+    auto result = deserialize(v, *member_sz_value);
+    if (result != ts::success) { return result; }
+    value.set_min(v);
+  }
+  {
+    auto const* member_sz_value = sz_value.find_object_member_by_name("max");
+    if (!member_sz_value) { return ts::Error("Cannot find member value 'max'"); }
+    std::remove_cv<std::remove_reference<decltype(value.get_max())>::type>::type v;
+    auto result = deserialize(v, *member_sz_value);
+    if (result != ts::success) { return result; }
+    value.set_max(v);
+  }
+  return ts::success;
+}
+ts::sz::Value serialize(PCA9685_Config::PWM_Channel const& value)
+{
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
+  {
+    auto result = serialize(value.get_min());
+    sz_value.add_object_member("min", std::move(result));
+  }
+  {
+    auto result = serialize(value.get_max());
+    sz_value.add_object_member("max", std::move(result));
+  }
+  return sz_value;
+}
+ts::Result<void> deserialize(PCA9685_Config& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -8450,17 +8160,16 @@ ts::Result<void> deserialize(PCA9685_Config& value, ts::serialization::Value con
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(PCA9685_Config const& value)
+ts::sz::Value serialize(PCA9685_Config const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_channels());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("channels", result.extract_payload());
+    sz_value.add_object_member("channels", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(Poly<PCA9685_Config::IChannel>& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(Poly<PCA9685_Config::IChannel>& value, ts::sz::Value const& sz_value)
 {
   if (sz_value.is_empty()) { value = Poly<PCA9685_Config::IChannel>(); return ts::success; }
   if (!sz_value.is_object()) { return ts::Error("Expected object or null value when deserializing"); }
@@ -8483,30 +8192,28 @@ ts::Result<void> deserialize(Poly<PCA9685_Config::IChannel>& value, ts::serializ
   else { return ts::Error("Cannot find type '" + path + "' when deserializing"); }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(Poly<PCA9685_Config::IChannel> const& value)
+ts::sz::Value serialize(Poly<PCA9685_Config::IChannel> const& value)
 {
-  if (!value) { return ts::serialization::Value(ts::serialization::Value::Type::EMPTY); }
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
-  if (false) { return ts::Error(""); } //this is here just to have the next items with 'else if'
+  if (!value) { return ts::sz::Value(); }
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
+  if (false) { return ts::sz::Value(); } //this is here just to have the next items with 'else if'
   else if (typeid(*value) == typeid(PCA9685_Config::Servo_Channel))
   {
     sz_value.add_object_member("type", "PCA9685_Config::Servo_Channel");
     auto result = serialize((PCA9685_Config::Servo_Channel&)*value);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("value", result.extract_payload());
+    sz_value.add_object_member("value", std::move(result));
     return std::move(sz_value);
   }
   else if (typeid(*value) == typeid(PCA9685_Config::PWM_Channel))
   {
     sz_value.add_object_member("type", "PCA9685_Config::PWM_Channel");
     auto result = serialize((PCA9685_Config::PWM_Channel&)*value);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("value", result.extract_payload());
+    sz_value.add_object_member("value", std::move(result));
     return std::move(sz_value);
   }
-  else { return ts::Error("Cannot serialize type"); }
+  else { TS_ASSERT(false); return ts::sz::Value(); }
 }
-ts::Result<void> deserialize(std::vector<Poly<PCA9685_Config::IChannel>>& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(std::vector<Poly<PCA9685_Config::IChannel>>& value, ts::sz::Value const& sz_value)
 {
   value.clear();
   if (!sz_value.is_array()) { return ts::Error("Expected array value when deserializing"); }
@@ -8518,18 +8225,17 @@ ts::Result<void> deserialize(std::vector<Poly<PCA9685_Config::IChannel>>& value,
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(std::vector<Poly<PCA9685_Config::IChannel>> const& value)
+ts::sz::Value serialize(std::vector<Poly<PCA9685_Config::IChannel>> const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::ARRAY);
+  ts::sz::Value sz_value(ts::sz::Value::Type::ARRAY);
   for (size_t i = 0; i < value.size(); i++)
   {
     auto result = serialize(value[i]);
-    if (result != ts::success) { return result; }
-    sz_value.add_array_element(result.extract_payload());
+    sz_value.add_array_element(std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(PIGPIO_Descriptor::Channel& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(PIGPIO_Descriptor::Channel& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -8558,27 +8264,24 @@ ts::Result<void> deserialize(PIGPIO_Descriptor::Channel& value, ts::serializatio
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(PIGPIO_Descriptor::Channel const& value)
+ts::sz::Value serialize(PIGPIO_Descriptor::Channel const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_enabled());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("enabled", result.extract_payload());
+    sz_value.add_object_member("enabled", std::move(result));
   }
   {
     auto result = serialize(value.get_servo_signal());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("servo_signal", result.extract_payload());
+    sz_value.add_object_member("servo_signal", std::move(result));
   }
   {
     auto result = serialize(value.get_rate());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("rate", result.extract_payload());
+    sz_value.add_object_member("rate", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(PIGPIO_Descriptor& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(PIGPIO_Descriptor& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -8791,188 +8494,126 @@ ts::Result<void> deserialize(PIGPIO_Descriptor& value, ts::serialization::Value 
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(PIGPIO_Descriptor const& value)
+ts::sz::Value serialize(PIGPIO_Descriptor const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_gpio_2());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("gpio_2", result.extract_payload());
+    sz_value.add_object_member("gpio_2", std::move(result));
   }
   {
     auto result = serialize(value.get_gpio_3());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("gpio_3", result.extract_payload());
+    sz_value.add_object_member("gpio_3", std::move(result));
   }
   {
     auto result = serialize(value.get_gpio_4());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("gpio_4", result.extract_payload());
+    sz_value.add_object_member("gpio_4", std::move(result));
   }
   {
     auto result = serialize(value.get_gpio_5());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("gpio_5", result.extract_payload());
+    sz_value.add_object_member("gpio_5", std::move(result));
   }
   {
     auto result = serialize(value.get_gpio_6());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("gpio_6", result.extract_payload());
+    sz_value.add_object_member("gpio_6", std::move(result));
   }
   {
     auto result = serialize(value.get_gpio_7());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("gpio_7", result.extract_payload());
+    sz_value.add_object_member("gpio_7", std::move(result));
   }
   {
     auto result = serialize(value.get_gpio_8());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("gpio_8", result.extract_payload());
+    sz_value.add_object_member("gpio_8", std::move(result));
   }
   {
     auto result = serialize(value.get_gpio_9());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("gpio_9", result.extract_payload());
+    sz_value.add_object_member("gpio_9", std::move(result));
   }
   {
     auto result = serialize(value.get_gpio_10());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("gpio_10", result.extract_payload());
+    sz_value.add_object_member("gpio_10", std::move(result));
   }
   {
     auto result = serialize(value.get_gpio_11());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("gpio_11", result.extract_payload());
+    sz_value.add_object_member("gpio_11", std::move(result));
   }
   {
     auto result = serialize(value.get_gpio_12());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("gpio_12", result.extract_payload());
+    sz_value.add_object_member("gpio_12", std::move(result));
   }
   {
     auto result = serialize(value.get_gpio_13());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("gpio_13", result.extract_payload());
+    sz_value.add_object_member("gpio_13", std::move(result));
   }
   {
     auto result = serialize(value.get_gpio_14());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("gpio_14", result.extract_payload());
+    sz_value.add_object_member("gpio_14", std::move(result));
   }
   {
     auto result = serialize(value.get_gpio_15());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("gpio_15", result.extract_payload());
+    sz_value.add_object_member("gpio_15", std::move(result));
   }
   {
     auto result = serialize(value.get_gpio_16());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("gpio_16", result.extract_payload());
+    sz_value.add_object_member("gpio_16", std::move(result));
   }
   {
     auto result = serialize(value.get_gpio_17());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("gpio_17", result.extract_payload());
+    sz_value.add_object_member("gpio_17", std::move(result));
   }
   {
     auto result = serialize(value.get_gpio_18());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("gpio_18", result.extract_payload());
+    sz_value.add_object_member("gpio_18", std::move(result));
   }
   {
     auto result = serialize(value.get_gpio_19());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("gpio_19", result.extract_payload());
+    sz_value.add_object_member("gpio_19", std::move(result));
   }
   {
     auto result = serialize(value.get_gpio_20());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("gpio_20", result.extract_payload());
+    sz_value.add_object_member("gpio_20", std::move(result));
   }
   {
     auto result = serialize(value.get_gpio_21());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("gpio_21", result.extract_payload());
+    sz_value.add_object_member("gpio_21", std::move(result));
   }
   {
     auto result = serialize(value.get_gpio_22());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("gpio_22", result.extract_payload());
+    sz_value.add_object_member("gpio_22", std::move(result));
   }
   {
     auto result = serialize(value.get_gpio_23());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("gpio_23", result.extract_payload());
+    sz_value.add_object_member("gpio_23", std::move(result));
   }
   {
     auto result = serialize(value.get_gpio_24());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("gpio_24", result.extract_payload());
+    sz_value.add_object_member("gpio_24", std::move(result));
   }
   {
     auto result = serialize(value.get_gpio_25());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("gpio_25", result.extract_payload());
+    sz_value.add_object_member("gpio_25", std::move(result));
   }
   {
     auto result = serialize(value.get_gpio_26());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("gpio_26", result.extract_payload());
+    sz_value.add_object_member("gpio_26", std::move(result));
   }
   {
     auto result = serialize(value.get_gpio_27());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("gpio_27", result.extract_payload());
+    sz_value.add_object_member("gpio_27", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(PIGPIO_Config::IChannel& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(PIGPIO_Config::IChannel& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(PIGPIO_Config::IChannel const& value)
+ts::sz::Value serialize(PIGPIO_Config::IChannel const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   return sz_value;
 }
-ts::Result<void> deserialize(PIGPIO_Config::Servo_Channel& value, ts::serialization::Value const& sz_value)
-{
-  if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("min");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'min'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_min())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_min(v);
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("max");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'max'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_max())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_max(v);
-  }
-  return ts::success;
-}
-ts::Result<ts::serialization::Value> serialize(PIGPIO_Config::Servo_Channel const& value)
-{
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
-  {
-    auto result = serialize(value.get_min());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("min", result.extract_payload());
-  }
-  {
-    auto result = serialize(value.get_max());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("max", result.extract_payload());
-  }
-  return sz_value;
-}
-ts::Result<void> deserialize(PIGPIO_Config::PWM_Channel& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(PIGPIO_Config::Servo_Channel& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -8993,22 +8634,54 @@ ts::Result<void> deserialize(PIGPIO_Config::PWM_Channel& value, ts::serializatio
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(PIGPIO_Config::PWM_Channel const& value)
+ts::sz::Value serialize(PIGPIO_Config::Servo_Channel const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_min());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("min", result.extract_payload());
+    sz_value.add_object_member("min", std::move(result));
   }
   {
     auto result = serialize(value.get_max());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("max", result.extract_payload());
+    sz_value.add_object_member("max", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(PIGPIO_Config& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(PIGPIO_Config::PWM_Channel& value, ts::sz::Value const& sz_value)
+{
+  if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  {
+    auto const* member_sz_value = sz_value.find_object_member_by_name("min");
+    if (!member_sz_value) { return ts::Error("Cannot find member value 'min'"); }
+    std::remove_cv<std::remove_reference<decltype(value.get_min())>::type>::type v;
+    auto result = deserialize(v, *member_sz_value);
+    if (result != ts::success) { return result; }
+    value.set_min(v);
+  }
+  {
+    auto const* member_sz_value = sz_value.find_object_member_by_name("max");
+    if (!member_sz_value) { return ts::Error("Cannot find member value 'max'"); }
+    std::remove_cv<std::remove_reference<decltype(value.get_max())>::type>::type v;
+    auto result = deserialize(v, *member_sz_value);
+    if (result != ts::success) { return result; }
+    value.set_max(v);
+  }
+  return ts::success;
+}
+ts::sz::Value serialize(PIGPIO_Config::PWM_Channel const& value)
+{
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
+  {
+    auto result = serialize(value.get_min());
+    sz_value.add_object_member("min", std::move(result));
+  }
+  {
+    auto result = serialize(value.get_max());
+    sz_value.add_object_member("max", std::move(result));
+  }
+  return sz_value;
+}
+ts::Result<void> deserialize(PIGPIO_Config& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -9221,142 +8894,116 @@ ts::Result<void> deserialize(PIGPIO_Config& value, ts::serialization::Value cons
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(PIGPIO_Config const& value)
+ts::sz::Value serialize(PIGPIO_Config const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_gpio_2());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("gpio_2", result.extract_payload());
+    sz_value.add_object_member("gpio_2", std::move(result));
   }
   {
     auto result = serialize(value.get_gpio_3());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("gpio_3", result.extract_payload());
+    sz_value.add_object_member("gpio_3", std::move(result));
   }
   {
     auto result = serialize(value.get_gpio_4());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("gpio_4", result.extract_payload());
+    sz_value.add_object_member("gpio_4", std::move(result));
   }
   {
     auto result = serialize(value.get_gpio_5());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("gpio_5", result.extract_payload());
+    sz_value.add_object_member("gpio_5", std::move(result));
   }
   {
     auto result = serialize(value.get_gpio_6());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("gpio_6", result.extract_payload());
+    sz_value.add_object_member("gpio_6", std::move(result));
   }
   {
     auto result = serialize(value.get_gpio_7());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("gpio_7", result.extract_payload());
+    sz_value.add_object_member("gpio_7", std::move(result));
   }
   {
     auto result = serialize(value.get_gpio_8());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("gpio_8", result.extract_payload());
+    sz_value.add_object_member("gpio_8", std::move(result));
   }
   {
     auto result = serialize(value.get_gpio_9());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("gpio_9", result.extract_payload());
+    sz_value.add_object_member("gpio_9", std::move(result));
   }
   {
     auto result = serialize(value.get_gpio_10());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("gpio_10", result.extract_payload());
+    sz_value.add_object_member("gpio_10", std::move(result));
   }
   {
     auto result = serialize(value.get_gpio_11());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("gpio_11", result.extract_payload());
+    sz_value.add_object_member("gpio_11", std::move(result));
   }
   {
     auto result = serialize(value.get_gpio_12());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("gpio_12", result.extract_payload());
+    sz_value.add_object_member("gpio_12", std::move(result));
   }
   {
     auto result = serialize(value.get_gpio_13());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("gpio_13", result.extract_payload());
+    sz_value.add_object_member("gpio_13", std::move(result));
   }
   {
     auto result = serialize(value.get_gpio_14());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("gpio_14", result.extract_payload());
+    sz_value.add_object_member("gpio_14", std::move(result));
   }
   {
     auto result = serialize(value.get_gpio_15());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("gpio_15", result.extract_payload());
+    sz_value.add_object_member("gpio_15", std::move(result));
   }
   {
     auto result = serialize(value.get_gpio_16());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("gpio_16", result.extract_payload());
+    sz_value.add_object_member("gpio_16", std::move(result));
   }
   {
     auto result = serialize(value.get_gpio_17());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("gpio_17", result.extract_payload());
+    sz_value.add_object_member("gpio_17", std::move(result));
   }
   {
     auto result = serialize(value.get_gpio_18());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("gpio_18", result.extract_payload());
+    sz_value.add_object_member("gpio_18", std::move(result));
   }
   {
     auto result = serialize(value.get_gpio_19());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("gpio_19", result.extract_payload());
+    sz_value.add_object_member("gpio_19", std::move(result));
   }
   {
     auto result = serialize(value.get_gpio_20());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("gpio_20", result.extract_payload());
+    sz_value.add_object_member("gpio_20", std::move(result));
   }
   {
     auto result = serialize(value.get_gpio_21());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("gpio_21", result.extract_payload());
+    sz_value.add_object_member("gpio_21", std::move(result));
   }
   {
     auto result = serialize(value.get_gpio_22());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("gpio_22", result.extract_payload());
+    sz_value.add_object_member("gpio_22", std::move(result));
   }
   {
     auto result = serialize(value.get_gpio_23());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("gpio_23", result.extract_payload());
+    sz_value.add_object_member("gpio_23", std::move(result));
   }
   {
     auto result = serialize(value.get_gpio_24());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("gpio_24", result.extract_payload());
+    sz_value.add_object_member("gpio_24", std::move(result));
   }
   {
     auto result = serialize(value.get_gpio_25());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("gpio_25", result.extract_payload());
+    sz_value.add_object_member("gpio_25", std::move(result));
   }
   {
     auto result = serialize(value.get_gpio_26());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("gpio_26", result.extract_payload());
+    sz_value.add_object_member("gpio_26", std::move(result));
   }
   {
     auto result = serialize(value.get_gpio_27());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("gpio_27", result.extract_payload());
+    sz_value.add_object_member("gpio_27", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(Poly<PIGPIO_Config::IChannel>& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(Poly<PIGPIO_Config::IChannel>& value, ts::sz::Value const& sz_value)
 {
   if (sz_value.is_empty()) { value = Poly<PIGPIO_Config::IChannel>(); return ts::success; }
   if (!sz_value.is_object()) { return ts::Error("Expected object or null value when deserializing"); }
@@ -9379,30 +9026,28 @@ ts::Result<void> deserialize(Poly<PIGPIO_Config::IChannel>& value, ts::serializa
   else { return ts::Error("Cannot find type '" + path + "' when deserializing"); }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(Poly<PIGPIO_Config::IChannel> const& value)
+ts::sz::Value serialize(Poly<PIGPIO_Config::IChannel> const& value)
 {
-  if (!value) { return ts::serialization::Value(ts::serialization::Value::Type::EMPTY); }
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
-  if (false) { return ts::Error(""); } //this is here just to have the next items with 'else if'
+  if (!value) { return ts::sz::Value(); }
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
+  if (false) { return ts::sz::Value(); } //this is here just to have the next items with 'else if'
   else if (typeid(*value) == typeid(PIGPIO_Config::Servo_Channel))
   {
     sz_value.add_object_member("type", "PIGPIO_Config::Servo_Channel");
     auto result = serialize((PIGPIO_Config::Servo_Channel&)*value);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("value", result.extract_payload());
+    sz_value.add_object_member("value", std::move(result));
     return std::move(sz_value);
   }
   else if (typeid(*value) == typeid(PIGPIO_Config::PWM_Channel))
   {
     sz_value.add_object_member("type", "PIGPIO_Config::PWM_Channel");
     auto result = serialize((PIGPIO_Config::PWM_Channel&)*value);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("value", result.extract_payload());
+    sz_value.add_object_member("value", std::move(result));
     return std::move(sz_value);
   }
-  else { return ts::Error("Cannot serialize type"); }
+  else { TS_ASSERT(false); return ts::sz::Value(); }
 }
-ts::Result<void> deserialize(Pressure_Velocity_Descriptor& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(Pressure_Velocity_Descriptor& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -9415,27 +9060,26 @@ ts::Result<void> deserialize(Pressure_Velocity_Descriptor& value, ts::serializat
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(Pressure_Velocity_Descriptor const& value)
+ts::sz::Value serialize(Pressure_Velocity_Descriptor const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_rate());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("rate", result.extract_payload());
+    sz_value.add_object_member("rate", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(Pressure_Velocity_Config& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(Pressure_Velocity_Config& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(Pressure_Velocity_Config const& value)
+ts::sz::Value serialize(Pressure_Velocity_Config const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   return sz_value;
 }
-ts::Result<void> deserialize(Proximity_Descriptor& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(Proximity_Descriptor& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -9456,32 +9100,30 @@ ts::Result<void> deserialize(Proximity_Descriptor& value, ts::serialization::Val
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(Proximity_Descriptor const& value)
+ts::sz::Value serialize(Proximity_Descriptor const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_rate());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("rate", result.extract_payload());
+    sz_value.add_object_member("rate", std::move(result));
   }
   {
     auto result = serialize(value.get_channel_count());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("channel_count", result.extract_payload());
+    sz_value.add_object_member("channel_count", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(Proximity_Config& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(Proximity_Config& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(Proximity_Config const& value)
+ts::sz::Value serialize(Proximity_Config const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   return sz_value;
 }
-ts::Result<void> deserialize(Rate_Controller_Descriptor& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(Rate_Controller_Descriptor& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -9494,17 +9136,16 @@ ts::Result<void> deserialize(Rate_Controller_Descriptor& value, ts::serializatio
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(Rate_Controller_Descriptor const& value)
+ts::sz::Value serialize(Rate_Controller_Descriptor const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_rate());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("rate", result.extract_payload());
+    sz_value.add_object_member("rate", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(Rate_Controller_Config::Feedback::Separate_XY_PIDs& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(Rate_Controller_Config::Feedback::Separate_XY_PIDs& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -9525,22 +9166,20 @@ ts::Result<void> deserialize(Rate_Controller_Config::Feedback::Separate_XY_PIDs&
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(Rate_Controller_Config::Feedback::Separate_XY_PIDs const& value)
+ts::sz::Value serialize(Rate_Controller_Config::Feedback::Separate_XY_PIDs const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_x_pid());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("x_pid", result.extract_payload());
+    sz_value.add_object_member("x_pid", std::move(result));
   }
   {
     auto result = serialize(value.get_y_pid());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("y_pid", result.extract_payload());
+    sz_value.add_object_member("y_pid", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(Rate_Controller_Config::Feedback& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(Rate_Controller_Config::Feedback& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -9569,27 +9208,24 @@ ts::Result<void> deserialize(Rate_Controller_Config::Feedback& value, ts::serial
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(Rate_Controller_Config::Feedback const& value)
+ts::sz::Value serialize(Rate_Controller_Config::Feedback const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_weight());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("weight", result.extract_payload());
+    sz_value.add_object_member("weight", std::move(result));
   }
   {
     auto result = serialize(value.get_xy_pids());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("xy_pids", result.extract_payload());
+    sz_value.add_object_member("xy_pids", std::move(result));
   }
   {
     auto result = serialize(value.get_z_pid());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("z_pid", result.extract_payload());
+    sz_value.add_object_member("z_pid", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(Rate_Controller_Config::Feedforward& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(Rate_Controller_Config::Feedforward& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -9610,22 +9246,20 @@ ts::Result<void> deserialize(Rate_Controller_Config::Feedforward& value, ts::ser
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(Rate_Controller_Config::Feedforward const& value)
+ts::sz::Value serialize(Rate_Controller_Config::Feedforward const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_weight());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("weight", result.extract_payload());
+    sz_value.add_object_member("weight", std::move(result));
   }
   {
     auto result = serialize(value.get_max_torque());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("max_torque", result.extract_payload());
+    sz_value.add_object_member("max_torque", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(Rate_Controller_Config& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(Rate_Controller_Config& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -9646,22 +9280,20 @@ ts::Result<void> deserialize(Rate_Controller_Config& value, ts::serialization::V
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(Rate_Controller_Config const& value)
+ts::sz::Value serialize(Rate_Controller_Config const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_feedback());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("feedback", result.extract_payload());
+    sz_value.add_object_member("feedback", std::move(result));
   }
   {
     auto result = serialize(value.get_feedforward());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("feedforward", result.extract_payload());
+    sz_value.add_object_member("feedforward", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(boost::variant<Rate_Controller_Config::Feedback::Combined_XY_PIDs,Rate_Controller_Config::Feedback::Separate_XY_PIDs>& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(boost::variant<Rate_Controller_Config::Feedback::Combined_XY_PIDs,Rate_Controller_Config::Feedback::Separate_XY_PIDs>& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   auto const* type_sz_value = sz_value.find_object_member_by_name("type");
@@ -9687,29 +9319,27 @@ ts::Result<void> deserialize(boost::variant<Rate_Controller_Config::Feedback::Co
   else { return ts::Error("Cannot find type '" + path + "' when deserializing"); }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(boost::variant<Rate_Controller_Config::Feedback::Combined_XY_PIDs,Rate_Controller_Config::Feedback::Separate_XY_PIDs> const& value)
+ts::sz::Value serialize(boost::variant<Rate_Controller_Config::Feedback::Combined_XY_PIDs,Rate_Controller_Config::Feedback::Separate_XY_PIDs> const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
-  if (false) { return ts::Error(""); } //this is here just to have the next items with 'else if'
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
+  if (false) { return ts::sz::Value(); } //this is here just to have the next items with 'else if'
   else if (auto* v = boost::get<Rate_Controller_Config::Feedback::Combined_XY_PIDs>(&value))
   {
     sz_value.add_object_member("type", "Rate_Controller_Config::Feedback::Combined_XY_PIDs");
     auto result = serialize(*v);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("value", result.extract_payload());
+    sz_value.add_object_member("value", std::move(result));
     return std::move(sz_value);
   }
   else if (auto* v = boost::get<Rate_Controller_Config::Feedback::Separate_XY_PIDs>(&value))
   {
     sz_value.add_object_member("type", "Rate_Controller_Config::Feedback::Separate_XY_PIDs");
     auto result = serialize(*v);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("value", result.extract_payload());
+    sz_value.add_object_member("value", std::move(result));
     return std::move(sz_value);
   }
-  else { return ts::Error("Cannot serialize type"); }
+  else { TS_ASSERT(false); return ts::sz::Value(); }
 }
-ts::Result<void> deserialize(Raspicam_Descriptor::Quality& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(Raspicam_Descriptor::Quality& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -9730,22 +9360,20 @@ ts::Result<void> deserialize(Raspicam_Descriptor::Quality& value, ts::serializat
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(Raspicam_Descriptor::Quality const& value)
+ts::sz::Value serialize(Raspicam_Descriptor::Quality const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_resolution());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("resolution", result.extract_payload());
+    sz_value.add_object_member("resolution", std::move(result));
   }
   {
     auto result = serialize(value.get_bitrate());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("bitrate", result.extract_payload());
+    sz_value.add_object_member("bitrate", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(Raspicam_Descriptor& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(Raspicam_Descriptor& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -9782,32 +9410,28 @@ ts::Result<void> deserialize(Raspicam_Descriptor& value, ts::serialization::Valu
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(Raspicam_Descriptor const& value)
+ts::sz::Value serialize(Raspicam_Descriptor const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_fps());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("fps", result.extract_payload());
+    sz_value.add_object_member("fps", std::move(result));
   }
   {
     auto result = serialize(value.get_streaming_low());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("streaming_low", result.extract_payload());
+    sz_value.add_object_member("streaming_low", std::move(result));
   }
   {
     auto result = serialize(value.get_streaming_high());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("streaming_high", result.extract_payload());
+    sz_value.add_object_member("streaming_high", std::move(result));
   }
   {
     auto result = serialize(value.get_recording());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("recording", result.extract_payload());
+    sz_value.add_object_member("recording", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(Raspicam_Config::awb_mode_t& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(Raspicam_Config::awb_mode_t& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_string()) { return ts::Error("Expected string value when deserializing"); }
   std::string const& key = sz_value.get_as_string();
@@ -9829,7 +9453,7 @@ ts::Result<void> deserialize(Raspicam_Config::awb_mode_t& value, ts::serializati
   value = it->second;
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(Raspicam_Config::awb_mode_t const& value)
+ts::sz::Value serialize(Raspicam_Config::awb_mode_t const& value)
 {
   typedef Raspicam_Config::awb_mode_t _etype;
   static std::map<_etype, std::string> s_map = {
@@ -9845,10 +9469,10 @@ ts::Result<ts::serialization::Value> serialize(Raspicam_Config::awb_mode_t const
     { _etype::HORIZON, "HORIZON" },
   };
   auto it = s_map.find(value);
-  if (it == s_map.end()) { return ts::Error("Cannot serialize type"); }
-  return ts::serialization::Value(it->second);
+  if (it == s_map.end()) { TS_ASSERT(false); return ts::sz::Value(); }
+  return ts::sz::Value(it->second);
 }
-ts::Result<void> deserialize(Raspicam_Config& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(Raspicam_Config& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -9933,62 +9557,52 @@ ts::Result<void> deserialize(Raspicam_Config& value, ts::serialization::Value co
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(Raspicam_Config const& value)
+ts::sz::Value serialize(Raspicam_Config const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_iso());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("iso", result.extract_payload());
+    sz_value.add_object_member("iso", std::move(result));
   }
   {
     auto result = serialize(value.get_shutter_speed());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("shutter_speed", result.extract_payload());
+    sz_value.add_object_member("shutter_speed", std::move(result));
   }
   {
     auto result = serialize(value.get_ev());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("ev", result.extract_payload());
+    sz_value.add_object_member("ev", std::move(result));
   }
   {
     auto result = serialize(value.get_sharpness());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("sharpness", result.extract_payload());
+    sz_value.add_object_member("sharpness", std::move(result));
   }
   {
     auto result = serialize(value.get_contrast());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("contrast", result.extract_payload());
+    sz_value.add_object_member("contrast", std::move(result));
   }
   {
     auto result = serialize(value.get_brightness());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("brightness", result.extract_payload());
+    sz_value.add_object_member("brightness", std::move(result));
   }
   {
     auto result = serialize(value.get_saturation());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("saturation", result.extract_payload());
+    sz_value.add_object_member("saturation", std::move(result));
   }
   {
     auto result = serialize(value.get_awb_mode());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("awb_mode", result.extract_payload());
+    sz_value.add_object_member("awb_mode", std::move(result));
   }
   {
     auto result = serialize(value.get_quality());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("quality", result.extract_payload());
+    sz_value.add_object_member("quality", std::move(result));
   }
   {
     auto result = serialize(value.get_recording());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("recording", result.extract_payload());
+    sz_value.add_object_member("recording", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(RC5T619_Descriptor& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(RC5T619_Descriptor& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -10017,37 +9631,34 @@ ts::Result<void> deserialize(RC5T619_Descriptor& value, ts::serialization::Value
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(RC5T619_Descriptor const& value)
+ts::sz::Value serialize(RC5T619_Descriptor const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_bus());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("bus", result.extract_payload());
+    sz_value.add_object_member("bus", std::move(result));
   }
   {
     auto result = serialize(value.get_adc0_rate());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("adc0_rate", result.extract_payload());
+    sz_value.add_object_member("adc0_rate", std::move(result));
   }
   {
     auto result = serialize(value.get_adc1_rate());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("adc1_rate", result.extract_payload());
+    sz_value.add_object_member("adc1_rate", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(RC5T619_Config& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(RC5T619_Config& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(RC5T619_Config const& value)
+ts::sz::Value serialize(RC5T619_Config const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   return sz_value;
 }
-ts::Result<void> deserialize(Resampler_Descriptor& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(Resampler_Descriptor& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -10068,22 +9679,20 @@ ts::Result<void> deserialize(Resampler_Descriptor& value, ts::serialization::Val
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(Resampler_Descriptor const& value)
+ts::sz::Value serialize(Resampler_Descriptor const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_input_rate());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("input_rate", result.extract_payload());
+    sz_value.add_object_member("input_rate", std::move(result));
   }
   {
     auto result = serialize(value.get_output_rate());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("output_rate", result.extract_payload());
+    sz_value.add_object_member("output_rate", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(Resampler_Config& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(Resampler_Config& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -10096,17 +9705,16 @@ ts::Result<void> deserialize(Resampler_Config& value, ts::serialization::Value c
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(Resampler_Config const& value)
+ts::sz::Value serialize(Resampler_Config const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_lpf());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("lpf", result.extract_payload());
+    sz_value.add_object_member("lpf", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(Scalar_Generator_Descriptor& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(Scalar_Generator_Descriptor& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -10119,17 +9727,16 @@ ts::Result<void> deserialize(Scalar_Generator_Descriptor& value, ts::serializati
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(Scalar_Generator_Descriptor const& value)
+ts::sz::Value serialize(Scalar_Generator_Descriptor const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_rate());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("rate", result.extract_payload());
+    sz_value.add_object_member("rate", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(Scalar_Generator_Config& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(Scalar_Generator_Config& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -10142,17 +9749,16 @@ ts::Result<void> deserialize(Scalar_Generator_Config& value, ts::serialization::
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(Scalar_Generator_Config const& value)
+ts::sz::Value serialize(Scalar_Generator_Config const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_value());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("value", result.extract_payload());
+    sz_value.add_object_member("value", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(Servo_Gimbal_Descriptor& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(Servo_Gimbal_Descriptor& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -10173,22 +9779,20 @@ ts::Result<void> deserialize(Servo_Gimbal_Descriptor& value, ts::serialization::
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(Servo_Gimbal_Descriptor const& value)
+ts::sz::Value serialize(Servo_Gimbal_Descriptor const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_rate());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("rate", result.extract_payload());
+    sz_value.add_object_member("rate", std::move(result));
   }
   {
     auto result = serialize(value.get_commands_rate());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("commands_rate", result.extract_payload());
+    sz_value.add_object_member("commands_rate", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(Servo_Gimbal_Config::Channel& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(Servo_Gimbal_Config::Channel& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -10225,32 +9829,28 @@ ts::Result<void> deserialize(Servo_Gimbal_Config::Channel& value, ts::serializat
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(Servo_Gimbal_Config::Channel const& value)
+ts::sz::Value serialize(Servo_Gimbal_Config::Channel const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_min_angle());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("min_angle", result.extract_payload());
+    sz_value.add_object_member("min_angle", std::move(result));
   }
   {
     auto result = serialize(value.get_max_angle());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("max_angle", result.extract_payload());
+    sz_value.add_object_member("max_angle", std::move(result));
   }
   {
     auto result = serialize(value.get_min_pwm());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("min_pwm", result.extract_payload());
+    sz_value.add_object_member("min_pwm", std::move(result));
   }
   {
     auto result = serialize(value.get_max_pwm());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("max_pwm", result.extract_payload());
+    sz_value.add_object_member("max_pwm", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(Servo_Gimbal_Config& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(Servo_Gimbal_Config& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -10279,27 +9879,24 @@ ts::Result<void> deserialize(Servo_Gimbal_Config& value, ts::serialization::Valu
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(Servo_Gimbal_Config const& value)
+ts::sz::Value serialize(Servo_Gimbal_Config const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_x_channel());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("x_channel", result.extract_payload());
+    sz_value.add_object_member("x_channel", std::move(result));
   }
   {
     auto result = serialize(value.get_y_channel());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("y_channel", result.extract_payload());
+    sz_value.add_object_member("y_channel", std::move(result));
   }
   {
     auto result = serialize(value.get_z_channel());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("z_channel", result.extract_payload());
+    sz_value.add_object_member("z_channel", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(SRF01_Descriptor& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(SRF01_Descriptor& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -10320,22 +9917,20 @@ ts::Result<void> deserialize(SRF01_Descriptor& value, ts::serialization::Value c
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(SRF01_Descriptor const& value)
+ts::sz::Value serialize(SRF01_Descriptor const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_bus());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("bus", result.extract_payload());
+    sz_value.add_object_member("bus", std::move(result));
   }
   {
     auto result = serialize(value.get_rate());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("rate", result.extract_payload());
+    sz_value.add_object_member("rate", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(SRF01_Config& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(SRF01_Config& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -10364,27 +9959,24 @@ ts::Result<void> deserialize(SRF01_Config& value, ts::serialization::Value const
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(SRF01_Config const& value)
+ts::sz::Value serialize(SRF01_Config const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_direction());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("direction", result.extract_payload());
+    sz_value.add_object_member("direction", std::move(result));
   }
   {
     auto result = serialize(value.get_max_distance());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("max_distance", result.extract_payload());
+    sz_value.add_object_member("max_distance", std::move(result));
   }
   {
     auto result = serialize(value.get_min_distance());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("min_distance", result.extract_payload());
+    sz_value.add_object_member("min_distance", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(SRF02_Descriptor& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(SRF02_Descriptor& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -10405,22 +9997,20 @@ ts::Result<void> deserialize(SRF02_Descriptor& value, ts::serialization::Value c
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(SRF02_Descriptor const& value)
+ts::sz::Value serialize(SRF02_Descriptor const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_bus());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("bus", result.extract_payload());
+    sz_value.add_object_member("bus", std::move(result));
   }
   {
     auto result = serialize(value.get_rate());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("rate", result.extract_payload());
+    sz_value.add_object_member("rate", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(SRF02_Config& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(SRF02_Config& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -10449,27 +10039,24 @@ ts::Result<void> deserialize(SRF02_Config& value, ts::serialization::Value const
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(SRF02_Config const& value)
+ts::sz::Value serialize(SRF02_Config const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_direction());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("direction", result.extract_payload());
+    sz_value.add_object_member("direction", std::move(result));
   }
   {
     auto result = serialize(value.get_max_distance());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("max_distance", result.extract_payload());
+    sz_value.add_object_member("max_distance", std::move(result));
   }
   {
     auto result = serialize(value.get_min_distance());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("min_distance", result.extract_payload());
+    sz_value.add_object_member("min_distance", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(Throttle_To_PWM_Descriptor& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(Throttle_To_PWM_Descriptor& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -10490,32 +10077,30 @@ ts::Result<void> deserialize(Throttle_To_PWM_Descriptor& value, ts::serializatio
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(Throttle_To_PWM_Descriptor const& value)
+ts::sz::Value serialize(Throttle_To_PWM_Descriptor const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_rate());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("rate", result.extract_payload());
+    sz_value.add_object_member("rate", std::move(result));
   }
   {
     auto result = serialize(value.get_channel_count());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("channel_count", result.extract_payload());
+    sz_value.add_object_member("channel_count", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(Throttle_To_PWM_Config& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(Throttle_To_PWM_Config& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(Throttle_To_PWM_Config const& value)
+ts::sz::Value serialize(Throttle_To_PWM_Config const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   return sz_value;
 }
-ts::Result<void> deserialize(Transformer_Descriptor& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(Transformer_Descriptor& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -10528,27 +10113,26 @@ ts::Result<void> deserialize(Transformer_Descriptor& value, ts::serialization::V
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(Transformer_Descriptor const& value)
+ts::sz::Value serialize(Transformer_Descriptor const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_rate());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("rate", result.extract_payload());
+    sz_value.add_object_member("rate", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(Transformer_Config& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(Transformer_Config& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(Transformer_Config const& value)
+ts::sz::Value serialize(Transformer_Config const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   return sz_value;
 }
-ts::Result<void> deserialize(UBLOX_Descriptor& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(UBLOX_Descriptor& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -10569,32 +10153,30 @@ ts::Result<void> deserialize(UBLOX_Descriptor& value, ts::serialization::Value c
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(UBLOX_Descriptor const& value)
+ts::sz::Value serialize(UBLOX_Descriptor const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_bus());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("bus", result.extract_payload());
+    sz_value.add_object_member("bus", std::move(result));
   }
   {
     auto result = serialize(value.get_rate());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("rate", result.extract_payload());
+    sz_value.add_object_member("rate", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(UBLOX_Config& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(UBLOX_Config& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(UBLOX_Config const& value)
+ts::sz::Value serialize(UBLOX_Config const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   return sz_value;
 }
-ts::Result<void> deserialize(Vec3_Generator_Descriptor& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(Vec3_Generator_Descriptor& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -10607,17 +10189,16 @@ ts::Result<void> deserialize(Vec3_Generator_Descriptor& value, ts::serialization
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(Vec3_Generator_Descriptor const& value)
+ts::sz::Value serialize(Vec3_Generator_Descriptor const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_rate());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("rate", result.extract_payload());
+    sz_value.add_object_member("rate", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(Vec3_Generator_Config& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(Vec3_Generator_Config& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -10630,13 +10211,12 @@ ts::Result<void> deserialize(Vec3_Generator_Config& value, ts::serialization::Va
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(Vec3_Generator_Config const& value)
+ts::sz::Value serialize(Vec3_Generator_Config const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_value());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("value", result.extract_payload());
+    sz_value.add_object_member("value", std::move(result));
   }
   return sz_value;
 }

@@ -1,7 +1,13 @@
 namespace ts
 {
-namespace serialization
+namespace sz
 {
+
+inline Value::Value() noexcept
+    : type(Type::EMPTY)
+{
+    construct();
+}
 
 inline Value::~Value()
 {

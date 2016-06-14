@@ -28,8 +28,8 @@ public:
     using Value_Template_EP<Bool_Traits>::copy_assign;
     Result<void> copy_assign(IInitializer_List const& initializer_list) override;
 
-    Result<serialization::Value> serialize() const override;
-    Result<void> deserialize(serialization::Value const&) override;
+    Result<sz::Value> serialize() const override;
+    Result<void> deserialize(sz::Value const&) override;
 
 
 private:

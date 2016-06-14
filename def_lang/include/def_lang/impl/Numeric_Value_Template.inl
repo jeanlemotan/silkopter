@@ -143,7 +143,7 @@ Result<void> Numeric_Value_Template<Traits>::copy_assign(IInitializer_List const
 }
 
 template<typename Traits>
-Result<serialization::Value> Numeric_Value_Template<Traits>::serialize() const
+Result<sz::Value> Numeric_Value_Template<Traits>::serialize() const
 {
     if (!this->is_constructed())
     {
@@ -153,16 +153,16 @@ Result<serialization::Value> Numeric_Value_Template<Traits>::serialize() const
 
     if (Traits::component_count == 1)
     {
-        return serialization::Value(detail::get_component(this->get_value(), 0));
+        return sz::Value(detail::get_component(this->get_value(), 0));
     }
     else
     {
-        serialization::Value svalue(serialization::Value::Type::OBJECT);
+        sz::Value svalue(sz::Value::Type::OBJECT);
 
         for (size_t i = 0; i < Traits::component_count; i++)
         {
             const char* name = Traits::component_names[i];
-            svalue.add_object_member(name, serialization::Value(detail::get_component(this->get_value(), i)));
+            svalue.add_object_member(name, sz::Value(detail::get_component(this->get_value(), i)));
         }
 
         return std::move(svalue);
@@ -170,7 +170,7 @@ Result<serialization::Value> Numeric_Value_Template<Traits>::serialize() const
 }
 
 template<typename Traits>
-Result<void> Numeric_Value_Template<Traits>::deserialize(serialization::Value const& sz_value)
+Result<void> Numeric_Value_Template<Traits>::deserialize(sz::Value const& sz_value)
 {
     if (!this->is_constructed())
     {
@@ -217,7 +217,7 @@ Result<void> Numeric_Value_Template<Traits>::deserialize(serialization::Value co
         for (size_t i = 0; i < Traits::component_count; i++)
         {
             const char* name = Traits::component_names[i];
-            serialization::Value const* component_sz_value = sz_value.find_object_member_by_name(name);
+            sz::Value const* component_sz_value = sz_value.find_object_member_by_name(name);
             if (!component_sz_value)
             {
                 return Error("Cannot find member: '" + std::string(name) + "'");

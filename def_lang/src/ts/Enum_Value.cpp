@@ -163,17 +163,17 @@ std::shared_ptr<IValue> Enum_Value::select(Value_Selector&& selector)
     return nullptr;
 }
 
-Result<serialization::Value> Enum_Value::serialize() const
+Result<sz::Value> Enum_Value::serialize() const
 {
     if (!is_constructed())
     {
         TS_ASSERT(false);
         return Error("Unconstructed value");
     }
-    return serialization::Value(m_value->get_name());
+    return sz::Value(m_value->get_name());
 }
 
-Result<void> Enum_Value::deserialize(serialization::Value const& sz_value)
+Result<void> Enum_Value::deserialize(sz::Value const& sz_value)
 {
     if (!is_constructed())
     {

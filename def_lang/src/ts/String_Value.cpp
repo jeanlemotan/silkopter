@@ -59,12 +59,12 @@ Result<void> String_Value::copy_assign(IInitializer_List const& initializer_list
     return copy_assign(*initializer->get_literal()->get_value());
 }
 
-Result<serialization::Value> String_Value::serialize() const
+Result<sz::Value> String_Value::serialize() const
 {
-    return serialization::Value(get_value());
+    return sz::Value(get_value());
 }
 
-Result<void> String_Value::deserialize(serialization::Value const& sz_value)
+Result<void> String_Value::deserialize(sz::Value const& sz_value)
 {
     if (!sz_value.is_string())
     {

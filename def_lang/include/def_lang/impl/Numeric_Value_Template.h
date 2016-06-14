@@ -28,8 +28,8 @@ public:
     using Value_Template_EP<Traits>::set_value;
     using Value_Template_EP<Traits>::get_specialized_type;
 
-    Result<serialization::Value> serialize() const override;
-    Result<void> deserialize(serialization::Value const&) override;
+    Result<sz::Value> serialize() const override;
+    Result<void> deserialize(sz::Value const&) override;
 
 
 private:

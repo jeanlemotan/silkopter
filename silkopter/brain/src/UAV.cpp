@@ -194,7 +194,7 @@ void UAV::save_settings()
             node_data.get_input_paths().push_back(si.stream_path.get_as<std::string>());
         }
 
-        node_datas.push_back(node_data);
+        node_datas.push_back(std::move(node_data));
     }
 
     std::vector<uav::Settings::Bus_Data> bus_datas = settings.get_buses();
@@ -207,23 +207,16 @@ void UAV::save_settings()
         bus_data.set_type(b.type);
         bus_data.set_descriptor(uav::Poly<const uav::IBus_Descriptor>(b.ptr->get_descriptor()));
 
-        bus_datas.push_back(bus_data);
+        bus_datas.push_back(std::move(bus_data));
     }
 
-    auto result = uav::serialize(settings);
-    if (result != ts::success)
-    {
-        QLOGE("Cannot serialize settings: {}.", result.error().what());
-        return;
-    }
+    ts::sz::Value sz_value = uav::serialize(settings);
 
-    ts::serialization::Value serialized_value = result.extract_payload();
-
-    silk::async(std::function<void()>([=]()
+    silk::async(std::function<void()>([sz_value]()
     {
         TIMED_FUNCTION();
 
-        std::string json = ts::serialization::to_json(serialized_value, true);
+        std::string json = ts::sz::to_json(sz_value, true);
 
         q::data::File_Sink fs(k_settings_path);
         if (fs.is_open())
@@ -339,23 +332,23 @@ auto UAV::get_telemetry_data() const -> Telemetry_Data const&
     return m_telemetry_data;
 }
 
-auto UAV::get_bus_factory()    -> const Factory<bus::IBus>&
+UAV::Bus_Factory const& UAV::get_bus_factory() const
 {
     return m_bus_factory;
 }
-auto UAV::get_node_factory()  -> const Factory<node::INode>&
+UAV::Node_Factory const& UAV::get_node_factory() const
 {
     return m_node_factory;
 }
-auto UAV::get_buses()    -> const Registry<bus::IBus>&
+UAV::Bus_Registry const& UAV::get_buses() const
 {
     return m_buses;
 }
-auto UAV::get_nodes()  -> const Registry<node::INode>&
+UAV::Node_Registry const& UAV::get_nodes() const
 {
     return m_nodes;
 }
-auto UAV::get_streams()  -> const Registry<stream::IStream>&
+UAV::Stream_Registry const& UAV::get_streams() const
 {
     return m_streams;
 }
@@ -944,7 +937,7 @@ auto UAV::init(Comms& comms) -> bool
 
     std::string data = q::data::read_whole_source_as_string<std::string>(fs);
 
-    ts::Result<ts::serialization::Value> json_result = ts::serialization::from_json(data);
+    ts::Result<ts::sz::Value> json_result = ts::sz::from_json(data);
     if (json_result != ts::success)
     {
         QLOGE("Failed to load '{}': {}", k_settings_path, json_result.error().what());

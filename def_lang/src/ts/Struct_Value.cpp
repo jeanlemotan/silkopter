@@ -217,14 +217,14 @@ std::shared_ptr<IStruct_Type const> Struct_Value::get_specialized_type() const
     return m_type;
 }
 
-Result<serialization::Value> Struct_Value::serialize() const
+Result<sz::Value> Struct_Value::serialize() const
 {
     if (!is_constructed())
     {
         TS_ASSERT(false);
         return Error("Unconstructed value");
     }
-    serialization::Value svalue(serialization::Value::Type::OBJECT);
+    sz::Value svalue(sz::Value::Type::OBJECT);
 
     for (size_t i = 0; i < get_member_count(); i++)
     {
@@ -242,7 +242,7 @@ Result<serialization::Value> Struct_Value::serialize() const
     return std::move(svalue);
 }
 
-Result<void> Struct_Value::deserialize(serialization::Value const& sz_value)
+Result<void> Struct_Value::deserialize(sz::Value const& sz_value)
 {
     if (!is_constructed())
     {
@@ -257,7 +257,7 @@ Result<void> Struct_Value::deserialize(serialization::Value const& sz_value)
     for (size_t i = 0; i < get_member_count(); i++)
     {
         std::string const& name = get_specialized_type()->get_member_def(i)->get_name();
-        serialization::Value const* member_sz_value = sz_value.find_object_member_by_name(name);
+        sz::Value const* member_sz_value = sz_value.find_object_member_by_name(name);
         if (!member_sz_value)
         {
             return Error("Cannot find member name '" + name + "'");

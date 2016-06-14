@@ -4,7 +4,7 @@
 
 namespace ts
 {
-namespace serialization
+namespace sz
 {
 
 static void to_json(Value const& value, std::string& dst, size_t ident_count, bool nice)
@@ -305,7 +305,7 @@ static Result<Value> parse_null_value(std::string const& json, size_t& offset)
         return Error("Unexpected value");
     }
     offset += 4;
-    return Value(Value::Type::EMPTY);
+    return Value();
 }
 
 static Result<Value> parse_number_value(std::string const& json, size_t& offset)

@@ -78,18 +78,13 @@ namespace setup
   }
 
 ////////////////////////////////////////////////////////////
-  void Set_UAV_Descriptor_Res::set_result(boost::variant<setup::serialized_data_t,setup::Error> const& value)
+  void Set_UAV_Descriptor_Res::set_data(setup::serialized_data_t const& value)
   {
-    m_result = value;
+    m_data = value;
   }
-  auto Set_UAV_Descriptor_Res::get_result() const -> boost::variant<setup::serialized_data_t,setup::Error> const& 
+  auto Set_UAV_Descriptor_Res::get_data() const -> setup::serialized_data_t const& 
   {
-    return m_result;
-  }
-
-  auto Set_UAV_Descriptor_Res::get_result() -> boost::variant<setup::serialized_data_t,setup::Error>& 
-  {
-    return m_result;
+    return m_data;
   }
 
 ////////////////////////////////////////////////////////////
@@ -433,18 +428,18 @@ namespace setup
   }
 
 ////////////////////////////////////////////////////////////
-  void Set_Node_Input_Stream_Path_Res::set_result(boost::variant<setup::Node_Data,setup::Error> const& value)
+  void Set_Node_Input_Stream_Path_Res::set_node_data(setup::Node_Data const& value)
   {
-    m_result = value;
+    m_node_data = value;
   }
-  auto Set_Node_Input_Stream_Path_Res::get_result() const -> boost::variant<setup::Node_Data,setup::Error> const& 
+  auto Set_Node_Input_Stream_Path_Res::get_node_data() const -> setup::Node_Data const& 
   {
-    return m_result;
+    return m_node_data;
   }
 
-  auto Set_Node_Input_Stream_Path_Res::get_result() -> boost::variant<setup::Node_Data,setup::Error>& 
+  auto Set_Node_Input_Stream_Path_Res::get_node_data() -> setup::Node_Data& 
   {
-    return m_result;
+    return m_node_data;
   }
 
 ////////////////////////////////////////////////////////////
@@ -478,28 +473,18 @@ namespace setup
   }
 
 ////////////////////////////////////////////////////////////
-    void Add_Node_Res::Error::set_message(std::string const& value)
-    {
-      m_message = value;
-    }
-    auto Add_Node_Res::Error::get_message() const -> std::string const& 
-    {
-      return m_message;
-    }
-
-////////////////////////////////////////////////////////////
-  void Add_Node_Res::set_result(boost::variant<setup::Node_Data,Error> const& value)
+  void Add_Node_Res::set_node_data(setup::Node_Data const& value)
   {
-    m_result = value;
+    m_node_data = value;
   }
-  auto Add_Node_Res::get_result() const -> boost::variant<setup::Node_Data,Error> const& 
+  auto Add_Node_Res::get_node_data() const -> setup::Node_Data const& 
   {
-    return m_result;
+    return m_node_data;
   }
 
-  auto Add_Node_Res::get_result() -> boost::variant<setup::Node_Data,Error>& 
+  auto Add_Node_Res::get_node_data() -> setup::Node_Data& 
   {
-    return m_result;
+    return m_node_data;
   }
 
 ////////////////////////////////////////////////////////////
@@ -513,115 +498,58 @@ namespace setup
   }
 
 ////////////////////////////////////////////////////////////
-    void Remove_Node_Res::Error::set_message(std::string const& value)
-    {
-      m_message = value;
-    }
-    auto Remove_Node_Res::Error::get_message() const -> std::string const& 
-    {
-      return m_message;
-    }
-
-////////////////////////////////////////////////////////////
-  void Remove_Node_Res::set_error(boost::optional<Error> const& value)
-  {
-    m_error = value;
-  }
-  auto Remove_Node_Res::get_error() const -> boost::optional<Error> const& 
-  {
-    return m_error;
-  }
-
-  auto Remove_Node_Res::get_error() -> boost::optional<Error>& 
-  {
-    return m_error;
-  }
-
-////////////////////////////////////////////////////////////
 }
-ts::Result<void> deserialize(bool& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(bool& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_bool()) { return ts::Error("Expected bool value when deserializing"); }
   value = sz_value.get_as_bool();
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(bool const& value)
+ts::sz::Value serialize(bool const& value)
 {
-  return ts::serialization::Value(value);
+  return ts::sz::Value(value);
 }
-ts::Result<void> deserialize(std::string& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(std::string& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_string()) { return ts::Error("Expected string value when deserializing"); }
   value = sz_value.get_as_string();
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(std::string const& value)
+ts::sz::Value serialize(std::string const& value)
 {
-  return ts::serialization::Value(value);
+  return ts::sz::Value(value);
 }
-ts::Result<void> deserialize(int64_t& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(int64_t& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_integral_number()) { return ts::Error("Expected integral number value when deserializing"); }
   value = sz_value.get_as_integral_number();
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(int64_t const& value)
+ts::sz::Value serialize(int64_t const& value)
 {
-  return ts::serialization::Value(value);
+  return ts::sz::Value(value);
 }
-ts::Result<void> deserialize(float& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(float& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_real_number()) { return ts::Error("Expected real number value when deserializing"); }
   value = (float)sz_value.get_as_real_number();
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(float const& value)
+ts::sz::Value serialize(float const& value)
 {
-  return ts::serialization::Value(value);
+  return ts::sz::Value(value);
 }
-ts::Result<void> deserialize(double& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(double& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_real_number()) { return ts::Error("Expected real number value when deserializing"); }
   value = sz_value.get_as_real_number();
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(double const& value)
+ts::sz::Value serialize(double const& value)
 {
-  return ts::serialization::Value(value);
+  return ts::sz::Value(value);
 }
-ts::Result<void> deserialize(vec2f& value, ts::serialization::Value const& sz_value)
-{
-  if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
-  {
-    auto const* sz_v = sz_value.find_object_member_by_name("x");
-    if (!sz_v) { return ts::Error("Cannot find component 'x'"); }
-    auto result = deserialize(value.x, *sz_v);
-    if (result != ts::success) { return result; }
-  }
-  {
-    auto const* sz_v = sz_value.find_object_member_by_name("y");
-    if (!sz_v) { return ts::Error("Cannot find component 'y'"); }
-    auto result = deserialize(value.y, *sz_v);
-    if (result != ts::success) { return result; }
-  }
-  return ts::success;
-}
-ts::Result<ts::serialization::Value> serialize(vec2f const& value)
-{
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
-  {
-    auto result = serialize(value.x);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("x", result.extract_payload());
-  }
-  {
-    auto result = serialize(value.y);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("y", result.extract_payload());
-  }
-  return sz_value;
-}
-ts::Result<void> deserialize(vec2d& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(vec2f& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -638,22 +566,20 @@ ts::Result<void> deserialize(vec2d& value, ts::serialization::Value const& sz_va
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(vec2d const& value)
+ts::sz::Value serialize(vec2f const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.x);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("x", result.extract_payload());
+    sz_value.add_object_member("x", std::move(result));
   }
   {
     auto result = serialize(value.y);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("y", result.extract_payload());
+    sz_value.add_object_member("y", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(vec2i& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(vec2d& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -670,22 +596,20 @@ ts::Result<void> deserialize(vec2i& value, ts::serialization::Value const& sz_va
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(vec2i const& value)
+ts::sz::Value serialize(vec2d const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.x);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("x", result.extract_payload());
+    sz_value.add_object_member("x", std::move(result));
   }
   {
     auto result = serialize(value.y);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("y", result.extract_payload());
+    sz_value.add_object_member("y", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(vec3f& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(vec2i& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -700,35 +624,22 @@ ts::Result<void> deserialize(vec3f& value, ts::serialization::Value const& sz_va
     auto result = deserialize(value.y, *sz_v);
     if (result != ts::success) { return result; }
   }
-  {
-    auto const* sz_v = sz_value.find_object_member_by_name("z");
-    if (!sz_v) { return ts::Error("Cannot find component 'z'"); }
-    auto result = deserialize(value.z, *sz_v);
-    if (result != ts::success) { return result; }
-  }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(vec3f const& value)
+ts::sz::Value serialize(vec2i const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.x);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("x", result.extract_payload());
+    sz_value.add_object_member("x", std::move(result));
   }
   {
     auto result = serialize(value.y);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("y", result.extract_payload());
-  }
-  {
-    auto result = serialize(value.z);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("z", result.extract_payload());
+    sz_value.add_object_member("y", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(vec3d& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(vec3f& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -751,27 +662,24 @@ ts::Result<void> deserialize(vec3d& value, ts::serialization::Value const& sz_va
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(vec3d const& value)
+ts::sz::Value serialize(vec3f const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.x);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("x", result.extract_payload());
+    sz_value.add_object_member("x", std::move(result));
   }
   {
     auto result = serialize(value.y);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("y", result.extract_payload());
+    sz_value.add_object_member("y", std::move(result));
   }
   {
     auto result = serialize(value.z);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("z", result.extract_payload());
+    sz_value.add_object_member("z", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(vec3i& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(vec3d& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -794,27 +702,64 @@ ts::Result<void> deserialize(vec3i& value, ts::serialization::Value const& sz_va
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(vec3i const& value)
+ts::sz::Value serialize(vec3d const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.x);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("x", result.extract_payload());
+    sz_value.add_object_member("x", std::move(result));
   }
   {
     auto result = serialize(value.y);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("y", result.extract_payload());
+    sz_value.add_object_member("y", std::move(result));
   }
   {
     auto result = serialize(value.z);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("z", result.extract_payload());
+    sz_value.add_object_member("z", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(vec4f& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(vec3i& value, ts::sz::Value const& sz_value)
+{
+  if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  {
+    auto const* sz_v = sz_value.find_object_member_by_name("x");
+    if (!sz_v) { return ts::Error("Cannot find component 'x'"); }
+    auto result = deserialize(value.x, *sz_v);
+    if (result != ts::success) { return result; }
+  }
+  {
+    auto const* sz_v = sz_value.find_object_member_by_name("y");
+    if (!sz_v) { return ts::Error("Cannot find component 'y'"); }
+    auto result = deserialize(value.y, *sz_v);
+    if (result != ts::success) { return result; }
+  }
+  {
+    auto const* sz_v = sz_value.find_object_member_by_name("z");
+    if (!sz_v) { return ts::Error("Cannot find component 'z'"); }
+    auto result = deserialize(value.z, *sz_v);
+    if (result != ts::success) { return result; }
+  }
+  return ts::success;
+}
+ts::sz::Value serialize(vec3i const& value)
+{
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
+  {
+    auto result = serialize(value.x);
+    sz_value.add_object_member("x", std::move(result));
+  }
+  {
+    auto result = serialize(value.y);
+    sz_value.add_object_member("y", std::move(result));
+  }
+  {
+    auto result = serialize(value.z);
+    sz_value.add_object_member("z", std::move(result));
+  }
+  return sz_value;
+}
+ts::Result<void> deserialize(vec4f& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -843,32 +788,28 @@ ts::Result<void> deserialize(vec4f& value, ts::serialization::Value const& sz_va
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(vec4f const& value)
+ts::sz::Value serialize(vec4f const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.x);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("x", result.extract_payload());
+    sz_value.add_object_member("x", std::move(result));
   }
   {
     auto result = serialize(value.y);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("y", result.extract_payload());
+    sz_value.add_object_member("y", std::move(result));
   }
   {
     auto result = serialize(value.z);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("z", result.extract_payload());
+    sz_value.add_object_member("z", std::move(result));
   }
   {
     auto result = serialize(value.w);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("w", result.extract_payload());
+    sz_value.add_object_member("w", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(vec4d& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(vec4d& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -897,32 +838,28 @@ ts::Result<void> deserialize(vec4d& value, ts::serialization::Value const& sz_va
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(vec4d const& value)
+ts::sz::Value serialize(vec4d const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.x);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("x", result.extract_payload());
+    sz_value.add_object_member("x", std::move(result));
   }
   {
     auto result = serialize(value.y);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("y", result.extract_payload());
+    sz_value.add_object_member("y", std::move(result));
   }
   {
     auto result = serialize(value.z);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("z", result.extract_payload());
+    sz_value.add_object_member("z", std::move(result));
   }
   {
     auto result = serialize(value.w);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("w", result.extract_payload());
+    sz_value.add_object_member("w", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(vec4i& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(vec4i& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -951,92 +888,88 @@ ts::Result<void> deserialize(vec4i& value, ts::serialization::Value const& sz_va
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(vec4i const& value)
+ts::sz::Value serialize(vec4i const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.x);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("x", result.extract_payload());
+    sz_value.add_object_member("x", std::move(result));
   }
   {
     auto result = serialize(value.y);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("y", result.extract_payload());
+    sz_value.add_object_member("y", std::move(result));
   }
   {
     auto result = serialize(value.z);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("z", result.extract_payload());
+    sz_value.add_object_member("z", std::move(result));
   }
   {
     auto result = serialize(value.w);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("w", result.extract_payload());
+    sz_value.add_object_member("w", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(int8_t& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(int8_t& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_integral_number()) { return ts::Error("Expected integral number value when deserializing"); }
   value = sz_value.get_as_integral_number();
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(int8_t const& value)
+ts::sz::Value serialize(int8_t const& value)
 {
-  return ts::serialization::Value(value);
+  return ts::sz::Value(value);
 }
-ts::Result<void> deserialize(uint8_t& value, ts::serialization::Value const& sz_value)
-{
-  if (!sz_value.is_integral_number()) { return ts::Error("Expected integral number value when deserializing"); }
-  value = sz_value.get_as_integral_number();
-  return ts::success;
-}
-ts::Result<ts::serialization::Value> serialize(uint8_t const& value)
-{
-  return ts::serialization::Value(value);
-}
-ts::Result<void> deserialize(int16_t& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(uint8_t& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_integral_number()) { return ts::Error("Expected integral number value when deserializing"); }
   value = sz_value.get_as_integral_number();
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(int16_t const& value)
+ts::sz::Value serialize(uint8_t const& value)
 {
-  return ts::serialization::Value(value);
+  return ts::sz::Value(value);
 }
-ts::Result<void> deserialize(uint16_t& value, ts::serialization::Value const& sz_value)
-{
-  if (!sz_value.is_integral_number()) { return ts::Error("Expected integral number value when deserializing"); }
-  value = sz_value.get_as_integral_number();
-  return ts::success;
-}
-ts::Result<ts::serialization::Value> serialize(uint16_t const& value)
-{
-  return ts::serialization::Value(value);
-}
-ts::Result<void> deserialize(int32_t& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(int16_t& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_integral_number()) { return ts::Error("Expected integral number value when deserializing"); }
   value = sz_value.get_as_integral_number();
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(int32_t const& value)
+ts::sz::Value serialize(int16_t const& value)
 {
-  return ts::serialization::Value(value);
+  return ts::sz::Value(value);
 }
-ts::Result<void> deserialize(uint32_t& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(uint16_t& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_integral_number()) { return ts::Error("Expected integral number value when deserializing"); }
   value = sz_value.get_as_integral_number();
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(uint32_t const& value)
+ts::sz::Value serialize(uint16_t const& value)
 {
-  return ts::serialization::Value(value);
+  return ts::sz::Value(value);
 }
-ts::Result<void> deserialize(setup::Error& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(int32_t& value, ts::sz::Value const& sz_value)
+{
+  if (!sz_value.is_integral_number()) { return ts::Error("Expected integral number value when deserializing"); }
+  value = sz_value.get_as_integral_number();
+  return ts::success;
+}
+ts::sz::Value serialize(int32_t const& value)
+{
+  return ts::sz::Value(value);
+}
+ts::Result<void> deserialize(uint32_t& value, ts::sz::Value const& sz_value)
+{
+  if (!sz_value.is_integral_number()) { return ts::Error("Expected integral number value when deserializing"); }
+  value = sz_value.get_as_integral_number();
+  return ts::success;
+}
+ts::sz::Value serialize(uint32_t const& value)
+{
+  return ts::sz::Value(value);
+}
+ts::Result<void> deserialize(setup::Error& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -1049,17 +982,16 @@ ts::Result<void> deserialize(setup::Error& value, ts::serialization::Value const
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(setup::Error const& value)
+ts::sz::Value serialize(setup::Error const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_message());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("message", result.extract_payload());
+    sz_value.add_object_member("message", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(setup::Set_Clock_Req& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(setup::Set_Clock_Req& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -1072,17 +1004,16 @@ ts::Result<void> deserialize(setup::Set_Clock_Req& value, ts::serialization::Val
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(setup::Set_Clock_Req const& value)
+ts::sz::Value serialize(setup::Set_Clock_Req const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_time());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("time", result.extract_payload());
+    sz_value.add_object_member("time", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(setup::Set_Clock_Res& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(setup::Set_Clock_Res& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -1103,22 +1034,20 @@ ts::Result<void> deserialize(setup::Set_Clock_Res& value, ts::serialization::Val
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(setup::Set_Clock_Res const& value)
+ts::sz::Value serialize(setup::Set_Clock_Res const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_time());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("time", result.extract_payload());
+    sz_value.add_object_member("time", std::move(result));
   }
   {
     auto result = serialize(value.get_error());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("error", result.extract_payload());
+    sz_value.add_object_member("error", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(setup::Set_UAV_Descriptor_Req& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(setup::Set_UAV_Descriptor_Req& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -1131,50 +1060,16 @@ ts::Result<void> deserialize(setup::Set_UAV_Descriptor_Req& value, ts::serializa
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(setup::Set_UAV_Descriptor_Req const& value)
+ts::sz::Value serialize(setup::Set_UAV_Descriptor_Req const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_data());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("data", result.extract_payload());
+    sz_value.add_object_member("data", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(setup::Set_UAV_Descriptor_Res& value, ts::serialization::Value const& sz_value)
-{
-  if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("result");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'result'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_result())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_result(v);
-  }
-  return ts::success;
-}
-ts::Result<ts::serialization::Value> serialize(setup::Set_UAV_Descriptor_Res const& value)
-{
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
-  {
-    auto result = serialize(value.get_result());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("result", result.extract_payload());
-  }
-  return sz_value;
-}
-ts::Result<void> deserialize(setup::Get_UAV_Descriptor_Req& value, ts::serialization::Value const& sz_value)
-{
-  if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
-  return ts::success;
-}
-ts::Result<ts::serialization::Value> serialize(setup::Get_UAV_Descriptor_Req const& value)
-{
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
-  return sz_value;
-}
-ts::Result<void> deserialize(setup::Get_UAV_Descriptor_Res& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(setup::Set_UAV_Descriptor_Res& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -1187,17 +1082,48 @@ ts::Result<void> deserialize(setup::Get_UAV_Descriptor_Res& value, ts::serializa
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(setup::Get_UAV_Descriptor_Res const& value)
+ts::sz::Value serialize(setup::Set_UAV_Descriptor_Res const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_data());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("data", result.extract_payload());
+    sz_value.add_object_member("data", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(setup::Node_Def_Data::Input& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(setup::Get_UAV_Descriptor_Req& value, ts::sz::Value const& sz_value)
+{
+  if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  return ts::success;
+}
+ts::sz::Value serialize(setup::Get_UAV_Descriptor_Req const& value)
+{
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
+  return sz_value;
+}
+ts::Result<void> deserialize(setup::Get_UAV_Descriptor_Res& value, ts::sz::Value const& sz_value)
+{
+  if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  {
+    auto const* member_sz_value = sz_value.find_object_member_by_name("data");
+    if (!member_sz_value) { return ts::Error("Cannot find member value 'data'"); }
+    std::remove_cv<std::remove_reference<decltype(value.get_data())>::type>::type v;
+    auto result = deserialize(v, *member_sz_value);
+    if (result != ts::success) { return result; }
+    value.set_data(v);
+  }
+  return ts::success;
+}
+ts::sz::Value serialize(setup::Get_UAV_Descriptor_Res const& value)
+{
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
+  {
+    auto result = serialize(value.get_data());
+    sz_value.add_object_member("data", std::move(result));
+  }
+  return sz_value;
+}
+ts::Result<void> deserialize(setup::Node_Def_Data::Input& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -1226,27 +1152,24 @@ ts::Result<void> deserialize(setup::Node_Def_Data::Input& value, ts::serializati
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(setup::Node_Def_Data::Input const& value)
+ts::sz::Value serialize(setup::Node_Def_Data::Input const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_name());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("name", result.extract_payload());
+    sz_value.add_object_member("name", std::move(result));
   }
   {
     auto result = serialize(value.get_type());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("type", result.extract_payload());
+    sz_value.add_object_member("type", std::move(result));
   }
   {
     auto result = serialize(value.get_rate());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("rate", result.extract_payload());
+    sz_value.add_object_member("rate", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(setup::Node_Def_Data::Output& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(setup::Node_Def_Data::Output& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -1275,27 +1198,24 @@ ts::Result<void> deserialize(setup::Node_Def_Data::Output& value, ts::serializat
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(setup::Node_Def_Data::Output const& value)
+ts::sz::Value serialize(setup::Node_Def_Data::Output const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_name());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("name", result.extract_payload());
+    sz_value.add_object_member("name", std::move(result));
   }
   {
     auto result = serialize(value.get_type());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("type", result.extract_payload());
+    sz_value.add_object_member("type", std::move(result));
   }
   {
     auto result = serialize(value.get_rate());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("rate", result.extract_payload());
+    sz_value.add_object_member("rate", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(setup::Node_Def_Data& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(setup::Node_Def_Data& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -1340,47 +1260,42 @@ ts::Result<void> deserialize(setup::Node_Def_Data& value, ts::serialization::Val
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(setup::Node_Def_Data const& value)
+ts::sz::Value serialize(setup::Node_Def_Data const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_name());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("name", result.extract_payload());
+    sz_value.add_object_member("name", std::move(result));
   }
   {
     auto result = serialize(value.get_type());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("type", result.extract_payload());
+    sz_value.add_object_member("type", std::move(result));
   }
   {
     auto result = serialize(value.get_inputs());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("inputs", result.extract_payload());
+    sz_value.add_object_member("inputs", std::move(result));
   }
   {
     auto result = serialize(value.get_outputs());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("outputs", result.extract_payload());
+    sz_value.add_object_member("outputs", std::move(result));
   }
   {
     auto result = serialize(value.get_descriptor_data());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("descriptor_data", result.extract_payload());
+    sz_value.add_object_member("descriptor_data", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(setup::Get_Node_Defs_Req& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(setup::Get_Node_Defs_Req& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(setup::Get_Node_Defs_Req const& value)
+ts::sz::Value serialize(setup::Get_Node_Defs_Req const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   return sz_value;
 }
-ts::Result<void> deserialize(setup::Get_Node_Defs_Res& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(setup::Get_Node_Defs_Res& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -1393,17 +1308,16 @@ ts::Result<void> deserialize(setup::Get_Node_Defs_Res& value, ts::serialization:
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(setup::Get_Node_Defs_Res const& value)
+ts::sz::Value serialize(setup::Get_Node_Defs_Res const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_node_def_datas());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("node_def_datas", result.extract_payload());
+    sz_value.add_object_member("node_def_datas", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(setup::Node_Data::Input& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(setup::Node_Data::Input& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -1440,32 +1354,28 @@ ts::Result<void> deserialize(setup::Node_Data::Input& value, ts::serialization::
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(setup::Node_Data::Input const& value)
+ts::sz::Value serialize(setup::Node_Data::Input const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_name());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("name", result.extract_payload());
+    sz_value.add_object_member("name", std::move(result));
   }
   {
     auto result = serialize(value.get_type());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("type", result.extract_payload());
+    sz_value.add_object_member("type", std::move(result));
   }
   {
     auto result = serialize(value.get_rate());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("rate", result.extract_payload());
+    sz_value.add_object_member("rate", std::move(result));
   }
   {
     auto result = serialize(value.get_stream_path());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("stream_path", result.extract_payload());
+    sz_value.add_object_member("stream_path", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(setup::Node_Data::Output& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(setup::Node_Data::Output& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -1494,27 +1404,24 @@ ts::Result<void> deserialize(setup::Node_Data::Output& value, ts::serialization:
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(setup::Node_Data::Output const& value)
+ts::sz::Value serialize(setup::Node_Data::Output const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_name());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("name", result.extract_payload());
+    sz_value.add_object_member("name", std::move(result));
   }
   {
     auto result = serialize(value.get_type());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("type", result.extract_payload());
+    sz_value.add_object_member("type", std::move(result));
   }
   {
     auto result = serialize(value.get_rate());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("rate", result.extract_payload());
+    sz_value.add_object_member("rate", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(setup::Node_Data& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(setup::Node_Data& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -1567,42 +1474,36 @@ ts::Result<void> deserialize(setup::Node_Data& value, ts::serialization::Value c
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(setup::Node_Data const& value)
+ts::sz::Value serialize(setup::Node_Data const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_name());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("name", result.extract_payload());
+    sz_value.add_object_member("name", std::move(result));
   }
   {
     auto result = serialize(value.get_type());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("type", result.extract_payload());
+    sz_value.add_object_member("type", std::move(result));
   }
   {
     auto result = serialize(value.get_inputs());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("inputs", result.extract_payload());
+    sz_value.add_object_member("inputs", std::move(result));
   }
   {
     auto result = serialize(value.get_outputs());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("outputs", result.extract_payload());
+    sz_value.add_object_member("outputs", std::move(result));
   }
   {
     auto result = serialize(value.get_descriptor_data());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("descriptor_data", result.extract_payload());
+    sz_value.add_object_member("descriptor_data", std::move(result));
   }
   {
     auto result = serialize(value.get_config_data());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("config_data", result.extract_payload());
+    sz_value.add_object_member("config_data", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(setup::Get_Nodes_Req& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(setup::Get_Nodes_Req& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -1615,17 +1516,16 @@ ts::Result<void> deserialize(setup::Get_Nodes_Req& value, ts::serialization::Val
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(setup::Get_Nodes_Req const& value)
+ts::sz::Value serialize(setup::Get_Nodes_Req const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_name());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("name", result.extract_payload());
+    sz_value.add_object_member("name", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(setup::Get_Nodes_Res& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(setup::Get_Nodes_Res& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -1638,17 +1538,16 @@ ts::Result<void> deserialize(setup::Get_Nodes_Res& value, ts::serialization::Val
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(setup::Get_Nodes_Res const& value)
+ts::sz::Value serialize(setup::Get_Nodes_Res const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_node_datas());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("node_datas", result.extract_payload());
+    sz_value.add_object_member("node_datas", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(setup::Set_Node_Input_Stream_Path_Req& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(setup::Set_Node_Input_Stream_Path_Req& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -1677,50 +1576,46 @@ ts::Result<void> deserialize(setup::Set_Node_Input_Stream_Path_Req& value, ts::s
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(setup::Set_Node_Input_Stream_Path_Req const& value)
+ts::sz::Value serialize(setup::Set_Node_Input_Stream_Path_Req const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_node_name());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("node_name", result.extract_payload());
+    sz_value.add_object_member("node_name", std::move(result));
   }
   {
     auto result = serialize(value.get_input_name());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("input_name", result.extract_payload());
+    sz_value.add_object_member("input_name", std::move(result));
   }
   {
     auto result = serialize(value.get_stream_path());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("stream_path", result.extract_payload());
+    sz_value.add_object_member("stream_path", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(setup::Set_Node_Input_Stream_Path_Res& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(setup::Set_Node_Input_Stream_Path_Res& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("result");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'result'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_result())>::type>::type v;
+    auto const* member_sz_value = sz_value.find_object_member_by_name("node_data");
+    if (!member_sz_value) { return ts::Error("Cannot find member value 'node_data'"); }
+    std::remove_cv<std::remove_reference<decltype(value.get_node_data())>::type>::type v;
     auto result = deserialize(v, *member_sz_value);
     if (result != ts::success) { return result; }
-    value.set_result(v);
+    value.set_node_data(v);
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(setup::Set_Node_Input_Stream_Path_Res const& value)
+ts::sz::Value serialize(setup::Set_Node_Input_Stream_Path_Res const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
-    auto result = serialize(value.get_result());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("result", result.extract_payload());
+    auto result = serialize(value.get_node_data());
+    sz_value.add_object_member("node_data", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(setup::Add_Node_Req& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(setup::Add_Node_Req& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -1749,73 +1644,46 @@ ts::Result<void> deserialize(setup::Add_Node_Req& value, ts::serialization::Valu
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(setup::Add_Node_Req const& value)
+ts::sz::Value serialize(setup::Add_Node_Req const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_def_name());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("def_name", result.extract_payload());
+    sz_value.add_object_member("def_name", std::move(result));
   }
   {
     auto result = serialize(value.get_name());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("name", result.extract_payload());
+    sz_value.add_object_member("name", std::move(result));
   }
   {
     auto result = serialize(value.get_descriptor_data());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("descriptor_data", result.extract_payload());
+    sz_value.add_object_member("descriptor_data", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(setup::Add_Node_Res::Error& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(setup::Add_Node_Res& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("message");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'message'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_message())>::type>::type v;
+    auto const* member_sz_value = sz_value.find_object_member_by_name("node_data");
+    if (!member_sz_value) { return ts::Error("Cannot find member value 'node_data'"); }
+    std::remove_cv<std::remove_reference<decltype(value.get_node_data())>::type>::type v;
     auto result = deserialize(v, *member_sz_value);
     if (result != ts::success) { return result; }
-    value.set_message(v);
+    value.set_node_data(v);
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(setup::Add_Node_Res::Error const& value)
+ts::sz::Value serialize(setup::Add_Node_Res const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
-    auto result = serialize(value.get_message());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("message", result.extract_payload());
+    auto result = serialize(value.get_node_data());
+    sz_value.add_object_member("node_data", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(setup::Add_Node_Res& value, ts::serialization::Value const& sz_value)
-{
-  if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("result");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'result'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_result())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_result(v);
-  }
-  return ts::success;
-}
-ts::Result<ts::serialization::Value> serialize(setup::Add_Node_Res const& value)
-{
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
-  {
-    auto result = serialize(value.get_result());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("result", result.extract_payload());
-  }
-  return sz_value;
-}
-ts::Result<void> deserialize(setup::Remove_Node_Req& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(setup::Remove_Node_Req& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
@@ -1828,63 +1696,26 @@ ts::Result<void> deserialize(setup::Remove_Node_Req& value, ts::serialization::V
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(setup::Remove_Node_Req const& value)
+ts::sz::Value serialize(setup::Remove_Node_Req const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   {
     auto result = serialize(value.get_name());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("name", result.extract_payload());
+    sz_value.add_object_member("name", std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(setup::Remove_Node_Res::Error& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(setup::Remove_Node_Res& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("message");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'message'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_message())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_message(v);
-  }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(setup::Remove_Node_Res::Error const& value)
+ts::sz::Value serialize(setup::Remove_Node_Res const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
-  {
-    auto result = serialize(value.get_message());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("message", result.extract_payload());
-  }
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   return sz_value;
 }
-ts::Result<void> deserialize(setup::Remove_Node_Res& value, ts::serialization::Value const& sz_value)
-{
-  if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("error");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'error'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_error())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_error(v);
-  }
-  return ts::success;
-}
-ts::Result<ts::serialization::Value> serialize(setup::Remove_Node_Res const& value)
-{
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
-  {
-    auto result = serialize(value.get_error());
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("error", result.extract_payload());
-  }
-  return sz_value;
-}
-ts::Result<void> deserialize(setup::Brain_Message& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(setup::Brain_Req& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   auto const* type_sz_value = sz_value.find_object_member_by_name("type");
@@ -1935,6 +1766,13 @@ ts::Result<void> deserialize(setup::Brain_Message& value, ts::serialization::Val
     if (result != ts::success) { return result; }
     value = v;
   }
+  else if (path == "::setup::Get_Nodes_Req")
+  {
+    setup::Get_Nodes_Req v;
+    auto result = deserialize(boost::get<setup::Get_Nodes_Req>(value), *value_sz_value);
+    if (result != ts::success) { return result; }
+    value = v;
+  }
   else if (path == "::setup::Set_Node_Input_Stream_Path_Req")
   {
     setup::Set_Node_Input_Stream_Path_Req v;
@@ -1945,128 +1783,224 @@ ts::Result<void> deserialize(setup::Brain_Message& value, ts::serialization::Val
   else { return ts::Error("Cannot find type '" + path + "' when deserializing"); }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(setup::Brain_Message const& value)
+ts::sz::Value serialize(setup::Brain_Req const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
-  if (false) { return ts::Error(""); } //this is here just to have the next items with 'else if'
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
+  if (false) { return ts::sz::Value(); } //this is here just to have the next items with 'else if'
   else if (auto* v = boost::get<setup::Set_Clock_Req>(&value))
   {
     sz_value.add_object_member("type", "setup::Set_Clock_Req");
     auto result = serialize(*v);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("value", result.extract_payload());
+    sz_value.add_object_member("value", std::move(result));
     return std::move(sz_value);
   }
   else if (auto* v = boost::get<setup::Set_UAV_Descriptor_Req>(&value))
   {
     sz_value.add_object_member("type", "setup::Set_UAV_Descriptor_Req");
     auto result = serialize(*v);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("value", result.extract_payload());
+    sz_value.add_object_member("value", std::move(result));
     return std::move(sz_value);
   }
   else if (auto* v = boost::get<setup::Get_UAV_Descriptor_Req>(&value))
   {
     sz_value.add_object_member("type", "setup::Get_UAV_Descriptor_Req");
     auto result = serialize(*v);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("value", result.extract_payload());
+    sz_value.add_object_member("value", std::move(result));
     return std::move(sz_value);
   }
   else if (auto* v = boost::get<setup::Get_Node_Defs_Req>(&value))
   {
     sz_value.add_object_member("type", "setup::Get_Node_Defs_Req");
     auto result = serialize(*v);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("value", result.extract_payload());
+    sz_value.add_object_member("value", std::move(result));
     return std::move(sz_value);
   }
   else if (auto* v = boost::get<setup::Remove_Node_Req>(&value))
   {
     sz_value.add_object_member("type", "setup::Remove_Node_Req");
     auto result = serialize(*v);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("value", result.extract_payload());
+    sz_value.add_object_member("value", std::move(result));
     return std::move(sz_value);
   }
   else if (auto* v = boost::get<setup::Add_Node_Req>(&value))
   {
     sz_value.add_object_member("type", "setup::Add_Node_Req");
     auto result = serialize(*v);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("value", result.extract_payload());
+    sz_value.add_object_member("value", std::move(result));
+    return std::move(sz_value);
+  }
+  else if (auto* v = boost::get<setup::Get_Nodes_Req>(&value))
+  {
+    sz_value.add_object_member("type", "setup::Get_Nodes_Req");
+    auto result = serialize(*v);
+    sz_value.add_object_member("value", std::move(result));
     return std::move(sz_value);
   }
   else if (auto* v = boost::get<setup::Set_Node_Input_Stream_Path_Req>(&value))
   {
     sz_value.add_object_member("type", "setup::Set_Node_Input_Stream_Path_Req");
     auto result = serialize(*v);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("value", result.extract_payload());
+    sz_value.add_object_member("value", std::move(result));
     return std::move(sz_value);
   }
-  else { return ts::Error("Cannot serialize type"); }
+  else { TS_ASSERT(false); return ts::sz::Value(); }
 }
-ts::Result<void> deserialize(boost::optional<setup::Error>& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(setup::Brain_Res& value, ts::sz::Value const& sz_value)
+{
+  if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  auto const* type_sz_value = sz_value.find_object_member_by_name("type");
+  if (!type_sz_value || !type_sz_value->is_string()) { return ts::Error("Expected 'type' string value when deserializing"); }
+  auto const* value_sz_value = sz_value.find_object_member_by_name("value");
+  if (!value_sz_value) { return ts::Error("Expected 'value' when deserializing"); }
+  std::string const& path = type_sz_value->get_as_string();
+  if (false) { return ts::Error(""); } //this is here just to have the next items with 'else if'
+  else if (path == "::setup::Set_Clock_Res")
+  {
+    setup::Set_Clock_Res v;
+    auto result = deserialize(boost::get<setup::Set_Clock_Res>(value), *value_sz_value);
+    if (result != ts::success) { return result; }
+    value = v;
+  }
+  else if (path == "::setup::Set_UAV_Descriptor_Res")
+  {
+    setup::Set_UAV_Descriptor_Res v;
+    auto result = deserialize(boost::get<setup::Set_UAV_Descriptor_Res>(value), *value_sz_value);
+    if (result != ts::success) { return result; }
+    value = v;
+  }
+  else if (path == "::setup::Get_UAV_Descriptor_Res")
+  {
+    setup::Get_UAV_Descriptor_Res v;
+    auto result = deserialize(boost::get<setup::Get_UAV_Descriptor_Res>(value), *value_sz_value);
+    if (result != ts::success) { return result; }
+    value = v;
+  }
+  else if (path == "::setup::Get_Node_Defs_Res")
+  {
+    setup::Get_Node_Defs_Res v;
+    auto result = deserialize(boost::get<setup::Get_Node_Defs_Res>(value), *value_sz_value);
+    if (result != ts::success) { return result; }
+    value = v;
+  }
+  else if (path == "::setup::Remove_Node_Res")
+  {
+    setup::Remove_Node_Res v;
+    auto result = deserialize(boost::get<setup::Remove_Node_Res>(value), *value_sz_value);
+    if (result != ts::success) { return result; }
+    value = v;
+  }
+  else if (path == "::setup::Add_Node_Res")
+  {
+    setup::Add_Node_Res v;
+    auto result = deserialize(boost::get<setup::Add_Node_Res>(value), *value_sz_value);
+    if (result != ts::success) { return result; }
+    value = v;
+  }
+  else if (path == "::setup::Get_Nodes_Res")
+  {
+    setup::Get_Nodes_Res v;
+    auto result = deserialize(boost::get<setup::Get_Nodes_Res>(value), *value_sz_value);
+    if (result != ts::success) { return result; }
+    value = v;
+  }
+  else if (path == "::setup::Set_Node_Input_Stream_Path_Res")
+  {
+    setup::Set_Node_Input_Stream_Path_Res v;
+    auto result = deserialize(boost::get<setup::Set_Node_Input_Stream_Path_Res>(value), *value_sz_value);
+    if (result != ts::success) { return result; }
+    value = v;
+  }
+  else if (path == "::setup::Error")
+  {
+    setup::Error v;
+    auto result = deserialize(boost::get<setup::Error>(value), *value_sz_value);
+    if (result != ts::success) { return result; }
+    value = v;
+  }
+  else { return ts::Error("Cannot find type '" + path + "' when deserializing"); }
+  return ts::success;
+}
+ts::sz::Value serialize(setup::Brain_Res const& value)
+{
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
+  if (false) { return ts::sz::Value(); } //this is here just to have the next items with 'else if'
+  else if (auto* v = boost::get<setup::Set_Clock_Res>(&value))
+  {
+    sz_value.add_object_member("type", "setup::Set_Clock_Res");
+    auto result = serialize(*v);
+    sz_value.add_object_member("value", std::move(result));
+    return std::move(sz_value);
+  }
+  else if (auto* v = boost::get<setup::Set_UAV_Descriptor_Res>(&value))
+  {
+    sz_value.add_object_member("type", "setup::Set_UAV_Descriptor_Res");
+    auto result = serialize(*v);
+    sz_value.add_object_member("value", std::move(result));
+    return std::move(sz_value);
+  }
+  else if (auto* v = boost::get<setup::Get_UAV_Descriptor_Res>(&value))
+  {
+    sz_value.add_object_member("type", "setup::Get_UAV_Descriptor_Res");
+    auto result = serialize(*v);
+    sz_value.add_object_member("value", std::move(result));
+    return std::move(sz_value);
+  }
+  else if (auto* v = boost::get<setup::Get_Node_Defs_Res>(&value))
+  {
+    sz_value.add_object_member("type", "setup::Get_Node_Defs_Res");
+    auto result = serialize(*v);
+    sz_value.add_object_member("value", std::move(result));
+    return std::move(sz_value);
+  }
+  else if (auto* v = boost::get<setup::Remove_Node_Res>(&value))
+  {
+    sz_value.add_object_member("type", "setup::Remove_Node_Res");
+    auto result = serialize(*v);
+    sz_value.add_object_member("value", std::move(result));
+    return std::move(sz_value);
+  }
+  else if (auto* v = boost::get<setup::Add_Node_Res>(&value))
+  {
+    sz_value.add_object_member("type", "setup::Add_Node_Res");
+    auto result = serialize(*v);
+    sz_value.add_object_member("value", std::move(result));
+    return std::move(sz_value);
+  }
+  else if (auto* v = boost::get<setup::Get_Nodes_Res>(&value))
+  {
+    sz_value.add_object_member("type", "setup::Get_Nodes_Res");
+    auto result = serialize(*v);
+    sz_value.add_object_member("value", std::move(result));
+    return std::move(sz_value);
+  }
+  else if (auto* v = boost::get<setup::Set_Node_Input_Stream_Path_Res>(&value))
+  {
+    sz_value.add_object_member("type", "setup::Set_Node_Input_Stream_Path_Res");
+    auto result = serialize(*v);
+    sz_value.add_object_member("value", std::move(result));
+    return std::move(sz_value);
+  }
+  else if (auto* v = boost::get<setup::Error>(&value))
+  {
+    sz_value.add_object_member("type", "setup::Error");
+    auto result = serialize(*v);
+    sz_value.add_object_member("value", std::move(result));
+    return std::move(sz_value);
+  }
+  else { TS_ASSERT(false); return ts::sz::Value(); }
+}
+ts::Result<void> deserialize(boost::optional<setup::Error>& value, ts::sz::Value const& sz_value)
 {
   if (sz_value.is_empty()) { value = boost::none; return ts::success; }
   value = setup::Error();
   return deserialize(*value, sz_value);
 }
-ts::Result<ts::serialization::Value> serialize(boost::optional<setup::Error> const& value)
+ts::sz::Value serialize(boost::optional<setup::Error> const& value)
 {
-  if (!value) { return ts::serialization::Value(ts::serialization::Value::Type::EMPTY); }
+  if (!value) { return ts::sz::Value(); }
   return serialize(*value);
 }
-ts::Result<void> deserialize(boost::variant<setup::serialized_data_t,setup::Error>& value, ts::serialization::Value const& sz_value)
-{
-  if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
-  auto const* type_sz_value = sz_value.find_object_member_by_name("type");
-  if (!type_sz_value || !type_sz_value->is_string()) { return ts::Error("Expected 'type' string value when deserializing"); }
-  auto const* value_sz_value = sz_value.find_object_member_by_name("value");
-  if (!value_sz_value) { return ts::Error("Expected 'value' when deserializing"); }
-  std::string const& path = type_sz_value->get_as_string();
-  if (false) { return ts::Error(""); } //this is here just to have the next items with 'else if'
-  else if (path == "::setup::serialized_data_t")
-  {
-    setup::serialized_data_t v;
-    auto result = deserialize(boost::get<setup::serialized_data_t>(value), *value_sz_value);
-    if (result != ts::success) { return result; }
-    value = v;
-  }
-  else if (path == "::setup::Error")
-  {
-    setup::Error v;
-    auto result = deserialize(boost::get<setup::Error>(value), *value_sz_value);
-    if (result != ts::success) { return result; }
-    value = v;
-  }
-  else { return ts::Error("Cannot find type '" + path + "' when deserializing"); }
-  return ts::success;
-}
-ts::Result<ts::serialization::Value> serialize(boost::variant<setup::serialized_data_t,setup::Error> const& value)
-{
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
-  if (false) { return ts::Error(""); } //this is here just to have the next items with 'else if'
-  else if (auto* v = boost::get<setup::serialized_data_t>(&value))
-  {
-    sz_value.add_object_member("type", "setup::serialized_data_t");
-    auto result = serialize(*v);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("value", result.extract_payload());
-    return std::move(sz_value);
-  }
-  else if (auto* v = boost::get<setup::Error>(&value))
-  {
-    sz_value.add_object_member("type", "setup::Error");
-    auto result = serialize(*v);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("value", result.extract_payload());
-    return std::move(sz_value);
-  }
-  else { return ts::Error("Cannot serialize type"); }
-}
-ts::Result<void> deserialize(std::vector<setup::Node_Def_Data::Input>& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(std::vector<setup::Node_Def_Data::Input>& value, ts::sz::Value const& sz_value)
 {
   value.clear();
   if (!sz_value.is_array()) { return ts::Error("Expected array value when deserializing"); }
@@ -2078,18 +2012,17 @@ ts::Result<void> deserialize(std::vector<setup::Node_Def_Data::Input>& value, ts
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(std::vector<setup::Node_Def_Data::Input> const& value)
+ts::sz::Value serialize(std::vector<setup::Node_Def_Data::Input> const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::ARRAY);
+  ts::sz::Value sz_value(ts::sz::Value::Type::ARRAY);
   for (size_t i = 0; i < value.size(); i++)
   {
     auto result = serialize(value[i]);
-    if (result != ts::success) { return result; }
-    sz_value.add_array_element(result.extract_payload());
+    sz_value.add_array_element(std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(std::vector<setup::Node_Def_Data::Output>& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(std::vector<setup::Node_Def_Data::Output>& value, ts::sz::Value const& sz_value)
 {
   value.clear();
   if (!sz_value.is_array()) { return ts::Error("Expected array value when deserializing"); }
@@ -2101,18 +2034,17 @@ ts::Result<void> deserialize(std::vector<setup::Node_Def_Data::Output>& value, t
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(std::vector<setup::Node_Def_Data::Output> const& value)
+ts::sz::Value serialize(std::vector<setup::Node_Def_Data::Output> const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::ARRAY);
+  ts::sz::Value sz_value(ts::sz::Value::Type::ARRAY);
   for (size_t i = 0; i < value.size(); i++)
   {
     auto result = serialize(value[i]);
-    if (result != ts::success) { return result; }
-    sz_value.add_array_element(result.extract_payload());
+    sz_value.add_array_element(std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(std::vector<setup::Node_Def_Data>& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(std::vector<setup::Node_Def_Data>& value, ts::sz::Value const& sz_value)
 {
   value.clear();
   if (!sz_value.is_array()) { return ts::Error("Expected array value when deserializing"); }
@@ -2124,18 +2056,17 @@ ts::Result<void> deserialize(std::vector<setup::Node_Def_Data>& value, ts::seria
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(std::vector<setup::Node_Def_Data> const& value)
+ts::sz::Value serialize(std::vector<setup::Node_Def_Data> const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::ARRAY);
+  ts::sz::Value sz_value(ts::sz::Value::Type::ARRAY);
   for (size_t i = 0; i < value.size(); i++)
   {
     auto result = serialize(value[i]);
-    if (result != ts::success) { return result; }
-    sz_value.add_array_element(result.extract_payload());
+    sz_value.add_array_element(std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(std::vector<setup::Node_Data::Input>& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(std::vector<setup::Node_Data::Input>& value, ts::sz::Value const& sz_value)
 {
   value.clear();
   if (!sz_value.is_array()) { return ts::Error("Expected array value when deserializing"); }
@@ -2147,18 +2078,17 @@ ts::Result<void> deserialize(std::vector<setup::Node_Data::Input>& value, ts::se
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(std::vector<setup::Node_Data::Input> const& value)
+ts::sz::Value serialize(std::vector<setup::Node_Data::Input> const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::ARRAY);
+  ts::sz::Value sz_value(ts::sz::Value::Type::ARRAY);
   for (size_t i = 0; i < value.size(); i++)
   {
     auto result = serialize(value[i]);
-    if (result != ts::success) { return result; }
-    sz_value.add_array_element(result.extract_payload());
+    sz_value.add_array_element(std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(std::vector<setup::Node_Data::Output>& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(std::vector<setup::Node_Data::Output>& value, ts::sz::Value const& sz_value)
 {
   value.clear();
   if (!sz_value.is_array()) { return ts::Error("Expected array value when deserializing"); }
@@ -2170,18 +2100,17 @@ ts::Result<void> deserialize(std::vector<setup::Node_Data::Output>& value, ts::s
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(std::vector<setup::Node_Data::Output> const& value)
+ts::sz::Value serialize(std::vector<setup::Node_Data::Output> const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::ARRAY);
+  ts::sz::Value sz_value(ts::sz::Value::Type::ARRAY);
   for (size_t i = 0; i < value.size(); i++)
   {
     auto result = serialize(value[i]);
-    if (result != ts::success) { return result; }
-    sz_value.add_array_element(result.extract_payload());
+    sz_value.add_array_element(std::move(result));
   }
   return sz_value;
 }
-ts::Result<void> deserialize(std::vector<setup::Node_Data>& value, ts::serialization::Value const& sz_value)
+ts::Result<void> deserialize(std::vector<setup::Node_Data>& value, ts::sz::Value const& sz_value)
 {
   value.clear();
   if (!sz_value.is_array()) { return ts::Error("Expected array value when deserializing"); }
@@ -2193,123 +2122,15 @@ ts::Result<void> deserialize(std::vector<setup::Node_Data>& value, ts::serializa
   }
   return ts::success;
 }
-ts::Result<ts::serialization::Value> serialize(std::vector<setup::Node_Data> const& value)
+ts::sz::Value serialize(std::vector<setup::Node_Data> const& value)
 {
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::ARRAY);
+  ts::sz::Value sz_value(ts::sz::Value::Type::ARRAY);
   for (size_t i = 0; i < value.size(); i++)
   {
     auto result = serialize(value[i]);
-    if (result != ts::success) { return result; }
-    sz_value.add_array_element(result.extract_payload());
+    sz_value.add_array_element(std::move(result));
   }
   return sz_value;
-}
-ts::Result<void> deserialize(boost::variant<setup::Node_Data,setup::Error>& value, ts::serialization::Value const& sz_value)
-{
-  if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
-  auto const* type_sz_value = sz_value.find_object_member_by_name("type");
-  if (!type_sz_value || !type_sz_value->is_string()) { return ts::Error("Expected 'type' string value when deserializing"); }
-  auto const* value_sz_value = sz_value.find_object_member_by_name("value");
-  if (!value_sz_value) { return ts::Error("Expected 'value' when deserializing"); }
-  std::string const& path = type_sz_value->get_as_string();
-  if (false) { return ts::Error(""); } //this is here just to have the next items with 'else if'
-  else if (path == "::setup::Node_Data")
-  {
-    setup::Node_Data v;
-    auto result = deserialize(boost::get<setup::Node_Data>(value), *value_sz_value);
-    if (result != ts::success) { return result; }
-    value = v;
-  }
-  else if (path == "::setup::Error")
-  {
-    setup::Error v;
-    auto result = deserialize(boost::get<setup::Error>(value), *value_sz_value);
-    if (result != ts::success) { return result; }
-    value = v;
-  }
-  else { return ts::Error("Cannot find type '" + path + "' when deserializing"); }
-  return ts::success;
-}
-ts::Result<ts::serialization::Value> serialize(boost::variant<setup::Node_Data,setup::Error> const& value)
-{
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
-  if (false) { return ts::Error(""); } //this is here just to have the next items with 'else if'
-  else if (auto* v = boost::get<setup::Node_Data>(&value))
-  {
-    sz_value.add_object_member("type", "setup::Node_Data");
-    auto result = serialize(*v);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("value", result.extract_payload());
-    return std::move(sz_value);
-  }
-  else if (auto* v = boost::get<setup::Error>(&value))
-  {
-    sz_value.add_object_member("type", "setup::Error");
-    auto result = serialize(*v);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("value", result.extract_payload());
-    return std::move(sz_value);
-  }
-  else { return ts::Error("Cannot serialize type"); }
-}
-ts::Result<void> deserialize(boost::variant<setup::Node_Data,setup::Add_Node_Res::Error>& value, ts::serialization::Value const& sz_value)
-{
-  if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
-  auto const* type_sz_value = sz_value.find_object_member_by_name("type");
-  if (!type_sz_value || !type_sz_value->is_string()) { return ts::Error("Expected 'type' string value when deserializing"); }
-  auto const* value_sz_value = sz_value.find_object_member_by_name("value");
-  if (!value_sz_value) { return ts::Error("Expected 'value' when deserializing"); }
-  std::string const& path = type_sz_value->get_as_string();
-  if (false) { return ts::Error(""); } //this is here just to have the next items with 'else if'
-  else if (path == "::setup::Node_Data")
-  {
-    setup::Node_Data v;
-    auto result = deserialize(boost::get<setup::Node_Data>(value), *value_sz_value);
-    if (result != ts::success) { return result; }
-    value = v;
-  }
-  else if (path == "::setup::Add_Node_Res::Error")
-  {
-    setup::Add_Node_Res::Error v;
-    auto result = deserialize(boost::get<setup::Add_Node_Res::Error>(value), *value_sz_value);
-    if (result != ts::success) { return result; }
-    value = v;
-  }
-  else { return ts::Error("Cannot find type '" + path + "' when deserializing"); }
-  return ts::success;
-}
-ts::Result<ts::serialization::Value> serialize(boost::variant<setup::Node_Data,setup::Add_Node_Res::Error> const& value)
-{
-  ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
-  if (false) { return ts::Error(""); } //this is here just to have the next items with 'else if'
-  else if (auto* v = boost::get<setup::Node_Data>(&value))
-  {
-    sz_value.add_object_member("type", "setup::Node_Data");
-    auto result = serialize(*v);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("value", result.extract_payload());
-    return std::move(sz_value);
-  }
-  else if (auto* v = boost::get<setup::Add_Node_Res::Error>(&value))
-  {
-    sz_value.add_object_member("type", "setup::Add_Node_Res::Error");
-    auto result = serialize(*v);
-    if (result != ts::success) { return result; }
-    sz_value.add_object_member("value", result.extract_payload());
-    return std::move(sz_value);
-  }
-  else { return ts::Error("Cannot serialize type"); }
-}
-ts::Result<void> deserialize(boost::optional<setup::Remove_Node_Res::Error>& value, ts::serialization::Value const& sz_value)
-{
-  if (sz_value.is_empty()) { value = boost::none; return ts::success; }
-  value = setup::Remove_Node_Res::Error();
-  return deserialize(*value, sz_value);
-}
-ts::Result<ts::serialization::Value> serialize(boost::optional<setup::Remove_Node_Res::Error> const& value)
-{
-  if (!value) { return ts::serialization::Value(ts::serialization::Value::Type::EMPTY); }
-  return serialize(*value);
 }
 }
 }

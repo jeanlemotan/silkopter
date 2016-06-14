@@ -153,7 +153,7 @@ std::shared_ptr<IOptional_Type const> Optional_Value::get_specialized_type() con
     return m_type;
 }
 
-Result<serialization::Value> Optional_Value::serialize() const
+Result<sz::Value> Optional_Value::serialize() const
 {
     if (!is_constructed())
     {
@@ -162,7 +162,7 @@ Result<serialization::Value> Optional_Value::serialize() const
     }
     if (!is_set())
     {
-        return serialization::Value(serialization::Value::Type::EMPTY);
+        return sz::Value();
     }
     else
     {
@@ -170,7 +170,7 @@ Result<serialization::Value> Optional_Value::serialize() const
     }
 }
 
-Result<void> Optional_Value::deserialize(serialization::Value const& sz_value)
+Result<void> Optional_Value::deserialize(sz::Value const& sz_value)
 {
     if (!is_constructed())
     {

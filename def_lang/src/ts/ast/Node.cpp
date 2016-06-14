@@ -145,15 +145,15 @@ std::string Node::to_string(size_t ident_count, bool deep) const
     return str;
 }
 
-Result<serialization::Value> Node::serialize() const
+Result<sz::Value> Node::serialize() const
 {
-    ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+    ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
 
-    sz_value.add_object_member("type", ts::serialization::Value(static_cast<uint8_t>(m_type)));
+    sz_value.add_object_member("type", ts::sz::Value(static_cast<uint8_t>(m_type)));
 
     if (!m_attributes.empty())
     {
-        ts::serialization::Value sz_value_attributes(ts::serialization::Value::Type::ARRAY);
+        ts::sz::Value sz_value_attributes(ts::sz::Value::Type::ARRAY);
         for (Attribute const& att: m_attributes)
         {
             auto result = att.serialize();
@@ -168,7 +168,7 @@ Result<serialization::Value> Node::serialize() const
 
     if (!m_children.empty())
     {
-        ts::serialization::Value sz_value_children(ts::serialization::Value::Type::ARRAY);
+        ts::sz::Value sz_value_children(ts::sz::Value::Type::ARRAY);
         for (Node const& ch: m_children)
         {
             auto result = ch.serialize();
@@ -184,7 +184,7 @@ Result<serialization::Value> Node::serialize() const
     return sz_value;
 }
 
-Result<void> Node::deserialize(serialization::Value const& value)
+Result<void> Node::deserialize(sz::Value const& value)
 {
     return ts::success;
 }

@@ -887,13 +887,8 @@ void Comms::serialize_and_send(size_t channel_idx, T const& message)
 {
     if (m_rcp->is_connected())
     {
-        auto result = silk::comms::serialize(message);
-        if (result != ts::success)
-        {
-            QLOGE("Failed to serialize message: {}", result.error().what());
-            return;
-        }
-        std::string json = ts::serialization::to_json(result.payload(), true);
+        ts::sz::Value sz_value = silk::comms::serialize(message);
+        std::string json = ts::sz::to_json(sz_value, true);
         if (!m_rcp->send(channel_idx, json.data(), json.size()))
         {
             QLOGE("Failed to send message");
@@ -902,13 +897,56 @@ void Comms::serialize_and_send(size_t channel_idx, T const& message)
     }
 }
 
+static boost::variant<comms::setup::Node_Data, comms::setup::Error> get_node_data(node::INode const& node)
+{
+    comms::setup::Node_Data node_data;
 
-void Comms::handle_message(comms::setup::Set_Clock_Req const& message)
+    node_data.set_type(node::get_as_string(node.get_type()));
+
+    for (node::INode::Input const& input: node.get_inputs())
+    {
+        comms::setup::Node_Data::Input node_data_input;
+        node_data_input.set_name(input.name);
+        node_data_input.set_type(stream::get_as_string(input.type, false));
+        node_data_input.set_rate(input.rate);
+        node_data_input.set_stream_path(input.stream_path.template get_as<std::string>());
+        node_data.get_inputs().push_back(std::move(node_data_input));
+    }
+    for (node::INode::Output const& output: node.get_outputs())
+    {
+        comms::setup::Node_Data::Output node_data_output;
+        node_data_output.set_name(output.name);
+        node_data_output.set_type(stream::get_as_string(output.stream->get_type(), false));
+        node_data_output.set_rate(output.stream->get_rate());
+        node_data.get_outputs().push_back(std::move(node_data_output));
+    }
+
+    ts::sz::Value sz_value = uav::serialize(uav::Poly<const uav::INode_Descriptor>(node.get_descriptor()));
+    node_data.set_descriptor_data(comms::setup::serialized_data_t(ts::sz::to_json(sz_value, true)));
+
+    sz_value = uav::serialize(uav::Poly<const uav::INode_Config>(node.get_config()));
+    node_data.set_config_data(comms::setup::serialized_data_t(ts::sz::to_json(sz_value, true)));
+
+    return std::move(node_data);
+}
+
+template<class Format_String, typename... Params>
+comms::setup::Error make_error(Format_String const& fmt, Params&&... params)
+{
+    comms::setup::Error error;
+    error.set_message(q::util::format<std::string>(fmt, std::forward<Params>(params)...));
+    QLOGE("Comms error: {}", error.get_message());
+    return error;
+}
+
+void Comms::handle_req(comms::setup::Set_Clock_Req const& req)
 {
     auto& channel = m_channels->setup;
     QLOGI("Req clock");
 
-    int64_t time_t_data = message.get_time();
+    comms::setup::Brain_Res response;
+
+    int64_t time_t_data = req.get_time();
 #ifdef RASPBERRY_PI
     time_t t = time_t_data / 1000;
     if (stime(&t) == 0)
@@ -923,107 +961,209 @@ void Comms::handle_message(comms::setup::Set_Clock_Req const& message)
     }
     else
     {
-        QLOGE("Failed to set time: {}", strerror(errno));
+        response = make_error("Failed to set time: {}", strerror(errno));
     }
 #endif
 
     comms::setup::Set_Clock_Res res;
     res.set_time(static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::milliseconds>(q::Clock::now().time_since_epoch()).count()));
+    response = res;
 
-    serialize_and_send(SETUP_CHANNEL, res);
+    serialize_and_send(SETUP_CHANNEL, response);
 }
 
-void Comms::handle_message(comms::setup::Set_UAV_Descriptor_Req const& message)
+void Comms::handle_req(comms::setup::Set_UAV_Descriptor_Req const& req)
 {
-    auto& channel = m_channels->setup;
-    channel.begin_unpack();
+    QLOGI("Set_UAV_Descriptor_Req");
 
-    QLOGI("Req uav descriptor");
+    comms::setup::Brain_Res response;
 
-    comms::setup::Error error;
+    comms::setup::serialized_data_t const& serialized_data = req.get_data();
+
+    auto json_result = ts::sz::from_json(serialized_data.data(), serialized_data.size());
+    if (json_result != ts::success)
+    {
+        response = make_error(q::util::format<std::string>("Cannot deserialize uav descriptor data: {}", json_result.error().what()));
+        serialize_and_send(SETUP_CHANNEL, response);
+        return;
+    }
+    uav::Poly<const uav::IUAV_Descriptor> uav_descriptor;
+    auto deserialize_result = uav::deserialize(uav_descriptor, json_result.payload());
+    if (deserialize_result != ts::success)
+    {
+        response = make_error(q::util::format<std::string>("Cannot deserialize uav descriptor json: {}", deserialize_result.error().what()));
+        serialize_and_send(SETUP_CHANNEL, response);
+        return;
+    }
+
+    if (!m_uav.set_uav_descriptor(*uav_descriptor))
+    {
+        response = make_error(q::util::format<std::string>("Cannot set uav descriptor: {}", "N/A"));
+        serialize_and_send(SETUP_CHANNEL, response);
+        return;
+    }
+
+    m_uav.save_settings();
+
+    ts::sz::Value sz_value = uav::serialize(uav::Poly<const uav::IUAV_Descriptor>(m_uav.get_uav_descriptor()));
+
     comms::setup::Set_UAV_Descriptor_Res res;
+    res.set_data(comms::setup::serialized_data_t(ts::sz::to_json(sz_value, true)));
+    response = std::move(res);
 
-    comms::setup::serialized_data_t const& serialized_data = message.get_data();
+    serialize_and_send(SETUP_CHANNEL, response);
+}
 
-    auto json_result = ts::serialization::from_json(serialized_data.data(), serialized_data.size());
-    if (json_result == ts::success)
+void Comms::handle_req(comms::setup::Get_UAV_Descriptor_Req const& /*req*/)
+{
+    QLOGI("Get_UAV_Descriptor_Req");
+
+    comms::setup::Brain_Res response;
+
+    ts::sz::Value sz_value = uav::serialize(uav::Poly<const uav::IUAV_Descriptor>(m_uav.get_uav_descriptor()));
+    comms::setup::Get_UAV_Descriptor_Res res;
+    res.set_data(comms::setup::serialized_data_t(ts::sz::to_json(sz_value, true)));
+    response = std::move(res);
+
+    serialize_and_send(SETUP_CHANNEL, response);
+}
+
+void Comms::handle_req(comms::setup::Get_Node_Defs_Req const& /*req*/)
+{
+    QLOGI("Get_UAV_Descriptor_Req");
+
+    comms::setup::Brain_Res response;
+
+    //first disable all telemetry because the GS doesn't yet have all the streams
+    m_stream_telemetry_data.clear();
+    m_uav_telemetry_data.is_enabled = false;
+
+    QLOGI("Enumerate node factory");
+    std::vector<UAV::Node_Factory::Info> nodes = m_uav.get_node_factory().create_all();
+
+    comms::setup::Get_Node_Defs_Res res;
+    for (UAV::Node_Factory::Info const& n: nodes)
     {
-        uav::Poly<const uav::IUAV_Descriptor> uav_descriptor;
-        auto deserialize_result = uav::deserialize(uav_descriptor, json_result.payload());
-        if (deserialize_result == ts::success)
+        comms::setup::Node_Def_Data node_data;
+
+        node_data.set_name(n.name);
+        node_data.set_type(node::get_as_string(n.ptr->get_type()));
+
+        for (node::INode::Input const& input: n.ptr->get_inputs())
         {
-            if (m_uav.set_uav_descriptor(*uav_descriptor))
-            {
-                m_uav.save_settings();
-
-                auto serialize_result = uav::serialize(uav::Poly<const uav::IUAV_Descriptor>(m_uav.get_uav_descriptor()));
-                if (serialize_result == ts::success)
-                {
-                    std::string json = ts::serialization::to_json(serialize_result.payload(), true);
-                    res.get_result() = comms::setup::serialized_data_t(json);
-                }
-                else
-                {
-                    error.set_message(q::util::format<std::string>("Cannot serialize uav descriptor json: {}", serialize_result.error().what()));
-                }
-            }
-            else
-            {
-                error.set_message(q::util::format<std::string>("Cannot set uav descriptor: {}", "N/A"));
-            }
+            comms::setup::Node_Def_Data::Input node_data_input;
+            node_data_input.set_name(input.name);
+            node_data_input.set_type(stream::get_as_string(input.type, false));
+            node_data_input.set_rate(input.rate);
+            node_data.get_inputs().push_back(std::move(node_data_input));
         }
-        else
+        for (node::INode::Output const& output: n.ptr->get_outputs())
         {
-            error.set_message(q::util::format<std::string>("Cannot deserialize uav descriptor json: {}", deserialize_result.error().what()));
+            comms::setup::Node_Def_Data::Output node_data_output;
+            node_data_output.set_name(output.name);
+            node_data_output.set_type(stream::get_as_string(output.stream->get_type(), false));
+            node_data_output.set_rate(output.stream->get_rate());
+            node_data.get_outputs().push_back(std::move(node_data_output));
         }
+
+        std::shared_ptr<const uav::INode_Descriptor> descriptor = n.ptr->get_descriptor();
+        ts::sz::Value sz_value = uav::serialize(uav::Poly<const uav::INode_Descriptor>(descriptor));
+        node_data.set_descriptor_data(comms::setup::serialized_data_t(ts::sz::to_json(sz_value, true)));
+        res.get_node_def_datas().push_back(std::move(node_data));
     }
-    else
+
+    response = std::move(res);
+    serialize_and_send(SETUP_CHANNEL, response);
+}
+
+void Comms::handle_req(comms::setup::Remove_Node_Req const& req)
+{
+    QLOGI("Remove_Node_Req");
+
+    comms::setup::Brain_Res response;
+
+    std::shared_ptr<node::INode> node = m_uav.get_nodes().find_by_name<node::INode>(req.get_name());
+    if (!node)
     {
-        error.set_message(q::util::format<std::string>("Cannot deserialize uav descriptor data: {}", json_result.error().what()));
+        response = make_error(q::util::format<std::string>("Cannot find node '{}'", req.get_name()));
+        serialize_and_send(SETUP_CHANNEL, response);
+        return;
     }
 
-    if (!error.get_message().empty())
+    m_uav.remove_node(node);
+    m_uav.save_settings();
+
+    response = comms::setup::Remove_Node_Res();
+    serialize_and_send(SETUP_CHANNEL, response);
+}
+
+void Comms::handle_req(comms::setup::Add_Node_Req const& req)
+{
+    QLOGI("Add_Node_Req");
+
+    comms::setup::Brain_Res response;
+
+    comms::setup::serialized_data_t const& serialized_data = req.get_descriptor_data();
+
+    auto json_result = ts::sz::from_json(serialized_data.data(), serialized_data.size());
+    if (json_result != ts::success)
     {
-        res.get_result() = error;
+        response = make_error(q::util::format<std::string>("Cannot deserialize node {} descriptor data: {}", req.get_def_name(), json_result.error().what()));
+        serialize_and_send(SETUP_CHANNEL, response);
+        return;
+    }
+    uav::Poly<const uav::INode_Descriptor> descriptor;
+    auto deserialize_result = uav::deserialize(descriptor, json_result.payload());
+    if (deserialize_result != ts::success)
+    {
+        response = make_error(q::util::format<std::string>("Cannot deserialize node {} descriptor json: {}", req.get_def_name(), deserialize_result.error().what()));
+        serialize_and_send(SETUP_CHANNEL, response);
+        return;
     }
 
-    serialize_and_send(SETUP_CHANNEL, res);
+    std::shared_ptr<node::INode> node = m_uav.create_node(req.get_def_name(), req.get_name(), *descriptor);
+    if (!node)
+    {
+        response = make_error(q::util::format<std::string>("Cannot create node {} descriptor json: {}", req.get_def_name(), deserialize_result.error().what()));
+        serialize_and_send(SETUP_CHANNEL, response);
+        return;
+    }
+    m_uav.save_settings();
+
+    comms::setup::Add_Node_Res res;
+    boost::variant<comms::setup::Node_Data, comms::setup::Error> result = get_node_data(*node);
+    if (auto* error = boost::get<comms::setup::Error>(&result))
+    {
+        response = std::move(*error);
+        serialize_and_send(SETUP_CHANNEL, response);
+        return;
+    }
+
+    res.set_node_data(std::move(boost::get<comms::setup::Node_Data>(result)));
+    response = std::move(res);
+    serialize_and_send(SETUP_CHANNEL, response);
 }
 
-void Comms::handle_message(comms::setup::Get_UAV_Descriptor_Req const& message)
+void Comms::handle_req(comms::setup::Get_Nodes_Req const& req)
 {
+    QLOGI("Get_Nodes_Req");
 
 }
 
-void Comms::handle_message(comms::setup::Get_Node_Defs_Req const& message)
+void Comms::handle_req(comms::setup::Set_Node_Input_Stream_Path_Req const& req)
 {
-
-}
-
-void Comms::handle_message(comms::setup::Remove_Node_Req const& message)
-{
-
-}
-
-void Comms::handle_message(comms::setup::Add_Node_Req const& message)
-{
-
-}
-
-void Comms::handle_message(comms::setup::Set_Node_Input_Stream_Path_Req const& message)
-{
-
+    QLOGI("Set_Node_Input_Stream_Path_Req");
 }
 
 
-struct Comms::Dispatch_Message_Visitor : boost::static_visitor<void>
+struct Comms::Dispatch_Req_Visitor : boost::static_visitor<void>
 {
-    Dispatch_Message_Visitor(Comms& comms) : m_comms(comms) {}
+    Dispatch_Req_Visitor(Comms& comms) : m_comms(comms) {}
 
     template <typename T>
     void operator()(T const& t) const
     {
-        m_comms.handle_message(t);
+        m_comms.handle_req(t);
     }
 
 private:
@@ -1050,23 +1190,23 @@ void Comms::process()
 //    }
 
 
-    Dispatch_Message_Visitor dispatcher(*this);
+    Dispatch_Req_Visitor dispatcher(*this);
     while (m_rcp->receive(SETUP_CHANNEL, m_channels->setup_buffer))
     {
-        auto parse_result = ts::serialization::from_json(m_channels->setup_buffer.data(), m_channels->setup_buffer.size());
+        auto parse_result = ts::sz::from_json(m_channels->setup_buffer.data(), m_channels->setup_buffer.size());
         if (parse_result != ts::success)
         {
-            QLOGE("Cannot parse setup message: {}", parse_result.error().what());
+            QLOGE("Cannot parse setup req: {}", parse_result.error().what());
         }
         else
         {
-            silk::comms::setup::Brain_Message message;
-            auto result = silk::comms::deserialize(message, parse_result.payload());
+            silk::comms::setup::Brain_Req req;
+            auto result = silk::comms::deserialize(req, parse_result.payload());
             if (result != ts::success)
             {
-                QLOGE("Cannot deserialize setup message: {}", result.error().what());
+                QLOGE("Cannot deserialize setup req: {}", result.error().what());
             }
-            boost::apply_visitor(dispatcher, message);
+            boost::apply_visitor(dispatcher, req);
         }
         m_channels->setup_buffer.clear();
     }

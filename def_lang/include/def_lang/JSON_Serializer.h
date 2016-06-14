@@ -5,7 +5,7 @@
 
 namespace ts
 {
-namespace serialization
+namespace sz
 {
 
 std::string to_json(Value const& value, bool nice);

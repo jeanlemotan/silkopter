@@ -116,21 +116,21 @@ std::string Attribute::to_string() const
 }
 
 
-class serialize_visitor : public boost::static_visitor<serialization::Value>
+class serialize_visitor : public boost::static_visitor<sz::Value>
 {
 public:
     template<typename T>
-    serialization::Value operator()(T v) const
+    sz::Value operator()(T v) const
     {
-        return serialization::Value(v);
+        return sz::Value(v);
     }
 };
 
-Result<serialization::Value> Attribute::serialize() const
+Result<sz::Value> Attribute::serialize() const
 {
-    ts::serialization::Value sz_value(ts::serialization::Value::Type::OBJECT);
+    ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
 
-    sz_value.add_object_member("type", ts::serialization::Value(static_cast<uint8_t>(m_type)));
+    sz_value.add_object_member("type", ts::sz::Value(static_cast<uint8_t>(m_type)));
     sz_value.add_object_member("value", boost::apply_visitor(serialize_visitor(), m_value));
 
     return sz_value;
