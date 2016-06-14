@@ -59,18 +59,20 @@ struct Node_Def_Data
     struct Input
     {
         string name;
-        string type;
+        uint8_t space;
+        uint8_t semantic;
         uint32_t rate = 0;
     };
     struct Output
     {
         string name;
-        string type;
+        uint8_t space;
+        uint8_t semantic;
         uint32_t rate = 0;
     };
 
     string name;
-    string type;
+    uint8_t type;
     vector<Input> inputs;
     vector<Output> outputs;
     serialized_data_t descriptor_data;
@@ -91,19 +93,21 @@ struct Node_Data
     struct Input
     {
         string name;
-        string type;
+        uint8_t space;
+        uint8_t semantic;
         uint32_t rate = 0;
         string stream_path;
     };
     struct Output
     {
         string name;
-        string type;
+        uint8_t space;
+        uint8_t semantic;
         uint32_t rate = 0;
     };
 
     string name;
-    string type;
+    uint8_t type;
     vector<Input> inputs;
     vector<Output> outputs;
     serialized_data_t descriptor_data;

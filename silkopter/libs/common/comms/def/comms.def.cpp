@@ -108,13 +108,23 @@ namespace setup
     }
 
 ////////////////////////////////////////////////////////////
-    void Node_Def_Data::Input::set_type(std::string const& value)
+    void Node_Def_Data::Input::set_space(uint8_t const& value)
     {
-      m_type = value;
+      m_space = clamp(value, uint8_t(0), uint8_t(255));
     }
-    auto Node_Def_Data::Input::get_type() const -> std::string const& 
+    auto Node_Def_Data::Input::get_space() const -> uint8_t const& 
     {
-      return m_type;
+      return m_space;
+    }
+
+////////////////////////////////////////////////////////////
+    void Node_Def_Data::Input::set_semantic(uint8_t const& value)
+    {
+      m_semantic = clamp(value, uint8_t(0), uint8_t(255));
+    }
+    auto Node_Def_Data::Input::get_semantic() const -> uint8_t const& 
+    {
+      return m_semantic;
     }
 
 ////////////////////////////////////////////////////////////
@@ -138,13 +148,23 @@ namespace setup
     }
 
 ////////////////////////////////////////////////////////////
-    void Node_Def_Data::Output::set_type(std::string const& value)
+    void Node_Def_Data::Output::set_space(uint8_t const& value)
     {
-      m_type = value;
+      m_space = clamp(value, uint8_t(0), uint8_t(255));
     }
-    auto Node_Def_Data::Output::get_type() const -> std::string const& 
+    auto Node_Def_Data::Output::get_space() const -> uint8_t const& 
     {
-      return m_type;
+      return m_space;
+    }
+
+////////////////////////////////////////////////////////////
+    void Node_Def_Data::Output::set_semantic(uint8_t const& value)
+    {
+      m_semantic = clamp(value, uint8_t(0), uint8_t(255));
+    }
+    auto Node_Def_Data::Output::get_semantic() const -> uint8_t const& 
+    {
+      return m_semantic;
     }
 
 ////////////////////////////////////////////////////////////
@@ -168,11 +188,11 @@ namespace setup
   }
 
 ////////////////////////////////////////////////////////////
-  void Node_Def_Data::set_type(std::string const& value)
+  void Node_Def_Data::set_type(uint8_t const& value)
   {
-    m_type = value;
+    m_type = clamp(value, uint8_t(0), uint8_t(255));
   }
-  auto Node_Def_Data::get_type() const -> std::string const& 
+  auto Node_Def_Data::get_type() const -> uint8_t const& 
   {
     return m_type;
   }
@@ -243,13 +263,23 @@ namespace setup
     }
 
 ////////////////////////////////////////////////////////////
-    void Node_Data::Input::set_type(std::string const& value)
+    void Node_Data::Input::set_space(uint8_t const& value)
     {
-      m_type = value;
+      m_space = clamp(value, uint8_t(0), uint8_t(255));
     }
-    auto Node_Data::Input::get_type() const -> std::string const& 
+    auto Node_Data::Input::get_space() const -> uint8_t const& 
     {
-      return m_type;
+      return m_space;
+    }
+
+////////////////////////////////////////////////////////////
+    void Node_Data::Input::set_semantic(uint8_t const& value)
+    {
+      m_semantic = clamp(value, uint8_t(0), uint8_t(255));
+    }
+    auto Node_Data::Input::get_semantic() const -> uint8_t const& 
+    {
+      return m_semantic;
     }
 
 ////////////////////////////////////////////////////////////
@@ -283,13 +313,23 @@ namespace setup
     }
 
 ////////////////////////////////////////////////////////////
-    void Node_Data::Output::set_type(std::string const& value)
+    void Node_Data::Output::set_space(uint8_t const& value)
     {
-      m_type = value;
+      m_space = clamp(value, uint8_t(0), uint8_t(255));
     }
-    auto Node_Data::Output::get_type() const -> std::string const& 
+    auto Node_Data::Output::get_space() const -> uint8_t const& 
     {
-      return m_type;
+      return m_space;
+    }
+
+////////////////////////////////////////////////////////////
+    void Node_Data::Output::set_semantic(uint8_t const& value)
+    {
+      m_semantic = clamp(value, uint8_t(0), uint8_t(255));
+    }
+    auto Node_Data::Output::get_semantic() const -> uint8_t const& 
+    {
+      return m_semantic;
     }
 
 ////////////////////////////////////////////////////////////
@@ -313,11 +353,11 @@ namespace setup
   }
 
 ////////////////////////////////////////////////////////////
-  void Node_Data::set_type(std::string const& value)
+  void Node_Data::set_type(uint8_t const& value)
   {
-    m_type = value;
+    m_type = clamp(value, uint8_t(0), uint8_t(255));
   }
-  auto Node_Data::get_type() const -> std::string const& 
+  auto Node_Data::get_type() const -> uint8_t const& 
   {
     return m_type;
   }
@@ -1135,12 +1175,20 @@ ts::Result<void> deserialize(setup::Node_Def_Data::Input& value, ts::sz::Value c
     value.set_name(v);
   }
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("type");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'type'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_type())>::type>::type v;
+    auto const* member_sz_value = sz_value.find_object_member_by_name("space");
+    if (!member_sz_value) { return ts::Error("Cannot find member value 'space'"); }
+    std::remove_cv<std::remove_reference<decltype(value.get_space())>::type>::type v;
     auto result = deserialize(v, *member_sz_value);
     if (result != ts::success) { return result; }
-    value.set_type(v);
+    value.set_space(v);
+  }
+  {
+    auto const* member_sz_value = sz_value.find_object_member_by_name("semantic");
+    if (!member_sz_value) { return ts::Error("Cannot find member value 'semantic'"); }
+    std::remove_cv<std::remove_reference<decltype(value.get_semantic())>::type>::type v;
+    auto result = deserialize(v, *member_sz_value);
+    if (result != ts::success) { return result; }
+    value.set_semantic(v);
   }
   {
     auto const* member_sz_value = sz_value.find_object_member_by_name("rate");
@@ -1160,8 +1208,12 @@ ts::sz::Value serialize(setup::Node_Def_Data::Input const& value)
     sz_value.add_object_member("name", std::move(result));
   }
   {
-    auto result = serialize(value.get_type());
-    sz_value.add_object_member("type", std::move(result));
+    auto result = serialize(value.get_space());
+    sz_value.add_object_member("space", std::move(result));
+  }
+  {
+    auto result = serialize(value.get_semantic());
+    sz_value.add_object_member("semantic", std::move(result));
   }
   {
     auto result = serialize(value.get_rate());
@@ -1181,12 +1233,20 @@ ts::Result<void> deserialize(setup::Node_Def_Data::Output& value, ts::sz::Value 
     value.set_name(v);
   }
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("type");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'type'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_type())>::type>::type v;
+    auto const* member_sz_value = sz_value.find_object_member_by_name("space");
+    if (!member_sz_value) { return ts::Error("Cannot find member value 'space'"); }
+    std::remove_cv<std::remove_reference<decltype(value.get_space())>::type>::type v;
     auto result = deserialize(v, *member_sz_value);
     if (result != ts::success) { return result; }
-    value.set_type(v);
+    value.set_space(v);
+  }
+  {
+    auto const* member_sz_value = sz_value.find_object_member_by_name("semantic");
+    if (!member_sz_value) { return ts::Error("Cannot find member value 'semantic'"); }
+    std::remove_cv<std::remove_reference<decltype(value.get_semantic())>::type>::type v;
+    auto result = deserialize(v, *member_sz_value);
+    if (result != ts::success) { return result; }
+    value.set_semantic(v);
   }
   {
     auto const* member_sz_value = sz_value.find_object_member_by_name("rate");
@@ -1206,8 +1266,12 @@ ts::sz::Value serialize(setup::Node_Def_Data::Output const& value)
     sz_value.add_object_member("name", std::move(result));
   }
   {
-    auto result = serialize(value.get_type());
-    sz_value.add_object_member("type", std::move(result));
+    auto result = serialize(value.get_space());
+    sz_value.add_object_member("space", std::move(result));
+  }
+  {
+    auto result = serialize(value.get_semantic());
+    sz_value.add_object_member("semantic", std::move(result));
   }
   {
     auto result = serialize(value.get_rate());
@@ -1329,12 +1393,20 @@ ts::Result<void> deserialize(setup::Node_Data::Input& value, ts::sz::Value const
     value.set_name(v);
   }
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("type");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'type'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_type())>::type>::type v;
+    auto const* member_sz_value = sz_value.find_object_member_by_name("space");
+    if (!member_sz_value) { return ts::Error("Cannot find member value 'space'"); }
+    std::remove_cv<std::remove_reference<decltype(value.get_space())>::type>::type v;
     auto result = deserialize(v, *member_sz_value);
     if (result != ts::success) { return result; }
-    value.set_type(v);
+    value.set_space(v);
+  }
+  {
+    auto const* member_sz_value = sz_value.find_object_member_by_name("semantic");
+    if (!member_sz_value) { return ts::Error("Cannot find member value 'semantic'"); }
+    std::remove_cv<std::remove_reference<decltype(value.get_semantic())>::type>::type v;
+    auto result = deserialize(v, *member_sz_value);
+    if (result != ts::success) { return result; }
+    value.set_semantic(v);
   }
   {
     auto const* member_sz_value = sz_value.find_object_member_by_name("rate");
@@ -1362,8 +1434,12 @@ ts::sz::Value serialize(setup::Node_Data::Input const& value)
     sz_value.add_object_member("name", std::move(result));
   }
   {
-    auto result = serialize(value.get_type());
-    sz_value.add_object_member("type", std::move(result));
+    auto result = serialize(value.get_space());
+    sz_value.add_object_member("space", std::move(result));
+  }
+  {
+    auto result = serialize(value.get_semantic());
+    sz_value.add_object_member("semantic", std::move(result));
   }
   {
     auto result = serialize(value.get_rate());
@@ -1387,12 +1463,20 @@ ts::Result<void> deserialize(setup::Node_Data::Output& value, ts::sz::Value cons
     value.set_name(v);
   }
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("type");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'type'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_type())>::type>::type v;
+    auto const* member_sz_value = sz_value.find_object_member_by_name("space");
+    if (!member_sz_value) { return ts::Error("Cannot find member value 'space'"); }
+    std::remove_cv<std::remove_reference<decltype(value.get_space())>::type>::type v;
     auto result = deserialize(v, *member_sz_value);
     if (result != ts::success) { return result; }
-    value.set_type(v);
+    value.set_space(v);
+  }
+  {
+    auto const* member_sz_value = sz_value.find_object_member_by_name("semantic");
+    if (!member_sz_value) { return ts::Error("Cannot find member value 'semantic'"); }
+    std::remove_cv<std::remove_reference<decltype(value.get_semantic())>::type>::type v;
+    auto result = deserialize(v, *member_sz_value);
+    if (result != ts::success) { return result; }
+    value.set_semantic(v);
   }
   {
     auto const* member_sz_value = sz_value.find_object_member_by_name("rate");
@@ -1412,8 +1496,12 @@ ts::sz::Value serialize(setup::Node_Data::Output const& value)
     sz_value.add_object_member("name", std::move(result));
   }
   {
-    auto result = serialize(value.get_type());
-    sz_value.add_object_member("type", std::move(result));
+    auto result = serialize(value.get_space());
+    sz_value.add_object_member("space", std::move(result));
+  }
+  {
+    auto result = serialize(value.get_semantic());
+    sz_value.add_object_member("semantic", std::move(result));
   }
   {
     auto result = serialize(value.get_rate());

@@ -138,15 +138,19 @@ public:
     void set_name(std::string const& value);
     auto get_name() const -> std::string const&;
 
-    void set_type(std::string const& value);
-    auto get_type() const -> std::string const&;
+    void set_space(uint8_t const& value);
+    auto get_space() const -> uint8_t const&;
+
+    void set_semantic(uint8_t const& value);
+    auto get_semantic() const -> uint8_t const&;
 
     void set_rate(uint32_t const& value);
     auto get_rate() const -> uint32_t const&;
 
   private:
     std::string m_name;
-    std::string m_type;
+    uint8_t m_space = {0};
+    uint8_t m_semantic = {0};
     uint32_t m_rate = {0};
   };
 
@@ -157,15 +161,19 @@ public:
     void set_name(std::string const& value);
     auto get_name() const -> std::string const&;
 
-    void set_type(std::string const& value);
-    auto get_type() const -> std::string const&;
+    void set_space(uint8_t const& value);
+    auto get_space() const -> uint8_t const&;
+
+    void set_semantic(uint8_t const& value);
+    auto get_semantic() const -> uint8_t const&;
 
     void set_rate(uint32_t const& value);
     auto get_rate() const -> uint32_t const&;
 
   private:
     std::string m_name;
-    std::string m_type;
+    uint8_t m_space = {0};
+    uint8_t m_semantic = {0};
     uint32_t m_rate = {0};
   };
 
@@ -173,8 +181,8 @@ public:
   void set_name(std::string const& value);
   auto get_name() const -> std::string const&;
 
-  void set_type(std::string const& value);
-  auto get_type() const -> std::string const&;
+  void set_type(uint8_t const& value);
+  auto get_type() const -> uint8_t const&;
 
   void set_inputs(std::vector<setup::Node_Def_Data::Input> const& value);
   auto get_inputs() const -> std::vector<setup::Node_Def_Data::Input> const&;
@@ -189,7 +197,7 @@ public:
 
 private:
   std::string m_name;
-  std::string m_type;
+  uint8_t m_type = {0};
   std::vector<setup::Node_Def_Data::Input> m_inputs;
   std::vector<setup::Node_Def_Data::Output> m_outputs;
   setup::serialized_data_t m_descriptor_data;
@@ -224,8 +232,11 @@ public:
     void set_name(std::string const& value);
     auto get_name() const -> std::string const&;
 
-    void set_type(std::string const& value);
-    auto get_type() const -> std::string const&;
+    void set_space(uint8_t const& value);
+    auto get_space() const -> uint8_t const&;
+
+    void set_semantic(uint8_t const& value);
+    auto get_semantic() const -> uint8_t const&;
 
     void set_rate(uint32_t const& value);
     auto get_rate() const -> uint32_t const&;
@@ -235,7 +246,8 @@ public:
 
   private:
     std::string m_name;
-    std::string m_type;
+    uint8_t m_space = {0};
+    uint8_t m_semantic = {0};
     uint32_t m_rate = {0};
     std::string m_stream_path;
   };
@@ -247,15 +259,19 @@ public:
     void set_name(std::string const& value);
     auto get_name() const -> std::string const&;
 
-    void set_type(std::string const& value);
-    auto get_type() const -> std::string const&;
+    void set_space(uint8_t const& value);
+    auto get_space() const -> uint8_t const&;
+
+    void set_semantic(uint8_t const& value);
+    auto get_semantic() const -> uint8_t const&;
 
     void set_rate(uint32_t const& value);
     auto get_rate() const -> uint32_t const&;
 
   private:
     std::string m_name;
-    std::string m_type;
+    uint8_t m_space = {0};
+    uint8_t m_semantic = {0};
     uint32_t m_rate = {0};
   };
 
@@ -263,8 +279,8 @@ public:
   void set_name(std::string const& value);
   auto get_name() const -> std::string const&;
 
-  void set_type(std::string const& value);
-  auto get_type() const -> std::string const&;
+  void set_type(uint8_t const& value);
+  auto get_type() const -> uint8_t const&;
 
   void set_inputs(std::vector<setup::Node_Data::Input> const& value);
   auto get_inputs() const -> std::vector<setup::Node_Data::Input> const&;
@@ -282,7 +298,7 @@ public:
 
 private:
   std::string m_name;
-  std::string m_type;
+  uint8_t m_type = {0};
   std::vector<setup::Node_Data::Input> m_inputs;
   std::vector<setup::Node_Data::Output> m_outputs;
   setup::serialized_data_t m_descriptor_data;

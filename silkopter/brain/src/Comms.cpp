@@ -901,13 +901,14 @@ static boost::variant<comms::setup::Node_Data, comms::setup::Error> get_node_dat
 {
     comms::setup::Node_Data node_data;
 
-    node_data.set_type(node::get_as_string(node.get_type()));
+    node_data.set_type(static_cast<uint8_t>(node.get_type()));
 
     for (node::INode::Input const& input: node.get_inputs())
     {
         comms::setup::Node_Data::Input node_data_input;
         node_data_input.set_name(input.name);
-        node_data_input.set_type(stream::get_as_string(input.type, false));
+        node_data_input.set_space(static_cast<uint8_t>(input.type.get_space()));
+        node_data_input.set_semantic(static_cast<uint8_t>(input.type.get_semantic()));
         node_data_input.set_rate(input.rate);
         node_data_input.set_stream_path(input.stream_path.template get_as<std::string>());
         node_data.get_inputs().push_back(std::move(node_data_input));
@@ -916,7 +917,8 @@ static boost::variant<comms::setup::Node_Data, comms::setup::Error> get_node_dat
     {
         comms::setup::Node_Data::Output node_data_output;
         node_data_output.set_name(output.name);
-        node_data_output.set_type(stream::get_as_string(output.stream->get_type(), false));
+        node_data_output.set_space(static_cast<uint8_t>(output.stream->get_type().get_space()));
+        node_data_output.set_semantic(static_cast<uint8_t>(output.stream->get_type().get_semantic()));
         node_data_output.set_rate(output.stream->get_rate());
         node_data.get_outputs().push_back(std::move(node_data_output));
     }
@@ -1047,13 +1049,14 @@ void Comms::handle_req(comms::setup::Get_Node_Defs_Req const& /*req*/)
         comms::setup::Node_Def_Data node_data;
 
         node_data.set_name(n.name);
-        node_data.set_type(node::get_as_string(n.ptr->get_type()));
+        node_data.set_type(static_cast<uint8_t>(n.ptr->get_type()));
 
         for (node::INode::Input const& input: n.ptr->get_inputs())
         {
             comms::setup::Node_Def_Data::Input node_data_input;
             node_data_input.set_name(input.name);
-            node_data_input.set_type(stream::get_as_string(input.type, false));
+            node_data_input.set_space(static_cast<uint8_t>(input.type.get_space()));
+            node_data_input.set_semantic(static_cast<uint8_t>(input.type.get_semantic()));
             node_data_input.set_rate(input.rate);
             node_data.get_inputs().push_back(std::move(node_data_input));
         }
@@ -1061,7 +1064,8 @@ void Comms::handle_req(comms::setup::Get_Node_Defs_Req const& /*req*/)
         {
             comms::setup::Node_Def_Data::Output node_data_output;
             node_data_output.set_name(output.name);
-            node_data_output.set_type(stream::get_as_string(output.stream->get_type(), false));
+            node_data_output.set_space(static_cast<uint8_t>(output.stream->get_type().get_space()));
+            node_data_output.set_semantic(static_cast<uint8_t>(output.stream->get_type().get_semantic()));
             node_data_output.set_rate(output.stream->get_rate());
             node_data.get_outputs().push_back(std::move(node_data_output));
         }
