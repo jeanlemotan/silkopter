@@ -179,7 +179,7 @@ void UAV::save_settings()
     settings.set_uav_descriptor(uav::Poly<uav::IUAV_Descriptor>(m_uav_descriptor));
 
     std::vector<uav::Settings::Node_Data> node_datas = settings.get_nodes();
-    auto const& nodes = get_nodes().get_all();
+    auto const& nodes = get_node_registry().get_all();
     for (auto const& n: nodes)
     {
         uav::Settings::Node_Data node_data;
@@ -198,7 +198,7 @@ void UAV::save_settings()
     }
 
     std::vector<uav::Settings::Bus_Data> bus_datas = settings.get_buses();
-    auto const& buses = get_buses().get_all();
+    auto const& buses = get_bus_registry().get_all();
     for (auto const& b: buses)
     {
         uav::Settings::Bus_Data bus_data;
@@ -340,15 +340,15 @@ UAV::Node_Factory const& UAV::get_node_factory() const
 {
     return m_node_factory;
 }
-UAV::Bus_Registry const& UAV::get_buses() const
+UAV::Bus_Registry const& UAV::get_bus_registry() const
 {
     return m_buses;
 }
-UAV::Node_Registry const& UAV::get_nodes() const
+UAV::Node_Registry const& UAV::get_node_registry() const
 {
     return m_nodes;
 }
-UAV::Stream_Registry const& UAV::get_streams() const
+UAV::Stream_Registry const& UAV::get_stream_registry() const
 {
     return m_streams;
 }
@@ -952,9 +952,12 @@ auto UAV::init(Comms& comms) -> bool
         return false;
     }
 
-    if (!set_uav_descriptor(*settings.get_uav_descriptor()))
+    if (settings.get_uav_descriptor())
     {
-        return false;
+        if (!set_uav_descriptor(*settings.get_uav_descriptor()))
+        {
+            return false;
+        }
     }
 
     for (uav::Settings::Bus_Data const& data: settings.get_buses())

@@ -322,9 +322,9 @@ auto UBLOX::init(uav::INode_Descriptor const& descriptor) -> bool
 }
 auto UBLOX::init() -> bool
 {
-    m_i2c = m_uav.get_buses().find_by_name<bus::II2C>(m_descriptor->get_bus());
-    m_spi = m_uav.get_buses().find_by_name<bus::ISPI>(m_descriptor->get_bus());
-    m_uart = m_uav.get_buses().find_by_name<bus::IUART>(m_descriptor->get_bus());
+    m_i2c = m_uav.get_bus_registry().find_by_name<bus::II2C>(m_descriptor->get_bus());
+    m_spi = m_uav.get_bus_registry().find_by_name<bus::ISPI>(m_descriptor->get_bus());
+    m_uart = m_uav.get_bus_registry().find_by_name<bus::IUART>(m_descriptor->get_bus());
 
     m_position_stream->set_rate(m_descriptor->get_rate());
     m_velocity_stream->set_rate(m_descriptor->get_rate());

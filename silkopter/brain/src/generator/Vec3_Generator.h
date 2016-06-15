@@ -104,7 +104,7 @@ void Vec3_Generator<Stream_t>::set_input_stream_path(size_t idx, q::Path const& 
 
     char name[3] = { 'x', 'y', 'z' };
 
-    auto stream = m_uav.get_streams().template find_by_name<stream::IFloat>(path.get_as<std::string>());
+    auto stream = m_uav.get_stream_registry().template find_by_name<stream::IFloat>(path.get_as<std::string>());
     if (stream && stream->get_rate() != m_output_stream->get_rate())
     {
         QLOGW("Bad {} modulation stream '{}'. Expected rate {}Hz, got {}Hz", name[idx], path, m_output_stream->get_rate(), stream->get_rate());

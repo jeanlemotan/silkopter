@@ -98,7 +98,7 @@ auto Scalar_Generator<Stream_t>::start(q::Clock::time_point tp) -> bool
 template<class Stream_t>
 void Scalar_Generator<Stream_t>::set_input_stream_path(size_t idx, q::Path const& path)
 {
-    auto modulation_stream = m_uav.get_streams().template find_by_name<stream::IFloat>(path.get_as<std::string>());
+    auto modulation_stream = m_uav.get_stream_registry().template find_by_name<stream::IFloat>(path.get_as<std::string>());
     if (modulation_stream && modulation_stream->get_rate() != m_output_stream->get_rate())
     {
         QLOGW("Bad modulation stream '{}'. Expected rate {}Hz, got {}Hz", path, m_output_stream->get_rate(), modulation_stream->get_rate());

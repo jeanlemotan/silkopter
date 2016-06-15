@@ -105,7 +105,7 @@ auto PCA9685::init(uav::INode_Descriptor const& descriptor) -> bool
 
 auto PCA9685::init() -> bool
 {
-    m_i2c = m_uav.get_buses().find_by_name<bus::II2C>(m_descriptor->get_bus());
+    m_i2c = m_uav.get_bus_registry().find_by_name<bus::II2C>(m_descriptor->get_bus());
     auto i2c = m_i2c.lock();
     if (!i2c)
     {
@@ -311,7 +311,7 @@ void PCA9685::process()
 #define FIND_STREAM(CH)\
 if (idx == CH)\
 {\
-    auto input_stream = m_uav.get_streams().find_by_name<stream::IPWM>(path.get_as<std::string>());\
+    auto input_stream = m_uav.get_stream_registry().find_by_name<stream::IPWM>(path.get_as<std::string>());\
     auto rate = input_stream ? input_stream->get_rate() : 0u;\
     if (rate != m_descriptor->get_rate())\
     {\

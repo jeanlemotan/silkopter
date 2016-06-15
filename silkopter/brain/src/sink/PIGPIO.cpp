@@ -271,7 +271,7 @@ void PIGPIO::process()
 
 void PIGPIO::set_input_stream_path(size_t idx, q::Path const& path)
 {
-    auto input_stream = m_uav.get_streams().find_by_name<stream::IPWM>(path.get_as<std::string>());
+    auto input_stream = m_uav.get_stream_registry().find_by_name<stream::IPWM>(path.get_as<std::string>());
     auto rate = input_stream ? input_stream->get_rate() : 0u;
     std::unique_ptr<Channel>& channel = m_channels[idx];
     if (rate != channel->rate)

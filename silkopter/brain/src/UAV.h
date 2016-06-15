@@ -95,13 +95,13 @@ public:
     Node_Factory const& get_node_factory() const;
 
     typedef Registry<bus::IBus> Bus_Registry;
-    Bus_Registry const& get_buses() const;
+    Bus_Registry const& get_bus_registry() const;
 
     typedef Registry<node::INode> Node_Registry;
-    Node_Registry const& get_nodes() const;
+    Node_Registry const& get_node_registry() const;
 
     typedef Registry<stream::IStream> Stream_Registry;
-    Stream_Registry const& get_streams() const;
+    Stream_Registry const& get_stream_registry() const;
 
     void remove_add_nodes();
 

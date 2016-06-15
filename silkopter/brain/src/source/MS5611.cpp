@@ -133,8 +133,8 @@ auto MS5611::init(uav::INode_Descriptor const& descriptor) -> bool
 }
 auto MS5611::init() -> bool
 {
-    m_i2c = m_uav.get_buses().find_by_name<bus::II2C>(m_descriptor->get_bus());
-    m_spi = m_uav.get_buses().find_by_name<bus::ISPI>(m_descriptor->get_bus());
+    m_i2c = m_uav.get_bus_registry().find_by_name<bus::II2C>(m_descriptor->get_bus());
+    m_spi = m_uav.get_bus_registry().find_by_name<bus::ISPI>(m_descriptor->get_bus());
 
     Buses buses = { m_i2c.lock(), m_spi.lock() };
     if (!buses.i2c && !buses.spi)

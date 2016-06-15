@@ -83,24 +83,24 @@ private:
     void gather_telemetry_data();
     void pack_telemetry_data();
 
-    void handle_clock();
+//    void handle_clock();
 
-    void handle_enumerate_node_defs();
-    void handle_enumerate_nodes();
-    void handle_get_node_data();
+//    void handle_enumerate_node_defs();
+//    void handle_enumerate_nodes();
+//    void handle_get_node_data();
 
-    void handle_node_config();
-    void handle_node_message();
-    void handle_node_input_stream_path();
+//    void handle_node_config();
+//    void handle_node_message();
+//    void handle_node_input_stream_path();
 
-    void handle_add_node();
-    void handle_remove_node();
+//    void handle_add_node();
+//    void handle_remove_node();
 
-    void handle_uav_descriptor();
-    void handle_multirotor_commands();
+//    void handle_uav_descriptor();
+//    void handle_multirotor_commands();
 
-    void handle_streams_telemetry_active();
-    void handle_uav_telemetry_active();
+//    void handle_streams_telemetry_active();
+//    void handle_uav_telemetry_active();
 
     template<typename T>
     void serialize_and_send(size_t channel_idx, T const& res);

@@ -367,41 +367,41 @@ void Comms::pack_telemetry_data()
     }
 }
 
-template<class T>
-void pack_outputs(Comms::Channels::Setup& channel, std::vector<T> const& io)
-{
-    channel.pack_param(static_cast<uint32_t>(io.size()));
-    for (auto const& i: io)
-    {
-        channel.pack_param(i.name);
-        channel.pack_param(i.stream->get_type());
-        channel.pack_param(i.stream->get_rate());
-    }
-}
+//template<class T>
+//void pack_outputs(Comms::Channels::Setup& channel, std::vector<T> const& io)
+//{
+//    channel.pack_param(static_cast<uint32_t>(io.size()));
+//    for (auto const& i: io)
+//    {
+//        channel.pack_param(i.name);
+//        channel.pack_param(i.stream->get_type());
+//        channel.pack_param(i.stream->get_rate());
+//    }
+//}
 
-template<class T>
-void pack_def_inputs(Comms::Channels::Setup& channel, std::vector<T> const& io)
-{
-    channel.pack_param(static_cast<uint32_t>(io.size()));
-    for (auto const& i: io)
-    {
-        channel.pack_param(i.name);
-        channel.pack_param(i.type);
-        channel.pack_param(i.rate);
-    }
-}
-template<class T>
-void pack_inputs(Comms::Channels::Setup& channel, std::vector<T> const& io)
-{
-    channel.pack_param(static_cast<uint32_t>(io.size()));
-    for (auto const& i: io)
-    {
-        channel.pack_param(i.name);
-        channel.pack_param(i.type);
-        channel.pack_param(i.rate);
-        channel.pack_param(i.stream_path.template get_as<std::string>());
-    }
-}
+//template<class T>
+//void pack_def_inputs(Comms::Channels::Setup& channel, std::vector<T> const& io)
+//{
+//    channel.pack_param(static_cast<uint32_t>(io.size()));
+//    for (auto const& i: io)
+//    {
+//        channel.pack_param(i.name);
+//        channel.pack_param(i.type);
+//        channel.pack_param(i.rate);
+//    }
+//}
+//template<class T>
+//void pack_inputs(Comms::Channels::Setup& channel, std::vector<T> const& io)
+//{
+//    channel.pack_param(static_cast<uint32_t>(io.size()));
+//    for (auto const& i: io)
+//    {
+//        channel.pack_param(i.name);
+//        channel.pack_param(i.type);
+//        channel.pack_param(i.rate);
+//        channel.pack_param(i.stream_path.template get_as<std::string>());
+//    }
+//}
 //auto parse_json(std::string const& str) -> std::unique_ptr<rapidjson::Document>
 //{
 //    std::unique_ptr<rapidjson::Document> json(new rapidjson::Document);
@@ -414,443 +414,443 @@ void pack_inputs(Comms::Channels::Setup& channel, std::vector<T> const& io)
 //    return std::move(json);
 //}
 
-static void pack_node_def_data(Comms::Channels::Setup& channel, node::INode const& node)
-{
-    pack_def_inputs(channel, node.get_inputs());
-    pack_outputs(channel, node.get_outputs());
-    //todo - fix this
-    //channel.pack_param(node.get_init_params());
-}
+//static void pack_node_def_data(Comms::Channels::Setup& channel, node::INode const& node)
+//{
+//    pack_def_inputs(channel, node.get_inputs());
+//    pack_outputs(channel, node.get_outputs());
+//    //todo - fix this
+//    //channel.pack_param(node.get_init_params());
+//}
 
-static void pack_node_data(Comms::Channels::Setup& channel, node::INode const& node)
-{
-    channel.pack_param(node.get_type());
-    pack_inputs(channel, node.get_inputs());
-    pack_outputs(channel, node.get_outputs());
-    //todo - fix this
-    //channel.pack_param(node.get_init_params());
-    //channel.pack_param(node.get_config());
-}
+//static void pack_node_data(Comms::Channels::Setup& channel, node::INode const& node)
+//{
+//    channel.pack_param(node.get_type());
+//    pack_inputs(channel, node.get_inputs());
+//    pack_outputs(channel, node.get_outputs());
+//    //todo - fix this
+//    //channel.pack_param(node.get_init_params());
+//    //channel.pack_param(node.get_config());
+//}
 
-void Comms::handle_clock()
-{
-    auto& channel = m_channels->setup;
-    QLOGI("Req clock");
+//void Comms::handle_clock()
+//{
+//    auto& channel = m_channels->setup;
+//    QLOGI("Req clock");
 
-    channel.begin_unpack();
+//    channel.begin_unpack();
 
-    QLOGI("Req multirotor config");
+//    QLOGI("Req multirotor config");
 
-    int64_t time_t_data = 0;
-    if (channel.unpack_param(time_t_data))
-    {
-#ifdef RASPBERRY_PI
-        time_t t = time_t_data;
-        if (stime(&t) == 0)
-        {
-            char mbstr[256] = {0};
-            std::time_t t = std::time(nullptr);
-            if (!std::strftime(mbstr, 100, "%e-%m-%Y-%H-%M-%S", std::localtime(&t)))
-            {
-                strcpy(mbstr, "<cannot format>");
-            }
-            QLOGI("Clock set, current time is: {}", mbstr);
-        }
-        else
-        {
-            QLOGE("Failed to set time: {}", strerror(errno));
-        }
-#endif
-    }
-    channel.end_unpack();
-
-    uint64_t tp = static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::microseconds>(q::Clock::now().time_since_epoch()).count());
-    channel.pack_all(comms::Setup_Message::CLOCK, tp);
-}
-
-void Comms::handle_uav_descriptor()
-{
-    auto& channel = m_channels->setup;
-    channel.begin_unpack();
-
-    QLOGI("Req multirotor config");
-
-    //todo - fix this
-//    bool has_config = false;
-//    UAV_Config::Type type;
-//    rapidjson::Document configj;
-//    if (channel.unpack_param(has_config))
+//    int64_t time_t_data = 0;
+//    if (channel.unpack_param(time_t_data))
 //    {
-//        if (channel.unpack_param(type) && channel.unpack_param(configj))
+//#ifdef RASPBERRY_PI
+//        time_t t = time_t_data;
+//        if (stime(&t) == 0)
 //        {
-//            std::shared_ptr<UAV_Config> config;
-//            if (type == Multirotor_Config::TYPE)
+//            char mbstr[256] = {0};
+//            std::time_t t = std::time(nullptr);
+//            if (!std::strftime(mbstr, 100, "%e-%m-%Y-%H-%M-%S", std::localtime(&t)))
 //            {
-//                config = std::make_shared<Multirotor_Config>();
-//                autojsoncxx::error::ErrorStack result;
-//                if (!autojsoncxx::from_value(static_cast<Multirotor_Config&>(*config), configj, result))
-//                {
-//                    std::ostringstream ss;
-//                    ss << result;
-//                    QLOGE("Req Id: {} - Cannot deserialize multirotor config: {}", ss.str());
-//                }
+//                strcpy(mbstr, "<cannot format>");
 //            }
-//            if (config && m_uav.set_uav_config(config))
-//            {
-//                m_uav.save_settings();
-//            }
+//            QLOGI("Clock set, current time is: {}", mbstr);
+//        }
+//        else
+//        {
+//            QLOGE("Failed to set time: {}", strerror(errno));
+//        }
+//#endif
+//    }
+//    channel.end_unpack();
+
+//    uint64_t tp = static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::microseconds>(q::Clock::now().time_since_epoch()).count());
+//    channel.pack_all(comms::Setup_Message::CLOCK, tp);
+//}
+
+//void Comms::handle_uav_descriptor()
+//{
+//    auto& channel = m_channels->setup;
+//    channel.begin_unpack();
+
+//    QLOGI("Req multirotor config");
+
+//    //todo - fix this
+////    bool has_config = false;
+////    UAV_Config::Type type;
+////    rapidjson::Document configj;
+////    if (channel.unpack_param(has_config))
+////    {
+////        if (channel.unpack_param(type) && channel.unpack_param(configj))
+////        {
+////            std::shared_ptr<UAV_Config> config;
+////            if (type == Multirotor_Config::TYPE)
+////            {
+////                config = std::make_shared<Multirotor_Config>();
+////                autojsoncxx::error::ErrorStack result;
+////                if (!autojsoncxx::from_value(static_cast<Multirotor_Config&>(*config), configj, result))
+////                {
+////                    std::ostringstream ss;
+////                    ss << result;
+////                    QLOGE("Req Id: {} - Cannot deserialize multirotor config: {}", ss.str());
+////                }
+////            }
+////            if (config && m_uav.set_uav_config(config))
+////            {
+////                m_uav.save_settings();
+////            }
+////        }
+////    }
+////    else
+////    {
+////        if (m_uav.set_uav_config(std::shared_ptr<UAV_Config>()))
+////        {
+////            m_uav.save_settings();
+////        }
+////    }
+
+////    channel.begin_pack(comms::Setup_Message::UAV_CONFIG);
+
+////    if (std::shared_ptr<const Multirotor_Config> config = m_uav.get_specialized_uav_config<Multirotor_Config>())
+////    {
+////        channel.pack_param(true);
+////        configj.SetObject();
+////        autojsoncxx::to_document(*config, configj);
+////        channel.pack_param(config->get_type());
+////        channel.pack_param(configj);
+////    }
+////    else
+////    {
+////        channel.pack_param(false);
+////    }
+
+//    channel.end_pack();
+//}
+
+
+//void Comms::handle_enumerate_node_defs()
+//{
+//    auto& channel = m_channels->setup;
+
+//    //first disable all telemetry because the GS doesn't yet have all the streams
+//    m_stream_telemetry_data.clear();
+//    m_uav_telemetry_data.is_enabled = false;
+
+//    QLOGI("Enumerate node factory");
+//    auto nodes = m_uav.get_node_factory().create_all();
+
+//    channel.begin_pack(comms::Setup_Message::ENUMERATE_NODE_DEFS);
+//    channel.pack_param(static_cast<uint32_t>(nodes.size()));
+
+//    for (auto const& n: nodes)
+//    {
+//        channel.pack_param(n.name);
+//        channel.pack_param(n.ptr->get_type());
+//        pack_node_def_data(channel, *n.ptr);
+//    }
+
+//    channel.end_pack();
+//}
+
+//void Comms::handle_enumerate_nodes()
+//{
+//    auto& channel = m_channels->setup;
+
+//    //first disable all telemetry because the GS doesn't yet have all the streams
+//    m_stream_telemetry_data.clear();
+//    m_uav_telemetry_data.is_enabled = false;
+
+//    QLOGI("Enumerate nodes");
+//    auto const& nodes = m_uav.get_node_registry().get_all();
+
+//    channel.begin_pack(comms::Setup_Message::ENUMERATE_NODES);
+//    channel.pack_param(static_cast<uint32_t>(nodes.size()));
+
+//    for (auto const& n: nodes)
+//    {
+//        channel.pack_param(n.name);
+//        pack_node_data(channel, *n.ptr);
+//    }
+
+//    channel.end_pack();
+//}
+
+//void Comms::handle_get_node_data()
+//{
+//    auto& channel = m_channels->setup;
+
+//    channel.begin_unpack();
+//    std::string name;
+//    if (!channel.unpack_param(name))
+//    {
+//        QLOGE("Error in unpacking node data request");
+//        return;
+//    }
+
+//    QLOGI("Get node data");
+//    auto node = m_uav.get_node_registry().find_by_name<node::INode>(name);
+//    if (!node)
+//    {
+//        QLOGE("Cannot find node '{}'", name);
+//        return;
+//    }
+
+//    channel.begin_pack(comms::Setup_Message::GET_NODE_DATA);
+//    channel.pack_param(name);
+//    pack_node_data(channel, *node);
+//    channel.end_pack();
+//}
+
+//void Comms::handle_node_config()
+//{
+//    auto& channel = m_channels->setup;
+
+//    channel.begin_unpack();
+//    std::string name;
+//    if (!channel.unpack_param(name))
+//    {
+//        QLOGE("Error in unpacking config request");
+//        return;
+//    }
+
+//    QLOGI("Node config");
+//    auto node = m_uav.get_node_registry().find_by_name<node::INode>(name);
+//    if (!node)
+//    {
+//        QLOGE("Cannot find node '{}'", name);
+//        return;
+//    }
+
+//    //todo - fix this
+////    rapidjson::Document config;
+////    if (channel.unpack_param(config))
+////    {
+////        node->set_config(config);
+////    }
+////    m_uav.save_settings();
+////
+////    channel.begin_pack(comms::Setup_Message::NODE_CONFIG);
+////    channel.pack_param(name);
+////    channel.pack_param(node->get_config());
+//    channel.end_pack();
+//}
+
+//void Comms::handle_node_message()
+//{
+//    auto& channel = m_channels->setup;
+
+//    channel.begin_unpack();
+//    std::string name;
+//    if (!channel.unpack_param(name))
+//    {
+//        QLOGE("Error in unpacking config rquest");
+//        return;
+//    }
+
+////    QLOGI("Node message");
+//    auto node = m_uav.get_node_registry().find_by_name<node::INode>(name);
+//    if (!node)
+//    {
+//        QLOGE("Cannot find node '{}'", name);
+//        return;
+//    }
+
+////    rapidjson::Document message;
+////    if (!channel.unpack_param(message))
+////    {
+////        QLOGE("Cannot unpack node '{}' message", name);
+////        return;
+////    }
+////    auto response = node->send_message(message);
+
+////    channel.begin_pack(comms::Setup_Message::NODE_MESSAGE);
+////    channel.pack_param(name);
+////    channel.pack_param(response);
+//    channel.end_pack();
+//}
+
+//void Comms::handle_node_input_stream_path()
+//{
+//    auto& channel = m_channels->setup;
+
+//    channel.begin_unpack();
+//    std::string name;
+//    std::string input_name;
+//    std::string path;
+//    if (!channel.unpack_param(name) ||
+//        !channel.unpack_param(input_name) ||
+//        !channel.unpack_param(path))
+//    {
+//        QLOGE("Error in unpacking input stream path request");
+//        return;
+//    }
+
+//    QLOGI("Node input stream path");
+//    auto node = m_uav.get_node_registry().find_by_name<node::INode>(name);
+//    if (!node)
+//    {
+//        QLOGE("Cannot find node '{}'", name);
+//        return;
+//    }
+
+//    std::vector<node::INode::Input> inputs = node->get_inputs();
+//    for (size_t idx = 0; idx < inputs.size(); idx++)
+//    {
+//        const node::INode::Input& input = inputs[idx];
+//        if (input.name == input_name)
+//        {
+//            node->set_input_stream_path(idx, q::Path(path));
+//            break;
 //        }
 //    }
-//    else
+
+//    m_uav.save_settings();
+
+//    channel.begin_pack(comms::Setup_Message::NODE_INPUT_STREAM_PATH);
+//    channel.pack_param(name);
+//    pack_node_data(channel, *node);
+//    channel.end_pack();
+//}
+
+//void Comms::handle_add_node()
+//{
+//    auto& channel = m_channels->setup;
+
+////    std::string def_name, name;
+////    rapidjson::Document init_paramsj;
+////    if (!channel.begin_unpack() ||
+////        !channel.unpack_param(def_name) ||
+////        !channel.unpack_param(name) ||
+////        !channel.unpack_param(init_paramsj))
+////    {
+////        QLOGE("Error in unpacking add node request");
+////        return;
+////    }
+
+////    QLOGI("Add node");
+////    QLOGI("\tAdd node {} of type {}", name, def_name);
+
+////    auto node = m_uav.create_node(def_name, name, std::move(init_paramsj));
+////    if (!node)
+////    {
+////        channel.end_pack();
+////        return;
+////    }
+////    m_uav.save_settings();
+
+////    //reply
+////    channel.begin_pack(comms::Setup_Message::ADD_NODE);
+////    channel.pack_param(name);
+////    pack_node_data(channel, *node);
+////    channel.end_pack();
+//}
+
+//void Comms::handle_remove_node()
+//{
+//    auto& channel = m_channels->setup;
+
+//    std::string name;
+//    if (!channel.begin_unpack() ||
+//        !channel.unpack_param(name))
 //    {
-//        if (m_uav.set_uav_config(std::shared_ptr<UAV_Config>()))
-//        {
-//            m_uav.save_settings();
-//        }
+//        QLOGE("Error in unpacking remove node request");
+//        return;
 //    }
 
-//    channel.begin_pack(comms::Setup_Message::UAV_CONFIG);
+//    QLOGI("Remove node {}", name);
 
-//    if (std::shared_ptr<const Multirotor_Config> config = m_uav.get_specialized_uav_config<Multirotor_Config>())
+//    auto node = m_uav.get_node_registry().find_by_name<node::INode>(name);
+//    if (!node)
 //    {
-//        channel.pack_param(true);
-//        configj.SetObject();
-//        autojsoncxx::to_document(*config, configj);
-//        channel.pack_param(config->get_type());
-//        channel.pack_param(configj);
+//        QLOGE("Cannot find node '{}'", name);
+//        return;
+//    }
+
+//    m_uav.remove_node(node);
+//    m_uav.save_settings();
+
+//    //reply
+//    channel.begin_pack(comms::Setup_Message::REMOVE_NODE);
+//    channel.pack_param(name);
+//    channel.end_pack();
+//}
+
+//void Comms::handle_streams_telemetry_active()
+//{
+//    auto& channel = m_channels->setup;
+
+//    std::string stream_name;
+//    bool is_active = false;
+//    if (!channel.begin_unpack() ||
+//        !channel.unpack_param(stream_name) ||
+//        !channel.unpack_param(is_active))
+//    {
+//        QLOGE("Error in unpacking stream telemetry");
+//        return;
+//    }
+//    channel.end_unpack();
+
+//    QLOGI("Stream '{}' telemetry: {}", stream_name, is_active ? "ON" : "OFF");
+
+//    //remove the stream from the telemetry list (it's added again below if needed)
+//    m_stream_telemetry_data.erase(std::remove_if(m_stream_telemetry_data.begin(), m_stream_telemetry_data.end(), [&stream_name](Stream_Telemetry_Data const& ts)
+//    {
+//        return ts.stream_name == stream_name;
+//    }), m_stream_telemetry_data.end());
+
+
+//    channel.begin_pack(comms::Setup_Message::STREAM_TELEMETRY_ACTIVE);
+
+//    if (is_active)
+//    {
+//        auto stream = m_uav.get_stream_registry().find_by_name<stream::IStream>(stream_name);
+//        if (stream)
+//        {
+//            //add the stream to the telemetry list
+//            Stream_Telemetry_Data ts;
+//            ts.stream_name = stream_name;
+//            ts.stream = stream;
+//            m_stream_telemetry_data.push_back(ts);
+
+//            channel.pack_param(true);
+//        }
+//        else
+//        {
+//            channel.pack_param(false);
+//            QLOGE("Cannot find stream '{}' for telemetry", stream_name);
+//        }
 //    }
 //    else
 //    {
 //        channel.pack_param(false);
 //    }
 
-    channel.end_pack();
-}
-
-
-void Comms::handle_enumerate_node_defs()
-{
-    auto& channel = m_channels->setup;
-
-    //first disable all telemetry because the GS doesn't yet have all the streams
-    m_stream_telemetry_data.clear();
-    m_uav_telemetry_data.is_enabled = false;
-
-    QLOGI("Enumerate node factory");
-    auto nodes = m_uav.get_node_factory().create_all();
-
-    channel.begin_pack(comms::Setup_Message::ENUMERATE_NODE_DEFS);
-    channel.pack_param(static_cast<uint32_t>(nodes.size()));
-
-    for (auto const& n: nodes)
-    {
-        channel.pack_param(n.name);
-        channel.pack_param(n.ptr->get_type());
-        pack_node_def_data(channel, *n.ptr);
-    }
-
-    channel.end_pack();
-}
-
-void Comms::handle_enumerate_nodes()
-{
-    auto& channel = m_channels->setup;
-
-    //first disable all telemetry because the GS doesn't yet have all the streams
-    m_stream_telemetry_data.clear();
-    m_uav_telemetry_data.is_enabled = false;
-
-    QLOGI("Enumerate nodes");
-    auto const& nodes = m_uav.get_nodes().get_all();
-
-    channel.begin_pack(comms::Setup_Message::ENUMERATE_NODES);
-    channel.pack_param(static_cast<uint32_t>(nodes.size()));
-
-    for (auto const& n: nodes)
-    {
-        channel.pack_param(n.name);
-        pack_node_data(channel, *n.ptr);
-    }
-
-    channel.end_pack();
-}
-
-void Comms::handle_get_node_data()
-{
-    auto& channel = m_channels->setup;
-
-    channel.begin_unpack();
-    std::string name;
-    if (!channel.unpack_param(name))
-    {
-        QLOGE("Error in unpacking node data request");
-        return;
-    }
-
-    QLOGI("Get node data");
-    auto node = m_uav.get_nodes().find_by_name<node::INode>(name);
-    if (!node)
-    {
-        QLOGE("Cannot find node '{}'", name);
-        return;
-    }
-
-    channel.begin_pack(comms::Setup_Message::GET_NODE_DATA);
-    channel.pack_param(name);
-    pack_node_data(channel, *node);
-    channel.end_pack();
-}
-
-void Comms::handle_node_config()
-{
-    auto& channel = m_channels->setup;
-
-    channel.begin_unpack();
-    std::string name;
-    if (!channel.unpack_param(name))
-    {
-        QLOGE("Error in unpacking config request");
-        return;
-    }
-
-    QLOGI("Node config");
-    auto node = m_uav.get_nodes().find_by_name<node::INode>(name);
-    if (!node)
-    {
-        QLOGE("Cannot find node '{}'", name);
-        return;
-    }
-
-    //todo - fix this
-//    rapidjson::Document config;
-//    if (channel.unpack_param(config))
-//    {
-//        node->set_config(config);
-//    }
-//    m_uav.save_settings();
-//
-//    channel.begin_pack(comms::Setup_Message::NODE_CONFIG);
-//    channel.pack_param(name);
-//    channel.pack_param(node->get_config());
-    channel.end_pack();
-}
-
-void Comms::handle_node_message()
-{
-    auto& channel = m_channels->setup;
-
-    channel.begin_unpack();
-    std::string name;
-    if (!channel.unpack_param(name))
-    {
-        QLOGE("Error in unpacking config rquest");
-        return;
-    }
-
-//    QLOGI("Node message");
-    auto node = m_uav.get_nodes().find_by_name<node::INode>(name);
-    if (!node)
-    {
-        QLOGE("Cannot find node '{}'", name);
-        return;
-    }
-
-//    rapidjson::Document message;
-//    if (!channel.unpack_param(message))
-//    {
-//        QLOGE("Cannot unpack node '{}' message", name);
-//        return;
-//    }
-//    auto response = node->send_message(message);
-
-//    channel.begin_pack(comms::Setup_Message::NODE_MESSAGE);
-//    channel.pack_param(name);
-//    channel.pack_param(response);
-    channel.end_pack();
-}
-
-void Comms::handle_node_input_stream_path()
-{
-    auto& channel = m_channels->setup;
-
-    channel.begin_unpack();
-    std::string name;
-    std::string input_name;
-    std::string path;
-    if (!channel.unpack_param(name) ||
-        !channel.unpack_param(input_name) ||
-        !channel.unpack_param(path))
-    {
-        QLOGE("Error in unpacking input stream path request");
-        return;
-    }
-
-    QLOGI("Node input stream path");
-    auto node = m_uav.get_nodes().find_by_name<node::INode>(name);
-    if (!node)
-    {
-        QLOGE("Cannot find node '{}'", name);
-        return;
-    }
-
-    std::vector<node::INode::Input> inputs = node->get_inputs();
-    for (size_t idx = 0; idx < inputs.size(); idx++)
-    {
-        const node::INode::Input& input = inputs[idx];
-        if (input.name == input_name)
-        {
-            node->set_input_stream_path(idx, q::Path(path));
-            break;
-        }
-    }
-
-    m_uav.save_settings();
-
-    channel.begin_pack(comms::Setup_Message::NODE_INPUT_STREAM_PATH);
-    channel.pack_param(name);
-    pack_node_data(channel, *node);
-    channel.end_pack();
-}
-
-void Comms::handle_add_node()
-{
-    auto& channel = m_channels->setup;
-
-//    std::string def_name, name;
-//    rapidjson::Document init_paramsj;
-//    if (!channel.begin_unpack() ||
-//        !channel.unpack_param(def_name) ||
-//        !channel.unpack_param(name) ||
-//        !channel.unpack_param(init_paramsj))
-//    {
-//        QLOGE("Error in unpacking add node request");
-//        return;
-//    }
-
-//    QLOGI("Add node");
-//    QLOGI("\tAdd node {} of type {}", name, def_name);
-
-//    auto node = m_uav.create_node(def_name, name, std::move(init_paramsj));
-//    if (!node)
-//    {
-//        channel.end_pack();
-//        return;
-//    }
-//    m_uav.save_settings();
-
-//    //reply
-//    channel.begin_pack(comms::Setup_Message::ADD_NODE);
-//    channel.pack_param(name);
-//    pack_node_data(channel, *node);
 //    channel.end_pack();
-}
+//}
 
-void Comms::handle_remove_node()
-{
-    auto& channel = m_channels->setup;
+//void Comms::handle_uav_telemetry_active()
+//{
+//    auto& channel = m_channels->setup;
 
-    std::string name;
-    if (!channel.begin_unpack() ||
-        !channel.unpack_param(name))
-    {
-        QLOGE("Error in unpacking remove node request");
-        return;
-    }
+//    if (!channel.begin_unpack())
+//    {
+//        QLOGE("Error in unpacking stream telemetry");
+//        return;
+//    }
+//    channel.end_unpack();
 
-    QLOGI("Remove node {}", name);
+//    bool is_active = false;
+//    if (channel.unpack_param(is_active))
+//    {
+//        QLOGI("UAV telemetry: {}", is_active ? "ON" : "OFF");
+//        m_uav_telemetry_data.is_enabled = is_active;
+//    }
 
-    auto node = m_uav.get_nodes().find_by_name<node::INode>(name);
-    if (!node)
-    {
-        QLOGE("Cannot find node '{}'", name);
-        return;
-    }
-
-    m_uav.remove_node(node);
-    m_uav.save_settings();
-
-    //reply
-    channel.begin_pack(comms::Setup_Message::REMOVE_NODE);
-    channel.pack_param(name);
-    channel.end_pack();
-}
-
-void Comms::handle_streams_telemetry_active()
-{
-    auto& channel = m_channels->setup;
-
-    std::string stream_name;
-    bool is_active = false;
-    if (!channel.begin_unpack() ||
-        !channel.unpack_param(stream_name) ||
-        !channel.unpack_param(is_active))
-    {
-        QLOGE("Error in unpacking stream telemetry");
-        return;
-    }
-    channel.end_unpack();
-
-    QLOGI("Stream '{}' telemetry: {}", stream_name, is_active ? "ON" : "OFF");
-
-    //remove the stream from the telemetry list (it's added again below if needed)
-    m_stream_telemetry_data.erase(std::remove_if(m_stream_telemetry_data.begin(), m_stream_telemetry_data.end(), [&stream_name](Stream_Telemetry_Data const& ts)
-    {
-        return ts.stream_name == stream_name;
-    }), m_stream_telemetry_data.end());
-
-
-    channel.begin_pack(comms::Setup_Message::STREAM_TELEMETRY_ACTIVE);
-
-    if (is_active)
-    {
-        auto stream = m_uav.get_streams().find_by_name<stream::IStream>(stream_name);
-        if (stream)
-        {
-            //add the stream to the telemetry list
-            Stream_Telemetry_Data ts;
-            ts.stream_name = stream_name;
-            ts.stream = stream;
-            m_stream_telemetry_data.push_back(ts);
-
-            channel.pack_param(true);
-        }
-        else
-        {
-            channel.pack_param(false);
-            QLOGE("Cannot find stream '{}' for telemetry", stream_name);
-        }
-    }
-    else
-    {
-        channel.pack_param(false);
-    }
-
-    channel.end_pack();
-}
-
-void Comms::handle_uav_telemetry_active()
-{
-    auto& channel = m_channels->setup;
-
-    if (!channel.begin_unpack())
-    {
-        QLOGE("Error in unpacking stream telemetry");
-        return;
-    }
-    channel.end_unpack();
-
-    bool is_active = false;
-    if (channel.unpack_param(is_active))
-    {
-        QLOGI("UAV telemetry: {}", is_active ? "ON" : "OFF");
-        m_uav_telemetry_data.is_enabled = is_active;
-    }
-
-    //respond
-    channel.begin_pack(comms::Setup_Message::UAV_TELEMETRY_ACTIVE);
-    channel.pack_param(m_uav_telemetry_data.is_enabled);
-    channel.end_pack();
-}
+//    //respond
+//    channel.begin_pack(comms::Setup_Message::UAV_TELEMETRY_ACTIVE);
+//    channel.pack_param(m_uav_telemetry_data.is_enabled);
+//    channel.end_pack();
+//}
 
 auto Comms::get_multirotor_commands_values() const -> std::vector<stream::IMultirotor_Commands::Value> const&
 {
@@ -867,19 +867,19 @@ void Comms::add_video_sample(stream::IVideo::Sample const& sample)
     m_channels->video.send(*m_rcp);
 }
 
-void Comms::handle_multirotor_commands()
-{
-    auto& channel = m_channels->pilot;
+//void Comms::handle_multirotor_commands()
+//{
+//    auto& channel = m_channels->pilot;
 
-    stream::IMultirotor_Commands::Value value;
-    if (!channel.unpack_all(value))
-    {
-        QLOGE("Error in unpacking multirotor commands");
-        return;
-    }
+//    stream::IMultirotor_Commands::Value value;
+//    if (!channel.unpack_all(value))
+//    {
+//        QLOGE("Error in unpacking multirotor commands");
+//        return;
+//    }
 
-    m_multirotor_commands_values.push_back(value);
-}
+//    m_multirotor_commands_values.push_back(value);
+//}
 
 
 template<typename T>
@@ -897,10 +897,11 @@ void Comms::serialize_and_send(size_t channel_idx, T const& message)
     }
 }
 
-static boost::variant<comms::setup::Node_Data, comms::setup::Error> get_node_data(node::INode const& node)
+static boost::variant<comms::setup::Node_Data, comms::setup::Error> get_node_data(std::string const& name, node::INode const& node)
 {
     comms::setup::Node_Data node_data;
 
+    node_data.set_name(name);
     node_data.set_type(static_cast<uint8_t>(node.get_type()));
 
     for (node::INode::Input const& input: node.get_inputs())
@@ -1086,7 +1087,7 @@ void Comms::handle_req(comms::setup::Remove_Node_Req const& req)
 
     comms::setup::Brain_Res response;
 
-    std::shared_ptr<node::INode> node = m_uav.get_nodes().find_by_name<node::INode>(req.get_name());
+    std::shared_ptr<node::INode> node = m_uav.get_node_registry().find_by_name<node::INode>(req.get_name());
     if (!node)
     {
         response = make_error(q::util::format<std::string>("Cannot find node '{}'", req.get_name()));
@@ -1135,7 +1136,7 @@ void Comms::handle_req(comms::setup::Add_Node_Req const& req)
     m_uav.save_settings();
 
     comms::setup::Add_Node_Res res;
-    boost::variant<comms::setup::Node_Data, comms::setup::Error> result = get_node_data(*node);
+    boost::variant<comms::setup::Node_Data, comms::setup::Error> result = get_node_data(req.get_name(), *node);
     if (auto* error = boost::get<comms::setup::Error>(&result))
     {
         response = std::move(*error);
@@ -1152,24 +1153,107 @@ void Comms::handle_req(comms::setup::Get_Nodes_Req const& req)
 {
     QLOGI("Get_Nodes_Req");
 
+    comms::setup::Brain_Res response;
+
+    comms::setup::Get_Nodes_Res res;
+
+    std::string const& name = req.get_name();
+    if (name.empty())
+    {
+        std::vector<UAV::Node_Registry::Item> const& nodes = m_uav.get_node_registry().get_all();
+
+        for (UAV::Node_Registry::Item const& item: nodes)
+        {
+            boost::variant<comms::setup::Node_Data, comms::setup::Error> result = get_node_data(item.name, *item.ptr);
+            if (auto* error = boost::get<comms::setup::Error>(&result))
+            {
+                response = std::move(*error);
+                serialize_and_send(SETUP_CHANNEL, response);
+                return;
+            }
+            res.get_node_datas().push_back(std::move(boost::get<comms::setup::Node_Data>(result)));
+        }
+    }
+    else
+    {
+        std::shared_ptr<node::INode> node = m_uav.get_node_registry().find_by_name<node::INode>(name);
+        if (!node)
+        {
+            response = make_error(q::util::format<std::string>("Cannot find node '{}'", name));
+            serialize_and_send(SETUP_CHANNEL, response);
+            return;
+        }
+
+        boost::variant<comms::setup::Node_Data, comms::setup::Error> result = get_node_data(name, *node);
+        if (auto* error = boost::get<comms::setup::Error>(&result))
+        {
+            response = std::move(*error);
+            serialize_and_send(SETUP_CHANNEL, response);
+            return;
+        }
+        res.get_node_datas().push_back(std::move(boost::get<comms::setup::Node_Data>(result)));
+    }
+
+    response = std::move(res);
+    serialize_and_send(SETUP_CHANNEL, response);
 }
 
 void Comms::handle_req(comms::setup::Set_Node_Input_Stream_Path_Req const& req)
 {
     QLOGI("Set_Node_Input_Stream_Path_Req");
+
+    comms::setup::Brain_Res response;
+    comms::setup::Set_Node_Input_Stream_Path_Res res;
+
+    std::string const& node_name = req.get_node_name();
+    std::string const& input_name = req.get_input_name();
+
+    std::shared_ptr<node::INode> node = m_uav.get_node_registry().find_by_name<node::INode>(node_name);
+    if (!node)
+    {
+        response = make_error(q::util::format<std::string>("Cannot find node '{}'", node_name));
+        serialize_and_send(SETUP_CHANNEL, response);
+        return;
+    }
+
+    std::vector<node::INode::Input> inputs = node->get_inputs();
+    for (size_t idx = 0; idx < inputs.size(); idx++)
+    {
+        const node::INode::Input& input = inputs[idx];
+        if (input.name == input_name)
+        {
+            node->set_input_stream_path(idx, q::Path(req.get_stream_path()));
+            m_uav.save_settings();
+
+            boost::variant<comms::setup::Node_Data, comms::setup::Error> result = get_node_data(node_name, *node);
+            if (auto* error = boost::get<comms::setup::Error>(&result))
+            {
+                response = std::move(*error);
+                serialize_and_send(SETUP_CHANNEL, response);
+                return;
+            }
+
+            //all good!!!
+            res.set_node_data(std::move(boost::get<comms::setup::Node_Data>(result)));
+            response = std::move(res);
+            serialize_and_send(SETUP_CHANNEL, response);
+            return;
+        }
+    }
+
+    response = make_error(q::util::format<std::string>("Cannot find node '{}', input '{}'", node_name, input_name));
+    serialize_and_send(SETUP_CHANNEL, response);
+    return;
 }
 
 
 struct Comms::Dispatch_Req_Visitor : boost::static_visitor<void>
 {
     Dispatch_Req_Visitor(Comms& comms) : m_comms(comms) {}
-
-    template <typename T>
-    void operator()(T const& t) const
+    template <typename T> void operator()(T const& t) const
     {
         m_comms.handle_req(t);
     }
-
 private:
     Comms& m_comms;
 };

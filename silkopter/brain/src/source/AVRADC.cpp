@@ -55,7 +55,7 @@ auto AVRADC::init(uav::INode_Descriptor const& descriptor) -> bool
 
 auto AVRADC::init() -> bool
 {
-    m_i2c = m_uav.get_buses().find_by_name<bus::II2C>(m_descriptor->get_bus());
+    m_i2c = m_uav.get_bus_registry().find_by_name<bus::II2C>(m_descriptor->get_bus());
 
     auto i2c = m_i2c.lock();
     if (!i2c)

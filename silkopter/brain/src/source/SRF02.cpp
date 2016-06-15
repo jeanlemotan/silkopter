@@ -69,7 +69,7 @@ auto SRF02::init(uav::INode_Descriptor const& descriptor) -> bool
 
 auto SRF02::init() -> bool
 {
-    m_bus = m_uav.get_buses().find_by_name<bus::II2C>(m_descriptor->get_bus());
+    m_bus = m_uav.get_bus_registry().find_by_name<bus::II2C>(m_descriptor->get_bus());
     auto bus = m_bus.lock();
     if (!bus)
     {

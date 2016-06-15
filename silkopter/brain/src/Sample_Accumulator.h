@@ -105,7 +105,7 @@ public:
             m_stream_path.clear();
             m_stream.reset();
 
-            auto stream = uav.get_streams().find_by_name<Stream>(path.get_as<std::string>());
+            auto stream = uav.get_stream_registry().find_by_name<Stream>(path.get_as<std::string>());
             if (stream)
             {
                 if (desired_rate > 0 && stream->get_rate() != desired_rate)
