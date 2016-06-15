@@ -4,8 +4,9 @@
 #include "common/node/IGenerator.h"
 #include "generator/Oscillator.h"
 
-//#include "sz_math.hpp"
-//#include "sz_Vec3_Generator.hpp"
+#include "Basic_Output_Stream.h"
+
+#include "uav.def.h"
 
 namespace silk
 {
@@ -54,6 +55,8 @@ private:
 template<class Stream_t>
 Vec3_Generator<Stream_t>::Vec3_Generator(UAV& uav)
     : m_uav(uav)
+    , m_descriptor(new uav::Vec3_Generator_Descriptor)
+    , m_config(new uav::Vec3_Generator_Config)
 {
     m_output_stream = std::make_shared<Output_Stream>();
 }

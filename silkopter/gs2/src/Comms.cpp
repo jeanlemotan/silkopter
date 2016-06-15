@@ -3,15 +3,13 @@
 #include "common/node/INode.h"
 #include "common/node/IPilot.h"
 
-#include "common/config/Multirotor_Config.h"
 #include "common/Comm_Data.h"
-
-
-#include "sz_math.hpp"
-#include "sz_Multirotor_Config.hpp"
 
 #include "utils/RCP_UDP_Socket.h"
 #include "utils/RCP_RFMON_Socket.h"
+
+#include "comms.def.h"
+#include "def_lang/JSON_Serializer.h"
 
 
 using namespace silk;
@@ -23,8 +21,8 @@ constexpr uint8_t VIDEO_CHANNEL = 16;
 constexpr uint8_t TELEMETRY_CHANNEL = 20;
 
 Comms::Comms()
-    : m_setup_channel(SETUP_CHANNEL)
-    , m_pilot_channel(PILOT_CHANNEL)
+    //: m_setup_channel(SETUP_CHANNEL)
+    : m_pilot_channel(PILOT_CHANNEL)
     , m_video_channel(VIDEO_CHANNEL)
     , m_telemetry_channel(TELEMETRY_CHANNEL)
 {
@@ -66,8 +64,8 @@ Comms::Comms()
     m_streams[stream::IECEF_Velocity::TYPE] =           std::unique_ptr<Comms::IStream_Data>(new Comms::Stream_Data<stream::IECEF_Velocity>());
     m_streams[stream::IVoltage::TYPE] =                 std::unique_ptr<Comms::IStream_Data>(new Comms::Stream_Data<stream::IVoltage>());
     m_streams[stream::IVideo::TYPE] =                   std::unique_ptr<Comms::IStream_Data>(new Comms::Stream_Data<stream::IVideo>());
-    m_streams[stream::IMultirotor_Commands::TYPE] =          std::unique_ptr<Comms::IStream_Data>(new Comms::Stream_Data<stream::IMultirotor_Commands>());
-    m_streams[stream::IMultirotor_State::TYPE] =             std::unique_ptr<Comms::IStream_Data>(new Comms::Stream_Data<stream::IMultirotor_State>());
+    m_streams[stream::IMultirotor_Commands::TYPE] =     std::unique_ptr<Comms::IStream_Data>(new Comms::Stream_Data<stream::IMultirotor_Commands>());
+    m_streams[stream::IMultirotor_State::TYPE] =        std::unique_ptr<Comms::IStream_Data>(new Comms::Stream_Data<stream::IMultirotor_State>());
     m_streams[stream::IProximity::TYPE] =               std::unique_ptr<Comms::IStream_Data>(new Comms::Stream_Data<stream::IProximity>());
 
 }
@@ -227,191 +225,220 @@ void Comms::configure_channels()
 
 }
 
-auto Comms::get_setup_channel() -> Setup_Channel&
-{
-    return m_setup_channel;
-}
+//auto Comms::get_setup_channel() -> Setup_Channel&
+//{
+//    return m_setup_channel;
+//}
 
 void Comms::reset()
 {
     sig_reset.execute();
 }
 
-void Comms::add_node(std::string const& def_name,
-                     std::string const& name,
-                     rapidjson::Document const& init_params)
-{
-    auto& channel = m_setup_channel;
-    channel.begin_pack(comms::Setup_Message::ADD_NODE);
-    channel.pack_param(def_name);
-    channel.pack_param(name);
-    channel.pack_param(init_params);
-    channel.end_pack();
-}
+//void Comms::add_node(std::string const& def_name,
+//                     std::string const& name,
+//                     rapidjson::Document const& init_params)
+//{
+//    auto& channel = m_setup_channel;
+//    channel.begin_pack(comms::Setup_Message::ADD_NODE);
+//    channel.pack_param(def_name);
+//    channel.pack_param(name);
+//    channel.pack_param(init_params);
+//    channel.end_pack();
+//}
 
-void Comms::remove_node(std::string const& name)
-{
-    auto& channel = m_setup_channel;
-    channel.begin_pack(comms::Setup_Message::REMOVE_NODE);
-    channel.pack_param(name);
-    channel.end_pack();
-}
+//void Comms::remove_node(std::string const& name)
+//{
+//    auto& channel = m_setup_channel;
+//    channel.begin_pack(comms::Setup_Message::REMOVE_NODE);
+//    channel.pack_param(name);
+//    channel.end_pack();
+//}
 
-void Comms::set_node_input_stream_path(std::string const& name, std::string const& input_name, q::Path const& stream_path)
-{
-    auto& channel = m_setup_channel;
-    channel.begin_pack(comms::Setup_Message::NODE_INPUT_STREAM_PATH);
-    channel.pack_param(name);
-    channel.pack_param(input_name);
-    channel.pack_param(stream_path.get_as<std::string>());
-    channel.end_pack();
-}
+//void Comms::set_node_input_stream_path(std::string const& name, std::string const& input_name, q::Path const& stream_path)
+//{
+//    auto& channel = m_setup_channel;
+//    channel.begin_pack(comms::Setup_Message::NODE_INPUT_STREAM_PATH);
+//    channel.pack_param(name);
+//    channel.pack_param(input_name);
+//    channel.pack_param(stream_path.get_as<std::string>());
+//    channel.end_pack();
+//}
 
-void Comms::set_node_config(std::string const& name, rapidjson::Document const& config)
-{
-    auto& channel = m_setup_channel;
-    channel.begin_pack(comms::Setup_Message::NODE_CONFIG);
-    channel.pack_param(name);
-    channel.pack_param(config);
-    channel.end_pack();
-}
+//void Comms::set_node_config(std::string const& name, rapidjson::Document const& config)
+//{
+//    auto& channel = m_setup_channel;
+//    channel.begin_pack(comms::Setup_Message::NODE_CONFIG);
+//    channel.pack_param(name);
+//    channel.pack_param(config);
+//    channel.end_pack();
+//}
 
-void Comms::send_node_message(std::string const& name, rapidjson::Document const& json)
-{
-    auto& channel = m_setup_channel;
-    channel.begin_pack(comms::Setup_Message::NODE_MESSAGE);
-    channel.pack_param(name);
-    channel.pack_param(json);
-    channel.end_pack();
-}
+//void Comms::send_node_message(std::string const& name, rapidjson::Document const& json)
+//{
+//    auto& channel = m_setup_channel;
+//    channel.begin_pack(comms::Setup_Message::NODE_MESSAGE);
+//    channel.pack_param(name);
+//    channel.pack_param(json);
+//    channel.end_pack();
+//}
 
-void Comms::set_stream_telemetry_active(q::Path const& stream_path, bool active)
-{
-    auto& channel = m_setup_channel;
-    channel.begin_pack(comms::Setup_Message::STREAM_TELEMETRY_ACTIVE);
-    channel.pack_param(stream_path.get_as<std::string>());
-    channel.pack_param(active);
-    channel.end_pack();
-}
+//void Comms::set_stream_telemetry_active(q::Path const& stream_path, bool active)
+//{
+//    auto& channel = m_setup_channel;
+//    channel.begin_pack(comms::Setup_Message::STREAM_TELEMETRY_ACTIVE);
+//    channel.pack_param(stream_path.get_as<std::string>());
+//    channel.pack_param(active);
+//    channel.end_pack();
+//}
 
+template<typename T>
+void Comms::serialize_and_send(size_t channel_idx, T const& message)
+{
+    if (m_rcp->is_connected())
+    {
+        ts::sz::Value sz_value = silk::comms::serialize(message);
+        std::string json = ts::sz::to_json(sz_value, true);
+        if (!m_rcp->send(channel_idx, json.data(), json.size()))
+        {
+            QLOGE("Failed to send message");
+            return;
+        }
+    }
+}
 
 void Comms::request_all_data()
 {
+    comms::setup::Brain_Req request;
     {
-        time_t t = time(nullptr);
-        int64_t time_t_data = t;
-        m_setup_channel.pack_all(comms::Setup_Message::CLOCK, time_t_data);
+        uint64_t t = time(nullptr);
+        comms::setup::Set_Clock_Req req;
+        req.set_time(t * 1000);
+        request = req;
+        serialize_and_send(SETUP_CHANNEL, request);
     }
-    m_setup_channel.pack_all(comms::Setup_Message::UAV_CONFIG);
-    m_setup_channel.pack_all(comms::Setup_Message::ENUMERATE_NODE_DEFS);
-    m_setup_channel.pack_all(comms::Setup_Message::ENUMERATE_NODES);
-}
-
-void Comms::request_node_config(std::string const& name)
-{
-    m_setup_channel.pack_all(comms::Setup_Message::NODE_CONFIG, name);
-}
-
-void Comms::request_uav_config()
-{
-    m_setup_channel.pack_all(comms::Setup_Message::UAV_CONFIG);
-}
-
-void Comms::send_uav_config(boost::optional<silk::UAV_Config&> config)
-{
-    if (!config)
     {
-        m_setup_channel.pack_all(comms::Setup_Message::UAV_CONFIG, false);
+        comms::setup::Get_UAV_Descriptor_Req req;
+        request = req;
+        serialize_and_send(SETUP_CHANNEL, request);
     }
-    else if (silk::Multirotor_Config* multirotor_config = dynamic_cast<silk::Multirotor_Config*>(config.get_ptr()))
     {
-        rapidjson::Document configj;
-        configj.SetObject();
-        autojsoncxx::to_document(*multirotor_config, configj);
-        m_setup_channel.pack_all(comms::Setup_Message::UAV_CONFIG, true, silk::UAV_Config::Type::MULTIROTOR, configj);
+        comms::setup::Get_Node_Defs_Req req;
+        request = req;
+        serialize_and_send(SETUP_CHANNEL, request);
+    }
+    {
+        comms::setup::Get_Nodes_Req req;
+        request = req;
+        serialize_and_send(SETUP_CHANNEL, request);
     }
 }
 
+//void Comms::request_node_config(std::string const& name)
+//{
+//    m_setup_channel.pack_all(comms::Setup_Message::NODE_CONFIG, name);
+//}
 
-auto parse_json(std::string const& str) -> std::unique_ptr<rapidjson::Document>
-{
-    std::unique_ptr<rapidjson::Document> json(new rapidjson::Document);
-    json->SetObject();
-    if (!str.empty() && json->Parse(str.c_str()).HasParseError())
-    {
-        //            QLOGE("Failed to parse config: {}:{}", name, node->config.GetParseError(), node->config.GetErrorOffset());
-        return nullptr;
-    }
-    return std::move(json);
-}
+//void Comms::request_uav_config()
+//{
+////    m_setup_channel.pack_all(comms::Setup_Message::UAV_CONFIG);
+//}
 
-template<class T>
-auto unpack_def_inputs(Comms::Setup_Channel& channel, std::vector<T>& io) -> bool
-{
-    io.clear();
-    uint32_t size = 0;
-    if (!channel.unpack_param(size))
-    {
-        return false;
-    }
-    io.resize(size);
-    for (auto& i: io)
-    {
-        if (!channel.unpack_param(i.name) ||
-            !channel.unpack_param(i.type) ||
-            !channel.unpack_param(i.rate))
-        {
-            return false;
-        }
-    }
-    return true;
-}
-template<class T>
-auto unpack_inputs(Comms::Setup_Channel& channel, std::vector<T>& io) -> bool
-{
-    io.clear();
-    uint32_t size = 0;
-    if (!channel.unpack_param(size))
-    {
-        return false;
-    }
-    io.resize(size);
-    std::string stream_path;
-    for (auto& i: io)
-    {
-        if (!channel.unpack_param(i.name) ||
-                !channel.unpack_param(i.type) ||
-                !channel.unpack_param(i.rate) ||
-                !channel.unpack_param(stream_path))
-        {
-            return false;
-        }
-        i.stream_path = q::Path(stream_path);
-    }
-    return true;
-}
+//void Comms::send_uav_config(boost::optional<silk::UAV_Config&> config)
+//{
+//    if (!config)
+//    {
+//        m_setup_channel.pack_all(comms::Setup_Message::UAV_CONFIG, false);
+//    }
+//    else if (silk::Multirotor_Config* multirotor_config = dynamic_cast<silk::Multirotor_Config*>(config.get_ptr()))
+//    {
+//        rapidjson::Document configj;
+//        configj.SetObject();
+//        autojsoncxx::to_document(*multirotor_config, configj);
+//        m_setup_channel.pack_all(comms::Setup_Message::UAV_CONFIG, true, silk::UAV_Config::Type::MULTIROTOR, configj);
+//    }
+//}
 
-template<class T>
-auto unpack_outputs(Comms::Setup_Channel& channel, std::vector<T>& io) -> bool
-{
-    io.clear();
-    uint32_t size = 0;
-    if (!channel.unpack_param(size))
-    {
-        return false;
-    }
-    io.resize(size);
-    for (auto& o: io)
-    {
-        if (!channel.unpack_param(o.name) ||
-            !channel.unpack_param(o.type) ||
-            !channel.unpack_param(o.rate))
-        {
-            return false;
-        }
-    }
-    return true;
-}
+
+//auto parse_json(std::string const& str) -> std::unique_ptr<rapidjson::Document>
+//{
+//    std::unique_ptr<rapidjson::Document> json(new rapidjson::Document);
+//    json->SetObject();
+//    if (!str.empty() && json->Parse(str.c_str()).HasParseError())
+//    {
+//        //            QLOGE("Failed to parse config: {}:{}", name, node->config.GetParseError(), node->config.GetErrorOffset());
+//        return nullptr;
+//    }
+//    return std::move(json);
+//}
+
+//template<class T>
+//auto unpack_def_inputs(Comms::Setup_Channel& channel, std::vector<T>& io) -> bool
+//{
+//    io.clear();
+//    uint32_t size = 0;
+//    if (!channel.unpack_param(size))
+//    {
+//        return false;
+//    }
+//    io.resize(size);
+//    for (auto& i: io)
+//    {
+//        if (!channel.unpack_param(i.name) ||
+//            !channel.unpack_param(i.type) ||
+//            !channel.unpack_param(i.rate))
+//        {
+//            return false;
+//        }
+//    }
+//    return true;
+//}
+//template<class T>
+//auto unpack_inputs(Comms::Setup_Channel& channel, std::vector<T>& io) -> bool
+//{
+//    io.clear();
+//    uint32_t size = 0;
+//    if (!channel.unpack_param(size))
+//    {
+//        return false;
+//    }
+//    io.resize(size);
+//    std::string stream_path;
+//    for (auto& i: io)
+//    {
+//        if (!channel.unpack_param(i.name) ||
+//                !channel.unpack_param(i.type) ||
+//                !channel.unpack_param(i.rate) ||
+//                !channel.unpack_param(stream_path))
+//        {
+//            return false;
+//        }
+//        i.stream_path = q::Path(stream_path);
+//    }
+//    return true;
+//}
+
+//template<class T>
+//auto unpack_outputs(Comms::Setup_Channel& channel, std::vector<T>& io) -> bool
+//{
+//    io.clear();
+//    uint32_t size = 0;
+//    if (!channel.unpack_param(size))
+//    {
+//        return false;
+//    }
+//    io.resize(size);
+//    for (auto& o: io)
+//    {
+//        if (!channel.unpack_param(o.name) ||
+//            !channel.unpack_param(o.type) ||
+//            !channel.unpack_param(o.rate))
+//        {
+//            return false;
+//        }
+//    }
+//    return true;
+//}
 
 //template<class T>
 //auto process_config(rapidjson::Document const& config, T& node)
@@ -436,35 +463,35 @@ auto unpack_outputs(Comms::Setup_Channel& channel, std::vector<T>& io) -> bool
 //    }
 //}
 
-static auto unpack_node_def_data(Comms::Setup_Channel& channel, Comms::Node_Def& node_def) -> bool
-{
-    bool ok = channel.unpack_param(node_def.name);
-    ok &= channel.unpack_param(node_def.type);
-    ok &= unpack_def_inputs(channel, node_def.inputs);
-    ok &= unpack_outputs(channel, node_def.outputs);
-    ok &= channel.unpack_param(node_def.default_init_params_json);
-    return ok;
-}
+//static auto unpack_node_def_data(Comms::Setup_Channel& channel, Comms::Node_Def& node_def) -> bool
+//{
+//    bool ok = channel.unpack_param(node_def.name);
+//    ok &= channel.unpack_param(node_def.type);
+//    ok &= unpack_def_inputs(channel, node_def.inputs);
+//    ok &= unpack_outputs(channel, node_def.outputs);
+//    ok &= channel.unpack_param(node_def.default_init_params_json);
+//    return ok;
+//}
 
-auto Comms::unpack_node_data(Comms::Setup_Channel& channel, Comms::Node& node) -> bool
-{
-    bool ok = channel.unpack_param(node.type);
-    ok &= unpack_inputs(channel, node.inputs);
-    ok &= unpack_outputs(channel, node.outputs);
-    ok &= channel.unpack_param(node.init_params_json);
-    ok &= channel.unpack_param(node.config_json);
+//auto Comms::unpack_node_data(Comms::Setup_Channel& channel, Comms::Node& node) -> bool
+//{
+//    bool ok = channel.unpack_param(node.type);
+//    ok &= unpack_inputs(channel, node.inputs);
+//    ok &= unpack_outputs(channel, node.outputs);
+//    ok &= channel.unpack_param(node.init_params_json);
+//    ok &= channel.unpack_param(node.config_json);
 
-//    if (ok)
-//    {
-//        for (auto& os: node.outputs)
-//        {
-//            auto stream = m_hal->m_streams.find_by_name(node.name + "/" + os.name);
-//            os.stream = stream;
-//        }
-//    }
+////    if (ok)
+////    {
+////        for (auto& os: node.outputs)
+////        {
+////            auto stream = m_hal->m_streams.find_by_name(node.name + "/" + os.name);
+////            os.stream = stream;
+////        }
+////    }
 
-    return ok;
-}
+//    return ok;
+//}
 
 //template<class T>
 //auto unpack_io_stream(HAL& hal, Comms::Setup_Channel& channel, std::vector<T>& io) -> bool
@@ -493,314 +520,314 @@ auto Comms::unpack_node_data(Comms::Setup_Channel& channel, Comms::Node& node) -
 //    return true;
 //}
 
-void Comms::handle_clock()
-{
-    uint64_t us;
-    if (m_setup_channel.unpack_all(us))
-    {
-        sig_clock_received.execute(Manual_Clock::time_point(std::chrono::microseconds(us)));
-        //m_hal->m_remote_clock.set_epoch(Manual_Clock::time_point(std::chrono::microseconds(us)));
-    }
-    else
-    {
-        QLOGE("Error in enumerating clock");
-    }
-}
-
-void Comms::handle_uav_config()
-{
-    bool has_config = false;
-    bool ok = m_setup_channel.begin_unpack() &&
-              m_setup_channel.unpack_param(has_config);
-    if (!ok)
-    {
-        QLOGE("Failed to unpack uav config");
-        return;
-    }
-
-    QLOGI("Uav config received");
-
-    if (has_config)
-    {
-        UAV_Config::Type type;
-        rapidjson::Document configj;
-        if (!m_setup_channel.unpack_param(type) || !m_setup_channel.unpack_param(configj))
-        {
-            QLOGE("Failed to unpack config json");
-        }
-
-        if (type == Multirotor_Config::TYPE)
-        {
-            Multirotor_Config config;
-            autojsoncxx::error::ErrorStack result;
-            if (!autojsoncxx::from_value(config, configj, result))
-            {
-                std::ostringstream ss;
-                ss << result;
-                QLOGE("Req Id: {} - Cannot deserialize multi config: {}", ss.str());
-                return;
-            }
-            sig_uav_config_received.execute(config);
-        }
-    }
-    else
-    {
-        sig_uav_config_received.execute(boost::none);
-    }
-
-    m_setup_channel.end_unpack();
-}
-
-
-void Comms::handle_enumerate_node_defs()
-{
-    //m_hal->m_node_defs.remove_all();
-
-    uint32_t node_count = 0;
-    if (!m_setup_channel.begin_unpack() ||
-        !m_setup_channel.unpack_param(node_count))
-    {
-        QLOGE("Error in enumerating node defs");
-        return;
-    }
-
-    QLOGI("Received defs for {} nodes", node_count);
-
-    std::vector<Node_Def> defs;
-    for (uint32_t i = 0; i < node_count; i++)
-    {
-        Node_Def def;
-        if (!unpack_node_def_data(m_setup_channel, def))
-        {
-            QLOGE("\t\tBad node");
-            return;
-        }
-        QLOGI("\tNode: {}", def.name);
-        //m_hal->m_node_defs.add(std::move(def));
-        defs.push_back(std::move(def));
-    }
-    sig_node_defs_reset.execute();
-    sig_node_defs_added.execute(defs);
-
-    m_setup_channel.end_unpack();
-}
-
-//auto Comms::publish_streams(Node const& node) -> bool
+//void Comms::handle_clock()
 //{
-//    for (auto& os: node.outputs)
+//    uint64_t us;
+//    if (m_setup_channel.unpack_all(us))
 //    {
-//        auto stream = create_stream_from_type(os.type);
-//        if (!stream)
+//        sig_clock_received.execute(Manual_Clock::time_point(std::chrono::microseconds(us)));
+//        //m_hal->m_remote_clock.set_epoch(Manual_Clock::time_point(std::chrono::microseconds(us)));
+//    }
+//    else
+//    {
+//        QLOGE("Error in enumerating clock");
+//    }
+//}
+
+//void Comms::handle_uav_config()
+//{
+//    bool has_config = false;
+//    bool ok = m_setup_channel.begin_unpack() &&
+//              m_setup_channel.unpack_param(has_config);
+//    if (!ok)
+//    {
+//        QLOGE("Failed to unpack uav config");
+//        return;
+//    }
+
+//    QLOGI("Uav config received");
+
+//    if (has_config)
+//    {
+//        UAV_Config::Type type;
+//        rapidjson::Document configj;
+//        if (!m_setup_channel.unpack_param(type) || !m_setup_channel.unpack_param(configj))
 //        {
-//            QLOGE("\t\tCannot create output stream '{}/{}', type {}", node.name, os.name, os.type);
-//            return false;
+//            QLOGE("Failed to unpack config json");
 //        }
-//        //os.stream = stream;
 
-//        //stream->node = node;
-//        stream->rate = os.rate;
-//        //m_hal->m_streams.add(stream);
-//        //sig_stream_added.execute(stream);
-//        m_stream_data_holders[node.name + "/" + os.name] = std::move(stream);
+//        if (type == Multirotor_Config::TYPE)
+//        {
+//            Multirotor_Config config;
+//            autojsoncxx::error::ErrorStack result;
+//            if (!autojsoncxx::from_value(config, configj, result))
+//            {
+//                std::ostringstream ss;
+//                ss << result;
+//                QLOGE("Req Id: {} - Cannot deserialize multi config: {}", ss.str());
+//                return;
+//            }
+//            sig_uav_config_received.execute(config);
+//        }
 //    }
-//    return true;
+//    else
+//    {
+//        sig_uav_config_received.execute(boost::none);
+//    }
+
+//    m_setup_channel.end_unpack();
 //}
 
-//auto Comms::unpublish_streams(Node const& node) -> bool
+
+//void Comms::handle_enumerate_node_defs()
 //{
-//    for (auto& os: node.outputs)
+//    //m_hal->m_node_defs.remove_all();
+
+//    uint32_t node_count = 0;
+//    if (!m_setup_channel.begin_unpack() ||
+//        !m_setup_channel.unpack_param(node_count))
 //    {
-//        //auto stream = m_hal->m_streams.find_by_name(node->name + "/" + os.name);
-//        //m_hal->m_streams.remove(stream);
-//        //sig_stream_removed.execute(os);
-//        m_stream_data_holders.erase(node.name + "/" + os.name);
+//        QLOGE("Error in enumerating node defs");
+//        return;
 //    }
-//    return true;
+
+//    QLOGI("Received defs for {} nodes", node_count);
+
+//    std::vector<Node_Def> defs;
+//    for (uint32_t i = 0; i < node_count; i++)
+//    {
+//        Node_Def def;
+//        if (!unpack_node_def_data(m_setup_channel, def))
+//        {
+//            QLOGE("\t\tBad node");
+//            return;
+//        }
+//        QLOGI("\tNode: {}", def.name);
+//        //m_hal->m_node_defs.add(std::move(def));
+//        defs.push_back(std::move(def));
+//    }
+//    sig_node_defs_reset.execute();
+//    sig_node_defs_added.execute(defs);
+
+//    m_setup_channel.end_unpack();
 //}
 
-void Comms::handle_enumerate_nodes()
-{
-    uint32_t node_count = 0;
-    if (!m_setup_channel.begin_unpack() ||
-        !m_setup_channel.unpack_param(node_count))
-    {
-        QLOGE("Error in unpacking enumerate nodes message");
-        return;
-    }
+////auto Comms::publish_streams(Node const& node) -> bool
+////{
+////    for (auto& os: node.outputs)
+////    {
+////        auto stream = create_stream_from_type(os.type);
+////        if (!stream)
+////        {
+////            QLOGE("\t\tCannot create output stream '{}/{}', type {}", node.name, os.name, os.type);
+////            return false;
+////        }
+////        //os.stream = stream;
 
-    QLOGI("Received {} nodes", node_count);
+////        //stream->node = node;
+////        stream->rate = os.rate;
+////        //m_hal->m_streams.add(stream);
+////        //sig_stream_added.execute(stream);
+////        m_stream_data_holders[node.name + "/" + os.name] = std::move(stream);
+////    }
+////    return true;
+////}
 
-    std::vector<Node> nodes;
-    for (uint32_t i = 0; i < node_count; i++)
-    {
-        Node node;
-        bool ok = m_setup_channel.unpack_param(node.name);
-        ok &= unpack_node_data(m_setup_channel, node);
-        if (!ok)
-        {
-            QLOGE("\t\tBad node");
-            return;
-        }
-        QLOGI("\tNode: {}", node.name);
-        //nodes.push_back(std::move(node));
-    }
+////auto Comms::unpublish_streams(Node const& node) -> bool
+////{
+////    for (auto& os: node.outputs)
+////    {
+////        //auto stream = m_hal->m_streams.find_by_name(node->name + "/" + os.name);
+////        //m_hal->m_streams.remove(stream);
+////        //sig_stream_removed.execute(os);
+////        m_stream_data_holders.erase(node.name + "/" + os.name);
+////    }
+////    return true;
+////}
 
-    sig_nodes_reset.execute();
-    sig_nodes_added.execute(nodes);
-
-    m_setup_channel.end_unpack();
-}
-
-
-void Comms::handle_node_message()
-{
-    std::string name;
-    if (!m_setup_channel.begin_unpack() ||
-        !m_setup_channel.unpack_param(name))
-    {
-        QLOGE("Failed to unpack node message");
-        return;
-    }
-
-//    auto node = m_hal->get_nodes().find_by_name(name);
-//    if (!node)
+//void Comms::handle_enumerate_nodes()
+//{
+//    uint32_t node_count = 0;
+//    if (!m_setup_channel.begin_unpack() ||
+//        !m_setup_channel.unpack_param(node_count))
 //    {
-//        QLOGE("Cannot find node '{}'", name);
+//        QLOGE("Error in unpacking enumerate nodes message");
+//        return;
+//    }
+
+//    QLOGI("Received {} nodes", node_count);
+
+//    std::vector<Node> nodes;
+//    for (uint32_t i = 0; i < node_count; i++)
+//    {
+//        Node node;
+//        bool ok = m_setup_channel.unpack_param(node.name);
+//        ok &= unpack_node_data(m_setup_channel, node);
+//        if (!ok)
+//        {
+//            QLOGE("\t\tBad node");
+//            return;
+//        }
+//        QLOGI("\tNode: {}", node.name);
+//        //nodes.push_back(std::move(node));
+//    }
+
+//    sig_nodes_reset.execute();
+//    sig_nodes_added.execute(nodes);
+
+//    m_setup_channel.end_unpack();
+//}
+
+
+//void Comms::handle_node_message()
+//{
+//    std::string name;
+//    if (!m_setup_channel.begin_unpack() ||
+//        !m_setup_channel.unpack_param(name))
+//    {
+//        QLOGE("Failed to unpack node message");
+//        return;
+//    }
+
+////    auto node = m_hal->get_nodes().find_by_name(name);
+////    if (!node)
+////    {
+////        QLOGE("Cannot find node '{}'", name);
+////        return;
+////    }
+
+////    QLOGI("Node '{}' - message received", name);
+
+//    rapidjson::Document json;
+//    if (!m_setup_channel.unpack_param(json))
+//    {
+//        QLOGE("Node '{}' - failed to unpack message", name);
+//    }
+
+//    sig_node_message_received.execute(name, json);
+
+
+//    //node->message_received_signal.execute(json);
+//}
+
+//void Comms::handle_node_config()
+//{
+//    std::string name;
+//    rapidjson::Document json;
+//    if (!m_setup_channel.begin_unpack() ||
+//        !m_setup_channel.unpack_param(name) ||
+//        !m_setup_channel.unpack_param(json))
+//    {
+//        QLOGE("Failed to unpack node config");
+//        return;
+//    }
+
+//    sig_node_config_received.execute(name, json);
+//    //auto node = m_hal->get_nodes().find_by_name(name);
+//    //if (!node)
+//    //{
+//    //    QLOGE("Cannot find node '{}'", name);
+//    //    return;
+//    //}
+//    //node->config.SetObject();
+//    //jsonutil::clone_value(node->config, json, node->config.GetAllocator());
+//    //node->changed_signal.execute();
+//}
+
+
+//void Comms::handle_get_node_data()
+//{
+//    std::string name;
+//    bool ok = m_setup_channel.begin_unpack() &&
+//              m_setup_channel.unpack_param(name);
+//    if (!ok)
+//    {
+//        QLOGE("Failed to unpack node data");
+//        return;
+//    }
+
+//    QLOGI("Node '{}' - config received", name);
+
+//    Node node;
+//    node.name = name;
+//    if (!unpack_node_data(m_setup_channel, node))
+//    {
+//        QLOGE("Node '{}' - failed to unpack config", name);
+//    }
+
+//    sig_node_changed.execute(node);
+//}
+
+//void Comms::handle_node_input_stream_path()
+//{
+//    std::string name;
+//    if (!m_setup_channel.begin_unpack() ||
+//        !m_setup_channel.unpack_param(name))
+//    {
+//        QLOGE("Failed to unpack node input stream path");
 //        return;
 //    }
 
 //    QLOGI("Node '{}' - message received", name);
 
-    rapidjson::Document json;
-    if (!m_setup_channel.unpack_param(json))
-    {
-        QLOGE("Node '{}' - failed to unpack message", name);
-    }
+//    Node node;
+//    node.name = name;
+//    if (!unpack_node_data(m_setup_channel, node))
+//    {
+//        QLOGE("Node '{}' - failed to unpack config", name);
+//    }
 
-    sig_node_message_received.execute(name, json);
+//    sig_node_changed.execute(node);
+//}
 
+//void Comms::handle_add_node()
+//{
+//    std::string name;
+//    if (!m_setup_channel.begin_unpack() ||
+//        !m_setup_channel.unpack_param(name))
+//    {
+//        QLOGE("Failed to unpack add node request");
+//        return;
+//    }
 
-    //node->message_received_signal.execute(json);
-}
+//    Node node;
+//    node.name = name;
+//    bool ok = unpack_node_data(m_setup_channel, node);
+//    if (!ok)
+//    {
+//        return;
+//    }
 
-void Comms::handle_node_config()
-{
-    std::string name;
-    rapidjson::Document json;
-    if (!m_setup_channel.begin_unpack() ||
-        !m_setup_channel.unpack_param(name) ||
-        !m_setup_channel.unpack_param(json))
-    {
-        QLOGE("Failed to unpack node config");
-        return;
-    }
+//    std::vector<Node> nodes;
+//    nodes.push_back(std::move(node));
+//    sig_nodes_added.execute(nodes);
+//}
 
-    sig_node_config_received.execute(name, json);
-    //auto node = m_hal->get_nodes().find_by_name(name);
-    //if (!node)
-    //{
-    //    QLOGE("Cannot find node '{}'", name);
-    //    return;
-    //}
-    //node->config.SetObject();
-    //jsonutil::clone_value(node->config, json, node->config.GetAllocator());
-    //node->changed_signal.execute();
-}
+//void Comms::handle_remove_node()
+//{
+//    std::string name;
+//    bool ok = m_setup_channel.begin_unpack() &&
+//              m_setup_channel.unpack_param(name);
+//    if (!ok)
+//    {
+//        QLOGE("Failed to unpack remove node request");
+//        return;
+//    }
 
+//    sig_node_removed.execute(name);
+//}
 
-void Comms::handle_get_node_data()
-{
-    std::string name;
-    bool ok = m_setup_channel.begin_unpack() &&
-              m_setup_channel.unpack_param(name);
-    if (!ok)
-    {
-        QLOGE("Failed to unpack node data");
-        return;
-    }
-
-    QLOGI("Node '{}' - config received", name);
-
-    Node node;
-    node.name = name;
-    if (!unpack_node_data(m_setup_channel, node))
-    {
-        QLOGE("Node '{}' - failed to unpack config", name);
-    }
-
-    sig_node_changed.execute(node);
-}
-
-void Comms::handle_node_input_stream_path()
-{
-    std::string name;
-    if (!m_setup_channel.begin_unpack() ||
-        !m_setup_channel.unpack_param(name))
-    {
-        QLOGE("Failed to unpack node input stream path");
-        return;
-    }
-
-    QLOGI("Node '{}' - message received", name);
-
-    Node node;
-    node.name = name;
-    if (!unpack_node_data(m_setup_channel, node))
-    {
-        QLOGE("Node '{}' - failed to unpack config", name);
-    }
-
-    sig_node_changed.execute(node);
-}
-
-void Comms::handle_add_node()
-{
-    std::string name;
-    if (!m_setup_channel.begin_unpack() ||
-        !m_setup_channel.unpack_param(name))
-    {
-        QLOGE("Failed to unpack add node request");
-        return;
-    }
-
-    Node node;
-    node.name = name;
-    bool ok = unpack_node_data(m_setup_channel, node);
-    if (!ok)
-    {
-        return;
-    }
-
-    std::vector<Node> nodes;
-    nodes.push_back(std::move(node));
-    sig_nodes_added.execute(nodes);
-}
-
-void Comms::handle_remove_node()
-{
-    std::string name;
-    bool ok = m_setup_channel.begin_unpack() &&
-              m_setup_channel.unpack_param(name);
-    if (!ok)
-    {
-        QLOGE("Failed to unpack remove node request");
-        return;
-    }
-
-    sig_node_removed.execute(name);
-}
-
-void Comms::handle_streams_telemetry_active()
-{
-    bool is_active = false;
-    bool ok = m_setup_channel.begin_unpack() &&
-              m_setup_channel.unpack_param(is_active);
-    if (!ok)
-    {
-        QLOGE("Failed to unpack remove node request");
-        return;
-    }
-}
+//void Comms::handle_streams_telemetry_active()
+//{
+//    bool is_active = false;
+//    bool ok = m_setup_channel.begin_unpack() &&
+//              m_setup_channel.unpack_param(is_active);
+//    if (!ok)
+//    {
+//        QLOGE("Failed to unpack remove node request");
+//        return;
+//    }
+//}
 
 template<typename Stream>
 void Comms::Stream_Data<Stream>::unpack(Comms::Telemetry_Channel& channel, uint32_t sample_count)
@@ -817,77 +844,77 @@ void Comms::Stream_Data<Stream>::unpack(Comms::Telemetry_Channel& channel, uint3
     }
 }
 
-void Comms::handle_stream_data()
-{
-    std::string stream_name;
-    stream::Type stream_type;
-    uint32_t sample_count = 0;
-    bool ok = m_telemetry_channel.begin_unpack() &&
-              m_telemetry_channel.unpack_param(stream_name) &&
-              m_telemetry_channel.unpack_param(stream_type) &&
-              m_telemetry_channel.unpack_param(sample_count);
-    if (!ok)
-    {
-        QLOGE("Failed to unpack stream telemetry");
-        return;
-    }
+//void Comms::handle_stream_data()
+//{
+//    std::string stream_name;
+//    stream::Type stream_type;
+//    uint32_t sample_count = 0;
+//    bool ok = m_telemetry_channel.begin_unpack() &&
+//              m_telemetry_channel.unpack_param(stream_name) &&
+//              m_telemetry_channel.unpack_param(stream_type) &&
+//              m_telemetry_channel.unpack_param(sample_count);
+//    if (!ok)
+//    {
+//        QLOGE("Failed to unpack stream telemetry");
+//        return;
+//    }
 
-    IStream_Data* stream_data = nullptr;
-    auto it = m_streams.find(stream_type);
-    if (it != m_streams.end())
-    {
-        stream_data = it->second.get();
-    }
-    else
-    {
-        QLOGE("Failed to find a stream data holder for semantic {}, space {} for stream {}", stream_type.get_semantic(), stream_type.get_space(), stream_name);
-        return;
-    }
+//    IStream_Data* stream_data = nullptr;
+//    auto it = m_streams.find(stream_type);
+//    if (it != m_streams.end())
+//    {
+//        stream_data = it->second.get();
+//    }
+//    else
+//    {
+//        QLOGE("Failed to find a stream data holder for semantic {}, space {} for stream {}", stream_type.get_semantic(), stream_type.get_space(), stream_name);
+//        return;
+//    }
 
-    stream_data->unpack(m_telemetry_channel, sample_count);
-    sig_stream_data_received.execute(*stream_data);
-}
+//    stream_data->unpack(m_telemetry_channel, sample_count);
+//    sig_stream_data_received.execute(*stream_data);
+//}
 
-void Comms::handle_multirotor_state()
-{
-    auto& channel = m_pilot_channel;
+//void Comms::handle_multirotor_state()
+//{
+//    auto& channel = m_pilot_channel;
 
-    stream::IMultirotor_State::Sample sample;
-    if (!channel.unpack_all(sample))
-    {
-        QLOGE("Error in unpacking multirotor state");
-        return;
-    }
+//    stream::IMultirotor_State::Sample sample;
+//    if (!channel.unpack_all(sample))
+//    {
+//        QLOGE("Error in unpacking multirotor state");
+//        return;
+//    }
 
-    m_multirotor_state_samples.push_back(sample);
-}
-void Comms::handle_video()
-{
-    auto& channel = m_video_channel;
+//    m_multirotor_state_samples.push_back(sample);
+//}
+//void Comms::handle_video()
+//{
+//    auto& channel = m_video_channel;
 
-    stream::IVideo::Sample sample;
-    if (!channel.unpack_all(sample))
-    {
-        QLOGE("Error in unpacking video");
-        return;
-    }
+//    stream::IVideo::Sample sample;
+//    if (!channel.unpack_all(sample))
+//    {
+//        QLOGE("Error in unpacking video");
+//        return;
+//    }
 
-    m_video_samples.push_back(sample);
-}
+//    m_video_samples.push_back(sample);
+//}
 
-auto Comms::get_video_samples() const -> std::vector<stream::IVideo::Sample> const&
-{
-    return m_video_samples;
-}
-auto Comms::get_multirotor_state_samples() const -> std::vector<stream::IMultirotor_State::Sample> const&
-{
-    return m_multirotor_state_samples;
-}
-void Comms::send_multirotor_commands_value(stream::IMultirotor_Commands::Value const& value)
-{
-    m_pilot_channel.pack_all(silk::comms::Pilot_Message::MULTIROTOR_COMMANDS, value);
-    m_pilot_channel.try_sending(*m_rcp);
-}
+//auto Comms::get_video_samples() const -> std::vector<stream::IVideo::Sample> const&
+//{
+//    return m_video_samples;
+//}
+//auto Comms::get_multirotor_state_samples() const -> std::vector<stream::IMultirotor_State::Sample> const&
+//{
+//    return m_multirotor_state_samples;
+//}
+//void Comms::send_multirotor_commands_value(stream::IMultirotor_Commands::Value const& value)
+//{
+//    m_pilot_channel.pack_all(silk::comms::Pilot_Message::MULTIROTOR_COMMANDS, value);
+//    m_pilot_channel.try_sending(*m_rcp);
+//}
 
 void Comms::process_rcp()
 {
@@ -919,7 +946,7 @@ void Comms::process()
     {
         switch (msg.get())
         {
-        case comms::Pilot_Message::MULTIROTOR_STATE : handle_multirotor_state(); break;
+        //case comms::Pilot_Message::MULTIROTOR_STATE : handle_multirotor_state(); break;
         default: break;
         }
     }
@@ -927,7 +954,7 @@ void Comms::process()
     {
         switch (msg.get())
         {
-        case comms::Video_Message::FRAME_DATA : handle_video(); break;
+        //case comms::Video_Message::FRAME_DATA : handle_video(); break;
         default: break;
         }
     }
@@ -940,35 +967,35 @@ void Comms::process()
         {
             switch (msg.get())
             {
-            case comms::Telemetry_Message::STREAM_DATA : handle_stream_data(); break;
+//            case comms::Telemetry_Message::STREAM_DATA : handle_stream_data(); break;
             default: break;
             }
         }
     }
 
-    while (auto msg = m_setup_channel.get_next_message(*m_rcp))
-    {
-        switch (msg.get())
-        {
-        case comms::Setup_Message::UAV_CONFIG: handle_uav_config(); break;
+//    while (auto msg = m_setup_channel.get_next_message(*m_rcp))
+//    {
+//        switch (msg.get())
+//        {
+//        case comms::Setup_Message::UAV_CONFIG: handle_uav_config(); break;
 
-        case comms::Setup_Message::CLOCK: handle_clock(); break;
+//        case comms::Setup_Message::CLOCK: handle_clock(); break;
 
-        case comms::Setup_Message::ENUMERATE_NODE_DEFS: handle_enumerate_node_defs(); break;
-        case comms::Setup_Message::ENUMERATE_NODES: handle_enumerate_nodes(); break;
-        case comms::Setup_Message::GET_NODE_DATA: handle_get_node_data(); break;
+//        case comms::Setup_Message::ENUMERATE_NODE_DEFS: handle_enumerate_node_defs(); break;
+//        case comms::Setup_Message::ENUMERATE_NODES: handle_enumerate_nodes(); break;
+//        case comms::Setup_Message::GET_NODE_DATA: handle_get_node_data(); break;
 
-        case comms::Setup_Message::ADD_NODE: handle_add_node(); break;
-        case comms::Setup_Message::REMOVE_NODE: handle_remove_node(); break;
-        case comms::Setup_Message::NODE_CONFIG: handle_node_config(); break;
-        case comms::Setup_Message::NODE_MESSAGE: handle_node_message(); break;
-        case comms::Setup_Message::NODE_INPUT_STREAM_PATH: handle_node_input_stream_path(); break;
+//        case comms::Setup_Message::ADD_NODE: handle_add_node(); break;
+//        case comms::Setup_Message::REMOVE_NODE: handle_remove_node(); break;
+//        case comms::Setup_Message::NODE_CONFIG: handle_node_config(); break;
+//        case comms::Setup_Message::NODE_MESSAGE: handle_node_message(); break;
+//        case comms::Setup_Message::NODE_INPUT_STREAM_PATH: handle_node_input_stream_path(); break;
 
-        case comms::Setup_Message::STREAM_TELEMETRY_ACTIVE: handle_streams_telemetry_active(); break;
+//        case comms::Setup_Message::STREAM_TELEMETRY_ACTIVE: handle_streams_telemetry_active(); break;
 
-        default: break;
-        }
-    }
+//        default: break;
+//        }
+//    }
     //    QLOGI("*********** LOOP: {}", xxx);
 
     if (m_rcp->is_connected())
@@ -984,7 +1011,7 @@ void Comms::process()
         m_did_request_data = false;
     }
 
-    m_setup_channel.send(*m_rcp);
+    //m_setup_channel.send(*m_rcp);
     m_telemetry_channel.try_sending(*m_rcp);
 }
 

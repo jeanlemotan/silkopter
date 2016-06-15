@@ -58,12 +58,15 @@ public:
   typedef float mass_t;
   virtual ~IUAV_Descriptor() = default;
   void set_name(std::string const& value);
+  void set_name(std::string&& value);
   auto get_name() const -> std::string const&;
 
   void set_mass(mass_t const& value);
+  void set_mass(mass_t&& value);
   auto get_mass() const -> mass_t const&;
 
   void set_moment_of_inertia(ufloat const& value);
+  void set_moment_of_inertia(ufloat&& value);
   auto get_moment_of_inertia() const -> ufloat const&;
 
 private:
@@ -101,12 +104,15 @@ public:
   public:
     virtual ~Bus_Data() = default;
     void set_name(std::string const& value);
+    void set_name(std::string&& value);
     auto get_name() const -> std::string const&;
 
     void set_type(std::string const& value);
+    void set_type(std::string&& value);
     auto get_type() const -> std::string const&;
 
     void set_descriptor(Poly<const IBus_Descriptor> const& value);
+    void set_descriptor(Poly<const IBus_Descriptor>&& value);
     auto get_descriptor() const -> Poly<const IBus_Descriptor> const&;
     auto get_descriptor() -> Poly<const IBus_Descriptor>&;
 
@@ -121,20 +127,25 @@ public:
   public:
     virtual ~Node_Data() = default;
     void set_name(std::string const& value);
+    void set_name(std::string&& value);
     auto get_name() const -> std::string const&;
 
     void set_type(std::string const& value);
+    void set_type(std::string&& value);
     auto get_type() const -> std::string const&;
 
     void set_descriptor(Poly<const INode_Descriptor> const& value);
+    void set_descriptor(Poly<const INode_Descriptor>&& value);
     auto get_descriptor() const -> Poly<const INode_Descriptor> const&;
     auto get_descriptor() -> Poly<const INode_Descriptor>&;
 
     void set_config(Poly<const INode_Config> const& value);
+    void set_config(Poly<const INode_Config>&& value);
     auto get_config() const -> Poly<const INode_Config> const&;
     auto get_config() -> Poly<const INode_Config>&;
 
     void set_input_paths(std::vector<std::string> const& value);
+    void set_input_paths(std::vector<std::string>&& value);
     auto get_input_paths() const -> std::vector<std::string> const&;
     auto get_input_paths() -> std::vector<std::string>&;
 
@@ -148,14 +159,17 @@ public:
 
   virtual ~Settings() = default;
   void set_uav_descriptor(Poly<const IUAV_Descriptor> const& value);
+  void set_uav_descriptor(Poly<const IUAV_Descriptor>&& value);
   auto get_uav_descriptor() const -> Poly<const IUAV_Descriptor> const&;
   auto get_uav_descriptor() -> Poly<const IUAV_Descriptor>&;
 
   void set_buses(std::vector<Settings::Bus_Data> const& value);
+  void set_buses(std::vector<Settings::Bus_Data>&& value);
   auto get_buses() const -> std::vector<Settings::Bus_Data> const&;
   auto get_buses() -> std::vector<Settings::Bus_Data>&;
 
   void set_nodes(std::vector<Settings::Node_Data> const& value);
+  void set_nodes(std::vector<Settings::Node_Data>&& value);
   auto get_nodes() const -> std::vector<Settings::Node_Data> const&;
   auto get_nodes() -> std::vector<Settings::Node_Data>&;
 
@@ -178,12 +192,15 @@ public:
   public:
     virtual ~Motor() = default;
     void set_position(vec3f const& value);
+    void set_position(vec3f&& value);
     auto get_position() const -> vec3f const&;
 
     void set_thrust_vector(direction_t const& value);
+    void set_thrust_vector(direction_t&& value);
     auto get_thrust_vector() const -> direction_t const&;
 
     void set_clockwise(bool const& value);
+    void set_clockwise(bool&& value);
     auto get_clockwise() const -> bool const&;
 
   private:
@@ -194,33 +211,43 @@ public:
 
   virtual ~Multirotor_Descriptor() = default;
   void set_name(std::string const& value);
+  void set_name(std::string&& value);
   auto get_name() const -> std::string const&;
 
   void set_mass(IUAV_Descriptor::mass_t const& value);
+  void set_mass(IUAV_Descriptor::mass_t&& value);
   auto get_mass() const -> IUAV_Descriptor::mass_t const&;
 
   void set_moment_of_inertia(ufloat const& value);
+  void set_moment_of_inertia(ufloat&& value);
   auto get_moment_of_inertia() const -> ufloat const&;
 
   void set_radius(radius_t const& value);
+  void set_radius(radius_t&& value);
   auto get_radius() const -> radius_t const&;
 
   void set_height(height_t const& value);
+  void set_height(height_t&& value);
   auto get_height() const -> height_t const&;
 
   void set_motor_z_torque(torque_t const& value);
+  void set_motor_z_torque(torque_t&& value);
   auto get_motor_z_torque() const -> torque_t const&;
 
   void set_motor_thrust(thrust_t const& value);
+  void set_motor_thrust(thrust_t&& value);
   auto get_motor_thrust() const -> thrust_t const&;
 
   void set_motor_acceleration(acceleration_t const& value);
+  void set_motor_acceleration(acceleration_t&& value);
   auto get_motor_acceleration() const -> acceleration_t const&;
 
   void set_motor_deceleration(acceleration_t const& value);
+  void set_motor_deceleration(acceleration_t&& value);
   auto get_motor_deceleration() const -> acceleration_t const&;
 
   void set_motors(std::vector<Multirotor_Descriptor::Motor> const& value);
+  void set_motors(std::vector<Multirotor_Descriptor::Motor>&& value);
   auto get_motors() const -> std::vector<Multirotor_Descriptor::Motor> const&;
   auto get_motors() -> std::vector<Multirotor_Descriptor::Motor>&;
 
@@ -252,9 +279,11 @@ public:
 
   virtual ~UART_Linux_Descriptor() = default;
   void set_dev(std::string const& value);
+  void set_dev(std::string&& value);
   auto get_dev() const -> std::string const&;
 
   void set_baud(baud_t const& value);
+  void set_baud(baud_t&& value);
   auto get_baud() const -> baud_t const&;
 
 private:
@@ -267,12 +296,15 @@ struct UART_BBang_Descriptor : public IBus_Descriptor
 public:
   virtual ~UART_BBang_Descriptor() = default;
   void set_rx_pin(uint32_t const& value);
+  void set_rx_pin(uint32_t&& value);
   auto get_rx_pin() const -> uint32_t const&;
 
   void set_baud(uint32_t const& value);
+  void set_baud(uint32_t&& value);
   auto get_baud() const -> uint32_t const&;
 
   void set_invert(bool const& value);
+  void set_invert(bool&& value);
   auto get_invert() const -> bool const&;
 
 private:
@@ -288,9 +320,11 @@ public:
   typedef uint32_t baud_t;
   virtual ~I2C_BCM_Descriptor() = default;
   void set_dev(dev_t const& value);
+  void set_dev(dev_t&& value);
   auto get_dev() const -> dev_t const&;
 
   void set_baud(baud_t const& value);
+  void set_baud(baud_t&& value);
   auto get_baud() const -> baud_t const&;
 
 private:
@@ -303,6 +337,7 @@ struct I2C_Linux_Descriptor : public IBus_Descriptor
 public:
   virtual ~I2C_Linux_Descriptor() = default;
   void set_dev(std::string const& value);
+  void set_dev(std::string&& value);
   auto get_dev() const -> std::string const&;
 
 private:
@@ -317,15 +352,19 @@ public:
   typedef uint32_t speed_t;
   virtual ~SPI_BCM_Descriptor() = default;
   void set_dev(dev_t const& value);
+  void set_dev(dev_t&& value);
   auto get_dev() const -> dev_t const&;
 
   void set_baud(uint32_t const& value);
+  void set_baud(uint32_t&& value);
   auto get_baud() const -> uint32_t const&;
 
   void set_mode(mode_t const& value);
+  void set_mode(mode_t&& value);
   auto get_mode() const -> mode_t const&;
 
   void set_speed(speed_t const& value);
+  void set_speed(speed_t&& value);
   auto get_speed() const -> speed_t const&;
 
 private:
@@ -341,9 +380,11 @@ public:
   typedef uint32_t speed_t;
   virtual ~SPI_Linux_Descriptor() = default;
   void set_dev(std::string const& value);
+  void set_dev(std::string&& value);
   auto get_dev() const -> std::string const&;
 
   void set_speed(speed_t const& value);
+  void set_speed(speed_t&& value);
   auto get_speed() const -> speed_t const&;
 
 private:
@@ -356,6 +397,7 @@ struct P_Controller_Descriptor
 public:
   virtual ~P_Controller_Descriptor() = default;
   void set_kp(ufloat const& value);
+  void set_kp(ufloat&& value);
   auto get_kp() const -> ufloat const&;
 
 private:
@@ -367,12 +409,15 @@ struct PI_Controller_Descriptor : public P_Controller_Descriptor
 public:
   virtual ~PI_Controller_Descriptor() = default;
   void set_kp(ufloat const& value);
+  void set_kp(ufloat&& value);
   auto get_kp() const -> ufloat const&;
 
   void set_ki(ufloat const& value);
+  void set_ki(ufloat&& value);
   auto get_ki() const -> ufloat const&;
 
   void set_max_i(ufloat const& value);
+  void set_max_i(ufloat&& value);
   auto get_max_i() const -> ufloat const&;
 
 private:
@@ -386,12 +431,15 @@ struct PD_Controller_Descriptor : public P_Controller_Descriptor
 public:
   virtual ~PD_Controller_Descriptor() = default;
   void set_kp(ufloat const& value);
+  void set_kp(ufloat&& value);
   auto get_kp() const -> ufloat const&;
 
   void set_kd(ufloat const& value);
+  void set_kd(ufloat&& value);
   auto get_kd() const -> ufloat const&;
 
   void set_d_filter(muf_t const& value);
+  void set_d_filter(muf_t&& value);
   auto get_d_filter() const -> muf_t const&;
 
 private:
@@ -405,18 +453,23 @@ struct PID_Controller_Descriptor : public PD_Controller_Descriptor
 public:
   virtual ~PID_Controller_Descriptor() = default;
   void set_kp(ufloat const& value);
+  void set_kp(ufloat&& value);
   auto get_kp() const -> ufloat const&;
 
   void set_kd(ufloat const& value);
+  void set_kd(ufloat&& value);
   auto get_kd() const -> ufloat const&;
 
   void set_d_filter(muf_t const& value);
+  void set_d_filter(muf_t&& value);
   auto get_d_filter() const -> muf_t const&;
 
   void set_ki(ufloat const& value);
+  void set_ki(ufloat&& value);
   auto get_ki() const -> ufloat const&;
 
   void set_max_i(ufloat const& value);
+  void set_max_i(ufloat&& value);
   auto get_max_i() const -> ufloat const&;
 
 private:
@@ -433,6 +486,7 @@ public:
   typedef uint32_t rate_t;
   virtual ~ADC_Ammeter_Descriptor() = default;
   void set_rate(uint32_t const& value);
+  void set_rate(uint32_t&& value);
   auto get_rate() const -> uint32_t const&;
 
 private:
@@ -444,9 +498,11 @@ struct ADC_Ammeter_Config : public INode_Config
 public:
   virtual ~ADC_Ammeter_Config() = default;
   void set_scale(float const& value);
+  void set_scale(float&& value);
   auto get_scale() const -> float const&;
 
   void set_bias(float const& value);
+  void set_bias(float&& value);
   auto get_bias() const -> float const&;
 
 private:
@@ -460,6 +516,7 @@ public:
   typedef uint32_t rate_t;
   virtual ~ADC_Voltmeter_Descriptor() = default;
   void set_rate(uint32_t const& value);
+  void set_rate(uint32_t&& value);
   auto get_rate() const -> uint32_t const&;
 
 private:
@@ -471,9 +528,11 @@ struct ADC_Voltmeter_Config : public INode_Config
 public:
   virtual ~ADC_Voltmeter_Config() = default;
   void set_scale(float const& value);
+  void set_scale(float&& value);
   auto get_scale() const -> float const&;
 
   void set_bias(float const& value);
+  void set_bias(float&& value);
   auto get_bias() const -> float const&;
 
 private:
@@ -487,18 +546,23 @@ public:
   typedef uint32_t rate_t;
   virtual ~ADS1115_Descriptor() = default;
   void set_bus(std::string const& value);
+  void set_bus(std::string&& value);
   auto get_bus() const -> std::string const&;
 
   void set_adc0_rate(uint32_t const& value);
+  void set_adc0_rate(uint32_t&& value);
   auto get_adc0_rate() const -> uint32_t const&;
 
   void set_adc1_rate(uint32_t const& value);
+  void set_adc1_rate(uint32_t&& value);
   auto get_adc1_rate() const -> uint32_t const&;
 
   void set_adc2_rate(uint32_t const& value);
+  void set_adc2_rate(uint32_t&& value);
   auto get_adc2_rate() const -> uint32_t const&;
 
   void set_adc3_rate(uint32_t const& value);
+  void set_adc3_rate(uint32_t&& value);
   auto get_adc3_rate() const -> uint32_t const&;
 
 private:
@@ -522,9 +586,11 @@ public:
   typedef uint32_t rate_t;
   virtual ~AVRADC_Descriptor() = default;
   void set_bus(std::string const& value);
+  void set_bus(std::string&& value);
   auto get_bus() const -> std::string const&;
 
   void set_rate(uint32_t const& value);
+  void set_rate(uint32_t&& value);
   auto get_rate() const -> uint32_t const&;
 
 private:
@@ -545,6 +611,7 @@ public:
   typedef uint32_t rate_t;
   virtual ~Comp_AHRS_Descriptor() = default;
   void set_rate(uint32_t const& value);
+  void set_rate(uint32_t&& value);
   auto get_rate() const -> uint32_t const&;
 
 private:
@@ -556,6 +623,7 @@ struct Comp_AHRS_Config : public INode_Config
 public:
   virtual ~Comp_AHRS_Config() = default;
   void set_drift_correction_factor(muf_t const& value);
+  void set_drift_correction_factor(muf_t&& value);
   auto get_drift_correction_factor() const -> muf_t const&;
 
 private:
@@ -568,6 +636,7 @@ public:
   typedef uint32_t rate_t;
   virtual ~Combiner_Descriptor() = default;
   void set_rate(uint32_t const& value);
+  void set_rate(uint32_t&& value);
   auto get_rate() const -> uint32_t const&;
 
 private:
@@ -587,6 +656,7 @@ public:
   typedef uint32_t rate_t;
   virtual ~Gravity_Filter_Descriptor() = default;
   void set_rate(uint32_t const& value);
+  void set_rate(uint32_t&& value);
   auto get_rate() const -> uint32_t const&;
 
 private:
@@ -606,6 +676,7 @@ public:
   typedef uint32_t rate_t;
   virtual ~KF_ECEF_Descriptor() = default;
   void set_rate(uint32_t const& value);
+  void set_rate(uint32_t&& value);
   auto get_rate() const -> uint32_t const&;
 
 private:
@@ -617,21 +688,27 @@ struct KF_ECEF_Config : public INode_Config
 public:
   virtual ~KF_ECEF_Config() = default;
   void set_gps_position_lag(ufloat const& value);
+  void set_gps_position_lag(ufloat&& value);
   auto get_gps_position_lag() const -> ufloat const&;
 
   void set_gps_position_accuracy(ufloat const& value);
+  void set_gps_position_accuracy(ufloat&& value);
   auto get_gps_position_accuracy() const -> ufloat const&;
 
   void set_gps_velocity_lag(ufloat const& value);
+  void set_gps_velocity_lag(ufloat&& value);
   auto get_gps_velocity_lag() const -> ufloat const&;
 
   void set_gps_velocity_accuracy(ufloat const& value);
+  void set_gps_velocity_accuracy(ufloat&& value);
   auto get_gps_velocity_accuracy() const -> ufloat const&;
 
   void set_acceleration_lag(ufloat const& value);
+  void set_acceleration_lag(ufloat&& value);
   auto get_acceleration_lag() const -> ufloat const&;
 
   void set_acceleration_accuracy(ufloat const& value);
+  void set_acceleration_accuracy(ufloat&& value);
   auto get_acceleration_accuracy() const -> ufloat const&;
 
 private:
@@ -649,6 +726,7 @@ public:
   typedef uint32_t rate_t;
   virtual ~ENU_Frame_System_Descriptor() = default;
   void set_rate(uint32_t const& value);
+  void set_rate(uint32_t&& value);
   auto get_rate() const -> uint32_t const&;
 
 private:
@@ -668,6 +746,7 @@ public:
   typedef uint32_t rate_t;
   virtual ~LPF_Descriptor() = default;
   void set_rate(uint32_t const& value);
+  void set_rate(uint32_t&& value);
   auto get_rate() const -> uint32_t const&;
 
 private:
@@ -680,9 +759,11 @@ public:
   typedef uint32_t poles_t;
   virtual ~LPF_Config() = default;
   void set_poles(poles_t const& value);
+  void set_poles(poles_t&& value);
   auto get_poles() const -> poles_t const&;
 
   void set_cutoff_frequency(ufloat const& value);
+  void set_cutoff_frequency(ufloat&& value);
   auto get_cutoff_frequency() const -> ufloat const&;
 
 private:
@@ -696,9 +777,11 @@ public:
   typedef uint32_t rate_t;
   virtual ~MaxSonar_Descriptor() = default;
   void set_bus(std::string const& value);
+  void set_bus(std::string&& value);
   auto get_bus() const -> std::string const&;
 
   void set_rate(uint32_t const& value);
+  void set_rate(uint32_t&& value);
   auto get_rate() const -> uint32_t const&;
 
 private:
@@ -711,12 +794,15 @@ struct MaxSonar_Config : public INode_Config
 public:
   virtual ~MaxSonar_Config() = default;
   void set_direction(direction_t const& value);
+  void set_direction(direction_t&& value);
   auto get_direction() const -> direction_t const&;
 
   void set_max_distance(ufloat const& value);
+  void set_max_distance(ufloat&& value);
   auto get_max_distance() const -> ufloat const&;
 
   void set_min_distance(ufloat const& value);
+  void set_min_distance(ufloat&& value);
   auto get_min_distance() const -> ufloat const&;
 
 private:
@@ -731,6 +817,7 @@ public:
   typedef uint32_t rate_t;
   virtual ~Motor_Mixer_Descriptor() = default;
   void set_rate(uint32_t const& value);
+  void set_rate(uint32_t&& value);
   auto get_rate() const -> uint32_t const&;
 
 private:
@@ -742,6 +829,7 @@ struct Motor_Mixer_Config : public INode_Config
 public:
   virtual ~Motor_Mixer_Config() = default;
   void set_armed_thrust(ufloat const& value);
+  void set_armed_thrust(ufloat&& value);
   auto get_armed_thrust() const -> ufloat const&;
 
 private:
@@ -753,12 +841,15 @@ struct Acceleration_Calibration_Point
 public:
   virtual ~Acceleration_Calibration_Point() = default;
   void set_temperature(float const& value);
+  void set_temperature(float&& value);
   auto get_temperature() const -> float const&;
 
   void set_bias(vec3f const& value);
+  void set_bias(vec3f&& value);
   auto get_bias() const -> vec3f const&;
 
   void set_scale(vec3f const& value);
+  void set_scale(vec3f&& value);
   auto get_scale() const -> vec3f const&;
 
 private:
@@ -772,9 +863,11 @@ struct Angular_Velocity_Calibration_Point
 public:
   virtual ~Angular_Velocity_Calibration_Point() = default;
   void set_temperature(float const& value);
+  void set_temperature(float&& value);
   auto get_temperature() const -> float const&;
 
   void set_bias(vec3f const& value);
+  void set_bias(vec3f&& value);
   auto get_bias() const -> vec3f const&;
 
 private:
@@ -787,12 +880,15 @@ struct Magnetic_Field_Calibration_Point
 public:
   virtual ~Magnetic_Field_Calibration_Point() = default;
   void set_temperature(float const& value);
+  void set_temperature(float&& value);
   auto get_temperature() const -> float const&;
 
   void set_bias(vec3f const& value);
+  void set_bias(vec3f&& value);
   auto get_bias() const -> vec3f const&;
 
   void set_scale(vec3f const& value);
+  void set_scale(vec3f&& value);
   auto get_scale() const -> vec3f const&;
 
 private:
@@ -830,21 +926,27 @@ public:
 
   virtual ~MPU9250_Descriptor() = default;
   void set_bus(std::string const& value);
+  void set_bus(std::string&& value);
   auto get_bus() const -> std::string const&;
 
   void set_imu_rate(imu_rate_t const& value);
+  void set_imu_rate(imu_rate_t&& value);
   auto get_imu_rate() const -> imu_rate_t const&;
 
   void set_magnetometer_rate(uint32_t const& value);
+  void set_magnetometer_rate(uint32_t&& value);
   auto get_magnetometer_rate() const -> uint32_t const&;
 
   void set_thermometer_rate(uint32_t const& value);
+  void set_thermometer_rate(uint32_t&& value);
   auto get_thermometer_rate() const -> uint32_t const&;
 
   void set_acceleration_range(acceleration_range_t const& value);
+  void set_acceleration_range(acceleration_range_t&& value);
   auto get_acceleration_range() const -> acceleration_range_t const&;
 
   void set_angular_velocity_range(angular_velocity_range_t const& value);
+  void set_angular_velocity_range(angular_velocity_range_t&& value);
   auto get_angular_velocity_range() const -> angular_velocity_range_t const&;
 
 private:
@@ -864,14 +966,17 @@ public:
   public:
     virtual ~Calibration() = default;
     void set_acceleration(std::vector<Acceleration_Calibration_Point> const& value);
+    void set_acceleration(std::vector<Acceleration_Calibration_Point>&& value);
     auto get_acceleration() const -> std::vector<Acceleration_Calibration_Point> const&;
     auto get_acceleration() -> std::vector<Acceleration_Calibration_Point>&;
 
     void set_angular_velocity(std::vector<Angular_Velocity_Calibration_Point> const& value);
+    void set_angular_velocity(std::vector<Angular_Velocity_Calibration_Point>&& value);
     auto get_angular_velocity() const -> std::vector<Angular_Velocity_Calibration_Point> const&;
     auto get_angular_velocity() -> std::vector<Angular_Velocity_Calibration_Point>&;
 
     void set_magnetic_field(std::vector<Magnetic_Field_Calibration_Point> const& value);
+    void set_magnetic_field(std::vector<Magnetic_Field_Calibration_Point>&& value);
     auto get_magnetic_field() const -> std::vector<Magnetic_Field_Calibration_Point> const&;
     auto get_magnetic_field() -> std::vector<Magnetic_Field_Calibration_Point>&;
 
@@ -883,9 +988,11 @@ public:
 
   virtual ~MPU9250_Config() = default;
   void set_rotation(euler3_t const& value);
+  void set_rotation(euler3_t&& value);
   auto get_rotation() const -> euler3_t const&;
 
   void set_calibration(Calibration const& value);
+  void set_calibration(Calibration&& value);
   auto get_calibration() const -> Calibration const&;
   auto get_calibration() -> Calibration&;
 
@@ -900,12 +1007,15 @@ public:
   typedef uint32_t rate_t;
   virtual ~MS5611_Descriptor() = default;
   void set_bus(std::string const& value);
+  void set_bus(std::string&& value);
   auto get_bus() const -> std::string const&;
 
   void set_pressure_rate(uint32_t const& value);
+  void set_pressure_rate(uint32_t&& value);
   auto get_pressure_rate() const -> uint32_t const&;
 
   void set_temperature_rate(uint32_t const& value);
+  void set_temperature_rate(uint32_t&& value);
   auto get_temperature_rate() const -> uint32_t const&;
 
 private:
@@ -927,12 +1037,15 @@ public:
   typedef uint32_t rate_t;
   virtual ~Multirotor_Brain_Descriptor() = default;
   void set_rate(uint32_t const& value);
+  void set_rate(uint32_t&& value);
   auto get_rate() const -> uint32_t const&;
 
   void set_commands_rate(uint32_t const& value);
+  void set_commands_rate(uint32_t&& value);
   auto get_commands_rate() const -> uint32_t const&;
 
   void set_state_rate(uint32_t const& value);
+  void set_state_rate(uint32_t&& value);
   auto get_state_rate() const -> uint32_t const&;
 
 private:
@@ -954,10 +1067,12 @@ public:
     public:
       virtual ~Separate_XY_PIDs() = default;
       void set_x_pid(PID_Controller_Descriptor const& value);
+      void set_x_pid(PID_Controller_Descriptor&& value);
       auto get_x_pid() const -> PID_Controller_Descriptor const&;
       auto get_x_pid() -> PID_Controller_Descriptor&;
 
       void set_y_pid(PID_Controller_Descriptor const& value);
+      void set_y_pid(PID_Controller_Descriptor&& value);
       auto get_y_pid() const -> PID_Controller_Descriptor const&;
       auto get_y_pid() -> PID_Controller_Descriptor&;
 
@@ -968,9 +1083,11 @@ public:
 
     virtual ~Horizontal_Angle() = default;
     void set_max_speed_deg(speed_deg_t const& value);
+    void set_max_speed_deg(speed_deg_t&& value);
     auto get_max_speed_deg() const -> speed_deg_t const&;
 
     void set_xy_pids(boost::variant<Combined_XY_PIDs,Separate_XY_PIDs> const& value);
+    void set_xy_pids(boost::variant<Combined_XY_PIDs,Separate_XY_PIDs>&& value);
     auto get_xy_pids() const -> boost::variant<Combined_XY_PIDs,Separate_XY_PIDs> const&;
     auto get_xy_pids() -> boost::variant<Combined_XY_PIDs,Separate_XY_PIDs>&;
 
@@ -985,17 +1102,21 @@ public:
     typedef float speed_t;
     virtual ~Horizontal_Position() = default;
     void set_max_speed(speed_t const& value);
+    void set_max_speed(speed_t&& value);
     auto get_max_speed() const -> speed_t const&;
 
     void set_lpf(LPF_Config const& value);
+    void set_lpf(LPF_Config&& value);
     auto get_lpf() const -> LPF_Config const&;
     auto get_lpf() -> LPF_Config&;
 
     void set_velocity_pi(PI_Controller_Descriptor const& value);
+    void set_velocity_pi(PI_Controller_Descriptor&& value);
     auto get_velocity_pi() const -> PI_Controller_Descriptor const&;
     auto get_velocity_pi() -> PI_Controller_Descriptor&;
 
     void set_position_p(P_Controller_Descriptor const& value);
+    void set_position_p(P_Controller_Descriptor&& value);
     auto get_position_p() const -> P_Controller_Descriptor const&;
     auto get_position_p() -> P_Controller_Descriptor&;
 
@@ -1012,9 +1133,11 @@ public:
     typedef float speed_deg_t;
     virtual ~Yaw_Angle() = default;
     void set_max_speed_deg(speed_deg_t const& value);
+    void set_max_speed_deg(speed_deg_t&& value);
     auto get_max_speed_deg() const -> speed_deg_t const&;
 
     void set_pid(PID_Controller_Descriptor const& value);
+    void set_pid(PID_Controller_Descriptor&& value);
     auto get_pid() const -> PID_Controller_Descriptor const&;
     auto get_pid() -> PID_Controller_Descriptor&;
 
@@ -1029,17 +1152,21 @@ public:
     typedef float speed_t;
     virtual ~Altitude() = default;
     void set_max_speed(speed_t const& value);
+    void set_max_speed(speed_t&& value);
     auto get_max_speed() const -> speed_t const&;
 
     void set_lpf(LPF_Config const& value);
+    void set_lpf(LPF_Config&& value);
     auto get_lpf() const -> LPF_Config const&;
     auto get_lpf() -> LPF_Config&;
 
     void set_speed_pi(PI_Controller_Descriptor const& value);
+    void set_speed_pi(PI_Controller_Descriptor&& value);
     auto get_speed_pi() const -> PI_Controller_Descriptor const&;
     auto get_speed_pi() -> PI_Controller_Descriptor&;
 
     void set_position_p(P_Controller_Descriptor const& value);
+    void set_position_p(P_Controller_Descriptor&& value);
     auto get_position_p() const -> P_Controller_Descriptor const&;
     auto get_position_p() -> P_Controller_Descriptor&;
 
@@ -1052,24 +1179,30 @@ public:
 
   virtual ~Multirotor_Brain_Config() = default;
   void set_max_thrust(ufloat const& value);
+  void set_max_thrust(ufloat&& value);
   auto get_max_thrust() const -> ufloat const&;
 
   void set_min_thrust(ufloat const& value);
+  void set_min_thrust(ufloat&& value);
   auto get_min_thrust() const -> ufloat const&;
 
   void set_horizontal_angle(Horizontal_Angle const& value);
+  void set_horizontal_angle(Horizontal_Angle&& value);
   auto get_horizontal_angle() const -> Horizontal_Angle const&;
   auto get_horizontal_angle() -> Horizontal_Angle&;
 
   void set_horizontal_position(Horizontal_Position const& value);
+  void set_horizontal_position(Horizontal_Position&& value);
   auto get_horizontal_position() const -> Horizontal_Position const&;
   auto get_horizontal_position() -> Horizontal_Position&;
 
   void set_yaw_angle(Yaw_Angle const& value);
+  void set_yaw_angle(Yaw_Angle&& value);
   auto get_yaw_angle() const -> Yaw_Angle const&;
   auto get_yaw_angle() -> Yaw_Angle&;
 
   void set_altitude(Altitude const& value);
+  void set_altitude(Altitude&& value);
   auto get_altitude() const -> Altitude const&;
   auto get_altitude() -> Altitude&;
 
@@ -1088,12 +1221,15 @@ public:
   typedef uint32_t rate_t;
   virtual ~Multirotor_Pilot_Descriptor() = default;
   void set_commands_rate(uint32_t const& value);
+  void set_commands_rate(uint32_t&& value);
   auto get_commands_rate() const -> uint32_t const&;
 
   void set_state_rate(uint32_t const& value);
+  void set_state_rate(uint32_t&& value);
   auto get_state_rate() const -> uint32_t const&;
 
   void set_video_rate(uint32_t const& value);
+  void set_video_rate(uint32_t&& value);
   auto get_video_rate() const -> uint32_t const&;
 
 private:
@@ -1115,27 +1251,35 @@ public:
   typedef uint32_t rate_t;
   virtual ~Multirotor_Simulator_Descriptor() = default;
   void set_throttle_rate(uint32_t const& value);
+  void set_throttle_rate(uint32_t&& value);
   auto get_throttle_rate() const -> uint32_t const&;
 
   void set_acceleration_rate(uint32_t const& value);
+  void set_acceleration_rate(uint32_t&& value);
   auto get_acceleration_rate() const -> uint32_t const&;
 
   void set_angular_velocity_rate(uint32_t const& value);
+  void set_angular_velocity_rate(uint32_t&& value);
   auto get_angular_velocity_rate() const -> uint32_t const&;
 
   void set_magnetic_field_rate(uint32_t const& value);
+  void set_magnetic_field_rate(uint32_t&& value);
   auto get_magnetic_field_rate() const -> uint32_t const&;
 
   void set_pressure_rate(uint32_t const& value);
+  void set_pressure_rate(uint32_t&& value);
   auto get_pressure_rate() const -> uint32_t const&;
 
   void set_temperature_rate(uint32_t const& value);
+  void set_temperature_rate(uint32_t&& value);
   auto get_temperature_rate() const -> uint32_t const&;
 
   void set_distance_rate(uint32_t const& value);
+  void set_distance_rate(uint32_t&& value);
   auto get_distance_rate() const -> uint32_t const&;
 
   void set_gps_rate(uint32_t const& value);
+  void set_gps_rate(uint32_t&& value);
   auto get_gps_rate() const -> uint32_t const&;
 
 private:
@@ -1157,33 +1301,43 @@ public:
   public:
     virtual ~Noise() = default;
     void set_gps_position(ufloat const& value);
+    void set_gps_position(ufloat&& value);
     auto get_gps_position() const -> ufloat const&;
 
     void set_gps_velocity(ufloat const& value);
+    void set_gps_velocity(ufloat&& value);
     auto get_gps_velocity() const -> ufloat const&;
 
     void set_gps_pacc(ufloat const& value);
+    void set_gps_pacc(ufloat&& value);
     auto get_gps_pacc() const -> ufloat const&;
 
     void set_gps_vacc(ufloat const& value);
+    void set_gps_vacc(ufloat&& value);
     auto get_gps_vacc() const -> ufloat const&;
 
     void set_acceleration(ufloat const& value);
+    void set_acceleration(ufloat&& value);
     auto get_acceleration() const -> ufloat const&;
 
     void set_angular_velocity(ufloat const& value);
+    void set_angular_velocity(ufloat&& value);
     auto get_angular_velocity() const -> ufloat const&;
 
     void set_magnetic_field(ufloat const& value);
+    void set_magnetic_field(ufloat&& value);
     auto get_magnetic_field() const -> ufloat const&;
 
     void set_pressure(ufloat const& value);
+    void set_pressure(ufloat&& value);
     auto get_pressure() const -> ufloat const&;
 
     void set_temperature(ufloat const& value);
+    void set_temperature(ufloat&& value);
     auto get_temperature() const -> ufloat const&;
 
     void set_ground_distance(ufloat const& value);
+    void set_ground_distance(ufloat&& value);
     auto get_ground_distance() const -> ufloat const&;
 
   private:
@@ -1201,18 +1355,23 @@ public:
 
   virtual ~Multirotor_Simulator_Config() = default;
   void set_simulation_enabled(bool const& value);
+  void set_simulation_enabled(bool&& value);
   auto get_simulation_enabled() const -> bool const&;
 
   void set_drag_enabled(bool const& value);
+  void set_drag_enabled(bool&& value);
   auto get_drag_enabled() const -> bool const&;
 
   void set_ground_enabled(bool const& value);
+  void set_ground_enabled(bool&& value);
   auto get_ground_enabled() const -> bool const&;
 
   void set_gravity_enabled(bool const& value);
+  void set_gravity_enabled(bool&& value);
   auto get_gravity_enabled() const -> bool const&;
 
   void set_noise(Noise const& value);
+  void set_noise(Noise&& value);
   auto get_noise() const -> Noise const&;
   auto get_noise() -> Noise&;
 
@@ -1231,9 +1390,11 @@ public:
   typedef int32_t component_count_t;
   virtual ~Oscillator_Descriptor() = default;
   void set_rate(uint32_t const& value);
+  void set_rate(uint32_t&& value);
   auto get_rate() const -> uint32_t const&;
 
   void set_component_count(component_count_t const& value);
+  void set_component_count(component_count_t&& value);
   auto get_component_count() const -> component_count_t const&;
 
 private:
@@ -1249,12 +1410,15 @@ public:
   public:
     virtual ~Component() = default;
     void set_frequency(ufloat const& value);
+    void set_frequency(ufloat&& value);
     auto get_frequency() const -> ufloat const&;
 
     void set_amplitude(ufloat const& value);
+    void set_amplitude(ufloat&& value);
     auto get_amplitude() const -> ufloat const&;
 
     void set_square(bool const& value);
+    void set_square(bool&& value);
     auto get_square() const -> bool const&;
 
   private:
@@ -1265,12 +1429,15 @@ public:
 
   virtual ~Oscillator_Config() = default;
   void set_amplitude(ufloat const& value);
+  void set_amplitude(ufloat&& value);
   auto get_amplitude() const -> ufloat const&;
 
   void set_noise(ufloat const& value);
+  void set_noise(ufloat&& value);
   auto get_noise() const -> ufloat const&;
 
   void set_components(std::vector<Oscillator_Config::Component> const& value);
+  void set_components(std::vector<Oscillator_Config::Component>&& value);
   auto get_components() const -> std::vector<Oscillator_Config::Component> const&;
   auto get_components() -> std::vector<Oscillator_Config::Component>&;
 
@@ -1289,9 +1456,11 @@ public:
   public:
     virtual ~Channel() = default;
     void set_enabled(bool const& value);
+    void set_enabled(bool&& value);
     auto get_enabled() const -> bool const&;
 
     void set_servo_signal(bool const& value);
+    void set_servo_signal(bool&& value);
     auto get_servo_signal() const -> bool const&;
 
   private:
@@ -1301,15 +1470,19 @@ public:
 
   virtual ~PCA9685_Descriptor() = default;
   void set_bus(std::string const& value);
+  void set_bus(std::string&& value);
   auto get_bus() const -> std::string const&;
 
   void set_rate(uint32_t const& value);
+  void set_rate(uint32_t&& value);
   auto get_rate() const -> uint32_t const&;
 
   void set_address(uint8_t const& value);
+  void set_address(uint8_t&& value);
   auto get_address() const -> uint8_t const&;
 
   void set_channels(std::vector<PCA9685_Descriptor::Channel> const& value);
+  void set_channels(std::vector<PCA9685_Descriptor::Channel>&& value);
   auto get_channels() const -> std::vector<PCA9685_Descriptor::Channel> const&;
   auto get_channels() -> std::vector<PCA9685_Descriptor::Channel>&;
 
@@ -1335,9 +1508,11 @@ public:
   public:
     virtual ~Servo_Channel() = default;
     void set_min(servo_signal_t const& value);
+    void set_min(servo_signal_t&& value);
     auto get_min() const -> servo_signal_t const&;
 
     void set_max(servo_signal_t const& value);
+    void set_max(servo_signal_t&& value);
     auto get_max() const -> servo_signal_t const&;
 
   private:
@@ -1350,9 +1525,11 @@ public:
   public:
     virtual ~PWM_Channel() = default;
     void set_min(pwm_signal_t const& value);
+    void set_min(pwm_signal_t&& value);
     auto get_min() const -> pwm_signal_t const&;
 
     void set_max(pwm_signal_t const& value);
+    void set_max(pwm_signal_t&& value);
     auto get_max() const -> pwm_signal_t const&;
 
   private:
@@ -1362,6 +1539,7 @@ public:
 
   virtual ~PCA9685_Config() = default;
   void set_channels(std::vector<Poly<PCA9685_Config::IChannel>> const& value);
+  void set_channels(std::vector<Poly<PCA9685_Config::IChannel>>&& value);
   auto get_channels() const -> std::vector<Poly<PCA9685_Config::IChannel>> const&;
   auto get_channels() -> std::vector<Poly<PCA9685_Config::IChannel>>&;
 
@@ -1378,12 +1556,15 @@ public:
   public:
     virtual ~Channel() = default;
     void set_enabled(bool const& value);
+    void set_enabled(bool&& value);
     auto get_enabled() const -> bool const&;
 
     void set_servo_signal(bool const& value);
+    void set_servo_signal(bool&& value);
     auto get_servo_signal() const -> bool const&;
 
     void set_rate(uint32_t const& value);
+    void set_rate(uint32_t&& value);
     auto get_rate() const -> uint32_t const&;
 
   private:
@@ -1394,106 +1575,132 @@ public:
 
   virtual ~PIGPIO_Descriptor() = default;
   void set_gpio_2(Channel const& value);
+  void set_gpio_2(Channel&& value);
   auto get_gpio_2() const -> Channel const&;
   auto get_gpio_2() -> Channel&;
 
   void set_gpio_3(Channel const& value);
+  void set_gpio_3(Channel&& value);
   auto get_gpio_3() const -> Channel const&;
   auto get_gpio_3() -> Channel&;
 
   void set_gpio_4(Channel const& value);
+  void set_gpio_4(Channel&& value);
   auto get_gpio_4() const -> Channel const&;
   auto get_gpio_4() -> Channel&;
 
   void set_gpio_5(Channel const& value);
+  void set_gpio_5(Channel&& value);
   auto get_gpio_5() const -> Channel const&;
   auto get_gpio_5() -> Channel&;
 
   void set_gpio_6(Channel const& value);
+  void set_gpio_6(Channel&& value);
   auto get_gpio_6() const -> Channel const&;
   auto get_gpio_6() -> Channel&;
 
   void set_gpio_7(Channel const& value);
+  void set_gpio_7(Channel&& value);
   auto get_gpio_7() const -> Channel const&;
   auto get_gpio_7() -> Channel&;
 
   void set_gpio_8(Channel const& value);
+  void set_gpio_8(Channel&& value);
   auto get_gpio_8() const -> Channel const&;
   auto get_gpio_8() -> Channel&;
 
   void set_gpio_9(Channel const& value);
+  void set_gpio_9(Channel&& value);
   auto get_gpio_9() const -> Channel const&;
   auto get_gpio_9() -> Channel&;
 
   void set_gpio_10(Channel const& value);
+  void set_gpio_10(Channel&& value);
   auto get_gpio_10() const -> Channel const&;
   auto get_gpio_10() -> Channel&;
 
   void set_gpio_11(Channel const& value);
+  void set_gpio_11(Channel&& value);
   auto get_gpio_11() const -> Channel const&;
   auto get_gpio_11() -> Channel&;
 
   void set_gpio_12(Channel const& value);
+  void set_gpio_12(Channel&& value);
   auto get_gpio_12() const -> Channel const&;
   auto get_gpio_12() -> Channel&;
 
   void set_gpio_13(Channel const& value);
+  void set_gpio_13(Channel&& value);
   auto get_gpio_13() const -> Channel const&;
   auto get_gpio_13() -> Channel&;
 
   void set_gpio_14(Channel const& value);
+  void set_gpio_14(Channel&& value);
   auto get_gpio_14() const -> Channel const&;
   auto get_gpio_14() -> Channel&;
 
   void set_gpio_15(Channel const& value);
+  void set_gpio_15(Channel&& value);
   auto get_gpio_15() const -> Channel const&;
   auto get_gpio_15() -> Channel&;
 
   void set_gpio_16(Channel const& value);
+  void set_gpio_16(Channel&& value);
   auto get_gpio_16() const -> Channel const&;
   auto get_gpio_16() -> Channel&;
 
   void set_gpio_17(Channel const& value);
+  void set_gpio_17(Channel&& value);
   auto get_gpio_17() const -> Channel const&;
   auto get_gpio_17() -> Channel&;
 
   void set_gpio_18(Channel const& value);
+  void set_gpio_18(Channel&& value);
   auto get_gpio_18() const -> Channel const&;
   auto get_gpio_18() -> Channel&;
 
   void set_gpio_19(Channel const& value);
+  void set_gpio_19(Channel&& value);
   auto get_gpio_19() const -> Channel const&;
   auto get_gpio_19() -> Channel&;
 
   void set_gpio_20(Channel const& value);
+  void set_gpio_20(Channel&& value);
   auto get_gpio_20() const -> Channel const&;
   auto get_gpio_20() -> Channel&;
 
   void set_gpio_21(Channel const& value);
+  void set_gpio_21(Channel&& value);
   auto get_gpio_21() const -> Channel const&;
   auto get_gpio_21() -> Channel&;
 
   void set_gpio_22(Channel const& value);
+  void set_gpio_22(Channel&& value);
   auto get_gpio_22() const -> Channel const&;
   auto get_gpio_22() -> Channel&;
 
   void set_gpio_23(Channel const& value);
+  void set_gpio_23(Channel&& value);
   auto get_gpio_23() const -> Channel const&;
   auto get_gpio_23() -> Channel&;
 
   void set_gpio_24(Channel const& value);
+  void set_gpio_24(Channel&& value);
   auto get_gpio_24() const -> Channel const&;
   auto get_gpio_24() -> Channel&;
 
   void set_gpio_25(Channel const& value);
+  void set_gpio_25(Channel&& value);
   auto get_gpio_25() const -> Channel const&;
   auto get_gpio_25() -> Channel&;
 
   void set_gpio_26(Channel const& value);
+  void set_gpio_26(Channel&& value);
   auto get_gpio_26() const -> Channel const&;
   auto get_gpio_26() -> Channel&;
 
   void set_gpio_27(Channel const& value);
+  void set_gpio_27(Channel&& value);
   auto get_gpio_27() const -> Channel const&;
   auto get_gpio_27() -> Channel&;
 
@@ -1541,9 +1748,11 @@ public:
   public:
     virtual ~Servo_Channel() = default;
     void set_min(servo_signal_t const& value);
+    void set_min(servo_signal_t&& value);
     auto get_min() const -> servo_signal_t const&;
 
     void set_max(servo_signal_t const& value);
+    void set_max(servo_signal_t&& value);
     auto get_max() const -> servo_signal_t const&;
 
   private:
@@ -1556,9 +1765,11 @@ public:
   public:
     virtual ~PWM_Channel() = default;
     void set_min(pwm_signal_t const& value);
+    void set_min(pwm_signal_t&& value);
     auto get_min() const -> pwm_signal_t const&;
 
     void set_max(pwm_signal_t const& value);
+    void set_max(pwm_signal_t&& value);
     auto get_max() const -> pwm_signal_t const&;
 
   private:
@@ -1568,106 +1779,132 @@ public:
 
   virtual ~PIGPIO_Config() = default;
   void set_gpio_2(Poly<PIGPIO_Config::IChannel> const& value);
+  void set_gpio_2(Poly<PIGPIO_Config::IChannel>&& value);
   auto get_gpio_2() const -> Poly<PIGPIO_Config::IChannel> const&;
   auto get_gpio_2() -> Poly<PIGPIO_Config::IChannel>&;
 
   void set_gpio_3(Poly<PIGPIO_Config::IChannel> const& value);
+  void set_gpio_3(Poly<PIGPIO_Config::IChannel>&& value);
   auto get_gpio_3() const -> Poly<PIGPIO_Config::IChannel> const&;
   auto get_gpio_3() -> Poly<PIGPIO_Config::IChannel>&;
 
   void set_gpio_4(Poly<PIGPIO_Config::IChannel> const& value);
+  void set_gpio_4(Poly<PIGPIO_Config::IChannel>&& value);
   auto get_gpio_4() const -> Poly<PIGPIO_Config::IChannel> const&;
   auto get_gpio_4() -> Poly<PIGPIO_Config::IChannel>&;
 
   void set_gpio_5(Poly<PIGPIO_Config::IChannel> const& value);
+  void set_gpio_5(Poly<PIGPIO_Config::IChannel>&& value);
   auto get_gpio_5() const -> Poly<PIGPIO_Config::IChannel> const&;
   auto get_gpio_5() -> Poly<PIGPIO_Config::IChannel>&;
 
   void set_gpio_6(Poly<PIGPIO_Config::IChannel> const& value);
+  void set_gpio_6(Poly<PIGPIO_Config::IChannel>&& value);
   auto get_gpio_6() const -> Poly<PIGPIO_Config::IChannel> const&;
   auto get_gpio_6() -> Poly<PIGPIO_Config::IChannel>&;
 
   void set_gpio_7(Poly<PIGPIO_Config::IChannel> const& value);
+  void set_gpio_7(Poly<PIGPIO_Config::IChannel>&& value);
   auto get_gpio_7() const -> Poly<PIGPIO_Config::IChannel> const&;
   auto get_gpio_7() -> Poly<PIGPIO_Config::IChannel>&;
 
   void set_gpio_8(Poly<PIGPIO_Config::IChannel> const& value);
+  void set_gpio_8(Poly<PIGPIO_Config::IChannel>&& value);
   auto get_gpio_8() const -> Poly<PIGPIO_Config::IChannel> const&;
   auto get_gpio_8() -> Poly<PIGPIO_Config::IChannel>&;
 
   void set_gpio_9(Poly<PIGPIO_Config::IChannel> const& value);
+  void set_gpio_9(Poly<PIGPIO_Config::IChannel>&& value);
   auto get_gpio_9() const -> Poly<PIGPIO_Config::IChannel> const&;
   auto get_gpio_9() -> Poly<PIGPIO_Config::IChannel>&;
 
   void set_gpio_10(Poly<PIGPIO_Config::IChannel> const& value);
+  void set_gpio_10(Poly<PIGPIO_Config::IChannel>&& value);
   auto get_gpio_10() const -> Poly<PIGPIO_Config::IChannel> const&;
   auto get_gpio_10() -> Poly<PIGPIO_Config::IChannel>&;
 
   void set_gpio_11(Poly<PIGPIO_Config::IChannel> const& value);
+  void set_gpio_11(Poly<PIGPIO_Config::IChannel>&& value);
   auto get_gpio_11() const -> Poly<PIGPIO_Config::IChannel> const&;
   auto get_gpio_11() -> Poly<PIGPIO_Config::IChannel>&;
 
   void set_gpio_12(Poly<PIGPIO_Config::IChannel> const& value);
+  void set_gpio_12(Poly<PIGPIO_Config::IChannel>&& value);
   auto get_gpio_12() const -> Poly<PIGPIO_Config::IChannel> const&;
   auto get_gpio_12() -> Poly<PIGPIO_Config::IChannel>&;
 
   void set_gpio_13(Poly<PIGPIO_Config::IChannel> const& value);
+  void set_gpio_13(Poly<PIGPIO_Config::IChannel>&& value);
   auto get_gpio_13() const -> Poly<PIGPIO_Config::IChannel> const&;
   auto get_gpio_13() -> Poly<PIGPIO_Config::IChannel>&;
 
   void set_gpio_14(Poly<PIGPIO_Config::IChannel> const& value);
+  void set_gpio_14(Poly<PIGPIO_Config::IChannel>&& value);
   auto get_gpio_14() const -> Poly<PIGPIO_Config::IChannel> const&;
   auto get_gpio_14() -> Poly<PIGPIO_Config::IChannel>&;
 
   void set_gpio_15(Poly<PIGPIO_Config::IChannel> const& value);
+  void set_gpio_15(Poly<PIGPIO_Config::IChannel>&& value);
   auto get_gpio_15() const -> Poly<PIGPIO_Config::IChannel> const&;
   auto get_gpio_15() -> Poly<PIGPIO_Config::IChannel>&;
 
   void set_gpio_16(Poly<PIGPIO_Config::IChannel> const& value);
+  void set_gpio_16(Poly<PIGPIO_Config::IChannel>&& value);
   auto get_gpio_16() const -> Poly<PIGPIO_Config::IChannel> const&;
   auto get_gpio_16() -> Poly<PIGPIO_Config::IChannel>&;
 
   void set_gpio_17(Poly<PIGPIO_Config::IChannel> const& value);
+  void set_gpio_17(Poly<PIGPIO_Config::IChannel>&& value);
   auto get_gpio_17() const -> Poly<PIGPIO_Config::IChannel> const&;
   auto get_gpio_17() -> Poly<PIGPIO_Config::IChannel>&;
 
   void set_gpio_18(Poly<PIGPIO_Config::IChannel> const& value);
+  void set_gpio_18(Poly<PIGPIO_Config::IChannel>&& value);
   auto get_gpio_18() const -> Poly<PIGPIO_Config::IChannel> const&;
   auto get_gpio_18() -> Poly<PIGPIO_Config::IChannel>&;
 
   void set_gpio_19(Poly<PIGPIO_Config::IChannel> const& value);
+  void set_gpio_19(Poly<PIGPIO_Config::IChannel>&& value);
   auto get_gpio_19() const -> Poly<PIGPIO_Config::IChannel> const&;
   auto get_gpio_19() -> Poly<PIGPIO_Config::IChannel>&;
 
   void set_gpio_20(Poly<PIGPIO_Config::IChannel> const& value);
+  void set_gpio_20(Poly<PIGPIO_Config::IChannel>&& value);
   auto get_gpio_20() const -> Poly<PIGPIO_Config::IChannel> const&;
   auto get_gpio_20() -> Poly<PIGPIO_Config::IChannel>&;
 
   void set_gpio_21(Poly<PIGPIO_Config::IChannel> const& value);
+  void set_gpio_21(Poly<PIGPIO_Config::IChannel>&& value);
   auto get_gpio_21() const -> Poly<PIGPIO_Config::IChannel> const&;
   auto get_gpio_21() -> Poly<PIGPIO_Config::IChannel>&;
 
   void set_gpio_22(Poly<PIGPIO_Config::IChannel> const& value);
+  void set_gpio_22(Poly<PIGPIO_Config::IChannel>&& value);
   auto get_gpio_22() const -> Poly<PIGPIO_Config::IChannel> const&;
   auto get_gpio_22() -> Poly<PIGPIO_Config::IChannel>&;
 
   void set_gpio_23(Poly<PIGPIO_Config::IChannel> const& value);
+  void set_gpio_23(Poly<PIGPIO_Config::IChannel>&& value);
   auto get_gpio_23() const -> Poly<PIGPIO_Config::IChannel> const&;
   auto get_gpio_23() -> Poly<PIGPIO_Config::IChannel>&;
 
   void set_gpio_24(Poly<PIGPIO_Config::IChannel> const& value);
+  void set_gpio_24(Poly<PIGPIO_Config::IChannel>&& value);
   auto get_gpio_24() const -> Poly<PIGPIO_Config::IChannel> const&;
   auto get_gpio_24() -> Poly<PIGPIO_Config::IChannel>&;
 
   void set_gpio_25(Poly<PIGPIO_Config::IChannel> const& value);
+  void set_gpio_25(Poly<PIGPIO_Config::IChannel>&& value);
   auto get_gpio_25() const -> Poly<PIGPIO_Config::IChannel> const&;
   auto get_gpio_25() -> Poly<PIGPIO_Config::IChannel>&;
 
   void set_gpio_26(Poly<PIGPIO_Config::IChannel> const& value);
+  void set_gpio_26(Poly<PIGPIO_Config::IChannel>&& value);
   auto get_gpio_26() const -> Poly<PIGPIO_Config::IChannel> const&;
   auto get_gpio_26() -> Poly<PIGPIO_Config::IChannel>&;
 
   void set_gpio_27(Poly<PIGPIO_Config::IChannel> const& value);
+  void set_gpio_27(Poly<PIGPIO_Config::IChannel>&& value);
   auto get_gpio_27() const -> Poly<PIGPIO_Config::IChannel> const&;
   auto get_gpio_27() -> Poly<PIGPIO_Config::IChannel>&;
 
@@ -1706,6 +1943,7 @@ public:
   typedef uint32_t rate_t;
   virtual ~Pressure_Velocity_Descriptor() = default;
   void set_rate(uint32_t const& value);
+  void set_rate(uint32_t&& value);
   auto get_rate() const -> uint32_t const&;
 
 private:
@@ -1726,9 +1964,11 @@ public:
   typedef int32_t channel_count_t;
   virtual ~Proximity_Descriptor() = default;
   void set_rate(uint32_t const& value);
+  void set_rate(uint32_t&& value);
   auto get_rate() const -> uint32_t const&;
 
   void set_channel_count(channel_count_t const& value);
+  void set_channel_count(channel_count_t&& value);
   auto get_channel_count() const -> channel_count_t const&;
 
 private:
@@ -1749,6 +1989,7 @@ public:
   typedef uint32_t rate_t;
   virtual ~Rate_Controller_Descriptor() = default;
   void set_rate(uint32_t const& value);
+  void set_rate(uint32_t&& value);
   auto get_rate() const -> uint32_t const&;
 
 private:
@@ -1767,10 +2008,12 @@ public:
     public:
       virtual ~Separate_XY_PIDs() = default;
       void set_x_pid(PID_Controller_Descriptor const& value);
+      void set_x_pid(PID_Controller_Descriptor&& value);
       auto get_x_pid() const -> PID_Controller_Descriptor const&;
       auto get_x_pid() -> PID_Controller_Descriptor&;
 
       void set_y_pid(PID_Controller_Descriptor const& value);
+      void set_y_pid(PID_Controller_Descriptor&& value);
       auto get_y_pid() const -> PID_Controller_Descriptor const&;
       auto get_y_pid() -> PID_Controller_Descriptor&;
 
@@ -1781,13 +2024,16 @@ public:
 
     virtual ~Feedback() = default;
     void set_weight(muf_t const& value);
+    void set_weight(muf_t&& value);
     auto get_weight() const -> muf_t const&;
 
     void set_xy_pids(boost::variant<Combined_XY_PIDs,Separate_XY_PIDs> const& value);
+    void set_xy_pids(boost::variant<Combined_XY_PIDs,Separate_XY_PIDs>&& value);
     auto get_xy_pids() const -> boost::variant<Combined_XY_PIDs,Separate_XY_PIDs> const&;
     auto get_xy_pids() -> boost::variant<Combined_XY_PIDs,Separate_XY_PIDs>&;
 
     void set_z_pid(PID_Controller_Descriptor const& value);
+    void set_z_pid(PID_Controller_Descriptor&& value);
     auto get_z_pid() const -> PID_Controller_Descriptor const&;
     auto get_z_pid() -> PID_Controller_Descriptor&;
 
@@ -1803,9 +2049,11 @@ public:
     typedef float torque_t;
     virtual ~Feedforward() = default;
     void set_weight(muf_t const& value);
+    void set_weight(muf_t&& value);
     auto get_weight() const -> muf_t const&;
 
     void set_max_torque(torque_t const& value);
+    void set_max_torque(torque_t&& value);
     auto get_max_torque() const -> torque_t const&;
 
   private:
@@ -1815,10 +2063,12 @@ public:
 
   virtual ~Rate_Controller_Config() = default;
   void set_feedback(Feedback const& value);
+  void set_feedback(Feedback&& value);
   auto get_feedback() const -> Feedback const&;
   auto get_feedback() -> Feedback&;
 
   void set_feedforward(Feedforward const& value);
+  void set_feedforward(Feedforward&& value);
   auto get_feedforward() const -> Feedforward const&;
   auto get_feedforward() -> Feedforward&;
 
@@ -1837,9 +2087,11 @@ public:
     typedef uint32_t bitrate_t;
     virtual ~Quality() = default;
     void set_resolution(resolution_t const& value);
+    void set_resolution(resolution_t&& value);
     auto get_resolution() const -> resolution_t const&;
 
     void set_bitrate(bitrate_t const& value);
+    void set_bitrate(bitrate_t&& value);
     auto get_bitrate() const -> bitrate_t const&;
 
   private:
@@ -1850,17 +2102,21 @@ public:
   typedef int32_t fps_t;
   virtual ~Raspicam_Descriptor() = default;
   void set_fps(fps_t const& value);
+  void set_fps(fps_t&& value);
   auto get_fps() const -> fps_t const&;
 
   void set_streaming_low(Quality const& value);
+  void set_streaming_low(Quality&& value);
   auto get_streaming_low() const -> Quality const&;
   auto get_streaming_low() -> Quality&;
 
   void set_streaming_high(Quality const& value);
+  void set_streaming_high(Quality&& value);
   auto get_streaming_high() const -> Quality const&;
   auto get_streaming_high() -> Quality&;
 
   void set_recording(Quality const& value);
+  void set_recording(Quality&& value);
   auto get_recording() const -> Quality const&;
   auto get_recording() -> Quality&;
 
@@ -1898,33 +2154,43 @@ public:
 
   virtual ~Raspicam_Config() = default;
   void set_iso(iso_t const& value);
+  void set_iso(iso_t&& value);
   auto get_iso() const -> iso_t const&;
 
   void set_shutter_speed(shutter_speed_t const& value);
+  void set_shutter_speed(shutter_speed_t&& value);
   auto get_shutter_speed() const -> shutter_speed_t const&;
 
   void set_ev(ev_t const& value);
+  void set_ev(ev_t&& value);
   auto get_ev() const -> ev_t const&;
 
   void set_sharpness(sharpness_t const& value);
+  void set_sharpness(sharpness_t&& value);
   auto get_sharpness() const -> sharpness_t const&;
 
   void set_contrast(contrast_t const& value);
+  void set_contrast(contrast_t&& value);
   auto get_contrast() const -> contrast_t const&;
 
   void set_brightness(brightness_t const& value);
+  void set_brightness(brightness_t&& value);
   auto get_brightness() const -> brightness_t const&;
 
   void set_saturation(saturation_t const& value);
+  void set_saturation(saturation_t&& value);
   auto get_saturation() const -> saturation_t const&;
 
   void set_awb_mode(awb_mode_t const& value);
+  void set_awb_mode(awb_mode_t&& value);
   auto get_awb_mode() const -> awb_mode_t const&;
 
   void set_quality(quality_t const& value);
+  void set_quality(quality_t&& value);
   auto get_quality() const -> quality_t const&;
 
   void set_recording(bool const& value);
+  void set_recording(bool&& value);
   auto get_recording() const -> bool const&;
 
 private:
@@ -1946,12 +2212,15 @@ public:
   typedef uint32_t rate_t;
   virtual ~RC5T619_Descriptor() = default;
   void set_bus(std::string const& value);
+  void set_bus(std::string&& value);
   auto get_bus() const -> std::string const&;
 
   void set_adc0_rate(uint32_t const& value);
+  void set_adc0_rate(uint32_t&& value);
   auto get_adc0_rate() const -> uint32_t const&;
 
   void set_adc1_rate(uint32_t const& value);
+  void set_adc1_rate(uint32_t&& value);
   auto get_adc1_rate() const -> uint32_t const&;
 
 private:
@@ -1973,9 +2242,11 @@ public:
   typedef uint32_t rate_t;
   virtual ~Resampler_Descriptor() = default;
   void set_input_rate(uint32_t const& value);
+  void set_input_rate(uint32_t&& value);
   auto get_input_rate() const -> uint32_t const&;
 
   void set_output_rate(uint32_t const& value);
+  void set_output_rate(uint32_t&& value);
   auto get_output_rate() const -> uint32_t const&;
 
 private:
@@ -1988,6 +2259,7 @@ struct Resampler_Config : public INode_Config
 public:
   virtual ~Resampler_Config() = default;
   void set_lpf(LPF_Config const& value);
+  void set_lpf(LPF_Config&& value);
   auto get_lpf() const -> LPF_Config const&;
   auto get_lpf() -> LPF_Config&;
 
@@ -2001,6 +2273,7 @@ public:
   typedef uint32_t rate_t;
   virtual ~Scalar_Generator_Descriptor() = default;
   void set_rate(uint32_t const& value);
+  void set_rate(uint32_t&& value);
   auto get_rate() const -> uint32_t const&;
 
 private:
@@ -2012,6 +2285,7 @@ struct Scalar_Generator_Config : public INode_Config
 public:
   virtual ~Scalar_Generator_Config() = default;
   void set_value(float const& value);
+  void set_value(float&& value);
   auto get_value() const -> float const&;
 
 private:
@@ -2024,9 +2298,11 @@ public:
   typedef uint32_t rate_t;
   virtual ~Servo_Gimbal_Descriptor() = default;
   void set_rate(uint32_t const& value);
+  void set_rate(uint32_t&& value);
   auto get_rate() const -> uint32_t const&;
 
   void set_commands_rate(uint32_t const& value);
+  void set_commands_rate(uint32_t&& value);
   auto get_commands_rate() const -> uint32_t const&;
 
 private:
@@ -2042,15 +2318,19 @@ public:
   public:
     virtual ~Channel() = default;
     void set_min_angle(euler_t const& value);
+    void set_min_angle(euler_t&& value);
     auto get_min_angle() const -> euler_t const&;
 
     void set_max_angle(euler_t const& value);
+    void set_max_angle(euler_t&& value);
     auto get_max_angle() const -> euler_t const&;
 
     void set_min_pwm(pwm_signal_t const& value);
+    void set_min_pwm(pwm_signal_t&& value);
     auto get_min_pwm() const -> pwm_signal_t const&;
 
     void set_max_pwm(pwm_signal_t const& value);
+    void set_max_pwm(pwm_signal_t&& value);
     auto get_max_pwm() const -> pwm_signal_t const&;
 
   private:
@@ -2062,14 +2342,17 @@ public:
 
   virtual ~Servo_Gimbal_Config() = default;
   void set_x_channel(Channel const& value);
+  void set_x_channel(Channel&& value);
   auto get_x_channel() const -> Channel const&;
   auto get_x_channel() -> Channel&;
 
   void set_y_channel(Channel const& value);
+  void set_y_channel(Channel&& value);
   auto get_y_channel() const -> Channel const&;
   auto get_y_channel() -> Channel&;
 
   void set_z_channel(Channel const& value);
+  void set_z_channel(Channel&& value);
   auto get_z_channel() const -> Channel const&;
   auto get_z_channel() -> Channel&;
 
@@ -2085,9 +2368,11 @@ public:
   typedef uint32_t rate_t;
   virtual ~SRF01_Descriptor() = default;
   void set_bus(std::string const& value);
+  void set_bus(std::string&& value);
   auto get_bus() const -> std::string const&;
 
   void set_rate(uint32_t const& value);
+  void set_rate(uint32_t&& value);
   auto get_rate() const -> uint32_t const&;
 
 private:
@@ -2100,12 +2385,15 @@ struct SRF01_Config : public INode_Config
 public:
   virtual ~SRF01_Config() = default;
   void set_direction(direction_t const& value);
+  void set_direction(direction_t&& value);
   auto get_direction() const -> direction_t const&;
 
   void set_max_distance(ufloat const& value);
+  void set_max_distance(ufloat&& value);
   auto get_max_distance() const -> ufloat const&;
 
   void set_min_distance(ufloat const& value);
+  void set_min_distance(ufloat&& value);
   auto get_min_distance() const -> ufloat const&;
 
 private:
@@ -2120,9 +2408,11 @@ public:
   typedef uint32_t rate_t;
   virtual ~SRF02_Descriptor() = default;
   void set_bus(std::string const& value);
+  void set_bus(std::string&& value);
   auto get_bus() const -> std::string const&;
 
   void set_rate(uint32_t const& value);
+  void set_rate(uint32_t&& value);
   auto get_rate() const -> uint32_t const&;
 
 private:
@@ -2135,12 +2425,15 @@ struct SRF02_Config : public INode_Config
 public:
   virtual ~SRF02_Config() = default;
   void set_direction(direction_t const& value);
+  void set_direction(direction_t&& value);
   auto get_direction() const -> direction_t const&;
 
   void set_max_distance(ufloat const& value);
+  void set_max_distance(ufloat&& value);
   auto get_max_distance() const -> ufloat const&;
 
   void set_min_distance(ufloat const& value);
+  void set_min_distance(ufloat&& value);
   auto get_min_distance() const -> ufloat const&;
 
 private:
@@ -2156,9 +2449,11 @@ public:
   typedef int32_t channel_count_t;
   virtual ~Throttle_To_PWM_Descriptor() = default;
   void set_rate(uint32_t const& value);
+  void set_rate(uint32_t&& value);
   auto get_rate() const -> uint32_t const&;
 
   void set_channel_count(channel_count_t const& value);
+  void set_channel_count(channel_count_t&& value);
   auto get_channel_count() const -> channel_count_t const&;
 
 private:
@@ -2179,6 +2474,7 @@ public:
   typedef uint32_t rate_t;
   virtual ~Transformer_Descriptor() = default;
   void set_rate(uint32_t const& value);
+  void set_rate(uint32_t&& value);
   auto get_rate() const -> uint32_t const&;
 
 private:
@@ -2198,9 +2494,11 @@ public:
   typedef uint32_t rate_t;
   virtual ~UBLOX_Descriptor() = default;
   void set_bus(std::string const& value);
+  void set_bus(std::string&& value);
   auto get_bus() const -> std::string const&;
 
   void set_rate(uint32_t const& value);
+  void set_rate(uint32_t&& value);
   auto get_rate() const -> uint32_t const&;
 
 private:
@@ -2221,6 +2519,7 @@ public:
   typedef uint32_t rate_t;
   virtual ~Vec3_Generator_Descriptor() = default;
   void set_rate(uint32_t const& value);
+  void set_rate(uint32_t&& value);
   auto get_rate() const -> uint32_t const&;
 
 private:
@@ -2232,6 +2531,7 @@ struct Vec3_Generator_Config : public INode_Config
 public:
   virtual ~Vec3_Generator_Config() = default;
   void set_value(vec3f const& value);
+  void set_value(vec3f&& value);
   auto get_value() const -> vec3f const&;
 
 private:

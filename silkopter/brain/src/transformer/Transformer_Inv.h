@@ -7,6 +7,8 @@
 #include "Sample_Accumulator.h"
 #include "Basic_Output_Stream.h"
 
+#include "uav.def.h"
+
 namespace silk
 {
 namespace node
@@ -52,6 +54,8 @@ private:
 template<class In_Stream_t, class Out_Stream_t, class Frame_Stream_t>
 Transformer_Inv<In_Stream_t, Out_Stream_t, Frame_Stream_t>::Transformer_Inv(UAV& uav)
     : m_uav(uav)
+    , m_descriptor(new uav::Transformer_Descriptor)
+    , m_config(new uav::Transformer_Config)
 {
     static_assert(In_Stream_t::SEMANTIC == Out_Stream_t::SEMANTIC, "Both streams need to have the same semantic");
     static_assert(In_Stream_t::SPACE == Frame_Stream_t::SPACE, "Bad Input stream or Frame");

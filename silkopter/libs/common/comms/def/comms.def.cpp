@@ -27,6 +27,10 @@ namespace setup
   {
     m_message = value;
   }
+  void Error::set_message(std::string&& value)
+  {
+    m_message = std::move(value);
+  }
   auto Error::get_message() const -> std::string const& 
   {
     return m_message;
@@ -36,6 +40,10 @@ namespace setup
   void Set_Clock_Req::set_time(setup::time_ms_t const& value)
   {
     m_time = value;
+  }
+  void Set_Clock_Req::set_time(setup::time_ms_t&& value)
+  {
+    m_time = std::move(value);
   }
   auto Set_Clock_Req::get_time() const -> setup::time_ms_t const& 
   {
@@ -47,6 +55,10 @@ namespace setup
   {
     m_time = value;
   }
+  void Set_Clock_Res::set_time(setup::time_ms_t&& value)
+  {
+    m_time = std::move(value);
+  }
   auto Set_Clock_Res::get_time() const -> setup::time_ms_t const& 
   {
     return m_time;
@@ -56,6 +68,10 @@ namespace setup
   void Set_Clock_Res::set_error(boost::optional<setup::Error> const& value)
   {
     m_error = value;
+  }
+  void Set_Clock_Res::set_error(boost::optional<setup::Error>&& value)
+  {
+    m_error = std::move(value);
   }
   auto Set_Clock_Res::get_error() const -> boost::optional<setup::Error> const& 
   {
@@ -72,6 +88,10 @@ namespace setup
   {
     m_data = value;
   }
+  void Set_UAV_Descriptor_Req::set_data(setup::serialized_data_t&& value)
+  {
+    m_data = std::move(value);
+  }
   auto Set_UAV_Descriptor_Req::get_data() const -> setup::serialized_data_t const& 
   {
     return m_data;
@@ -81,6 +101,10 @@ namespace setup
   void Set_UAV_Descriptor_Res::set_data(setup::serialized_data_t const& value)
   {
     m_data = value;
+  }
+  void Set_UAV_Descriptor_Res::set_data(setup::serialized_data_t&& value)
+  {
+    m_data = std::move(value);
   }
   auto Set_UAV_Descriptor_Res::get_data() const -> setup::serialized_data_t const& 
   {
@@ -92,6 +116,10 @@ namespace setup
   {
     m_data = value;
   }
+  void Get_UAV_Descriptor_Res::set_data(setup::serialized_data_t&& value)
+  {
+    m_data = std::move(value);
+  }
   auto Get_UAV_Descriptor_Res::get_data() const -> setup::serialized_data_t const& 
   {
     return m_data;
@@ -102,6 +130,10 @@ namespace setup
     {
       m_name = value;
     }
+    void Node_Def_Data::Input::set_name(std::string&& value)
+    {
+      m_name = std::move(value);
+    }
     auto Node_Def_Data::Input::get_name() const -> std::string const& 
     {
       return m_name;
@@ -110,7 +142,11 @@ namespace setup
 ////////////////////////////////////////////////////////////
     void Node_Def_Data::Input::set_space(uint8_t const& value)
     {
-      m_space = clamp(value, uint8_t(0), uint8_t(255));
+      m_space = value;
+    }
+    void Node_Def_Data::Input::set_space(uint8_t&& value)
+    {
+      m_space = std::move(value);
     }
     auto Node_Def_Data::Input::get_space() const -> uint8_t const& 
     {
@@ -120,7 +156,11 @@ namespace setup
 ////////////////////////////////////////////////////////////
     void Node_Def_Data::Input::set_semantic(uint8_t const& value)
     {
-      m_semantic = clamp(value, uint8_t(0), uint8_t(255));
+      m_semantic = value;
+    }
+    void Node_Def_Data::Input::set_semantic(uint8_t&& value)
+    {
+      m_semantic = std::move(value);
     }
     auto Node_Def_Data::Input::get_semantic() const -> uint8_t const& 
     {
@@ -130,7 +170,11 @@ namespace setup
 ////////////////////////////////////////////////////////////
     void Node_Def_Data::Input::set_rate(uint32_t const& value)
     {
-      m_rate = clamp(value, uint32_t(0), uint32_t(4294967295LL));
+      m_rate = value;
+    }
+    void Node_Def_Data::Input::set_rate(uint32_t&& value)
+    {
+      m_rate = std::move(value);
     }
     auto Node_Def_Data::Input::get_rate() const -> uint32_t const& 
     {
@@ -142,6 +186,10 @@ namespace setup
     {
       m_name = value;
     }
+    void Node_Def_Data::Output::set_name(std::string&& value)
+    {
+      m_name = std::move(value);
+    }
     auto Node_Def_Data::Output::get_name() const -> std::string const& 
     {
       return m_name;
@@ -150,7 +198,11 @@ namespace setup
 ////////////////////////////////////////////////////////////
     void Node_Def_Data::Output::set_space(uint8_t const& value)
     {
-      m_space = clamp(value, uint8_t(0), uint8_t(255));
+      m_space = value;
+    }
+    void Node_Def_Data::Output::set_space(uint8_t&& value)
+    {
+      m_space = std::move(value);
     }
     auto Node_Def_Data::Output::get_space() const -> uint8_t const& 
     {
@@ -160,7 +212,11 @@ namespace setup
 ////////////////////////////////////////////////////////////
     void Node_Def_Data::Output::set_semantic(uint8_t const& value)
     {
-      m_semantic = clamp(value, uint8_t(0), uint8_t(255));
+      m_semantic = value;
+    }
+    void Node_Def_Data::Output::set_semantic(uint8_t&& value)
+    {
+      m_semantic = std::move(value);
     }
     auto Node_Def_Data::Output::get_semantic() const -> uint8_t const& 
     {
@@ -170,7 +226,11 @@ namespace setup
 ////////////////////////////////////////////////////////////
     void Node_Def_Data::Output::set_rate(uint32_t const& value)
     {
-      m_rate = clamp(value, uint32_t(0), uint32_t(4294967295LL));
+      m_rate = value;
+    }
+    void Node_Def_Data::Output::set_rate(uint32_t&& value)
+    {
+      m_rate = std::move(value);
     }
     auto Node_Def_Data::Output::get_rate() const -> uint32_t const& 
     {
@@ -182,6 +242,10 @@ namespace setup
   {
     m_name = value;
   }
+  void Node_Def_Data::set_name(std::string&& value)
+  {
+    m_name = std::move(value);
+  }
   auto Node_Def_Data::get_name() const -> std::string const& 
   {
     return m_name;
@@ -190,7 +254,11 @@ namespace setup
 ////////////////////////////////////////////////////////////
   void Node_Def_Data::set_type(uint8_t const& value)
   {
-    m_type = clamp(value, uint8_t(0), uint8_t(255));
+    m_type = value;
+  }
+  void Node_Def_Data::set_type(uint8_t&& value)
+  {
+    m_type = std::move(value);
   }
   auto Node_Def_Data::get_type() const -> uint8_t const& 
   {
@@ -201,6 +269,10 @@ namespace setup
   void Node_Def_Data::set_inputs(std::vector<setup::Node_Def_Data::Input> const& value)
   {
     m_inputs = value;
+  }
+  void Node_Def_Data::set_inputs(std::vector<setup::Node_Def_Data::Input>&& value)
+  {
+    m_inputs = std::move(value);
   }
   auto Node_Def_Data::get_inputs() const -> std::vector<setup::Node_Def_Data::Input> const& 
   {
@@ -217,6 +289,10 @@ namespace setup
   {
     m_outputs = value;
   }
+  void Node_Def_Data::set_outputs(std::vector<setup::Node_Def_Data::Output>&& value)
+  {
+    m_outputs = std::move(value);
+  }
   auto Node_Def_Data::get_outputs() const -> std::vector<setup::Node_Def_Data::Output> const& 
   {
     return m_outputs;
@@ -232,6 +308,10 @@ namespace setup
   {
     m_descriptor_data = value;
   }
+  void Node_Def_Data::set_descriptor_data(setup::serialized_data_t&& value)
+  {
+    m_descriptor_data = std::move(value);
+  }
   auto Node_Def_Data::get_descriptor_data() const -> setup::serialized_data_t const& 
   {
     return m_descriptor_data;
@@ -241,6 +321,10 @@ namespace setup
   void Get_Node_Defs_Res::set_node_def_datas(std::vector<setup::Node_Def_Data> const& value)
   {
     m_node_def_datas = value;
+  }
+  void Get_Node_Defs_Res::set_node_def_datas(std::vector<setup::Node_Def_Data>&& value)
+  {
+    m_node_def_datas = std::move(value);
   }
   auto Get_Node_Defs_Res::get_node_def_datas() const -> std::vector<setup::Node_Def_Data> const& 
   {
@@ -257,6 +341,10 @@ namespace setup
     {
       m_name = value;
     }
+    void Node_Data::Input::set_name(std::string&& value)
+    {
+      m_name = std::move(value);
+    }
     auto Node_Data::Input::get_name() const -> std::string const& 
     {
       return m_name;
@@ -265,7 +353,11 @@ namespace setup
 ////////////////////////////////////////////////////////////
     void Node_Data::Input::set_space(uint8_t const& value)
     {
-      m_space = clamp(value, uint8_t(0), uint8_t(255));
+      m_space = value;
+    }
+    void Node_Data::Input::set_space(uint8_t&& value)
+    {
+      m_space = std::move(value);
     }
     auto Node_Data::Input::get_space() const -> uint8_t const& 
     {
@@ -275,7 +367,11 @@ namespace setup
 ////////////////////////////////////////////////////////////
     void Node_Data::Input::set_semantic(uint8_t const& value)
     {
-      m_semantic = clamp(value, uint8_t(0), uint8_t(255));
+      m_semantic = value;
+    }
+    void Node_Data::Input::set_semantic(uint8_t&& value)
+    {
+      m_semantic = std::move(value);
     }
     auto Node_Data::Input::get_semantic() const -> uint8_t const& 
     {
@@ -285,7 +381,11 @@ namespace setup
 ////////////////////////////////////////////////////////////
     void Node_Data::Input::set_rate(uint32_t const& value)
     {
-      m_rate = clamp(value, uint32_t(0), uint32_t(4294967295LL));
+      m_rate = value;
+    }
+    void Node_Data::Input::set_rate(uint32_t&& value)
+    {
+      m_rate = std::move(value);
     }
     auto Node_Data::Input::get_rate() const -> uint32_t const& 
     {
@@ -297,6 +397,10 @@ namespace setup
     {
       m_stream_path = value;
     }
+    void Node_Data::Input::set_stream_path(std::string&& value)
+    {
+      m_stream_path = std::move(value);
+    }
     auto Node_Data::Input::get_stream_path() const -> std::string const& 
     {
       return m_stream_path;
@@ -307,6 +411,10 @@ namespace setup
     {
       m_name = value;
     }
+    void Node_Data::Output::set_name(std::string&& value)
+    {
+      m_name = std::move(value);
+    }
     auto Node_Data::Output::get_name() const -> std::string const& 
     {
       return m_name;
@@ -315,7 +423,11 @@ namespace setup
 ////////////////////////////////////////////////////////////
     void Node_Data::Output::set_space(uint8_t const& value)
     {
-      m_space = clamp(value, uint8_t(0), uint8_t(255));
+      m_space = value;
+    }
+    void Node_Data::Output::set_space(uint8_t&& value)
+    {
+      m_space = std::move(value);
     }
     auto Node_Data::Output::get_space() const -> uint8_t const& 
     {
@@ -325,7 +437,11 @@ namespace setup
 ////////////////////////////////////////////////////////////
     void Node_Data::Output::set_semantic(uint8_t const& value)
     {
-      m_semantic = clamp(value, uint8_t(0), uint8_t(255));
+      m_semantic = value;
+    }
+    void Node_Data::Output::set_semantic(uint8_t&& value)
+    {
+      m_semantic = std::move(value);
     }
     auto Node_Data::Output::get_semantic() const -> uint8_t const& 
     {
@@ -335,7 +451,11 @@ namespace setup
 ////////////////////////////////////////////////////////////
     void Node_Data::Output::set_rate(uint32_t const& value)
     {
-      m_rate = clamp(value, uint32_t(0), uint32_t(4294967295LL));
+      m_rate = value;
+    }
+    void Node_Data::Output::set_rate(uint32_t&& value)
+    {
+      m_rate = std::move(value);
     }
     auto Node_Data::Output::get_rate() const -> uint32_t const& 
     {
@@ -347,6 +467,10 @@ namespace setup
   {
     m_name = value;
   }
+  void Node_Data::set_name(std::string&& value)
+  {
+    m_name = std::move(value);
+  }
   auto Node_Data::get_name() const -> std::string const& 
   {
     return m_name;
@@ -355,7 +479,11 @@ namespace setup
 ////////////////////////////////////////////////////////////
   void Node_Data::set_type(uint8_t const& value)
   {
-    m_type = clamp(value, uint8_t(0), uint8_t(255));
+    m_type = value;
+  }
+  void Node_Data::set_type(uint8_t&& value)
+  {
+    m_type = std::move(value);
   }
   auto Node_Data::get_type() const -> uint8_t const& 
   {
@@ -366,6 +494,10 @@ namespace setup
   void Node_Data::set_inputs(std::vector<setup::Node_Data::Input> const& value)
   {
     m_inputs = value;
+  }
+  void Node_Data::set_inputs(std::vector<setup::Node_Data::Input>&& value)
+  {
+    m_inputs = std::move(value);
   }
   auto Node_Data::get_inputs() const -> std::vector<setup::Node_Data::Input> const& 
   {
@@ -382,6 +514,10 @@ namespace setup
   {
     m_outputs = value;
   }
+  void Node_Data::set_outputs(std::vector<setup::Node_Data::Output>&& value)
+  {
+    m_outputs = std::move(value);
+  }
   auto Node_Data::get_outputs() const -> std::vector<setup::Node_Data::Output> const& 
   {
     return m_outputs;
@@ -397,6 +533,10 @@ namespace setup
   {
     m_descriptor_data = value;
   }
+  void Node_Data::set_descriptor_data(setup::serialized_data_t&& value)
+  {
+    m_descriptor_data = std::move(value);
+  }
   auto Node_Data::get_descriptor_data() const -> setup::serialized_data_t const& 
   {
     return m_descriptor_data;
@@ -406,6 +546,10 @@ namespace setup
   void Node_Data::set_config_data(setup::serialized_data_t const& value)
   {
     m_config_data = value;
+  }
+  void Node_Data::set_config_data(setup::serialized_data_t&& value)
+  {
+    m_config_data = std::move(value);
   }
   auto Node_Data::get_config_data() const -> setup::serialized_data_t const& 
   {
@@ -417,6 +561,10 @@ namespace setup
   {
     m_name = value;
   }
+  void Get_Nodes_Req::set_name(std::string&& value)
+  {
+    m_name = std::move(value);
+  }
   auto Get_Nodes_Req::get_name() const -> std::string const& 
   {
     return m_name;
@@ -426,6 +574,10 @@ namespace setup
   void Get_Nodes_Res::set_node_datas(std::vector<setup::Node_Data> const& value)
   {
     m_node_datas = value;
+  }
+  void Get_Nodes_Res::set_node_datas(std::vector<setup::Node_Data>&& value)
+  {
+    m_node_datas = std::move(value);
   }
   auto Get_Nodes_Res::get_node_datas() const -> std::vector<setup::Node_Data> const& 
   {
@@ -442,6 +594,10 @@ namespace setup
   {
     m_node_name = value;
   }
+  void Set_Node_Input_Stream_Path_Req::set_node_name(std::string&& value)
+  {
+    m_node_name = std::move(value);
+  }
   auto Set_Node_Input_Stream_Path_Req::get_node_name() const -> std::string const& 
   {
     return m_node_name;
@@ -451,6 +607,10 @@ namespace setup
   void Set_Node_Input_Stream_Path_Req::set_input_name(std::string const& value)
   {
     m_input_name = value;
+  }
+  void Set_Node_Input_Stream_Path_Req::set_input_name(std::string&& value)
+  {
+    m_input_name = std::move(value);
   }
   auto Set_Node_Input_Stream_Path_Req::get_input_name() const -> std::string const& 
   {
@@ -462,6 +622,10 @@ namespace setup
   {
     m_stream_path = value;
   }
+  void Set_Node_Input_Stream_Path_Req::set_stream_path(std::string&& value)
+  {
+    m_stream_path = std::move(value);
+  }
   auto Set_Node_Input_Stream_Path_Req::get_stream_path() const -> std::string const& 
   {
     return m_stream_path;
@@ -471,6 +635,10 @@ namespace setup
   void Set_Node_Input_Stream_Path_Res::set_node_data(setup::Node_Data const& value)
   {
     m_node_data = value;
+  }
+  void Set_Node_Input_Stream_Path_Res::set_node_data(setup::Node_Data&& value)
+  {
+    m_node_data = std::move(value);
   }
   auto Set_Node_Input_Stream_Path_Res::get_node_data() const -> setup::Node_Data const& 
   {
@@ -487,6 +655,10 @@ namespace setup
   {
     m_def_name = value;
   }
+  void Add_Node_Req::set_def_name(std::string&& value)
+  {
+    m_def_name = std::move(value);
+  }
   auto Add_Node_Req::get_def_name() const -> std::string const& 
   {
     return m_def_name;
@@ -496,6 +668,10 @@ namespace setup
   void Add_Node_Req::set_name(std::string const& value)
   {
     m_name = value;
+  }
+  void Add_Node_Req::set_name(std::string&& value)
+  {
+    m_name = std::move(value);
   }
   auto Add_Node_Req::get_name() const -> std::string const& 
   {
@@ -507,6 +683,10 @@ namespace setup
   {
     m_descriptor_data = value;
   }
+  void Add_Node_Req::set_descriptor_data(setup::serialized_data_t&& value)
+  {
+    m_descriptor_data = std::move(value);
+  }
   auto Add_Node_Req::get_descriptor_data() const -> setup::serialized_data_t const& 
   {
     return m_descriptor_data;
@@ -516,6 +696,10 @@ namespace setup
   void Add_Node_Res::set_node_data(setup::Node_Data const& value)
   {
     m_node_data = value;
+  }
+  void Add_Node_Res::set_node_data(setup::Node_Data&& value)
+  {
+    m_node_data = std::move(value);
   }
   auto Add_Node_Res::get_node_data() const -> setup::Node_Data const& 
   {
@@ -531,6 +715,10 @@ namespace setup
   void Remove_Node_Req::set_name(std::string const& value)
   {
     m_name = value;
+  }
+  void Remove_Node_Req::set_name(std::string&& value)
+  {
+    m_name = std::move(value);
   }
   auto Remove_Node_Req::get_name() const -> std::string const& 
   {
@@ -609,14 +797,8 @@ ts::Result<void> deserialize(vec2f& value, ts::sz::Value const& sz_value)
 ts::sz::Value serialize(vec2f const& value)
 {
   ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
-  {
-    auto result = serialize(value.x);
-    sz_value.add_object_member("x", std::move(result));
-  }
-  {
-    auto result = serialize(value.y);
-    sz_value.add_object_member("y", std::move(result));
-  }
+  sz_value.add_object_member("x", serialize(value.x));
+  sz_value.add_object_member("y", serialize(value.y));
   return sz_value;
 }
 ts::Result<void> deserialize(vec2d& value, ts::sz::Value const& sz_value)
@@ -639,14 +821,8 @@ ts::Result<void> deserialize(vec2d& value, ts::sz::Value const& sz_value)
 ts::sz::Value serialize(vec2d const& value)
 {
   ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
-  {
-    auto result = serialize(value.x);
-    sz_value.add_object_member("x", std::move(result));
-  }
-  {
-    auto result = serialize(value.y);
-    sz_value.add_object_member("y", std::move(result));
-  }
+  sz_value.add_object_member("x", serialize(value.x));
+  sz_value.add_object_member("y", serialize(value.y));
   return sz_value;
 }
 ts::Result<void> deserialize(vec2i& value, ts::sz::Value const& sz_value)
@@ -669,14 +845,8 @@ ts::Result<void> deserialize(vec2i& value, ts::sz::Value const& sz_value)
 ts::sz::Value serialize(vec2i const& value)
 {
   ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
-  {
-    auto result = serialize(value.x);
-    sz_value.add_object_member("x", std::move(result));
-  }
-  {
-    auto result = serialize(value.y);
-    sz_value.add_object_member("y", std::move(result));
-  }
+  sz_value.add_object_member("x", serialize(value.x));
+  sz_value.add_object_member("y", serialize(value.y));
   return sz_value;
 }
 ts::Result<void> deserialize(vec3f& value, ts::sz::Value const& sz_value)
@@ -705,18 +875,9 @@ ts::Result<void> deserialize(vec3f& value, ts::sz::Value const& sz_value)
 ts::sz::Value serialize(vec3f const& value)
 {
   ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
-  {
-    auto result = serialize(value.x);
-    sz_value.add_object_member("x", std::move(result));
-  }
-  {
-    auto result = serialize(value.y);
-    sz_value.add_object_member("y", std::move(result));
-  }
-  {
-    auto result = serialize(value.z);
-    sz_value.add_object_member("z", std::move(result));
-  }
+  sz_value.add_object_member("x", serialize(value.x));
+  sz_value.add_object_member("y", serialize(value.y));
+  sz_value.add_object_member("z", serialize(value.z));
   return sz_value;
 }
 ts::Result<void> deserialize(vec3d& value, ts::sz::Value const& sz_value)
@@ -745,18 +906,9 @@ ts::Result<void> deserialize(vec3d& value, ts::sz::Value const& sz_value)
 ts::sz::Value serialize(vec3d const& value)
 {
   ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
-  {
-    auto result = serialize(value.x);
-    sz_value.add_object_member("x", std::move(result));
-  }
-  {
-    auto result = serialize(value.y);
-    sz_value.add_object_member("y", std::move(result));
-  }
-  {
-    auto result = serialize(value.z);
-    sz_value.add_object_member("z", std::move(result));
-  }
+  sz_value.add_object_member("x", serialize(value.x));
+  sz_value.add_object_member("y", serialize(value.y));
+  sz_value.add_object_member("z", serialize(value.z));
   return sz_value;
 }
 ts::Result<void> deserialize(vec3i& value, ts::sz::Value const& sz_value)
@@ -785,18 +937,9 @@ ts::Result<void> deserialize(vec3i& value, ts::sz::Value const& sz_value)
 ts::sz::Value serialize(vec3i const& value)
 {
   ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
-  {
-    auto result = serialize(value.x);
-    sz_value.add_object_member("x", std::move(result));
-  }
-  {
-    auto result = serialize(value.y);
-    sz_value.add_object_member("y", std::move(result));
-  }
-  {
-    auto result = serialize(value.z);
-    sz_value.add_object_member("z", std::move(result));
-  }
+  sz_value.add_object_member("x", serialize(value.x));
+  sz_value.add_object_member("y", serialize(value.y));
+  sz_value.add_object_member("z", serialize(value.z));
   return sz_value;
 }
 ts::Result<void> deserialize(vec4f& value, ts::sz::Value const& sz_value)
@@ -831,22 +974,10 @@ ts::Result<void> deserialize(vec4f& value, ts::sz::Value const& sz_value)
 ts::sz::Value serialize(vec4f const& value)
 {
   ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
-  {
-    auto result = serialize(value.x);
-    sz_value.add_object_member("x", std::move(result));
-  }
-  {
-    auto result = serialize(value.y);
-    sz_value.add_object_member("y", std::move(result));
-  }
-  {
-    auto result = serialize(value.z);
-    sz_value.add_object_member("z", std::move(result));
-  }
-  {
-    auto result = serialize(value.w);
-    sz_value.add_object_member("w", std::move(result));
-  }
+  sz_value.add_object_member("x", serialize(value.x));
+  sz_value.add_object_member("y", serialize(value.y));
+  sz_value.add_object_member("z", serialize(value.z));
+  sz_value.add_object_member("w", serialize(value.w));
   return sz_value;
 }
 ts::Result<void> deserialize(vec4d& value, ts::sz::Value const& sz_value)
@@ -881,22 +1012,10 @@ ts::Result<void> deserialize(vec4d& value, ts::sz::Value const& sz_value)
 ts::sz::Value serialize(vec4d const& value)
 {
   ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
-  {
-    auto result = serialize(value.x);
-    sz_value.add_object_member("x", std::move(result));
-  }
-  {
-    auto result = serialize(value.y);
-    sz_value.add_object_member("y", std::move(result));
-  }
-  {
-    auto result = serialize(value.z);
-    sz_value.add_object_member("z", std::move(result));
-  }
-  {
-    auto result = serialize(value.w);
-    sz_value.add_object_member("w", std::move(result));
-  }
+  sz_value.add_object_member("x", serialize(value.x));
+  sz_value.add_object_member("y", serialize(value.y));
+  sz_value.add_object_member("z", serialize(value.z));
+  sz_value.add_object_member("w", serialize(value.w));
   return sz_value;
 }
 ts::Result<void> deserialize(vec4i& value, ts::sz::Value const& sz_value)
@@ -931,22 +1050,10 @@ ts::Result<void> deserialize(vec4i& value, ts::sz::Value const& sz_value)
 ts::sz::Value serialize(vec4i const& value)
 {
   ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
-  {
-    auto result = serialize(value.x);
-    sz_value.add_object_member("x", std::move(result));
-  }
-  {
-    auto result = serialize(value.y);
-    sz_value.add_object_member("y", std::move(result));
-  }
-  {
-    auto result = serialize(value.z);
-    sz_value.add_object_member("z", std::move(result));
-  }
-  {
-    auto result = serialize(value.w);
-    sz_value.add_object_member("w", std::move(result));
-  }
+  sz_value.add_object_member("x", serialize(value.x));
+  sz_value.add_object_member("y", serialize(value.y));
+  sz_value.add_object_member("z", serialize(value.z));
+  sz_value.add_object_member("w", serialize(value.w));
   return sz_value;
 }
 ts::Result<void> deserialize(int8_t& value, ts::sz::Value const& sz_value)
@@ -1018,17 +1125,14 @@ ts::Result<void> deserialize(setup::Error& value, ts::sz::Value const& sz_value)
     std::remove_cv<std::remove_reference<decltype(value.get_message())>::type>::type v;
     auto result = deserialize(v, *member_sz_value);
     if (result != ts::success) { return result; }
-    value.set_message(v);
+    value.set_message(std::move(v));
   }
   return ts::success;
 }
 ts::sz::Value serialize(setup::Error const& value)
 {
   ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
-  {
-    auto result = serialize(value.get_message());
-    sz_value.add_object_member("message", std::move(result));
-  }
+  sz_value.add_object_member("message", serialize(value.get_message()));
   return sz_value;
 }
 ts::Result<void> deserialize(setup::Set_Clock_Req& value, ts::sz::Value const& sz_value)
@@ -1040,17 +1144,14 @@ ts::Result<void> deserialize(setup::Set_Clock_Req& value, ts::sz::Value const& s
     std::remove_cv<std::remove_reference<decltype(value.get_time())>::type>::type v;
     auto result = deserialize(v, *member_sz_value);
     if (result != ts::success) { return result; }
-    value.set_time(v);
+    value.set_time(std::move(v));
   }
   return ts::success;
 }
 ts::sz::Value serialize(setup::Set_Clock_Req const& value)
 {
   ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
-  {
-    auto result = serialize(value.get_time());
-    sz_value.add_object_member("time", std::move(result));
-  }
+  sz_value.add_object_member("time", serialize(value.get_time()));
   return sz_value;
 }
 ts::Result<void> deserialize(setup::Set_Clock_Res& value, ts::sz::Value const& sz_value)
@@ -1062,7 +1163,7 @@ ts::Result<void> deserialize(setup::Set_Clock_Res& value, ts::sz::Value const& s
     std::remove_cv<std::remove_reference<decltype(value.get_time())>::type>::type v;
     auto result = deserialize(v, *member_sz_value);
     if (result != ts::success) { return result; }
-    value.set_time(v);
+    value.set_time(std::move(v));
   }
   {
     auto const* member_sz_value = sz_value.find_object_member_by_name("error");
@@ -1070,21 +1171,15 @@ ts::Result<void> deserialize(setup::Set_Clock_Res& value, ts::sz::Value const& s
     std::remove_cv<std::remove_reference<decltype(value.get_error())>::type>::type v;
     auto result = deserialize(v, *member_sz_value);
     if (result != ts::success) { return result; }
-    value.set_error(v);
+    value.set_error(std::move(v));
   }
   return ts::success;
 }
 ts::sz::Value serialize(setup::Set_Clock_Res const& value)
 {
   ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
-  {
-    auto result = serialize(value.get_time());
-    sz_value.add_object_member("time", std::move(result));
-  }
-  {
-    auto result = serialize(value.get_error());
-    sz_value.add_object_member("error", std::move(result));
-  }
+  sz_value.add_object_member("time", serialize(value.get_time()));
+  sz_value.add_object_member("error", serialize(value.get_error()));
   return sz_value;
 }
 ts::Result<void> deserialize(setup::Set_UAV_Descriptor_Req& value, ts::sz::Value const& sz_value)
@@ -1096,17 +1191,14 @@ ts::Result<void> deserialize(setup::Set_UAV_Descriptor_Req& value, ts::sz::Value
     std::remove_cv<std::remove_reference<decltype(value.get_data())>::type>::type v;
     auto result = deserialize(v, *member_sz_value);
     if (result != ts::success) { return result; }
-    value.set_data(v);
+    value.set_data(std::move(v));
   }
   return ts::success;
 }
 ts::sz::Value serialize(setup::Set_UAV_Descriptor_Req const& value)
 {
   ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
-  {
-    auto result = serialize(value.get_data());
-    sz_value.add_object_member("data", std::move(result));
-  }
+  sz_value.add_object_member("data", serialize(value.get_data()));
   return sz_value;
 }
 ts::Result<void> deserialize(setup::Set_UAV_Descriptor_Res& value, ts::sz::Value const& sz_value)
@@ -1118,17 +1210,14 @@ ts::Result<void> deserialize(setup::Set_UAV_Descriptor_Res& value, ts::sz::Value
     std::remove_cv<std::remove_reference<decltype(value.get_data())>::type>::type v;
     auto result = deserialize(v, *member_sz_value);
     if (result != ts::success) { return result; }
-    value.set_data(v);
+    value.set_data(std::move(v));
   }
   return ts::success;
 }
 ts::sz::Value serialize(setup::Set_UAV_Descriptor_Res const& value)
 {
   ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
-  {
-    auto result = serialize(value.get_data());
-    sz_value.add_object_member("data", std::move(result));
-  }
+  sz_value.add_object_member("data", serialize(value.get_data()));
   return sz_value;
 }
 ts::Result<void> deserialize(setup::Get_UAV_Descriptor_Req& value, ts::sz::Value const& sz_value)
@@ -1150,17 +1239,14 @@ ts::Result<void> deserialize(setup::Get_UAV_Descriptor_Res& value, ts::sz::Value
     std::remove_cv<std::remove_reference<decltype(value.get_data())>::type>::type v;
     auto result = deserialize(v, *member_sz_value);
     if (result != ts::success) { return result; }
-    value.set_data(v);
+    value.set_data(std::move(v));
   }
   return ts::success;
 }
 ts::sz::Value serialize(setup::Get_UAV_Descriptor_Res const& value)
 {
   ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
-  {
-    auto result = serialize(value.get_data());
-    sz_value.add_object_member("data", std::move(result));
-  }
+  sz_value.add_object_member("data", serialize(value.get_data()));
   return sz_value;
 }
 ts::Result<void> deserialize(setup::Node_Def_Data::Input& value, ts::sz::Value const& sz_value)
@@ -1172,7 +1258,7 @@ ts::Result<void> deserialize(setup::Node_Def_Data::Input& value, ts::sz::Value c
     std::remove_cv<std::remove_reference<decltype(value.get_name())>::type>::type v;
     auto result = deserialize(v, *member_sz_value);
     if (result != ts::success) { return result; }
-    value.set_name(v);
+    value.set_name(std::move(v));
   }
   {
     auto const* member_sz_value = sz_value.find_object_member_by_name("space");
@@ -1180,7 +1266,7 @@ ts::Result<void> deserialize(setup::Node_Def_Data::Input& value, ts::sz::Value c
     std::remove_cv<std::remove_reference<decltype(value.get_space())>::type>::type v;
     auto result = deserialize(v, *member_sz_value);
     if (result != ts::success) { return result; }
-    value.set_space(v);
+    value.set_space(std::move(v));
   }
   {
     auto const* member_sz_value = sz_value.find_object_member_by_name("semantic");
@@ -1188,7 +1274,7 @@ ts::Result<void> deserialize(setup::Node_Def_Data::Input& value, ts::sz::Value c
     std::remove_cv<std::remove_reference<decltype(value.get_semantic())>::type>::type v;
     auto result = deserialize(v, *member_sz_value);
     if (result != ts::success) { return result; }
-    value.set_semantic(v);
+    value.set_semantic(std::move(v));
   }
   {
     auto const* member_sz_value = sz_value.find_object_member_by_name("rate");
@@ -1196,29 +1282,17 @@ ts::Result<void> deserialize(setup::Node_Def_Data::Input& value, ts::sz::Value c
     std::remove_cv<std::remove_reference<decltype(value.get_rate())>::type>::type v;
     auto result = deserialize(v, *member_sz_value);
     if (result != ts::success) { return result; }
-    value.set_rate(v);
+    value.set_rate(std::move(v));
   }
   return ts::success;
 }
 ts::sz::Value serialize(setup::Node_Def_Data::Input const& value)
 {
   ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
-  {
-    auto result = serialize(value.get_name());
-    sz_value.add_object_member("name", std::move(result));
-  }
-  {
-    auto result = serialize(value.get_space());
-    sz_value.add_object_member("space", std::move(result));
-  }
-  {
-    auto result = serialize(value.get_semantic());
-    sz_value.add_object_member("semantic", std::move(result));
-  }
-  {
-    auto result = serialize(value.get_rate());
-    sz_value.add_object_member("rate", std::move(result));
-  }
+  sz_value.add_object_member("name", serialize(value.get_name()));
+  sz_value.add_object_member("space", serialize(value.get_space()));
+  sz_value.add_object_member("semantic", serialize(value.get_semantic()));
+  sz_value.add_object_member("rate", serialize(value.get_rate()));
   return sz_value;
 }
 ts::Result<void> deserialize(setup::Node_Def_Data::Output& value, ts::sz::Value const& sz_value)
@@ -1230,7 +1304,7 @@ ts::Result<void> deserialize(setup::Node_Def_Data::Output& value, ts::sz::Value 
     std::remove_cv<std::remove_reference<decltype(value.get_name())>::type>::type v;
     auto result = deserialize(v, *member_sz_value);
     if (result != ts::success) { return result; }
-    value.set_name(v);
+    value.set_name(std::move(v));
   }
   {
     auto const* member_sz_value = sz_value.find_object_member_by_name("space");
@@ -1238,7 +1312,7 @@ ts::Result<void> deserialize(setup::Node_Def_Data::Output& value, ts::sz::Value 
     std::remove_cv<std::remove_reference<decltype(value.get_space())>::type>::type v;
     auto result = deserialize(v, *member_sz_value);
     if (result != ts::success) { return result; }
-    value.set_space(v);
+    value.set_space(std::move(v));
   }
   {
     auto const* member_sz_value = sz_value.find_object_member_by_name("semantic");
@@ -1246,7 +1320,7 @@ ts::Result<void> deserialize(setup::Node_Def_Data::Output& value, ts::sz::Value 
     std::remove_cv<std::remove_reference<decltype(value.get_semantic())>::type>::type v;
     auto result = deserialize(v, *member_sz_value);
     if (result != ts::success) { return result; }
-    value.set_semantic(v);
+    value.set_semantic(std::move(v));
   }
   {
     auto const* member_sz_value = sz_value.find_object_member_by_name("rate");
@@ -1254,29 +1328,17 @@ ts::Result<void> deserialize(setup::Node_Def_Data::Output& value, ts::sz::Value 
     std::remove_cv<std::remove_reference<decltype(value.get_rate())>::type>::type v;
     auto result = deserialize(v, *member_sz_value);
     if (result != ts::success) { return result; }
-    value.set_rate(v);
+    value.set_rate(std::move(v));
   }
   return ts::success;
 }
 ts::sz::Value serialize(setup::Node_Def_Data::Output const& value)
 {
   ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
-  {
-    auto result = serialize(value.get_name());
-    sz_value.add_object_member("name", std::move(result));
-  }
-  {
-    auto result = serialize(value.get_space());
-    sz_value.add_object_member("space", std::move(result));
-  }
-  {
-    auto result = serialize(value.get_semantic());
-    sz_value.add_object_member("semantic", std::move(result));
-  }
-  {
-    auto result = serialize(value.get_rate());
-    sz_value.add_object_member("rate", std::move(result));
-  }
+  sz_value.add_object_member("name", serialize(value.get_name()));
+  sz_value.add_object_member("space", serialize(value.get_space()));
+  sz_value.add_object_member("semantic", serialize(value.get_semantic()));
+  sz_value.add_object_member("rate", serialize(value.get_rate()));
   return sz_value;
 }
 ts::Result<void> deserialize(setup::Node_Def_Data& value, ts::sz::Value const& sz_value)
@@ -1288,7 +1350,7 @@ ts::Result<void> deserialize(setup::Node_Def_Data& value, ts::sz::Value const& s
     std::remove_cv<std::remove_reference<decltype(value.get_name())>::type>::type v;
     auto result = deserialize(v, *member_sz_value);
     if (result != ts::success) { return result; }
-    value.set_name(v);
+    value.set_name(std::move(v));
   }
   {
     auto const* member_sz_value = sz_value.find_object_member_by_name("type");
@@ -1296,7 +1358,7 @@ ts::Result<void> deserialize(setup::Node_Def_Data& value, ts::sz::Value const& s
     std::remove_cv<std::remove_reference<decltype(value.get_type())>::type>::type v;
     auto result = deserialize(v, *member_sz_value);
     if (result != ts::success) { return result; }
-    value.set_type(v);
+    value.set_type(std::move(v));
   }
   {
     auto const* member_sz_value = sz_value.find_object_member_by_name("inputs");
@@ -1304,7 +1366,7 @@ ts::Result<void> deserialize(setup::Node_Def_Data& value, ts::sz::Value const& s
     std::remove_cv<std::remove_reference<decltype(value.get_inputs())>::type>::type v;
     auto result = deserialize(v, *member_sz_value);
     if (result != ts::success) { return result; }
-    value.set_inputs(v);
+    value.set_inputs(std::move(v));
   }
   {
     auto const* member_sz_value = sz_value.find_object_member_by_name("outputs");
@@ -1312,7 +1374,7 @@ ts::Result<void> deserialize(setup::Node_Def_Data& value, ts::sz::Value const& s
     std::remove_cv<std::remove_reference<decltype(value.get_outputs())>::type>::type v;
     auto result = deserialize(v, *member_sz_value);
     if (result != ts::success) { return result; }
-    value.set_outputs(v);
+    value.set_outputs(std::move(v));
   }
   {
     auto const* member_sz_value = sz_value.find_object_member_by_name("descriptor_data");
@@ -1320,33 +1382,18 @@ ts::Result<void> deserialize(setup::Node_Def_Data& value, ts::sz::Value const& s
     std::remove_cv<std::remove_reference<decltype(value.get_descriptor_data())>::type>::type v;
     auto result = deserialize(v, *member_sz_value);
     if (result != ts::success) { return result; }
-    value.set_descriptor_data(v);
+    value.set_descriptor_data(std::move(v));
   }
   return ts::success;
 }
 ts::sz::Value serialize(setup::Node_Def_Data const& value)
 {
   ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
-  {
-    auto result = serialize(value.get_name());
-    sz_value.add_object_member("name", std::move(result));
-  }
-  {
-    auto result = serialize(value.get_type());
-    sz_value.add_object_member("type", std::move(result));
-  }
-  {
-    auto result = serialize(value.get_inputs());
-    sz_value.add_object_member("inputs", std::move(result));
-  }
-  {
-    auto result = serialize(value.get_outputs());
-    sz_value.add_object_member("outputs", std::move(result));
-  }
-  {
-    auto result = serialize(value.get_descriptor_data());
-    sz_value.add_object_member("descriptor_data", std::move(result));
-  }
+  sz_value.add_object_member("name", serialize(value.get_name()));
+  sz_value.add_object_member("type", serialize(value.get_type()));
+  sz_value.add_object_member("inputs", serialize(value.get_inputs()));
+  sz_value.add_object_member("outputs", serialize(value.get_outputs()));
+  sz_value.add_object_member("descriptor_data", serialize(value.get_descriptor_data()));
   return sz_value;
 }
 ts::Result<void> deserialize(setup::Get_Node_Defs_Req& value, ts::sz::Value const& sz_value)
@@ -1368,17 +1415,14 @@ ts::Result<void> deserialize(setup::Get_Node_Defs_Res& value, ts::sz::Value cons
     std::remove_cv<std::remove_reference<decltype(value.get_node_def_datas())>::type>::type v;
     auto result = deserialize(v, *member_sz_value);
     if (result != ts::success) { return result; }
-    value.set_node_def_datas(v);
+    value.set_node_def_datas(std::move(v));
   }
   return ts::success;
 }
 ts::sz::Value serialize(setup::Get_Node_Defs_Res const& value)
 {
   ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
-  {
-    auto result = serialize(value.get_node_def_datas());
-    sz_value.add_object_member("node_def_datas", std::move(result));
-  }
+  sz_value.add_object_member("node_def_datas", serialize(value.get_node_def_datas()));
   return sz_value;
 }
 ts::Result<void> deserialize(setup::Node_Data::Input& value, ts::sz::Value const& sz_value)
@@ -1390,7 +1434,7 @@ ts::Result<void> deserialize(setup::Node_Data::Input& value, ts::sz::Value const
     std::remove_cv<std::remove_reference<decltype(value.get_name())>::type>::type v;
     auto result = deserialize(v, *member_sz_value);
     if (result != ts::success) { return result; }
-    value.set_name(v);
+    value.set_name(std::move(v));
   }
   {
     auto const* member_sz_value = sz_value.find_object_member_by_name("space");
@@ -1398,7 +1442,7 @@ ts::Result<void> deserialize(setup::Node_Data::Input& value, ts::sz::Value const
     std::remove_cv<std::remove_reference<decltype(value.get_space())>::type>::type v;
     auto result = deserialize(v, *member_sz_value);
     if (result != ts::success) { return result; }
-    value.set_space(v);
+    value.set_space(std::move(v));
   }
   {
     auto const* member_sz_value = sz_value.find_object_member_by_name("semantic");
@@ -1406,7 +1450,7 @@ ts::Result<void> deserialize(setup::Node_Data::Input& value, ts::sz::Value const
     std::remove_cv<std::remove_reference<decltype(value.get_semantic())>::type>::type v;
     auto result = deserialize(v, *member_sz_value);
     if (result != ts::success) { return result; }
-    value.set_semantic(v);
+    value.set_semantic(std::move(v));
   }
   {
     auto const* member_sz_value = sz_value.find_object_member_by_name("rate");
@@ -1414,7 +1458,7 @@ ts::Result<void> deserialize(setup::Node_Data::Input& value, ts::sz::Value const
     std::remove_cv<std::remove_reference<decltype(value.get_rate())>::type>::type v;
     auto result = deserialize(v, *member_sz_value);
     if (result != ts::success) { return result; }
-    value.set_rate(v);
+    value.set_rate(std::move(v));
   }
   {
     auto const* member_sz_value = sz_value.find_object_member_by_name("stream_path");
@@ -1422,33 +1466,18 @@ ts::Result<void> deserialize(setup::Node_Data::Input& value, ts::sz::Value const
     std::remove_cv<std::remove_reference<decltype(value.get_stream_path())>::type>::type v;
     auto result = deserialize(v, *member_sz_value);
     if (result != ts::success) { return result; }
-    value.set_stream_path(v);
+    value.set_stream_path(std::move(v));
   }
   return ts::success;
 }
 ts::sz::Value serialize(setup::Node_Data::Input const& value)
 {
   ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
-  {
-    auto result = serialize(value.get_name());
-    sz_value.add_object_member("name", std::move(result));
-  }
-  {
-    auto result = serialize(value.get_space());
-    sz_value.add_object_member("space", std::move(result));
-  }
-  {
-    auto result = serialize(value.get_semantic());
-    sz_value.add_object_member("semantic", std::move(result));
-  }
-  {
-    auto result = serialize(value.get_rate());
-    sz_value.add_object_member("rate", std::move(result));
-  }
-  {
-    auto result = serialize(value.get_stream_path());
-    sz_value.add_object_member("stream_path", std::move(result));
-  }
+  sz_value.add_object_member("name", serialize(value.get_name()));
+  sz_value.add_object_member("space", serialize(value.get_space()));
+  sz_value.add_object_member("semantic", serialize(value.get_semantic()));
+  sz_value.add_object_member("rate", serialize(value.get_rate()));
+  sz_value.add_object_member("stream_path", serialize(value.get_stream_path()));
   return sz_value;
 }
 ts::Result<void> deserialize(setup::Node_Data::Output& value, ts::sz::Value const& sz_value)
@@ -1460,7 +1489,7 @@ ts::Result<void> deserialize(setup::Node_Data::Output& value, ts::sz::Value cons
     std::remove_cv<std::remove_reference<decltype(value.get_name())>::type>::type v;
     auto result = deserialize(v, *member_sz_value);
     if (result != ts::success) { return result; }
-    value.set_name(v);
+    value.set_name(std::move(v));
   }
   {
     auto const* member_sz_value = sz_value.find_object_member_by_name("space");
@@ -1468,7 +1497,7 @@ ts::Result<void> deserialize(setup::Node_Data::Output& value, ts::sz::Value cons
     std::remove_cv<std::remove_reference<decltype(value.get_space())>::type>::type v;
     auto result = deserialize(v, *member_sz_value);
     if (result != ts::success) { return result; }
-    value.set_space(v);
+    value.set_space(std::move(v));
   }
   {
     auto const* member_sz_value = sz_value.find_object_member_by_name("semantic");
@@ -1476,7 +1505,7 @@ ts::Result<void> deserialize(setup::Node_Data::Output& value, ts::sz::Value cons
     std::remove_cv<std::remove_reference<decltype(value.get_semantic())>::type>::type v;
     auto result = deserialize(v, *member_sz_value);
     if (result != ts::success) { return result; }
-    value.set_semantic(v);
+    value.set_semantic(std::move(v));
   }
   {
     auto const* member_sz_value = sz_value.find_object_member_by_name("rate");
@@ -1484,29 +1513,17 @@ ts::Result<void> deserialize(setup::Node_Data::Output& value, ts::sz::Value cons
     std::remove_cv<std::remove_reference<decltype(value.get_rate())>::type>::type v;
     auto result = deserialize(v, *member_sz_value);
     if (result != ts::success) { return result; }
-    value.set_rate(v);
+    value.set_rate(std::move(v));
   }
   return ts::success;
 }
 ts::sz::Value serialize(setup::Node_Data::Output const& value)
 {
   ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
-  {
-    auto result = serialize(value.get_name());
-    sz_value.add_object_member("name", std::move(result));
-  }
-  {
-    auto result = serialize(value.get_space());
-    sz_value.add_object_member("space", std::move(result));
-  }
-  {
-    auto result = serialize(value.get_semantic());
-    sz_value.add_object_member("semantic", std::move(result));
-  }
-  {
-    auto result = serialize(value.get_rate());
-    sz_value.add_object_member("rate", std::move(result));
-  }
+  sz_value.add_object_member("name", serialize(value.get_name()));
+  sz_value.add_object_member("space", serialize(value.get_space()));
+  sz_value.add_object_member("semantic", serialize(value.get_semantic()));
+  sz_value.add_object_member("rate", serialize(value.get_rate()));
   return sz_value;
 }
 ts::Result<void> deserialize(setup::Node_Data& value, ts::sz::Value const& sz_value)
@@ -1518,7 +1535,7 @@ ts::Result<void> deserialize(setup::Node_Data& value, ts::sz::Value const& sz_va
     std::remove_cv<std::remove_reference<decltype(value.get_name())>::type>::type v;
     auto result = deserialize(v, *member_sz_value);
     if (result != ts::success) { return result; }
-    value.set_name(v);
+    value.set_name(std::move(v));
   }
   {
     auto const* member_sz_value = sz_value.find_object_member_by_name("type");
@@ -1526,7 +1543,7 @@ ts::Result<void> deserialize(setup::Node_Data& value, ts::sz::Value const& sz_va
     std::remove_cv<std::remove_reference<decltype(value.get_type())>::type>::type v;
     auto result = deserialize(v, *member_sz_value);
     if (result != ts::success) { return result; }
-    value.set_type(v);
+    value.set_type(std::move(v));
   }
   {
     auto const* member_sz_value = sz_value.find_object_member_by_name("inputs");
@@ -1534,7 +1551,7 @@ ts::Result<void> deserialize(setup::Node_Data& value, ts::sz::Value const& sz_va
     std::remove_cv<std::remove_reference<decltype(value.get_inputs())>::type>::type v;
     auto result = deserialize(v, *member_sz_value);
     if (result != ts::success) { return result; }
-    value.set_inputs(v);
+    value.set_inputs(std::move(v));
   }
   {
     auto const* member_sz_value = sz_value.find_object_member_by_name("outputs");
@@ -1542,7 +1559,7 @@ ts::Result<void> deserialize(setup::Node_Data& value, ts::sz::Value const& sz_va
     std::remove_cv<std::remove_reference<decltype(value.get_outputs())>::type>::type v;
     auto result = deserialize(v, *member_sz_value);
     if (result != ts::success) { return result; }
-    value.set_outputs(v);
+    value.set_outputs(std::move(v));
   }
   {
     auto const* member_sz_value = sz_value.find_object_member_by_name("descriptor_data");
@@ -1550,7 +1567,7 @@ ts::Result<void> deserialize(setup::Node_Data& value, ts::sz::Value const& sz_va
     std::remove_cv<std::remove_reference<decltype(value.get_descriptor_data())>::type>::type v;
     auto result = deserialize(v, *member_sz_value);
     if (result != ts::success) { return result; }
-    value.set_descriptor_data(v);
+    value.set_descriptor_data(std::move(v));
   }
   {
     auto const* member_sz_value = sz_value.find_object_member_by_name("config_data");
@@ -1558,37 +1575,19 @@ ts::Result<void> deserialize(setup::Node_Data& value, ts::sz::Value const& sz_va
     std::remove_cv<std::remove_reference<decltype(value.get_config_data())>::type>::type v;
     auto result = deserialize(v, *member_sz_value);
     if (result != ts::success) { return result; }
-    value.set_config_data(v);
+    value.set_config_data(std::move(v));
   }
   return ts::success;
 }
 ts::sz::Value serialize(setup::Node_Data const& value)
 {
   ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
-  {
-    auto result = serialize(value.get_name());
-    sz_value.add_object_member("name", std::move(result));
-  }
-  {
-    auto result = serialize(value.get_type());
-    sz_value.add_object_member("type", std::move(result));
-  }
-  {
-    auto result = serialize(value.get_inputs());
-    sz_value.add_object_member("inputs", std::move(result));
-  }
-  {
-    auto result = serialize(value.get_outputs());
-    sz_value.add_object_member("outputs", std::move(result));
-  }
-  {
-    auto result = serialize(value.get_descriptor_data());
-    sz_value.add_object_member("descriptor_data", std::move(result));
-  }
-  {
-    auto result = serialize(value.get_config_data());
-    sz_value.add_object_member("config_data", std::move(result));
-  }
+  sz_value.add_object_member("name", serialize(value.get_name()));
+  sz_value.add_object_member("type", serialize(value.get_type()));
+  sz_value.add_object_member("inputs", serialize(value.get_inputs()));
+  sz_value.add_object_member("outputs", serialize(value.get_outputs()));
+  sz_value.add_object_member("descriptor_data", serialize(value.get_descriptor_data()));
+  sz_value.add_object_member("config_data", serialize(value.get_config_data()));
   return sz_value;
 }
 ts::Result<void> deserialize(setup::Get_Nodes_Req& value, ts::sz::Value const& sz_value)
@@ -1600,17 +1599,14 @@ ts::Result<void> deserialize(setup::Get_Nodes_Req& value, ts::sz::Value const& s
     std::remove_cv<std::remove_reference<decltype(value.get_name())>::type>::type v;
     auto result = deserialize(v, *member_sz_value);
     if (result != ts::success) { return result; }
-    value.set_name(v);
+    value.set_name(std::move(v));
   }
   return ts::success;
 }
 ts::sz::Value serialize(setup::Get_Nodes_Req const& value)
 {
   ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
-  {
-    auto result = serialize(value.get_name());
-    sz_value.add_object_member("name", std::move(result));
-  }
+  sz_value.add_object_member("name", serialize(value.get_name()));
   return sz_value;
 }
 ts::Result<void> deserialize(setup::Get_Nodes_Res& value, ts::sz::Value const& sz_value)
@@ -1622,17 +1618,14 @@ ts::Result<void> deserialize(setup::Get_Nodes_Res& value, ts::sz::Value const& s
     std::remove_cv<std::remove_reference<decltype(value.get_node_datas())>::type>::type v;
     auto result = deserialize(v, *member_sz_value);
     if (result != ts::success) { return result; }
-    value.set_node_datas(v);
+    value.set_node_datas(std::move(v));
   }
   return ts::success;
 }
 ts::sz::Value serialize(setup::Get_Nodes_Res const& value)
 {
   ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
-  {
-    auto result = serialize(value.get_node_datas());
-    sz_value.add_object_member("node_datas", std::move(result));
-  }
+  sz_value.add_object_member("node_datas", serialize(value.get_node_datas()));
   return sz_value;
 }
 ts::Result<void> deserialize(setup::Set_Node_Input_Stream_Path_Req& value, ts::sz::Value const& sz_value)
@@ -1644,7 +1637,7 @@ ts::Result<void> deserialize(setup::Set_Node_Input_Stream_Path_Req& value, ts::s
     std::remove_cv<std::remove_reference<decltype(value.get_node_name())>::type>::type v;
     auto result = deserialize(v, *member_sz_value);
     if (result != ts::success) { return result; }
-    value.set_node_name(v);
+    value.set_node_name(std::move(v));
   }
   {
     auto const* member_sz_value = sz_value.find_object_member_by_name("input_name");
@@ -1652,7 +1645,7 @@ ts::Result<void> deserialize(setup::Set_Node_Input_Stream_Path_Req& value, ts::s
     std::remove_cv<std::remove_reference<decltype(value.get_input_name())>::type>::type v;
     auto result = deserialize(v, *member_sz_value);
     if (result != ts::success) { return result; }
-    value.set_input_name(v);
+    value.set_input_name(std::move(v));
   }
   {
     auto const* member_sz_value = sz_value.find_object_member_by_name("stream_path");
@@ -1660,25 +1653,16 @@ ts::Result<void> deserialize(setup::Set_Node_Input_Stream_Path_Req& value, ts::s
     std::remove_cv<std::remove_reference<decltype(value.get_stream_path())>::type>::type v;
     auto result = deserialize(v, *member_sz_value);
     if (result != ts::success) { return result; }
-    value.set_stream_path(v);
+    value.set_stream_path(std::move(v));
   }
   return ts::success;
 }
 ts::sz::Value serialize(setup::Set_Node_Input_Stream_Path_Req const& value)
 {
   ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
-  {
-    auto result = serialize(value.get_node_name());
-    sz_value.add_object_member("node_name", std::move(result));
-  }
-  {
-    auto result = serialize(value.get_input_name());
-    sz_value.add_object_member("input_name", std::move(result));
-  }
-  {
-    auto result = serialize(value.get_stream_path());
-    sz_value.add_object_member("stream_path", std::move(result));
-  }
+  sz_value.add_object_member("node_name", serialize(value.get_node_name()));
+  sz_value.add_object_member("input_name", serialize(value.get_input_name()));
+  sz_value.add_object_member("stream_path", serialize(value.get_stream_path()));
   return sz_value;
 }
 ts::Result<void> deserialize(setup::Set_Node_Input_Stream_Path_Res& value, ts::sz::Value const& sz_value)
@@ -1690,17 +1674,14 @@ ts::Result<void> deserialize(setup::Set_Node_Input_Stream_Path_Res& value, ts::s
     std::remove_cv<std::remove_reference<decltype(value.get_node_data())>::type>::type v;
     auto result = deserialize(v, *member_sz_value);
     if (result != ts::success) { return result; }
-    value.set_node_data(v);
+    value.set_node_data(std::move(v));
   }
   return ts::success;
 }
 ts::sz::Value serialize(setup::Set_Node_Input_Stream_Path_Res const& value)
 {
   ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
-  {
-    auto result = serialize(value.get_node_data());
-    sz_value.add_object_member("node_data", std::move(result));
-  }
+  sz_value.add_object_member("node_data", serialize(value.get_node_data()));
   return sz_value;
 }
 ts::Result<void> deserialize(setup::Add_Node_Req& value, ts::sz::Value const& sz_value)
@@ -1712,7 +1693,7 @@ ts::Result<void> deserialize(setup::Add_Node_Req& value, ts::sz::Value const& sz
     std::remove_cv<std::remove_reference<decltype(value.get_def_name())>::type>::type v;
     auto result = deserialize(v, *member_sz_value);
     if (result != ts::success) { return result; }
-    value.set_def_name(v);
+    value.set_def_name(std::move(v));
   }
   {
     auto const* member_sz_value = sz_value.find_object_member_by_name("name");
@@ -1720,7 +1701,7 @@ ts::Result<void> deserialize(setup::Add_Node_Req& value, ts::sz::Value const& sz
     std::remove_cv<std::remove_reference<decltype(value.get_name())>::type>::type v;
     auto result = deserialize(v, *member_sz_value);
     if (result != ts::success) { return result; }
-    value.set_name(v);
+    value.set_name(std::move(v));
   }
   {
     auto const* member_sz_value = sz_value.find_object_member_by_name("descriptor_data");
@@ -1728,25 +1709,16 @@ ts::Result<void> deserialize(setup::Add_Node_Req& value, ts::sz::Value const& sz
     std::remove_cv<std::remove_reference<decltype(value.get_descriptor_data())>::type>::type v;
     auto result = deserialize(v, *member_sz_value);
     if (result != ts::success) { return result; }
-    value.set_descriptor_data(v);
+    value.set_descriptor_data(std::move(v));
   }
   return ts::success;
 }
 ts::sz::Value serialize(setup::Add_Node_Req const& value)
 {
   ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
-  {
-    auto result = serialize(value.get_def_name());
-    sz_value.add_object_member("def_name", std::move(result));
-  }
-  {
-    auto result = serialize(value.get_name());
-    sz_value.add_object_member("name", std::move(result));
-  }
-  {
-    auto result = serialize(value.get_descriptor_data());
-    sz_value.add_object_member("descriptor_data", std::move(result));
-  }
+  sz_value.add_object_member("def_name", serialize(value.get_def_name()));
+  sz_value.add_object_member("name", serialize(value.get_name()));
+  sz_value.add_object_member("descriptor_data", serialize(value.get_descriptor_data()));
   return sz_value;
 }
 ts::Result<void> deserialize(setup::Add_Node_Res& value, ts::sz::Value const& sz_value)
@@ -1758,17 +1730,14 @@ ts::Result<void> deserialize(setup::Add_Node_Res& value, ts::sz::Value const& sz
     std::remove_cv<std::remove_reference<decltype(value.get_node_data())>::type>::type v;
     auto result = deserialize(v, *member_sz_value);
     if (result != ts::success) { return result; }
-    value.set_node_data(v);
+    value.set_node_data(std::move(v));
   }
   return ts::success;
 }
 ts::sz::Value serialize(setup::Add_Node_Res const& value)
 {
   ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
-  {
-    auto result = serialize(value.get_node_data());
-    sz_value.add_object_member("node_data", std::move(result));
-  }
+  sz_value.add_object_member("node_data", serialize(value.get_node_data()));
   return sz_value;
 }
 ts::Result<void> deserialize(setup::Remove_Node_Req& value, ts::sz::Value const& sz_value)
@@ -1780,17 +1749,14 @@ ts::Result<void> deserialize(setup::Remove_Node_Req& value, ts::sz::Value const&
     std::remove_cv<std::remove_reference<decltype(value.get_name())>::type>::type v;
     auto result = deserialize(v, *member_sz_value);
     if (result != ts::success) { return result; }
-    value.set_name(v);
+    value.set_name(std::move(v));
   }
   return ts::success;
 }
 ts::sz::Value serialize(setup::Remove_Node_Req const& value)
 {
   ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
-  {
-    auto result = serialize(value.get_name());
-    sz_value.add_object_member("name", std::move(result));
-  }
+  sz_value.add_object_member("name", serialize(value.get_name()));
   return sz_value;
 }
 ts::Result<void> deserialize(setup::Remove_Node_Res& value, ts::sz::Value const& sz_value)
@@ -1812,61 +1778,53 @@ ts::Result<void> deserialize(setup::Brain_Req& value, ts::sz::Value const& sz_va
   if (!value_sz_value) { return ts::Error("Expected 'value' when deserializing"); }
   std::string const& path = type_sz_value->get_as_string();
   if (false) { return ts::Error(""); } //this is here just to have the next items with 'else if'
-  else if (path == "::setup::Set_Clock_Req")
+  else if (path == "setup::Set_Clock_Req")
   {
-    setup::Set_Clock_Req v;
+    value = setup::Set_Clock_Req();
     auto result = deserialize(boost::get<setup::Set_Clock_Req>(value), *value_sz_value);
     if (result != ts::success) { return result; }
-    value = v;
   }
-  else if (path == "::setup::Set_UAV_Descriptor_Req")
+  else if (path == "setup::Set_UAV_Descriptor_Req")
   {
-    setup::Set_UAV_Descriptor_Req v;
+    value = setup::Set_UAV_Descriptor_Req();
     auto result = deserialize(boost::get<setup::Set_UAV_Descriptor_Req>(value), *value_sz_value);
     if (result != ts::success) { return result; }
-    value = v;
   }
-  else if (path == "::setup::Get_UAV_Descriptor_Req")
+  else if (path == "setup::Get_UAV_Descriptor_Req")
   {
-    setup::Get_UAV_Descriptor_Req v;
+    value = setup::Get_UAV_Descriptor_Req();
     auto result = deserialize(boost::get<setup::Get_UAV_Descriptor_Req>(value), *value_sz_value);
     if (result != ts::success) { return result; }
-    value = v;
   }
-  else if (path == "::setup::Get_Node_Defs_Req")
+  else if (path == "setup::Get_Node_Defs_Req")
   {
-    setup::Get_Node_Defs_Req v;
+    value = setup::Get_Node_Defs_Req();
     auto result = deserialize(boost::get<setup::Get_Node_Defs_Req>(value), *value_sz_value);
     if (result != ts::success) { return result; }
-    value = v;
   }
-  else if (path == "::setup::Remove_Node_Req")
+  else if (path == "setup::Remove_Node_Req")
   {
-    setup::Remove_Node_Req v;
+    value = setup::Remove_Node_Req();
     auto result = deserialize(boost::get<setup::Remove_Node_Req>(value), *value_sz_value);
     if (result != ts::success) { return result; }
-    value = v;
   }
-  else if (path == "::setup::Add_Node_Req")
+  else if (path == "setup::Add_Node_Req")
   {
-    setup::Add_Node_Req v;
+    value = setup::Add_Node_Req();
     auto result = deserialize(boost::get<setup::Add_Node_Req>(value), *value_sz_value);
     if (result != ts::success) { return result; }
-    value = v;
   }
-  else if (path == "::setup::Get_Nodes_Req")
+  else if (path == "setup::Get_Nodes_Req")
   {
-    setup::Get_Nodes_Req v;
+    value = setup::Get_Nodes_Req();
     auto result = deserialize(boost::get<setup::Get_Nodes_Req>(value), *value_sz_value);
     if (result != ts::success) { return result; }
-    value = v;
   }
-  else if (path == "::setup::Set_Node_Input_Stream_Path_Req")
+  else if (path == "setup::Set_Node_Input_Stream_Path_Req")
   {
-    setup::Set_Node_Input_Stream_Path_Req v;
+    value = setup::Set_Node_Input_Stream_Path_Req();
     auto result = deserialize(boost::get<setup::Set_Node_Input_Stream_Path_Req>(value), *value_sz_value);
     if (result != ts::success) { return result; }
-    value = v;
   }
   else { return ts::Error("Cannot find type '" + path + "' when deserializing"); }
   return ts::success;
@@ -1878,57 +1836,49 @@ ts::sz::Value serialize(setup::Brain_Req const& value)
   else if (auto* v = boost::get<setup::Set_Clock_Req>(&value))
   {
     sz_value.add_object_member("type", "setup::Set_Clock_Req");
-    auto result = serialize(*v);
-    sz_value.add_object_member("value", std::move(result));
+    sz_value.add_object_member("value", serialize(*v));
     return std::move(sz_value);
   }
   else if (auto* v = boost::get<setup::Set_UAV_Descriptor_Req>(&value))
   {
     sz_value.add_object_member("type", "setup::Set_UAV_Descriptor_Req");
-    auto result = serialize(*v);
-    sz_value.add_object_member("value", std::move(result));
+    sz_value.add_object_member("value", serialize(*v));
     return std::move(sz_value);
   }
   else if (auto* v = boost::get<setup::Get_UAV_Descriptor_Req>(&value))
   {
     sz_value.add_object_member("type", "setup::Get_UAV_Descriptor_Req");
-    auto result = serialize(*v);
-    sz_value.add_object_member("value", std::move(result));
+    sz_value.add_object_member("value", serialize(*v));
     return std::move(sz_value);
   }
   else if (auto* v = boost::get<setup::Get_Node_Defs_Req>(&value))
   {
     sz_value.add_object_member("type", "setup::Get_Node_Defs_Req");
-    auto result = serialize(*v);
-    sz_value.add_object_member("value", std::move(result));
+    sz_value.add_object_member("value", serialize(*v));
     return std::move(sz_value);
   }
   else if (auto* v = boost::get<setup::Remove_Node_Req>(&value))
   {
     sz_value.add_object_member("type", "setup::Remove_Node_Req");
-    auto result = serialize(*v);
-    sz_value.add_object_member("value", std::move(result));
+    sz_value.add_object_member("value", serialize(*v));
     return std::move(sz_value);
   }
   else if (auto* v = boost::get<setup::Add_Node_Req>(&value))
   {
     sz_value.add_object_member("type", "setup::Add_Node_Req");
-    auto result = serialize(*v);
-    sz_value.add_object_member("value", std::move(result));
+    sz_value.add_object_member("value", serialize(*v));
     return std::move(sz_value);
   }
   else if (auto* v = boost::get<setup::Get_Nodes_Req>(&value))
   {
     sz_value.add_object_member("type", "setup::Get_Nodes_Req");
-    auto result = serialize(*v);
-    sz_value.add_object_member("value", std::move(result));
+    sz_value.add_object_member("value", serialize(*v));
     return std::move(sz_value);
   }
   else if (auto* v = boost::get<setup::Set_Node_Input_Stream_Path_Req>(&value))
   {
     sz_value.add_object_member("type", "setup::Set_Node_Input_Stream_Path_Req");
-    auto result = serialize(*v);
-    sz_value.add_object_member("value", std::move(result));
+    sz_value.add_object_member("value", serialize(*v));
     return std::move(sz_value);
   }
   else { TS_ASSERT(false); return ts::sz::Value(); }
@@ -1942,68 +1892,59 @@ ts::Result<void> deserialize(setup::Brain_Res& value, ts::sz::Value const& sz_va
   if (!value_sz_value) { return ts::Error("Expected 'value' when deserializing"); }
   std::string const& path = type_sz_value->get_as_string();
   if (false) { return ts::Error(""); } //this is here just to have the next items with 'else if'
-  else if (path == "::setup::Set_Clock_Res")
+  else if (path == "setup::Set_Clock_Res")
   {
-    setup::Set_Clock_Res v;
+    value = setup::Set_Clock_Res();
     auto result = deserialize(boost::get<setup::Set_Clock_Res>(value), *value_sz_value);
     if (result != ts::success) { return result; }
-    value = v;
   }
-  else if (path == "::setup::Set_UAV_Descriptor_Res")
+  else if (path == "setup::Set_UAV_Descriptor_Res")
   {
-    setup::Set_UAV_Descriptor_Res v;
+    value = setup::Set_UAV_Descriptor_Res();
     auto result = deserialize(boost::get<setup::Set_UAV_Descriptor_Res>(value), *value_sz_value);
     if (result != ts::success) { return result; }
-    value = v;
   }
-  else if (path == "::setup::Get_UAV_Descriptor_Res")
+  else if (path == "setup::Get_UAV_Descriptor_Res")
   {
-    setup::Get_UAV_Descriptor_Res v;
+    value = setup::Get_UAV_Descriptor_Res();
     auto result = deserialize(boost::get<setup::Get_UAV_Descriptor_Res>(value), *value_sz_value);
     if (result != ts::success) { return result; }
-    value = v;
   }
-  else if (path == "::setup::Get_Node_Defs_Res")
+  else if (path == "setup::Get_Node_Defs_Res")
   {
-    setup::Get_Node_Defs_Res v;
+    value = setup::Get_Node_Defs_Res();
     auto result = deserialize(boost::get<setup::Get_Node_Defs_Res>(value), *value_sz_value);
     if (result != ts::success) { return result; }
-    value = v;
   }
-  else if (path == "::setup::Remove_Node_Res")
+  else if (path == "setup::Remove_Node_Res")
   {
-    setup::Remove_Node_Res v;
+    value = setup::Remove_Node_Res();
     auto result = deserialize(boost::get<setup::Remove_Node_Res>(value), *value_sz_value);
     if (result != ts::success) { return result; }
-    value = v;
   }
-  else if (path == "::setup::Add_Node_Res")
+  else if (path == "setup::Add_Node_Res")
   {
-    setup::Add_Node_Res v;
+    value = setup::Add_Node_Res();
     auto result = deserialize(boost::get<setup::Add_Node_Res>(value), *value_sz_value);
     if (result != ts::success) { return result; }
-    value = v;
   }
-  else if (path == "::setup::Get_Nodes_Res")
+  else if (path == "setup::Get_Nodes_Res")
   {
-    setup::Get_Nodes_Res v;
+    value = setup::Get_Nodes_Res();
     auto result = deserialize(boost::get<setup::Get_Nodes_Res>(value), *value_sz_value);
     if (result != ts::success) { return result; }
-    value = v;
   }
-  else if (path == "::setup::Set_Node_Input_Stream_Path_Res")
+  else if (path == "setup::Set_Node_Input_Stream_Path_Res")
   {
-    setup::Set_Node_Input_Stream_Path_Res v;
+    value = setup::Set_Node_Input_Stream_Path_Res();
     auto result = deserialize(boost::get<setup::Set_Node_Input_Stream_Path_Res>(value), *value_sz_value);
     if (result != ts::success) { return result; }
-    value = v;
   }
-  else if (path == "::setup::Error")
+  else if (path == "setup::Error")
   {
-    setup::Error v;
+    value = setup::Error();
     auto result = deserialize(boost::get<setup::Error>(value), *value_sz_value);
     if (result != ts::success) { return result; }
-    value = v;
   }
   else { return ts::Error("Cannot find type '" + path + "' when deserializing"); }
   return ts::success;
@@ -2015,64 +1956,55 @@ ts::sz::Value serialize(setup::Brain_Res const& value)
   else if (auto* v = boost::get<setup::Set_Clock_Res>(&value))
   {
     sz_value.add_object_member("type", "setup::Set_Clock_Res");
-    auto result = serialize(*v);
-    sz_value.add_object_member("value", std::move(result));
+    sz_value.add_object_member("value", serialize(*v));
     return std::move(sz_value);
   }
   else if (auto* v = boost::get<setup::Set_UAV_Descriptor_Res>(&value))
   {
     sz_value.add_object_member("type", "setup::Set_UAV_Descriptor_Res");
-    auto result = serialize(*v);
-    sz_value.add_object_member("value", std::move(result));
+    sz_value.add_object_member("value", serialize(*v));
     return std::move(sz_value);
   }
   else if (auto* v = boost::get<setup::Get_UAV_Descriptor_Res>(&value))
   {
     sz_value.add_object_member("type", "setup::Get_UAV_Descriptor_Res");
-    auto result = serialize(*v);
-    sz_value.add_object_member("value", std::move(result));
+    sz_value.add_object_member("value", serialize(*v));
     return std::move(sz_value);
   }
   else if (auto* v = boost::get<setup::Get_Node_Defs_Res>(&value))
   {
     sz_value.add_object_member("type", "setup::Get_Node_Defs_Res");
-    auto result = serialize(*v);
-    sz_value.add_object_member("value", std::move(result));
+    sz_value.add_object_member("value", serialize(*v));
     return std::move(sz_value);
   }
   else if (auto* v = boost::get<setup::Remove_Node_Res>(&value))
   {
     sz_value.add_object_member("type", "setup::Remove_Node_Res");
-    auto result = serialize(*v);
-    sz_value.add_object_member("value", std::move(result));
+    sz_value.add_object_member("value", serialize(*v));
     return std::move(sz_value);
   }
   else if (auto* v = boost::get<setup::Add_Node_Res>(&value))
   {
     sz_value.add_object_member("type", "setup::Add_Node_Res");
-    auto result = serialize(*v);
-    sz_value.add_object_member("value", std::move(result));
+    sz_value.add_object_member("value", serialize(*v));
     return std::move(sz_value);
   }
   else if (auto* v = boost::get<setup::Get_Nodes_Res>(&value))
   {
     sz_value.add_object_member("type", "setup::Get_Nodes_Res");
-    auto result = serialize(*v);
-    sz_value.add_object_member("value", std::move(result));
+    sz_value.add_object_member("value", serialize(*v));
     return std::move(sz_value);
   }
   else if (auto* v = boost::get<setup::Set_Node_Input_Stream_Path_Res>(&value))
   {
     sz_value.add_object_member("type", "setup::Set_Node_Input_Stream_Path_Res");
-    auto result = serialize(*v);
-    sz_value.add_object_member("value", std::move(result));
+    sz_value.add_object_member("value", serialize(*v));
     return std::move(sz_value);
   }
   else if (auto* v = boost::get<setup::Error>(&value))
   {
     sz_value.add_object_member("type", "setup::Error");
-    auto result = serialize(*v);
-    sz_value.add_object_member("value", std::move(result));
+    sz_value.add_object_member("value", serialize(*v));
     return std::move(sz_value);
   }
   else { TS_ASSERT(false); return ts::sz::Value(); }
@@ -2105,8 +2037,7 @@ ts::sz::Value serialize(std::vector<setup::Node_Def_Data::Input> const& value)
   ts::sz::Value sz_value(ts::sz::Value::Type::ARRAY);
   for (size_t i = 0; i < value.size(); i++)
   {
-    auto result = serialize(value[i]);
-    sz_value.add_array_element(std::move(result));
+    sz_value.add_array_element(serialize(value[i]));
   }
   return sz_value;
 }
@@ -2127,8 +2058,7 @@ ts::sz::Value serialize(std::vector<setup::Node_Def_Data::Output> const& value)
   ts::sz::Value sz_value(ts::sz::Value::Type::ARRAY);
   for (size_t i = 0; i < value.size(); i++)
   {
-    auto result = serialize(value[i]);
-    sz_value.add_array_element(std::move(result));
+    sz_value.add_array_element(serialize(value[i]));
   }
   return sz_value;
 }
@@ -2149,8 +2079,7 @@ ts::sz::Value serialize(std::vector<setup::Node_Def_Data> const& value)
   ts::sz::Value sz_value(ts::sz::Value::Type::ARRAY);
   for (size_t i = 0; i < value.size(); i++)
   {
-    auto result = serialize(value[i]);
-    sz_value.add_array_element(std::move(result));
+    sz_value.add_array_element(serialize(value[i]));
   }
   return sz_value;
 }
@@ -2171,8 +2100,7 @@ ts::sz::Value serialize(std::vector<setup::Node_Data::Input> const& value)
   ts::sz::Value sz_value(ts::sz::Value::Type::ARRAY);
   for (size_t i = 0; i < value.size(); i++)
   {
-    auto result = serialize(value[i]);
-    sz_value.add_array_element(std::move(result));
+    sz_value.add_array_element(serialize(value[i]));
   }
   return sz_value;
 }
@@ -2193,8 +2121,7 @@ ts::sz::Value serialize(std::vector<setup::Node_Data::Output> const& value)
   ts::sz::Value sz_value(ts::sz::Value::Type::ARRAY);
   for (size_t i = 0; i < value.size(); i++)
   {
-    auto result = serialize(value[i]);
-    sz_value.add_array_element(std::move(result));
+    sz_value.add_array_element(serialize(value[i]));
   }
   return sz_value;
 }
@@ -2215,8 +2142,7 @@ ts::sz::Value serialize(std::vector<setup::Node_Data> const& value)
   ts::sz::Value sz_value(ts::sz::Value::Type::ARRAY);
   for (size_t i = 0; i < value.size(); i++)
   {
-    auto result = serialize(value[i]);
-    sz_value.add_array_element(std::move(result));
+    sz_value.add_array_element(serialize(value[i]));
   }
   return sz_value;
 }

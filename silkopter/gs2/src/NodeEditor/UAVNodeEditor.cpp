@@ -67,25 +67,25 @@ void UAVNodeEditor::slot_node_removed(std::string const& name)
 
 }
 
-void UAVNodeEditor::slot_node_message_received(std::string const& name, rapidjson::Value const& message)
-{
+//void UAVNodeEditor::slot_node_message_received(std::string const& name, rapidjson::Value const& message)
+//{
 
-}
+//}
 
-void UAVNodeEditor::slot_node_config_received(std::string const& name, rapidjson::Value const& json)
-{
+//void UAVNodeEditor::slot_node_config_received(std::string const& name, rapidjson::Value const& json)
+//{
 
-}
+//}
 
 void UAVNodeEditor::slot_stream_data_received(silk::Comms::IStream_Data const&)
 {
 
 }
 
-void UAVNodeEditor::slot_uav_config_received(boost::optional<silk::UAV_Config&> config)
-{
+//void UAVNodeEditor::slot_uav_config_received(boost::optional<silk::UAV_Config&> config)
+//{
 
-}
+//}
 
 void UAVNodeEditor::paint(QPainter* painter)
 {

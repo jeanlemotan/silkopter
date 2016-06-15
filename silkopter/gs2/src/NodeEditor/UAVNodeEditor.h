@@ -61,10 +61,10 @@ private:
     void slot_nodes_added(std::vector<silk::Comms::Node> const&) override;
     void slot_node_changed(silk::Comms::Node const&) override;
     void slot_node_removed(std::string const& name) override;
-    void slot_node_message_received(std::string const& name, rapidjson::Value const& message) override;
-    void slot_node_config_received(std::string const& name, rapidjson::Value const& json) override;
+    //void slot_node_message_received(std::string const& name, rapidjson::Value const& message) override;
+    //void slot_node_config_received(std::string const& name, rapidjson::Value const& json) override;
     void slot_stream_data_received(silk::Comms::IStream_Data const&) override;
-    void slot_uav_config_received(boost::optional<silk::UAV_Config&> config) override;
+    //void slot_uav_config_received(boost::optional<silk::UAV_Config&> config) override;
 
     void paint(QPainter* painter);
 

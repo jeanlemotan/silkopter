@@ -443,76 +443,82 @@ static void generate_member_def_declaration_code(Context& context, ts::IMember_D
 }
 
 template <typename T, typename Native>
-static std::string generate_scalar_type_clamping_code(Context& context, T const& type)
+static std::string generate_scalar_type_clamping_code(Context& context, T const& type, std::string const& value_str)
 {
     std::string native_type_str = get_type_relative_scope_path(context.parent_scope, type).to_string();
     if (type.get_min_value() == std::numeric_limits<Native>::lowest() && type.get_max_value() == std::numeric_limits<Native>::max())
     {
-        return "value";
+        return value_str;
     }
     if (type.get_min_value() == std::numeric_limits<Native>::lowest())
     {
-        return "min(value, " + native_type_str + "(" + to_string(type.get_max_value()) + "))";
+        return "min(" + value_str + ", " + native_type_str + "(" + to_string(type.get_max_value()) + "))";
     }
     if (type.get_max_value() == std::numeric_limits<Native>::max())
     {
-        return "max(value, " + native_type_str + "(" + to_string(type.get_min_value()) + "))";
+        return "max(" + value_str + ", " + native_type_str + "(" + to_string(type.get_min_value()) + "))";
     }
-    return "clamp(value, " + native_type_str + "(" + to_string(type.get_min_value()) + "), " + native_type_str + "(" + to_string(type.get_max_value()) + "))";
+    return "clamp(" + value_str + ", " + native_type_str + "(" + to_string(type.get_min_value()) + "), " + native_type_str + "(" + to_string(type.get_max_value()) + "))";
 }
 
-static std::string generate_numeric_type_clamping_code(Context& context, ts::IType const& _type)
+static std::string generate_numeric_type_clamping_code(Context& context, ts::IType const& _type, std::string const& value_str)
 {
     std::string native_type_str = get_type_relative_scope_path(context.parent_scope, _type).to_string();
     if (ts::IInt_Type const* type = dynamic_cast<ts::IInt_Type const*>(&_type))
     {
-        return generate_scalar_type_clamping_code<ts::IInt_Type, int64_t>(context, *type);
+        if (native_type_str == "int8_t") { return generate_scalar_type_clamping_code<ts::IInt_Type, int8_t>(context, *type, value_str); }
+        if (native_type_str == "uint8_t") { return generate_scalar_type_clamping_code<ts::IInt_Type, uint8_t>(context, *type, value_str); }
+        if (native_type_str == "int16_t") { return generate_scalar_type_clamping_code<ts::IInt_Type, int16_t>(context, *type, value_str); }
+        if (native_type_str == "uint16_t") { return generate_scalar_type_clamping_code<ts::IInt_Type, uint16_t>(context, *type, value_str); }
+        if (native_type_str == "int32_t") { return generate_scalar_type_clamping_code<ts::IInt_Type, int32_t>(context, *type, value_str); }
+        if (native_type_str == "uint32_t") { return generate_scalar_type_clamping_code<ts::IInt_Type, uint32_t>(context, *type, value_str); }
+        return generate_scalar_type_clamping_code<ts::IInt_Type, int64_t>(context, *type, value_str);
     }
     if (ts::IFloat_Type const* type = dynamic_cast<ts::IFloat_Type const*>(&_type))
     {
-        return generate_scalar_type_clamping_code<ts::IFloat_Type, float>(context, *type);
+        return generate_scalar_type_clamping_code<ts::IFloat_Type, float>(context, *type, value_str);
     }
     if (ts::IDouble_Type const* type = dynamic_cast<ts::IDouble_Type const*>(&_type))
     {
-        return generate_scalar_type_clamping_code<ts::IDouble_Type, double>(context, *type);
+        return generate_scalar_type_clamping_code<ts::IDouble_Type, double>(context, *type, value_str);
     }
     if (ts::IVec2f_Type const* type = dynamic_cast<ts::IVec2f_Type const*>(&_type))
     {
-        return "clamp(value, " + native_type_str + "(" + to_string(type->get_min_value()) + "), " + native_type_str + "(" + to_string(type->get_max_value()) + "))";
+        return "clamp(" + value_str + ", " + native_type_str + "(" + to_string(type->get_min_value()) + "), " + native_type_str + "(" + to_string(type->get_max_value()) + "))";
     }
     if (ts::IVec2d_Type const* type = dynamic_cast<ts::IVec2d_Type const*>(&_type))
     {
-        return "clamp(value, " + native_type_str + "(" + to_string(type->get_min_value()) + "), " + native_type_str + "(" + to_string(type->get_max_value()) + "))";
+        return "clamp(" + value_str + ", " + native_type_str + "(" + to_string(type->get_min_value()) + "), " + native_type_str + "(" + to_string(type->get_max_value()) + "))";
     }
     if (ts::IVec2i_Type const* type = dynamic_cast<ts::IVec2i_Type const*>(&_type))
     {
-        return "clamp(value, " + native_type_str + "(" + to_string(type->get_min_value()) + "), " + native_type_str + "(" + to_string(type->get_max_value()) + "))";
+        return "clamp(" + value_str + ", " + native_type_str + "(" + to_string(type->get_min_value()) + "), " + native_type_str + "(" + to_string(type->get_max_value()) + "))";
     }
     if (ts::IVec3f_Type const* type = dynamic_cast<ts::IVec3f_Type const*>(&_type))
     {
-        return "clamp(value, " + native_type_str + "(" + to_string(type->get_min_value()) + "), " + native_type_str + "(" + to_string(type->get_max_value()) + "))";
+        return "clamp(" + value_str + ", " + native_type_str + "(" + to_string(type->get_min_value()) + "), " + native_type_str + "(" + to_string(type->get_max_value()) + "))";
     }
     if (ts::IVec3d_Type const* type = dynamic_cast<ts::IVec3d_Type const*>(&_type))
     {
-        return "clamp(value, " + native_type_str + "(" + to_string(type->get_min_value()) + "), " + native_type_str + "(" + to_string(type->get_max_value()) + "))";
+        return "clamp(" + value_str + ", " + native_type_str + "(" + to_string(type->get_min_value()) + "), " + native_type_str + "(" + to_string(type->get_max_value()) + "))";
     }
     if (ts::IVec3i_Type const* type = dynamic_cast<ts::IVec3i_Type const*>(&_type))
     {
-        return "clamp(value, " + native_type_str + "(" + to_string(type->get_min_value()) + "), " + native_type_str + "(" + to_string(type->get_max_value()) + "))";
+        return "clamp(" + value_str + ", " + native_type_str + "(" + to_string(type->get_min_value()) + "), " + native_type_str + "(" + to_string(type->get_max_value()) + "))";
     }
     if (ts::IVec4f_Type const* type = dynamic_cast<ts::IVec4f_Type const*>(&_type))
     {
-        return "clamp(value, " + native_type_str + "(" + to_string(type->get_min_value()) + "), " + native_type_str + "(" + to_string(type->get_max_value()) + "))";
+        return "clamp(" + value_str + ", " + native_type_str + "(" + to_string(type->get_min_value()) + "), " + native_type_str + "(" + to_string(type->get_max_value()) + "))";
     }
     if (ts::IVec4d_Type const* type = dynamic_cast<ts::IVec4d_Type const*>(&_type))
     {
-        return "clamp(value, " + native_type_str + "(" + to_string(type->get_min_value()) + "), " + native_type_str + "(" + to_string(type->get_max_value()) + "))";
+        return "clamp(" + value_str + ", " + native_type_str + "(" + to_string(type->get_min_value()) + "), " + native_type_str + "(" + to_string(type->get_max_value()) + "))";
     }
     if (ts::IVec4i_Type const* type = dynamic_cast<ts::IVec4i_Type const*>(&_type))
     {
-        return "clamp(value, " + native_type_str + "(" + to_string(type->get_min_value()) + "), " + native_type_str + "(" + to_string(type->get_max_value()) + "))";
+        return "clamp(" + value_str + ", " + native_type_str + "(" + to_string(type->get_min_value()) + "), " + native_type_str + "(" + to_string(type->get_max_value()) + "))";
     }
-    return "value";
+    return value_str;
 }
 
 static void generate_member_def_setter_getter_code(Context& context, ts::IStruct_Type const& struct_type, ts::IMember_Def const& member_def)
@@ -528,6 +534,7 @@ static void generate_member_def_setter_getter_code(Context& context, ts::IStruct
     std::string native_type_str = get_type_relative_scope_path(context.parent_scope, *member_def.get_type()).to_string();
 
     context.h_file += context.ident_str + "void set_" + member_def.get_name() + "(" + native_type_str + " const& value);\n";
+    context.h_file += context.ident_str + "void set_" + member_def.get_name() + "(" + native_type_str + "&& value);\n";
     context.h_file += context.ident_str + "auto get_" + member_def.get_name() + "() const -> " + native_type_str + " const&;\n";
 
     bool has_mutable_getter = std::dynamic_pointer_cast<const ts::IStruct_Type>(member_def.get_type()) != nullptr ||
@@ -543,7 +550,12 @@ static void generate_member_def_setter_getter_code(Context& context, ts::IStruct
 
     context.cpp_file += context.ident_str + "void " + struct_type_str + "::set_" + member_def.get_name() + "(" + native_type_str + " const& value)\n" +
             context.ident_str + "{\n" +
-            context.ident_str + "  m_" + member_def.get_name() + " = " + generate_numeric_type_clamping_code(context, *member_def.get_type()) + ";\n" +
+            context.ident_str + "  m_" + member_def.get_name() + " = " + generate_numeric_type_clamping_code(context, *member_def.get_type(), "value") + ";\n" +
+            context.ident_str + "}\n";
+
+    context.cpp_file += context.ident_str + "void " + struct_type_str + "::set_" + member_def.get_name() + "(" + native_type_str + "&& value)\n" +
+            context.ident_str + "{\n" +
+            context.ident_str + "  m_" + member_def.get_name() + " = " + generate_numeric_type_clamping_code(context, *member_def.get_type(), "std::move(value)") + ";\n" +
             context.ident_str + "}\n";
 
     context.cpp_file += context.ident_str + "auto " + struct_type_str + "::get_" + member_def.get_name() + "() const -> " + native_type_str + " const& \n" +
@@ -586,7 +598,7 @@ static ts::Result<void> generate_struct_type_sz_code(Context& context, ts::IStru
                                              "    std::remove_cv<std::remove_reference<decltype(value.get_" + member_def.get_name() + "())>::type>::type v;\n"
                                              "    auto result = deserialize(v, *member_sz_value);\n"
                                              "    if (result != ts::success) { return result; }\n"
-                                             "    value.set_" + member_def.get_name() + "(v);\n"
+                                             "    value.set_" + member_def.get_name() + "(std::move(v));\n"
                                              "  }\n";
     }
     context.sz_section_cpp += "  return ts::success;\n"
@@ -602,11 +614,7 @@ static ts::Result<void> generate_struct_type_sz_code(Context& context, ts::IStru
     for (size_t i = 0; i < type.get_member_def_count(); i++)
     {
         ts::IMember_Def const& member_def = *type.get_member_def(i);
-
-        context.sz_section_cpp += "  {\n"
-                                             "    auto result = serialize(value.get_" + member_def.get_name() + "());\n"
-                                             "    sz_value.add_object_member(\"" + member_def.get_name() + "\", std::move(result));\n"
-                                             "  }\n";
+        context.sz_section_cpp += "  sz_value.add_object_member(\"" + member_def.get_name() + "\", serialize(value.get_" + member_def.get_name() + "()));\n";
     }
     context.sz_section_cpp += "  return sz_value;\n"
                                          "}\n";
@@ -843,8 +851,7 @@ static ts::Result<void> generate_poly_type_code(Context& context, ts::IPoly_Type
         context.sz_section_cpp += "  else if (typeid(*value) == typeid(" + native_inner_type_str + "))\n"
                                          "  {\n"
                                          "    sz_value.add_object_member(\"type\", \"" + native_inner_type_str + "\");\n"
-                                         "    auto result = serialize((" + native_inner_type_str + "&)*value);\n"
-                                         "    sz_value.add_object_member(\"value\", std::move(result));\n"
+                                         "    sz_value.add_object_member(\"value\", serialize((" + native_inner_type_str + "&)*value));\n"
                                          "    return std::move(sz_value);\n"
                                          "  }\n";
     }
@@ -927,12 +934,11 @@ static ts::Result<void> generate_variant_type_code(Context& context, ts::IVarian
     for (size_t i = 0; i < type.get_inner_qualified_type_count(); i++)
     {
         std::string native_inner_type_str = get_native_type(context.parent_scope, *type.get_inner_qualified_type(i)->get_type()).to_string();
-        context.sz_section_cpp += "  else if (path == \"" + type.get_inner_qualified_type(i)->get_type()->get_symbol_path().to_string() + "\")\n"
+        context.sz_section_cpp += "  else if (path == \"" + native_inner_type_str + "\")\n"
                                              "  {\n"
-                                             "    " + native_inner_type_str + " v;\n"
+                                             "    value = " + native_inner_type_str + "();\n"
                                              "    auto result = deserialize(boost::get<" + native_inner_type_str + ">(value), *value_sz_value);\n"
                                              "    if (result != ts::success) { return result; }\n"
-                                             "    value = v;\n"
                                              "  }\n";
     }
     context.sz_section_cpp += "  else { return ts::Error(\"Cannot find type '\" + path + \"' when deserializing\"); }\n"
@@ -951,8 +957,7 @@ static ts::Result<void> generate_variant_type_code(Context& context, ts::IVarian
         context.sz_section_cpp += "  else if (auto* v = boost::get<" + native_inner_type_str + ">(&value))\n"
                                              "  {\n"
                                              "    sz_value.add_object_member(\"type\", \"" + native_inner_type_str + "\");\n"
-                                             "    auto result = serialize(*v);\n"
-                                             "    sz_value.add_object_member(\"value\", std::move(result));\n"
+                                             "    sz_value.add_object_member(\"value\", serialize(*v));\n"
                                              "    return std::move(sz_value);\n"
                                              "  }\n";
     }
@@ -1019,8 +1024,7 @@ static ts::Result<void> generate_vector_type_code(Context& context, ts::IVector_
                                            "  ts::sz::Value sz_value(ts::sz::Value::Type::ARRAY);\n"
                                            "  for (size_t i = 0; i < value.size(); i++)\n"
                                            "  {\n"
-                                           "    auto result = serialize(value[i]);\n"
-                                           "    sz_value.add_array_element(std::move(result));\n"
+                                           "    sz_value.add_array_element(serialize(value[i]));\n"
                                            "  }\n"
                                            "  return sz_value;\n"
                                            "}\n";
@@ -1132,10 +1136,7 @@ static ts::Result<void> generate_vecXY_type_code(Context& context, std::string c
                                            "  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);\n";
     for (std::string const& component_name: component_names)
     {
-        context.sz_section_cpp += "  {\n"
-                                             "    auto result = serialize(value." + component_name + ");\n"
-                                             "    sz_value.add_object_member(\"" + component_name + "\", std::move(result));\n"
-                                             "  }\n";
+        context.sz_section_cpp += "  sz_value.add_object_member(\"" + component_name + "\", serialize(value." + component_name + "));\n";
     }
     context.sz_section_cpp += "  return sz_value;\n"
                                          "}\n";

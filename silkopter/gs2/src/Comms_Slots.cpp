@@ -11,10 +11,10 @@ Comms_Slots::Comms_Slots(silk::Comms& comms)
     m_connections.nodes_added = m_comms.sig_nodes_added.connect(std::bind(&Comms_Slots::slot_nodes_added, this, std::placeholders::_1));
     m_connections.node_changed = m_comms.sig_node_changed.connect(std::bind(&Comms_Slots::slot_node_changed, this, std::placeholders::_1));
     m_connections.node_removed = m_comms.sig_node_removed.connect(std::bind(&Comms_Slots::slot_node_removed, this, std::placeholders::_1));
-    m_connections.node_message_received = m_comms.sig_node_message_received.connect(std::bind(&Comms_Slots::slot_node_message_received, this, std::placeholders::_1, std::placeholders::_2));
-    m_connections.node_config_received = m_comms.sig_node_config_received.connect(std::bind(&Comms_Slots::slot_node_config_received, this, std::placeholders::_1, std::placeholders::_2));
+    //m_connections.node_message_received = m_comms.sig_node_message_received.connect(std::bind(&Comms_Slots::slot_node_message_received, this, std::placeholders::_1, std::placeholders::_2));
+    //m_connections.node_config_received = m_comms.sig_node_config_received.connect(std::bind(&Comms_Slots::slot_node_config_received, this, std::placeholders::_1, std::placeholders::_2));
     m_connections.stream_data_received = m_comms.sig_stream_data_received.connect(std::bind(&Comms_Slots::slot_stream_data_received, this, std::placeholders::_1));
-    m_connections.uav_config_received = m_comms.sig_uav_config_received.connect(std::bind(&Comms_Slots::slot_uav_config_received, this, std::placeholders::_1));
+    //m_connections.uav_config_received = m_comms.sig_uav_config_received.connect(std::bind(&Comms_Slots::slot_uav_config_received, this, std::placeholders::_1));
 }
 
 void Comms_Slots::refresh()

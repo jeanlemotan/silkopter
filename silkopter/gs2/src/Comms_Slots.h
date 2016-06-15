@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Comms.h"
-#include "common/config/Multirotor_Config.h"
 
 class Comms_Slots
 {
@@ -19,10 +18,10 @@ private:
     virtual void slot_nodes_added(std::vector<silk::Comms::Node> const&) = 0;
     virtual void slot_node_changed(silk::Comms::Node const&) = 0;
     virtual void slot_node_removed(std::string const& name) = 0;
-    virtual void slot_node_message_received(std::string const& name, rapidjson::Value const& message) = 0;
-    virtual void slot_node_config_received(std::string const& name, rapidjson::Value const& json) = 0;
+//    virtual void slot_node_message_received(std::string const& name, rapidjson::Value const& message) = 0;
+//    virtual void slot_node_config_received(std::string const& name, rapidjson::Value const& json) = 0;
     virtual void slot_stream_data_received(silk::Comms::IStream_Data const&) = 0;
-    virtual void slot_uav_config_received(boost::optional<silk::UAV_Config&> config) = 0;
+//    virtual void slot_uav_config_received(boost::optional<silk::UAV_Config&> config) = 0;
 
     struct Connections
     {

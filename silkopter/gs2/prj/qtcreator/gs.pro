@@ -26,11 +26,11 @@ INCLUDEPATH += ../../../../qbase/include
 INCLUDEPATH += ../../../../qdata/include
 INCLUDEPATH += ../../../../qmath/include
 INCLUDEPATH += ../../../../qinput/include
+INCLUDEPATH += ../../../../def_lang/include
 INCLUDEPATH += ../../../libs
-INCLUDEPATH += ../../../../autojsoncxx/include
-INCLUDEPATH += ../../../../autojsoncxx/rapidjson/include
 INCLUDEPATH += ../../../../eigen
-INCLUDEPATH += ../../../brain/autogen
+INCLUDEPATH += ../../../libs/common/comms/def
+
 
 QMAKE_CXXFLAGS += -Wno-unused-variable -Wno-unused-parameter
 QMAKE_CFLAGS += -Wno-unused-variable -Wno-unused-parameter
@@ -73,6 +73,7 @@ LIBS += -L$${ROOT_LIBS_PATH}/qinput/lib/$${DEST_FOLDER} -lqinput
 LIBS += -L$${ROOT_LIBS_PATH}/qdata/lib/$${DEST_FOLDER} -lqdata
 LIBS += -L$${ROOT_LIBS_PATH}/qmath/lib/$${DEST_FOLDER} -lqmath
 LIBS += -L$${ROOT_LIBS_PATH}/qbase/lib/$${DEST_FOLDER} -lqbase
+LIBS += -L$${ROOT_LIBS_PATH}/def_lang/lib/$${DEST_FOLDER} -ldef_lang
 
 LIBS += -lfftw3 -lpcap -lz
 
@@ -99,22 +100,6 @@ HEADERS += \
     ../../../libs/common/bus/II2C.h \
     ../../../libs/common/bus/ISPI.h \
     ../../../libs/common/bus/IUART.h \
-    ../../../../autojsoncxx/rapidjson/include/rapidjson/allocators.h \
-    ../../../../autojsoncxx/rapidjson/include/rapidjson/document.h \
-    ../../../../autojsoncxx/rapidjson/include/rapidjson/encodedstream.h \
-    ../../../../autojsoncxx/rapidjson/include/rapidjson/encodings.h \
-    ../../../../autojsoncxx/rapidjson/include/rapidjson/filereadstream.h \
-    ../../../../autojsoncxx/rapidjson/include/rapidjson/filestream.h \
-    ../../../../autojsoncxx/rapidjson/include/rapidjson/filewritestream.h \
-    ../../../../autojsoncxx/rapidjson/include/rapidjson/memorybuffer.h \
-    ../../../../autojsoncxx/rapidjson/include/rapidjson/memorystream.h \
-    ../../../../autojsoncxx/rapidjson/include/rapidjson/prettywriter.h \
-    ../../../../autojsoncxx/rapidjson/include/rapidjson/rapidjson.h \
-    ../../../../autojsoncxx/rapidjson/include/rapidjson/reader.h \
-    ../../../../autojsoncxx/rapidjson/include/rapidjson/stringbuffer.h \
-    ../../../../autojsoncxx/rapidjson/include/rapidjson/writer.h \
-    ../../../libs/json_editor/JSON_Model.h \
-    ../../../libs/utils/Json_Util.h \
     ../../../libs/common/stream/IAcceleration.h \
     ../../../libs/common/stream/IADC.h \
     ../../../libs/common/stream/IAngular_Velocity.h \
@@ -172,13 +157,14 @@ HEADERS += \
     ../../src/UAV_QML_Proxy.h \
     ../../src/OS_QML_Proxy.h \
     ../../src/Menus_QML_Proxy.h \
-    ../../src/Comms_QML_Proxy.h
+    ../../src/Comms_QML_Proxy.h \
+    ../../../libs/common/comms/def/comms.def.h \
+    ../../../libs/common/comms/def/gen_support.h
 
 SOURCES += \
     ../../src/main.cpp \
     ../../src/Comms.cpp \
     ../../src/HAL.cpp \
-    ../../../libs/json_editor/JSON_Model.cpp \
     ../../../libs/utils/RCP_UDP_Socket.cpp \
     ../../../libs/lz4/lz4.c \
     ../../../libs/utils/Coordinates.cpp \
@@ -191,7 +177,8 @@ SOURCES += \
     ../../src/UAV_QML_Proxy.cpp \
     ../../src/Comms_QML_Proxy.cpp \
     ../../src/Menus_QML_Proxy.cpp \
-    ../../src/OS_QML_Proxy.cpp
+    ../../src/OS_QML_Proxy.cpp \
+    ../../../libs/common/comms/def/comms.def.cpp
 
 DISTFILES += \
     ../../src/node.png \

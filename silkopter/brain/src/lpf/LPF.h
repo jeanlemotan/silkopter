@@ -56,6 +56,8 @@ private:
 template<class Stream_t>
 LPF<Stream_t>::LPF(UAV& uav)
     : m_uav(uav)
+    , m_descriptor(new uav::LPF_Descriptor)
+    , m_config(new uav::LPF_Config)
 {
     m_output_stream = std::make_shared<Output_Stream>();
 }

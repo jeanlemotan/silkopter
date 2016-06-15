@@ -6,8 +6,7 @@
 
 #include "Basic_Output_Stream.h"
 
-//#include "sz_math.hpp"
-//#include "sz_Scalar_Generator.hpp"
+#include "uav.def.h"
 
 namespace silk
 {
@@ -55,6 +54,8 @@ private:
 template<class Stream_t>
 Scalar_Generator<Stream_t>::Scalar_Generator(UAV& uav)
     : m_uav(uav)
+    , m_descriptor(new uav::Scalar_Generator_Descriptor)
+    , m_config(new uav::Scalar_Generator_Config)
 {
     m_output_stream = std::make_shared<Output_Stream>();
 }

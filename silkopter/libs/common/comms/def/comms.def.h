@@ -55,6 +55,7 @@ struct Error
 public:
   virtual ~Error() = default;
   void set_message(std::string const& value);
+  void set_message(std::string&& value);
   auto get_message() const -> std::string const&;
 
 private:
@@ -66,6 +67,7 @@ struct Set_Clock_Req
 public:
   virtual ~Set_Clock_Req() = default;
   void set_time(setup::time_ms_t const& value);
+  void set_time(setup::time_ms_t&& value);
   auto get_time() const -> setup::time_ms_t const&;
 
 private:
@@ -77,9 +79,11 @@ struct Set_Clock_Res
 public:
   virtual ~Set_Clock_Res() = default;
   void set_time(setup::time_ms_t const& value);
+  void set_time(setup::time_ms_t&& value);
   auto get_time() const -> setup::time_ms_t const&;
 
   void set_error(boost::optional<setup::Error> const& value);
+  void set_error(boost::optional<setup::Error>&& value);
   auto get_error() const -> boost::optional<setup::Error> const&;
   auto get_error() -> boost::optional<setup::Error>&;
 
@@ -93,6 +97,7 @@ struct Set_UAV_Descriptor_Req
 public:
   virtual ~Set_UAV_Descriptor_Req() = default;
   void set_data(setup::serialized_data_t const& value);
+  void set_data(setup::serialized_data_t&& value);
   auto get_data() const -> setup::serialized_data_t const&;
 
 private:
@@ -104,6 +109,7 @@ struct Set_UAV_Descriptor_Res
 public:
   virtual ~Set_UAV_Descriptor_Res() = default;
   void set_data(setup::serialized_data_t const& value);
+  void set_data(setup::serialized_data_t&& value);
   auto get_data() const -> setup::serialized_data_t const&;
 
 private:
@@ -122,6 +128,7 @@ struct Get_UAV_Descriptor_Res
 public:
   virtual ~Get_UAV_Descriptor_Res() = default;
   void set_data(setup::serialized_data_t const& value);
+  void set_data(setup::serialized_data_t&& value);
   auto get_data() const -> setup::serialized_data_t const&;
 
 private:
@@ -136,15 +143,19 @@ public:
   public:
     virtual ~Input() = default;
     void set_name(std::string const& value);
+    void set_name(std::string&& value);
     auto get_name() const -> std::string const&;
 
     void set_space(uint8_t const& value);
+    void set_space(uint8_t&& value);
     auto get_space() const -> uint8_t const&;
 
     void set_semantic(uint8_t const& value);
+    void set_semantic(uint8_t&& value);
     auto get_semantic() const -> uint8_t const&;
 
     void set_rate(uint32_t const& value);
+    void set_rate(uint32_t&& value);
     auto get_rate() const -> uint32_t const&;
 
   private:
@@ -159,15 +170,19 @@ public:
   public:
     virtual ~Output() = default;
     void set_name(std::string const& value);
+    void set_name(std::string&& value);
     auto get_name() const -> std::string const&;
 
     void set_space(uint8_t const& value);
+    void set_space(uint8_t&& value);
     auto get_space() const -> uint8_t const&;
 
     void set_semantic(uint8_t const& value);
+    void set_semantic(uint8_t&& value);
     auto get_semantic() const -> uint8_t const&;
 
     void set_rate(uint32_t const& value);
+    void set_rate(uint32_t&& value);
     auto get_rate() const -> uint32_t const&;
 
   private:
@@ -179,20 +194,25 @@ public:
 
   virtual ~Node_Def_Data() = default;
   void set_name(std::string const& value);
+  void set_name(std::string&& value);
   auto get_name() const -> std::string const&;
 
   void set_type(uint8_t const& value);
+  void set_type(uint8_t&& value);
   auto get_type() const -> uint8_t const&;
 
   void set_inputs(std::vector<setup::Node_Def_Data::Input> const& value);
+  void set_inputs(std::vector<setup::Node_Def_Data::Input>&& value);
   auto get_inputs() const -> std::vector<setup::Node_Def_Data::Input> const&;
   auto get_inputs() -> std::vector<setup::Node_Def_Data::Input>&;
 
   void set_outputs(std::vector<setup::Node_Def_Data::Output> const& value);
+  void set_outputs(std::vector<setup::Node_Def_Data::Output>&& value);
   auto get_outputs() const -> std::vector<setup::Node_Def_Data::Output> const&;
   auto get_outputs() -> std::vector<setup::Node_Def_Data::Output>&;
 
   void set_descriptor_data(setup::serialized_data_t const& value);
+  void set_descriptor_data(setup::serialized_data_t&& value);
   auto get_descriptor_data() const -> setup::serialized_data_t const&;
 
 private:
@@ -215,6 +235,7 @@ struct Get_Node_Defs_Res
 public:
   virtual ~Get_Node_Defs_Res() = default;
   void set_node_def_datas(std::vector<setup::Node_Def_Data> const& value);
+  void set_node_def_datas(std::vector<setup::Node_Def_Data>&& value);
   auto get_node_def_datas() const -> std::vector<setup::Node_Def_Data> const&;
   auto get_node_def_datas() -> std::vector<setup::Node_Def_Data>&;
 
@@ -230,18 +251,23 @@ public:
   public:
     virtual ~Input() = default;
     void set_name(std::string const& value);
+    void set_name(std::string&& value);
     auto get_name() const -> std::string const&;
 
     void set_space(uint8_t const& value);
+    void set_space(uint8_t&& value);
     auto get_space() const -> uint8_t const&;
 
     void set_semantic(uint8_t const& value);
+    void set_semantic(uint8_t&& value);
     auto get_semantic() const -> uint8_t const&;
 
     void set_rate(uint32_t const& value);
+    void set_rate(uint32_t&& value);
     auto get_rate() const -> uint32_t const&;
 
     void set_stream_path(std::string const& value);
+    void set_stream_path(std::string&& value);
     auto get_stream_path() const -> std::string const&;
 
   private:
@@ -257,15 +283,19 @@ public:
   public:
     virtual ~Output() = default;
     void set_name(std::string const& value);
+    void set_name(std::string&& value);
     auto get_name() const -> std::string const&;
 
     void set_space(uint8_t const& value);
+    void set_space(uint8_t&& value);
     auto get_space() const -> uint8_t const&;
 
     void set_semantic(uint8_t const& value);
+    void set_semantic(uint8_t&& value);
     auto get_semantic() const -> uint8_t const&;
 
     void set_rate(uint32_t const& value);
+    void set_rate(uint32_t&& value);
     auto get_rate() const -> uint32_t const&;
 
   private:
@@ -277,23 +307,29 @@ public:
 
   virtual ~Node_Data() = default;
   void set_name(std::string const& value);
+  void set_name(std::string&& value);
   auto get_name() const -> std::string const&;
 
   void set_type(uint8_t const& value);
+  void set_type(uint8_t&& value);
   auto get_type() const -> uint8_t const&;
 
   void set_inputs(std::vector<setup::Node_Data::Input> const& value);
+  void set_inputs(std::vector<setup::Node_Data::Input>&& value);
   auto get_inputs() const -> std::vector<setup::Node_Data::Input> const&;
   auto get_inputs() -> std::vector<setup::Node_Data::Input>&;
 
   void set_outputs(std::vector<setup::Node_Data::Output> const& value);
+  void set_outputs(std::vector<setup::Node_Data::Output>&& value);
   auto get_outputs() const -> std::vector<setup::Node_Data::Output> const&;
   auto get_outputs() -> std::vector<setup::Node_Data::Output>&;
 
   void set_descriptor_data(setup::serialized_data_t const& value);
+  void set_descriptor_data(setup::serialized_data_t&& value);
   auto get_descriptor_data() const -> setup::serialized_data_t const&;
 
   void set_config_data(setup::serialized_data_t const& value);
+  void set_config_data(setup::serialized_data_t&& value);
   auto get_config_data() const -> setup::serialized_data_t const&;
 
 private:
@@ -310,6 +346,7 @@ struct Get_Nodes_Req
 public:
   virtual ~Get_Nodes_Req() = default;
   void set_name(std::string const& value);
+  void set_name(std::string&& value);
   auto get_name() const -> std::string const&;
 
 private:
@@ -321,6 +358,7 @@ struct Get_Nodes_Res
 public:
   virtual ~Get_Nodes_Res() = default;
   void set_node_datas(std::vector<setup::Node_Data> const& value);
+  void set_node_datas(std::vector<setup::Node_Data>&& value);
   auto get_node_datas() const -> std::vector<setup::Node_Data> const&;
   auto get_node_datas() -> std::vector<setup::Node_Data>&;
 
@@ -333,12 +371,15 @@ struct Set_Node_Input_Stream_Path_Req
 public:
   virtual ~Set_Node_Input_Stream_Path_Req() = default;
   void set_node_name(std::string const& value);
+  void set_node_name(std::string&& value);
   auto get_node_name() const -> std::string const&;
 
   void set_input_name(std::string const& value);
+  void set_input_name(std::string&& value);
   auto get_input_name() const -> std::string const&;
 
   void set_stream_path(std::string const& value);
+  void set_stream_path(std::string&& value);
   auto get_stream_path() const -> std::string const&;
 
 private:
@@ -352,6 +393,7 @@ struct Set_Node_Input_Stream_Path_Res
 public:
   virtual ~Set_Node_Input_Stream_Path_Res() = default;
   void set_node_data(setup::Node_Data const& value);
+  void set_node_data(setup::Node_Data&& value);
   auto get_node_data() const -> setup::Node_Data const&;
   auto get_node_data() -> setup::Node_Data&;
 
@@ -364,12 +406,15 @@ struct Add_Node_Req
 public:
   virtual ~Add_Node_Req() = default;
   void set_def_name(std::string const& value);
+  void set_def_name(std::string&& value);
   auto get_def_name() const -> std::string const&;
 
   void set_name(std::string const& value);
+  void set_name(std::string&& value);
   auto get_name() const -> std::string const&;
 
   void set_descriptor_data(setup::serialized_data_t const& value);
+  void set_descriptor_data(setup::serialized_data_t&& value);
   auto get_descriptor_data() const -> setup::serialized_data_t const&;
 
 private:
@@ -383,6 +428,7 @@ struct Add_Node_Res
 public:
   virtual ~Add_Node_Res() = default;
   void set_node_data(setup::Node_Data const& value);
+  void set_node_data(setup::Node_Data&& value);
   auto get_node_data() const -> setup::Node_Data const&;
   auto get_node_data() -> setup::Node_Data&;
 
@@ -395,6 +441,7 @@ struct Remove_Node_Req
 public:
   virtual ~Remove_Node_Req() = default;
   void set_name(std::string const& value);
+  void set_name(std::string&& value);
   auto get_name() const -> std::string const&;
 
 private:

@@ -20,27 +20,27 @@ enum class Telemetry_Message : uint8_t
     COUNT //keep last
 };
 
-enum class Setup_Message : uint8_t
-{
-    CLOCK,
+//enum class Setup_Message : uint8_t
+//{
+//    CLOCK,
 
-    UAV_DESCRIPTOR,
+//    UAV_DESCRIPTOR,
 
-    ENUMERATE_NODE_DEFS,
-    ENUMERATE_NODES,
-    GET_NODE_DATA,
+//    ENUMERATE_NODE_DEFS,
+//    ENUMERATE_NODES,
+//    GET_NODE_DATA,
 
-    ADD_NODE,
-    REMOVE_NODE,
-    NODE_CONFIG,
-    NODE_MESSAGE,
-    NODE_INPUT_STREAM_PATH,
+//    ADD_NODE,
+//    REMOVE_NODE,
+//    NODE_CONFIG,
+//    NODE_MESSAGE,
+//    NODE_INPUT_STREAM_PATH,
 
-    STREAM_TELEMETRY_ACTIVE,
-    UAV_TELEMETRY_ACTIVE,
+//    STREAM_TELEMETRY_ACTIVE,
+//    UAV_TELEMETRY_ACTIVE,
 
-    COUNT //keep last
-};
+//    COUNT //keep last
+//};
 
 enum class Pilot_Message : uint8_t
 {

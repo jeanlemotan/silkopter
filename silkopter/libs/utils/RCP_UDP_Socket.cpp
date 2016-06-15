@@ -190,7 +190,7 @@ void RCP_UDP_Socket::handle_send(const boost::system::error_code& error, std::si
 
 auto RCP_UDP_Socket::get_mtu() const -> size_t
 {
-    return 1450;
+    return 64;
 }
 
 auto RCP_UDP_Socket::process() -> Result

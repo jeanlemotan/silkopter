@@ -32,8 +32,6 @@
 #include "utils/Channel.h"
 #include "common/Manual_Clock.h"
 
-#include "common/config/UAV_Config.h"
-
 #include "common/node/INode.h"
 #include "common/stream/IVideo.h"
 #include "common/stream/IMultirotor_State.h"
@@ -58,12 +56,12 @@ public:
 
     //----------------------------------------------------------------------
 
-    typedef util::Channel<comms::Setup_Message, uint32_t> Setup_Channel;
+    //typedef util::Channel<comms::Setup_Message, uint32_t> Setup_Channel;
     typedef util::Channel<comms::Pilot_Message, uint32_t> Pilot_Channel;
     typedef util::Channel<comms::Video_Message, uint32_t> Video_Channel;
     typedef util::Channel<comms::Telemetry_Message, uint32_t> Telemetry_Channel;
 
-    auto get_setup_channel() -> Setup_Channel&;
+    //auto get_setup_channel() -> Setup_Channel&;
 
     auto get_video_samples() const -> std::vector<stream::IVideo::Sample> const&;
     auto get_multirotor_state_samples() const -> std::vector<stream::IMultirotor_State::Sample> const&;
@@ -72,12 +70,12 @@ public:
     //----------------------------------------------------------------------
 
 
-    void add_node(std::string const& def_name, std::string const& name, rapidjson::Document const& init_params);
-    void remove_node(std::string const& name);
-    void set_node_input_stream_path(std::string const& name, std::string const& input_name, q::Path const& stream_path);
-    void set_node_config(std::string const& name, rapidjson::Document const& config);
-    void set_stream_telemetry_active(q::Path const& stream_path, bool active);
-    void send_node_message(std::string const& name, rapidjson::Document const& json);
+//    void add_node(std::string const& def_name, std::string const& name, rapidjson::Document const& init_params);
+//    void remove_node(std::string const& name);
+//    void set_node_input_stream_path(std::string const& name, std::string const& input_name, q::Path const& stream_path);
+//    void set_node_config(std::string const& name, rapidjson::Document const& config);
+//    void set_stream_telemetry_active(q::Path const& stream_path, bool active);
+//    void send_node_message(std::string const& name, rapidjson::Document const& json);
 
     //----------------------------------------------------------------------
 
@@ -140,8 +138,8 @@ public:
     q::util::Signal<void(std::vector<Node> const&)> sig_nodes_added;
     q::util::Signal<void(Node const&)> sig_node_changed;
     q::util::Signal<void(std::string const& name)> sig_node_removed;
-    q::util::Signal<void(std::string const& name, rapidjson::Value const& message)> sig_node_message_received;
-    q::util::Signal<void(std::string const& name, rapidjson::Value const& json)> sig_node_config_received;
+//    q::util::Signal<void(std::string const& name, rapidjson::Value const& message)> sig_node_message_received;
+//    q::util::Signal<void(std::string const& name, rapidjson::Value const& json)> sig_node_config_received;
 
     struct IStream_Data
     {
@@ -166,11 +164,11 @@ public:
     q::util::Signal<void(IStream_Data const&)> sig_stream_data_received;
 
 
-    void request_node_config(std::string const& name);
+//    void request_node_config(std::string const& name);
 
-    void request_uav_config();
-    q::util::Signal<void(boost::optional<silk::UAV_Config&> config)> sig_uav_config_received;
-    void send_uav_config(boost::optional<silk::UAV_Config&> config);
+//    void request_uav_config();
+//    q::util::Signal<void(boost::optional<silk::UAV_Config&> config)> sig_uav_config_received;
+//    void send_uav_config(boost::optional<silk::UAV_Config&> config);
 
     void process_rcp();
     void process();
@@ -184,10 +182,13 @@ private:
     void reset();
     bool m_did_request_data = false;
 
+    template<typename T>
+    void serialize_and_send(size_t channel_idx, T const& message);
+
     std::shared_ptr<util::RCP_Socket> m_socket;
     std::shared_ptr<util::RCP> m_rcp;
 
-    mutable Setup_Channel m_setup_channel;
+    //mutable Setup_Channel m_setup_channel;
     mutable Pilot_Channel m_pilot_channel;
     mutable Video_Channel m_video_channel;
     mutable Telemetry_Channel m_telemetry_channel;
@@ -195,7 +196,7 @@ private:
     std::vector<stream::IVideo::Sample> m_video_samples;
     std::vector<stream::IMultirotor_State::Sample> m_multirotor_state_samples;
 
-    auto unpack_node_data(Comms::Setup_Channel& channel, Node& node) -> bool;
+//    auto unpack_node_data(Comms::Setup_Channel& channel, Node& node) -> bool;
     auto publish_streams(Node const& node) -> bool;
     auto unpublish_streams(Node const& node) -> bool;
 

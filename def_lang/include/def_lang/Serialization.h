@@ -48,6 +48,7 @@ struct Value final
     Value(uint64_t  value) noexcept;
     Value(float     value) noexcept;
     Value(double    value) noexcept;
+    Value(char const* value) noexcept;
     Value(std::string const& value) noexcept;
     Value(std::string&& value) noexcept;
 

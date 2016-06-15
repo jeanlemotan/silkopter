@@ -110,6 +110,8 @@ private:
 template<class Stream_t>
 Resampler<Stream_t>::Resampler(UAV& uav)
     : m_uav(uav)
+    , m_descriptor(new uav::Resampler_Descriptor)
+    , m_config(new uav::Resampler_Config)
 {
     m_output_stream = std::make_shared<Output_Stream>();
 }

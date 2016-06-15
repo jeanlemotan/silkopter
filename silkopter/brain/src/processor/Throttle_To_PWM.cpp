@@ -54,7 +54,7 @@ auto Throttle_To_PWM::start(q::Clock::time_point tp) -> bool
 
 auto Throttle_To_PWM::get_inputs() const -> std::vector<Input>
 {
-    std::vector<Input> inputs(m_descriptor->get_channel_count());
+    std::vector<Input> inputs(m_accumulators.size());
     for (size_t i = 0; i < inputs.size(); i++)
     {
         inputs[i] = { stream::IThrottle::TYPE, m_descriptor->get_rate(), q::util::format<std::string>("Throttle {}", i), m_accumulators[i].get_stream_path(0) };
@@ -63,7 +63,7 @@ auto Throttle_To_PWM::get_inputs() const -> std::vector<Input>
 }
 auto Throttle_To_PWM::get_outputs() const -> std::vector<Output>
 {
-    std::vector<Output> outputs(m_descriptor->get_channel_count());
+    std::vector<Output> outputs(m_accumulators.size());
     for (size_t i = 0; i < outputs.size(); i++)
     {
         outputs[i] = { q::util::format<std::string>("PWM {}", i), m_output_streams[i] };

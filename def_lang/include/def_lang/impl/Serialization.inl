@@ -79,6 +79,11 @@ inline Value::Value(std::string const& value) noexcept
     , string_value(value)
 {
 }
+inline Value::Value(char const* value) noexcept
+    : type(Type::STRING)
+    , string_value(value ? value : "")
+{
+}
 inline Value::Value(std::string&& value) noexcept
     : type(Type::STRING)
     , string_value(std::move(value))
@@ -241,7 +246,7 @@ inline int64_t Value::get_as_int64() const noexcept
 inline uint64_t Value::get_as_uint64() const noexcept
 {
     TS_ASSERT(type == Type::UINT64);
-    return int64_value;
+    return uint64_value;
 }
 inline float Value::get_as_float() const noexcept
 {
@@ -264,6 +269,7 @@ inline double Value::get_as_number() const noexcept
     case Type::INT32: return static_cast<double>(get_as_int32());
     case Type::UINT32: return static_cast<double>(get_as_uint32());
     case Type::INT64: return static_cast<double>(get_as_int64());
+    case Type::UINT64: return static_cast<double>(get_as_uint64());
     case Type::FLOAT: return static_cast<double>(get_as_float());
     default: return get_as_double();
     }
@@ -286,7 +292,8 @@ inline int64_t Value::get_as_integral_number() const noexcept
     case Type::UINT16: return get_as_uint16();
     case Type::INT32: return get_as_int32();
     case Type::UINT32: return get_as_uint32();
-    default: return get_as_int64();
+    case Type::INT64: return get_as_int64();
+    default: return get_as_uint64();
     }
 }
 inline std::string const& Value::get_as_string() const noexcept
@@ -379,7 +386,7 @@ inline bool Value::is_integral_number() const noexcept
     return type == Type::INT8 || type == Type::UINT8 ||
             type == Type::INT16 || type == Type::UINT16 ||
             type == Type::INT32 || type == Type::UINT32 ||
-            type == Type::INT64;
+            type == Type::INT64 || type == Type::UINT64;
 }
 inline bool Value::is_real_number() const noexcept
 {

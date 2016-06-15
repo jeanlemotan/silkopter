@@ -51,19 +51,19 @@ constexpr q::Clock::duration RCP_PERIOD = std::chrono::milliseconds(30);
 
 struct Comms::Channels
 {
-    typedef util::Channel<comms::Setup_Message, uint32_t> Setup;
+    //typedef util::Channel<comms::Setup_Message, uint32_t> Setup;
     typedef util::Channel<comms::Pilot_Message, uint32_t> Pilot;
     typedef util::Channel<comms::Video_Message, uint32_t> Video;
     typedef util::Channel<comms::Telemetry_Message, uint32_t> Telemetry;
 
     Channels()
-        : setup(SETUP_CHANNEL)
-        , pilot(PILOT_CHANNEL)
+//        : setup(SETUP_CHANNEL)
+        : pilot(PILOT_CHANNEL)
         , telemetry(TELEMETRY_CHANNEL)
         , video(VIDEO_CHANNEL)
     {}
 
-    Setup setup;
+    //Setup setup;
     Pilot pilot;
     Telemetry telemetry;
     Video video;
@@ -944,8 +944,7 @@ comms::setup::Error make_error(Format_String const& fmt, Params&&... params)
 
 void Comms::handle_req(comms::setup::Set_Clock_Req const& req)
 {
-    auto& channel = m_channels->setup;
-    QLOGI("Req clock");
+    QLOGI("Set_Clock_Req");
 
     comms::setup::Brain_Res response;
 
@@ -954,22 +953,22 @@ void Comms::handle_req(comms::setup::Set_Clock_Req const& req)
     time_t t = time_t_data / 1000;
     if (stime(&t) == 0)
     {
-        char mbstr[256] = {0};
-        std::time_t t = std::time(nullptr);
-        if (!std::strftime(mbstr, 100, "%e-%m-%Y-%H-%M-%S", std::localtime(&t)))
-        {
-            strcpy(mbstr, "<cannot format>");
-        }
-        QLOGI("Clock set, current time is: {}", mbstr);
-    }
-    else
-    {
         response = make_error("Failed to set time: {}", strerror(errno));
+        serialize_and_send(SETUP_CHANNEL, response);
+        return;
     }
 #endif
 
+    char mbstr[256] = {0};
+    std::time_t t = std::time(nullptr);
+    if (!std::strftime(mbstr, 100, "%e-%m-%Y-%H-%M-%S", std::localtime(&t)))
+    {
+        strcpy(mbstr, "<cannot format>");
+    }
+    QLOGI("Clock set, current time is: {}", mbstr);
+
     comms::setup::Set_Clock_Res res;
-    res.set_time(static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::milliseconds>(q::Clock::now().time_since_epoch()).count()));
+    res.set_time(static_cast<uint64_t>(t) * 1000);
     response = res;
 
     serialize_and_send(SETUP_CHANNEL, response);
@@ -1033,7 +1032,7 @@ void Comms::handle_req(comms::setup::Get_UAV_Descriptor_Req const& /*req*/)
 
 void Comms::handle_req(comms::setup::Get_Node_Defs_Req const& /*req*/)
 {
-    QLOGI("Get_UAV_Descriptor_Req");
+    QLOGI("Get_Node_Defs_Req");
 
     comms::setup::Brain_Res response;
 
@@ -1041,7 +1040,6 @@ void Comms::handle_req(comms::setup::Get_Node_Defs_Req const& /*req*/)
     m_stream_telemetry_data.clear();
     m_uav_telemetry_data.is_enabled = false;
 
-    QLOGI("Enumerate node factory");
     std::vector<UAV::Node_Factory::Info> nodes = m_uav.get_node_factory().create_all();
 
     comms::setup::Get_Node_Defs_Res res;
@@ -1342,7 +1340,7 @@ void Comms::process()
 
         pack_telemetry_data();
 
-        m_channels->setup.send(*m_rcp);
+        //m_channels->setup.send(*m_rcp);
         m_channels->telemetry.try_sending(*m_rcp);
     }
 
