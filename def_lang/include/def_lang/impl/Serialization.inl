@@ -440,11 +440,13 @@ inline void Value::construct() noexcept
     case Type::OBJECT:
     {
         new (&object_value) object_type;
+        object_value.reserve(32);
         break;
     }
     case Type::ARRAY:
     {
         new (&array_value) array_type;
+        array_value.reserve(32);
         break;
     }
     default: break;

@@ -232,6 +232,7 @@ void Comms::configure_channels()
 
 void Comms::reset()
 {
+    m_last_req_id = 0;
     sig_reset.execute();
 }
 
@@ -313,22 +314,26 @@ void Comms::request_all_data()
     {
         uint64_t t = time(nullptr);
         comms::setup::Set_Clock_Req req;
+        req.set_req_id(++m_last_req_id);
         req.set_time(t * 1000);
         request = req;
         serialize_and_send(SETUP_CHANNEL, request);
     }
     {
         comms::setup::Get_UAV_Descriptor_Req req;
+        req.set_req_id(++m_last_req_id);
         request = req;
         serialize_and_send(SETUP_CHANNEL, request);
     }
     {
         comms::setup::Get_Node_Defs_Req req;
+        req.set_req_id(++m_last_req_id);
         request = req;
         serialize_and_send(SETUP_CHANNEL, request);
     }
     {
         comms::setup::Get_Nodes_Req req;
+        req.set_req_id(++m_last_req_id);
         request = req;
         serialize_and_send(SETUP_CHANNEL, request);
     }
@@ -916,6 +921,60 @@ void Comms::Stream_Data<Stream>::unpack(Comms::Telemetry_Channel& channel, uint3
 //    m_pilot_channel.try_sending(*m_rcp);
 //}
 
+void Comms::handle_res(comms::setup::Error const& res)
+{
+    QLOGI("Error {}", res.get_req_id());
+}
+
+void Comms::handle_res(comms::setup::Set_Clock_Res const& res)
+{
+    QLOGI("Set_Clock_Res {}", res.get_req_id());
+}
+
+void Comms::handle_res(comms::setup::Set_UAV_Descriptor_Res const& res)
+{
+    QLOGI("Set_UAV_Descriptor_Res {}", res.get_req_id());
+
+}
+
+void Comms::handle_res(comms::setup::Get_UAV_Descriptor_Res const& res)
+{
+    QLOGI("Get_UAV_Descriptor_Res {}", res.get_req_id());
+
+}
+
+void Comms::handle_res(comms::setup::Get_Node_Defs_Res const& res)
+{
+    QLOGI("Get_Node_Defs_Res {}", res.get_req_id());
+
+}
+
+void Comms::handle_res(comms::setup::Remove_Node_Res const& res)
+{
+    QLOGI("Remove_Node_Res {}", res.get_req_id());
+
+}
+
+void Comms::handle_res(comms::setup::Get_Nodes_Res const& res)
+{
+    QLOGI("Get_Nodes_Res {}", res.get_req_id());
+
+}
+
+void Comms::handle_res(comms::setup::Add_Node_Res const& res)
+{
+    QLOGI("Add_Node_Res {}", res.get_req_id());
+
+}
+
+void Comms::handle_res(comms::setup::Set_Node_Input_Stream_Path_Res const& res)
+{
+    QLOGI("Set_Node_Input_Stream_Path_Res {}", res.get_req_id());
+
+}
+
+
+
 void Comms::process_rcp()
 {
     if (!is_connected())
@@ -931,6 +990,19 @@ void Comms::process_rcp()
 
     m_rcp->process();
 }
+
+struct Comms::Dispatch_Res_Visitor : boost::static_visitor<void>
+{
+    Dispatch_Res_Visitor(Comms& comms) : m_comms(comms) {}
+    template <typename T> void operator()(T const& t) const { m_comms.handle_res(t); }
+    Comms& m_comms;
+};
+struct Comms::Dispatch_Req_Visitor : boost::static_visitor<void>
+{
+    Dispatch_Req_Visitor(Comms& comms) : m_comms(comms) {}
+//    template <typename T> void operator()(T const& t) const { m_comms.handle_req(t); }
+    Comms& m_comms;
+};
 
 void Comms::process()
 {
@@ -971,6 +1043,31 @@ void Comms::process()
             default: break;
             }
         }
+    }
+
+    Dispatch_Res_Visitor dispatcher(*this);
+    while (m_rcp->receive(SETUP_CHANNEL, m_setup_buffer))
+    {
+        const char* data = (const char*)m_setup_buffer.data();
+        std::string json(data, data + m_setup_buffer.size());
+        QLOGI("{}", data);
+
+        auto parse_result = ts::sz::from_json(m_setup_buffer.data(), m_setup_buffer.size());
+        if (parse_result != ts::success)
+        {
+            QLOGE("Cannot parse setup req: {}", parse_result.error().what());
+        }
+        else
+        {
+            silk::comms::setup::Brain_Res res;
+            auto result = silk::comms::deserialize(res, parse_result.payload());
+            if (result != ts::success)
+            {
+                QLOGE("Cannot deserialize setup res: {}", result.error().what());
+            }
+            boost::apply_visitor(dispatcher, res);
+        }
+        m_setup_buffer.clear();
     }
 
 //    while (auto msg = m_setup_channel.get_next_message(*m_rcp))

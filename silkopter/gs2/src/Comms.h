@@ -38,7 +38,24 @@
 
 #include <boost/asio.hpp>
 
-
+namespace silk
+{
+namespace comms
+{
+namespace setup
+{
+class Error;
+class Set_Clock_Res;
+class Set_UAV_Descriptor_Res;
+class Get_UAV_Descriptor_Res;
+class Get_Node_Defs_Res;
+class Remove_Node_Res;
+class Get_Nodes_Res;
+class Add_Node_Res;
+class Set_Node_Input_Stream_Path_Res;
+}
+}
+}
 
 namespace silk
 {
@@ -178,6 +195,8 @@ private:
 
     std::map<stream::Type, std::unique_ptr<IStream_Data>> m_streams;
 
+    struct Dispatch_Res_Visitor;
+    struct Dispatch_Req_Visitor;
 
     void reset();
     bool m_did_request_data = false;
@@ -188,10 +207,25 @@ private:
     std::shared_ptr<util::RCP_Socket> m_socket;
     std::shared_ptr<util::RCP> m_rcp;
 
+    uint32_t m_last_req_id = 0;
+
     //mutable Setup_Channel m_setup_channel;
     mutable Pilot_Channel m_pilot_channel;
     mutable Video_Channel m_video_channel;
     mutable Telemetry_Channel m_telemetry_channel;
+
+    std::vector<uint8_t> m_setup_buffer;
+
+    void handle_res(comms::setup::Error const& res);
+    void handle_res(comms::setup::Set_Clock_Res const& res);
+    void handle_res(comms::setup::Set_UAV_Descriptor_Res const& res);
+    void handle_res(comms::setup::Get_UAV_Descriptor_Res const& res);
+    void handle_res(comms::setup::Get_Node_Defs_Res const& res);
+    void handle_res(comms::setup::Remove_Node_Res const& res);
+    void handle_res(comms::setup::Get_Nodes_Res const& res);
+    void handle_res(comms::setup::Add_Node_Res const& res);
+    void handle_res(comms::setup::Set_Node_Input_Stream_Path_Res const& res);
+
 
     std::vector<stream::IVideo::Sample> m_video_samples;
     std::vector<stream::IMultirotor_State::Sample> m_multirotor_state_samples;

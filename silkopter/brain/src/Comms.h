@@ -102,8 +102,13 @@ private:
 //    void handle_streams_telemetry_active();
 //    void handle_uav_telemetry_active();
 
+    std::string m_json_buffer;
+    std::string m_base64_buffer;
+
     template<typename T>
     void serialize_and_send(size_t channel_idx, T const& res);
+    std::string const& decode_json(std::string const& json_base64);
+    std::string const& encode_json(std::string const& json);
 
     class Dispatch_Req_Visitor;
     friend class Dispatch_Req_Visitor;

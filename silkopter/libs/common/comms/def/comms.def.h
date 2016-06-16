@@ -50,88 +50,141 @@ namespace setup
 
 typedef int64_t time_ms_t;
 typedef std::string serialized_data_t;
-struct Error
+struct IReq
+{
+public:
+  virtual ~IReq() = default;
+  void set_req_id(uint32_t const& value);
+  void set_req_id(uint32_t&& value);
+  auto get_req_id() const -> uint32_t const&;
+
+private:
+  uint32_t m_req_id = {0};
+};
+
+struct IRes
+{
+public:
+  virtual ~IRes() = default;
+  void set_req_id(uint32_t const& value);
+  void set_req_id(uint32_t&& value);
+  auto get_req_id() const -> uint32_t const&;
+
+private:
+  uint32_t m_req_id = {0};
+};
+
+struct Error : public setup::IRes
 {
 public:
   virtual ~Error() = default;
+  void set_req_id(uint32_t const& value);
+  void set_req_id(uint32_t&& value);
+  auto get_req_id() const -> uint32_t const&;
+
   void set_message(std::string const& value);
   void set_message(std::string&& value);
   auto get_message() const -> std::string const&;
 
 private:
+  uint32_t m_req_id = {0};
   std::string m_message;
 };
 
-struct Set_Clock_Req
+struct Set_Clock_Req : public setup::IReq
 {
 public:
   virtual ~Set_Clock_Req() = default;
+  void set_req_id(uint32_t const& value);
+  void set_req_id(uint32_t&& value);
+  auto get_req_id() const -> uint32_t const&;
+
   void set_time(setup::time_ms_t const& value);
   void set_time(setup::time_ms_t&& value);
   auto get_time() const -> setup::time_ms_t const&;
 
 private:
+  uint32_t m_req_id = {0};
   setup::time_ms_t m_time = {0};
 };
 
-struct Set_Clock_Res
+struct Set_Clock_Res : public setup::IRes
 {
 public:
   virtual ~Set_Clock_Res() = default;
+  void set_req_id(uint32_t const& value);
+  void set_req_id(uint32_t&& value);
+  auto get_req_id() const -> uint32_t const&;
+
   void set_time(setup::time_ms_t const& value);
   void set_time(setup::time_ms_t&& value);
   auto get_time() const -> setup::time_ms_t const&;
 
-  void set_error(boost::optional<setup::Error> const& value);
-  void set_error(boost::optional<setup::Error>&& value);
-  auto get_error() const -> boost::optional<setup::Error> const&;
-  auto get_error() -> boost::optional<setup::Error>&;
-
 private:
+  uint32_t m_req_id = {0};
   setup::time_ms_t m_time = {0};
-  boost::optional<setup::Error> m_error;
 };
 
-struct Set_UAV_Descriptor_Req
+struct Set_UAV_Descriptor_Req : public setup::IReq
 {
 public:
   virtual ~Set_UAV_Descriptor_Req() = default;
+  void set_req_id(uint32_t const& value);
+  void set_req_id(uint32_t&& value);
+  auto get_req_id() const -> uint32_t const&;
+
   void set_data(setup::serialized_data_t const& value);
   void set_data(setup::serialized_data_t&& value);
   auto get_data() const -> setup::serialized_data_t const&;
 
 private:
+  uint32_t m_req_id = {0};
   setup::serialized_data_t m_data;
 };
 
-struct Set_UAV_Descriptor_Res
+struct Set_UAV_Descriptor_Res : public setup::IRes
 {
 public:
   virtual ~Set_UAV_Descriptor_Res() = default;
+  void set_req_id(uint32_t const& value);
+  void set_req_id(uint32_t&& value);
+  auto get_req_id() const -> uint32_t const&;
+
   void set_data(setup::serialized_data_t const& value);
   void set_data(setup::serialized_data_t&& value);
   auto get_data() const -> setup::serialized_data_t const&;
 
 private:
+  uint32_t m_req_id = {0};
   setup::serialized_data_t m_data;
 };
 
-struct Get_UAV_Descriptor_Req
+struct Get_UAV_Descriptor_Req : public setup::IRes
 {
 public:
   virtual ~Get_UAV_Descriptor_Req() = default;
+  void set_req_id(uint32_t const& value);
+  void set_req_id(uint32_t&& value);
+  auto get_req_id() const -> uint32_t const&;
+
 private:
+  uint32_t m_req_id = {0};
 };
 
-struct Get_UAV_Descriptor_Res
+struct Get_UAV_Descriptor_Res : public setup::IRes
 {
 public:
   virtual ~Get_UAV_Descriptor_Res() = default;
+  void set_req_id(uint32_t const& value);
+  void set_req_id(uint32_t&& value);
+  auto get_req_id() const -> uint32_t const&;
+
   void set_data(setup::serialized_data_t const& value);
   void set_data(setup::serialized_data_t&& value);
   auto get_data() const -> setup::serialized_data_t const&;
 
 private:
+  uint32_t m_req_id = {0};
   setup::serialized_data_t m_data;
 };
 
@@ -223,23 +276,33 @@ private:
   setup::serialized_data_t m_descriptor_data;
 };
 
-struct Get_Node_Defs_Req
+struct Get_Node_Defs_Req : public setup::IReq
 {
 public:
   virtual ~Get_Node_Defs_Req() = default;
+  void set_req_id(uint32_t const& value);
+  void set_req_id(uint32_t&& value);
+  auto get_req_id() const -> uint32_t const&;
+
 private:
+  uint32_t m_req_id = {0};
 };
 
-struct Get_Node_Defs_Res
+struct Get_Node_Defs_Res : public setup::IRes
 {
 public:
   virtual ~Get_Node_Defs_Res() = default;
+  void set_req_id(uint32_t const& value);
+  void set_req_id(uint32_t&& value);
+  auto get_req_id() const -> uint32_t const&;
+
   void set_node_def_datas(std::vector<setup::Node_Def_Data> const& value);
   void set_node_def_datas(std::vector<setup::Node_Def_Data>&& value);
   auto get_node_def_datas() const -> std::vector<setup::Node_Def_Data> const&;
   auto get_node_def_datas() -> std::vector<setup::Node_Def_Data>&;
 
 private:
+  uint32_t m_req_id = {0};
   std::vector<setup::Node_Def_Data> m_node_def_datas;
 };
 
@@ -341,35 +404,49 @@ private:
   setup::serialized_data_t m_config_data;
 };
 
-struct Get_Nodes_Req
+struct Get_Nodes_Req : public setup::IReq
 {
 public:
   virtual ~Get_Nodes_Req() = default;
+  void set_req_id(uint32_t const& value);
+  void set_req_id(uint32_t&& value);
+  auto get_req_id() const -> uint32_t const&;
+
   void set_name(std::string const& value);
   void set_name(std::string&& value);
   auto get_name() const -> std::string const&;
 
 private:
+  uint32_t m_req_id = {0};
   std::string m_name;
 };
 
-struct Get_Nodes_Res
+struct Get_Nodes_Res : public setup::IRes
 {
 public:
   virtual ~Get_Nodes_Res() = default;
+  void set_req_id(uint32_t const& value);
+  void set_req_id(uint32_t&& value);
+  auto get_req_id() const -> uint32_t const&;
+
   void set_node_datas(std::vector<setup::Node_Data> const& value);
   void set_node_datas(std::vector<setup::Node_Data>&& value);
   auto get_node_datas() const -> std::vector<setup::Node_Data> const&;
   auto get_node_datas() -> std::vector<setup::Node_Data>&;
 
 private:
+  uint32_t m_req_id = {0};
   std::vector<setup::Node_Data> m_node_datas;
 };
 
-struct Set_Node_Input_Stream_Path_Req
+struct Set_Node_Input_Stream_Path_Req : public setup::IReq
 {
 public:
   virtual ~Set_Node_Input_Stream_Path_Req() = default;
+  void set_req_id(uint32_t const& value);
+  void set_req_id(uint32_t&& value);
+  auto get_req_id() const -> uint32_t const&;
+
   void set_node_name(std::string const& value);
   void set_node_name(std::string&& value);
   auto get_node_name() const -> std::string const&;
@@ -383,28 +460,38 @@ public:
   auto get_stream_path() const -> std::string const&;
 
 private:
+  uint32_t m_req_id = {0};
   std::string m_node_name;
   std::string m_input_name;
   std::string m_stream_path;
 };
 
-struct Set_Node_Input_Stream_Path_Res
+struct Set_Node_Input_Stream_Path_Res : public setup::IRes
 {
 public:
   virtual ~Set_Node_Input_Stream_Path_Res() = default;
+  void set_req_id(uint32_t const& value);
+  void set_req_id(uint32_t&& value);
+  auto get_req_id() const -> uint32_t const&;
+
   void set_node_data(setup::Node_Data const& value);
   void set_node_data(setup::Node_Data&& value);
   auto get_node_data() const -> setup::Node_Data const&;
   auto get_node_data() -> setup::Node_Data&;
 
 private:
+  uint32_t m_req_id = {0};
   setup::Node_Data m_node_data;
 };
 
-struct Add_Node_Req
+struct Add_Node_Req : public setup::IReq
 {
 public:
   virtual ~Add_Node_Req() = default;
+  void set_req_id(uint32_t const& value);
+  void set_req_id(uint32_t&& value);
+  auto get_req_id() const -> uint32_t const&;
+
   void set_def_name(std::string const& value);
   void set_def_name(std::string&& value);
   auto get_def_name() const -> std::string const&;
@@ -418,41 +505,57 @@ public:
   auto get_descriptor_data() const -> setup::serialized_data_t const&;
 
 private:
+  uint32_t m_req_id = {0};
   std::string m_def_name;
   std::string m_name;
   setup::serialized_data_t m_descriptor_data;
 };
 
-struct Add_Node_Res
+struct Add_Node_Res : public setup::IRes
 {
 public:
   virtual ~Add_Node_Res() = default;
+  void set_req_id(uint32_t const& value);
+  void set_req_id(uint32_t&& value);
+  auto get_req_id() const -> uint32_t const&;
+
   void set_node_data(setup::Node_Data const& value);
   void set_node_data(setup::Node_Data&& value);
   auto get_node_data() const -> setup::Node_Data const&;
   auto get_node_data() -> setup::Node_Data&;
 
 private:
+  uint32_t m_req_id = {0};
   setup::Node_Data m_node_data;
 };
 
-struct Remove_Node_Req
+struct Remove_Node_Req : public setup::IReq
 {
 public:
   virtual ~Remove_Node_Req() = default;
+  void set_req_id(uint32_t const& value);
+  void set_req_id(uint32_t&& value);
+  auto get_req_id() const -> uint32_t const&;
+
   void set_name(std::string const& value);
   void set_name(std::string&& value);
   auto get_name() const -> std::string const&;
 
 private:
+  uint32_t m_req_id = {0};
   std::string m_name;
 };
 
-struct Remove_Node_Res
+struct Remove_Node_Res : public setup::IRes
 {
 public:
   virtual ~Remove_Node_Res() = default;
+  void set_req_id(uint32_t const& value);
+  void set_req_id(uint32_t&& value);
+  auto get_req_id() const -> uint32_t const&;
+
 private:
+  uint32_t m_req_id = {0};
 };
 
 typedef boost::variant<setup::Set_Clock_Req,setup::Set_UAV_Descriptor_Req,setup::Get_UAV_Descriptor_Req,setup::Get_Node_Defs_Req,setup::Remove_Node_Req,setup::Add_Node_Req,setup::Get_Nodes_Req,setup::Set_Node_Input_Stream_Path_Req> Brain_Req;
@@ -498,6 +601,10 @@ ts::Result<void> deserialize(int32_t& value, ts::sz::Value const& sz_value);
 ts::sz::Value serialize(int32_t const& value);
 ts::Result<void> deserialize(uint32_t& value, ts::sz::Value const& sz_value);
 ts::sz::Value serialize(uint32_t const& value);
+ts::Result<void> deserialize(setup::IReq& value, ts::sz::Value const& sz_value);
+ts::sz::Value serialize(setup::IReq const& value);
+ts::Result<void> deserialize(setup::IRes& value, ts::sz::Value const& sz_value);
+ts::sz::Value serialize(setup::IRes const& value);
 ts::Result<void> deserialize(setup::Error& value, ts::sz::Value const& sz_value);
 ts::sz::Value serialize(setup::Error const& value);
 ts::Result<void> deserialize(setup::Set_Clock_Req& value, ts::sz::Value const& sz_value);
@@ -548,8 +655,6 @@ ts::Result<void> deserialize(setup::Brain_Req& value, ts::sz::Value const& sz_va
 ts::sz::Value serialize(setup::Brain_Req const& value);
 ts::Result<void> deserialize(setup::Brain_Res& value, ts::sz::Value const& sz_value);
 ts::sz::Value serialize(setup::Brain_Res const& value);
-ts::Result<void> deserialize(boost::optional<setup::Error>& value, ts::sz::Value const& sz_value);
-ts::sz::Value serialize(boost::optional<setup::Error> const& value);
 ts::Result<void> deserialize(std::vector<setup::Node_Def_Data::Input>& value, ts::sz::Value const& sz_value);
 ts::sz::Value serialize(std::vector<setup::Node_Def_Data::Input> const& value);
 ts::Result<void> deserialize(std::vector<setup::Node_Def_Data::Output>& value, ts::sz::Value const& sz_value);

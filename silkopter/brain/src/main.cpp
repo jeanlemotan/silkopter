@@ -8,10 +8,17 @@
 #include <boost/program_options.hpp>
 #include <thread>
 #include <iostream>
+#include <malloc.h>
 
 size_t s_test = 0;
 bool s_exit = false;
 boost::asio::io_service s_async_io_service;
+
+struct Memory
+{
+    size_t allocation_count = 0;
+    size_t free_count = 0;
+} s_memory;
 
 namespace boost
 {
@@ -20,6 +27,22 @@ namespace boost
         QLOGE("boost::exception {}", e.what());
 		throw e;
     }
+}
+
+static void* malloc_hook(size_t size, const void* caller)
+{
+    s_memory.allocation_count++;
+    __malloc_hook = nullptr;
+    void* ptr = malloc(size);
+    __malloc_hook = &malloc_hook;
+    return ptr;
+}
+void free_hook(void* ptr, const void* caller)
+{
+    s_memory.free_count++;
+    __free_hook = nullptr;
+    free(ptr);
+    __free_hook = &free_hook;
 }
 
 
@@ -49,6 +72,9 @@ int main(int argc, char const* argv[])
     signal(SIGQUIT, signal_handler);
 //    signal(SIGABRT, signal_handler);
     signal(SIGTERM, signal_handler);
+
+    __malloc_hook = &malloc_hook;
+    __free_hook = &free_hook;
 
     //set the new_handler
     std::set_new_handler(out_of_memory_handler);
@@ -170,6 +196,7 @@ int main(int argc, char const* argv[])
 #ifndef RASPBERRY_PI
                 std::this_thread::sleep_for(std::chrono::milliseconds(1));
 #endif
+                printf("\n%d, %d", int(s_memory.allocation_count), int(s_memory.free_count));
             }
         }
 

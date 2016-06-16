@@ -14,40 +14,54 @@ namespace setup
 alias time_ms_t = int64_t;
 alias serialized_data_t = string;
 
-struct Error
+////////////////////////////////////////////////////////////////
+
+
+struct IReq
+{
+    uint32_t req_id;
+};
+struct IRes
+{
+    uint32_t req_id;
+};
+
+////////////////////////////////////////////////////////////////
+
+
+struct Error : public IRes
 {
     string message;
 };
 
 ////////////////////////////////////////////////////////////////
 
-struct Set_Clock_Req
+struct Set_Clock_Req : public IReq
 {
     time_ms_t time;
 };
-struct Set_Clock_Res
+struct Set_Clock_Res : public IRes
 {
     time_ms_t time;
-    optional<Error> error;
 };
 
 ////////////////////////////////////////////////////////////////
 
-struct Set_UAV_Descriptor_Req
+struct Set_UAV_Descriptor_Req : public IReq
 {
     serialized_data_t data;
 };
-struct Set_UAV_Descriptor_Res
+struct Set_UAV_Descriptor_Res : public IRes
 {
     serialized_data_t data;
 };
 
 ////////////////////////////////////////////////////////////////
 
-struct Get_UAV_Descriptor_Req
+struct Get_UAV_Descriptor_Req : public IRes
 {
 };
-struct Get_UAV_Descriptor_Res
+struct Get_UAV_Descriptor_Res : public IRes
 {
     serialized_data_t data;
 };
@@ -78,10 +92,10 @@ struct Node_Def_Data
     serialized_data_t descriptor_data;
 };
 
-struct Get_Node_Defs_Req
+struct Get_Node_Defs_Req : public IReq
 {
 };
-struct Get_Node_Defs_Res
+struct Get_Node_Defs_Res : public IRes
 {
     vector<Node_Def_Data> node_def_datas;
 };
@@ -114,48 +128,48 @@ struct Node_Data
     serialized_data_t config_data;
 };
 
-struct Get_Nodes_Req
+struct Get_Nodes_Req : public IReq
 {
     string name; //if empty, all nodes
 };
-struct Get_Nodes_Res
+struct Get_Nodes_Res : public IRes
 {
     vector<Node_Data> node_datas;
 };
 
 ////////////////////////////////////////////////////////////////
 
-struct Set_Node_Input_Stream_Path_Req
+struct Set_Node_Input_Stream_Path_Req : public IReq
 {
     string node_name;
     string input_name;
     string stream_path;
 };
-struct Set_Node_Input_Stream_Path_Res
+struct Set_Node_Input_Stream_Path_Res : public IRes
 {
     Node_Data node_data;
 };
 
 ////////////////////////////////////////////////////////////////
 
-struct Add_Node_Req
+struct Add_Node_Req : public IReq
 {
     string def_name;
     string name;
     serialized_data_t descriptor_data;
 };
-struct Add_Node_Res
+struct Add_Node_Res : public IRes
 {
     Node_Data node_data;
 };
 
 ////////////////////////////////////////////////////////////////
 
-struct Remove_Node_Req
+struct Remove_Node_Req : public IReq
 {
     string name;
 };
-struct Remove_Node_Res
+struct Remove_Node_Res : public IRes
 {
 };
 

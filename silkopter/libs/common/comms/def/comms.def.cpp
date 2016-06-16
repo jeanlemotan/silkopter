@@ -23,6 +23,48 @@ T max(T v, T max)
 namespace setup
 {
 
+  void IReq::set_req_id(uint32_t const& value)
+  {
+    m_req_id = value;
+  }
+  void IReq::set_req_id(uint32_t&& value)
+  {
+    m_req_id = std::move(value);
+  }
+  auto IReq::get_req_id() const -> uint32_t const& 
+  {
+    return m_req_id;
+  }
+
+////////////////////////////////////////////////////////////
+  void IRes::set_req_id(uint32_t const& value)
+  {
+    m_req_id = value;
+  }
+  void IRes::set_req_id(uint32_t&& value)
+  {
+    m_req_id = std::move(value);
+  }
+  auto IRes::get_req_id() const -> uint32_t const& 
+  {
+    return m_req_id;
+  }
+
+////////////////////////////////////////////////////////////
+  void Error::set_req_id(uint32_t const& value)
+  {
+    m_req_id = value;
+  }
+  void Error::set_req_id(uint32_t&& value)
+  {
+    m_req_id = std::move(value);
+  }
+  auto Error::get_req_id() const -> uint32_t const& 
+  {
+    return m_req_id;
+  }
+
+////////////////////////////////////////////////////////////
   void Error::set_message(std::string const& value)
   {
     m_message = value;
@@ -34,6 +76,20 @@ namespace setup
   auto Error::get_message() const -> std::string const& 
   {
     return m_message;
+  }
+
+////////////////////////////////////////////////////////////
+  void Set_Clock_Req::set_req_id(uint32_t const& value)
+  {
+    m_req_id = value;
+  }
+  void Set_Clock_Req::set_req_id(uint32_t&& value)
+  {
+    m_req_id = std::move(value);
+  }
+  auto Set_Clock_Req::get_req_id() const -> uint32_t const& 
+  {
+    return m_req_id;
   }
 
 ////////////////////////////////////////////////////////////
@@ -51,6 +107,20 @@ namespace setup
   }
 
 ////////////////////////////////////////////////////////////
+  void Set_Clock_Res::set_req_id(uint32_t const& value)
+  {
+    m_req_id = value;
+  }
+  void Set_Clock_Res::set_req_id(uint32_t&& value)
+  {
+    m_req_id = std::move(value);
+  }
+  auto Set_Clock_Res::get_req_id() const -> uint32_t const& 
+  {
+    return m_req_id;
+  }
+
+////////////////////////////////////////////////////////////
   void Set_Clock_Res::set_time(setup::time_ms_t const& value)
   {
     m_time = value;
@@ -65,22 +135,17 @@ namespace setup
   }
 
 ////////////////////////////////////////////////////////////
-  void Set_Clock_Res::set_error(boost::optional<setup::Error> const& value)
+  void Set_UAV_Descriptor_Req::set_req_id(uint32_t const& value)
   {
-    m_error = value;
+    m_req_id = value;
   }
-  void Set_Clock_Res::set_error(boost::optional<setup::Error>&& value)
+  void Set_UAV_Descriptor_Req::set_req_id(uint32_t&& value)
   {
-    m_error = std::move(value);
+    m_req_id = std::move(value);
   }
-  auto Set_Clock_Res::get_error() const -> boost::optional<setup::Error> const& 
+  auto Set_UAV_Descriptor_Req::get_req_id() const -> uint32_t const& 
   {
-    return m_error;
-  }
-
-  auto Set_Clock_Res::get_error() -> boost::optional<setup::Error>& 
-  {
-    return m_error;
+    return m_req_id;
   }
 
 ////////////////////////////////////////////////////////////
@@ -98,6 +163,20 @@ namespace setup
   }
 
 ////////////////////////////////////////////////////////////
+  void Set_UAV_Descriptor_Res::set_req_id(uint32_t const& value)
+  {
+    m_req_id = value;
+  }
+  void Set_UAV_Descriptor_Res::set_req_id(uint32_t&& value)
+  {
+    m_req_id = std::move(value);
+  }
+  auto Set_UAV_Descriptor_Res::get_req_id() const -> uint32_t const& 
+  {
+    return m_req_id;
+  }
+
+////////////////////////////////////////////////////////////
   void Set_UAV_Descriptor_Res::set_data(setup::serialized_data_t const& value)
   {
     m_data = value;
@@ -109,6 +188,34 @@ namespace setup
   auto Set_UAV_Descriptor_Res::get_data() const -> setup::serialized_data_t const& 
   {
     return m_data;
+  }
+
+////////////////////////////////////////////////////////////
+  void Get_UAV_Descriptor_Req::set_req_id(uint32_t const& value)
+  {
+    m_req_id = value;
+  }
+  void Get_UAV_Descriptor_Req::set_req_id(uint32_t&& value)
+  {
+    m_req_id = std::move(value);
+  }
+  auto Get_UAV_Descriptor_Req::get_req_id() const -> uint32_t const& 
+  {
+    return m_req_id;
+  }
+
+////////////////////////////////////////////////////////////
+  void Get_UAV_Descriptor_Res::set_req_id(uint32_t const& value)
+  {
+    m_req_id = value;
+  }
+  void Get_UAV_Descriptor_Res::set_req_id(uint32_t&& value)
+  {
+    m_req_id = std::move(value);
+  }
+  auto Get_UAV_Descriptor_Res::get_req_id() const -> uint32_t const& 
+  {
+    return m_req_id;
   }
 
 ////////////////////////////////////////////////////////////
@@ -315,6 +422,34 @@ namespace setup
   auto Node_Def_Data::get_descriptor_data() const -> setup::serialized_data_t const& 
   {
     return m_descriptor_data;
+  }
+
+////////////////////////////////////////////////////////////
+  void Get_Node_Defs_Req::set_req_id(uint32_t const& value)
+  {
+    m_req_id = value;
+  }
+  void Get_Node_Defs_Req::set_req_id(uint32_t&& value)
+  {
+    m_req_id = std::move(value);
+  }
+  auto Get_Node_Defs_Req::get_req_id() const -> uint32_t const& 
+  {
+    return m_req_id;
+  }
+
+////////////////////////////////////////////////////////////
+  void Get_Node_Defs_Res::set_req_id(uint32_t const& value)
+  {
+    m_req_id = value;
+  }
+  void Get_Node_Defs_Res::set_req_id(uint32_t&& value)
+  {
+    m_req_id = std::move(value);
+  }
+  auto Get_Node_Defs_Res::get_req_id() const -> uint32_t const& 
+  {
+    return m_req_id;
   }
 
 ////////////////////////////////////////////////////////////
@@ -557,6 +692,20 @@ namespace setup
   }
 
 ////////////////////////////////////////////////////////////
+  void Get_Nodes_Req::set_req_id(uint32_t const& value)
+  {
+    m_req_id = value;
+  }
+  void Get_Nodes_Req::set_req_id(uint32_t&& value)
+  {
+    m_req_id = std::move(value);
+  }
+  auto Get_Nodes_Req::get_req_id() const -> uint32_t const& 
+  {
+    return m_req_id;
+  }
+
+////////////////////////////////////////////////////////////
   void Get_Nodes_Req::set_name(std::string const& value)
   {
     m_name = value;
@@ -568,6 +717,20 @@ namespace setup
   auto Get_Nodes_Req::get_name() const -> std::string const& 
   {
     return m_name;
+  }
+
+////////////////////////////////////////////////////////////
+  void Get_Nodes_Res::set_req_id(uint32_t const& value)
+  {
+    m_req_id = value;
+  }
+  void Get_Nodes_Res::set_req_id(uint32_t&& value)
+  {
+    m_req_id = std::move(value);
+  }
+  auto Get_Nodes_Res::get_req_id() const -> uint32_t const& 
+  {
+    return m_req_id;
   }
 
 ////////////////////////////////////////////////////////////
@@ -587,6 +750,20 @@ namespace setup
   auto Get_Nodes_Res::get_node_datas() -> std::vector<setup::Node_Data>& 
   {
     return m_node_datas;
+  }
+
+////////////////////////////////////////////////////////////
+  void Set_Node_Input_Stream_Path_Req::set_req_id(uint32_t const& value)
+  {
+    m_req_id = value;
+  }
+  void Set_Node_Input_Stream_Path_Req::set_req_id(uint32_t&& value)
+  {
+    m_req_id = std::move(value);
+  }
+  auto Set_Node_Input_Stream_Path_Req::get_req_id() const -> uint32_t const& 
+  {
+    return m_req_id;
   }
 
 ////////////////////////////////////////////////////////////
@@ -632,6 +809,20 @@ namespace setup
   }
 
 ////////////////////////////////////////////////////////////
+  void Set_Node_Input_Stream_Path_Res::set_req_id(uint32_t const& value)
+  {
+    m_req_id = value;
+  }
+  void Set_Node_Input_Stream_Path_Res::set_req_id(uint32_t&& value)
+  {
+    m_req_id = std::move(value);
+  }
+  auto Set_Node_Input_Stream_Path_Res::get_req_id() const -> uint32_t const& 
+  {
+    return m_req_id;
+  }
+
+////////////////////////////////////////////////////////////
   void Set_Node_Input_Stream_Path_Res::set_node_data(setup::Node_Data const& value)
   {
     m_node_data = value;
@@ -648,6 +839,20 @@ namespace setup
   auto Set_Node_Input_Stream_Path_Res::get_node_data() -> setup::Node_Data& 
   {
     return m_node_data;
+  }
+
+////////////////////////////////////////////////////////////
+  void Add_Node_Req::set_req_id(uint32_t const& value)
+  {
+    m_req_id = value;
+  }
+  void Add_Node_Req::set_req_id(uint32_t&& value)
+  {
+    m_req_id = std::move(value);
+  }
+  auto Add_Node_Req::get_req_id() const -> uint32_t const& 
+  {
+    return m_req_id;
   }
 
 ////////////////////////////////////////////////////////////
@@ -693,6 +898,20 @@ namespace setup
   }
 
 ////////////////////////////////////////////////////////////
+  void Add_Node_Res::set_req_id(uint32_t const& value)
+  {
+    m_req_id = value;
+  }
+  void Add_Node_Res::set_req_id(uint32_t&& value)
+  {
+    m_req_id = std::move(value);
+  }
+  auto Add_Node_Res::get_req_id() const -> uint32_t const& 
+  {
+    return m_req_id;
+  }
+
+////////////////////////////////////////////////////////////
   void Add_Node_Res::set_node_data(setup::Node_Data const& value)
   {
     m_node_data = value;
@@ -712,6 +931,20 @@ namespace setup
   }
 
 ////////////////////////////////////////////////////////////
+  void Remove_Node_Req::set_req_id(uint32_t const& value)
+  {
+    m_req_id = value;
+  }
+  void Remove_Node_Req::set_req_id(uint32_t&& value)
+  {
+    m_req_id = std::move(value);
+  }
+  auto Remove_Node_Req::get_req_id() const -> uint32_t const& 
+  {
+    return m_req_id;
+  }
+
+////////////////////////////////////////////////////////////
   void Remove_Node_Req::set_name(std::string const& value)
   {
     m_name = value;
@@ -723,6 +956,20 @@ namespace setup
   auto Remove_Node_Req::get_name() const -> std::string const& 
   {
     return m_name;
+  }
+
+////////////////////////////////////////////////////////////
+  void Remove_Node_Res::set_req_id(uint32_t const& value)
+  {
+    m_req_id = value;
+  }
+  void Remove_Node_Res::set_req_id(uint32_t&& value)
+  {
+    m_req_id = std::move(value);
+  }
+  auto Remove_Node_Res::get_req_id() const -> uint32_t const& 
+  {
+    return m_req_id;
   }
 
 ////////////////////////////////////////////////////////////
@@ -1116,9 +1363,55 @@ ts::sz::Value serialize(uint32_t const& value)
 {
   return ts::sz::Value(value);
 }
+ts::Result<void> deserialize(setup::IReq& value, ts::sz::Value const& sz_value)
+{
+  if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  {
+    auto const* member_sz_value = sz_value.find_object_member_by_name("req_id");
+    if (!member_sz_value) { return ts::Error("Cannot find member value 'req_id'"); }
+    std::remove_cv<std::remove_reference<decltype(value.get_req_id())>::type>::type v;
+    auto result = deserialize(v, *member_sz_value);
+    if (result != ts::success) { return result; }
+    value.set_req_id(std::move(v));
+  }
+  return ts::success;
+}
+ts::sz::Value serialize(setup::IReq const& value)
+{
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
+  sz_value.add_object_member("req_id", serialize(value.get_req_id()));
+  return sz_value;
+}
+ts::Result<void> deserialize(setup::IRes& value, ts::sz::Value const& sz_value)
+{
+  if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  {
+    auto const* member_sz_value = sz_value.find_object_member_by_name("req_id");
+    if (!member_sz_value) { return ts::Error("Cannot find member value 'req_id'"); }
+    std::remove_cv<std::remove_reference<decltype(value.get_req_id())>::type>::type v;
+    auto result = deserialize(v, *member_sz_value);
+    if (result != ts::success) { return result; }
+    value.set_req_id(std::move(v));
+  }
+  return ts::success;
+}
+ts::sz::Value serialize(setup::IRes const& value)
+{
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
+  sz_value.add_object_member("req_id", serialize(value.get_req_id()));
+  return sz_value;
+}
 ts::Result<void> deserialize(setup::Error& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  {
+    auto const* member_sz_value = sz_value.find_object_member_by_name("req_id");
+    if (!member_sz_value) { return ts::Error("Cannot find member value 'req_id'"); }
+    std::remove_cv<std::remove_reference<decltype(value.get_req_id())>::type>::type v;
+    auto result = deserialize(v, *member_sz_value);
+    if (result != ts::success) { return result; }
+    value.set_req_id(std::move(v));
+  }
   {
     auto const* member_sz_value = sz_value.find_object_member_by_name("message");
     if (!member_sz_value) { return ts::Error("Cannot find member value 'message'"); }
@@ -1132,12 +1425,21 @@ ts::Result<void> deserialize(setup::Error& value, ts::sz::Value const& sz_value)
 ts::sz::Value serialize(setup::Error const& value)
 {
   ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
+  sz_value.add_object_member("req_id", serialize(value.get_req_id()));
   sz_value.add_object_member("message", serialize(value.get_message()));
   return sz_value;
 }
 ts::Result<void> deserialize(setup::Set_Clock_Req& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  {
+    auto const* member_sz_value = sz_value.find_object_member_by_name("req_id");
+    if (!member_sz_value) { return ts::Error("Cannot find member value 'req_id'"); }
+    std::remove_cv<std::remove_reference<decltype(value.get_req_id())>::type>::type v;
+    auto result = deserialize(v, *member_sz_value);
+    if (result != ts::success) { return result; }
+    value.set_req_id(std::move(v));
+  }
   {
     auto const* member_sz_value = sz_value.find_object_member_by_name("time");
     if (!member_sz_value) { return ts::Error("Cannot find member value 'time'"); }
@@ -1151,12 +1453,21 @@ ts::Result<void> deserialize(setup::Set_Clock_Req& value, ts::sz::Value const& s
 ts::sz::Value serialize(setup::Set_Clock_Req const& value)
 {
   ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
+  sz_value.add_object_member("req_id", serialize(value.get_req_id()));
   sz_value.add_object_member("time", serialize(value.get_time()));
   return sz_value;
 }
 ts::Result<void> deserialize(setup::Set_Clock_Res& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  {
+    auto const* member_sz_value = sz_value.find_object_member_by_name("req_id");
+    if (!member_sz_value) { return ts::Error("Cannot find member value 'req_id'"); }
+    std::remove_cv<std::remove_reference<decltype(value.get_req_id())>::type>::type v;
+    auto result = deserialize(v, *member_sz_value);
+    if (result != ts::success) { return result; }
+    value.set_req_id(std::move(v));
+  }
   {
     auto const* member_sz_value = sz_value.find_object_member_by_name("time");
     if (!member_sz_value) { return ts::Error("Cannot find member value 'time'"); }
@@ -1165,26 +1476,26 @@ ts::Result<void> deserialize(setup::Set_Clock_Res& value, ts::sz::Value const& s
     if (result != ts::success) { return result; }
     value.set_time(std::move(v));
   }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("error");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'error'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_error())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_error(std::move(v));
-  }
   return ts::success;
 }
 ts::sz::Value serialize(setup::Set_Clock_Res const& value)
 {
   ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
+  sz_value.add_object_member("req_id", serialize(value.get_req_id()));
   sz_value.add_object_member("time", serialize(value.get_time()));
-  sz_value.add_object_member("error", serialize(value.get_error()));
   return sz_value;
 }
 ts::Result<void> deserialize(setup::Set_UAV_Descriptor_Req& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  {
+    auto const* member_sz_value = sz_value.find_object_member_by_name("req_id");
+    if (!member_sz_value) { return ts::Error("Cannot find member value 'req_id'"); }
+    std::remove_cv<std::remove_reference<decltype(value.get_req_id())>::type>::type v;
+    auto result = deserialize(v, *member_sz_value);
+    if (result != ts::success) { return result; }
+    value.set_req_id(std::move(v));
+  }
   {
     auto const* member_sz_value = sz_value.find_object_member_by_name("data");
     if (!member_sz_value) { return ts::Error("Cannot find member value 'data'"); }
@@ -1198,12 +1509,21 @@ ts::Result<void> deserialize(setup::Set_UAV_Descriptor_Req& value, ts::sz::Value
 ts::sz::Value serialize(setup::Set_UAV_Descriptor_Req const& value)
 {
   ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
+  sz_value.add_object_member("req_id", serialize(value.get_req_id()));
   sz_value.add_object_member("data", serialize(value.get_data()));
   return sz_value;
 }
 ts::Result<void> deserialize(setup::Set_UAV_Descriptor_Res& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  {
+    auto const* member_sz_value = sz_value.find_object_member_by_name("req_id");
+    if (!member_sz_value) { return ts::Error("Cannot find member value 'req_id'"); }
+    std::remove_cv<std::remove_reference<decltype(value.get_req_id())>::type>::type v;
+    auto result = deserialize(v, *member_sz_value);
+    if (result != ts::success) { return result; }
+    value.set_req_id(std::move(v));
+  }
   {
     auto const* member_sz_value = sz_value.find_object_member_by_name("data");
     if (!member_sz_value) { return ts::Error("Cannot find member value 'data'"); }
@@ -1217,22 +1537,40 @@ ts::Result<void> deserialize(setup::Set_UAV_Descriptor_Res& value, ts::sz::Value
 ts::sz::Value serialize(setup::Set_UAV_Descriptor_Res const& value)
 {
   ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
+  sz_value.add_object_member("req_id", serialize(value.get_req_id()));
   sz_value.add_object_member("data", serialize(value.get_data()));
   return sz_value;
 }
 ts::Result<void> deserialize(setup::Get_UAV_Descriptor_Req& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  {
+    auto const* member_sz_value = sz_value.find_object_member_by_name("req_id");
+    if (!member_sz_value) { return ts::Error("Cannot find member value 'req_id'"); }
+    std::remove_cv<std::remove_reference<decltype(value.get_req_id())>::type>::type v;
+    auto result = deserialize(v, *member_sz_value);
+    if (result != ts::success) { return result; }
+    value.set_req_id(std::move(v));
+  }
   return ts::success;
 }
 ts::sz::Value serialize(setup::Get_UAV_Descriptor_Req const& value)
 {
   ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
+  sz_value.add_object_member("req_id", serialize(value.get_req_id()));
   return sz_value;
 }
 ts::Result<void> deserialize(setup::Get_UAV_Descriptor_Res& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  {
+    auto const* member_sz_value = sz_value.find_object_member_by_name("req_id");
+    if (!member_sz_value) { return ts::Error("Cannot find member value 'req_id'"); }
+    std::remove_cv<std::remove_reference<decltype(value.get_req_id())>::type>::type v;
+    auto result = deserialize(v, *member_sz_value);
+    if (result != ts::success) { return result; }
+    value.set_req_id(std::move(v));
+  }
   {
     auto const* member_sz_value = sz_value.find_object_member_by_name("data");
     if (!member_sz_value) { return ts::Error("Cannot find member value 'data'"); }
@@ -1246,6 +1584,7 @@ ts::Result<void> deserialize(setup::Get_UAV_Descriptor_Res& value, ts::sz::Value
 ts::sz::Value serialize(setup::Get_UAV_Descriptor_Res const& value)
 {
   ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
+  sz_value.add_object_member("req_id", serialize(value.get_req_id()));
   sz_value.add_object_member("data", serialize(value.get_data()));
   return sz_value;
 }
@@ -1399,16 +1738,33 @@ ts::sz::Value serialize(setup::Node_Def_Data const& value)
 ts::Result<void> deserialize(setup::Get_Node_Defs_Req& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  {
+    auto const* member_sz_value = sz_value.find_object_member_by_name("req_id");
+    if (!member_sz_value) { return ts::Error("Cannot find member value 'req_id'"); }
+    std::remove_cv<std::remove_reference<decltype(value.get_req_id())>::type>::type v;
+    auto result = deserialize(v, *member_sz_value);
+    if (result != ts::success) { return result; }
+    value.set_req_id(std::move(v));
+  }
   return ts::success;
 }
 ts::sz::Value serialize(setup::Get_Node_Defs_Req const& value)
 {
   ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
+  sz_value.add_object_member("req_id", serialize(value.get_req_id()));
   return sz_value;
 }
 ts::Result<void> deserialize(setup::Get_Node_Defs_Res& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  {
+    auto const* member_sz_value = sz_value.find_object_member_by_name("req_id");
+    if (!member_sz_value) { return ts::Error("Cannot find member value 'req_id'"); }
+    std::remove_cv<std::remove_reference<decltype(value.get_req_id())>::type>::type v;
+    auto result = deserialize(v, *member_sz_value);
+    if (result != ts::success) { return result; }
+    value.set_req_id(std::move(v));
+  }
   {
     auto const* member_sz_value = sz_value.find_object_member_by_name("node_def_datas");
     if (!member_sz_value) { return ts::Error("Cannot find member value 'node_def_datas'"); }
@@ -1422,6 +1778,7 @@ ts::Result<void> deserialize(setup::Get_Node_Defs_Res& value, ts::sz::Value cons
 ts::sz::Value serialize(setup::Get_Node_Defs_Res const& value)
 {
   ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
+  sz_value.add_object_member("req_id", serialize(value.get_req_id()));
   sz_value.add_object_member("node_def_datas", serialize(value.get_node_def_datas()));
   return sz_value;
 }
@@ -1594,6 +1951,14 @@ ts::Result<void> deserialize(setup::Get_Nodes_Req& value, ts::sz::Value const& s
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
+    auto const* member_sz_value = sz_value.find_object_member_by_name("req_id");
+    if (!member_sz_value) { return ts::Error("Cannot find member value 'req_id'"); }
+    std::remove_cv<std::remove_reference<decltype(value.get_req_id())>::type>::type v;
+    auto result = deserialize(v, *member_sz_value);
+    if (result != ts::success) { return result; }
+    value.set_req_id(std::move(v));
+  }
+  {
     auto const* member_sz_value = sz_value.find_object_member_by_name("name");
     if (!member_sz_value) { return ts::Error("Cannot find member value 'name'"); }
     std::remove_cv<std::remove_reference<decltype(value.get_name())>::type>::type v;
@@ -1606,12 +1971,21 @@ ts::Result<void> deserialize(setup::Get_Nodes_Req& value, ts::sz::Value const& s
 ts::sz::Value serialize(setup::Get_Nodes_Req const& value)
 {
   ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
+  sz_value.add_object_member("req_id", serialize(value.get_req_id()));
   sz_value.add_object_member("name", serialize(value.get_name()));
   return sz_value;
 }
 ts::Result<void> deserialize(setup::Get_Nodes_Res& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  {
+    auto const* member_sz_value = sz_value.find_object_member_by_name("req_id");
+    if (!member_sz_value) { return ts::Error("Cannot find member value 'req_id'"); }
+    std::remove_cv<std::remove_reference<decltype(value.get_req_id())>::type>::type v;
+    auto result = deserialize(v, *member_sz_value);
+    if (result != ts::success) { return result; }
+    value.set_req_id(std::move(v));
+  }
   {
     auto const* member_sz_value = sz_value.find_object_member_by_name("node_datas");
     if (!member_sz_value) { return ts::Error("Cannot find member value 'node_datas'"); }
@@ -1625,12 +1999,21 @@ ts::Result<void> deserialize(setup::Get_Nodes_Res& value, ts::sz::Value const& s
 ts::sz::Value serialize(setup::Get_Nodes_Res const& value)
 {
   ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
+  sz_value.add_object_member("req_id", serialize(value.get_req_id()));
   sz_value.add_object_member("node_datas", serialize(value.get_node_datas()));
   return sz_value;
 }
 ts::Result<void> deserialize(setup::Set_Node_Input_Stream_Path_Req& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  {
+    auto const* member_sz_value = sz_value.find_object_member_by_name("req_id");
+    if (!member_sz_value) { return ts::Error("Cannot find member value 'req_id'"); }
+    std::remove_cv<std::remove_reference<decltype(value.get_req_id())>::type>::type v;
+    auto result = deserialize(v, *member_sz_value);
+    if (result != ts::success) { return result; }
+    value.set_req_id(std::move(v));
+  }
   {
     auto const* member_sz_value = sz_value.find_object_member_by_name("node_name");
     if (!member_sz_value) { return ts::Error("Cannot find member value 'node_name'"); }
@@ -1660,6 +2043,7 @@ ts::Result<void> deserialize(setup::Set_Node_Input_Stream_Path_Req& value, ts::s
 ts::sz::Value serialize(setup::Set_Node_Input_Stream_Path_Req const& value)
 {
   ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
+  sz_value.add_object_member("req_id", serialize(value.get_req_id()));
   sz_value.add_object_member("node_name", serialize(value.get_node_name()));
   sz_value.add_object_member("input_name", serialize(value.get_input_name()));
   sz_value.add_object_member("stream_path", serialize(value.get_stream_path()));
@@ -1668,6 +2052,14 @@ ts::sz::Value serialize(setup::Set_Node_Input_Stream_Path_Req const& value)
 ts::Result<void> deserialize(setup::Set_Node_Input_Stream_Path_Res& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  {
+    auto const* member_sz_value = sz_value.find_object_member_by_name("req_id");
+    if (!member_sz_value) { return ts::Error("Cannot find member value 'req_id'"); }
+    std::remove_cv<std::remove_reference<decltype(value.get_req_id())>::type>::type v;
+    auto result = deserialize(v, *member_sz_value);
+    if (result != ts::success) { return result; }
+    value.set_req_id(std::move(v));
+  }
   {
     auto const* member_sz_value = sz_value.find_object_member_by_name("node_data");
     if (!member_sz_value) { return ts::Error("Cannot find member value 'node_data'"); }
@@ -1681,12 +2073,21 @@ ts::Result<void> deserialize(setup::Set_Node_Input_Stream_Path_Res& value, ts::s
 ts::sz::Value serialize(setup::Set_Node_Input_Stream_Path_Res const& value)
 {
   ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
+  sz_value.add_object_member("req_id", serialize(value.get_req_id()));
   sz_value.add_object_member("node_data", serialize(value.get_node_data()));
   return sz_value;
 }
 ts::Result<void> deserialize(setup::Add_Node_Req& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  {
+    auto const* member_sz_value = sz_value.find_object_member_by_name("req_id");
+    if (!member_sz_value) { return ts::Error("Cannot find member value 'req_id'"); }
+    std::remove_cv<std::remove_reference<decltype(value.get_req_id())>::type>::type v;
+    auto result = deserialize(v, *member_sz_value);
+    if (result != ts::success) { return result; }
+    value.set_req_id(std::move(v));
+  }
   {
     auto const* member_sz_value = sz_value.find_object_member_by_name("def_name");
     if (!member_sz_value) { return ts::Error("Cannot find member value 'def_name'"); }
@@ -1716,6 +2117,7 @@ ts::Result<void> deserialize(setup::Add_Node_Req& value, ts::sz::Value const& sz
 ts::sz::Value serialize(setup::Add_Node_Req const& value)
 {
   ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
+  sz_value.add_object_member("req_id", serialize(value.get_req_id()));
   sz_value.add_object_member("def_name", serialize(value.get_def_name()));
   sz_value.add_object_member("name", serialize(value.get_name()));
   sz_value.add_object_member("descriptor_data", serialize(value.get_descriptor_data()));
@@ -1724,6 +2126,14 @@ ts::sz::Value serialize(setup::Add_Node_Req const& value)
 ts::Result<void> deserialize(setup::Add_Node_Res& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  {
+    auto const* member_sz_value = sz_value.find_object_member_by_name("req_id");
+    if (!member_sz_value) { return ts::Error("Cannot find member value 'req_id'"); }
+    std::remove_cv<std::remove_reference<decltype(value.get_req_id())>::type>::type v;
+    auto result = deserialize(v, *member_sz_value);
+    if (result != ts::success) { return result; }
+    value.set_req_id(std::move(v));
+  }
   {
     auto const* member_sz_value = sz_value.find_object_member_by_name("node_data");
     if (!member_sz_value) { return ts::Error("Cannot find member value 'node_data'"); }
@@ -1737,12 +2147,21 @@ ts::Result<void> deserialize(setup::Add_Node_Res& value, ts::sz::Value const& sz
 ts::sz::Value serialize(setup::Add_Node_Res const& value)
 {
   ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
+  sz_value.add_object_member("req_id", serialize(value.get_req_id()));
   sz_value.add_object_member("node_data", serialize(value.get_node_data()));
   return sz_value;
 }
 ts::Result<void> deserialize(setup::Remove_Node_Req& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  {
+    auto const* member_sz_value = sz_value.find_object_member_by_name("req_id");
+    if (!member_sz_value) { return ts::Error("Cannot find member value 'req_id'"); }
+    std::remove_cv<std::remove_reference<decltype(value.get_req_id())>::type>::type v;
+    auto result = deserialize(v, *member_sz_value);
+    if (result != ts::success) { return result; }
+    value.set_req_id(std::move(v));
+  }
   {
     auto const* member_sz_value = sz_value.find_object_member_by_name("name");
     if (!member_sz_value) { return ts::Error("Cannot find member value 'name'"); }
@@ -1756,17 +2175,27 @@ ts::Result<void> deserialize(setup::Remove_Node_Req& value, ts::sz::Value const&
 ts::sz::Value serialize(setup::Remove_Node_Req const& value)
 {
   ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
+  sz_value.add_object_member("req_id", serialize(value.get_req_id()));
   sz_value.add_object_member("name", serialize(value.get_name()));
   return sz_value;
 }
 ts::Result<void> deserialize(setup::Remove_Node_Res& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  {
+    auto const* member_sz_value = sz_value.find_object_member_by_name("req_id");
+    if (!member_sz_value) { return ts::Error("Cannot find member value 'req_id'"); }
+    std::remove_cv<std::remove_reference<decltype(value.get_req_id())>::type>::type v;
+    auto result = deserialize(v, *member_sz_value);
+    if (result != ts::success) { return result; }
+    value.set_req_id(std::move(v));
+  }
   return ts::success;
 }
 ts::sz::Value serialize(setup::Remove_Node_Res const& value)
 {
   ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
+  sz_value.add_object_member("req_id", serialize(value.get_req_id()));
   return sz_value;
 }
 ts::Result<void> deserialize(setup::Brain_Req& value, ts::sz::Value const& sz_value)
@@ -2008,17 +2437,6 @@ ts::sz::Value serialize(setup::Brain_Res const& value)
     return std::move(sz_value);
   }
   else { TS_ASSERT(false); return ts::sz::Value(); }
-}
-ts::Result<void> deserialize(boost::optional<setup::Error>& value, ts::sz::Value const& sz_value)
-{
-  if (sz_value.is_empty()) { value = boost::none; return ts::success; }
-  value = setup::Error();
-  return deserialize(*value, sz_value);
-}
-ts::sz::Value serialize(boost::optional<setup::Error> const& value)
-{
-  if (!value) { return ts::sz::Value(); }
-  return serialize(*value);
 }
 ts::Result<void> deserialize(std::vector<setup::Node_Def_Data::Input>& value, ts::sz::Value const& sz_value)
 {

@@ -7,22 +7,83 @@ namespace ts
 namespace sz
 {
 
-static void to_json(Value const& value, std::string& dst, size_t ident_count, bool nice)
+static void to_string(std::string& dst, int8_t v)
+{
+    char buffer[32];
+    sprintf(buffer, "%d", int(v));
+    dst += buffer;
+}
+static void to_string(std::string& dst, uint8_t v)
+{
+    char buffer[32];
+    sprintf(buffer, "%d", int(v));
+    dst += buffer;
+}
+static void to_string(std::string& dst, int16_t v)
+{
+    char buffer[32];
+    sprintf(buffer, "%d", int(v));
+    dst += buffer;
+}
+static void to_string(std::string& dst, uint16_t v)
+{
+    char buffer[32];
+    sprintf(buffer, "%d", int(v));
+    dst += buffer;
+}
+static void to_string(std::string& dst, int32_t v)
+{
+    char buffer[32];
+    sprintf(buffer, "%d", v);
+    dst += buffer;
+}
+static void to_string(std::string& dst, uint32_t v)
+{
+    char buffer[32];
+    sprintf(buffer, "%u", v);
+    dst += buffer;
+}
+static void to_string(std::string& dst, int64_t v)
+{
+    char buffer[32];
+    sprintf(buffer, "%lld", v);
+    dst += buffer;
+}
+static void to_string(std::string& dst, uint64_t v)
+{
+    char buffer[32];
+    sprintf(buffer, "%llu", v);
+    dst += buffer;
+}
+static void to_string(std::string& dst, float v)
+{
+    char buffer[64];
+    sprintf(buffer, "%f", v);
+    dst += buffer;
+}
+static void to_string(std::string& dst, double v)
+{
+    char buffer[64];
+    sprintf(buffer, "%f", v);
+    dst += buffer;
+}
+
+static void to_json(std::string& dst, Value const& value, size_t ident_count, bool nice)
 {
     switch (value.get_type())
     {
     case Value::Type::EMPTY: dst += "null"; break;
     case Value::Type::BOOL: dst += value.get_as_bool() ? "true" : "false"; break;
-    case Value::Type::INT8: dst += std::to_string(value.get_as_int8()); break;
-    case Value::Type::UINT8: dst += std::to_string(value.get_as_uint8()); break;
-    case Value::Type::INT16: dst += std::to_string(value.get_as_int16()); break;
-    case Value::Type::UINT16: dst += std::to_string(value.get_as_uint16()); break;
-    case Value::Type::INT32: dst += std::to_string(value.get_as_int32()); break;
-    case Value::Type::UINT32: dst += std::to_string(value.get_as_uint32()); break;
-    case Value::Type::INT64: dst += std::to_string(value.get_as_int64()); break;
-    case Value::Type::UINT64: dst += std::to_string(value.get_as_uint64()); break;
-    case Value::Type::FLOAT: dst += std::to_string(value.get_as_float()); break;
-    case Value::Type::DOUBLE: dst += std::to_string(value.get_as_double()); break;
+    case Value::Type::INT8: to_string(dst, value.get_as_int8()); break;
+    case Value::Type::UINT8: to_string(dst, value.get_as_uint8()); break;
+    case Value::Type::INT16: to_string(dst, value.get_as_int16()); break;
+    case Value::Type::UINT16: to_string(dst, value.get_as_uint16()); break;
+    case Value::Type::INT32: to_string(dst, value.get_as_int32()); break;
+    case Value::Type::UINT32: to_string(dst, value.get_as_uint32()); break;
+    case Value::Type::INT64: to_string(dst, value.get_as_int64()); break;
+    case Value::Type::UINT64: to_string(dst, value.get_as_uint64()); break;
+    case Value::Type::FLOAT: to_string(dst, value.get_as_float()); break;
+    case Value::Type::DOUBLE: to_string(dst, value.get_as_double()); break;
     case Value::Type::STRING: dst += "\"" + value.get_as_string() + "\""; break;
     case Value::Type::OBJECT:
     {
@@ -40,7 +101,7 @@ static void to_json(Value const& value, std::string& dst, size_t ident_count, bo
             dst.push_back('"');
             dst += value.get_object_member_name(i);
             dst += "\":";
-            to_json(value.get_object_member_value(i), dst, ident_count + 1, nice);
+            to_json(dst, value.get_object_member_value(i), ident_count + 1, nice);
             if (i + 1 < count)
             {
                 dst.push_back(',');
@@ -67,7 +128,7 @@ static void to_json(Value const& value, std::string& dst, size_t ident_count, bo
         for (size_t i = 0; i < count; i++)
         {
             dst += element_ident_str;
-            to_json(value.get_array_element_value(i), dst, ident_count + 1, nice);
+            to_json(dst, value.get_array_element_value(i), ident_count + 1, nice);
             if (i + 1 < count)
             {
                 dst.push_back(',');
@@ -89,53 +150,55 @@ static void to_json(Value const& value, std::string& dst, size_t ident_count, bo
 ////////////////////////////////////////////////////////////////////////////////////////////
 
 
-static size_t skip_whitespace(std::string const& json, size_t offset)
+static char const* skip_whitespace(char const*& json_ptr, char const* json_end)
 {
-    const char* data = json.data() + offset;
-    const char* end = data + json.size();
-    while (data < end)
+    const char* ptr = json_ptr;
+    while (ptr < json_end)
     {
-        char ch = *data;
+        char ch = *ptr;
         if (ch != ' ' && ch != '\t' && ch != '\n' && ch != '\r')
         {
-            return data - json.data();
+            return ptr;
         }
-        data++;
+        ptr++;
     }
-    return std::string::npos;
+    return json_end;
 }
 
-static Result<std::string> parse_string(std::string const& json, size_t& offset)
+static Result<std::string> parse_string(char const*& json_ptr, char const* json_end)
 {
-    if (json[offset] != '"')
+    if (json_ptr >= json_end)
     {
-        return Error("Unexpected char '" + std::to_string(json[offset]) + "' while parsing string value");
+        return Error("Unexpected end of data while parsing string value");
     }
-    offset++;
+    if (*json_ptr != '"')
+    {
+        return Error("Unexpected char '" + std::to_string(*json_ptr) + "' while parsing string value");
+    }
+    json_ptr++; //skip the "
 
     char prev_ch = 0;
 
-    const char* data = json.data() + offset;
-    const char* start = data;
-    const char* end = data + json.size();
-    while (data < end)
+    const char* ptr = json_ptr;
+    const char* start = ptr;
+    while (ptr < json_end)
     {
-        char ch = *data;
+        char ch = *ptr;
         if (ch == '"' && prev_ch != '\\')
         {
-            offset = data - json.data() + 1;
-            return std::string(start, data);
+            json_ptr = ptr + 1;
+            return std::string(start, ptr);
         }
         prev_ch = ch;
-        data++;
+        ptr++;
     }
 
     return Error("Unexpected end of string");
 }
 
-static Result<Value> parse_string_value(std::string const& json, size_t& offset)
+static Result<Value> parse_string_value(char const*& json_ptr, char const* json_end)
 {
-    auto result = parse_string(json, offset);
+    auto result = parse_string(json_ptr, json_end);
     if (result != success)
     {
         return result.error();
@@ -143,72 +206,76 @@ static Result<Value> parse_string_value(std::string const& json, size_t& offset)
     return Value(result.extract_payload());
 }
 
-static Result<Value> parse_value(std::string const& json, size_t& offset);
+static Result<Value> parse_value(char const*& json_ptr, char const* json_end);
 
-static Result<Value> parse_object_value(std::string const& json, size_t& offset)
+static Result<Value> parse_object_value(char const*& json_ptr, char const* json_end)
 {
-    if (json[offset] != '{')
+    if (json_ptr >= json_end)
     {
-        return Error("Unexpected char '" + std::to_string(json[offset]) + "' while parsing object value");
+        return Error("Unexpected end of data while parsing object value");
     }
-    offset++;
+    if (*json_ptr != '{')
+    {
+        return Error("Unexpected char '" + std::to_string(*json_ptr) + "' while parsing object value");
+    }
+    json_ptr++; //skip the {
 
     Value object_value(Value::Type::OBJECT);
 
     while (true)
     {
-        offset = skip_whitespace(json, offset);
-        if (offset == std::string::npos)
+        json_ptr = skip_whitespace(json_ptr, json_end);
+        if (json_ptr >= json_end)
         {
-            return Error("Unexpected end of string");
+            return Error("Unexpected end of data");
         }
 
-        if (json[offset] == '}')
+        if (*json_ptr == '}')
         {
-            offset++;
+            json_ptr++; //skip the }
             return std::move(object_value);
         }
 
         if (object_value.get_object_member_count() > 0)
         {
-            if (json[offset] != ',')
+            if (*json_ptr != ',')
             {
                 return Error("Missing ',' while parsing object value");
             }
-            offset++;
+            json_ptr++; //skip the ,
             //treat the case of stray comma after the last member of an object
-            offset = skip_whitespace(json, offset);
-            if (offset == std::string::npos)
+            json_ptr = skip_whitespace(json_ptr, json_end);
+            if (json_ptr >= json_end)
             {
                 return Error("Unexpected end of string");
             }
-            if (json[offset] == '}')
+            if (*json_ptr == '}')
             {
-                offset++;
+                json_ptr++; //skip the }
                 return std::move(object_value);
             }
         }
 
-        auto name_result = parse_string(json, offset);
+        auto name_result = parse_string(json_ptr, json_end);
         if (name_result != success)
         {
             return name_result.error();
         }
         std::string name = name_result.extract_payload();
 
-        offset = skip_whitespace(json, offset);
-        if (offset == std::string::npos)
+        json_ptr = skip_whitespace(json_ptr, json_end);
+        if (json_ptr >= json_end)
         {
             return Error("Unexpected end of string");
         }
 
-        if (json[offset] != ':')
+        if (*json_ptr != ':')
         {
             return Error("Missing ':' while parsing object value");
         }
-        offset++;
+        json_ptr++; //skip the :
 
-        auto result = parse_value(json, offset);
+        auto result = parse_value(json_ptr, json_end);
         if (result != success)
         {
             return std::move(result);
@@ -220,53 +287,57 @@ static Result<Value> parse_object_value(std::string const& json, size_t& offset)
     return Error("Unexpected end of string");
 }
 
-static Result<Value> parse_array_value(std::string const& json, size_t& offset)
+static Result<Value> parse_array_value(char const*& json_ptr, char const* json_end)
 {
-    if (json[offset] != '[')
+    if (json_ptr >= json_end)
     {
-        return Error("Unexpected char '" + std::to_string(json[offset]) + "' while parsing array value");
+        return Error("Unexpected end of data while parsing array value");
     }
-    offset++;
+    if (*json_ptr != '[')
+    {
+        return Error("Unexpected char '" + std::to_string(*json_ptr) + "' while parsing array value");
+    }
+    json_ptr++; //skip the [
 
     Value array_value(Value::Type::ARRAY);
 
     while (true)
     {
-        offset = skip_whitespace(json, offset);
-        if (offset == std::string::npos)
+        json_ptr = skip_whitespace(json_ptr, json_end);
+        if (json_ptr >= json_end)
         {
             return Error("Unexpected end of string");
         }
 
-        if (json[offset] == ']')
+        if (*json_ptr == ']')
         {
-            offset++;
+            json_ptr++; //skip the ]
             return std::move(array_value);
         }
 
         if (array_value.get_array_element_count() > 0)
         {
-            if (json[offset] != ',')
+            if (*json_ptr != ',')
             {
                 return Error("Missing ',' while parsing array value");
             }
-            offset++;
+            json_ptr++; //skip the ,
 
             //handle the case of stray comma after the last element of an array
-            offset = skip_whitespace(json, offset);
-            if (offset == std::string::npos)
+            json_ptr = skip_whitespace(json_ptr, json_end);
+            if (json_ptr >= json_end)
             {
                 return Error("Unexpected end of string");
             }
 
-            if (json[offset] == ']')
+            if (*json_ptr == ']')
             {
-                offset++;
+                json_ptr++; //skip the ]
                 return std::move(array_value);
             }
         }
 
-        auto result = parse_value(json, offset);
+        auto result = parse_value(json_ptr, json_end);
         if (result != success)
         {
             return std::move(result);
@@ -278,48 +349,60 @@ static Result<Value> parse_array_value(std::string const& json, size_t& offset)
     return Error("Unexpected end of string");
 }
 
-static Result<Value> parse_true_value(std::string const& json, size_t& offset)
+static Result<Value> parse_true_value(char const*& json_ptr, char const* json_end)
 {
-    if (json.find("true", offset, 4) != offset)
+    if (json_ptr + 4 >= json_end)
+    {
+        return Error("Unexpected end of data while parsing 'true' value");
+    }
+    if (std::memcmp(json_ptr, "true", 4) != 0)
     {
         return Error("Unexpected value");
     }
-    offset += 4;
+    json_ptr += 4;
     return Value(true);
 }
 
-static Result<Value> parse_false_value(std::string const& json, size_t& offset)
+static Result<Value> parse_false_value(char const*& json_ptr, char const* json_end)
 {
-    if (json.find("false", offset, 5) != offset)
+    if (json_ptr + 5 >= json_end)
+    {
+        return Error("Unexpected end of data while parsing 'false' value");
+    }
+    if (std::memcmp(json_ptr, "false", 5) != 0)
     {
         return Error("Unexpected value");
     }
-    offset += 5;
+    json_ptr += 5;
     return Value(false);
 }
 
-static Result<Value> parse_null_value(std::string const& json, size_t& offset)
+static Result<Value> parse_null_value(char const*& json_ptr, char const* json_end)
 {
-    if (json.find("null", offset, 4) != offset)
+    if (json_ptr + 4 >= json_end)
+    {
+        return Error("Unexpected end of data while parsing 'null' value");
+    }
+    if (std::memcmp(json_ptr, "null", 4) != 0)
     {
         return Error("Unexpected value");
     }
-    offset += 4;
+    json_ptr += 4;
     return Value();
 }
 
-static Result<Value> parse_number_value(std::string const& json, size_t& offset)
+static Result<Value> parse_number_value(char const*& json_ptr, char const* json_end)
 {
-    if (offset + 1 >= json.size())
+    if (json_ptr + 1 >= json_end)
     {
-        return Error("Malformed number");
+        return Error("Unexpected end of data while parsing number value");
     }
 
     int64_t sign = 1;
-    if (json[offset] == '-')
+    if (*json_ptr == '-')
     {
         sign = -1;
-        offset++;
+        json_ptr++; //skip the sign
     }
 
     int64_t whole = 0;
@@ -328,56 +411,56 @@ static Result<Value> parse_number_value(std::string const& json, size_t& offset)
     int64_t exponent = 0;
     int32_t exponent_sign = 1;
 
-    const char* data = json.c_str() + offset;
-    while (data != 0)
+    const char* ptr = json_ptr;
+    while (ptr != 0)
     {
-        char ch = *data;
+        char ch = *ptr;
         if (ch < '0' || ch > '9')
         {
             break;
         }
         whole = whole * 10 + (ch - '0');
-        data++;
+        ptr++;
     }
 
-    if (*data == '.')
+    if (*ptr == '.')
     {
-        data++; //skip the '.'
-        while (data != 0)
+        ptr++; //skip the '.'
+        while (ptr != 0)
         {
-            char ch = *data;
+            char ch = *ptr;
             if (ch < '0' || ch > '9')
             {
                 break;
             }
             decimal = decimal * 10 + (ch - '0');
             decimal_digit_count++;
-            data++;
+            ptr++;
         }
     }
-    if (*data == 'e' || *data == 'E')
+    if (*ptr == 'e' || *ptr == 'E')
     {
-        data++; //skip the 'e'
+        ptr++; //skip the 'e'
 
-        if (*data == '-')
+        if (*ptr == '-')
         {
             exponent_sign = -1;
-            data++;
+            ptr++; //skip the -
         }
 
-        while (data != 0)
+        while (ptr != 0)
         {
-            char ch = *data;
+            char ch = *ptr;
             if (ch < '0' || ch > '9')
             {
                 break;
             }
             exponent = exponent * 10 + (ch - '0');
-            data++;
+            ptr++;
         }
     }
 
-    offset = data - json.data();
+    json_ptr = ptr;
 
     whole *= sign;
 
@@ -478,24 +561,24 @@ static Result<Value> parse_number_value(std::string const& json, size_t& offset)
     return Value(value);
 }
 
-static Result<Value> parse_value(std::string const& json, size_t& offset)
+static Result<Value> parse_value(char const*& json_ptr, char const* json_end)
 {
-    offset = skip_whitespace(json, offset);
-    if (offset == std::string::npos)
+    json_ptr = skip_whitespace(json_ptr, json_end);
+    if (json_ptr >= json_end)
     {
         return Error("Unexpected end of string");
     }
 
-    char ch = json[offset];
+    char ch = *json_ptr;
     switch (ch)
     {
-    case '"': return parse_string_value(json, offset);
-    case '{': return parse_object_value(json, offset);
-    case '[': return parse_array_value(json, offset);
-    case 't': return parse_true_value(json, offset);
-    case 'f': return parse_false_value(json, offset);
-    case 'n': return parse_null_value(json, offset);
-    default: return parse_number_value(json, offset);
+    case '"': return parse_string_value(json_ptr, json_end);
+    case '{': return parse_object_value(json_ptr, json_end);
+    case '[': return parse_array_value(json_ptr, json_end);
+    case 't': return parse_true_value(json_ptr, json_end);
+    case 'f': return parse_false_value(json_ptr, json_end);
+    case 'n': return parse_null_value(json_ptr, json_end);
+    default: return parse_number_value(json_ptr, json_end);
     }
 }
 
@@ -505,22 +588,34 @@ static Result<Value> parse_value(std::string const& json, size_t& offset)
 std::string to_json(Value const& value, bool nice)
 {
     std::string json;
-    to_json(value, json, 1, nice);
+    to_json(json, value, 1, nice);
     return json;
+}
+
+void to_json(std::string& dst, Value const& value, bool nice)
+{
+    dst.clear();
+    dst.reserve(1024);
+    to_json(dst, value, 1, nice);
 }
 
 Result<Value> from_json(std::string const& json)
 {
-    size_t offset = 0;
-    return parse_value(json, offset);
+    char const* ptr = json.c_str();
+    return parse_value(ptr, ptr + json.size());
 }
 
 Result<Value> from_json(void const* data, size_t size)
 {
+    TS_ASSERT(data && size > 0);
+    if (!data || size == 0)
+    {
+        return ts::Error("Cannot parse empty string");
+    }
+
     //todo - optimize this to avoid the temp string
-    size_t offset = 0;
-    std::string json(reinterpret_cast<char const*>(data), size);
-    return parse_value(json, offset);
+    char const* json = reinterpret_cast<char const*>(data);
+    return parse_value(json, json + size);
 }
 
 }
