@@ -609,8 +609,8 @@ static ts::Result<void> generate_struct_type_sz_code(Context& context, ts::IStru
     context.sz_section_h += "ts::sz::Value serialize(" + native_type_str + " const& value);\n";
     context.sz_section_cpp += "ts::sz::Value serialize(" + native_type_str + " const& value)\n"
                                            "{\n"
-                                           "  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);\n";
-
+                                           "  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);\n"
+                                           "  sz_value.reserve_object_members(" + std::to_string(type.get_member_def_count()) + ");\n";
     for (size_t i = 0; i < type.get_member_def_count(); i++)
     {
         ts::IMember_Def const& member_def = *type.get_member_def(i);
@@ -850,6 +850,7 @@ static ts::Result<void> generate_poly_type_code(Context& context, ts::IPoly_Type
         std::string native_inner_type_str = get_native_type(context.parent_scope, *inner_type->get_type()).to_string();
         context.sz_section_cpp += "  else if (typeid(*value) == typeid(" + native_inner_type_str + "))\n"
                                          "  {\n"
+                                         "    sz_value.reserve_object_members(2);\n"
                                          "    sz_value.add_object_member(\"type\", \"" + native_inner_type_str + "\");\n"
                                          "    sz_value.add_object_member(\"value\", serialize((" + native_inner_type_str + "&)*value));\n"
                                          "    return std::move(sz_value);\n"
@@ -956,6 +957,7 @@ static ts::Result<void> generate_variant_type_code(Context& context, ts::IVarian
         std::string native_inner_type_str = get_native_type(context.parent_scope, *type.get_inner_qualified_type(i)->get_type()).to_string();
         context.sz_section_cpp += "  else if (auto* v = boost::get<" + native_inner_type_str + ">(&value))\n"
                                              "  {\n"
+                                             "    sz_value.reserve_object_members(2);\n"
                                              "    sz_value.add_object_member(\"type\", \"" + native_inner_type_str + "\");\n"
                                              "    sz_value.add_object_member(\"value\", serialize(*v));\n"
                                              "    return std::move(sz_value);\n"
@@ -1022,6 +1024,7 @@ static ts::Result<void> generate_vector_type_code(Context& context, ts::IVector_
     context.sz_section_cpp += "ts::sz::Value serialize(" + native_type_str + " const& value)\n"
                                            "{\n"
                                            "  ts::sz::Value sz_value(ts::sz::Value::Type::ARRAY);\n"
+                                           "  sz_value.reserve_array_members(value.size());\n"
                                            "  for (size_t i = 0; i < value.size(); i++)\n"
                                            "  {\n"
                                            "    sz_value.add_array_element(serialize(value[i]));\n"
@@ -1133,7 +1136,8 @@ static ts::Result<void> generate_vecXY_type_code(Context& context, std::string c
     context.sz_section_h += "ts::sz::Value serialize(" + native_type_str + " const& value);\n";
     context.sz_section_cpp += "ts::sz::Value serialize(" + native_type_str + " const& value)\n"
                                            "{\n"
-                                           "  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);\n";
+                                           "  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);\n"
+                                           "  sz_value.reserve_object_members(" + std::to_string(component_names.size()) + ");\n";
     for (std::string const& component_name: component_names)
     {
         context.sz_section_cpp += "  sz_value.add_object_member(\"" + component_name + "\", serialize(value." + component_name + "));\n";

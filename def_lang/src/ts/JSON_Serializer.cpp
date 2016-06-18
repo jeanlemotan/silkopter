@@ -2,6 +2,8 @@
 #include "def_lang/ts_assert.h"
 #include "def_lang/Result.h"
 
+#include <memory.h>
+
 namespace ts
 {
 namespace sz
@@ -84,7 +86,13 @@ static void to_json(std::string& dst, Value const& value, size_t ident_count, bo
     case Value::Type::UINT64: to_string(dst, value.get_as_uint64()); break;
     case Value::Type::FLOAT: to_string(dst, value.get_as_float()); break;
     case Value::Type::DOUBLE: to_string(dst, value.get_as_double()); break;
-    case Value::Type::STRING: dst += "\"" + value.get_as_string() + "\""; break;
+    case Value::Type::STRING:
+    {
+        dst.push_back('"');
+        dst += value.get_as_string();
+        dst.push_back('"');
+        break;
+    }
     case Value::Type::OBJECT:
     {
         std::string ident_str = nice ? std::string(ident_count > 0 ? ident_count - 1 : ident_count, '\t') : std::string();
@@ -355,7 +363,7 @@ static Result<Value> parse_true_value(char const*& json_ptr, char const* json_en
     {
         return Error("Unexpected end of data while parsing 'true' value");
     }
-    if (std::memcmp(json_ptr, "true", 4) != 0)
+    if (memcmp(json_ptr, "true", 4) != 0)
     {
         return Error("Unexpected value");
     }
@@ -369,7 +377,7 @@ static Result<Value> parse_false_value(char const*& json_ptr, char const* json_e
     {
         return Error("Unexpected end of data while parsing 'false' value");
     }
-    if (std::memcmp(json_ptr, "false", 5) != 0)
+    if (memcmp(json_ptr, "false", 5) != 0)
     {
         return Error("Unexpected value");
     }
@@ -383,7 +391,7 @@ static Result<Value> parse_null_value(char const*& json_ptr, char const* json_en
     {
         return Error("Unexpected end of data while parsing 'null' value");
     }
-    if (std::memcmp(json_ptr, "null", 4) != 0)
+    if (memcmp(json_ptr, "null", 4) != 0)
     {
         return Error("Unexpected value");
     }
@@ -595,7 +603,7 @@ std::string to_json(Value const& value, bool nice)
 void to_json(std::string& dst, Value const& value, bool nice)
 {
     dst.clear();
-    dst.reserve(1024);
+    dst.reserve(32768);
     to_json(dst, value, 1, nice);
 }
 

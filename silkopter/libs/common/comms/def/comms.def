@@ -36,6 +36,16 @@ struct Error : public IRes
 
 ////////////////////////////////////////////////////////////////
 
+struct Get_AST_Req : public IReq
+{
+};
+struct Get_AST_Res : public IRes
+{
+    serialized_data_t data;
+};
+
+////////////////////////////////////////////////////////////////
+
 struct Set_Clock_Req : public IReq
 {
     time_ms_t time;
@@ -177,9 +187,9 @@ struct Remove_Node_Res : public IRes
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-alias Brain_Req = variant<Set_Clock_Req, Set_UAV_Descriptor_Req, Get_UAV_Descriptor_Req, Get_Node_Defs_Req, Remove_Node_Req, Add_Node_Req, Get_Nodes_Req, Set_Node_Input_Stream_Path_Req>;
+alias Brain_Req = variant<Get_AST_Req, Set_Clock_Req, Set_UAV_Descriptor_Req, Get_UAV_Descriptor_Req, Get_Node_Defs_Req, Remove_Node_Req, Add_Node_Req, Get_Nodes_Req, Set_Node_Input_Stream_Path_Req>;
 
-alias Brain_Res = variant<Set_Clock_Res, Set_UAV_Descriptor_Res, Get_UAV_Descriptor_Res, Get_Node_Defs_Res, Remove_Node_Res, Add_Node_Res, Get_Nodes_Res, Set_Node_Input_Stream_Path_Res, Error>;
+alias Brain_Res = variant<Get_AST_Res, Set_Clock_Res, Set_UAV_Descriptor_Res, Get_UAV_Descriptor_Res, Get_Node_Defs_Res, Remove_Node_Res, Add_Node_Res, Get_Nodes_Res, Set_Node_Input_Stream_Path_Res, Error>;
 
 }
 

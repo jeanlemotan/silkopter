@@ -208,7 +208,7 @@ auto PCA9685::set_all_pwm_enabled(bool val) -> bool
     QLOGI("Setting all pwm to {}", is_enabled ? "enabled" : "disabled");
 
     bcm2835_gpio_fsel(27, BCM2835_GPIO_FSEL_OUTP);
-    bcm2835_gpio_write(27, is_enabled ? LOW : HIGH); //inverted output
+    bcm2835_gpio_write(27, is_enabled ? LEVEL_LOW : LEVEL_HIGH); //inverted output
 #endif
 
     return true;

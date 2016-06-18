@@ -87,6 +87,7 @@ struct Value final
     std::string const& get_as_string() const noexcept;
     std::string&& extract_as_string() noexcept;
 
+    void reserve_object_members(size_t members) noexcept;
     void add_object_member(std::string const& name, Value const& member) noexcept;
     void add_object_member(std::string const& name, Value&& member) noexcept;
     void add_object_member(std::string&& name, Value&& member) noexcept;
@@ -96,6 +97,7 @@ struct Value final
     std::string const& get_object_member_name(size_t idx) const noexcept;
     Value const& get_object_member_value(size_t idx) const noexcept;
 
+    void reserve_array_members(size_t members) noexcept;
     void add_array_element(Value const& member) noexcept;
     void add_array_element(Value&& member) noexcept;
 

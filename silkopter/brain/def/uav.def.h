@@ -2137,7 +2137,12 @@ public:
   typedef int32_t contrast_t;
   typedef int32_t brightness_t;
   typedef int32_t saturation_t;
-  typedef int32_t quality_t;
+  enum class quality_t
+  {
+    LOW = 0,
+    HIGH = 0,
+  };
+
   enum class awb_mode_t
   {
     OFF = 0,
@@ -2202,7 +2207,7 @@ private:
   brightness_t m_brightness = {0};
   saturation_t m_saturation = {0};
   awb_mode_t m_awb_mode = {Raspicam_Config::awb_mode_t::AUTO};
-  quality_t m_quality = {0};
+  quality_t m_quality = {Raspicam_Config::quality_t::HIGH};
   bool m_recording = {false};
 };
 
@@ -2800,6 +2805,8 @@ ts::Result<void> deserialize(Raspicam_Descriptor::Quality& value, ts::sz::Value 
 ts::sz::Value serialize(Raspicam_Descriptor::Quality const& value);
 ts::Result<void> deserialize(Raspicam_Descriptor& value, ts::sz::Value const& sz_value);
 ts::sz::Value serialize(Raspicam_Descriptor const& value);
+ts::Result<void> deserialize(Raspicam_Config::quality_t& value, ts::sz::Value const& sz_value);
+ts::sz::Value serialize(Raspicam_Config::quality_t const& value);
 ts::Result<void> deserialize(Raspicam_Config::awb_mode_t& value, ts::sz::Value const& sz_value);
 ts::sz::Value serialize(Raspicam_Config::awb_mode_t const& value);
 ts::Result<void> deserialize(Raspicam_Config& value, ts::sz::Value const& sz_value);

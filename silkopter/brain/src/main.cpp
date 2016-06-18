@@ -5,7 +5,7 @@
 #include <sys/time.h>
 #include <sys/resource.h>
 
-#include <boost/program_options.hpp>
+//#include <boost/program_options.hpp>
 #include <thread>
 #include <iostream>
 #include <malloc.h>
@@ -33,6 +33,8 @@ static void* malloc_hook(size_t size, const void* caller)
 {
     s_memory.allocation_count++;
     __malloc_hook = nullptr;
+    printf("\n%d, %d", int(s_memory.allocation_count), int(s_memory.free_count));
+    fflush(stdout);
     void* ptr = malloc(size);
     __malloc_hook = &malloc_hook;
     return ptr;
@@ -41,6 +43,8 @@ void free_hook(void* ptr, const void* caller)
 {
     s_memory.free_count++;
     __free_hook = nullptr;
+    printf("\n%d, %d", int(s_memory.allocation_count), int(s_memory.free_count));
+    fflush(stdout);
     free(ptr);
     __free_hook = &free_hook;
 }
@@ -93,26 +97,26 @@ int main(int argc, char const* argv[])
 //        test_mm(target, 0.5);
 //    }
 
-    namespace po = boost::program_options;
+//    namespace po = boost::program_options;
 
-	po::options_description desc("Options");
-	desc.add_options()
-		("help", "produce help message")
-        ("blind", "no camera")
-        ("test", po::value<size_t>(), "test");
+//	po::options_description desc("Options");
+//	desc.add_options()
+//		("help", "produce help message")
+//        ("blind", "no camera")
+//        ("test", po::value<size_t>(), "test");
 
-	po::variables_map vm;
-	po::store(po::parse_command_line(argc, argv, desc), vm);
-	po::notify(vm);
+//	po::variables_map vm;
+//	po::store(po::parse_command_line(argc, argv, desc), vm);
+//	po::notify(vm);
 
-	if (vm.count("help")) 
-	{
-        std::cout << desc << "\n";
-		return 1;
-	}
+//	if (vm.count("help"))
+//	{
+//        std::cout << desc << "\n";
+//		return 1;
+//	}
 
-    s_test = vm.count("test") ? vm["test"].as<size_t>() : size_t(0);
-    //bool blind = vm.count("blind") != 0;
+//    s_test = vm.count("test") ? vm["test"].as<size_t>() : size_t(0);
+//    //bool blind = vm.count("blind") != 0;
 
     QLOGI("Creating io_service thread");
 
@@ -196,7 +200,6 @@ int main(int argc, char const* argv[])
 #ifndef RASPBERRY_PI
                 std::this_thread::sleep_for(std::chrono::milliseconds(1));
 #endif
-                printf("\n%d, %d", int(s_memory.allocation_count), int(s_memory.free_count));
             }
         }
 

@@ -1051,57 +1051,57 @@ void UAV::generate_settings_file()
 //            QASSERT(res);
 //        }
 //    }
-    for (size_t i = 0; i < 2; i++)
-    {
-        auto node = m_bus_factory.create("SPI BCM");
-        QASSERT(node);
-        rapidjson::Document json;
-        jsonutil::clone_value(json, node->get_init_params(), json.GetAllocator());
-        auto* valj = jsonutil::get_or_add_value(json, q::Path("dev"), rapidjson::Type::kNumberType, json.GetAllocator());
-        QASSERT(valj);
-        valj->SetInt(i);
-        valj = jsonutil::get_or_add_value(json, q::Path("speed"), rapidjson::Type::kNumberType, json.GetAllocator());
-        QASSERT(valj);
-        valj->SetInt(1000000);
-        if (node->init(json))
-        {
-            auto res = m_buses.add(q::util::format<std::string>("spi{}", i), "SPI BCM", node);
-            QASSERT(res);
-        }
-    }
+//    for (size_t i = 0; i < 2; i++)
+//    {
+//        auto node = m_bus_factory.create("SPI BCM");
+//        QASSERT(node);
+//        rapidjson::Document json;
+//        jsonutil::clone_value(json, node->get_init_params(), json.GetAllocator());
+//        auto* valj = jsonutil::get_or_add_value(json, q::Path("dev"), rapidjson::Type::kNumberType, json.GetAllocator());
+//        QASSERT(valj);
+//        valj->SetInt(i);
+//        valj = jsonutil::get_or_add_value(json, q::Path("speed"), rapidjson::Type::kNumberType, json.GetAllocator());
+//        QASSERT(valj);
+//        valj->SetInt(1000000);
+//        if (node->init(json))
+//        {
+//            auto res = m_buses.add(q::util::format<std::string>("spi{}", i), "SPI BCM", node);
+//            QASSERT(res);
+//        }
+//    }
 
-    {
-        auto node = m_bus_factory.create("I2C Linux");
-        QASSERT(node);
-        rapidjson::Document json;
-        jsonutil::clone_value(json, node->get_init_params(), json.GetAllocator());
-        auto* valj = jsonutil::get_or_add_value(json, q::Path("dev"), rapidjson::Type::kStringType, json.GetAllocator());
-        QASSERT(valj);
-        valj->SetString("/dev/i2c-1");
-        if (node->init(json))
-        {
-            auto res = m_buses.add("i2c1", "I2C Linux", node);
-            QASSERT(res);
-        }
-    }
+//    {
+//        auto node = m_bus_factory.create("I2C Linux");
+//        QASSERT(node);
+//        rapidjson::Document json;
+//        jsonutil::clone_value(json, node->get_init_params(), json.GetAllocator());
+//        auto* valj = jsonutil::get_or_add_value(json, q::Path("dev"), rapidjson::Type::kStringType, json.GetAllocator());
+//        QASSERT(valj);
+//        valj->SetString("/dev/i2c-1");
+//        if (node->init(json))
+//        {
+//            auto res = m_buses.add("i2c1", "I2C Linux", node);
+//            QASSERT(res);
+//        }
+//    }
 
-    {
-        auto node = m_bus_factory.create("UART Linux");
-        QASSERT(node);
-        rapidjson::Document json;
-        jsonutil::clone_value(json, node->get_init_params(), json.GetAllocator());
-        auto* valj = jsonutil::get_or_add_value(json, q::Path("dev"), rapidjson::Type::kStringType, json.GetAllocator());
-        QASSERT(valj);
-        valj->SetString("/dev/ttyAMA0");
-        valj = jsonutil::get_or_add_value(json, q::Path("baud"), rapidjson::Type::kNumberType, json.GetAllocator());
-        QASSERT(valj);
-        valj->SetInt(115200);
-        if (node->init(json))
-        {
-            auto res = m_buses.add("uart0", "UART Linux", node);
-            QASSERT(res);
-        }
-    }
+//    {
+//        auto node = m_bus_factory.create("UART Linux");
+//        QASSERT(node);
+//        rapidjson::Document json;
+//        jsonutil::clone_value(json, node->get_init_params(), json.GetAllocator());
+//        auto* valj = jsonutil::get_or_add_value(json, q::Path("dev"), rapidjson::Type::kStringType, json.GetAllocator());
+//        QASSERT(valj);
+//        valj->SetString("/dev/ttyAMA0");
+//        valj = jsonutil::get_or_add_value(json, q::Path("baud"), rapidjson::Type::kNumberType, json.GetAllocator());
+//        QASSERT(valj);
+//        valj->SetInt(115200);
+//        if (node->init(json))
+//        {
+//            auto res = m_buses.add("uart0", "UART Linux", node);
+//            QASSERT(res);
+//        }
+//    }
 
 #else
 

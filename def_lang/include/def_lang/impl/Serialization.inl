@@ -307,6 +307,12 @@ inline std::string&& Value::extract_as_string() noexcept
     return std::move(string_value);
 }
 
+inline void Value::reserve_object_members(size_t size) noexcept
+{
+    TS_ASSERT(type == Type::OBJECT);
+    object_value.reserve(size);
+}
+
 inline void Value::add_object_member(std::string const& name, Value const& member) noexcept
 {
     TS_ASSERT(type == Type::OBJECT);
@@ -345,6 +351,12 @@ inline Value const* Value::find_object_member_by_name(std::string const& name) c
     TS_ASSERT(type == Type::OBJECT);
     auto it = std::find_if(object_value.begin(), object_value.end(), [&name](std::pair<string_type, Value> const& p) { return p.first == name; });
     return it != object_value.end() ? &it->second : nullptr;
+}
+
+inline void Value::reserve_array_members(size_t size) noexcept
+{
+    TS_ASSERT(type == Type::ARRAY);
+    array_value.reserve(size);
 }
 
 inline void Value::add_array_element(Value const& member) noexcept
@@ -440,13 +452,11 @@ inline void Value::construct() noexcept
     case Type::OBJECT:
     {
         new (&object_value) object_type;
-        object_value.reserve(32);
         break;
     }
     case Type::ARRAY:
     {
         new (&array_value) array_type;
-        array_value.reserve(32);
         break;
     }
     default: break;

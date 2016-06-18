@@ -815,7 +815,11 @@ struct Raspicam_Config : public INode_Config
     alias contrast_t = int32_t : [ min = 0, max = 100 ];
     alias brightness_t = int32_t : [ min = 0, max = 100 ];
     alias saturation_t = int32_t : [ min = 0, max = 100 ];
-    alias quality_t = int32_t : [ min = 0, max = 1 ];
+    enum quality_t
+    {
+        LOW = 0 : [ ui_name = "Low" ],
+        HIGH = 0 : [ ui_name = "High" ],
+    };
 
     enum awb_mode_t
     {
@@ -839,7 +843,7 @@ struct Raspicam_Config : public INode_Config
     brightness_t brightness : [ ui_name = "Brightness" ];
     saturation_t saturation : [ ui_name = "Saturation" ];
     awb_mode_t awb_mode = awb_mode_t::AUTO : [ ui_name = "AWB Mode" ];
-    quality_t quality : [ ui_name = "Quality" ];
+    quality_t quality = quality_t::HIGH : [ ui_name = "Quality" ];
     bool recording : [ ui_name = "Recording" ];
 };
 

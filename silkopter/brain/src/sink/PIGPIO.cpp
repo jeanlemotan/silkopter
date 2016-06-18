@@ -227,10 +227,10 @@ void PIGPIO::set_pwm_value(size_t idx, float value)
     Channel const& channel = *m_channels[idx];
     if (channel.is_servo)
     {
-        PIGPIO_Config::Servo_Channel const& config = *(PIGPIO_Config::Servo_Channel const*)m_channels[idx].config.get();
+        uav::PIGPIO_Config::Servo_Channel const* config = static_cast<uav::PIGPIO_Config::Servo_Channel const*>(channel.config);
         value = math::clamp(value, 0.f, 1.f);
-        float pulse = value * (config.max - config.min);
-        gpioPWM(channel.gpio, (config.min + pulse) * 1000);
+        float pulse = value * (config->get_max() - config->get_min());
+        gpioPWM(channel.gpio, (config->get_min() + pulse) * 1000);
     }
     else
     {

@@ -79,6 +79,48 @@ namespace setup
   }
 
 ////////////////////////////////////////////////////////////
+  void Get_AST_Req::set_req_id(uint32_t const& value)
+  {
+    m_req_id = value;
+  }
+  void Get_AST_Req::set_req_id(uint32_t&& value)
+  {
+    m_req_id = std::move(value);
+  }
+  auto Get_AST_Req::get_req_id() const -> uint32_t const& 
+  {
+    return m_req_id;
+  }
+
+////////////////////////////////////////////////////////////
+  void Get_AST_Res::set_req_id(uint32_t const& value)
+  {
+    m_req_id = value;
+  }
+  void Get_AST_Res::set_req_id(uint32_t&& value)
+  {
+    m_req_id = std::move(value);
+  }
+  auto Get_AST_Res::get_req_id() const -> uint32_t const& 
+  {
+    return m_req_id;
+  }
+
+////////////////////////////////////////////////////////////
+  void Get_AST_Res::set_data(setup::serialized_data_t const& value)
+  {
+    m_data = value;
+  }
+  void Get_AST_Res::set_data(setup::serialized_data_t&& value)
+  {
+    m_data = std::move(value);
+  }
+  auto Get_AST_Res::get_data() const -> setup::serialized_data_t const& 
+  {
+    return m_data;
+  }
+
+////////////////////////////////////////////////////////////
   void Set_Clock_Req::set_req_id(uint32_t const& value)
   {
     m_req_id = value;
@@ -1044,6 +1086,7 @@ ts::Result<void> deserialize(vec2f& value, ts::sz::Value const& sz_value)
 ts::sz::Value serialize(vec2f const& value)
 {
   ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
+  sz_value.reserve_object_members(2);
   sz_value.add_object_member("x", serialize(value.x));
   sz_value.add_object_member("y", serialize(value.y));
   return sz_value;
@@ -1068,6 +1111,7 @@ ts::Result<void> deserialize(vec2d& value, ts::sz::Value const& sz_value)
 ts::sz::Value serialize(vec2d const& value)
 {
   ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
+  sz_value.reserve_object_members(2);
   sz_value.add_object_member("x", serialize(value.x));
   sz_value.add_object_member("y", serialize(value.y));
   return sz_value;
@@ -1092,6 +1136,7 @@ ts::Result<void> deserialize(vec2i& value, ts::sz::Value const& sz_value)
 ts::sz::Value serialize(vec2i const& value)
 {
   ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
+  sz_value.reserve_object_members(2);
   sz_value.add_object_member("x", serialize(value.x));
   sz_value.add_object_member("y", serialize(value.y));
   return sz_value;
@@ -1122,6 +1167,7 @@ ts::Result<void> deserialize(vec3f& value, ts::sz::Value const& sz_value)
 ts::sz::Value serialize(vec3f const& value)
 {
   ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
+  sz_value.reserve_object_members(3);
   sz_value.add_object_member("x", serialize(value.x));
   sz_value.add_object_member("y", serialize(value.y));
   sz_value.add_object_member("z", serialize(value.z));
@@ -1153,6 +1199,7 @@ ts::Result<void> deserialize(vec3d& value, ts::sz::Value const& sz_value)
 ts::sz::Value serialize(vec3d const& value)
 {
   ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
+  sz_value.reserve_object_members(3);
   sz_value.add_object_member("x", serialize(value.x));
   sz_value.add_object_member("y", serialize(value.y));
   sz_value.add_object_member("z", serialize(value.z));
@@ -1184,6 +1231,7 @@ ts::Result<void> deserialize(vec3i& value, ts::sz::Value const& sz_value)
 ts::sz::Value serialize(vec3i const& value)
 {
   ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
+  sz_value.reserve_object_members(3);
   sz_value.add_object_member("x", serialize(value.x));
   sz_value.add_object_member("y", serialize(value.y));
   sz_value.add_object_member("z", serialize(value.z));
@@ -1221,6 +1269,7 @@ ts::Result<void> deserialize(vec4f& value, ts::sz::Value const& sz_value)
 ts::sz::Value serialize(vec4f const& value)
 {
   ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
+  sz_value.reserve_object_members(4);
   sz_value.add_object_member("x", serialize(value.x));
   sz_value.add_object_member("y", serialize(value.y));
   sz_value.add_object_member("z", serialize(value.z));
@@ -1259,6 +1308,7 @@ ts::Result<void> deserialize(vec4d& value, ts::sz::Value const& sz_value)
 ts::sz::Value serialize(vec4d const& value)
 {
   ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
+  sz_value.reserve_object_members(4);
   sz_value.add_object_member("x", serialize(value.x));
   sz_value.add_object_member("y", serialize(value.y));
   sz_value.add_object_member("z", serialize(value.z));
@@ -1297,6 +1347,7 @@ ts::Result<void> deserialize(vec4i& value, ts::sz::Value const& sz_value)
 ts::sz::Value serialize(vec4i const& value)
 {
   ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
+  sz_value.reserve_object_members(4);
   sz_value.add_object_member("x", serialize(value.x));
   sz_value.add_object_member("y", serialize(value.y));
   sz_value.add_object_member("z", serialize(value.z));
@@ -1379,6 +1430,7 @@ ts::Result<void> deserialize(setup::IReq& value, ts::sz::Value const& sz_value)
 ts::sz::Value serialize(setup::IReq const& value)
 {
   ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
+  sz_value.reserve_object_members(1);
   sz_value.add_object_member("req_id", serialize(value.get_req_id()));
   return sz_value;
 }
@@ -1398,6 +1450,7 @@ ts::Result<void> deserialize(setup::IRes& value, ts::sz::Value const& sz_value)
 ts::sz::Value serialize(setup::IRes const& value)
 {
   ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
+  sz_value.reserve_object_members(1);
   sz_value.add_object_member("req_id", serialize(value.get_req_id()));
   return sz_value;
 }
@@ -1425,8 +1478,58 @@ ts::Result<void> deserialize(setup::Error& value, ts::sz::Value const& sz_value)
 ts::sz::Value serialize(setup::Error const& value)
 {
   ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
+  sz_value.reserve_object_members(2);
   sz_value.add_object_member("req_id", serialize(value.get_req_id()));
   sz_value.add_object_member("message", serialize(value.get_message()));
+  return sz_value;
+}
+ts::Result<void> deserialize(setup::Get_AST_Req& value, ts::sz::Value const& sz_value)
+{
+  if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  {
+    auto const* member_sz_value = sz_value.find_object_member_by_name("req_id");
+    if (!member_sz_value) { return ts::Error("Cannot find member value 'req_id'"); }
+    std::remove_cv<std::remove_reference<decltype(value.get_req_id())>::type>::type v;
+    auto result = deserialize(v, *member_sz_value);
+    if (result != ts::success) { return result; }
+    value.set_req_id(std::move(v));
+  }
+  return ts::success;
+}
+ts::sz::Value serialize(setup::Get_AST_Req const& value)
+{
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
+  sz_value.reserve_object_members(1);
+  sz_value.add_object_member("req_id", serialize(value.get_req_id()));
+  return sz_value;
+}
+ts::Result<void> deserialize(setup::Get_AST_Res& value, ts::sz::Value const& sz_value)
+{
+  if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  {
+    auto const* member_sz_value = sz_value.find_object_member_by_name("req_id");
+    if (!member_sz_value) { return ts::Error("Cannot find member value 'req_id'"); }
+    std::remove_cv<std::remove_reference<decltype(value.get_req_id())>::type>::type v;
+    auto result = deserialize(v, *member_sz_value);
+    if (result != ts::success) { return result; }
+    value.set_req_id(std::move(v));
+  }
+  {
+    auto const* member_sz_value = sz_value.find_object_member_by_name("data");
+    if (!member_sz_value) { return ts::Error("Cannot find member value 'data'"); }
+    std::remove_cv<std::remove_reference<decltype(value.get_data())>::type>::type v;
+    auto result = deserialize(v, *member_sz_value);
+    if (result != ts::success) { return result; }
+    value.set_data(std::move(v));
+  }
+  return ts::success;
+}
+ts::sz::Value serialize(setup::Get_AST_Res const& value)
+{
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
+  sz_value.reserve_object_members(2);
+  sz_value.add_object_member("req_id", serialize(value.get_req_id()));
+  sz_value.add_object_member("data", serialize(value.get_data()));
   return sz_value;
 }
 ts::Result<void> deserialize(setup::Set_Clock_Req& value, ts::sz::Value const& sz_value)
@@ -1453,6 +1556,7 @@ ts::Result<void> deserialize(setup::Set_Clock_Req& value, ts::sz::Value const& s
 ts::sz::Value serialize(setup::Set_Clock_Req const& value)
 {
   ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
+  sz_value.reserve_object_members(2);
   sz_value.add_object_member("req_id", serialize(value.get_req_id()));
   sz_value.add_object_member("time", serialize(value.get_time()));
   return sz_value;
@@ -1481,6 +1585,7 @@ ts::Result<void> deserialize(setup::Set_Clock_Res& value, ts::sz::Value const& s
 ts::sz::Value serialize(setup::Set_Clock_Res const& value)
 {
   ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
+  sz_value.reserve_object_members(2);
   sz_value.add_object_member("req_id", serialize(value.get_req_id()));
   sz_value.add_object_member("time", serialize(value.get_time()));
   return sz_value;
@@ -1509,6 +1614,7 @@ ts::Result<void> deserialize(setup::Set_UAV_Descriptor_Req& value, ts::sz::Value
 ts::sz::Value serialize(setup::Set_UAV_Descriptor_Req const& value)
 {
   ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
+  sz_value.reserve_object_members(2);
   sz_value.add_object_member("req_id", serialize(value.get_req_id()));
   sz_value.add_object_member("data", serialize(value.get_data()));
   return sz_value;
@@ -1537,6 +1643,7 @@ ts::Result<void> deserialize(setup::Set_UAV_Descriptor_Res& value, ts::sz::Value
 ts::sz::Value serialize(setup::Set_UAV_Descriptor_Res const& value)
 {
   ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
+  sz_value.reserve_object_members(2);
   sz_value.add_object_member("req_id", serialize(value.get_req_id()));
   sz_value.add_object_member("data", serialize(value.get_data()));
   return sz_value;
@@ -1557,6 +1664,7 @@ ts::Result<void> deserialize(setup::Get_UAV_Descriptor_Req& value, ts::sz::Value
 ts::sz::Value serialize(setup::Get_UAV_Descriptor_Req const& value)
 {
   ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
+  sz_value.reserve_object_members(1);
   sz_value.add_object_member("req_id", serialize(value.get_req_id()));
   return sz_value;
 }
@@ -1584,6 +1692,7 @@ ts::Result<void> deserialize(setup::Get_UAV_Descriptor_Res& value, ts::sz::Value
 ts::sz::Value serialize(setup::Get_UAV_Descriptor_Res const& value)
 {
   ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
+  sz_value.reserve_object_members(2);
   sz_value.add_object_member("req_id", serialize(value.get_req_id()));
   sz_value.add_object_member("data", serialize(value.get_data()));
   return sz_value;
@@ -1628,6 +1737,7 @@ ts::Result<void> deserialize(setup::Node_Def_Data::Input& value, ts::sz::Value c
 ts::sz::Value serialize(setup::Node_Def_Data::Input const& value)
 {
   ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
+  sz_value.reserve_object_members(4);
   sz_value.add_object_member("name", serialize(value.get_name()));
   sz_value.add_object_member("space", serialize(value.get_space()));
   sz_value.add_object_member("semantic", serialize(value.get_semantic()));
@@ -1674,6 +1784,7 @@ ts::Result<void> deserialize(setup::Node_Def_Data::Output& value, ts::sz::Value 
 ts::sz::Value serialize(setup::Node_Def_Data::Output const& value)
 {
   ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
+  sz_value.reserve_object_members(4);
   sz_value.add_object_member("name", serialize(value.get_name()));
   sz_value.add_object_member("space", serialize(value.get_space()));
   sz_value.add_object_member("semantic", serialize(value.get_semantic()));
@@ -1728,6 +1839,7 @@ ts::Result<void> deserialize(setup::Node_Def_Data& value, ts::sz::Value const& s
 ts::sz::Value serialize(setup::Node_Def_Data const& value)
 {
   ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
+  sz_value.reserve_object_members(5);
   sz_value.add_object_member("name", serialize(value.get_name()));
   sz_value.add_object_member("type", serialize(value.get_type()));
   sz_value.add_object_member("inputs", serialize(value.get_inputs()));
@@ -1751,6 +1863,7 @@ ts::Result<void> deserialize(setup::Get_Node_Defs_Req& value, ts::sz::Value cons
 ts::sz::Value serialize(setup::Get_Node_Defs_Req const& value)
 {
   ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
+  sz_value.reserve_object_members(1);
   sz_value.add_object_member("req_id", serialize(value.get_req_id()));
   return sz_value;
 }
@@ -1778,6 +1891,7 @@ ts::Result<void> deserialize(setup::Get_Node_Defs_Res& value, ts::sz::Value cons
 ts::sz::Value serialize(setup::Get_Node_Defs_Res const& value)
 {
   ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
+  sz_value.reserve_object_members(2);
   sz_value.add_object_member("req_id", serialize(value.get_req_id()));
   sz_value.add_object_member("node_def_datas", serialize(value.get_node_def_datas()));
   return sz_value;
@@ -1830,6 +1944,7 @@ ts::Result<void> deserialize(setup::Node_Data::Input& value, ts::sz::Value const
 ts::sz::Value serialize(setup::Node_Data::Input const& value)
 {
   ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
+  sz_value.reserve_object_members(5);
   sz_value.add_object_member("name", serialize(value.get_name()));
   sz_value.add_object_member("space", serialize(value.get_space()));
   sz_value.add_object_member("semantic", serialize(value.get_semantic()));
@@ -1877,6 +1992,7 @@ ts::Result<void> deserialize(setup::Node_Data::Output& value, ts::sz::Value cons
 ts::sz::Value serialize(setup::Node_Data::Output const& value)
 {
   ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
+  sz_value.reserve_object_members(4);
   sz_value.add_object_member("name", serialize(value.get_name()));
   sz_value.add_object_member("space", serialize(value.get_space()));
   sz_value.add_object_member("semantic", serialize(value.get_semantic()));
@@ -1939,6 +2055,7 @@ ts::Result<void> deserialize(setup::Node_Data& value, ts::sz::Value const& sz_va
 ts::sz::Value serialize(setup::Node_Data const& value)
 {
   ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
+  sz_value.reserve_object_members(6);
   sz_value.add_object_member("name", serialize(value.get_name()));
   sz_value.add_object_member("type", serialize(value.get_type()));
   sz_value.add_object_member("inputs", serialize(value.get_inputs()));
@@ -1971,6 +2088,7 @@ ts::Result<void> deserialize(setup::Get_Nodes_Req& value, ts::sz::Value const& s
 ts::sz::Value serialize(setup::Get_Nodes_Req const& value)
 {
   ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
+  sz_value.reserve_object_members(2);
   sz_value.add_object_member("req_id", serialize(value.get_req_id()));
   sz_value.add_object_member("name", serialize(value.get_name()));
   return sz_value;
@@ -1999,6 +2117,7 @@ ts::Result<void> deserialize(setup::Get_Nodes_Res& value, ts::sz::Value const& s
 ts::sz::Value serialize(setup::Get_Nodes_Res const& value)
 {
   ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
+  sz_value.reserve_object_members(2);
   sz_value.add_object_member("req_id", serialize(value.get_req_id()));
   sz_value.add_object_member("node_datas", serialize(value.get_node_datas()));
   return sz_value;
@@ -2043,6 +2162,7 @@ ts::Result<void> deserialize(setup::Set_Node_Input_Stream_Path_Req& value, ts::s
 ts::sz::Value serialize(setup::Set_Node_Input_Stream_Path_Req const& value)
 {
   ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
+  sz_value.reserve_object_members(4);
   sz_value.add_object_member("req_id", serialize(value.get_req_id()));
   sz_value.add_object_member("node_name", serialize(value.get_node_name()));
   sz_value.add_object_member("input_name", serialize(value.get_input_name()));
@@ -2073,6 +2193,7 @@ ts::Result<void> deserialize(setup::Set_Node_Input_Stream_Path_Res& value, ts::s
 ts::sz::Value serialize(setup::Set_Node_Input_Stream_Path_Res const& value)
 {
   ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
+  sz_value.reserve_object_members(2);
   sz_value.add_object_member("req_id", serialize(value.get_req_id()));
   sz_value.add_object_member("node_data", serialize(value.get_node_data()));
   return sz_value;
@@ -2117,6 +2238,7 @@ ts::Result<void> deserialize(setup::Add_Node_Req& value, ts::sz::Value const& sz
 ts::sz::Value serialize(setup::Add_Node_Req const& value)
 {
   ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
+  sz_value.reserve_object_members(4);
   sz_value.add_object_member("req_id", serialize(value.get_req_id()));
   sz_value.add_object_member("def_name", serialize(value.get_def_name()));
   sz_value.add_object_member("name", serialize(value.get_name()));
@@ -2147,6 +2269,7 @@ ts::Result<void> deserialize(setup::Add_Node_Res& value, ts::sz::Value const& sz
 ts::sz::Value serialize(setup::Add_Node_Res const& value)
 {
   ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
+  sz_value.reserve_object_members(2);
   sz_value.add_object_member("req_id", serialize(value.get_req_id()));
   sz_value.add_object_member("node_data", serialize(value.get_node_data()));
   return sz_value;
@@ -2175,6 +2298,7 @@ ts::Result<void> deserialize(setup::Remove_Node_Req& value, ts::sz::Value const&
 ts::sz::Value serialize(setup::Remove_Node_Req const& value)
 {
   ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
+  sz_value.reserve_object_members(2);
   sz_value.add_object_member("req_id", serialize(value.get_req_id()));
   sz_value.add_object_member("name", serialize(value.get_name()));
   return sz_value;
@@ -2195,6 +2319,7 @@ ts::Result<void> deserialize(setup::Remove_Node_Res& value, ts::sz::Value const&
 ts::sz::Value serialize(setup::Remove_Node_Res const& value)
 {
   ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
+  sz_value.reserve_object_members(1);
   sz_value.add_object_member("req_id", serialize(value.get_req_id()));
   return sz_value;
 }
@@ -2207,6 +2332,12 @@ ts::Result<void> deserialize(setup::Brain_Req& value, ts::sz::Value const& sz_va
   if (!value_sz_value) { return ts::Error("Expected 'value' when deserializing"); }
   std::string const& path = type_sz_value->get_as_string();
   if (false) { return ts::Error(""); } //this is here just to have the next items with 'else if'
+  else if (path == "setup::Get_AST_Req")
+  {
+    value = setup::Get_AST_Req();
+    auto result = deserialize(boost::get<setup::Get_AST_Req>(value), *value_sz_value);
+    if (result != ts::success) { return result; }
+  }
   else if (path == "setup::Set_Clock_Req")
   {
     value = setup::Set_Clock_Req();
@@ -2262,50 +2393,65 @@ ts::sz::Value serialize(setup::Brain_Req const& value)
 {
   ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   if (false) { return ts::sz::Value(); } //this is here just to have the next items with 'else if'
+  else if (auto* v = boost::get<setup::Get_AST_Req>(&value))
+  {
+    sz_value.reserve_object_members(2);
+    sz_value.add_object_member("type", "setup::Get_AST_Req");
+    sz_value.add_object_member("value", serialize(*v));
+    return std::move(sz_value);
+  }
   else if (auto* v = boost::get<setup::Set_Clock_Req>(&value))
   {
+    sz_value.reserve_object_members(2);
     sz_value.add_object_member("type", "setup::Set_Clock_Req");
     sz_value.add_object_member("value", serialize(*v));
     return std::move(sz_value);
   }
   else if (auto* v = boost::get<setup::Set_UAV_Descriptor_Req>(&value))
   {
+    sz_value.reserve_object_members(2);
     sz_value.add_object_member("type", "setup::Set_UAV_Descriptor_Req");
     sz_value.add_object_member("value", serialize(*v));
     return std::move(sz_value);
   }
   else if (auto* v = boost::get<setup::Get_UAV_Descriptor_Req>(&value))
   {
+    sz_value.reserve_object_members(2);
     sz_value.add_object_member("type", "setup::Get_UAV_Descriptor_Req");
     sz_value.add_object_member("value", serialize(*v));
     return std::move(sz_value);
   }
   else if (auto* v = boost::get<setup::Get_Node_Defs_Req>(&value))
   {
+    sz_value.reserve_object_members(2);
     sz_value.add_object_member("type", "setup::Get_Node_Defs_Req");
     sz_value.add_object_member("value", serialize(*v));
     return std::move(sz_value);
   }
   else if (auto* v = boost::get<setup::Remove_Node_Req>(&value))
   {
+    sz_value.reserve_object_members(2);
     sz_value.add_object_member("type", "setup::Remove_Node_Req");
     sz_value.add_object_member("value", serialize(*v));
     return std::move(sz_value);
   }
   else if (auto* v = boost::get<setup::Add_Node_Req>(&value))
   {
+    sz_value.reserve_object_members(2);
     sz_value.add_object_member("type", "setup::Add_Node_Req");
     sz_value.add_object_member("value", serialize(*v));
     return std::move(sz_value);
   }
   else if (auto* v = boost::get<setup::Get_Nodes_Req>(&value))
   {
+    sz_value.reserve_object_members(2);
     sz_value.add_object_member("type", "setup::Get_Nodes_Req");
     sz_value.add_object_member("value", serialize(*v));
     return std::move(sz_value);
   }
   else if (auto* v = boost::get<setup::Set_Node_Input_Stream_Path_Req>(&value))
   {
+    sz_value.reserve_object_members(2);
     sz_value.add_object_member("type", "setup::Set_Node_Input_Stream_Path_Req");
     sz_value.add_object_member("value", serialize(*v));
     return std::move(sz_value);
@@ -2321,6 +2467,12 @@ ts::Result<void> deserialize(setup::Brain_Res& value, ts::sz::Value const& sz_va
   if (!value_sz_value) { return ts::Error("Expected 'value' when deserializing"); }
   std::string const& path = type_sz_value->get_as_string();
   if (false) { return ts::Error(""); } //this is here just to have the next items with 'else if'
+  else if (path == "setup::Get_AST_Res")
+  {
+    value = setup::Get_AST_Res();
+    auto result = deserialize(boost::get<setup::Get_AST_Res>(value), *value_sz_value);
+    if (result != ts::success) { return result; }
+  }
   else if (path == "setup::Set_Clock_Res")
   {
     value = setup::Set_Clock_Res();
@@ -2382,56 +2534,72 @@ ts::sz::Value serialize(setup::Brain_Res const& value)
 {
   ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   if (false) { return ts::sz::Value(); } //this is here just to have the next items with 'else if'
+  else if (auto* v = boost::get<setup::Get_AST_Res>(&value))
+  {
+    sz_value.reserve_object_members(2);
+    sz_value.add_object_member("type", "setup::Get_AST_Res");
+    sz_value.add_object_member("value", serialize(*v));
+    return std::move(sz_value);
+  }
   else if (auto* v = boost::get<setup::Set_Clock_Res>(&value))
   {
+    sz_value.reserve_object_members(2);
     sz_value.add_object_member("type", "setup::Set_Clock_Res");
     sz_value.add_object_member("value", serialize(*v));
     return std::move(sz_value);
   }
   else if (auto* v = boost::get<setup::Set_UAV_Descriptor_Res>(&value))
   {
+    sz_value.reserve_object_members(2);
     sz_value.add_object_member("type", "setup::Set_UAV_Descriptor_Res");
     sz_value.add_object_member("value", serialize(*v));
     return std::move(sz_value);
   }
   else if (auto* v = boost::get<setup::Get_UAV_Descriptor_Res>(&value))
   {
+    sz_value.reserve_object_members(2);
     sz_value.add_object_member("type", "setup::Get_UAV_Descriptor_Res");
     sz_value.add_object_member("value", serialize(*v));
     return std::move(sz_value);
   }
   else if (auto* v = boost::get<setup::Get_Node_Defs_Res>(&value))
   {
+    sz_value.reserve_object_members(2);
     sz_value.add_object_member("type", "setup::Get_Node_Defs_Res");
     sz_value.add_object_member("value", serialize(*v));
     return std::move(sz_value);
   }
   else if (auto* v = boost::get<setup::Remove_Node_Res>(&value))
   {
+    sz_value.reserve_object_members(2);
     sz_value.add_object_member("type", "setup::Remove_Node_Res");
     sz_value.add_object_member("value", serialize(*v));
     return std::move(sz_value);
   }
   else if (auto* v = boost::get<setup::Add_Node_Res>(&value))
   {
+    sz_value.reserve_object_members(2);
     sz_value.add_object_member("type", "setup::Add_Node_Res");
     sz_value.add_object_member("value", serialize(*v));
     return std::move(sz_value);
   }
   else if (auto* v = boost::get<setup::Get_Nodes_Res>(&value))
   {
+    sz_value.reserve_object_members(2);
     sz_value.add_object_member("type", "setup::Get_Nodes_Res");
     sz_value.add_object_member("value", serialize(*v));
     return std::move(sz_value);
   }
   else if (auto* v = boost::get<setup::Set_Node_Input_Stream_Path_Res>(&value))
   {
+    sz_value.reserve_object_members(2);
     sz_value.add_object_member("type", "setup::Set_Node_Input_Stream_Path_Res");
     sz_value.add_object_member("value", serialize(*v));
     return std::move(sz_value);
   }
   else if (auto* v = boost::get<setup::Error>(&value))
   {
+    sz_value.reserve_object_members(2);
     sz_value.add_object_member("type", "setup::Error");
     sz_value.add_object_member("value", serialize(*v));
     return std::move(sz_value);
@@ -2453,6 +2621,7 @@ ts::Result<void> deserialize(std::vector<setup::Node_Def_Data::Input>& value, ts
 ts::sz::Value serialize(std::vector<setup::Node_Def_Data::Input> const& value)
 {
   ts::sz::Value sz_value(ts::sz::Value::Type::ARRAY);
+  sz_value.reserve_array_members(value.size());
   for (size_t i = 0; i < value.size(); i++)
   {
     sz_value.add_array_element(serialize(value[i]));
@@ -2474,6 +2643,7 @@ ts::Result<void> deserialize(std::vector<setup::Node_Def_Data::Output>& value, t
 ts::sz::Value serialize(std::vector<setup::Node_Def_Data::Output> const& value)
 {
   ts::sz::Value sz_value(ts::sz::Value::Type::ARRAY);
+  sz_value.reserve_array_members(value.size());
   for (size_t i = 0; i < value.size(); i++)
   {
     sz_value.add_array_element(serialize(value[i]));
@@ -2495,6 +2665,7 @@ ts::Result<void> deserialize(std::vector<setup::Node_Def_Data>& value, ts::sz::V
 ts::sz::Value serialize(std::vector<setup::Node_Def_Data> const& value)
 {
   ts::sz::Value sz_value(ts::sz::Value::Type::ARRAY);
+  sz_value.reserve_array_members(value.size());
   for (size_t i = 0; i < value.size(); i++)
   {
     sz_value.add_array_element(serialize(value[i]));
@@ -2516,6 +2687,7 @@ ts::Result<void> deserialize(std::vector<setup::Node_Data::Input>& value, ts::sz
 ts::sz::Value serialize(std::vector<setup::Node_Data::Input> const& value)
 {
   ts::sz::Value sz_value(ts::sz::Value::Type::ARRAY);
+  sz_value.reserve_array_members(value.size());
   for (size_t i = 0; i < value.size(); i++)
   {
     sz_value.add_array_element(serialize(value[i]));
@@ -2537,6 +2709,7 @@ ts::Result<void> deserialize(std::vector<setup::Node_Data::Output>& value, ts::s
 ts::sz::Value serialize(std::vector<setup::Node_Data::Output> const& value)
 {
   ts::sz::Value sz_value(ts::sz::Value::Type::ARRAY);
+  sz_value.reserve_array_members(value.size());
   for (size_t i = 0; i < value.size(); i++)
   {
     sz_value.add_array_element(serialize(value[i]));
@@ -2558,6 +2731,7 @@ ts::Result<void> deserialize(std::vector<setup::Node_Data>& value, ts::sz::Value
 ts::sz::Value serialize(std::vector<setup::Node_Data> const& value)
 {
   ts::sz::Value sz_value(ts::sz::Value::Type::ARRAY);
+  sz_value.reserve_array_members(value.size());
   for (size_t i = 0; i < value.size(); i++)
   {
     sz_value.add_array_element(serialize(value[i]));

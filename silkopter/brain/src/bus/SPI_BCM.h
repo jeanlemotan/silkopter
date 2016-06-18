@@ -41,6 +41,7 @@ private:
     std::shared_ptr<uav::SPI_BCM_Descriptor> m_descriptor;
     uint32_t m_dev = 0;
     uint32_t m_speed = 0;
+    uint32_t m_mode = 0;
 
     uint32_t m_clock_divider = 0;
 

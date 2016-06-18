@@ -91,7 +91,7 @@ void UART_BBang::close()
 
     if (m_is_initialized)
     {
-        int res = gpioSerialReadClose(m_rx_pin);
+        int res = gpioSerialReadClose(m_descriptor->get_rx_pin());
         QASSERT(res == 0);
     }
 
@@ -121,10 +121,10 @@ auto UART_BBang::read(uint8_t* data, size_t max_size) -> size_t
     std::lock_guard<UART_BBang> lg(*this);
 
 #if defined (RASPBERRY_PI)
-    int res = gpioSerialRead(m_rx_pin, data, max_size);
+    int res = gpioSerialRead(m_descriptor->get_rx_pin(), data, max_size);
     if (res < 0)
     {
-        QLOGE("error reading from bit-banged rx pin {}: {}", m_rx_pin, res);
+        QLOGE("error reading from bit-banged rx pin {}: {}", m_descriptor->get_rx_pin(), res);
         return 0;
     }
     return res;

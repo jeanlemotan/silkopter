@@ -21,6 +21,7 @@ namespace comms
 {
 namespace setup
 {
+class Get_AST_Req;
 class Set_Clock_Req;
 class Set_UAV_Descriptor_Req;
 class Get_UAV_Descriptor_Req;
@@ -113,6 +114,7 @@ private:
     class Dispatch_Req_Visitor;
     friend class Dispatch_Req_Visitor;
 
+    void handle_req(comms::setup::Get_AST_Req const& req);
     void handle_req(comms::setup::Set_Clock_Req const& req);
     void handle_req(comms::setup::Set_UAV_Descriptor_Req const& req);
     void handle_req(comms::setup::Get_UAV_Descriptor_Req const& req);

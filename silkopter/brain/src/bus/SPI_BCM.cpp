@@ -69,12 +69,13 @@ bool SPI_BCM::open(uint32_t dev, uint32_t speed, uint32_t mode)
 
     m_dev = dev;
     m_speed = speed;
+    m_mode = mode;
 
 #ifdef RASPBERRY_PI
 
     bcm2835_spi_begin();
     bcm2835_spi_setBitOrder(BCM2835_SPI_BIT_ORDER_MSBFIRST);      // The default
-    bcm2835_spi_setChipSelectPolarity(dev, LOW);      // the default
+    bcm2835_spi_setChipSelectPolarity(dev, LEVEL_LOW);      // the default
 
 #endif
 

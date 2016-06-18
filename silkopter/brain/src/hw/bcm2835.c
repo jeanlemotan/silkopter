@@ -290,7 +290,7 @@ uint8_t bcm2835_gpio_lev(uint8_t pin)
     volatile uint32_t* paddr = bcm2835_gpio + BCM2835_GPLEV0/4 + pin/32;
     uint8_t shift = pin % 32;
     uint32_t value = bcm2835_peri_read(paddr);
-    return (value & (1 << shift)) ? HIGH : LOW;
+    return (value & (1 << shift)) ? LEVEL_HIGH : LEVEL_LOW;
 }
 
 /* See if an event detection bit is set
@@ -301,7 +301,7 @@ uint8_t bcm2835_gpio_eds(uint8_t pin)
     volatile uint32_t* paddr = bcm2835_gpio + BCM2835_GPEDS0/4 + pin/32;
     uint8_t shift = pin % 32;
     uint32_t value = bcm2835_peri_read(paddr);
-    return (value & (1 << shift)) ? HIGH : LOW;
+    return (value & (1 << shift)) ? LEVEL_HIGH : LEVEL_LOW;
 }
 
 /* Write a 1 to clear the bit in EDS */
@@ -1488,13 +1488,13 @@ int main(int argc, char **argv)
     while (1)
     {
         /* Turn it on */
-        bcm2835_gpio_write(RPI_GPIO_P1_11, HIGH);
+        bcm2835_gpio_write(RPI_GPIO_P1_11, LEVEL_HIGH);
 
         /* wait a bit */
         bcm2835_delay(500);
 
         /* turn it off */
-        bcm2835_gpio_write(RPI_GPIO_P1_11, LOW);
+        bcm2835_gpio_write(RPI_GPIO_P1_11, LEVEL_LOW);
 
         /* wait a bit */
         bcm2835_delay(500);

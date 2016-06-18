@@ -91,6 +91,35 @@ private:
   std::string m_message;
 };
 
+struct Get_AST_Req : public setup::IReq
+{
+public:
+  virtual ~Get_AST_Req() = default;
+  void set_req_id(uint32_t const& value);
+  void set_req_id(uint32_t&& value);
+  auto get_req_id() const -> uint32_t const&;
+
+private:
+  uint32_t m_req_id = {0};
+};
+
+struct Get_AST_Res : public setup::IRes
+{
+public:
+  virtual ~Get_AST_Res() = default;
+  void set_req_id(uint32_t const& value);
+  void set_req_id(uint32_t&& value);
+  auto get_req_id() const -> uint32_t const&;
+
+  void set_data(setup::serialized_data_t const& value);
+  void set_data(setup::serialized_data_t&& value);
+  auto get_data() const -> setup::serialized_data_t const&;
+
+private:
+  uint32_t m_req_id = {0};
+  setup::serialized_data_t m_data;
+};
+
 struct Set_Clock_Req : public setup::IReq
 {
 public:
@@ -558,8 +587,8 @@ private:
   uint32_t m_req_id = {0};
 };
 
-typedef boost::variant<setup::Set_Clock_Req,setup::Set_UAV_Descriptor_Req,setup::Get_UAV_Descriptor_Req,setup::Get_Node_Defs_Req,setup::Remove_Node_Req,setup::Add_Node_Req,setup::Get_Nodes_Req,setup::Set_Node_Input_Stream_Path_Req> Brain_Req;
-typedef boost::variant<setup::Set_Clock_Res,setup::Set_UAV_Descriptor_Res,setup::Get_UAV_Descriptor_Res,setup::Get_Node_Defs_Res,setup::Remove_Node_Res,setup::Add_Node_Res,setup::Get_Nodes_Res,setup::Set_Node_Input_Stream_Path_Res,setup::Error> Brain_Res;
+typedef boost::variant<setup::Get_AST_Req,setup::Set_Clock_Req,setup::Set_UAV_Descriptor_Req,setup::Get_UAV_Descriptor_Req,setup::Get_Node_Defs_Req,setup::Remove_Node_Req,setup::Add_Node_Req,setup::Get_Nodes_Req,setup::Set_Node_Input_Stream_Path_Req> Brain_Req;
+typedef boost::variant<setup::Get_AST_Res,setup::Set_Clock_Res,setup::Set_UAV_Descriptor_Res,setup::Get_UAV_Descriptor_Res,setup::Get_Node_Defs_Res,setup::Remove_Node_Res,setup::Add_Node_Res,setup::Get_Nodes_Res,setup::Set_Node_Input_Stream_Path_Res,setup::Error> Brain_Res;
 }
 ts::Result<void> deserialize(bool& value, ts::sz::Value const& sz_value);
 ts::sz::Value serialize(bool const& value);
@@ -607,6 +636,10 @@ ts::Result<void> deserialize(setup::IRes& value, ts::sz::Value const& sz_value);
 ts::sz::Value serialize(setup::IRes const& value);
 ts::Result<void> deserialize(setup::Error& value, ts::sz::Value const& sz_value);
 ts::sz::Value serialize(setup::Error const& value);
+ts::Result<void> deserialize(setup::Get_AST_Req& value, ts::sz::Value const& sz_value);
+ts::sz::Value serialize(setup::Get_AST_Req const& value);
+ts::Result<void> deserialize(setup::Get_AST_Res& value, ts::sz::Value const& sz_value);
+ts::sz::Value serialize(setup::Get_AST_Res const& value);
 ts::Result<void> deserialize(setup::Set_Clock_Req& value, ts::sz::Value const& sz_value);
 ts::sz::Value serialize(setup::Set_Clock_Req const& value);
 ts::Result<void> deserialize(setup::Set_Clock_Res& value, ts::sz::Value const& sz_value);

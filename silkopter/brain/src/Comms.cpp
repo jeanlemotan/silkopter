@@ -958,6 +958,11 @@ comms::setup::Error make_error(Format_String const& fmt, Params&&... params)
     return error;
 }
 
+void Comms::handle_req(comms::setup::Get_AST_Req const& req)
+{
+    QLOGI("Get_AST_Req {}", req.get_req_id());
+}
+
 void Comms::handle_req(comms::setup::Set_Clock_Req const& req)
 {
     QLOGI("Set_Clock_Req {}", req.get_req_id());
@@ -966,8 +971,8 @@ void Comms::handle_req(comms::setup::Set_Clock_Req const& req)
 
     int64_t time_t_data = req.get_time();
 #ifdef RASPBERRY_PI
-    time_t t = time_t_data / 1000;
-    if (stime(&t) == 0)
+    time_t time_s = time_t_data / 1000;
+    if (stime(&time_s) == 0)
     {
         response = make_error("Failed to set time: {}", strerror(errno));
         serialize_and_send(SETUP_CHANNEL, response);
