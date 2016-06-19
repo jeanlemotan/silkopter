@@ -3,3 +3,4 @@
 /Makefile
 /.obj/
 /Makefile.rpi
+*.qmake.stash

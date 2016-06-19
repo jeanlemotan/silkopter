@@ -1,2 +1,6 @@
 *.pro.user
 *.pro.user.*
+/Makefile
+*.def_lang
+*.rpi
+*.qmake.stash
