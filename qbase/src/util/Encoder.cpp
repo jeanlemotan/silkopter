@@ -336,5 +336,63 @@ void decodeBase64(data::OStream& dst, data::IStream& src)
 }
 */
 
+void encode_base64(const char* src, size_t size, char* dst)
+{
+    QASSERT(src && dst);
+
+    if ((reinterpret_cast<size_t>(src) & 0x3) == 0) //aligned access?
+    {
+        while (size >= 4)
+        {
+            uint32_t bit_pattern = *reinterpret_cast<uint32_t const*>(src);
+            src += 3;
+            size -= 3;
+
+            // create 4 encoded chars taking 6 bits each time
+            *dst++ = s_char_64[(bit_pattern  >> 26) & 0x3F];
+            *dst++ = s_char_64[(bit_pattern  >> 20) & 0x3F];
+            *dst++ = s_char_64[(bit_pattern  >> 14) & 0x3F];
+            *dst++ = s_char_64[(bit_pattern  >> 8 ) & 0x3F];
+        }
+    }
+
+    while (size >= 3)
+    {
+        uint32_t bit_pattern = uint32_t(*src++) << 16;
+        bit_pattern += uint32_t(*src++) << 8;
+        bit_pattern += *src++;
+
+        size -= 3;
+
+        // create 4 encoded chars taking 6 bits each time
+        *dst++ = s_char_64[(bit_pattern  >> 18) & 0x3F];
+        *dst++ = s_char_64[(bit_pattern  >> 12) & 0x3F];
+        *dst++ = s_char_64[(bit_pattern  >> 6 ) & 0x3F];
+        *dst++ = s_char_64[(bit_pattern       ) & 0x3F];
+    }
+
+    if (size == 2)
+    {
+        uint32_t bit_pattern = uint32_t(*src++) << 16;
+        bit_pattern += uint32_t(*src++) << 8;
+
+        // create 4 encoded chars taking 6 bits each time
+        *dst++ = s_char_64[(bit_pattern  >> 18) & 0x3F];
+        *dst++ = s_char_64[(bit_pattern  >> 12) & 0x3F];
+        *dst++ = s_char_64[(bit_pattern  >> 6 ) & 0x3F];
+        *dst++ = '=';
+    }
+    else if (size == 1)
+    {
+        uint32_t bit_pattern = uint32_t(*src++) << 16;
+
+        // create 4 encoded chars taking 6 bits each time
+        *dst++ = s_char_64[(bit_pattern  >> 18) & 0x3F];
+        *dst++ = s_char_64[(bit_pattern  >> 12) & 0x3F];
+        *dst++ = '=';
+        *dst++ = '=';
+    }
+}
+
 }
 }

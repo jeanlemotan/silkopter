@@ -7,62 +7,67 @@ namespace util
     extern const uint8_t s_char_64_rev[256];
     extern const uint8_t s_char_64[64];
 
+    inline size_t compute_base64_encoded_size(size_t n)
+    {
+        return ((4 * n / 3) + 3) & (~3);
+    }
+    inline size_t compute_base64_max_decoded_size(size_t n)
+    {
+        if (n & 3)
+        {
+            QASSERT(0);
+            return 0;
+        }
+        return 3 * n / 4;
+    }
+
+    void encode_base64(const char* src, size_t size, char* dst);
+
     template <typename _II, typename _OI>
-    void encode_base_64(_II first, _II last, _OI result)
+    void encode_base64(_II first, _II last, _OI result)
     {
         size_t i = 0;
-        auto src_size = std::distance(first, last);
-        if (src_size > 3)
-        {
-            // for each 3 bytes, create 4 encoded chars
-            for (i = 0; i < src_size - 3; i += 3)
-            {
-                uint32_t bit_pattern = uint32_t(*first++) << 16;
-                bit_pattern += uint32_t(*first++) << 8;
-                bit_pattern += *first++;
-                // create 4 encoded chars taking 6 bits each time
-                for (uint8_t k = 0; k < 4; k++)
-                {
-                    uint32_t index = bit_pattern  >> (24 - (k + 1) * 6);
-                    index = index & (0x3F);
-                    QASSERT(index < 64);
-                    *result++ = s_char_64[index];
-                }
-            }
-        }
-        if (i < src_size)
+        size_t src_size = std::distance(first, last);
+        while (src_size >= 3)
         {
             uint32_t bit_pattern = uint32_t(*first++) << 16;
-            if (i + 1 < src_size)
-            {
-                bit_pattern += uint32_t(*first++) << 8;
-            }
-            if (i + 2 < src_size)
-            {
-                bit_pattern += *first++;
-            }
+            bit_pattern += uint32_t(*first++) << 8;
+            bit_pattern += *first++;
+
+            src_size -= 3;
+
             // create 4 encoded chars taking 6 bits each time
-            for (uint8_t k = 0; k < 4; k++)
-            {
-                uint32_t index = bit_pattern  >> (24 - (k + 1) * 6);
-                index = index & (0x3F);
-                QASSERT(index < 64);
-                *result++ = s_char_64[index];
-            }
+            *result++ = s_char_64[(bit_pattern  >> 18) & 0x3F];
+            *result++ = s_char_64[(bit_pattern  >> 12) & 0x3F];
+            *result++ = s_char_64[(bit_pattern  >> 6 ) & 0x3F];
+            *result++ = s_char_64[(bit_pattern       ) & 0x3F];
         }
 
-        // process padding
-        size_t m = src_size % 3;
-        switch (m)
+        if (src_size == 2)
         {
-        case 3: *result++ = '='; //fallthrough
-        case 2: *result++ = '='; //fallthrough
-        case 1: *result++ = '='; //fallthrough
+            uint32_t bit_pattern = uint32_t(*first++) << 16;
+            bit_pattern += uint32_t(*first++) << 8;
+
+            // create 4 encoded chars taking 6 bits each time
+            *result++ = s_char_64[(bit_pattern  >> 18) & 0x3F];
+            *result++ = s_char_64[(bit_pattern  >> 12) & 0x3F];
+            *result++ = s_char_64[(bit_pattern  >> 6 ) & 0x3F];
+            *result++ = '=';
+        }
+        else if (src_size == 1)
+        {
+            uint32_t bit_pattern = uint32_t(*first++) << 16;
+
+            // create 4 encoded chars taking 6 bits each time
+            *result++ = s_char_64[(bit_pattern  >> 18) & 0x3F];
+            *result++ = s_char_64[(bit_pattern  >> 12) & 0x3F];
+            *result++ = '=';
+            *result++ = '=';
         }
     }
 
     template <typename _II, typename _OI>
-    void decode_base_64(_II first, _II last, _OI result)
+    _OI decode_base64(_II first, _II last, _OI result)
     {
         auto src_size = std::distance(first, last);
         QASSERT(src_size % 4 == 0);
@@ -114,22 +119,23 @@ namespace util
                 *result++ = (bit_pattern) & 0xFF;
             }
         }
+        return result;
     }
 
 	template<class String_T>
-	auto encode_base_64(String_T const& src) -> String_T
+    auto encode_base64(String_T const& src) -> String_T
 	{
 		std::vector<uint8_t> dst;
         dst.reserve(src.size());
-        encode_base_64(src.begin(), src.end(), std::back_inserter(dst));
+        encode_base64(src.begin(), src.end(), std::back_inserter(dst));
 		return dst.empty() ? String_T() : String_T((char const*)&dst[0], (char const*)&dst[0] + dst.size());
 	}
 	template<class String_T>
-	auto decode_base_64(String_T const& src) -> String_T
+    auto decode_base64(String_T const& src) -> String_T
 	{
         std::vector<uint8_t> dst;
         dst.reserve(src.size());
-        decode_base_64(src.begin(), src.end(), std::back_inserter(dst));
+        decode_base64(src.begin(), src.end(), std::back_inserter(dst));
 		return dst.empty() ? String_T() : String_T((char const*)&dst[0], (char const*)&dst[0] + dst.size());
 	}
 
