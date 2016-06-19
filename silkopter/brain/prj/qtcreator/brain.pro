@@ -45,7 +45,7 @@ DESTDIR = ../../bin/$${DEST_FOLDER}
 QMAKE_CXXFLAGS += -isystem =/opt/vc/include -isystem =/opt/vc/include/interface/vcos/pthreads -isystem =/opt/vc/include/interface/vmcs_host/linux
 QMAKE_CXXFLAGS += -Wno-unused-variable -Wno-unused-parameter
 QMAKE_CFLAGS += -Wno-unused-variable -Wno-unused-parameter
-QMAKE_LFLAGS += -rdynamic
+QMAKE_LFLAGS += -rdynamic -Wl,--whole-archive -lpthread -Wl,--no-whole-archive
 
 
 INCLUDEPATH += /usr/include/bullet

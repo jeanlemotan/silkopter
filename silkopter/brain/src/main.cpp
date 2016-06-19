@@ -2,6 +2,9 @@
 #include "UAV.h"
 #include "Comms.h"
 
+#include <boost/asio.hpp>
+#include <boost/thread.hpp>
+
 #include <sys/time.h>
 #include <sys/resource.h>
 
@@ -27,6 +30,14 @@ namespace boost
         QLOGE("boost::exception {}", e.what());
 		throw e;
     }
+}
+
+namespace silk
+{
+void execute_async_call(std::function<void()> f)
+{
+    s_async_io_service.post(f);
+}
 }
 
 static void* malloc_hook(size_t size, const void* caller)
@@ -77,8 +88,8 @@ int main(int argc, char const* argv[])
 //    signal(SIGABRT, signal_handler);
     signal(SIGTERM, signal_handler);
 
-    __malloc_hook = &malloc_hook;
-    __free_hook = &free_hook;
+    //__malloc_hook = &malloc_hook;
+    //__free_hook = &free_hook;
 
     //set the new_handler
     std::set_new_handler(out_of_memory_handler);
@@ -87,15 +98,6 @@ int main(int argc, char const* argv[])
     q::logging::set_decorations(q::logging::Decorations(q::logging::Decoration::TIMESTAMP, q::logging::Decoration::LEVEL, q::logging::Decoration::TOPIC));
 
     QLOG_TOPIC("silk");
-
-//    q::util::Rand rnd;
-//    while (true)
-//    {
-//        math::vec3f target(rnd.get_float() * 40.0, rnd.get_float() * 40.0, rnd.get_float() * 10.0);
-//        test_mm(target, 0.01);
-//        test_mm(target, 0.1);
-//        test_mm(target, 0.5);
-//    }
 
 //    namespace po = boost::program_options;
 
@@ -121,7 +123,7 @@ int main(int argc, char const* argv[])
     QLOGI("Creating io_service thread");
 
     boost::shared_ptr<boost::asio::io_service::work> async_work(new boost::asio::io_service::work(s_async_io_service));
-    auto async_thread = std::thread([]() { s_async_io_service.run(); });
+    auto async_thread = boost::thread([]() { s_async_io_service.run(); });
 
 #if defined RASPBERRY_PI
     {

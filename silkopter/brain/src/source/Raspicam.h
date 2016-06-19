@@ -4,7 +4,7 @@
 #include "common/node/ISource.h"
 #include "common/Comm_Data.h"
 #include "common/stream/IVideo.h"
-
+#include <boost/thread.hpp>
 
 namespace silk
 {
@@ -92,7 +92,7 @@ private:
     struct Recording_Data
     {
         std::mutex mutex;
-        std::thread thread;
+        boost::thread thread;
         std::atomic_bool should_stop = {false};
         std::vector<uint8_t> data_in;
         std::vector<uint8_t> data_out;

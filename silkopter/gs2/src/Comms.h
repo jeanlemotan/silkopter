@@ -45,6 +45,7 @@ namespace comms
 namespace setup
 {
 class Error;
+class Get_AST_Res;
 class Set_Clock_Res;
 class Set_UAV_Descriptor_Res;
 class Get_UAV_Descriptor_Res;
@@ -217,6 +218,7 @@ private:
     std::vector<uint8_t> m_setup_buffer;
 
     void handle_res(comms::setup::Error const& res);
+    void handle_res(comms::setup::Get_AST_Res const& res);
     void handle_res(comms::setup::Set_Clock_Res const& res);
     void handle_res(comms::setup::Set_UAV_Descriptor_Res const& res);
     void handle_res(comms::setup::Get_UAV_Descriptor_Res const& res);

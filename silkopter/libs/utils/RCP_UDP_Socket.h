@@ -1,7 +1,22 @@
 #pragma once
 
 #include "RCP.h"
-#include <boost/asio.hpp>
+#include <boost/thread.hpp>
+
+namespace boost
+{
+namespace system
+{
+class error_code;
+}
+namespace asio
+{
+namespace ip
+{
+class address;
+}
+}
+}
 
 namespace util
 {
@@ -15,9 +30,9 @@ public:
 
     auto process() -> Result override;
 
-    void set_send_endpoint(boost::asio::ip::udp::endpoint endpoint);
     void open(uint16_t send_port, uint16_t receive_port);
     void start_listening();
+    void set_send_endpoint(boost::asio::ip::address const& address, uint16_t port);
 
     auto get_mtu() const -> size_t override;
 
@@ -33,9 +48,10 @@ private:
     boost::function<void(const boost::system::error_code& error, std::size_t bytes_transferred)> m_asio_send_callback;
     boost::function<void(const boost::system::error_code& error, std::size_t bytes_transferred)> m_asio_receive_callback;
 
-    boost::asio::io_service m_io_service;
-    std::thread m_io_thread;
-    std::unique_ptr<boost::asio::io_service::work> m_io_work;
+    struct ASIO_Impl;
+    std::unique_ptr<ASIO_Impl> m_asio_impl;
+
+    boost::thread m_io_thread;
 
     std::atomic_bool m_send_in_progress = {false};
 
@@ -53,9 +69,6 @@ private:
     Buffer m_tx_buffer_in_transit;
     q::Clock::time_point m_tx_data_sent_tp;
 
-    boost::asio::ip::udp::endpoint m_tx_endpoint;
-    boost::asio::ip::udp::endpoint m_rx_endpoint;
-    boost::asio::ip::udp::socket m_socket;
     std::vector<uint8_t> m_rx_buffer;
 
     uint16_t m_send_port = 0;

@@ -1,6 +1,11 @@
 #include "BrainStdAfx.h"
 #include "bus/SPI_Linux.h"
 
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <sys/ioctl.h>
+
 #include <linux/spi/spidev.h>
 
 #include "uav.def.h"

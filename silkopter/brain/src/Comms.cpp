@@ -39,8 +39,9 @@
 #include "comms.def.h"
 #include "def_lang/JSON_Serializer.h"
 
+#include <boost/asio.hpp>
+
 using namespace silk;
-using namespace boost::asio;
 
 constexpr uint8_t SETUP_CHANNEL = 10;
 constexpr uint8_t PILOT_CHANNEL = 15;
@@ -96,7 +97,7 @@ auto Comms::start_udp(uint16_t send_port, uint16_t receive_port) -> bool
 
             s->open(send_port, receive_port);
             s->start_listening();
-            s->set_send_endpoint(ip::udp::endpoint(ip::address::from_string("127.0.0.1"), send_port));
+//            s->set_send_endpoint(boost::asio::ip::address::from_string("127.0.0.1"), send_port);
             m_is_connected = true;
         }
     }
@@ -885,10 +886,11 @@ void Comms::add_video_sample(stream::IVideo::Sample const& sample)
 template<typename T>
 void Comms::serialize_and_send(size_t channel_idx, T const& message)
 {
+    TIMED_FUNCTION();
     if (m_rcp->is_connected())
     {
         ts::sz::Value sz_value = silk::comms::serialize(message);
-        ts::sz::to_json(m_json_buffer, sz_value, true);
+        ts::sz::to_json(m_json_buffer, sz_value, false);
         if (!m_rcp->send(channel_idx, m_json_buffer.data(), m_json_buffer.size()))
         {
             QLOGE("Failed to send message");
@@ -899,22 +901,22 @@ void Comms::serialize_and_send(size_t channel_idx, T const& message)
 
 std::string const& Comms::decode_json(std::string const& json_base64)
 {
-    m_base64_buffer.clear();
-    m_base64_buffer.reserve(json_base64.size() * 2);
-    q::util::decode_base_64(json_base64.begin(), json_base64.end(), std::back_inserter(m_base64_buffer));
+    m_base64_buffer.resize(q::util::compute_base64_max_decoded_size(json_base64.size()));
+    auto last_it = q::util::decode_base64(json_base64.data(), json_base64.data() + json_base64.size(), m_base64_buffer.begin());
+    m_base64_buffer.erase(last_it, m_base64_buffer.end());
     return m_base64_buffer;
 }
 std::string const& Comms::encode_json(std::string const& json)
 {
-    m_base64_buffer.clear();
-    m_base64_buffer.reserve(json.size() * 2);
-    q::util::encode_base_64(json.begin(), json.end(), std::back_inserter(m_base64_buffer));
+    m_base64_buffer.resize(q::util::compute_base64_encoded_size(json.size()));
+    q::util::encode_base64(json.data(), json.size(), &m_base64_buffer[0]);
     return m_base64_buffer;
 }
 
 
-static boost::variant<comms::setup::Node_Data, comms::setup::Error> get_node_data(std::string const& name, node::INode const& node)
+boost::variant<comms::setup::Node_Data, comms::setup::Error> Comms::get_node_data(std::string const& name, node::INode const& node)
 {
+    TIMED_FUNCTION();
     comms::setup::Node_Data node_data;
 
     node_data.set_name(name);
@@ -941,16 +943,16 @@ static boost::variant<comms::setup::Node_Data, comms::setup::Error> get_node_dat
     }
 
     ts::sz::Value sz_value = uav::serialize(uav::Poly<const uav::INode_Descriptor>(node.get_descriptor()));
-    node_data.set_descriptor_data(comms::setup::serialized_data_t(ts::sz::to_json(sz_value, true)));
+    node_data.set_descriptor_data(encode_json(ts::sz::to_json(m_json_buffer, sz_value, false)));
 
     sz_value = uav::serialize(uav::Poly<const uav::INode_Config>(node.get_config()));
-    node_data.set_config_data(comms::setup::serialized_data_t(ts::sz::to_json(sz_value, true)));
+    node_data.set_config_data(encode_json((ts::sz::to_json(m_json_buffer, sz_value, false))));
 
     return std::move(node_data);
 }
 
 template<class Format_String, typename... Params>
-comms::setup::Error make_error(Format_String const& fmt, Params&&... params)
+comms::setup::Error Comms::make_error(Format_String const& fmt, Params&&... params)
 {
     comms::setup::Error error;
     error.set_message(q::util::format<std::string>(fmt, std::forward<Params>(params)...));
@@ -960,11 +962,21 @@ comms::setup::Error make_error(Format_String const& fmt, Params&&... params)
 
 void Comms::handle_req(comms::setup::Get_AST_Req const& req)
 {
+    TIMED_FUNCTION();
     QLOGI("Get_AST_Req {}", req.get_req_id());
+
+    comms::setup::Brain_Res response = comms::setup::Get_AST_Res();
+    comms::setup::Get_AST_Res& res = boost::get<comms::setup::Get_AST_Res>(response);
+
+    res.set_req_id(req.get_req_id());
+    res.set_data(encode_json(uav::get_ast_json()));
+
+    serialize_and_send(SETUP_CHANNEL, response);
 }
 
 void Comms::handle_req(comms::setup::Set_Clock_Req const& req)
 {
+    TIMED_FUNCTION();
     QLOGI("Set_Clock_Req {}", req.get_req_id());
 
     comms::setup::Brain_Res response;
@@ -972,7 +984,7 @@ void Comms::handle_req(comms::setup::Set_Clock_Req const& req)
     int64_t time_t_data = req.get_time();
 #ifdef RASPBERRY_PI
     time_t time_s = time_t_data / 1000;
-    if (stime(&time_s) == 0)
+    if (stime(&time_s) != 0)
     {
         response = make_error("Failed to set time: {}", strerror(errno));
         serialize_and_send(SETUP_CHANNEL, response);
@@ -998,6 +1010,7 @@ void Comms::handle_req(comms::setup::Set_Clock_Req const& req)
 
 void Comms::handle_req(comms::setup::Set_UAV_Descriptor_Req const& req)
 {
+    TIMED_FUNCTION();
     QLOGI("Set_UAV_Descriptor_Req {}", req.get_req_id());
 
     comms::setup::Brain_Res response;
@@ -1030,35 +1043,36 @@ void Comms::handle_req(comms::setup::Set_UAV_Descriptor_Req const& req)
 
     ts::sz::Value sz_value = uav::serialize(uav::Poly<const uav::IUAV_Descriptor>(m_uav.get_uav_descriptor()));
 
-    comms::setup::Set_UAV_Descriptor_Res res;
+    response = comms::setup::Set_UAV_Descriptor_Res();
+    comms::setup::Set_UAV_Descriptor_Res& res = boost::get<comms::setup::Set_UAV_Descriptor_Res>(response);
     res.set_req_id(req.get_req_id());
-
-    res.set_data(encode_json(ts::sz::to_json(sz_value, true)));
-    response = std::move(res);
+    res.set_data(encode_json(ts::sz::to_json(m_json_buffer, sz_value, false)));
 
     serialize_and_send(SETUP_CHANNEL, response);
 }
 
 void Comms::handle_req(comms::setup::Get_UAV_Descriptor_Req const& req)
 {
+    TIMED_FUNCTION();
     QLOGI("Get_UAV_Descriptor_Req {}", req.get_req_id());
 
-    comms::setup::Brain_Res response;
+    comms::setup::Brain_Res response = comms::setup::Get_UAV_Descriptor_Res();
+    comms::setup::Get_UAV_Descriptor_Res& res = boost::get<comms::setup::Get_UAV_Descriptor_Res>(response);
 
     ts::sz::Value sz_value = uav::serialize(uav::Poly<const uav::IUAV_Descriptor>(m_uav.get_uav_descriptor()));
-    comms::setup::Get_UAV_Descriptor_Res res;
     res.set_req_id(req.get_req_id());
-    res.set_data(encode_json(ts::sz::to_json(sz_value, true)));
-    response = std::move(res);
+    res.set_data(encode_json(ts::sz::to_json(m_json_buffer, sz_value, false)));
 
     serialize_and_send(SETUP_CHANNEL, response);
 }
 
 void Comms::handle_req(comms::setup::Get_Node_Defs_Req const& req)
 {
+    TIMED_FUNCTION();
     QLOGI("Get_Node_Defs_Req {}", req.get_req_id());
 
-    comms::setup::Brain_Res response;
+    comms::setup::Brain_Res response = comms::setup::Get_Node_Defs_Res();
+    comms::setup::Get_Node_Defs_Res& res = boost::get<comms::setup::Get_Node_Defs_Res>(response);
 
     //first disable all telemetry because the GS doesn't yet have all the streams
     m_stream_telemetry_data.clear();
@@ -1066,7 +1080,6 @@ void Comms::handle_req(comms::setup::Get_Node_Defs_Req const& req)
 
     std::vector<UAV::Node_Factory::Info> nodes = m_uav.get_node_factory().create_all();
 
-    comms::setup::Get_Node_Defs_Res res;
     res.set_req_id(req.get_req_id());
 
     res.get_node_def_datas().resize(nodes.size());
@@ -1079,43 +1092,42 @@ void Comms::handle_req(comms::setup::Get_Node_Defs_Req const& req)
         node_data.set_type(static_cast<uint8_t>(n.ptr->get_type()));
 
         std::vector<node::INode::Input> inputs = n.ptr->get_inputs();
-        node_data.get_inputs().resize(inputs.size());
+        std::vector<comms::setup::Node_Def_Data::Input>& node_data_inputs = node_data.get_inputs();
+        node_data_inputs.resize(inputs.size());
         for (size_t i = 0; i < inputs.size(); i++)
         {
             node::INode::Input const& input = inputs[i];
-            comms::setup::Node_Def_Data::Input& node_data_input = node_data.get_inputs()[i];
+            comms::setup::Node_Def_Data::Input& node_data_input = node_data_inputs[i];
 
             node_data_input.set_name(input.name);
             node_data_input.set_space(static_cast<uint8_t>(input.type.get_space()));
             node_data_input.set_semantic(static_cast<uint8_t>(input.type.get_semantic()));
-            node_data_input.set_rate(input.rate);
         }
 
         std::vector<node::INode::Output> outputs = n.ptr->get_outputs();
-        node_data.get_outputs().resize(outputs.size());
+        std::vector<comms::setup::Node_Def_Data::Output>& node_data_outputs = node_data.get_outputs();
+        node_data_outputs.resize(outputs.size());
         for (size_t i = 0; i < outputs.size(); i++)
         {
             node::INode::Output const& output = outputs[i];
-            comms::setup::Node_Def_Data::Output& node_data_output = node_data.get_outputs()[i];
+            comms::setup::Node_Def_Data::Output& node_data_output = node_data_outputs[i];
 
             node_data_output.set_name(output.name);
             node_data_output.set_space(static_cast<uint8_t>(output.stream->get_type().get_space()));
             node_data_output.set_semantic(static_cast<uint8_t>(output.stream->get_type().get_semantic()));
-            node_data_output.set_rate(output.stream->get_rate());
-            node_data.get_outputs().push_back(std::move(node_data_output));
         }
 
         std::shared_ptr<const uav::INode_Descriptor> descriptor = n.ptr->get_descriptor();
         ts::sz::Value sz_value = uav::serialize(uav::Poly<const uav::INode_Descriptor>(descriptor));
-        node_data.set_descriptor_data(encode_json(ts::sz::to_json(sz_value, true)));
+        node_data.set_descriptor_data(encode_json(ts::sz::to_json(m_json_buffer, sz_value, false)));
     }
 
-    response = std::move(res);
     serialize_and_send(SETUP_CHANNEL, response);
 }
 
 void Comms::handle_req(comms::setup::Remove_Node_Req const& req)
 {
+    TIMED_FUNCTION();
     QLOGI("Remove_Node_Req {}", req.get_req_id());
 
     comms::setup::Brain_Res response;
@@ -1139,6 +1151,7 @@ void Comms::handle_req(comms::setup::Remove_Node_Req const& req)
 
 void Comms::handle_req(comms::setup::Add_Node_Req const& req)
 {
+    TIMED_FUNCTION();
     QLOGI("Add_Node_Req {}", req.get_req_id());
 
     comms::setup::Brain_Res response;
@@ -1187,6 +1200,7 @@ void Comms::handle_req(comms::setup::Add_Node_Req const& req)
 
 void Comms::handle_req(comms::setup::Get_Nodes_Req const& req)
 {
+    TIMED_FUNCTION();
     QLOGI("Get_Nodes_Req {}", req.get_req_id());
 
     comms::setup::Brain_Res response;
@@ -1237,6 +1251,7 @@ void Comms::handle_req(comms::setup::Get_Nodes_Req const& req)
 
 void Comms::handle_req(comms::setup::Set_Node_Input_Stream_Path_Req const& req)
 {
+    TIMED_FUNCTION();
     QLOGI("Set_Node_Input_Stream_Path_Req {}", req.get_req_id());
 
     comms::setup::Brain_Res response;

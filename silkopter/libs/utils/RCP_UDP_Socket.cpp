@@ -1,4 +1,6 @@
 #include "RCP_UDP_Socket.h"
+#include <boost/asio.hpp>
+#include <boost/thread.hpp>
 
 namespace util
 {
@@ -8,33 +10,55 @@ static constexpr uint8_t MARKER_ACK = 1;
 
 static constexpr std::chrono::milliseconds MAX_ACK_TIMEOUT(100);
 
-RCP_UDP_Socket::RCP_UDP_Socket()
-    : m_io_work(new boost::asio::io_service::work(m_io_service))
-    , m_socket(m_io_service)
+struct RCP_UDP_Socket::ASIO_Impl
 {
+    ASIO_Impl()
+        : io_service()
+        , io_work(io_service)
+        , socket(io_service)
+    {}
+    ~ASIO_Impl()
+    {
+        io_service.stop();
+    }
+
+    boost::asio::io_service io_service;
+    boost::asio::io_service::work io_work;
+    boost::asio::ip::udp::endpoint tx_endpoint;
+    boost::asio::ip::udp::endpoint rx_endpoint;
+    boost::asio::ip::udp::socket socket;
+};
+
+
+RCP_UDP_Socket::RCP_UDP_Socket()
+{
+    m_asio_impl.reset(new ASIO_Impl);
+
     m_rx_buffer.resize(100 * 1024);
     m_asio_send_callback = boost::bind(&RCP_UDP_Socket::handle_send, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred);
     m_asio_receive_callback = boost::bind(&RCP_UDP_Socket::handle_receive, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred);
 
-    m_io_thread = std::thread([this]() { m_io_service.run(); });
+    m_io_thread = boost::thread([this]() { m_asio_impl->io_service.run(); });
 }
 
 RCP_UDP_Socket::~RCP_UDP_Socket()
 {
-    m_io_work.reset();
-    m_io_service.stop();
+    m_asio_impl->io_service.stop();
+
     if (m_io_thread.joinable())
     {
         std::this_thread::yield();
         m_io_thread.join();
     }
+
+    m_asio_impl = nullptr;
 }
 
 void RCP_UDP_Socket::open(uint16_t send_port, uint16_t receive_port)
 {
-    m_socket.open(boost::asio::ip::udp::v4());
-    m_socket.set_option(boost::asio::ip::udp::socket::reuse_address(true));
-    m_socket.bind(boost::asio::ip::udp::endpoint(boost::asio::ip::udp::v4(), receive_port));
+    m_asio_impl->socket.open(boost::asio::ip::udp::v4());
+    m_asio_impl->socket.set_option(boost::asio::ip::udp::socket::reuse_address(true));
+    m_asio_impl->socket.bind(boost::asio::ip::udp::endpoint(boost::asio::ip::udp::v4(), receive_port));
 
     m_send_port = send_port;
     m_receive_port = receive_port;
@@ -42,12 +66,12 @@ void RCP_UDP_Socket::open(uint16_t send_port, uint16_t receive_port)
 
 void RCP_UDP_Socket::start_listening()
 {
-    m_socket.async_receive_from(boost::asio::buffer(m_rx_buffer), m_rx_endpoint, m_asio_receive_callback);
+    m_asio_impl->socket.async_receive_from(boost::asio::buffer(m_rx_buffer), m_asio_impl->rx_endpoint, m_asio_receive_callback);
 }
 
-void RCP_UDP_Socket::set_send_endpoint(boost::asio::ip::udp::endpoint endpoint)
+void RCP_UDP_Socket::set_send_endpoint(boost::asio::ip::address const& address, uint16_t port)
 {
-    m_tx_endpoint = endpoint;
+    m_asio_impl->tx_endpoint = boost::asio::ip::udp::endpoint(address, port);
 }
 
 auto RCP_UDP_Socket::acquire_tx_buffer_locked(size_t size) -> Buffer
@@ -114,7 +138,7 @@ void RCP_UDP_Socket::send_next_packet_locked()
             m_tx_data_sent_tp = q::Clock::now();
         }
 
-        m_socket.async_send_to(boost::asio::buffer(*m_tx_buffer_in_transit), m_tx_endpoint, m_asio_send_callback);
+        m_asio_impl->socket.async_send_to(boost::asio::buffer(*m_tx_buffer_in_transit), m_asio_impl->tx_endpoint, m_asio_send_callback);
     }
 }
 
@@ -195,11 +219,11 @@ auto RCP_UDP_Socket::get_mtu() const -> size_t
 
 auto RCP_UDP_Socket::process() -> Result
 {
-    if (m_tx_endpoint.address().is_unspecified() && !m_rx_endpoint.address().is_unspecified())
+    if (m_asio_impl->tx_endpoint.address().is_unspecified() && !m_asio_impl->rx_endpoint.address().is_unspecified())
     {
-        auto endpoint = m_rx_endpoint;
+        auto endpoint = m_asio_impl->rx_endpoint;
         endpoint.port(m_send_port);
-        m_tx_endpoint = endpoint;
+        m_asio_impl->tx_endpoint = endpoint;
         return Result::RECONNECTED;
     }
 

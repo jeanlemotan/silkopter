@@ -63,7 +63,7 @@ int LZ4_versionNumber (void);
  * Reduced memory usage can improve speed, due to cache effect
  * Default value is 14, for 16KB, which nicely fits into Intel x86 L1 cache
  */
-#define LZ4_MEMORY_USAGE 16
+#define LZ4_MEMORY_USAGE 20
 
 
 /**************************************

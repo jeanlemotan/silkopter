@@ -226,7 +226,7 @@ auto Raspicam::init() -> bool
         return true;
     }
 
-    m_recording_data.thread = std::thread([this]()
+    m_recording_data.thread = boost::thread([this]()
     {
         while (!m_recording_data.should_stop)
         {

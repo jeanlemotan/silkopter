@@ -86,7 +86,7 @@ int main(int argc, char *argv[])
 
 
     QTimer timer;
-    timer.setInterval(1);
+    timer.setInterval(0);
     timer.setSingleShot(false);
     QObject::connect(&timer, &QTimer::timeout, []()
     {

@@ -92,7 +92,7 @@ auto Comms::start_udp(boost::asio::ip::address const& address, uint16_t send_por
         m_rcp->set_socket_handle(TELEMETRY_CHANNEL, handle);
 
         s->open(send_port, receive_port);
-        s->set_send_endpoint(boost::asio::ip::udp::endpoint(address, send_port));
+        s->set_send_endpoint(address, send_port);
         s->start_listening();
 
 //        m_socket.open(ip::udp::v4());
@@ -316,6 +316,12 @@ void Comms::request_all_data()
         comms::setup::Set_Clock_Req req;
         req.set_req_id(++m_last_req_id);
         req.set_time(t * 1000);
+        request = req;
+        serialize_and_send(SETUP_CHANNEL, request);
+    }
+    {
+        comms::setup::Get_AST_Req req;
+        req.set_req_id(++m_last_req_id);
         request = req;
         serialize_and_send(SETUP_CHANNEL, request);
     }
@@ -926,6 +932,11 @@ void Comms::handle_res(comms::setup::Error const& res)
     QLOGI("Error {}", res.get_req_id());
 }
 
+void Comms::handle_res(comms::setup::Get_AST_Res const& res)
+{
+    QLOGI("Get_AST_Res {}", res.get_req_id());
+}
+
 void Comms::handle_res(comms::setup::Set_Clock_Res const& res)
 {
     QLOGI("Set_Clock_Res {}", res.get_req_id());
@@ -1050,7 +1061,7 @@ void Comms::process()
     {
         const char* data = (const char*)m_setup_buffer.data();
         std::string json(data, data + m_setup_buffer.size());
-        QLOGI("{}", data);
+//        QLOGI("{}", data);
 
         auto parse_result = ts::sz::from_json(m_setup_buffer.data(), m_setup_buffer.size());
         if (parse_result != ts::success)

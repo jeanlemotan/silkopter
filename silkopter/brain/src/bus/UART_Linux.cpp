@@ -1,6 +1,9 @@
 #include "BrainStdAfx.h"
 #include "bus/UART_Linux.h"
 
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 #include <termios.h>
 
 #include "uav.def.h"

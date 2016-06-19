@@ -112,7 +112,7 @@ private:
     auto _send_locked(uint8_t channel_idx, Send_Params const& params, void const* data, size_t size) -> bool;
 
     static const uint8_t VERSION = 1;
-    const q::Clock::duration RECONNECT_BEACON_TIMEOUT = std::chrono::milliseconds(500);
+    const q::Clock::duration RECONNECT_BEACON_TIMEOUT = std::chrono::milliseconds(1000);
 
     enum Type
     {
@@ -125,13 +125,18 @@ private:
     static const size_t MAX_CHANNELS = 32;
     static const size_t MAX_FRAGMENTS = 65000;
 
+    typedef uint16_t crc_t;
+
 #pragma pack(push, 1)
     struct Header
     {
-        uint32_t crc;
-        uint32_t size : 16;
-        uint32_t type : 4;
+        crc_t crc;
+        uint16_t size : 12;
+        uint16_t type : 4;
+
+        constexpr static size_t MAX_SIZE = 2047;
     };
+    static_assert(sizeof(Header) == 4, "Data too big");
 
     struct Packet_Header : public Header
     {
@@ -141,12 +146,14 @@ private:
         uint32_t flag_is_compressed : 1;
         uint16_t fragment_idx;
     };
+    static_assert(sizeof(Packet_Header) == 4 + 6, "Data too big");
 
     struct Packet_Main_Header : public Packet_Header
     {
         uint32_t packet_size;
         uint16_t fragment_count;
     };
+    static_assert(sizeof(Packet_Main_Header) == 4 + 6 + 6, "Data too big");
 
     struct Confirmations_Header : public Header
     {
@@ -370,7 +377,7 @@ private:
     template<class H> static auto get_header(void const* data) -> H const&;
     template<class H> static auto get_header(uint8_t* data) -> H&;
     static auto get_header_size(void const* data_ptr, size_t data_size) -> size_t;
-    auto compute_crc(void const* data, size_t size) -> uint32_t;
+    auto compute_crc(void const* data, size_t size) -> crc_t;
     //to avoid popping front in vectors
     //Note - I use a vector instead of a deque because the deque is too slow at iterating.
     //The pop_front can be implemented optimally for vectors if order need not be preserved.

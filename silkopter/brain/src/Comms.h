@@ -21,6 +21,8 @@ namespace comms
 {
 namespace setup
 {
+class Error;
+class Node_Data;
 class Get_AST_Req;
 class Set_Clock_Req;
 class Set_UAV_Descriptor_Req;
@@ -58,7 +60,7 @@ public:
 private:
     void configure_channels();
 
-    void handle_accept(boost::system::error_code const& error);
+    //void handle_accept(boost::system::error_code const& error);
 
 
     struct Stream_Telemetry_Data
@@ -108,8 +110,11 @@ private:
 
     template<typename T>
     void serialize_and_send(size_t channel_idx, T const& res);
+    template<class Format_String, typename... Params>
+    comms::setup::Error make_error(Format_String const& fmt, Params&&... params);
     std::string const& decode_json(std::string const& json_base64);
     std::string const& encode_json(std::string const& json);
+    boost::variant<comms::setup::Node_Data, comms::setup::Error> get_node_data(std::string const& name, node::INode const& node);
 
     class Dispatch_Req_Visitor;
     friend class Dispatch_Req_Visitor;

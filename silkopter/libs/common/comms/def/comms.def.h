@@ -236,15 +236,10 @@ public:
     void set_semantic(uint8_t&& value);
     auto get_semantic() const -> uint8_t const&;
 
-    void set_rate(uint32_t const& value);
-    void set_rate(uint32_t&& value);
-    auto get_rate() const -> uint32_t const&;
-
   private:
     std::string m_name;
     uint8_t m_space = {0};
     uint8_t m_semantic = {0};
-    uint32_t m_rate = {0};
   };
 
   struct Output
@@ -263,15 +258,10 @@ public:
     void set_semantic(uint8_t&& value);
     auto get_semantic() const -> uint8_t const&;
 
-    void set_rate(uint32_t const& value);
-    void set_rate(uint32_t&& value);
-    auto get_rate() const -> uint32_t const&;
-
   private:
     std::string m_name;
     uint8_t m_space = {0};
     uint8_t m_semantic = {0};
-    uint32_t m_rate = {0};
   };
 
   virtual ~Node_Def_Data() = default;

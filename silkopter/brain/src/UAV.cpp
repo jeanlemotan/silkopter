@@ -145,8 +145,6 @@ namespace silk
 
 static const q::Path k_settings_path("settings.json");
 
-using namespace boost::asio;
-
 //wrapper to keep all nodes in the same container
 struct INode_Wrapper : q::util::Noncopyable
 {
@@ -222,6 +220,7 @@ void UAV::save_settings()
         if (fs.is_open())
         {
             fs.write(reinterpret_cast<uint8_t const*>(json.data()), json.size());
+            fs.flush();
         }
         else
         {
@@ -681,13 +680,11 @@ auto UAV::init(Comms& comms) -> bool
     QLOG_TOPIC("uav::init");
 
 #if defined (RASPBERRY_PI)
-    QLOGI("Initializing pigpio");
     if (!initialize_pigpio())
     {
         QLOGE("Cannot initialize pigpio");
         return false;
     }
-    QLOGI("Initializing bcm");
     if (!initialize_bcm())
     {
         QLOGE("Cannot initialize bcm");

@@ -317,20 +317,6 @@ namespace setup
     }
 
 ////////////////////////////////////////////////////////////
-    void Node_Def_Data::Input::set_rate(uint32_t const& value)
-    {
-      m_rate = value;
-    }
-    void Node_Def_Data::Input::set_rate(uint32_t&& value)
-    {
-      m_rate = std::move(value);
-    }
-    auto Node_Def_Data::Input::get_rate() const -> uint32_t const& 
-    {
-      return m_rate;
-    }
-
-////////////////////////////////////////////////////////////
     void Node_Def_Data::Output::set_name(std::string const& value)
     {
       m_name = value;
@@ -370,20 +356,6 @@ namespace setup
     auto Node_Def_Data::Output::get_semantic() const -> uint8_t const& 
     {
       return m_semantic;
-    }
-
-////////////////////////////////////////////////////////////
-    void Node_Def_Data::Output::set_rate(uint32_t const& value)
-    {
-      m_rate = value;
-    }
-    void Node_Def_Data::Output::set_rate(uint32_t&& value)
-    {
-      m_rate = std::move(value);
-    }
-    auto Node_Def_Data::Output::get_rate() const -> uint32_t const& 
-    {
-      return m_rate;
     }
 
 ////////////////////////////////////////////////////////////
@@ -1724,24 +1696,15 @@ ts::Result<void> deserialize(setup::Node_Def_Data::Input& value, ts::sz::Value c
     if (result != ts::success) { return result; }
     value.set_semantic(std::move(v));
   }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("rate");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'rate'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_rate())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_rate(std::move(v));
-  }
   return ts::success;
 }
 ts::sz::Value serialize(setup::Node_Def_Data::Input const& value)
 {
   ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
-  sz_value.reserve_object_members(4);
+  sz_value.reserve_object_members(3);
   sz_value.add_object_member("name", serialize(value.get_name()));
   sz_value.add_object_member("space", serialize(value.get_space()));
   sz_value.add_object_member("semantic", serialize(value.get_semantic()));
-  sz_value.add_object_member("rate", serialize(value.get_rate()));
   return sz_value;
 }
 ts::Result<void> deserialize(setup::Node_Def_Data::Output& value, ts::sz::Value const& sz_value)
@@ -1771,24 +1734,15 @@ ts::Result<void> deserialize(setup::Node_Def_Data::Output& value, ts::sz::Value 
     if (result != ts::success) { return result; }
     value.set_semantic(std::move(v));
   }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("rate");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'rate'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_rate())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_rate(std::move(v));
-  }
   return ts::success;
 }
 ts::sz::Value serialize(setup::Node_Def_Data::Output const& value)
 {
   ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
-  sz_value.reserve_object_members(4);
+  sz_value.reserve_object_members(3);
   sz_value.add_object_member("name", serialize(value.get_name()));
   sz_value.add_object_member("space", serialize(value.get_space()));
   sz_value.add_object_member("semantic", serialize(value.get_semantic()));
-  sz_value.add_object_member("rate", serialize(value.get_rate()));
   return sz_value;
 }
 ts::Result<void> deserialize(setup::Node_Def_Data& value, ts::sz::Value const& sz_value)

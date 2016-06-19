@@ -2,9 +2,10 @@
 
 #include <type_traits>
 #include <typeinfo>
-#include <boost/thread.hpp>
+#include <future>
+//#include <boost/thread.hpp>
 
-#include <boost/asio.hpp>
+//#include <boost/asio.hpp>
 #include <boost/optional.hpp>
 
 #include "QBase.h"

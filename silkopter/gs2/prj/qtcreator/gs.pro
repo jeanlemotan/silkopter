@@ -49,7 +49,6 @@ rpi {
         DEST_FOLDER = rpi/release
         DEFINES += NDEBUG
     }
-    LIBS += -lfreetype
     LIBS += -lmmal_core
     LIBS += -lmmal_util
     LIBS += -lmmal_vc_client
@@ -57,7 +56,6 @@ rpi {
     LIBS += -lbcm_host
     LIBS += -lGLESv2
     LIBS += -lEGL
-    LIBS += -lboost_system
 } else {
     CONFIG(debug, debug|release) {
         DEST_FOLDER = pc/debug
@@ -66,16 +64,17 @@ rpi {
         DEST_FOLDER = pc/release
         DEFINES += NDEBUG
     }
-    LIBS += -lfreetype -lavutil -lavcodec -lavformat -lswscale -lboost_system
+    LIBS += -lavutil -lavcodec -lavformat -lswscale
 }
 
+LIBS += -lfreetype
+LIBS += -lboost_system -lboost_thread
+LIBS += -lfftw3 -lpcap -lz
 LIBS += -L$${ROOT_LIBS_PATH}/qinput/lib/$${DEST_FOLDER} -lqinput
 LIBS += -L$${ROOT_LIBS_PATH}/qdata/lib/$${DEST_FOLDER} -lqdata
 LIBS += -L$${ROOT_LIBS_PATH}/qmath/lib/$${DEST_FOLDER} -lqmath
 LIBS += -L$${ROOT_LIBS_PATH}/qbase/lib/$${DEST_FOLDER} -lqbase
 LIBS += -L$${ROOT_LIBS_PATH}/def_lang/lib/$${DEST_FOLDER} -ldef_lang
-
-LIBS += -lfftw3 -lpcap -lz
 
 OBJECTS_DIR = ./.obj/$${DEST_FOLDER}
 MOC_DIR = ./.moc/$${DEST_FOLDER}
@@ -147,8 +146,6 @@ HEADERS += \
     ../../../libs/utils/radiotap/radiotap.h \
     ../../../libs/common/node/ICombiner.h \
     ../../src/Nodes.h \
-    ../../../libs/common/config/Multirotor_Config.h \
-    ../../../libs/common/config/UAV_Config.h \
     ../../../libs/common/stream/IMultirotor_Commands.h \
     ../../../libs/common/stream/IMultirotor_State.h \
     ../../src/Comms_Slots.h \

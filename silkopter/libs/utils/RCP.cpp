@@ -1,6 +1,7 @@
 #include "RCP.h"
 #include "utils/Timed_Scope.h"
 #include "lz4/lz4.h"
+#include <zlib.h>
 
 namespace util
 {
@@ -65,7 +66,7 @@ auto RCP::get_header_size(void const* data_ptr, size_t data_size) -> size_t
     {
         return 0;
     }
-    auto const& header = get_header<Header>(data_ptr);
+    Header const& header = get_header<Header>(data_ptr);
     switch (header.type)
     {
     case Type::TYPE_PACKET:
@@ -80,9 +81,9 @@ auto RCP::get_header_size(void const* data_ptr, size_t data_size) -> size_t
     return 0;
 }
 
-auto RCP::compute_crc(void const* data, size_t size) -> uint32_t
+auto RCP::compute_crc(void const* data, size_t size) -> crc_t
 {
-    auto crc = q::util::compute_murmur_hash32(data, size, 0);
+    crc_t crc = q::util::compute_murmur_hash16(data, size, 0);
     return crc;
 }
 
@@ -143,6 +144,7 @@ RCP::Socket_Handle RCP::add_socket(RCP_Socket* socket)
     Socket_Data& socket_data = m_sockets.back();
     socket_data.socket = socket;
     socket_data.mtu = socket->get_mtu();
+    QASSERT(socket_data.mtu < Header::MAX_SIZE);
 
     socket->receive_callback = std::bind(&RCP::handle_receive, this, std::placeholders::_1, std::placeholders::_2);
     socket->send_callback = std::bind(&RCP::handle_send, this, handle, std::placeholders::_1);
@@ -292,7 +294,18 @@ auto RCP::_send_locked(uint8_t channel_idx, Send_Params const& params, void cons
     size_t uncompressed_size = size;
     if (is_compressed)
     {
-        //auto start = q::Clock::now();
+        auto start = q::Clock::now();
+
+//        uLongf comp_size = compressBound(size);
+//        channel_data.comp_state.buffer.resize(comp_size);
+//        int ret = compress2(reinterpret_cast<Bytef*>(channel_data.comp_state.buffer.data()), &comp_size, data, size, 1);
+//        if (ret == Z_OK)// && static_cast<size_t>(comp_size) < uncompressed_size)
+//        {
+//            QLOGI("Compressed {}B -> {}B. {}% : {}", static_cast<int>(uncompressed_size), (int)comp_size, comp_size * 100.f / uncompressed_size, q::Clock::now() - start);
+//            channel_data.comp_state.buffer.resize(comp_size);
+//            data = channel_data.comp_state.buffer.data();
+//            size = comp_size;
+//        }
 
         auto comp_size = LZ4_compressBound(static_cast<int>(size));
         channel_data.comp_state.buffer.resize(comp_size);
@@ -301,10 +314,10 @@ auto RCP::_send_locked(uint8_t channel_idx, Send_Params const& params, void cons
                                              reinterpret_cast<char*>(channel_data.comp_state.buffer.data()),
                                              static_cast<int>(size),
                                              comp_size,
-                                             5);
+                                             1);
         if (ret > 0 && static_cast<size_t>(ret) < uncompressed_size)
         {
-//            QLOGI("Compressed {}B -> {}B. {}% : {}", static_cast<int>(uncompressed_size), ret, ret * 100.f / uncompressed_size, q::Clock::now() - start);
+            QLOGI("Compressed {}B -> {}B. {}% : {}", static_cast<int>(uncompressed_size), ret, ret * 100.f / uncompressed_size, q::Clock::now() - start);
             channel_data.comp_state.buffer.resize(ret);
             data = channel_data.comp_state.buffer.data();
             size = ret;
@@ -321,9 +334,19 @@ auto RCP::_send_locked(uint8_t channel_idx, Send_Params const& params, void cons
 
     Socket_Data& socket_data = m_sockets[channel_data.socket_handle];
 
-    size_t max_fragment_size = socket_data.mtu - sizeof(Packet_Main_Header);
-    size_t left = size;
-    size_t fragment_count = ((size - 1) / max_fragment_size) + 1;
+    size_t fragment_count = 1; //main fragment
+
+    if (size > (socket_data.mtu - sizeof(Packet_Main_Header)))
+    {
+        size_t left = size - (socket_data.mtu - sizeof(Packet_Main_Header));
+        size_t fs = (socket_data.mtu - sizeof(Packet_Header));
+        fragment_count += left / fs; //rest of the fragments
+        if (left % fs > 0)
+        {
+            fragment_count++; //last fragment
+        }
+    }
+
     if (fragment_count > MAX_FRAGMENTS)
     {
         auto max = MAX_FRAGMENTS;
@@ -361,17 +384,19 @@ auto RCP::_send_locked(uint8_t channel_idx, Send_Params const& params, void cons
         channel_data.fragments_to_insert.reserve(fragment_count);
 
         //add the new fragments
+        size_t left = size;
         for (size_t i = 0; i < fragment_count; i++)
         {
             QASSERT(left > 0);
-            auto fragment_size = math::min(max_fragment_size, left);
+            size_t header_size = (i == 0) ? sizeof(Packet_Main_Header) : sizeof(Packet_Header);
+            size_t max_fragment_size = socket_data.mtu - header_size;
+            size_t fragment_size = math::min(max_fragment_size, left);
 
-            auto header_size = (i == 0) ? sizeof(Packet_Main_Header) : sizeof(Packet_Header);
             auto fragment = acquire_tx_datagram(header_size, header_size + fragment_size);
 
             fragment->params = params;
 
-            auto& header = get_header<Packet_Header>(fragment->data.data());
+            Packet_Header& header = get_header<Packet_Header>(fragment->data.data());
             header.id = id;
             header.channel_idx = channel_idx;
             header.flag_needs_confirmation = params.is_reliable || params.unreliable_retransmit_count > 0;
@@ -381,7 +406,7 @@ auto RCP::_send_locked(uint8_t channel_idx, Send_Params const& params, void cons
 
             if (i == 0)
             {
-                auto& f_header = get_header<Packet_Main_Header>(fragment->data.data());
+                Packet_Main_Header& f_header = get_header<Packet_Main_Header>(fragment->data.data());
                 f_header.packet_size = uncompressed_size;
                 f_header.fragment_count = fragment_count;
             }
@@ -395,6 +420,7 @@ auto RCP::_send_locked(uint8_t channel_idx, Send_Params const& params, void cons
 
             channel_data.fragments_to_insert.push_back(fragment);
         }
+        QASSERT(left == 0);
 //        for (auto const& d: queue)
 //        {
 //            QLOGI("{}, id: {}, f: {}, sc: {}", &d - &queue.front(), int(get_header<Packet_Header>(d->data).id), int(get_header<Packet_Header>(d->data).fragment_idx), d->sent_count);
@@ -617,10 +643,10 @@ void RCP::process()
 
 void RCP::prepare_to_send_datagram(TX::Datagram& datagram)
 {
-    auto& header = get_header<Header>(datagram.data.data());
+    Header& header = get_header<Header>(datagram.data.data());
     header.size = datagram.data.size();
     header.crc = 0;
-    auto crc = compute_crc(datagram.data.data(), datagram.data.size());
+    crc_t crc = compute_crc(datagram.data.data(), datagram.data.size());
     header.crc = crc;
 
     if (datagram.added_tp.time_since_epoch().count() == 0)
@@ -711,6 +737,12 @@ auto RCP::compute_next_transit_datagram(Socket_Handle socket_handle) -> bool
         }
     }
 
+    if (!socket_data.buffer.empty())
+    {
+        //don't continue further as we're not likely to fit anything else
+        return true;
+    }
+
     //next normal packets
     {
         std::lock_guard<std::mutex> lg(m_tx.packet_queue_mutex);
@@ -739,15 +771,15 @@ auto RCP::compute_next_transit_datagram(Socket_Handle socket_handle) -> bool
             {
                 if (add_datagram_to_send_buffer(socket_data, datagram))
                 {
-                    //                dbg += q::util::format<std::string>("{}:{}:{}:{}", datagram->params.importance, datagram->sent_count, pheader.id, pheader.fragment_idx);
-                    //                dbg += "#,";
+//                  dbg += q::util::format<std::string>("{}:{}:{}:{}", datagram->params.importance, datagram->sent_count, pheader.id, pheader.fragment_idx);
+//                  dbg += "#,";
 
                     merged++;
                     datagram->sent_tp = now;
                     datagram->sent_count++;
 
-                    //                auto& header = get_header<Packet_Header>(datagram->data.data());
-                    //                QLOGI("SENDING {}: pk {} fr {}, ch {}", queue.size(), int(header.id), header.fragment_idx, static_cast<int>(header.channel_idx));
+//                  auto& header = get_header<Packet_Header>(datagram->data.data());
+//                  QLOGI("SENDING {}: pk {} fr {}, ch {}", queue.size(), int(header.id), header.fragment_idx, static_cast<int>(header.channel_idx));
 
                     //do I have to insert it back?
                     if (datagram->params.is_reliable == true || datagram->sent_count < datagram->params.unreliable_retransmit_count)
@@ -756,7 +788,19 @@ auto RCP::compute_next_transit_datagram(Socket_Handle socket_handle) -> bool
                     }
 
                     it = queue.erase(it);
-                    continue;
+
+                    //can we fit another packet, maybe?
+                    constexpr size_t useful_payload = 8;
+                    if (socket_data.buffer.size() + sizeof(Header) + useful_payload >= socket_data.mtu) //plus some extra payload
+                    {
+                        //no, no space left so stop searching
+                        break;
+                    }
+                    else
+                    {
+                        //some space left, keep looking
+                        continue;
+                    }
                 }
             }
             //            dbg += " ,";
@@ -1006,13 +1050,13 @@ void RCP::process_incoming_data(uint8_t* data_ptr, size_t data_size)
 
         m_global_stats.rx_total_datagrams++;
 
-        auto crc1 = header.crc;
+        crc_t crc1 = header.crc;
         header.crc = 0;
-        auto crc2 = compute_crc(start_ptr, size);
+        crc_t crc2 = compute_crc(start_ptr, size);
         if (crc1 != crc2)
         {
             m_global_stats.rx_corrupted_datagrams++;
-            auto loss = m_global_stats.rx_corrupted_datagrams * 100 / m_global_stats.rx_total_datagrams;
+            size_t loss = m_global_stats.rx_corrupted_datagrams * 100 / m_global_stats.rx_total_datagrams;
 
             QLOGW("Crc is wrong. {} != {}. Packet loss: {.2}", crc1, crc2, loss);
         }
@@ -1345,7 +1389,7 @@ void RCP::disconnect()
 {
     m_connection.is_connected = false;
 
-    QLOGI("Disconncting.");
+    QLOGI("Disconnecting.");
     purge();
 }
 void RCP::connect()

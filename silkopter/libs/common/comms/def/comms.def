@@ -85,14 +85,12 @@ struct Node_Def_Data
         string name;
         uint8_t space;
         uint8_t semantic;
-        uint32_t rate = 0;
     };
     struct Output
     {
         string name;
         uint8_t space;
         uint8_t semantic;
-        uint32_t rate = 0;
     };
 
     string name;
