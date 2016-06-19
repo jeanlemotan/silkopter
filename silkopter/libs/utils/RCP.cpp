@@ -432,8 +432,8 @@ auto RCP::_send_locked(uint8_t channel_idx, Send_Params const& params, void cons
 
             auto& queue = m_tx.packet_queue;
             queue.insert(std::upper_bound(queue.begin(), queue.end(), channel_data.fragments_to_insert[0], tx_packet_datagram_predicate),
-                    channel_data.fragments_to_insert.begin(),
-                    channel_data.fragments_to_insert.end());
+                    std::make_move_iterator(channel_data.fragments_to_insert.begin()),
+                    std::make_move_iterator(channel_data.fragments_to_insert.end()));
         }
         channel_data.fragments_to_insert.clear();
 
