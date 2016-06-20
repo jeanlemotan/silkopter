@@ -49,7 +49,12 @@ public:
     };
 
     Node() = default;
+    Node(Node const&) = default;
+    Node(Node&&) = default;
     Node(Type type, ts::Source_Location const& loc);
+
+    Node& operator=(Node const&) = default;
+    Node& operator=(Node&&) = default;
 
     Type get_type() const;
 
@@ -59,12 +64,14 @@ public:
     Node& move_children_from(Node&& node);
 
     Node& add_child(Node const& node);
+    Node& add_child(Node&& node);
     std::vector<Node> const& get_children() const;
 
     Node const* find_first_child_by_type(Type type) const;
     std::vector<Node> get_all_children_of_type(Type type) const;
 
     Node& add_attribute(Attribute const& att);
+    Node& add_attribute(Attribute&& att);
     std::vector<Attribute> const& get_attributes() const;
     Attribute const* find_first_attribute_by_name(std::string const& name) const;
 

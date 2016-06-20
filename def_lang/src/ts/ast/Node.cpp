@@ -42,6 +42,12 @@ Node& Node::add_child(Node const& node)
     return *this;
 }
 
+Node& Node::add_child(Node&& node)
+{
+    m_children.push_back(std::move(node));
+    return *this;
+}
+
 std::vector<Node> const& Node::get_children() const
 {
     return m_children;
@@ -70,6 +76,12 @@ std::vector<Node> Node::get_all_children_of_type(Type type) const
 Node& Node::add_attribute(Attribute const& att)
 {
     m_attributes.push_back(att);
+    return *this;
+}
+
+Node& Node::add_attribute(Attribute&& att)
+{
+    m_attributes.push_back(std::move(att));
     return *this;
 }
 
@@ -232,12 +244,13 @@ Result<void> Node::deserialize(sz::Value const& sz_value)
 
         for (size_t i = 0; i < sz_children_value->get_array_element_count(); i++)
         {
-            Node& child = add_child(Node());
+            Node child;
             auto result = child.deserialize(sz_children_value->get_array_element_value(i));
             if (result != success)
             {
                 return result;
             }
+            add_child(std::move(child));
         }
     }
 
