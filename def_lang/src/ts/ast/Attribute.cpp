@@ -135,6 +135,7 @@ Result<sz::Value> Attribute::serialize() const
 {
     ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
 
+    sz_value.add_object_member("name", ts::sz::Value(m_name));
     sz_value.add_object_member("type", ts::sz::Value(static_cast<uint8_t>(m_type)));
     sz_value.add_object_member("value", boost::apply_visitor(serialize_visitor(), m_value));
 
@@ -147,6 +148,18 @@ Result<void> Attribute::deserialize(sz::Value const& sz_value)
     {
         return Error("Expected an object value while deserializing");
     }
+
+    sz::Value const* sz_name_value = sz_value.find_object_member_by_name("name");
+    if (!sz_name_value)
+    {
+        return Error("Cannot find 'name' member");
+    }
+    if (!sz_name_value->is_string())
+    {
+        return Error("Expected string for the 'name' member");
+    }
+
+    m_name = sz_name_value->get_as_string();
 
     sz::Value const* sz_type_value = sz_value.find_object_member_by_name("type");
     if (!sz_type_value)
@@ -180,7 +193,14 @@ Result<void> Attribute::deserialize(sz::Value const& sz_value)
     }
     else if (sz_value_value->is_real_number())
     {
-        m_value = sz_value_value->get_as_double();
+        if (m_type == Type::FLOAT)
+        {
+            m_value = static_cast<float>(sz_value_value->get_as_real_number());
+        }
+        else
+        {
+            m_value = static_cast<double>(sz_value_value->get_as_real_number());
+        }
     }
     else
     {
