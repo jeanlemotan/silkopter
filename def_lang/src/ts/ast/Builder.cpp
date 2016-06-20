@@ -53,6 +53,8 @@ Builder::Builder()
 
 Builder::~Builder()
 {
+    //to silence asserts about not checking this result
+    TS_ASSERT(m_parse_result == ts::success || m_parse_result != ts::success);
 }
 
 Source_Location Builder::get_location() const
@@ -172,12 +174,12 @@ static Result<std::string> get_name_identifier(Node const& node)
     Node const* identifier = node.find_first_child_by_type(Node::Type::IDENTIFIER);
     if (!identifier)
     {
-        return Error("Cannot find 'identifier'' node");
+        return Error("Cannot find 'identifier' node");
     }
     Attribute const* identifier_value = identifier->find_first_attribute_by_name("value");
     if (!identifier_value)
     {
-        return Error("Cannot find 'value'' attribute for identifier node");
+        return Error("Cannot find 'value' attribute for identifier node");
     }
     if (identifier_value->get_type() != Attribute::Type::STRING)
     {
@@ -868,7 +870,7 @@ static Result<void> create_enum_item(Type_System& ts, IEnum_Type& type, Node con
     Attribute const* identifier_attribute = node.find_first_attribute_by_name("value");
     if (!identifier_attribute)
     {
-        return Error("Cannot find 'value'' attribute for identifier node");
+        return Error("Cannot find 'value' attribute for identifier node");
     }
     if (identifier_attribute->get_type() != Attribute::Type::STRING)
     {
