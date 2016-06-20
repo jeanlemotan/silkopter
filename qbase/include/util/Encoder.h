@@ -30,9 +30,9 @@ namespace util
         size_t src_size = std::distance(first, last);
         while (src_size >= 3)
         {
-            uint32_t bit_pattern = uint32_t(*first++) << 16;
-            bit_pattern += uint32_t(*first++) << 8;
-            bit_pattern += *first++;
+            uint32_t bit_pattern = static_cast<uint32_t>(*first++) << 16;
+            bit_pattern += static_cast<uint32_t>(*first++) << 8;
+            bit_pattern += static_cast<uint32_t>(*first++);
 
             src_size -= 3;
 
@@ -45,8 +45,8 @@ namespace util
 
         if (src_size == 2)
         {
-            uint32_t bit_pattern = uint32_t(*first++) << 16;
-            bit_pattern += uint32_t(*first++) << 8;
+            uint32_t bit_pattern = static_cast<uint32_t>(*first++) << 16;
+            bit_pattern += static_cast<uint32_t>(*first++) << 8;
 
             // create 4 encoded chars taking 6 bits each time
             *result++ = s_char_64[(bit_pattern  >> 18) & 0x3F];
@@ -56,7 +56,7 @@ namespace util
         }
         else if (src_size == 1)
         {
-            uint32_t bit_pattern = uint32_t(*first++) << 16;
+            uint32_t bit_pattern = static_cast<uint32_t>(*first++) << 16;
 
             // create 4 encoded chars taking 6 bits each time
             *result++ = s_char_64[(bit_pattern  >> 18) & 0x3F];
@@ -73,41 +73,39 @@ namespace util
         QASSERT(src_size % 4 == 0);
 
         // for each 4 encoded chars, create 3 bytes
-        size_t i = 0;
-        if (src_size > 4)
+        while (src_size >= 6) //4 bytes processes, and maybe 2 bytes worth of '=' that we don't want to process
         {
-            for (i = 0; i < src_size - 4; i += 4)
-            {
-                uint32_t idx0 = s_char_64_rev[*first++];
-                uint32_t idx1 = s_char_64_rev[*first++];
-                uint32_t idx2 = s_char_64_rev[*first++];
-                uint32_t idx3 = s_char_64_rev[*first++];
-                // create bitPattern from encoded chars
-                uint32_t bit_pattern  = (idx0 << 18);
-                bit_pattern += (idx1 << 12);
-                bit_pattern += (idx2 <<  6);
-                bit_pattern += (idx3      );
-                // split 3 bytes
-                *result++ = (bit_pattern >> 16) & 0xFF;
-                *result++ = (bit_pattern >>  8) & 0xFF;
-                *result++ = (bit_pattern      ) & 0xFF;
-            }
-        }
-        if (i + 4 <= src_size)
-        {
-            auto f0 = *first++;
-            auto f1 = *first++;
-            auto f2 = *first++;
-            auto f3 = *first++;
-            uint32_t idx0 = s_char_64_rev[f0];
-            uint32_t idx1 = s_char_64_rev[f1];
-            uint32_t idx2 = s_char_64_rev[f2];
-            uint32_t idx3 = s_char_64_rev[f3];
-            // create bitPattern from encoded chars
+            uint8_t idx0 = s_char_64_rev[static_cast<uint8_t>(*first++)];
+            uint8_t idx1 = s_char_64_rev[static_cast<uint8_t>(*first++)];
+            uint8_t idx2 = s_char_64_rev[static_cast<uint8_t>(*first++)];
+            uint8_t idx3 = s_char_64_rev[static_cast<uint8_t>(*first++)];
+            src_size -= 4;
+
+            // create bit_pattern from encoded chars
             uint32_t bit_pattern  = (idx0 << 18);
-            bit_pattern += (idx1 << 12);
-            bit_pattern += (idx2 <<  6);
-            bit_pattern += (idx3      );
+            bit_pattern          += (idx1 << 12);
+            bit_pattern          += (idx2 <<  6);
+            bit_pattern          += (idx3      );
+            // split 3 bytes
+            *result++ = (bit_pattern >> 16) & 0xFF;
+            *result++ = (bit_pattern >>  8) & 0xFF;
+            *result++ = (bit_pattern      ) & 0xFF;
+        }
+        if (src_size >= 4)
+        {
+            uint8_t f0 = static_cast<uint8_t>(*first++);
+            uint8_t f1 = static_cast<uint8_t>(*first++);
+            uint8_t f2 = static_cast<uint8_t>(*first++);
+            uint8_t f3 = static_cast<uint8_t>(*first++);
+            uint8_t idx0 = s_char_64_rev[f0];
+            uint8_t idx1 = s_char_64_rev[f1];
+            uint8_t idx2 = s_char_64_rev[f2];
+            uint8_t idx3 = s_char_64_rev[f3];
+            // create bit_pattern from encoded chars
+            uint32_t bit_pattern  = (idx0 << 18);
+            bit_pattern          += (idx1 << 12);
+            bit_pattern          += (idx2 <<  6);
+            bit_pattern          += (idx3      );
             // split 3 bytes
             *result++ = (bit_pattern >> 16) & 0xFF;
             if (f2 != '=')
