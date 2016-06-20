@@ -969,6 +969,9 @@ void Comms::handle_res(comms::setup::Get_AST_Res const& res)
         return;
     }
 
+    m_ts = ts::Type_System();
+    m_ts.populate_builtin_types();
+
     auto compile_result = builder.compile(m_ts);
     if (compile_result != ts::success)
     {
@@ -1100,8 +1103,7 @@ void Comms::process()
     while (m_rcp->receive(SETUP_CHANNEL, m_setup_buffer))
     {
         const char* data = (const char*)m_setup_buffer.data();
-        std::string json(data, data + m_setup_buffer.size());
-//        QLOGI("{}", data);
+//        QLOGI("{}", std::string(data, data + m_setup_buffer.size()));
 
         auto parse_result = ts::sz::from_json(m_setup_buffer.data(), m_setup_buffer.size());
         if (parse_result != ts::success)
