@@ -64,7 +64,7 @@ namespace silk
 class Comms : q::util::Noncopyable
 {
 public:
-    Comms();
+    Comms(ts::Type_System& ts);
 
     auto start_udp(boost::asio::ip::address const& address, uint16_t send_port, uint16_t receive_port) -> bool;
     auto start_rfmon(std::string const& interface, uint8_t id) -> bool;
@@ -108,19 +108,19 @@ public:
     {
         std::string name;
         node::Type type;
-        std::string default_init_params_json;
+        std::shared_ptr<ts::IStruct_Value> default_descriptor;
         struct Input
         {
             stream::Type type;
             std::string name;
-            uint32_t rate = 0;
+            //uint32_t rate = 0;
         };
         std::vector<Input> inputs;
         struct Output
         {
             stream::Type type;
             std::string name;
-            uint32_t rate = 0;
+            //uint32_t rate = 0;
         };
         std::vector<Output> outputs;
     };
@@ -132,8 +132,8 @@ public:
     {
         std::string name;
         node::Type type;
-        std::string init_params_json;
-        std::string config_json;
+        std::shared_ptr<ts::IStruct_Value> descriptor;
+        std::shared_ptr<ts::IStruct_Value> config;
 
         struct Input
         {
@@ -192,6 +192,8 @@ public:
     void process();
 
 private:
+    ts::Type_System& m_ts;
+
     void configure_channels();
 
     std::map<stream::Type, std::unique_ptr<IStream_Data>> m_streams;
@@ -215,7 +217,12 @@ private:
     mutable Video_Channel m_video_channel;
     mutable Telemetry_Channel m_telemetry_channel;
 
+
+    std::string const& decode_json(std::string const& json_base64);
+    std::string const& encode_json(std::string const& json);
+
     std::vector<uint8_t> m_setup_buffer;
+    std::string m_base64_buffer;
 
     void handle_res(comms::setup::Error const& res);
     void handle_res(comms::setup::Get_AST_Res const& res);

@@ -972,6 +972,29 @@ void Comms::handle_req(comms::setup::Get_AST_Req const& req)
     res.set_data(encode_json(uav::get_ast_json()));
 
     serialize_and_send(SETUP_CHANNEL, response);
+//    serialize_and_send(SETUP_CHANNEL, response);
+//    serialize_and_send(SETUP_CHANNEL, response);
+//    serialize_and_send(SETUP_CHANNEL, response);
+//    serialize_and_send(SETUP_CHANNEL, response);
+//    serialize_and_send(SETUP_CHANNEL, response);
+//    serialize_and_send(SETUP_CHANNEL, response);
+//    serialize_and_send(SETUP_CHANNEL, response);
+//    serialize_and_send(SETUP_CHANNEL, response);
+//    serialize_and_send(SETUP_CHANNEL, response);
+//    serialize_and_send(SETUP_CHANNEL, response);
+//    serialize_and_send(SETUP_CHANNEL, response);
+//    serialize_and_send(SETUP_CHANNEL, response);
+//    serialize_and_send(SETUP_CHANNEL, response);
+//    serialize_and_send(SETUP_CHANNEL, response);
+//    serialize_and_send(SETUP_CHANNEL, response);
+//    serialize_and_send(SETUP_CHANNEL, response);
+//    serialize_and_send(SETUP_CHANNEL, response);
+//    serialize_and_send(SETUP_CHANNEL, response);
+//    serialize_and_send(SETUP_CHANNEL, response);
+//    serialize_and_send(SETUP_CHANNEL, response);
+//    serialize_and_send(SETUP_CHANNEL, response);
+//    serialize_and_send(SETUP_CHANNEL, response);
+//    serialize_and_send(SETUP_CHANNEL, response);
 }
 
 void Comms::handle_req(comms::setup::Set_Clock_Req const& req)

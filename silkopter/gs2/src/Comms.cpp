@@ -11,6 +11,9 @@
 #include "comms.def.h"
 #include "def_lang/JSON_Serializer.h"
 
+#include "def_lang/ast/Node.h"
+#include "def_lang/ast/Builder.h"
+
 
 using namespace silk;
 //using namespace boost::asio;
@@ -20,9 +23,9 @@ constexpr uint8_t PILOT_CHANNEL = 15;
 constexpr uint8_t VIDEO_CHANNEL = 16;
 constexpr uint8_t TELEMETRY_CHANNEL = 20;
 
-Comms::Comms()
-    //: m_setup_channel(SETUP_CHANNEL)
-    : m_pilot_channel(PILOT_CHANNEL)
+Comms::Comms(ts::Type_System& ts)
+    : m_ts(ts)
+    , m_pilot_channel(PILOT_CHANNEL)
     , m_video_channel(VIDEO_CHANNEL)
     , m_telemetry_channel(TELEMETRY_CHANNEL)
 {
@@ -927,6 +930,20 @@ void Comms::Stream_Data<Stream>::unpack(Comms::Telemetry_Channel& channel, uint3
 //    m_pilot_channel.try_sending(*m_rcp);
 //}
 
+std::string const& Comms::decode_json(std::string const& json_base64)
+{
+    m_base64_buffer.resize(q::util::compute_base64_max_decoded_size(json_base64.size()));
+    auto last_it = q::util::decode_base64(json_base64.data(), json_base64.data() + json_base64.size(), m_base64_buffer.begin());
+    m_base64_buffer.erase(last_it, m_base64_buffer.end());
+    return m_base64_buffer;
+}
+std::string const& Comms::encode_json(std::string const& json)
+{
+    m_base64_buffer.resize(q::util::compute_base64_encoded_size(json.size()));
+    q::util::encode_base64(json.data(), json.size(), &m_base64_buffer[0]);
+    return m_base64_buffer;
+}
+
 void Comms::handle_res(comms::setup::Error const& res)
 {
     QLOGI("Error {}", res.get_req_id());
@@ -935,6 +952,29 @@ void Comms::handle_res(comms::setup::Error const& res)
 void Comms::handle_res(comms::setup::Get_AST_Res const& res)
 {
     QLOGI("Get_AST_Res {}", res.get_req_id());
+
+    std::string const& json = decode_json(res.get_data());
+    auto json_result = ts::sz::from_json(json);
+    if (json_result != ts::success)
+    {
+        QLOGE("Cannot deserialize ast json data: {}", json_result.error().what());
+        return;
+    }
+
+    ts::ast::Builder builder;
+    auto deserialize_result = builder.get_ast_root_node().deserialize(json_result.payload());
+    if (deserialize_result != ts::success)
+    {
+        QLOGE("Cannot deserialize ast root: {}", deserialize_result.error().what());
+        return;
+    }
+
+    auto compile_result = builder.compile(m_ts);
+    if (compile_result != ts::success)
+    {
+        QLOGE("Cannot compile type system: {}", compile_result.error().what());
+        return;
+    }
 }
 
 void Comms::handle_res(comms::setup::Set_Clock_Res const& res)

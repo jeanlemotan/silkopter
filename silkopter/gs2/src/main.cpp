@@ -12,7 +12,8 @@
 
 //boost::asio::io_service s_async_io_service(4);
 
-silk::Comms s_comms;
+ts::Type_System s_type_system;
+silk::Comms s_comms(s_type_system);
 
 int main(int argc, char *argv[])
 {
@@ -86,7 +87,7 @@ int main(int argc, char *argv[])
 
 
     QTimer timer;
-    timer.setInterval(0);
+    timer.setInterval(1);
     timer.setSingleShot(false);
     QObject::connect(&timer, &QTimer::timeout, []()
     {

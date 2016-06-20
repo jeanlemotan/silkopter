@@ -5,6 +5,11 @@ namespace ts
 namespace ast
 {
 
+Attribute::Attribute()
+    : m_type(Type::BOOL)
+    , m_value(false)
+{
+}
 Attribute::Attribute(std::string const& name, bool value)
     : m_type(Type::BOOL)
     , m_name(name)
@@ -136,6 +141,54 @@ Result<sz::Value> Attribute::serialize() const
     return sz_value;
 }
 
+Result<void> Attribute::deserialize(sz::Value const& sz_value)
+{
+    if (!sz_value.is_object())
+    {
+        return Error("Expected an object value while deserializing");
+    }
+
+    sz::Value const* sz_type_value = sz_value.find_object_member_by_name("type");
+    if (!sz_type_value)
+    {
+        return Error("Cannot find 'type' member");
+    }
+    if (!sz_type_value->is_integral_number())
+    {
+        return Error("Expected integral for the 'type' member");
+    }
+
+    m_type = static_cast<Type>(sz_type_value->get_as_integral_number());
+
+    sz::Value const* sz_value_value = sz_value.find_object_member_by_name("value");
+    if (!sz_value_value)
+    {
+        return Error("Cannot find 'value' member");
+    }
+
+    if (sz_value_value->is_string())
+    {
+        m_value = sz_value_value->get_as_string();
+    }
+    else if (sz_value_value->is_bool())
+    {
+        m_value = sz_value_value->get_as_bool();
+    }
+    else if (sz_value_value->is_integral_number())
+    {
+        m_value = sz_value_value->get_as_integral_number();
+    }
+    else if (sz_value_value->is_real_number())
+    {
+        m_value = sz_value_value->get_as_double();
+    }
+    else
+    {
+        return Error("Unexpected type for the 'value' member");
+    }
+
+    return success;
+}
 
 }
 }

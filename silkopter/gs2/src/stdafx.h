@@ -60,6 +60,8 @@ extern "C"
 #include "QBase.h"
 #include "QData.h"
 #include "QInput.h"
+#include "def_lang/Type_System.h"
+#include "def_lang/IStruct_Value.h"
 
 
 namespace std

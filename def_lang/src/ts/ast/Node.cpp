@@ -184,9 +184,64 @@ Result<sz::Value> Node::serialize() const
     return sz_value;
 }
 
-Result<void> Node::deserialize(sz::Value const& value)
+Result<void> Node::deserialize(sz::Value const& sz_value)
 {
-    return ts::success;
+    if (!sz_value.is_object())
+    {
+        return Error("Expected an object value while deserializing");
+    }
+
+    sz::Value const* sz_type_value = sz_value.find_object_member_by_name("type");
+    if (!sz_type_value)
+    {
+        return Error("Cannot find 'type' member");
+    }
+    if (!sz_type_value->is_integral_number())
+    {
+        return Error("Expected integral for the 'type' member");
+    }
+
+    m_type = static_cast<Type>(sz_type_value->get_as_integral_number());
+
+    sz::Value const* sz_attributes_value = sz_value.find_object_member_by_name("attributes");
+    if (sz_attributes_value)
+    {
+        if (!sz_attributes_value->is_array())
+        {
+            return Error("Expected array 'attributes' member");
+        }
+
+        for (size_t i = 0; i < sz_attributes_value->get_array_element_count(); i++)
+        {
+            Attribute att;
+            auto result = att.deserialize(sz_attributes_value->get_array_element_value(i));
+            if (result != success)
+            {
+                return result;
+            }
+            add_attribute(att);
+        }
+    }
+    sz::Value const* sz_children_value = sz_value.find_object_member_by_name("children");
+    if (sz_children_value)
+    {
+        if (!sz_children_value->is_array())
+        {
+            return Error("Expected array 'children' member");
+        }
+
+        for (size_t i = 0; i < sz_children_value->get_array_element_count(); i++)
+        {
+            Node& child = add_child(Node());
+            auto result = child.deserialize(sz_children_value->get_array_element_value(i));
+            if (result != success)
+            {
+                return result;
+            }
+        }
+    }
+
+    return success;
 }
 
 }

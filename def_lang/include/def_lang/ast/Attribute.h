@@ -22,6 +22,7 @@ public:
         DOUBLE
     };
 
+    Attribute();
     Attribute(std::string const& name, bool value);
     Attribute(std::string const& name, int64_t value);
     Attribute(std::string const& name, float value);
@@ -41,6 +42,7 @@ public:
     std::string to_string() const;
 
     Result<sz::Value> serialize() const;
+    Result<void> deserialize(sz::Value const& sz_value);
 
 private:
     Type m_type;
