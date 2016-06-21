@@ -14,6 +14,9 @@
 #include "def_lang/ast/Node.h"
 #include "def_lang/ast/Builder.h"
 
+#include "def_lang/IPoly_Type.h"
+#include "def_lang/IPoly_Value.h"
+
 
 using namespace silk;
 //using namespace boost::asio;
@@ -969,15 +972,21 @@ void Comms::handle_res(comms::setup::Get_AST_Res const& res)
         return;
     }
 
-    m_ts = ts::Type_System();
-    m_ts.populate_builtin_types();
+    ts::Type_System ts;
+    ts.populate_builtin_types();
 
-    auto compile_result = builder.compile(m_ts);
+    auto compile_result = builder.compile(ts);
     if (compile_result != ts::success)
     {
         QLOGE("Cannot compile type system: {}", compile_result.error().what());
         return;
     }
+
+    sig_type_system_will_be_reset.execute();
+
+    m_ts = ts;
+
+    sig_type_system_reset.execute();
 }
 
 void Comms::handle_res(comms::setup::Set_Clock_Res const& res)
@@ -1001,6 +1010,81 @@ void Comms::handle_res(comms::setup::Get_Node_Defs_Res const& res)
 {
     QLOGI("Get_Node_Defs_Res {}", res.get_req_id());
 
+
+    std::shared_ptr<const ts::IPoly_Type> descriptor_type = m_ts.get_root_scope()->find_specialized_symbol_by_path<ts::IPoly_Type>("Poly_INode_Descriptor");
+    if (!descriptor_type)
+    {
+        QLOGE("Cannot find 'Poly_INode_Descriptor' type in the type system");
+        return;
+    }
+
+    std::shared_ptr<ts::IPoly_Value> descriptor_value = descriptor_type->create_specialized_value();
+    QASSERT(descriptor_value);
+    auto construction_result = descriptor_value->construct();
+    if (construction_result != ts::success)
+    {
+        QLOGE("Cannot construct a 'Poly_INode_Descriptor' value: {}", construction_result.error().what());
+        return;
+    }
+
+
+    std::vector<Node_Def> node_defs;
+
+    std::vector<comms::setup::Node_Def_Data> const& node_def_datas = res.get_node_def_datas();
+    node_defs.reserve(node_def_datas.size());
+
+    for (comms::setup::Node_Def_Data const& node_def_data: node_def_datas)
+    {
+        Node_Def node_def;
+        node_def.name = node_def_data.get_name();
+        node_def.type = static_cast<node::Type>(node_def_data.get_type());
+
+        std::vector<comms::setup::Node_Def_Data::Input> const& input_datas = node_def_data.get_inputs();
+        node_def.inputs.reserve(input_datas.size());
+        for (comms::setup::Node_Def_Data::Input const& input_data: input_datas)
+        {
+            Node_Def::Input input;
+            input.name = input_data.get_name();
+            input.type = stream::Type(static_cast<stream::Semantic>(input_data.get_semantic()), static_cast<stream::Space>(input_data.get_space()));
+            node_def.inputs.push_back(std::move(input));
+        }
+
+        std::vector<comms::setup::Node_Def_Data::Output> const& output_datas = node_def_data.get_outputs();
+        node_def.outputs.reserve(output_datas.size());
+        for (comms::setup::Node_Def_Data::Output const& output_data: output_datas)
+        {
+            Node_Def::Output output;
+            output.name = output_data.get_name();
+            output.type = stream::Type(static_cast<stream::Semantic>(output_data.get_semantic()), static_cast<stream::Space>(output_data.get_space()));
+            node_def.outputs.push_back(std::move(output));
+        }
+
+        std::string const& json = decode_json(node_def_data.get_descriptor_data());
+        auto json_result = ts::sz::from_json(json);
+        if (json_result != ts::success)
+        {
+            QLOGE("Cannot deserialize ast json data: {}", json_result.error().what());
+            return;
+        }
+
+        auto deserialize_result = descriptor_value->deserialize(json_result.payload());
+        if (deserialize_result != ts::success)
+        {
+            QLOGE("Cannot deserialize descriptor: {}", deserialize_result.error().what());
+            return;
+        }
+
+        node_def.default_descriptor = std::dynamic_pointer_cast<ts::IStruct_Value>(descriptor_value->get_value());
+        if (!node_def.default_descriptor)
+        {
+            QLOGE("Invalid descriptor value. Expected struct, got something else");
+            return;
+        }
+
+        node_defs.push_back(std::move(node_def));
+    }
+
+    sig_node_defs_added.execute(node_defs);
 }
 
 void Comms::handle_res(comms::setup::Remove_Node_Res const& res)

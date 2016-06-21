@@ -100,6 +100,8 @@ public:
 
     q::util::Signal<void()> sig_reset;
     q::util::Signal<void(Manual_Clock::time_point)> sig_clock_received;
+    q::util::Signal<void()> sig_type_system_will_be_reset;
+    q::util::Signal<void()> sig_type_system_reset;
 
 
     void request_all_data();

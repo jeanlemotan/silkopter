@@ -16,6 +16,7 @@ alias euler3_t = vec3f : [ min = {-180.f, -180.f, -180.f}, max = {180.f, 180.f, 
 alias servo_signal_t = float : [ min = 1.f, max = 2.f ];
 alias pwm_signal_t = float : [ min = 0.f, max = 1.f ];
 
+
 struct IUAV_Descriptor
 {
     alias mass_t = float : [ min = 0.01f, max = 100.f ];
@@ -24,18 +25,25 @@ struct IUAV_Descriptor
     mass_t mass : [ui_name = "Mass (Kg)"];
     ufloat moment_of_inertia : [ui_name = "Moment Of Inertia"];
 };
+alias Poly_IUAV_Descriptor = poly<IUAV_Descriptor>;
+
 
 struct IBus_Descriptor
 {
 };
+alias Poly_IBus_Descriptor = poly<IBus_Descriptor>;
+
 
 struct INode_Descriptor
 {
 };
+alias Poly_INode_Descriptor = poly<INode_Descriptor>;
+
 
 struct INode_Config
 {
 };
+alias Poly_INode_Config = poly<INode_Config>;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

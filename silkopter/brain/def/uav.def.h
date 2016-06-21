@@ -75,6 +75,7 @@ private:
   ufloat m_moment_of_inertia = {0};
 };
 
+typedef Poly<IUAV_Descriptor> Poly_IUAV_Descriptor;
 struct IBus_Descriptor
 {
 public:
@@ -82,6 +83,7 @@ public:
 private:
 };
 
+typedef Poly<IBus_Descriptor> Poly_IBus_Descriptor;
 struct INode_Descriptor
 {
 public:
@@ -89,6 +91,7 @@ public:
 private:
 };
 
+typedef Poly<INode_Descriptor> Poly_INode_Descriptor;
 struct INode_Config
 {
 public:
@@ -96,6 +99,7 @@ public:
 private:
 };
 
+typedef Poly<INode_Config> Poly_INode_Config;
 struct Settings
 {
 public:
@@ -2585,12 +2589,20 @@ ts::Result<void> deserialize(uint32_t& value, ts::sz::Value const& sz_value);
 ts::sz::Value serialize(uint32_t const& value);
 ts::Result<void> deserialize(IUAV_Descriptor& value, ts::sz::Value const& sz_value);
 ts::sz::Value serialize(IUAV_Descriptor const& value);
+ts::Result<void> deserialize(Poly<IUAV_Descriptor>& value, ts::sz::Value const& sz_value);
+ts::sz::Value serialize(Poly<IUAV_Descriptor> const& value);
 ts::Result<void> deserialize(IBus_Descriptor& value, ts::sz::Value const& sz_value);
 ts::sz::Value serialize(IBus_Descriptor const& value);
+ts::Result<void> deserialize(Poly<IBus_Descriptor>& value, ts::sz::Value const& sz_value);
+ts::sz::Value serialize(Poly<IBus_Descriptor> const& value);
 ts::Result<void> deserialize(INode_Descriptor& value, ts::sz::Value const& sz_value);
 ts::sz::Value serialize(INode_Descriptor const& value);
+ts::Result<void> deserialize(Poly<INode_Descriptor>& value, ts::sz::Value const& sz_value);
+ts::sz::Value serialize(Poly<INode_Descriptor> const& value);
 ts::Result<void> deserialize(INode_Config& value, ts::sz::Value const& sz_value);
 ts::sz::Value serialize(INode_Config const& value);
+ts::Result<void> deserialize(Poly<INode_Config>& value, ts::sz::Value const& sz_value);
+ts::sz::Value serialize(Poly<INode_Config> const& value);
 ts::Result<void> deserialize(Settings::Bus_Data& value, ts::sz::Value const& sz_value);
 ts::sz::Value serialize(Settings::Bus_Data const& value);
 ts::Result<void> deserialize(Settings::Node_Data& value, ts::sz::Value const& sz_value);
