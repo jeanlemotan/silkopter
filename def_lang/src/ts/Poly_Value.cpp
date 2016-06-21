@@ -255,7 +255,14 @@ Result<void> Poly_Value::deserialize(sz::Value const& sz_value)
         return Error("Cannot find type '" + type_sz_value->get_as_string() + "' when deserializing");
     }
 
-    auto result = set_value(type->create_value());
+    std::shared_ptr<IValue> value = type->create_value();
+    auto result = value->construct();
+    if (result != success)
+    {
+        return Error("Cannot construct value when deserializing: " + result.error().what());
+    }
+
+    result = set_value(value);
     if (result != success)
     {
         return Error("Cannot create value when deserializing: " + result.error().what());
