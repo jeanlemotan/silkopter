@@ -303,11 +303,11 @@ static Result<std::shared_ptr<ILiteral>> create_literal(Type_System& ts, Node co
     std::shared_ptr<IValue> value;
     switch (value_attribute->get_type())
     {
-    case Attribute::Type::BOOL: return std::make_shared<Literal>(ts, value_attribute->get_as_bool());
-    case Attribute::Type::DOUBLE: return std::make_shared<Literal>(ts, value_attribute->get_as_double());
-    case Attribute::Type::FLOAT: return std::make_shared<Literal>(ts, value_attribute->get_as_float());
-    case Attribute::Type::INTEGRAL: return std::make_shared<Literal>(ts, value_attribute->get_as_integral());
-    case Attribute::Type::STRING: return std::make_shared<Literal>(ts, value_attribute->get_as_string());
+    case Attribute::Type::BOOL: return std::make_shared<Literal>(*ts.get_root_scope(), value_attribute->get_as_bool());
+    case Attribute::Type::DOUBLE: return std::make_shared<Literal>(*ts.get_root_scope(), value_attribute->get_as_double());
+    case Attribute::Type::FLOAT: return std::make_shared<Literal>(*ts.get_root_scope(), value_attribute->get_as_float());
+    case Attribute::Type::INTEGRAL: return std::make_shared<Literal>(*ts.get_root_scope(), value_attribute->get_as_integral());
+    case Attribute::Type::STRING: return std::make_shared<Literal>(*ts.get_root_scope(), value_attribute->get_as_string());
     }
 
     return Error(node.get_source_location().to_string() + "Cannot create literal of type " + value_attribute->to_string());
@@ -457,7 +457,7 @@ static Result<void> create_type_attributes(Type_System& ts, IType& type, Node co
         }
         if (initializer_node)
         {
-            auto result = create_initializer_list(ts, ts, *initializer_node);
+            auto result = create_initializer_list(ts, *ts.get_root_scope(), *initializer_node);
             if (result != success)
             {
                 return Error(attribute_node.get_source_location().to_string() + "Cannot create initializer: " + result.error().what());
@@ -495,7 +495,7 @@ static Result<void> create_type_attributes(Type_System& ts, IType& type, Node co
         }
         else if (attribute_name == "decimals")
         {
-            std::shared_ptr<IInt_Value> value = ts.find_specialized_symbol_by_name<IInt_Type>("int")->create_specialized_value();
+            std::shared_ptr<IInt_Value> value = ts.get_root_scope()->find_specialized_symbol_by_name<IInt_Type>("int")->create_specialized_value();
             auto result = value->construct(*initializer_list);
             if (result != success)
             {
@@ -506,7 +506,7 @@ static Result<void> create_type_attributes(Type_System& ts, IType& type, Node co
         }
         else if (attribute_name == "ui_name")
         {
-            std::shared_ptr<IString_Value> value = ts.find_specialized_symbol_by_name<IString_Type>("string")->create_specialized_value();
+            std::shared_ptr<IString_Value> value = ts.get_root_scope()->find_specialized_symbol_by_name<IString_Type>("string")->create_specialized_value();
             auto result = value->construct(*initializer_list);
             if (result != success)
             {
@@ -517,7 +517,7 @@ static Result<void> create_type_attributes(Type_System& ts, IType& type, Node co
         }
         else if (attribute_name == "native_type")
         {
-            std::shared_ptr<IString_Value> value = ts.find_specialized_symbol_by_name<IString_Type>("string")->create_specialized_value();
+            std::shared_ptr<IString_Value> value = ts.get_root_scope()->find_specialized_symbol_by_name<IString_Type>("string")->create_specialized_value();
             auto result = value->construct(*initializer_list);
             if (result != success)
             {
@@ -562,7 +562,7 @@ static Result<void> create_member_def_attributes(Type_System& ts, IMember_Def& m
         }
         if (initializer_node)
         {
-            auto result = create_initializer_list(ts, ts, *initializer_node);
+            auto result = create_initializer_list(ts, *ts.get_root_scope(), *initializer_node);
             if (result != success)
             {
                 return Error(attribute_node.get_source_location().to_string() + "Cannot create initializer: " + result.error().what());
@@ -578,7 +578,7 @@ static Result<void> create_member_def_attributes(Type_System& ts, IMember_Def& m
 
         if (attribute_name == "ui_name")
         {
-            std::shared_ptr<IString_Value> value = ts.find_specialized_symbol_by_name<IString_Type>("string")->create_specialized_value();
+            std::shared_ptr<IString_Value> value = ts.get_root_scope()->find_specialized_symbol_by_name<IString_Type>("string")->create_specialized_value();
             auto result = value->construct(*initializer_list);
             if (result != success)
             {
@@ -623,7 +623,7 @@ static Result<void> create_enum_item_attributes(Type_System& ts, IEnum_Item& enu
         }
         if (initializer_node)
         {
-            auto result = create_initializer_list(ts, ts, *initializer_node);
+            auto result = create_initializer_list(ts, *ts.get_root_scope(), *initializer_node);
             if (result != success)
             {
                 return Error(attribute_node.get_source_location().to_string() + "Cannot create initializer: " + result.error().what());
@@ -649,7 +649,7 @@ static Result<void> create_enum_item_attributes(Type_System& ts, IEnum_Item& enu
                 return Error(attribute_node.get_source_location().to_string() + "Missing initializer for attribute");
             }
 
-            std::shared_ptr<IString_Value> value = ts.find_specialized_symbol_by_name<IString_Type>("string")->create_specialized_value();
+            std::shared_ptr<IString_Value> value = ts.get_root_scope()->find_specialized_symbol_by_name<IString_Type>("string")->create_specialized_value();
             auto result = value->construct(*initializer_list);
             if (result != success)
             {
@@ -987,7 +987,7 @@ Result<void> Builder::compile(Type_System& ts)
 
     for (Node const& ch: m_root_node.get_children())
     {
-        auto result = populate_declaration_scope(ts, ts, ch);
+        auto result = populate_declaration_scope(ts, *ts.get_root_scope(), ch);
         if (result != success)
         {
             return result;

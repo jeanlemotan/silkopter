@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Result.h"
-#include "ep/Declaration_Scope_EP.h"
+#include "def_lang/impl/Namespace.h"
 #include "IType.h"
 
 namespace ts
@@ -10,7 +10,7 @@ namespace ts
 class ITemplate_Argument;
 class ITemplated_Type;
 
-class Type_System final : public Declaration_Scope_EP
+class Type_System final
 {
 public:
     Type_System();
@@ -20,8 +20,11 @@ public:
 
     std::shared_ptr<IValue> create_value(Symbol_Path const& type_path) const;
 
-private:
-    Result<void> validate_symbol(std::shared_ptr<const ISymbol> symbol) override;
+    std::shared_ptr<IDeclaration_Scope> get_root_scope();
+    std::shared_ptr<const IDeclaration_Scope> get_root_scope() const;
+
+protected:
+    std::shared_ptr<Namespace> m_root_scope;
 };
 
 }
