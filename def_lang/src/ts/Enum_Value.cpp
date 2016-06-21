@@ -1,6 +1,7 @@
 #include "def_lang/impl/Enum_Type.h"
 #include "def_lang/impl/Enum_Value.h"
 #include "def_lang/IEnum_Item_Initializer.h"
+#include "def_lang/impl/Enum_Item_Initializer.h"
 #include "def_lang/impl/Initializer_List.h"
 
 namespace ts
@@ -46,19 +47,33 @@ Result<void> Enum_Value::construct(IInitializer_List const& initializer_list)
         return Error("Already constructed value");
     }
 
-    if (initializer_list.get_initializer_count() != 1)
+    std::shared_ptr<const IEnum_Item> item;
+
+    if (initializer_list.get_initializer_count() == 0)
+    {
+        item = get_specialized_type()->get_default_item();
+        if (!item)
+        {
+            return Error("Enum '" + get_type()->get_symbol_path().to_string() + "' cannot be default constructed as there is no default item");
+        }
+    }
+    else if (initializer_list.get_initializer_count() == 1)
+    {
+        std::shared_ptr<const IEnum_Item_Initializer> initializer = std::dynamic_pointer_cast<const IEnum_Item_Initializer>(initializer_list.get_initializer(0));
+        if (!initializer)
+        {
+            return Error("Cannot evaluate initializer list");
+        }
+        item = initializer->get_enum_item();
+    }
+    else
     {
         return Error("Expected an initializer list with one element");
-    }
-    std::shared_ptr<const IEnum_Item_Initializer> initializer = std::dynamic_pointer_cast<const IEnum_Item_Initializer>(initializer_list.get_initializer(0));
-    if (!initializer)
-    {
-        return Error("Cannot evaluate initializer list");
     }
 
     m_is_constructed = true;
 
-    auto result = set_value(initializer->get_enum_item());
+    auto result = set_value(item);
     if (result != success)
     {
         m_is_constructed = false;
@@ -69,12 +84,32 @@ Result<void> Enum_Value::construct(IInitializer_List const& initializer_list)
 }
 Result<void> Enum_Value::copy_construct(IValue const& other)
 {
-    auto result = construct();
-    if (result != success)
+    if (is_constructed())
     {
-        return result;
+        TS_ASSERT(false);
+        return Error("Already constructed value");
     }
-    return copy_assign(other);
+
+    if (!other.is_constructed())
+    {
+        TS_ASSERT(false);
+        return Error("Unconstructed value");
+    }
+    IEnum_Value const* v = dynamic_cast<const IEnum_Value*>(&other);
+    if (!v)
+    {
+        return Error("incompatible values");
+    }
+
+    if (get_type() != v->get_type())
+    {
+        return Error("incompatible types");
+    }
+
+    std::vector<std::shared_ptr<const IInitializer>> initializers;
+    initializers.emplace_back(new Enum_Item_Initializer(v->get_value()));
+    Initializer_List ilist(initializers);
+    return construct(ilist);
 }
 
 Result<void> Enum_Value::copy_assign(IValue const& other)
