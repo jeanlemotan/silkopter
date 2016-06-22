@@ -355,45 +355,59 @@ auto UAV::get_uav_descriptor() const -> std::shared_ptr<const uav::IUAV_Descript
 {
     return m_uav_descriptor;
 }
-auto UAV::set_uav_descriptor(uav::IUAV_Descriptor const& descriptor) -> bool
+auto UAV::set_uav_descriptor(std::shared_ptr<uav::IUAV_Descriptor> descriptor) -> bool
 {
-    auto multirotor_descriptor = dynamic_cast<uav::Multirotor_Descriptor const*>(&descriptor);
-    if (multirotor_descriptor)
+    if (!descriptor)
     {
-        return set_multirotor_descriptor(*multirotor_descriptor);
-    }
-
-    QLOGE("Unrecognized UAV descriptor");
-    return false;
-}
-auto UAV::set_multirotor_descriptor(uav::Multirotor_Descriptor const& descriptor) -> bool
-{
-    QLOG_TOPIC("uav::set_multirotor_descriptor");
-
-    if (descriptor.get_motors().size() < 2)
-    {
-        QLOGE("Bad motor count: {}", descriptor.get_motors().size());
+        QLOGE("Cannot set null descriptor");
         return false;
     }
-    for (auto const& m: descriptor.get_motors())
+
+    std::shared_ptr<IUAV_Properties> new_properties = std::make_shared<IUAV_Properties>();
+    if (!new_properties->init(*descriptor))
     {
-        if (math::is_zero(m.get_position(), math::epsilon<float>()))
-        {
-            QLOGE("Bad motor position: {}", m.get_position());
-            return false;
-        }
+        return false;
     }
 
-    //http://en.wikipedia.org/wiki/List_of_moments_of_inertia
-    m_uav_descriptor.reset(new uav::Multirotor_Descriptor(descriptor)); //make a copy
-    if (math::is_zero(descriptor.get_moment_of_inertia(), math::epsilon<float>()))
-    {
-        m_uav_descriptor->set_moment_of_inertia((1.f / 12.f) * descriptor.get_mass() * (3.f * math::square(descriptor.get_radius()) + math::square(descriptor.get_height())));
-    }
+    m_uav_descriptor = descriptor;
+    std::swap(m_uav_properties, new_properties);
 
-    descriptor_changed_signal.execute(*this);
+    uav_properties_changed_signal.execute(*this);
 
     return true;
+}
+//auto UAV::set_multirotor_descriptor(uav::Multirotor_Descriptor const& descriptor) -> bool
+//{
+//    QLOG_TOPIC("uav::set_multirotor_descriptor");
+
+//    if (descriptor.get_motors().size() < 2)
+//    {
+//        QLOGE("Bad motor count: {}", descriptor.get_motors().size());
+//        return false;
+//    }
+//    for (auto const& m: descriptor.get_motors())
+//    {
+//        if (math::is_zero(m.get_position(), math::epsilon<float>()))
+//        {
+//            QLOGE("Bad motor position: {}", m.get_position());
+//            return false;
+//        }
+//    }
+
+//    //http://en.wikipedia.org/wiki/List_of_moments_of_inertia
+//    m_uav_descriptor.reset(new uav::Multirotor_Descriptor(descriptor)); //make a copy
+//    if (math::is_zero(descriptor.get_moment_of_inertia(), math::epsilon<float>()))
+//    {
+//        m_uav_descriptor->set_moment_of_inertia((1.f / 12.f) * descriptor.get_mass() * (3.f * math::square(descriptor.get_radius()) + math::square(descriptor.get_height())));
+//    }
+
+
+//    return true;
+//}
+
+auto UAV::get_uav_descriptor() const -> std::shared_ptr<const IUAV_Properties>
+{
+    return m_uav_properties;
 }
 
 auto UAV::remove_node(std::shared_ptr<node::INode> node) -> bool

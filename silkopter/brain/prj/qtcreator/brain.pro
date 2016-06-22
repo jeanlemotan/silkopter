@@ -152,7 +152,8 @@ SOURCES += \
     ../../src/pilot/Multirotor_Pilot.cpp \
     ../../src/UAV.cpp \
     ../../def/uav.def.cpp \
-    ../../../libs/common/comms/def/comms.def.cpp
+    ../../../libs/common/comms/def/comms.def.cpp \
+    ../../src/Multirotor_Properties.cpp
 
 HEADERS += \
     ../../src/BrainStdAfx.h \
@@ -288,7 +289,9 @@ HEADERS += \
     ../../src/UAV.h \
     ../../def/gen_support.h \
     ../../def/uav.def.h \
-    ../../../libs/common/comms/def/comms.def.h
+    ../../../libs/common/comms/def/comms.def.h \
+    ../../src/Multirotor_Properties.h \
+    ../../src/IUAV_Properties.h
 
 DISTFILES +=
 

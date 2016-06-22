@@ -316,6 +316,7 @@ void Comms::serialize_and_send(size_t channel_idx, T const& message)
 
 void Comms::request_all_data()
 {
+    //todo - ask for these in sequence, not all at once as the response is not guaranteed to arrive in order
     comms::setup::Brain_Req request;
     {
         uint64_t t = time(nullptr);

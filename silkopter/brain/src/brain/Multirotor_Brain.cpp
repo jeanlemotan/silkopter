@@ -38,10 +38,10 @@ auto Multirotor_Brain::init(uav::INode_Descriptor const& descriptor) -> bool
 
 auto Multirotor_Brain::init() -> bool
 {
-    m_multirotor_descriptor = m_uav.get_specialized_uav_descriptor<uav::Multirotor_Descriptor>();
-    if (!m_multirotor_descriptor)
+    m_multirotor_properties = m_uav.get_specialized_uav_properties<Multirotor_Properties>();
+    if (!m_multirotor_properties)
     {
-        QLOGE("No multi descriptor found");
+        QLOGE("No multi properties found");
         return false;
     }
 
@@ -121,7 +121,7 @@ void Multirotor_Brain::process_state_mode_idle()
 
 float Multirotor_Brain::compute_ff_thrust(float target_altitude)
 {
-    float mass = m_multirotor_descriptor->get_mass();
+    float mass = m_multirotor_properties->get_mass();
 
 
     float v0 = m_enu_velocity.z;
@@ -184,8 +184,6 @@ math::vec2f Multirotor_Brain::compute_horizontal_rate_for_angle(math::vec2f cons
 
 void Multirotor_Brain::state_mode_armed_apply_commands(const stream::IMultirotor_Commands::Value& prev_commands, stream::IMultirotor_Commands::Value& commands)
 {
-    std::shared_ptr<const uav::Multirotor_Descriptor> multirotor_descriptor = m_uav.get_specialized_uav_descriptor<uav::Multirotor_Descriptor>();
-
     QASSERT(commands.mode.get() == stream::IMultirotor_Commands::Mode::ARMED);
 
     if (!m_home.is_acquired)
@@ -243,7 +241,7 @@ void Multirotor_Brain::state_mode_armed_apply_commands(const stream::IMultirotor
             output = math::clamp(output, -1.f, 1.f);
             m_vertical_altitude_data.dsp.process(output);
 
-            float hover_thrust = multirotor_descriptor->get_mass() * physics::constants::g;
+            float hover_thrust = m_multirotor_properties->get_mass() * physics::constants::g;
             float max_thrust_range = math::max(hover_thrust, m_config->get_max_thrust() - hover_thrust);
 
             thrust = output * max_thrust_range + hover_thrust;
@@ -637,8 +635,8 @@ auto Multirotor_Brain::set_config(uav::INode_Config const& config) -> bool
 
     uint32_t output_rate = m_rate_output_stream->get_rate();
 
-    m_config->set_min_thrust(math::clamp(m_config->get_min_thrust(), 0.f, m_multirotor_descriptor->get_motor_thrust() * m_multirotor_descriptor->get_motors().size() * 0.5f));
-    m_config->set_max_thrust(math::clamp(m_config->get_max_thrust(), m_config->get_min_thrust(), m_multirotor_descriptor->get_motor_thrust() * m_multirotor_descriptor->get_motors().size()));
+    m_config->set_min_thrust(math::clamp(m_config->get_min_thrust(), 0.f, m_multirotor_properties->get_motor_thrust() * m_multirotor_properties->get_motors().size() * 0.5f));
+    m_config->set_max_thrust(math::clamp(m_config->get_max_thrust(), m_config->get_min_thrust(), m_multirotor_properties->get_motor_thrust() * m_multirotor_properties->get_motors().size()));
 
     {
         uav::Multirotor_Brain_Config::Horizontal_Angle const& descriptor = m_config->get_horizontal_angle();

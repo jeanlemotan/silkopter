@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core quick qml
+QT       += core quick qml quickcontrols2
 
 TARGET = gs
 TEMPLATE = app

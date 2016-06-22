@@ -2,6 +2,7 @@
 
 #include <memory>
 
+#include "IUAV_Properties.h"
 #include "common/bus/IBus.h"
 #include "common/node/INode.h"
 #include "common/stream/IStream.h"
@@ -80,13 +81,15 @@ public:
 
     void save_settings();
 
-    auto set_uav_descriptor(uav::IUAV_Descriptor const& descriptor) -> bool;
+    auto set_uav_descriptor(std::shared_ptr<uav::IUAV_Descriptor> descriptor) -> bool;
     auto get_uav_descriptor() const   -> std::shared_ptr<const uav::IUAV_Descriptor>;
 
-    template<class Descriptor>
-    auto get_specialized_uav_descriptor() const   -> std::shared_ptr<const Descriptor>;
+    auto get_uav_properties() const   -> std::shared_ptr<const IUAV_Properties>;
 
-    q::util::Signal<void(UAV&)> descriptor_changed_signal;
+    template<class Properties>
+    auto get_specialized_uav_properties() const   -> std::shared_ptr<const Properties>;
+
+    q::util::Signal<void(UAV&)> uav_properties_changed_signal;
 
     typedef Factory<bus::IBus> Bus_Factory;
     Bus_Factory const& get_bus_factory() const;
@@ -122,8 +125,6 @@ protected:
     auto get_telemetry_data() const -> Telemetry_Data const&;
 
 private:
-    auto set_multirotor_descriptor(uav::Multirotor_Descriptor const& descriptor) -> bool;
-
     void generate_settings_file();
 
     auto create_bus(std::string const& type, std::string const& name, uav::IBus_Descriptor const& descriptor) -> std::shared_ptr<bus::IBus>;
@@ -133,6 +134,7 @@ private:
 
     void sort_nodes(std::shared_ptr<node::INode> first_node);
 
+    std::shared_ptr<IUAV_Properties> m_uav_properties;
     std::shared_ptr<uav::IUAV_Descriptor> m_uav_descriptor;
 
     Bus_Registry m_buses;
@@ -151,11 +153,11 @@ private:
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
-template<class Descriptor>
-auto UAV::get_specialized_uav_descriptor() const   -> std::shared_ptr<const Descriptor>
+template<class Properties>
+auto UAV::get_specialized_uav_properties() const   -> std::shared_ptr<const Properties>
 {
-    std::shared_ptr<const uav::IUAV_Descriptor> descriptor = get_uav_descriptor();
-    return std::dynamic_pointer_cast<const Descriptor>(descriptor);
+    std::shared_ptr<const IUAV_Properties> properties = get_uav_properties();
+    return std::dynamic_pointer_cast<const Properties>(properties);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////

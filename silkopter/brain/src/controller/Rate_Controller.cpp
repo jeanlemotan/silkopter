@@ -68,18 +68,18 @@ void Rate_Controller::process()
 
     m_output_stream->clear();
 
-    std::shared_ptr<const uav::Multirotor_Descriptor> multirotor_descriptor = m_uav.get_specialized_uav_descriptor<uav::Multirotor_Descriptor>();
-    if (!multirotor_descriptor)
+    std::shared_ptr<const Multirotor_Properties> multirotor_properties = m_uav.get_specialized_uav_properties<Multirotor_Properties>();
+    if (!multirotor_properties)
     {
         return;
     }
 
-    m_accumulator.process([this, &multirotor_descriptor](stream::IAngular_Velocity::Sample const& i_sample,
+    m_accumulator.process([this, &multirotor_properties](stream::IAngular_Velocity::Sample const& i_sample,
                                                 stream::IAngular_Velocity::Sample const& t_sample)
     {
         if (i_sample.is_healthy & t_sample.is_healthy)
         {
-            math::vec3f ff = compute_feedforward(*multirotor_descriptor, i_sample.value, t_sample.value);
+            math::vec3f ff = compute_feedforward(*multirotor_properties, i_sample.value, t_sample.value);
             math::vec3f fb = compute_feedback(i_sample.value, t_sample.value);
 
             Output_Stream::Value value(ff * m_config->get_feedforward().get_weight() + fb * m_config->get_feedback().get_weight());
@@ -94,15 +94,15 @@ void Rate_Controller::process()
 }
 
 
-math::vec3f Rate_Controller::compute_feedforward(uav::Multirotor_Descriptor const& multirotor_descriptor, stream::IAngular_Velocity::Value const& input, stream::IAngular_Velocity::Value const& target)
+math::vec3f Rate_Controller::compute_feedforward(Multirotor_Properties const& multirotor_properties, stream::IAngular_Velocity::Value const& input, stream::IAngular_Velocity::Value const& target)
 {
     math::vec3f v = target - input;
-    float vm = math::length(v) * multirotor_descriptor.get_moment_of_inertia();
+    float vm = math::length(v) * multirotor_properties.get_moment_of_inertia();
 
     float max_T = m_config->get_feedforward().get_max_torque();
 
-    float A = multirotor_descriptor.get_motor_acceleration();
-    float C = multirotor_descriptor.get_motor_deceleration();
+    float A = multirotor_properties.get_motor_acceleration();
+    float C = multirotor_properties.get_motor_deceleration();
 
     float x_sq = vm / ((A + C) * max_T / 2.f);
     float x = math::min(1.f, math::sqrt(x_sq));

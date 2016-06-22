@@ -89,19 +89,50 @@ struct Multirotor_Descriptor : public IUAV_Descriptor
     alias thrust_t = float : [ min = 0.01f, max = 1000.f ];
     alias acceleration_t = float : [ min = 0.1f ];
 
-    struct Motor
-    {
-        vec3f position;
-        direction_t thrust_vector = {0.f, 0.f, 1.f};
-        bool clockwise = false;
-    };
-
     radius_t radius = 1.f : [ ui_name = "Radius (m)" ];
     height_t height = 1.f : [ ui_name = "Height (m)" ];
     torque_t motor_z_torque = 1.f : [ ui_name = "Motor Z Torque (Nm)" ];
     thrust_t motor_thrust = 1.f : [ ui_name = "Motor Thrust (N)" ];
     acceleration_t motor_acceleration = 10.f : [ ui_name = "Motor acceleration (N/s)" ];
     acceleration_t motor_deceleration = 10.f : [ ui_name = "Motor Deceleration (N/s)" ];
+};
+
+struct Tricopter_Descriptor : public Multirotor_Descriptor
+{
+};
+
+struct Quadcopter_Descriptor : public Multirotor_Descriptor
+{
+    bool plus_configuration = false : [ ui_name = "+ Configuration" ];
+};
+
+struct Hexacopter_Descriptor : public Multirotor_Descriptor
+{
+    bool plus_configuration = false : [ ui_name = "+ Configuration" ];
+};
+
+struct Hexatri_Descriptor : public Multirotor_Descriptor
+{
+};
+
+struct Octocopter_Descriptor : public Multirotor_Descriptor
+{
+    bool plus_configuration = false : [ ui_name = "+ Configuration" ];
+};
+
+struct Octaquad_Descriptor : public Multirotor_Descriptor
+{
+    bool plus_configuration = false : [ ui_name = "+ Configuration" ];
+};
+
+struct Custom_Multirotor_Descriptor : public Multirotor_Descriptor
+{
+    struct Motor
+    {
+        vec3f position;
+        direction_t thrust_vector = {0.f, 0.f, 1.f};
+        bool clockwise = false;
+    };
     vector<Motor> motors;
 };
 

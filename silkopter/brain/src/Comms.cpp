@@ -1055,7 +1055,7 @@ void Comms::handle_req(comms::setup::Set_UAV_Descriptor_Req const& req)
         return;
     }
 
-    if (!m_uav.set_uav_descriptor(*uav_descriptor))
+    if (!m_uav.set_uav_descriptor(uav_descriptor))
     {
         response = make_error(q::util::format<std::string>("Cannot set uav descriptor: {}", "N/A"));
         serialize_and_send(SETUP_CHANNEL, response);

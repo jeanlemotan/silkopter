@@ -1,5 +1,6 @@
 #include "BrainStdAfx.h"
 #include "Multirotor_Simulator.h"
+#include "Multirotor_Properties.h"
 
 #if !defined RASPBERRY_PI
 
@@ -44,10 +45,10 @@ auto Multirotor_Simulator::init(uav::INode_Descriptor const& descriptor) -> bool
 }
 auto Multirotor_Simulator::init() -> bool
 {
-    std::shared_ptr<const uav::Multirotor_Descriptor> multirotor_descriptor = m_uav.get_specialized_uav_descriptor<uav::Multirotor_Descriptor>();
-    if (!multirotor_descriptor)
+    std::shared_ptr<const Multirotor_Properties> multirotor_properties = m_uav.get_specialized_uav_properties<Multirotor_Properties>();
+    if (!multirotor_properties)
     {
-        QLOGE("No multi descriptor found");
+        QLOGE("No multi properties found");
         return false;
     }
 
@@ -56,13 +57,13 @@ auto Multirotor_Simulator::init() -> bool
         return false;
     }
 
-    if (!m_simulation.init_uav(multirotor_descriptor))
+    if (!m_simulation.init_uav(multirotor_properties))
     {
         return false;
     }
 
-    m_input_throttle_streams.resize(multirotor_descriptor->get_motors().size());
-    m_input_throttle_stream_paths.resize(multirotor_descriptor->get_motors().size());
+    m_input_throttle_streams.resize(multirotor_properties->get_motors().size());
+    m_input_throttle_stream_paths.resize(multirotor_properties->get_motors().size());
 
     m_angular_velocity_stream->rate = m_descriptor->get_angular_velocity_rate();
     m_angular_velocity_stream->dt = std::chrono::microseconds(1000000 / m_angular_velocity_stream->rate);
@@ -332,14 +333,14 @@ auto Multirotor_Simulator::set_config(uav::INode_Config const& config) -> bool
 //        uav_config.motors[i].deceleration = sz.motors[i].deceleration;
 //    }
 
-    std::shared_ptr<const uav::Multirotor_Descriptor> multirotor_descriptor = m_uav.get_specialized_uav_descriptor<uav::Multirotor_Descriptor>();
-    if (!multirotor_descriptor)
+    std::shared_ptr<const Multirotor_Properties> multirotor_properties = m_uav.get_specialized_uav_properties<Multirotor_Properties>();
+    if (!multirotor_properties)
     {
-        QLOGE("No multi descriptor found");
+        QLOGE("No multi properties found");
         return false;
     }
 
-    if (!m_simulation.init_uav(multirotor_descriptor))
+    if (!m_simulation.init_uav(multirotor_properties))
     {
         return false;
     }

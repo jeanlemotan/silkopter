@@ -4,6 +4,7 @@
 #include "common/stream/ITorque.h"
 #include "common/stream/IFloat.h"
 #include "common/stream/IThrottle.h"
+#include "Multirotor_Properties.h"
 
 #include "UAV.h"
 
@@ -51,7 +52,7 @@ public:
 private:
     auto init() -> bool;
 
-    void compute_throttles(uav::Multirotor_Descriptor const& multirotor_descriptor, stream::IFloat::Value const& collective_thrust, stream::ITorque::Value const& torque);
+    void compute_throttles(Multirotor_Properties const& multirotor_properties, stream::IFloat::Value const& collective_thrust, stream::ITorque::Value const& torque);
 
 
     UAV& m_uav;

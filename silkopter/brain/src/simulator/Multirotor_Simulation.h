@@ -1,6 +1,7 @@
 #pragma once
 
 #include "common/node/IMultirotor_Simulator.h"
+#include "Multirotor_Properties.h"
 
 class btCylinderShapeZ;
 class btMotionState;
@@ -12,14 +13,6 @@ class btSequentialImpulseConstraintSolver;
 class btCollisionShape;
 class btRigidBody;
 class btDiscreteDynamicsWorld;
-
-namespace silk
-{
-namespace uav
-{
-struct Multirotor_Descriptor;
-}
-}
 
 namespace silk
 {
@@ -35,7 +28,7 @@ public:
 
     auto init(uint32_t rate) -> bool;
 
-    auto init_uav(std::shared_ptr<const uav::Multirotor_Descriptor> multirotor_descriptor) -> bool;
+    auto init_uav(std::shared_ptr<const Multirotor_Properties> multirotor_properties) -> bool;
 
     void reset();
     void stop_motion();
@@ -64,7 +57,7 @@ private:
 
     struct UAV
     {
-        std::shared_ptr<const uav::Multirotor_Descriptor> descriptor;
+        std::shared_ptr<const Multirotor_Properties> properties;
         std::shared_ptr<btCylinderShapeZ> shape;
         std::shared_ptr<btMotionState> motion_state;
         std::shared_ptr<btRigidBody> body;
