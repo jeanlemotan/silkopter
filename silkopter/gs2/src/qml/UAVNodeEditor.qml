@@ -52,9 +52,9 @@ Rectangle {
             anchors.fill: parent
             model: parent.nodeDefModel
 
-            onSelectedItemChanged: {
-                 //console.log("selection ", selectedItem);
-            }
+//            onSelectedItemChanged: {
+//                 //console.log("selection ", selectedItem);
+//            }
         }
     }
 }

@@ -153,7 +153,13 @@ SOURCES += \
     ../../src/UAV.cpp \
     ../../def/uav.def.cpp \
     ../../../libs/common/comms/def/comms.def.cpp \
-    ../../src/Multirotor_Properties.cpp
+    ../../src/uav_properties/Hexa_Properties.cpp \
+    ../../src/uav_properties/Hexatri_Properties.cpp \
+    ../../src/uav_properties/Octo_Properties.cpp \
+    ../../src/uav_properties/Octoquad_Properties.cpp \
+    ../../src/uav_properties/Quad_Properties.cpp \
+    ../../src/uav_properties/Tri_Properties.cpp \
+    ../../src/uav_properties/IMultirotor_Properties.cpp
 
 HEADERS += \
     ../../src/BrainStdAfx.h \
@@ -290,8 +296,14 @@ HEADERS += \
     ../../def/gen_support.h \
     ../../def/uav.def.h \
     ../../../libs/common/comms/def/comms.def.h \
-    ../../src/Multirotor_Properties.h \
-    ../../src/IUAV_Properties.h
+    ../../src/uav_properties/Quad_Properties.h \
+    ../../src/uav_properties/Hexa_Properties.h \
+    ../../src/uav_properties/Hexatri_Properties.h \
+    ../../src/uav_properties/Octo_Properties.h \
+    ../../src/uav_properties/Octoquad_Properties.h \
+    ../../src/uav_properties/Tri_Properties.h \
+    ../../src/uav_properties/IMultirotor_Properties.h \
+    ../../src/uav_properties/IUAV_Properties.h
 
 DISTFILES +=
 

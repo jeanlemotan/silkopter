@@ -97,16 +97,16 @@ struct Multirotor_Descriptor : public IUAV_Descriptor
     acceleration_t motor_deceleration = 10.f : [ ui_name = "Motor Deceleration (N/s)" ];
 };
 
-struct Tricopter_Descriptor : public Multirotor_Descriptor
+struct Tri_Descriptor : public Multirotor_Descriptor
 {
 };
 
-struct Quadcopter_Descriptor : public Multirotor_Descriptor
+struct Quad_Descriptor : public Multirotor_Descriptor
 {
     bool plus_configuration = false : [ ui_name = "+ Configuration" ];
 };
 
-struct Hexacopter_Descriptor : public Multirotor_Descriptor
+struct Hexa_Descriptor : public Multirotor_Descriptor
 {
     bool plus_configuration = false : [ ui_name = "+ Configuration" ];
 };
@@ -115,7 +115,7 @@ struct Hexatri_Descriptor : public Multirotor_Descriptor
 {
 };
 
-struct Octocopter_Descriptor : public Multirotor_Descriptor
+struct Octo_Descriptor : public Multirotor_Descriptor
 {
     bool plus_configuration = false : [ ui_name = "+ Configuration" ];
 };

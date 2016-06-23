@@ -72,7 +72,7 @@ Rectangle {
         }
         MenuButton {
             id: editNodesButton
-            enabled: s_uav.type !== UAV.NONE && s_comms.connectionStatus === Comms.CONNECTED
+            //enabled: s_uav.type !== UAV.NONE && s_comms.connectionStatus === Comms.CONNECTED
             text: "Edit Nodes"
             icon: "qrc:/icons/ui/" + parent.getUAVIconName()
             onClicked: s_menus.push("UAVNodeEditor.qml")
@@ -91,10 +91,10 @@ Rectangle {
         anchors.right: parent.right
         anchors.top: topBar.bottom
         anchors.margins: 16
-        height: 100
+        height: 60
         Text {
             id: label
-            anchors.top: parent.top
+            anchors.verticalCenter: parent.verticalCenter
             anchors.left: parent.left
             height: 30
             width: 150
@@ -109,7 +109,7 @@ Rectangle {
         Slider {
             id: slider
             anchors.left: label.right
-            anchors.top: parent.top
+            anchors.verticalCenter: parent.verticalCenter
             anchors.right: parent.right
             onValueChanged: {
                 s_os.brightness = value

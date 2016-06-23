@@ -240,10 +240,10 @@ private:
   acceleration_t m_motor_deceleration = {10.000000f};
 };
 
-struct Tricopter_Descriptor : public Multirotor_Descriptor
+struct Tri_Descriptor : public Multirotor_Descriptor
 {
 public:
-  virtual ~Tricopter_Descriptor() = default;
+  virtual ~Tri_Descriptor() = default;
   void set_name(std::string const& value);
   void set_name(std::string&& value);
   auto get_name() const -> std::string const&;
@@ -292,10 +292,10 @@ private:
   Multirotor_Descriptor::acceleration_t m_motor_deceleration = {10.000000f};
 };
 
-struct Quadcopter_Descriptor : public Multirotor_Descriptor
+struct Quad_Descriptor : public Multirotor_Descriptor
 {
 public:
-  virtual ~Quadcopter_Descriptor() = default;
+  virtual ~Quad_Descriptor() = default;
   void set_name(std::string const& value);
   void set_name(std::string&& value);
   auto get_name() const -> std::string const&;
@@ -349,10 +349,10 @@ private:
   bool m_plus_configuration = {false};
 };
 
-struct Hexacopter_Descriptor : public Multirotor_Descriptor
+struct Hexa_Descriptor : public Multirotor_Descriptor
 {
 public:
-  virtual ~Hexacopter_Descriptor() = default;
+  virtual ~Hexa_Descriptor() = default;
   void set_name(std::string const& value);
   void set_name(std::string&& value);
   auto get_name() const -> std::string const&;
@@ -458,10 +458,10 @@ private:
   Multirotor_Descriptor::acceleration_t m_motor_deceleration = {10.000000f};
 };
 
-struct Octocopter_Descriptor : public Multirotor_Descriptor
+struct Octo_Descriptor : public Multirotor_Descriptor
 {
 public:
-  virtual ~Octocopter_Descriptor() = default;
+  virtual ~Octo_Descriptor() = default;
   void set_name(std::string const& value);
   void set_name(std::string&& value);
   auto get_name() const -> std::string const&;
@@ -3009,16 +3009,16 @@ ts::Result<void> deserialize(std::vector<Settings::Node_Data>& value, ts::sz::Va
 ts::sz::Value serialize(std::vector<Settings::Node_Data> const& value);
 ts::Result<void> deserialize(Multirotor_Descriptor& value, ts::sz::Value const& sz_value);
 ts::sz::Value serialize(Multirotor_Descriptor const& value);
-ts::Result<void> deserialize(Tricopter_Descriptor& value, ts::sz::Value const& sz_value);
-ts::sz::Value serialize(Tricopter_Descriptor const& value);
-ts::Result<void> deserialize(Quadcopter_Descriptor& value, ts::sz::Value const& sz_value);
-ts::sz::Value serialize(Quadcopter_Descriptor const& value);
-ts::Result<void> deserialize(Hexacopter_Descriptor& value, ts::sz::Value const& sz_value);
-ts::sz::Value serialize(Hexacopter_Descriptor const& value);
+ts::Result<void> deserialize(Tri_Descriptor& value, ts::sz::Value const& sz_value);
+ts::sz::Value serialize(Tri_Descriptor const& value);
+ts::Result<void> deserialize(Quad_Descriptor& value, ts::sz::Value const& sz_value);
+ts::sz::Value serialize(Quad_Descriptor const& value);
+ts::Result<void> deserialize(Hexa_Descriptor& value, ts::sz::Value const& sz_value);
+ts::sz::Value serialize(Hexa_Descriptor const& value);
 ts::Result<void> deserialize(Hexatri_Descriptor& value, ts::sz::Value const& sz_value);
 ts::sz::Value serialize(Hexatri_Descriptor const& value);
-ts::Result<void> deserialize(Octocopter_Descriptor& value, ts::sz::Value const& sz_value);
-ts::sz::Value serialize(Octocopter_Descriptor const& value);
+ts::Result<void> deserialize(Octo_Descriptor& value, ts::sz::Value const& sz_value);
+ts::sz::Value serialize(Octo_Descriptor const& value);
 ts::Result<void> deserialize(Octaquad_Descriptor& value, ts::sz::Value const& sz_value);
 ts::sz::Value serialize(Octaquad_Descriptor const& value);
 ts::Result<void> deserialize(Custom_Multirotor_Descriptor::Motor& value, ts::sz::Value const& sz_value);

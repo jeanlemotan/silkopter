@@ -68,7 +68,7 @@ void Rate_Controller::process()
 
     m_output_stream->clear();
 
-    std::shared_ptr<const Multirotor_Properties> multirotor_properties = m_uav.get_specialized_uav_properties<Multirotor_Properties>();
+    std::shared_ptr<const IMultirotor_Properties> multirotor_properties = m_uav.get_specialized_uav_properties<IMultirotor_Properties>();
     if (!multirotor_properties)
     {
         return;
@@ -94,7 +94,7 @@ void Rate_Controller::process()
 }
 
 
-math::vec3f Rate_Controller::compute_feedforward(Multirotor_Properties const& multirotor_properties, stream::IAngular_Velocity::Value const& input, stream::IAngular_Velocity::Value const& target)
+math::vec3f Rate_Controller::compute_feedforward(IMultirotor_Properties const& multirotor_properties, stream::IAngular_Velocity::Value const& input, stream::IAngular_Velocity::Value const& target)
 {
     math::vec3f v = target - input;
     float vm = math::length(v) * multirotor_properties.get_moment_of_inertia();

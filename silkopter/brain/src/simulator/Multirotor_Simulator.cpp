@@ -1,6 +1,6 @@
 #include "BrainStdAfx.h"
 #include "Multirotor_Simulator.h"
-#include "Multirotor_Properties.h"
+#include "uav_properties/IMultirotor_Properties.h"
 
 #if !defined RASPBERRY_PI
 
@@ -45,7 +45,7 @@ auto Multirotor_Simulator::init(uav::INode_Descriptor const& descriptor) -> bool
 }
 auto Multirotor_Simulator::init() -> bool
 {
-    std::shared_ptr<const Multirotor_Properties> multirotor_properties = m_uav.get_specialized_uav_properties<Multirotor_Properties>();
+    std::shared_ptr<const IMultirotor_Properties> multirotor_properties = m_uav.get_specialized_uav_properties<IMultirotor_Properties>();
     if (!multirotor_properties)
     {
         QLOGE("No multi properties found");
@@ -333,7 +333,7 @@ auto Multirotor_Simulator::set_config(uav::INode_Config const& config) -> bool
 //        uav_config.motors[i].deceleration = sz.motors[i].deceleration;
 //    }
 
-    std::shared_ptr<const Multirotor_Properties> multirotor_properties = m_uav.get_specialized_uav_properties<Multirotor_Properties>();
+    std::shared_ptr<const IMultirotor_Properties> multirotor_properties = m_uav.get_specialized_uav_properties<IMultirotor_Properties>();
     if (!multirotor_properties)
     {
         QLOGE("No multi properties found");

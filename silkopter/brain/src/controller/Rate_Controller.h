@@ -4,7 +4,7 @@
 #include "common/stream/IAngular_Velocity.h"
 #include "common/stream/ITorque.h"
 #include "UAV.h"
-#include "Multirotor_Properties.h"
+#include "uav_properties/IMultirotor_Properties.h"
 
 #include "utils/PID.h"
 #include "Sample_Accumulator.h"
@@ -58,7 +58,7 @@ private:
 
     Sample_Accumulator<stream::IAngular_Velocity, stream::IAngular_Velocity> m_accumulator;
 
-    math::vec3f compute_feedforward(const Multirotor_Properties& multirotor_properties, stream::IAngular_Velocity::Value const& input, stream::IAngular_Velocity::Value const& target);
+    math::vec3f compute_feedforward(const IMultirotor_Properties& multirotor_properties, stream::IAngular_Velocity::Value const& input, stream::IAngular_Velocity::Value const& target);
     math::vec3f compute_feedback(stream::IAngular_Velocity::Value const& input, stream::IAngular_Velocity::Value const& target);
 
     typedef util::PID<float, float, float> PID;

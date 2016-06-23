@@ -2,7 +2,7 @@
 
 #include <memory>
 
-#include "IUAV_Properties.h"
+#include "uav_properties/IUAV_Properties.h"
 #include "common/bus/IBus.h"
 #include "common/node/INode.h"
 #include "common/stream/IStream.h"

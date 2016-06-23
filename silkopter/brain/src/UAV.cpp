@@ -60,12 +60,15 @@
 
 #include "common/stream/IThrottle.h"
 
-//#include "source/EHealth.h"
-
-//#include "common/node/IAHRS.h"
-
 #include "def_lang/Serialization.h"
 #include "def_lang/JSON_Serializer.h"
+
+#include "uav_properties/Tri_Properties.h"
+#include "uav_properties/Quad_Properties.h"
+#include "uav_properties/Hexa_Properties.h"
+#include "uav_properties/Hexatri_Properties.h"
+#include "uav_properties/Octo_Properties.h"
+#include "uav_properties/Octoquad_Properties.h"
 
 #ifdef RASPBERRY_PI
 
@@ -363,9 +366,50 @@ auto UAV::set_uav_descriptor(std::shared_ptr<uav::IUAV_Descriptor> descriptor) -
         return false;
     }
 
-    std::shared_ptr<IUAV_Properties> new_properties = std::make_shared<IUAV_Properties>();
-    if (!new_properties->init(*descriptor))
+    std::shared_ptr<IUAV_Properties> new_properties;
+
+    if (auto* d = dynamic_cast<uav::Tri_Descriptor const*>(descriptor.get()))
     {
+        QLOGE("Tri not supported");
+        return false;
+    }
+    else if (auto* d = dynamic_cast<uav::Quad_Descriptor const*>(descriptor.get()))
+    {
+        std::shared_ptr<Quad_Properties> p = std::make_shared<Quad_Properties>();
+        if (!p->init(*d))
+        {
+            return false;
+        }
+        new_properties = p;
+    }
+    else if (auto* d = dynamic_cast<uav::Hexa_Descriptor const*>(descriptor.get()))
+    {
+        QLOGE("Hexa not supported");
+        return false;
+    }
+    else if (auto* d = dynamic_cast<uav::Hexatri_Descriptor const*>(descriptor.get()))
+    {
+        QLOGE("Hexatri not supported");
+        return false;
+    }
+    else if (auto* d = dynamic_cast<uav::Octo_Descriptor const*>(descriptor.get()))
+    {
+        QLOGE("Octo not supported");
+        return false;
+    }
+    else if (auto* d = dynamic_cast<uav::Octaquad_Descriptor const*>(descriptor.get()))
+    {
+        QLOGE("Octaquad not supported");
+        return false;
+    }
+    else if (auto* d = dynamic_cast<uav::Custom_Multirotor_Descriptor const*>(descriptor.get()))
+    {
+        QLOGE("Custom multirotor not supported");
+        return false;
+    }
+    else
+    {
+        QLOGE("Unknown multirotor descriptor type");
         return false;
     }
 
@@ -405,7 +449,7 @@ auto UAV::set_uav_descriptor(std::shared_ptr<uav::IUAV_Descriptor> descriptor) -
 //    return true;
 //}
 
-auto UAV::get_uav_descriptor() const -> std::shared_ptr<const IUAV_Properties>
+auto UAV::get_uav_properties() const -> std::shared_ptr<const IUAV_Properties>
 {
     return m_uav_properties;
 }
@@ -965,7 +1009,7 @@ auto UAV::init(Comms& comms) -> bool
 
     if (settings.get_uav_descriptor())
     {
-        if (!set_uav_descriptor(*settings.get_uav_descriptor()))
+        if (!set_uav_descriptor(settings.get_uav_descriptor()))
         {
             return false;
         }

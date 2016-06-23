@@ -1,6 +1,6 @@
 #include "BrainStdAfx.h"
 #include "Motor_Mixer.h"
-#include "Multirotor_Properties.h"
+#include "uav_properties/IMultirotor_Properties.h"
 
 #include "uav.def.h"
 //#include "sz_Motor_Mixer.hpp"
@@ -34,7 +34,7 @@ auto Motor_Mixer::init(uav::INode_Descriptor const& descriptor) -> bool
 
 auto Motor_Mixer::init() -> bool
 {
-    std::shared_ptr<const Multirotor_Properties> multirotor_properties = m_uav.get_specialized_uav_properties<Multirotor_Properties>();
+    std::shared_ptr<const IMultirotor_Properties> multirotor_properties = m_uav.get_specialized_uav_properties<IMultirotor_Properties>();
     if (!multirotor_properties)
     {
         QLOGE("No multirotor properties found");
@@ -107,7 +107,7 @@ void Motor_Mixer::process()
         os->samples.clear();
     }
 
-    std::shared_ptr<const Multirotor_Properties> multirotor_properties = m_uav.get_specialized_uav_properties<Multirotor_Properties>();
+    std::shared_ptr<const IMultirotor_Properties> multirotor_properties = m_uav.get_specialized_uav_properties<IMultirotor_Properties>();
     if (!multirotor_properties)
     {
         return;
@@ -160,7 +160,7 @@ constexpr float MIN_THRUST = 0.f;
 constexpr float DYN_RANGE_FACTOR = 1.1f;//allow a bit more dyn range than normal to get better torque resolution at the expense of collective force
 
 
-void Motor_Mixer::compute_throttles(Multirotor_Properties const& multirotor_properties, stream::IFloat::Value const& collective_thrust, stream::ITorque::Value const& _target)
+void Motor_Mixer::compute_throttles(IMultirotor_Properties const& multirotor_properties, stream::IFloat::Value const& collective_thrust, stream::ITorque::Value const& _target)
 {
     auto target = _target;
 

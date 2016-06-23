@@ -38,7 +38,7 @@ auto Multirotor_Brain::init(uav::INode_Descriptor const& descriptor) -> bool
 
 auto Multirotor_Brain::init() -> bool
 {
-    m_multirotor_properties = m_uav.get_specialized_uav_properties<Multirotor_Properties>();
+    m_multirotor_properties = m_uav.get_specialized_uav_properties<IMultirotor_Properties>();
     if (!m_multirotor_properties)
     {
         QLOGE("No multi properties found");

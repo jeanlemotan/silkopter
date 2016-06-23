@@ -15,7 +15,7 @@
 #include "common/stream/IMultirotor_Commands.h"
 #include "common/stream/IMultirotor_State.h"
 
-#include "Multirotor_Properties.h"
+#include "uav_properties/IMultirotor_Properties.h"
 
 #include "Comms.h"
 #include "UAV.h"
@@ -70,7 +70,7 @@ private:
     std::shared_ptr<uav::Multirotor_Brain_Descriptor> m_descriptor;
     std::shared_ptr<uav::Multirotor_Brain_Config> m_config;
 
-    std::shared_ptr<const Multirotor_Properties> m_multirotor_properties;
+    std::shared_ptr<const IMultirotor_Properties> m_multirotor_properties;
 
     LiPo_Battery m_battery;
 
