@@ -21,8 +21,6 @@ namespace silk
 class Quad_Properties : public IMultirotor_Properties
 {
 public:
-    virtual ~Quad_Properties() = default;
-
     bool init(uav::Quad_Descriptor const& descriptor);
 
     float get_mass() const override;
@@ -36,6 +34,8 @@ public:
     float get_motor_acceleration() const override;
     float get_motor_deceleration() const override;
 
+    bool is_plus_configuration() const;
+
     std::vector<Motor> const& get_motors() const override;
 
 private:
@@ -47,6 +47,7 @@ private:
     float m_motor_acceleration = 10.f;
     float m_motor_deceleration = 10.f;
     float m_moment_of_inertia = 0.f;
+    bool m_is_plus_configuration = false;
 
     std::vector<Motor> m_motors;
 };

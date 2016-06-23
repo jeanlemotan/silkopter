@@ -148,7 +148,7 @@ int main(int argc, char **argv)
     }
 
     std::string h_file, cpp_file;
-    Context context(h_file, cpp_file, ts, ts);
+    Context context(h_file, cpp_file, *ts.get_root_scope(), ts);
     context.h_filename = h_filename;
     auto result = generate_code(context, builder.get_ast_root_node(), ts);
     if (result != ts::success)
@@ -213,6 +213,8 @@ static void generate_aux_functions(Context& context)
     context.h_file += context.ident_str + "  T const& operator*() const { return *ptr; }\n";
     context.h_file += context.ident_str + "  T* get() { return ptr.get(); }\n";
     context.h_file += context.ident_str + "  T const* get() const { return ptr.get(); }\n";
+    context.h_file += context.ident_str + "  std::shared_ptr<T> get_shared_ptr() { return ptr; }\n";
+    context.h_file += context.ident_str + "  std::shared_ptr<const T> get_shared_ptr() const { return ptr; }\n";
     context.h_file += context.ident_str + "private:\n";
     context.h_file += context.ident_str + "  template<class U> friend class Poly;\n";
     context.h_file += context.ident_str + "  std::shared_ptr<T> ptr;\n";
@@ -1404,7 +1406,7 @@ static ts::Result<void> generate_code(Context& context, ts::ast::Node const& ast
         generate_ast_code(context, ast_json);
     }
 
-    auto result = generate_declaration_scope_code(context, ts);
+    auto result = generate_declaration_scope_code(context, *ts.get_root_scope());
     if (result != ts::success)
     {
         return result;

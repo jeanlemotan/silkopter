@@ -16,6 +16,7 @@ bool Quad_Properties::init(uav::Quad_Descriptor const& descriptor)
     m_motor_acceleration = descriptor.get_motor_acceleration();
     m_motor_deceleration = descriptor.get_motor_deceleration();
     m_moment_of_inertia = descriptor.get_moment_of_inertia();
+    m_is_plus_configuration = descriptor.get_plus_configuration();
 
     if (math::is_zero(m_moment_of_inertia, math::epsilon<float>()))
     {
@@ -27,6 +28,10 @@ bool Quad_Properties::init(uav::Quad_Descriptor const& descriptor)
     return true;
 }
 
+float Quad_Properties::get_mass() const
+{
+    return m_mass;
+}
 float Quad_Properties::get_radius() const
 {
     return m_radius;
@@ -54,6 +59,10 @@ float Quad_Properties::get_motor_acceleration() const
 float Quad_Properties::get_motor_deceleration() const
 {
     return m_motor_deceleration;
+}
+bool Quad_Properties::is_plus_configuration() const
+{
+    return m_is_plus_configuration;
 }
 std::vector<Quad_Properties::Motor> const& Quad_Properties::get_motors() const
 {

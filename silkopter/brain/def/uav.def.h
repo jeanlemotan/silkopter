@@ -33,6 +33,8 @@ struct Poly
   T const& operator*() const { return *ptr; }
   T* get() { return ptr.get(); }
   T const* get() const { return ptr.get(); }
+  std::shared_ptr<T> get_shared_ptr() { return ptr; }
+  std::shared_ptr<const T> get_shared_ptr() const { return ptr; }
 private:
   template<class U> friend class Poly;
   std::shared_ptr<T> ptr;

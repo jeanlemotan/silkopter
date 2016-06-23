@@ -81,7 +81,7 @@ public:
 
     void save_settings();
 
-    auto set_uav_descriptor(std::shared_ptr<uav::IUAV_Descriptor> descriptor) -> bool;
+    auto set_uav_descriptor(std::shared_ptr<const uav::IUAV_Descriptor> descriptor) -> bool;
     auto get_uav_descriptor() const   -> std::shared_ptr<const uav::IUAV_Descriptor>;
 
     auto get_uav_properties() const   -> std::shared_ptr<const IUAV_Properties>;
@@ -135,7 +135,7 @@ private:
     void sort_nodes(std::shared_ptr<node::INode> first_node);
 
     std::shared_ptr<IUAV_Properties> m_uav_properties;
-    std::shared_ptr<uav::IUAV_Descriptor> m_uav_descriptor;
+    std::shared_ptr<const uav::IUAV_Descriptor> m_uav_descriptor;
 
     Bus_Registry m_buses;
     Node_Registry m_nodes;

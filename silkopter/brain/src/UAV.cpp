@@ -177,9 +177,9 @@ void UAV::save_settings()
 
     uav::Settings settings;
 
-    settings.set_uav_descriptor(uav::Poly<uav::IUAV_Descriptor>(m_uav_descriptor));
+    settings.set_uav_descriptor(uav::Poly<const uav::IUAV_Descriptor>(m_uav_descriptor));
 
-    std::vector<uav::Settings::Node_Data> node_datas = settings.get_nodes();
+    std::vector<uav::Settings::Node_Data>& node_datas = settings.get_nodes();
     auto const& nodes = get_node_registry().get_all();
     for (auto const& n: nodes)
     {
@@ -198,7 +198,7 @@ void UAV::save_settings()
         node_datas.push_back(std::move(node_data));
     }
 
-    std::vector<uav::Settings::Bus_Data> bus_datas = settings.get_buses();
+    std::vector<uav::Settings::Bus_Data>& bus_datas = settings.get_buses();
     auto const& buses = get_bus_registry().get_all();
     for (auto const& b: buses)
     {
@@ -358,7 +358,7 @@ auto UAV::get_uav_descriptor() const -> std::shared_ptr<const uav::IUAV_Descript
 {
     return m_uav_descriptor;
 }
-auto UAV::set_uav_descriptor(std::shared_ptr<uav::IUAV_Descriptor> descriptor) -> bool
+auto UAV::set_uav_descriptor(std::shared_ptr<const uav::IUAV_Descriptor> descriptor) -> bool
 {
     if (!descriptor)
     {
@@ -1009,7 +1009,7 @@ auto UAV::init(Comms& comms) -> bool
 
     if (settings.get_uav_descriptor())
     {
-        if (!set_uav_descriptor(settings.get_uav_descriptor()))
+        if (!set_uav_descriptor(settings.get_uav_descriptor().get_shared_ptr()))
         {
             return false;
         }
