@@ -98,7 +98,8 @@ void Enum_Value_Editor::set_value(std::shared_ptr<const ts::IEnum_Item> element)
 	{
         if (std::shared_ptr<ts::IEnum_Value> mutable_value = m_qualified_value.get_mutable_value())
 		{
-            mutable_value->set_value(element);
+            auto result = mutable_value->set_value(element);
+            QASSERT(result == ts::success);
 		}
 	}
 }

@@ -135,7 +135,15 @@ Result<std::string> Variant_Value::get_ui_string() const
         TS_ASSERT(false);
         return Error("Unconstructed value");
     }
-    return Error("Not Supported");
+    auto result = get_value()->get_ui_string();
+    if (result == ts::success)
+    {
+        return get_value()->get_type()->get_ui_name() + ": " + result.payload();
+    }
+    else
+    {
+        return get_value()->get_type()->get_ui_name() + ": <N/A>";
+    }
 }
 
 std::shared_ptr<const IValue> Variant_Value::select(Value_Selector&& selector) const

@@ -27,9 +27,6 @@ public:
 
     std::shared_ptr<IType const> get_type() const override;
 
-    Result<void> parse_from_ui_string(std::string const& str) override;
-    Result<std::string> get_ui_string() const override;
-
     std::shared_ptr<const IValue> select(Value_Selector&& selector) const override;
     std::shared_ptr<IValue> select(Value_Selector&& selector) override;
 

@@ -221,6 +221,7 @@ enum_body_item  : identifier TCOMMA
                 | identifier TCOLON attribute_list TCOMMA
                 {
                     $$ = $1;
+                    $$.move_children_from(std::move($3));
                 }
                 | identifier TEQUAL TINTEGER_LITERAL TCOLON attribute_list TCOMMA
                 {

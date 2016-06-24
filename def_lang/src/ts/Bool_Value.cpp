@@ -63,6 +63,33 @@ Result<void> Bool_Value::copy_assign(IInitializer_List const& initializer_list)
     return copy_assign(*initializer->get_literal()->get_value());
 }
 
+Result<void> Bool_Value::parse_from_ui_string(std::string const& str)
+{
+    TS_ASSERT(is_constructed());
+    if (!is_constructed())
+    {
+        return Error("Unconstructed value");
+    }
+    if (str == "true")
+    {
+        return set_value(true);
+    }
+    else if (str == "false")
+    {
+        return set_value(false);
+    }
+    return Error("Invalid string - '" + str + "'");
+}
+Result<std::string> Bool_Value::get_ui_string() const
+{
+    TS_ASSERT(is_constructed());
+    if (!is_constructed())
+    {
+        return Error("Unconstructed value");
+    }
+    return get_value() ? "true" : "false";
+}
+
 Result<sz::Value> Bool_Value::serialize() const
 {
     if (!is_constructed())

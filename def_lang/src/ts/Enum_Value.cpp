@@ -175,7 +175,7 @@ Result<std::string> Enum_Value::get_ui_string() const
         TS_ASSERT(false);
         return Error("Unconstructed value");
     }
-    return Error("Not Supported");
+    return m_value->get_ui_name();
 }
 
 std::shared_ptr<const IValue> Enum_Value::select(Value_Selector&& selector) const

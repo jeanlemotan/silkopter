@@ -1,4 +1,4 @@
-#include "value_editors/Boolean_Value_Editor.h"
+#include "value_editors/Bool_Value_Editor.h"
 
 #include <QCheckBox>
 

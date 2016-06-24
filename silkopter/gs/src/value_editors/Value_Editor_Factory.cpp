@@ -1,10 +1,10 @@
 #include "value_editors/Value_Editor_Factory.h"
 
-#include "value_editors/Boolean_Value_Editor.h"
+#include "value_editors/Bool_Value_Editor.h"
 #include "value_editors/Double_Value_Editor.h"
 #include "value_editors/Enum_Value_Editor.h"
 #include "value_editors/Float_Value_Editor.h"
-#include "value_editors/Integral_Value_Editor.h"
+#include "value_editors/Int_Value_Editor.h"
 #include "value_editors/Optional_Value_Editor.h"
 #include "value_editors/String_Value_Editor.h"
 #include "value_editors/Variant_Value_Editor.h"

@@ -58,6 +58,24 @@ Result<void> String_Value::copy_assign(IInitializer_List const& initializer_list
 
     return copy_assign(*initializer->get_literal()->get_value());
 }
+Result<void> String_Value::parse_from_ui_string(std::string const& str)
+{
+    TS_ASSERT(is_constructed());
+    if (!is_constructed())
+    {
+        return Error("Unconstructed value");
+    }
+    return set_value(str);
+}
+Result<std::string> String_Value::get_ui_string() const
+{
+    TS_ASSERT(is_constructed());
+    if (!is_constructed())
+    {
+        return Error("Unconstructed value");
+    }
+    return get_value();
+}
 
 Result<sz::Value> String_Value::serialize() const
 {

@@ -31,6 +31,8 @@ public:
     Result<sz::Value> serialize() const override;
     Result<void> deserialize(sz::Value const&) override;
 
+    Result<void> parse_from_ui_string(std::string const& str) override;
+    Result<std::string> get_ui_string() const override;
 
 private:
 };

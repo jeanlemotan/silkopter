@@ -1,4 +1,4 @@
-#include "value_editors/Integral_Value_Editor.h"
+#include "value_editors/Int_Value_Editor.h"
 
 #include <QSpinBox>
 #include <QSlider>

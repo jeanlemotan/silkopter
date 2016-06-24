@@ -122,6 +122,11 @@ T get_component(ts::vec4<T> const& value, size_t idx)
     return value.w;
 }
 
+template<typename T> std::string to_string(T const& value) { return std::to_string(value); }
+template<typename T> std::string to_string(ts::vec2<T> const& value) { return to_string(value.x) + ", " + to_string(value.y); }
+template<typename T> std::string to_string(ts::vec3<T> const& value) { return to_string(value.x) + ", " + to_string(value.y) + ", " + to_string(value.z); }
+template<typename T> std::string to_string(ts::vec4<T> const& value) { return to_string(value.x) + ", " + to_string(value.y) + ", " + to_string(value.z) + ", " + to_string(value.w); }
+
 template<typename T> bool is_smaller(T const& value, T min) { return value < min; }
 template<typename T> bool is_smaller(ts::vec2<T> const& value, T min) { return value.x < min || value.y < min; }
 template<typename T> bool is_smaller(ts::vec2<T> const& value, ts::vec2<T> const& min) { return value.x < min.x || value.y < min.y; }

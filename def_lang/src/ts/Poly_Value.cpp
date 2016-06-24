@@ -161,7 +161,19 @@ Result<std::string> Poly_Value::get_ui_string() const
         TS_ASSERT(false);
         return Error("Unconstructed value");
     }
-    return Error("Not Supported");
+    if (m_value)
+    {
+        auto result = m_value->get_ui_string();
+        if (result == ts::success)
+        {
+            return m_value->get_type()->get_ui_name() + ": " + result.payload();
+        }
+        else
+        {
+            return m_value->get_type()->get_ui_name() + ": <N/A>";
+        }
+    }
+    return Error("<null>");
 }
 
 std::shared_ptr<const IValue> Poly_Value::select(Value_Selector&& selector) const

@@ -143,6 +143,29 @@ Result<void> Numeric_Value_Template<Traits>::copy_assign(IInitializer_List const
 }
 
 template<typename Traits>
+Result<void> Numeric_Value_Template<Traits>::parse_from_ui_string(std::string const& str)
+{
+    TS_ASSERT(this->is_constructed());
+    if (!this->is_constructed())
+    {
+        return Error("Unconstructed value");
+    }
+    return Error("Not Supported");
+}
+
+template<typename Traits>
+Result<std::string> Numeric_Value_Template<Traits>::get_ui_string() const
+{
+    TS_ASSERT(this->is_constructed());
+    if (!this->is_constructed())
+    {
+        return Error("Unconstructed value");
+    }
+    return detail::to_string(this->get_value());
+}
+
+
+template<typename Traits>
 Result<sz::Value> Numeric_Value_Template<Traits>::serialize() const
 {
     if (!this->is_constructed())

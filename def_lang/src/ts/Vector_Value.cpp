@@ -173,7 +173,7 @@ Result<std::string> Vector_Value::get_ui_string() const
         TS_ASSERT(false);
         return Error("Unconstructed value");
     }
-    return Error("Not Supported");
+    return std::to_string(get_value_count()) + " elements";
 }
 
 std::shared_ptr<const IValue> Vector_Value::select(Value_Selector&& selector) const

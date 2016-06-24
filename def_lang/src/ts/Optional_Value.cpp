@@ -126,7 +126,11 @@ Result<std::string> Optional_Value::get_ui_string() const
         TS_ASSERT(false);
         return Error("Unconstructed value");
     }
-    return Error("Not Supported");
+    if (is_set())
+    {
+        return m_value->get_ui_string();
+    }
+    return "<none>";
 }
 
 std::shared_ptr<const IValue> Optional_Value::select(Value_Selector&& selector) const

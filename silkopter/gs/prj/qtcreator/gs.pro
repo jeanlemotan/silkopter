@@ -91,12 +91,10 @@ HEADERS += \
     ../../src/Properties_Model.h \
     ../../src/Properties_Browser.h \
     ../../src/value_editors/Value_Editor_Factory.h \
-    ../../src/value_editors/Boolean_Value_Editor.h \
     ../../src/value_editors/Double_Value_Editor.h \
     ../../src/value_editors/Empty_Value_Editor.h \
     ../../src/value_editors/Enum_Value_Editor.h \
     ../../src/value_editors/Float_Value_Editor.h \
-    ../../src/value_editors/Integral_Value_Editor.h \
     ../../src/value_editors/IValue_Editor.h \
     ../../src/value_editors/Optional_Value_Editor.h \
     ../../src/value_editors/Qualified_Value.h \
@@ -110,7 +108,9 @@ HEADERS += \
     ../../src/value_editors/Vec4i_Value_Editor.h \
     ../../src/value_editors/details/Numeric_Value_Editor_Helper.h \
     ../../src/value_editors/details/Qualified_Value.inl \
-    ../../src/value_editors/details/VecX_Value_Editor_Helper.h
+    ../../src/value_editors/details/VecX_Value_Editor_Helper.h \
+    ../../src/value_editors/Bool_Value_Editor.h \
+    ../../src/value_editors/Int_Value_Editor.h
 
 SOURCES += \
     ../../src/GS.cpp \
@@ -126,12 +126,10 @@ SOURCES += \
     ../../src/Properties_Model.cpp \
     ../../src/Properties_Browser.cpp \
     ../../src/value_editors/Value_Editor_Factory.cpp \
-    ../../src/value_editors/Boolean_Value_Editor.cpp \
     ../../src/value_editors/Double_Value_Editor.cpp \
     ../../src/value_editors/Empty_Value_Editor.cpp \
     ../../src/value_editors/Enum_Value_Editor.cpp \
     ../../src/value_editors/Float_Value_Editor.cpp \
-    ../../src/value_editors/Integral_Value_Editor.cpp \
     ../../src/value_editors/Numeric_Value_Editor_Helper.cpp \
     ../../src/value_editors/Optional_Value_Editor.cpp \
     ../../src/value_editors/String_Value_Editor.cpp \
@@ -142,7 +140,9 @@ SOURCES += \
     ../../src/value_editors/Vec3i_Value_Editor.cpp \
     ../../src/value_editors/Vec4f_Value_Editor.cpp \
     ../../src/value_editors/Vec4i_Value_Editor.cpp \
-    ../../src/value_editors/VecX_Value_Editor_Helper.cpp
+    ../../src/value_editors/VecX_Value_Editor_Helper.cpp \
+    ../../src/value_editors/Bool_Value_Editor.cpp \
+    ../../src/value_editors/Int_Value_Editor.cpp
 
 FORMS += \
     ../../src/GS.ui

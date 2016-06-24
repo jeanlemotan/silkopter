@@ -94,27 +94,6 @@ std::shared_ptr<IType const> Value_Template_EP<Traits>::get_type() const
 }
 
 template<typename Traits>
-Result<void> Value_Template_EP<Traits>::parse_from_ui_string(std::string const& str)
-{
-    TS_ASSERT(is_constructed());
-    if (!is_constructed())
-    {
-        return Error("Unconstructed value");
-    }
-    return Error("Not Supported");
-}
-template<typename Traits>
-Result<std::string> Value_Template_EP<Traits>::get_ui_string() const
-{
-    TS_ASSERT(is_constructed());
-    if (!is_constructed())
-    {
-        return Error("Unconstructed value");
-    }
-    return Error("Not Supported");
-}
-
-template<typename Traits>
 std::shared_ptr<const IValue> Value_Template_EP<Traits>::select(Value_Selector&& selector) const
 {
     TS_ASSERT(is_constructed());
