@@ -1,0 +1,51 @@
+<technique name="primitive2d">
+	<pass name="0">
+		<uniform desc="Viewport" name="uViewportSize" link="viewport/size"/>
+		<attribute desc="Positions" name="aPos" link="positions" count="3"/>
+		<attribute desc="Colors" name="aCol" link="colors" count="4"/>
+		<attribute desc="TexCoords0" name="aTexCoord0" link="tex_coords_0" count="2"/>
+		<sampler name="diffuse" filter="bilinear" wraps="clamp" wrapt="clamp" mipmap="true"/>
+
+		<renderstate>
+			<cull val="no">
+			</cull>
+			<depth>
+				<test val="no"/>
+				<write val="no"/>
+			</depth>
+			
+		</renderstate>	
+
+		<shader>
+			<vshader><![CDATA[
+				varying lowp vec4 vColor;
+				varying highp vec2 vTexCoord0;
+
+				void main()
+				{
+					highp vec2 pos = $(aPos).xy;
+					
+					pos = pos/$(uViewportSize)*2.0 - 1.0;
+					pos.y *= -1.0;
+					
+					vColor = $(aCol);
+					vTexCoord0 = $(aTexCoord0);
+					
+					gl_Position = vec4(pos, 1.0, 1.0);
+				}
+			]]></vshader>
+			<fshader><![CDATA[
+				varying lowp vec4 vColor;
+				varying highp vec2 vTexCoord0;
+				void main()
+				{
+					lowp vec4 diffuse = texture2D($(diffuse), vTexCoord0);
+					gl_FragColor = vec4(vColor.rgb, vColor.a * diffuse.a);
+				}
+			]]></fshader>
+		</shader>
+		
+	
+	</pass>
+	
+</technique>

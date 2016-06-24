@@ -1,0 +1,84 @@
+{
+    "nodes": {
+        "Multi Simulator": {
+            "hal_editor": {
+                "position": {
+                    "x": 34.0,
+                    "y": -897.0
+                }
+            }
+        },
+        "Throttle Generator": {
+            "hal_editor": {
+                "position": {
+                    "x": -215.0,
+                    "y": -518.0
+                }
+            }
+        },
+        "Rate Controller": {
+            "hal_editor": {
+                "position": {
+                    "x": -350.0,
+                    "y": -703.0
+                }
+            }
+        },
+        "Angular Velocity RS": {
+            "hal_editor": {
+                "position": {
+                    "x": -537.0,
+                    "y": -829.0
+                }
+            }
+        },
+        "Motor Mixer": {
+            "hal_editor": {
+                "position": {
+                    "x": -197.0,
+                    "y": -727.0
+                }
+            }
+        },
+        "Force Generator": {
+            "hal_editor": {
+                "position": {
+                    "x": -238.0,
+                    "y": -536.0
+                }
+            }
+        },
+        "Torque Generator": {
+            "hal_editor": {
+                "position": {
+                    "x": -427.0,
+                    "y": -680.0
+                }
+            }
+        },
+        "Float Generator": {
+            "hal_editor": {
+                "position": {
+                    "x": -363.0,
+                    "y": -552.0
+                }
+            }
+        },
+        "Oscillator": {
+            "hal_editor": {
+                "position": {
+                    "x": -707.0,
+                    "y": -506.0
+                }
+            }
+        },
+        "Angular Velocity Generator": {
+            "hal_editor": {
+                "position": {
+                    "x": -582.0,
+                    "y": -666.0
+                }
+            }
+        }
+    }
+}

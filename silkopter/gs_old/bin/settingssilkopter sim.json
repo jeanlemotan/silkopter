@@ -1,0 +1,388 @@
+{
+    "nodes": {
+        "Multi Simulator": {
+            "hal_editor": {
+                "position": {
+                    "x": -1869.0,
+                    "y": -1106.0
+                }
+            }
+        },
+        "Throttle Generator": {
+            "hal_editor": {
+                "position": {
+                    "x": -531.0,
+                    "y": -684.0
+                }
+            }
+        },
+        "Multi Brain": {
+            "hal_editor": {
+                "position": {
+                    "x": -1051.0,
+                    "y": -479.0
+                }
+            }
+        },
+        "Multi Pilot": {
+            "hal_editor": {
+                "position": {
+                    "x": -936.0,
+                    "y": -660.0
+                }
+            }
+        },
+        "Angular Velocity RS": {
+            "hal_editor": {
+                "position": {
+                    "x": -1358.0,
+                    "y": -761.0
+                }
+            }
+        },
+        "Acceleration RS": {
+            "hal_editor": {
+                "position": {
+                    "x": -1180.0,
+                    "y": -864.0
+                }
+            }
+        },
+        "Comp AHRS": {
+            "hal_editor": {
+                "position": {
+                    "x": -1177.0,
+                    "y": -1055.0
+                }
+            }
+        },
+        "Magnetic Field RS": {
+            "hal_editor": {
+                "position": {
+                    "x": -1377.0,
+                    "y": -863.0
+                }
+            }
+        },
+        "Frame RS": {
+            "hal_editor": {
+                "position": {
+                    "x": -1172.0,
+                    "y": -949.0
+                }
+            }
+        },
+        "Gravity Filter": {
+            "hal_editor": {
+                "position": {
+                    "x": -1020.0,
+                    "y": -914.0
+                }
+            }
+        },
+        "Linear Acceleration (Local->ENU)": {
+            "hal_editor": {
+                "position": {
+                    "x": -1025.0,
+                    "y": -779.0
+                }
+            }
+        },
+        "Linear Acceleration (ENU->ECEF)": {
+            "hal_editor": {
+                "position": {
+                    "x": 381.0,
+                    "y": 275.0
+                }
+            }
+        },
+        "Multi Input": {
+            "hal_editor": {
+                "position": {
+                    "x": -1123.0,
+                    "y": -348.0
+                }
+            }
+        },
+        "Motor Mixer": {
+            "hal_editor": {
+                "position": {
+                    "x": -2169.0,
+                    "y": -1081.0
+                }
+            }
+        },
+        "Rate Controller": {
+            "hal_editor": {
+                "position": {
+                    "x": -1168.0,
+                    "y": -715.0
+                }
+            }
+        },
+        "PCA9685": {
+            "hal_editor": {
+                "position": {
+                    "x": -149.0,
+                    "y": -698.0
+                }
+            }
+        },
+        "Oscillator": {
+            "hal_editor": {
+                "position": {
+                    "x": -475.0,
+                    "y": -815.0
+                }
+            }
+        },
+        "PWM Generator": {
+            "hal_editor": {
+                "position": {
+                    "x": -351.0,
+                    "y": -738.0
+                }
+            }
+        },
+        "MPU9250": {
+            "hal_editor": {
+                "position": {
+                    "x": -1553.0,
+                    "y": -1043.0
+                }
+            }
+        },
+        "Acceleration LPF": {
+            "hal_editor": {
+                "position": {
+                    "x": -1590.0,
+                    "y": -1052.0
+                }
+            }
+        },
+        "Angular Velocity LPF": {
+            "hal_editor": {
+                "position": {
+                    "x": -1578.0,
+                    "y": -961.0
+                }
+            }
+        },
+        "MS5611": {
+            "hal_editor": {
+                "position": {
+                    "x": -1547.0,
+                    "y": -795.0
+                }
+            }
+        },
+        "Raspicam": {
+            "hal_editor": {
+                "position": {
+                    "x": -1105.0,
+                    "y": -546.0
+                }
+            }
+        },
+        "PWM Generator 0": {
+            "hal_editor": {
+                "position": {
+                    "x": 219.0,
+                    "y": 90.0
+                }
+            }
+        },
+        "MaxSonar": {
+            "hal_editor": {
+                "position": {
+                    "x": -1528.0,
+                    "y": -617.0
+                }
+            }
+        },
+        "Throttle To PWM": {
+            "hal_editor": {
+                "position": {
+                    "x": -480.0,
+                    "y": -582.0
+                }
+            }
+        },
+        "Position RS (ECEF)": {
+            "hal_editor": {
+                "position": {
+                    "x": -1404.0,
+                    "y": -659.0
+                }
+            }
+        },
+        "Float RS": {
+            "hal_editor": {
+                "position": {
+                    "x": 304.0,
+                    "y": 135.0
+                }
+            }
+        },
+        "Float RS 0": {
+            "hal_editor": {
+                "position": {
+                    "x": 304.0,
+                    "y": 224.0
+                }
+            }
+        },
+        "Comp ECEF Position": {
+            "hal_editor": {
+                "position": {
+                    "x": 180.0,
+                    "y": 129.0
+                }
+            }
+        },
+        "Comp ECEF": {
+            "hal_editor": {
+                "position": {
+                    "x": 421.0,
+                    "y": -54.0
+                }
+            }
+        },
+        "EKF ECEF": {
+            "hal_editor": {
+                "position": {
+                    "x": -1420.0,
+                    "y": -482.0
+                }
+            }
+        },
+        "Velocity RS (ECEF)": {
+            "hal_editor": {
+                "position": {
+                    "x": -1434.0,
+                    "y": -571.0
+                }
+            }
+        },
+        "GPS Info RS": {
+            "hal_editor": {
+                "position": {
+                    "x": -377.0,
+                    "y": -24.0
+                }
+            }
+        },
+        "Acceleration LPF (ECEF)": {
+            "hal_editor": {
+                "position": {
+                    "x": 3.0,
+                    "y": 262.0
+                }
+            }
+        },
+        "Position LPF (ECEF)": {
+            "hal_editor": {
+                "position": {
+                    "x": -137.0,
+                    "y": 278.0
+                }
+            }
+        },
+        "Throttle To PWM 0": {
+            "hal_editor": {
+                "position": {
+                    "x": -609.0,
+                    "y": -612.0
+                }
+            }
+        },
+        "Throttle To PWM 1": {
+            "hal_editor": {
+                "position": {
+                    "x": -790.0,
+                    "y": -270.0
+                }
+            }
+        },
+        "Throttle To PWM 2": {
+            "hal_editor": {
+                "position": {
+                    "x": -794.0,
+                    "y": -192.0
+                }
+            }
+        },
+        "UBLOX": {
+            "hal_editor": {
+                "position": {
+                    "x": -1548.0,
+                    "y": -712.0
+                }
+            }
+        },
+        "ADS1115": {
+            "hal_editor": {
+                "position": {
+                    "x": -1612.0,
+                    "y": -533.0
+                }
+            }
+        },
+        "Proximity": {
+            "hal_editor": {
+                "position": {
+                    "x": -1337.0,
+                    "y": -277.0
+                }
+            }
+        },
+        "Distance RS": {
+            "hal_editor": {
+                "position": {
+                    "x": -1561.0,
+                    "y": -290.0
+                }
+            }
+        },
+        "ADC Ammeter": {
+            "hal_editor": {
+                "position": {
+                    "x": -1489.0,
+                    "y": -551.0
+                }
+            }
+        },
+        "Raspicam1": {
+            "hal_editor": {
+                "position": {
+                    "x": -1035.0,
+                    "y": -570.0
+                }
+            }
+        },
+        "Pressure LPF": {
+            "hal_editor": {
+                "position": {
+                    "x": -1603.0,
+                    "y": -647.0
+                }
+            }
+        },
+        "Rate Controller 0": {
+            "hal_editor": {
+                "position": {
+                    "x": -925.0,
+                    "y": -1067.0
+                }
+            }
+        },
+        "Rate Controller 1": {
+            "hal_editor": {
+                "position": {
+                    "x": -730.0,
+                    "y": -904.0
+                }
+            }
+        }
+    }
+}

@@ -654,7 +654,7 @@ static Result<Value> parse_array_value(char const*& json_ptr, char const* json_e
 
 static Result<Value> parse_true_value(char const*& json_ptr, char const* json_end)
 {
-    if (json_ptr + 4 >= json_end)
+    if (json_ptr + 4 > json_end)
     {
         return Error("Unexpected end of data while parsing 'true' value");
     }
@@ -668,7 +668,7 @@ static Result<Value> parse_true_value(char const*& json_ptr, char const* json_en
 
 static Result<Value> parse_false_value(char const*& json_ptr, char const* json_end)
 {
-    if (json_ptr + 5 >= json_end)
+    if (json_ptr + 5 > json_end)
     {
         return Error("Unexpected end of data while parsing 'false' value");
     }
@@ -682,7 +682,7 @@ static Result<Value> parse_false_value(char const*& json_ptr, char const* json_e
 
 static Result<Value> parse_null_value(char const*& json_ptr, char const* json_end)
 {
-    if (json_ptr + 4 >= json_end)
+    if (json_ptr + 4 > json_end)
     {
         return Error("Unexpected end of data while parsing 'null' value");
     }

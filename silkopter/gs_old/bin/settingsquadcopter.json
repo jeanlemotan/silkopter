@@ -1,0 +1,228 @@
+{
+    "nodes": {
+        "Multi Simulator": {
+            "hal_editor": {
+                "position": {
+                    "x": 24.0,
+                    "y": -528.0
+                }
+            }
+        },
+        "Throttle Generator": {
+            "hal_editor": {
+                "position": {
+                    "x": -192.0,
+                    "y": -496.0
+                }
+            }
+        },
+        "Simulator": {
+            "hal_editor": {
+                "position": {
+                    "x": -165.0,
+                    "y": -708.0
+                }
+            }
+        },
+        "Throttle Generator 1": {
+            "hal_editor": {
+                "position": {
+                    "x": -286.0,
+                    "y": -424.0
+                }
+            }
+        },
+        "Motor Mixer": {
+            "hal_editor": {
+                "position": {
+                    "x": 1112.0,
+                    "y": -696.0
+                }
+            }
+        },
+        "Torque Generator": {
+            "hal_editor": {
+                "position": {
+                    "x": -426.0,
+                    "y": -723.0
+                }
+            }
+        },
+        "Float Generator": {
+            "hal_editor": {
+                "position": {
+                    "x": -417.0,
+                    "y": -548.0
+                }
+            }
+        },
+        "Rate Controller": {
+            "hal_editor": {
+                "position": {
+                    "x": 886.0,
+                    "y": -707.0
+                }
+            }
+        },
+        "Angular Velocity RS": {
+            "hal_editor": {
+                "position": {
+                    "x": 629.0,
+                    "y": -742.0
+                }
+            }
+        },
+        "Angular Velocity Generator": {
+            "hal_editor": {
+                "position": {
+                    "x": -654.0,
+                    "y": -706.0
+                }
+            }
+        },
+        "Oscillator": {
+            "hal_editor": {
+                "position": {
+                    "x": -807.0,
+                    "y": -752.0
+                }
+            }
+        },
+        "Comp AHRS": {
+            "hal_editor": {
+                "position": {
+                    "x": 384.0,
+                    "y": -636.0
+                }
+            }
+        },
+        "Acceleration LPF": {
+            "hal_editor": {
+                "position": {
+                    "x": 152.0,
+                    "y": -638.0
+                }
+            }
+        },
+        "Angular Velocity LPF": {
+            "hal_editor": {
+                "position": {
+                    "x": 132.0,
+                    "y": -748.0
+                }
+            }
+        },
+        "Magnetic Field RS": {
+            "hal_editor": {
+                "position": {
+                    "x": 159.0,
+                    "y": -529.0
+                }
+            }
+        },
+        "Gravity Filter": {
+            "hal_editor": {
+                "position": {
+                    "x": 485.0,
+                    "y": -369.0
+                }
+            }
+        },
+        "Frame RS": {
+            "hal_editor": {
+                "position": {
+                    "x": 487.0,
+                    "y": -480.0
+                }
+            }
+        },
+        "Acceleration RS": {
+            "hal_editor": {
+                "position": {
+                    "x": 304.0,
+                    "y": -389.0
+                }
+            }
+        },
+        "Multi Brain": {
+            "hal_editor": {
+                "position": {
+                    "x": 916.0,
+                    "y": -462.0
+                }
+            }
+        },
+        "EKF ECEF": {
+            "hal_editor": {
+                "position": {
+                    "x": 382.0,
+                    "y": -90.0
+                }
+            }
+        },
+        "EKFECEF": {
+            "hal_editor": {
+                "position": {
+                    "x": 422.0,
+                    "y": -209.0
+                }
+            }
+        },
+        "Linear Acceleration (Local->ENU)": {
+            "hal_editor": {
+                "position": {
+                    "x": 371.0,
+                    "y": -234.0
+                }
+            }
+        },
+        "Position RS (ECEF)": {
+            "hal_editor": {
+                "position": {
+                    "x": 96.0,
+                    "y": -391.0
+                }
+            }
+        },
+        "Velocity RS (ECEF)": {
+            "hal_editor": {
+                "position": {
+                    "x": 96.0,
+                    "y": -281.0
+                }
+            }
+        },
+        "Multi Pilot": {
+            "hal_editor": {
+                "position": {
+                    "x": 999.0,
+                    "y": -107.0
+                }
+            }
+        },
+        "Proximity": {
+            "hal_editor": {
+                "position": {
+                    "x": 702.0,
+                    "y": -145.0
+                }
+            }
+        },
+        "Pressure Velocity": {
+            "hal_editor": {
+                "position": {
+                    "x": 77.0,
+                    "y": -145.0
+                }
+            }
+        },
+        "Pressure LPF": {
+            "hal_editor": {
+                "position": {
+                    "x": -102.0,
+                    "y": -154.0
+                }
+            }
+        }
+    }
+}

@@ -234,8 +234,7 @@ Result<void> Poly_Value::deserialize(sz::Value const& sz_value)
     }
     if (sz_value.is_empty())
     {
-        set_value(std::shared_ptr<IValue>());
-        return success;
+        return set_value(std::shared_ptr<IValue>());
     }
 
     if (!sz_value.is_object())
@@ -294,21 +293,27 @@ std::shared_ptr<IValue> Poly_Value::get_value()
 
 Result<void> Poly_Value::set_value(std::shared_ptr<IValue> value)
 {
-    if (!value)
-    {
-        return Error("Cannot insert null value");
-    }
-    if (!is_constructed() || !value->is_constructed())
+//    if (!value)
+//    {
+//        return Error("Cannot insert null value");
+//    }
+    if (!is_constructed())
     {
         TS_ASSERT(false);
         return Error("Unconstructed value");
     }
 
-    //    if (!value)
-//    {
-//        m_value = nullptr;
-//        return success;
-//    }
+    if (!value)
+    {
+        m_value = nullptr;
+        return success;
+    }
+
+    if (!value->is_constructed())
+    {
+        TS_ASSERT(false);
+        return Error("Cannot set an unconstructed value");
+    }
 
     if (!is_type_allowed(*value->get_type()))
     {
