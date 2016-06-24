@@ -2,7 +2,7 @@
 
 namespace silk
 {
-namespace uav
+namespace hal
 {
 struct IBus_Descriptor;
 }
@@ -20,8 +20,8 @@ class IBus : q::util::Noncopyable
 public:
     virtual ~IBus() = default;
 
-    virtual bool init(uav::IBus_Descriptor const& descriptor) = 0;
-    virtual std::shared_ptr<const uav::IBus_Descriptor> get_descriptor() const = 0;
+    virtual bool init(hal::IBus_Descriptor const& descriptor) = 0;
+    virtual std::shared_ptr<const hal::IBus_Descriptor> get_descriptor() const = 0;
 };
 
 }

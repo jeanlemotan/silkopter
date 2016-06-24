@@ -8,7 +8,7 @@
 
 namespace silk
 {
-namespace uav
+namespace hal
 {
 struct Quad_Descriptor;
 }
@@ -21,7 +21,7 @@ namespace silk
 class Quad_Properties : public IMultirotor_Properties
 {
 public:
-    bool init(uav::Quad_Descriptor const& descriptor);
+    bool init(hal::Quad_Descriptor const& descriptor);
 
     float get_mass() const override;
     float get_moment_of_inertia() const override;

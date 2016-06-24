@@ -6,7 +6,7 @@
 #include <fcntl.h>
 #include <termios.h>
 
-#include "uav.def.h"
+#include "hal.def.h"
 
 namespace silk
 {
@@ -14,7 +14,7 @@ namespace bus
 {
 
 UART_Linux::UART_Linux()
-    : m_descriptor(new uav::UART_Linux_Descriptor())
+    : m_descriptor(new hal::UART_Linux_Descriptor())
 {
 }
 
@@ -23,9 +23,9 @@ UART_Linux::~UART_Linux()
     close();
 }
 
-bool UART_Linux::init(uav::IBus_Descriptor const& descriptor)
+bool UART_Linux::init(hal::IBus_Descriptor const& descriptor)
 {
-    auto specialized = dynamic_cast<uav::UART_Linux_Descriptor const*>(&descriptor);
+    auto specialized = dynamic_cast<hal::UART_Linux_Descriptor const*>(&descriptor);
     if (!specialized)
     {
         QLOGE("Wrong descriptor type");
@@ -36,12 +36,12 @@ bool UART_Linux::init(uav::IBus_Descriptor const& descriptor)
     int baud_id = -1;
     switch (m_descriptor->get_baud())
     {
-    case uav::UART_Linux_Descriptor::baud_t::_9600: baud_id = B9600; break;
-    case uav::UART_Linux_Descriptor::baud_t::_19200: baud_id = B19200; break;
-    case uav::UART_Linux_Descriptor::baud_t::_38400: baud_id = B38400; break;
-    case uav::UART_Linux_Descriptor::baud_t::_57600: baud_id = B57600; break;
-    case uav::UART_Linux_Descriptor::baud_t::_115200: baud_id = B115200; break;
-    case uav::UART_Linux_Descriptor::baud_t::_230400: baud_id = B230400; break;
+    case hal::UART_Linux_Descriptor::baud_t::_9600: baud_id = B9600; break;
+    case hal::UART_Linux_Descriptor::baud_t::_19200: baud_id = B19200; break;
+    case hal::UART_Linux_Descriptor::baud_t::_38400: baud_id = B38400; break;
+    case hal::UART_Linux_Descriptor::baud_t::_57600: baud_id = B57600; break;
+    case hal::UART_Linux_Descriptor::baud_t::_115200: baud_id = B115200; break;
+    case hal::UART_Linux_Descriptor::baud_t::_230400: baud_id = B230400; break;
     }
     if (baud_id < 0)
     {
@@ -57,7 +57,7 @@ bool UART_Linux::init(uav::IBus_Descriptor const& descriptor)
     return true;
 }
 
-std::shared_ptr<const uav::IBus_Descriptor> UART_Linux::get_descriptor() const
+std::shared_ptr<const hal::IBus_Descriptor> UART_Linux::get_descriptor() const
 {
     return m_descriptor;
 }

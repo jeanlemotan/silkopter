@@ -10,7 +10,7 @@ extern "C"
 
 #endif
 
-#include "uav.def.h"
+#include "hal.def.h"
 
 ///////////////////////////////////////////////////////////////////
 
@@ -23,7 +23,7 @@ std::mutex SPI_BCM::s_mutex;
 
 
 SPI_BCM::SPI_BCM()
-    : m_descriptor(new uav::SPI_BCM_Descriptor())
+    : m_descriptor(new hal::SPI_BCM_Descriptor())
 {
 }
 
@@ -31,9 +31,9 @@ SPI_BCM::~SPI_BCM()
 {
 }
 
-bool SPI_BCM::init(uav::IBus_Descriptor const& descriptor)
+bool SPI_BCM::init(hal::IBus_Descriptor const& descriptor)
 {
-    auto specialized = dynamic_cast<uav::SPI_BCM_Descriptor const*>(&descriptor);
+    auto specialized = dynamic_cast<hal::SPI_BCM_Descriptor const*>(&descriptor);
     if (!specialized)
     {
         QLOGE("Wrong descriptor type");
@@ -49,7 +49,7 @@ bool SPI_BCM::init(uav::IBus_Descriptor const& descriptor)
     return true;
 }
 
-std::shared_ptr<const uav::IBus_Descriptor> SPI_BCM::get_descriptor() const
+std::shared_ptr<const hal::IBus_Descriptor> SPI_BCM::get_descriptor() const
 {
     return m_descriptor;
 }

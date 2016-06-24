@@ -1,7 +1,7 @@
 #include "BrainStdAfx.h"
 #include "PCA9685.h"
 
-#include "uav.def.h"
+#include "hal.def.h"
 //#include "sz_PCA9685.hpp"
 
 #ifdef RASPBERRY_PI
@@ -50,10 +50,10 @@ std::mutex PCA9685::s_pwm_enabled_mutex;
 size_t PCA9685::s_pwm_enabled_count = 0;
 
 
-PCA9685::PCA9685(UAV& uav)
-    : m_uav(uav)
-    , m_descriptor(new uav::PCA9685_Descriptor())
-    , m_config(new uav::PCA9685_Config())
+PCA9685::PCA9685(HAL& hal)
+    : m_hal(hal)
+    , m_descriptor(new hal::PCA9685_Descriptor())
+    , m_config(new hal::PCA9685_Config())
 {
     m_pwm_channels.resize(16);
 }
@@ -88,11 +88,11 @@ auto PCA9685::get_inputs() const -> std::vector<Input>
 }
 
 
-auto PCA9685::init(uav::INode_Descriptor const& descriptor) -> bool
+auto PCA9685::init(hal::INode_Descriptor const& descriptor) -> bool
 {
     QLOG_TOPIC("PCA9685::init");
 
-    auto specialized = dynamic_cast<uav::PCA9685_Descriptor const*>(&descriptor);
+    auto specialized = dynamic_cast<hal::PCA9685_Descriptor const*>(&descriptor);
     if (!specialized)
     {
         QLOGE("Wrong descriptor type");
@@ -105,7 +105,7 @@ auto PCA9685::init(uav::INode_Descriptor const& descriptor) -> bool
 
 auto PCA9685::init() -> bool
 {
-    m_i2c = m_uav.get_bus_registry().find_by_name<bus::II2C>(m_descriptor->get_bus());
+    m_i2c = m_hal.get_bus_registry().find_by_name<bus::II2C>(m_descriptor->get_bus());
     auto i2c = m_i2c.lock();
     if (!i2c)
     {
@@ -311,7 +311,7 @@ void PCA9685::process()
 #define FIND_STREAM(CH)\
 if (idx == CH)\
 {\
-    auto input_stream = m_uav.get_stream_registry().find_by_name<stream::IPWM>(path.get_as<std::string>());\
+    auto input_stream = m_hal.get_stream_registry().find_by_name<stream::IPWM>(path.get_as<std::string>());\
     auto rate = input_stream ? input_stream->get_rate() : 0u;\
     if (rate != m_descriptor->get_rate())\
     {\
@@ -363,11 +363,11 @@ void PCA9685::set_input_stream_path(size_t idx, q::Path const& path)
 constexpr float MIN_SERVO_MS = 0.5f;
 constexpr float MAX_SERVO_MS = 2.4f;
 
-auto PCA9685::set_config(uav::INode_Config const& config) -> bool
+auto PCA9685::set_config(hal::INode_Config const& config) -> bool
 {
     QLOG_TOPIC("PCA9685::set_config");
 
-    auto specialized = dynamic_cast<uav::PCA9685_Config const*>(&config);
+    auto specialized = dynamic_cast<hal::PCA9685_Config const*>(&config);
     if (!specialized)
     {
         QLOGE("Wrong config type");
@@ -395,7 +395,7 @@ auto PCA9685::set_config(uav::INode_Config const& config) -> bool
 
 
 
-auto PCA9685::get_config() const -> std::shared_ptr<const uav::INode_Config>
+auto PCA9685::get_config() const -> std::shared_ptr<const hal::INode_Config>
 {
     //todo - fix this
 //    rapidjson::Document json;
@@ -441,7 +441,7 @@ auto PCA9685::get_config() const -> std::shared_ptr<const uav::INode_Config>
     return m_config;
 }
 
-auto PCA9685::get_descriptor() const -> std::shared_ptr<const uav::INode_Descriptor>
+auto PCA9685::get_descriptor() const -> std::shared_ptr<const hal::INode_Descriptor>
 {
     return m_descriptor;
 }

@@ -1,7 +1,7 @@
 #include "BrainStdAfx.h"
 #include "PIGPIO.h"
 
-#include "uav.def.h"
+#include "hal.def.h"
 
 #ifdef RASPBERRY_PI
 extern "C"
@@ -27,7 +27,7 @@ namespace node
 
 struct PIGPIO::Channel
 {
-    uav::PIGPIO_Config::IChannel const* config = nullptr;
+    hal::PIGPIO_Config::IChannel const* config = nullptr;
     bool is_servo = false;
     uint32_t rate = 0;
     uint32_t gpio = 0;
@@ -36,10 +36,10 @@ struct PIGPIO::Channel
 };
 
 
-PIGPIO::PIGPIO(UAV& uav)
-    : m_uav(uav)
-    , m_descriptor(new uav::PIGPIO_Descriptor())
-    , m_config(new uav::PIGPIO_Config())
+PIGPIO::PIGPIO(HAL& hal)
+    : m_hal(hal)
+    , m_descriptor(new hal::PIGPIO_Descriptor())
+    , m_config(new hal::PIGPIO_Config())
 {
 }
 
@@ -59,11 +59,11 @@ auto PIGPIO::get_inputs() const -> std::vector<Input>
 }
 
 
-auto PIGPIO::init(uav::INode_Descriptor const& descriptor) -> bool
+auto PIGPIO::init(hal::INode_Descriptor const& descriptor) -> bool
 {
     QLOG_TOPIC("pigpio::init");
 
-    auto specialized = dynamic_cast<uav::PIGPIO_Descriptor const*>(&descriptor);
+    auto specialized = dynamic_cast<hal::PIGPIO_Descriptor const*>(&descriptor);
     if (!specialized)
     {
         QLOGE("Wrong descriptor type");
@@ -78,7 +78,7 @@ auto PIGPIO::init() -> bool
 {
 #define SETUP_CHANNEL(GPIO)\
     {\
-        uav::PIGPIO_Descriptor::Channel const& channel_descriptor = m_descriptor->get_gpio_##GPIO();\
+        hal::PIGPIO_Descriptor::Channel const& channel_descriptor = m_descriptor->get_gpio_##GPIO();\
         if (channel_descriptor.get_enabled())\
         {\
             Channel ch;\
@@ -87,11 +87,11 @@ auto PIGPIO::init() -> bool
             ch.gpio = GPIO;\
             if (ch.is_servo)\
             {\
-                m_config->set_gpio_##GPIO(uav::Poly<uav::PIGPIO_Config::IChannel>(new uav::PIGPIO_Config::Servo_Channel));\
+                m_config->set_gpio_##GPIO(hal::Poly<hal::PIGPIO_Config::IChannel>(new hal::PIGPIO_Config::Servo_Channel));\
             }\
             else\
             {\
-                m_config->set_gpio_##GPIO(uav::Poly<uav::PIGPIO_Config::IChannel>(new uav::PIGPIO_Config::PWM_Channel));\
+                m_config->set_gpio_##GPIO(hal::Poly<hal::PIGPIO_Config::IChannel>(new hal::PIGPIO_Config::PWM_Channel));\
             }\
             ch.config = m_config->get_gpio_##GPIO().get();\
             m_channels.emplace_back(new Channel(ch));\
@@ -227,7 +227,7 @@ void PIGPIO::set_pwm_value(size_t idx, float value)
     Channel const& channel = *m_channels[idx];
     if (channel.is_servo)
     {
-        uav::PIGPIO_Config::Servo_Channel const* config = static_cast<uav::PIGPIO_Config::Servo_Channel const*>(channel.config);
+        hal::PIGPIO_Config::Servo_Channel const* config = static_cast<hal::PIGPIO_Config::Servo_Channel const*>(channel.config);
         value = math::clamp(value, 0.f, 1.f);
         float pulse = value * (config->get_max() - config->get_min());
         gpioPWM(channel.gpio, (config->get_min() + pulse) * 1000);
@@ -271,7 +271,7 @@ void PIGPIO::process()
 
 void PIGPIO::set_input_stream_path(size_t idx, q::Path const& path)
 {
-    auto input_stream = m_uav.get_stream_registry().find_by_name<stream::IPWM>(path.get_as<std::string>());
+    auto input_stream = m_hal.get_stream_registry().find_by_name<stream::IPWM>(path.get_as<std::string>());
     auto rate = input_stream ? input_stream->get_rate() : 0u;
     std::unique_ptr<Channel>& channel = m_channels[idx];
     if (rate != channel->rate)
@@ -291,11 +291,11 @@ void PIGPIO::set_input_stream_path(size_t idx, q::Path const& path)
 }
 
 
-auto PIGPIO::set_config(uav::INode_Config const& config) -> bool
+auto PIGPIO::set_config(hal::INode_Config const& config) -> bool
 {
     QLOG_TOPIC("pigpio::set_config");
 
-    auto specialized = dynamic_cast<uav::PIGPIO_Config const*>(&config);
+    auto specialized = dynamic_cast<hal::PIGPIO_Config const*>(&config);
     if (!specialized)
     {
         QLOGE("Wrong config type");
@@ -305,12 +305,12 @@ auto PIGPIO::set_config(uav::INode_Config const& config) -> bool
 
     return true;
 }
-auto PIGPIO::get_config() const -> std::shared_ptr<const uav::INode_Config>
+auto PIGPIO::get_config() const -> std::shared_ptr<const hal::INode_Config>
 {
     return m_config;
 }
 
-auto PIGPIO::get_descriptor() const -> std::shared_ptr<const uav::INode_Descriptor>
+auto PIGPIO::get_descriptor() const -> std::shared_ptr<const hal::INode_Descriptor>
 {
     return m_descriptor;
 }

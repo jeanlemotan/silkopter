@@ -7,7 +7,7 @@
 #include "common/stream/IPressure.h"
 #include "common/stream/IFrame.h"
 
-#include "UAV.h"
+#include "HAL.h"
 
 #include "Sample_Accumulator.h"
 #include "Basic_Output_Stream.h"
@@ -15,7 +15,7 @@
 
 namespace silk
 {
-namespace uav
+namespace hal
 {
 struct Comp_ECEF_Descriptor;
 struct Comp_ECEF_Config;
@@ -31,13 +31,13 @@ namespace node
 class Comp_ECEF : public IProcessor
 {
 public:
-    Comp_ECEF(UAV& uav);
+    Comp_ECEF(HAL& hal);
 
-    bool init(uav::INode_Descriptor const& descriptor) override;
-    std::shared_ptr<const uav::INode_Descriptor> get_descriptor() const override;
+    bool init(hal::INode_Descriptor const& descriptor) override;
+    std::shared_ptr<const hal::INode_Descriptor> get_descriptor() const override;
 
-    bool set_config(uav::INode_Config const& config) override;
-    std::shared_ptr<const uav::INode_Config> get_config() const override;
+    bool set_config(hal::INode_Config const& config) override;
+    std::shared_ptr<const hal::INode_Config> get_config() const override;
 
     auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
 
@@ -52,10 +52,10 @@ public:
 private:
     auto init() -> bool;
 
-    UAV& m_uav;
+    HAL& m_hal;
 
-    std::shared_ptr<uav::Comp_ECEF_Descriptor> m_descriptor;
-    std::shared_ptr<uav::Comp_ECEF_Config> m_config;
+    std::shared_ptr<hal::Comp_ECEF_Descriptor> m_descriptor;
+    std::shared_ptr<hal::Comp_ECEF_Config> m_config;
 
     q::Clock::duration m_dt = q::Clock::duration(0);
 

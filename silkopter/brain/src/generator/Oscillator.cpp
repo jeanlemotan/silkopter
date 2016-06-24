@@ -1,7 +1,7 @@
 #include "BrainStdAfx.h"
 #include "Oscillator.h"
 
-#include "uav.def.h"
+#include "hal.def.h"
 //#include "sz_Oscillator.hpp"
 
 namespace silk
@@ -9,20 +9,20 @@ namespace silk
 namespace node
 {
 
-Oscillator::Oscillator(UAV& uav)
-    : m_uav(uav)
-    , m_descriptor(new uav::Oscillator_Descriptor())
-    , m_config(new uav::Oscillator_Config())
+Oscillator::Oscillator(HAL& hal)
+    : m_hal(hal)
+    , m_descriptor(new hal::Oscillator_Descriptor())
+    , m_config(new hal::Oscillator_Config())
     , m_rnd_distribution(0, 0)
 {
     m_output_stream = std::make_shared<Output_Stream>();
 }
 
-auto Oscillator::init(uav::INode_Descriptor const& descriptor) -> bool
+auto Oscillator::init(hal::INode_Descriptor const& descriptor) -> bool
 {
     QLOG_TOPIC("Oscillator::init");
 
-    auto specialized = dynamic_cast<uav::Oscillator_Descriptor const*>(&descriptor);
+    auto specialized = dynamic_cast<hal::Oscillator_Descriptor const*>(&descriptor);
     if (!specialized)
     {
         QLOGE("Wrong descriptor type");
@@ -116,11 +116,11 @@ void Oscillator::set_input_stream_path(size_t idx, q::Path const& path)
 {
 }
 
-auto Oscillator::set_config(uav::INode_Config const& config) -> bool
+auto Oscillator::set_config(hal::INode_Config const& config) -> bool
 {
     QLOG_TOPIC("Oscillator::set_config");
 
-    auto specialized = dynamic_cast<uav::Oscillator_Config const*>(&config);
+    auto specialized = dynamic_cast<hal::Oscillator_Config const*>(&config);
     if (!specialized)
     {
         QLOGE("Wrong config type");
@@ -133,12 +133,12 @@ auto Oscillator::set_config(uav::INode_Config const& config) -> bool
 
     return true;
 }
-auto Oscillator::get_config() const -> std::shared_ptr<const uav::INode_Config>
+auto Oscillator::get_config() const -> std::shared_ptr<const hal::INode_Config>
 {
     return m_config;
 }
 
-auto Oscillator::get_descriptor() const -> std::shared_ptr<const uav::INode_Descriptor>
+auto Oscillator::get_descriptor() const -> std::shared_ptr<const hal::INode_Descriptor>
 {
     return m_descriptor;
 }

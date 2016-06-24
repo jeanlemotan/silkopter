@@ -1,5 +1,5 @@
 #include "BrainStdAfx.h"
-#include "UAV.h"
+#include "HAL.h"
 #include "Comms.h"
 
 #include <boost/asio.hpp>
@@ -147,10 +147,10 @@ int main(int argc, char const* argv[])
 
     try
     {
-        silk::UAV uav;
-        silk::Comms comms(uav);
+        silk::HAL hal;
+        silk::Comms comms(hal);
 
-        if (!uav.init(comms))
+        if (!hal.init(comms))
         {
             QLOGE("Hardware failure! Aborting");
             goto exit;
@@ -195,7 +195,7 @@ int main(int argc, char const* argv[])
                     QLOGW("Process Latency of {}!!!!!", dt);
                 }
                 comms.process();
-                uav.process();
+                hal.process();
 
                 //No sleeping here!!! process as fast as possible as the nodes are not always in the ideal order
                 // and out of order nodes will be processes next 'frame'. So the quicker the frames, the smaller the lag between nodes
@@ -216,7 +216,7 @@ exit:
             std::this_thread::yield();
             async_thread.join();
         }
-        uav.shutdown();
+        hal.shutdown();
     }
     catch (std::exception const& e)
     {

@@ -1,7 +1,7 @@
 #include "BrainStdAfx.h"
 #include "OpenCV_Capture.h"
 /*
-#include "uav.def.h"
+#include "hal.def.h"
 //#include "sz_OpenCV_Capture.hpp"
 
 //#undef RASPBERRY_PI
@@ -52,10 +52,10 @@ struct OpenCV_Capture::Impl
 
 #endif
 
-OpenCV_Capture::OpenCV_Capture(UAV& uav)
-    : m_uav(uav)
-    , m_descriptor(new uav::OpenCV_Capture_Descriptor())
-    , m_config(new uav::OpenCV_Capture_Config())
+OpenCV_Capture::OpenCV_Capture(HAL& hal)
+    : m_hal(hal)
+    , m_descriptor(new hal::OpenCV_Capture_Descriptor())
+    , m_config(new hal::OpenCV_Capture_Config())
 {
     QLOG_TOPIC("OpenCV_Capture");
 #if !defined RASPBERRY_PI
@@ -100,11 +100,11 @@ auto OpenCV_Capture::get_outputs() const -> std::vector<Output>
     return outputs;
 }
 
-auto OpenCV_Capture::init(uav::INode_Descriptor const& descriptor) -> bool
+auto OpenCV_Capture::init(hal::INode_Descriptor const& descriptor) -> bool
 {
     QLOG_TOPIC("OpenCV_Capture::init");
 
-    auto specialized = dynamic_cast<uav::OpenCV_Capture_Descriptor const*>(&descriptor);
+    auto specialized = dynamic_cast<hal::OpenCV_Capture_Descriptor const*>(&descriptor);
     if (!specialized)
     {
         QLOGE("Wrong descriptor type");
@@ -150,9 +150,9 @@ auto OpenCV_Capture::start(q::Clock::time_point tp) -> bool
 }
 
 
-auto OpenCV_Capture::set_config(uav::INode_Config const& config) -> bool
+auto OpenCV_Capture::set_config(hal::INode_Config const& config) -> bool
 {
-    auto specialized = dynamic_cast<uav::OpenCV_Capture_Config const*>(&config);
+    auto specialized = dynamic_cast<hal::OpenCV_Capture_Config const*>(&config);
     if (!specialized)
     {
         QLOGE("Wrong config type");
@@ -164,12 +164,12 @@ auto OpenCV_Capture::set_config(uav::INode_Config const& config) -> bool
 
     return true;
 }
-auto OpenCV_Capture::get_config() const -> std::shared_ptr<const uav::INode_Config>
+auto OpenCV_Capture::get_config() const -> std::shared_ptr<const hal::INode_Config>
 {
     return m_config;
 }
 
-auto OpenCV_Capture::get_descriptor() const -> std::shared_ptr<const uav::INode_Descriptor>
+auto OpenCV_Capture::get_descriptor() const -> std::shared_ptr<const hal::INode_Descriptor>
 {
     return m_descriptor;
 }

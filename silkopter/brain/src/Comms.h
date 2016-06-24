@@ -1,7 +1,7 @@
 #pragma once
 
 #include "common/Comm_Data.h"
-#include "UAV.h"
+#include "HAL.h"
 
 #include "common/Manual_Clock.h"
 #include "common/node/ISource.h"
@@ -43,7 +43,7 @@ namespace silk
 class Comms : q::util::Noncopyable
 {
 public:
-    Comms(UAV& uav);
+    Comms(HAL& hal);
 
     auto start_udp(uint16_t send_port, uint16_t receive_port) -> bool;
     auto start_rfmon(std::string const& interface, uint8_t id) -> bool;
@@ -72,12 +72,12 @@ private:
     };
     std::vector<Stream_Telemetry_Data> m_stream_telemetry_data;
 
-    struct UAV_Telemetry
+    struct Telemetry
     {
         bool is_enabled = false;
         uint32_t sample_count = 0;
         std::vector<uint8_t> data;
-    } m_uav_telemetry_data;
+    } m_telemetry_data;
 
 
 //    auto send_video_stream(Stream_Telemetry_Data& ts, stream::IStream const& _stream) -> bool;
@@ -129,7 +129,7 @@ private:
     void handle_req(comms::setup::Add_Node_Req const& req);
     void handle_req(comms::setup::Set_Node_Input_Stream_Path_Req const& req);
 
-    UAV& m_uav;
+    HAL& m_hal;
     q::Clock::time_point m_uav_sent_tp = q::Clock::now();
 
     std::vector<stream::IMultirotor_Commands::Value> m_multirotor_commands_values;

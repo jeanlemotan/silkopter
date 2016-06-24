@@ -1,7 +1,7 @@
 #include "BrainStdAfx.h"
 #include "UBLOX.h"
 
-#include "uav.def.h"
+#include "hal.def.h"
 
 
 namespace silk
@@ -243,10 +243,10 @@ struct MON_VER
 #pragma pack(pop)
 
 
-UBLOX::UBLOX(UAV& uav)
-    : m_uav(uav)
-    , m_descriptor(new uav::UBLOX_Descriptor())
-    , m_config(new uav::UBLOX_Config())
+UBLOX::UBLOX(HAL& hal)
+    : m_hal(hal)
+    , m_descriptor(new hal::UBLOX_Descriptor())
+    , m_config(new hal::UBLOX_Config())
 {
     m_position_stream = std::make_shared<Position_Stream>();
     m_velocity_stream = std::make_shared<Velocity_Stream>();
@@ -306,11 +306,11 @@ auto UBLOX::get_outputs() const -> std::vector<Output>
     return outputs;
 }
 
-auto UBLOX::init(uav::INode_Descriptor const& descriptor) -> bool
+auto UBLOX::init(hal::INode_Descriptor const& descriptor) -> bool
 {
     QLOG_TOPIC("ublox::init");
 
-    auto specialized = dynamic_cast<uav::UBLOX_Descriptor const*>(&descriptor);
+    auto specialized = dynamic_cast<hal::UBLOX_Descriptor const*>(&descriptor);
     if (!specialized)
     {
         QLOGE("Wrong descriptor type");
@@ -322,9 +322,9 @@ auto UBLOX::init(uav::INode_Descriptor const& descriptor) -> bool
 }
 auto UBLOX::init() -> bool
 {
-    m_i2c = m_uav.get_bus_registry().find_by_name<bus::II2C>(m_descriptor->get_bus());
-    m_spi = m_uav.get_bus_registry().find_by_name<bus::ISPI>(m_descriptor->get_bus());
-    m_uart = m_uav.get_bus_registry().find_by_name<bus::IUART>(m_descriptor->get_bus());
+    m_i2c = m_hal.get_bus_registry().find_by_name<bus::II2C>(m_descriptor->get_bus());
+    m_spi = m_hal.get_bus_registry().find_by_name<bus::ISPI>(m_descriptor->get_bus());
+    m_uart = m_hal.get_bus_registry().find_by_name<bus::IUART>(m_descriptor->get_bus());
 
     m_position_stream->set_rate(m_descriptor->get_rate());
     m_velocity_stream->set_rate(m_descriptor->get_rate());
@@ -1147,11 +1147,11 @@ template<class T> auto UBLOX::send_packet_with_retry(Buses& buses, uint16_t msg,
 }
 
 
-auto UBLOX::set_config(uav::INode_Config const& config) -> bool
+auto UBLOX::set_config(hal::INode_Config const& config) -> bool
 {
     QLOG_TOPIC("ublox::set_config");
 
-    auto specialized = dynamic_cast<uav::UBLOX_Config const*>(&config);
+    auto specialized = dynamic_cast<hal::UBLOX_Config const*>(&config);
     if (!specialized)
     {
         QLOGE("Wrong config type");
@@ -1161,12 +1161,12 @@ auto UBLOX::set_config(uav::INode_Config const& config) -> bool
 
     return true;
 }
-auto UBLOX::get_config() const -> std::shared_ptr<const uav::INode_Config>
+auto UBLOX::get_config() const -> std::shared_ptr<const hal::INode_Config>
 {
     return m_config;
 }
 
-auto UBLOX::get_descriptor() const -> std::shared_ptr<const uav::INode_Descriptor>
+auto UBLOX::get_descriptor() const -> std::shared_ptr<const hal::INode_Descriptor>
 {
     return m_descriptor;
 }

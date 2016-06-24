@@ -1,7 +1,7 @@
 #include "BrainStdAfx.h"
 #include "Rate_Controller.h"
 
-#include "uav.def.h"
+#include "hal.def.h"
 //#include "sz_PID.hpp"
 //#include "sz_Rate_Controller.hpp"
 
@@ -10,19 +10,19 @@ namespace silk
 namespace node
 {
 
-Rate_Controller::Rate_Controller(UAV& uav)
-    : m_uav(uav)
-    , m_descriptor(new uav::Rate_Controller_Descriptor())
-    , m_config(new uav::Rate_Controller_Config())
+Rate_Controller::Rate_Controller(HAL& hal)
+    : m_hal(hal)
+    , m_descriptor(new hal::Rate_Controller_Descriptor())
+    , m_config(new hal::Rate_Controller_Config())
 {
     m_output_stream = std::make_shared<Output_Stream>();
 }
 
-auto Rate_Controller::init(uav::INode_Descriptor const& descriptor) -> bool
+auto Rate_Controller::init(hal::INode_Descriptor const& descriptor) -> bool
 {
     QLOG_TOPIC("rate_controller::init");
 
-    auto specialized = dynamic_cast<uav::Rate_Controller_Descriptor const*>(&descriptor);
+    auto specialized = dynamic_cast<hal::Rate_Controller_Descriptor const*>(&descriptor);
     if (!specialized)
     {
         QLOGE("Wrong descriptor type");
@@ -68,7 +68,7 @@ void Rate_Controller::process()
 
     m_output_stream->clear();
 
-    std::shared_ptr<const IMultirotor_Properties> multirotor_properties = m_uav.get_specialized_uav_properties<IMultirotor_Properties>();
+    std::shared_ptr<const IMultirotor_Properties> multirotor_properties = m_hal.get_specialized_uav_properties<IMultirotor_Properties>();
     if (!multirotor_properties)
     {
         return;
@@ -119,7 +119,7 @@ math::vec3f Rate_Controller::compute_feedback(stream::IAngular_Velocity::Value c
 
 void Rate_Controller::set_input_stream_path(size_t idx, q::Path const& path)
 {
-    m_accumulator.set_stream_path(idx, path, m_output_stream->get_rate(), m_uav);
+    m_accumulator.set_stream_path(idx, path, m_output_stream->get_rate(), m_hal);
 }
 
 template<class T, class PID>
@@ -133,11 +133,11 @@ void fill_pid_params(T& dst, PID const& src, size_t rate)
     dst.rate = rate;
 }
 
-auto Rate_Controller::set_config(uav::INode_Config const& config) -> bool
+auto Rate_Controller::set_config(hal::INode_Config const& config) -> bool
 {
     QLOG_TOPIC("rate_controller::set_config");
 
-    auto specialized = dynamic_cast<uav::Rate_Controller_Config const*>(&config);
+    auto specialized = dynamic_cast<hal::Rate_Controller_Config const*>(&config);
     if (!specialized)
     {
         QLOGE("Wrong config type");
@@ -147,16 +147,16 @@ auto Rate_Controller::set_config(uav::INode_Config const& config) -> bool
 
     uint32_t output_rate = m_output_stream->get_rate();
 
-    uav::Rate_Controller_Config::Feedback const& descriptor = m_config->get_feedback();
+    hal::Rate_Controller_Config::Feedback const& descriptor = m_config->get_feedback();
     PID::Params x_params, y_params, z_params;
-    if (auto combined_pids = boost::get<uav::Rate_Controller_Config::Feedback::Combined_XY_PIDs>(&descriptor.get_xy_pids()))
+    if (auto combined_pids = boost::get<hal::Rate_Controller_Config::Feedback::Combined_XY_PIDs>(&descriptor.get_xy_pids()))
     {
         fill_pid_params(x_params, *combined_pids, output_rate);
         fill_pid_params(y_params, *combined_pids, output_rate);
     }
     else
     {
-        auto separate_pids = boost::get<uav::Rate_Controller_Config::Feedback::Separate_XY_PIDs>(&descriptor.get_xy_pids());
+        auto separate_pids = boost::get<hal::Rate_Controller_Config::Feedback::Separate_XY_PIDs>(&descriptor.get_xy_pids());
         fill_pid_params(x_params, separate_pids->get_x_pid(), output_rate);
         fill_pid_params(y_params, separate_pids->get_y_pid(), output_rate);
     }
@@ -173,12 +173,12 @@ auto Rate_Controller::set_config(uav::INode_Config const& config) -> bool
 
     return true;
 }
-auto Rate_Controller::get_config() const -> std::shared_ptr<const uav::INode_Config>
+auto Rate_Controller::get_config() const -> std::shared_ptr<const hal::INode_Config>
 {
     return m_config;
 }
 
-auto Rate_Controller::get_descriptor() const -> std::shared_ptr<const uav::INode_Descriptor>
+auto Rate_Controller::get_descriptor() const -> std::shared_ptr<const hal::INode_Descriptor>
 {
     return m_descriptor;
 }

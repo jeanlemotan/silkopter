@@ -1,12 +1,12 @@
 #include "Quad_Properties.h"
 
-#include "uav.def.h"
+#include "hal.def.h"
 
 namespace silk
 {
 
 
-bool Quad_Properties::init(uav::Quad_Descriptor const& descriptor)
+bool Quad_Properties::init(hal::Quad_Descriptor const& descriptor)
 {
     m_mass = descriptor.get_mass();
     m_radius = descriptor.get_radius();

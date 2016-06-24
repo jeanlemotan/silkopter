@@ -1,7 +1,7 @@
 #include "BrainStdAfx.h"
 #include "MS5611.h"
 
-#include "uav.def.h"
+#include "hal.def.h"
 //#include "sz_MS5611.hpp"
 
 namespace silk
@@ -36,10 +36,10 @@ constexpr uint8_t CMD_CONVERT_D2_OSR4096 = 0x58;
 constexpr uint8_t ADDR_MS5611 = 0x77;
 
 
-MS5611::MS5611(UAV& uav)
-    : m_uav(uav)
-    , m_descriptor(new uav::MS5611_Descriptor())
-    , m_config(new uav::MS5611_Config())
+MS5611::MS5611(HAL& hal)
+    : m_hal(hal)
+    , m_descriptor(new hal::MS5611_Descriptor())
+    , m_config(new hal::MS5611_Config())
 {
     m_pressure = std::make_shared<Pressure_Stream>();
     m_temperature = std::make_shared<Temperature_Stream>();
@@ -117,11 +117,11 @@ auto MS5611::get_outputs() const -> std::vector<Output>
     outputs[1].stream = m_temperature;
     return outputs;
 }
-auto MS5611::init(uav::INode_Descriptor const& descriptor) -> bool
+auto MS5611::init(hal::INode_Descriptor const& descriptor) -> bool
 {
     QLOG_TOPIC("ms5611::init");
 
-    auto specialized = dynamic_cast<uav::MS5611_Descriptor const*>(&descriptor);
+    auto specialized = dynamic_cast<hal::MS5611_Descriptor const*>(&descriptor);
     if (!specialized)
     {
         QLOGE("Wrong descriptor type");
@@ -133,8 +133,8 @@ auto MS5611::init(uav::INode_Descriptor const& descriptor) -> bool
 }
 auto MS5611::init() -> bool
 {
-    m_i2c = m_uav.get_bus_registry().find_by_name<bus::II2C>(m_descriptor->get_bus());
-    m_spi = m_uav.get_bus_registry().find_by_name<bus::ISPI>(m_descriptor->get_bus());
+    m_i2c = m_hal.get_bus_registry().find_by_name<bus::II2C>(m_descriptor->get_bus());
+    m_spi = m_hal.get_bus_registry().find_by_name<bus::ISPI>(m_descriptor->get_bus());
 
     Buses buses = { m_i2c.lock(), m_spi.lock() };
     if (!buses.i2c && !buses.spi)
@@ -370,11 +370,11 @@ void MS5611::process()
     }
 }
 
-auto MS5611::set_config(uav::INode_Config const& config) -> bool
+auto MS5611::set_config(hal::INode_Config const& config) -> bool
 {
     QLOG_TOPIC("ms5611::set_config");
 
-    auto specialized = dynamic_cast<uav::MS5611_Config const*>(&config);
+    auto specialized = dynamic_cast<hal::MS5611_Config const*>(&config);
     if (!specialized)
     {
         QLOGE("Wrong config type");
@@ -384,12 +384,12 @@ auto MS5611::set_config(uav::INode_Config const& config) -> bool
 
     return true;
 }
-auto MS5611::get_config() const -> std::shared_ptr<const uav::INode_Config>
+auto MS5611::get_config() const -> std::shared_ptr<const hal::INode_Config>
 {
     return m_config;
 }
 
-auto MS5611::get_descriptor() const -> std::shared_ptr<const uav::INode_Descriptor>
+auto MS5611::get_descriptor() const -> std::shared_ptr<const hal::INode_Descriptor>
 {
     return m_descriptor;
 }

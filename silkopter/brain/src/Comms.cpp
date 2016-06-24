@@ -35,7 +35,7 @@
 #include "utils/RCP_RFMON_Socket.h"
 #include "utils/Channel.h"
 
-#include "uav.def.h"
+#include "hal.def.h"
 #include "comms.def.h"
 #include "def_lang/JSON_Serializer.h"
 
@@ -72,8 +72,8 @@ struct Comms::Channels
     std::vector<uint8_t> setup_buffer;
 };
 
-Comms::Comms(UAV& uav)
-    : m_uav(uav)
+Comms::Comms(HAL& hal)
+    : m_hal(hal)
     , m_channels(new Channels())
 {
 }
@@ -312,27 +312,27 @@ void Comms::gather_telemetry_data()
 
 
     //pack UAV telemetry
-    if (m_uav_telemetry_data.is_enabled)
+    if (m_telemetry_data.is_enabled)
     {
-        UAV::Telemetry_Data const& telemetry_data = m_uav.get_telemetry_data();
+        HAL::Telemetry_Data const& telemetry_data = m_hal.get_telemetry_data();
 
-        m_uav_telemetry_data.sample_count++;
-        size_t off = m_uav_telemetry_data.data.size();
+        m_telemetry_data.sample_count++;
+        size_t off = m_telemetry_data.data.size();
 
         auto dt = static_cast<uint32_t>(std::chrono::duration_cast<std::chrono::microseconds>(telemetry_data.total_duration).count());
-        util::serialization::serialize(m_uav_telemetry_data.data, dt, off);
-        util::serialization::serialize(m_uav_telemetry_data.data, telemetry_data.rate, off);
-        util::serialization::serialize(m_uav_telemetry_data.data, static_cast<uint32_t>(telemetry_data.nodes.size()), off);
+        util::serialization::serialize(m_telemetry_data.data, dt, off);
+        util::serialization::serialize(m_telemetry_data.data, telemetry_data.rate, off);
+        util::serialization::serialize(m_telemetry_data.data, static_cast<uint32_t>(telemetry_data.nodes.size()), off);
 
         for (auto const& nt: telemetry_data.nodes)
         {
             auto const& node_name = nt.first;
             auto const& node_telemetry_data = nt.second;
 
-            util::serialization::serialize(m_uav_telemetry_data.data, node_name, off);
+            util::serialization::serialize(m_telemetry_data.data, node_name, off);
             auto dt = static_cast<uint32_t>(std::chrono::duration_cast<std::chrono::microseconds>(node_telemetry_data.process_duration).count());
-            util::serialization::serialize(m_uav_telemetry_data.data, dt, off);
-            util::serialization::serialize(m_uav_telemetry_data.data, node_telemetry_data.process_percentage, off);
+            util::serialization::serialize(m_telemetry_data.data, dt, off);
+            util::serialization::serialize(m_telemetry_data.data, node_telemetry_data.process_percentage, off);
         }
     }
 }
@@ -353,9 +353,9 @@ void Comms::pack_telemetry_data()
         ts.sample_count = 0;
     }
 
-    if (m_uav_telemetry_data.is_enabled)
+    if (m_telemetry_data.is_enabled)
     {
-        auto& t = m_uav_telemetry_data;
+        auto& t = m_telemetry_data;
         if (!t.data.empty() && t.sample_count > 0)
         {
             m_channels->telemetry.begin_pack(comms::Telemetry_Message::STREAM_DATA);
@@ -942,10 +942,10 @@ boost::variant<comms::setup::Node_Data, comms::setup::Error> Comms::get_node_dat
         node_data.get_outputs().push_back(std::move(node_data_output));
     }
 
-    ts::sz::Value sz_value = uav::serialize(uav::Poly<const uav::INode_Descriptor>(node.get_descriptor()));
+    ts::sz::Value sz_value = hal::serialize(hal::Poly<const hal::INode_Descriptor>(node.get_descriptor()));
     node_data.set_descriptor_data(encode_json(ts::sz::to_json(m_json_buffer, sz_value, false)));
 
-    sz_value = uav::serialize(uav::Poly<const uav::INode_Config>(node.get_config()));
+    sz_value = hal::serialize(hal::Poly<const hal::INode_Config>(node.get_config()));
     node_data.set_config_data(encode_json((ts::sz::to_json(m_json_buffer, sz_value, false))));
 
     return std::move(node_data);
@@ -969,7 +969,7 @@ void Comms::handle_req(comms::setup::Get_AST_Req const& req)
     comms::setup::Get_AST_Res& res = boost::get<comms::setup::Get_AST_Res>(response);
 
     res.set_req_id(req.get_req_id());
-    res.set_data(encode_json(uav::get_ast_json()));
+    res.set_data(encode_json(hal::get_ast_json()));
 
     serialize_and_send(SETUP_CHANNEL, response);
 //    serialize_and_send(SETUP_CHANNEL, response);
@@ -1046,8 +1046,8 @@ void Comms::handle_req(comms::setup::Set_UAV_Descriptor_Req const& req)
         serialize_and_send(SETUP_CHANNEL, response);
         return;
     }
-    uav::Poly<const uav::IUAV_Descriptor> uav_descriptor;
-    auto deserialize_result = uav::deserialize(uav_descriptor, json_result.payload());
+    hal::Poly<const hal::IUAV_Descriptor> uav_descriptor;
+    auto deserialize_result = hal::deserialize(uav_descriptor, json_result.payload());
     if (deserialize_result != ts::success)
     {
         response = make_error(q::util::format<std::string>("Cannot deserialize uav descriptor json: {}", deserialize_result.error().what()));
@@ -1055,16 +1055,16 @@ void Comms::handle_req(comms::setup::Set_UAV_Descriptor_Req const& req)
         return;
     }
 
-    if (!m_uav.set_uav_descriptor(uav_descriptor.get_shared_ptr()))
+    if (!m_hal.set_uav_descriptor(uav_descriptor.get_shared_ptr()))
     {
         response = make_error(q::util::format<std::string>("Cannot set uav descriptor: {}", "N/A"));
         serialize_and_send(SETUP_CHANNEL, response);
         return;
     }
 
-    m_uav.save_settings();
+    m_hal.save_settings();
 
-    ts::sz::Value sz_value = uav::serialize(uav::Poly<const uav::IUAV_Descriptor>(m_uav.get_uav_descriptor()));
+    ts::sz::Value sz_value = hal::serialize(hal::Poly<const hal::IUAV_Descriptor>(m_hal.get_uav_descriptor()));
 
     response = comms::setup::Set_UAV_Descriptor_Res();
     comms::setup::Set_UAV_Descriptor_Res& res = boost::get<comms::setup::Set_UAV_Descriptor_Res>(response);
@@ -1082,7 +1082,7 @@ void Comms::handle_req(comms::setup::Get_UAV_Descriptor_Req const& req)
     comms::setup::Brain_Res response = comms::setup::Get_UAV_Descriptor_Res();
     comms::setup::Get_UAV_Descriptor_Res& res = boost::get<comms::setup::Get_UAV_Descriptor_Res>(response);
 
-    ts::sz::Value sz_value = uav::serialize(uav::Poly<const uav::IUAV_Descriptor>(m_uav.get_uav_descriptor()));
+    ts::sz::Value sz_value = hal::serialize(hal::Poly<const hal::IUAV_Descriptor>(m_hal.get_uav_descriptor()));
     res.set_req_id(req.get_req_id());
     res.set_data(encode_json(ts::sz::to_json(m_json_buffer, sz_value, false)));
 
@@ -1099,16 +1099,16 @@ void Comms::handle_req(comms::setup::Get_Node_Defs_Req const& req)
 
     //first disable all telemetry because the GS doesn't yet have all the streams
     m_stream_telemetry_data.clear();
-    m_uav_telemetry_data.is_enabled = false;
+    m_telemetry_data.is_enabled = false;
 
-    std::vector<UAV::Node_Factory::Info> nodes = m_uav.get_node_factory().create_all();
+    std::vector<HAL::Node_Factory::Info> nodes = m_hal.get_node_factory().create_all();
 
     res.set_req_id(req.get_req_id());
 
     res.get_node_def_datas().resize(nodes.size());
     for (size_t nidx = 0; nidx < nodes.size(); nidx++)
     {
-        UAV::Node_Factory::Info const& n = nodes[nidx];
+        HAL::Node_Factory::Info const& n = nodes[nidx];
         comms::setup::Node_Def_Data& node_data = res.get_node_def_datas()[nidx];
 
         node_data.set_name(n.name);
@@ -1140,8 +1140,8 @@ void Comms::handle_req(comms::setup::Get_Node_Defs_Req const& req)
             node_data_output.set_semantic(static_cast<uint8_t>(output.stream->get_type().get_semantic()));
         }
 
-        std::shared_ptr<const uav::INode_Descriptor> descriptor = n.ptr->get_descriptor();
-        ts::sz::Value sz_value = uav::serialize(uav::Poly<const uav::INode_Descriptor>(descriptor));
+        std::shared_ptr<const hal::INode_Descriptor> descriptor = n.ptr->get_descriptor();
+        ts::sz::Value sz_value = hal::serialize(hal::Poly<const hal::INode_Descriptor>(descriptor));
         node_data.set_descriptor_data(encode_json(ts::sz::to_json(m_json_buffer, sz_value, false)));
     }
 
@@ -1155,7 +1155,7 @@ void Comms::handle_req(comms::setup::Remove_Node_Req const& req)
 
     comms::setup::Brain_Res response;
 
-    std::shared_ptr<node::INode> node = m_uav.get_node_registry().find_by_name<node::INode>(req.get_name());
+    std::shared_ptr<node::INode> node = m_hal.get_node_registry().find_by_name<node::INode>(req.get_name());
     if (!node)
     {
         response = make_error(q::util::format<std::string>("Cannot find node '{}'", req.get_name()));
@@ -1163,8 +1163,8 @@ void Comms::handle_req(comms::setup::Remove_Node_Req const& req)
         return;
     }
 
-    m_uav.remove_node(node);
-    m_uav.save_settings();
+    m_hal.remove_node(node);
+    m_hal.save_settings();
 
     comms::setup::Remove_Node_Res res;
     res.set_req_id(req.get_req_id());
@@ -1187,8 +1187,8 @@ void Comms::handle_req(comms::setup::Add_Node_Req const& req)
         serialize_and_send(SETUP_CHANNEL, response);
         return;
     }
-    uav::Poly<const uav::INode_Descriptor> descriptor;
-    auto deserialize_result = uav::deserialize(descriptor, json_result.payload());
+    hal::Poly<const hal::INode_Descriptor> descriptor;
+    auto deserialize_result = hal::deserialize(descriptor, json_result.payload());
     if (deserialize_result != ts::success)
     {
         response = make_error(q::util::format<std::string>("Cannot deserialize node {} descriptor json: {}", req.get_def_name(), deserialize_result.error().what()));
@@ -1196,14 +1196,14 @@ void Comms::handle_req(comms::setup::Add_Node_Req const& req)
         return;
     }
 
-    std::shared_ptr<node::INode> node = m_uav.create_node(req.get_def_name(), req.get_name(), *descriptor);
+    std::shared_ptr<node::INode> node = m_hal.create_node(req.get_def_name(), req.get_name(), *descriptor);
     if (!node)
     {
         response = make_error(q::util::format<std::string>("Cannot create node {} descriptor json: {}", req.get_def_name(), deserialize_result.error().what()));
         serialize_and_send(SETUP_CHANNEL, response);
         return;
     }
-    m_uav.save_settings();
+    m_hal.save_settings();
 
     comms::setup::Add_Node_Res res;
     res.set_req_id(req.get_req_id());
@@ -1234,9 +1234,9 @@ void Comms::handle_req(comms::setup::Get_Nodes_Req const& req)
     std::string const& name = req.get_name();
     if (name.empty())
     {
-        std::vector<UAV::Node_Registry::Item> const& nodes = m_uav.get_node_registry().get_all();
+        std::vector<HAL::Node_Registry::Item> const& nodes = m_hal.get_node_registry().get_all();
 
-        for (UAV::Node_Registry::Item const& item: nodes)
+        for (HAL::Node_Registry::Item const& item: nodes)
         {
             boost::variant<comms::setup::Node_Data, comms::setup::Error> result = get_node_data(item.name, *item.ptr);
             if (auto* error = boost::get<comms::setup::Error>(&result))
@@ -1250,7 +1250,7 @@ void Comms::handle_req(comms::setup::Get_Nodes_Req const& req)
     }
     else
     {
-        std::shared_ptr<node::INode> node = m_uav.get_node_registry().find_by_name<node::INode>(name);
+        std::shared_ptr<node::INode> node = m_hal.get_node_registry().find_by_name<node::INode>(name);
         if (!node)
         {
             response = make_error(q::util::format<std::string>("Cannot find node '{}'", name));
@@ -1284,7 +1284,7 @@ void Comms::handle_req(comms::setup::Set_Node_Input_Stream_Path_Req const& req)
     std::string const& node_name = req.get_node_name();
     std::string const& input_name = req.get_input_name();
 
-    std::shared_ptr<node::INode> node = m_uav.get_node_registry().find_by_name<node::INode>(node_name);
+    std::shared_ptr<node::INode> node = m_hal.get_node_registry().find_by_name<node::INode>(node_name);
     if (!node)
     {
         response = make_error(q::util::format<std::string>("Cannot find node '{}'", node_name));
@@ -1299,7 +1299,7 @@ void Comms::handle_req(comms::setup::Set_Node_Input_Stream_Path_Req const& req)
         if (input.name == input_name)
         {
             node->set_input_stream_path(idx, q::Path(req.get_stream_path()));
-            m_uav.save_settings();
+            m_hal.save_settings();
 
             boost::variant<comms::setup::Node_Data, comms::setup::Error> result = get_node_data(node_name, *node);
             if (auto* error = boost::get<comms::setup::Error>(&result))

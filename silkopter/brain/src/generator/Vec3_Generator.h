@@ -1,12 +1,12 @@
 #pragma once
 
-#include "UAV.h"
+#include "HAL.h"
 #include "common/node/IGenerator.h"
 #include "generator/Oscillator.h"
 
 #include "Basic_Output_Stream.h"
 
-#include "uav.def.h"
+#include "hal.def.h"
 
 namespace silk
 {
@@ -17,13 +17,13 @@ template<class Stream_t>
 class Vec3_Generator : public IGenerator
 {
 public:
-    Vec3_Generator(UAV& uav);
+    Vec3_Generator(HAL& hal);
 
-    bool init(uav::INode_Descriptor const& descriptor) override;
-    std::shared_ptr<const uav::INode_Descriptor> get_descriptor() const override;
+    bool init(hal::INode_Descriptor const& descriptor) override;
+    std::shared_ptr<const hal::INode_Descriptor> get_descriptor() const override;
 
-    bool set_config(uav::INode_Config const& config) override;
-    std::shared_ptr<const uav::INode_Config> get_config() const override;
+    bool set_config(hal::INode_Config const& config) override;
+    std::shared_ptr<const hal::INode_Config> get_config() const override;
 
     //auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
 
@@ -38,10 +38,10 @@ public:
 private:
     auto init() -> bool;
 
-    UAV& m_uav;
+    HAL& m_hal;
 
-    std::shared_ptr<uav::Vec3_Generator_Descriptor> m_descriptor;
-    std::shared_ptr<uav::Vec3_Generator_Config> m_config;
+    std::shared_ptr<hal::Vec3_Generator_Descriptor> m_descriptor;
+    std::shared_ptr<hal::Vec3_Generator_Config> m_config;
 
     std::array<q::Path, 3> m_modulation_stream_paths;
     std::array<std::weak_ptr<stream::IFloat>, 3> m_modulation_streams;
@@ -53,20 +53,20 @@ private:
 
 
 template<class Stream_t>
-Vec3_Generator<Stream_t>::Vec3_Generator(UAV& uav)
-    : m_uav(uav)
-    , m_descriptor(new uav::Vec3_Generator_Descriptor)
-    , m_config(new uav::Vec3_Generator_Config)
+Vec3_Generator<Stream_t>::Vec3_Generator(HAL& hal)
+    : m_hal(hal)
+    , m_descriptor(new hal::Vec3_Generator_Descriptor)
+    , m_config(new hal::Vec3_Generator_Config)
 {
     m_output_stream = std::make_shared<Output_Stream>();
 }
 
 template<class Stream_t>
-auto Vec3_Generator<Stream_t>::init(uav::INode_Descriptor const& descriptor) -> bool
+auto Vec3_Generator<Stream_t>::init(hal::INode_Descriptor const& descriptor) -> bool
 {
     QLOG_TOPIC("vec3_generator::init");
 
-    auto specialized = dynamic_cast<uav::Vec3_Generator_Descriptor const*>(&descriptor);
+    auto specialized = dynamic_cast<hal::Vec3_Generator_Descriptor const*>(&descriptor);
     if (!specialized)
     {
         QLOGE("Wrong descriptor type");
@@ -85,7 +85,7 @@ auto Vec3_Generator<Stream_t>::init() -> bool
 }
 
 template<class Stream_t>
-auto Vec3_Generator<Stream_t>::get_descriptor() const -> std::shared_ptr<const uav::INode_Descriptor>
+auto Vec3_Generator<Stream_t>::get_descriptor() const -> std::shared_ptr<const hal::INode_Descriptor>
 {
     return m_descriptor;
 }
@@ -107,7 +107,7 @@ void Vec3_Generator<Stream_t>::set_input_stream_path(size_t idx, q::Path const& 
 
     char name[3] = { 'x', 'y', 'z' };
 
-    auto stream = m_uav.get_stream_registry().template find_by_name<stream::IFloat>(path.get_as<std::string>());
+    auto stream = m_hal.get_stream_registry().template find_by_name<stream::IFloat>(path.get_as<std::string>());
     if (stream && stream->get_rate() != m_output_stream->get_rate())
     {
         QLOGW("Bad {} modulation stream '{}'. Expected rate {}Hz, got {}Hz", name[idx], path, m_output_stream->get_rate(), stream->get_rate());
@@ -122,11 +122,11 @@ void Vec3_Generator<Stream_t>::set_input_stream_path(size_t idx, q::Path const& 
 }
 
 template<class Stream_t>
-auto Vec3_Generator<Stream_t>::set_config(uav::INode_Config const& config) -> bool
+auto Vec3_Generator<Stream_t>::set_config(hal::INode_Config const& config) -> bool
 {
     QLOG_TOPIC("vec3_generator::set_config");
 
-    auto specialized = dynamic_cast<uav::Vec3_Generator_Config const*>(&config);
+    auto specialized = dynamic_cast<hal::Vec3_Generator_Config const*>(&config);
     if (!specialized)
     {
         QLOGE("Wrong config type");
@@ -142,7 +142,7 @@ auto Vec3_Generator<Stream_t>::set_config(uav::INode_Config const& config) -> bo
 //    return rapidjson::Document();
 //}
 template<class Stream_t>
-auto Vec3_Generator<Stream_t>::get_config() const -> std::shared_ptr<const uav::INode_Config>
+auto Vec3_Generator<Stream_t>::get_config() const -> std::shared_ptr<const hal::INode_Config>
 {
     return m_config;
 }

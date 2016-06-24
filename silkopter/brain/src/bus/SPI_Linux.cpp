@@ -8,7 +8,7 @@
 
 #include <linux/spi/spidev.h>
 
-#include "uav.def.h"
+#include "hal.def.h"
 
 namespace silk
 {
@@ -16,7 +16,7 @@ namespace bus
 {
 
 SPI_Linux::SPI_Linux()
-    : m_descriptor(new uav::SPI_Linux_Descriptor())
+    : m_descriptor(new hal::SPI_Linux_Descriptor())
 {
 }
 
@@ -25,9 +25,9 @@ SPI_Linux::~SPI_Linux()
     close();
 }
 
-bool SPI_Linux::init(uav::IBus_Descriptor const& descriptor)
+bool SPI_Linux::init(hal::IBus_Descriptor const& descriptor)
 {
-    auto specialized = dynamic_cast<uav::SPI_Linux_Descriptor const*>(&descriptor);
+    auto specialized = dynamic_cast<hal::SPI_Linux_Descriptor const*>(&descriptor);
     if (!specialized)
     {
         QLOGE("Wrong descriptor type");
@@ -43,7 +43,7 @@ bool SPI_Linux::init(uav::IBus_Descriptor const& descriptor)
     return true;
 }
 
-std::shared_ptr<const uav::IBus_Descriptor> SPI_Linux::get_descriptor() const
+std::shared_ptr<const hal::IBus_Descriptor> SPI_Linux::get_descriptor() const
 {
     return m_descriptor;
 }

@@ -3,7 +3,7 @@
 #include "physics/constants.h"
 #include "utils/Timed_Scope.h"
 
-#include "uav.def.h"
+#include "hal.def.h"
 
 namespace silk
 {
@@ -23,10 +23,10 @@ constexpr uint8_t CLEAR_ADVANCED_MODE   = 0x63;
 constexpr std::chrono::milliseconds MAX_MEASUREMENT_DURATION(75);
 
 
-SRF01::SRF01(UAV& uav)
-    : m_uav(uav)
-    , m_descriptor(new uav::SRF01_Descriptor())
-    , m_config(new uav::SRF01_Config())
+SRF01::SRF01(HAL& hal)
+    : m_hal(hal)
+    , m_descriptor(new hal::SRF01_Descriptor())
+    , m_config(new hal::SRF01_Config())
 {
     m_config->set_direction(math::vec3f(0, 0, -1)); //pointing down
 
@@ -40,11 +40,11 @@ auto SRF01::get_outputs() const -> std::vector<Output>
     outputs[0].stream = m_output_stream;
     return outputs;
 }
-auto SRF01::init(uav::INode_Descriptor const& descriptor) -> bool
+auto SRF01::init(hal::INode_Descriptor const& descriptor) -> bool
 {
     QLOG_TOPIC("SRF01::init");
 
-    auto specialized = dynamic_cast<uav::SRF01_Descriptor const*>(&descriptor);
+    auto specialized = dynamic_cast<hal::SRF01_Descriptor const*>(&descriptor);
     if (!specialized)
     {
         QLOGE("Wrong descriptor type");
@@ -57,7 +57,7 @@ auto SRF01::init(uav::INode_Descriptor const& descriptor) -> bool
 
 auto SRF01::init() -> bool
 {
-    m_bus = m_uav.get_bus_registry().find_by_name<bus::IUART>(m_descriptor->get_bus());
+    m_bus = m_hal.get_bus_registry().find_by_name<bus::IUART>(m_descriptor->get_bus());
     auto bus = m_bus.lock();
     if (!bus)
     {
@@ -233,11 +233,11 @@ void SRF01::process()
     }
 }
 
-auto SRF01::set_config(uav::INode_Config const& config) -> bool
+auto SRF01::set_config(hal::INode_Config const& config) -> bool
 {
     QLOG_TOPIC("SRF01::set_config");
 
-    auto specialized = dynamic_cast<uav::SRF01_Config const*>(&config);
+    auto specialized = dynamic_cast<hal::SRF01_Config const*>(&config);
     if (!specialized)
     {
         QLOGE("Wrong config type");
@@ -255,12 +255,12 @@ auto SRF01::set_config(uav::INode_Config const& config) -> bool
 
     return true;
 }
-auto SRF01::get_config() const -> std::shared_ptr<const uav::INode_Config>
+auto SRF01::get_config() const -> std::shared_ptr<const hal::INode_Config>
 {
     return m_config;
 }
 
-auto SRF01::get_descriptor() const -> std::shared_ptr<const uav::INode_Descriptor>
+auto SRF01::get_descriptor() const -> std::shared_ptr<const hal::INode_Descriptor>
 {
     return m_descriptor;
 }

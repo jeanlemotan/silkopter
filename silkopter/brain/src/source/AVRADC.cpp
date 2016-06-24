@@ -3,7 +3,7 @@
 #include "physics/constants.h"
 #include "utils/Timed_Scope.h"
 
-#include "uav.def.h"
+#include "hal.def.h"
 //#include "sz_AVRADC.hpp"
 
 namespace silk
@@ -18,10 +18,10 @@ constexpr uint8_t AVRADC_REG_ADC1           = 0x2;
 
 constexpr std::chrono::milliseconds MIN_CONVERSION_DURATION(5);
 
-AVRADC::AVRADC(UAV& uav)
-    : m_uav(uav)
-    , m_descriptor(new uav::AVRADC_Descriptor())
-    , m_config(new uav::AVRADC_Config())
+AVRADC::AVRADC(HAL& hal)
+    : m_hal(hal)
+    , m_descriptor(new hal::AVRADC_Descriptor())
+    , m_config(new hal::AVRADC_Config())
 {
     for (auto& adc: m_adcs)
     {
@@ -38,11 +38,11 @@ auto AVRADC::get_outputs() const -> std::vector<Output>
      }};
     return outputs;
 }
-auto AVRADC::init(uav::INode_Descriptor const& descriptor) -> bool
+auto AVRADC::init(hal::INode_Descriptor const& descriptor) -> bool
 {
     QLOG_TOPIC("AVRADC::init");
 
-    auto specialized = dynamic_cast<uav::AVRADC_Descriptor const*>(&descriptor);
+    auto specialized = dynamic_cast<hal::AVRADC_Descriptor const*>(&descriptor);
     if (!specialized)
     {
         QLOGE("Wrong descriptor type");
@@ -55,7 +55,7 @@ auto AVRADC::init(uav::INode_Descriptor const& descriptor) -> bool
 
 auto AVRADC::init() -> bool
 {
-    m_i2c = m_uav.get_bus_registry().find_by_name<bus::II2C>(m_descriptor->get_bus());
+    m_i2c = m_hal.get_bus_registry().find_by_name<bus::II2C>(m_descriptor->get_bus());
 
     auto i2c = m_i2c.lock();
     if (!i2c)
@@ -165,11 +165,11 @@ void AVRADC::process()
     }
 }
 
-auto AVRADC::set_config(uav::INode_Config const& config) -> bool
+auto AVRADC::set_config(hal::INode_Config const& config) -> bool
 {
     QLOG_TOPIC("AVRADC::set_config");
 
-    auto specialized = dynamic_cast<uav::AVRADC_Config const*>(&config);
+    auto specialized = dynamic_cast<hal::AVRADC_Config const*>(&config);
     if (!specialized)
     {
         QLOGE("Wrong config type");
@@ -179,12 +179,12 @@ auto AVRADC::set_config(uav::INode_Config const& config) -> bool
 
     return true;
 }
-auto AVRADC::get_config() const -> std::shared_ptr<const uav::INode_Config>
+auto AVRADC::get_config() const -> std::shared_ptr<const hal::INode_Config>
 {
     return m_config;
 }
 
-auto AVRADC::get_descriptor() const -> std::shared_ptr<const uav::INode_Descriptor>
+auto AVRADC::get_descriptor() const -> std::shared_ptr<const hal::INode_Descriptor>
 {
     return m_descriptor;
 }

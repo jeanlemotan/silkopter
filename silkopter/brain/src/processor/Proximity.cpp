@@ -1,7 +1,7 @@
 #include "BrainStdAfx.h"
 #include "Proximity.h"
 
-#include "uav.def.h"
+#include "hal.def.h"
 //#include "sz_Proximity.hpp"
 
 namespace silk
@@ -9,19 +9,19 @@ namespace silk
 namespace node
 {
 
-Proximity::Proximity(UAV& uav)
-    : m_uav(uav)
-    , m_descriptor(new uav::Proximity_Descriptor())
-    , m_config(new uav::Proximity_Config())
+Proximity::Proximity(HAL& hal)
+    : m_hal(hal)
+    , m_descriptor(new hal::Proximity_Descriptor())
+    , m_config(new hal::Proximity_Config())
 {
     m_output_stream = std::make_shared<Output_Stream>();
 }
 
-auto Proximity::init(uav::INode_Descriptor const& descriptor) -> bool
+auto Proximity::init(hal::INode_Descriptor const& descriptor) -> bool
 {
     QLOG_TOPIC("Proximity::init");
 
-    auto specialized = dynamic_cast<uav::Proximity_Descriptor const*>(&descriptor);
+    auto specialized = dynamic_cast<hal::Proximity_Descriptor const*>(&descriptor);
     if (!specialized)
     {
         QLOGE("Wrong descriptor type");
@@ -93,14 +93,14 @@ void Proximity::process()
 
 void Proximity::set_input_stream_path(size_t idx, q::Path const& path)
 {
-    m_accumulators[idx].set_stream_path(0, path, m_output_stream->get_rate(), m_uav);
+    m_accumulators[idx].set_stream_path(0, path, m_output_stream->get_rate(), m_hal);
 }
 
-auto Proximity::set_config(uav::INode_Config const& config) -> bool
+auto Proximity::set_config(hal::INode_Config const& config) -> bool
 {
     QLOG_TOPIC("Proximity::set_config");
 
-    auto specialized = dynamic_cast<uav::Proximity_Config const*>(&config);
+    auto specialized = dynamic_cast<hal::Proximity_Config const*>(&config);
     if (!specialized)
     {
         QLOGE("Wrong config type");
@@ -110,12 +110,12 @@ auto Proximity::set_config(uav::INode_Config const& config) -> bool
 
     return true;
 }
-auto Proximity::get_config() const -> std::shared_ptr<const uav::INode_Config>
+auto Proximity::get_config() const -> std::shared_ptr<const hal::INode_Config>
 {
     return m_config;
 }
 
-auto Proximity::get_descriptor() const -> std::shared_ptr<const uav::INode_Descriptor>
+auto Proximity::get_descriptor() const -> std::shared_ptr<const hal::INode_Descriptor>
 {
     return m_descriptor;
 }

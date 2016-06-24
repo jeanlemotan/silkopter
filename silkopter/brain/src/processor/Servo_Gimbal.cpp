@@ -1,7 +1,7 @@
 #include "BrainStdAfx.h"
 #include "Servo_Gimbal.h"
 
-#include "uav.def.h"
+#include "hal.def.h"
 //#include "sz_Servo_Gimbal.hpp"
 
 namespace silk
@@ -9,21 +9,21 @@ namespace silk
 namespace node
 {
 
-Servo_Gimbal::Servo_Gimbal(UAV& uav)
-    : m_uav(uav)
-    , m_descriptor(new uav::Servo_Gimbal_Descriptor())
-    , m_config(new uav::Servo_Gimbal_Config())
+Servo_Gimbal::Servo_Gimbal(HAL& hal)
+    : m_hal(hal)
+    , m_descriptor(new hal::Servo_Gimbal_Descriptor())
+    , m_config(new hal::Servo_Gimbal_Config())
 {
     m_x_output_stream = std::make_shared<Output_Stream>();
     m_y_output_stream = std::make_shared<Output_Stream>();
     m_z_output_stream = std::make_shared<Output_Stream>();
 }
 
-auto Servo_Gimbal::init(uav::INode_Descriptor const& descriptor) -> bool
+auto Servo_Gimbal::init(hal::INode_Descriptor const& descriptor) -> bool
 {
     QLOG_TOPIC("servo_gimbal::init");
 
-    auto specialized = dynamic_cast<uav::Servo_Gimbal_Descriptor const*>(&descriptor);
+    auto specialized = dynamic_cast<hal::Servo_Gimbal_Descriptor const*>(&descriptor);
     if (!specialized)
     {
         QLOGE("Wrong descriptor type");
@@ -146,19 +146,19 @@ void Servo_Gimbal::set_input_stream_path(size_t idx, q::Path const& path)
 {
     if (idx == 0)
     {
-        m_frame_accumulator.set_stream_path(0, path, m_descriptor->get_rate(), m_uav);
+        m_frame_accumulator.set_stream_path(0, path, m_descriptor->get_rate(), m_hal);
     }
     else if (idx == 1)
     {
-        m_commands_accumulator.set_stream_path(0, path, m_descriptor->get_commands_rate(), m_uav);
+        m_commands_accumulator.set_stream_path(0, path, m_descriptor->get_commands_rate(), m_hal);
     }
 }
 
-auto Servo_Gimbal::set_config(uav::INode_Config const& config) -> bool
+auto Servo_Gimbal::set_config(hal::INode_Config const& config) -> bool
 {
     QLOG_TOPIC("servo_gimbal::set_config");
 
-    auto specialized = dynamic_cast<uav::Servo_Gimbal_Config const*>(&config);
+    auto specialized = dynamic_cast<hal::Servo_Gimbal_Config const*>(&config);
     if (!specialized)
     {
         QLOGE("Wrong config type");
@@ -168,12 +168,12 @@ auto Servo_Gimbal::set_config(uav::INode_Config const& config) -> bool
 
     return true;
 }
-auto Servo_Gimbal::get_config() const -> std::shared_ptr<const uav::INode_Config>
+auto Servo_Gimbal::get_config() const -> std::shared_ptr<const hal::INode_Config>
 {
     return m_config;
 }
 
-auto Servo_Gimbal::get_descriptor() const -> std::shared_ptr<const uav::INode_Descriptor>
+auto Servo_Gimbal::get_descriptor() const -> std::shared_ptr<const hal::INode_Descriptor>
 {
     return m_descriptor;
 }

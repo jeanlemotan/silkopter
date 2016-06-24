@@ -2,7 +2,7 @@
 #include "Motor_Mixer.h"
 #include "uav_properties/IMultirotor_Properties.h"
 
-#include "uav.def.h"
+#include "hal.def.h"
 //#include "sz_Motor_Mixer.hpp"
 
 namespace silk
@@ -10,18 +10,18 @@ namespace silk
 namespace node
 {
 
-Motor_Mixer::Motor_Mixer(UAV& uav)
-    : m_uav(uav)
-    , m_descriptor(new uav::Motor_Mixer_Descriptor())
-    , m_config(new uav::Motor_Mixer_Config())
+Motor_Mixer::Motor_Mixer(HAL& hal)
+    : m_hal(hal)
+    , m_descriptor(new hal::Motor_Mixer_Descriptor())
+    , m_config(new hal::Motor_Mixer_Config())
 {
 }
 
-auto Motor_Mixer::init(uav::INode_Descriptor const& descriptor) -> bool
+auto Motor_Mixer::init(hal::INode_Descriptor const& descriptor) -> bool
 {
     QLOG_TOPIC("motor_mixer::init");
 
-    auto specialized = dynamic_cast<uav::Motor_Mixer_Descriptor const*>(&descriptor);
+    auto specialized = dynamic_cast<hal::Motor_Mixer_Descriptor const*>(&descriptor);
     if (!specialized)
     {
         QLOGE("Wrong descriptor type");
@@ -34,7 +34,7 @@ auto Motor_Mixer::init(uav::INode_Descriptor const& descriptor) -> bool
 
 auto Motor_Mixer::init() -> bool
 {
-    std::shared_ptr<const IMultirotor_Properties> multirotor_properties = m_uav.get_specialized_uav_properties<IMultirotor_Properties>();
+    std::shared_ptr<const IMultirotor_Properties> multirotor_properties = m_hal.get_specialized_uav_properties<IMultirotor_Properties>();
     if (!multirotor_properties)
     {
         QLOGE("No multirotor properties found");
@@ -107,7 +107,7 @@ void Motor_Mixer::process()
         os->samples.clear();
     }
 
-    std::shared_ptr<const IMultirotor_Properties> multirotor_properties = m_uav.get_specialized_uav_properties<IMultirotor_Properties>();
+    std::shared_ptr<const IMultirotor_Properties> multirotor_properties = m_hal.get_specialized_uav_properties<IMultirotor_Properties>();
     if (!multirotor_properties)
     {
         return;
@@ -424,14 +424,14 @@ void Motor_Mixer::compute_throttles(IMultirotor_Properties const& multirotor_pro
 
 void Motor_Mixer::set_input_stream_path(size_t idx, q::Path const& path)
 {
-    m_accumulator.set_stream_path(idx, path, m_descriptor->get_rate(), m_uav);
+    m_accumulator.set_stream_path(idx, path, m_descriptor->get_rate(), m_hal);
 }
 
-auto Motor_Mixer::set_config(uav::INode_Config const& config) -> bool
+auto Motor_Mixer::set_config(hal::INode_Config const& config) -> bool
 {
     QLOG_TOPIC("motor_mixer::set_config");
 
-    auto specialized = dynamic_cast<uav::Motor_Mixer_Config const*>(&config);
+    auto specialized = dynamic_cast<hal::Motor_Mixer_Config const*>(&config);
     if (!specialized)
     {
         QLOGE("Wrong config type");
@@ -441,12 +441,12 @@ auto Motor_Mixer::set_config(uav::INode_Config const& config) -> bool
 
     return true;
 }
-auto Motor_Mixer::get_config() const -> std::shared_ptr<const uav::INode_Config>
+auto Motor_Mixer::get_config() const -> std::shared_ptr<const hal::INode_Config>
 {
     return m_config;
 }
 
-auto Motor_Mixer::get_descriptor() const -> std::shared_ptr<const uav::INode_Descriptor>
+auto Motor_Mixer::get_descriptor() const -> std::shared_ptr<const hal::INode_Descriptor>
 {
     return m_descriptor;
 }

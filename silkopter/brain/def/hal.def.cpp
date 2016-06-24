@@ -1,8 +1,8 @@
-#include "uav.def.h"
+#include "hal.def.h"
 namespace silk
 {
 
-namespace uav
+namespace hal
 {
 
 template <typename T>

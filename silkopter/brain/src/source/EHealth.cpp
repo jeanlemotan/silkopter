@@ -9,8 +9,8 @@ namespace silk
 namespace node
 {
 
-EHealth::EHealth(UAV& uav)
-    : m_uav(uav)
+EHealth::EHealth(HAL& hal)
+    : m_hal(hal)
 {
     m_stream = std::make_shared<Stream>();
 }
@@ -27,7 +27,7 @@ auto EHealth::get_outputs() const -> std::vector<Output>
     return outputs;
 }
 
-auto EHealth::init(uav::INode_Descriptor const& descriptor) -> bool
+auto EHealth::init(hal::INode_Descriptor const& descriptor) -> bool
 {
     QLOG_TOPIC("EHealth::init");
 
@@ -35,7 +35,7 @@ auto EHealth::init(uav::INode_Descriptor const& descriptor) -> bool
 }
 auto EHealth::init() -> bool
 {
-    m_uart = m_uav.get_buses().find_by_name<bus::IUART>("uart0");
+    m_uart = m_hal.get_buses().find_by_name<bus::IUART>("uart0");
 
     Buses buses = { m_uart.lock() };
     if (!buses.uart)
@@ -118,18 +118,18 @@ void EHealth::process()
     }
 }
 
-auto EHealth::set_config(uav::INode_Config const& config) -> bool
+auto EHealth::set_config(hal::INode_Config const& config) -> bool
 {
     QLOG_TOPIC("EHealth::set_config");
 
     return true;
 }
-auto EHealth::get_config() const -> std::shared_ptr<const uav::INode_Config>
+auto EHealth::get_config() const -> std::shared_ptr<const hal::INode_Config>
 {
     return m_config;
 }
 
-auto EHealth::get_descriptor() const -> std::shared_ptr<const uav::INode_Descriptor>
+auto EHealth::get_descriptor() const -> std::shared_ptr<const hal::INode_Descriptor>
 {
     return m_desc;
 }

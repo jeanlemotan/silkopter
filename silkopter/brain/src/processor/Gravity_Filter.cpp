@@ -2,7 +2,7 @@
 #include "Gravity_Filter.h"
 #include "physics/constants.h"
 
-#include "uav.def.h"
+#include "hal.def.h"
 //#include "sz_Gravity_Filter.hpp"
 
 namespace silk
@@ -10,19 +10,19 @@ namespace silk
 namespace node
 {
 
-Gravity_Filter::Gravity_Filter(UAV& uav)
-    : m_uav(uav)
-    , m_descriptor(new uav::Gravity_Filter_Descriptor())
-    , m_config(new uav::Gravity_Filter_Config())
+Gravity_Filter::Gravity_Filter(HAL& hal)
+    : m_hal(hal)
+    , m_descriptor(new hal::Gravity_Filter_Descriptor())
+    , m_config(new hal::Gravity_Filter_Config())
 {
     m_output_stream = std::make_shared<Output_Stream>();
 }
 
-auto Gravity_Filter::init(uav::INode_Descriptor const& descriptor) -> bool
+auto Gravity_Filter::init(hal::INode_Descriptor const& descriptor) -> bool
 {
     QLOG_TOPIC("gravity_filter::init");
 
-    auto specialized = dynamic_cast<uav::Gravity_Filter_Descriptor const*>(&descriptor);
+    auto specialized = dynamic_cast<hal::Gravity_Filter_Descriptor const*>(&descriptor);
     if (!specialized)
     {
         QLOGE("Wrong descriptor type");
@@ -86,14 +86,14 @@ void Gravity_Filter::process()
 
 void Gravity_Filter::set_input_stream_path(size_t idx, q::Path const& path)
 {
-    m_accumulator.set_stream_path(idx, path, m_output_stream->get_rate(), m_uav);
+    m_accumulator.set_stream_path(idx, path, m_output_stream->get_rate(), m_hal);
 }
 
-auto Gravity_Filter::set_config(uav::INode_Config const& config) -> bool
+auto Gravity_Filter::set_config(hal::INode_Config const& config) -> bool
 {
     QLOG_TOPIC("gravity_filter::set_config");
 
-    auto specialized = dynamic_cast<uav::Gravity_Filter_Config const*>(&config);
+    auto specialized = dynamic_cast<hal::Gravity_Filter_Config const*>(&config);
     if (!specialized)
     {
         QLOGE("Wrong config type");
@@ -103,12 +103,12 @@ auto Gravity_Filter::set_config(uav::INode_Config const& config) -> bool
 
     return true;
 }
-auto Gravity_Filter::get_config() const -> std::shared_ptr<const uav::INode_Config>
+auto Gravity_Filter::get_config() const -> std::shared_ptr<const hal::INode_Config>
 {
     return m_config;
 }
 
-auto Gravity_Filter::get_descriptor() const -> std::shared_ptr<const uav::INode_Descriptor>
+auto Gravity_Filter::get_descriptor() const -> std::shared_ptr<const hal::INode_Descriptor>
 {
     return m_descriptor;
 }

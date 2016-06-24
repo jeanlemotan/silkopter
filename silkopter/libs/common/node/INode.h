@@ -4,7 +4,7 @@
 
 namespace silk
 {
-namespace uav
+namespace hal
 {
 struct INode_Descriptor;
 struct INode_Config;
@@ -64,11 +64,11 @@ public:
 
     virtual Type get_type() const = 0;
 
-    virtual bool init(uav::INode_Descriptor const& descriptor) = 0;
-    virtual std::shared_ptr<const uav::INode_Descriptor> get_descriptor() const = 0;
+    virtual bool init(hal::INode_Descriptor const& descriptor) = 0;
+    virtual std::shared_ptr<const hal::INode_Descriptor> get_descriptor() const = 0;
 
-    virtual bool set_config(uav::INode_Config const& config) = 0;
-    virtual std::shared_ptr<const uav::INode_Config> get_config() const = 0;
+    virtual bool set_config(hal::INode_Config const& config) = 0;
+    virtual std::shared_ptr<const hal::INode_Config> get_config() const = 0;
 
     virtual bool start(q::Clock::time_point tp) = 0;
 

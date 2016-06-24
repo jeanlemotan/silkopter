@@ -1,7 +1,7 @@
 #include "BrainStdAfx.h"
 #include "ADC_Ammeter.h"
 
-#include "uav.def.h"
+#include "hal.def.h"
 //#include "sz_ADC_Ammeter.hpp"
 
 namespace silk
@@ -9,19 +9,19 @@ namespace silk
 namespace node
 {
 
-ADC_Ammeter::ADC_Ammeter(UAV& uav)
-    : m_uav(uav)
-    , m_descriptor(new uav::ADC_Ammeter_Descriptor())
-    , m_config(new uav::ADC_Ammeter_Config())
+ADC_Ammeter::ADC_Ammeter(HAL& hal)
+    : m_hal(hal)
+    , m_descriptor(new hal::ADC_Ammeter_Descriptor())
+    , m_config(new hal::ADC_Ammeter_Config())
 {
     m_output_stream = std::make_shared<Output_Stream>();
 }
 
-auto ADC_Ammeter::init(uav::INode_Descriptor const& descriptor) -> bool
+auto ADC_Ammeter::init(hal::INode_Descriptor const& descriptor) -> bool
 {
     QLOG_TOPIC("adc_ammeter::init");
 
-    auto specialized = dynamic_cast<uav::ADC_Ammeter_Descriptor const*>(&descriptor);
+    auto specialized = dynamic_cast<hal::ADC_Ammeter_Descriptor const*>(&descriptor);
     if (!specialized)
     {
         QLOGE("Wrong descriptor type");
@@ -81,14 +81,14 @@ void ADC_Ammeter::process()
 
 void ADC_Ammeter::set_input_stream_path(size_t idx, q::Path const& path)
 {
-    m_accumulator.set_stream_path(idx, path, m_output_stream->get_rate(), m_uav);
+    m_accumulator.set_stream_path(idx, path, m_output_stream->get_rate(), m_hal);
 }
 
-auto ADC_Ammeter::set_config(uav::INode_Config const& config) -> bool
+auto ADC_Ammeter::set_config(hal::INode_Config const& config) -> bool
 {
     QLOG_TOPIC("adc_ammeter::set_config");
 
-    auto specialized = dynamic_cast<uav::ADC_Ammeter_Config const*>(&config);
+    auto specialized = dynamic_cast<hal::ADC_Ammeter_Config const*>(&config);
     if (!specialized)
     {
         QLOGE("Wrong config type");
@@ -98,12 +98,12 @@ auto ADC_Ammeter::set_config(uav::INode_Config const& config) -> bool
 
     return true;
 }
-auto ADC_Ammeter::get_config() const -> std::shared_ptr<const uav::INode_Config>
+auto ADC_Ammeter::get_config() const -> std::shared_ptr<const hal::INode_Config>
 {
     return m_config;
 }
 
-auto ADC_Ammeter::get_descriptor() const -> std::shared_ptr<const uav::INode_Descriptor>
+auto ADC_Ammeter::get_descriptor() const -> std::shared_ptr<const hal::INode_Descriptor>
 {
     return m_descriptor;
 }

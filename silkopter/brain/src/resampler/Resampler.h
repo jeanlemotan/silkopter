@@ -1,6 +1,6 @@
 #pragma once
 
-#include "UAV.h"
+#include "HAL.h"
 #include "common/node/IResampler.h"
 #include "utils/Butterworth.h"
 #include <deque>
@@ -8,7 +8,7 @@
 #include "Sample_Accumulator.h"
 #include "Basic_Output_Stream.h"
 
-#include "uav.def.h"
+#include "hal.def.h"
 
 namespace silk
 {
@@ -21,13 +21,13 @@ class Resampler : public IResampler
 public:
     static const int MAX_POLES = 8;
 
-    Resampler(UAV& uav);
+    Resampler(HAL& hal);
 
-    bool init(uav::INode_Descriptor const& descriptor) override;
-    std::shared_ptr<const uav::INode_Descriptor> get_descriptor() const override;
+    bool init(hal::INode_Descriptor const& descriptor) override;
+    std::shared_ptr<const hal::INode_Descriptor> get_descriptor() const override;
 
-    bool set_config(uav::INode_Config const& config) override;
-    std::shared_ptr<const uav::INode_Config> get_config() const override;
+    bool set_config(hal::INode_Config const& config) override;
+    std::shared_ptr<const hal::INode_Config> get_config() const override;
 
     //auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
 
@@ -43,10 +43,10 @@ private:
     auto init() -> bool;
     void resample();
 
-    UAV& m_uav;
+    HAL& m_hal;
 
-    std::shared_ptr<uav::Resampler_Descriptor> m_descriptor;
-    std::shared_ptr<uav::Resampler_Config> m_config;
+    std::shared_ptr<hal::Resampler_Descriptor> m_descriptor;
+    std::shared_ptr<hal::Resampler_Config> m_config;
 
     Sample_Accumulator<Stream_t> m_accumulator;
 
@@ -108,20 +108,20 @@ private:
 
 
 template<class Stream_t>
-Resampler<Stream_t>::Resampler(UAV& uav)
-    : m_uav(uav)
-    , m_descriptor(new uav::Resampler_Descriptor)
-    , m_config(new uav::Resampler_Config)
+Resampler<Stream_t>::Resampler(HAL& hal)
+    : m_hal(hal)
+    , m_descriptor(new hal::Resampler_Descriptor)
+    , m_config(new hal::Resampler_Config)
 {
     m_output_stream = std::make_shared<Output_Stream>();
 }
 
 template<class Stream_t>
-auto Resampler<Stream_t>::init(uav::INode_Descriptor const& descriptor) -> bool
+auto Resampler<Stream_t>::init(hal::INode_Descriptor const& descriptor) -> bool
 {
     QLOG_TOPIC("resampler::init");
 
-    auto specialized = dynamic_cast<uav::Resampler_Descriptor const*>(&descriptor);
+    auto specialized = dynamic_cast<hal::Resampler_Descriptor const*>(&descriptor);
     if (!specialized)
     {
         QLOGE("Wrong descriptor type");
@@ -142,7 +142,7 @@ auto Resampler<Stream_t>::init() -> bool
 }
 
 template<class Stream_t>
-auto Resampler<Stream_t>::get_descriptor() const -> std::shared_ptr<const uav::INode_Descriptor>
+auto Resampler<Stream_t>::get_descriptor() const -> std::shared_ptr<const hal::INode_Descriptor>
 {
     return m_descriptor;
 }
@@ -150,15 +150,15 @@ auto Resampler<Stream_t>::get_descriptor() const -> std::shared_ptr<const uav::I
 template<class Stream_t>
 void Resampler<Stream_t>::set_input_stream_path(size_t idx, q::Path const& path)
 {
-    m_accumulator.set_stream_path(idx, path, m_descriptor->get_input_rate(), m_uav);
+    m_accumulator.set_stream_path(idx, path, m_descriptor->get_input_rate(), m_hal);
 }
 
 template<class Stream_t>
-auto Resampler<Stream_t>::set_config(uav::INode_Config const& config) -> bool
+auto Resampler<Stream_t>::set_config(hal::INode_Config const& config) -> bool
 {
     QLOG_TOPIC("resampler::set_config");
 
-    auto specialized = dynamic_cast<uav::Resampler_Config const*>(&config);
+    auto specialized = dynamic_cast<hal::Resampler_Config const*>(&config);
     if (!specialized)
     {
         QLOGE("Wrong config type");
@@ -172,7 +172,7 @@ auto Resampler<Stream_t>::set_config(uav::INode_Config const& config) -> bool
     uint32_t filter_rate = math::max(output_rate, input_rate);
     float max_cutoff = math::min(output_rate / 2.f, input_rate / 2.f);
 
-    uav::LPF_Config& lpf_config = m_config->get_lpf();
+    hal::LPF_Config& lpf_config = m_config->get_lpf();
 
     if (math::is_zero(lpf_config.get_cutoff_frequency()))
     {
@@ -194,7 +194,7 @@ auto Resampler<Stream_t>::set_config(uav::INode_Config const& config) -> bool
 //    return rapidjson::Document();
 //}
 template<class Stream_t>
-auto Resampler<Stream_t>::get_config() const -> std::shared_ptr<const uav::INode_Config>
+auto Resampler<Stream_t>::get_config() const -> std::shared_ptr<const hal::INode_Config>
 {
     return m_config;
 }

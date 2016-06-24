@@ -11,13 +11,13 @@
 
 namespace silk
 {
-namespace uav
+namespace hal
 {
 struct IUAV_Descriptor;
 struct Multirotor_Descriptor;
 }
 
-class UAV;
+class HAL;
 
 template<class Base>
 class Factory : q::util::Noncopyable
@@ -68,12 +68,12 @@ private:
 class Comms;
 
 
-class UAV : q::util::Noncopyable
+class HAL : q::util::Noncopyable
 {
     friend class Comms;
 public:
-    UAV();
-    ~UAV();
+    HAL();
+    ~HAL();
 
     auto init(Comms& comms) -> bool;
     void process();
@@ -81,15 +81,15 @@ public:
 
     void save_settings();
 
-    auto set_uav_descriptor(std::shared_ptr<const uav::IUAV_Descriptor> descriptor) -> bool;
-    auto get_uav_descriptor() const   -> std::shared_ptr<const uav::IUAV_Descriptor>;
+    auto set_uav_descriptor(std::shared_ptr<const hal::IUAV_Descriptor> descriptor) -> bool;
+    auto get_uav_descriptor() const   -> std::shared_ptr<const hal::IUAV_Descriptor>;
 
     auto get_uav_properties() const   -> std::shared_ptr<const IUAV_Properties>;
 
     template<class Properties>
     auto get_specialized_uav_properties() const   -> std::shared_ptr<const Properties>;
 
-    q::util::Signal<void(UAV&)> uav_properties_changed_signal;
+    q::util::Signal<void(HAL&)> uav_properties_changed_signal;
 
     typedef Factory<bus::IBus> Bus_Factory;
     Bus_Factory const& get_bus_factory() const;
@@ -127,15 +127,15 @@ protected:
 private:
     void generate_settings_file();
 
-    auto create_bus(std::string const& type, std::string const& name, uav::IBus_Descriptor const& descriptor) -> std::shared_ptr<bus::IBus>;
-    auto create_node(std::string const& type, std::string const& name, uav::INode_Descriptor const& descriptor) -> std::shared_ptr<node::INode>;
+    auto create_bus(std::string const& type, std::string const& name, hal::IBus_Descriptor const& descriptor) -> std::shared_ptr<bus::IBus>;
+    auto create_node(std::string const& type, std::string const& name, hal::INode_Descriptor const& descriptor) -> std::shared_ptr<node::INode>;
 
     auto remove_node(std::shared_ptr<node::INode> node) -> bool;
 
     void sort_nodes(std::shared_ptr<node::INode> first_node);
 
     std::shared_ptr<IUAV_Properties> m_uav_properties;
-    std::shared_ptr<const uav::IUAV_Descriptor> m_uav_descriptor;
+    std::shared_ptr<const hal::IUAV_Descriptor> m_uav_descriptor;
 
     Bus_Registry m_buses;
     Node_Registry m_nodes;
@@ -154,7 +154,7 @@ private:
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
 template<class Properties>
-auto UAV::get_specialized_uav_properties() const   -> std::shared_ptr<const Properties>
+auto HAL::get_specialized_uav_properties() const   -> std::shared_ptr<const Properties>
 {
     std::shared_ptr<const IUAV_Properties> properties = get_uav_properties();
     return std::dynamic_pointer_cast<const Properties>(properties);

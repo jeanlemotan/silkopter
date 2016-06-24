@@ -1,7 +1,7 @@
 #include "BrainStdAfx.h"
 #include "Multirotor_Pilot.h"
 
-#include "uav.def.h"
+#include "hal.def.h"
 //#include "sz_Multirotor_Pilot.hpp"
 
 namespace silk
@@ -9,20 +9,20 @@ namespace silk
 namespace node
 {
 
-Multirotor_Pilot::Multirotor_Pilot(UAV& uav, Comms& comms)
-    : m_uav(uav)
+Multirotor_Pilot::Multirotor_Pilot(HAL& hal, Comms& comms)
+    : m_hal(hal)
     , m_comms(comms)
-    , m_descriptor(new uav::Multirotor_Pilot_Descriptor())
-    , m_config(new uav::Multirotor_Pilot_Config())
+    , m_descriptor(new hal::Multirotor_Pilot_Descriptor())
+    , m_config(new hal::Multirotor_Pilot_Config())
 {
     m_output_stream = std::make_shared<Output_Stream>();
 }
 
-auto Multirotor_Pilot::init(uav::INode_Descriptor const& descriptor) -> bool
+auto Multirotor_Pilot::init(hal::INode_Descriptor const& descriptor) -> bool
 {
     QLOG_TOPIC("Multirotor_Pilot::init");
 
-    auto specialized = dynamic_cast<uav::Multirotor_Pilot_Descriptor const*>(&descriptor);
+    auto specialized = dynamic_cast<hal::Multirotor_Pilot_Descriptor const*>(&descriptor);
     if (!specialized)
     {
         QLOGE("Wrong descriptor type");
@@ -110,19 +110,19 @@ void Multirotor_Pilot::set_input_stream_path(size_t idx, q::Path const& path)
 {
     if (idx == 0)
     {
-        m_state_accumulator.set_stream_path(0, path, m_descriptor->get_state_rate(), m_uav);
+        m_state_accumulator.set_stream_path(0, path, m_descriptor->get_state_rate(), m_hal);
     }
     else
     {
-        m_video_accumulator.set_stream_path(0, path, m_descriptor->get_video_rate(), m_uav);
+        m_video_accumulator.set_stream_path(0, path, m_descriptor->get_video_rate(), m_hal);
     }
 }
 
-auto Multirotor_Pilot::set_config(uav::INode_Config const& config) -> bool
+auto Multirotor_Pilot::set_config(hal::INode_Config const& config) -> bool
 {
     QLOG_TOPIC("Multirotor_Pilot::set_config");
 
-    auto specialized = dynamic_cast<uav::Multirotor_Pilot_Config const*>(&config);
+    auto specialized = dynamic_cast<hal::Multirotor_Pilot_Config const*>(&config);
     if (!specialized)
     {
         QLOGE("Wrong config type");
@@ -132,12 +132,12 @@ auto Multirotor_Pilot::set_config(uav::INode_Config const& config) -> bool
 
     return true;
 }
-auto Multirotor_Pilot::get_config() const -> std::shared_ptr<const uav::INode_Config>
+auto Multirotor_Pilot::get_config() const -> std::shared_ptr<const hal::INode_Config>
 {
     return m_config;
 }
 
-auto Multirotor_Pilot::get_descriptor() const -> std::shared_ptr<const uav::INode_Descriptor>
+auto Multirotor_Pilot::get_descriptor() const -> std::shared_ptr<const hal::INode_Descriptor>
 {
     return m_descriptor;
 }

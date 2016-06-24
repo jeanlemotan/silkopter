@@ -2,7 +2,7 @@
 #include "ENU_Frame_System.h"
 #include "physics/constants.h"
 
-#include "uav.def.h"
+#include "hal.def.h"
 //#include "sz_ENU_Frame_System.hpp"
 
 namespace silk
@@ -10,19 +10,19 @@ namespace silk
 namespace node
 {
 
-ENU_Frame_System::ENU_Frame_System(UAV& uav)
-    : m_uav(uav)
-    , m_descriptor(new uav::ENU_Frame_System_Descriptor())
-    , m_config(new uav::ENU_Frame_System_Config())
+ENU_Frame_System::ENU_Frame_System(HAL& hal)
+    : m_hal(hal)
+    , m_descriptor(new hal::ENU_Frame_System_Descriptor())
+    , m_config(new hal::ENU_Frame_System_Config())
 {
     m_output_stream = std::make_shared<Output_Stream>();
 }
 
-auto ENU_Frame_System::init(uav::INode_Descriptor const& descriptor) -> bool
+auto ENU_Frame_System::init(hal::INode_Descriptor const& descriptor) -> bool
 {
     QLOG_TOPIC("ENU_Frame_System::init");
 
-    auto specialized = dynamic_cast<uav::ENU_Frame_System_Descriptor const*>(&descriptor);
+    auto specialized = dynamic_cast<hal::ENU_Frame_System_Descriptor const*>(&descriptor);
     if (!specialized)
     {
         QLOGE("Wrong descriptor type");
@@ -87,14 +87,14 @@ void ENU_Frame_System::process()
 
 void ENU_Frame_System::set_input_stream_path(size_t idx, q::Path const& path)
 {
-    m_accumulator.set_stream_path(idx, path, m_output_stream->get_rate(), m_uav);
+    m_accumulator.set_stream_path(idx, path, m_output_stream->get_rate(), m_hal);
 }
 
-auto ENU_Frame_System::set_config(uav::INode_Config const& config) -> bool
+auto ENU_Frame_System::set_config(hal::INode_Config const& config) -> bool
 {
     QLOG_TOPIC("ENU_Frame_System::set_config");
 
-    auto specialized = dynamic_cast<uav::ENU_Frame_System_Config const*>(&config);
+    auto specialized = dynamic_cast<hal::ENU_Frame_System_Config const*>(&config);
     if (!specialized)
     {
         QLOGE("Wrong config type");
@@ -104,12 +104,12 @@ auto ENU_Frame_System::set_config(uav::INode_Config const& config) -> bool
 
     return true;
 }
-auto ENU_Frame_System::get_config() const -> std::shared_ptr<const uav::INode_Config>
+auto ENU_Frame_System::get_config() const -> std::shared_ptr<const hal::INode_Config>
 {
     return m_config;
 }
 
-auto ENU_Frame_System::get_descriptor() const -> std::shared_ptr<const uav::INode_Descriptor>
+auto ENU_Frame_System::get_descriptor() const -> std::shared_ptr<const hal::INode_Descriptor>
 {
     return m_descriptor;
 }

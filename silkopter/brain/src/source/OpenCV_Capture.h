@@ -1,6 +1,6 @@
 #pragma once
 
-#include "UAV.h"
+#include "HAL.h"
 #include "common/node/ISource.h"
 #include "common/Comm_Data.h"
 #include "common/stream/IVideo.h"
@@ -8,7 +8,7 @@
 
 namespace silk
 {
-namespace uav
+namespace hal
 {
 struct OpenCV_Capture_Descriptor;
 struct OpenCV_Capture_Config;
@@ -25,14 +25,14 @@ namespace node
 class OpenCV_Capture : public ISource
 {
 public:
-    OpenCV_Capture(UAV& uav);
+    OpenCV_Capture(HAL& hal);
     ~OpenCV_Capture();
 
-    bool init(uav::INode_Descriptor const& descriptor) override;
-    std::shared_ptr<const uav::INode_Descriptor> get_descriptor() const override;
+    bool init(hal::INode_Descriptor const& descriptor) override;
+    std::shared_ptr<const hal::INode_Descriptor> get_descriptor() const override;
 
-    bool set_config(uav::INode_Config const& config) override;
-    std::shared_ptr<const uav::INode_Config> get_config() const override;
+    bool set_config(hal::INode_Config const& config) override;
+    std::shared_ptr<const hal::INode_Config> get_config() const override;
 
     //auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
 
@@ -54,12 +54,12 @@ public:
     typedef std::function<void(uint8_t const* data, size_t size, math::vec2u32 const& resolution, bool is_keyframe)> Data_Available_Callback;
 
 private:
-    UAV& m_uav;
+    HAL& m_hal;
 
     auto init() -> bool;
 
-    std::shared_ptr<uav::OpenCV_Capture_Descriptor> m_descriptor;
-    std::shared_ptr<uav::OpenCV_Capture_Config> m_config;
+    std::shared_ptr<hal::OpenCV_Capture_Descriptor> m_descriptor;
+    std::shared_ptr<hal::OpenCV_Capture_Config> m_config;
 
     void set_active_streams(bool recording, uint32_t quality);
 

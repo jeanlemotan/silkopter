@@ -1,6 +1,6 @@
 #pragma once
 
-#include "UAV.h"
+#include "HAL.h"
 #include "common/node/ISink.h"
 #include "common/stream/IPWM.h"
 #include "common/bus/II2C.h"
@@ -8,7 +8,7 @@
 
 namespace silk
 {
-namespace uav
+namespace hal
 {
 struct PCA9685_Descriptor;
 struct PCA9685_Config;
@@ -24,16 +24,16 @@ namespace node
 class PCA9685 : public ISink
 {
 public:
-    PCA9685(UAV& uav);
+    PCA9685(HAL& hal);
     ~PCA9685();
 
     static const size_t MAX_PWM_CHANNELS = 8;
 
-    bool init(uav::INode_Descriptor const& descriptor) override;
-    std::shared_ptr<const uav::INode_Descriptor> get_descriptor() const override;
+    bool init(hal::INode_Descriptor const& descriptor) override;
+    std::shared_ptr<const hal::INode_Descriptor> get_descriptor() const override;
 
-    bool set_config(uav::INode_Config const& config) override;
-    std::shared_ptr<const uav::INode_Config> get_config() const override;
+    bool set_config(hal::INode_Config const& config) override;
+    std::shared_ptr<const hal::INode_Config> get_config() const override;
 
     //auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
 
@@ -55,12 +55,12 @@ private:
 
     auto restart(bus::II2C& i2c) -> bool;
 
-    UAV& m_uav;
+    HAL& m_hal;
 
     std::weak_ptr<bus::II2C> m_i2c;
 
-    std::shared_ptr<uav::PCA9685_Descriptor> m_descriptor;
-    std::shared_ptr<uav::PCA9685_Config> m_config;
+    std::shared_ptr<hal::PCA9685_Descriptor> m_descriptor;
+    std::shared_ptr<hal::PCA9685_Config> m_config;
 
     struct PWM_Channel
     {

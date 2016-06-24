@@ -1,7 +1,7 @@
 #include "BrainStdAfx.h"
 #include "Throttle_To_PWM.h"
 
-#include "uav.def.h"
+#include "hal.def.h"
 //#include "sz_Throttle_To_PWM.hpp"
 
 namespace silk
@@ -9,18 +9,18 @@ namespace silk
 namespace node
 {
 
-Throttle_To_PWM::Throttle_To_PWM(UAV& uav)
-    : m_uav(uav)
-    , m_descriptor(new uav::Throttle_To_PWM_Descriptor())
-    , m_config(new uav::Throttle_To_PWM_Config())
+Throttle_To_PWM::Throttle_To_PWM(HAL& hal)
+    : m_hal(hal)
+    , m_descriptor(new hal::Throttle_To_PWM_Descriptor())
+    , m_config(new hal::Throttle_To_PWM_Config())
 {
 }
 
-auto Throttle_To_PWM::init(uav::INode_Descriptor const& descriptor) -> bool
+auto Throttle_To_PWM::init(hal::INode_Descriptor const& descriptor) -> bool
 {
     QLOG_TOPIC("Throttle_To_PWM::init");
 
-    auto specialized = dynamic_cast<uav::Throttle_To_PWM_Descriptor const*>(&descriptor);
+    auto specialized = dynamic_cast<hal::Throttle_To_PWM_Descriptor const*>(&descriptor);
     if (!specialized)
     {
         QLOGE("Wrong descriptor type");
@@ -95,14 +95,14 @@ void Throttle_To_PWM::process()
 
 void Throttle_To_PWM::set_input_stream_path(size_t idx, q::Path const& path)
 {
-    m_accumulators[idx].set_stream_path(0, path, m_output_streams[0]->get_rate(), m_uav);
+    m_accumulators[idx].set_stream_path(0, path, m_output_streams[0]->get_rate(), m_hal);
 }
 
-auto Throttle_To_PWM::set_config(uav::INode_Config const& config) -> bool
+auto Throttle_To_PWM::set_config(hal::INode_Config const& config) -> bool
 {
     QLOG_TOPIC("Throttle_To_PWM::set_config");
 
-    auto specialized = dynamic_cast<uav::Throttle_To_PWM_Config const*>(&config);
+    auto specialized = dynamic_cast<hal::Throttle_To_PWM_Config const*>(&config);
     if (!specialized)
     {
         QLOGE("Wrong config type");
@@ -112,12 +112,12 @@ auto Throttle_To_PWM::set_config(uav::INode_Config const& config) -> bool
 
     return true;
 }
-auto Throttle_To_PWM::get_config() const -> std::shared_ptr<const uav::INode_Config>
+auto Throttle_To_PWM::get_config() const -> std::shared_ptr<const hal::INode_Config>
 {
     return m_config;
 }
 
-auto Throttle_To_PWM::get_descriptor() const -> std::shared_ptr<const uav::INode_Descriptor>
+auto Throttle_To_PWM::get_descriptor() const -> std::shared_ptr<const hal::INode_Descriptor>
 {
     return m_descriptor;
 }

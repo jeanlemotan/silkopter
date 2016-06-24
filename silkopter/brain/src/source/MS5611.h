@@ -1,6 +1,6 @@
 #pragma once
 
-#include "UAV.h"
+#include "HAL.h"
 #include "common/node/ISource.h"
 #include "common/stream/IPressure.h"
 #include "common/stream/ITemperature.h"
@@ -12,7 +12,7 @@
 
 namespace silk
 {
-namespace uav
+namespace hal
 {
 struct MS5611_Descriptor;
 struct MS5611_Config;
@@ -28,13 +28,13 @@ namespace node
 class MS5611 : public ISource
 {
 public:
-    MS5611(UAV& uav);
+    MS5611(HAL& hal);
 
-    bool init(uav::INode_Descriptor const& descriptor) override;
-    std::shared_ptr<const uav::INode_Descriptor> get_descriptor() const override;
+    bool init(hal::INode_Descriptor const& descriptor) override;
+    std::shared_ptr<const hal::INode_Descriptor> get_descriptor() const override;
 
-    bool set_config(uav::INode_Config const& config) override;
-    std::shared_ptr<const uav::INode_Config> get_config() const override;
+    bool set_config(hal::INode_Config const& config) override;
+    std::shared_ptr<const hal::INode_Config> get_config() const override;
 
     //auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
 
@@ -47,7 +47,8 @@ public:
 private:
     auto init() -> bool;
 
-    UAV& m_uav;
+    HAL& m_hal;
+
     std::weak_ptr<bus::II2C> m_i2c;
     std::weak_ptr<bus::ISPI> m_spi;
 
@@ -64,8 +65,8 @@ private:
     auto bus_read_u16(Buses& buses, uint8_t reg, uint16_t& dst) -> bool;
     auto bus_write(Buses& buses, uint8_t data) -> bool;
 
-    std::shared_ptr<uav::MS5611_Descriptor> m_descriptor;
-    std::shared_ptr<uav::MS5611_Config> m_config;
+    std::shared_ptr<hal::MS5611_Descriptor> m_descriptor;
+    std::shared_ptr<hal::MS5611_Config> m_config;
 
     template<class Base>
     struct Common : public Base

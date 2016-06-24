@@ -1,6 +1,6 @@
 ﻿#include "BrainStdAfx.h"
 
-#include "UAV.h"
+#include "HAL.h"
 #include "Comms.h"
 #include "utils/Timed_Scope.h"
 
@@ -163,32 +163,32 @@ template<class T> struct Node_Wrapper : public INode_Wrapper
 
 ///////////////////////////////////////////////////////////////
 
-UAV::UAV()
+HAL::HAL()
 {
 }
 
-UAV::~UAV()
+HAL::~HAL()
 {
 }
 
-void UAV::save_settings()
+void HAL::save_settings()
 {
     TIMED_FUNCTION();
 
-    uav::Settings settings;
+    hal::Settings settings;
 
-    settings.set_uav_descriptor(uav::Poly<const uav::IUAV_Descriptor>(m_uav_descriptor));
+    settings.set_uav_descriptor(hal::Poly<const hal::IUAV_Descriptor>(m_uav_descriptor));
 
-    std::vector<uav::Settings::Node_Data>& node_datas = settings.get_nodes();
+    std::vector<hal::Settings::Node_Data>& node_datas = settings.get_nodes();
     auto const& nodes = get_node_registry().get_all();
     for (auto const& n: nodes)
     {
-        uav::Settings::Node_Data node_data;
+        hal::Settings::Node_Data node_data;
 
         node_data.set_name(n.name);
         node_data.set_type(n.type);
-        node_data.set_descriptor(uav::Poly<const uav::INode_Descriptor>(n.ptr->get_descriptor()));
-        node_data.set_config(uav::Poly<const uav::INode_Config>(n.ptr->get_config()));
+        node_data.set_descriptor(hal::Poly<const hal::INode_Descriptor>(n.ptr->get_descriptor()));
+        node_data.set_config(hal::Poly<const hal::INode_Config>(n.ptr->get_config()));
 
         for (auto const& si: n.ptr->get_inputs())
         {
@@ -198,20 +198,20 @@ void UAV::save_settings()
         node_datas.push_back(std::move(node_data));
     }
 
-    std::vector<uav::Settings::Bus_Data>& bus_datas = settings.get_buses();
+    std::vector<hal::Settings::Bus_Data>& bus_datas = settings.get_buses();
     auto const& buses = get_bus_registry().get_all();
     for (auto const& b: buses)
     {
-        uav::Settings::Bus_Data bus_data;
+        hal::Settings::Bus_Data bus_data;
 
         bus_data.set_name(b.name);
         bus_data.set_type(b.type);
-        bus_data.set_descriptor(uav::Poly<const uav::IBus_Descriptor>(b.ptr->get_descriptor()));
+        bus_data.set_descriptor(hal::Poly<const hal::IBus_Descriptor>(b.ptr->get_descriptor()));
 
         bus_datas.push_back(std::move(bus_data));
     }
 
-    ts::sz::Value sz_value = uav::serialize(settings);
+    ts::sz::Value sz_value = hal::serialize(settings);
 
     silk::async(std::function<void()>([sz_value]()
     {
@@ -329,36 +329,36 @@ void UAV::save_settings()
     //autojsoncxx::to_pretty_json_file("sensors_pi.cfg", config);
 }
 
-auto UAV::get_telemetry_data() const -> Telemetry_Data const&
+auto HAL::get_telemetry_data() const -> Telemetry_Data const&
 {
     return m_telemetry_data;
 }
 
-UAV::Bus_Factory const& UAV::get_bus_factory() const
+HAL::Bus_Factory const& HAL::get_bus_factory() const
 {
     return m_bus_factory;
 }
-UAV::Node_Factory const& UAV::get_node_factory() const
+HAL::Node_Factory const& HAL::get_node_factory() const
 {
     return m_node_factory;
 }
-UAV::Bus_Registry const& UAV::get_bus_registry() const
+HAL::Bus_Registry const& HAL::get_bus_registry() const
 {
     return m_buses;
 }
-UAV::Node_Registry const& UAV::get_node_registry() const
+HAL::Node_Registry const& HAL::get_node_registry() const
 {
     return m_nodes;
 }
-UAV::Stream_Registry const& UAV::get_stream_registry() const
+HAL::Stream_Registry const& HAL::get_stream_registry() const
 {
     return m_streams;
 }
-auto UAV::get_uav_descriptor() const -> std::shared_ptr<const uav::IUAV_Descriptor>
+auto HAL::get_uav_descriptor() const -> std::shared_ptr<const hal::IUAV_Descriptor>
 {
     return m_uav_descriptor;
 }
-auto UAV::set_uav_descriptor(std::shared_ptr<const uav::IUAV_Descriptor> descriptor) -> bool
+auto HAL::set_uav_descriptor(std::shared_ptr<const hal::IUAV_Descriptor> descriptor) -> bool
 {
     if (!descriptor)
     {
@@ -368,12 +368,12 @@ auto UAV::set_uav_descriptor(std::shared_ptr<const uav::IUAV_Descriptor> descrip
 
     std::shared_ptr<IUAV_Properties> new_properties;
 
-    if (auto* d = dynamic_cast<uav::Tri_Descriptor const*>(descriptor.get()))
+    if (auto* d = dynamic_cast<hal::Tri_Descriptor const*>(descriptor.get()))
     {
         QLOGE("Tri not supported");
         return false;
     }
-    else if (auto* d = dynamic_cast<uav::Quad_Descriptor const*>(descriptor.get()))
+    else if (auto* d = dynamic_cast<hal::Quad_Descriptor const*>(descriptor.get()))
     {
         std::shared_ptr<Quad_Properties> p = std::make_shared<Quad_Properties>();
         if (!p->init(*d))
@@ -382,27 +382,27 @@ auto UAV::set_uav_descriptor(std::shared_ptr<const uav::IUAV_Descriptor> descrip
         }
         new_properties = p;
     }
-    else if (auto* d = dynamic_cast<uav::Hexa_Descriptor const*>(descriptor.get()))
+    else if (auto* d = dynamic_cast<hal::Hexa_Descriptor const*>(descriptor.get()))
     {
         QLOGE("Hexa not supported");
         return false;
     }
-    else if (auto* d = dynamic_cast<uav::Hexatri_Descriptor const*>(descriptor.get()))
+    else if (auto* d = dynamic_cast<hal::Hexatri_Descriptor const*>(descriptor.get()))
     {
         QLOGE("Hexatri not supported");
         return false;
     }
-    else if (auto* d = dynamic_cast<uav::Octo_Descriptor const*>(descriptor.get()))
+    else if (auto* d = dynamic_cast<hal::Octo_Descriptor const*>(descriptor.get()))
     {
         QLOGE("Octo not supported");
         return false;
     }
-    else if (auto* d = dynamic_cast<uav::Octaquad_Descriptor const*>(descriptor.get()))
+    else if (auto* d = dynamic_cast<hal::Octaquad_Descriptor const*>(descriptor.get()))
     {
         QLOGE("Octaquad not supported");
         return false;
     }
-    else if (auto* d = dynamic_cast<uav::Custom_Multirotor_Descriptor const*>(descriptor.get()))
+    else if (auto* d = dynamic_cast<hal::Custom_Multirotor_Descriptor const*>(descriptor.get()))
     {
         QLOGE("Custom multirotor not supported");
         return false;
@@ -420,9 +420,9 @@ auto UAV::set_uav_descriptor(std::shared_ptr<const uav::IUAV_Descriptor> descrip
 
     return true;
 }
-//auto UAV::set_multirotor_descriptor(uav::Multirotor_Descriptor const& descriptor) -> bool
+//auto hal::set_multirotor_descriptor(hal::Multirotor_Descriptor const& descriptor) -> bool
 //{
-//    QLOG_TOPIC("uav::set_multirotor_descriptor");
+//    QLOG_TOPIC("hal::set_multirotor_descriptor");
 
 //    if (descriptor.get_motors().size() < 2)
 //    {
@@ -439,7 +439,7 @@ auto UAV::set_uav_descriptor(std::shared_ptr<const uav::IUAV_Descriptor> descrip
 //    }
 
 //    //http://en.wikipedia.org/wiki/List_of_moments_of_inertia
-//    m_uav_descriptor.reset(new uav::Multirotor_Descriptor(descriptor)); //make a copy
+//    m_uav_descriptor.reset(new hal::Multirotor_Descriptor(descriptor)); //make a copy
 //    if (math::is_zero(descriptor.get_moment_of_inertia(), math::epsilon<float>()))
 //    {
 //        m_uav_descriptor->set_moment_of_inertia((1.f / 12.f) * descriptor.get_mass() * (3.f * math::square(descriptor.get_radius()) + math::square(descriptor.get_height())));
@@ -449,12 +449,12 @@ auto UAV::set_uav_descriptor(std::shared_ptr<const uav::IUAV_Descriptor> descrip
 //    return true;
 //}
 
-auto UAV::get_uav_properties() const -> std::shared_ptr<const IUAV_Properties>
+auto HAL::get_uav_properties() const -> std::shared_ptr<const IUAV_Properties>
 {
     return m_uav_properties;
 }
 
-auto UAV::remove_node(std::shared_ptr<node::INode> node) -> bool
+auto HAL::remove_node(std::shared_ptr<node::INode> node) -> bool
 {
     m_nodes.remove(node);
     std::vector<node::INode::Output> outputs = node->get_outputs();
@@ -479,7 +479,7 @@ void write_gnu_plot(std::string const& name, std::vector<T> const& samples)
     }
 }
 
-auto UAV::create_bus(std::string const& type, std::string const& name, uav::IBus_Descriptor const& descriptor) -> std::shared_ptr<bus::IBus>
+auto HAL::create_bus(std::string const& type, std::string const& name, hal::IBus_Descriptor const& descriptor) -> std::shared_ptr<bus::IBus>
 {
     if (m_buses.find_by_name<bus::IBus>(name))
     {
@@ -495,7 +495,7 @@ auto UAV::create_bus(std::string const& type, std::string const& name, uav::IBus
     }
     return std::shared_ptr<bus::IBus>();
 }
-auto UAV::create_node(std::string const& type, std::string const& name, uav::INode_Descriptor const& descriptor) -> std::shared_ptr<node::INode>
+auto HAL::create_node(std::string const& type, std::string const& name, hal::INode_Descriptor const& descriptor) -> std::shared_ptr<node::INode>
 {
     if (m_nodes.find_by_name<node::INode>(name))
     {
@@ -523,7 +523,7 @@ auto UAV::create_node(std::string const& type, std::string const& name, uav::INo
     return std::shared_ptr<node::INode>();
 }
 
-//auto UAV::create_buses(rapidjson::Value& json) -> bool
+//auto hal::create_buses(rapidjson::Value& json) -> bool
 //{
 //    if (!json.IsObject())
 //    {
@@ -578,7 +578,7 @@ auto UAV::create_node(std::string const& type, std::string const& name, uav::INo
 //    return true;
 //}
 
-//auto UAV::create_nodes(rapidjson::Value& json) -> bool
+//auto hal::create_nodes(rapidjson::Value& json) -> bool
 //{
 //    if (!json.IsArray())
 //    {
@@ -645,7 +645,7 @@ auto UAV::create_node(std::string const& type, std::string const& name, uav::INo
 //    return true;
 //}
 
-void UAV::sort_nodes(std::shared_ptr<node::INode> first_node)
+void HAL::sort_nodes(std::shared_ptr<node::INode> first_node)
 {
     QASSERT(first_node);
     if (!first_node)
@@ -731,11 +731,11 @@ void UAV::sort_nodes(std::shared_ptr<node::INode> first_node)
 }
 
 
-auto UAV::init(Comms& comms) -> bool
+auto HAL::init(Comms& comms) -> bool
 {
     using namespace silk::node;
 
-    QLOG_TOPIC("uav::init");
+    QLOG_TOPIC("hal::init");
 
 #if defined (RASPBERRY_PI)
     if (!initialize_pigpio())
@@ -999,8 +999,8 @@ auto UAV::init(Comms& comms) -> bool
         return false;
     }
 
-    uav::Settings settings;
-    auto reserialize_result = uav::deserialize(settings, json_result.payload());
+    hal::Settings settings;
+    auto reserialize_result = hal::deserialize(settings, json_result.payload());
     if (reserialize_result != ts::success)
     {
         QLOGE("Failed to deserialize settings: {}", reserialize_result.error().what());
@@ -1015,7 +1015,7 @@ auto UAV::init(Comms& comms) -> bool
         }
     }
 
-    for (uav::Settings::Bus_Data const& data: settings.get_buses())
+    for (hal::Settings::Bus_Data const& data: settings.get_buses())
     {
         if (!create_bus(data.get_type(), data.get_name(), *data.get_descriptor()))
         {
@@ -1023,7 +1023,7 @@ auto UAV::init(Comms& comms) -> bool
             return false;
         }
     }
-    for (uav::Settings::Node_Data const& data: settings.get_nodes())
+    for (hal::Settings::Node_Data const& data: settings.get_nodes())
     {
         if (!create_node(data.get_type(), data.get_name(), *data.get_descriptor()))
         {
@@ -1033,7 +1033,7 @@ auto UAV::init(Comms& comms) -> bool
     }
 
     //set input paths and configs
-    for (uav::Settings::Node_Data const& data: settings.get_nodes())
+    for (hal::Settings::Node_Data const& data: settings.get_nodes())
     {
         std::shared_ptr<node::INode> node = m_nodes.find_by_name<node::INode>(data.get_name());
         if (!node)
@@ -1070,7 +1070,7 @@ auto UAV::init(Comms& comms) -> bool
     return true;
 }
 
-void UAV::shutdown()
+void HAL::shutdown()
 {
 #if defined (RASPBERRY_PI)
     shutdown_bcm();
@@ -1078,13 +1078,13 @@ void UAV::shutdown()
 #endif
 }
 
-void UAV::remove_add_nodes()
+void HAL::remove_add_nodes()
 {
     m_streams.remove_all();
     m_nodes.remove_all();
 }
 
-void UAV::generate_settings_file()
+void HAL::generate_settings_file()
 {
 #if defined RASPBERRY_PI
 
@@ -1169,7 +1169,7 @@ void UAV::generate_settings_file()
 //static std::vector<float> s_samples;
 //static std::vector<float> s_samples_lpf;
 
-void UAV::process()
+void HAL::process()
 {
 //    for (auto const& n: m_buses.get_all())
 //    {

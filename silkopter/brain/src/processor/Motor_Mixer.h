@@ -6,14 +6,14 @@
 #include "common/stream/IThrottle.h"
 #include "uav_properties/IMultirotor_Properties.h"
 
-#include "UAV.h"
+#include "HAL.h"
 
 #include "Sample_Accumulator.h"
 
 
 namespace silk
 {
-namespace uav
+namespace hal
 {
 struct Motor_Mixer_Descriptor;
 struct Motor_Mixer_Config;
@@ -29,13 +29,13 @@ namespace node
 class Motor_Mixer : public IProcessor
 {
 public:
-    Motor_Mixer(UAV& uav);
+    Motor_Mixer(HAL& hal);
 
-    bool init(uav::INode_Descriptor const& descriptor) override;
-    std::shared_ptr<const uav::INode_Descriptor> get_descriptor() const override;
+    bool init(hal::INode_Descriptor const& descriptor) override;
+    std::shared_ptr<const hal::INode_Descriptor> get_descriptor() const override;
 
-    bool set_config(uav::INode_Config const& config) override;
-    std::shared_ptr<const uav::INode_Config> get_config() const override;
+    bool set_config(hal::INode_Config const& config) override;
+    std::shared_ptr<const hal::INode_Config> get_config() const override;
 
     //auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
 
@@ -55,10 +55,10 @@ private:
     void compute_throttles(IMultirotor_Properties const& multirotor_properties, stream::IFloat::Value const& collective_thrust, stream::ITorque::Value const& torque);
 
 
-    UAV& m_uav;
+    HAL& m_hal;
 
-    std::shared_ptr<uav::Motor_Mixer_Descriptor> m_descriptor;
-    std::shared_ptr<uav::Motor_Mixer_Config> m_config;
+    std::shared_ptr<hal::Motor_Mixer_Descriptor> m_descriptor;
+    std::shared_ptr<hal::Motor_Mixer_Config> m_config;
 
     Sample_Accumulator<stream::ITorque, stream::IFloat> m_accumulator;
 

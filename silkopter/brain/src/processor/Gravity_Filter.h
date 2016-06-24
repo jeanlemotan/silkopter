@@ -4,14 +4,14 @@
 #include "common/stream/IFrame.h"
 #include "common/stream/IAcceleration.h"
 #include "common/stream/ILinear_Acceleration.h"
-#include "UAV.h"
+#include "HAL.h"
 #include "Sample_Accumulator.h"
 #include "Basic_Output_Stream.h"
 
 
 namespace silk
 {
-namespace uav
+namespace hal
 {
 struct Gravity_Filter_Descriptor;
 struct Gravity_Filter_Config;
@@ -27,13 +27,13 @@ namespace node
 class Gravity_Filter : public IProcessor
 {
 public:
-    Gravity_Filter(UAV& uav);
+    Gravity_Filter(HAL& hal);
 
-    bool init(uav::INode_Descriptor const& descriptor) override;
-    std::shared_ptr<const uav::INode_Descriptor> get_descriptor() const override;
+    bool init(hal::INode_Descriptor const& descriptor) override;
+    std::shared_ptr<const hal::INode_Descriptor> get_descriptor() const override;
 
-    bool set_config(uav::INode_Config const& config) override;
-    std::shared_ptr<const uav::INode_Config> get_config() const override;
+    bool set_config(hal::INode_Config const& config) override;
+    std::shared_ptr<const hal::INode_Config> get_config() const override;
 
     //auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
 
@@ -48,10 +48,10 @@ public:
 private:
     auto init() -> bool;
 
-    UAV& m_uav;
+    HAL& m_hal;
 
-    std::shared_ptr<uav::Gravity_Filter_Descriptor> m_descriptor;
-    std::shared_ptr<uav::Gravity_Filter_Config> m_config;
+    std::shared_ptr<hal::Gravity_Filter_Descriptor> m_descriptor;
+    std::shared_ptr<hal::Gravity_Filter_Config> m_config;
 
     Sample_Accumulator<stream::IUAV_Frame, stream::IAcceleration> m_accumulator;
 

@@ -150,8 +150,7 @@ SOURCES += \
     ../../src/source/RaspiCamControl.cpp \
     ../../src/brain/LiPo_Battery.cpp \
     ../../src/pilot/Multirotor_Pilot.cpp \
-    ../../src/UAV.cpp \
-    ../../def/uav.def.cpp \
+    ../../def/hal.def.cpp \
     ../../../libs/common/comms/def/comms.def.cpp \
     ../../src/uav_properties/Hexa_Properties.cpp \
     ../../src/uav_properties/Hexatri_Properties.cpp \
@@ -159,7 +158,8 @@ SOURCES += \
     ../../src/uav_properties/Octoquad_Properties.cpp \
     ../../src/uav_properties/Quad_Properties.cpp \
     ../../src/uav_properties/Tri_Properties.cpp \
-    ../../src/uav_properties/IMultirotor_Properties.cpp
+    ../../src/uav_properties/IMultirotor_Properties.cpp \
+    ../../src/HAL.cpp
 
 HEADERS += \
     ../../src/BrainStdAfx.h \
@@ -292,9 +292,8 @@ HEADERS += \
     ../../src/brain/LiPo_Battery.h \
     ../../src/pilot/Multirotor_Pilot.h \
     ../../../libs/common/node/IMultirotor_Simulator.h \
-    ../../src/UAV.h \
     ../../def/gen_support.h \
-    ../../def/uav.def.h \
+    ../../def/hal.def.h \
     ../../../libs/common/comms/def/comms.def.h \
     ../../src/uav_properties/Quad_Properties.h \
     ../../src/uav_properties/Hexa_Properties.h \
@@ -303,7 +302,8 @@ HEADERS += \
     ../../src/uav_properties/Octoquad_Properties.h \
     ../../src/uav_properties/Tri_Properties.h \
     ../../src/uav_properties/IMultirotor_Properties.h \
-    ../../src/uav_properties/IUAV_Properties.h
+    ../../src/uav_properties/IUAV_Properties.h \
+    ../../src/HAL.h
 
 DISTFILES +=
 

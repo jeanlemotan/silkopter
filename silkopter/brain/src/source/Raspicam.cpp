@@ -1,7 +1,7 @@
 #include "BrainStdAfx.h"
 #include "Raspicam.h"
 
-#include "uav.def.h"
+#include "hal.def.h"
 
 //#undef RASPBERRY_PI
 
@@ -66,7 +66,7 @@ struct Raspicam::Impl
 
     struct Encoder_Data
     {
-        uav::Raspicam_Descriptor::Quality* quality = nullptr;
+        hal::Raspicam_Descriptor::Quality* quality = nullptr;
 
         Component_ptr encoder;
         Connection_ptr encoder_connection;
@@ -112,10 +112,10 @@ static bool set_connection_enabled(Connection_ptr const& connection, bool yes)
 
 #endif
 
-Raspicam::Raspicam(UAV& uav)
-    : m_uav(uav)
-    , m_descriptor(new uav::Raspicam_Descriptor())
-    , m_config(new uav::Raspicam_Config())
+Raspicam::Raspicam(HAL& hal)
+    : m_hal(hal)
+    , m_descriptor(new hal::Raspicam_Descriptor())
+    , m_config(new hal::Raspicam_Config())
 {
     QLOG_TOPIC("raspicam");
 #if defined RASPBERRY_PI
@@ -132,7 +132,7 @@ Raspicam::Raspicam(UAV& uav)
 
     m_descriptor->set_fps(30);
 
-    uav::Raspicam_Descriptor::Quality quality;
+    hal::Raspicam_Descriptor::Quality quality;
     quality.set_resolution({ 320, 240 });
     quality.set_bitrate(100000);
     m_descriptor->set_streaming_low(quality);
@@ -203,11 +203,11 @@ auto Raspicam::get_outputs() const -> std::vector<Output>
     return outputs;
 }
 
-auto Raspicam::init(uav::INode_Descriptor const& descriptor) -> bool
+auto Raspicam::init(hal::INode_Descriptor const& descriptor) -> bool
 {
     QLOG_TOPIC("raspicam::init");
 
-    auto specialized = dynamic_cast<uav::Raspicam_Descriptor const*>(&descriptor);
+    auto specialized = dynamic_cast<hal::Raspicam_Descriptor const*>(&descriptor);
     if (!specialized)
     {
         QLOGE("Wrong descriptor type");
@@ -289,11 +289,11 @@ auto Raspicam::init() -> bool
 #endif
 }
 
-auto Raspicam::set_config(uav::INode_Config const& config) -> bool
+auto Raspicam::set_config(hal::INode_Config const& config) -> bool
 {
     QLOG_TOPIC("raspicam::set_config");
 
-    auto specialized = dynamic_cast<uav::Raspicam_Config const*>(&config);
+    auto specialized = dynamic_cast<hal::Raspicam_Config const*>(&config);
     if (!specialized)
     {
         QLOGE("Wrong config type");
@@ -340,12 +340,12 @@ auto Raspicam::set_config(uav::INode_Config const& config) -> bool
 
     return true;
 }
-auto Raspicam::get_config() const -> std::shared_ptr<const uav::INode_Config>
+auto Raspicam::get_config() const -> std::shared_ptr<const hal::INode_Config>
 {
     return m_config;
 }
 
-auto Raspicam::get_descriptor() const -> std::shared_ptr<const uav::INode_Descriptor>
+auto Raspicam::get_descriptor() const -> std::shared_ptr<const hal::INode_Descriptor>
 {
     return m_descriptor;
 }
@@ -443,8 +443,8 @@ void Raspicam::activate_streams()
     std::lock_guard<std::mutex> lg(m_impl->mutex);
 
     bool recording = m_recording_data.file_sink != nullptr;
-    bool high = m_config->get_quality() == uav::Raspicam_Config::quality_t::HIGH;
-    bool low = m_config->get_quality() == uav::Raspicam_Config::quality_t::LOW;
+    bool high = m_config->get_quality() == hal::Raspicam_Config::quality_t::HIGH;
+    bool low = m_config->get_quality() == hal::Raspicam_Config::quality_t::LOW;
 
     if (m_impl->recording.is_active == recording &&
         m_impl->high.is_active == high &&

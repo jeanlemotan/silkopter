@@ -7,7 +7,7 @@
 #include "common/stream/IVideo.h"
 
 #include "Comms.h"
-#include "UAV.h"
+#include "HAL.h"
 
 #include "Sample_Accumulator.h"
 #include "Basic_Output_Stream.h"
@@ -15,7 +15,7 @@
 
 namespace silk
 {
-namespace uav
+namespace hal
 {
 struct Multirotor_Pilot_Descriptor;
 struct Multirotor_Pilot_Config;
@@ -30,13 +30,13 @@ namespace node
 class Multirotor_Pilot : public IPilot
 {
 public:
-    Multirotor_Pilot(UAV& uav, Comms& comms);
+    Multirotor_Pilot(HAL& hal, Comms& comms);
 
-    bool init(uav::INode_Descriptor const& descriptor) override;
-    std::shared_ptr<const uav::INode_Descriptor> get_descriptor() const override;
+    bool init(hal::INode_Descriptor const& descriptor) override;
+    std::shared_ptr<const hal::INode_Descriptor> get_descriptor() const override;
 
-    bool set_config(uav::INode_Config const& config) override;
-    std::shared_ptr<const uav::INode_Config> get_config() const override;
+    bool set_config(hal::INode_Config const& config) override;
+    std::shared_ptr<const hal::INode_Config> get_config() const override;
 
     //auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
 
@@ -51,14 +51,15 @@ public:
 private:
     auto init() -> bool;
 
-    UAV& m_uav;
+    HAL& m_hal;
+
     Comms& m_comms;
 
     stream::IMultirotor_Commands::Value m_last_commands_value;
     q::Clock::time_point m_last_received_commands_value_tp = q::Clock::now();
 
-    std::shared_ptr<uav::Multirotor_Pilot_Descriptor> m_descriptor;
-    std::shared_ptr<uav::Multirotor_Pilot_Config> m_config;
+    std::shared_ptr<hal::Multirotor_Pilot_Descriptor> m_descriptor;
+    std::shared_ptr<hal::Multirotor_Pilot_Config> m_config;
 
     Sample_Accumulator<stream::IMultirotor_State> m_state_accumulator;
     Sample_Accumulator<stream::IVideo> m_video_accumulator;

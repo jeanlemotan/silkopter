@@ -3,7 +3,7 @@
 #include "physics/constants.h"
 #include "utils/Timed_Scope.h"
 
-#include "uav.def.h"
+#include "hal.def.h"
 //#include "sz_MaxSonar.hpp"
 
 namespace silk
@@ -12,10 +12,10 @@ namespace node
 {
 
 
-MaxSonar::MaxSonar(UAV& uav)
-    : m_uav(uav)
-    , m_descriptor(new uav::MaxSonar_Descriptor())
-    , m_config(new uav::MaxSonar_Config())
+MaxSonar::MaxSonar(HAL& hal)
+    : m_hal(hal)
+    , m_descriptor(new hal::MaxSonar_Descriptor())
+    , m_config(new hal::MaxSonar_Config())
 {
     m_config->set_direction(math::vec3f(0, 0, -1)); //pointing down
 
@@ -29,11 +29,11 @@ auto MaxSonar::get_outputs() const -> std::vector<Output>
     outputs[0].stream = m_output_stream;
     return outputs;
 }
-auto MaxSonar::init(uav::INode_Descriptor const& descriptor) -> bool
+auto MaxSonar::init(hal::INode_Descriptor const& descriptor) -> bool
 {
     QLOG_TOPIC("MaxSonar::init");
 
-    auto specialized = dynamic_cast<uav::MaxSonar_Descriptor const*>(&descriptor);
+    auto specialized = dynamic_cast<hal::MaxSonar_Descriptor const*>(&descriptor);
     if (!specialized)
     {
         QLOGE("Wrong descriptor type");
@@ -46,7 +46,7 @@ auto MaxSonar::init(uav::INode_Descriptor const& descriptor) -> bool
 
 auto MaxSonar::init() -> bool
 {
-    m_bus = m_uav.get_bus_registry().find_by_name<bus::IUART>(m_descriptor->get_bus());
+    m_bus = m_hal.get_bus_registry().find_by_name<bus::IUART>(m_descriptor->get_bus());
     auto bus = m_bus.lock();
     if (!bus)
     {
@@ -154,11 +154,11 @@ void MaxSonar::process()
     }
 }
 
-auto MaxSonar::set_config(uav::INode_Config const& config) -> bool
+auto MaxSonar::set_config(hal::INode_Config const& config) -> bool
 {
     QLOG_TOPIC("MaxSonar::set_config");
 
-    auto specialized = dynamic_cast<uav::MaxSonar_Config const*>(&config);
+    auto specialized = dynamic_cast<hal::MaxSonar_Config const*>(&config);
     if (!specialized)
     {
         QLOGE("Wrong config type");
@@ -174,12 +174,12 @@ auto MaxSonar::set_config(uav::INode_Config const& config) -> bool
 
     return true;
 }
-auto MaxSonar::get_config() const -> std::shared_ptr<const uav::INode_Config>
+auto MaxSonar::get_config() const -> std::shared_ptr<const hal::INode_Config>
 {
     return m_config;
 }
 
-auto MaxSonar::get_descriptor() const -> std::shared_ptr<const uav::INode_Descriptor>
+auto MaxSonar::get_descriptor() const -> std::shared_ptr<const hal::INode_Descriptor>
 {
     return m_descriptor;
 }

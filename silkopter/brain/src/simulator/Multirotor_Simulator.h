@@ -1,6 +1,6 @@
 #pragma once
 
-#include "UAV.h"
+#include "HAL.h"
 #include "common/stream/IAngular_Velocity.h"
 #include "common/stream/IAcceleration.h"
 #include "common/stream/IMagnetic_Field.h"
@@ -18,7 +18,7 @@
 
 namespace silk
 {
-namespace uav
+namespace hal
 {
 struct Multirotor_Simulator_Descriptor;
 struct Multirotor_Simulator_Config;
@@ -33,13 +33,13 @@ namespace node
 class Multirotor_Simulator : public IMultirotor_Simulator
 {
 public:
-    Multirotor_Simulator(UAV& uav);
+    Multirotor_Simulator(HAL& hal);
 
-    bool init(uav::INode_Descriptor const& descriptor) override;
-    std::shared_ptr<const uav::INode_Descriptor> get_descriptor() const override;
+    bool init(hal::INode_Descriptor const& descriptor) override;
+    std::shared_ptr<const hal::INode_Descriptor> get_descriptor() const override;
 
-    bool set_config(uav::INode_Config const& config) override;
-    std::shared_ptr<const uav::INode_Config> get_config() const override;
+    bool set_config(hal::INode_Config const& config) override;
+    std::shared_ptr<const hal::INode_Config> get_config() const override;
 
     //auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
 
@@ -54,10 +54,10 @@ public:
 private:
     auto init() -> bool;
 
-    UAV& m_uav;
+    HAL& m_hal;
 
-    std::shared_ptr<uav::Multirotor_Simulator_Descriptor> m_descriptor;
-    std::shared_ptr<uav::Multirotor_Simulator_Config> m_config;
+    std::shared_ptr<hal::Multirotor_Simulator_Descriptor> m_descriptor;
+    std::shared_ptr<hal::Multirotor_Simulator_Config> m_config;
 
     q::Clock::time_point m_last_tp = q::Clock::now();
 

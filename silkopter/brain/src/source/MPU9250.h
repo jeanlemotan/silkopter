@@ -1,6 +1,6 @@
 #pragma once
 
-#include "UAV.h"
+#include "HAL.h"
 #include "common/node/ISource.h"
 #include "common/bus/II2C.h"
 #include "common/bus/ISPI.h"
@@ -14,7 +14,7 @@
 
 namespace silk
 {
-namespace uav
+namespace hal
 {
 struct MPU9250_Descriptor;
 struct MPU9250_Config;
@@ -31,14 +31,14 @@ namespace node
 class MPU9250 : public ISource
 {
 public:
-    MPU9250(UAV& uav);
+    MPU9250(HAL& hal);
     ~MPU9250();
 
-    bool init(uav::INode_Descriptor const& descriptor) override;
-    std::shared_ptr<const uav::INode_Descriptor> get_descriptor() const override;
+    bool init(hal::INode_Descriptor const& descriptor) override;
+    std::shared_ptr<const hal::INode_Descriptor> get_descriptor() const override;
 
-    bool set_config(uav::INode_Config const& config) override;
-    std::shared_ptr<const uav::INode_Config> get_config() const override;
+    bool set_config(hal::INode_Config const& config) override;
+    std::shared_ptr<const hal::INode_Config> get_config() const override;
 
     //auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
 
@@ -52,7 +52,8 @@ private:
     auto init() -> bool;
 
 private:
-    UAV& m_uav;
+    HAL& m_hal;
+
     std::weak_ptr<bus::II2C> m_i2c;
     std::weak_ptr<bus::ISPI> m_spi;
 
@@ -88,8 +89,8 @@ private:
 //    void set_bypass(Buses& buses, bool on);
     void process_magnetometer(Buses& buses);
 
-    std::shared_ptr<uav::MPU9250_Descriptor> m_descriptor;
-    std::shared_ptr<uav::MPU9250_Config> m_config;
+    std::shared_ptr<hal::MPU9250_Descriptor> m_descriptor;
+    std::shared_ptr<hal::MPU9250_Config> m_config;
 
     mutable std::vector<uint8_t> m_fifo_buffer;
     size_t m_fifo_sample_size = 999999;

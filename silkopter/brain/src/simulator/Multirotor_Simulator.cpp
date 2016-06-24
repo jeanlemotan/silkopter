@@ -4,7 +4,7 @@
 
 #if !defined RASPBERRY_PI
 
-#include "uav.def.h"
+#include "hal.def.h"
 //#include "sz_Multirotor_Simulator.hpp"
 //#include "sz_Multirotor_Simulator_Structs.hpp"
 
@@ -13,10 +13,10 @@ namespace silk
 namespace node
 {
 
-Multirotor_Simulator::Multirotor_Simulator(UAV& uav)
-    : m_uav(uav)
-    , m_descriptor(new uav::Multirotor_Simulator_Descriptor())
-    , m_config(new uav::Multirotor_Simulator_Config())
+Multirotor_Simulator::Multirotor_Simulator(HAL& hal)
+    : m_hal(hal)
+    , m_descriptor(new hal::Multirotor_Simulator_Descriptor())
+    , m_config(new hal::Multirotor_Simulator_Config())
 {
     m_angular_velocity_stream = std::make_shared<Angular_Velocity>();
     m_acceleration_stream = std::make_shared<Acceleration>();
@@ -29,11 +29,11 @@ Multirotor_Simulator::Multirotor_Simulator(UAV& uav)
     m_ecef_velocity_stream = std::make_shared<ECEF_Velocity>();
 }
 
-auto Multirotor_Simulator::init(uav::INode_Descriptor const& descriptor) -> bool
+auto Multirotor_Simulator::init(hal::INode_Descriptor const& descriptor) -> bool
 {
     QLOG_TOPIC("multirotor_simulator::init");
 
-    auto specialized = dynamic_cast<uav::Multirotor_Simulator_Descriptor const*>(&descriptor);
+    auto specialized = dynamic_cast<hal::Multirotor_Simulator_Descriptor const*>(&descriptor);
     if (!specialized)
     {
         QLOGE("Wrong descriptor type");
@@ -45,7 +45,7 @@ auto Multirotor_Simulator::init(uav::INode_Descriptor const& descriptor) -> bool
 }
 auto Multirotor_Simulator::init() -> bool
 {
-    std::shared_ptr<const IMultirotor_Properties> multirotor_properties = m_uav.get_specialized_uav_properties<IMultirotor_Properties>();
+    std::shared_ptr<const IMultirotor_Properties> multirotor_properties = m_hal.get_specialized_uav_properties<IMultirotor_Properties>();
     if (!multirotor_properties)
     {
         QLOGE("No multi properties found");
@@ -292,7 +292,7 @@ void Multirotor_Simulator::process()
 
 void Multirotor_Simulator::set_input_stream_path(size_t idx, q::Path const& path)
 {
-    auto input_stream = m_uav.get_stream_registry().find_by_name<stream::IThrottle>(path.get_as<std::string>());
+    auto input_stream = m_hal.get_stream_registry().find_by_name<stream::IThrottle>(path.get_as<std::string>());
     auto rate = input_stream ? input_stream->get_rate() : 0u;
     if (rate != m_descriptor->get_throttle_rate())
     {
@@ -307,11 +307,11 @@ void Multirotor_Simulator::set_input_stream_path(size_t idx, q::Path const& path
     }
 }
 
-auto Multirotor_Simulator::set_config(uav::INode_Config const& config) -> bool
+auto Multirotor_Simulator::set_config(hal::INode_Config const& config) -> bool
 {
     QLOG_TOPIC("multirotor_simulator::set_config");
 
-    auto specialized = dynamic_cast<uav::Multirotor_Simulator_Config const*>(&config);
+    auto specialized = dynamic_cast<hal::Multirotor_Simulator_Config const*>(&config);
     if (!specialized)
     {
         QLOGE("Wrong config type");
@@ -333,7 +333,7 @@ auto Multirotor_Simulator::set_config(uav::INode_Config const& config) -> bool
 //        uav_config.motors[i].deceleration = sz.motors[i].deceleration;
 //    }
 
-    std::shared_ptr<const IMultirotor_Properties> multirotor_properties = m_uav.get_specialized_uav_properties<IMultirotor_Properties>();
+    std::shared_ptr<const IMultirotor_Properties> multirotor_properties = m_hal.get_specialized_uav_properties<IMultirotor_Properties>();
     if (!multirotor_properties)
     {
         QLOGE("No multi properties found");
@@ -366,12 +366,12 @@ auto Multirotor_Simulator::set_config(uav::INode_Config const& config) -> bool
 
     return true;
 }
-auto Multirotor_Simulator::get_config() const -> std::shared_ptr<const uav::INode_Config>
+auto Multirotor_Simulator::get_config() const -> std::shared_ptr<const hal::INode_Config>
 {
     return m_config;
 }
 
-auto Multirotor_Simulator::get_descriptor() const -> std::shared_ptr<const uav::INode_Descriptor>
+auto Multirotor_Simulator::get_descriptor() const -> std::shared_ptr<const hal::INode_Descriptor>
 {
     return m_descriptor;
 }

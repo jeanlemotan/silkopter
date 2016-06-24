@@ -10,7 +10,7 @@ extern "C"
 
 #endif
 
-#include "uav.def.h"
+#include "hal.def.h"
 
 
 namespace silk
@@ -22,7 +22,7 @@ std::mutex I2C_BCM::s_mutex;
 
 
 I2C_BCM::I2C_BCM()
-    : m_descriptor(new uav::I2C_BCM_Descriptor())
+    : m_descriptor(new hal::I2C_BCM_Descriptor())
 {
 }
 
@@ -30,9 +30,9 @@ I2C_BCM::~I2C_BCM()
 {
 }
 
-bool I2C_BCM::init(uav::IBus_Descriptor const& descriptor)
+bool I2C_BCM::init(hal::IBus_Descriptor const& descriptor)
 {
-    auto specialized = dynamic_cast<uav::I2C_BCM_Descriptor const*>(&descriptor);
+    auto specialized = dynamic_cast<hal::I2C_BCM_Descriptor const*>(&descriptor);
     if (!specialized)
     {
         QLOGE("Wrong descriptor type");
@@ -48,7 +48,7 @@ bool I2C_BCM::init(uav::IBus_Descriptor const& descriptor)
     return true;
 }
 
-std::shared_ptr<const uav::IBus_Descriptor> I2C_BCM::get_descriptor() const
+std::shared_ptr<const hal::IBus_Descriptor> I2C_BCM::get_descriptor() const
 {
     return m_descriptor;
 }

@@ -12,7 +12,7 @@
 namespace silk
 {
 
-namespace uav
+namespace hal
 {
 
 template<class T>

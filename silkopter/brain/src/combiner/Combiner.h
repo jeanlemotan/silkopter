@@ -1,20 +1,20 @@
 #pragma once
 
-#include "UAV.h"
+#include "HAL.h"
 #include "common/node/ICombiner.h"
 
-#include "UAV.h"
+#include "HAL.h"
 
 #include "Sample_Accumulator.h"
 #include "Basic_Output_Stream.h"
 
-#include "uav.def.h"
+#include "hal.def.h"
 //#include "sz_Combiner.hpp"
 
 
 namespace silk
 {
-namespace uav
+namespace hal
 {
 struct Combiner_Descriptor;
 struct Combiner_Config;
@@ -31,13 +31,13 @@ template<class Stream_t>
 class Combiner : public ICombiner
 {
 public:
-    Combiner(UAV& uav);
+    Combiner(HAL& hal);
 
-    bool init(uav::INode_Descriptor const& descriptor) override;
-    std::shared_ptr<const uav::INode_Descriptor> get_descriptor() const override;
+    bool init(hal::INode_Descriptor const& descriptor) override;
+    std::shared_ptr<const hal::INode_Descriptor> get_descriptor() const override;
 
-    bool set_config(uav::INode_Config const& config) override;
-    std::shared_ptr<const uav::INode_Config> get_config() const override;
+    bool set_config(hal::INode_Config const& config) override;
+    std::shared_ptr<const hal::INode_Config> get_config() const override;
 
     //auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
 
@@ -52,10 +52,10 @@ public:
 private:
     auto init() -> bool;
 
-    UAV& m_uav;
+    HAL& m_hal;
 
-    std::shared_ptr<uav::Combiner_Descriptor> m_descriptor;
-    std::shared_ptr<uav::Combiner_Config> m_config;
+    std::shared_ptr<hal::Combiner_Descriptor> m_descriptor;
+    std::shared_ptr<hal::Combiner_Config> m_config;
 
     Sample_Accumulator<Stream_t, Stream_t> m_accumulator;
 
@@ -71,20 +71,20 @@ private:
 };
 
 template<class Stream_t>
-Combiner<Stream_t>::Combiner(UAV& uav)
-    : m_uav(uav)
-    , m_descriptor(new uav::Combiner_Descriptor())
-    , m_config(new uav::Combiner_Config())
+Combiner<Stream_t>::Combiner(HAL& hal)
+    : m_hal(hal)
+    , m_descriptor(new hal::Combiner_Descriptor())
+    , m_config(new hal::Combiner_Config())
 {
     m_output_stream = std::make_shared<Output_Stream>();
 }
 
 template<class Stream_t>
-auto Combiner<Stream_t>::init(uav::INode_Descriptor const& descriptor) -> bool
+auto Combiner<Stream_t>::init(hal::INode_Descriptor const& descriptor) -> bool
 {
     QLOG_TOPIC("Combiner::init");
 
-    auto specialized = dynamic_cast<uav::Combiner_Descriptor const*>(&descriptor);
+    auto specialized = dynamic_cast<hal::Combiner_Descriptor const*>(&descriptor);
     if (!specialized)
     {
         QLOGE("Wrong descriptor type");
@@ -167,15 +167,15 @@ void Combiner<Stream_t>::process()
 template<class Stream_t>
 void Combiner<Stream_t>::set_input_stream_path(size_t idx, q::Path const& path)
 {
-    m_accumulator.set_stream_path(idx, path, m_output_stream->get_rate(), m_uav);
+    m_accumulator.set_stream_path(idx, path, m_output_stream->get_rate(), m_hal);
 }
 
 template<class Stream_t>
-auto Combiner<Stream_t>::set_config(uav::INode_Config const& config) -> bool
+auto Combiner<Stream_t>::set_config(hal::INode_Config const& config) -> bool
 {
     QLOG_TOPIC("Combiner::set_config");
 
-    auto specialized = dynamic_cast<uav::Combiner_Config const*>(&config);
+    auto specialized = dynamic_cast<hal::Combiner_Config const*>(&config);
     if (!specialized)
     {
         QLOGE("Wrong config type");
@@ -187,13 +187,13 @@ auto Combiner<Stream_t>::set_config(uav::INode_Config const& config) -> bool
 }
 
 template<class Stream_t>
-auto Combiner<Stream_t>::get_config() const -> std::shared_ptr<const uav::INode_Config>
+auto Combiner<Stream_t>::get_config() const -> std::shared_ptr<const hal::INode_Config>
 {
     return m_config;
 }
 
 template<class Stream_t>
-auto Combiner<Stream_t>::get_descriptor() const -> std::shared_ptr<const uav::INode_Descriptor>
+auto Combiner<Stream_t>::get_descriptor() const -> std::shared_ptr<const hal::INode_Descriptor>
 {
     return m_descriptor;
 }

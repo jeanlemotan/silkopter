@@ -5,7 +5,7 @@
 #include "common/stream/IFloat.h"
 #include "common/stream/IPWM.h"
 #include "common/stream/IMultirotor_Commands.h"
-#include "UAV.h"
+#include "HAL.h"
 
 #include "Sample_Accumulator.h"
 #include "Basic_Output_Stream.h"
@@ -13,7 +13,7 @@
 
 namespace silk
 {
-namespace uav
+namespace hal
 {
 struct Servo_Gimbal_Descriptor;
 struct Servo_Gimbal_Config;
@@ -30,13 +30,13 @@ namespace node
 class Servo_Gimbal : public IProcessor
 {
 public:
-    Servo_Gimbal(UAV& uav);
+    Servo_Gimbal(HAL& hal);
 
-    bool init(uav::INode_Descriptor const& descriptor) override;
-    std::shared_ptr<const uav::INode_Descriptor> get_descriptor() const override;
+    bool init(hal::INode_Descriptor const& descriptor) override;
+    std::shared_ptr<const hal::INode_Descriptor> get_descriptor() const override;
 
-    bool set_config(uav::INode_Config const& config) override;
-    std::shared_ptr<const uav::INode_Config> get_config() const override;
+    bool set_config(hal::INode_Config const& config) override;
+    std::shared_ptr<const hal::INode_Config> get_config() const override;
 
     //auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
 
@@ -51,10 +51,10 @@ public:
 private:
     auto init() -> bool;
 
-    UAV& m_uav;
+    HAL& m_hal;
 
-    std::shared_ptr<uav::Servo_Gimbal_Descriptor> m_descriptor;
-    std::shared_ptr<uav::Servo_Gimbal_Config> m_config;
+    std::shared_ptr<hal::Servo_Gimbal_Descriptor> m_descriptor;
+    std::shared_ptr<hal::Servo_Gimbal_Config> m_config;
 
     Sample_Accumulator<stream::IUAV_Frame> m_frame_accumulator;
     Sample_Accumulator<stream::IMultirotor_Commands> m_commands_accumulator;

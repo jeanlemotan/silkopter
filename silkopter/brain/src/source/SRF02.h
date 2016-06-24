@@ -1,6 +1,6 @@
 #pragma once
 
-#include "UAV.h"
+#include "HAL.h"
 #include "common/node/ISource.h"
 #include "common/stream/IDistance.h"
 #include "common/bus/II2C.h"
@@ -10,7 +10,7 @@
 
 namespace silk
 {
-namespace uav
+namespace hal
 {
 struct SRF02_Descriptor;
 struct SRF02_Config;
@@ -26,13 +26,13 @@ namespace node
 class SRF02 : public ISource
 {
 public:
-    SRF02(UAV& uav);
+    SRF02(HAL& hal);
 
-    bool init(uav::INode_Descriptor const& descriptor) override;
-    std::shared_ptr<const uav::INode_Descriptor> get_descriptor() const override;
+    bool init(hal::INode_Descriptor const& descriptor) override;
+    std::shared_ptr<const hal::INode_Descriptor> get_descriptor() const override;
 
-    bool set_config(uav::INode_Config const& config) override;
-    std::shared_ptr<const uav::INode_Config> get_config() const override;
+    bool set_config(hal::INode_Config const& config) override;
+    std::shared_ptr<const hal::INode_Config> get_config() const override;
 
     //auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
 
@@ -47,12 +47,12 @@ private:
 
     void trigger(bus::II2C& bus);
 
-    UAV& m_uav;
+    HAL& m_hal;
 
     std::weak_ptr<bus::II2C> m_bus;
 
-    std::shared_ptr<uav::SRF02_Descriptor> m_descriptor;
-    std::shared_ptr<uav::SRF02_Config> m_config;
+    std::shared_ptr<hal::SRF02_Descriptor> m_descriptor;
+    std::shared_ptr<hal::SRF02_Config> m_config;
 
     typedef Basic_Output_Stream<stream::IDistance> Output_Stream;
     mutable std::shared_ptr<Output_Stream> m_output_stream;

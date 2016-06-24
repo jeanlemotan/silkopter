@@ -1,28 +1,28 @@
 #include "BrainStdAfx.h"
 #include "Comp_ECEF.h"
 
-#include "uav.def.h"
+#include "hal.def.h"
 /*
 namespace silk
 {
 namespace node
 {
 
-Comp_ECEF::Comp_ECEF(UAV& uav)
-    : m_uav(uav)
-    , m_descriptor(new uav::Comp_ECEF_Descriptor())
-    , m_config(new uav::Comp_ECEF_Config())
+Comp_ECEF::Comp_ECEF(HAL& hal)
+    : m_hal(hal)
+    , m_descriptor(new hal::Comp_ECEF_Descriptor())
+    , m_config(new hal::Comp_ECEF_Config())
 {
     m_position_output_stream = std::make_shared<Position_Output_Stream>();
     m_velocity_output_stream = std::make_shared<Velocity_Output_Stream>();
 //    m_enu_frame_output_stream = std::make_shared<ENU_Frame_Stream>();
 }
 
-auto Comp_ECEF::init(uav::INode_Descriptor const& descriptor) -> bool
+auto Comp_ECEF::init(hal::INode_Descriptor const& descriptor) -> bool
 {
     QLOG_TOPIC("Comp_ECEF::init");
 
-    auto specialized = dynamic_cast<uav::Comp_ECEF_Descriptor const*>(&descriptor);
+    auto specialized = dynamic_cast<hal::Comp_ECEF_Descriptor const*>(&descriptor);
     if (!specialized)
     {
         QLOGE("Wrong descriptor type");
@@ -119,14 +119,14 @@ void Comp_ECEF::process()
 
 void Comp_ECEF::set_input_stream_path(size_t idx, q::Path const& path)
 {
-    m_accumulator.set_stream_path(idx, path, m_descriptor->rate, m_uav);
+    m_accumulator.set_stream_path(idx, path, m_descriptor->rate, m_hal);
 }
 
-auto Comp_ECEF::set_config(uav::INode_Config const& config) -> bool
+auto Comp_ECEF::set_config(hal::INode_Config const& config) -> bool
 {
     QLOG_TOPIC("Comp_ECEF::set_config");
 
-    auto specialized = dynamic_cast<uav::Comp_ECEF_Config const*>(&config);
+    auto specialized = dynamic_cast<hal::Comp_ECEF_Config const*>(&config);
     if (!specialized)
     {
         QLOGE("Wrong config type");
@@ -136,12 +136,12 @@ auto Comp_ECEF::set_config(uav::INode_Config const& config) -> bool
 
     return true;
 }
-auto Comp_ECEF::get_config() const -> std::shared_ptr<const uav::INode_Config>
+auto Comp_ECEF::get_config() const -> std::shared_ptr<const hal::INode_Config>
 {
     return m_config;
 }
 
-auto Comp_ECEF::get_descriptor() const -> std::shared_ptr<const uav::INode_Descriptor>
+auto Comp_ECEF::get_descriptor() const -> std::shared_ptr<const hal::INode_Descriptor>
 {
     return m_descriptor;
 }

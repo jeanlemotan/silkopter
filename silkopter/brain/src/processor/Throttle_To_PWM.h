@@ -1,6 +1,6 @@
 #pragma once
 
-#include "UAV.h"
+#include "HAL.h"
 #include "common/stream/IThrottle.h"
 #include "common/stream/IPWM.h"
 #include "common/node/IProcessor.h"
@@ -11,7 +11,7 @@
 
 namespace silk
 {
-namespace uav
+namespace hal
 {
 struct Throttle_To_PWM_Descriptor;
 struct Throttle_To_PWM_Config;
@@ -26,13 +26,13 @@ namespace node
 class Throttle_To_PWM : public IProcessor
 {
 public:
-    Throttle_To_PWM(UAV& uav);
+    Throttle_To_PWM(HAL& hal);
 
-    bool init(uav::INode_Descriptor const& descriptor) override;
-    std::shared_ptr<const uav::INode_Descriptor> get_descriptor() const override;
+    bool init(hal::INode_Descriptor const& descriptor) override;
+    std::shared_ptr<const hal::INode_Descriptor> get_descriptor() const override;
 
-    bool set_config(uav::INode_Config const& config) override;
-    std::shared_ptr<const uav::INode_Config> get_config() const override;
+    bool set_config(hal::INode_Config const& config) override;
+    std::shared_ptr<const hal::INode_Config> get_config() const override;
 
     //auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
 
@@ -47,10 +47,10 @@ public:
 private:
     auto init() -> bool;
 
-    UAV& m_uav;
+    HAL& m_hal;
 
-    std::shared_ptr<uav::Throttle_To_PWM_Descriptor> m_descriptor;
-    std::shared_ptr<uav::Throttle_To_PWM_Config> m_config;
+    std::shared_ptr<hal::Throttle_To_PWM_Descriptor> m_descriptor;
+    std::shared_ptr<hal::Throttle_To_PWM_Config> m_config;
 
     std::vector<Sample_Accumulator<stream::IThrottle>> m_accumulators;
 

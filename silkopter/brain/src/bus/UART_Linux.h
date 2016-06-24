@@ -4,7 +4,7 @@
 
 namespace silk
 {
-namespace uav
+namespace hal
 {
 struct UART_Linux_Descriptor;
 }
@@ -21,8 +21,8 @@ public:
     UART_Linux();
     ~UART_Linux();
 
-    bool init(uav::IBus_Descriptor const& descriptor) override;
-    std::shared_ptr<const uav::IBus_Descriptor> get_descriptor() const override;
+    bool init(hal::IBus_Descriptor const& descriptor) override;
+    std::shared_ptr<const hal::IBus_Descriptor> get_descriptor() const override;
 
     void lock();
     auto try_lock() -> bool;
@@ -37,7 +37,7 @@ private:
     bool init(std::string const& dev, int baud_id);
     void close();
 
-    std::shared_ptr<uav::UART_Linux_Descriptor> m_descriptor;
+    std::shared_ptr<hal::UART_Linux_Descriptor> m_descriptor;
     std::string m_dev;
 
     int m_fd = -1;

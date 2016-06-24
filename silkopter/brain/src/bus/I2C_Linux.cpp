@@ -9,7 +9,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-#include "uav.def.h"
+#include "hal.def.h"
 
 
 struct i2c_msg
@@ -34,7 +34,7 @@ namespace bus
 {
 
 I2C_Linux::I2C_Linux()
-    : m_descriptor(new uav::I2C_Linux_Descriptor())
+    : m_descriptor(new hal::I2C_Linux_Descriptor())
 {
 }
 
@@ -43,9 +43,9 @@ I2C_Linux::~I2C_Linux()
     close();
 }
 
-bool I2C_Linux::init(uav::IBus_Descriptor const& descriptor)
+bool I2C_Linux::init(hal::IBus_Descriptor const& descriptor)
 {
-    auto specialized = dynamic_cast<uav::I2C_Linux_Descriptor const*>(&descriptor);
+    auto specialized = dynamic_cast<hal::I2C_Linux_Descriptor const*>(&descriptor);
     if (!specialized)
     {
         QLOGE("Wrong descriptor type");
@@ -61,7 +61,7 @@ bool I2C_Linux::init(uav::IBus_Descriptor const& descriptor)
     return true;
 }
 
-std::shared_ptr<const uav::IBus_Descriptor> I2C_Linux::get_descriptor() const
+std::shared_ptr<const hal::IBus_Descriptor> I2C_Linux::get_descriptor() const
 {
     return m_descriptor;
 }

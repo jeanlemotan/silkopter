@@ -3,7 +3,7 @@
 #include "physics/constants.h"
 #include "utils/Timed_Scope.h"
 
-#include "uav.def.h"
+#include "hal.def.h"
 //#include "sz_ADS1115.hpp"
 
 namespace silk
@@ -99,10 +99,10 @@ constexpr std::chrono::milliseconds MIN_CONVERSION_DURATION(5);
 
 
 
-ADS1115::ADS1115(UAV& uav)
-    : m_uav(uav)
-    , m_descriptor(new uav::ADS1115_Descriptor())
-    , m_config(new uav::ADS1115_Config())
+ADS1115::ADS1115(HAL& hal)
+    : m_hal(hal)
+    , m_descriptor(new hal::ADS1115_Descriptor())
+    , m_config(new hal::ADS1115_Config())
 {
     for (auto& adc: m_adcs)
     {
@@ -121,11 +121,11 @@ auto ADS1115::get_outputs() const -> std::vector<Output>
      }};
     return outputs;
 }
-auto ADS1115::init(uav::INode_Descriptor const& descriptor) -> bool
+auto ADS1115::init(hal::INode_Descriptor const& descriptor) -> bool
 {
     QLOG_TOPIC("ADS1115::init");
 
-    auto specialized = dynamic_cast<uav::ADS1115_Descriptor const*>(&descriptor);
+    auto specialized = dynamic_cast<hal::ADS1115_Descriptor const*>(&descriptor);
     if (!specialized)
     {
         QLOGE("Wrong descriptor type");
@@ -138,7 +138,7 @@ auto ADS1115::init(uav::INode_Descriptor const& descriptor) -> bool
 
 auto ADS1115::init() -> bool
 {
-    m_i2c = m_uav.get_bus_registry().find_by_name<bus::II2C>(m_descriptor->get_bus());
+    m_i2c = m_hal.get_bus_registry().find_by_name<bus::II2C>(m_descriptor->get_bus());
 
     auto i2c = m_i2c.lock();
     if (!i2c)
@@ -314,11 +314,11 @@ void ADS1115::process()
     m_last_tp = now;
 }
 
-auto ADS1115::set_config(uav::INode_Config const& config) -> bool
+auto ADS1115::set_config(hal::INode_Config const& config) -> bool
 {
     QLOG_TOPIC("ADS1115::set_config");
 
-    auto specialized = dynamic_cast<uav::ADS1115_Config const*>(&config);
+    auto specialized = dynamic_cast<hal::ADS1115_Config const*>(&config);
     if (!specialized)
     {
         QLOGE("Wrong config type");
@@ -328,12 +328,12 @@ auto ADS1115::set_config(uav::INode_Config const& config) -> bool
 
     return true;
 }
-auto ADS1115::get_config() const -> std::shared_ptr<const uav::INode_Config>
+auto ADS1115::get_config() const -> std::shared_ptr<const hal::INode_Config>
 {
     return m_config;
 }
 
-auto ADS1115::get_descriptor() const -> std::shared_ptr<const uav::INode_Descriptor>
+auto ADS1115::get_descriptor() const -> std::shared_ptr<const hal::INode_Descriptor>
 {
     return m_descriptor;
 }

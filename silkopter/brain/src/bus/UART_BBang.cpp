@@ -8,7 +8,7 @@ extern "C"
 }
 #endif
 
-#include "uav.def.h"
+#include "hal.def.h"
 
 namespace silk
 {
@@ -16,7 +16,7 @@ namespace bus
 {
 
 UART_BBang::UART_BBang()
-    : m_descriptor(new uav::UART_BBang_Descriptor())
+    : m_descriptor(new hal::UART_BBang_Descriptor())
 {
 }
 
@@ -25,9 +25,9 @@ UART_BBang::~UART_BBang()
     close();
 }
 
-bool UART_BBang::init(uav::IBus_Descriptor const& descriptor)
+bool UART_BBang::init(hal::IBus_Descriptor const& descriptor)
 {
-    auto specialized = dynamic_cast<uav::UART_BBang_Descriptor const*>(&descriptor);
+    auto specialized = dynamic_cast<hal::UART_BBang_Descriptor const*>(&descriptor);
     if (!specialized)
     {
         QLOGE("Wrong descriptor type");
@@ -43,7 +43,7 @@ bool UART_BBang::init(uav::IBus_Descriptor const& descriptor)
     return true;
 }
 
-std::shared_ptr<const uav::IBus_Descriptor> UART_BBang::get_descriptor() const
+std::shared_ptr<const hal::IBus_Descriptor> UART_BBang::get_descriptor() const
 {
     return m_descriptor;
 }

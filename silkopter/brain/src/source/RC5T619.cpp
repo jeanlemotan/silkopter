@@ -3,7 +3,7 @@
 #include "physics/constants.h"
 #include "utils/Timed_Scope.h"
 
-#include "uav.def.h"
+#include "hal.def.h"
 //#include "sz_RC5T619.hpp"
 
 #if defined RASPBERRY_PI
@@ -123,10 +123,10 @@ constexpr uint8_t RC5T619_AIN0_DATAL	 = 0x77;
 constexpr uint8_t CONVERT_ADC0           = 0x17;
 constexpr uint8_t CONVERT_ADC1           = 0x16;
 
-RC5T619::RC5T619(UAV& uav)
-    : m_uav(uav)
-    , m_descriptor(new uav::RC5T619_Descriptor())
-    , m_config(new uav::RC5T619_Config())
+RC5T619::RC5T619(HAL& hal)
+    : m_hal(hal)
+    , m_descriptor(new hal::RC5T619_Descriptor())
+    , m_config(new hal::RC5T619_Config())
 {
     m_adc[0] = std::make_shared<Stream>();
     m_adc[1] = std::make_shared<Stream>();
@@ -141,11 +141,11 @@ auto RC5T619::get_outputs() const -> std::vector<Output>
     outputs[1].stream = m_adc[1];
     return outputs;
 }
-auto RC5T619::init(uav::INode_Descriptor const& descriptor) -> bool
+auto RC5T619::init(hal::INode_Descriptor const& descriptor) -> bool
 {
     QLOG_TOPIC("rc5t619::init");
 
-    auto specialized = dynamic_cast<uav::RC5T619_Descriptor const*>(&descriptor);
+    auto specialized = dynamic_cast<hal::RC5T619_Descriptor const*>(&descriptor);
     if (!specialized)
     {
         QLOGE("Wrong descriptor type");
@@ -158,7 +158,7 @@ auto RC5T619::init(uav::INode_Descriptor const& descriptor) -> bool
 
 auto RC5T619::init() -> bool
 {
-    m_i2c = m_uav.get_bus_registry().find_by_name<bus::II2C>(m_descriptor->get_bus());
+    m_i2c = m_hal.get_bus_registry().find_by_name<bus::II2C>(m_descriptor->get_bus());
 
     auto i2c = m_i2c.lock();
     if (!i2c)
@@ -302,11 +302,11 @@ void RC5T619::process()
     }
 }
 
-auto RC5T619::set_config(uav::INode_Config const& config) -> bool
+auto RC5T619::set_config(hal::INode_Config const& config) -> bool
 {
     QLOG_TOPIC("rc5t619::set_config");
 
-    auto specialized = dynamic_cast<uav::RC5T619_Config const*>(&config);
+    auto specialized = dynamic_cast<hal::RC5T619_Config const*>(&config);
     if (!specialized)
     {
         QLOGE("Wrong config type");
@@ -316,12 +316,12 @@ auto RC5T619::set_config(uav::INode_Config const& config) -> bool
 
     return true;
 }
-auto RC5T619::get_config() const -> std::shared_ptr<const uav::INode_Config>
+auto RC5T619::get_config() const -> std::shared_ptr<const hal::INode_Config>
 {
     return m_config;
 }
 
-auto RC5T619::get_descriptor() const -> std::shared_ptr<const uav::INode_Descriptor>
+auto RC5T619::get_descriptor() const -> std::shared_ptr<const hal::INode_Descriptor>
 {
     return m_descriptor;
 }

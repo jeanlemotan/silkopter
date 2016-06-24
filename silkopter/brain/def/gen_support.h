@@ -4,7 +4,7 @@
 
 namespace silk
 {
-namespace uav
+namespace hal
 {
 
 typedef ::math::vec2<int64_t> vec2i;
