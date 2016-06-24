@@ -1,0 +1,88 @@
+#include "value_editors/Vec2i_Value_Editor.h"
+#include "value_editors/details/VecX_Value_Editor_Helper.h"
+
+Vec2i_Value_Editor::Vec2i_Value_Editor(const Qualified_Value<ts::IVec2i_Value>& qualified_value)
+    : m_qualified_value(qualified_value)
+{
+    std::shared_ptr<const ts::IVec2i_Type> type = m_qualified_value.get_const_value()->get_specialized_type();
+    ts::vec2i value = m_qualified_value.get_const_value()->get_value();
+    ts::vec2i minValue = type->get_min_value();
+    ts::vec2i maxValue = type->get_max_value();
+    ts::vec2i step = ts::vec2i(1);//type->GetStep();
+
+    std::vector<VecX_Value_Editor_Helper::Component> components;
+    VecX_Value_Editor_Helper::Component c;
+	c.name = "x";
+	c.value = value.x;
+	c.minValue = minValue.x;
+	c.maxValue = maxValue.x;
+	c.step = step.x;
+	components.push_back(c);
+	c.name = "y";
+	c.value = value.y;
+	c.minValue = minValue.y;
+	c.maxValue = maxValue.y;
+	c.step = step.y;
+	components.push_back(c);
+
+    m_helper = std::make_shared<VecX_Value_Editor_Helper>(components, 0);
+
+    m_connection = m_helper->sig_value_changed.connect([this](const std::vector<double>& values)
+	{
+        QASSERT(values.size() == 2);
+        set_value(ts::vec2i(values[0], values[1]));
+	});
+
+    refresh_read_only_state();
+}
+
+QWidget* Vec2i_Value_Editor::get_widget()
+{
+    return m_helper->get_widget();
+}
+
+Qualified_Value<ts::IValue> Vec2i_Value_Editor::get_qualified_value()
+{
+    return Qualified_Value<ts::IValue>(m_qualified_value);
+}
+
+void Vec2i_Value_Editor::refresh_editor()
+{
+    ts::vec2i value = m_qualified_value.get_const_value()->get_values();
+    m_helper->set_values({ value.x, value.y });
+}
+void Vec2i_Value_Editor::refresh_value()
+{
+    std::vector<double> values = m_helper->get_values();
+    QASSERT(values.size() == 2);
+    set_value(ts::vec2i(values[0], values[1]));
+}
+
+void Vec2i_Value_Editor::set_read_only_override(bool read_only)
+{
+    m_read_only_override = read_only;
+    refresh_read_only_state();
+}
+
+bool Vec2i_Value_Editor::is_read_only() const
+{
+    return m_read_only_override || m_qualified_value.is_read_only();
+}
+
+void Vec2i_Value_Editor::refresh_read_only_state()
+{
+    m_helper->set_read_only(is_read_only());
+}
+
+void Vec2i_Value_Editor::set_value(const ts::vec2i& value)
+{
+    if (!is_read_only())
+	{
+        if (std::shared_ptr<ts::IVec2i_Value> mutable_value = m_qualified_value.get_mutable_value())
+		{
+            mutable_value->Set(value);
+		}
+	}
+}
+
+

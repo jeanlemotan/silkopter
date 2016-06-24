@@ -35,6 +35,8 @@ public:
 
     std::shared_ptr<IVariant_Type const> get_specialized_type() const override;
 
+    bool is_set() const override;
+
     Result<void> set_value_type(std::shared_ptr<const IType> type) override;
     Result<void> set_value_type_index(size_t idx) override;
     size_t get_value_type_index() const override;

@@ -88,7 +88,7 @@
    <attribute name="dockWidgetArea">
     <number>2</number>
    </attribute>
-   <widget class="Properties_Widget" name="properties_widget"/>
+   <widget class="Properties_Browser" name="properties_browser"/>
   </widget>
   <action name="action_connect">
    <property name="icon">
@@ -114,9 +114,9 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>Properties_Widget</class>
+   <class>Properties_Browser</class>
    <extends>QWidget</extends>
-   <header>Properties_Widget.h</header>
+   <header>Properties_Browser.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

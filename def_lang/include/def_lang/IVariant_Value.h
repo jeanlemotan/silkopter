@@ -18,6 +18,8 @@ public:
     virtual Result<void> set_value_type_index(size_t idx) = 0;
     virtual size_t get_value_type_index() const = 0;
 
+    virtual bool is_set() const = 0;
+
     virtual Result<void> set_value(std::shared_ptr<const IValue> value) = 0;
     virtual std::shared_ptr<const IValue> get_value() const = 0;
     virtual std::shared_ptr<IValue> get_value() = 0;

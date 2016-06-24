@@ -202,6 +202,7 @@ int main(int argc, char const* argv[])
                 {
                     QLOGW("Process Latency of {}!!!!!", dt);
                 }
+                gs_comms.process();
                 rc_comms.process();
                 hal.process();
 

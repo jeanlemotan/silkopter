@@ -11,6 +11,7 @@ struct vec2
 {
     vec2() = default;
     explicit vec2(T v) : x(v), y(v) {}
+    vec2(T x, T y) : x(x), y(y) {}
     bool operator==(vec2<T> const& other) const { return x == other.x && y == other.y; }
 
     T x = 0;
@@ -26,6 +27,7 @@ struct vec3
 {
     vec3() = default;
     explicit vec3(T v) : x(v), y(v), z(v) {}
+    vec3(T x, T y, T z) : x(x), y(y), z(z) {}
     bool operator==(vec3<T> const& other) const { return x == other.x && y == other.y && z == other.z; }
 
     T x = 0;
@@ -42,6 +44,7 @@ struct vec4
 {
     vec4() = default;
     explicit vec4(T v) : x(v), y(v), z(v), w(v) {}
+    vec4(T x, T y, T z, T w) : x(x), y(y), z(z), w(w) {}
     bool operator==(vec4<T> const& other) const { return x == other.x && y == other.y && z == other.z && w == other.w; }
 
     T x = 0;

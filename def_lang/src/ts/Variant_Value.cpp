@@ -223,6 +223,12 @@ Result<void> Variant_Value::deserialize(sz::Value const& sz_value)
     return get_value()->deserialize(*value_sz_value);
 }
 
+bool Variant_Value::is_set() const
+{
+    return m_value != nullptr;
+}
+
+
 std::shared_ptr<const IValue> Variant_Value::get_value() const
 {
     TS_ASSERT(is_constructed());

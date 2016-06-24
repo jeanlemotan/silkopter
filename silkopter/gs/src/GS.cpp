@@ -91,6 +91,14 @@ void GS::set_remote_address(std::string const& address)
 
 void GS::process()
 {
+    if (m_comms.is_connected())
+    {
+        m_ui.statusbar->showMessage(("Connected to " + m_remote_address).c_str());
+    }
+    else
+    {
+        m_ui.statusbar->showMessage("");
+    }
 //    if (!m_comms.is_connected() && !m_remote_address.empty())
 //    {
 //        m_comms.start_udp(boost::asio::ip::address::from_string(m_remote_address), 8001, 8000);

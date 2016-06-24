@@ -81,25 +81,68 @@ HEADERS += \
     ../../src/GS.h \
     ../../src/stdafx.h \
     ../../src/Nodes_Widget.h \
-    ../../src/Properties_Widget.h \
     ../../src/Config_Widget.h \
     ../../src/Comms.h \
     ../../../libs/utils/RCP_UDP_Socket.h \
     ../../../libs/utils/RCP.h \
     ../../../libs/common/comms/def/gs_comms.def.h \
-    ../../../libs/lz4/lz4.h
+    ../../../libs/lz4/lz4.h \
+    ../../src/Properties_Delegate.h \
+    ../../src/Properties_Model.h \
+    ../../src/Properties_Browser.h \
+    ../../src/value_editors/Value_Editor_Factory.h \
+    ../../src/value_editors/Boolean_Value_Editor.h \
+    ../../src/value_editors/Double_Value_Editor.h \
+    ../../src/value_editors/Empty_Value_Editor.h \
+    ../../src/value_editors/Enum_Value_Editor.h \
+    ../../src/value_editors/Float_Value_Editor.h \
+    ../../src/value_editors/Integral_Value_Editor.h \
+    ../../src/value_editors/IValue_Editor.h \
+    ../../src/value_editors/Optional_Value_Editor.h \
+    ../../src/value_editors/Qualified_Value.h \
+    ../../src/value_editors/String_Value_Editor.h \
+    ../../src/value_editors/Variant_Value_Editor.h \
+    ../../src/value_editors/Vec2f_Value_Editor.h \
+    ../../src/value_editors/Vec2i_Value_Editor.h \
+    ../../src/value_editors/Vec3f_Value_Editor.h \
+    ../../src/value_editors/Vec3i_Value_Editor.h \
+    ../../src/value_editors/Vec4f_Value_Editor.h \
+    ../../src/value_editors/Vec4i_Value_Editor.h \
+    ../../src/value_editors/details/Numeric_Value_Editor_Helper.h \
+    ../../src/value_editors/details/Qualified_Value.inl \
+    ../../src/value_editors/details/VecX_Value_Editor_Helper.h
 
 SOURCES += \
     ../../src/GS.cpp \
     ../../src/main.cpp \
     ../../src/Nodes_Widget.cpp \
-    ../../src/Properties_Widget.cpp \
     ../../src/Config_Widget.cpp \
     ../../src/Comms.cpp \
     ../../../libs/utils/RCP_UDP_Socket.cpp \
     ../../../libs/utils/RCP.cpp \
     ../../../libs/common/comms/def/gs_comms.def.cpp \
-    ../../../libs/lz4/lz4.c
+    ../../../libs/lz4/lz4.c \
+    ../../src/Properties_Delegate.cpp \
+    ../../src/Properties_Model.cpp \
+    ../../src/Properties_Browser.cpp \
+    ../../src/value_editors/Value_Editor_Factory.cpp \
+    ../../src/value_editors/Boolean_Value_Editor.cpp \
+    ../../src/value_editors/Double_Value_Editor.cpp \
+    ../../src/value_editors/Empty_Value_Editor.cpp \
+    ../../src/value_editors/Enum_Value_Editor.cpp \
+    ../../src/value_editors/Float_Value_Editor.cpp \
+    ../../src/value_editors/Integral_Value_Editor.cpp \
+    ../../src/value_editors/Numeric_Value_Editor_Helper.cpp \
+    ../../src/value_editors/Optional_Value_Editor.cpp \
+    ../../src/value_editors/String_Value_Editor.cpp \
+    ../../src/value_editors/Variant_Value_Editor.cpp \
+    ../../src/value_editors/Vec2f_Value_Editor.cpp \
+    ../../src/value_editors/Vec2i_Value_Editor.cpp \
+    ../../src/value_editors/Vec3f_Value_Editor.cpp \
+    ../../src/value_editors/Vec3i_Value_Editor.cpp \
+    ../../src/value_editors/Vec4f_Value_Editor.cpp \
+    ../../src/value_editors/Vec4i_Value_Editor.cpp \
+    ../../src/value_editors/VecX_Value_Editor_Helper.cpp
 
 FORMS += \
     ../../src/GS.ui

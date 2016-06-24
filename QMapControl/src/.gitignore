@@ -2,3 +2,4 @@
 *.qmapcontrol
 *.rpi
 /Makefile
+*.qmake.stash
