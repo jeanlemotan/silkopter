@@ -1,7 +1,8 @@
 ﻿#include "BrainStdAfx.h"
 
 #include "HAL.h"
-#include "Comms.h"
+#include "RC_Comms.h"
+#include "GS_Comms.h"
 #include "utils/Timed_Scope.h"
 
 /////////////////////////////////////////////////////////////////////////////////////
@@ -731,7 +732,7 @@ void HAL::sort_nodes(std::shared_ptr<node::INode> first_node)
 }
 
 
-auto HAL::init(Comms& comms) -> bool
+auto HAL::init(RC_Comms& rc_comms, GS_Comms& gs_comms) -> bool
 {
     using namespace silk::node;
 
@@ -778,7 +779,7 @@ auto HAL::init(Comms& comms) -> bool
     m_node_factory.add<PCA9685>("PCA9685", *this);
 
     m_node_factory.add<Multirotor_Brain>("Multirotor Brain", *this);
-    m_node_factory.add<Multirotor_Pilot>("Multirotor Pilot", *this, comms);
+    m_node_factory.add<Multirotor_Pilot>("Multirotor Pilot", *this, rc_comms);
 
     m_node_factory.add<ADC_Ammeter>("ADC Ammeter", *this);
     m_node_factory.add<ADC_Voltmeter>("ADC Voltmeter", *this);

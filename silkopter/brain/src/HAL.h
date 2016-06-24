@@ -65,17 +65,19 @@ private:
     std::vector<Item> m_items;
 };
 
-class Comms;
+class RC_Comms;
+class GS_Comms;
 
 
 class HAL : q::util::Noncopyable
 {
-    friend class Comms;
+    friend class RC_Comms;
+    friend class GS_Comms;
 public:
     HAL();
     ~HAL();
 
-    auto init(Comms& comms) -> bool;
+    auto init(RC_Comms& rc_comms, GS_Comms& gs_comms) -> bool;
     void process();
     void shutdown();
 

@@ -99,7 +99,6 @@ rpi {
 
 SOURCES += \
     ../../src/BrainStdAfx.cpp \
-    ../../src/Comms.cpp \
     ../../src/main.cpp \
     ../../src/bus/UART_Linux.cpp \
     ../../src/bus/SPI_Linux.cpp \
@@ -151,7 +150,7 @@ SOURCES += \
     ../../src/brain/LiPo_Battery.cpp \
     ../../src/pilot/Multirotor_Pilot.cpp \
     ../../def/hal.def.cpp \
-    ../../../libs/common/comms/def/comms.def.cpp \
+    ../../../libs/common/comms/def/gs_comms.def.cpp \
     ../../src/uav_properties/Hexa_Properties.cpp \
     ../../src/uav_properties/Hexatri_Properties.cpp \
     ../../src/uav_properties/Octo_Properties.cpp \
@@ -159,7 +158,9 @@ SOURCES += \
     ../../src/uav_properties/Quad_Properties.cpp \
     ../../src/uav_properties/Tri_Properties.cpp \
     ../../src/uav_properties/IMultirotor_Properties.cpp \
-    ../../src/HAL.cpp
+    ../../src/HAL.cpp \
+    ../../src/RC_Comms.cpp \
+    ../../src/GS_Comms.cpp
 
 HEADERS += \
     ../../src/BrainStdAfx.h \
@@ -168,7 +169,6 @@ HEADERS += \
     ../../../libs/utils/chrono.h \
     ../../../libs/utils/PID.h \
     ../../../libs/utils/Serial_Channel.h \
-    ../../src/Comms.h \
     ../../../libs/utils/Timed_Scope.h \
     ../../../libs/physics/constants.h \
     ../../../libs/common/Comm_Data.h \
@@ -294,7 +294,7 @@ HEADERS += \
     ../../../libs/common/node/IMultirotor_Simulator.h \
     ../../def/gen_support.h \
     ../../def/hal.def.h \
-    ../../../libs/common/comms/def/comms.def.h \
+    ../../../libs/common/comms/def/gs_comms.def.h \
     ../../src/uav_properties/Quad_Properties.h \
     ../../src/uav_properties/Hexa_Properties.h \
     ../../src/uav_properties/Hexatri_Properties.h \
@@ -303,7 +303,9 @@ HEADERS += \
     ../../src/uav_properties/Tri_Properties.h \
     ../../src/uav_properties/IMultirotor_Properties.h \
     ../../src/uav_properties/IUAV_Properties.h \
-    ../../src/HAL.h
+    ../../src/HAL.h \
+    ../../src/RC_Comms.h \
+    ../../src/GS_Comms.h
 
 DISTFILES +=
 

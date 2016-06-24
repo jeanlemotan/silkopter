@@ -7,7 +7,7 @@ rpi {
 }
 
 
-SUBDIRS += qmath qdata qbase qinput q gs qmapcontrol
+SUBDIRS += qmath qdata qbase gs qmapcontrol def_lang
 
 qbase.file = ../../../../qbase/prj/qtcreator/qbase.pro
 qbase.makefile = $${MKFL}
@@ -18,15 +18,12 @@ qdata.makefile = $${MKFL}
 qmath.file = ../../../../qmath/prj/qtcreator/qmath.pro
 qmath.makefile = $${MKFL}
 
-qinput.file = ../../../../qinput/prj/qtcreator/qinput.pro
-qinput.makefile = $${MKFL}
-
-q.file = ../../../../q/prj/qtcreator/q.pro
-q.makefile = $${MKFL}
-
 qmapcontrol.file = ../../../../QMapControl/src/qmapcontrol.pro
 qmapcontrol.makefile = $${MKFL}
 
+def_lang.file = ../../../../def_lang/prj/qtcreator/def_lang.pro
+def_lang.makefile = $${MKFL}
+
 gs.file = gs.pro
-gs.depends = qbase qdata qmath q qinput qmapcontrol
+gs.depends = qbase qdata qmath qmapcontrol def_lang
 

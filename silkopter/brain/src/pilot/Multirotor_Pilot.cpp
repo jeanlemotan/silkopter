@@ -9,9 +9,9 @@ namespace silk
 namespace node
 {
 
-Multirotor_Pilot::Multirotor_Pilot(HAL& hal, Comms& comms)
+Multirotor_Pilot::Multirotor_Pilot(HAL& hal, RC_Comms& rc_comms)
     : m_hal(hal)
-    , m_comms(comms)
+    , m_rc_comms(rc_comms)
     , m_descriptor(new hal::Multirotor_Pilot_Descriptor())
     , m_config(new hal::Multirotor_Pilot_Config())
 {
@@ -73,7 +73,7 @@ void Multirotor_Pilot::process()
 
     //process commandss
     {
-        auto const& commands_values = m_comms.get_multirotor_commands_values();
+        auto const& commands_values = m_rc_comms.get_multirotor_commands_values();
 
         auto now = q::Clock::now();
 
@@ -97,12 +97,12 @@ void Multirotor_Pilot::process()
     //write back the state
     m_state_accumulator.process([this](stream::IMultirotor_State::Sample const& i_state)
     {
-        m_comms.add_multirotor_state_sample(i_state);
+        m_rc_comms.add_multirotor_state_sample(i_state);
     });
     //write back the video
     m_video_accumulator.process([this](stream::IVideo::Sample const& i_video)
     {
-        m_comms.add_video_sample(i_video);
+        m_rc_comms.add_video_sample(i_video);
     });
 }
 

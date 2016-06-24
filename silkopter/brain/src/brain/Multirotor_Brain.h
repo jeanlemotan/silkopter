@@ -17,7 +17,7 @@
 
 #include "uav_properties/IMultirotor_Properties.h"
 
-#include "Comms.h"
+#include "RC_Comms.h"
 #include "HAL.h"
 #include "utils/PID.h"
 #include "utils/Butterworth.h"

@@ -2,7 +2,7 @@
 
 namespace silk
 {
-namespace comms
+namespace rc_comms
 {
 
 

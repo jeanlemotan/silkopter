@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>GS</class>
+ <widget class="QMainWindow" name="GS">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>800</width>
+    <height>600</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Silkopter GS</string>
+  </property>
+  <property name="unifiedTitleAndToolBarOnMac">
+   <bool>true</bool>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <property name="spacing">
+     <number>0</number>
+    </property>
+    <property name="leftMargin">
+     <number>0</number>
+    </property>
+    <property name="topMargin">
+     <number>0</number>
+    </property>
+    <property name="rightMargin">
+     <number>0</number>
+    </property>
+    <property name="bottomMargin">
+     <number>0</number>
+    </property>
+    <item>
+     <widget class="QTabWidget" name="tabWidget">
+      <property name="tabShape">
+       <enum>QTabWidget::Rounded</enum>
+      </property>
+      <property name="currentIndex">
+       <number>0</number>
+      </property>
+      <widget class="Config_Widget" name="Config">
+       <attribute name="icon">
+        <iconset resource="../res/res.qrc">
+         <normaloff>:/icons/ui/setup.png</normaloff>:/icons/ui/setup.png</iconset>
+       </attribute>
+       <attribute name="title">
+        <string>Config</string>
+       </attribute>
+      </widget>
+      <widget class="Nodes_Widget" name="Nodes">
+       <attribute name="icon">
+        <iconset resource="../res/res.qrc">
+         <normaloff>:/icons/ui/nodes.png</normaloff>:/icons/ui/nodes.png</iconset>
+       </attribute>
+       <attribute name="title">
+        <string>Nodes</string>
+       </attribute>
+      </widget>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>800</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="nativeMenuBar">
+    <bool>true</bool>
+   </property>
+   <widget class="QMenu" name="menuConnect">
+    <property name="title">
+     <string>Connect</string>
+    </property>
+    <addaction name="action_connect"/>
+   </widget>
+   <addaction name="menuConnect"/>
+  </widget>
+  <widget class="QDockWidget" name="dockWidget">
+   <attribute name="dockWidgetArea">
+    <number>2</number>
+   </attribute>
+   <widget class="Properties_Widget" name="properties_widget"/>
+  </widget>
+  <action name="action_connect">
+   <property name="icon">
+    <iconset resource="../res/res.qrc">
+     <normaloff>:/icons/ui/wifi.png</normaloff>:/icons/ui/wifi.png</iconset>
+   </property>
+   <property name="text">
+    <string>Connect</string>
+   </property>
+  </action>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>Config_Widget</class>
+   <extends>QWidget</extends>
+   <header>Config_Widget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>Nodes_Widget</class>
+   <extends>QWidget</extends>
+   <header>Nodes_Widget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>Properties_Widget</class>
+   <extends>QWidget</extends>
+   <header>Properties_Widget.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources>
+  <include location="../res/res.qrc"/>
+ </resources>
+ <connections/>
+</ui>

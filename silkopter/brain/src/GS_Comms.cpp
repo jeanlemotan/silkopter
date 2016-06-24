@@ -1,5 +1,5 @@
 #include "BrainStdAfx.h"
-#include "Comms.h"
+#include "GS_Comms.h"
 #include "utils/Timed_Scope.h"
 
 #include "common/stream/IAcceleration.h"
@@ -36,7 +36,7 @@
 #include "utils/Channel.h"
 
 #include "hal.def.h"
-#include "comms.def.h"
+#include "gs_comms.def.h"
 #include "def_lang/JSON_Serializer.h"
 
 #include <boost/asio.hpp>
@@ -44,41 +44,15 @@
 using namespace silk;
 
 constexpr uint8_t SETUP_CHANNEL = 10;
-constexpr uint8_t PILOT_CHANNEL = 15;
-constexpr uint8_t VIDEO_CHANNEL = 16;
-constexpr uint8_t TELEMETRY_CHANNEL = 20;
 
 constexpr q::Clock::duration RCP_PERIOD = std::chrono::milliseconds(30);
 
-struct Comms::Channels
-{
-    //typedef util::Channel<comms::Setup_Message, uint32_t> Setup;
-    typedef util::Channel<comms::Pilot_Message, uint32_t> Pilot;
-    typedef util::Channel<comms::Video_Message, uint32_t> Video;
-    typedef util::Channel<comms::Telemetry_Message, uint32_t> Telemetry;
-
-    Channels()
-//        : setup(SETUP_CHANNEL)
-        : pilot(PILOT_CHANNEL)
-        , telemetry(TELEMETRY_CHANNEL)
-        , video(VIDEO_CHANNEL)
-    {}
-
-    //Setup setup;
-    Pilot pilot;
-    Telemetry telemetry;
-    Video video;
-
-    std::vector<uint8_t> setup_buffer;
-};
-
-Comms::Comms(HAL& hal)
+GS_Comms::GS_Comms(HAL& hal)
     : m_hal(hal)
-    , m_channels(new Channels())
 {
 }
 
-auto Comms::start_udp(uint16_t send_port, uint16_t receive_port) -> bool
+auto GS_Comms::start_udp(uint16_t send_port, uint16_t receive_port) -> bool
 {
     try
     {
@@ -91,9 +65,6 @@ auto Comms::start_udp(uint16_t send_port, uint16_t receive_port) -> bool
         {
             m_rcp->set_internal_socket_handle(handle);
             m_rcp->set_socket_handle(SETUP_CHANNEL, handle);
-            m_rcp->set_socket_handle(PILOT_CHANNEL, handle);
-            m_rcp->set_socket_handle(VIDEO_CHANNEL, handle);
-            m_rcp->set_socket_handle(TELEMETRY_CHANNEL, handle);
 
             s->open(send_port, receive_port);
             s->start_listening();
@@ -122,7 +93,7 @@ auto Comms::start_udp(uint16_t send_port, uint16_t receive_port) -> bool
     return true;
 }
 
-auto Comms::start_rfmon(std::string const& interface, uint8_t id) -> bool
+auto GS_Comms::start_rfmon(std::string const& interface, uint8_t id) -> bool
 {
     try
     {
@@ -135,9 +106,6 @@ auto Comms::start_rfmon(std::string const& interface, uint8_t id) -> bool
         {
             m_rcp->set_internal_socket_handle(handle);
             m_rcp->set_socket_handle(SETUP_CHANNEL, handle);
-            m_rcp->set_socket_handle(PILOT_CHANNEL, handle);
-            m_rcp->set_socket_handle(VIDEO_CHANNEL, handle);
-            m_rcp->set_socket_handle(TELEMETRY_CHANNEL, handle);
 
             m_is_connected = s->start();
         }
@@ -161,7 +129,7 @@ auto Comms::start_rfmon(std::string const& interface, uint8_t id) -> bool
     return true;
 }
 
-void Comms::configure_channels()
+void GS_Comms::configure_channels()
 {
     {
         util::RCP::Send_Params params;
@@ -171,75 +139,18 @@ void Comms::configure_channels()
         m_rcp->set_send_params(SETUP_CHANNEL, params);
     }
     {
-        util::RCP::Send_Params params;
-        params.is_compressed = true;
-        params.is_reliable = true;
-        params.importance = 10;
-        params.cancel_after = std::chrono::milliseconds(150);
-        m_rcp->set_send_params(TELEMETRY_CHANNEL, params);
-    }
-    {
-        util::RCP::Send_Params params;
-        params.is_compressed = true;
-        params.is_reliable = true;
-        params.importance = 100;
-        params.cancel_previous_data = true;
-        params.cancel_after = std::chrono::milliseconds(150);
-        m_rcp->set_send_params(PILOT_CHANNEL, params);
-    }
-    {
-        util::RCP::Send_Params params;
-        params.is_compressed = false;
-        params.is_reliable = true;
-        params.importance = 100;
-        params.cancel_after = std::chrono::milliseconds(150);
-        m_rcp->set_send_params(VIDEO_CHANNEL, params);
-    }
-
-    {
         util::RCP::Receive_Params params;
         params.max_receive_time = std::chrono::seconds(999999);
         m_rcp->set_receive_params(SETUP_CHANNEL, params);
     }
-    {
-        util::RCP::Receive_Params params;
-        params.max_receive_time = std::chrono::milliseconds(100);
-        m_rcp->set_receive_params(PILOT_CHANNEL, params);
-    }
-    {
-        util::RCP::Receive_Params params;
-        params.max_receive_time = std::chrono::milliseconds(500);
-        m_rcp->set_receive_params(TELEMETRY_CHANNEL, params);
-    }
 }
 
-auto Comms::is_connected() const -> bool
+auto GS_Comms::is_connected() const -> bool
 {
     return m_is_connected;
 }
 
-//auto Comms::send_video_stream(Stream_Telemetry_Data& ts, stream::IStream const& _stream) -> bool
-//{
-//    if (_stream.get_type() != stream::IVideo::TYPE)
-//    {
-//        return false;
-//    }
-
-//    auto const& stream = static_cast<stream::IVideo const&>(_stream);
-//    auto const& samples = stream.get_samples();
-
-//    for (auto const& s: samples)
-//    {
-//        m_channels->video.begin_pack(comms::Video_Message::FRAME_DATA);
-//        m_channels->video.pack_param(ts.stream_name);
-//        m_channels->video.pack_param(s);
-//        m_channels->video.end_pack();
-//        m_channels->video.try_sending(*m_rcp);
-//    }
-//    return true;
-//}
-
-template<class Stream> auto Comms::gather_telemetry_stream(Stream_Telemetry_Data& ts, stream::IStream const& _stream) -> bool
+template<class Stream> auto GS_Comms::gather_telemetry_stream(Stream_Telemetry_Data& ts, stream::IStream const& _stream) -> bool
 {
     if (_stream.get_type() == Stream::TYPE)
     {
@@ -265,7 +176,7 @@ template<class Stream> auto Comms::gather_telemetry_stream(Stream_Telemetry_Data
     return false;
 }
 
-void Comms::gather_telemetry_data()
+void GS_Comms::gather_telemetry_data()
 {
     //first we gather samples and we send them at 30Hz. This improves bandwidth by reducing header overhead and allowing for better compression
     for (auto& ts: m_stream_telemetry_data)
@@ -337,35 +248,35 @@ void Comms::gather_telemetry_data()
     }
 }
 
-void Comms::pack_telemetry_data()
+void GS_Comms::pack_telemetry_data()
 {
-    for (auto& ts: m_stream_telemetry_data)
-    {
-        if (!ts.data.empty() && ts.sample_count > 0)
-        {
-            m_channels->telemetry.begin_pack(comms::Telemetry_Message::STREAM_DATA);
-            m_channels->telemetry.pack_param(ts.stream_name);
-            m_channels->telemetry.pack_param(ts.sample_count);
-            m_channels->telemetry.pack_data(ts.data.data(), ts.data.size());
-            m_channels->telemetry.end_pack();
-        }
-        ts.data.clear();
-        ts.sample_count = 0;
-    }
+//    for (auto& ts: m_stream_telemetry_data)
+//    {
+//        if (!ts.data.empty() && ts.sample_count > 0)
+//        {
+//            m_channels->telemetry.begin_pack(rc_comms::Telemetry_Message::STREAM_DATA);
+//            m_channels->telemetry.pack_param(ts.stream_name);
+//            m_channels->telemetry.pack_param(ts.sample_count);
+//            m_channels->telemetry.pack_data(ts.data.data(), ts.data.size());
+//            m_channels->telemetry.end_pack();
+//        }
+//        ts.data.clear();
+//        ts.sample_count = 0;
+//    }
 
-    if (m_telemetry_data.is_enabled)
-    {
-        auto& t = m_telemetry_data;
-        if (!t.data.empty() && t.sample_count > 0)
-        {
-            m_channels->telemetry.begin_pack(comms::Telemetry_Message::STREAM_DATA);
-            m_channels->telemetry.pack_param(t.sample_count);
-            m_channels->telemetry.pack_data(t.data.data(), t.data.size());
-            m_channels->telemetry.end_pack();
-        }
-        t.data.clear();
-        t.sample_count = 0;
-    }
+//    if (m_telemetry_data.is_enabled)
+//    {
+//        auto& t = m_telemetry_data;
+//        if (!t.data.empty() && t.sample_count > 0)
+//        {
+//            m_channels->telemetry.begin_pack(comms::Telemetry_Message::STREAM_DATA);
+//            m_channels->telemetry.pack_param(t.sample_count);
+//            m_channels->telemetry.pack_data(t.data.data(), t.data.size());
+//            m_channels->telemetry.end_pack();
+//        }
+//        t.data.clear();
+//        t.sample_count = 0;
+//    }
 }
 
 //template<class T>
@@ -853,43 +764,14 @@ void Comms::pack_telemetry_data()
 //    channel.end_pack();
 //}
 
-auto Comms::get_multirotor_commands_values() const -> std::vector<stream::IMultirotor_Commands::Value> const&
-{
-    return m_multirotor_commands_values;
-}
-void Comms::add_multirotor_state_sample(stream::IMultirotor_State::Sample const& sample)
-{
-    m_channels->pilot.pack_all(silk::comms::Pilot_Message::MULTIROTOR_STATE, sample);
-    m_channels->pilot.send(*m_rcp);
-}
-void Comms::add_video_sample(stream::IVideo::Sample const& sample)
-{
-    m_channels->video.pack_all(silk::comms::Video_Message::FRAME_DATA, sample);
-    m_channels->video.send(*m_rcp);
-}
-
-//void Comms::handle_multirotor_commands()
-//{
-//    auto& channel = m_channels->pilot;
-
-//    stream::IMultirotor_Commands::Value value;
-//    if (!channel.unpack_all(value))
-//    {
-//        QLOGE("Error in unpacking multirotor commands");
-//        return;
-//    }
-
-//    m_multirotor_commands_values.push_back(value);
-//}
-
 
 template<typename T>
-void Comms::serialize_and_send(size_t channel_idx, T const& message)
+void GS_Comms::serialize_and_send(size_t channel_idx, T const& message)
 {
     TIMED_FUNCTION();
     if (m_rcp->is_connected())
     {
-        ts::sz::Value sz_value = silk::comms::serialize(message);
+        ts::sz::Value sz_value = silk::gs_comms::serialize(message);
         ts::sz::to_json(m_json_buffer, sz_value, false);
         if (!m_rcp->send(channel_idx, m_json_buffer.data(), m_json_buffer.size()))
         {
@@ -899,14 +781,14 @@ void Comms::serialize_and_send(size_t channel_idx, T const& message)
     }
 }
 
-std::string const& Comms::decode_json(std::string const& json_base64)
+std::string const& GS_Comms::decode_json(std::string const& json_base64)
 {
     m_base64_buffer.resize(q::util::compute_base64_max_decoded_size(json_base64.size()));
     auto last_it = q::util::decode_base64(json_base64.data(), json_base64.data() + json_base64.size(), m_base64_buffer.begin());
     m_base64_buffer.erase(last_it, m_base64_buffer.end());
     return m_base64_buffer;
 }
-std::string const& Comms::encode_json(std::string const& json)
+std::string const& GS_Comms::encode_json(std::string const& json)
 {
     m_base64_buffer.resize(q::util::compute_base64_encoded_size(json.size()));
     q::util::encode_base64(json.data(), json.size(), &m_base64_buffer[0]);
@@ -914,17 +796,17 @@ std::string const& Comms::encode_json(std::string const& json)
 }
 
 
-boost::variant<comms::setup::Node_Data, comms::setup::Error> Comms::get_node_data(std::string const& name, node::INode const& node)
+boost::variant<gs_comms::setup::Node_Data, gs_comms::setup::Error> GS_Comms::get_node_data(std::string const& name, node::INode const& node)
 {
     TIMED_FUNCTION();
-    comms::setup::Node_Data node_data;
+    gs_comms::setup::Node_Data node_data;
 
     node_data.set_name(name);
     node_data.set_type(static_cast<uint8_t>(node.get_type()));
 
     for (node::INode::Input const& input: node.get_inputs())
     {
-        comms::setup::Node_Data::Input node_data_input;
+        gs_comms::setup::Node_Data::Input node_data_input;
         node_data_input.set_name(input.name);
         node_data_input.set_space(static_cast<uint8_t>(input.type.get_space()));
         node_data_input.set_semantic(static_cast<uint8_t>(input.type.get_semantic()));
@@ -934,7 +816,7 @@ boost::variant<comms::setup::Node_Data, comms::setup::Error> Comms::get_node_dat
     }
     for (node::INode::Output const& output: node.get_outputs())
     {
-        comms::setup::Node_Data::Output node_data_output;
+        gs_comms::setup::Node_Data::Output node_data_output;
         node_data_output.set_name(output.name);
         node_data_output.set_space(static_cast<uint8_t>(output.stream->get_type().get_space()));
         node_data_output.set_semantic(static_cast<uint8_t>(output.stream->get_type().get_semantic()));
@@ -952,21 +834,21 @@ boost::variant<comms::setup::Node_Data, comms::setup::Error> Comms::get_node_dat
 }
 
 template<class Format_String, typename... Params>
-comms::setup::Error Comms::make_error(Format_String const& fmt, Params&&... params)
+gs_comms::setup::Error GS_Comms::make_error(Format_String const& fmt, Params&&... params)
 {
-    comms::setup::Error error;
+    gs_comms::setup::Error error;
     error.set_message(q::util::format<std::string>(fmt, std::forward<Params>(params)...));
     QLOGE("Comms error: {}", error.get_message());
     return error;
 }
 
-void Comms::handle_req(comms::setup::Get_AST_Req const& req)
+void GS_Comms::handle_req(gs_comms::setup::Get_AST_Req const& req)
 {
     TIMED_FUNCTION();
     QLOGI("Get_AST_Req {}", req.get_req_id());
 
-    comms::setup::Brain_Res response = comms::setup::Get_AST_Res();
-    comms::setup::Get_AST_Res& res = boost::get<comms::setup::Get_AST_Res>(response);
+    gs_comms::setup::Brain_Res response = gs_comms::setup::Get_AST_Res();
+    gs_comms::setup::Get_AST_Res& res = boost::get<gs_comms::setup::Get_AST_Res>(response);
 
     res.set_req_id(req.get_req_id());
     res.set_data(encode_json(hal::get_ast_json()));
@@ -997,12 +879,12 @@ void Comms::handle_req(comms::setup::Get_AST_Req const& req)
 //    serialize_and_send(SETUP_CHANNEL, response);
 }
 
-void Comms::handle_req(comms::setup::Set_Clock_Req const& req)
+void GS_Comms::handle_req(gs_comms::setup::Set_Clock_Req const& req)
 {
     TIMED_FUNCTION();
     QLOGI("Set_Clock_Req {}", req.get_req_id());
 
-    comms::setup::Brain_Res response;
+    gs_comms::setup::Brain_Res response;
 
     int64_t time_t_data = req.get_time();
 #ifdef RASPBERRY_PI
@@ -1023,7 +905,7 @@ void Comms::handle_req(comms::setup::Set_Clock_Req const& req)
     }
     QLOGI("Clock set, current time is: {}", mbstr);
 
-    comms::setup::Set_Clock_Res res;
+    gs_comms::setup::Set_Clock_Res res;
     res.set_req_id(req.get_req_id());
     res.set_time(static_cast<uint64_t>(t) * 1000);
     response = res;
@@ -1031,12 +913,12 @@ void Comms::handle_req(comms::setup::Set_Clock_Req const& req)
     serialize_and_send(SETUP_CHANNEL, response);
 }
 
-void Comms::handle_req(comms::setup::Set_UAV_Descriptor_Req const& req)
+void GS_Comms::handle_req(gs_comms::setup::Set_UAV_Descriptor_Req const& req)
 {
     TIMED_FUNCTION();
     QLOGI("Set_UAV_Descriptor_Req {}", req.get_req_id());
 
-    comms::setup::Brain_Res response;
+    gs_comms::setup::Brain_Res response;
 
     std::string const& json = decode_json(req.get_data());
     auto json_result = ts::sz::from_json(json);
@@ -1066,21 +948,21 @@ void Comms::handle_req(comms::setup::Set_UAV_Descriptor_Req const& req)
 
     ts::sz::Value sz_value = hal::serialize(hal::Poly<const hal::IUAV_Descriptor>(m_hal.get_uav_descriptor()));
 
-    response = comms::setup::Set_UAV_Descriptor_Res();
-    comms::setup::Set_UAV_Descriptor_Res& res = boost::get<comms::setup::Set_UAV_Descriptor_Res>(response);
+    response = gs_comms::setup::Set_UAV_Descriptor_Res();
+    gs_comms::setup::Set_UAV_Descriptor_Res& res = boost::get<gs_comms::setup::Set_UAV_Descriptor_Res>(response);
     res.set_req_id(req.get_req_id());
     res.set_data(encode_json(ts::sz::to_json(m_json_buffer, sz_value, false)));
 
     serialize_and_send(SETUP_CHANNEL, response);
 }
 
-void Comms::handle_req(comms::setup::Get_UAV_Descriptor_Req const& req)
+void GS_Comms::handle_req(gs_comms::setup::Get_UAV_Descriptor_Req const& req)
 {
     TIMED_FUNCTION();
     QLOGI("Get_UAV_Descriptor_Req {}", req.get_req_id());
 
-    comms::setup::Brain_Res response = comms::setup::Get_UAV_Descriptor_Res();
-    comms::setup::Get_UAV_Descriptor_Res& res = boost::get<comms::setup::Get_UAV_Descriptor_Res>(response);
+    gs_comms::setup::Brain_Res response = gs_comms::setup::Get_UAV_Descriptor_Res();
+    gs_comms::setup::Get_UAV_Descriptor_Res& res = boost::get<gs_comms::setup::Get_UAV_Descriptor_Res>(response);
 
     ts::sz::Value sz_value = hal::serialize(hal::Poly<const hal::IUAV_Descriptor>(m_hal.get_uav_descriptor()));
     res.set_req_id(req.get_req_id());
@@ -1089,13 +971,13 @@ void Comms::handle_req(comms::setup::Get_UAV_Descriptor_Req const& req)
     serialize_and_send(SETUP_CHANNEL, response);
 }
 
-void Comms::handle_req(comms::setup::Get_Node_Defs_Req const& req)
+void GS_Comms::handle_req(gs_comms::setup::Get_Node_Defs_Req const& req)
 {
     TIMED_FUNCTION();
     QLOGI("Get_Node_Defs_Req {}", req.get_req_id());
 
-    comms::setup::Brain_Res response = comms::setup::Get_Node_Defs_Res();
-    comms::setup::Get_Node_Defs_Res& res = boost::get<comms::setup::Get_Node_Defs_Res>(response);
+    gs_comms::setup::Brain_Res response = gs_comms::setup::Get_Node_Defs_Res();
+    gs_comms::setup::Get_Node_Defs_Res& res = boost::get<gs_comms::setup::Get_Node_Defs_Res>(response);
 
     //first disable all telemetry because the GS doesn't yet have all the streams
     m_stream_telemetry_data.clear();
@@ -1109,18 +991,18 @@ void Comms::handle_req(comms::setup::Get_Node_Defs_Req const& req)
     for (size_t nidx = 0; nidx < nodes.size(); nidx++)
     {
         HAL::Node_Factory::Info const& n = nodes[nidx];
-        comms::setup::Node_Def_Data& node_data = res.get_node_def_datas()[nidx];
+        gs_comms::setup::Node_Def_Data& node_data = res.get_node_def_datas()[nidx];
 
         node_data.set_name(n.name);
         node_data.set_type(static_cast<uint8_t>(n.ptr->get_type()));
 
         std::vector<node::INode::Input> inputs = n.ptr->get_inputs();
-        std::vector<comms::setup::Node_Def_Data::Input>& node_data_inputs = node_data.get_inputs();
+        std::vector<gs_comms::setup::Node_Def_Data::Input>& node_data_inputs = node_data.get_inputs();
         node_data_inputs.resize(inputs.size());
         for (size_t i = 0; i < inputs.size(); i++)
         {
             node::INode::Input const& input = inputs[i];
-            comms::setup::Node_Def_Data::Input& node_data_input = node_data_inputs[i];
+            gs_comms::setup::Node_Def_Data::Input& node_data_input = node_data_inputs[i];
 
             node_data_input.set_name(input.name);
             node_data_input.set_space(static_cast<uint8_t>(input.type.get_space()));
@@ -1128,12 +1010,12 @@ void Comms::handle_req(comms::setup::Get_Node_Defs_Req const& req)
         }
 
         std::vector<node::INode::Output> outputs = n.ptr->get_outputs();
-        std::vector<comms::setup::Node_Def_Data::Output>& node_data_outputs = node_data.get_outputs();
+        std::vector<gs_comms::setup::Node_Def_Data::Output>& node_data_outputs = node_data.get_outputs();
         node_data_outputs.resize(outputs.size());
         for (size_t i = 0; i < outputs.size(); i++)
         {
             node::INode::Output const& output = outputs[i];
-            comms::setup::Node_Def_Data::Output& node_data_output = node_data_outputs[i];
+            gs_comms::setup::Node_Def_Data::Output& node_data_output = node_data_outputs[i];
 
             node_data_output.set_name(output.name);
             node_data_output.set_space(static_cast<uint8_t>(output.stream->get_type().get_space()));
@@ -1148,12 +1030,12 @@ void Comms::handle_req(comms::setup::Get_Node_Defs_Req const& req)
     serialize_and_send(SETUP_CHANNEL, response);
 }
 
-void Comms::handle_req(comms::setup::Remove_Node_Req const& req)
+void GS_Comms::handle_req(gs_comms::setup::Remove_Node_Req const& req)
 {
     TIMED_FUNCTION();
     QLOGI("Remove_Node_Req {}", req.get_req_id());
 
-    comms::setup::Brain_Res response;
+    gs_comms::setup::Brain_Res response;
 
     std::shared_ptr<node::INode> node = m_hal.get_node_registry().find_by_name<node::INode>(req.get_name());
     if (!node)
@@ -1166,18 +1048,18 @@ void Comms::handle_req(comms::setup::Remove_Node_Req const& req)
     m_hal.remove_node(node);
     m_hal.save_settings();
 
-    comms::setup::Remove_Node_Res res;
+    gs_comms::setup::Remove_Node_Res res;
     res.set_req_id(req.get_req_id());
     response = res;
     serialize_and_send(SETUP_CHANNEL, response);
 }
 
-void Comms::handle_req(comms::setup::Add_Node_Req const& req)
+void GS_Comms::handle_req(gs_comms::setup::Add_Node_Req const& req)
 {
     TIMED_FUNCTION();
     QLOGI("Add_Node_Req {}", req.get_req_id());
 
-    comms::setup::Brain_Res response;
+    gs_comms::setup::Brain_Res response;
 
     std::string const& json = decode_json(req.get_descriptor_data());
     auto json_result = ts::sz::from_json(json);
@@ -1205,30 +1087,30 @@ void Comms::handle_req(comms::setup::Add_Node_Req const& req)
     }
     m_hal.save_settings();
 
-    comms::setup::Add_Node_Res res;
+    gs_comms::setup::Add_Node_Res res;
     res.set_req_id(req.get_req_id());
 
-    boost::variant<comms::setup::Node_Data, comms::setup::Error> result = get_node_data(req.get_name(), *node);
-    if (auto* error = boost::get<comms::setup::Error>(&result))
+    boost::variant<gs_comms::setup::Node_Data, gs_comms::setup::Error> result = get_node_data(req.get_name(), *node);
+    if (auto* error = boost::get<gs_comms::setup::Error>(&result))
     {
         response = std::move(*error);
         serialize_and_send(SETUP_CHANNEL, response);
         return;
     }
 
-    res.set_node_data(std::move(boost::get<comms::setup::Node_Data>(result)));
+    res.set_node_data(std::move(boost::get<gs_comms::setup::Node_Data>(result)));
     response = std::move(res);
     serialize_and_send(SETUP_CHANNEL, response);
 }
 
-void Comms::handle_req(comms::setup::Get_Nodes_Req const& req)
+void GS_Comms::handle_req(gs_comms::setup::Get_Nodes_Req const& req)
 {
     TIMED_FUNCTION();
     QLOGI("Get_Nodes_Req {}", req.get_req_id());
 
-    comms::setup::Brain_Res response;
+    gs_comms::setup::Brain_Res response;
 
-    comms::setup::Get_Nodes_Res res;
+    gs_comms::setup::Get_Nodes_Res res;
     res.set_req_id(req.get_req_id());
 
     std::string const& name = req.get_name();
@@ -1238,14 +1120,14 @@ void Comms::handle_req(comms::setup::Get_Nodes_Req const& req)
 
         for (HAL::Node_Registry::Item const& item: nodes)
         {
-            boost::variant<comms::setup::Node_Data, comms::setup::Error> result = get_node_data(item.name, *item.ptr);
-            if (auto* error = boost::get<comms::setup::Error>(&result))
+            boost::variant<gs_comms::setup::Node_Data, gs_comms::setup::Error> result = get_node_data(item.name, *item.ptr);
+            if (auto* error = boost::get<gs_comms::setup::Error>(&result))
             {
                 response = std::move(*error);
                 serialize_and_send(SETUP_CHANNEL, response);
                 return;
             }
-            res.get_node_datas().push_back(std::move(boost::get<comms::setup::Node_Data>(result)));
+            res.get_node_datas().push_back(std::move(boost::get<gs_comms::setup::Node_Data>(result)));
         }
     }
     else
@@ -1258,27 +1140,27 @@ void Comms::handle_req(comms::setup::Get_Nodes_Req const& req)
             return;
         }
 
-        boost::variant<comms::setup::Node_Data, comms::setup::Error> result = get_node_data(name, *node);
-        if (auto* error = boost::get<comms::setup::Error>(&result))
+        boost::variant<gs_comms::setup::Node_Data, gs_comms::setup::Error> result = get_node_data(name, *node);
+        if (auto* error = boost::get<gs_comms::setup::Error>(&result))
         {
             response = std::move(*error);
             serialize_and_send(SETUP_CHANNEL, response);
             return;
         }
-        res.get_node_datas().push_back(std::move(boost::get<comms::setup::Node_Data>(result)));
+        res.get_node_datas().push_back(std::move(boost::get<gs_comms::setup::Node_Data>(result)));
     }
 
     response = std::move(res);
     serialize_and_send(SETUP_CHANNEL, response);
 }
 
-void Comms::handle_req(comms::setup::Set_Node_Input_Stream_Path_Req const& req)
+void GS_Comms::handle_req(gs_comms::setup::Set_Node_Input_Stream_Path_Req const& req)
 {
     TIMED_FUNCTION();
     QLOGI("Set_Node_Input_Stream_Path_Req {}", req.get_req_id());
 
-    comms::setup::Brain_Res response;
-    comms::setup::Set_Node_Input_Stream_Path_Res res;
+    gs_comms::setup::Brain_Res response;
+    gs_comms::setup::Set_Node_Input_Stream_Path_Res res;
     res.set_req_id(req.get_req_id());
 
     std::string const& node_name = req.get_node_name();
@@ -1301,8 +1183,8 @@ void Comms::handle_req(comms::setup::Set_Node_Input_Stream_Path_Req const& req)
             node->set_input_stream_path(idx, q::Path(req.get_stream_path()));
             m_hal.save_settings();
 
-            boost::variant<comms::setup::Node_Data, comms::setup::Error> result = get_node_data(node_name, *node);
-            if (auto* error = boost::get<comms::setup::Error>(&result))
+            boost::variant<gs_comms::setup::Node_Data, gs_comms::setup::Error> result = get_node_data(node_name, *node);
+            if (auto* error = boost::get<gs_comms::setup::Error>(&result))
             {
                 response = std::move(*error);
                 serialize_and_send(SETUP_CHANNEL, response);
@@ -1310,7 +1192,7 @@ void Comms::handle_req(comms::setup::Set_Node_Input_Stream_Path_Req const& req)
             }
 
             //all good!!!
-            res.set_node_data(std::move(boost::get<comms::setup::Node_Data>(result)));
+            res.set_node_data(std::move(boost::get<gs_comms::setup::Node_Data>(result)));
             response = std::move(res);
             serialize_and_send(SETUP_CHANNEL, response);
             return;
@@ -1323,78 +1205,40 @@ void Comms::handle_req(comms::setup::Set_Node_Input_Stream_Path_Req const& req)
 }
 
 
-struct Comms::Dispatch_Req_Visitor : boost::static_visitor<void>
+struct GS_Comms::Dispatch_Req_Visitor : boost::static_visitor<void>
 {
-    Dispatch_Req_Visitor(Comms& comms) : m_comms(comms) {}
+    Dispatch_Req_Visitor(GS_Comms& comms) : m_comms(comms) {}
     template <typename T> void operator()(T const& t) const { m_comms.handle_req(t); }
-    Comms& m_comms;
+    GS_Comms& m_comms;
 };
 
-void Comms::process()
+void GS_Comms::process()
 {
     if (!is_connected())
     {
         return;
     }
 
-//    m_multirotor_commands_values.clear();
-
-//    while (auto msg = m_channels->pilot.get_next_message(*m_rcp))
-//    {
-//        switch (msg.get())
-//        {
-//        case comms::Pilot_Message::MULTIROTOR_COMMANDS: handle_multirotor_commands(); break;
-
-//        default: QLOGE("Received unrecognised pilot message: {}", static_cast<int>(msg.get())); break;
-//        }
-//    }
-
-
     Dispatch_Req_Visitor dispatcher(*this);
-    while (m_rcp->receive(SETUP_CHANNEL, m_channels->setup_buffer))
+    while (m_rcp->receive(SETUP_CHANNEL, m_setup_buffer))
     {
-        auto parse_result = ts::sz::from_json(m_channels->setup_buffer.data(), m_channels->setup_buffer.size());
+        auto parse_result = ts::sz::from_json(m_setup_buffer.data(), m_setup_buffer.size());
         if (parse_result != ts::success)
         {
             QLOGE("Cannot parse setup req: {}", parse_result.error().what());
         }
         else
         {
-            silk::comms::setup::Brain_Req req;
-            auto result = silk::comms::deserialize(req, parse_result.payload());
+            silk::gs_comms::setup::Brain_Req req;
+            auto result = silk::gs_comms::deserialize(req, parse_result.payload());
             if (result != ts::success)
             {
                 QLOGE("Cannot deserialize setup req: {}", result.error().what());
             }
             boost::apply_visitor(dispatcher, req);
         }
-        m_channels->setup_buffer.clear();
+        m_setup_buffer.clear();
     }
-
-//    while (auto msg = m_channels->setup.get_next_message(*m_rcp))
-//    {
-//        switch (msg.get())
-//        {
-//        case comms::Setup_Message::CLOCK: handle_clock(); break;
-
-//        case comms::Setup_Message::UAV_DESCRIPTOR: handle_uav_descriptor(); break;
-
-//        case comms::Setup_Message::ENUMERATE_NODE_DEFS: handle_enumerate_node_defs(); break;
-//        case comms::Setup_Message::ENUMERATE_NODES: handle_enumerate_nodes(); break;
-//        case comms::Setup_Message::GET_NODE_DATA: handle_get_node_data(); break;
-
-//        case comms::Setup_Message::ADD_NODE: handle_add_node(); break;
-//        case comms::Setup_Message::REMOVE_NODE: handle_remove_node(); break;
-//        case comms::Setup_Message::NODE_CONFIG: handle_node_config(); break;
-//        case comms::Setup_Message::NODE_MESSAGE: handle_node_message(); break;
-//        case comms::Setup_Message::NODE_INPUT_STREAM_PATH: handle_node_input_stream_path(); break;
-
-//        case comms::Setup_Message::STREAM_TELEMETRY_ACTIVE: handle_streams_telemetry_active(); break;
-//        case comms::Setup_Message::UAV_TELEMETRY_ACTIVE: handle_uav_telemetry_active(); break;
-
-//        default: QLOGE("Received unrecognised setup message: {}", static_cast<int>(msg.get())); break;
-//        }
-//    }
 
     gather_telemetry_data();
 
@@ -1404,7 +1248,6 @@ void Comms::process()
         m_rcp->reconnect();
     }
 
-
     m_rcp->process();
 
     auto now = q::Clock::now();
@@ -1413,28 +1256,6 @@ void Comms::process()
         m_last_rcp_tp = now;
 
         pack_telemetry_data();
-
-        //m_channels->setup.send(*m_rcp);
-        m_channels->telemetry.try_sending(*m_rcp);
     }
-
-//    static std::vector<uint8_t> buf;
-//    if (buf.empty())
-//    {
-//        buf.resize(16000000);
-//        std::generate(buf.begin(), buf.end(), [](){ return rand() % 50;});
-//    }
-
-//    while(true)
-//    {
-//        m_rcp.send(12, buf.data(), buf.size());
-
-//        m_rcp.process();
-//        //m_channel.send(COMMS_CHANNEL);
-//        static int xxx = 0;
-//        LOG_INFO("{}", xxx);
-//        xxx++;
-//        std::this_thread::sleep_for(std::chrono::milliseconds(30));
-//    }
 }
 

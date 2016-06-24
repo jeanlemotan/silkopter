@@ -21,8 +21,7 @@ INCLUDEPATH += ../../../../QMapControl/src
 INCLUDEPATH += ../../../../qbase/include
 INCLUDEPATH += ../../../../qdata/include
 INCLUDEPATH += ../../../../qmath/include
-INCLUDEPATH += ../../../../qinput/include
-INCLUDEPATH += ../../../../q/include
+INCLUDEPATH += ../../../../def_lang/include
 INCLUDEPATH += ../../../libs
 INCLUDEPATH += /usr/include/freetype2
 INCLUDEPATH += /usr/include/ffmpeg
@@ -30,6 +29,7 @@ INCLUDEPATH += ../../../../autojsoncxx/include
 INCLUDEPATH += ../../../../autojsoncxx/rapidjson/include
 INCLUDEPATH += ../../../../eigen
 INCLUDEPATH += ../../../brain/autogen
+INCLUDEPATH += ../../../libs/common/comms/def
 
 QMAKE_CXXFLAGS += -Wno-unused-variable -Wno-unused-parameter -B$HOME/dev/bin/gold
 QMAKE_CFLAGS += -Wno-unused-variable -Wno-unused-parameter -B$HOME/dev/bin/gold
@@ -58,8 +58,7 @@ rpi {
     }
 }
 
-LIBS += -L$${ROOT_LIBS_PATH}/q/lib/$${DEST_FOLDER} -lq
-LIBS += -L$${ROOT_LIBS_PATH}/qinput/lib/$${DEST_FOLDER} -lqinput
+LIBS += -L$${ROOT_LIBS_PATH}/def_lang/lib/$${DEST_FOLDER} -ldef_lang
 LIBS += -L$${ROOT_LIBS_PATH}/qdata/lib/$${DEST_FOLDER} -lqdata
 LIBS += -L$${ROOT_LIBS_PATH}/qmath/lib/$${DEST_FOLDER} -lqmath
 LIBS += -L$${ROOT_LIBS_PATH}/qbase/lib/$${DEST_FOLDER} -lqbase
@@ -76,13 +75,34 @@ UI_DIR = ./.ui/$${DEST_FOLDER}
 DESTDIR = ../../bin
 
 RESOURCES += \
-    ../../src/res.qrc
+    ../../res/res.qrc
 
 HEADERS += \
+    ../../src/GS.h \
+    ../../src/stdafx.h \
+    ../../src/Nodes_Widget.h \
+    ../../src/Properties_Widget.h \
+    ../../src/Config_Widget.h \
+    ../../src/Comms.h \
+    ../../../libs/utils/RCP_UDP_Socket.h \
+    ../../../libs/utils/RCP.h \
+    ../../../libs/common/comms/def/gs_comms.def.h \
+    ../../../libs/lz4/lz4.h
 
 SOURCES += \
+    ../../src/GS.cpp \
+    ../../src/main.cpp \
+    ../../src/Nodes_Widget.cpp \
+    ../../src/Properties_Widget.cpp \
+    ../../src/Config_Widget.cpp \
+    ../../src/Comms.cpp \
+    ../../../libs/utils/RCP_UDP_Socket.cpp \
+    ../../../libs/utils/RCP.cpp \
+    ../../../libs/common/comms/def/gs_comms.def.cpp \
+    ../../../libs/lz4/lz4.c
 
 FORMS += \
+    ../../src/GS.ui
 
 DISTFILES += \
 

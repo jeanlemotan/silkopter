@@ -1,0 +1,76 @@
+<RCC>
+    <qresource prefix="/">
+        <file>icons/streams/Acceleration.png</file>
+        <file>icons/streams/Angular Velocity.png</file>
+        <file>icons/streams/Battery State.png</file>
+        <file>icons/streams/Cardinal Points.png</file>
+        <file>icons/streams/Current.png</file>
+        <file>icons/streams/Distance.png</file>
+        <file>icons/streams/Linear Acceleration.png</file>
+        <file>icons/streams/Location.png</file>
+        <file>icons/streams/Magnetic Field.png</file>
+        <file>icons/streams/Pressure.png</file>
+        <file>icons/streams/Frame.png</file>
+        <file>icons/streams/Temperature.png</file>
+        <file>icons/streams/Voltage.png</file>
+        <file>icons/streams/ADC.png</file>
+        <file>icons/streams/PWM.png</file>
+        <file>icons/streams/Commands.png</file>
+        <file>icons/streams/Force.png</file>
+        <file>icons/streams/Torque.png</file>
+        <file>icons/streams/Velocity.png</file>
+        <file>images/logo.png</file>
+        <file>icons/ui/back.png</file>
+        <file>icons/ui/battery.png</file>
+        <file>icons/ui/calibrate.png</file>
+        <file>icons/ui/connected.png</file>
+        <file>icons/ui/controller.png</file>
+        <file>icons/ui/disconnected.png</file>
+        <file>icons/ui/downlink.png</file>
+        <file>icons/ui/fft.png</file>
+        <file>icons/ui/fly.png</file>
+        <file>icons/ui/graph.png</file>
+        <file>icons/ui/gravity.png</file>
+        <file>icons/ui/ground.png</file>
+        <file>icons/ui/hud.png</file>
+        <file>icons/ui/lora.png</file>
+        <file>icons/ui/minus.png</file>
+        <file>icons/ui/multirotor-land.png</file>
+        <file>icons/ui/multirotor-signal.png</file>
+        <file>icons/ui/multirotor-take_off.png</file>
+        <file>icons/ui/new.png</file>
+        <file>icons/ui/nodes.png</file>
+        <file>icons/ui/plus.png</file>
+        <file>icons/ui/propeller.png</file>
+        <file>icons/ui/proximity.png</file>
+        <file>icons/ui/rc.png</file>
+        <file>icons/ui/reconnect.png</file>
+        <file>icons/ui/uav-rover.png</file>
+        <file>icons/ui/search.png</file>
+        <file>icons/ui/setup.png</file>
+        <file>icons/ui/simulator.png</file>
+        <file>icons/ui/stop.png</file>
+        <file>icons/ui/uav-boat.png</file>
+        <file>icons/ui/uav-copter.png</file>
+        <file>icons/ui/uav-multirotor.png</file>
+        <file>icons/ui/uav-plane.png</file>
+        <file>icons/ui/uplink.png</file>
+        <file>icons/ui/upload.png</file>
+        <file>icons/ui/view.png</file>
+        <file>icons/ui/waypoints.png</file>
+        <file>icons/ui/waypoints-destination.png</file>
+        <file>icons/ui/wifi.png</file>
+        <file>icons/nodes/Brain.png</file>
+        <file>icons/nodes/Combiner.png</file>
+        <file>icons/nodes/Controller.png</file>
+        <file>icons/nodes/Generator.png</file>
+        <file>icons/nodes/LPF.png</file>
+        <file>icons/nodes/Pilot.png</file>
+        <file>icons/nodes/Processor.png</file>
+        <file>icons/nodes/Resampler.png</file>
+        <file>icons/nodes/Simulator.png</file>
+        <file>icons/nodes/Sink.png</file>
+        <file>icons/nodes/Source.png</file>
+        <file>icons/nodes/Transformer.png</file>
+    </qresource>
+</RCC>

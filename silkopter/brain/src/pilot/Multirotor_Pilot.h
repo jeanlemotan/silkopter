@@ -6,7 +6,7 @@
 #include "common/stream/IMultirotor_State.h"
 #include "common/stream/IVideo.h"
 
-#include "Comms.h"
+#include "RC_Comms.h"
 #include "HAL.h"
 
 #include "Sample_Accumulator.h"
@@ -30,7 +30,7 @@ namespace node
 class Multirotor_Pilot : public IPilot
 {
 public:
-    Multirotor_Pilot(HAL& hal, Comms& comms);
+    Multirotor_Pilot(HAL& hal, RC_Comms& rc_comms);
 
     bool init(hal::INode_Descriptor const& descriptor) override;
     std::shared_ptr<const hal::INode_Descriptor> get_descriptor() const override;
@@ -53,7 +53,7 @@ private:
 
     HAL& m_hal;
 
-    Comms& m_comms;
+    RC_Comms& m_rc_comms;
 
     stream::IMultirotor_Commands::Value m_last_commands_value;
     q::Clock::time_point m_last_received_commands_value_tp = q::Clock::now();

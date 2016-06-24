@@ -4,7 +4,7 @@
 
 namespace silk
 {
-namespace comms
+namespace gs_comms
 {
 
 typedef ::math::vec2<int64_t> vec2i;

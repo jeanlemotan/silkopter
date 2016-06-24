@@ -1,6 +1,7 @@
 #include "BrainStdAfx.h"
 #include "HAL.h"
-#include "Comms.h"
+#include "RC_Comms.h"
+#include "GS_Comms.h"
 
 #include <boost/asio.hpp>
 #include <boost/thread.hpp>
@@ -148,9 +149,10 @@ int main(int argc, char const* argv[])
     try
     {
         silk::HAL hal;
-        silk::Comms comms(hal);
+        silk::RC_Comms rc_comms(hal);
+        silk::GS_Comms gs_comms(hal);
 
-        if (!hal.init(comms))
+        if (!hal.init(rc_comms, gs_comms))
         {
             QLOGE("Hardware failure! Aborting");
             goto exit;
@@ -159,16 +161,22 @@ int main(int argc, char const* argv[])
 //#if defined RASPBERRY_PI
 //        if (!comms.start_rfmon("mon0", 5))
 //        {
-//            QLOGE("Cannot start communication channel! Aborting");
+//            QLOGE("Cannot start rc communication channel! Aborting");
 //            goto exit;
 //        }
 //#else
-        if (!comms.start_udp(8000, 8001))
+        if (!rc_comms.start_udp(8000, 8001))
         {
-            QLOGE("Cannot start communication channel! Aborting");
+            QLOGE("Cannot start rc communication channel! Aborting");
             goto exit;
         }
 //#endif
+
+        if (!gs_comms.start_udp(8005, 8006))
+        {
+            QLOGE("Cannot start gs communication channel! Aborting");
+            goto exit;
+        }
 
 //        while (!s_exit)
 //        {
@@ -194,7 +202,7 @@ int main(int argc, char const* argv[])
                 {
                     QLOGW("Process Latency of {}!!!!!", dt);
                 }
-                comms.process();
+                rc_comms.process();
                 hal.process();
 
                 //No sleeping here!!! process as fast as possible as the nodes are not always in the ideal order

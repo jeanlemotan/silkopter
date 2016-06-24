@@ -1,8 +1,8 @@
-#include "comms.def.h"
+#include "gs_comms.def.h"
 namespace silk
 {
 
-namespace comms
+namespace gs_comms
 {
 
 template <typename T>
