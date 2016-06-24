@@ -55,8 +55,8 @@ Qualified_Value<ts::IValue> Vec3f_Value_Editor::get_qualified_value()
 
 void Vec3f_Value_Editor::refresh_editor()
 {
-    ts::vec3f value = m_qualified_value.get_const_value()->Get();
-	m_helper->SetValues({ value.x, value.y, value.z });
+    ts::vec3f value = m_qualified_value.get_const_value()->get_value();
+    m_helper->set_values({ value.x, value.y, value.z });
 }
 void Vec3f_Value_Editor::refresh_value()
 {
@@ -81,14 +81,15 @@ void Vec3f_Value_Editor::refresh_read_only_state()
     m_helper->set_read_only(is_read_only());
 }
 
-void Vec3f_Value_Editor::set_value(const math::vec3f& value)
+void Vec3f_Value_Editor::set_value(const ts::vec3f& value)
 {
     if (!is_read_only())
 	{
         if (std::shared_ptr<ts::IVec3f_Value> mutable_value = m_qualified_value.get_mutable_value())
 		{
-            mutable_value->Set(value);
-		}
+            auto result = mutable_value->set_value(value);
+            QASSERT(result == ts::success);
+        }
 	}
 }
 

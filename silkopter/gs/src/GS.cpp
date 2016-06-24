@@ -1,6 +1,6 @@
 #include "GS.h"
 #include <QInputDialog>
-
+#include "value_editors/Value_Editor_Factory.h"
 
 
 GS::GS(QWidget *parent)
@@ -9,7 +9,13 @@ GS::GS(QWidget *parent)
     , m_ts()
     , m_comms(m_ts)
 {
+    m_editor_factory = std::make_shared<Value_Editor_Factory>();
+    m_editor_factory->register_standard_editors();
+
     m_ui.setupUi(this);
+
+    m_ui.config_widget->init(m_ts, *m_ui.properties_browser);
+    m_ui.properties_browser->init(m_editor_factory);
 
     m_process_last_tp = q::Clock::now();
 
@@ -38,6 +44,11 @@ GS::GS(QWidget *parent)
             m_remote_address = text.toLatin1().data();
             m_comms.start_udp(boost::asio::ip::address::from_string(m_remote_address), 8006, 8005);
         }
+    });
+
+    m_comms.sig_type_system_reset.connect([this]()
+    {
+       m_ui.config_widget->refresh();
     });
 
     //set_remote_address("10.10.10.10");

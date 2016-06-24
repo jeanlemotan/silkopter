@@ -4,13 +4,16 @@
 #include <unordered_map>
 #include <memory>
 
-class Value_Editor_Factory : std::enable_shared_from_this<Value_Editor_Factory>
+class Value_Editor_Factory : public std::enable_shared_from_this<Value_Editor_Factory>
 {
 public:
+    Value_Editor_Factory();
+    void register_standard_editors();
+
     std::shared_ptr<IValue_Editor>	create_editor(std::shared_ptr<const ts::IValue> value) const;
     std::shared_ptr<IValue_Editor>	create_editor(std::shared_ptr<ts::IValue> value) const;
 
-    template<class Type, class Editor, class... FixedConstructorParams> void register_editor(FixedConstructorParams&&... fixedConstructorParams);
+    template<class Type, class Value, class Editor, class... FixedConstructorParams> void register_editor(FixedConstructorParams&&... fixedConstructorParams);
     void unregister_all_editors();
 
 private:
@@ -26,15 +29,13 @@ private:
     std::vector<Creators> m_registered_editors;
 };
 
-template<class Type, class Editor, class... FixedConstructorParams>
+template<class Type, class Value, class Editor, class... FixedConstructorParams>
 void Value_Editor_Factory::register_editor(FixedConstructorParams&&... fixedConstructorParams)
 {
     Creators creators;
     creators.mutable_creator = [=](std::shared_ptr<ts::IValue> value) -> std::shared_ptr<IValue_Editor>
     {
-        typedef typename Type::type_traits Traits;
-        typedef typename Traits::value_interface Value_Interface;
-        std::shared_ptr<Value_Interface> v = std::dynamic_pointer_cast<Value_Interface>(value);
+        std::shared_ptr<Value> v = std::dynamic_pointer_cast<Value>(value);
         if (v)
         {
             return std::make_shared<Editor>(v, fixedConstructorParams...);
@@ -43,9 +44,7 @@ void Value_Editor_Factory::register_editor(FixedConstructorParams&&... fixedCons
     };
     creators.const_creator = [=](std::shared_ptr<const ts::IValue> value) -> std::shared_ptr<IValue_Editor>
     {
-        typedef typename Type::type_traits Traits;
-        typedef typename Traits::value_interface Value_Interface;
-        std::shared_ptr<const Value_Interface> v = std::dynamic_pointer_cast<const Value_Interface>(value);
+        std::shared_ptr<const Value> v = std::dynamic_pointer_cast<const Value>(value);
         if (v)
         {
             return std::make_shared<Editor>(v, fixedConstructorParams...);

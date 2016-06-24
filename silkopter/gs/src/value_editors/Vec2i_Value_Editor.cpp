@@ -48,8 +48,8 @@ Qualified_Value<ts::IValue> Vec2i_Value_Editor::get_qualified_value()
 
 void Vec2i_Value_Editor::refresh_editor()
 {
-    ts::vec2i value = m_qualified_value.get_const_value()->get_values();
-    m_helper->set_values({ value.x, value.y });
+    ts::vec2i value = m_qualified_value.get_const_value()->get_value();
+    m_helper->set_values({ static_cast<double>(value.x), static_cast<double>(value.y) });
 }
 void Vec2i_Value_Editor::refresh_value()
 {
@@ -80,8 +80,9 @@ void Vec2i_Value_Editor::set_value(const ts::vec2i& value)
 	{
         if (std::shared_ptr<ts::IVec2i_Value> mutable_value = m_qualified_value.get_mutable_value())
 		{
-            mutable_value->Set(value);
-		}
+            auto result = mutable_value->set_value(value);
+            QASSERT(result == ts::success);
+        }
 	}
 }
 

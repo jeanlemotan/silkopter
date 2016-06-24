@@ -27,7 +27,7 @@ public:
 	
 protected:
 	void defaultExpand();
-	void keyReleaseEvent(QKeyEvent * event) override;
+    //void keyReleaseEvent(QKeyEvent * event) override;
 
 private:
     void save_collapse_status();

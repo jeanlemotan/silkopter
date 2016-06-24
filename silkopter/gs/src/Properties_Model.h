@@ -105,7 +105,7 @@ private:
     std::shared_ptr<ts::IStruct_Value> m_rootValue;
 
     mutable std::recursive_mutex m_tree_mutex;
-    Tree_Item m_root;
+    std::shared_ptr<Tree_Item> m_root;
     //QModelIndex m_pressed;
 };
 

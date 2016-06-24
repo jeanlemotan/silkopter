@@ -249,7 +249,7 @@ void Properties_Model::Tree_Item::insert_child(size_t off, std::shared_ptr<Tree_
 
 Properties_Model::Properties_Model(QWidget* parent)
 	: QAbstractItemModel(parent)
-	, m_root(this, "root")
+    , m_root(std::make_shared<Tree_Item>(this, "root"))
 {
 }
 
@@ -282,7 +282,7 @@ QModelIndex Properties_Model::index(int row, int column, QModelIndex const& pare
     Tree_Item const* ti = nullptr;
 	if (!parent.isValid())
 	{
-		ti = &m_root;
+        ti = m_root.get();
 	}
 	else
 	{
@@ -315,7 +315,7 @@ QModelIndex Properties_Model::parent(QModelIndex const& index) const
 	}
 
     std::shared_ptr<Tree_Item> parent = ti->m_parent.lock();
-    if (!parent || parent.get() == &m_root)
+    if (!parent || parent == m_root)
 	{
 		return QModelIndex();
 	}
@@ -332,7 +332,7 @@ int Properties_Model::rowCount(QModelIndex const& index) const
     Tree_Item const* ti = nullptr;
 	if (!index.isValid())
 	{
-		ti = &m_root;
+        ti = m_root.get();
 	}
 	else
 	{
@@ -511,7 +511,7 @@ void Properties_Model::set_value(std::shared_ptr<ts::IStruct_Value> value)
 		return;
 	}
 
-    m_root.build_root(*m_rootValue);
+    m_root->build_root(*m_rootValue);
 	Q_EMIT layoutChanged();
 
     //sig_handleChanged.emit();
@@ -598,7 +598,7 @@ void Properties_Model::on_value_changed(std::shared_ptr<const ts::IValue> value)
 {
     std::lock_guard<std::recursive_mutex> sm(m_tree_mutex);
 
-    const std::shared_ptr<Tree_Item> item = m_root.find_by_primary_or_secondary(*value);
+    const std::shared_ptr<Tree_Item> item = m_root->find_by_primary_or_secondary(*value);
 	if (item)
 	{
         QModelIndex& topLeft = item->m_model_index;
@@ -624,7 +624,7 @@ void Properties_Model::on_value_changed(std::shared_ptr<const ts::IValue> value)
 
 QModelIndex Properties_Model::get_root_index() const
 {
-    return m_root.m_model_index;
+    return m_root->m_model_index;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -663,7 +663,7 @@ bool Properties_Model::is_index_read_only(QModelIndex index) const
 
 QModelIndex Properties_Model::get_index_from_value(const ts::IValue& value) const
 {
-    auto ti = m_root.find_by_primary_or_secondary(value);
+    auto ti = m_root->find_by_primary_or_secondary(value);
 	if (!ti)
 	{
 		return QModelIndex();

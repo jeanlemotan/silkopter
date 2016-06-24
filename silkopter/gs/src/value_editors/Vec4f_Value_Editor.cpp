@@ -86,14 +86,15 @@ void Vec4f_Value_Editor::refresh_read_only_state()
     m_helper->set_read_only(is_read_only());
 }
 
-void Vec4f_Value_Editor::set_value(const math::vec4f& value)
+void Vec4f_Value_Editor::set_value(const ts::vec4f& value)
 {
     if (!is_read_only())
 	{
         if (std::shared_ptr<ts::IVec4f_Value> mutable_value = m_qualified_value.get_mutable_value())
 		{
-            mutable_value->set_value(value);
-		}
+            auto result = mutable_value->set_value(value);
+            QASSERT(result == ts::success);
+        }
 	}
 }
 

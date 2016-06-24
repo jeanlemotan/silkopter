@@ -19,7 +19,7 @@ public:
 
 private:
     void		refresh_read_only_state();
-    void		set_value(const math::vec3f& value);
+    void		set_value(const ts::vec3f& value);
 
     Qualified_Value<ts::IVec3f_Value> m_qualified_value;
     std::shared_ptr<VecX_Value_Editor_Helper> m_helper;

@@ -39,9 +39,9 @@
        <enum>QTabWidget::Rounded</enum>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
-      <widget class="Config_Widget" name="Config">
+      <widget class="Config_Widget" name="config_widget">
        <attribute name="icon">
         <iconset resource="../res/res.qrc">
          <normaloff>:/icons/ui/setup.png</normaloff>:/icons/ui/setup.png</iconset>
@@ -50,7 +50,7 @@
         <string>Config</string>
        </attribute>
       </widget>
-      <widget class="Nodes_Widget" name="Nodes">
+      <widget class="Nodes_Widget" name="nodes_widget">
        <attribute name="icon">
         <iconset resource="../res/res.qrc">
          <normaloff>:/icons/ui/nodes.png</normaloff>:/icons/ui/nodes.png</iconset>

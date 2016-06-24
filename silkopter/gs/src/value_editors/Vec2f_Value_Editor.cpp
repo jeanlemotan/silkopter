@@ -81,8 +81,9 @@ void Vec2f_Value_Editor::set_value(const ts::vec2f& value)
 	{
         if (std::shared_ptr<ts::IVec2f_Value> mutable_value = m_qualified_value.get_mutable_value())
 		{
-            mutable_value->set_value(value);
-		}
+            auto result = mutable_value->set_value(value);
+            QASSERT(result == ts::success);
+        }
 	}
 }
 

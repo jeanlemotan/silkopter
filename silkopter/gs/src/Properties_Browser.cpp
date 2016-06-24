@@ -29,6 +29,7 @@ void Properties_Browser::init(std::shared_ptr<Value_Editor_Factory> editor_facto
     m_model = std::make_shared<Properties_Model>(this);
     m_delegate = std::make_shared<Properties_Delegate>(this, editor_factory);
     QTreeView::setItemDelegate(m_delegate.get());
+    QTreeView::setModel(m_model.get());
 
 	// setup vertical scrollbar
 	setVerticalScrollMode(QAbstractItemView::ScrollMode::ScrollPerPixel);

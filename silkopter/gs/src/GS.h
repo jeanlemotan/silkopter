@@ -5,6 +5,9 @@
 
 #include "Comms.h"
 
+class Value_Editor_Factory;
+
+
 class GS : public QMainWindow
 {
 public:
@@ -27,6 +30,8 @@ private:
 //    silk::HAL m_hal;
     ts::Type_System m_ts;
     silk::Comms m_comms;
+
+    std::shared_ptr<Value_Editor_Factory> m_editor_factory;
 
     void set_remote_address(std::string const& address);
     std::string m_remote_address;

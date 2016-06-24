@@ -56,7 +56,7 @@ Qualified_Value<ts::IValue> Vec3i_Value_Editor::get_qualified_value()
 void Vec3i_Value_Editor::refresh_editor()
 {
     ts::vec3i value = m_qualified_value.get_const_value()->get_value();
-    m_helper->set_values({ value.x, value.y, value.z });
+    m_helper->set_values({ static_cast<double>(value.x), static_cast<double>(value.y), static_cast<double>(value.z) });
 }
 void Vec3i_Value_Editor::refresh_value()
 {
@@ -68,7 +68,7 @@ void Vec3i_Value_Editor::refresh_value()
 
 void Vec3i_Value_Editor::set_read_only_override(bool read_only)
 {
-    m_read_only_override = readOnly;
+    m_read_only_override = read_only;
     refresh_read_only_state();
 }
 
@@ -82,14 +82,15 @@ void Vec3i_Value_Editor::refresh_read_only_state()
     m_helper->set_read_only(is_read_only());
 }
 
-void Vec3i_Value_Editor::set_value(const math::vec3s64& value)
+void Vec3i_Value_Editor::set_value(const ts::vec3i& value)
 {
     if (!is_read_only())
 	{
-        if (jtl::lent_ptr<ts::IVec3i_Value> mutable_value = m_qualified_value.get_mutable_value())
+        if (std::shared_ptr<ts::IVec3i_Value> mutable_value = m_qualified_value.get_mutable_value())
 		{
-            mutable_value->Set(value);
-		}
+            auto result = mutable_value->set_value(value);
+            QASSERT(result == ts::success);
+        }
 	}
 }
 

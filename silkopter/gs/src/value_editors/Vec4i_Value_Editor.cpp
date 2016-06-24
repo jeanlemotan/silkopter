@@ -62,7 +62,7 @@ Qualified_Value<ts::IValue> Vec4i_Value_Editor::get_qualified_value()
 void Vec4i_Value_Editor::refresh_editor()
 {
     ts::vec4i value = m_qualified_value.get_const_value()->get_value();
-    m_helper->set_values({ value.x, value.y, value.z, value.w });
+    m_helper->set_values({ static_cast<double>(value.x), static_cast<double>(value.y), static_cast<double>(value.z), static_cast<double>(value.w) });
 }
 void Vec4i_Value_Editor::refresh_value()
 {
@@ -91,10 +91,11 @@ void Vec4i_Value_Editor::set_value(const ts::vec4i& value)
 {
     if (!is_read_only())
 	{
-        if (jtl::lent_ptr<ts::IVec4i_Value> mutable_value = m_qualified_value.get_mutable_value())
+        if (std::shared_ptr<ts::IVec4i_Value> mutable_value = m_qualified_value.get_mutable_value())
 		{
-            mutable_value->set_value(value);
-		}
+            auto result = mutable_value->set_value(value);
+            QASSERT(result == ts::success);
+        }
 	}
 }
 
