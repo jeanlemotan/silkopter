@@ -12,7 +12,7 @@ void Config_Widget::init(ts::Type_System& ts, Properties_Browser& browser)
 
 void Config_Widget::refresh()
 {
-    std::shared_ptr<const ts::IStruct_Type> descriptor_type = m_ts->get_root_scope()->find_specialized_symbol_by_path<ts::IStruct_Type>("Raspicam_Config");
+    std::shared_ptr<const ts::IStruct_Type> descriptor_type = m_ts->get_root_scope()->find_specialized_symbol_by_path<ts::IStruct_Type>("Multirotor_Brain_Config");
     if (!descriptor_type)
     {
         return;

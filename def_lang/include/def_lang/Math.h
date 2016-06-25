@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdint.h>
+#include <sstream>
 //#include "qmath.h"
 
 namespace ts
@@ -13,6 +14,7 @@ struct vec2
     explicit vec2(T v) : x(v), y(v) {}
     vec2(T x, T y) : x(x), y(y) {}
     bool operator==(vec2<T> const& other) const { return x == other.x && y == other.y; }
+    bool operator!=(vec2<T> const& other) const { return !operator==(other); }
 
     T x = 0;
     T y = 0;
@@ -29,6 +31,7 @@ struct vec3
     explicit vec3(T v) : x(v), y(v), z(v) {}
     vec3(T x, T y, T z) : x(x), y(y), z(z) {}
     bool operator==(vec3<T> const& other) const { return x == other.x && y == other.y && z == other.z; }
+    bool operator!=(vec3<T> const& other) const { return !operator==(other); }
 
     T x = 0;
     T y = 0;
@@ -46,6 +49,7 @@ struct vec4
     explicit vec4(T v) : x(v), y(v), z(v), w(v) {}
     vec4(T x, T y, T z, T w) : x(x), y(y), z(z), w(w) {}
     bool operator==(vec4<T> const& other) const { return x == other.x && y == other.y && z == other.z && w == other.w; }
+    bool operator!=(vec4<T> const& other) const { return !operator==(other); }
 
     T x = 0;
     T y = 0;
@@ -122,10 +126,16 @@ T get_component(ts::vec4<T> const& value, size_t idx)
     return value.w;
 }
 
-template<typename T> std::string to_string(T const& value) { return std::to_string(value); }
-template<typename T> std::string to_string(ts::vec2<T> const& value) { return to_string(value.x) + ", " + to_string(value.y); }
-template<typename T> std::string to_string(ts::vec3<T> const& value) { return to_string(value.x) + ", " + to_string(value.y) + ", " + to_string(value.z); }
-template<typename T> std::string to_string(ts::vec4<T> const& value) { return to_string(value.x) + ", " + to_string(value.y) + ", " + to_string(value.z) + ", " + to_string(value.w); }
+template<typename T> std::string to_string(T const& value, size_t decimals)
+{
+    std::stringstream ss;
+    ss.precision(decimals);
+    ss << value;
+    return ss.str();
+}
+template<typename T> std::string to_string(ts::vec2<T> const& value, size_t decimals) { return to_string(value.x, decimals) + ", " + to_string(value.y, decimals); }
+template<typename T> std::string to_string(ts::vec3<T> const& value, size_t decimals) { return to_string(value.x, decimals) + ", " + to_string(value.y, decimals) + ", " + to_string(value.z, decimals); }
+template<typename T> std::string to_string(ts::vec4<T> const& value, size_t decimals) { return to_string(value.x, decimals) + ", " + to_string(value.y, decimals) + ", " + to_string(value.z, decimals) + ", " + to_string(value.w, decimals); }
 
 template<typename T> bool is_smaller(T const& value, T min) { return value < min; }
 template<typename T> bool is_smaller(ts::vec2<T> const& value, T min) { return value.x < min || value.y < min; }

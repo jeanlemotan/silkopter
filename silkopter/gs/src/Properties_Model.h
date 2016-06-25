@@ -86,7 +86,7 @@ protected:
         std::vector<std::shared_ptr<Tree_Item>> m_children;
         QModelIndex m_model_index;
 
-        std::vector<q::util::Scoped_Connection> m_connections;
+        std::vector<boost::signals2::scoped_connection> m_connections;
 
         std::string m_name;
         std::shared_ptr<ts::IValue> m_value;

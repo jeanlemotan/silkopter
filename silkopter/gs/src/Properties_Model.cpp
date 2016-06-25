@@ -58,7 +58,7 @@ void Properties_Model::Tree_Item::build(std::shared_ptr<ts::IValue> value)
 	m_children.clear();
 	m_connections.clear();
 
-//    m_connections.push_back(value->sig_value_changed.connect(&Properties_Model::on_value_changed, m_model, value));
+    m_connections.push_back(value->sig_value_changed.connect(std::bind(&Properties_Model::on_value_changed, m_model, value)));
 
     if (std::shared_ptr<ts::IOptional_Value> optional_value = std::dynamic_pointer_cast<ts::IOptional_Value>(value))
 	{

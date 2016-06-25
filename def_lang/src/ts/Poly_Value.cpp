@@ -170,7 +170,7 @@ Result<std::string> Poly_Value::get_ui_string() const
         }
         else
         {
-            return m_value->get_type()->get_ui_name() + ": <N/A>";
+            return m_value->get_type()->get_ui_name() + ":";
         }
     }
     return Error("<null>");
@@ -315,24 +315,25 @@ Result<void> Poly_Value::set_value(std::shared_ptr<IValue> value)
         return Error("Unconstructed value");
     }
 
-    if (!value)
+    if (value)
     {
-        m_value = nullptr;
-        return success;
+        if (!value->is_constructed())
+        {
+            TS_ASSERT(false);
+            return Error("Cannot set an unconstructed value");
+        }
+
+        if (!is_type_allowed(*value->get_type()))
+        {
+            return Error("Cannot point to type " + value->get_type()->get_symbol_path().to_string());
+        }
     }
 
-    if (!value->is_constructed())
+    if (m_value != value)
     {
-        TS_ASSERT(false);
-        return Error("Cannot set an unconstructed value");
+        m_value = value;
+        sig_value_changed();
     }
-
-    if (!is_type_allowed(*value->get_type()))
-    {
-        return Error("Cannot point to type " + value->get_type()->get_symbol_path().to_string());
-    }
-
-    m_value = value;
     return success;
 }
 

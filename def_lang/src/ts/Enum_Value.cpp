@@ -246,7 +246,11 @@ Result<void> Enum_Value::set_value(std::shared_ptr<const IEnum_Item> item)
     {
         return Error("Cannot initialize a '" + m_type->get_symbol_path().to_string() + "' with a '" + item->get_symbol_path().to_string() + "'");
     }
-    m_value = item;
+    if (m_value != item)
+    {
+        m_value = item;
+        sig_value_changed();
+    }
     return success;
 }
 

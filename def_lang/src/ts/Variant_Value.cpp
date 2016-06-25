@@ -142,7 +142,7 @@ Result<std::string> Variant_Value::get_ui_string() const
     }
     else
     {
-        return get_value()->get_type()->get_ui_name() + ": <N/A>";
+        return get_value()->get_type()->get_ui_name() + ":";
     }
 }
 
@@ -303,7 +303,17 @@ Result<void> Variant_Value::set_value_type_index(size_t idx)
         TS_ASSERT(false);
         return Error("Unconstructed value");
     }
-    return set_value(m_type->get_inner_qualified_type(idx)->get_type()->create_value());
+    if (idx != get_value_type_index())
+    {
+        std::shared_ptr<IValue> value = m_type->get_inner_qualified_type(idx)->get_type()->create_value();
+        auto result = value->construct();
+        if (result != ts::success)
+        {
+            return result;
+        }
+        return set_value(value);
+    }
+    return ts::success;
 }
 
 size_t Variant_Value::get_value_type_index() const

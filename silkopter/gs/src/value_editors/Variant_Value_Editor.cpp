@@ -65,69 +65,35 @@ Qualified_Value<ts::IValue> Variant_Value_Editor::get_qualified_value()
 
 void Variant_Value_Editor::refresh_editor()
 {
-//    bool isSet = m_qualified_value.get_const_value()->IsSet();
+    std::shared_ptr<const ts::IVariant_Value> value = m_qualified_value.get_const_value();
+    size_t index = value->get_value_type_index();
+    m_combobox->setCurrentIndex(static_cast<int>(index));
 
-//    jtl::lent_ref<const ts::IVariant_Value> value = m_qualified_value.get_const_value();
-//    jtl::lent_ref<const ts::IVariant_Type> type = value->get_specialized_type();
-//    ts::IVariant_Value::TypeIndex index = value->GetValueTypeIndex();
-//    if (type->GetOptionality() == ts::IVariant_Type::Optionality::CanBeEmpty)
-//	{
-//		if (!index.is_valid())
-//		{
-//			m_combobox->setCurrentIndex(0);
-//		}
-//		else
-//		{
-//			m_combobox->setCurrentIndex(static_cast<int>(index.value() + 1));
-//		}
-//	}
-//	else
-//	{
-//		m_combobox->setCurrentIndex(static_cast<int>(index.value()));
-//	}
-
-//	CreateInnerEditor();
-//	if (m_inner_editor)
-//	{
-//        m_inner_editor->refresh_editor();
-//	}
+    create_inner_editor();
+    if (m_inner_editor)
+    {
+        m_inner_editor->refresh_editor();
+    }
 }
 
 void Variant_Value_Editor::refresh_value()
 {
-//    if (!is_read_only())
-//	{
-//		int index = m_combobox->currentIndex();
-//        jtl::lent_ptr<ts::IVariant_Value> value = m_qualified_value.get_mutable_value();
-//		if (value)
-//		{
-//            jtl::lent_ref<const ts::IVariant_Type> type = value->get_specialized_type();
-//            ts::IVariant_Value::TypeIndex typeIndex;
-//            if (type->GetOptionality() == ts::IVariant_Type::Optionality::CanBeEmpty)
-//			{
-//				if (index <= 0)
-//				{
-//                    typeIndex = ts::IVariant_Value::TypeIndex();
-//				}
-//				else
-//				{
-//                    typeIndex = ts::IVariant_Value::TypeIndex(static_cast<size_t>(index - 1));
-//				}
-//			}
-//			else
-//			{
-//                typeIndex = ts::IVariant_Value::TypeIndex(static_cast<size_t>(index));
-//			}
-//            ts::ExecutionResult<ts::IVariant_Value::TypeIndex> result = value->SetValueTypeIndex(typeIndex);
-//			QASSERT(result);
-//		}
+    if (!is_read_only())
+    {
+        int index = m_combobox->currentIndex();
+        std::shared_ptr<ts::IVariant_Value> value = m_qualified_value.get_mutable_value();
+        if (value)
+        {
+            ts::Result<void> result = value->set_value_type_index(static_cast<size_t>(index));
+            QASSERT(result == ts::success);
+        }
 
-//		CreateInnerEditor();
-//		if (m_inner_editor)
-//		{
-//            m_inner_editor->refresh_value();
-//		}
-//	}
+        create_inner_editor();
+        if (m_inner_editor)
+        {
+            m_inner_editor->refresh_value();
+        }
+    }
 }
 
 void Variant_Value_Editor::set_read_only_override(bool read_only)
@@ -152,38 +118,38 @@ void Variant_Value_Editor::refresh_read_only_state()
 
 void Variant_Value_Editor::create_inner_editor()
 {
-//    jtl::lent_ref<const ts::IVariant_Value> value = m_qualified_value.get_const_value();
-//	if (m_inner_editor && value->GetValueTypeIndex() == m_inner_editor_type_index)
-//	{
-//		return;
-//	}
+    std::shared_ptr<const ts::IVariant_Value> value = m_qualified_value.get_const_value();
+    if (m_inner_editor && value->get_value_type_index() == m_inner_editor_type_index)
+    {
+        return;
+    }
 
-//	if (m_inner_editor)
-//	{
-//        m_editor->layout()->removeWidget(m_inner_editor->get_widget());
+    if (m_inner_editor)
+    {
+        m_editor->layout()->removeWidget(m_inner_editor->get_widget());
 		
-//		JTL_TODO("Clarify why this is needed");
-//        delete m_inner_editor->get_widget();
-//	}
+        //TODO - Clarify why this is needed
+        delete m_inner_editor->get_widget();
+    }
 
-//	m_inner_editor.reset();
+    m_inner_editor.reset();
 
-//	if (value->IsSet())
-//	{
-//        if (m_qualified_value.get_mutable_value())
-//		{
-//            m_inner_editor = m_value_editor_factory->CreateEditor(jtl::promote_to_ref(m_qualified_value.get_mutable_value()->get_value()));
-//		}
-//		else
-//		{
-//            m_inner_editor = m_value_editor_factory->CreateEditor(jtl::promote_to_ref(m_qualified_value.get_const_value()->get_value()));
-//		}
-//	}
+    if (value->is_set())
+    {
+        if (m_qualified_value.get_mutable_value())
+        {
+            m_inner_editor = m_value_editor_factory->create_editor(m_qualified_value.get_mutable_value()->get_value());
+        }
+        else
+        {
+            m_inner_editor = m_value_editor_factory->create_editor(m_qualified_value.get_const_value()->get_value());
+        }
+    }
 
-//	m_inner_editor_type_index = value->GetValueTypeIndex();
-//	if (m_inner_editor)
-//	{
-//        m_editor->layout()->addWidget(m_inner_editor->get_widget());
-//	}
+    m_inner_editor_type_index = value->get_value_type_index();
+    if (m_inner_editor)
+    {
+        m_editor->layout()->addWidget(m_inner_editor->get_widget());
+    }
     refresh_read_only_state();
 }

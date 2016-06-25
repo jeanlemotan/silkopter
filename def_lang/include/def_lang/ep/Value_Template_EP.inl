@@ -120,7 +120,11 @@ Result<void> Value_Template_EP<Traits>::set_value(fundamental_type value)
     {
         return Error("Unconstructed value");
     }
-    m_value = value;
+    if (this->m_value != value)
+    {
+        m_value = value;
+        this->sig_value_changed();
+    }
     return ts::success;
 }
 template<typename Traits>

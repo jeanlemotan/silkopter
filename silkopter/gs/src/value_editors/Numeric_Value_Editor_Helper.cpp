@@ -17,6 +17,7 @@ Numeric_Value_Editor_Helper::Numeric_Value_Editor_Helper(double value, double mi
 	m_spinbox->setDecimals(static_cast<int>(decimals));
 	m_spinbox->setSingleStep(step);
 	m_spinbox->setValue(value);
+    m_spinbox->setAutoFillBackground(true);
 	layout->addWidget(m_spinbox);
 
 	QObject::connect(m_spinbox, &QDoubleSpinBox::editingFinished, [this]()
@@ -27,6 +28,7 @@ Numeric_Value_Editor_Helper::Numeric_Value_Editor_Helper(double value, double mi
     if (max_value < std::numeric_limits<float>::max() && min_value > std::numeric_limits<float>::lowest())
 	{
 		m_slider = new QSlider(Qt::Orientation::Horizontal, m_editor);
+        m_slider->setAutoFillBackground(true);
 
 		m_slider->setMinimum(0);
 		m_slider->setMaximum(1000000);

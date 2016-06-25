@@ -1,5 +1,6 @@
 #pragma once
 
+#include <boost/signals2.hpp>
 #include <memory>
 #include "Result.h"
 #include "IInitializer_List.h"
@@ -43,6 +44,8 @@ public:
 
     template<typename T>
     std::shared_ptr<T> select_specialized(Value_Selector&& selector);
+
+    boost::signals2::signal<void()> sig_value_changed;
 };
 
 }

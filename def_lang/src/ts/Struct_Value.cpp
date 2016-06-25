@@ -149,7 +149,7 @@ Result<std::string> Struct_Value::get_ui_string() const
         TS_ASSERT(false);
         return Error("Unconstructed value");
     }
-    return std::to_string(get_member_count()) + " members";
+    return Error("Not supported");
 }
 
 size_t Struct_Value::get_first_noninhereted_member_index() const

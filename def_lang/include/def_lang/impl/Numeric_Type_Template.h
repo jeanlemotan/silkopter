@@ -29,7 +29,7 @@ protected:
 private:
     typename Traits::fundamental_type m_min_value = typename Traits::fundamental_type(Traits::min_value);
     typename Traits::fundamental_type m_max_value = typename Traits::fundamental_type(Traits::max_value);
-    size_t m_decimals = 0;
+    size_t m_decimals = 3;
 };
 
 }

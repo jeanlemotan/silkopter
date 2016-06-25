@@ -20,7 +20,8 @@ Int_Value_Editor::Int_Value_Editor(const Qualified_Value<ts::IInt_Value>& qualif
     m_spinbox->setMaximum(std::min<int64_t>(type->get_max_value(), std::numeric_limits<int>::max()));
     m_spinbox->setSingleStep(1);//type->GetStep());
     m_spinbox->setValue(m_qualified_value.get_const_value()->get_value());
-	layout->addWidget(m_spinbox);
+    m_spinbox->setAutoFillBackground(true);
+    layout->addWidget(m_spinbox);
 
 	m_editingFinishedConnection = QObject::connect(m_spinbox, &QDoubleSpinBox::editingFinished, [this]()
 	{
@@ -31,6 +32,7 @@ Int_Value_Editor::Int_Value_Editor(const Qualified_Value<ts::IInt_Value>& qualif
         type->get_min_value() > std::numeric_limits<int64_t>::lowest())
 	{
 		m_slider = new QSlider(Qt::Orientation::Horizontal, m_editor);
+        m_slider->setAutoFillBackground(true);
 
 		m_slider->setMinimum(0);
 		m_slider->setMaximum(1000000);

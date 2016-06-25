@@ -161,7 +161,7 @@ Result<std::string> Numeric_Value_Template<Traits>::get_ui_string() const
     {
         return Error("Unconstructed value");
     }
-    return detail::to_string(this->get_value());
+    return detail::to_string(this->get_value(), this->get_specialized_type()->get_decimals());
 }
 
 
