@@ -62,8 +62,8 @@ void Properties_Model::Tree_Item::build(std::shared_ptr<ts::IValue> value)
 
     if (std::shared_ptr<ts::IOptional_Value> optional_value = std::dynamic_pointer_cast<ts::IOptional_Value>(value))
 	{
-        //m_connections.push_back(optional_value->sig_wasSet.connect(&Properties_Model::on_optional_was_set, m_model, jtl::promote_to_ref(optional_value)));
-        //m_connections.push_back(optional_value->sig_willBeUnset.connect(&Properties_Model::on_optional_will_be_unset, m_model, jtl::promote_to_ref(optional_value)));
+        m_connections.push_back(optional_value->sig_will_be_unset.connect(std::bind(&Properties_Model::on_optional_will_be_unset, m_model, optional_value)));
+        m_connections.push_back(optional_value->sig_was_set.connect(std::bind(&Properties_Model::on_optional_was_set, m_model, optional_value)));
 
         if (optional_value->is_set())
 		{
@@ -74,8 +74,8 @@ void Properties_Model::Tree_Item::build(std::shared_ptr<ts::IValue> value)
 	}
     else if (std::shared_ptr<ts::IVariant_Value> variant_value = std::dynamic_pointer_cast<ts::IVariant_Value>(value))
 	{
-        //m_connections.push_back(variant_value->sig_typeIndexWillBeChanged.connect(&Properties_Model::on_variant_type_index_will_be_changed, m_model, jtl::promote_to_ref(variant_value)));
-        //m_connections.push_back(variant_value->sig_typeIndexWasChanged.connect(&Properties_Model::on_variant_type_index_was_changed, m_model, jtl::promote_to_ref(variant_value)));
+        m_connections.push_back(variant_value->sig_type_index_will_change.connect(std::bind(&Properties_Model::on_variant_type_index_will_change, m_model, variant_value)));
+        m_connections.push_back(variant_value->sig_type_index_has_changed.connect(std::bind(&Properties_Model::on_variant_type_index_has_changed, m_model, variant_value)));
 
         if (variant_value->is_set())
 		{
@@ -540,8 +540,6 @@ bool Properties_Model::setData(QModelIndex const& index, QVariant const& value, 
 
 	if (index.column() == 0)
 	{
-		// 		auto cmd = std::make_shared<SetItemNameCmd>(*item, value.toString().toUtf8().data());
-		// 		Commander::inst().execute(cmd);
 		return true;
 	}
 	return false;
@@ -608,18 +606,6 @@ void Properties_Model::on_value_changed(std::shared_ptr<const ts::IValue> value)
 	}
 }
 
-// void Properties_Model::PropertyEnabledChanged(Property& prop)
-// {
-// 	std::vector<TreeItem*> allTis = mRoot.findAll(prop);
-// 	QASSERT(!allTis.empty());
-// 
-// 	for (size_t i = 0; i < allTis.size(); i++)
-// 	{
-// 		allTis[i]->refreshCachedIcon();
-// 		Q_EMIT dataChanged(allTis[i]->mModelIndex, allTis[i]->mModelIndex);
-// 	}
-// }
-
 //////////////////////////////////////////////////////////////////////////
 
 QModelIndex Properties_Model::get_root_index() const
@@ -673,12 +659,12 @@ QModelIndex Properties_Model::get_index_from_value(const ts::IValue& value) cons
 
 //////////////////////////////////////////////////////////////////////////
 
-//void Properties_Model::on_elements_added(jtl::lent_ref<ts::IVectorValue> parent, jtl::const_random_iterator<jtl::lent_ref<ts::IValue>> beginIt, jtl::const_random_iterator<jtl::lent_ref<ts::IValue>> endIt)
+//void Properties_Model::on_elements_added(std::shared_ptr<ts::IVectorValue> parent, jtl::const_random_iterator<std::shared_ptr<ts::IValue>> beginIt, jtl::const_random_iterator<std::shared_ptr<ts::IValue>> endIt)
 //{
 //	const size_t start = std::distance(parent->get_values().begin(), beginIt);
 //	const size_t count = std::distance(beginIt, endIt);
 
-//    std::vector<jtl::lent_ref<ts::IValue>> elements;
+//    std::vector<std::shared_ptr<ts::IValue>> elements;
 //	elements.reserve(count);
 
 //	std::copy(beginIt, endIt, std::back_inserter(elements));
@@ -686,12 +672,12 @@ QModelIndex Properties_Model::get_index_from_value(const ts::IValue& value) cons
 //    _added(*parent, elements, start, count);
 
 //	//update the names
-//    jtl::lent_ptr<Tree_Item> parentTi = m_root.find_by_primary_or_secondary(*parent);
-//	if (parentTi)
+//    std::shared_ptr<Tree_Item> parent_ti = m_root.find_by_primary_or_secondary(*parent);
+//	if (parent_ti)
 //	{
-//		for (size_t i = 0; i < parentTi->m_children.size(); i++)
+//		for (size_t i = 0; i < parent_ti->m_children.size(); i++)
 //		{
-//            Tree_Item& child = *parentTi->m_children[i];
+//            Tree_Item& child = *parent_ti->m_children[i];
 //			child.m_name = jtl::format("{}", i);
 //            const QModelIndex& topLeft = child.m_model_index;
 //			QModelIndex bottomRight = createIndex(static_cast<int>(topLeft.row()), columnCount(topLeft) - 1, topLeft.internalPointer());
@@ -702,12 +688,12 @@ QModelIndex Properties_Model::get_index_from_value(const ts::IValue& value) cons
 
 ///////////////////////////////////////////////////////////////////////////////
 
-//void Properties_Model::on_elements_will_be_removed(jtl::lent_ref<ts::IVectorValue> parent, jtl::const_random_iterator<jtl::lent_ref<ts::IValue>> beginIt, jtl::const_random_iterator<jtl::lent_ref<ts::IValue>> endIt)
+//void Properties_Model::on_elements_will_be_removed(std::shared_ptr<ts::IVectorValue> parent, jtl::const_random_iterator<std::shared_ptr<ts::IValue>> beginIt, jtl::const_random_iterator<std::shared_ptr<ts::IValue>> endIt)
 //{
 //	const size_t start = std::distance(parent->get_values().begin(), beginIt);
 //	const size_t count = std::distance(beginIt, endIt);
 
-//    std::vector<jtl::lent_ref<ts::IValue>> elements;
+//    std::vector<std::shared_ptr<ts::IValue>> elements;
 //	elements.reserve(count);
 
 //	std::copy(beginIt, endIt, std::back_inserter(elements));
@@ -715,12 +701,12 @@ QModelIndex Properties_Model::get_index_from_value(const ts::IValue& value) cons
 //    _will_be_removed(*parent, elements, start, count);
 
 //	//update the names
-//    jtl::lent_ptr<Tree_Item> parentTi = m_root.find_by_primary_or_secondary(*parent);
-//	if (parentTi)
+//    std::shared_ptr<Tree_Item> parent_ti = m_root.find_by_primary_or_secondary(*parent);
+//	if (parent_ti)
 //	{
-//		for (size_t i = 0; i < parentTi->m_children.size(); i++)
+//		for (size_t i = 0; i < parent_ti->m_children.size(); i++)
 //		{
-//            Tree_Item& child = *parentTi->m_children[i];
+//            Tree_Item& child = *parent_ti->m_children[i];
 //			child.m_name = jtl::format("{}", i);
 //            const QModelIndex& topLeft = child.m_model_index;
 //			QModelIndex bottomRight = createIndex(static_cast<int>(topLeft.row()), columnCount(topLeft) - 1, topLeft.internalPointer());
@@ -731,200 +717,126 @@ QModelIndex Properties_Model::get_index_from_value(const ts::IValue& value) cons
 
 //////////////////////////////////////////////////////////////////////////
 
-//void Properties_Model::on_members_added(jtl::lent_ref<ts::IDynamicStructValue> parent, jtl::const_random_iterator<jtl::lent_ref<ts::IValue>> beginIt, jtl::const_random_iterator<jtl::lent_ref<ts::IValue>> endIt)
-//{
-//	const size_t start = std::distance(parent->GetMembers().begin(), beginIt);
-//	const size_t count = std::distance(beginIt, endIt);
+void Properties_Model::on_optional_was_set(std::shared_ptr<ts::IOptional_Value> parent)
+{
+    QASSERT(parent->is_set()); //already set
 
-//    std::vector<jtl::lent_ref<ts::IValue>> members;
-//	members.reserve(count);
+    std::lock_guard<std::recursive_mutex> sm(m_tree_mutex);
+    std::shared_ptr<Tree_Item> parent_ti = m_root->find_by_primary_or_secondary(*parent);
+    if (parent_ti)
+    {
+        //assign the wrapped value now, as it changed. This makes the TreeItem findable using both values (the Optional and the Inner value).
+        parent_ti->m_secondary_value = parent->get_value();
 
-//	std::copy(beginIt, endIt, std::back_inserter(members));
+        //first we build in a temp tree item to be able to count the children. Qt demands we know the count before actually adding them!
+        std::shared_ptr<Tree_Item> temp = std::make_shared<Tree_Item>(this, std::string());
+        temp->build_children(parent->get_value());
 
-//    _added(*parent, members, start, count);
-
-//	for (auto it = beginIt; it != endIt; ++it)
-//	{
-//        const jtl::lent_ptr<ts::IValue> value = *it;
-//        const jtl::lent_ptr<Tree_Item> item = m_root.find_by_primary_or_secondary(*value);
-//		item->m_name = parent->GetMemberName(it);
-//	}
-//}
-
-///////////////////////////////////////////////////////////////////////////////
-
-//void Properties_Model::on_members_will_be_removed(jtl::lent_ref<ts::IDynamicStructValue> parent, jtl::const_random_iterator<jtl::lent_ref<ts::IValue>> beginIt, jtl::const_random_iterator<jtl::lent_ref<ts::IValue>> endIt)
-//{
-//	const size_t start = std::distance(parent->GetMembers().begin(), beginIt);
-//	const size_t count = std::distance(beginIt, endIt);
-
-//    std::vector<jtl::lent_ref<ts::IValue>> elements;
-//	elements.reserve(count);
-
-//	std::copy(beginIt, endIt, std::back_inserter(elements));
-
-//    _will_be_removed(*parent, elements, start, count);
-//}
+        size_t count = temp->get_child_count();
+        if (count > 0)
+        {
+            beginInsertRows(parent_ti->m_model_index, static_cast<int>(0), static_cast<int>(count - 1));
+            for (size_t c = 0; c < count; c++)
+            {
+                parent_ti->add_child(std::move(temp->m_children[c]));
+            }
+            endInsertRows();
+        }
+    }
+}
 
 //////////////////////////////////////////////////////////////////////////
 
-//void Properties_Model::on_optional_was_set(jtl::lent_ref<ts::IOptionalValue> parent)
-//{
-//	QASSERT(parent->IsSet()); //already set
+void Properties_Model::on_optional_will_be_unset(std::shared_ptr<ts::IOptional_Value> parent)
+{
+    QASSERT(parent->is_set()); //still set, will be unset after this callback
 
-//    std::lock_guard<std::recursive_mutex> sm(m_tree_mutex);
-//    jtl::lent_ptr<Tree_Item> parentTi = m_root.find_by_primary_or_secondary(*parent);
-//	if (parentTi)
-//	{
-//		//assign the wrapped value now, as it changed. This makes the TreeItem findable using both values (the Optional and the Inner value).
-//		parentTi->m_secondaryValue = parent->get_value();
+    std::lock_guard<std::recursive_mutex> sm(m_tree_mutex);
+    std::shared_ptr<Tree_Item> parent_ti = m_root->find_by_primary_or_secondary(*parent);
+    if (parent_ti)
+    {
+        //assign the wrapped value to null as the optinal doesn't have an inner value anymore
+        parent_ti->m_secondary_value = nullptr;
 
-//		//first we build in a temp tree item to be able to count the children. Qt demands we know the count before actually adding them!
-//        jtl::unique_ptr<Tree_Item> temp = jtl::make_unique<Tree_Item>(this, std::string());
-//		temp->BuildChildren(jtl::promote_to_ref(parent->get_value()));
-
-//		size_t count = temp->GetChildCount();
-//		if (count > 0)
-//		{
-//			beginInsertRows(parentTi->m_modelIndex, static_cast<int>(0), static_cast<int>(count - 1));
-//			for (size_t c = 0; c < count; c++)
-//			{
-//                jtl::lent_ref<Tree_Item> ti = parentTi->AddChild(std::move(temp->m_children[c]));
-//			}
-//			endInsertRows();
-//		}
-//	}
-//}
+        size_t count = parent_ti->get_child_count();
+        if (count > 0)
+        {
+            beginRemoveRows(parent_ti->m_model_index, static_cast<int>(0), static_cast<int>(count - 1));
+            parent_ti->m_children.clear();
+            endRemoveRows();
+        }
+    }
+}
 
 //////////////////////////////////////////////////////////////////////////
 
-//void Properties_Model::on_optional_will_be_unset(jtl::lent_ref<ts::IOptionalValue> parent)
-//{
-//	QASSERT(parent->IsSet()); //still set, will be unset after this callback
+void Properties_Model::on_variant_type_index_has_changed(std::shared_ptr<ts::IVariant_Value> parent)
+{
+    std::lock_guard<std::recursive_mutex> sm(m_tree_mutex);
 
-//    std::lock_guard<std::recursive_mutex> sm(m_tree_mutex);
-//    jtl::lent_ptr<Tree_Item> parentTi = m_root.find_by_primary_or_secondary(*parent);
-//	if (parentTi)
-//	{
-//		//assign the wrapped value to null as the optinal doesn't have an inner value anymore
-//		parentTi->m_secondaryValue = nullptr;
+    if (parent->is_set())
+    {
+        std::shared_ptr<Tree_Item> parent_ti = m_root->find_by_primary_or_secondary(*parent);
+        if (parent_ti)
+        {
+            //assign the wrapped value now, as it changed. This makes the TreeItem findable using both values (the Variant and the Inner value).
+            parent_ti->m_secondary_value = parent->get_value();
 
-//		size_t count = parentTi->GetChildCount();
-//		if (count > 0)
-//		{
-//			beginRemoveRows(parentTi->m_modelIndex, static_cast<int>(0), static_cast<int>(count - 1));
-//			parentTi->m_children.clear();
-//			endRemoveRows();
-//		}
-//	}
-//}
+            //first we build in a temp tree item to be able to count the children. Qt demands we know the count before actually adding them!
+            std::shared_ptr<Tree_Item> temp = std::make_shared<Tree_Item>(this, std::string());
+            temp->build_children(parent->get_value());
 
-//////////////////////////////////////////////////////////////////////////
-
-//void Properties_Model::on_variant_type_index_was_changed(jtl::lent_ref<ts::IVariantValue> parent)
-//{
-//    std::lock_guard<std::recursive_mutex> sm(m_tree_mutex);
-
-//	if (parent->IsSet())
-//	{
-//        jtl::lent_ptr<Tree_Item> parentTi = m_root.find_by_primary_or_secondary(*parent);
-//		if (parentTi)
-//		{
-//			//assign the wrapped value now, as it changed. This makes the TreeItem findable using both values (the Variant and the Inner value).
-//			parentTi->m_secondaryValue = parent->get_value();
-
-//			//first we build in a temp tree item to be able to count the children. Qt demands we know the count before actually adding them!
-//            jtl::unique_ptr<Tree_Item> temp = jtl::make_unique<Tree_Item>(this, std::string());
-//			temp->BuildChildren(jtl::promote_to_ref(parent->get_value()));
-
-//			size_t count = temp->GetChildCount();
-//			if (count > 0)
-//			{
-//				beginInsertRows(parentTi->m_modelIndex, static_cast<int>(0), static_cast<int>(count - 1));
-//				for (size_t c = 0; c < count; c++)
-//				{
-//                    jtl::lent_ref<Tree_Item> ti = parentTi->AddChild(std::move(temp->m_children[c]));
-//				}
-//				endInsertRows();
-//			}
-//		}
-//	}
-//}
+            size_t count = temp->get_child_count();
+            if (count > 0)
+            {
+                beginInsertRows(parent_ti->m_model_index, static_cast<int>(0), static_cast<int>(count - 1));
+                for (size_t c = 0; c < count; c++)
+                {
+                    parent_ti->add_child(std::move(temp->m_children[c]));
+                }
+                endInsertRows();
+            }
+        }
+    }
+}
 
 //////////////////////////////////////////////////////////////////////////
 
-//void Properties_Model::on_variant_type_index_will_be_changed(jtl::lent_ref<ts::IVariantValue> parent)
+void Properties_Model::on_variant_type_index_will_change(std::shared_ptr<ts::IVariant_Value> parent)
+{
+    std::lock_guard<std::recursive_mutex> sm(m_tree_mutex);
+    std::shared_ptr<Tree_Item> parent_ti = m_root->find_by_primary_or_secondary(*parent);
+    if (parent_ti)
+    {
+        size_t count = parent_ti->get_child_count();
+        if (count > 0)
+        {
+            beginRemoveRows(parent_ti->m_model_index, static_cast<int>(0), static_cast<int>(count - 1));
+            parent_ti->m_children.clear();
+            endRemoveRows();
+        }
+    }
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+//void Properties_Model::_added(const ts::IValue& parent, const std::vector<std::shared_ptr<ts::IValue>>& elements, size_t start, size_t count)
 //{
 //    std::lock_guard<std::recursive_mutex> sm(m_tree_mutex);
-//    jtl::lent_ptr<Tree_Item> parentTi = m_root.find_by_primary_or_secondary(*parent);
-//	if (parentTi)
+//    std::shared_ptr<Tree_Item> parent_ti = m_root.find_by_primary_or_secondary(parent);
+//	if (parent_ti)
 //	{
-//		size_t count = parentTi->GetChildCount();
-//		if (count > 0)
-//		{
-//			beginRemoveRows(parentTi->m_modelIndex, static_cast<int>(0), static_cast<int>(count - 1));
-//			parentTi->m_children.clear();
-//			endRemoveRows();
-//		}
-//	}
-//}
-
-//////////////////////////////////////////////////////////////////////////
-
-//void Properties_Model::OnDictionaryElementsAdded(jtl::lent_ref<ts::IDictionaryValue> parent, jtl::const_random_iterator<jtl::lent_ref<ts::IValue>> beginIt, jtl::const_random_iterator<jtl::lent_ref<ts::IValue>> endIt)
-//{
-//	const size_t start = std::distance(parent->GetElements().begin(), beginIt);
-//	const size_t count = std::distance(beginIt, endIt);
-
-//    std::vector<jtl::lent_ref<ts::IValue>> elements;
-//	elements.reserve(count);
-
-//	std::copy(beginIt, endIt, std::back_inserter(elements));
-
-//    _added(*parent, elements, start, count);
-
-//	for (auto it = beginIt; it != endIt; ++it)
-//	{
-//        const jtl::lent_ptr<ts::IValue> value = *it;
-//        const jtl::lent_ptr<Tree_Item> item = m_root.find_by_primary_or_secondary(*value);
-//		item->m_name = parent->GetElementName(it);
-//	}
-//}
-
-///////////////////////////////////////////////////////////////////////////////
-
-//void Properties_Model::OnDictionaryElementsWillBeRemoved(jtl::lent_ref<ts::IDictionaryValue> parent, jtl::const_random_iterator<jtl::lent_ref<ts::IValue>> beginIt, jtl::const_random_iterator<jtl::lent_ref<ts::IValue>> endIt)
-//{
-//	const size_t start = std::distance(parent->GetElements().begin(), beginIt);
-//	const size_t count = std::distance(beginIt, endIt);
-
-//    std::vector<jtl::lent_ref<ts::IValue>> elements;
-//	elements.reserve(count);
-
-//	std::copy(beginIt, endIt, std::back_inserter(elements));
-
-//    _will_be_removed(*parent, elements, start, count);
-//}
-
-//////////////////////////////////////////////////////////////////////////
-
-//void Properties_Model::_added(const ts::IValue& parent, const std::vector<jtl::lent_ref<ts::IValue>>& elements, size_t start, size_t count)
-//{
-//    std::lock_guard<std::recursive_mutex> sm(m_tree_mutex);
-//    jtl::lent_ptr<Tree_Item> parentTi = m_root.find_by_primary_or_secondary(parent);
-//	if (parentTi)
-//	{
-//		beginInsertRows(parentTi->m_modelIndex, static_cast<int>(start), static_cast<int>(start + count - 1));
+//		beginInsertRows(parent_ti->m_model_index, static_cast<int>(start), static_cast<int>(start + count - 1));
 //		for (size_t c = 0; c < count; c++)
 //		{
-//            jtl::unique_ref<Tree_Item> ti = jtl::make_unique<Tree_Item>(this, std::string());
+//            jtl::unique_ref<Tree_Item> ti = std::make_shared<Tree_Item>(this, std::string());
 //			ti->Build(elements[c]);
 //			ti->RefreshModelIndex(c + start);
-//			parentTi->InsertChild(start + c, std::move(ti));
+//			parent_ti->InsertChild(start + c, std::move(ti));
 //		}
-//		for (size_t j = 0; j < parentTi->m_children.size(); j++)
+//		for (size_t j = 0; j < parent_ti->m_children.size(); j++)
 //		{
-//			parentTi->m_children[j]->RefreshModelIndex(j);
+//			parent_ti->m_children[j]->RefreshModelIndex(j);
 //		}
 //		endInsertRows();
 //	}
@@ -932,28 +844,28 @@ QModelIndex Properties_Model::get_index_from_value(const ts::IValue& value) cons
 
 ///////////////////////////////////////////////////////////////////////////////
 
-//void Properties_Model::_will_be_removed(const ts::IValue& parent, const std::vector<jtl::lent_ref<ts::IValue>>& elements, size_t start, size_t count)
+//void Properties_Model::_will_be_removed(const ts::IValue& parent, const std::vector<std::shared_ptr<ts::IValue>>& elements, size_t start, size_t count)
 //{
 //	JTL_TODO("beginRemoveRows should be called once, not in every iteration to improve performance");
 
 //    std::lock_guard<std::recursive_mutex> sm(m_tree_mutex);
 //	for (size_t c = 0; c < count; c++)
 //	{
-//        jtl::lent_ptr<Tree_Item> ti = m_root.find_by_primary_or_secondary(*elements[c]);
+//        std::shared_ptr<Tree_Item> ti = m_root.find_by_primary_or_secondary(*elements[c]);
 //		QASSERT(ti);
 //		if (ti)
 //		{
 //			size_t row = ti->GetRow();
-//            jtl::lent_ptr<Tree_Item> parentTi = ti->m_parent;
-//			QASSERT(parentTi);
-//			if (parentTi)
+//            std::shared_ptr<Tree_Item> parent_ti = ti->m_parent;
+//			QASSERT(parent_ti);
+//			if (parent_ti)
 //			{
 //				ti.reset();
-//				beginRemoveRows(parentTi->m_modelIndex, static_cast<int>(row), static_cast<int>(row));//check todo at the beginning of the function
-//				parentTi->m_children.erase(parentTi->m_children.begin() + row);
-//				for (size_t j = 0; j < parentTi->m_children.size(); j++)
+//				beginRemoveRows(parent_ti->m_model_index, static_cast<int>(row), static_cast<int>(row));//check todo at the beginning of the function
+//				parent_ti->m_children.erase(parent_ti->m_children.begin() + row);
+//				for (size_t j = 0; j < parent_ti->m_children.size(); j++)
 //				{
-//					parentTi->m_children[j]->RefreshModelIndex(j);
+//					parent_ti->m_children[j]->RefreshModelIndex(j);
 //				}
 //				endRemoveRows();
 //			}

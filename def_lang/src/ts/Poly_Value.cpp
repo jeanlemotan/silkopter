@@ -170,7 +170,7 @@ Result<std::string> Poly_Value::get_ui_string() const
         }
         else
         {
-            return m_value->get_type()->get_ui_name() + ":";
+            return m_value->get_type()->get_ui_name();
         }
     }
     return Error("<null>");

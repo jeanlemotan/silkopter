@@ -93,6 +93,11 @@ Result<void> Optional_Value::copy_assign(IValue const& other)
         return Error("incompatible types");
     }
 
+    if (!v->is_set())
+    {
+        return mark_as_set(v->is_set());
+    }
+
     return set_value(v->get_value());
 }
 Result<void> Optional_Value::copy_assign(IInitializer_List const& initializer_list)
@@ -183,17 +188,13 @@ Result<void> Optional_Value::deserialize(sz::Value const& sz_value)
     }
     if (sz_value.is_empty())
     {
-        set_value(std::shared_ptr<IValue>());
-        return success;
+        return mark_as_set(false);
     }
 
-    if (!m_value)
+    auto result = mark_as_set(true);
+    if (result != success)
     {
-        auto result = create_value();
-        if (result != success)
-        {
-            return result;
-        }
+        return result;
     }
 
     return get_value()->deserialize(sz_value);
@@ -208,7 +209,6 @@ Result<void> Optional_Value::create_value()
         return result;
     }
 
-    m_is_set = true;
     m_value = value;
     return success;
 }
@@ -217,6 +217,37 @@ bool Optional_Value::is_set() const
 {
     return m_is_set;
 }
+
+Result<void> Optional_Value::mark_as_set(bool set)
+{
+    if (m_is_set == set)
+    {
+        return ts::success;
+    }
+
+    if (!set)
+    {
+        sig_will_be_unset();
+    }
+
+    m_is_set = set;
+    if (m_is_set && !m_value)
+    {
+        auto result = create_value();
+        if (result != success)
+        {
+            return result;
+        }
+    }
+
+    if (set)
+    {
+        sig_was_set();
+    }
+
+    return ts::success;
+}
+
 
 std::shared_ptr<const IValue> Optional_Value::get_value() const
 {
@@ -250,13 +281,10 @@ Result<void> Optional_Value::set_value(std::shared_ptr<const IValue> value)
         return Error("Type '" + value->get_type()->get_symbol_path().to_string() + "' not allowed in optional '" + m_type->get_symbol_path().to_string() + "'");
     }
 
-    if (!m_value)
+    auto result = mark_as_set(true);
+    if (result != success)
     {
-        auto result = create_value();
-        if (result != success)
-        {
-            return result;
-        }
+        return result;
     }
 
     return m_value->copy_assign(*value);

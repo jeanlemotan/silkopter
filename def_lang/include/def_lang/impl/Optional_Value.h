@@ -36,6 +36,7 @@ public:
     std::shared_ptr<IOptional_Type const> get_specialized_type() const override;
 
     bool is_set() const override;
+    Result<void> mark_as_set(bool set) override;
 
     Result<void> set_value(std::shared_ptr<const IValue> value) override;
     std::shared_ptr<const IValue> get_value() const override;

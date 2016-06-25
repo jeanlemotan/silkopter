@@ -57,8 +57,8 @@ protected:
     void on_optional_was_set(std::shared_ptr<ts::IOptional_Value> parent);
     void on_optional_will_be_unset(std::shared_ptr<ts::IOptional_Value> parent);
 
-    void on_variant_type_index_will_be_changed(std::shared_ptr<ts::IVariant_Value> parent);
-    void on_variant_type_index_was_changed(std::shared_ptr<ts::IVariant_Value> parent);
+    void on_variant_type_index_will_change(std::shared_ptr<ts::IVariant_Value> parent);
+    void on_variant_type_index_has_changed(std::shared_ptr<ts::IVariant_Value> parent);
 
     void on_elements_added(std::shared_ptr<ts::IVector_Value> parent, size_t idx, size_t count);
     void on_elements_will_be_removed(std::shared_ptr<ts::IVector_Value> parent, size_t idx, size_t count);

@@ -142,7 +142,7 @@ Result<std::string> Variant_Value::get_ui_string() const
     }
     else
     {
-        return get_value()->get_type()->get_ui_name() + ":";
+        return get_value()->get_type()->get_ui_name();
     }
 }
 
@@ -271,6 +271,12 @@ Result<void> Variant_Value::set_value(std::shared_ptr<const IValue> value)
         return Error("Type '" + value->get_type()->get_symbol_path().to_string() + "' not allowed in variant '" + m_type->get_symbol_path().to_string() + "'");
     }
 
+    bool index_change = m_value ? *idx != get_value_type_index() : true;
+    if (index_change)
+    {
+        sig_type_index_will_change();
+    }
+
     std::shared_ptr<IValue> new_value = value->get_type()->create_value();
     auto result = new_value->copy_construct(*value);
     if (result != success)
@@ -279,6 +285,12 @@ Result<void> Variant_Value::set_value(std::shared_ptr<const IValue> value)
     }
 
     m_value = new_value;
+
+    if (index_change)
+    {
+        sig_type_index_has_changed();
+    }
+
     return success;
 }
 
