@@ -21,7 +21,7 @@ namespace util
         return 3 * n / 4;
     }
 
-    void encode_base64(const char* src, size_t size, char* dst);
+    void encode_base64(const uint8_t* src, size_t size, char* dst);
 
     template <typename _II, typename _OI>
     void encode_base64(_II first, _II last, _OI result)
@@ -30,9 +30,9 @@ namespace util
         size_t src_size = std::distance(first, last);
         while (src_size >= 3)
         {
-            uint32_t bit_pattern = static_cast<uint32_t>(*first++) << 16;
-            bit_pattern += static_cast<uint32_t>(*first++) << 8;
-            bit_pattern += static_cast<uint32_t>(*first++);
+            uint32_t bit_pattern = static_cast<uint32_t>(static_cast<uint8_t>(*first++)) << 16;
+            bit_pattern += static_cast<uint32_t>(static_cast<uint8_t>(*first++)) << 8;
+            bit_pattern += static_cast<uint32_t>(static_cast<uint8_t>(*first++));
 
             src_size -= 3;
 
@@ -45,8 +45,8 @@ namespace util
 
         if (src_size == 2)
         {
-            uint32_t bit_pattern = static_cast<uint32_t>(*first++) << 16;
-            bit_pattern += static_cast<uint32_t>(*first++) << 8;
+            uint32_t bit_pattern = static_cast<uint32_t>(static_cast<uint8_t>(*first++)) << 16;
+            bit_pattern += static_cast<uint32_t>(static_cast<uint8_t>(*first++)) << 8;
 
             // create 4 encoded chars taking 6 bits each time
             *result++ = s_char_64[(bit_pattern  >> 18) & 0x3F];
@@ -56,7 +56,7 @@ namespace util
         }
         else if (src_size == 1)
         {
-            uint32_t bit_pattern = static_cast<uint32_t>(*first++) << 16;
+            uint32_t bit_pattern = static_cast<uint32_t>(static_cast<uint8_t>(*first++)) << 16;
 
             // create 4 encoded chars taking 6 bits each time
             *result++ = s_char_64[(bit_pattern  >> 18) & 0x3F];
