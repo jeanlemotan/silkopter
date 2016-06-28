@@ -14,10 +14,10 @@ public:
     Properties_Delegate(QObject* parent, std::shared_ptr<Value_Editor_Factory> editor_factory);
     ~Properties_Delegate();
 
-    //void Init(jtl::lent_ref<tui::UndoSystem> undoSystem, jtl::lent_ref<ts::ITypeSystem> typeSystem, jtl::lent_ref<Value_Editor_Factory> editorFactory);
-
     void reset();
     void finish_editing();
+
+    std::shared_ptr<Value_Editor_Factory> get_editor_factory();
 
 protected:
 	QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const override;

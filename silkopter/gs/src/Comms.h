@@ -46,6 +46,7 @@ namespace gs_comms
 {
 namespace setup
 {
+class Node_Data;
 class Error;
 class Get_AST_Res;
 class Set_Clock_Res;
@@ -78,20 +79,6 @@ public:
     ts::Result<std::shared_ptr<ts::IStruct_Value>> request_uav_descriptor(std::chrono::high_resolution_clock::duration timeout = std::chrono::milliseconds(1000));
     ts::Result<std::shared_ptr<ts::IStruct_Value>> send_uav_descriptor(std::shared_ptr<ts::IStruct_Value> descriptor, std::chrono::high_resolution_clock::duration timeout = std::chrono::milliseconds(1000));
 
-    //----------------------------------------------------------------------
-
-    boost::signals2::signal<void()> sig_reset;
-    boost::signals2::signal<void(Manual_Clock::time_point)> sig_clock_received;
-    boost::signals2::signal<void()> sig_type_system_will_be_reset;
-    boost::signals2::signal<void()> sig_type_system_reset;
-
-    boost::signals2::signal<void(uint32_t req_id, std::string const& message)> sig_error_received;
-
-    boost::signals2::signal<void(std::shared_ptr<ts::IStruct_Value>)> sig_uav_descriptor_received;
-
-
-    void request_all_data();
-
     struct Node_Def
     {
         std::string name;
@@ -112,10 +99,6 @@ public:
         };
         std::vector<Output> outputs;
     };
-
-    boost::signals2::signal<void()> sig_node_defs_reset;
-    boost::signals2::signal<void(std::vector<Node_Def> const&)> sig_node_defs_added;
-
     struct Node
     {
         std::string name;
@@ -140,10 +123,29 @@ public:
         std::vector<Output> outputs;
     };
 
-    boost::signals2::signal<void()> sig_nodes_reset;
-    boost::signals2::signal<void(std::vector<Node> const&)> sig_nodes_added;
-    boost::signals2::signal<void(Node const&)> sig_node_changed;
+    ts::Result<std::vector<Node_Def>> request_node_defs(std::chrono::high_resolution_clock::duration timeout = std::chrono::milliseconds(1000));
+    ts::Result<std::vector<Node>> request_nodes(std::chrono::high_resolution_clock::duration timeout = std::chrono::milliseconds(1000));
+
+    ts::Result<Node> add_node(std::string const& name, std::string const def_name, std::shared_ptr<ts::IStruct_Value> descriptor, std::chrono::high_resolution_clock::duration timeout = std::chrono::milliseconds(1000));
+
+    //----------------------------------------------------------------------
+
+    boost::signals2::signal<void()> sig_reset;
+    boost::signals2::signal<void(Manual_Clock::time_point)> sig_clock_received;
+    boost::signals2::signal<void()> sig_type_system_will_be_reset;
+    boost::signals2::signal<void()> sig_type_system_reset;
+
+    boost::signals2::signal<void(uint32_t req_id, std::string const& message)> sig_error_received;
+
+    boost::signals2::signal<void(std::shared_ptr<ts::IStruct_Value>)> sig_uav_descriptor_received;
+
+    void request_all_data();
+
+    boost::signals2::signal<void(std::vector<Node_Def> const&)> sig_node_defs_received;
+    boost::signals2::signal<void(std::vector<Node> const&)> sig_nodes_received;
+    boost::signals2::signal<void(Node const&)> sig_node_added;
     boost::signals2::signal<void(std::string const& name)> sig_node_removed;
+
 //    boost::signals2::signal<void(std::string const& name, rapidjson::Value const& message)> sig_node_message_received;
 //    boost::signals2::signal<void(std::string const& name, rapidjson::Value const& json)> sig_node_config_received;
 
@@ -207,6 +209,7 @@ private:
     std::string m_base64_buffer;
 
     bool handle_uav_descriptor(std::string const& serialized_data);
+    ts::Result<Node> handle_node_data(gs_comms::setup::Node_Data const& node_data);
 
     void handle_res(gs_comms::setup::Error const& res);
     void handle_res(gs_comms::setup::Get_AST_Res const& res);

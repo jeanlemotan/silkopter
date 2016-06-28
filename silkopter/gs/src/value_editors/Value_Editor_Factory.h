@@ -55,13 +55,3 @@ void Value_Editor_Factory::register_editor(FixedConstructorParams&&... fixedCons
     m_registered_editors.push_back(creators);
 }
 
-// 	template<class Type>
-// 	void Value_Editor_Factory::UnregisterEditorFor()
-// 	{
-// 		m_registeredEditors.erase(jtl::jtypeid<Type>());
-// 	}
-// 	template<class Type> bool Value_Editor_Factory::ContainsEditorFor() const
-// 	{
-// 		return m_registeredEditors.find(jtl::jtypeid<Type>()) != m_registeredEditors.end();
-// 	}
-

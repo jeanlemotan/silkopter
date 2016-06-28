@@ -6085,42 +6085,42 @@ ts::Result<void> deserialize(Poly<IUAV_Descriptor>& value, ts::sz::Value const& 
   if (!value_sz_value) { return ts::Error("Expected 'value' when deserializing"); }
   std::string const& path = type_sz_value->get_as_string();
   if (false) { return ts::Error(""); } //this is here just to have the next items with 'else if'
-  else if (path == "::Multirotor_Descriptor")
+  else if (path == "Multirotor_Descriptor")
   {
     value = Poly<IUAV_Descriptor>(new Multirotor_Descriptor());
     return deserialize((Multirotor_Descriptor&)*value, *value_sz_value);
   }
-  else if (path == "::Tri_Multirotor_Descriptor")
+  else if (path == "Tri_Multirotor_Descriptor")
   {
     value = Poly<IUAV_Descriptor>(new Tri_Multirotor_Descriptor());
     return deserialize((Tri_Multirotor_Descriptor&)*value, *value_sz_value);
   }
-  else if (path == "::Quad_Multirotor_Descriptor")
+  else if (path == "Quad_Multirotor_Descriptor")
   {
     value = Poly<IUAV_Descriptor>(new Quad_Multirotor_Descriptor());
     return deserialize((Quad_Multirotor_Descriptor&)*value, *value_sz_value);
   }
-  else if (path == "::Hexa_Multirotor_Descriptor")
+  else if (path == "Hexa_Multirotor_Descriptor")
   {
     value = Poly<IUAV_Descriptor>(new Hexa_Multirotor_Descriptor());
     return deserialize((Hexa_Multirotor_Descriptor&)*value, *value_sz_value);
   }
-  else if (path == "::Hexatri_Multirotor_Descriptor")
+  else if (path == "Hexatri_Multirotor_Descriptor")
   {
     value = Poly<IUAV_Descriptor>(new Hexatri_Multirotor_Descriptor());
     return deserialize((Hexatri_Multirotor_Descriptor&)*value, *value_sz_value);
   }
-  else if (path == "::Octo_Multirotor_Descriptor")
+  else if (path == "Octo_Multirotor_Descriptor")
   {
     value = Poly<IUAV_Descriptor>(new Octo_Multirotor_Descriptor());
     return deserialize((Octo_Multirotor_Descriptor&)*value, *value_sz_value);
   }
-  else if (path == "::Octaquad_Multirotor_Descriptor")
+  else if (path == "Octaquad_Multirotor_Descriptor")
   {
     value = Poly<IUAV_Descriptor>(new Octaquad_Multirotor_Descriptor());
     return deserialize((Octaquad_Multirotor_Descriptor&)*value, *value_sz_value);
   }
-  else if (path == "::Custom_Multirotor_Descriptor")
+  else if (path == "Custom_Multirotor_Descriptor")
   {
     value = Poly<IUAV_Descriptor>(new Custom_Multirotor_Descriptor());
     return deserialize((Custom_Multirotor_Descriptor&)*value, *value_sz_value);
@@ -6212,32 +6212,32 @@ ts::Result<void> deserialize(Poly<IBus_Descriptor>& value, ts::sz::Value const& 
   if (!value_sz_value) { return ts::Error("Expected 'value' when deserializing"); }
   std::string const& path = type_sz_value->get_as_string();
   if (false) { return ts::Error(""); } //this is here just to have the next items with 'else if'
-  else if (path == "::UART_Linux_Descriptor")
+  else if (path == "UART_Linux_Descriptor")
   {
     value = Poly<IBus_Descriptor>(new UART_Linux_Descriptor());
     return deserialize((UART_Linux_Descriptor&)*value, *value_sz_value);
   }
-  else if (path == "::UART_BBang_Descriptor")
+  else if (path == "UART_BBang_Descriptor")
   {
     value = Poly<IBus_Descriptor>(new UART_BBang_Descriptor());
     return deserialize((UART_BBang_Descriptor&)*value, *value_sz_value);
   }
-  else if (path == "::I2C_BCM_Descriptor")
+  else if (path == "I2C_BCM_Descriptor")
   {
     value = Poly<IBus_Descriptor>(new I2C_BCM_Descriptor());
     return deserialize((I2C_BCM_Descriptor&)*value, *value_sz_value);
   }
-  else if (path == "::I2C_Linux_Descriptor")
+  else if (path == "I2C_Linux_Descriptor")
   {
     value = Poly<IBus_Descriptor>(new I2C_Linux_Descriptor());
     return deserialize((I2C_Linux_Descriptor&)*value, *value_sz_value);
   }
-  else if (path == "::SPI_BCM_Descriptor")
+  else if (path == "SPI_BCM_Descriptor")
   {
     value = Poly<IBus_Descriptor>(new SPI_BCM_Descriptor());
     return deserialize((SPI_BCM_Descriptor&)*value, *value_sz_value);
   }
-  else if (path == "::SPI_Linux_Descriptor")
+  else if (path == "SPI_Linux_Descriptor")
   {
     value = Poly<IBus_Descriptor>(new SPI_Linux_Descriptor());
     return deserialize((SPI_Linux_Descriptor&)*value, *value_sz_value);
@@ -6315,172 +6315,172 @@ ts::Result<void> deserialize(Poly<INode_Descriptor>& value, ts::sz::Value const&
   if (!value_sz_value) { return ts::Error("Expected 'value' when deserializing"); }
   std::string const& path = type_sz_value->get_as_string();
   if (false) { return ts::Error(""); } //this is here just to have the next items with 'else if'
-  else if (path == "::ADC_Ammeter_Descriptor")
+  else if (path == "ADC_Ammeter_Descriptor")
   {
     value = Poly<INode_Descriptor>(new ADC_Ammeter_Descriptor());
     return deserialize((ADC_Ammeter_Descriptor&)*value, *value_sz_value);
   }
-  else if (path == "::ADC_Voltmeter_Descriptor")
+  else if (path == "ADC_Voltmeter_Descriptor")
   {
     value = Poly<INode_Descriptor>(new ADC_Voltmeter_Descriptor());
     return deserialize((ADC_Voltmeter_Descriptor&)*value, *value_sz_value);
   }
-  else if (path == "::ADS1115_Descriptor")
+  else if (path == "ADS1115_Descriptor")
   {
     value = Poly<INode_Descriptor>(new ADS1115_Descriptor());
     return deserialize((ADS1115_Descriptor&)*value, *value_sz_value);
   }
-  else if (path == "::AVRADC_Descriptor")
+  else if (path == "AVRADC_Descriptor")
   {
     value = Poly<INode_Descriptor>(new AVRADC_Descriptor());
     return deserialize((AVRADC_Descriptor&)*value, *value_sz_value);
   }
-  else if (path == "::Comp_AHRS_Descriptor")
+  else if (path == "Comp_AHRS_Descriptor")
   {
     value = Poly<INode_Descriptor>(new Comp_AHRS_Descriptor());
     return deserialize((Comp_AHRS_Descriptor&)*value, *value_sz_value);
   }
-  else if (path == "::Combiner_Descriptor")
+  else if (path == "Combiner_Descriptor")
   {
     value = Poly<INode_Descriptor>(new Combiner_Descriptor());
     return deserialize((Combiner_Descriptor&)*value, *value_sz_value);
   }
-  else if (path == "::Gravity_Filter_Descriptor")
+  else if (path == "Gravity_Filter_Descriptor")
   {
     value = Poly<INode_Descriptor>(new Gravity_Filter_Descriptor());
     return deserialize((Gravity_Filter_Descriptor&)*value, *value_sz_value);
   }
-  else if (path == "::KF_ECEF_Descriptor")
+  else if (path == "KF_ECEF_Descriptor")
   {
     value = Poly<INode_Descriptor>(new KF_ECEF_Descriptor());
     return deserialize((KF_ECEF_Descriptor&)*value, *value_sz_value);
   }
-  else if (path == "::ENU_Frame_System_Descriptor")
+  else if (path == "ENU_Frame_System_Descriptor")
   {
     value = Poly<INode_Descriptor>(new ENU_Frame_System_Descriptor());
     return deserialize((ENU_Frame_System_Descriptor&)*value, *value_sz_value);
   }
-  else if (path == "::LPF_Descriptor")
+  else if (path == "LPF_Descriptor")
   {
     value = Poly<INode_Descriptor>(new LPF_Descriptor());
     return deserialize((LPF_Descriptor&)*value, *value_sz_value);
   }
-  else if (path == "::MaxSonar_Descriptor")
+  else if (path == "MaxSonar_Descriptor")
   {
     value = Poly<INode_Descriptor>(new MaxSonar_Descriptor());
     return deserialize((MaxSonar_Descriptor&)*value, *value_sz_value);
   }
-  else if (path == "::Motor_Mixer_Descriptor")
+  else if (path == "Motor_Mixer_Descriptor")
   {
     value = Poly<INode_Descriptor>(new Motor_Mixer_Descriptor());
     return deserialize((Motor_Mixer_Descriptor&)*value, *value_sz_value);
   }
-  else if (path == "::MPU9250_Descriptor")
+  else if (path == "MPU9250_Descriptor")
   {
     value = Poly<INode_Descriptor>(new MPU9250_Descriptor());
     return deserialize((MPU9250_Descriptor&)*value, *value_sz_value);
   }
-  else if (path == "::MS5611_Descriptor")
+  else if (path == "MS5611_Descriptor")
   {
     value = Poly<INode_Descriptor>(new MS5611_Descriptor());
     return deserialize((MS5611_Descriptor&)*value, *value_sz_value);
   }
-  else if (path == "::Multirotor_Brain_Descriptor")
+  else if (path == "Multirotor_Brain_Descriptor")
   {
     value = Poly<INode_Descriptor>(new Multirotor_Brain_Descriptor());
     return deserialize((Multirotor_Brain_Descriptor&)*value, *value_sz_value);
   }
-  else if (path == "::Multirotor_Pilot_Descriptor")
+  else if (path == "Multirotor_Pilot_Descriptor")
   {
     value = Poly<INode_Descriptor>(new Multirotor_Pilot_Descriptor());
     return deserialize((Multirotor_Pilot_Descriptor&)*value, *value_sz_value);
   }
-  else if (path == "::Multirotor_Simulator_Descriptor")
+  else if (path == "Multirotor_Simulator_Descriptor")
   {
     value = Poly<INode_Descriptor>(new Multirotor_Simulator_Descriptor());
     return deserialize((Multirotor_Simulator_Descriptor&)*value, *value_sz_value);
   }
-  else if (path == "::Oscillator_Descriptor")
+  else if (path == "Oscillator_Descriptor")
   {
     value = Poly<INode_Descriptor>(new Oscillator_Descriptor());
     return deserialize((Oscillator_Descriptor&)*value, *value_sz_value);
   }
-  else if (path == "::PCA9685_Descriptor")
+  else if (path == "PCA9685_Descriptor")
   {
     value = Poly<INode_Descriptor>(new PCA9685_Descriptor());
     return deserialize((PCA9685_Descriptor&)*value, *value_sz_value);
   }
-  else if (path == "::PIGPIO_Descriptor")
+  else if (path == "PIGPIO_Descriptor")
   {
     value = Poly<INode_Descriptor>(new PIGPIO_Descriptor());
     return deserialize((PIGPIO_Descriptor&)*value, *value_sz_value);
   }
-  else if (path == "::Pressure_Velocity_Descriptor")
+  else if (path == "Pressure_Velocity_Descriptor")
   {
     value = Poly<INode_Descriptor>(new Pressure_Velocity_Descriptor());
     return deserialize((Pressure_Velocity_Descriptor&)*value, *value_sz_value);
   }
-  else if (path == "::Proximity_Descriptor")
+  else if (path == "Proximity_Descriptor")
   {
     value = Poly<INode_Descriptor>(new Proximity_Descriptor());
     return deserialize((Proximity_Descriptor&)*value, *value_sz_value);
   }
-  else if (path == "::Rate_Controller_Descriptor")
+  else if (path == "Rate_Controller_Descriptor")
   {
     value = Poly<INode_Descriptor>(new Rate_Controller_Descriptor());
     return deserialize((Rate_Controller_Descriptor&)*value, *value_sz_value);
   }
-  else if (path == "::Raspicam_Descriptor")
+  else if (path == "Raspicam_Descriptor")
   {
     value = Poly<INode_Descriptor>(new Raspicam_Descriptor());
     return deserialize((Raspicam_Descriptor&)*value, *value_sz_value);
   }
-  else if (path == "::RC5T619_Descriptor")
+  else if (path == "RC5T619_Descriptor")
   {
     value = Poly<INode_Descriptor>(new RC5T619_Descriptor());
     return deserialize((RC5T619_Descriptor&)*value, *value_sz_value);
   }
-  else if (path == "::Resampler_Descriptor")
+  else if (path == "Resampler_Descriptor")
   {
     value = Poly<INode_Descriptor>(new Resampler_Descriptor());
     return deserialize((Resampler_Descriptor&)*value, *value_sz_value);
   }
-  else if (path == "::Scalar_Generator_Descriptor")
+  else if (path == "Scalar_Generator_Descriptor")
   {
     value = Poly<INode_Descriptor>(new Scalar_Generator_Descriptor());
     return deserialize((Scalar_Generator_Descriptor&)*value, *value_sz_value);
   }
-  else if (path == "::Servo_Gimbal_Descriptor")
+  else if (path == "Servo_Gimbal_Descriptor")
   {
     value = Poly<INode_Descriptor>(new Servo_Gimbal_Descriptor());
     return deserialize((Servo_Gimbal_Descriptor&)*value, *value_sz_value);
   }
-  else if (path == "::SRF01_Descriptor")
+  else if (path == "SRF01_Descriptor")
   {
     value = Poly<INode_Descriptor>(new SRF01_Descriptor());
     return deserialize((SRF01_Descriptor&)*value, *value_sz_value);
   }
-  else if (path == "::SRF02_Descriptor")
+  else if (path == "SRF02_Descriptor")
   {
     value = Poly<INode_Descriptor>(new SRF02_Descriptor());
     return deserialize((SRF02_Descriptor&)*value, *value_sz_value);
   }
-  else if (path == "::Throttle_To_PWM_Descriptor")
+  else if (path == "Throttle_To_PWM_Descriptor")
   {
     value = Poly<INode_Descriptor>(new Throttle_To_PWM_Descriptor());
     return deserialize((Throttle_To_PWM_Descriptor&)*value, *value_sz_value);
   }
-  else if (path == "::Transformer_Descriptor")
+  else if (path == "Transformer_Descriptor")
   {
     value = Poly<INode_Descriptor>(new Transformer_Descriptor());
     return deserialize((Transformer_Descriptor&)*value, *value_sz_value);
   }
-  else if (path == "::UBLOX_Descriptor")
+  else if (path == "UBLOX_Descriptor")
   {
     value = Poly<INode_Descriptor>(new UBLOX_Descriptor());
     return deserialize((UBLOX_Descriptor&)*value, *value_sz_value);
   }
-  else if (path == "::Vec3_Generator_Descriptor")
+  else if (path == "Vec3_Generator_Descriptor")
   {
     value = Poly<INode_Descriptor>(new Vec3_Generator_Descriptor());
     return deserialize((Vec3_Generator_Descriptor&)*value, *value_sz_value);
@@ -6754,172 +6754,172 @@ ts::Result<void> deserialize(Poly<INode_Config>& value, ts::sz::Value const& sz_
   if (!value_sz_value) { return ts::Error("Expected 'value' when deserializing"); }
   std::string const& path = type_sz_value->get_as_string();
   if (false) { return ts::Error(""); } //this is here just to have the next items with 'else if'
-  else if (path == "::ADC_Ammeter_Config")
+  else if (path == "ADC_Ammeter_Config")
   {
     value = Poly<INode_Config>(new ADC_Ammeter_Config());
     return deserialize((ADC_Ammeter_Config&)*value, *value_sz_value);
   }
-  else if (path == "::ADC_Voltmeter_Config")
+  else if (path == "ADC_Voltmeter_Config")
   {
     value = Poly<INode_Config>(new ADC_Voltmeter_Config());
     return deserialize((ADC_Voltmeter_Config&)*value, *value_sz_value);
   }
-  else if (path == "::ADS1115_Config")
+  else if (path == "ADS1115_Config")
   {
     value = Poly<INode_Config>(new ADS1115_Config());
     return deserialize((ADS1115_Config&)*value, *value_sz_value);
   }
-  else if (path == "::AVRADC_Config")
+  else if (path == "AVRADC_Config")
   {
     value = Poly<INode_Config>(new AVRADC_Config());
     return deserialize((AVRADC_Config&)*value, *value_sz_value);
   }
-  else if (path == "::Comp_AHRS_Config")
+  else if (path == "Comp_AHRS_Config")
   {
     value = Poly<INode_Config>(new Comp_AHRS_Config());
     return deserialize((Comp_AHRS_Config&)*value, *value_sz_value);
   }
-  else if (path == "::Combiner_Config")
+  else if (path == "Combiner_Config")
   {
     value = Poly<INode_Config>(new Combiner_Config());
     return deserialize((Combiner_Config&)*value, *value_sz_value);
   }
-  else if (path == "::Gravity_Filter_Config")
+  else if (path == "Gravity_Filter_Config")
   {
     value = Poly<INode_Config>(new Gravity_Filter_Config());
     return deserialize((Gravity_Filter_Config&)*value, *value_sz_value);
   }
-  else if (path == "::KF_ECEF_Config")
+  else if (path == "KF_ECEF_Config")
   {
     value = Poly<INode_Config>(new KF_ECEF_Config());
     return deserialize((KF_ECEF_Config&)*value, *value_sz_value);
   }
-  else if (path == "::ENU_Frame_System_Config")
+  else if (path == "ENU_Frame_System_Config")
   {
     value = Poly<INode_Config>(new ENU_Frame_System_Config());
     return deserialize((ENU_Frame_System_Config&)*value, *value_sz_value);
   }
-  else if (path == "::LPF_Config")
+  else if (path == "LPF_Config")
   {
     value = Poly<INode_Config>(new LPF_Config());
     return deserialize((LPF_Config&)*value, *value_sz_value);
   }
-  else if (path == "::MaxSonar_Config")
+  else if (path == "MaxSonar_Config")
   {
     value = Poly<INode_Config>(new MaxSonar_Config());
     return deserialize((MaxSonar_Config&)*value, *value_sz_value);
   }
-  else if (path == "::Motor_Mixer_Config")
+  else if (path == "Motor_Mixer_Config")
   {
     value = Poly<INode_Config>(new Motor_Mixer_Config());
     return deserialize((Motor_Mixer_Config&)*value, *value_sz_value);
   }
-  else if (path == "::MPU9250_Config")
+  else if (path == "MPU9250_Config")
   {
     value = Poly<INode_Config>(new MPU9250_Config());
     return deserialize((MPU9250_Config&)*value, *value_sz_value);
   }
-  else if (path == "::MS5611_Config")
+  else if (path == "MS5611_Config")
   {
     value = Poly<INode_Config>(new MS5611_Config());
     return deserialize((MS5611_Config&)*value, *value_sz_value);
   }
-  else if (path == "::Multirotor_Brain_Config")
+  else if (path == "Multirotor_Brain_Config")
   {
     value = Poly<INode_Config>(new Multirotor_Brain_Config());
     return deserialize((Multirotor_Brain_Config&)*value, *value_sz_value);
   }
-  else if (path == "::Multirotor_Pilot_Config")
+  else if (path == "Multirotor_Pilot_Config")
   {
     value = Poly<INode_Config>(new Multirotor_Pilot_Config());
     return deserialize((Multirotor_Pilot_Config&)*value, *value_sz_value);
   }
-  else if (path == "::Multirotor_Simulator_Config")
+  else if (path == "Multirotor_Simulator_Config")
   {
     value = Poly<INode_Config>(new Multirotor_Simulator_Config());
     return deserialize((Multirotor_Simulator_Config&)*value, *value_sz_value);
   }
-  else if (path == "::Oscillator_Config")
+  else if (path == "Oscillator_Config")
   {
     value = Poly<INode_Config>(new Oscillator_Config());
     return deserialize((Oscillator_Config&)*value, *value_sz_value);
   }
-  else if (path == "::PCA9685_Config")
+  else if (path == "PCA9685_Config")
   {
     value = Poly<INode_Config>(new PCA9685_Config());
     return deserialize((PCA9685_Config&)*value, *value_sz_value);
   }
-  else if (path == "::PIGPIO_Config")
+  else if (path == "PIGPIO_Config")
   {
     value = Poly<INode_Config>(new PIGPIO_Config());
     return deserialize((PIGPIO_Config&)*value, *value_sz_value);
   }
-  else if (path == "::Pressure_Velocity_Config")
+  else if (path == "Pressure_Velocity_Config")
   {
     value = Poly<INode_Config>(new Pressure_Velocity_Config());
     return deserialize((Pressure_Velocity_Config&)*value, *value_sz_value);
   }
-  else if (path == "::Proximity_Config")
+  else if (path == "Proximity_Config")
   {
     value = Poly<INode_Config>(new Proximity_Config());
     return deserialize((Proximity_Config&)*value, *value_sz_value);
   }
-  else if (path == "::Rate_Controller_Config")
+  else if (path == "Rate_Controller_Config")
   {
     value = Poly<INode_Config>(new Rate_Controller_Config());
     return deserialize((Rate_Controller_Config&)*value, *value_sz_value);
   }
-  else if (path == "::Raspicam_Config")
+  else if (path == "Raspicam_Config")
   {
     value = Poly<INode_Config>(new Raspicam_Config());
     return deserialize((Raspicam_Config&)*value, *value_sz_value);
   }
-  else if (path == "::RC5T619_Config")
+  else if (path == "RC5T619_Config")
   {
     value = Poly<INode_Config>(new RC5T619_Config());
     return deserialize((RC5T619_Config&)*value, *value_sz_value);
   }
-  else if (path == "::Resampler_Config")
+  else if (path == "Resampler_Config")
   {
     value = Poly<INode_Config>(new Resampler_Config());
     return deserialize((Resampler_Config&)*value, *value_sz_value);
   }
-  else if (path == "::Scalar_Generator_Config")
+  else if (path == "Scalar_Generator_Config")
   {
     value = Poly<INode_Config>(new Scalar_Generator_Config());
     return deserialize((Scalar_Generator_Config&)*value, *value_sz_value);
   }
-  else if (path == "::Servo_Gimbal_Config")
+  else if (path == "Servo_Gimbal_Config")
   {
     value = Poly<INode_Config>(new Servo_Gimbal_Config());
     return deserialize((Servo_Gimbal_Config&)*value, *value_sz_value);
   }
-  else if (path == "::SRF01_Config")
+  else if (path == "SRF01_Config")
   {
     value = Poly<INode_Config>(new SRF01_Config());
     return deserialize((SRF01_Config&)*value, *value_sz_value);
   }
-  else if (path == "::SRF02_Config")
+  else if (path == "SRF02_Config")
   {
     value = Poly<INode_Config>(new SRF02_Config());
     return deserialize((SRF02_Config&)*value, *value_sz_value);
   }
-  else if (path == "::Throttle_To_PWM_Config")
+  else if (path == "Throttle_To_PWM_Config")
   {
     value = Poly<INode_Config>(new Throttle_To_PWM_Config());
     return deserialize((Throttle_To_PWM_Config&)*value, *value_sz_value);
   }
-  else if (path == "::Transformer_Config")
+  else if (path == "Transformer_Config")
   {
     value = Poly<INode_Config>(new Transformer_Config());
     return deserialize((Transformer_Config&)*value, *value_sz_value);
   }
-  else if (path == "::UBLOX_Config")
+  else if (path == "UBLOX_Config")
   {
     value = Poly<INode_Config>(new UBLOX_Config());
     return deserialize((UBLOX_Config&)*value, *value_sz_value);
   }
-  else if (path == "::Vec3_Generator_Config")
+  else if (path == "Vec3_Generator_Config")
   {
     value = Poly<INode_Config>(new Vec3_Generator_Config());
     return deserialize((Vec3_Generator_Config&)*value, *value_sz_value);
@@ -7314,32 +7314,32 @@ ts::Result<void> deserialize(Poly<const IBus_Descriptor>& value, ts::sz::Value c
   if (!value_sz_value) { return ts::Error("Expected 'value' when deserializing"); }
   std::string const& path = type_sz_value->get_as_string();
   if (false) { return ts::Error(""); } //this is here just to have the next items with 'else if'
-  else if (path == "::UART_Linux_Descriptor")
+  else if (path == "UART_Linux_Descriptor")
   {
     value = Poly<const IBus_Descriptor>(new UART_Linux_Descriptor());
     return deserialize((UART_Linux_Descriptor&)*value, *value_sz_value);
   }
-  else if (path == "::UART_BBang_Descriptor")
+  else if (path == "UART_BBang_Descriptor")
   {
     value = Poly<const IBus_Descriptor>(new UART_BBang_Descriptor());
     return deserialize((UART_BBang_Descriptor&)*value, *value_sz_value);
   }
-  else if (path == "::I2C_BCM_Descriptor")
+  else if (path == "I2C_BCM_Descriptor")
   {
     value = Poly<const IBus_Descriptor>(new I2C_BCM_Descriptor());
     return deserialize((I2C_BCM_Descriptor&)*value, *value_sz_value);
   }
-  else if (path == "::I2C_Linux_Descriptor")
+  else if (path == "I2C_Linux_Descriptor")
   {
     value = Poly<const IBus_Descriptor>(new I2C_Linux_Descriptor());
     return deserialize((I2C_Linux_Descriptor&)*value, *value_sz_value);
   }
-  else if (path == "::SPI_BCM_Descriptor")
+  else if (path == "SPI_BCM_Descriptor")
   {
     value = Poly<const IBus_Descriptor>(new SPI_BCM_Descriptor());
     return deserialize((SPI_BCM_Descriptor&)*value, *value_sz_value);
   }
-  else if (path == "::SPI_Linux_Descriptor")
+  else if (path == "SPI_Linux_Descriptor")
   {
     value = Poly<const IBus_Descriptor>(new SPI_Linux_Descriptor());
     return deserialize((SPI_Linux_Descriptor&)*value, *value_sz_value);
@@ -7406,172 +7406,172 @@ ts::Result<void> deserialize(Poly<const INode_Descriptor>& value, ts::sz::Value 
   if (!value_sz_value) { return ts::Error("Expected 'value' when deserializing"); }
   std::string const& path = type_sz_value->get_as_string();
   if (false) { return ts::Error(""); } //this is here just to have the next items with 'else if'
-  else if (path == "::ADC_Ammeter_Descriptor")
+  else if (path == "ADC_Ammeter_Descriptor")
   {
     value = Poly<const INode_Descriptor>(new ADC_Ammeter_Descriptor());
     return deserialize((ADC_Ammeter_Descriptor&)*value, *value_sz_value);
   }
-  else if (path == "::ADC_Voltmeter_Descriptor")
+  else if (path == "ADC_Voltmeter_Descriptor")
   {
     value = Poly<const INode_Descriptor>(new ADC_Voltmeter_Descriptor());
     return deserialize((ADC_Voltmeter_Descriptor&)*value, *value_sz_value);
   }
-  else if (path == "::ADS1115_Descriptor")
+  else if (path == "ADS1115_Descriptor")
   {
     value = Poly<const INode_Descriptor>(new ADS1115_Descriptor());
     return deserialize((ADS1115_Descriptor&)*value, *value_sz_value);
   }
-  else if (path == "::AVRADC_Descriptor")
+  else if (path == "AVRADC_Descriptor")
   {
     value = Poly<const INode_Descriptor>(new AVRADC_Descriptor());
     return deserialize((AVRADC_Descriptor&)*value, *value_sz_value);
   }
-  else if (path == "::Comp_AHRS_Descriptor")
+  else if (path == "Comp_AHRS_Descriptor")
   {
     value = Poly<const INode_Descriptor>(new Comp_AHRS_Descriptor());
     return deserialize((Comp_AHRS_Descriptor&)*value, *value_sz_value);
   }
-  else if (path == "::Combiner_Descriptor")
+  else if (path == "Combiner_Descriptor")
   {
     value = Poly<const INode_Descriptor>(new Combiner_Descriptor());
     return deserialize((Combiner_Descriptor&)*value, *value_sz_value);
   }
-  else if (path == "::Gravity_Filter_Descriptor")
+  else if (path == "Gravity_Filter_Descriptor")
   {
     value = Poly<const INode_Descriptor>(new Gravity_Filter_Descriptor());
     return deserialize((Gravity_Filter_Descriptor&)*value, *value_sz_value);
   }
-  else if (path == "::KF_ECEF_Descriptor")
+  else if (path == "KF_ECEF_Descriptor")
   {
     value = Poly<const INode_Descriptor>(new KF_ECEF_Descriptor());
     return deserialize((KF_ECEF_Descriptor&)*value, *value_sz_value);
   }
-  else if (path == "::ENU_Frame_System_Descriptor")
+  else if (path == "ENU_Frame_System_Descriptor")
   {
     value = Poly<const INode_Descriptor>(new ENU_Frame_System_Descriptor());
     return deserialize((ENU_Frame_System_Descriptor&)*value, *value_sz_value);
   }
-  else if (path == "::LPF_Descriptor")
+  else if (path == "LPF_Descriptor")
   {
     value = Poly<const INode_Descriptor>(new LPF_Descriptor());
     return deserialize((LPF_Descriptor&)*value, *value_sz_value);
   }
-  else if (path == "::MaxSonar_Descriptor")
+  else if (path == "MaxSonar_Descriptor")
   {
     value = Poly<const INode_Descriptor>(new MaxSonar_Descriptor());
     return deserialize((MaxSonar_Descriptor&)*value, *value_sz_value);
   }
-  else if (path == "::Motor_Mixer_Descriptor")
+  else if (path == "Motor_Mixer_Descriptor")
   {
     value = Poly<const INode_Descriptor>(new Motor_Mixer_Descriptor());
     return deserialize((Motor_Mixer_Descriptor&)*value, *value_sz_value);
   }
-  else if (path == "::MPU9250_Descriptor")
+  else if (path == "MPU9250_Descriptor")
   {
     value = Poly<const INode_Descriptor>(new MPU9250_Descriptor());
     return deserialize((MPU9250_Descriptor&)*value, *value_sz_value);
   }
-  else if (path == "::MS5611_Descriptor")
+  else if (path == "MS5611_Descriptor")
   {
     value = Poly<const INode_Descriptor>(new MS5611_Descriptor());
     return deserialize((MS5611_Descriptor&)*value, *value_sz_value);
   }
-  else if (path == "::Multirotor_Brain_Descriptor")
+  else if (path == "Multirotor_Brain_Descriptor")
   {
     value = Poly<const INode_Descriptor>(new Multirotor_Brain_Descriptor());
     return deserialize((Multirotor_Brain_Descriptor&)*value, *value_sz_value);
   }
-  else if (path == "::Multirotor_Pilot_Descriptor")
+  else if (path == "Multirotor_Pilot_Descriptor")
   {
     value = Poly<const INode_Descriptor>(new Multirotor_Pilot_Descriptor());
     return deserialize((Multirotor_Pilot_Descriptor&)*value, *value_sz_value);
   }
-  else if (path == "::Multirotor_Simulator_Descriptor")
+  else if (path == "Multirotor_Simulator_Descriptor")
   {
     value = Poly<const INode_Descriptor>(new Multirotor_Simulator_Descriptor());
     return deserialize((Multirotor_Simulator_Descriptor&)*value, *value_sz_value);
   }
-  else if (path == "::Oscillator_Descriptor")
+  else if (path == "Oscillator_Descriptor")
   {
     value = Poly<const INode_Descriptor>(new Oscillator_Descriptor());
     return deserialize((Oscillator_Descriptor&)*value, *value_sz_value);
   }
-  else if (path == "::PCA9685_Descriptor")
+  else if (path == "PCA9685_Descriptor")
   {
     value = Poly<const INode_Descriptor>(new PCA9685_Descriptor());
     return deserialize((PCA9685_Descriptor&)*value, *value_sz_value);
   }
-  else if (path == "::PIGPIO_Descriptor")
+  else if (path == "PIGPIO_Descriptor")
   {
     value = Poly<const INode_Descriptor>(new PIGPIO_Descriptor());
     return deserialize((PIGPIO_Descriptor&)*value, *value_sz_value);
   }
-  else if (path == "::Pressure_Velocity_Descriptor")
+  else if (path == "Pressure_Velocity_Descriptor")
   {
     value = Poly<const INode_Descriptor>(new Pressure_Velocity_Descriptor());
     return deserialize((Pressure_Velocity_Descriptor&)*value, *value_sz_value);
   }
-  else if (path == "::Proximity_Descriptor")
+  else if (path == "Proximity_Descriptor")
   {
     value = Poly<const INode_Descriptor>(new Proximity_Descriptor());
     return deserialize((Proximity_Descriptor&)*value, *value_sz_value);
   }
-  else if (path == "::Rate_Controller_Descriptor")
+  else if (path == "Rate_Controller_Descriptor")
   {
     value = Poly<const INode_Descriptor>(new Rate_Controller_Descriptor());
     return deserialize((Rate_Controller_Descriptor&)*value, *value_sz_value);
   }
-  else if (path == "::Raspicam_Descriptor")
+  else if (path == "Raspicam_Descriptor")
   {
     value = Poly<const INode_Descriptor>(new Raspicam_Descriptor());
     return deserialize((Raspicam_Descriptor&)*value, *value_sz_value);
   }
-  else if (path == "::RC5T619_Descriptor")
+  else if (path == "RC5T619_Descriptor")
   {
     value = Poly<const INode_Descriptor>(new RC5T619_Descriptor());
     return deserialize((RC5T619_Descriptor&)*value, *value_sz_value);
   }
-  else if (path == "::Resampler_Descriptor")
+  else if (path == "Resampler_Descriptor")
   {
     value = Poly<const INode_Descriptor>(new Resampler_Descriptor());
     return deserialize((Resampler_Descriptor&)*value, *value_sz_value);
   }
-  else if (path == "::Scalar_Generator_Descriptor")
+  else if (path == "Scalar_Generator_Descriptor")
   {
     value = Poly<const INode_Descriptor>(new Scalar_Generator_Descriptor());
     return deserialize((Scalar_Generator_Descriptor&)*value, *value_sz_value);
   }
-  else if (path == "::Servo_Gimbal_Descriptor")
+  else if (path == "Servo_Gimbal_Descriptor")
   {
     value = Poly<const INode_Descriptor>(new Servo_Gimbal_Descriptor());
     return deserialize((Servo_Gimbal_Descriptor&)*value, *value_sz_value);
   }
-  else if (path == "::SRF01_Descriptor")
+  else if (path == "SRF01_Descriptor")
   {
     value = Poly<const INode_Descriptor>(new SRF01_Descriptor());
     return deserialize((SRF01_Descriptor&)*value, *value_sz_value);
   }
-  else if (path == "::SRF02_Descriptor")
+  else if (path == "SRF02_Descriptor")
   {
     value = Poly<const INode_Descriptor>(new SRF02_Descriptor());
     return deserialize((SRF02_Descriptor&)*value, *value_sz_value);
   }
-  else if (path == "::Throttle_To_PWM_Descriptor")
+  else if (path == "Throttle_To_PWM_Descriptor")
   {
     value = Poly<const INode_Descriptor>(new Throttle_To_PWM_Descriptor());
     return deserialize((Throttle_To_PWM_Descriptor&)*value, *value_sz_value);
   }
-  else if (path == "::Transformer_Descriptor")
+  else if (path == "Transformer_Descriptor")
   {
     value = Poly<const INode_Descriptor>(new Transformer_Descriptor());
     return deserialize((Transformer_Descriptor&)*value, *value_sz_value);
   }
-  else if (path == "::UBLOX_Descriptor")
+  else if (path == "UBLOX_Descriptor")
   {
     value = Poly<const INode_Descriptor>(new UBLOX_Descriptor());
     return deserialize((UBLOX_Descriptor&)*value, *value_sz_value);
   }
-  else if (path == "::Vec3_Generator_Descriptor")
+  else if (path == "Vec3_Generator_Descriptor")
   {
     value = Poly<const INode_Descriptor>(new Vec3_Generator_Descriptor());
     return deserialize((Vec3_Generator_Descriptor&)*value, *value_sz_value);
@@ -7834,172 +7834,172 @@ ts::Result<void> deserialize(Poly<const INode_Config>& value, ts::sz::Value cons
   if (!value_sz_value) { return ts::Error("Expected 'value' when deserializing"); }
   std::string const& path = type_sz_value->get_as_string();
   if (false) { return ts::Error(""); } //this is here just to have the next items with 'else if'
-  else if (path == "::ADC_Ammeter_Config")
+  else if (path == "ADC_Ammeter_Config")
   {
     value = Poly<const INode_Config>(new ADC_Ammeter_Config());
     return deserialize((ADC_Ammeter_Config&)*value, *value_sz_value);
   }
-  else if (path == "::ADC_Voltmeter_Config")
+  else if (path == "ADC_Voltmeter_Config")
   {
     value = Poly<const INode_Config>(new ADC_Voltmeter_Config());
     return deserialize((ADC_Voltmeter_Config&)*value, *value_sz_value);
   }
-  else if (path == "::ADS1115_Config")
+  else if (path == "ADS1115_Config")
   {
     value = Poly<const INode_Config>(new ADS1115_Config());
     return deserialize((ADS1115_Config&)*value, *value_sz_value);
   }
-  else if (path == "::AVRADC_Config")
+  else if (path == "AVRADC_Config")
   {
     value = Poly<const INode_Config>(new AVRADC_Config());
     return deserialize((AVRADC_Config&)*value, *value_sz_value);
   }
-  else if (path == "::Comp_AHRS_Config")
+  else if (path == "Comp_AHRS_Config")
   {
     value = Poly<const INode_Config>(new Comp_AHRS_Config());
     return deserialize((Comp_AHRS_Config&)*value, *value_sz_value);
   }
-  else if (path == "::Combiner_Config")
+  else if (path == "Combiner_Config")
   {
     value = Poly<const INode_Config>(new Combiner_Config());
     return deserialize((Combiner_Config&)*value, *value_sz_value);
   }
-  else if (path == "::Gravity_Filter_Config")
+  else if (path == "Gravity_Filter_Config")
   {
     value = Poly<const INode_Config>(new Gravity_Filter_Config());
     return deserialize((Gravity_Filter_Config&)*value, *value_sz_value);
   }
-  else if (path == "::KF_ECEF_Config")
+  else if (path == "KF_ECEF_Config")
   {
     value = Poly<const INode_Config>(new KF_ECEF_Config());
     return deserialize((KF_ECEF_Config&)*value, *value_sz_value);
   }
-  else if (path == "::ENU_Frame_System_Config")
+  else if (path == "ENU_Frame_System_Config")
   {
     value = Poly<const INode_Config>(new ENU_Frame_System_Config());
     return deserialize((ENU_Frame_System_Config&)*value, *value_sz_value);
   }
-  else if (path == "::LPF_Config")
+  else if (path == "LPF_Config")
   {
     value = Poly<const INode_Config>(new LPF_Config());
     return deserialize((LPF_Config&)*value, *value_sz_value);
   }
-  else if (path == "::MaxSonar_Config")
+  else if (path == "MaxSonar_Config")
   {
     value = Poly<const INode_Config>(new MaxSonar_Config());
     return deserialize((MaxSonar_Config&)*value, *value_sz_value);
   }
-  else if (path == "::Motor_Mixer_Config")
+  else if (path == "Motor_Mixer_Config")
   {
     value = Poly<const INode_Config>(new Motor_Mixer_Config());
     return deserialize((Motor_Mixer_Config&)*value, *value_sz_value);
   }
-  else if (path == "::MPU9250_Config")
+  else if (path == "MPU9250_Config")
   {
     value = Poly<const INode_Config>(new MPU9250_Config());
     return deserialize((MPU9250_Config&)*value, *value_sz_value);
   }
-  else if (path == "::MS5611_Config")
+  else if (path == "MS5611_Config")
   {
     value = Poly<const INode_Config>(new MS5611_Config());
     return deserialize((MS5611_Config&)*value, *value_sz_value);
   }
-  else if (path == "::Multirotor_Brain_Config")
+  else if (path == "Multirotor_Brain_Config")
   {
     value = Poly<const INode_Config>(new Multirotor_Brain_Config());
     return deserialize((Multirotor_Brain_Config&)*value, *value_sz_value);
   }
-  else if (path == "::Multirotor_Pilot_Config")
+  else if (path == "Multirotor_Pilot_Config")
   {
     value = Poly<const INode_Config>(new Multirotor_Pilot_Config());
     return deserialize((Multirotor_Pilot_Config&)*value, *value_sz_value);
   }
-  else if (path == "::Multirotor_Simulator_Config")
+  else if (path == "Multirotor_Simulator_Config")
   {
     value = Poly<const INode_Config>(new Multirotor_Simulator_Config());
     return deserialize((Multirotor_Simulator_Config&)*value, *value_sz_value);
   }
-  else if (path == "::Oscillator_Config")
+  else if (path == "Oscillator_Config")
   {
     value = Poly<const INode_Config>(new Oscillator_Config());
     return deserialize((Oscillator_Config&)*value, *value_sz_value);
   }
-  else if (path == "::PCA9685_Config")
+  else if (path == "PCA9685_Config")
   {
     value = Poly<const INode_Config>(new PCA9685_Config());
     return deserialize((PCA9685_Config&)*value, *value_sz_value);
   }
-  else if (path == "::PIGPIO_Config")
+  else if (path == "PIGPIO_Config")
   {
     value = Poly<const INode_Config>(new PIGPIO_Config());
     return deserialize((PIGPIO_Config&)*value, *value_sz_value);
   }
-  else if (path == "::Pressure_Velocity_Config")
+  else if (path == "Pressure_Velocity_Config")
   {
     value = Poly<const INode_Config>(new Pressure_Velocity_Config());
     return deserialize((Pressure_Velocity_Config&)*value, *value_sz_value);
   }
-  else if (path == "::Proximity_Config")
+  else if (path == "Proximity_Config")
   {
     value = Poly<const INode_Config>(new Proximity_Config());
     return deserialize((Proximity_Config&)*value, *value_sz_value);
   }
-  else if (path == "::Rate_Controller_Config")
+  else if (path == "Rate_Controller_Config")
   {
     value = Poly<const INode_Config>(new Rate_Controller_Config());
     return deserialize((Rate_Controller_Config&)*value, *value_sz_value);
   }
-  else if (path == "::Raspicam_Config")
+  else if (path == "Raspicam_Config")
   {
     value = Poly<const INode_Config>(new Raspicam_Config());
     return deserialize((Raspicam_Config&)*value, *value_sz_value);
   }
-  else if (path == "::RC5T619_Config")
+  else if (path == "RC5T619_Config")
   {
     value = Poly<const INode_Config>(new RC5T619_Config());
     return deserialize((RC5T619_Config&)*value, *value_sz_value);
   }
-  else if (path == "::Resampler_Config")
+  else if (path == "Resampler_Config")
   {
     value = Poly<const INode_Config>(new Resampler_Config());
     return deserialize((Resampler_Config&)*value, *value_sz_value);
   }
-  else if (path == "::Scalar_Generator_Config")
+  else if (path == "Scalar_Generator_Config")
   {
     value = Poly<const INode_Config>(new Scalar_Generator_Config());
     return deserialize((Scalar_Generator_Config&)*value, *value_sz_value);
   }
-  else if (path == "::Servo_Gimbal_Config")
+  else if (path == "Servo_Gimbal_Config")
   {
     value = Poly<const INode_Config>(new Servo_Gimbal_Config());
     return deserialize((Servo_Gimbal_Config&)*value, *value_sz_value);
   }
-  else if (path == "::SRF01_Config")
+  else if (path == "SRF01_Config")
   {
     value = Poly<const INode_Config>(new SRF01_Config());
     return deserialize((SRF01_Config&)*value, *value_sz_value);
   }
-  else if (path == "::SRF02_Config")
+  else if (path == "SRF02_Config")
   {
     value = Poly<const INode_Config>(new SRF02_Config());
     return deserialize((SRF02_Config&)*value, *value_sz_value);
   }
-  else if (path == "::Throttle_To_PWM_Config")
+  else if (path == "Throttle_To_PWM_Config")
   {
     value = Poly<const INode_Config>(new Throttle_To_PWM_Config());
     return deserialize((Throttle_To_PWM_Config&)*value, *value_sz_value);
   }
-  else if (path == "::Transformer_Config")
+  else if (path == "Transformer_Config")
   {
     value = Poly<const INode_Config>(new Transformer_Config());
     return deserialize((Transformer_Config&)*value, *value_sz_value);
   }
-  else if (path == "::UBLOX_Config")
+  else if (path == "UBLOX_Config")
   {
     value = Poly<const INode_Config>(new UBLOX_Config());
     return deserialize((UBLOX_Config&)*value, *value_sz_value);
   }
-  else if (path == "::Vec3_Generator_Config")
+  else if (path == "Vec3_Generator_Config")
   {
     value = Poly<const INode_Config>(new Vec3_Generator_Config());
     return deserialize((Vec3_Generator_Config&)*value, *value_sz_value);
@@ -8284,42 +8284,42 @@ ts::Result<void> deserialize(Poly<const IUAV_Descriptor>& value, ts::sz::Value c
   if (!value_sz_value) { return ts::Error("Expected 'value' when deserializing"); }
   std::string const& path = type_sz_value->get_as_string();
   if (false) { return ts::Error(""); } //this is here just to have the next items with 'else if'
-  else if (path == "::Multirotor_Descriptor")
+  else if (path == "Multirotor_Descriptor")
   {
     value = Poly<const IUAV_Descriptor>(new Multirotor_Descriptor());
     return deserialize((Multirotor_Descriptor&)*value, *value_sz_value);
   }
-  else if (path == "::Tri_Multirotor_Descriptor")
+  else if (path == "Tri_Multirotor_Descriptor")
   {
     value = Poly<const IUAV_Descriptor>(new Tri_Multirotor_Descriptor());
     return deserialize((Tri_Multirotor_Descriptor&)*value, *value_sz_value);
   }
-  else if (path == "::Quad_Multirotor_Descriptor")
+  else if (path == "Quad_Multirotor_Descriptor")
   {
     value = Poly<const IUAV_Descriptor>(new Quad_Multirotor_Descriptor());
     return deserialize((Quad_Multirotor_Descriptor&)*value, *value_sz_value);
   }
-  else if (path == "::Hexa_Multirotor_Descriptor")
+  else if (path == "Hexa_Multirotor_Descriptor")
   {
     value = Poly<const IUAV_Descriptor>(new Hexa_Multirotor_Descriptor());
     return deserialize((Hexa_Multirotor_Descriptor&)*value, *value_sz_value);
   }
-  else if (path == "::Hexatri_Multirotor_Descriptor")
+  else if (path == "Hexatri_Multirotor_Descriptor")
   {
     value = Poly<const IUAV_Descriptor>(new Hexatri_Multirotor_Descriptor());
     return deserialize((Hexatri_Multirotor_Descriptor&)*value, *value_sz_value);
   }
-  else if (path == "::Octo_Multirotor_Descriptor")
+  else if (path == "Octo_Multirotor_Descriptor")
   {
     value = Poly<const IUAV_Descriptor>(new Octo_Multirotor_Descriptor());
     return deserialize((Octo_Multirotor_Descriptor&)*value, *value_sz_value);
   }
-  else if (path == "::Octaquad_Multirotor_Descriptor")
+  else if (path == "Octaquad_Multirotor_Descriptor")
   {
     value = Poly<const IUAV_Descriptor>(new Octaquad_Multirotor_Descriptor());
     return deserialize((Octaquad_Multirotor_Descriptor&)*value, *value_sz_value);
   }
-  else if (path == "::Custom_Multirotor_Descriptor")
+  else if (path == "Custom_Multirotor_Descriptor")
   {
     value = Poly<const IUAV_Descriptor>(new Custom_Multirotor_Descriptor());
     return deserialize((Custom_Multirotor_Descriptor&)*value, *value_sz_value);
@@ -11609,12 +11609,12 @@ ts::Result<void> deserialize(Poly<PCA9685_Config::IChannel>& value, ts::sz::Valu
   if (!value_sz_value) { return ts::Error("Expected 'value' when deserializing"); }
   std::string const& path = type_sz_value->get_as_string();
   if (false) { return ts::Error(""); } //this is here just to have the next items with 'else if'
-  else if (path == "::PCA9685_Config::Servo_Channel")
+  else if (path == "PCA9685_Config::Servo_Channel")
   {
     value = Poly<PCA9685_Config::IChannel>(new PCA9685_Config::Servo_Channel());
     return deserialize((PCA9685_Config::Servo_Channel&)*value, *value_sz_value);
   }
-  else if (path == "::PCA9685_Config::PWM_Channel")
+  else if (path == "PCA9685_Config::PWM_Channel")
   {
     value = Poly<PCA9685_Config::IChannel>(new PCA9685_Config::PWM_Channel());
     return deserialize((PCA9685_Config::PWM_Channel&)*value, *value_sz_value);
@@ -12272,12 +12272,12 @@ ts::Result<void> deserialize(Poly<PIGPIO_Config::IChannel>& value, ts::sz::Value
   if (!value_sz_value) { return ts::Error("Expected 'value' when deserializing"); }
   std::string const& path = type_sz_value->get_as_string();
   if (false) { return ts::Error(""); } //this is here just to have the next items with 'else if'
-  else if (path == "::PIGPIO_Config::Servo_Channel")
+  else if (path == "PIGPIO_Config::Servo_Channel")
   {
     value = Poly<PIGPIO_Config::IChannel>(new PIGPIO_Config::Servo_Channel());
     return deserialize((PIGPIO_Config::Servo_Channel&)*value, *value_sz_value);
   }
-  else if (path == "::PIGPIO_Config::PWM_Channel")
+  else if (path == "PIGPIO_Config::PWM_Channel")
   {
     value = Poly<PIGPIO_Config::IChannel>(new PIGPIO_Config::PWM_Channel());
     return deserialize((PIGPIO_Config::PWM_Channel&)*value, *value_sz_value);

@@ -108,8 +108,8 @@ void Properties_Model::Tree_Item::build_children(std::shared_ptr<ts::IValue> val
 	}
     else if (std::shared_ptr<ts::IVector_Value> vector_value = std::dynamic_pointer_cast<ts::IVector_Value>(value))
 	{
-        //m_connections.push_back(vectorValue->sig_elementsAdded.connect(&Properties_Model::on_elements_added, m_model, jtl::promote_to_ref(vectorValue), std::placeholders::_1, std::placeholders::_2));
-        //m_connections.push_back(vectorValue->sig_elementsWillBeRemoved.connect(&Properties_Model::on_elements_will_be_removed, m_model, jtl::promote_to_ref(vectorValue), std::placeholders::_1, std::placeholders::_2));
+        //m_connections.push_back(vectorValue->sig_elementsAdded.connect(&Properties_Model::on_elements_added, m_model, vectorValue, std::placeholders::_1, std::placeholders::_2));
+        //m_connections.push_back(vectorValue->sig_elementsWillBeRemoved.connect(&Properties_Model::on_elements_will_be_removed, m_model, vectorValue, std::placeholders::_1, std::placeholders::_2));
 
         m_children.reserve(vector_value->get_value_count());
         for (size_t i = 0; i < vector_value->get_value_count(); i++)
@@ -438,7 +438,7 @@ QVariant Properties_Model::data(QModelIndex const& index, int role) const
 			}
 
 			//don't use value->GetAsString() for structs because it returns the real member count, but the tree item might be hiding some members
-            return QVariant(/*jtl::format<std::string>("{} member{}", count, count == 1 ? "" : "s").c_str()*/);
+            return QVariant();
 		}
 	}
 	else if (role == Qt::DecorationRole && index.column() == 0)
@@ -505,14 +505,11 @@ void Properties_Model::set_value(std::shared_ptr<ts::IStruct_Value> value)
 	endResetModel();
 
     m_rootValue = value;
-    if (!m_rootValue)
+    if (m_rootValue)
 	{
-        //sig_handleChanged.emit();
-		return;
-	}
-
-    m_root->build_root(*m_rootValue);
-	Q_EMIT layoutChanged();
+        m_root->build_root(*m_rootValue);
+    }
+    Q_EMIT layoutChanged();
 
     //sig_handleChanged.emit();
 }
@@ -659,7 +656,7 @@ QModelIndex Properties_Model::get_index_from_value(const ts::IValue& value) cons
 
 //////////////////////////////////////////////////////////////////////////
 
-//void Properties_Model::on_elements_added(std::shared_ptr<ts::IVectorValue> parent, jtl::const_random_iterator<std::shared_ptr<ts::IValue>> beginIt, jtl::const_random_iterator<std::shared_ptr<ts::IValue>> endIt)
+//void Properties_Model::on_elements_added(std::shared_ptr<ts::IVectorValue> parent, size_t idx, size_t count)
 //{
 //	const size_t start = std::distance(parent->get_values().begin(), beginIt);
 //	const size_t count = std::distance(beginIt, endIt);
@@ -678,7 +675,7 @@ QModelIndex Properties_Model::get_index_from_value(const ts::IValue& value) cons
 //		for (size_t i = 0; i < parent_ti->m_children.size(); i++)
 //		{
 //            Tree_Item& child = *parent_ti->m_children[i];
-//			child.m_name = jtl::format("{}", i);
+//			child.m_name = format("{}", i);
 //            const QModelIndex& topLeft = child.m_model_index;
 //			QModelIndex bottomRight = createIndex(static_cast<int>(topLeft.row()), columnCount(topLeft) - 1, topLeft.internalPointer());
 //			Q_EMIT dataChanged(topLeft, bottomRight, QVector<int>() << Qt::DisplayRole << Qt::EditRole);
@@ -688,7 +685,7 @@ QModelIndex Properties_Model::get_index_from_value(const ts::IValue& value) cons
 
 ///////////////////////////////////////////////////////////////////////////////
 
-//void Properties_Model::on_elements_will_be_removed(std::shared_ptr<ts::IVectorValue> parent, jtl::const_random_iterator<std::shared_ptr<ts::IValue>> beginIt, jtl::const_random_iterator<std::shared_ptr<ts::IValue>> endIt)
+//void Properties_Model::on_elements_will_be_removed(std::shared_ptr<ts::IVectorValue> parent, size_t idx, size_t count)
 //{
 //	const size_t start = std::distance(parent->get_values().begin(), beginIt);
 //	const size_t count = std::distance(beginIt, endIt);
@@ -707,7 +704,7 @@ QModelIndex Properties_Model::get_index_from_value(const ts::IValue& value) cons
 //		for (size_t i = 0; i < parent_ti->m_children.size(); i++)
 //		{
 //            Tree_Item& child = *parent_ti->m_children[i];
-//			child.m_name = jtl::format("{}", i);
+//			child.m_name = format("{}", i);
 //            const QModelIndex& topLeft = child.m_model_index;
 //			QModelIndex bottomRight = createIndex(static_cast<int>(topLeft.row()), columnCount(topLeft) - 1, topLeft.internalPointer());
 //			Q_EMIT dataChanged(topLeft, bottomRight, QVector<int>() << Qt::DisplayRole << Qt::EditRole);
@@ -829,7 +826,7 @@ void Properties_Model::on_variant_type_index_will_change(std::shared_ptr<ts::IVa
 //		beginInsertRows(parent_ti->m_model_index, static_cast<int>(start), static_cast<int>(start + count - 1));
 //		for (size_t c = 0; c < count; c++)
 //		{
-//            jtl::unique_ref<Tree_Item> ti = std::make_shared<Tree_Item>(this, std::string());
+//            std::shared_ptr<Tree_Item> ti = std::make_shared<Tree_Item>(this, std::string());
 //			ti->Build(elements[c]);
 //			ti->RefreshModelIndex(c + start);
 //			parent_ti->InsertChild(start + c, std::move(ti));

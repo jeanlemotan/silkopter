@@ -112,7 +112,11 @@ HEADERS += \
     ../../src/value_editors/Int_Value_Editor.h \
     ../../src/Multirotor_Render_Widget.h \
     ../../src/ITab_Widget.h \
-    ../../src/UAV_Descriptor_Widget.h
+    ../../src/UAV_Descriptor_Widget.h \
+    ../../src/qnodeseditor/qneblock.h \
+    ../../src/qnodeseditor/qneconnection.h \
+    ../../src/qnodeseditor/qneport.h \
+    ../../src/qnodeseditor/qnodeseditor.h
 
 SOURCES += \
     ../../src/GS.cpp \
@@ -145,11 +149,16 @@ SOURCES += \
     ../../src/value_editors/Bool_Value_Editor.cpp \
     ../../src/value_editors/Int_Value_Editor.cpp \
     ../../src/Multirotor_Render_Widget.cpp \
-    ../../src/UAV_Descriptor_Widget.cpp
+    ../../src/UAV_Descriptor_Widget.cpp \
+    ../../src/qnodeseditor/qneblock.cpp \
+    ../../src/qnodeseditor/qneconnection.cpp \
+    ../../src/qnodeseditor/qneport.cpp \
+    ../../src/qnodeseditor/qnodeseditor.cpp
 
 FORMS += \
     ../../src/GS.ui \
-    ../../src/UAV_Descriptor_Widget.ui
+    ../../src/UAV_Descriptor_Widget.ui \
+    ../../src/New_Node_Dialog.ui
 
 DISTFILES += \
 

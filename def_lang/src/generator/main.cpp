@@ -830,7 +830,7 @@ static ts::Result<void> generate_poly_type_code(Context& context, ts::IPoly_Type
     for (std::shared_ptr<const ts::Qualified_Type> inner_type: inner_types)
     {
         std::string native_inner_type_str = get_native_type(context.parent_scope, *inner_type->get_type()).to_string();
-        context.sz_section_cpp += "  else if (path == \"" + inner_type->get_type()->get_symbol_path().to_string() + "\")\n"
+        context.sz_section_cpp += "  else if (path == \"" + native_inner_type_str + "\")\n"
                                          "  {\n"
                                          "    value = " + native_type_str + "(new " + native_inner_type_str + "());\n"
                                          "    return deserialize((" + native_inner_type_str + "&)*value, *value_sz_value);\n"

@@ -472,7 +472,6 @@ void Comms::request_all_data()
 //        //m_hal->m_node_defs.add(std::move(def));
 //        defs.push_back(std::move(def));
 //    }
-//    sig_node_defs_reset();
 //    sig_node_defs_added(defs);
 
 //    m_setup_channel.end_unpack();
@@ -538,7 +537,6 @@ void Comms::request_all_data()
 //        //nodes.push_back(std::move(node));
 //    }
 
-//    sig_nodes_reset();
 //    sig_nodes_added(nodes);
 
 //    m_setup_channel.end_unpack();
@@ -919,7 +917,6 @@ void Comms::handle_res(gs_comms::setup::Get_Node_Defs_Res const& res)
 {
     QLOGI("Get_Node_Defs_Res {}", res.get_req_id());
 
-
     std::shared_ptr<const ts::IPoly_Type> descriptor_poly_type = m_ts.get_root_scope()->find_specialized_symbol_by_path<ts::IPoly_Type>("Poly_INode_Descriptor");
     if (!descriptor_poly_type)
     {
@@ -993,7 +990,7 @@ void Comms::handle_res(gs_comms::setup::Get_Node_Defs_Res const& res)
         node_defs.push_back(std::move(node_def));
     }
 
-    sig_node_defs_added(node_defs);
+    sig_node_defs_received(node_defs);
 }
 
 void Comms::handle_res(gs_comms::setup::Remove_Node_Res const& res)
@@ -1002,24 +999,146 @@ void Comms::handle_res(gs_comms::setup::Remove_Node_Res const& res)
 
 }
 
+ts::Result<Comms::Node> Comms::handle_node_data(gs_comms::setup::Node_Data const& node_data)
+{
+    std::shared_ptr<const ts::IPoly_Type> descriptor_poly_type = m_ts.get_root_scope()->find_specialized_symbol_by_path<ts::IPoly_Type>("Poly_INode_Descriptor");
+    if (!descriptor_poly_type)
+    {
+        return ts::Error("Cannot find 'Poly_INode_Descriptor' type in the type system");
+    }
+
+    std::shared_ptr<ts::IPoly_Value> descriptor_poly_value = descriptor_poly_type->create_specialized_value();
+    QASSERT(descriptor_poly_value);
+    auto construction_result = descriptor_poly_value->construct();
+    if (construction_result != ts::success)
+    {
+        return ts::Error("Cannot construct a 'Poly_INode_Descriptor' value: " + construction_result.error().what());
+    }
+
+    std::shared_ptr<const ts::IPoly_Type> config_poly_type = m_ts.get_root_scope()->find_specialized_symbol_by_path<ts::IPoly_Type>("Poly_INode_Config");
+    if (!config_poly_type)
+    {
+        return ts::Error("Cannot find 'Poly_INode_Config' type in the type system");
+    }
+
+    std::shared_ptr<ts::IPoly_Value> config_poly_value = config_poly_type->create_specialized_value();
+    QASSERT(config_poly_value);
+    construction_result = config_poly_value->construct();
+    if (construction_result != ts::success)
+    {
+        return ts::Error("Cannot construct a 'Poly_INode_Config' value: " + construction_result.error().what());
+    }
+
+    Node node;
+    node.name = node_data.get_name();
+    node.type = static_cast<node::Type>(node_data.get_type());
+
+    std::vector<gs_comms::setup::Node_Data::Input> const& input_datas = node_data.get_inputs();
+    node.inputs.reserve(input_datas.size());
+    for (gs_comms::setup::Node_Data::Input const& input_data: input_datas)
+    {
+        Node::Input input;
+        input.name = input_data.get_name();
+        input.type = stream::Type(static_cast<stream::Semantic>(input_data.get_semantic()), static_cast<stream::Space>(input_data.get_space()));
+        node.inputs.push_back(std::move(input));
+    }
+
+    std::vector<gs_comms::setup::Node_Data::Output> const& output_datas = node_data.get_outputs();
+    node.outputs.reserve(output_datas.size());
+    for (gs_comms::setup::Node_Data::Output const& output_data: output_datas)
+    {
+        Node::Output output;
+        output.name = output_data.get_name();
+        output.type = stream::Type(static_cast<stream::Semantic>(output_data.get_semantic()), static_cast<stream::Space>(output_data.get_space()));
+        node.outputs.push_back(std::move(output));
+    }
+
+    {
+        std::string const& json = decode_json(node_data.get_descriptor_data());
+        auto json_result = ts::sz::from_json(json);
+        if (json_result != ts::success)
+        {
+            return ts::Error("Cannot deserialize ast json data: " + json_result.error().what());
+        }
+
+        auto deserialize_result = descriptor_poly_value->deserialize(json_result.payload());
+        if (deserialize_result != ts::success)
+        {
+            return ts::Error("Cannot deserialize descriptor: " + deserialize_result.error().what());
+        }
+
+        node.descriptor = std::dynamic_pointer_cast<ts::IStruct_Value>(descriptor_poly_value->get_value());
+        if (!node.descriptor)
+        {
+            return ts::Error("Invalid descriptor value. Expected struct, got something else");
+        }
+    }
+
+    {
+        std::string const& json = decode_json(node_data.get_config_data());
+        auto json_result = ts::sz::from_json(json);
+        if (json_result != ts::success)
+        {
+            return ts::Error("Cannot deserialize ast json data: " + json_result.error().what());
+        }
+
+        auto deserialize_result = config_poly_value->deserialize(json_result.payload());
+        if (deserialize_result != ts::success)
+        {
+            return ts::Error("Cannot deserialize config: " + deserialize_result.error().what());
+        }
+
+        node.config = std::dynamic_pointer_cast<ts::IStruct_Value>(config_poly_value->get_value());
+        if (!node.config)
+        {
+            return ts::Error("Invalid config value. Expected struct, got something else");
+        }
+    }
+
+    return node;
+}
+
 void Comms::handle_res(gs_comms::setup::Get_Nodes_Res const& res)
 {
     QLOGI("Get_Nodes_Res {}", res.get_req_id());
 
+    std::vector<Node> nodes;
+
+    std::vector<gs_comms::setup::Node_Data> const& node_datas = res.get_node_datas();
+    nodes.reserve(node_datas.size());
+
+    for (gs_comms::setup::Node_Data const& node_data: node_datas)
+    {
+        auto result = handle_node_data(node_data);
+        if (result != ts::success)
+        {
+            QLOGE("Cannot handle node '{}' data: {}", node_data.get_name(), result.error().what());
+            return;
+        }
+        nodes.push_back(result.extract_payload());
+    }
+
+    sig_nodes_received(nodes);
 }
 
 void Comms::handle_res(gs_comms::setup::Add_Node_Res const& res)
 {
     QLOGI("Add_Node_Res {}", res.get_req_id());
 
+    auto result = handle_node_data(res.get_node_data());
+    if (result != ts::success)
+    {
+        QLOGE("Cannot handle node '{}' data: {}", res.get_node_data().get_name(), result.error().what());
+        return;
+    }
+
+    sig_node_added(result.extract_payload());
 }
 
 void Comms::handle_res(gs_comms::setup::Set_Node_Input_Stream_Path_Res const& res)
 {
     QLOGI("Set_Node_Input_Stream_Path_Res {}", res.get_req_id());
-
 }
-
 
 ts::Result<std::shared_ptr<ts::IStruct_Value>> Comms::request_uav_descriptor(std::chrono::high_resolution_clock::duration timeout)
 {
@@ -1095,6 +1214,141 @@ ts::Result<std::shared_ptr<ts::IStruct_Value>> Comms::send_uav_descriptor(std::s
     boost::signals2::scoped_connection c = sig_uav_descriptor_received.connect([this, &result, &done](std::shared_ptr<ts::IStruct_Value> d)
     {
         result = std::move(d);
+        done = true;
+    });
+    boost::signals2::scoped_connection ec = sig_error_received.connect([this, &result, &req, &done](uint32_t req_id, std::string const& message)
+    {
+        if (req_id == req.get_req_id())
+        {
+            result = ts::Error(message);
+            done = true;
+        }
+    });
+
+    auto start = std::chrono::high_resolution_clock::now();
+    while (!done && (std::chrono::high_resolution_clock::now() - start) < timeout)
+    {
+        process_rcp();
+        process();
+    }
+
+    return result;
+}
+
+ts::Result<std::vector<Comms::Node_Def>> Comms::request_node_defs(std::chrono::high_resolution_clock::duration timeout)
+{
+    ts::Result<std::vector<Comms::Node_Def>> result = ts::Error("Timeout");
+    bool done = false;
+
+    gs_comms::setup::Brain_Req request;
+    gs_comms::setup::Get_Node_Defs_Req req;
+    req.set_req_id(++m_last_req_id);
+    request = req;
+    serialize_and_send(SETUP_CHANNEL, request);
+
+    boost::signals2::scoped_connection c = sig_node_defs_received.connect([this, &result, &done](std::vector<Node_Def> const& defs)
+    {
+        result = defs;
+        done = true;
+    });
+    boost::signals2::scoped_connection ec = sig_error_received.connect([this, &result, &req, &done](uint32_t req_id, std::string const& message)
+    {
+        if (req_id == req.get_req_id())
+        {
+            result = ts::Error(message);
+            done = true;
+        }
+    });
+
+    auto start = std::chrono::high_resolution_clock::now();
+    while (!done && (std::chrono::high_resolution_clock::now() - start) < timeout)
+    {
+        process_rcp();
+        process();
+    }
+
+    return result;
+}
+
+ts::Result<std::vector<Comms::Node>> Comms::request_nodes(std::chrono::high_resolution_clock::duration timeout)
+{
+    ts::Result<std::vector<Comms::Node>> result = ts::Error("Timeout");
+    bool done = false;
+
+    gs_comms::setup::Brain_Req request;
+    gs_comms::setup::Get_Nodes_Req req;
+    req.set_req_id(++m_last_req_id);
+    request = req;
+    serialize_and_send(SETUP_CHANNEL, request);
+
+    boost::signals2::scoped_connection c = sig_nodes_received.connect([this, &result, &done](std::vector<Node> const& nodes)
+    {
+        result = nodes;
+        done = true;
+    });
+    boost::signals2::scoped_connection ec = sig_error_received.connect([this, &result, &req, &done](uint32_t req_id, std::string const& message)
+    {
+        if (req_id == req.get_req_id())
+        {
+            result = ts::Error(message);
+            done = true;
+        }
+    });
+
+    auto start = std::chrono::high_resolution_clock::now();
+    while (!done && (std::chrono::high_resolution_clock::now() - start) < timeout)
+    {
+        process_rcp();
+        process();
+    }
+
+    return result;
+}
+
+ts::Result<Comms::Node> Comms::add_node(std::string const& name,
+                                         std::string const def_name,
+                                         std::shared_ptr<ts::IStruct_Value> descriptor,
+                                         std::chrono::high_resolution_clock::duration timeout)
+{
+    std::shared_ptr<ts::IPoly_Value> container_value = m_ts.create_specialized_value<ts::IPoly_Value>("Poly_INode_Descriptor");
+    if (!container_value)
+    {
+        return ts::Error("Cannot find container type.");
+    }
+    auto construct_result = container_value->construct();
+    if (construct_result != ts::success)
+    {
+        return ts::Error("Cannot construct container value: " + construct_result.error().what());
+    }
+
+    auto set_result = container_value->set_value(descriptor);
+    if (set_result != ts::success)
+    {
+        return ts::Error("Cannot set descriptor in container value: " + set_result.error().what());
+    }
+
+    auto serialize_result = container_value->serialize();
+    if (serialize_result != ts::success)
+    {
+        return ts::Error("Cannot serialize container value: " + serialize_result.error().what());
+    }
+
+    ts::Result<Node> result = ts::Error("Timeout");
+    bool done = false;
+
+    gs_comms::setup::Brain_Req request;
+    gs_comms::setup::Add_Node_Req req;
+    req.set_req_id(++m_last_req_id);
+    req.set_def_name(def_name);
+    req.set_name(name);
+
+    req.set_descriptor_data(encode_json(ts::sz::to_json(serialize_result.payload(), false)));
+    request = req;
+    serialize_and_send(SETUP_CHANNEL, request);
+
+    boost::signals2::scoped_connection c = sig_node_added.connect([this, &result, &done](Node const& node)
+    {
+        result = node;
         done = true;
     });
     boost::signals2::scoped_connection ec = sig_error_received.connect([this, &result, &req, &done](uint32_t req_id, std::string const& message)

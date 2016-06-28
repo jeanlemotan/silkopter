@@ -81,6 +81,8 @@ void UAV_Descriptor_Widget::set_active(bool active)
 
     m_new_action = m_toolbar->addAction(QIcon(":/icons/ui/new.png"), "New");
     QObject::connect(m_new_action, &QAction::triggered, [this](bool) { show_new_descriptor_menu(); });
+
+    m_browser->set_value(m_descriptor);
 }
 
 void UAV_Descriptor_Widget::create_descriptor(std::shared_ptr<const ts::IStruct_Type> type)

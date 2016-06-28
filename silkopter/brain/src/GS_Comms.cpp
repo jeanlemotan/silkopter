@@ -1081,7 +1081,7 @@ void GS_Comms::handle_req(gs_comms::setup::Add_Node_Req const& req)
     std::shared_ptr<node::INode> node = m_hal.create_node(req.get_def_name(), req.get_name(), *descriptor);
     if (!node)
     {
-        response = make_error(q::util::format<std::string>("Cannot create node {} descriptor json: {}", req.get_def_name(), deserialize_result.error().what()));
+        response = make_error(q::util::format<std::string>("Cannot create node {}", req.get_def_name()));
         serialize_and_send(SETUP_CHANNEL, response);
         return;
     }

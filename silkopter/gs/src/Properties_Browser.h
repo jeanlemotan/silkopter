@@ -21,6 +21,8 @@ public:
     void init(std::shared_ptr<Value_Editor_Factory> editor_factory);
     void shutdown();
 
+    std::shared_ptr<Value_Editor_Factory> get_editor_factory();
+
     void reset();
 
     void set_value(std::shared_ptr<ts::IStruct_Value> value);
@@ -52,7 +54,5 @@ private:
 
     std::shared_ptr<Properties_Model> m_model;
     std::shared_ptr<Properties_Delegate> m_delegate;
-
-    //jtl::lent_ptr<QSettings> m_settings;
 };
 

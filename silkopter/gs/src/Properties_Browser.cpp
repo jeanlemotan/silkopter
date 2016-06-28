@@ -51,6 +51,13 @@ void Properties_Browser::shutdown()
 
 //////////////////////////////////////////////////////////////////////////
 
+std::shared_ptr<Value_Editor_Factory> Properties_Browser::get_editor_factory()
+{
+    return m_delegate->get_editor_factory();
+}
+
+//////////////////////////////////////////////////////////////////////////
+
 void Properties_Browser::reset()
 {
     set_value(nullptr);

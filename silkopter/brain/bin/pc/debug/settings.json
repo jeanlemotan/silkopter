@@ -1,19 +1,5 @@
 {
-	"uav_descriptor":{
-		"type":"Quad_Multirotor_Descriptor",
-		"value":{
-			"name":"",
-			"mass":0.010000,
-			"moment_of_inertia":0.000000,
-			"radius":1.000000,
-			"height":1.000000,
-			"motor_z_torque":1.000000,
-			"motor_thrust":1.000000,
-			"motor_acceleration":10.000000,
-			"motor_deceleration":10.000000,
-			"plus_configuration":false
-		}
-	},
+	"uav_descriptor":null,
 	"buses":[
 	],
 	"nodes":[
