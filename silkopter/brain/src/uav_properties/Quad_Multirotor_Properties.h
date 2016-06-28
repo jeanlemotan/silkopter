@@ -10,7 +10,7 @@ namespace silk
 {
 namespace hal
 {
-struct Quad_Descriptor;
+struct Quad_Multirotor_Descriptor;
 }
 }
 
@@ -18,10 +18,10 @@ struct Quad_Descriptor;
 namespace silk
 {
 
-class Quad_Properties : public IMultirotor_Properties
+class Quad_Multirotor_Properties : public IMultirotor_Properties
 {
 public:
-    bool init(hal::Quad_Descriptor const& descriptor);
+    bool init(hal::Quad_Multirotor_Descriptor const& descriptor);
 
     float get_mass() const override;
     float get_moment_of_inertia() const override;

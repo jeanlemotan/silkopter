@@ -158,7 +158,8 @@ HEADERS += \
     ../../include/def_lang/IOptional_Value.h \
     ../../include/def_lang/impl/Optional_Type.h \
     ../../include/def_lang/impl/Optional_Value.h \
-    ../../include/def_lang/Qualified_Type.h
+    ../../include/def_lang/Qualified_Type.h \
+    ../../include/def_lang/impl/Public_Attribute.h
 
 SOURCES += \
     ../../src/yy_lexer.cpp \
@@ -209,5 +210,6 @@ SOURCES += \
     ../../src/ts/Native_Type_Attribute.cpp \
     ../../src/ts/Optional_Type.cpp \
     ../../src/ts/Optional_Value.cpp \
-    ../../src/ts/Qualified_Type.cpp
+    ../../src/ts/Qualified_Type.cpp \
+    ../../src/ts/Public_Attribute.cpp
 

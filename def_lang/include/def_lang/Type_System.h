@@ -20,11 +20,22 @@ public:
 
     std::shared_ptr<IValue> create_value(Symbol_Path const& type_path) const;
 
+    template<typename T>
+    std::shared_ptr<T> create_specialized_value(Symbol_Path const& type_path) const;
+
     std::shared_ptr<IDeclaration_Scope> get_root_scope();
     std::shared_ptr<const IDeclaration_Scope> get_root_scope() const;
 
 protected:
     std::shared_ptr<Namespace> m_root_scope;
 };
+
+template<typename T>
+std::shared_ptr<T> Type_System::create_specialized_value(Symbol_Path const& type_path) const
+{
+    return std::dynamic_pointer_cast<T>(create_value(type_path));
+}
+
+
 
 }

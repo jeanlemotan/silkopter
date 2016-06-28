@@ -33,6 +33,10 @@ public:
     std::shared_ptr<const IStruct_Type> get_base_struct() const override;
     bool is_base_of(IStruct_Type const& type) const override;
 
+    std::vector<std::shared_ptr<const IStruct_Type>> get_all_inheriting_types() const override;
+
+    bool is_public() const override;
+
 protected:
     Result<void> validate_symbol(std::shared_ptr<const ISymbol> symbol) override;
     Result<void> validate_attribute(IAttribute const& attribute) override;
@@ -45,6 +49,7 @@ private:
     std::string m_ui_name;
     Symbol_Path m_native_type;
     size_t m_first_noninherited_member_def_index = 0;
+    bool m_is_public = true;
 };
 
 }

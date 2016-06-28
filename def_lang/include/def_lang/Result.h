@@ -46,7 +46,7 @@ class Result final
 {
 public:
 
-    inline ~Result()
+    inline ~Result() noexcept
 	{
         if (m_is_success)
 		{
@@ -61,30 +61,32 @@ public:
 #endif
 	}
 
-    inline Result(const Error& error)
+    inline Result(const Error& error) noexcept
         : m_is_success(false)
 	{
         new (&m_data) Error(error);
 	}
 
-    inline Result(Error&& error)
+    inline Result(Error&& error) noexcept
         : m_is_success(false)
 	{
         new (&m_data) Error(std::move(error));
 	}
 
 	template<typename T2>
-    inline Result(T2&& payload)
+    inline Result(T2&& payload) noexcept
         : m_is_success(true)
 	{
 		new (&m_data) T(std::forward<T2>(payload));
 	}
 
+    inline Result(const Result<T>& other) = delete;
+
 	template<typename T2>
     inline Result(const Result<T2>& other) = delete;
 
 	template<typename T2>
-    inline Result(Result<T2>&& other)
+    inline Result(Result<T2>&& other) noexcept
         : m_is_success(other.m_is_success)
 	{
     #ifndef NDEBUG
@@ -102,11 +104,13 @@ public:
 		}
 	}
 
-	template<typename T2>
-    inline Result<T>& operator = (const Result<T2>& other) = delete;
+    inline Result<T>& operator=(const Result<T>& other) = delete;
 
 	template<typename T2>
-    inline Result<T>& operator = (Result<T2>&& other)
+    inline Result<T>& operator=(const Result<T2>& other) = delete;
+
+	template<typename T2>
+    inline Result<T>& operator=(Result<T2>&& other)
 	{
 #ifndef NDEBUG
         m_check_pending = other.m_check_pending;
@@ -134,6 +138,21 @@ public:
 		}
 		return *this;
 	}
+
+    inline Result<T>& operator=(const Error& error)
+    {
+        return operator=(Result<T>(error));
+    }
+    inline Result<T>& operator=(Error&& error)
+    {
+        return operator=(Result<T>(std::move(error)));
+    }
+
+    template<typename T2>
+    inline Result<T>& operator=(T2&& payload)
+    {
+        return operator=(Result<T>(std::forward<T2>(payload)));
+    }
 
 	inline T& payload()
 	{
@@ -265,6 +284,13 @@ public:
         TS_ASSERT(!m_is_success);
         return *reinterpret_cast<const Error*>(&m_data);
 	}
+
+    inline void ignore()
+    {
+#ifndef NDEBUG
+        m_check_pending = false;
+#endif
+    }
 
     inline bool operator==(success_t) const
 	{

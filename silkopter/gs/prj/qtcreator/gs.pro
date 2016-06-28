@@ -81,7 +81,6 @@ HEADERS += \
     ../../src/GS.h \
     ../../src/stdafx.h \
     ../../src/Nodes_Widget.h \
-    ../../src/Config_Widget.h \
     ../../src/Comms.h \
     ../../../libs/utils/RCP_UDP_Socket.h \
     ../../../libs/utils/RCP.h \
@@ -110,13 +109,15 @@ HEADERS += \
     ../../src/value_editors/details/Qualified_Value.inl \
     ../../src/value_editors/details/VecX_Value_Editor_Helper.h \
     ../../src/value_editors/Bool_Value_Editor.h \
-    ../../src/value_editors/Int_Value_Editor.h
+    ../../src/value_editors/Int_Value_Editor.h \
+    ../../src/Multirotor_Render_Widget.h \
+    ../../src/ITab_Widget.h \
+    ../../src/UAV_Descriptor_Widget.h
 
 SOURCES += \
     ../../src/GS.cpp \
     ../../src/main.cpp \
     ../../src/Nodes_Widget.cpp \
-    ../../src/Config_Widget.cpp \
     ../../src/Comms.cpp \
     ../../../libs/utils/RCP_UDP_Socket.cpp \
     ../../../libs/utils/RCP.cpp \
@@ -142,10 +143,13 @@ SOURCES += \
     ../../src/value_editors/Vec4i_Value_Editor.cpp \
     ../../src/value_editors/VecX_Value_Editor_Helper.cpp \
     ../../src/value_editors/Bool_Value_Editor.cpp \
-    ../../src/value_editors/Int_Value_Editor.cpp
+    ../../src/value_editors/Int_Value_Editor.cpp \
+    ../../src/Multirotor_Render_Widget.cpp \
+    ../../src/UAV_Descriptor_Widget.cpp
 
 FORMS += \
-    ../../src/GS.ui
+    ../../src/GS.ui \
+    ../../src/UAV_Descriptor_Widget.ui
 
 DISTFILES += \
 

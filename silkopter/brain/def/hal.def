@@ -17,7 +17,7 @@ alias servo_signal_t = float : [ min = 1.f, max = 2.f ];
 alias pwm_signal_t = float : [ min = 0.f, max = 1.f ];
 
 
-struct IUAV_Descriptor
+struct IUAV_Descriptor : [ ui_name = "UAV Descriptor" ]
 {
     alias mass_t = float : [ min = 0.01f, max = 100.f ];
 
@@ -28,19 +28,19 @@ struct IUAV_Descriptor
 alias Poly_IUAV_Descriptor = poly<IUAV_Descriptor>;
 
 
-struct IBus_Descriptor
+struct IBus_Descriptor : [ ui_name = "Bus Descriptor" ]
 {
 };
 alias Poly_IBus_Descriptor = poly<IBus_Descriptor>;
 
 
-struct INode_Descriptor
+struct INode_Descriptor : [ ui_name = "Node Descriptor" ]
 {
 };
 alias Poly_INode_Descriptor = poly<INode_Descriptor>;
 
 
-struct INode_Config
+struct INode_Config : [ ui_name = "UAV Config" ]
 {
 };
 alias Poly_INode_Config = poly<INode_Config>;
@@ -81,7 +81,7 @@ struct Settings
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Configs
 
-struct Multirotor_Descriptor : public IUAV_Descriptor
+struct Multirotor_Descriptor : public IUAV_Descriptor : [ ui_name = "Multirotor Descriptor" ]
 {
     alias height_t = float : [ min = 0.01f, max = 100.f ];
     alias radius_t = float : [ min = 0.01f, max = 100.f ];
@@ -97,35 +97,35 @@ struct Multirotor_Descriptor : public IUAV_Descriptor
     acceleration_t motor_deceleration = 10.f : [ ui_name = "Motor Deceleration (N/s)" ];
 };
 
-struct Tri_Descriptor : public Multirotor_Descriptor
+struct Tri_Multirotor_Descriptor : public Multirotor_Descriptor : [ ui_name = "Tri Multirotor Descriptor" ]
 {
 };
 
-struct Quad_Descriptor : public Multirotor_Descriptor
-{
-    bool plus_configuration = false : [ ui_name = "+ Configuration" ];
-};
-
-struct Hexa_Descriptor : public Multirotor_Descriptor
+struct Quad_Multirotor_Descriptor : public Multirotor_Descriptor : [ ui_name = "Quad Multirotor Descriptor" ]
 {
     bool plus_configuration = false : [ ui_name = "+ Configuration" ];
 };
 
-struct Hexatri_Descriptor : public Multirotor_Descriptor
-{
-};
-
-struct Octo_Descriptor : public Multirotor_Descriptor
+struct Hexa_Multirotor_Descriptor : public Multirotor_Descriptor : [ ui_name = "Hexa Multirotor Descriptor" ]
 {
     bool plus_configuration = false : [ ui_name = "+ Configuration" ];
 };
 
-struct Octaquad_Descriptor : public Multirotor_Descriptor
+struct Hexatri_Multirotor_Descriptor : public Multirotor_Descriptor : [ ui_name = "Hexatri Multirotor Descriptor" ]
+{
+};
+
+struct Octo_Multirotor_Descriptor : public Multirotor_Descriptor : [ ui_name = "Octo Multirotor Descriptor" ]
 {
     bool plus_configuration = false : [ ui_name = "+ Configuration" ];
 };
 
-struct Custom_Multirotor_Descriptor : public Multirotor_Descriptor
+struct Octaquad_Multirotor_Descriptor : public Multirotor_Descriptor : [ ui_name = "Octoquad Multirotor Descriptor" ]
+{
+    bool plus_configuration = false : [ ui_name = "+ Configuration" ];
+};
+
+struct Custom_Multirotor_Descriptor : public Multirotor_Descriptor : [ ui_name = "Custom Multirotor Descriptor" ]
 {
     struct Motor
     {

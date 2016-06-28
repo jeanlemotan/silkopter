@@ -14,7 +14,22 @@ GS::GS(QWidget *parent)
 
     m_ui.setupUi(this);
 
-    m_ui.config_widget->init(m_ts, *m_ui.properties_browser);
+    QObject::connect(m_ui.tabWidget, &QTabWidget::currentChanged, [this](int index)
+    {
+        for (int i = 0; i < m_ui.tabWidget->count(); i++)
+        {
+            if (ITab_Widget* t = dynamic_cast<ITab_Widget*>(m_ui.tabWidget->widget(i)))
+            {
+                t->set_active(false);
+            }
+        }
+        if (ITab_Widget* t = dynamic_cast<ITab_Widget*>(m_ui.tabWidget->widget(index)))
+        {
+            t->set_active(true);
+        }
+    });
+
+    m_ui.uav_descriptor_widget->init(m_ui.toolbar, m_comms, *m_ui.properties_browser);
     m_ui.properties_browser->init(m_editor_factory);
 
     m_process_last_tp = q::Clock::now();
@@ -48,7 +63,7 @@ GS::GS(QWidget *parent)
 
     m_comms.sig_type_system_reset.connect([this]()
     {
-       m_ui.config_widget->refresh();
+       m_ui.uav_descriptor_widget->refresh();
     });
 
     //set_remote_address("10.10.10.10");

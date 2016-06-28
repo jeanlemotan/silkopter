@@ -24,6 +24,10 @@ public:
 
     virtual std::shared_ptr<const IStruct_Type> get_base_struct() const = 0;
     virtual bool is_base_of(IStruct_Type const& type) const = 0;
+
+    virtual std::vector<std::shared_ptr<const IStruct_Type>> get_all_inheriting_types() const = 0;
+
+    virtual bool is_public() const = 0;
 };
 
 }

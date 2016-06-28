@@ -31,6 +31,7 @@
 #include "def_lang/impl/Decimals_Attribute.h"
 #include "def_lang/impl/Default_Attribute.h"
 #include "def_lang/impl/UI_Name_Attribute.h"
+#include "def_lang/impl/Public_Attribute.h"
 #include "def_lang/impl/Native_Type_Attribute.h"
 #include "def_lang/impl/String_Type.h"
 #include "def_lang/impl/String_Value.h"
@@ -514,6 +515,17 @@ static Result<void> create_type_attributes(Type_System& ts, IType& type, Node co
             }
 
             attribute = std::make_shared<UI_Name_Attribute>(value->get_value());
+        }
+        else if (attribute_name == "public")
+        {
+            std::shared_ptr<IBool_Value> value = ts.get_root_scope()->find_specialized_symbol_by_name<IBool_Type>("bool")->create_specialized_value();
+            auto result = value->construct(*initializer_list);
+            if (result != success)
+            {
+                return Error(attribute_node.get_source_location().to_string() + "Cannot initialize attribute: " + result.error().what());
+            }
+
+            attribute = std::make_shared<Public_Attribute>(value->get_value());
         }
         else if (attribute_name == "native_type")
         {

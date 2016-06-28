@@ -39,9 +39,9 @@
        <enum>QTabWidget::Rounded</enum>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
-      <widget class="Config_Widget" name="config_widget">
+      <widget class="UAV_Descriptor_Widget" name="uav_descriptor_widget">
        <attribute name="icon">
         <iconset resource="../res/res.qrc">
          <normaloff>:/icons/ui/setup.png</normaloff>:/icons/ui/setup.png</iconset>
@@ -70,7 +70,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>23</height>
+     <height>19</height>
     </rect>
    </property>
    <property name="nativeMenuBar">
@@ -90,6 +90,17 @@
    </attribute>
    <widget class="Properties_Browser" name="properties_browser"/>
   </widget>
+  <widget class="QToolBar" name="toolbar">
+   <property name="windowTitle">
+    <string>toolBar</string>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+  </widget>
   <action name="action_connect">
    <property name="icon">
     <iconset resource="../res/res.qrc">
@@ -102,12 +113,6 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>Config_Widget</class>
-   <extends>QWidget</extends>
-   <header>Config_Widget.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
    <class>Nodes_Widget</class>
    <extends>QWidget</extends>
    <header>Nodes_Widget.h</header>
@@ -117,6 +122,12 @@
    <class>Properties_Browser</class>
    <extends>QWidget</extends>
    <header>Properties_Browser.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>UAV_Descriptor_Widget</class>
+   <extends>QWidget</extends>
+   <header>UAV_Descriptor_Widget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

@@ -64,12 +64,12 @@
 #include "def_lang/Serialization.h"
 #include "def_lang/JSON_Serializer.h"
 
-#include "uav_properties/Tri_Properties.h"
-#include "uav_properties/Quad_Properties.h"
-#include "uav_properties/Hexa_Properties.h"
-#include "uav_properties/Hexatri_Properties.h"
-#include "uav_properties/Octo_Properties.h"
-#include "uav_properties/Octoquad_Properties.h"
+#include "uav_properties/Tri_Multirotor_Properties.h"
+#include "uav_properties/Quad_Multirotor_Properties.h"
+#include "uav_properties/Hexa_Multirotor_Properties.h"
+#include "uav_properties/Hexatri_Multirotor_Properties.h"
+#include "uav_properties/Octo_Multirotor_Properties.h"
+#include "uav_properties/Octoquad_Multirotor_Properties.h"
 
 #ifdef RASPBERRY_PI
 
@@ -369,36 +369,36 @@ auto HAL::set_uav_descriptor(std::shared_ptr<const hal::IUAV_Descriptor> descrip
 
     std::shared_ptr<IUAV_Properties> new_properties;
 
-    if (auto* d = dynamic_cast<hal::Tri_Descriptor const*>(descriptor.get()))
+    if (auto* d = dynamic_cast<hal::Tri_Multirotor_Descriptor const*>(descriptor.get()))
     {
         QLOGE("Tri not supported");
         return false;
     }
-    else if (auto* d = dynamic_cast<hal::Quad_Descriptor const*>(descriptor.get()))
+    else if (auto* d = dynamic_cast<hal::Quad_Multirotor_Descriptor const*>(descriptor.get()))
     {
-        std::shared_ptr<Quad_Properties> p = std::make_shared<Quad_Properties>();
+        std::shared_ptr<Quad_Multirotor_Properties> p = std::make_shared<Quad_Multirotor_Properties>();
         if (!p->init(*d))
         {
             return false;
         }
         new_properties = p;
     }
-    else if (auto* d = dynamic_cast<hal::Hexa_Descriptor const*>(descriptor.get()))
+    else if (auto* d = dynamic_cast<hal::Hexa_Multirotor_Descriptor const*>(descriptor.get()))
     {
         QLOGE("Hexa not supported");
         return false;
     }
-    else if (auto* d = dynamic_cast<hal::Hexatri_Descriptor const*>(descriptor.get()))
+    else if (auto* d = dynamic_cast<hal::Hexatri_Multirotor_Descriptor const*>(descriptor.get()))
     {
         QLOGE("Hexatri not supported");
         return false;
     }
-    else if (auto* d = dynamic_cast<hal::Octo_Descriptor const*>(descriptor.get()))
+    else if (auto* d = dynamic_cast<hal::Octo_Multirotor_Descriptor const*>(descriptor.get()))
     {
         QLOGE("Octo not supported");
         return false;
     }
-    else if (auto* d = dynamic_cast<hal::Octaquad_Descriptor const*>(descriptor.get()))
+    else if (auto* d = dynamic_cast<hal::Octaquad_Multirotor_Descriptor const*>(descriptor.get()))
     {
         QLOGE("Octaquad not supported");
         return false;

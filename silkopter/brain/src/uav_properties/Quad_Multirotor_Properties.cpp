@@ -1,4 +1,4 @@
-#include "Quad_Properties.h"
+#include "Quad_Multirotor_Properties.h"
 
 #include "hal.def.h"
 
@@ -6,7 +6,7 @@ namespace silk
 {
 
 
-bool Quad_Properties::init(hal::Quad_Descriptor const& descriptor)
+bool Quad_Multirotor_Properties::init(hal::Quad_Multirotor_Descriptor const& descriptor)
 {
     m_mass = descriptor.get_mass();
     m_radius = descriptor.get_radius();
@@ -28,43 +28,43 @@ bool Quad_Properties::init(hal::Quad_Descriptor const& descriptor)
     return true;
 }
 
-float Quad_Properties::get_mass() const
+float Quad_Multirotor_Properties::get_mass() const
 {
     return m_mass;
 }
-float Quad_Properties::get_radius() const
+float Quad_Multirotor_Properties::get_radius() const
 {
     return m_radius;
 }
-float Quad_Properties::get_height() const
+float Quad_Multirotor_Properties::get_height() const
 {
     return m_height;
 }
-float Quad_Properties::get_moment_of_inertia() const
+float Quad_Multirotor_Properties::get_moment_of_inertia() const
 {
     return m_moment_of_inertia;
 }
-float Quad_Properties::get_motor_z_torque() const
+float Quad_Multirotor_Properties::get_motor_z_torque() const
 {
     return m_motor_z_torque;
 }
-float Quad_Properties::get_motor_thrust() const
+float Quad_Multirotor_Properties::get_motor_thrust() const
 {
     return m_motor_thrust;
 }
-float Quad_Properties::get_motor_acceleration() const
+float Quad_Multirotor_Properties::get_motor_acceleration() const
 {
     return m_motor_acceleration;
 }
-float Quad_Properties::get_motor_deceleration() const
+float Quad_Multirotor_Properties::get_motor_deceleration() const
 {
     return m_motor_deceleration;
 }
-bool Quad_Properties::is_plus_configuration() const
+bool Quad_Multirotor_Properties::is_plus_configuration() const
 {
     return m_is_plus_configuration;
 }
-std::vector<Quad_Properties::Motor> const& Quad_Properties::get_motors() const
+std::vector<Quad_Multirotor_Properties::Motor> const& Quad_Multirotor_Properties::get_motors() const
 {
     return m_motors;
 }

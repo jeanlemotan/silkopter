@@ -68,21 +68,26 @@ class Comms : q::util::Noncopyable
 public:
     Comms(ts::Type_System& ts);
 
+    ts::Type_System& get_type_system();
+
     auto start_udp(boost::asio::ip::address const& address, uint16_t send_port, uint16_t receive_port) -> bool;
 
     void disconnect();
     auto is_connected() const -> bool;
 
+    ts::Result<std::shared_ptr<ts::IStruct_Value>> request_uav_descriptor(std::chrono::high_resolution_clock::duration timeout = std::chrono::milliseconds(1000));
+    ts::Result<std::shared_ptr<ts::IStruct_Value>> send_uav_descriptor(std::shared_ptr<ts::IStruct_Value> descriptor, std::chrono::high_resolution_clock::duration timeout = std::chrono::milliseconds(1000));
+
     //----------------------------------------------------------------------
 
-    q::util::Signal<void()> sig_reset;
-    q::util::Signal<void(Manual_Clock::time_point)> sig_clock_received;
-    q::util::Signal<void()> sig_type_system_will_be_reset;
-    q::util::Signal<void()> sig_type_system_reset;
+    boost::signals2::signal<void()> sig_reset;
+    boost::signals2::signal<void(Manual_Clock::time_point)> sig_clock_received;
+    boost::signals2::signal<void()> sig_type_system_will_be_reset;
+    boost::signals2::signal<void()> sig_type_system_reset;
 
-    q::util::Signal<void(uint32_t req_id, std::string const& message)> sig_error_occurred;
+    boost::signals2::signal<void(uint32_t req_id, std::string const& message)> sig_error_received;
 
-    q::util::Signal<void(std::shared_ptr<ts::IStruct_Value>)> sig_uav_descriptor_received;
+    boost::signals2::signal<void(std::shared_ptr<ts::IStruct_Value>)> sig_uav_descriptor_received;
 
 
     void request_all_data();
@@ -108,8 +113,8 @@ public:
         std::vector<Output> outputs;
     };
 
-    q::util::Signal<void()> sig_node_defs_reset;
-    q::util::Signal<void(std::vector<Node_Def> const&)> sig_node_defs_added;
+    boost::signals2::signal<void()> sig_node_defs_reset;
+    boost::signals2::signal<void(std::vector<Node_Def> const&)> sig_node_defs_added;
 
     struct Node
     {
@@ -135,12 +140,12 @@ public:
         std::vector<Output> outputs;
     };
 
-    q::util::Signal<void()> sig_nodes_reset;
-    q::util::Signal<void(std::vector<Node> const&)> sig_nodes_added;
-    q::util::Signal<void(Node const&)> sig_node_changed;
-    q::util::Signal<void(std::string const& name)> sig_node_removed;
-//    q::util::Signal<void(std::string const& name, rapidjson::Value const& message)> sig_node_message_received;
-//    q::util::Signal<void(std::string const& name, rapidjson::Value const& json)> sig_node_config_received;
+    boost::signals2::signal<void()> sig_nodes_reset;
+    boost::signals2::signal<void(std::vector<Node> const&)> sig_nodes_added;
+    boost::signals2::signal<void(Node const&)> sig_node_changed;
+    boost::signals2::signal<void(std::string const& name)> sig_node_removed;
+//    boost::signals2::signal<void(std::string const& name, rapidjson::Value const& message)> sig_node_message_received;
+//    boost::signals2::signal<void(std::string const& name, rapidjson::Value const& json)> sig_node_config_received;
 
     struct IStream_Data
     {
@@ -162,13 +167,13 @@ public:
         //void unpack(Comms::Telemetry_Channel& channel, uint32_t sample_count) override;
     };
 
-    q::util::Signal<void(IStream_Data const&)> sig_stream_data_received;
+    boost::signals2::signal<void(IStream_Data const&)> sig_stream_data_received;
 
 
 //    void request_node_config(std::string const& name);
 
 //    void request_uav_config();
-//    q::util::Signal<void(boost::optional<silk::UAV_Config&> config)> sig_uav_config_received;
+//    boost::signals2::signal<void(boost::optional<silk::UAV_Config&> config)> sig_uav_config_received;
 //    void send_uav_config(boost::optional<silk::UAV_Config&> config);
 
     void process_rcp();

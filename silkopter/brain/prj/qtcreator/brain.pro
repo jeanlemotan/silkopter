@@ -151,16 +151,16 @@ SOURCES += \
     ../../src/pilot/Multirotor_Pilot.cpp \
     ../../def/hal.def.cpp \
     ../../../libs/common/comms/def/gs_comms.def.cpp \
-    ../../src/uav_properties/Hexa_Properties.cpp \
-    ../../src/uav_properties/Hexatri_Properties.cpp \
-    ../../src/uav_properties/Octo_Properties.cpp \
-    ../../src/uav_properties/Octoquad_Properties.cpp \
-    ../../src/uav_properties/Quad_Properties.cpp \
-    ../../src/uav_properties/Tri_Properties.cpp \
     ../../src/uav_properties/IMultirotor_Properties.cpp \
     ../../src/HAL.cpp \
     ../../src/RC_Comms.cpp \
-    ../../src/GS_Comms.cpp
+    ../../src/GS_Comms.cpp \
+    ../../src/uav_properties/Hexa_Multirotor_Properties.cpp \
+    ../../src/uav_properties/Hexatri_Multirotor_Properties.cpp \
+    ../../src/uav_properties/Octo_Multirotor_Properties.cpp \
+    ../../src/uav_properties/Octoquad_Multirotor_Properties.cpp \
+    ../../src/uav_properties/Quad_Multirotor_Properties.cpp \
+    ../../src/uav_properties/Tri_Multirotor_Properties.cpp
 
 HEADERS += \
     ../../src/BrainStdAfx.h \
@@ -295,17 +295,17 @@ HEADERS += \
     ../../def/gen_support.h \
     ../../def/hal.def.h \
     ../../../libs/common/comms/def/gs_comms.def.h \
-    ../../src/uav_properties/Quad_Properties.h \
-    ../../src/uav_properties/Hexa_Properties.h \
-    ../../src/uav_properties/Hexatri_Properties.h \
-    ../../src/uav_properties/Octo_Properties.h \
-    ../../src/uav_properties/Octoquad_Properties.h \
-    ../../src/uav_properties/Tri_Properties.h \
     ../../src/uav_properties/IMultirotor_Properties.h \
     ../../src/uav_properties/IUAV_Properties.h \
     ../../src/HAL.h \
     ../../src/RC_Comms.h \
-    ../../src/GS_Comms.h
+    ../../src/GS_Comms.h \
+    ../../src/uav_properties/Hexa_Multirotor_Properties.h \
+    ../../src/uav_properties/Hexatri_Multirotor_Properties.h \
+    ../../src/uav_properties/Octo_Multirotor_Properties.h \
+    ../../src/uav_properties/Octoquad_Multirotor_Properties.h \
+    ../../src/uav_properties/Quad_Multirotor_Properties.h \
+    ../../src/uav_properties/Tri_Multirotor_Properties.h
 
 DISTFILES +=
 

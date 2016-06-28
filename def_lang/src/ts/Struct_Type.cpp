@@ -3,7 +3,10 @@
 #include "def_lang/impl/Struct_Value.h"
 #include "def_lang/IAttribute.h"
 #include "def_lang/impl/UI_Name_Attribute.h"
+#include "def_lang/impl/Public_Attribute.h"
 #include "def_lang/impl/Native_Type_Attribute.h"
+
+#include <deque>
 
 namespace ts
 {
@@ -24,6 +27,7 @@ Struct_Type::Struct_Type(Struct_Type const& other, std::string const& name)
     , m_ui_name(name)
     , m_native_type(other.m_native_type)
     , m_first_noninherited_member_def_index(other.m_first_noninherited_member_def_index)
+    , m_is_public(other.m_is_public)
 {
 }
 
@@ -66,6 +70,52 @@ Symbol_Path Struct_Type::get_native_type() const
 {
     return m_native_type;
 }
+bool Struct_Type::is_public() const
+{
+    return m_is_public;
+}
+
+std::vector<std::shared_ptr<const IStruct_Type>> Struct_Type::get_all_inheriting_types() const
+{
+    IDeclaration_Scope const* top_scope = get_parent_scope();
+    if (!top_scope)
+    {
+        return {};
+    }
+    while (top_scope->get_parent_scope())
+    {
+        top_scope = top_scope->get_parent_scope();
+    }
+
+    std::vector<std::shared_ptr<const IStruct_Type>> results;
+
+    std::deque<const IDeclaration_Scope*> stack{ top_scope };
+    while (!stack.empty())
+    {
+        IDeclaration_Scope const* scope = stack.front();
+        stack.pop_front();
+
+        for (size_t i = 0; i < scope->get_symbol_count(); i++)
+        {
+            std::shared_ptr<ISymbol const> symbol = scope->get_symbol(i);
+            if (std::shared_ptr<IStruct_Type const> struct_type = std::dynamic_pointer_cast<IStruct_Type const>(symbol))
+            {
+                if (is_base_of(*struct_type))
+                {
+                    results.emplace_back(struct_type);
+                }
+            }
+
+            if (std::shared_ptr<IDeclaration_Scope const> s = std::dynamic_pointer_cast<IDeclaration_Scope const>(symbol))
+            {
+                stack.push_back(s.get());
+            }
+        }
+    }
+
+    return results;
+}
+
 
 Result<void> Struct_Type::validate_symbol(std::shared_ptr<const ISymbol> symbol)
 {
@@ -82,6 +132,11 @@ Result<void> Struct_Type::validate_attribute(IAttribute const& attribute)
     else if (Native_Type_Attribute const* att = dynamic_cast<Native_Type_Attribute const*>(&attribute))
     {
         m_native_type = att->get_native_type();
+        return success;
+    }
+    else if (Public_Attribute const* att = dynamic_cast<Public_Attribute const*>(&attribute))
+    {
+        m_is_public = att->is_public();
         return success;
     }
     else

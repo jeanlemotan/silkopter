@@ -69,6 +69,12 @@ Comms::Comms(ts::Type_System& ts)
 
 }
 
+ts::Type_System& Comms::get_type_system()
+{
+    return m_ts;
+}
+
+
 auto Comms::start_udp(boost::asio::ip::address const& address, uint16_t send_port, uint16_t receive_port) -> bool
 {
     try
@@ -115,7 +121,7 @@ void Comms::disconnect()
 
 auto Comms::is_connected() const -> bool
 {
-    return m_socket != nullptr;
+    return m_rcp != nullptr && m_rcp->is_connected();
 }
 
 
@@ -138,7 +144,7 @@ void Comms::configure_channels()
 void Comms::reset()
 {
     m_last_req_id = 0;
-    sig_reset.execute();
+    sig_reset();
 }
 
 template<typename T>
@@ -385,7 +391,7 @@ void Comms::request_all_data()
 //    uint64_t us;
 //    if (m_setup_channel.unpack_all(us))
 //    {
-//        sig_clock_received.execute(Manual_Clock::time_point(std::chrono::microseconds(us)));
+//        sig_clock_received(Manual_Clock::time_point(std::chrono::microseconds(us)));
 //        //m_hal->m_remote_clock.set_epoch(Manual_Clock::time_point(std::chrono::microseconds(us)));
 //    }
 //    else
@@ -427,12 +433,12 @@ void Comms::request_all_data()
 //                QLOGE("Req Id: {} - Cannot deserialize multi config: {}", ss.str());
 //                return;
 //            }
-//            sig_uav_config_received.execute(config);
+//            sig_uav_config_received(config);
 //        }
 //    }
 //    else
 //    {
-//        sig_uav_config_received.execute(boost::none);
+//        sig_uav_config_received(boost::none);
 //    }
 
 //    m_setup_channel.end_unpack();
@@ -466,8 +472,8 @@ void Comms::request_all_data()
 //        //m_hal->m_node_defs.add(std::move(def));
 //        defs.push_back(std::move(def));
 //    }
-//    sig_node_defs_reset.execute();
-//    sig_node_defs_added.execute(defs);
+//    sig_node_defs_reset();
+//    sig_node_defs_added(defs);
 
 //    m_setup_channel.end_unpack();
 //}
@@ -487,7 +493,7 @@ void Comms::request_all_data()
 ////        //stream->node = node;
 ////        stream->rate = os.rate;
 ////        //m_hal->m_streams.add(stream);
-////        //sig_stream_added.execute(stream);
+////        //sig_stream_added(stream);
 ////        m_stream_data_holders[node.name + "/" + os.name] = std::move(stream);
 ////    }
 ////    return true;
@@ -499,7 +505,7 @@ void Comms::request_all_data()
 ////    {
 ////        //auto stream = m_hal->m_streams.find_by_name(node->name + "/" + os.name);
 ////        //m_hal->m_streams.remove(stream);
-////        //sig_stream_removed.execute(os);
+////        //sig_stream_removed(os);
 ////        m_stream_data_holders.erase(node.name + "/" + os.name);
 ////    }
 ////    return true;
@@ -532,8 +538,8 @@ void Comms::request_all_data()
 //        //nodes.push_back(std::move(node));
 //    }
 
-//    sig_nodes_reset.execute();
-//    sig_nodes_added.execute(nodes);
+//    sig_nodes_reset();
+//    sig_nodes_added(nodes);
 
 //    m_setup_channel.end_unpack();
 //}
@@ -564,10 +570,10 @@ void Comms::request_all_data()
 //        QLOGE("Node '{}' - failed to unpack message", name);
 //    }
 
-//    sig_node_message_received.execute(name, json);
+//    sig_node_message_received(name, json);
 
 
-//    //node->message_received_signal.execute(json);
+//    //node->message_received_signal(json);
 //}
 
 //void Comms::handle_node_config()
@@ -582,7 +588,7 @@ void Comms::request_all_data()
 //        return;
 //    }
 
-//    sig_node_config_received.execute(name, json);
+//    sig_node_config_received(name, json);
 //    //auto node = m_hal->get_nodes().find_by_name(name);
 //    //if (!node)
 //    //{
@@ -591,7 +597,7 @@ void Comms::request_all_data()
 //    //}
 //    //node->config.SetObject();
 //    //jsonutil::clone_value(node->config, json, node->config.GetAllocator());
-//    //node->changed_signal.execute();
+//    //node->changed_signal();
 //}
 
 
@@ -615,7 +621,7 @@ void Comms::request_all_data()
 //        QLOGE("Node '{}' - failed to unpack config", name);
 //    }
 
-//    sig_node_changed.execute(node);
+//    sig_node_changed(node);
 //}
 
 //void Comms::handle_node_input_stream_path()
@@ -637,7 +643,7 @@ void Comms::request_all_data()
 //        QLOGE("Node '{}' - failed to unpack config", name);
 //    }
 
-//    sig_node_changed.execute(node);
+//    sig_node_changed(node);
 //}
 
 //void Comms::handle_add_node()
@@ -660,7 +666,7 @@ void Comms::request_all_data()
 
 //    std::vector<Node> nodes;
 //    nodes.push_back(std::move(node));
-//    sig_nodes_added.execute(nodes);
+//    sig_nodes_added(nodes);
 //}
 
 //void Comms::handle_remove_node()
@@ -674,7 +680,7 @@ void Comms::request_all_data()
 //        return;
 //    }
 
-//    sig_node_removed.execute(name);
+//    sig_node_removed(name);
 //}
 
 //void Comms::handle_streams_telemetry_active()
@@ -732,7 +738,7 @@ void Comms::request_all_data()
 //    }
 
 //    stream_data->unpack(m_telemetry_channel, sample_count);
-//    sig_stream_data_received.execute(*stream_data);
+//    sig_stream_data_received(*stream_data);
 //}
 
 //void Comms::handle_multirotor_state()
@@ -794,7 +800,7 @@ void Comms::handle_res(gs_comms::setup::Error const& res)
 {
     QLOGI("Error {}", res.get_req_id());
 
-    sig_error_occurred.execute(res.get_req_id(), res.get_message());
+    sig_error_received(res.get_req_id(), res.get_message());
 }
 
 void Comms::handle_res(gs_comms::setup::Get_AST_Res const& res)
@@ -827,11 +833,11 @@ void Comms::handle_res(gs_comms::setup::Get_AST_Res const& res)
         return;
     }
 
-    sig_type_system_will_be_reset.execute();
+    sig_type_system_will_be_reset();
 
     m_ts = ts;
 
-    sig_type_system_reset.execute();
+    sig_type_system_reset();
 }
 
 void Comms::handle_res(gs_comms::setup::Set_Clock_Res const& res)
@@ -840,7 +846,7 @@ void Comms::handle_res(gs_comms::setup::Set_Clock_Res const& res)
 
     Manual_Clock clock;
     clock.set_epoch(Manual_Clock::time_point(Manual_Clock::duration(std::chrono::milliseconds(res.get_time()))));
-    sig_clock_received.execute(clock.now());
+    sig_clock_received(clock.now());
 }
 
 
@@ -885,11 +891,11 @@ bool Comms::handle_uav_descriptor(std::string const& serialized_data)
             QLOGE("Invalid descriptor value. Expected struct, got something else");
             return false;
         }
-        sig_uav_descriptor_received.execute(descriptor_value);
+        sig_uav_descriptor_received(descriptor_value);
     }
     else
     {
-        sig_uav_descriptor_received.execute(nullptr);
+        sig_uav_descriptor_received(nullptr);
     }
 
     return true;
@@ -987,7 +993,7 @@ void Comms::handle_res(gs_comms::setup::Get_Node_Defs_Res const& res)
         node_defs.push_back(std::move(node_def));
     }
 
-    sig_node_defs_added.execute(node_defs);
+    sig_node_defs_added(node_defs);
 }
 
 void Comms::handle_res(gs_comms::setup::Remove_Node_Res const& res)
@@ -1015,10 +1021,105 @@ void Comms::handle_res(gs_comms::setup::Set_Node_Input_Stream_Path_Res const& re
 }
 
 
+ts::Result<std::shared_ptr<ts::IStruct_Value>> Comms::request_uav_descriptor(std::chrono::high_resolution_clock::duration timeout)
+{
+    ts::Result<std::shared_ptr<ts::IStruct_Value>> result = ts::Error("Timeout");
+    bool done = false;
+
+    gs_comms::setup::Brain_Req request;
+    gs_comms::setup::Get_UAV_Descriptor_Req req;
+    req.set_req_id(++m_last_req_id);
+    request = req;
+    serialize_and_send(SETUP_CHANNEL, request);
+
+    boost::signals2::scoped_connection c = sig_uav_descriptor_received.connect([this, &result, &done](std::shared_ptr<ts::IStruct_Value> d)
+    {
+        result = std::move(d);
+        done = true;
+    });
+    boost::signals2::scoped_connection ec = sig_error_received.connect([this, &result, &req, &done](uint32_t req_id, std::string const& message)
+    {
+        if (req_id == req.get_req_id())
+        {
+            result = ts::Error(message);
+            done = true;
+        }
+    });
+
+    auto start = std::chrono::high_resolution_clock::now();
+    while (!done && (std::chrono::high_resolution_clock::now() - start) < timeout)
+    {
+        process_rcp();
+        process();
+    }
+
+    return result;
+}
+
+ts::Result<std::shared_ptr<ts::IStruct_Value>> Comms::send_uav_descriptor(std::shared_ptr<ts::IStruct_Value> descriptor, std::chrono::high_resolution_clock::duration timeout)
+{
+    std::shared_ptr<ts::IPoly_Value> container_value = m_ts.create_specialized_value<ts::IPoly_Value>("Poly_IUAV_Descriptor");
+    if (!container_value)
+    {
+        return ts::Error("Cannot find container type.");
+    }
+    auto construct_result = container_value->construct();
+    if (construct_result != ts::success)
+    {
+        return ts::Error("Cannot construct container value: " + construct_result.error().what());
+    }
+
+    auto set_result = container_value->set_value(descriptor);
+    if (set_result != ts::success)
+    {
+        return ts::Error("Cannot set descriptor in container value: " + set_result.error().what());
+    }
+
+    auto serialize_result = container_value->serialize();
+    if (serialize_result != ts::success)
+    {
+        return ts::Error("Cannot serialize container value: " + serialize_result.error().what());
+    }
+
+    ts::Result<std::shared_ptr<ts::IStruct_Value>> result = ts::Error("Timeout");
+    bool done = false;
+
+    gs_comms::setup::Brain_Req request;
+    gs_comms::setup::Set_UAV_Descriptor_Req req;
+    req.set_req_id(++m_last_req_id);
+
+    req.set_data(encode_json(ts::sz::to_json(serialize_result.payload(), false)));
+    request = req;
+    serialize_and_send(SETUP_CHANNEL, request);
+
+    boost::signals2::scoped_connection c = sig_uav_descriptor_received.connect([this, &result, &done](std::shared_ptr<ts::IStruct_Value> d)
+    {
+        result = std::move(d);
+        done = true;
+    });
+    boost::signals2::scoped_connection ec = sig_error_received.connect([this, &result, &req, &done](uint32_t req_id, std::string const& message)
+    {
+        if (req_id == req.get_req_id())
+        {
+            result = ts::Error(message);
+            done = true;
+        }
+    });
+
+    auto start = std::chrono::high_resolution_clock::now();
+    while (!done && (std::chrono::high_resolution_clock::now() - start) < timeout)
+    {
+        process_rcp();
+        process();
+    }
+
+    return result;
+}
+
 
 void Comms::process_rcp()
 {
-    if (!is_connected())
+    if (!m_rcp)
     {
         return;
     }
@@ -1047,7 +1148,7 @@ struct Comms::Dispatch_Req_Visitor : boost::static_visitor<void>
 
 void Comms::process()
 {
-    if (!is_connected())
+    if (!m_rcp)
     {
         return;
     }
