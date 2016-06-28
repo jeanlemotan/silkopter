@@ -22,6 +22,22 @@
 #include <QVBoxLayout>
 #include <QMessageBox>
 
+static std::map<silk::node::Type, QColor> s_node_colors =
+{{
+    { silk::node::ISource::TYPE, QColor(0x86E2D5) },
+    { silk::node::ISink::TYPE, QColor(0xF1A9A0) },
+    { silk::node::IProcessor::TYPE, QColor(0xFDE3A7) },
+    { silk::node::ILPF::TYPE, QColor(0xF7CA18) },
+    { silk::node::IResampler::TYPE, QColor(0xEB974E) },
+    { silk::node::IPilot::TYPE, QColor(0xBE90D4) },
+    { silk::node::IController::TYPE, QColor(0x9B59B6) },
+    { silk::node::ITransformer::TYPE, QColor(0xF10FC4) },
+    { silk::node::IGenerator::TYPE, QColor(0xC40FF1) },
+//    { silk::node::IMulti_Simulator::TYPE, QColor(0xF1C40F) },
+    { silk::node::IBrain::TYPE, QColor(0xC4F10F) },
+    { silk::node::ICombiner::TYPE, QColor(0xF10FC4) },
+}};
+
 
 Nodes_Widget::Nodes_Widget()
 {
@@ -49,23 +65,23 @@ Nodes_Widget::Nodes_Widget()
     m_nodes_editor = new QNodesEditor(this);
     m_nodes_editor->install(m_scene);
 
-//    m_selection.config_dock = new QDockWidget(this);
-//    m_selection.config_view = new QTreeView(m_selection.config_dock);
-//    m_selection.config_model = new JSON_Model(m_selection.config_view);
-//    connect(m_selection.config_model, &QAbstractItemModel::dataChanged, this, &HAL_Window::on_config_changed);
+    //    m_selection.config_dock = new QDockWidget(this);
+    //    m_selection.config_view = new QTreeView(m_selection.config_dock);
+    //    m_selection.config_model = new JSON_Model(m_selection.config_view);
+    //    connect(m_selection.config_model, &QAbstractItemModel::dataChanged, this, &HAL_Window::on_config_changed);
 
-//    m_selection.config_dock->setWidget(m_selection.config_view);
-//    m_selection.config_view->setModel(m_selection.config_model);
-//    m_selection.config_view->setItemDelegate(new Custom_Item_Delegate(m_selection.config_view));
+    //    m_selection.config_dock->setWidget(m_selection.config_view);
+    //    m_selection.config_view->setModel(m_selection.config_model);
+    //    m_selection.config_view->setItemDelegate(new Custom_Item_Delegate(m_selection.config_view));
 
-//    addDockWidget(Qt::RightDockWidgetArea, m_selection.config_dock);
+    //    addDockWidget(Qt::RightDockWidgetArea, m_selection.config_dock);
 
-//    connect(m_scene, &QGraphicsScene::selectionChanged, [this]() { selection_changed(); });
+    //    connect(m_scene, &QGraphicsScene::selectionChanged, [this]() { selection_changed(); });
 
     connect(m_nodes_editor, &QNodesEditor::contextMenu, this, &Nodes_Widget::show_context_menu);
-//    connect(m_nodes_editor, &QNodesEditor::portContextMenu, this, &HAL_Window::port_context_menu);
-//    connect(m_nodes_editor, &QNodesEditor::blockContextMenu, this, &HAL_Window::block_context_menu);
-//    connect(m_nodes_editor, &QNodesEditor::connectionContextMenu, this, &HAL_Window::connection_context_menu);
+    //    connect(m_nodes_editor, &QNodesEditor::portContextMenu, this, &HAL_Window::port_context_menu);
+    //    connect(m_nodes_editor, &QNodesEditor::blockContextMenu, this, &HAL_Window::block_context_menu);
+    //    connect(m_nodes_editor, &QNodesEditor::connectionContextMenu, this, &HAL_Window::connection_context_menu);
 }
 
 Nodes_Widget::~Nodes_Widget()
@@ -147,11 +163,20 @@ void Nodes_Widget::refresh_nodes()
         return;
     }
 
-    auto nodes_result = m_comms->request_nodes();
-    if (nodes_result != ts::success)
+    auto result = m_comms->request_nodes();
+    if (result != ts::success)
     {
-        QMessageBox::critical(this, "Error", nodes_result.error().what().c_str());
+        QMessageBox::critical(this, "Error", result.error().what().c_str());
         return;
+    }
+
+    m_scene->clear();
+    m_nodes.clear();
+
+    std::vector<silk::Comms::Node> nodes = result.extract_payload();
+    for (silk::Comms::Node const& node: nodes)
+    {
+        add_node(node);
     }
 }
 
@@ -356,33 +381,20 @@ void Nodes_Widget::try_add_node(silk::Comms::Node_Def const& def, QPointF pos)
         return;
     }
 
-//    auto init_paramsj = jsonutil::clone_value(def->default_init_params);
-
-    QDialog dialog;
-//    dialog.setLayout(new QVBoxLayout(&dialog));
-
     Ui::New_Node_Dialog ui;
-//    QWidget* widget = new QWidget(&dialog);
+    QDialog dialog;
     ui.setupUi(&dialog);
     ui.properties->init(m_browser->get_editor_factory());
     ui.properties->set_value(descriptor);
-//    widget->setMinimumSize(600, 400);
-//    dialog.layout()->addWidget(widget);
 
-//    JSON_Model* model = new JSON_Model(ui.init_params);
-//    model->set_document("Init Params", &init_paramsj);
-//    ui.init_params->setModel(model);
-//    ui.init_params->expandAll();
-//    ui.init_params->header()->resizeSections(QHeaderView::ResizeToContents);
+    ui.properties->expandAll();
+    ui.properties->header()->resizeSections(QHeaderView::ResizeToContents);
     ui.name->setText(compute_unique_name(prettify_name(def.name)).c_str());
-
-//    connect(ui.ok, &QPushButton::released, &dialog, &QDialog::accept);
-//    connect(ui.cancel, &QPushButton::released, &dialog, &QDialog::reject);
 
     if (dialog.exec() == QDialog::Accepted)
     {
         std::string node_name = ui.name->text().toLatin1().data();
-//        set_node_position(node_name, pos);
+        //        set_node_position(node_name, pos);
         auto result = m_comms->add_node(node_name, def.name, descriptor);
         if (result != ts::success)
         {
@@ -390,8 +402,115 @@ void Nodes_Widget::try_add_node(silk::Comms::Node_Def const& def, QPointF pos)
             return;
         }
 
-        refresh_nodes();
+        //refresh_nodes();
+        add_node(result.payload());
     }
+}
+
+void Nodes_Widget::add_node(silk::Comms::Node const& src_node)
+{
+    QPointF pos = get_node_position(src_node.name);
+
+    std::shared_ptr<Node>& dst_node = m_nodes[src_node.name];
+    dst_node = std::make_shared<Node>();
+
+    QNEBlock* b = new QNEBlock();
+    m_scene->addItem(b);
+    b->setName(src_node.name.c_str());
+    b->setId(src_node.name.c_str());
+    b->setPos(pos);
+
+    b->setBrush(QBrush(Qt::white));
+    auto it = s_node_colors.find(src_node.type);
+    if (it != s_node_colors.end())
+    {
+        b->setBrush(it->second);
+    }
+
+    std::string node_name = src_node.name;
+    b->positionChangedSignal.connect([this, node_name](const QPointF& pos)
+    {
+        set_node_position(node_name, pos);
+    });
+
+    dst_node->name = src_node.name;
+    dst_node->type = src_node.type;
+    dst_node->descriptor = src_node.descriptor;
+    dst_node->config = src_node.config;
+
+    dst_node->block = b;
+
+    for (silk::Comms::Node::Input const& src_input: src_node.inputs)
+    {
+        auto port = b->addInputPort(QString());
+        port->setBrush(QBrush(QColor(0xe67e22)));
+        port->setId(src_input.name.c_str());
+        port->setToolTip(silk::stream::get_as_string(src_input.type, true).c_str());
+        if (src_input.rate > 0)
+        {
+            port->setName(q::util::format<std::string>("{} {}Hz", src_input.name, src_input.rate).c_str());
+        }
+        else
+        {
+            port->setName(q::util::format<std::string>("{}", src_input.name).c_str());
+        }
+        port->setPortType(src_input.type.get_id());
+        port->setPortRate(src_input.rate);
+
+        auto input_name = src_input.name;
+        port->connectedSignal.connect([src_node, input_name, this](QNEPort* output_port)
+        {
+            auto* block = output_port->block();
+            std::string node_name = block->id().toLatin1().data();
+            q::Path stream_path(node_name);
+            stream_path += output_port->id().toLatin1().data();
+//            m_hal.set_node_input_stream_path(node, input_name, stream_path);
+        });
+
+        Node::Input& dst_input = dst_node->inputs[src_input.name];
+        dst_input.name = src_input.name;
+        dst_input.rate = src_input.rate;
+        dst_input.stream_path = src_input.stream_path;
+        dst_input.type = src_input.type;
+        dst_input.port = port;
+    }
+    for (silk::Comms::Node::Output const& src_output: src_node.outputs)
+    {
+        auto port = b->addOutputPort(QString());
+        port->setBrush(QBrush(QColor(0x9b59b6)));
+        port->setId(src_output.name.c_str());
+        port->setToolTip(silk::stream::get_as_string(src_output.type, true).c_str());
+        port->setName(q::util::format<std::string>("{} {}Hz", src_output.name, src_output.rate).c_str());
+        port->setPortType(src_output.type.get_id());
+        port->setPortRate(src_output.rate);
+
+        Node::Output& dst_output = dst_node->outputs[src_output.name];
+        dst_output.name = src_output.name;
+        dst_output.rate = src_output.rate;
+        dst_output.type = src_output.type;
+        dst_output.port = port;
+
+//        auto& stream_data = m_ui_streams[src_output.stream->name];
+//        stream_data.stream = src_output.stream;
+//        stream_data.port = dst_output.port;
+//        stream_data.block = dst_node.block;
+    }
+
+//    auto* node_ptr = src_node.get();
+//    m_connections.push_back( src_node.changed_signal.connect([this, node_ptr]()
+//    {
+//        refresh_node(*node_ptr);
+//    }) );
+}
+
+void Nodes_Widget::set_node_position(std::string const& node_name, QPointF const& pos)
+{
+
+}
+
+QPointF Nodes_Widget::get_node_position(std::string const& node_name)
+{
+    return QPointF();
 }
 
 void Nodes_Widget::load_editor_data()

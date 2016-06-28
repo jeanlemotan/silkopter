@@ -48,7 +48,7 @@ private:
         //JSON_Model* config_model = nullptr;
     } m_selection;
 
-    struct UI_Stream
+    struct Stream
     {
         //silk::stream::gs::Stream_wptr stream;
         QNEPort* port = nullptr;
@@ -103,4 +103,5 @@ private:
     void show_context_menu(QGraphicsSceneMouseEvent*);
 
     void try_add_node(silk::Comms::Node_Def const& def, QPointF pos);
+    void add_node(silk::Comms::Node const& node);
 };

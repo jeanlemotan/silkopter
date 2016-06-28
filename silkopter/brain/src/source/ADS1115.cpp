@@ -121,30 +121,28 @@ auto ADS1115::get_outputs() const -> std::vector<Output>
      }};
     return outputs;
 }
-auto ADS1115::init(hal::INode_Descriptor const& descriptor) -> bool
+ts::Result<void> ADS1115::init(hal::INode_Descriptor const& descriptor)
 {
     QLOG_TOPIC("ADS1115::init");
 
     auto specialized = dynamic_cast<hal::ADS1115_Descriptor const*>(&descriptor);
     if (!specialized)
     {
-        QLOGE("Wrong descriptor type");
-        return false;
+        return make_error("Wrong descriptor type");
     }
     *m_descriptor = *specialized;
 
     return init();
 }
 
-auto ADS1115::init() -> bool
+ts::Result<void> ADS1115::init()
 {
     m_i2c = m_hal.get_bus_registry().find_by_name<bus::II2C>(m_descriptor->get_bus());
 
     auto i2c = m_i2c.lock();
     if (!i2c)
     {
-        QLOGE("No bus configured");
-        return false;
+        return make_error("No bus configured");
     }
 
     i2c->lock();
@@ -180,8 +178,11 @@ auto ADS1115::init() -> bool
     m_crt_adc = 0;
     m_config_register.status = ADS1115_OS_ACTIVE;
     res &= set_config_register(*i2c);
-
-    return res;
+    if (!res)
+    {
+        return make_error("Cannot find ADS1115");
+    }
+    return ts::success;
 }
 
 auto ADS1115::set_config_register(bus::II2C& i2c) -> bool
@@ -198,14 +199,14 @@ auto ADS1115::set_config_register(bus::II2C& i2c) -> bool
     return i2c.write_register_u16(ADS1115_DEFAULT_ADDRESS, ADS1115_RA_CONFIG, config);
 }
 
-auto ADS1115::start(q::Clock::time_point tp) -> bool
+ts::Result<void> ADS1115::start(q::Clock::time_point tp)
 {
     m_last_tp = tp;
     for (auto& adc: m_adcs)
     {
         adc->set_tp(tp);
     }
-    return true;
+    return ts::success;
 }
 
 
@@ -314,19 +315,18 @@ void ADS1115::process()
     m_last_tp = now;
 }
 
-auto ADS1115::set_config(hal::INode_Config const& config) -> bool
+ts::Result<void> ADS1115::set_config(hal::INode_Config const& config)
 {
     QLOG_TOPIC("ADS1115::set_config");
 
     auto specialized = dynamic_cast<hal::ADS1115_Config const*>(&config);
     if (!specialized)
     {
-        QLOGE("Wrong config type");
-        return false;
+        return make_error("Wrong config type");
     }
     *m_config = *specialized;
 
-    return true;
+    return ts::success;
 }
 auto ADS1115::get_config() const -> std::shared_ptr<const hal::INode_Config>
 {

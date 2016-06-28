@@ -28,24 +28,24 @@ class ADC_Ammeter : public IProcessor
 public:
     ADC_Ammeter(HAL& hal);
 
-    bool init(hal::INode_Descriptor const& descriptor) override;
+    ts::Result<void> init(hal::INode_Descriptor const& descriptor) override;
     std::shared_ptr<const hal::INode_Descriptor> get_descriptor() const override;
 
-    bool set_config(hal::INode_Config const& config) override;
+    ts::Result<void> set_config(hal::INode_Config const& config) override;
     std::shared_ptr<const hal::INode_Config> get_config() const override;
 
     //auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
 
-    auto start(q::Clock::time_point tp) -> bool override;
+    ts::Result<void> start(q::Clock::time_point tp) override;
 
-    void set_input_stream_path(size_t idx, q::Path const& path);
+    ts::Result<void> set_input_stream_path(size_t idx, q::Path const& path);
     auto get_inputs() const -> std::vector<Input>;
     auto get_outputs() const -> std::vector<Output>;
 
     void process();
 
 private:
-    auto init() -> bool;
+    ts::Result<void> init();
 
     HAL& m_hal;
 

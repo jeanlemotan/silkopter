@@ -20,24 +20,24 @@ class LPF : public ILPF
 public:
     LPF(HAL& hal);
 
-    bool init(hal::INode_Descriptor const& descriptor) override;
+    ts::Result<void> init(hal::INode_Descriptor const& descriptor) override;
     std::shared_ptr<const hal::INode_Descriptor> get_descriptor() const override;
 
-    bool set_config(hal::INode_Config const& config) override;
+    ts::Result<void> set_config(hal::INode_Config const& config) override;
     std::shared_ptr<const hal::INode_Config> get_config() const override;
 
     //auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
 
-    auto start(q::Clock::time_point tp) -> bool override;
+    ts::Result<void> start(q::Clock::time_point tp) override;
 
-    void set_input_stream_path(size_t idx, q::Path const& path);
+    ts::Result<void> set_input_stream_path(size_t idx, q::Path const& path);
     auto get_inputs() const -> std::vector<Input>;
     auto get_outputs() const -> std::vector<Output>;
 
     void process();
 
 private:
-    auto init() -> bool;
+    ts::Result<void> init();
 
     HAL& m_hal;
 
@@ -63,15 +63,14 @@ LPF<Stream_t>::LPF(HAL& hal)
 }
 
 template<class Stream_t>
-auto LPF<Stream_t>::init(hal::INode_Descriptor const& descriptor) -> bool
+ts::Result<void> LPF<Stream_t>::init(hal::INode_Descriptor const& descriptor)
 {
     QLOG_TOPIC("lpf::init");
 
     auto specialized = dynamic_cast<hal::LPF_Descriptor const*>(&descriptor);
     if (!specialized)
     {
-        QLOGE("Wrong descriptor type");
-        return false;
+        return make_error("Wrong descriptor type");
     }
     *m_descriptor = *specialized;
 
@@ -79,10 +78,10 @@ auto LPF<Stream_t>::init(hal::INode_Descriptor const& descriptor) -> bool
 }
 
 template<class Stream_t>
-auto LPF<Stream_t>::init() -> bool
+ts::Result<void> LPF<Stream_t>::init()
 {
     m_output_stream->set_rate(m_descriptor->get_rate());
-    return true;
+    return ts::success;
 }
 
 template<class Stream_t>
@@ -92,21 +91,20 @@ auto LPF<Stream_t>::get_descriptor() const -> std::shared_ptr<const hal::INode_D
 }
 
 template<class Stream_t>
-void LPF<Stream_t>::set_input_stream_path(size_t idx, q::Path const& path)
+ts::Result<void> LPF<Stream_t>::set_input_stream_path(size_t idx, q::Path const& path)
 {
-    m_accumulator.set_stream_path(idx, path, m_output_stream->get_rate(), m_hal);
+    return m_accumulator.set_stream_path(idx, path, m_output_stream->get_rate(), m_hal);
 }
 
 template<class Stream_t>
-auto LPF<Stream_t>::set_config(hal::INode_Config const& config) -> bool
+ts::Result<void> LPF<Stream_t>::set_config(hal::INode_Config const& config)
 {
     QLOG_TOPIC("lpf::config");
 
     auto specialized = dynamic_cast<hal::LPF_Config const*>(&config);
     if (!specialized)
     {
-        QLOGE("Wrong config type");
-        return false;
+        return make_error("Wrong config type");
     }
     *m_config = *specialized;
 
@@ -120,12 +118,11 @@ auto LPF<Stream_t>::set_config(hal::INode_Config const& config) -> bool
     m_config->set_cutoff_frequency(math::clamp(m_config->get_cutoff_frequency(), 0.1f, max_cutoff));
     if (!m_dsp.setup(m_config->get_poles(), output_rate, m_config->get_cutoff_frequency()))
     {
-        QLOGE("Cannot setup dsp filter.");
-        return false;
+        return make_error("Cannot setup dsp filter.");
     }
     m_dsp.reset();
 
-    return true;
+    return ts::success;
 }
 //template<class Stream_t>
 //auto LPF<Stream_t>::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document
@@ -139,10 +136,10 @@ auto LPF<Stream_t>::get_config() const -> std::shared_ptr<const hal::INode_Confi
 }
 
 template<class Stream_t>
-auto LPF<Stream_t>::start(q::Clock::time_point tp) -> bool
+ts::Result<void> LPF<Stream_t>::start(q::Clock::time_point tp)
 {
     m_output_stream->set_tp(tp);
-    return true;
+    return ts::success;
 }
 
 template<class Stream_t>

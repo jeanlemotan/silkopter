@@ -21,7 +21,7 @@ public:
     SPI_BCM();
     ~SPI_BCM();
 
-    bool init(hal::IBus_Descriptor const& descriptor) override;
+    ts::Result<void> init(hal::IBus_Descriptor const& descriptor) override;
     std::shared_ptr<const hal::IBus_Descriptor> get_descriptor() const override;
 
     void lock();
@@ -32,7 +32,7 @@ public:
     virtual auto transfer_register(uint8_t reg, uint8_t const* tx_data, uint8_t* rx_data, size_t size, uint32_t speed = 0) -> bool override;
 
 private:
-    bool open(uint32_t dev, uint32_t speed, uint32_t mode);
+    ts::Result<void> open(uint32_t dev, uint32_t speed, uint32_t mode);
 
     auto get_divider(uint32_t speed) const -> uint32_t;
 

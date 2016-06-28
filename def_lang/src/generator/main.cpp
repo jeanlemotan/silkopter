@@ -830,7 +830,7 @@ static ts::Result<void> generate_poly_type_code(Context& context, ts::IPoly_Type
     for (std::shared_ptr<const ts::Qualified_Type> inner_type: inner_types)
     {
         std::string native_inner_type_str = get_native_type(context.parent_scope, *inner_type->get_type()).to_string();
-        context.sz_section_cpp += "  else if (path == \"" + native_inner_type_str + "\")\n"
+        context.sz_section_cpp += "  else if (path == \"" + inner_type->get_type()->get_symbol_path().to_string() + "\")\n"
                                          "  {\n"
                                          "    value = " + native_type_str + "(new " + native_inner_type_str + "());\n"
                                          "    return deserialize((" + native_inner_type_str + "&)*value, *value_sz_value);\n"
@@ -853,7 +853,7 @@ static ts::Result<void> generate_poly_type_code(Context& context, ts::IPoly_Type
         context.sz_section_cpp += "  else if (typeid(*value) == typeid(" + native_inner_type_str + "))\n"
                                          "  {\n"
                                          "    sz_value.reserve_object_members(2);\n"
-                                         "    sz_value.add_object_member(\"type\", \"" + native_inner_type_str + "\");\n"
+                                         "    sz_value.add_object_member(\"type\", \"" + inner_type->get_type()->get_symbol_path().to_string() + "\");\n"
                                          "    sz_value.add_object_member(\"value\", serialize((" + native_inner_type_str + "&)*value));\n"
                                          "    return std::move(sz_value);\n"
                                          "  }\n";
@@ -937,7 +937,7 @@ static ts::Result<void> generate_variant_type_code(Context& context, ts::IVarian
     for (size_t i = 0; i < type.get_inner_qualified_type_count(); i++)
     {
         std::string native_inner_type_str = get_native_type(context.parent_scope, *type.get_inner_qualified_type(i)->get_type()).to_string();
-        context.sz_section_cpp += "  else if (path == \"" + native_inner_type_str + "\")\n"
+        context.sz_section_cpp += "  else if (path == \"" + type.get_inner_qualified_type(i)->get_type()->get_symbol_path().to_string() + "\")\n"
                                              "  {\n"
                                              "    value = " + native_inner_type_str + "();\n"
                                              "    auto result = deserialize(boost::get<" + native_inner_type_str + ">(value), *value_sz_value);\n"
@@ -960,7 +960,7 @@ static ts::Result<void> generate_variant_type_code(Context& context, ts::IVarian
         context.sz_section_cpp += "  else if (auto* v = boost::get<" + native_inner_type_str + ">(&value))\n"
                                              "  {\n"
                                              "    sz_value.reserve_object_members(2);\n"
-                                             "    sz_value.add_object_member(\"type\", \"" + native_inner_type_str + "\");\n"
+                                             "    sz_value.add_object_member(\"type\", \"" + type.get_inner_qualified_type(i)->get_type()->get_symbol_path().to_string() + "\");\n"
                                              "    sz_value.add_object_member(\"value\", serialize(*v));\n"
                                              "    return std::move(sz_value);\n"
                                              "  }\n";

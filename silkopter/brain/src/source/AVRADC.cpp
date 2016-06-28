@@ -38,30 +38,28 @@ auto AVRADC::get_outputs() const -> std::vector<Output>
      }};
     return outputs;
 }
-auto AVRADC::init(hal::INode_Descriptor const& descriptor) -> bool
+ts::Result<void> AVRADC::init(hal::INode_Descriptor const& descriptor)
 {
     QLOG_TOPIC("AVRADC::init");
 
     auto specialized = dynamic_cast<hal::AVRADC_Descriptor const*>(&descriptor);
     if (!specialized)
     {
-        QLOGE("Wrong descriptor type");
-        return false;
+        return make_error("Wrong descriptor type");
     }
     *m_descriptor = *specialized;
 
     return init();
 }
 
-auto AVRADC::init() -> bool
+ts::Result<void> AVRADC::init()
 {
     m_i2c = m_hal.get_bus_registry().find_by_name<bus::II2C>(m_descriptor->get_bus());
 
     auto i2c = m_i2c.lock();
     if (!i2c)
     {
-        QLOGE("No bus configured");
-        return false;
+        return make_error("No bus configured");
     }
 
     i2c->lock();
@@ -70,21 +68,20 @@ auto AVRADC::init() -> bool
         i2c->unlock();
     });
 
-
     m_adcs[0]->set_rate(m_descriptor->get_rate());
     m_adcs[1]->set_rate(m_descriptor->get_rate());
 
-    return true;
+    return ts::success;
 }
 
-auto AVRADC::start(q::Clock::time_point tp) -> bool
+ts::Result<void> AVRADC::start(q::Clock::time_point tp)
 {
     m_last_process_tp = tp;
     for (auto& adc: m_adcs)
     {
         adc->set_tp(tp);
     }
-    return true;
+    return ts::success;
 }
 
 
@@ -165,19 +162,18 @@ void AVRADC::process()
     }
 }
 
-auto AVRADC::set_config(hal::INode_Config const& config) -> bool
+ts::Result<void> AVRADC::set_config(hal::INode_Config const& config)
 {
     QLOG_TOPIC("AVRADC::set_config");
 
     auto specialized = dynamic_cast<hal::AVRADC_Config const*>(&config);
     if (!specialized)
     {
-        QLOGE("Wrong config type");
-        return false;
+        return make_error("Wrong config type");
     }
     *m_config = *specialized;
 
-    return true;
+    return ts::success;
 }
 auto AVRADC::get_config() const -> std::shared_ptr<const hal::INode_Config>
 {

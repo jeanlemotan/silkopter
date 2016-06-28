@@ -19,12 +19,11 @@ LiPo_Battery::LiPo_Battery()
 {
 }
 
-auto LiPo_Battery::init(size_t rate) -> bool
+ts::Result<void> LiPo_Battery::init(size_t rate)
 {
     if (rate == 0)
     {
-        QLOGE("Bad rate: {}Hz", rate);
-        return false;
+        return make_error("Bad rate: {}Hz", rate);
     }
 
     m_rate = rate;
@@ -32,11 +31,10 @@ auto LiPo_Battery::init(size_t rate) -> bool
     if (!m_current_filter.setup(2, rate, 10.f) ||
         !m_voltage_filter.setup(2, rate, 2.f))
     {
-        QLOGE("Cannot setup dsp filters");
-        return false;
+        return make_error("Cannot setup dsp filters");
     }
 
-    return true;
+    return ts::success;
 }
 
 auto LiPo_Battery::process(stream::IVoltage::Sample const& v_sample, stream::ICurrent::Sample const& c_sample) -> stream::IBattery_State::Sample const&
@@ -120,13 +118,13 @@ auto LiPo_Battery::compute_cell_count() -> boost::optional<uint8_t>
     return boost::none;
 }
 
-auto LiPo_Battery::set_config(Config const& config) -> bool
+ts::Result<void> LiPo_Battery::set_config(Config const& config)
 {
     QLOG_TOPIC("lipo_battery::set_config");
 
     m_config = config;
 
-    return true;
+    return ts::success;
 }
 
 void LiPo_Battery::reset()

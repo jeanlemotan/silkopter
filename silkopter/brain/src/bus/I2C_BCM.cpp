@@ -30,22 +30,16 @@ I2C_BCM::~I2C_BCM()
 {
 }
 
-bool I2C_BCM::init(hal::IBus_Descriptor const& descriptor)
+ts::Result<void> I2C_BCM::init(hal::IBus_Descriptor const& descriptor)
 {
     auto specialized = dynamic_cast<hal::I2C_BCM_Descriptor const*>(&descriptor);
     if (!specialized)
     {
-        QLOGE("Wrong descriptor type");
-        return false;
+        return make_error("Wrong descriptor type");
     }
     *m_descriptor = *specialized;
 
-    if (!init(specialized->get_dev(), specialized->get_baud()))
-    {
-        return false;
-    }
-
-    return true;
+    return init(specialized->get_dev(), specialized->get_baud());
 }
 
 std::shared_ptr<const hal::IBus_Descriptor> I2C_BCM::get_descriptor() const
@@ -53,12 +47,11 @@ std::shared_ptr<const hal::IBus_Descriptor> I2C_BCM::get_descriptor() const
     return m_descriptor;
 }
 
-bool I2C_BCM::init(uint32_t dev, uint32_t baud)
+ts::Result<void> I2C_BCM::init(uint32_t dev, uint32_t baud)
 {
     if (dev > 1)
     {
-        QLOGE("Only I2C devices 0 & 1 are allowed");
-        return false;
+        return make_error("Only I2C devices 0 & 1 are allowed");
     }
 
 #ifdef RASPBERRY_PI
@@ -68,7 +61,7 @@ bool I2C_BCM::init(uint32_t dev, uint32_t baud)
 
 #endif
 
-    return true;
+    return ts::success;
 }
 
 void I2C_BCM::lock()

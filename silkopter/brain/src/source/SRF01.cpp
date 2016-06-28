@@ -40,29 +40,27 @@ auto SRF01::get_outputs() const -> std::vector<Output>
     outputs[0].stream = m_output_stream;
     return outputs;
 }
-auto SRF01::init(hal::INode_Descriptor const& descriptor) -> bool
+ts::Result<void> SRF01::init(hal::INode_Descriptor const& descriptor)
 {
     QLOG_TOPIC("SRF01::init");
 
     auto specialized = dynamic_cast<hal::SRF01_Descriptor const*>(&descriptor);
     if (!specialized)
     {
-        QLOGE("Wrong descriptor type");
-        return false;
+        return make_error("Wrong descriptor type");
     }
     *m_descriptor = *specialized;
 
     return init();
 }
 
-auto SRF01::init() -> bool
+ts::Result<void> SRF01::init()
 {
     m_bus = m_hal.get_bus_registry().find_by_name<bus::IUART>(m_descriptor->get_bus());
     auto bus = m_bus.lock();
     if (!bus)
     {
-        QLOGE("No bus configured");
-        return false;
+        return make_error("No bus configured");
     }
 
     bus->lock();
@@ -92,8 +90,7 @@ auto SRF01::init() -> bool
 
     if (tries > max_tries)
     {
-        QLOGE("Failed to initialize SRF01");
-        return false;
+        return make_error("Failed to initialize SRF01");
     }
 
     //clear advanced mode
@@ -104,14 +101,14 @@ auto SRF01::init() -> bool
 
     m_output_stream->set_rate(m_descriptor->get_rate());
 
-    return true;
+    return ts::success;
 }
 
-auto SRF01::start(q::Clock::time_point tp) -> bool
+ts::Result<void> SRF01::start(q::Clock::time_point tp)
 {
     m_last_trigger_tp = tp;
     m_output_stream->set_tp(tp);
-    return true;
+    return ts::success;
 }
 
 auto SRF01::send_command(bus::IUART& bus, uint8_t command) -> bool
@@ -233,15 +230,14 @@ void SRF01::process()
     }
 }
 
-auto SRF01::set_config(hal::INode_Config const& config) -> bool
+ts::Result<void> SRF01::set_config(hal::INode_Config const& config)
 {
     QLOG_TOPIC("SRF01::set_config");
 
     auto specialized = dynamic_cast<hal::SRF01_Config const*>(&config);
     if (!specialized)
     {
-        QLOGE("Wrong config type");
-        return false;
+        return make_error("Wrong config type");
     }
     *m_config = *specialized;
 
@@ -253,7 +249,7 @@ auto SRF01::set_config(hal::INode_Config const& config) -> bool
     }
     m_config->set_direction(math::normalized(m_config->get_direction()));
 
-    return true;
+    return ts::success;
 }
 auto SRF01::get_config() const -> std::shared_ptr<const hal::INode_Config>
 {

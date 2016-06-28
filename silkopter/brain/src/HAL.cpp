@@ -359,59 +359,52 @@ auto HAL::get_uav_descriptor() const -> std::shared_ptr<const hal::IUAV_Descript
 {
     return m_uav_descriptor;
 }
-auto HAL::set_uav_descriptor(std::shared_ptr<const hal::IUAV_Descriptor> descriptor) -> bool
+ts::Result<void> HAL::set_uav_descriptor(std::shared_ptr<const hal::IUAV_Descriptor> descriptor)
 {
     if (!descriptor)
     {
-        QLOGE("Cannot set null descriptor");
-        return false;
+        return make_error("Cannot set null descriptor");
     }
 
     std::shared_ptr<IUAV_Properties> new_properties;
 
     if (auto* d = dynamic_cast<hal::Tri_Multirotor_Descriptor const*>(descriptor.get()))
     {
-        QLOGE("Tri not supported");
-        return false;
+        return make_error("Tri not supported");
     }
     else if (auto* d = dynamic_cast<hal::Quad_Multirotor_Descriptor const*>(descriptor.get()))
     {
         std::shared_ptr<Quad_Multirotor_Properties> p = std::make_shared<Quad_Multirotor_Properties>();
-        if (!p->init(*d))
+        auto result = p->init(*d);
+        if (result != ts::success)
         {
-            return false;
+            return result;
         }
         new_properties = p;
     }
     else if (auto* d = dynamic_cast<hal::Hexa_Multirotor_Descriptor const*>(descriptor.get()))
     {
-        QLOGE("Hexa not supported");
-        return false;
+        return make_error("Hexa not supported");
     }
     else if (auto* d = dynamic_cast<hal::Hexatri_Multirotor_Descriptor const*>(descriptor.get()))
     {
-        QLOGE("Hexatri not supported");
-        return false;
+        return make_error("Hexatri not supported");
     }
     else if (auto* d = dynamic_cast<hal::Octo_Multirotor_Descriptor const*>(descriptor.get()))
     {
-        QLOGE("Octo not supported");
-        return false;
+        return make_error("Octo not supported");
     }
     else if (auto* d = dynamic_cast<hal::Octaquad_Multirotor_Descriptor const*>(descriptor.get()))
     {
-        QLOGE("Octaquad not supported");
-        return false;
+        return make_error("Octaquad not supported");
     }
     else if (auto* d = dynamic_cast<hal::Custom_Multirotor_Descriptor const*>(descriptor.get()))
     {
-        QLOGE("Custom multirotor not supported");
-        return false;
+        return make_error("Custom multirotor not supported");
     }
     else
     {
-        QLOGE("Unknown multirotor descriptor type");
-        return false;
+        return make_error("Unknown multirotor descriptor type");
     }
 
     m_uav_descriptor = descriptor;
@@ -419,7 +412,7 @@ auto HAL::set_uav_descriptor(std::shared_ptr<const hal::IUAV_Descriptor> descrip
 
     uav_properties_changed_signal.execute(*this);
 
-    return true;
+    return ts::success;
 }
 //auto hal::set_multirotor_descriptor(hal::Multirotor_Descriptor const& descriptor) -> bool
 //{
@@ -480,48 +473,62 @@ void write_gnu_plot(std::string const& name, std::vector<T> const& samples)
     }
 }
 
-auto HAL::create_bus(std::string const& type, std::string const& name, hal::IBus_Descriptor const& descriptor) -> std::shared_ptr<bus::IBus>
+ts::Result<std::shared_ptr<bus::IBus>> HAL::create_bus(std::string const& type, std::string const& name, hal::IBus_Descriptor const& descriptor)
 {
     if (m_buses.find_by_name<bus::IBus>(name))
     {
-        QLOGE("Bus '{}' already exist", name);
-        return std::shared_ptr<bus::IBus>();
+        return make_error("Bus '{}' already exist", name);
     }
     auto node = m_bus_factory.create(type);
-    if (node && node->init(descriptor))
+    if (!node)
     {
-        auto res = m_buses.add(name, type, node); //this has to succeed since we already tested for duplicate names
-        QASSERT(res);
-        return node;
+        return make_error("Cannot create bus type '{}'", type);
     }
-    return std::shared_ptr<bus::IBus>();
+    auto result = node->init(descriptor);
+    if (result != ts::success)
+    {
+        return result.error();
+    }
+    auto res = m_buses.add(name, type, node); //this has to succeed since we already tested for duplicate names
+    QASSERT(res);
+    return node;
 }
-auto HAL::create_node(std::string const& type, std::string const& name, hal::INode_Descriptor const& descriptor) -> std::shared_ptr<node::INode>
+ts::Result<std::shared_ptr<node::INode>> HAL::create_node(std::string const& type, std::string const& name, hal::INode_Descriptor const& descriptor)
 {
     if (m_nodes.find_by_name<node::INode>(name))
     {
-        QLOGE("Node '{}' already exist", name);
-        return std::shared_ptr<node::INode>();
+        return make_error("Node '{}' already exist", name);
     }
     auto node = m_node_factory.create(type);
-    if (node && node->init(descriptor))
+    if (!node)
     {
-        node->set_config(*node->get_config());//apply default config
-        auto res = m_nodes.add(name, type, node); //this has to succeed since we already tested for duplicate names
-        QASSERT(res);
-        auto outputs = node->get_outputs();
-        for (auto const& x: outputs)
-        {
-            std::string stream_name = q::util::format<std::string>("{}/{}", name, x.name);
-            if (!m_streams.add(stream_name, std::string(), x.stream))
-            {
-                QLOGE("Cannot add stream '{}'", stream_name);
-                return std::shared_ptr<node::INode>();
-            }
-        }
-        return node;
+        return make_error("Cannot create  node type '{}", type);
     }
-    return std::shared_ptr<node::INode>();
+    auto result = node->init(descriptor);
+    if (result != ts::success)
+    {
+        return result.error();
+    }
+
+    result = node->set_config(*node->get_config());//apply default config
+    if (result != ts::success)
+    {
+        return result.error();
+    }
+
+    auto res = m_nodes.add(name, type, node); //this has to succeed since we already tested for duplicate names
+    QASSERT(res);
+    auto outputs = node->get_outputs();
+    for (auto const& x: outputs)
+    {
+        std::string stream_name = q::util::format<std::string>("{}/{}", name, x.name);
+        if (!m_streams.add(stream_name, std::string(), x.stream))
+        {
+            m_nodes.remove(node);
+            return make_error("Cannot add stream '{}'", stream_name);
+        }
+    }
+    return node;
 }
 
 //auto hal::create_buses(rapidjson::Value& json) -> bool
@@ -1010,25 +1017,29 @@ auto HAL::init(RC_Comms& rc_comms, GS_Comms& gs_comms) -> bool
 
     if (settings.get_uav_descriptor())
     {
-        if (!set_uav_descriptor(settings.get_uav_descriptor().get_shared_ptr()))
+        auto result = set_uav_descriptor(settings.get_uav_descriptor().get_shared_ptr());
+        if (result != ts::success)
         {
+            QLOGE("Error setting UAV descriptor: {}", result.error().what());
             return false;
         }
     }
 
     for (hal::Settings::Bus_Data const& data: settings.get_buses())
     {
-        if (!create_bus(data.get_type(), data.get_name(), *data.get_descriptor()))
+        auto result = create_bus(data.get_type(), data.get_name(), *data.get_descriptor());
+        if (result != ts::success)
         {
-            QLOGE("Failed to create bus {} of type '{}'", data.get_name(), data.get_type());
+            QLOGE("Failed to create bus {} of type '{}': {}", data.get_name(), data.get_type(), result.error().what());
             return false;
         }
     }
     for (hal::Settings::Node_Data const& data: settings.get_nodes())
     {
-        if (!create_node(data.get_type(), data.get_name(), *data.get_descriptor()))
+        auto result = create_node(data.get_type(), data.get_name(), *data.get_descriptor());
+        if (result != ts::success)
         {
-            QLOGE("Failed to create node {} of type '{}'", data.get_name(), data.get_type());
+            QLOGE("Failed to create node {} of type '{}': {}", data.get_name(), data.get_type(), result.error().what());
             return false;
         }
     }
@@ -1046,12 +1057,18 @@ auto HAL::init(RC_Comms& rc_comms, GS_Comms& gs_comms) -> bool
         size_t idx = 0;
         for (std::string const& input_path: data.get_input_paths())
         {
-            node->set_input_stream_path(idx++, q::Path(input_path));
+            auto result = node->set_input_stream_path(idx++, q::Path(input_path));
+            if (result != ts::success)
+            {
+                QLOGE("Failed to set input stream path for node {} of type '{}': {}", data.get_name(), data.get_type(), result.error().what());
+                return false;
+            }
         }
 
-        if (!node->set_config(*data.get_config()))
+        auto result = node->set_config(*data.get_config());
+        if (result != ts::success)
         {
-            QLOGE("Failed to set config for node {} of type '{}'", data.get_name(), data.get_type());
+            QLOGE("Failed to set config for node {} of type '{}': {}", data.get_name(), data.get_type(), result.error().what());
             return false;
         }
     }
@@ -1060,8 +1077,10 @@ auto HAL::init(RC_Comms& rc_comms, GS_Comms& gs_comms) -> bool
     auto now = q::Clock::now();
     for (auto const& n: m_nodes.get_all())
     {
-        if (!n.ptr->start(now))
+        auto result = n.ptr->start(now);
+        if (result != ts::success)
         {
+            QLOGE("Failed to start node {} of type '{}': {}", n.name, n.type, result.error().what());
             return false;
         }
     }

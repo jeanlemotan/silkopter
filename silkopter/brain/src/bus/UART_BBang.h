@@ -21,7 +21,7 @@ public:
     UART_BBang();
     ~UART_BBang();
 
-    bool init(hal::IBus_Descriptor const& descriptor) override;
+    ts::Result<void> init(hal::IBus_Descriptor const& descriptor) override;
     std::shared_ptr<const hal::IBus_Descriptor> get_descriptor() const override;
 
     void lock();
@@ -34,7 +34,7 @@ public:
     void send_break();
 
 private:
-    bool init(uint32_t rx_pin, uint32_t baud, bool invert);
+    ts::Result<void> init(uint32_t rx_pin, uint32_t baud, bool invert);
     void close();
 
     std::shared_ptr<hal::UART_BBang_Descriptor> m_descriptor;

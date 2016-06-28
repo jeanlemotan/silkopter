@@ -21,34 +21,32 @@ Multirotor_Brain::Multirotor_Brain(HAL& hal)
     m_thrust_output_stream = std::make_shared<Thrust_Output_Stream>();
 }
 
-auto Multirotor_Brain::init(hal::INode_Descriptor const& descriptor) -> bool
+ts::Result<void> Multirotor_Brain::init(hal::INode_Descriptor const& descriptor)
 {
     QLOG_TOPIC("Multirotor_Brain::init");
 
     auto specialized = dynamic_cast<hal::Multirotor_Brain_Descriptor const*>(&descriptor);
     if (!specialized)
     {
-        QLOGE("Wrong descriptor type");
-        return false;
+        return make_error("Wrong descriptor type");
     }
     *m_descriptor = *specialized;
 
     return init();
 }
 
-auto Multirotor_Brain::init() -> bool
+ts::Result<void> Multirotor_Brain::init()
 {
     m_multirotor_properties = m_hal.get_specialized_uav_properties<IMultirotor_Properties>();
     if (!m_multirotor_properties)
     {
-        QLOGE("No multi properties found");
-        return false;
+        return make_error("No multi properties found");
     }
 
-    if (!m_battery.init(m_descriptor->get_rate()))
+    auto result = m_battery.init(m_descriptor->get_rate());
+    if (result != ts::success)
     {
-        QLOGE("Cannot initialize the battery");
-        return false;
+        return make_error("Cannot initialize the battery: {}", result.error().what());
     }
     m_state_output_stream->set_rate(m_descriptor->get_state_rate());
     m_rate_output_stream->set_rate(m_descriptor->get_rate());
@@ -56,15 +54,15 @@ auto Multirotor_Brain::init() -> bool
 
     m_dts = std::chrono::duration<float>(m_thrust_output_stream->get_dt()).count();
 
-    return true;
+    return ts::success;
 }
 
-auto Multirotor_Brain::start(q::Clock::time_point tp) -> bool
+ts::Result<void> Multirotor_Brain::start(q::Clock::time_point tp)
 {
     m_state_output_stream->set_tp(tp);
     m_rate_output_stream->set_tp(tp);
     m_thrust_output_stream->set_tp(tp);
-    return true;
+    return ts::success;
 }
 
 auto Multirotor_Brain::get_inputs() const -> std::vector<Input>
@@ -584,16 +582,17 @@ void Multirotor_Brain::process()
     }
 }
 
-void Multirotor_Brain::set_input_stream_path(size_t idx, q::Path const& path)
+ts::Result<void> Multirotor_Brain::set_input_stream_path(size_t idx, q::Path const& path)
 {
     if (idx == 0)
     {
-        m_commands_accumulator.set_stream_path(0, path, m_descriptor->get_commands_rate(), m_hal);
+        return m_commands_accumulator.set_stream_path(0, path, m_descriptor->get_commands_rate(), m_hal);
     }
-    else if (idx >= 1 && idx <= 7)
+    else if (idx >= 1)
     {
-        m_sensor_accumulator.set_stream_path(idx - 1, path, m_descriptor->get_rate(), m_hal);
+        return m_sensor_accumulator.set_stream_path(idx - 1, path, m_descriptor->get_rate(), m_hal);
     }
+    return ts::success;
 }
 
 template<class T, class PID>
@@ -621,15 +620,14 @@ void fill_p_params(T& dst, P const& src, size_t rate)
     dst.rate = rate;
 }
 
-auto Multirotor_Brain::set_config(hal::INode_Config const& config) -> bool
+ts::Result<void> Multirotor_Brain::set_config(hal::INode_Config const& config)
 {
     QLOG_TOPIC("Multirotor_Brain::set_config");
 
     auto specialized = dynamic_cast<hal::Multirotor_Brain_Config const*>(&config);
     if (!specialized)
     {
-        QLOGE("Wrong config type");
-        return false;
+        return make_error("Wrong config type");
     }
     *m_config = *specialized;
 
@@ -656,8 +654,7 @@ auto Multirotor_Brain::set_config(hal::INode_Config const& config) -> bool
         if (!m_horizontal_angle_data.x_pid.set_params(x_params) ||
                 !m_horizontal_angle_data.y_pid.set_params(y_params))
         {
-            QLOGE("Bad horizontal PID params");
-            return false;
+            return make_error("Bad horizontal PID params");
         }
     }
 
@@ -666,8 +663,7 @@ auto Multirotor_Brain::set_config(hal::INode_Config const& config) -> bool
         fill_pid_params(params, m_config->get_yaw_angle().get_pid(), output_rate);
         if (!m_yaw_stable_angle_rate_data.pid.set_params(params))
         {
-            QLOGE("Bad yaw PID params");
-            return false;
+            return make_error("Bad yaw PID params");
         }
     }
 
@@ -678,13 +674,11 @@ auto Multirotor_Brain::set_config(hal::INode_Config const& config) -> bool
         fill_p_params(position_p_params, m_config->get_altitude().get_position_p(), output_rate);
         if (!m_vertical_altitude_data.speed_pi.set_params(speed_pi_params))
         {
-            QLOGE("Bad altitude PID params");
-            return false;
+            return make_error("Bad altitude PID params");
         }
         if (!m_vertical_altitude_data.position_p.set_params(position_p_params))
         {
-            QLOGE("Bad altitude PID params");
-            return false;
+            return make_error("Bad altitude PID params");
         }
     }
 
@@ -693,8 +687,7 @@ auto Multirotor_Brain::set_config(hal::INode_Config const& config) -> bool
         lpf_config.set_cutoff_frequency(math::clamp(lpf_config.get_cutoff_frequency(), 0.1f, output_rate / 2.f));
         if (!m_vertical_altitude_data.dsp.setup(lpf_config.get_poles(), output_rate, lpf_config.get_cutoff_frequency()))
         {
-            QLOGE("Cannot setup dsp filter.");
-            return false;
+            return make_error("Cannot setup dsp filter.");
         }
         m_vertical_altitude_data.dsp.reset();
     }
@@ -706,13 +699,11 @@ auto Multirotor_Brain::set_config(hal::INode_Config const& config) -> bool
         fill_p_params(position_p_params, m_config->get_horizontal_position().get_position_p(), output_rate);
         if (!m_horizontal_position_data.velocity_pi.set_params(velocity_pi_params))
         {
-            QLOGE("Bad horizontal position PID params");
-            return false;
+            return make_error("Bad horizontal position PID params");
         }
         if (!m_horizontal_position_data.position_p.set_params(position_p_params))
         {
-            QLOGE("Bad horizontal position PID params");
-            return false;
+            return make_error("Bad horizontal position PID params");
         }
     }
 
@@ -721,13 +712,12 @@ auto Multirotor_Brain::set_config(hal::INode_Config const& config) -> bool
         lpf_config.set_cutoff_frequency(math::clamp(lpf_config.get_cutoff_frequency(), 0.1f, output_rate / 2.f));
         if (!m_horizontal_position_data.dsp.setup(lpf_config.get_poles(), output_rate, lpf_config.get_cutoff_frequency()))
         {
-            QLOGE("Cannot setup dsp filter.");
-            return false;
+            return make_error("Cannot setup dsp filter.");
         }
         m_horizontal_position_data.dsp.reset();
     }
 
-    return true;
+    return ts::success;
 }
 auto Multirotor_Brain::get_config() const -> std::shared_ptr<const hal::INode_Config>
 {

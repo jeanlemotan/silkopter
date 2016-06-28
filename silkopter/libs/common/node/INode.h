@@ -64,13 +64,13 @@ public:
 
     virtual Type get_type() const = 0;
 
-    virtual bool init(hal::INode_Descriptor const& descriptor) = 0;
+    virtual ts::Result<void> init(hal::INode_Descriptor const& descriptor) = 0;
     virtual std::shared_ptr<const hal::INode_Descriptor> get_descriptor() const = 0;
 
-    virtual bool set_config(hal::INode_Config const& config) = 0;
+    virtual ts::Result<void> set_config(hal::INode_Config const& config) = 0;
     virtual std::shared_ptr<const hal::INode_Config> get_config() const = 0;
 
-    virtual bool start(q::Clock::time_point tp) = 0;
+    virtual ts::Result<void> start(q::Clock::time_point tp) = 0;
 
     //virtual auto send_message(rapidjson::Value const& json) -> rapidjson::Document = 0;
 
@@ -82,7 +82,7 @@ public:
         q::Path stream_path; //the path of the stream connected to this input in the "node/output" format
     };
     virtual std::vector<Input> get_inputs() const = 0;
-    virtual void set_input_stream_path(size_t idx, q::Path const& path) = 0;
+    virtual ts::Result<void> set_input_stream_path(size_t idx, q::Path const& path) = 0;
 
     struct Output
     {

@@ -306,21 +306,20 @@ auto UBLOX::get_outputs() const -> std::vector<Output>
     return outputs;
 }
 
-auto UBLOX::init(hal::INode_Descriptor const& descriptor) -> bool
+ts::Result<void> UBLOX::init(hal::INode_Descriptor const& descriptor)
 {
     QLOG_TOPIC("ublox::init");
 
     auto specialized = dynamic_cast<hal::UBLOX_Descriptor const*>(&descriptor);
     if (!specialized)
     {
-        QLOGE("Wrong descriptor type");
-        return false;
+        return make_error("Wrong descriptor type");
     }
     *m_descriptor = *specialized;
 
     return init();
 }
-auto UBLOX::init() -> bool
+ts::Result<void> UBLOX::init()
 {
     m_i2c = m_hal.get_bus_registry().find_by_name<bus::II2C>(m_descriptor->get_bus());
     m_spi = m_hal.get_bus_registry().find_by_name<bus::ISPI>(m_descriptor->get_bus());
@@ -373,7 +372,7 @@ auto UBLOX::write(Buses& buses, uint8_t const* tx_data, size_t size) -> bool
     return false;
 }
 
-auto UBLOX::setup() -> bool
+ts::Result<void> UBLOX::setup()
 {
     QLOG_TOPIC("ublox::setup");
 
@@ -384,8 +383,7 @@ auto UBLOX::setup() -> bool
     Buses buses = { m_i2c.lock(), m_spi.lock(), m_uart.lock() };
     if (!buses.i2c && !buses.spi && !buses.uart)
     {
-        QLOGE("No bus configured");
-        return false;
+        return make_error("No bus configured");
     }
 
     lock(buses);
@@ -459,17 +457,17 @@ auto UBLOX::setup() -> bool
     util::coordinates::LLA default_coords(0, 0, 0);
     m_last_position_value = util::coordinates::lla_to_ecef(default_coords);
 
-    return true;
+    return ts::success;
 }
 
-auto UBLOX::start(q::Clock::time_point tp) -> bool
+ts::Result<void> UBLOX::start(q::Clock::time_point tp)
 {
     m_position_stream->set_tp(tp);
     m_velocity_stream->set_tp(tp);
     m_gps_info_stream->set_tp(tp);
 
     m_last_process_tp = tp;
-    return true;
+    return ts::success;
 }
 
 void UBLOX::poll_for_data(Buses& buses)
@@ -1147,19 +1145,18 @@ template<class T> auto UBLOX::send_packet_with_retry(Buses& buses, uint16_t msg,
 }
 
 
-auto UBLOX::set_config(hal::INode_Config const& config) -> bool
+ts::Result<void> UBLOX::set_config(hal::INode_Config const& config)
 {
     QLOG_TOPIC("ublox::set_config");
 
     auto specialized = dynamic_cast<hal::UBLOX_Config const*>(&config);
     if (!specialized)
     {
-        QLOGE("Wrong config type");
-        return false;
+        return make_error("Wrong config type");
     }
     *m_config = *specialized;
 
-    return true;
+    return ts::success;
 }
 auto UBLOX::get_config() const -> std::shared_ptr<const hal::INode_Config>
 {

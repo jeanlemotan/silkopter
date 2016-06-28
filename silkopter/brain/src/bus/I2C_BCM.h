@@ -21,7 +21,7 @@ public:
     I2C_BCM();
     ~I2C_BCM();
 
-    bool init(hal::IBus_Descriptor const& descriptor) override;
+    ts::Result<void> init(hal::IBus_Descriptor const& descriptor) override;
     std::shared_ptr<const hal::IBus_Descriptor> get_descriptor() const override;
 
     void lock();
@@ -35,7 +35,7 @@ public:
     auto write_register(uint8_t address, uint8_t reg, uint8_t const* data, size_t size) -> bool;
 
 private:
-    bool init(uint32_t dev, uint32_t baud);
+    ts::Result<void> init(uint32_t dev, uint32_t baud);
 
     std::shared_ptr<hal::I2C_BCM_Descriptor> m_descriptor;
 

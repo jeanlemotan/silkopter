@@ -20,7 +20,7 @@ class IBus : q::util::Noncopyable
 public:
     virtual ~IBus() = default;
 
-    virtual bool init(hal::IBus_Descriptor const& descriptor) = 0;
+    virtual ts::Result<void> init(hal::IBus_Descriptor const& descriptor) = 0;
     virtual std::shared_ptr<const hal::IBus_Descriptor> get_descriptor() const = 0;
 };
 

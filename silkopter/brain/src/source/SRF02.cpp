@@ -52,29 +52,27 @@ auto SRF02::get_outputs() const -> std::vector<Output>
     outputs[0].stream = m_output_stream;
     return outputs;
 }
-auto SRF02::init(hal::INode_Descriptor const& descriptor) -> bool
+ts::Result<void> SRF02::init(hal::INode_Descriptor const& descriptor)
 {
     QLOG_TOPIC("srf02::init");
 
     auto specialized = dynamic_cast<hal::SRF02_Descriptor const*>(&descriptor);
     if (!specialized)
     {
-        QLOGE("Wrong descriptor type");
-        return false;
+        return make_error("Wrong descriptor type");
     }
     *m_descriptor = *specialized;
 
     return init();
 }
 
-auto SRF02::init() -> bool
+ts::Result<void> SRF02::init()
 {
     m_bus = m_hal.get_bus_registry().find_by_name<bus::II2C>(m_descriptor->get_bus());
     auto bus = m_bus.lock();
     if (!bus)
     {
-        QLOGE("No bus configured");
-        return false;
+        return make_error("No bus configured");
     }
 
     bus->lock();
@@ -106,15 +104,14 @@ auto SRF02::init() -> bool
 
     if (tries > max_tries)
     {
-        QLOGE("Failed to initialize SRF02");
-        return false;
+        return make_error("Failed to initialize SRF02");
     }
 
     trigger(*bus);
 
     m_output_stream->set_rate(m_descriptor->get_rate());
 
-    return true;
+    return ts::success;
 }
 
 void SRF02::trigger(bus::II2C& bus)
@@ -123,11 +120,11 @@ void SRF02::trigger(bus::II2C& bus)
     bus.write_register_u8(ADDR, SW_REV_CMD, REAL_RAGING_MODE_CM);
 }
 
-auto SRF02::start(q::Clock::time_point tp) -> bool
+ts::Result<void> SRF02::start(q::Clock::time_point tp)
 {
     m_last_trigger_tp = tp;
     m_output_stream->set_tp(tp);
-    return true;
+    return ts::success;
 }
 
 void SRF02::process()
@@ -189,15 +186,14 @@ void SRF02::process()
     }
 }
 
-auto SRF02::set_config(hal::INode_Config const& config) -> bool
+ts::Result<void> SRF02::set_config(hal::INode_Config const& config)
 {
     QLOG_TOPIC("srf02::set_config");
 
     auto specialized = dynamic_cast<hal::SRF02_Config const*>(&config);
     if (!specialized)
     {
-        QLOGE("Wrong descriptor type");
-        return false;
+        return make_error("Wrong descriptor type");
     }
     *m_config = *specialized;
 
@@ -209,7 +205,7 @@ auto SRF02::set_config(hal::INode_Config const& config) -> bool
     }
     m_config->set_direction(math::normalized(m_config->get_direction()));
 
-    return true;
+    return ts::success;
 }
 auto SRF02::get_config() const -> std::shared_ptr<const hal::INode_Config>
 {

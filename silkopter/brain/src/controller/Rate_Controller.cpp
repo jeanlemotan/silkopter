@@ -18,30 +18,29 @@ Rate_Controller::Rate_Controller(HAL& hal)
     m_output_stream = std::make_shared<Output_Stream>();
 }
 
-auto Rate_Controller::init(hal::INode_Descriptor const& descriptor) -> bool
+ts::Result<void> Rate_Controller::init(hal::INode_Descriptor const& descriptor)
 {
     QLOG_TOPIC("rate_controller::init");
 
     auto specialized = dynamic_cast<hal::Rate_Controller_Descriptor const*>(&descriptor);
     if (!specialized)
     {
-        QLOGE("Wrong descriptor type");
-        return false;
+        return make_error("Wrong descriptor type");
     }
     *m_descriptor = *specialized;
 
     return init();
 }
-auto Rate_Controller::init() -> bool
+ts::Result<void> Rate_Controller::init()
 {
     m_output_stream->set_rate(m_descriptor->get_rate());
-    return true;
+    return ts::success;
 }
 
-auto Rate_Controller::start(q::Clock::time_point tp) -> bool
+ts::Result<void> Rate_Controller::start(q::Clock::time_point tp)
 {
     m_output_stream->set_tp(tp);
-    return true;
+    return ts::success;
 }
 
 auto Rate_Controller::get_inputs() const -> std::vector<Input>
@@ -117,9 +116,9 @@ math::vec3f Rate_Controller::compute_feedback(stream::IAngular_Velocity::Value c
     return math::vec3f(x, y, z);
 }
 
-void Rate_Controller::set_input_stream_path(size_t idx, q::Path const& path)
+ts::Result<void> Rate_Controller::set_input_stream_path(size_t idx, q::Path const& path)
 {
-    m_accumulator.set_stream_path(idx, path, m_output_stream->get_rate(), m_hal);
+    return m_accumulator.set_stream_path(idx, path, m_output_stream->get_rate(), m_hal);
 }
 
 template<class T, class PID>
@@ -133,15 +132,14 @@ void fill_pid_params(T& dst, PID const& src, size_t rate)
     dst.rate = rate;
 }
 
-auto Rate_Controller::set_config(hal::INode_Config const& config) -> bool
+ts::Result<void> Rate_Controller::set_config(hal::INode_Config const& config)
 {
     QLOG_TOPIC("rate_controller::set_config");
 
     auto specialized = dynamic_cast<hal::Rate_Controller_Config const*>(&config);
     if (!specialized)
     {
-        QLOGE("Wrong config type");
-        return false;
+        return make_error("Wrong config type");
     }
     *m_config = *specialized;
 
@@ -167,11 +165,10 @@ auto Rate_Controller::set_config(hal::INode_Config const& config) -> bool
         !m_y_pid.set_params(y_params) ||
         !m_z_pid.set_params(z_params))
     {
-        QLOGE("Bad PID params");
-        return false;
+        return make_error("Bad PID params");
     }
 
-    return true;
+    return ts::success;
 }
 auto Rate_Controller::get_config() const -> std::shared_ptr<const hal::INode_Config>
 {

@@ -469,7 +469,7 @@ auto MPU9250::get_outputs() const -> std::vector<Output>
     outputs[3].stream = m_temperature;
     return outputs;
 }
-auto MPU9250::init(hal::INode_Descriptor const& descriptor) -> bool
+ts::Result<void> MPU9250::init(hal::INode_Descriptor const& descriptor)
 {
     QLOG_TOPIC("mpu9250::init");
 
@@ -485,7 +485,7 @@ auto MPU9250::init(hal::INode_Descriptor const& descriptor) -> bool
 }
 
 
-auto MPU9250::init() -> bool
+ts::Result<void> MPU9250::init()
 {
     m_i2c = m_hal.get_bus_registry().find_by_name<bus::II2C>(m_descriptor->get_bus());
     m_spi = m_hal.get_bus_registry().find_by_name<bus::ISPI>(m_descriptor->get_bus());
@@ -493,8 +493,7 @@ auto MPU9250::init() -> bool
     Buses buses = { m_i2c.lock(), m_spi.lock() };
     if (!buses.i2c && !buses.spi)
     {
-        QLOGE("No bus configured");
-        return false;
+        return make_error("No bus configured");
     }
 
     lock(buses);
@@ -558,8 +557,7 @@ auto MPU9250::init() -> bool
         m_angular_velocity_sensor_scale = math::radians(1.f) / (131.f / 8.f);
         break;
     default:
-        QLOGE("Invalid angular velocity range: {}", m_descriptor->get_angular_velocity_range());
-        return false;
+        return make_error("Invalid angular velocity range: {}", m_descriptor->get_angular_velocity_range());
     }
 
 
@@ -583,8 +581,7 @@ auto MPU9250::init() -> bool
         m_acceleration_sensor_scale = physics::constants::g / 2048.f;
         break;
     default:
-        QLOGE("Invalid acceleration range: {}", m_descriptor->get_acceleration_range());
-        return false;
+        return make_error("Invalid acceleration range: {}", m_descriptor->get_acceleration_range());
     }
 
     // First disable the master I2C to avoid hanging the slaves on the aulixiliar I2C bus
@@ -623,10 +620,7 @@ auto MPU9250::init() -> bool
     res &= mpu_read_u8(buses, MPU_REG_WHO_AM_I, who_am_i, CONFIG_REGISTER_SPEED);
     if (!res || who_am_i != 0x71)
     {
-        QLOGE("Cannot find mpu9250");
-#ifdef RASPBERRY_PI
-        return false;
-#endif
+        return make_error("Cannot find mpu9250");
     }
     QLOGI("Found MPU9250 id: {x}", who_am_i);
 
@@ -695,8 +689,7 @@ auto MPU9250::init() -> bool
     }
     if (tries > max_tries)
     {
-        QLOGE("Failed to initialize Magnetometer");
-        return false;
+        return make_error("Failed to initialize Magnetometer");
     }
 
     res &= mpu_write_u8(buses, MPU_REG_USER_CTRL, m_user_ctrl_value | MPU_BIT_FIFO_RST, CONFIG_REGISTER_SPEED);
@@ -704,10 +697,7 @@ auto MPU9250::init() -> bool
 
     if (!res)
     {
-        QLOGE("Failed to setup mpu9250");
-#ifdef RASPBERRY_PI
-        return false;
-#endif
+        return make_error("Failed to setup mpu9250");
     }
 
     reset_fifo(buses);
@@ -717,7 +707,7 @@ auto MPU9250::init() -> bool
     m_angular_velocity->set_rate((size_t)m_descriptor->get_imu_rate());
     m_temperature->set_rate(m_descriptor->get_thermometer_rate());
 
-    return true;
+    return ts::success;
 }
 
 auto MPU9250::setup_magnetometer(Buses& buses) -> bool
@@ -912,7 +902,7 @@ auto MPU9250::setup_magnetometer_spi(Buses& buses) -> bool
 //    }
 //}
 
-auto MPU9250::start(q::Clock::time_point tp) -> bool
+ts::Result<void> MPU9250::start(q::Clock::time_point tp)
 {
     m_magnetic_field->set_tp(tp);
     m_acceleration->set_tp(tp);
@@ -920,7 +910,7 @@ auto MPU9250::start(q::Clock::time_point tp) -> bool
     m_temperature->set_tp(tp);
     m_magnetic_field->set_tp(tp);
 
-    return true;
+    return ts::success;
 }
 
 void MPU9250::reset_fifo(Buses& buses)
@@ -1319,15 +1309,14 @@ void MPU9250::process_magnetometer(Buses& buses)
 #endif
 }
 
-auto MPU9250::set_config(hal::INode_Config const& config) -> bool
+ts::Result<void> MPU9250::set_config(hal::INode_Config const& config)
 {
     QLOG_TOPIC("mpu9250::set_config");
 
     auto specialized = dynamic_cast<hal::MPU9250_Config const*>(&config);
     if (!specialized)
     {
-        QLOGE("Wrong config type");
-        return false;
+        return make_error("Wrong config type");
     }
     *m_config = *specialized;
 
@@ -1374,7 +1363,7 @@ auto MPU9250::set_config(hal::INode_Config const& config) -> bool
 
     m_magnetometer_rotation = (imu_rot * mag_rot).get_as_mat3();
 
-    return true;
+    return ts::success;
 }
 auto MPU9250::get_config() const -> std::shared_ptr<const hal::INode_Config>
 {

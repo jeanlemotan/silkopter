@@ -83,7 +83,8 @@ private:
     template<typename T>
     void serialize_and_send(size_t channel_idx, T const& res);
     template<class Format_String, typename... Params>
-    gs_comms::setup::Error make_error(Format_String const& fmt, Params&&... params);
+    gs_comms::setup::Error make_error_response(uint32_t req_id, Format_String const& fmt, Params&&... params);
+
     std::string const& decode_json(std::string const& json_base64);
     std::string const& encode_json(std::string const& json);
     boost::variant<gs_comms::setup::Node_Data, gs_comms::setup::Error> get_node_data(std::string const& name, node::INode const& node);

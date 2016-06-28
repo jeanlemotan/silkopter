@@ -305,7 +305,14 @@ Result<void> Variant_Value::set_value_type(std::shared_ptr<const IType> type)
     {
         return Error("Cannot set null type in variant '" + m_type->get_symbol_path().to_string() + "'");
     }
-    return set_value(type->create_value());
+    std::shared_ptr<IValue> value = type->create_value();
+    auto result = value->construct();
+    if (result != ts::success)
+    {
+        return result;
+    }
+
+    return set_value(value);
 }
 
 Result<void> Variant_Value::set_value_type_index(size_t idx)

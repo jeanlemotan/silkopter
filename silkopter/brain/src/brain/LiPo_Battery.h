@@ -16,7 +16,7 @@ class LiPo_Battery : q::util::Noncopyable
 public:
     LiPo_Battery();
 
-    auto init(size_t rate) -> bool;
+    ts::Result<void> init(size_t rate);
 
     struct Config
     {
@@ -24,7 +24,7 @@ public:
 
     };
 
-    auto set_config(Config const& config) -> bool;
+    ts::Result<void> set_config(Config const& config);
     void reset();
 
     auto get_cell_count() const -> boost::optional<uint8_t>;

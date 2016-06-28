@@ -50,6 +50,14 @@ private:
     std::function<void()> m_at_exit;
 };
 
+
+template<class Format_String, typename... Params>
+ts::Error make_error(Format_String const& fmt, Params&&... params)
+{
+    return ts::Error(q::util::format<std::string>(fmt, std::forward<Params>(params)...));
+}
+
+
 }
 
 

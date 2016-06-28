@@ -12,7 +12,7 @@ namespace detail
 }
 
 typedef int detail::success_helper::*success_t;
-success_t const success = (static_cast<success_t>(0));
+constexpr success_t success = (static_cast<success_t>(0));
 
 //////////////////////////////////////////////////////////////////////////
 
@@ -73,11 +73,11 @@ public:
         new (&m_data) Error(std::move(error));
 	}
 
-	template<typename T2>
+    template<typename T2>
     inline Result(T2&& payload) noexcept
         : m_is_success(true)
 	{
-		new (&m_data) T(std::forward<T2>(payload));
+        new (&m_data) T(std::forward<T2>(payload));
 	}
 
     inline Result(const Result<T>& other) = delete;
@@ -85,7 +85,7 @@ public:
 	template<typename T2>
     inline Result(const Result<T2>& other) = delete;
 
-	template<typename T2>
+    template<typename T2>
     inline Result(Result<T2>&& other) noexcept
         : m_is_success(other.m_is_success)
 	{
@@ -96,7 +96,7 @@ public:
 
         if (other.m_is_success)
 		{
-			new (&m_data) T(std::move(*reinterpret_cast<T2*>(&other.m_data)));
+            new (&m_data) T(std::move(*reinterpret_cast<T2*>(&other.m_data)));
 		}
 		else
 		{
@@ -109,7 +109,7 @@ public:
 	template<typename T2>
     inline Result<T>& operator=(const Result<T2>& other) = delete;
 
-	template<typename T2>
+    template<typename T2>
     inline Result<T>& operator=(Result<T2>&& other)
 	{
 #ifndef NDEBUG
@@ -130,7 +130,7 @@ public:
 
         if (other.m_is_success)
 		{
-			new (&m_data) T(std::move(*reinterpret_cast<T2*>(&other.m_data)));
+            new (&m_data) T(std::move(*reinterpret_cast<T2*>(&other.m_data)));
 		}
 		else
 		{

@@ -25,22 +25,16 @@ SPI_Linux::~SPI_Linux()
     close();
 }
 
-bool SPI_Linux::init(hal::IBus_Descriptor const& descriptor)
+ts::Result<void> SPI_Linux::init(hal::IBus_Descriptor const& descriptor)
 {
     auto specialized = dynamic_cast<hal::SPI_Linux_Descriptor const*>(&descriptor);
     if (!specialized)
     {
-        QLOGE("Wrong descriptor type");
-        return false;
+        return make_error("Wrong descriptor type");
     }
     *m_descriptor = *specialized;
 
-    if (!open(m_descriptor->get_dev(), m_descriptor->get_speed()))
-    {
-        return false;
-    }
-
-    return true;
+    return open(m_descriptor->get_dev(), m_descriptor->get_speed());
 }
 
 std::shared_ptr<const hal::IBus_Descriptor> SPI_Linux::get_descriptor() const
@@ -48,7 +42,7 @@ std::shared_ptr<const hal::IBus_Descriptor> SPI_Linux::get_descriptor() const
     return m_descriptor;
 }
 
-bool SPI_Linux::open(std::string const& dev, uint32_t speed)
+ts::Result<void> SPI_Linux::open(std::string const& dev, uint32_t speed)
 {
     QLOG_TOPIC("spi_linux::open");
 
@@ -56,11 +50,10 @@ bool SPI_Linux::open(std::string const& dev, uint32_t speed)
     m_fd = ::open(dev.c_str(), O_RDWR);
     if (m_fd < 0)
     {
-        QLOGE("can't open {}: {}", dev, strerror(errno));
-        return false;
+        return make_error("Can't open " + dev + ": " + strerror(errno));
     }
     m_speed = speed;
-    return true;
+    return ts::success;
 }
 void SPI_Linux::close()
 {

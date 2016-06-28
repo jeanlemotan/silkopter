@@ -159,7 +159,8 @@ HEADERS += \
     ../../include/def_lang/impl/Optional_Type.h \
     ../../include/def_lang/impl/Optional_Value.h \
     ../../include/def_lang/Qualified_Type.h \
-    ../../include/def_lang/impl/Public_Attribute.h
+    ../../include/def_lang/impl/Public_Attribute.h \
+    ../../include/def_lang/impl/UI_Suffix_Attribute.h
 
 SOURCES += \
     ../../src/yy_lexer.cpp \
@@ -211,5 +212,6 @@ SOURCES += \
     ../../src/ts/Optional_Type.cpp \
     ../../src/ts/Optional_Value.cpp \
     ../../src/ts/Qualified_Type.cpp \
-    ../../src/ts/Public_Attribute.cpp
+    ../../src/ts/Public_Attribute.cpp \
+    ../../src/ts/UI_Suffix_Attribute.cpp
 

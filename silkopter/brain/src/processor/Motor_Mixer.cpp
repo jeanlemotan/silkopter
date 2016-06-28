@@ -17,28 +17,26 @@ Motor_Mixer::Motor_Mixer(HAL& hal)
 {
 }
 
-auto Motor_Mixer::init(hal::INode_Descriptor const& descriptor) -> bool
+ts::Result<void> Motor_Mixer::init(hal::INode_Descriptor const& descriptor)
 {
     QLOG_TOPIC("motor_mixer::init");
 
     auto specialized = dynamic_cast<hal::Motor_Mixer_Descriptor const*>(&descriptor);
     if (!specialized)
     {
-        QLOGE("Wrong descriptor type");
-        return false;
+        return make_error("Wrong descriptor type");
     }
     *m_descriptor = *specialized;
 
     return init();
 }
 
-auto Motor_Mixer::init() -> bool
+ts::Result<void> Motor_Mixer::init()
 {
     std::shared_ptr<const IMultirotor_Properties> multirotor_properties = m_hal.get_specialized_uav_properties<IMultirotor_Properties>();
     if (!multirotor_properties)
     {
-        QLOGE("No multirotor properties found");
-        return false;
+        return make_error("No multirotor properties found");
     }
 
     //check symmetry
@@ -51,13 +49,11 @@ auto Motor_Mixer::init() -> bool
     }
     if (!math::is_zero(center, 0.05f))
     {
-        QLOGE("Motors are not a symmetrical");
-        return false;
+        return make_error("Motors are not a symmetrical");
     }
     if (!math::is_zero(torque, 0.05f))
     {
-        QLOGE("Motors don't produce symmetrical thrust");
-        return false;
+        return make_error("Motors don't produce symmetrical thrust");
     }
 
     m_outputs.resize(multirotor_properties->get_motors().size());
@@ -69,13 +65,13 @@ auto Motor_Mixer::init() -> bool
 
     //m_config->output_streams.throttles.resize(multirotor_descriptor->motors.size());
 
-    return true;
+    return ts::success;
 }
 
-auto Motor_Mixer::start(q::Clock::time_point tp) -> bool
+ts::Result<void> Motor_Mixer::start(q::Clock::time_point tp)
 {
     //TODO - use an basic_output_stream instead of the ad-hoc streams
-    return true;
+    return ts::success;
 }
 
 auto Motor_Mixer::get_inputs() const -> std::vector<Input>
@@ -422,24 +418,23 @@ void Motor_Mixer::compute_throttles(IMultirotor_Properties const& multirotor_pro
 
 //}
 
-void Motor_Mixer::set_input_stream_path(size_t idx, q::Path const& path)
+ts::Result<void> Motor_Mixer::set_input_stream_path(size_t idx, q::Path const& path)
 {
-    m_accumulator.set_stream_path(idx, path, m_descriptor->get_rate(), m_hal);
+    return m_accumulator.set_stream_path(idx, path, m_descriptor->get_rate(), m_hal);
 }
 
-auto Motor_Mixer::set_config(hal::INode_Config const& config) -> bool
+ts::Result<void> Motor_Mixer::set_config(hal::INode_Config const& config)
 {
     QLOG_TOPIC("motor_mixer::set_config");
 
     auto specialized = dynamic_cast<hal::Motor_Mixer_Config const*>(&config);
     if (!specialized)
     {
-        QLOGE("Wrong config type");
-        return false;
+        return make_error("Wrong config type");
     }
     *m_config = *specialized;
 
-    return true;
+    return ts::success;
 }
 auto Motor_Mixer::get_config() const -> std::shared_ptr<const hal::INode_Config>
 {

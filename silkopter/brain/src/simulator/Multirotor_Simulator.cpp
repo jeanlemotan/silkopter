@@ -29,37 +29,35 @@ Multirotor_Simulator::Multirotor_Simulator(HAL& hal)
     m_ecef_velocity_stream = std::make_shared<ECEF_Velocity>();
 }
 
-auto Multirotor_Simulator::init(hal::INode_Descriptor const& descriptor) -> bool
+ts::Result<void> Multirotor_Simulator::init(hal::INode_Descriptor const& descriptor)
 {
     QLOG_TOPIC("multirotor_simulator::init");
 
     auto specialized = dynamic_cast<hal::Multirotor_Simulator_Descriptor const*>(&descriptor);
     if (!specialized)
     {
-        QLOGE("Wrong descriptor type");
-        return false;
+        return make_error("Wrong descriptor type");
     }
     *m_descriptor = *specialized;
 
     return init();
 }
-auto Multirotor_Simulator::init() -> bool
+ts::Result<void> Multirotor_Simulator::init()
 {
     std::shared_ptr<const IMultirotor_Properties> multirotor_properties = m_hal.get_specialized_uav_properties<IMultirotor_Properties>();
     if (!multirotor_properties)
     {
-        QLOGE("No multi properties found");
-        return false;
+        return make_error("No multi properties found");
     }
 
     if (!m_simulation.init(1000))
     {
-        return false;
+        return make_error("Cannot initialize simulator world");
     }
 
     if (!m_simulation.init_uav(multirotor_properties))
     {
-        return false;
+        return make_error("Cannot initialize UAV simulator");
     }
 
     m_input_throttle_streams.resize(multirotor_properties->get_motors().size());
@@ -92,14 +90,13 @@ auto Multirotor_Simulator::init() -> bool
     m_ecef_velocity_stream->rate = m_descriptor->get_gps_rate();
     m_ecef_velocity_stream->dt = std::chrono::microseconds(1000000 / m_ecef_velocity_stream->rate);
 
-
-    return true;
+    return ts::success;
 }
 
-auto Multirotor_Simulator::start(q::Clock::time_point tp) -> bool
+ts::Result<void> Multirotor_Simulator::start(q::Clock::time_point tp)
 {
     m_last_tp = tp;
-    return true;
+    return ts::success;
 }
 
 auto Multirotor_Simulator::get_inputs() const -> std::vector<Input>
@@ -290,32 +287,32 @@ void Multirotor_Simulator::process()
     });
 }
 
-void Multirotor_Simulator::set_input_stream_path(size_t idx, q::Path const& path)
+ts::Result<void> Multirotor_Simulator::set_input_stream_path(size_t idx, q::Path const& path)
 {
     auto input_stream = m_hal.get_stream_registry().find_by_name<stream::IThrottle>(path.get_as<std::string>());
     auto rate = input_stream ? input_stream->get_rate() : 0u;
     if (rate != m_descriptor->get_throttle_rate())
     {
-        QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", path, m_descriptor->get_throttle_rate(), rate);
         m_input_throttle_streams[idx].reset();
         m_input_throttle_stream_paths[idx].clear();
+        return make_error("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", path, m_descriptor->get_throttle_rate(), rate);
     }
     else
     {
         m_input_throttle_streams[idx] = input_stream;
         m_input_throttle_stream_paths[idx] = path;
     }
+    return ts::success;
 }
 
-auto Multirotor_Simulator::set_config(hal::INode_Config const& config) -> bool
+ts::Result<void> Multirotor_Simulator::set_config(hal::INode_Config const& config)
 {
     QLOG_TOPIC("multirotor_simulator::set_config");
 
     auto specialized = dynamic_cast<hal::Multirotor_Simulator_Config const*>(&config);
     if (!specialized)
     {
-        QLOGE("Wrong config type");
-        return false;
+        return make_error("Wrong config type");
     }
 
 //    Simulation::UAV_Config uav_config;
@@ -336,13 +333,12 @@ auto Multirotor_Simulator::set_config(hal::INode_Config const& config) -> bool
     std::shared_ptr<const IMultirotor_Properties> multirotor_properties = m_hal.get_specialized_uav_properties<IMultirotor_Properties>();
     if (!multirotor_properties)
     {
-        QLOGE("No multi properties found");
-        return false;
+        return make_error("No multi properties found");
     }
 
     if (!m_simulation.init_uav(multirotor_properties))
     {
-        return false;
+        return make_error("Cannot configure UAV simulator");
     }
     *m_config = *specialized;
 
@@ -364,7 +360,7 @@ auto Multirotor_Simulator::set_config(hal::INode_Config const& config) -> bool
     m_noise.temperature = Noise::Distribution<float>(-noise.get_temperature()*0.5f, noise.get_temperature()*0.5f);
     m_noise.ground_distance = Noise::Distribution<float>(-noise.get_ground_distance()*0.5f, noise.get_ground_distance()*0.5f);
 
-    return true;
+    return ts::success;
 }
 auto Multirotor_Simulator::get_config() const -> std::shared_ptr<const hal::INode_Config>
 {

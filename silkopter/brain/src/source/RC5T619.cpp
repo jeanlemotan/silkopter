@@ -141,30 +141,28 @@ auto RC5T619::get_outputs() const -> std::vector<Output>
     outputs[1].stream = m_adc[1];
     return outputs;
 }
-auto RC5T619::init(hal::INode_Descriptor const& descriptor) -> bool
+ts::Result<void> RC5T619::init(hal::INode_Descriptor const& descriptor)
 {
     QLOG_TOPIC("rc5t619::init");
 
     auto specialized = dynamic_cast<hal::RC5T619_Descriptor const*>(&descriptor);
     if (!specialized)
     {
-        QLOGE("Wrong descriptor type");
-        return false;
+        return make_error("Wrong descriptor type");
     }
     *m_descriptor = *specialized;
 
     return init();
 }
 
-auto RC5T619::init() -> bool
+ts::Result<void> RC5T619::init()
 {
     m_i2c = m_hal.get_bus_registry().find_by_name<bus::II2C>(m_descriptor->get_bus());
 
     auto i2c = m_i2c.lock();
     if (!i2c)
     {
-        QLOGE("No bus configured");
-        return false;
+        return make_error("No bus configured");
     }
 
     //m_descriptor->adc0_rate = math::clamp<size_t>(m_descriptor->adc0_rate, 1, 50);
@@ -181,10 +179,7 @@ auto RC5T619::init() -> bool
     auto res = i2c->read_register_u8(ADDR, 0x36, control);
     if (!res || control == 0xff)
     {
-        QLOGE("rc5t619 not found");
-#ifdef RASPBERRY_PI
-        return false;
-#endif
+        return make_error("rc5t619 not found");
     }
     QLOGI("rc5t619 found: {}", control);
 
@@ -204,19 +199,16 @@ auto RC5T619::init() -> bool
     res &= i2c->write_register_u8(ADDR, RC5T619_ADC_CNT3, CONVERT_ADC1);
     if (!res)
     {
-        QLOGI("Failed to init rc5t619");
-#ifdef RASPBERRY_PI
-        return false;
-#endif
+        return make_error("Failed to init rc5t619");
     }
 
-    return true;
+    return ts::success;
 }
 
-auto RC5T619::start(q::Clock::time_point tp) -> bool
+ts::Result<void> RC5T619::start(q::Clock::time_point tp)
 {
     m_last_tp = tp;
-    return true;
+    return ts::success;
 }
 
 void RC5T619::process()
@@ -302,19 +294,18 @@ void RC5T619::process()
     }
 }
 
-auto RC5T619::set_config(hal::INode_Config const& config) -> bool
+ts::Result<void> RC5T619::set_config(hal::INode_Config const& config)
 {
     QLOG_TOPIC("rc5t619::set_config");
 
     auto specialized = dynamic_cast<hal::RC5T619_Config const*>(&config);
     if (!specialized)
     {
-        QLOGE("Wrong config type");
-        return false;
+        return make_error("Wrong config type");
     }
     *m_config = *specialized;
 
-    return true;
+    return ts::success;
 }
 auto RC5T619::get_config() const -> std::shared_ptr<const hal::INode_Config>
 {

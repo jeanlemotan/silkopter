@@ -21,7 +21,7 @@ namespace silk
 class Quad_Multirotor_Properties : public IMultirotor_Properties
 {
 public:
-    bool init(hal::Quad_Multirotor_Descriptor const& descriptor);
+    ts::Result<void> init(hal::Quad_Multirotor_Descriptor const& descriptor);
 
     float get_mass() const override;
     float get_moment_of_inertia() const override;

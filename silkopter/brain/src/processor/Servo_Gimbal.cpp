@@ -19,35 +19,34 @@ Servo_Gimbal::Servo_Gimbal(HAL& hal)
     m_z_output_stream = std::make_shared<Output_Stream>();
 }
 
-auto Servo_Gimbal::init(hal::INode_Descriptor const& descriptor) -> bool
+ts::Result<void> Servo_Gimbal::init(hal::INode_Descriptor const& descriptor)
 {
     QLOG_TOPIC("servo_gimbal::init");
 
     auto specialized = dynamic_cast<hal::Servo_Gimbal_Descriptor const*>(&descriptor);
     if (!specialized)
     {
-        QLOGE("Wrong descriptor type");
-        return false;
+        return make_error("Wrong descriptor type");
     }
     *m_descriptor = *specialized;
 
     return init();
 }
 
-auto Servo_Gimbal::init() -> bool
+ts::Result<void> Servo_Gimbal::init()
 {
     m_x_output_stream->set_rate(m_descriptor->get_rate());
     m_y_output_stream->set_rate(m_descriptor->get_rate());
     m_z_output_stream->set_rate(m_descriptor->get_rate());
-    return true;
+    return ts::success;
 }
 
-auto Servo_Gimbal::start(q::Clock::time_point tp) -> bool
+ts::Result<void> Servo_Gimbal::start(q::Clock::time_point tp)
 {
     m_x_output_stream->set_tp(tp);
     m_y_output_stream->set_tp(tp);
     m_z_output_stream->set_tp(tp);
-    return true;
+    return ts::success;
 }
 
 auto Servo_Gimbal::get_inputs() const -> std::vector<Input>
@@ -142,31 +141,31 @@ void Servo_Gimbal::process()
 
 }
 
-void Servo_Gimbal::set_input_stream_path(size_t idx, q::Path const& path)
+ts::Result<void> Servo_Gimbal::set_input_stream_path(size_t idx, q::Path const& path)
 {
     if (idx == 0)
     {
-        m_frame_accumulator.set_stream_path(0, path, m_descriptor->get_rate(), m_hal);
+        return m_frame_accumulator.set_stream_path(0, path, m_descriptor->get_rate(), m_hal);
     }
     else if (idx == 1)
     {
-        m_commands_accumulator.set_stream_path(0, path, m_descriptor->get_commands_rate(), m_hal);
+        return m_commands_accumulator.set_stream_path(0, path, m_descriptor->get_commands_rate(), m_hal);
     }
+    return make_error("Invalid stream index {}", idx);
 }
 
-auto Servo_Gimbal::set_config(hal::INode_Config const& config) -> bool
+ts::Result<void> Servo_Gimbal::set_config(hal::INode_Config const& config)
 {
     QLOG_TOPIC("servo_gimbal::set_config");
 
     auto specialized = dynamic_cast<hal::Servo_Gimbal_Config const*>(&config);
     if (!specialized)
     {
-        QLOGE("Wrong config type");
-        return false;
+        return make_error("Wrong config type");
     }
     *m_config = *specialized;
 
-    return true;
+    return ts::success;
 }
 auto Servo_Gimbal::get_config() const -> std::shared_ptr<const hal::INode_Config>
 {

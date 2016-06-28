@@ -23,11 +23,12 @@ inline auto get_as_string(Space s, bool details) -> std::string
 {
     switch (s)
     {
+    case Space::SCALAR: return GET_AS_STRING("Scalar", "(Non-spatial)");
     case Space::LLA: return GET_AS_STRING("LLA", "(Latitude Longitude Altitude)");
     case Space::ECEF: return GET_AS_STRING("ECEF", "(Earth Centered Earth Fixed)");
     case Space::ENU: return GET_AS_STRING("ENU", "(East North Up)");
     case Space::UAV: return GET_AS_STRING("UAV", "(UAV Frame)");
-    case Space::GIMBAL: return GET_AS_STRING("GIMBAL", "(Gimbal Frame)");
+    case Space::GIMBAL: return GET_AS_STRING("Gimbal", "(Gimbal Frame)");
     default: QASSERT(false); return "Unknown";
     }
 }
@@ -97,21 +98,22 @@ inline auto get_as_string(Semantic type, bool details) -> std::string
 struct Type
 {
     constexpr Type(Semantic semantic, Space space)
-        : type((static_cast<uint16_t>(semantic) << 8) | static_cast<uint16_t>(space))
+        : id((static_cast<uint16_t>(semantic) << 8) | static_cast<uint16_t>(space))
     {
     }
     Type() : Type(Semantic::ACCELERATION, Space::UAV) {}
 
-    Semantic get_semantic() const { return static_cast<Semantic>((type >> 8) & 0xFF); }
-    Space get_space() const { return static_cast<Space>((type) & 0xFF); }
+    Semantic get_semantic() const { return static_cast<Semantic>((id >> 8) & 0xFF); }
+    Space get_space() const { return static_cast<Space>((id) & 0xFF); }
+    uint16_t get_id() const { return id; }
 
-    bool operator==(Type const& other) const { return type == other.type; }
+    bool operator==(Type const& other) const { return id == other.id; }
     bool operator!=(Type const& other) const { return !operator==(other); }
-    bool operator<(Type const& other) const { return type < other.type; }
-    bool operator>(Type const& other) const { return type > other.type; }
+    bool operator<(Type const& other) const { return id < other.id; }
+    bool operator>(Type const& other) const { return id > other.id; }
 
 private:
-    uint16_t type;
+    uint16_t id;
 };
 
 inline auto get_as_string(Type type, bool details) -> std::string

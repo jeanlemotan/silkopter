@@ -203,27 +203,26 @@ auto Raspicam::get_outputs() const -> std::vector<Output>
     return outputs;
 }
 
-auto Raspicam::init(hal::INode_Descriptor const& descriptor) -> bool
+ts::Result<void> Raspicam::init(hal::INode_Descriptor const& descriptor)
 {
     QLOG_TOPIC("raspicam::init");
 
     auto specialized = dynamic_cast<hal::Raspicam_Descriptor const*>(&descriptor);
     if (!specialized)
     {
-        QLOGE("Wrong descriptor type");
-        return false;
+        return make_error("Wrong descriptor type");
     }
     *m_descriptor = *specialized;
 
     return init();
 }
-auto Raspicam::init() -> bool
+ts::Result<void> Raspicam::init()
 {
 #if defined RASPBERRY_PI
     QLOG_TOPIC("raspicam::init");
     if (m_impl->camera)
     {
-        return true;
+        return ts::success;
     }
 
     m_recording_data.thread = boost::thread([this]()
@@ -277,27 +276,25 @@ auto Raspicam::init() -> bool
 
     if (!create_components())
     {
-        return false;
+        return make_error("Cannot create mmal components");
     }
 
     activate_streams();
 
     return true;
 #else
-    QLOGE("Raspicam is only supported on the Raspberry pi.");
-    return false;
+    return make_error("Raspicam is only supported on the Raspberry pi.");
 #endif
 }
 
-auto Raspicam::set_config(hal::INode_Config const& config) -> bool
+ts::Result<void> Raspicam::set_config(hal::INode_Config const& config)
 {
     QLOG_TOPIC("raspicam::set_config");
 
     auto specialized = dynamic_cast<hal::Raspicam_Config const*>(&config);
     if (!specialized)
     {
-        QLOGE("Wrong config type");
-        return false;
+        return make_error("Wrong config type");
     }
     *m_config = *specialized;
 
@@ -338,7 +335,7 @@ auto Raspicam::set_config(hal::INode_Config const& config) -> bool
     //raspicamcontrol_set_awb_gains(m_impl->camera.get(), m_config->awb_rb_gains.x, m_config->awb_rb_gains.y);
 #endif
 
-    return true;
+    return ts::success;
 }
 auto Raspicam::get_config() const -> std::shared_ptr<const hal::INode_Config>
 {
@@ -362,9 +359,9 @@ void Raspicam::shutdown()
 #endif
 }
 
-auto Raspicam::start(q::Clock::time_point tp) -> bool
+ts::Result<void> Raspicam::start(q::Clock::time_point tp)
 {
-    return true;
+    return ts::success;
 }
 
 void Raspicam::process()

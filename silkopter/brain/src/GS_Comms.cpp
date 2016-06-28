@@ -791,7 +791,16 @@ std::string const& GS_Comms::decode_json(std::string const& json_base64)
 std::string const& GS_Comms::encode_json(std::string const& json)
 {
     m_base64_buffer.resize(q::util::compute_base64_encoded_size(json.size()));
-    q::util::encode_base64(json.data(), json.size(), &m_base64_buffer[0]);
+    q::util::encode_base64(reinterpret_cast<uint8_t const*>(json.data()), json.size(), &m_base64_buffer[0]);
+
+    {
+        std::string buf;
+        buf.resize(q::util::compute_base64_max_decoded_size(m_base64_buffer.size()));
+        auto last_it = q::util::decode_base64(m_base64_buffer.data(), m_base64_buffer.data() + m_base64_buffer.size(), buf.begin());
+        buf.erase(last_it, buf.end());
+        QASSERT(json == buf);
+    }
+
     return m_base64_buffer;
 }
 
@@ -834,11 +843,12 @@ boost::variant<gs_comms::setup::Node_Data, gs_comms::setup::Error> GS_Comms::get
 }
 
 template<class Format_String, typename... Params>
-gs_comms::setup::Error GS_Comms::make_error(Format_String const& fmt, Params&&... params)
+gs_comms::setup::Error GS_Comms::make_error_response(uint32_t req_id, Format_String const& fmt, Params&&... params)
 {
     gs_comms::setup::Error error;
+    error.set_req_id(req_id);
     error.set_message(q::util::format<std::string>(fmt, std::forward<Params>(params)...));
-    QLOGE("Comms error: {}", error.get_message());
+    //QLOGE("Comms error: {}", error.get_message());
     return error;
 }
 
@@ -891,7 +901,7 @@ void GS_Comms::handle_req(gs_comms::setup::Set_Clock_Req const& req)
     time_t time_s = time_t_data / 1000;
     if (stime(&time_s) != 0)
     {
-        response = make_error("Failed to set time: {}", strerror(errno));
+        response = make_error_response(req.get_req_id(), "Failed to set time: {}", strerror(errno));
         serialize_and_send(SETUP_CHANNEL, response);
         return;
     }
@@ -924,7 +934,7 @@ void GS_Comms::handle_req(gs_comms::setup::Set_UAV_Descriptor_Req const& req)
     auto json_result = ts::sz::from_json(json);
     if (json_result != ts::success)
     {
-        response = make_error(q::util::format<std::string>("Cannot deserialize uav descriptor data: {}", json_result.error().what()));
+        response = make_error_response(req.get_req_id(), "Cannot deserialize uav descriptor data: {}", json_result.error().what());
         serialize_and_send(SETUP_CHANNEL, response);
         return;
     }
@@ -932,16 +942,19 @@ void GS_Comms::handle_req(gs_comms::setup::Set_UAV_Descriptor_Req const& req)
     auto deserialize_result = hal::deserialize(uav_descriptor, json_result.payload());
     if (deserialize_result != ts::success)
     {
-        response = make_error(q::util::format<std::string>("Cannot deserialize uav descriptor json: {}", deserialize_result.error().what()));
+        response = make_error_response(req.get_req_id(), "Cannot deserialize uav descriptor json: {}", deserialize_result.error().what());
         serialize_and_send(SETUP_CHANNEL, response);
         return;
     }
 
-    if (!m_hal.set_uav_descriptor(uav_descriptor.get_shared_ptr()))
     {
-        response = make_error(q::util::format<std::string>("Cannot set uav descriptor: {}", "N/A"));
-        serialize_and_send(SETUP_CHANNEL, response);
-        return;
+        auto result = m_hal.set_uav_descriptor(uav_descriptor.get_shared_ptr());
+        if (result != ts::success)
+        {
+            response = make_error_response(req.get_req_id(), "Cannot set uav descriptor: {}", result.error().what());
+            serialize_and_send(SETUP_CHANNEL, response);
+            return;
+        }
     }
 
     m_hal.save_settings();
@@ -1040,7 +1053,7 @@ void GS_Comms::handle_req(gs_comms::setup::Remove_Node_Req const& req)
     std::shared_ptr<node::INode> node = m_hal.get_node_registry().find_by_name<node::INode>(req.get_name());
     if (!node)
     {
-        response = make_error(q::util::format<std::string>("Cannot find node '{}'", req.get_name()));
+        response = make_error_response(req.get_req_id(), "Cannot find node '{}'", req.get_name());
         serialize_and_send(SETUP_CHANNEL, response);
         return;
     }
@@ -1065,7 +1078,7 @@ void GS_Comms::handle_req(gs_comms::setup::Add_Node_Req const& req)
     auto json_result = ts::sz::from_json(json);
     if (json_result != ts::success)
     {
-        response = make_error(q::util::format<std::string>("Cannot deserialize node {} descriptor data: {}", req.get_def_name(), json_result.error().what()));
+        response = make_error_response(req.get_req_id(), "Cannot deserialize node {} descriptor data: {}", req.get_def_name(), json_result.error().what());
         serialize_and_send(SETUP_CHANNEL, response);
         return;
     }
@@ -1073,15 +1086,15 @@ void GS_Comms::handle_req(gs_comms::setup::Add_Node_Req const& req)
     auto deserialize_result = hal::deserialize(descriptor, json_result.payload());
     if (deserialize_result != ts::success)
     {
-        response = make_error(q::util::format<std::string>("Cannot deserialize node {} descriptor json: {}", req.get_def_name(), deserialize_result.error().what()));
+        response = make_error_response(req.get_req_id(), "Cannot deserialize node {} descriptor json: {}", req.get_def_name(), deserialize_result.error().what());
         serialize_and_send(SETUP_CHANNEL, response);
         return;
     }
 
-    std::shared_ptr<node::INode> node = m_hal.create_node(req.get_def_name(), req.get_name(), *descriptor);
-    if (!node)
+    auto create_node_result = m_hal.create_node(req.get_def_name(), req.get_name(), *descriptor);
+    if (create_node_result != ts::success)
     {
-        response = make_error(q::util::format<std::string>("Cannot create node {}", req.get_def_name()));
+        response = make_error_response(req.get_req_id(), "Cannot create node {}: {}", req.get_def_name(), create_node_result.error().what());
         serialize_and_send(SETUP_CHANNEL, response);
         return;
     }
@@ -1090,7 +1103,7 @@ void GS_Comms::handle_req(gs_comms::setup::Add_Node_Req const& req)
     gs_comms::setup::Add_Node_Res res;
     res.set_req_id(req.get_req_id());
 
-    boost::variant<gs_comms::setup::Node_Data, gs_comms::setup::Error> result = get_node_data(req.get_name(), *node);
+    boost::variant<gs_comms::setup::Node_Data, gs_comms::setup::Error> result = get_node_data(req.get_name(), *create_node_result.payload());
     if (auto* error = boost::get<gs_comms::setup::Error>(&result))
     {
         response = std::move(*error);
@@ -1135,7 +1148,7 @@ void GS_Comms::handle_req(gs_comms::setup::Get_Nodes_Req const& req)
         std::shared_ptr<node::INode> node = m_hal.get_node_registry().find_by_name<node::INode>(name);
         if (!node)
         {
-            response = make_error(q::util::format<std::string>("Cannot find node '{}'", name));
+            response = make_error_response(req.get_req_id(), "Cannot find node '{}'", name);
             serialize_and_send(SETUP_CHANNEL, response);
             return;
         }
@@ -1169,7 +1182,7 @@ void GS_Comms::handle_req(gs_comms::setup::Set_Node_Input_Stream_Path_Req const&
     std::shared_ptr<node::INode> node = m_hal.get_node_registry().find_by_name<node::INode>(node_name);
     if (!node)
     {
-        response = make_error(q::util::format<std::string>("Cannot find node '{}'", node_name));
+        response = make_error_response(req.get_req_id(), "Cannot find node '{}'", node_name);
         serialize_and_send(SETUP_CHANNEL, response);
         return;
     }
@@ -1199,7 +1212,7 @@ void GS_Comms::handle_req(gs_comms::setup::Set_Node_Input_Stream_Path_Req const&
         }
     }
 
-    response = make_error(q::util::format<std::string>("Cannot find node '{}', input '{}'", node_name, input_name));
+    response = make_error_response(req.get_req_id(), "Cannot find node '{}', input '{}'", node_name, input_name);
     serialize_and_send(SETUP_CHANNEL, response);
     return;
 }

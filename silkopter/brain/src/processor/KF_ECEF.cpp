@@ -106,21 +106,20 @@ KF_ECEF::KF_ECEF(HAL& hal)
     m_linear_acceleration_output_stream = std::make_shared<Linear_Acceleration_Output_Stream>();
 }
 
-auto KF_ECEF::init(hal::INode_Descriptor const& descriptor) -> bool
+ts::Result<void> KF_ECEF::init(hal::INode_Descriptor const& descriptor)
 {
     QLOG_TOPIC("KF_ECEF::init");
 
     auto specialized = dynamic_cast<hal::KF_ECEF_Descriptor const*>(&descriptor);
     if (!specialized)
     {
-        QLOGE("Wrong descriptor type");
-        return false;
+        return make_error("Wrong descriptor type");
     }
     *m_descriptor = *specialized;
 
     return init();
 }
-auto KF_ECEF::init() -> bool
+ts::Result<void> KF_ECEF::init()
 {
     m_position_output_stream->set_rate(m_descriptor->get_rate());
     m_velocity_output_stream->set_rate(m_descriptor->get_rate());
@@ -151,15 +150,15 @@ auto KF_ECEF::init() -> bool
     m_kf_z = m_kf_x;
 //    m_kf_z = m_kf_x;
 
-    return true;
+    return ts::success;
 }
 
-auto KF_ECEF::start(q::Clock::time_point tp) -> bool
+ts::Result<void> KF_ECEF::start(q::Clock::time_point tp)
 {
     m_position_output_stream->set_tp(tp);
     m_velocity_output_stream->set_tp(tp);
     m_linear_acceleration_output_stream->set_tp(tp);
-    return true;
+    return ts::success;
 }
 
 auto KF_ECEF::get_inputs() const -> std::vector<Input>
@@ -255,20 +254,19 @@ void KF_ECEF::process()
     });
 }
 
-void KF_ECEF::set_input_stream_path(size_t idx, q::Path const& path)
+ts::Result<void> KF_ECEF::set_input_stream_path(size_t idx, q::Path const& path)
 {
-    m_accumulator.set_stream_path(idx, path, m_descriptor->get_rate(), m_hal);
+    return m_accumulator.set_stream_path(idx, path, m_descriptor->get_rate(), m_hal);
 }
 
-auto KF_ECEF::set_config(hal::INode_Config const& config) -> bool
+ts::Result<void> KF_ECEF::set_config(hal::INode_Config const& config)
 {
     QLOG_TOPIC("KF_ECEF::set_config");
 
     auto specialized = dynamic_cast<hal::KF_ECEF_Config const*>(&config);
     if (!specialized)
     {
-        QLOGE("Wrong config type");
-        return false;
+        return make_error("Wrong config type");
     }
     *m_config = *specialized;
 
@@ -287,7 +285,7 @@ auto KF_ECEF::set_config(hal::INode_Config const& config) -> bool
     m_gps_velocity_delayer.init(m_dts, m_config->get_gps_velocity_lag());
     m_linear_acceleration_delayer.init(m_dts, m_config->get_acceleration_lag());
 
-    return true;
+    return ts::success;
 }
 auto KF_ECEF::get_config() const -> std::shared_ptr<const hal::INode_Config>
 {

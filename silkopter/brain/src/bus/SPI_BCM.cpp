@@ -31,22 +31,16 @@ SPI_BCM::~SPI_BCM()
 {
 }
 
-bool SPI_BCM::init(hal::IBus_Descriptor const& descriptor)
+ts::Result<void> SPI_BCM::init(hal::IBus_Descriptor const& descriptor)
 {
     auto specialized = dynamic_cast<hal::SPI_BCM_Descriptor const*>(&descriptor);
     if (!specialized)
     {
-        QLOGE("Wrong descriptor type");
-        return false;
+        return make_error("Wrong descriptor type");
     }
     *m_descriptor = *specialized;
 
-    if (!open(specialized->get_dev(), specialized->get_speed(), specialized->get_mode()))
-    {
-        return false;
-    }
-
-    return true;
+    return open(specialized->get_dev(), specialized->get_speed(), specialized->get_mode());
 }
 
 std::shared_ptr<const hal::IBus_Descriptor> SPI_BCM::get_descriptor() const
@@ -54,17 +48,15 @@ std::shared_ptr<const hal::IBus_Descriptor> SPI_BCM::get_descriptor() const
     return m_descriptor;
 }
 
-bool SPI_BCM::open(uint32_t dev, uint32_t speed, uint32_t mode)
+ts::Result<void> SPI_BCM::open(uint32_t dev, uint32_t speed, uint32_t mode)
 {
     if (dev > 1)
     {
-        QLOGE("Only SPI devices 0 & 1 are allowed");
-        return false;
+        return make_error("Only SPI devices 0 & 1 are allowed");
     }
     if (mode > 3)
     {
-        QLOGE("Only SPI modes 0 to 3 are allowed");
-        return false;
+        return make_error("Only SPI modes 0 to 3 are allowed");
     }
 
     m_dev = dev;
@@ -79,7 +71,7 @@ bool SPI_BCM::open(uint32_t dev, uint32_t speed, uint32_t mode)
 
 #endif
 
-    return true;
+    return ts::success;
 }
 
 void SPI_BCM::lock()

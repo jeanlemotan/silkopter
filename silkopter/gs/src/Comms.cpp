@@ -790,7 +790,7 @@ std::string const& Comms::decode_json(std::string const& json_base64)
 std::string const& Comms::encode_json(std::string const& json)
 {
     m_base64_buffer.resize(q::util::compute_base64_encoded_size(json.size()));
-    q::util::encode_base64(json.data(), json.size(), &m_base64_buffer[0]);
+    q::util::encode_base64(reinterpret_cast<uint8_t const*>(json.data()), json.size(), &m_base64_buffer[0]);
     return m_base64_buffer;
 }
 

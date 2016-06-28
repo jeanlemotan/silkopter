@@ -83,7 +83,7 @@ public:
 
     void save_settings();
 
-    auto set_uav_descriptor(std::shared_ptr<const hal::IUAV_Descriptor> descriptor) -> bool;
+    ts::Result<void> set_uav_descriptor(std::shared_ptr<const hal::IUAV_Descriptor> descriptor);
     auto get_uav_descriptor() const   -> std::shared_ptr<const hal::IUAV_Descriptor>;
 
     auto get_uav_properties() const   -> std::shared_ptr<const IUAV_Properties>;
@@ -129,10 +129,10 @@ protected:
 private:
     void generate_settings_file();
 
-    auto create_bus(std::string const& type, std::string const& name, hal::IBus_Descriptor const& descriptor) -> std::shared_ptr<bus::IBus>;
-    auto create_node(std::string const& type, std::string const& name, hal::INode_Descriptor const& descriptor) -> std::shared_ptr<node::INode>;
+    ts::Result<std::shared_ptr<bus::IBus>> create_bus(std::string const& type, std::string const& name, hal::IBus_Descriptor const& descriptor);
+    ts::Result<std::shared_ptr<node::INode>> create_node(std::string const& type, std::string const& name, hal::INode_Descriptor const& descriptor);
 
-    auto remove_node(std::shared_ptr<node::INode> node) -> bool;
+    bool remove_node(std::shared_ptr<node::INode> node);
 
     void sort_nodes(std::shared_ptr<node::INode> first_node);
 

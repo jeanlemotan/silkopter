@@ -21,7 +21,7 @@ public:
     UART_Linux();
     ~UART_Linux();
 
-    bool init(hal::IBus_Descriptor const& descriptor) override;
+    ts::Result<void> init(hal::IBus_Descriptor const& descriptor) override;
     std::shared_ptr<const hal::IBus_Descriptor> get_descriptor() const override;
 
     void lock();
@@ -34,7 +34,7 @@ public:
     void send_break();
 
 private:
-    bool init(std::string const& dev, int baud_id);
+    ts::Result<void> init(std::string const& dev, int baud_id);
     void close();
 
     std::shared_ptr<hal::UART_Linux_Descriptor> m_descriptor;

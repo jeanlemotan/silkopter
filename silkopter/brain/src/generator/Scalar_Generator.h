@@ -19,24 +19,24 @@ class Scalar_Generator : public IGenerator
 public:
     Scalar_Generator(HAL& hal);
 
-    bool init(hal::INode_Descriptor const& descriptor) override;
+    ts::Result<void> init(hal::INode_Descriptor const& descriptor) override;
     std::shared_ptr<const hal::INode_Descriptor> get_descriptor() const override;
 
-    bool set_config(hal::INode_Config const& config) override;
+    ts::Result<void> set_config(hal::INode_Config const& config) override;
     std::shared_ptr<const hal::INode_Config> get_config() const override;
 
     //auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
 
-    auto start(q::Clock::time_point tp) -> bool override;
+    ts::Result<void> start(q::Clock::time_point tp) override;
 
-    void set_input_stream_path(size_t idx, q::Path const& path);
+    ts::Result<void> set_input_stream_path(size_t idx, q::Path const& path);
     auto get_inputs() const -> std::vector<Input>;
     auto get_outputs() const -> std::vector<Output>;
 
     void process();
 
 private:
-    auto init() -> bool;
+    ts::Result<void> init();
 
     HAL& m_hal;
 
@@ -61,15 +61,14 @@ Scalar_Generator<Stream_t>::Scalar_Generator(HAL& hal)
 }
 
 template<class Stream_t>
-auto Scalar_Generator<Stream_t>::init(hal::INode_Descriptor const& descriptor) -> bool
+ts::Result<void> Scalar_Generator<Stream_t>::init(hal::INode_Descriptor const& descriptor)
 {
     QLOG_TOPIC("scalar_generator::init");
 
     auto specialized = dynamic_cast<hal::Scalar_Generator_Descriptor const*>(&descriptor);
     if (!specialized)
     {
-        QLOGE("Wrong descriptor type");
-        return false;
+        return make_error("Wrong descriptor type");
     }
     *m_descriptor = *specialized;
 
@@ -77,10 +76,10 @@ auto Scalar_Generator<Stream_t>::init(hal::INode_Descriptor const& descriptor) -
 }
 
 template<class Stream_t>
-auto Scalar_Generator<Stream_t>::init() -> bool
+ts::Result<void> Scalar_Generator<Stream_t>::init()
 {
     m_output_stream->set_rate(m_descriptor->get_rate());
-    return true;
+    return ts::success;
 }
 
 template<class Stream_t>
@@ -90,43 +89,43 @@ auto Scalar_Generator<Stream_t>::get_descriptor() const -> std::shared_ptr<const
 }
 
 template<class Stream_t>
-auto Scalar_Generator<Stream_t>::start(q::Clock::time_point tp) -> bool
+ts::Result<void> Scalar_Generator<Stream_t>::start(q::Clock::time_point tp)
 {
     m_output_stream->set_tp(tp);
-    return true;
+    return ts::success;
 }
 
 template<class Stream_t>
-void Scalar_Generator<Stream_t>::set_input_stream_path(size_t idx, q::Path const& path)
+ts::Result<void> Scalar_Generator<Stream_t>::set_input_stream_path(size_t idx, q::Path const& path)
 {
     auto modulation_stream = m_hal.get_stream_registry().template find_by_name<stream::IFloat>(path.get_as<std::string>());
     if (modulation_stream && modulation_stream->get_rate() != m_output_stream->get_rate())
     {
-        QLOGW("Bad modulation stream '{}'. Expected rate {}Hz, got {}Hz", path, m_output_stream->get_rate(), modulation_stream->get_rate());
         m_modulation_stream.reset();
         m_modulation_stream_path.clear();
+        return make_error("Bad modulation stream '{}'. Expected rate {}Hz, got {}Hz", path, m_output_stream->get_rate(), modulation_stream->get_rate());
     }
     else
     {
         m_modulation_stream = modulation_stream;
         m_modulation_stream_path = path;
     }
+    return ts::success;
 }
 
 template<class Stream_t>
-auto Scalar_Generator<Stream_t>::set_config(hal::INode_Config const& config) -> bool
+ts::Result<void> Scalar_Generator<Stream_t>::set_config(hal::INode_Config const& config)
 {
     QLOG_TOPIC("scalar_generator::set_config");
 
     auto specialized = dynamic_cast<hal::Scalar_Generator_Config const*>(&config);
     if (!specialized)
     {
-        QLOGE("Wrong config type");
-        return false;
+        return make_error("Wrong config type");
     }
     *m_config = *specialized;
 
-    return true;
+    return ts::success;
 }
 
 //template<class Stream_t>

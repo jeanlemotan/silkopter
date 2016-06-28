@@ -18,30 +18,29 @@ ENU_Frame_System::ENU_Frame_System(HAL& hal)
     m_output_stream = std::make_shared<Output_Stream>();
 }
 
-auto ENU_Frame_System::init(hal::INode_Descriptor const& descriptor) -> bool
+ts::Result<void> ENU_Frame_System::init(hal::INode_Descriptor const& descriptor)
 {
     QLOG_TOPIC("ENU_Frame_System::init");
 
     auto specialized = dynamic_cast<hal::ENU_Frame_System_Descriptor const*>(&descriptor);
     if (!specialized)
     {
-        QLOGE("Wrong descriptor type");
-        return false;
+        return make_error("Wrong descriptor type");
     }
     *m_descriptor = *specialized;
 
     return init();
 }
-auto ENU_Frame_System::init() -> bool
+ts::Result<void> ENU_Frame_System::init()
 {
     m_output_stream->set_rate(m_descriptor->get_rate());
-    return true;
+    return ts::success;
 }
 
-auto ENU_Frame_System::start(q::Clock::time_point tp) -> bool
+ts::Result<void> ENU_Frame_System::start(q::Clock::time_point tp)
 {
     m_output_stream->set_tp(tp);
-    return true;
+    return ts::success;
 }
 
 auto ENU_Frame_System::get_inputs() const -> std::vector<Input>
@@ -85,24 +84,23 @@ void ENU_Frame_System::process()
     });
 }
 
-void ENU_Frame_System::set_input_stream_path(size_t idx, q::Path const& path)
+ts::Result<void> ENU_Frame_System::set_input_stream_path(size_t idx, q::Path const& path)
 {
-    m_accumulator.set_stream_path(idx, path, m_output_stream->get_rate(), m_hal);
+    return m_accumulator.set_stream_path(idx, path, m_output_stream->get_rate(), m_hal);
 }
 
-auto ENU_Frame_System::set_config(hal::INode_Config const& config) -> bool
+ts::Result<void> ENU_Frame_System::set_config(hal::INode_Config const& config)
 {
     QLOG_TOPIC("ENU_Frame_System::set_config");
 
     auto specialized = dynamic_cast<hal::ENU_Frame_System_Config const*>(&config);
     if (!specialized)
     {
-        QLOGE("Wrong config type");
-        return false;
+        return make_error("Wrong config type");
     }
     *m_config = *specialized;
 
-    return true;
+    return ts::success;
 }
 auto ENU_Frame_System::get_config() const -> std::shared_ptr<const hal::INode_Config>
 {

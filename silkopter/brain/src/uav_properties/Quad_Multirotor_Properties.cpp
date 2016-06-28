@@ -6,7 +6,7 @@ namespace silk
 {
 
 
-bool Quad_Multirotor_Properties::init(hal::Quad_Multirotor_Descriptor const& descriptor)
+ts::Result<void> Quad_Multirotor_Properties::init(hal::Quad_Multirotor_Descriptor const& descriptor)
 {
     m_mass = descriptor.get_mass();
     m_radius = descriptor.get_radius();
@@ -25,7 +25,7 @@ bool Quad_Multirotor_Properties::init(hal::Quad_Multirotor_Descriptor const& des
 
     m_motors = create_motors(4, 1, descriptor.get_plus_configuration());
 
-    return true;
+    return ts::success;
 }
 
 float Quad_Multirotor_Properties::get_mass() const

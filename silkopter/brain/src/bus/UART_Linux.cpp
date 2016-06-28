@@ -23,13 +23,12 @@ UART_Linux::~UART_Linux()
     close();
 }
 
-bool UART_Linux::init(hal::IBus_Descriptor const& descriptor)
+ts::Result<void> UART_Linux::init(hal::IBus_Descriptor const& descriptor)
 {
     auto specialized = dynamic_cast<hal::UART_Linux_Descriptor const*>(&descriptor);
     if (!specialized)
     {
-        QLOGE("Wrong descriptor type");
-        return false;
+        return make_error("Wrong descriptor type");
     }
     *m_descriptor = *specialized;
 
@@ -49,12 +48,7 @@ bool UART_Linux::init(hal::IBus_Descriptor const& descriptor)
         return false;
     }
 
-    if (!init(m_descriptor->get_dev(), baud_id))
-    {
-        return false;
-    }
-
-    return true;
+    return init(m_descriptor->get_dev(), baud_id);
 }
 
 std::shared_ptr<const hal::IBus_Descriptor> UART_Linux::get_descriptor() const
@@ -62,7 +56,7 @@ std::shared_ptr<const hal::IBus_Descriptor> UART_Linux::get_descriptor() const
     return m_descriptor;
 }
 
-auto UART_Linux::init(std::string const& dev, int baud_id) -> bool
+ts::Result<void> UART_Linux::init(std::string const& dev, int baud_id)
 {
     close();
 
@@ -71,8 +65,7 @@ auto UART_Linux::init(std::string const& dev, int baud_id) -> bool
     m_fd = ::open(dev.c_str(), O_RDWR | O_NOCTTY | O_NDELAY | O_NONBLOCK);
     if (m_fd < 0)
     {
-        QLOGE("can't open {}: {}", dev, strerror(errno));
-        return false;
+        return make_error("Can't open " + dev + ": " + strerror(errno));
     }
 
     m_dev = dev;
@@ -87,7 +80,7 @@ auto UART_Linux::init(std::string const& dev, int baud_id) -> bool
     tcflush(m_fd, TCIFLUSH);
     tcsetattr(m_fd, TCSANOW, &options);
 
-    return true;
+    return ts::success;
 }
 
 void UART_Linux::close()

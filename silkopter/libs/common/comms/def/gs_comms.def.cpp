@@ -2286,55 +2286,55 @@ ts::Result<void> deserialize(setup::Brain_Req& value, ts::sz::Value const& sz_va
   if (!value_sz_value) { return ts::Error("Expected 'value' when deserializing"); }
   std::string const& path = type_sz_value->get_as_string();
   if (false) { return ts::Error(""); } //this is here just to have the next items with 'else if'
-  else if (path == "setup::Get_AST_Req")
+  else if (path == "::setup::Get_AST_Req")
   {
     value = setup::Get_AST_Req();
     auto result = deserialize(boost::get<setup::Get_AST_Req>(value), *value_sz_value);
     if (result != ts::success) { return result; }
   }
-  else if (path == "setup::Set_Clock_Req")
+  else if (path == "::setup::Set_Clock_Req")
   {
     value = setup::Set_Clock_Req();
     auto result = deserialize(boost::get<setup::Set_Clock_Req>(value), *value_sz_value);
     if (result != ts::success) { return result; }
   }
-  else if (path == "setup::Set_UAV_Descriptor_Req")
+  else if (path == "::setup::Set_UAV_Descriptor_Req")
   {
     value = setup::Set_UAV_Descriptor_Req();
     auto result = deserialize(boost::get<setup::Set_UAV_Descriptor_Req>(value), *value_sz_value);
     if (result != ts::success) { return result; }
   }
-  else if (path == "setup::Get_UAV_Descriptor_Req")
+  else if (path == "::setup::Get_UAV_Descriptor_Req")
   {
     value = setup::Get_UAV_Descriptor_Req();
     auto result = deserialize(boost::get<setup::Get_UAV_Descriptor_Req>(value), *value_sz_value);
     if (result != ts::success) { return result; }
   }
-  else if (path == "setup::Get_Node_Defs_Req")
+  else if (path == "::setup::Get_Node_Defs_Req")
   {
     value = setup::Get_Node_Defs_Req();
     auto result = deserialize(boost::get<setup::Get_Node_Defs_Req>(value), *value_sz_value);
     if (result != ts::success) { return result; }
   }
-  else if (path == "setup::Remove_Node_Req")
+  else if (path == "::setup::Remove_Node_Req")
   {
     value = setup::Remove_Node_Req();
     auto result = deserialize(boost::get<setup::Remove_Node_Req>(value), *value_sz_value);
     if (result != ts::success) { return result; }
   }
-  else if (path == "setup::Add_Node_Req")
+  else if (path == "::setup::Add_Node_Req")
   {
     value = setup::Add_Node_Req();
     auto result = deserialize(boost::get<setup::Add_Node_Req>(value), *value_sz_value);
     if (result != ts::success) { return result; }
   }
-  else if (path == "setup::Get_Nodes_Req")
+  else if (path == "::setup::Get_Nodes_Req")
   {
     value = setup::Get_Nodes_Req();
     auto result = deserialize(boost::get<setup::Get_Nodes_Req>(value), *value_sz_value);
     if (result != ts::success) { return result; }
   }
-  else if (path == "setup::Set_Node_Input_Stream_Path_Req")
+  else if (path == "::setup::Set_Node_Input_Stream_Path_Req")
   {
     value = setup::Set_Node_Input_Stream_Path_Req();
     auto result = deserialize(boost::get<setup::Set_Node_Input_Stream_Path_Req>(value), *value_sz_value);
@@ -2350,63 +2350,63 @@ ts::sz::Value serialize(setup::Brain_Req const& value)
   else if (auto* v = boost::get<setup::Get_AST_Req>(&value))
   {
     sz_value.reserve_object_members(2);
-    sz_value.add_object_member("type", "setup::Get_AST_Req");
+    sz_value.add_object_member("type", "::setup::Get_AST_Req");
     sz_value.add_object_member("value", serialize(*v));
     return std::move(sz_value);
   }
   else if (auto* v = boost::get<setup::Set_Clock_Req>(&value))
   {
     sz_value.reserve_object_members(2);
-    sz_value.add_object_member("type", "setup::Set_Clock_Req");
+    sz_value.add_object_member("type", "::setup::Set_Clock_Req");
     sz_value.add_object_member("value", serialize(*v));
     return std::move(sz_value);
   }
   else if (auto* v = boost::get<setup::Set_UAV_Descriptor_Req>(&value))
   {
     sz_value.reserve_object_members(2);
-    sz_value.add_object_member("type", "setup::Set_UAV_Descriptor_Req");
+    sz_value.add_object_member("type", "::setup::Set_UAV_Descriptor_Req");
     sz_value.add_object_member("value", serialize(*v));
     return std::move(sz_value);
   }
   else if (auto* v = boost::get<setup::Get_UAV_Descriptor_Req>(&value))
   {
     sz_value.reserve_object_members(2);
-    sz_value.add_object_member("type", "setup::Get_UAV_Descriptor_Req");
+    sz_value.add_object_member("type", "::setup::Get_UAV_Descriptor_Req");
     sz_value.add_object_member("value", serialize(*v));
     return std::move(sz_value);
   }
   else if (auto* v = boost::get<setup::Get_Node_Defs_Req>(&value))
   {
     sz_value.reserve_object_members(2);
-    sz_value.add_object_member("type", "setup::Get_Node_Defs_Req");
+    sz_value.add_object_member("type", "::setup::Get_Node_Defs_Req");
     sz_value.add_object_member("value", serialize(*v));
     return std::move(sz_value);
   }
   else if (auto* v = boost::get<setup::Remove_Node_Req>(&value))
   {
     sz_value.reserve_object_members(2);
-    sz_value.add_object_member("type", "setup::Remove_Node_Req");
+    sz_value.add_object_member("type", "::setup::Remove_Node_Req");
     sz_value.add_object_member("value", serialize(*v));
     return std::move(sz_value);
   }
   else if (auto* v = boost::get<setup::Add_Node_Req>(&value))
   {
     sz_value.reserve_object_members(2);
-    sz_value.add_object_member("type", "setup::Add_Node_Req");
+    sz_value.add_object_member("type", "::setup::Add_Node_Req");
     sz_value.add_object_member("value", serialize(*v));
     return std::move(sz_value);
   }
   else if (auto* v = boost::get<setup::Get_Nodes_Req>(&value))
   {
     sz_value.reserve_object_members(2);
-    sz_value.add_object_member("type", "setup::Get_Nodes_Req");
+    sz_value.add_object_member("type", "::setup::Get_Nodes_Req");
     sz_value.add_object_member("value", serialize(*v));
     return std::move(sz_value);
   }
   else if (auto* v = boost::get<setup::Set_Node_Input_Stream_Path_Req>(&value))
   {
     sz_value.reserve_object_members(2);
-    sz_value.add_object_member("type", "setup::Set_Node_Input_Stream_Path_Req");
+    sz_value.add_object_member("type", "::setup::Set_Node_Input_Stream_Path_Req");
     sz_value.add_object_member("value", serialize(*v));
     return std::move(sz_value);
   }
@@ -2421,61 +2421,61 @@ ts::Result<void> deserialize(setup::Brain_Res& value, ts::sz::Value const& sz_va
   if (!value_sz_value) { return ts::Error("Expected 'value' when deserializing"); }
   std::string const& path = type_sz_value->get_as_string();
   if (false) { return ts::Error(""); } //this is here just to have the next items with 'else if'
-  else if (path == "setup::Get_AST_Res")
+  else if (path == "::setup::Get_AST_Res")
   {
     value = setup::Get_AST_Res();
     auto result = deserialize(boost::get<setup::Get_AST_Res>(value), *value_sz_value);
     if (result != ts::success) { return result; }
   }
-  else if (path == "setup::Set_Clock_Res")
+  else if (path == "::setup::Set_Clock_Res")
   {
     value = setup::Set_Clock_Res();
     auto result = deserialize(boost::get<setup::Set_Clock_Res>(value), *value_sz_value);
     if (result != ts::success) { return result; }
   }
-  else if (path == "setup::Set_UAV_Descriptor_Res")
+  else if (path == "::setup::Set_UAV_Descriptor_Res")
   {
     value = setup::Set_UAV_Descriptor_Res();
     auto result = deserialize(boost::get<setup::Set_UAV_Descriptor_Res>(value), *value_sz_value);
     if (result != ts::success) { return result; }
   }
-  else if (path == "setup::Get_UAV_Descriptor_Res")
+  else if (path == "::setup::Get_UAV_Descriptor_Res")
   {
     value = setup::Get_UAV_Descriptor_Res();
     auto result = deserialize(boost::get<setup::Get_UAV_Descriptor_Res>(value), *value_sz_value);
     if (result != ts::success) { return result; }
   }
-  else if (path == "setup::Get_Node_Defs_Res")
+  else if (path == "::setup::Get_Node_Defs_Res")
   {
     value = setup::Get_Node_Defs_Res();
     auto result = deserialize(boost::get<setup::Get_Node_Defs_Res>(value), *value_sz_value);
     if (result != ts::success) { return result; }
   }
-  else if (path == "setup::Remove_Node_Res")
+  else if (path == "::setup::Remove_Node_Res")
   {
     value = setup::Remove_Node_Res();
     auto result = deserialize(boost::get<setup::Remove_Node_Res>(value), *value_sz_value);
     if (result != ts::success) { return result; }
   }
-  else if (path == "setup::Add_Node_Res")
+  else if (path == "::setup::Add_Node_Res")
   {
     value = setup::Add_Node_Res();
     auto result = deserialize(boost::get<setup::Add_Node_Res>(value), *value_sz_value);
     if (result != ts::success) { return result; }
   }
-  else if (path == "setup::Get_Nodes_Res")
+  else if (path == "::setup::Get_Nodes_Res")
   {
     value = setup::Get_Nodes_Res();
     auto result = deserialize(boost::get<setup::Get_Nodes_Res>(value), *value_sz_value);
     if (result != ts::success) { return result; }
   }
-  else if (path == "setup::Set_Node_Input_Stream_Path_Res")
+  else if (path == "::setup::Set_Node_Input_Stream_Path_Res")
   {
     value = setup::Set_Node_Input_Stream_Path_Res();
     auto result = deserialize(boost::get<setup::Set_Node_Input_Stream_Path_Res>(value), *value_sz_value);
     if (result != ts::success) { return result; }
   }
-  else if (path == "setup::Error")
+  else if (path == "::setup::Error")
   {
     value = setup::Error();
     auto result = deserialize(boost::get<setup::Error>(value), *value_sz_value);
@@ -2491,70 +2491,70 @@ ts::sz::Value serialize(setup::Brain_Res const& value)
   else if (auto* v = boost::get<setup::Get_AST_Res>(&value))
   {
     sz_value.reserve_object_members(2);
-    sz_value.add_object_member("type", "setup::Get_AST_Res");
+    sz_value.add_object_member("type", "::setup::Get_AST_Res");
     sz_value.add_object_member("value", serialize(*v));
     return std::move(sz_value);
   }
   else if (auto* v = boost::get<setup::Set_Clock_Res>(&value))
   {
     sz_value.reserve_object_members(2);
-    sz_value.add_object_member("type", "setup::Set_Clock_Res");
+    sz_value.add_object_member("type", "::setup::Set_Clock_Res");
     sz_value.add_object_member("value", serialize(*v));
     return std::move(sz_value);
   }
   else if (auto* v = boost::get<setup::Set_UAV_Descriptor_Res>(&value))
   {
     sz_value.reserve_object_members(2);
-    sz_value.add_object_member("type", "setup::Set_UAV_Descriptor_Res");
+    sz_value.add_object_member("type", "::setup::Set_UAV_Descriptor_Res");
     sz_value.add_object_member("value", serialize(*v));
     return std::move(sz_value);
   }
   else if (auto* v = boost::get<setup::Get_UAV_Descriptor_Res>(&value))
   {
     sz_value.reserve_object_members(2);
-    sz_value.add_object_member("type", "setup::Get_UAV_Descriptor_Res");
+    sz_value.add_object_member("type", "::setup::Get_UAV_Descriptor_Res");
     sz_value.add_object_member("value", serialize(*v));
     return std::move(sz_value);
   }
   else if (auto* v = boost::get<setup::Get_Node_Defs_Res>(&value))
   {
     sz_value.reserve_object_members(2);
-    sz_value.add_object_member("type", "setup::Get_Node_Defs_Res");
+    sz_value.add_object_member("type", "::setup::Get_Node_Defs_Res");
     sz_value.add_object_member("value", serialize(*v));
     return std::move(sz_value);
   }
   else if (auto* v = boost::get<setup::Remove_Node_Res>(&value))
   {
     sz_value.reserve_object_members(2);
-    sz_value.add_object_member("type", "setup::Remove_Node_Res");
+    sz_value.add_object_member("type", "::setup::Remove_Node_Res");
     sz_value.add_object_member("value", serialize(*v));
     return std::move(sz_value);
   }
   else if (auto* v = boost::get<setup::Add_Node_Res>(&value))
   {
     sz_value.reserve_object_members(2);
-    sz_value.add_object_member("type", "setup::Add_Node_Res");
+    sz_value.add_object_member("type", "::setup::Add_Node_Res");
     sz_value.add_object_member("value", serialize(*v));
     return std::move(sz_value);
   }
   else if (auto* v = boost::get<setup::Get_Nodes_Res>(&value))
   {
     sz_value.reserve_object_members(2);
-    sz_value.add_object_member("type", "setup::Get_Nodes_Res");
+    sz_value.add_object_member("type", "::setup::Get_Nodes_Res");
     sz_value.add_object_member("value", serialize(*v));
     return std::move(sz_value);
   }
   else if (auto* v = boost::get<setup::Set_Node_Input_Stream_Path_Res>(&value))
   {
     sz_value.reserve_object_members(2);
-    sz_value.add_object_member("type", "setup::Set_Node_Input_Stream_Path_Res");
+    sz_value.add_object_member("type", "::setup::Set_Node_Input_Stream_Path_Res");
     sz_value.add_object_member("value", serialize(*v));
     return std::move(sz_value);
   }
   else if (auto* v = boost::get<setup::Error>(&value))
   {
     sz_value.reserve_object_members(2);
-    sz_value.add_object_member("type", "setup::Error");
+    sz_value.add_object_member("type", "::setup::Error");
     sz_value.add_object_member("value", serialize(*v));
     return std::move(sz_value);
   }

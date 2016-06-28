@@ -29,29 +29,27 @@ auto MaxSonar::get_outputs() const -> std::vector<Output>
     outputs[0].stream = m_output_stream;
     return outputs;
 }
-auto MaxSonar::init(hal::INode_Descriptor const& descriptor) -> bool
+ts::Result<void> MaxSonar::init(hal::INode_Descriptor const& descriptor)
 {
     QLOG_TOPIC("MaxSonar::init");
 
     auto specialized = dynamic_cast<hal::MaxSonar_Descriptor const*>(&descriptor);
     if (!specialized)
     {
-        QLOGE("Wrong descriptor type");
-        return false;
+        return make_error("Wrong descriptor type");
     }
     *m_descriptor = *specialized;
 
     return init();
 }
 
-auto MaxSonar::init() -> bool
+ts::Result<void> MaxSonar::init()
 {
     m_bus = m_hal.get_bus_registry().find_by_name<bus::IUART>(m_descriptor->get_bus());
     auto bus = m_bus.lock();
     if (!bus)
     {
-        QLOGE("No bus configured");
-        return false;
+        return make_error("No bus configured");
     }
 
     bus->lock();
@@ -62,14 +60,13 @@ auto MaxSonar::init() -> bool
 
     m_output_stream->set_rate(m_descriptor->get_rate());
 
-    return true;
+    return ts::success;
 }
 
-auto MaxSonar::start(q::Clock::time_point tp) -> bool
+ts::Result<void> MaxSonar::start(q::Clock::time_point tp)
 {
     m_output_stream->set_tp(tp);
-
-    return true;
+    return ts::success;
 }
 
 void MaxSonar::process()
@@ -154,15 +151,14 @@ void MaxSonar::process()
     }
 }
 
-auto MaxSonar::set_config(hal::INode_Config const& config) -> bool
+ts::Result<void> MaxSonar::set_config(hal::INode_Config const& config)
 {
     QLOG_TOPIC("MaxSonar::set_config");
 
     auto specialized = dynamic_cast<hal::MaxSonar_Config const*>(&config);
     if (!specialized)
     {
-        QLOGE("Wrong config type");
-        return false;
+        return make_error("Wrong config type");
     }
     *m_config = *specialized;
 
@@ -172,7 +168,7 @@ auto MaxSonar::set_config(hal::INode_Config const& config) -> bool
     }
     m_config->set_direction(math::normalized(m_config->get_direction()));
 
-    return true;
+    return ts::success;
 }
 auto MaxSonar::get_config() const -> std::shared_ptr<const hal::INode_Config>
 {

@@ -117,21 +117,20 @@ auto MS5611::get_outputs() const -> std::vector<Output>
     outputs[1].stream = m_temperature;
     return outputs;
 }
-auto MS5611::init(hal::INode_Descriptor const& descriptor) -> bool
+ts::Result<void> MS5611::init(hal::INode_Descriptor const& descriptor)
 {
     QLOG_TOPIC("ms5611::init");
 
     auto specialized = dynamic_cast<hal::MS5611_Descriptor const*>(&descriptor);
     if (!specialized)
     {
-        QLOGE("Wrong descriptor type");
-        return false;
+        return make_error("Wrong descriptor type");
     }
     *m_descriptor = *specialized;
 
     return init();
 }
-auto MS5611::init() -> bool
+ts::Result<void> MS5611::init()
 {
     m_i2c = m_hal.get_bus_registry().find_by_name<bus::II2C>(m_descriptor->get_bus());
     m_spi = m_hal.get_bus_registry().find_by_name<bus::ISPI>(m_descriptor->get_bus());
@@ -139,8 +138,7 @@ auto MS5611::init() -> bool
     Buses buses = { m_i2c.lock(), m_spi.lock() };
     if (!buses.i2c && !buses.spi)
     {
-        QLOGE("No bus configured");
-        return false;
+        return make_error("No bus configured");
     }
 
     lock(buses);
@@ -171,10 +169,7 @@ auto MS5611::init() -> bool
     res &= bus_read_u16(buses, CMD_MS5611_PROM_C6, C6);
     if (!res)
     {
-        QLOGE("MS5611 not found!");
-#ifdef RASPBERRY_PI
-        return false;
-#endif
+        return make_error("MS5611 not found!");
     }
     QLOGI("PROM: {} {} {} {} {} {}", C1, C2, C3, C4, C5, C6);
 
@@ -186,33 +181,27 @@ auto MS5611::init() -> bool
     m_c6 = C6;
     if (m_c1 == 0 || m_c2 == 0 || m_c3 == 0 || m_c4 == 0 || m_c5 == 0 || m_c6 == 0)
     {
-        QLOGE("MS5611 seems broken!");
-#ifdef RASPBERRY_PI
-        return false;
-#endif
+        return make_error("MS5611 seems broken!");
     }
 
     res = bus_write(buses, CMD_CONVERT_D2_OSR256);
     if (!res)
     {
-        QLOGE("cannot start conversion");
-#ifdef RASPBERRY_PI
-        return false;
-#endif
+        return make_error("cannot start conversion");
     }
 
     m_pressure->set_rate(m_descriptor->get_pressure_rate());
     m_temperature->set_rate(m_descriptor->get_temperature_rate());
 
-    return true;
+    return ts::success;
 }
 
-auto MS5611::start(q::Clock::time_point tp) -> bool
+ts::Result<void> MS5611::start(q::Clock::time_point tp)
 {
     m_last_process_tp = tp;
     m_pressure->set_tp(tp);
     m_temperature->set_tp(tp);
-    return true;
+    return ts::success;
 }
 
 void MS5611::process()
@@ -370,19 +359,18 @@ void MS5611::process()
     }
 }
 
-auto MS5611::set_config(hal::INode_Config const& config) -> bool
+ts::Result<void> MS5611::set_config(hal::INode_Config const& config)
 {
     QLOG_TOPIC("ms5611::set_config");
 
     auto specialized = dynamic_cast<hal::MS5611_Config const*>(&config);
     if (!specialized)
     {
-        QLOGE("Wrong config type");
-        return false;
+        return make_error("Wrong config type");
     }
     *m_config = *specialized;
 
-    return true;
+    return ts::success;
 }
 auto MS5611::get_config() const -> std::shared_ptr<const hal::INode_Config>
 {

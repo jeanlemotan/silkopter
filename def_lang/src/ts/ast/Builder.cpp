@@ -31,6 +31,7 @@
 #include "def_lang/impl/Decimals_Attribute.h"
 #include "def_lang/impl/Default_Attribute.h"
 #include "def_lang/impl/UI_Name_Attribute.h"
+#include "def_lang/impl/UI_Suffix_Attribute.h"
 #include "def_lang/impl/Public_Attribute.h"
 #include "def_lang/impl/Native_Type_Attribute.h"
 #include "def_lang/impl/String_Type.h"
@@ -598,6 +599,17 @@ static Result<void> create_member_def_attributes(Type_System& ts, IMember_Def& m
             }
 
             attribute = std::make_shared<UI_Name_Attribute>(value->get_value());
+        }
+        else if (attribute_name == "ui_suffix")
+        {
+            std::shared_ptr<IString_Value> value = ts.get_root_scope()->find_specialized_symbol_by_name<IString_Type>("string")->create_specialized_value();
+            auto result = value->construct(*initializer_list);
+            if (result != success)
+            {
+                return Error(attribute_node.get_source_location().to_string() + "Cannot initialize attribute: " + result.error().what());
+            }
+
+            attribute = std::make_shared<UI_Suffix_Attribute>(value->get_value());
         }
         else
         {

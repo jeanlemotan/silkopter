@@ -22,6 +22,7 @@ public:
     std::shared_ptr<const IValue> get_default_value() const override;
 
     std::string const& get_ui_name() const override;
+    std::string const& get_ui_suffix() const override;
 
 protected:
     Result<void> validate_attribute(IAttribute const& attribute);
@@ -30,6 +31,7 @@ private:
     std::shared_ptr<IType const> m_type;
     std::shared_ptr<const IValue> m_default_value;
     std::string m_ui_name;
+    std::string m_ui_suffix;
 };
 
 }

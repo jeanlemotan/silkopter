@@ -1,6 +1,7 @@
 #include "def_lang/impl/Member_Def.h"
 #include "def_lang/IValue.h"
 #include "def_lang/impl/UI_Name_Attribute.h"
+#include "def_lang/impl/UI_Suffix_Attribute.h"
 
 namespace ts
 {
@@ -33,11 +34,20 @@ std::string const& Member_Def::get_ui_name() const
     return m_ui_name.empty() ? get_name() : m_ui_name;
 }
 
+std::string const& Member_Def::get_ui_suffix() const
+{
+    return m_ui_suffix;
+}
+
 Result<void> Member_Def::validate_attribute(IAttribute const& attribute)
 {
     if (UI_Name_Attribute const* att = dynamic_cast<UI_Name_Attribute const*>(&attribute))
     {
         m_ui_name = att->get_ui_name();
+    }
+    else if (UI_Suffix_Attribute const* att = dynamic_cast<UI_Suffix_Attribute const*>(&attribute))
+    {
+        m_ui_suffix = att->get_ui_suffix();
     }
     else
     {

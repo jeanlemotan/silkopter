@@ -33,24 +33,24 @@ class Combiner : public ICombiner
 public:
     Combiner(HAL& hal);
 
-    bool init(hal::INode_Descriptor const& descriptor) override;
+    ts::Result<void> init(hal::INode_Descriptor const& descriptor) override;
     std::shared_ptr<const hal::INode_Descriptor> get_descriptor() const override;
 
-    bool set_config(hal::INode_Config const& config) override;
+    ts::Result<void> set_config(hal::INode_Config const& config) override;
     std::shared_ptr<const hal::INode_Config> get_config() const override;
 
     //auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
 
-    auto start(q::Clock::time_point tp) -> bool override;
+    ts::Result<void> start(q::Clock::time_point tp) override;
 
-    void set_input_stream_path(size_t idx, q::Path const& path);
+    ts::Result<void> set_input_stream_path(size_t idx, q::Path const& path);
     auto get_inputs() const -> std::vector<Input>;
     auto get_outputs() const -> std::vector<Output>;
 
     void process();
 
 private:
-    auto init() -> bool;
+    ts::Result<void> init();
 
     HAL& m_hal;
 
@@ -80,15 +80,14 @@ Combiner<Stream_t>::Combiner(HAL& hal)
 }
 
 template<class Stream_t>
-auto Combiner<Stream_t>::init(hal::INode_Descriptor const& descriptor) -> bool
+ts::Result<void> Combiner<Stream_t>::init(hal::INode_Descriptor const& descriptor)
 {
     QLOG_TOPIC("Combiner::init");
 
     auto specialized = dynamic_cast<hal::Combiner_Descriptor const*>(&descriptor);
     if (!specialized)
     {
-        QLOGE("Wrong descriptor type");
-        return false;
+        return make_error("Wrong descriptor type");
     }
     *m_descriptor = *specialized;
 
@@ -96,18 +95,17 @@ auto Combiner<Stream_t>::init(hal::INode_Descriptor const& descriptor) -> bool
 }
 
 template<class Stream_t>
-auto Combiner<Stream_t>::init() -> bool
+ts::Result<void> Combiner<Stream_t>::init()
 {
     m_output_stream->set_rate(m_descriptor->get_rate());
-
-    return true;
+    return ts::success;
 }
 
 template<class Stream_t>
-auto Combiner<Stream_t>::start(q::Clock::time_point tp) -> bool
+ts::Result<void> Combiner<Stream_t>::start(q::Clock::time_point tp)
 {
     m_output_stream->set_tp(tp);
-    return true;
+    return ts::success;
 }
 
 template<class Stream_t>
@@ -165,25 +163,24 @@ void Combiner<Stream_t>::process()
 }
 
 template<class Stream_t>
-void Combiner<Stream_t>::set_input_stream_path(size_t idx, q::Path const& path)
+ts::Result<void> Combiner<Stream_t>::set_input_stream_path(size_t idx, q::Path const& path)
 {
-    m_accumulator.set_stream_path(idx, path, m_output_stream->get_rate(), m_hal);
+    return m_accumulator.set_stream_path(idx, path, m_output_stream->get_rate(), m_hal);
 }
 
 template<class Stream_t>
-auto Combiner<Stream_t>::set_config(hal::INode_Config const& config) -> bool
+ts::Result<void> Combiner<Stream_t>::set_config(hal::INode_Config const& config)
 {
     QLOG_TOPIC("Combiner::set_config");
 
     auto specialized = dynamic_cast<hal::Combiner_Config const*>(&config);
     if (!specialized)
     {
-        QLOGE("Wrong config type");
-        return false;
+        return make_error("Wrong config type");
     }
     *m_config = *specialized;
 
-    return true;
+    return ts::success;
 }
 
 template<class Stream_t>

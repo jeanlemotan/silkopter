@@ -59,22 +59,21 @@ auto PIGPIO::get_inputs() const -> std::vector<Input>
 }
 
 
-auto PIGPIO::init(hal::INode_Descriptor const& descriptor) -> bool
+ts::Result<void> PIGPIO::init(hal::INode_Descriptor const& descriptor)
 {
     QLOG_TOPIC("pigpio::init");
 
     auto specialized = dynamic_cast<hal::PIGPIO_Descriptor const*>(&descriptor);
     if (!specialized)
     {
-        QLOGE("Wrong descriptor type");
-        return false;
+        return make_error("Wrong descriptor type");
     }
     *m_descriptor = *specialized;
 
     return init();
 }
 
-auto PIGPIO::init() -> bool
+ts::Result<void> PIGPIO::init()
 {
 #define SETUP_CHANNEL(GPIO)\
     {\
@@ -143,8 +142,7 @@ auto PIGPIO::init() -> bool
         Channel const& channel = *m_channels[i];
         if (channel.is_servo && channel.rate > 400)
         {
-            QLOGE("channel {} on GPIO {}: max rate for servo channels is 400Hz", i, channel.gpio);
-            return false;
+            return make_error("channel {} on GPIO {}: max rate for servo channels is 400Hz", i, channel.gpio);
         }
 //        if (config.min >= config.max)
 //        {
@@ -159,8 +157,7 @@ auto PIGPIO::init() -> bool
 //        }
         if (std::find(rates.begin(), rates.end(), channel.rate) == rates.end())
         {
-            QLOGE("channel {}: invalid rate {}. Supported are: {}", channel.gpio, channel.rate, rates);
-            return false;
+            return make_error("channel {}: invalid rate {}. Supported are: {}", channel.gpio, channel.rate, rates);
         }
     }
 
@@ -171,13 +168,11 @@ auto PIGPIO::init() -> bool
         Channel const& channel = *m_channels[i];
         if (gpioSetPullUpDown(channel.gpio, PI_PUD_DOWN) < 0)
         {
-            QLOGE("channel {} on GPIO {}: Cannot set pull down mode", i, channel.gpio);
-            return false;
+            return make_error("channel {} on GPIO {}: Cannot set pull down mode", i, channel.gpio);
         }
         if (gpioSetMode(channel.gpio, PI_OUTPUT) < 0)
         {
-            QLOGE("channel {} on GPIO {}: Cannot set GPIO mode to output", i, channel.gpio);
-            return false;
+            return make_error("channel {} on GPIO {}: Cannot set GPIO mode to output", i, channel.gpio);
         }
      }
 
@@ -188,16 +183,14 @@ auto PIGPIO::init() -> bool
         auto f = gpioSetPWMfrequency(channel.gpio, channel.rate);
         if (f < 0)
         {
-            QLOGE("channel {}: Cannot set pwm rate {}", channel.gpio, channel.rate);
-            return false;
+            return make_error("channel {}: Cannot set pwm rate {}", channel.gpio, channel.rate);
         }
         if (channel.is_servo)
         {
             uint32_t range = 1000000 / channel.rate;
             if (gpioSetPWMrange(channel.gpio, range) < 0)
             {
-                QLOGE("channel {}: Cannot set pwm range {} on gpio {}", channel.gpio, range);
-                return false;
+                return make_error("channel {}: Cannot set pwm range {} on gpio {}", channel.gpio, range);
             }
             QLOGI("SERVO Channel {}: gpio {}, rate {}, range {}", i, channel.gpio, channel.rate, range);
         }
@@ -209,14 +202,13 @@ auto PIGPIO::init() -> bool
 
     return true;
 #else
-    QLOGE("PIGPIO only supported on the raspberry pi");
-    return false;
+    return make_error("PIGPIO only supported on the raspberry pi");
 #endif
 }
 
-auto PIGPIO::start(q::Clock::time_point tp) -> bool
+ts::Result<void> PIGPIO::start(q::Clock::time_point tp)
 {
-    return true;
+    return ts::success;
 }
 
 void PIGPIO::set_pwm_value(size_t idx, float value)
@@ -269,41 +261,41 @@ void PIGPIO::process()
 
 
 
-void PIGPIO::set_input_stream_path(size_t idx, q::Path const& path)
+ts::Result<void> PIGPIO::set_input_stream_path(size_t idx, q::Path const& path)
 {
     auto input_stream = m_hal.get_stream_registry().find_by_name<stream::IPWM>(path.get_as<std::string>());
     auto rate = input_stream ? input_stream->get_rate() : 0u;
     std::unique_ptr<Channel>& channel = m_channels[idx];
     if (rate != channel->rate)
     {
-        if (input_stream)
-        {
-            QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", path, channel->rate, rate);
-        }
         channel->stream.reset();
         channel->stream_path = q::Path();
+        if (input_stream)
+        {
+            return make_error("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", path, channel->rate, rate);
+        }
     }
     else
     {
         channel->stream = input_stream;
         channel->stream_path = path;
     }
+    return ts::success;
 }
 
 
-auto PIGPIO::set_config(hal::INode_Config const& config) -> bool
+ts::Result<void> PIGPIO::set_config(hal::INode_Config const& config)
 {
     QLOG_TOPIC("pigpio::set_config");
 
     auto specialized = dynamic_cast<hal::PIGPIO_Config const*>(&config);
     if (!specialized)
     {
-        QLOGE("Wrong config type");
-        return false;
+        return make_error("Wrong config type");
     }
     *m_config = *specialized;
 
-    return true;
+    return ts::success;
 }
 auto PIGPIO::get_config() const -> std::shared_ptr<const hal::INode_Config>
 {

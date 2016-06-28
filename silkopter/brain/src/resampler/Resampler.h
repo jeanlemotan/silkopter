@@ -23,24 +23,24 @@ public:
 
     Resampler(HAL& hal);
 
-    bool init(hal::INode_Descriptor const& descriptor) override;
+    ts::Result<void> init(hal::INode_Descriptor const& descriptor) override;
     std::shared_ptr<const hal::INode_Descriptor> get_descriptor() const override;
 
-    bool set_config(hal::INode_Config const& config) override;
+    ts::Result<void> set_config(hal::INode_Config const& config) override;
     std::shared_ptr<const hal::INode_Config> get_config() const override;
 
     //auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
 
-    auto start(q::Clock::time_point tp) -> bool override;
+    ts::Result<void> start(q::Clock::time_point tp) override;
 
-    void set_input_stream_path(size_t idx, q::Path const& path);
+    ts::Result<void> set_input_stream_path(size_t idx, q::Path const& path);
     auto get_inputs() const -> std::vector<Input>;
     auto get_outputs() const -> std::vector<Output>;
 
     void process();
 
 private:
-    auto init() -> bool;
+    ts::Result<void> init();
     void resample();
 
     HAL& m_hal;
@@ -117,28 +117,27 @@ Resampler<Stream_t>::Resampler(HAL& hal)
 }
 
 template<class Stream_t>
-auto Resampler<Stream_t>::init(hal::INode_Descriptor const& descriptor) -> bool
+ts::Result<void> Resampler<Stream_t>::init(hal::INode_Descriptor const& descriptor)
 {
     QLOG_TOPIC("resampler::init");
 
     auto specialized = dynamic_cast<hal::Resampler_Descriptor const*>(&descriptor);
     if (!specialized)
     {
-        QLOGE("Wrong descriptor type");
-        return false;
+        return make_error("Wrong descriptor type");
     }
     *m_descriptor = *specialized;
 
     return init();
 }
 template<class Stream_t>
-auto Resampler<Stream_t>::init() -> bool
+ts::Result<void> Resampler<Stream_t>::init()
 {
     m_output_stream->set_rate(m_descriptor->get_output_rate());
 
     m_input_stream_dt = std::chrono::microseconds(1000000 / m_descriptor->get_input_rate());
 
-    return true;
+    return ts::success;
 }
 
 template<class Stream_t>
@@ -148,21 +147,20 @@ auto Resampler<Stream_t>::get_descriptor() const -> std::shared_ptr<const hal::I
 }
 
 template<class Stream_t>
-void Resampler<Stream_t>::set_input_stream_path(size_t idx, q::Path const& path)
+ts::Result<void> Resampler<Stream_t>::set_input_stream_path(size_t idx, q::Path const& path)
 {
-    m_accumulator.set_stream_path(idx, path, m_descriptor->get_input_rate(), m_hal);
+    return m_accumulator.set_stream_path(idx, path, m_descriptor->get_input_rate(), m_hal);
 }
 
 template<class Stream_t>
-auto Resampler<Stream_t>::set_config(hal::INode_Config const& config) -> bool
+ts::Result<void> Resampler<Stream_t>::set_config(hal::INode_Config const& config)
 {
     QLOG_TOPIC("resampler::set_config");
 
     auto specialized = dynamic_cast<hal::Resampler_Config const*>(&config);
     if (!specialized)
     {
-        QLOGE("Wrong config type");
-        return false;
+        return make_error("Wrong config type");
     }
     *m_config = *specialized;
 
@@ -181,12 +179,11 @@ auto Resampler<Stream_t>::set_config(hal::INode_Config const& config) -> bool
     lpf_config.set_cutoff_frequency(math::clamp(lpf_config.get_cutoff_frequency(), 0.1f, max_cutoff));
     if (!m_dsp.setup(lpf_config.get_poles(), filter_rate, lpf_config.get_cutoff_frequency()))
     {
-        QLOGE("Cannot setup dsp filter.");
-        return false;
+        return make_error("Cannot setup dsp filter.");
     }
     m_dsp.reset();
 
-    return true;
+    return ts::success;
 }
 //template<class Stream_t>
 //auto Resampler<Stream_t>::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document
@@ -200,10 +197,10 @@ auto Resampler<Stream_t>::get_config() const -> std::shared_ptr<const hal::INode
 }
 
 template<class Stream_t>
-auto Resampler<Stream_t>::start(q::Clock::time_point tp) -> bool
+ts::Result<void> Resampler<Stream_t>::start(q::Clock::time_point tp)
 {
     m_output_stream->set_tp(tp);
-    return true;
+    return ts::success;
 }
 
 template<class Stream_t>

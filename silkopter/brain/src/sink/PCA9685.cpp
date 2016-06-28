@@ -88,29 +88,27 @@ auto PCA9685::get_inputs() const -> std::vector<Input>
 }
 
 
-auto PCA9685::init(hal::INode_Descriptor const& descriptor) -> bool
+ts::Result<void> PCA9685::init(hal::INode_Descriptor const& descriptor)
 {
     QLOG_TOPIC("PCA9685::init");
 
     auto specialized = dynamic_cast<hal::PCA9685_Descriptor const*>(&descriptor);
     if (!specialized)
     {
-        QLOGE("Wrong descriptor type");
-        return false;
+        return make_error("Wrong descriptor type");
     }
     *m_descriptor = *specialized;
 
     return init();
 }
 
-auto PCA9685::init() -> bool
+ts::Result<void> PCA9685::init()
 {
     m_i2c = m_hal.get_bus_registry().find_by_name<bus::II2C>(m_descriptor->get_bus());
     auto i2c = m_i2c.lock();
     if (!i2c)
     {
-        QLOGE("No bus configured");
-        return false;
+        return make_error("No bus configured");
     }
 
     //todo - fix this
@@ -177,18 +175,16 @@ auto PCA9685::init() -> bool
 //        set_pwm_value(*i2c, i, boost::none);
 //    }
 
-    return true;
+    return ts::success;
 }
 
-auto PCA9685::start(q::Clock::time_point tp) -> bool
+ts::Result<void> PCA9685::start(q::Clock::time_point tp)
 {
     if (!set_all_pwm_enabled(true))
     {
-        QLOGE("Cannot enable global PWM!");
-        return false;
+        return make_error("Cannot enable global PWM!");
     }
-
-    return true;
+    return ts::success;
 }
 
 auto PCA9685::set_all_pwm_enabled(bool val) -> bool
@@ -315,12 +311,12 @@ if (idx == CH)\
     auto rate = input_stream ? input_stream->get_rate() : 0u;\
     if (rate != m_descriptor->get_rate())\
     {\
-        if (input_stream)\
-        {\
-            QLOGW("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", path, m_descriptor->get_rate(), rate);\
-        }\
         m_pwm_channels[CH].stream.reset();\
         m_pwm_channels[CH].stream_path = q::Path();\
+        if (input_stream)\
+        {\
+            return make_error("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", path, m_descriptor->get_rate(), rate);\
+        }\
     }\
     else\
     {\
@@ -331,14 +327,14 @@ if (idx == CH)\
     set_pwm_value(*i2c, idx, boost::none);\
 }
 
-void PCA9685::set_input_stream_path(size_t idx, q::Path const& path)
+ts::Result<void> PCA9685::set_input_stream_path(size_t idx, q::Path const& path)
 {
     QLOG_TOPIC("PCA9685::set_input_stream_path");
 
     auto i2c = m_i2c.lock();
     if (!i2c)
     {
-        return;
+        return make_error("Bus error");
     }
 
     FIND_STREAM(0);
@@ -357,21 +353,21 @@ void PCA9685::set_input_stream_path(size_t idx, q::Path const& path)
     FIND_STREAM(13);
     FIND_STREAM(14);
     FIND_STREAM(15);
+    return ts::success;
 }
 
 
 constexpr float MIN_SERVO_MS = 0.5f;
 constexpr float MAX_SERVO_MS = 2.4f;
 
-auto PCA9685::set_config(hal::INode_Config const& config) -> bool
+ts::Result<void> PCA9685::set_config(hal::INode_Config const& config)
 {
     QLOG_TOPIC("PCA9685::set_config");
 
     auto specialized = dynamic_cast<hal::PCA9685_Config const*>(&config);
     if (!specialized)
     {
-        QLOGE("Wrong config type");
-        return false;
+        return make_error("Wrong config type");
     }
     *m_config = *specialized;
 
@@ -390,7 +386,7 @@ auto PCA9685::set_config(hal::INode_Config const& config) -> bool
 //        }
 //    }
 
-    return true;
+    return ts::success;
 }
 
 

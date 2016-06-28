@@ -25,22 +25,16 @@ UART_BBang::~UART_BBang()
     close();
 }
 
-bool UART_BBang::init(hal::IBus_Descriptor const& descriptor)
+ts::Result<void> UART_BBang::init(hal::IBus_Descriptor const& descriptor)
 {
     auto specialized = dynamic_cast<hal::UART_BBang_Descriptor const*>(&descriptor);
     if (!specialized)
     {
-        QLOGE("Wrong descriptor type");
-        return false;
+        return make_error("Wrong descriptor type");
     }
     *m_descriptor = *specialized;
 
-    if (!init(specialized->get_rx_pin(), specialized->get_baud(), specialized->get_invert()))
-    {
-        return false;
-    }
-
-    return true;
+    return init(specialized->get_rx_pin(), specialized->get_baud(), specialized->get_invert());
 }
 
 std::shared_ptr<const hal::IBus_Descriptor> UART_BBang::get_descriptor() const
@@ -48,7 +42,7 @@ std::shared_ptr<const hal::IBus_Descriptor> UART_BBang::get_descriptor() const
     return m_descriptor;
 }
 
-auto UART_BBang::init(uint32_t rx_pin, uint32_t baud, bool invert) -> bool
+ts::Result<void> UART_BBang::init(uint32_t rx_pin, uint32_t baud, bool invert)
 {
     close();
 
@@ -59,28 +53,25 @@ auto UART_BBang::init(uint32_t rx_pin, uint32_t baud, bool invert) -> bool
     int res = gpioSetMode(rx_pin, PI_INPUT);
     if (res != 0)
     {
-        QLOGE("can't change bit-banging rx pin to input {}: {}", rx_pin, res);
-        return false;
+        return make_error("can't change bit-banging rx pin to input {}: {}", rx_pin, res);
     }
 
     res = gpioSerialReadOpen(rx_pin, baud, 8);
     if (res != 0)
     {
-        QLOGE("can't open bit-banging rx pin {}: {}", rx_pin, res);
-        return false;
+        return make_error("can't open bit-banging rx pin {}: {}", rx_pin, res);
     }
 
     res = gpioSerialReadInvert(rx_pin, invert ? PI_BB_SER_INVERT : PI_BB_SER_NORMAL);
     if (res != 0)
     {
-        QLOGE("can't open bit-banging invert property on pin {}: {}", rx_pin, res);
-        return false;
+        return make_error("can't open bit-banging invert property on pin {}: {}", rx_pin, res);
     }
 #endif
 
     m_is_initialized = true;
 
-    return true;
+    return ts::success;
 }
 
 void UART_BBang::close()

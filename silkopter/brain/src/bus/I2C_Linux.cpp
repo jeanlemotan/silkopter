@@ -43,22 +43,16 @@ I2C_Linux::~I2C_Linux()
     close();
 }
 
-bool I2C_Linux::init(hal::IBus_Descriptor const& descriptor)
+ts::Result<void> I2C_Linux::init(hal::IBus_Descriptor const& descriptor)
 {
     auto specialized = dynamic_cast<hal::I2C_Linux_Descriptor const*>(&descriptor);
     if (!specialized)
     {
-        QLOGE("Wrong descriptor type");
-        return false;
+        return make_error("Wrong descriptor type");
     }
     *m_descriptor = *specialized;
 
-    if (!init(m_descriptor->get_dev()))
-    {
-        return false;
-    }
-
-    return true;
+    return init(m_descriptor->get_dev());
 }
 
 std::shared_ptr<const hal::IBus_Descriptor> I2C_Linux::get_descriptor() const
@@ -66,7 +60,7 @@ std::shared_ptr<const hal::IBus_Descriptor> I2C_Linux::get_descriptor() const
     return m_descriptor;
 }
 
-bool I2C_Linux::init(std::string const& dev)
+ts::Result<void> I2C_Linux::init(std::string const& dev)
 {
     close();
 
@@ -75,11 +69,9 @@ bool I2C_Linux::init(std::string const& dev)
     m_fd = ::open(dev.c_str(), O_RDWR);
     if (m_fd < 0)
     {
-        QLOGE("can't open {}: {}", dev, strerror(errno));
-        return false;
+        return make_error("can't open " + dev + ": " + strerror(errno));
     }
-
-    return true;
+    return ts::success;
 }
 
 void I2C_Linux::close()
