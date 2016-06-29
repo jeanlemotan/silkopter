@@ -28,6 +28,8 @@ private:
 
     void set_active(bool active) override;
 
+    void on_selection_changed();
+
     //std::vector<q::util::Scoped_Connection> m_connections;
 
     QToolBar* m_toolbar = nullptr;
@@ -81,14 +83,16 @@ private:
 
             QNEPort* port = nullptr;
         };
-        std::map<std::string, Input> inputs;
-        std::map<std::string, Output> outputs;
+        std::vector<Input> inputs;
+        std::vector<Output> outputs;
     };
 
     //std::map<std::string, UI_Stream> m_ui_streams;
     std::map<std::string, std::shared_ptr<Node>> m_nodes;
 
     std::vector<silk::Comms::Node_Def> m_node_defs;
+
+    std::string m_uav_name;
 
 //    Sim_Window* m_sim_window = nullptr;
 
@@ -100,8 +104,20 @@ private:
     void save_editor_data();
     void load_editor_data();
 
-    void show_context_menu(QGraphicsSceneMouseEvent*);
+    bool supports_acceleration_calibration(Node const& node, Node::Output const& output) const;
+    bool supports_angular_velocity_calibration(Node const& node, Node::Output const& output) const;
+    bool supports_magnetic_field_calibration(Node const& node, Node::Output const& output) const;
 
-    void try_add_node(silk::Comms::Node_Def const& def, QPointF pos);
+    void do_acceleration_calibration(Node const& node, size_t output_idx);
+    void do_magnetic_field_calibration(Node const& node, size_t output_idx);
+    void do_angular_velocity_calibration(Node const& node, size_t output_idx);
+
+
+    void show_context_menu(QGraphicsSceneMouseEvent*);
+    void show_port_context_menu(QGraphicsSceneMouseEvent* event, QNEPort* port);
+    void show_connection_context_menu(QGraphicsSceneMouseEvent* event, QNEConnection* connection);
+    void show_block_context_menu(QGraphicsSceneMouseEvent* event, QNEBlock* block);
+
+    void add_node_dialog(silk::Comms::Node_Def const& def, QPointF pos);
     void add_node(silk::Comms::Node const& node);
 };

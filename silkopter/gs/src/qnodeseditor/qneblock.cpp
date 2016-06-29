@@ -42,8 +42,8 @@ QNEBlock::QNEBlock(QGraphicsItem *parent) : QGraphicsPathItem(parent)
 	setFlag(QGraphicsItem::ItemIsMovable);
 	setFlag(QGraphicsItem::ItemIsSelectable);
     setFlag(QGraphicsItem::ItemSendsScenePositionChanges);
-    m_horzMargin = 20;
-    m_vertMargin = 5;
+    m_horzMargin = 30;
+    m_vertMargin = 10;
     m_width = m_horzMargin;
     m_height = m_vertMargin;
     m_label = new QGraphicsTextItem(this);
@@ -202,7 +202,7 @@ QVariant QNEBlock::itemChange(GraphicsItemChange change, const QVariant &value)
 {
     if (change == QGraphicsItem::ItemPositionHasChanged)
     {
-        positionChangedSignal.execute(scenePos());
+        sig_position_changed(scenePos());
     }
 
 	return value;

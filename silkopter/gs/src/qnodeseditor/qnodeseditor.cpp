@@ -181,8 +181,8 @@ bool QNodesEditor::eventFilter(QObject *o, QEvent *e)
                             port1->portType() == port2->portType() &&
                             !port1->isConnected(port2))
                     {
-                        port1->connectedSignal.execute(port2);
-                        port2->connectedSignal.execute(port1);
+                        port1->sig_connected(port2);
+                        port2->sig_connected(port1);
 
                         m_connection->setPort2(port2);
                         m_connection->setPen(connectedPen);

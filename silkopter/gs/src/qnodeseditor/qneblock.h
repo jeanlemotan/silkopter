@@ -52,7 +52,7 @@ public:
 
 	int type() const { return Type; }
 
-    q::util::Signal<void(const QPointF&)> positionChangedSignal;
+    boost::signals2::signal<void(const QPointF&)> sig_position_changed;
 
 protected:
 	QVariant itemChange(GraphicsItemChange change, const QVariant &value);

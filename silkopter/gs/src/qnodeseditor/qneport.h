@@ -72,7 +72,7 @@ public:
 
 	bool isConnected(QNEPort*);
 
-    q::util::Signal<void(QNEPort*)> connectedSignal;
+    boost::signals2::signal<void(QNEPort*)> sig_connected;
 
 protected:
 	QVariant itemChange(GraphicsItemChange change, const QVariant &value);
@@ -80,13 +80,13 @@ protected:
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
 
 private:
-	QNEBlock *m_block;
+    QNEBlock* m_block = nullptr;
     QString m_name;
     QString m_id;
-    bool m_isOutput;
-    QGraphicsTextItem *m_label;
-    int m_radius;
-    int m_margin;
+    bool m_isOutput = false;
+    QGraphicsTextItem* m_label = nullptr;
+    int m_radius = 0;
+    int m_margin = 0;
 	QVector<QNEConnection*> m_connections;
     uint32_t m_portType = 0;
     uint32_t m_portRate = 0;

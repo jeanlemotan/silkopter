@@ -22,7 +22,7 @@ Numeric_Value_Editor_Helper::Numeric_Value_Editor_Helper(double value, double mi
 
 	QObject::connect(m_spinbox, &QDoubleSpinBox::editingFinished, [this]()
 	{
-        sig_value_changed.execute(m_spinbox->value());
+        sig_value_changed(m_spinbox->value());
 	});
 
     if (max_value < std::numeric_limits<float>::max() && min_value > std::numeric_limits<float>::lowest())
@@ -49,7 +49,7 @@ Numeric_Value_Editor_Helper::Numeric_Value_Editor_Helper(double value, double mi
 			//we multiply by 10 to bring the actual value
             set_value(val * 10.0);
 
-            sig_value_changed.execute(m_spinbox->value());
+            sig_value_changed(m_spinbox->value());
 		});
 	}
 }

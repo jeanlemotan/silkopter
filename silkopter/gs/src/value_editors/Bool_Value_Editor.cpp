@@ -18,7 +18,7 @@ Bool_Value_Editor::Bool_Value_Editor(const Qualified_Value<ts::IBool_Value>& qua
     m_changed_connection = QObject::connect(m_editor, &QCheckBox::stateChanged, [this](int)
 	{
         refresh_value();
-        sig_editing_finished.execute();
+        sig_editing_finished();
 	});
 
     refresh_read_only_state();

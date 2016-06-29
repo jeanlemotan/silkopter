@@ -25,7 +25,7 @@ public:
     void 		set_values(const std::vector<double>& values);
 	void		set_read_only(bool readOnly);
 
-    q::util::Signal<void(const std::vector<double>&)> sig_value_changed;
+    boost::signals2::signal<void(const std::vector<double>&)> sig_value_changed;
 
 private:
 	QWidget* m_editor = nullptr;

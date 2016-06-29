@@ -28,7 +28,7 @@ VecX_Value_Editor_Helper::VecX_Value_Editor_Helper(const std::vector<Component>&
 		spinData.connection = QObject::connect(spinbox, &QDoubleSpinBox::editingFinished, [this]()
 		{
             std::vector<double> values = get_values();
-            sig_value_changed.execute(values);
+            sig_value_changed(values);
 		});
 
 		m_spinboxes.push_back(spinData);

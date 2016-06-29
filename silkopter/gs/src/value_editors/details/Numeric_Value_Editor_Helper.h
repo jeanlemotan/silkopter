@@ -15,7 +15,7 @@ public:
     void 	set_value(double value);
     void	set_read_only(bool readOnly);
 
-    q::util::Signal<void(double)> sig_value_changed;
+    boost::signals2::signal<void(double)> sig_value_changed;
 
 private:
     QWidget* m_editor = nullptr;

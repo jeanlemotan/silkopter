@@ -46,7 +46,7 @@ public:
 
 	bool eventFilter(QObject *, QEvent *);
 
-signals:
+Q_SIGNALS:
     void contextMenu(QGraphicsSceneMouseEvent*);
     void portContextMenu(QGraphicsSceneMouseEvent*, QNEPort*);
     void blockContextMenu(QGraphicsSceneMouseEvent*, QNEBlock*);

@@ -16,7 +16,7 @@ public:
     virtual void	set_read_only_override(bool read_only) = 0;
     virtual bool	is_read_only() const = 0;
 
-    q::util::Signal<void()>     sig_editing_finished;
+    boost::signals2::signal<void()>     sig_editing_finished;
 };
 
 

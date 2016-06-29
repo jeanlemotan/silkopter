@@ -14,13 +14,17 @@
 #include "common/node/ITransformer.h"
 #include "common/node/IGenerator.h"
 #include "common/node/IBrain.h"
+#include "common/node/IMultirotor_Simulator.h"
 
 #include "boost/algorithm/string.hpp"
+#include "def_lang/Value_Selector.h"
 
 #include "ui_New_Node_Dialog.h"
+#include "qneconnection.h"
 
 #include <QVBoxLayout>
 #include <QMessageBox>
+#include <QSettings>
 
 static std::map<silk::node::Type, QColor> s_node_colors =
 {{
@@ -33,7 +37,7 @@ static std::map<silk::node::Type, QColor> s_node_colors =
     { silk::node::IController::TYPE, QColor(0x9B59B6) },
     { silk::node::ITransformer::TYPE, QColor(0xF10FC4) },
     { silk::node::IGenerator::TYPE, QColor(0xC40FF1) },
-//    { silk::node::IMulti_Simulator::TYPE, QColor(0xF1C40F) },
+    { silk::node::IMultirotor_Simulator::TYPE, QColor(0xF1C40F) },
     { silk::node::IBrain::TYPE, QColor(0xC4F10F) },
     { silk::node::ICombiner::TYPE, QColor(0xF10FC4) },
 }};
@@ -68,7 +72,7 @@ Nodes_Widget::Nodes_Widget()
     //    m_selection.config_dock = new QDockWidget(this);
     //    m_selection.config_view = new QTreeView(m_selection.config_dock);
     //    m_selection.config_model = new JSON_Model(m_selection.config_view);
-    //    connect(m_selection.config_model, &QAbstractItemModel::dataChanged, this, &HAL_Window::on_config_changed);
+    //    connect(m_selection.config_model, &QAbstractItemModel::dataChanged, this, &Nodes_Widget::on_config_changed);
 
     //    m_selection.config_dock->setWidget(m_selection.config_view);
     //    m_selection.config_view->setModel(m_selection.config_model);
@@ -76,12 +80,11 @@ Nodes_Widget::Nodes_Widget()
 
     //    addDockWidget(Qt::RightDockWidgetArea, m_selection.config_dock);
 
-    //    connect(m_scene, &QGraphicsScene::selectionChanged, [this]() { selection_changed(); });
-
+    connect(m_scene, &QGraphicsScene::selectionChanged, [this]() { on_selection_changed(); });
     connect(m_nodes_editor, &QNodesEditor::contextMenu, this, &Nodes_Widget::show_context_menu);
-    //    connect(m_nodes_editor, &QNodesEditor::portContextMenu, this, &HAL_Window::port_context_menu);
-    //    connect(m_nodes_editor, &QNodesEditor::blockContextMenu, this, &HAL_Window::block_context_menu);
-    //    connect(m_nodes_editor, &QNodesEditor::connectionContextMenu, this, &HAL_Window::connection_context_menu);
+    connect(m_nodes_editor, &QNodesEditor::portContextMenu, this, &Nodes_Widget::show_port_context_menu);
+    connect(m_nodes_editor, &QNodesEditor::blockContextMenu, this, &Nodes_Widget::show_block_context_menu);
+    connect(m_nodes_editor, &QNodesEditor::connectionContextMenu, this, &Nodes_Widget::show_connection_context_menu);
 }
 
 Nodes_Widget::~Nodes_Widget()
@@ -105,22 +108,22 @@ void Nodes_Widget::set_active(bool active)
             delete m_refresh_action;
             m_refresh_action = nullptr;
 
-            //            delete m_upload_action;
-            //            m_upload_action = nullptr;
+//            delete m_upload_action;
+//            m_upload_action = nullptr;
 
-            //            delete m_new_action;
-            //            m_new_action = nullptr;
+//            delete m_new_action;
+//            m_new_action = nullptr;
         }
         return;
     }
     m_refresh_action = m_toolbar->addAction(QIcon(":/icons/ui/reconnect.png"), "Refresh");
     QObject::connect(m_refresh_action, &QAction::triggered, [this](bool) { refresh(); });
 
-    //    m_upload_action = m_toolbar->addAction(QIcon(":/icons/ui/upload.png"), "Upload");
-    //    QObject::connect(m_upload_action, &QAction::triggered, [this](bool) { upload(); });
+//    m_upload_action = m_toolbar->addAction(QIcon(":/icons/ui/upload.png"), "Upload");
+//    QObject::connect(m_upload_action, &QAction::triggered, [this](bool) { upload(); });
 
-    //    m_new_action = m_toolbar->addAction(QIcon(":/icons/ui/new.png"), "New");
-    //    QObject::connect(m_new_action, &QAction::triggered, [this](bool) { show_new_descriptor_menu(); });
+//    m_new_action = m_toolbar->addAction(QIcon(":/icons/ui/new.png"), "New");
+//    QObject::connect(m_new_action, &QAction::triggered, [this](bool) { show_new_descriptor_menu(); });
 
     m_browser->set_value(nullptr);
 }
@@ -131,6 +134,23 @@ void Nodes_Widget::refresh()
     {
         QMessageBox::critical(this, "Error", "Not connected to any UAV");
         return;
+    }
+
+    auto result = m_comms->request_uav_descriptor();
+    if (result != ts::success)
+    {
+        QMessageBox::critical(this, "Error", result.error().what().c_str());
+    }
+
+    m_uav_name.clear();
+    std::shared_ptr<const ts::IMember> member = result.payload()->find_member_by_name("name");
+    if (member)
+    {
+        std::shared_ptr<const ts::IString_Value> name_value = std::dynamic_pointer_cast<const ts::IString_Value>(member->get_value());
+        if (name_value)
+        {
+            m_uav_name = name_value->get_value();
+        }
     }
 
     refresh_node_defs();
@@ -180,7 +200,68 @@ void Nodes_Widget::refresh_nodes()
     }
 }
 
-static auto prettify_name(std::string const& name) -> std::string
+bool Nodes_Widget::supports_acceleration_calibration(Node const& node, Node::Output const& output) const
+{
+    if (output.type.get_semantic() != silk::stream::Semantic::ACCELERATION)
+    {
+        return false;
+    }
+
+    std::shared_ptr<const ts::IValue> value = node.config->select(ts::Value_Selector("calibration/" + output.name));
+    if (!value)
+    {
+        return false;
+    }
+    return value->get_type() == m_comms->get_type_system().get_root_scope()->find_symbol_by_name("Acceleration_Calibration_Point");
+}
+
+bool Nodes_Widget::supports_angular_velocity_calibration(Node const& node, Node::Output const& output) const
+{
+    if (output.type.get_semantic() != silk::stream::Semantic::ANGULAR_VELOCITY)
+    {
+        return false;
+    }
+    std::shared_ptr<const ts::IValue> value = node.config->select(ts::Value_Selector("calibration/" + output.name));
+    if (!value)
+    {
+        return false;
+    }
+    return value->get_type() == m_comms->get_type_system().get_root_scope()->find_symbol_by_name("Angular_Velocity_Calibration_Point");
+}
+
+bool Nodes_Widget::supports_magnetic_field_calibration(Node const& node, Node::Output const& output) const
+{
+    if (output.type.get_semantic() != silk::stream::Semantic::MAGNETIC_FIELD)
+    {
+        return false;
+    }
+    std::shared_ptr<const ts::IValue> value = node.config->select(ts::Value_Selector("calibration/" + output.name));
+    if (!value)
+    {
+        return false;
+    }
+    return value->get_type() == m_comms->get_type_system().get_root_scope()->find_symbol_by_name("Magnetic_Field_Calibration_Point");
+}
+
+void Nodes_Widget::do_acceleration_calibration(Node const& node, size_t output_idx)
+{
+//    Acceleration_Calibration_Wizard wizard(m_hal, m_comms, node, output_idx, this);
+//    wizard.exec();
+}
+
+void Nodes_Widget::do_magnetic_field_calibration(Node const& node, size_t output_idx)
+{
+//    Magnetic_Field_Calibration_Wizard wizard(m_hal, m_comms, node, output_idx, this);
+//    wizard.exec();
+}
+
+void Nodes_Widget::do_angular_velocity_calibration(Node const& node, size_t output_idx)
+{
+//    Angular_Velocity_Calibration_Wizard wizard(m_hal, m_comms, node, output_idx, this);
+//    wizard.exec();
+}
+
+static std::string prettify_name(std::string const& name)
 {
     std::string new_name = name;
     boost::trim(new_name);
@@ -197,7 +278,7 @@ static auto prettify_name(std::string const& name) -> std::string
     return new_name;
 }
 
-static auto get_icon(std::string const& node_icon_name, silk::Comms::Node_Def const& node_def) -> QIcon
+static QIcon get_icon(std::string const& node_icon_name, silk::Comms::Node_Def const& node_def)
 {
     auto name = prettify_name(node_def.name);
     QString icon_name(q::util::format<std::string>(":/icons/nodes/{}.png", name).c_str());
@@ -266,6 +347,139 @@ std::string Nodes_Widget::compute_unique_name(std::string const& name) const
         count++;
     }
     return name;
+}
+
+void Nodes_Widget::show_block_context_menu(QGraphicsSceneMouseEvent* event, QNEBlock* block)
+{
+    QASSERT(block);
+
+    QMenu menu(this);
+
+    auto it = m_nodes.find(block->id().toLatin1().data());
+    if (it != m_nodes.end())
+    {
+        std::shared_ptr<Node> node = it->second;
+        if (node && node->type == silk::node::IMultirotor_Simulator::TYPE)
+        {
+            auto action = menu.addAction(QIcon(":/icons/ui/simulator.png"), "View Simulatior");
+            connect(action, &QAction::triggered, [=](bool)
+            {
+//                delete m_sim_window;
+//                m_sim_window = new Sim_Window(m_hal, node, m_comms, m_context, this);
+//                m_sim_window->show();
+            });
+        }
+
+        for (size_t i = 0; i < node->outputs.size(); i++)
+        {
+            Node::Output const& os = node->outputs[i];
+
+            if (supports_acceleration_calibration(*node, os))
+            {
+                auto action = menu.addAction(QIcon(":/icons/ui/calibrate.png"), "Start Acceleration Calibration");
+                connect(action, &QAction::triggered, [=](bool)
+                {
+//                    do_acceleration_calibration(node, i);
+                });
+            }
+            if (supports_angular_velocity_calibration(*node, os))
+            {
+                auto action = menu.addAction(QIcon(":/icons/ui/calibrate.png"), "Start Angular Velocity Calibration");
+                connect(action, &QAction::triggered, [=](bool)
+                {
+//                    do_angular_velocity_calibration(node, i);
+                });
+
+                continue;
+            }
+            if (supports_magnetic_field_calibration(*node, os))
+            {
+                auto action = menu.addAction(QIcon(":/icons/ui/calibrate.png"), "Start Magnetic Field Calibration");
+                connect(action, &QAction::triggered, [=](bool)
+                {
+//                    do_magnetic_field_calibration(node, i);
+                });
+
+                continue;
+            }
+        }
+
+        QAction* action = menu.addAction(QIcon(":/icons/ui/minus.png"), q::util::format<std::string>("Remove {}", block->id().toLatin1().data()).c_str());
+        connect(action, &QAction::triggered, [this, node](bool)
+        {
+//            try_remove_node(node);
+        });
+
+        menu.exec(event->screenPos());
+    }
+}
+
+void Nodes_Widget::show_port_context_menu(QGraphicsSceneMouseEvent* event, QNEPort* port)
+{
+    QASSERT(port);
+
+    QMenu menu(this);
+
+    QAction* view_stream_action = menu.addAction(QIcon(":/icons/ui/view.png"), "View Stream");
+    QNEPort* output_port = port->isOutput() ? port : nullptr;
+
+    menu.addSeparator();
+
+    auto& conn = port->connections();
+    for (auto const& c: conn)
+    {
+        QNEPort* other = c->port1() == port ? c->port2() : c->port1();
+        QASSERT(other);
+        if (other && !output_port && other->isOutput())
+        {
+            output_port = other;
+            break;
+        }
+    }
+
+    if (output_port)
+    {
+        std::string stream_name = (output_port->block()->id() + "/" + output_port->id()).toLatin1().data();
+        //connect(view_stream_action, &QAction::triggered, [=](bool) { open_stream_viewer(stream_name); });
+    }
+    else
+    {
+        view_stream_action->setEnabled(false);
+    }
+
+    menu.exec(event->screenPos());
+}
+
+void Nodes_Widget::show_connection_context_menu(QGraphicsSceneMouseEvent* event, QNEConnection* connection)
+{
+    QASSERT(connection);
+
+    QNEPort* input_port = !connection->port1()->isOutput() ? connection->port1() : connection->port2();
+    QASSERT(!input_port->isOutput());
+
+    auto* block = input_port->block();
+    QASSERT(block);
+
+    auto it = m_nodes.find(block->id().toLatin1().data());
+    if (it == m_nodes.end())
+    {
+        return;
+    }
+    std::shared_ptr<Node> node = it->second;
+
+    QMenu menu(this);
+
+//    QAction* action = menu.addAction(QIcon(":/icons/ui/view.png"), "Open Viewer");
+//    menu.addSeparator();
+    QAction* action = menu.addAction(QIcon(":/icons/ui/minus.png"), "Disconnect");
+
+    connect(action, &QAction::triggered, [=](bool)
+    {
+        std::string input_name = input_port->id().toLatin1().data();
+        //m_hal.set_node_input_stream_path(node, input_name, q::Path());
+    });
+
+    menu.exec(event->screenPos());
 }
 
 void Nodes_Widget::show_context_menu(QGraphicsSceneMouseEvent* event)
@@ -358,14 +572,17 @@ void Nodes_Widget::show_context_menu(QGraphicsSceneMouseEvent* event)
 
         if (action)
         {
-            connect(action, &QAction::triggered, [=](bool) { try_add_node(def, pos); });
+            connect(action, &QAction::triggered, [def, pos, this](bool)
+            {
+                add_node_dialog(def, pos);
+            });
         }
     }
 
     menu.exec(event->screenPos());
 }
 
-void Nodes_Widget::try_add_node(silk::Comms::Node_Def const& def, QPointF pos)
+void Nodes_Widget::add_node_dialog(silk::Comms::Node_Def const& def, QPointF pos)
 {
     std::shared_ptr<ts::IStruct_Value> descriptor = def.default_descriptor->get_specialized_type()->create_specialized_value();
     if (!descriptor)
@@ -394,7 +611,7 @@ void Nodes_Widget::try_add_node(silk::Comms::Node_Def const& def, QPointF pos)
     if (dialog.exec() == QDialog::Accepted)
     {
         std::string node_name = ui.name->text().toLatin1().data();
-        //        set_node_position(node_name, pos);
+        set_node_position(node_name, pos);
         auto result = m_comms->add_node(node_name, def.name, descriptor);
         if (result != ts::success)
         {
@@ -402,7 +619,6 @@ void Nodes_Widget::try_add_node(silk::Comms::Node_Def const& def, QPointF pos)
             return;
         }
 
-        //refresh_nodes();
         add_node(result.payload());
     }
 }
@@ -428,7 +644,7 @@ void Nodes_Widget::add_node(silk::Comms::Node const& src_node)
     }
 
     std::string node_name = src_node.name;
-    b->positionChangedSignal.connect([this, node_name](const QPointF& pos)
+    b->sig_position_changed.connect([this, node_name](const QPointF& pos)
     {
         set_node_position(node_name, pos);
     });
@@ -442,7 +658,7 @@ void Nodes_Widget::add_node(silk::Comms::Node const& src_node)
 
     for (silk::Comms::Node::Input const& src_input: src_node.inputs)
     {
-        auto port = b->addInputPort(QString());
+        QNEPort* port = b->addInputPort(QString());
         port->setBrush(QBrush(QColor(0xe67e22)));
         port->setId(src_input.name.c_str());
         port->setToolTip(silk::stream::get_as_string(src_input.type, true).c_str());
@@ -457,26 +673,27 @@ void Nodes_Widget::add_node(silk::Comms::Node const& src_node)
         port->setPortType(src_input.type.get_id());
         port->setPortRate(src_input.rate);
 
-        auto input_name = src_input.name;
-        port->connectedSignal.connect([src_node, input_name, this](QNEPort* output_port)
+        std::string input_name = src_input.name;
+        port->sig_connected.connect([src_node, input_name, this](QNEPort* output_port)
         {
-            auto* block = output_port->block();
+            QNEBlock* block = output_port->block();
             std::string node_name = block->id().toLatin1().data();
             q::Path stream_path(node_name);
             stream_path += output_port->id().toLatin1().data();
 //            m_hal.set_node_input_stream_path(node, input_name, stream_path);
         });
 
-        Node::Input& dst_input = dst_node->inputs[src_input.name];
+        Node::Input dst_input;
         dst_input.name = src_input.name;
         dst_input.rate = src_input.rate;
         dst_input.stream_path = src_input.stream_path;
         dst_input.type = src_input.type;
         dst_input.port = port;
+        dst_node->inputs.push_back(dst_input);
     }
     for (silk::Comms::Node::Output const& src_output: src_node.outputs)
     {
-        auto port = b->addOutputPort(QString());
+        QNEPort* port = b->addOutputPort(QString());
         port->setBrush(QBrush(QColor(0x9b59b6)));
         port->setId(src_output.name.c_str());
         port->setToolTip(silk::stream::get_as_string(src_output.type, true).c_str());
@@ -484,11 +701,12 @@ void Nodes_Widget::add_node(silk::Comms::Node const& src_node)
         port->setPortType(src_output.type.get_id());
         port->setPortRate(src_output.rate);
 
-        Node::Output& dst_output = dst_node->outputs[src_output.name];
+        Node::Output dst_output;
         dst_output.name = src_output.name;
         dst_output.rate = src_output.rate;
         dst_output.type = src_output.type;
         dst_output.port = port;
+        dst_node->outputs.push_back(dst_output);
 
 //        auto& stream_data = m_ui_streams[src_output.stream->name];
 //        stream_data.stream = src_output.stream;
@@ -503,14 +721,67 @@ void Nodes_Widget::add_node(silk::Comms::Node const& src_node)
 //    }) );
 }
 
+void Nodes_Widget::on_selection_changed()
+{
+    m_browser->set_value(nullptr);
+
+    QList<QGraphicsItem*> items = m_scene->selectedItems();
+    if (items.empty())
+    {
+        return;
+    }
+    QGraphicsItem* item = items.at(0);
+    if (!item || item->type() != QNEBlock::Type)
+    {
+        return;
+    }
+    QNEBlock* block = reinterpret_cast<QNEBlock*>(item);
+
+    auto it = m_nodes.find(block->id().toLatin1().data());
+    if (it == m_nodes.end())
+    {
+        return;
+    }
+    m_browser->set_value(it->second->config);
+    m_browser->expandAll();
+}
+
 void Nodes_Widget::set_node_position(std::string const& node_name, QPointF const& pos)
 {
+    std::string settings_file = "settings_";
+    if (m_uav_name.empty())
+    {
+        settings_file += "noname";
+    }
+    else
+    {
+        settings_file += m_uav_name;
+    }
+    QSettings settings(settings_file.c_str(), QSettings::IniFormat);
 
+    settings.beginGroup(("nodes/" + node_name + "").c_str());
+    settings.setValue("position", pos);
+    settings.endGroup();
 }
 
 QPointF Nodes_Widget::get_node_position(std::string const& node_name)
 {
-    return QPointF();
+    std::string settings_file = "settings_";
+    if (m_uav_name.empty())
+    {
+        settings_file += "noname";
+    }
+    else
+    {
+        settings_file += m_uav_name;
+    }
+    QSettings settings(settings_file.c_str(), QSettings::IniFormat);
+
+    settings.beginGroup(("nodes/" + node_name + "").c_str());
+    QPointF pos = settings.value("position", QPointF()).toPointF();
+    settings.endGroup();
+
+    return pos;
 }
 
 void Nodes_Widget::load_editor_data()

@@ -78,6 +78,8 @@ extern "C"
 #include "def_lang/IOptional_Type.h"
 #include "def_lang/IVariant_Value.h"
 #include "def_lang/IVariant_Type.h"
+#include "def_lang/IMember.h"
+#include "def_lang/IMember_Def.h"
 
 namespace std
 {
