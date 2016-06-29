@@ -240,7 +240,7 @@ struct ADC_Ammeter_Descriptor : public INode_Descriptor
 struct ADC_Ammeter_Config : public INode_Config
 {
     float scale = 1.f : [ ui_name = "Scale" ];
-    float bias = 0.f : [ ui_name = "Scale" ];
+    float bias = 0.f : [ ui_name = "Bias" ];
 };
 
 //////////////////////////////////////////////////////////////
@@ -255,7 +255,7 @@ struct ADC_Voltmeter_Descriptor : public INode_Descriptor
 struct ADC_Voltmeter_Config : public INode_Config
 {
     float scale = 1.f : [ ui_name = "Scale" ];
-    float bias = 0.f : [ ui_name = "Scale" ];
+    float bias = 0.f : [ ui_name = "Bias" ];
 };
 
 //////////////////////////////////////////////////////////////

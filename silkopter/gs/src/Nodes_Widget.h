@@ -118,6 +118,10 @@ private:
     void show_connection_context_menu(QGraphicsSceneMouseEvent* event, QNEConnection* connection);
     void show_block_context_menu(QGraphicsSceneMouseEvent* event, QNEBlock* block);
 
+    void remove_node_dialog(std::shared_ptr<Node> node);
+
+    bool set_node_input_stream_path(Node const& node, std::string const& input_name, q::Path const& stream_path);
+
     void add_node_dialog(silk::Comms::Node_Def const& def, QPointF pos);
     void add_node(silk::Comms::Node const& node);
 };

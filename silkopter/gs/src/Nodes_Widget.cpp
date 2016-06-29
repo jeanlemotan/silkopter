@@ -379,15 +379,17 @@ void Nodes_Widget::show_block_context_menu(QGraphicsSceneMouseEvent* event, QNEB
                 auto action = menu.addAction(QIcon(":/icons/ui/calibrate.png"), "Start Acceleration Calibration");
                 connect(action, &QAction::triggered, [=](bool)
                 {
-//                    do_acceleration_calibration(node, i);
+                    do_acceleration_calibration(*node, i);
                 });
+
+                continue;
             }
             if (supports_angular_velocity_calibration(*node, os))
             {
                 auto action = menu.addAction(QIcon(":/icons/ui/calibrate.png"), "Start Angular Velocity Calibration");
                 connect(action, &QAction::triggered, [=](bool)
                 {
-//                    do_angular_velocity_calibration(node, i);
+                    do_angular_velocity_calibration(*node, i);
                 });
 
                 continue;
@@ -397,7 +399,7 @@ void Nodes_Widget::show_block_context_menu(QGraphicsSceneMouseEvent* event, QNEB
                 auto action = menu.addAction(QIcon(":/icons/ui/calibrate.png"), "Start Magnetic Field Calibration");
                 connect(action, &QAction::triggered, [=](bool)
                 {
-//                    do_magnetic_field_calibration(node, i);
+                    do_magnetic_field_calibration(*node, i);
                 });
 
                 continue;
@@ -407,7 +409,7 @@ void Nodes_Widget::show_block_context_menu(QGraphicsSceneMouseEvent* event, QNEB
         QAction* action = menu.addAction(QIcon(":/icons/ui/minus.png"), q::util::format<std::string>("Remove {}", block->id().toLatin1().data()).c_str());
         connect(action, &QAction::triggered, [this, node](bool)
         {
-//            try_remove_node(node);
+            remove_node_dialog(node);
         });
 
         menu.exec(event->screenPos());
@@ -582,6 +584,42 @@ void Nodes_Widget::show_context_menu(QGraphicsSceneMouseEvent* event)
     menu.exec(event->screenPos());
 }
 
+bool Nodes_Widget::set_node_input_stream_path(Node const& node, std::string const& input_name, q::Path const& stream_path)
+{
+    auto it = std::find_if(node.inputs.begin(), node.inputs.end(), [&input_name](Node::Input const& input) { return input.name == input_name; });
+    if (it == node.inputs.end())
+    {
+        QMessageBox::critical(this, "Error", ("Cannot find input '" + input_name + "' in node '" + node.name + "'").c_str());
+        return false;
+    }
+
+    auto result = m_comms->set_node_input_stream_path(node.name, input_name, stream_path);
+    if (result != ts::success)
+    {
+        QMessageBox::critical(this, "Error", result.error().what().c_str());
+        return false;
+    }
+
+    return true;
+}
+
+void Nodes_Widget::remove_node_dialog(std::shared_ptr<Node> node)
+{
+    auto answer = QMessageBox::question(this, "Question", q::util::format<std::string>("Are you sure you want to remove node {}", node->name).c_str());
+    if (answer == QMessageBox::Yes)
+    {
+        auto result = m_comms->remove_node(node->name);
+        if (result != ts::success)
+        {
+            QMessageBox::critical(this, "Error", result.error().what().c_str());
+            return;
+        }
+
+        //refresh all nodes
+        refresh_nodes();
+    }
+}
+
 void Nodes_Widget::add_node_dialog(silk::Comms::Node_Def const& def, QPointF pos)
 {
     std::shared_ptr<ts::IStruct_Value> descriptor = def.default_descriptor->get_specialized_type()->create_specialized_value();
@@ -674,13 +712,16 @@ void Nodes_Widget::add_node(silk::Comms::Node const& src_node)
         port->setPortRate(src_input.rate);
 
         std::string input_name = src_input.name;
-        port->sig_connected.connect([src_node, input_name, this](QNEPort* output_port)
+        port->sig_connected.connect([dst_node, input_name, port, this](QNEPort* output_port)
         {
             QNEBlock* block = output_port->block();
             std::string node_name = block->id().toLatin1().data();
             q::Path stream_path(node_name);
             stream_path += output_port->id().toLatin1().data();
-//            m_hal.set_node_input_stream_path(node, input_name, stream_path);
+            if (!set_node_input_stream_path(*dst_node, input_name, stream_path))
+            {
+                port->disconnectAll();
+            }
         });
 
         Node::Input dst_input;

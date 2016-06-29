@@ -127,6 +127,9 @@ public:
     ts::Result<std::vector<Node>> request_nodes(std::chrono::high_resolution_clock::duration timeout = std::chrono::milliseconds(1000));
 
     ts::Result<Node> add_node(std::string const& name, std::string const def_name, std::shared_ptr<ts::IStruct_Value> descriptor, std::chrono::high_resolution_clock::duration timeout = std::chrono::milliseconds(1000));
+    ts::Result<void> remove_node(std::string const& name, std::chrono::high_resolution_clock::duration timeout = std::chrono::milliseconds(1000));
+
+    ts::Result<Comms::Node> set_node_input_stream_path(std::string const& node_name, std::string const& input_name, q::Path const& stream_path, std::chrono::high_resolution_clock::duration timeout = std::chrono::milliseconds(1000));
 
     //----------------------------------------------------------------------
 
@@ -144,7 +147,8 @@ public:
     boost::signals2::signal<void(std::vector<Node_Def> const&)> sig_node_defs_received;
     boost::signals2::signal<void(std::vector<Node> const&)> sig_nodes_received;
     boost::signals2::signal<void(Node const&)> sig_node_added;
-    boost::signals2::signal<void(std::string const& name)> sig_node_removed;
+    boost::signals2::signal<void()> sig_node_removed;
+    boost::signals2::signal<void(Node const&)> sig_node_changed;
 
 //    boost::signals2::signal<void(std::string const& name, rapidjson::Value const& message)> sig_node_message_received;
 //    boost::signals2::signal<void(std::string const& name, rapidjson::Value const& json)> sig_node_config_received;

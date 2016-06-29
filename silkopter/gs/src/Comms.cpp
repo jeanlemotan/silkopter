@@ -997,6 +997,7 @@ void Comms::handle_res(gs_comms::setup::Remove_Node_Res const& res)
 {
     QLOGI("Remove_Node_Res {}", res.get_req_id());
 
+    sig_node_removed();
 }
 
 ts::Result<Comms::Node> Comms::handle_node_data(gs_comms::setup::Node_Data const& node_data)
@@ -1039,6 +1040,7 @@ ts::Result<Comms::Node> Comms::handle_node_data(gs_comms::setup::Node_Data const
     {
         Node::Input input;
         input.name = input_data.get_name();
+        input.rate = input_data.get_rate();
         input.type = stream::Type(static_cast<stream::Semantic>(input_data.get_semantic()), static_cast<stream::Space>(input_data.get_space()));
         node.inputs.push_back(std::move(input));
     }
@@ -1049,6 +1051,7 @@ ts::Result<Comms::Node> Comms::handle_node_data(gs_comms::setup::Node_Data const
     {
         Node::Output output;
         output.name = output_data.get_name();
+        output.rate = output_data.get_rate();
         output.type = stream::Type(static_cast<stream::Semantic>(output_data.get_semantic()), static_cast<stream::Space>(output_data.get_space()));
         node.outputs.push_back(std::move(output));
     }
@@ -1138,6 +1141,15 @@ void Comms::handle_res(gs_comms::setup::Add_Node_Res const& res)
 void Comms::handle_res(gs_comms::setup::Set_Node_Input_Stream_Path_Res const& res)
 {
     QLOGI("Set_Node_Input_Stream_Path_Res {}", res.get_req_id());
+
+    auto result = handle_node_data(res.get_node_data());
+    if (result != ts::success)
+    {
+        QLOGE("Cannot handle node '{}' data: {}", res.get_node_data().get_name(), result.error().what());
+        return;
+    }
+
+    sig_node_changed(result.extract_payload());
 }
 
 ts::Result<std::shared_ptr<ts::IStruct_Value>> Comms::request_uav_descriptor(std::chrono::high_resolution_clock::duration timeout)
@@ -1369,6 +1381,83 @@ ts::Result<Comms::Node> Comms::add_node(std::string const& name,
 
     return result;
 }
+
+ts::Result<void> Comms::remove_node(std::string const& name, std::chrono::high_resolution_clock::duration timeout)
+{
+    ts::Result<void> result = ts::Error("Timeout");
+    bool done = false;
+
+    gs_comms::setup::Brain_Req request;
+    gs_comms::setup::Remove_Node_Req req;
+    req.set_req_id(++m_last_req_id);
+    req.set_name(name);
+
+    request = req;
+    serialize_and_send(SETUP_CHANNEL, request);
+
+    boost::signals2::scoped_connection c = sig_node_removed.connect([this, &result, &done, &name]()
+    {
+        result = ts::success;
+        done = true;
+    });
+    boost::signals2::scoped_connection ec = sig_error_received.connect([this, &result, &req, &done](uint32_t req_id, std::string const& message)
+    {
+        if (req_id == req.get_req_id())
+        {
+            result = ts::Error(message);
+            done = true;
+        }
+    });
+
+    auto start = std::chrono::high_resolution_clock::now();
+    while (!done && (std::chrono::high_resolution_clock::now() - start) < timeout)
+    {
+        process_rcp();
+        process();
+    }
+
+    return result;
+}
+
+ts::Result<Comms::Node> Comms::set_node_input_stream_path(std::string const& node_name, std::string const& input_name, q::Path const& stream_path, std::chrono::high_resolution_clock::duration timeout)
+{
+    ts::Result<Comms::Node> result = ts::Error("Timeout");
+    bool done = false;
+
+    gs_comms::setup::Brain_Req request;
+    gs_comms::setup::Set_Node_Input_Stream_Path_Req req;
+    req.set_req_id(++m_last_req_id);
+    req.set_node_name(node_name);
+    req.set_input_name(input_name);
+    req.set_stream_path(stream_path.get_as_string().c_str());
+
+    request = req;
+    serialize_and_send(SETUP_CHANNEL, request);
+
+    boost::signals2::scoped_connection c = sig_node_changed.connect([this, &result, &done](Node const& node)
+    {
+        result = node;
+        done = true;
+    });
+    boost::signals2::scoped_connection ec = sig_error_received.connect([this, &result, &req, &done](uint32_t req_id, std::string const& message)
+    {
+        if (req_id == req.get_req_id())
+        {
+            result = ts::Error(message);
+            done = true;
+        }
+    });
+
+    auto start = std::chrono::high_resolution_clock::now();
+    while (!done && (std::chrono::high_resolution_clock::now() - start) < timeout)
+    {
+        process_rcp();
+        process();
+    }
+
+    return result;
+}
+
 
 
 void Comms::process_rcp()
