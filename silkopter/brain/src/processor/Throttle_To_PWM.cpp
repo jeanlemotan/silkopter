@@ -92,7 +92,7 @@ void Throttle_To_PWM::process()
     }
 }
 
-ts::Result<void> Throttle_To_PWM::set_input_stream_path(size_t idx, q::Path const& path)
+ts::Result<void> Throttle_To_PWM::set_input_stream_path(size_t idx, std::string const& path)
 {
     return m_accumulators[idx].set_stream_path(0, path, m_output_streams[0]->get_rate(), m_hal);
 }

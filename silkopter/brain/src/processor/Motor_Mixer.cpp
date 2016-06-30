@@ -418,7 +418,7 @@ void Motor_Mixer::compute_throttles(IMultirotor_Properties const& multirotor_pro
 
 //}
 
-ts::Result<void> Motor_Mixer::set_input_stream_path(size_t idx, q::Path const& path)
+ts::Result<void> Motor_Mixer::set_input_stream_path(size_t idx, std::string const& path)
 {
     return m_accumulator.set_stream_path(idx, path, m_descriptor->get_rate(), m_hal);
 }

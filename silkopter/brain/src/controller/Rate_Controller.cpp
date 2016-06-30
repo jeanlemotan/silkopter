@@ -116,7 +116,7 @@ math::vec3f Rate_Controller::compute_feedback(stream::IAngular_Velocity::Value c
     return math::vec3f(x, y, z);
 }
 
-ts::Result<void> Rate_Controller::set_input_stream_path(size_t idx, q::Path const& path)
+ts::Result<void> Rate_Controller::set_input_stream_path(size_t idx, std::string const& path)
 {
     return m_accumulator.set_stream_path(idx, path, m_output_stream->get_rate(), m_hal);
 }

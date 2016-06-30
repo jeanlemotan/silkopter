@@ -34,11 +34,31 @@
 				}
 			},
 			"input_paths":[
-				""
+				"ADC LPF 0/Output"
 			]
 		},
 		{
 			"name":"ADC LPF",
+			"type":"ADC LPF",
+			"descriptor":{
+				"type":"::LPF_Descriptor",
+				"value":{
+					"rate":100
+				}
+			},
+			"config":{
+				"type":"::LPF_Config",
+				"value":{
+					"poles":1,
+					"cutoff_frequency":1.000000
+				}
+			},
+			"input_paths":[
+				""
+			]
+		},
+		{
+			"name":"ADC LPF 0",
 			"type":"ADC LPF",
 			"descriptor":{
 				"type":"::LPF_Descriptor",

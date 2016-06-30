@@ -84,7 +84,7 @@ void ENU_Frame_System::process()
     });
 }
 
-ts::Result<void> ENU_Frame_System::set_input_stream_path(size_t idx, q::Path const& path)
+ts::Result<void> ENU_Frame_System::set_input_stream_path(size_t idx, std::string const& path)
 {
     return m_accumulator.set_stream_path(idx, path, m_output_stream->get_rate(), m_hal);
 }

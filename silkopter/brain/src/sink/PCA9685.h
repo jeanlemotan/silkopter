@@ -39,7 +39,7 @@ public:
 
     ts::Result<void> start(q::Clock::time_point tp) override;
 
-    ts::Result<void> set_input_stream_path(size_t idx, q::Path const& path);
+    ts::Result<void> set_input_stream_path(size_t idx, std::string const& path);
     auto get_inputs() const -> std::vector<Input>;
 
     void process();
@@ -70,7 +70,7 @@ private:
         {
             int pulse = -1;
         } last_data;
-        q::Path stream_path;
+        std::string stream_path;
     };
 
     std::vector<PWM_Channel> m_pwm_channels;

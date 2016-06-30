@@ -611,7 +611,7 @@ void GS_Comms::pack_telemetry_data()
 //        const node::INode::Input& input = inputs[idx];
 //        if (input.name == input_name)
 //        {
-//            node->set_input_stream_path(idx, q::Path(path));
+//            node->set_input_stream_path(idx, std::string(path));
 //            break;
 //        }
 //    }
@@ -820,7 +820,7 @@ boost::variant<gs_comms::setup::Node_Data, gs_comms::setup::Error> GS_Comms::get
         node_data_input.set_space(static_cast<uint8_t>(input.type.get_space()));
         node_data_input.set_semantic(static_cast<uint8_t>(input.type.get_semantic()));
         node_data_input.set_rate(input.rate);
-        node_data_input.set_stream_path(input.stream_path.template get_as<std::string>());
+        node_data_input.set_stream_path(input.stream_path);
         node_data.get_inputs().push_back(std::move(node_data_input));
     }
     for (node::INode::Output const& output: node.get_outputs())
@@ -1193,7 +1193,13 @@ void GS_Comms::handle_req(gs_comms::setup::Set_Node_Input_Stream_Path_Req const&
         const node::INode::Input& input = inputs[idx];
         if (input.name == input_name)
         {
-            node->set_input_stream_path(idx, q::Path(req.get_stream_path()));
+            auto set_input_result = node->set_input_stream_path(idx, req.get_stream_path());
+            if (set_input_result != ts::success)
+            {
+                response = make_error_response(req.get_req_id(), set_input_result.error().what());
+                serialize_and_send(SETUP_CHANNEL, response);
+                return;
+            }
             m_hal.save_settings();
 
             boost::variant<gs_comms::setup::Node_Data, gs_comms::setup::Error> result = get_node_data(node_name, *node);

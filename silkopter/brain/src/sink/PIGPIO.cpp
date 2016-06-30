@@ -31,7 +31,7 @@ struct PIGPIO::Channel
     bool is_servo = false;
     uint32_t rate = 0;
     uint32_t gpio = 0;
-    q::Path stream_path;
+    std::string stream_path;
     std::weak_ptr<stream::IPWM> stream;
 };
 
@@ -261,15 +261,15 @@ void PIGPIO::process()
 
 
 
-ts::Result<void> PIGPIO::set_input_stream_path(size_t idx, q::Path const& path)
+ts::Result<void> PIGPIO::set_input_stream_path(size_t idx, std::string const& path)
 {
-    auto input_stream = m_hal.get_stream_registry().find_by_name<stream::IPWM>(path.get_as<std::string>());
+    auto input_stream = m_hal.get_stream_registry().find_by_name<stream::IPWM>(path);
     auto rate = input_stream ? input_stream->get_rate() : 0u;
     std::unique_ptr<Channel>& channel = m_channels[idx];
     if (rate != channel->rate)
     {
         channel->stream.reset();
-        channel->stream_path = q::Path();
+        channel->stream_path = std::string();
         if (input_stream)
         {
             return make_error("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", path, channel->rate, rate);

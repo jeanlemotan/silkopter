@@ -254,7 +254,7 @@ void KF_ECEF::process()
     });
 }
 
-ts::Result<void> KF_ECEF::set_input_stream_path(size_t idx, q::Path const& path)
+ts::Result<void> KF_ECEF::set_input_stream_path(size_t idx, std::string const& path)
 {
     return m_accumulator.set_stream_path(idx, path, m_descriptor->get_rate(), m_hal);
 }

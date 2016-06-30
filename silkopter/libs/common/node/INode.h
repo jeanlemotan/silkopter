@@ -79,10 +79,10 @@ public:
         stream::Type type;
         uint32_t rate;
         std::string name;
-        q::Path stream_path; //the path of the stream connected to this input in the "node/output" format
+        std::string stream_path; //the path of the stream connected to this input in the "node/output" format
     };
     virtual std::vector<Input> get_inputs() const = 0;
-    virtual ts::Result<void> set_input_stream_path(size_t idx, q::Path const& path) = 0;
+    virtual ts::Result<void> set_input_stream_path(size_t idx, std::string const& path) = 0;
 
     struct Output
     {

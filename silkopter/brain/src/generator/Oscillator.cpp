@@ -111,7 +111,7 @@ void Oscillator::process()
     }
 }
 
-ts::Result<void> Oscillator::set_input_stream_path(size_t idx, q::Path const& path)
+ts::Result<void> Oscillator::set_input_stream_path(size_t idx, std::string const& path)
 {
     return ts::success;
 }

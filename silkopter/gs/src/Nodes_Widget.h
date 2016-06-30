@@ -50,13 +50,6 @@ private:
         //JSON_Model* config_model = nullptr;
     } m_selection;
 
-    struct Stream
-    {
-        //silk::stream::gs::Stream_wptr stream;
-        QNEPort* port = nullptr;
-        QNEBlock* block = nullptr;
-    };
-
     struct Node
     {
         std::string name;
@@ -68,7 +61,7 @@ private:
 
         struct Input
         {
-            q::Path stream_path;
+            std::string stream_path;
             silk::stream::Type type;
             std::string name;
             uint32_t rate = 0;
@@ -87,7 +80,15 @@ private:
         std::vector<Output> outputs;
     };
 
-    //std::map<std::string, UI_Stream> m_ui_streams;
+    struct Stream
+    {
+        std::shared_ptr<Node> node;
+        size_t output_idx = 0;
+        QNEPort* port = nullptr;
+        QNEBlock* block = nullptr;
+    };
+
+    std::map<std::string, Stream> m_streams;
     std::map<std::string, std::shared_ptr<Node>> m_nodes;
 
     std::vector<silk::Comms::Node_Def> m_node_defs;
@@ -120,8 +121,9 @@ private:
 
     void remove_node_dialog(std::shared_ptr<Node> node);
 
-    bool set_node_input_stream_path(Node const& node, std::string const& input_name, q::Path const& stream_path);
+    bool set_node_input_stream_path(Node const& node, std::string const& input_name, std::string const& stream_path);
 
     void add_node_dialog(silk::Comms::Node_Def const& def, QPointF pos);
     void add_node(silk::Comms::Node const& node);
+    void refresh_node(silk::Comms::Node const& src_node);
 };

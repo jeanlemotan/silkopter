@@ -45,7 +45,7 @@ public:
 
     ts::Result<void> start(q::Clock::time_point tp) override;
 
-    ts::Result<void> set_input_stream_path(size_t idx, q::Path const& path);
+    ts::Result<void> set_input_stream_path(size_t idx, std::string const& path);
     auto get_inputs() const -> std::vector<Input>;
     auto get_outputs() const -> std::vector<Output>;
 
@@ -181,7 +181,7 @@ private:
     mutable std::shared_ptr<ECEF_Velocity> m_ecef_velocity_stream;
 
     std::vector<std::weak_ptr<stream::IThrottle>> m_input_throttle_streams;
-    std::vector<q::Path> m_input_throttle_stream_paths;
+    std::vector<std::string> m_input_throttle_stream_paths;
 
     Multirotor_Simulation m_simulation;
 };

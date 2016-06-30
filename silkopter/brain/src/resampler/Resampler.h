@@ -33,7 +33,7 @@ public:
 
     ts::Result<void> start(q::Clock::time_point tp) override;
 
-    ts::Result<void> set_input_stream_path(size_t idx, q::Path const& path);
+    ts::Result<void> set_input_stream_path(size_t idx, std::string const& path);
     auto get_inputs() const -> std::vector<Input>;
     auto get_outputs() const -> std::vector<Output>;
 
@@ -137,6 +137,13 @@ ts::Result<void> Resampler<Stream_t>::init()
 
     m_input_stream_dt = std::chrono::microseconds(1000000 / m_descriptor->get_input_rate());
 
+    uint32_t input_rate = m_descriptor->get_input_rate();
+    uint32_t output_rate = m_descriptor->get_output_rate();
+    uint32_t min_rate = math::min(output_rate, input_rate);
+    float max_cutoff = min_rate / 2.f - min_rate / 100.f;
+    hal::LPF_Config& lpf_config = m_config->get_lpf();
+    lpf_config.set_cutoff_frequency(max_cutoff);
+
     return ts::success;
 }
 
@@ -147,7 +154,7 @@ auto Resampler<Stream_t>::get_descriptor() const -> std::shared_ptr<const hal::I
 }
 
 template<class Stream_t>
-ts::Result<void> Resampler<Stream_t>::set_input_stream_path(size_t idx, q::Path const& path)
+ts::Result<void> Resampler<Stream_t>::set_input_stream_path(size_t idx, std::string const& path)
 {
     return m_accumulator.set_stream_path(idx, path, m_descriptor->get_input_rate(), m_hal);
 }
@@ -164,11 +171,11 @@ ts::Result<void> Resampler<Stream_t>::set_config(hal::INode_Config const& config
     }
     *m_config = *specialized;
 
-    auto input_rate = m_descriptor->get_input_rate();
-    auto output_rate = m_descriptor->get_output_rate();
-
-    uint32_t filter_rate = math::max(output_rate, input_rate);
-    float max_cutoff = math::min(output_rate / 2.f, input_rate / 2.f);
+    uint32_t input_rate = m_descriptor->get_input_rate();
+    uint32_t output_rate = m_descriptor->get_output_rate();
+    uint32_t min_rate = math::min(output_rate, input_rate);
+    uint32_t max_rate = math::max(output_rate, input_rate);
+    float max_cutoff = min_rate / 2.f - min_rate / 100.f;
 
     hal::LPF_Config& lpf_config = m_config->get_lpf();
 
@@ -177,7 +184,7 @@ ts::Result<void> Resampler<Stream_t>::set_config(hal::INode_Config const& config
         lpf_config.set_cutoff_frequency(max_cutoff);
     }
     lpf_config.set_cutoff_frequency(math::clamp(lpf_config.get_cutoff_frequency(), 0.1f, max_cutoff));
-    if (!m_dsp.setup(lpf_config.get_poles(), filter_rate, lpf_config.get_cutoff_frequency()))
+    if (!m_dsp.setup(lpf_config.get_poles(), max_rate, lpf_config.get_cutoff_frequency()))
     {
         return make_error("Cannot setup dsp filter.");
     }

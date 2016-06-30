@@ -1040,6 +1040,7 @@ ts::Result<Comms::Node> Comms::handle_node_data(gs_comms::setup::Node_Data const
     {
         Node::Input input;
         input.name = input_data.get_name();
+        input.stream_path = input_data.get_stream_path();
         input.rate = input_data.get_rate();
         input.type = stream::Type(static_cast<stream::Semantic>(input_data.get_semantic()), static_cast<stream::Space>(input_data.get_space()));
         node.inputs.push_back(std::move(input));
@@ -1419,7 +1420,7 @@ ts::Result<void> Comms::remove_node(std::string const& name, std::chrono::high_r
     return result;
 }
 
-ts::Result<Comms::Node> Comms::set_node_input_stream_path(std::string const& node_name, std::string const& input_name, q::Path const& stream_path, std::chrono::high_resolution_clock::duration timeout)
+ts::Result<Comms::Node> Comms::set_node_input_stream_path(std::string const& node_name, std::string const& input_name, std::string const& stream_path, std::chrono::high_resolution_clock::duration timeout)
 {
     ts::Result<Comms::Node> result = ts::Error("Timeout");
     bool done = false;
@@ -1429,7 +1430,7 @@ ts::Result<Comms::Node> Comms::set_node_input_stream_path(std::string const& nod
     req.set_req_id(++m_last_req_id);
     req.set_node_name(node_name);
     req.set_input_name(input_name);
-    req.set_stream_path(stream_path.get_as_string().c_str());
+    req.set_stream_path(stream_path);
 
     request = req;
     serialize_and_send(SETUP_CHANNEL, request);

@@ -90,7 +90,7 @@ void Proximity::process()
     }
 }
 
-ts::Result<void> Proximity::set_input_stream_path(size_t idx, q::Path const& path)
+ts::Result<void> Proximity::set_input_stream_path(size_t idx, std::string const& path)
 {
     return m_accumulators[idx].set_stream_path(0, path, m_output_stream->get_rate(), m_hal);
 }

@@ -141,7 +141,7 @@ void Servo_Gimbal::process()
 
 }
 
-ts::Result<void> Servo_Gimbal::set_input_stream_path(size_t idx, q::Path const& path)
+ts::Result<void> Servo_Gimbal::set_input_stream_path(size_t idx, std::string const& path)
 {
     if (idx == 0)
     {

@@ -307,12 +307,12 @@ void PCA9685::process()
 #define FIND_STREAM(CH)\
 if (idx == CH)\
 {\
-    auto input_stream = m_hal.get_stream_registry().find_by_name<stream::IPWM>(path.get_as<std::string>());\
+    auto input_stream = m_hal.get_stream_registry().find_by_name<stream::IPWM>(path);\
     auto rate = input_stream ? input_stream->get_rate() : 0u;\
     if (rate != m_descriptor->get_rate())\
     {\
         m_pwm_channels[CH].stream.reset();\
-        m_pwm_channels[CH].stream_path = q::Path();\
+        m_pwm_channels[CH].stream_path = std::string();\
         if (input_stream)\
         {\
             return make_error("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", path, m_descriptor->get_rate(), rate);\
@@ -327,7 +327,7 @@ if (idx == CH)\
     set_pwm_value(*i2c, idx, boost::none);\
 }
 
-ts::Result<void> PCA9685::set_input_stream_path(size_t idx, q::Path const& path)
+ts::Result<void> PCA9685::set_input_stream_path(size_t idx, std::string const& path)
 {
     QLOG_TOPIC("PCA9685::set_input_stream_path");
 
@@ -400,35 +400,35 @@ auto PCA9685::get_config() const -> std::shared_ptr<const hal::INode_Config>
 //    //rates lower than 50 and higher than 400Hz don't support servo signals
 //    if (m_descriptor->rate > 400 || m_descriptor->rate < 50)
 //    {
-//        jsonutil::remove_value(json, q::Path("Channel 1/Servo Signal"));
-//        jsonutil::remove_value(json, q::Path("Channel 2/Servo Signal"));
-//        jsonutil::remove_value(json, q::Path("Channel 3/Servo Signal"));
-//        jsonutil::remove_value(json, q::Path("Channel 4/Servo Signal"));
-//        jsonutil::remove_value(json, q::Path("Channel 5/Servo Signal"));
-//        jsonutil::remove_value(json, q::Path("Channel 6/Servo Signal"));
-//        jsonutil::remove_value(json, q::Path("Channel 7/Servo Signal"));
-//        jsonutil::remove_value(json, q::Path("Channel 8/Servo Signal"));
-//        jsonutil::remove_value(json, q::Path("Channel 9/Servo Signal"));
-//        jsonutil::remove_value(json, q::Path("Channel 10/Servo Signal"));
-//        jsonutil::remove_value(json, q::Path("Channel 11/Servo Signal"));
-//        jsonutil::remove_value(json, q::Path("Channel 12/Servo Signal"));
-//        jsonutil::remove_value(json, q::Path("Channel 13/Servo Signal"));
-//        jsonutil::remove_value(json, q::Path("Channel 14/Servo Signal"));
-//        jsonutil::remove_value(json, q::Path("Channel 15/Servo Signal"));
-//        jsonutil::remove_value(json, q::Path("Channel 16/Servo Signal"));
+//        jsonutil::remove_value(json, std::string("Channel 1/Servo Signal"));
+//        jsonutil::remove_value(json, std::string("Channel 2/Servo Signal"));
+//        jsonutil::remove_value(json, std::string("Channel 3/Servo Signal"));
+//        jsonutil::remove_value(json, std::string("Channel 4/Servo Signal"));
+//        jsonutil::remove_value(json, std::string("Channel 5/Servo Signal"));
+//        jsonutil::remove_value(json, std::string("Channel 6/Servo Signal"));
+//        jsonutil::remove_value(json, std::string("Channel 7/Servo Signal"));
+//        jsonutil::remove_value(json, std::string("Channel 8/Servo Signal"));
+//        jsonutil::remove_value(json, std::string("Channel 9/Servo Signal"));
+//        jsonutil::remove_value(json, std::string("Channel 10/Servo Signal"));
+//        jsonutil::remove_value(json, std::string("Channel 11/Servo Signal"));
+//        jsonutil::remove_value(json, std::string("Channel 12/Servo Signal"));
+//        jsonutil::remove_value(json, std::string("Channel 13/Servo Signal"));
+//        jsonutil::remove_value(json, std::string("Channel 14/Servo Signal"));
+//        jsonutil::remove_value(json, std::string("Channel 15/Servo Signal"));
+//        jsonutil::remove_value(json, std::string("Channel 16/Servo Signal"));
 //    }
 
 //    for (size_t i = 0; i < 16; i++)
 //    {
 //        if (m_pwm_channels[i].config->servo_signal)
 //        {
-//            jsonutil::remove_value(json, q::Path(q::util::format<q::String>("Channel {}/Min PWM", i + 1)));
-//            jsonutil::remove_value(json, q::Path(q::util::format<q::String>("Channel {}/Max PWM", i + 1)));
+//            jsonutil::remove_value(json, std::string(q::util::format<q::String>("Channel {}/Min PWM", i + 1)));
+//            jsonutil::remove_value(json, std::string(q::util::format<q::String>("Channel {}/Max PWM", i + 1)));
 //        }
 //        else
 //        {
-//            jsonutil::remove_value(json, q::Path(q::util::format<q::String>("Channel {}/Min Servo (ms)", i + 1)));
-//            jsonutil::remove_value(json, q::Path(q::util::format<q::String>("Channel {}/Max Servo (ms)", i + 1)));
+//            jsonutil::remove_value(json, std::string(q::util::format<q::String>("Channel {}/Min Servo (ms)", i + 1)));
+//            jsonutil::remove_value(json, std::string(q::util::format<q::String>("Channel {}/Max Servo (ms)", i + 1)));
 //        }
 //    }
 

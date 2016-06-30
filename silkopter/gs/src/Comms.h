@@ -108,7 +108,7 @@ public:
 
         struct Input
         {
-            q::Path stream_path;
+            std::string stream_path;
             stream::Type type;
             std::string name;
             uint32_t rate = 0;
@@ -129,7 +129,7 @@ public:
     ts::Result<Node> add_node(std::string const& name, std::string const def_name, std::shared_ptr<ts::IStruct_Value> descriptor, std::chrono::high_resolution_clock::duration timeout = std::chrono::milliseconds(1000));
     ts::Result<void> remove_node(std::string const& name, std::chrono::high_resolution_clock::duration timeout = std::chrono::milliseconds(1000));
 
-    ts::Result<Comms::Node> set_node_input_stream_path(std::string const& node_name, std::string const& input_name, q::Path const& stream_path, std::chrono::high_resolution_clock::duration timeout = std::chrono::milliseconds(1000));
+    ts::Result<Comms::Node> set_node_input_stream_path(std::string const& node_name, std::string const& input_name, std::string const& stream_path, std::chrono::high_resolution_clock::duration timeout = std::chrono::milliseconds(1000));
 
     //----------------------------------------------------------------------
 

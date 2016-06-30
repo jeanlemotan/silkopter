@@ -117,7 +117,7 @@ void Comp_ECEF::process()
     });
 }
 
-void Comp_ECEF::set_input_stream_path(size_t idx, q::Path const& path)
+void Comp_ECEF::set_input_stream_path(size_t idx, std::string const& path)
 {
     m_accumulator.set_stream_path(idx, path, m_descriptor->rate, m_hal);
 }

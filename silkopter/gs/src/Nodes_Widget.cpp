@@ -190,13 +190,20 @@ void Nodes_Widget::refresh_nodes()
         return;
     }
 
-    m_scene->clear();
+    m_streams.clear();
     m_nodes.clear();
+    m_scene->clear();
 
     std::vector<silk::Comms::Node> nodes = result.extract_payload();
     for (silk::Comms::Node const& node: nodes)
     {
         add_node(node);
+    }
+
+    //refresh one more time to link the streams
+    for (silk::Comms::Node const& node: nodes)
+    {
+        refresh_node(node);
     }
 }
 
@@ -478,7 +485,7 @@ void Nodes_Widget::show_connection_context_menu(QGraphicsSceneMouseEvent* event,
     connect(action, &QAction::triggered, [=](bool)
     {
         std::string input_name = input_port->id().toLatin1().data();
-        //m_hal.set_node_input_stream_path(node, input_name, q::Path());
+        //m_hal.set_node_input_stream_path(node, input_name, std::string());
     });
 
     menu.exec(event->screenPos());
@@ -584,7 +591,7 @@ void Nodes_Widget::show_context_menu(QGraphicsSceneMouseEvent* event)
     menu.exec(event->screenPos());
 }
 
-bool Nodes_Widget::set_node_input_stream_path(Node const& node, std::string const& input_name, q::Path const& stream_path)
+bool Nodes_Widget::set_node_input_stream_path(Node const& node, std::string const& input_name, std::string const& stream_path)
 {
     auto it = std::find_if(node.inputs.begin(), node.inputs.end(), [&input_name](Node::Input const& input) { return input.name == input_name; });
     if (it == node.inputs.end())
@@ -599,6 +606,9 @@ bool Nodes_Widget::set_node_input_stream_path(Node const& node, std::string cons
         QMessageBox::critical(this, "Error", result.error().what().c_str());
         return false;
     }
+
+    //xxx add refresh_node here!!!
+    refresh_node(result.payload());
 
     return true;
 }
@@ -716,7 +726,8 @@ void Nodes_Widget::add_node(silk::Comms::Node const& src_node)
         {
             QNEBlock* block = output_port->block();
             std::string node_name = block->id().toLatin1().data();
-            q::Path stream_path(node_name);
+            std::string stream_path(node_name);
+            stream_path += "/";
             stream_path += output_port->id().toLatin1().data();
             if (!set_node_input_stream_path(*dst_node, input_name, stream_path))
             {
@@ -732,8 +743,10 @@ void Nodes_Widget::add_node(silk::Comms::Node const& src_node)
         dst_input.port = port;
         dst_node->inputs.push_back(dst_input);
     }
-    for (silk::Comms::Node::Output const& src_output: src_node.outputs)
+    for (size_t i = 0; i < src_node.outputs.size(); i++)
     {
+        silk::Comms::Node::Output const& src_output = src_node.outputs[i];
+
         QNEPort* port = b->addOutputPort(QString());
         port->setBrush(QBrush(QColor(0x9b59b6)));
         port->setId(src_output.name.c_str());
@@ -749,17 +762,55 @@ void Nodes_Widget::add_node(silk::Comms::Node const& src_node)
         dst_output.port = port;
         dst_node->outputs.push_back(dst_output);
 
-//        auto& stream_data = m_ui_streams[src_output.stream->name];
-//        stream_data.stream = src_output.stream;
-//        stream_data.port = dst_output.port;
-//        stream_data.block = dst_node.block;
+        std::string stream_name = dst_node->name + "/" + dst_output.name;
+        Stream& stream = m_streams[stream_name];
+        stream.node = dst_node;
+        stream.block = b;
+        stream.port = port;
+        stream.output_idx = i;
     }
 
-//    auto* node_ptr = src_node.get();
-//    m_connections.push_back( src_node.changed_signal.connect([this, node_ptr]()
-//    {
-//        refresh_node(*node_ptr);
-//    }) );
+    refresh_node(src_node);
+}
+
+void Nodes_Widget::refresh_node(silk::Comms::Node const& src_node)
+{
+    auto it = m_nodes.find(src_node.name);
+    QASSERT(it != m_nodes.end());
+    if (it == m_nodes.end())
+    {
+        return;
+    }
+
+    std::shared_ptr<Node> const& dst_node = it->second;
+
+    dst_node->descriptor = src_node.descriptor;
+    dst_node->config = src_node.config;
+
+    QASSERT(src_node.inputs.size() == dst_node->inputs.size());
+
+    for (size_t i = 0; i < src_node.inputs.size(); i++)
+    {
+        silk::Comms::Node::Input const& src_input = src_node.inputs[i];
+        Node::Input& dst_input = dst_node->inputs[i];
+
+        dst_input.stream_path = src_input.stream_path;
+
+        dst_input.port->disconnectAll();
+        auto it = m_streams.find(dst_input.stream_path);
+        if (it == m_streams.end())
+        {
+            continue;
+        }
+
+        Stream const& stream = it->second;
+
+        QNEConnection* connection = new QNEConnection(0);
+        m_scene->addItem(connection);
+        connection->setPort1((QNEPort*)dst_input.port);
+        connection->setPort2(stream.port);
+        connection->updatePath();
+    }
 }
 
 void Nodes_Widget::on_selection_changed()

@@ -30,7 +30,7 @@ public:
 
     ts::Result<void> start(q::Clock::time_point tp) override;
 
-    ts::Result<void> set_input_stream_path(size_t idx, q::Path const& path);
+    ts::Result<void> set_input_stream_path(size_t idx, std::string const& path);
     auto get_inputs() const -> std::vector<Input>;
     auto get_outputs() const -> std::vector<Output>;
 
@@ -81,6 +81,11 @@ template<class Stream_t>
 ts::Result<void> LPF<Stream_t>::init()
 {
     m_output_stream->set_rate(m_descriptor->get_rate());
+
+    float output_rate = static_cast<float>(m_output_stream->get_rate());
+    float max_cutoff = output_rate / 2.f - output_rate / 100.f;
+    m_config->set_cutoff_frequency(max_cutoff);
+
     return ts::success;
 }
 
@@ -91,7 +96,7 @@ auto LPF<Stream_t>::get_descriptor() const -> std::shared_ptr<const hal::INode_D
 }
 
 template<class Stream_t>
-ts::Result<void> LPF<Stream_t>::set_input_stream_path(size_t idx, q::Path const& path)
+ts::Result<void> LPF<Stream_t>::set_input_stream_path(size_t idx, std::string const& path)
 {
     return m_accumulator.set_stream_path(idx, path, m_output_stream->get_rate(), m_hal);
 }

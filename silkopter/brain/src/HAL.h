@@ -59,7 +59,7 @@ public:
     void set_all(std::vector<Item> const& items);
     void remove_all();
     template<class T> auto find_by_name(std::string const& name) const -> std::shared_ptr<T>;
-    auto add(std::string const& name, std::string const& type, std::shared_ptr<Base> const& ptr) -> bool;
+    bool add(std::string const& name, std::string const& type, std::shared_ptr<Base> const& ptr);
     void remove(std::shared_ptr<Base> const& ptr);
 private:
     std::vector<Item> m_items;

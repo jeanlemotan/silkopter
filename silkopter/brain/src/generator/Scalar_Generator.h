@@ -29,7 +29,7 @@ public:
 
     ts::Result<void> start(q::Clock::time_point tp) override;
 
-    ts::Result<void> set_input_stream_path(size_t idx, q::Path const& path);
+    ts::Result<void> set_input_stream_path(size_t idx, std::string const& path);
     auto get_inputs() const -> std::vector<Input>;
     auto get_outputs() const -> std::vector<Output>;
 
@@ -44,7 +44,7 @@ private:
     std::shared_ptr<hal::Scalar_Generator_Config> m_config;
 
     std::weak_ptr<stream::IFloat> m_modulation_stream;
-    q::Path m_modulation_stream_path;
+    std::string m_modulation_stream_path;
 
     typedef Basic_Output_Stream<Stream_t> Output_Stream;
     mutable std::shared_ptr<Output_Stream> m_output_stream;
@@ -96,9 +96,9 @@ ts::Result<void> Scalar_Generator<Stream_t>::start(q::Clock::time_point tp)
 }
 
 template<class Stream_t>
-ts::Result<void> Scalar_Generator<Stream_t>::set_input_stream_path(size_t idx, q::Path const& path)
+ts::Result<void> Scalar_Generator<Stream_t>::set_input_stream_path(size_t idx, std::string const& path)
 {
-    auto modulation_stream = m_hal.get_stream_registry().template find_by_name<stream::IFloat>(path.get_as<std::string>());
+    auto modulation_stream = m_hal.get_stream_registry().template find_by_name<stream::IFloat>(path);
     if (modulation_stream && modulation_stream->get_rate() != m_output_stream->get_rate())
     {
         m_modulation_stream.reset();

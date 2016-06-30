@@ -287,9 +287,9 @@ void Multirotor_Simulator::process()
     });
 }
 
-ts::Result<void> Multirotor_Simulator::set_input_stream_path(size_t idx, q::Path const& path)
+ts::Result<void> Multirotor_Simulator::set_input_stream_path(size_t idx, std::string const& path)
 {
-    auto input_stream = m_hal.get_stream_registry().find_by_name<stream::IThrottle>(path.get_as<std::string>());
+    auto input_stream = m_hal.get_stream_registry().find_by_name<stream::IThrottle>(path);
     auto rate = input_stream ? input_stream->get_rate() : 0u;
     if (rate != m_descriptor->get_throttle_rate())
     {

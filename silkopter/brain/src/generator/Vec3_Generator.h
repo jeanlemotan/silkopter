@@ -29,7 +29,7 @@ public:
 
     ts::Result<void> start(q::Clock::time_point tp) override;
 
-    ts::Result<void> set_input_stream_path(size_t idx, q::Path const& path);
+    ts::Result<void> set_input_stream_path(size_t idx, std::string const& path);
     auto get_inputs() const -> std::vector<Input>;
     auto get_outputs() const -> std::vector<Output>;
 
@@ -43,7 +43,7 @@ private:
     std::shared_ptr<hal::Vec3_Generator_Descriptor> m_descriptor;
     std::shared_ptr<hal::Vec3_Generator_Config> m_config;
 
-    std::array<q::Path, 3> m_modulation_stream_paths;
+    std::array<std::string, 3> m_modulation_stream_paths;
     std::array<std::weak_ptr<stream::IFloat>, 3> m_modulation_streams;
     std::array<std::vector<stream::IFloat::Sample>, 3> m_modulation_samples;
 
@@ -97,7 +97,7 @@ ts::Result<void> Vec3_Generator<Stream_t>::start(q::Clock::time_point tp)
 }
 
 template<class Stream_t>
-ts::Result<void> Vec3_Generator<Stream_t>::set_input_stream_path(size_t idx, q::Path const& path)
+ts::Result<void> Vec3_Generator<Stream_t>::set_input_stream_path(size_t idx, std::string const& path)
 {
     if (idx >= 3)
     {
@@ -106,7 +106,7 @@ ts::Result<void> Vec3_Generator<Stream_t>::set_input_stream_path(size_t idx, q::
 
     char name[3] = { 'x', 'y', 'z' };
 
-    auto stream = m_hal.get_stream_registry().template find_by_name<stream::IFloat>(path.get_as<std::string>());
+    auto stream = m_hal.get_stream_registry().template find_by_name<stream::IFloat>(path);
     if (stream && stream->get_rate() != m_output_stream->get_rate())
     {
         m_modulation_streams[idx].reset();

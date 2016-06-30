@@ -105,7 +105,7 @@ void Multirotor_Pilot::process()
     });
 }
 
-ts::Result<void> Multirotor_Pilot::set_input_stream_path(size_t idx, q::Path const& path)
+ts::Result<void> Multirotor_Pilot::set_input_stream_path(size_t idx, std::string const& path)
 {
     if (idx == 0)
     {

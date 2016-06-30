@@ -193,7 +193,7 @@ void HAL::save_settings()
 
         for (auto const& si: n.ptr->get_inputs())
         {
-            node_data.get_input_paths().push_back(si.stream_path.get_as<std::string>());
+            node_data.get_input_paths().push_back(si.stream_path);
         }
 
         node_datas.push_back(std::move(node_data));
@@ -291,7 +291,7 @@ void HAL::save_settings()
 //                input_pathsj.SetArray();
 //                for (auto const& si: inputs)
 //                {
-//                    input_pathsj.PushBack(rapidjson::Value(si.stream_path.get_as<std::string>(), allocator), allocator);
+//                    input_pathsj.PushBack(rapidjson::Value(si.stream_path, allocator), allocator);
 //                }
 //            }
 
@@ -499,12 +499,12 @@ ts::Result<std::shared_ptr<node::INode>> HAL::create_node(std::string const& typ
     {
         return make_error("Node '{}' already exist", name);
     }
-    auto node = m_node_factory.create(type);
+    std::shared_ptr<node::INode> node = m_node_factory.create(type);
     if (!node)
     {
         return make_error("Cannot create  node type '{}", type);
     }
-    auto result = node->init(descriptor);
+    ts::Result<void> result = node->init(descriptor);
     if (result != ts::success)
     {
         return result.error();
@@ -516,10 +516,10 @@ ts::Result<std::shared_ptr<node::INode>> HAL::create_node(std::string const& typ
         return result.error();
     }
 
-    auto res = m_nodes.add(name, type, node); //this has to succeed since we already tested for duplicate names
+    bool res = m_nodes.add(name, type, node); //this has to succeed since we already tested for duplicate names
     QASSERT(res);
-    auto outputs = node->get_outputs();
-    for (auto const& x: outputs)
+    std::vector<node::INode::Output> outputs = node->get_outputs();
+    for (node::INode::Output const& x: outputs)
     {
         std::string stream_name = q::util::format<std::string>("{}/{}", name, x.name);
         if (!m_streams.add(stream_name, std::string(), x.stream))
@@ -661,81 +661,81 @@ void HAL::sort_nodes(std::shared_ptr<node::INode> first_node)
         return;
     }
 
-    typedef Registry<node::INode>::Item Item;
+//    typedef Registry<node::INode>::Item Item;
 
-    std::vector<Item> items = m_nodes.get_all();
-    auto it = std::find_if(items.begin(), items.end(), [first_node](const Item& item) { return item.ptr == first_node; });
-    QASSERT(it != items.end());
-    if (it == items.end())
-    {
-        return;
-    }
+//    std::vector<Item> items = m_nodes.get_all();
+//    auto it = std::find_if(items.begin(), items.end(), [first_node](const Item& item) { return item.ptr == first_node; });
+//    QASSERT(it != items.end());
+//    if (it == items.end())
+//    {
+//        return;
+//    }
 
-    std::vector<Item> sorted;
-    sorted.reserve(items.size() * 2); //to avoid allocations
+//    std::vector<Item> sorted;
+//    sorted.reserve(items.size() * 2); //to avoid allocations
 
-    Item first_item = *it;
-    items.erase(it);
+//    Item first_item = *it;
+//    items.erase(it);
 
-    sorted.push_back(first_item);
-    for (auto it = sorted.begin(); it != sorted.end(); ++it)
-    {
-        const std::string& node_name = it->name;
+//    sorted.push_back(first_item);
+//    for (auto it = sorted.begin(); it != sorted.end(); ++it)
+//    {
+//        const std::string& node_name = it->name;
 
-        //now find all the nodes that this node uses as input
-        if (it->ptr != first_node)
-        {
-            std::vector<node::INode::Input> inputs = it->ptr->get_inputs();
-            for (const node::INode::Input& input : inputs)
-            {
-                if (input.stream_path.empty())
-                {
-                    continue;
-                }
-                for (auto nit = items.begin(); nit != items.end();)
-                {
-                    if (input.stream_path[0] == nit->name)
-                    {
-                        sorted.push_back(*nit);
-                        items.erase(nit);
-                    }
-                    else
-                    {
-                        ++nit;
-                    }
-                }
-            }
-        }
+//        //now find all the nodes that this node uses as input
+//        if (it->ptr != first_node)
+//        {
+//            std::vector<node::INode::Input> inputs = it->ptr->get_inputs();
+//            for (const node::INode::Input& input : inputs)
+//            {
+//                if (input.stream_path.empty())
+//                {
+//                    continue;
+//                }
+//                for (auto nit = items.begin(); nit != items.end();)
+//                {
+//                    if (input.stream_path[0] == nit->name)
+//                    {
+//                        sorted.push_back(*nit);
+//                        items.erase(nit);
+//                    }
+//                    else
+//                    {
+//                        ++nit;
+//                    }
+//                }
+//            }
+//        }
 
-        //now find all the nodes that use this node as an input
-        for (auto nit = items.begin(); nit != items.end();)
-        {
-            bool found = false;
-            std::vector<node::INode::Input> inputs = nit->ptr->get_inputs();
-            for (const node::INode::Input& input : inputs)
-            {
-                if (!input.stream_path.empty() && input.stream_path[0] == node_name)
-                {
-                    sorted.push_back(*nit);
-                    items.erase(nit);
-                    found = true;
-                    break;
-                }
-            }
-            if (!found)
-            {
-                ++nit;
-            }
-        }
-    }
+//        //now find all the nodes that use this node as an input
+//        for (auto nit = items.begin(); nit != items.end();)
+//        {
+//            bool found = false;
+//            std::vector<node::INode::Input> inputs = nit->ptr->get_inputs();
+//            for (const node::INode::Input& input : inputs)
+//            {
+//                if (!input.stream_path.empty() && input.stream_path[0] == node_name)
+//                {
+//                    sorted.push_back(*nit);
+//                    items.erase(nit);
+//                    found = true;
+//                    break;
+//                }
+//            }
+//            if (!found)
+//            {
+//                ++nit;
+//            }
+//        }
+//    }
 
-    //add all the remainding nodes
-    for (Item const& item: items)
-    {
-        sorted.push_back(item);
-    }
+//    //add all the remainding nodes
+//    for (Item const& item: items)
+//    {
+//        sorted.push_back(item);
+//    }
 
-    m_nodes.set_all(sorted);
+//    m_nodes.set_all(sorted);
 }
 
 
@@ -1057,7 +1057,7 @@ auto HAL::init(RC_Comms& rc_comms, GS_Comms& gs_comms) -> bool
         size_t idx = 0;
         for (std::string const& input_path: data.get_input_paths())
         {
-            auto result = node->set_input_stream_path(idx++, q::Path(input_path));
+            auto result = node->set_input_stream_path(idx++, input_path);
             if (result != ts::success)
             {
                 QLOGE("Failed to set input stream path for node {} of type '{}': {}", data.get_name(), data.get_type(), result.error().what());
