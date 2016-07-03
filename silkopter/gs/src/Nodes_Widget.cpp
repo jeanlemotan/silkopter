@@ -22,6 +22,11 @@
 #include "ui_New_Node_Dialog.h"
 #include "qneconnection.h"
 
+#include "Angular_Velocity_Calibration_Wizard.h"
+#include "Acceleration_Calibration_Wizard.h"
+#include "Magnetic_Field_Calibration_Wizard.h"
+
+
 #include <QVBoxLayout>
 #include <QMessageBox>
 #include <QSettings>
@@ -217,18 +222,13 @@ bool Nodes_Widget::supports_acceleration_calibration(Node const& node, Node::Out
         return false;
     }
 
-    std::shared_ptr<const ts::IValue> value = node.config->select(ts::Value_Selector("calibration." + output.name));
+    std::shared_ptr<const ts::IVector_Value> value = node.config->select_specialized<ts::IVector_Value>(ts::Value_Selector("calibration." + output.name));
     if (!value)
     {
         return false;
     }
-    std::shared_ptr<const ts::IVector_Type> vector_type = std::dynamic_pointer_cast<const ts::IVector_Type>(value->get_type());
-    if (vector_type == nullptr)
-    {
-        return false;
-    }
 
-    return vector_type->get_inner_type() == m_comms->get_type_system().get_root_scope()->find_symbol_by_name("Acceleration_Calibration_Point");
+    return value->get_specialized_type()->get_inner_type() == m_comms->get_type_system().get_root_scope()->find_symbol_by_name("Acceleration_Calibration_Point");
 }
 
 bool Nodes_Widget::supports_angular_velocity_calibration(Node const& node, Node::Output const& output) const
@@ -237,18 +237,13 @@ bool Nodes_Widget::supports_angular_velocity_calibration(Node const& node, Node:
     {
         return false;
     }
-    std::shared_ptr<const ts::IValue> value = node.config->select(ts::Value_Selector("calibration." + output.name));
+    std::shared_ptr<const ts::IVector_Value> value = node.config->select_specialized<ts::IVector_Value>(ts::Value_Selector("calibration." + output.name));
     if (!value)
     {
         return false;
     }
-    std::shared_ptr<const ts::IVector_Type> vector_type = std::dynamic_pointer_cast<const ts::IVector_Type>(value->get_type());
-    if (vector_type == nullptr)
-    {
-        return false;
-    }
 
-    return vector_type->get_inner_type() == m_comms->get_type_system().get_root_scope()->find_symbol_by_name("Angular_Velocity_Calibration_Point");
+    return value->get_specialized_type()->get_inner_type() == m_comms->get_type_system().get_root_scope()->find_symbol_by_name("Angular_Velocity_Calibration_Point");
 }
 
 bool Nodes_Widget::supports_magnetic_field_calibration(Node const& node, Node::Output const& output) const
@@ -257,24 +252,27 @@ bool Nodes_Widget::supports_magnetic_field_calibration(Node const& node, Node::O
     {
         return false;
     }
-    std::shared_ptr<const ts::IValue> value = node.config->select(ts::Value_Selector("calibration." + output.name));
+    std::shared_ptr<const ts::IVector_Value> value = node.config->select_specialized<ts::IVector_Value>(ts::Value_Selector("calibration." + output.name));
     if (!value)
     {
         return false;
     }
-    std::shared_ptr<const ts::IVector_Type> vector_type = std::dynamic_pointer_cast<const ts::IVector_Type>(value->get_type());
-    if (vector_type == nullptr)
-    {
-        return false;
-    }
 
-    return vector_type->get_inner_type() == m_comms->get_type_system().get_root_scope()->find_symbol_by_name("Magnetic_Field_Calibration_Point");
+    return value->get_specialized_type()->get_inner_type() == m_comms->get_type_system().get_root_scope()->find_symbol_by_name("Magnetic_Field_Calibration_Point");
 }
 
 void Nodes_Widget::do_acceleration_calibration(Node const& node, size_t output_idx)
 {
-//    Acceleration_Calibration_Wizard wizard(m_hal, m_comms, node, output_idx, this);
-//    wizard.exec();
+    Node::Output const& output = node.outputs[output_idx];
+    std::shared_ptr<ts::IVector_Value> value = node.config->select_specialized<ts::IVector_Value>(ts::Value_Selector("calibration." + output.name));
+    if (!value)
+    {
+        QASSERT(false);
+        return;
+    }
+
+    Acceleration_Calibration_Wizard wizard(*m_comms, node.name, node.name + "/" + output.name, output.rate, value, this);
+    wizard.exec();
 }
 
 void Nodes_Widget::do_magnetic_field_calibration(Node const& node, size_t output_idx)

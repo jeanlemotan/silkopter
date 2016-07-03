@@ -82,6 +82,7 @@ extern "C"
 #include "def_lang/IVariant_Type.h"
 #include "def_lang/IMember.h"
 #include "def_lang/IMember_Def.h"
+#include "def_lang/Value_Selector.h"
 
 namespace std
 {

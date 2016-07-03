@@ -17,6 +17,7 @@ CONFIG += c++11
 
 INCLUDEPATH += ../../src
 INCLUDEPATH += ../../src/qnodeseditor
+INCLUDEPATH += ../../src/calibration
 INCLUDEPATH += ../../../../QMapControl/src
 INCLUDEPATH += ../../../../qbase/include
 INCLUDEPATH += ../../../../qdata/include
@@ -116,7 +117,10 @@ HEADERS += \
     ../../src/qnodeseditor/qneblock.h \
     ../../src/qnodeseditor/qneconnection.h \
     ../../src/qnodeseditor/qneport.h \
-    ../../src/qnodeseditor/qnodeseditor.h
+    ../../src/qnodeseditor/qnodeseditor.h \
+    ../../src/calibration/Acceleration_Calibration_Wizard.h \
+    ../../src/calibration/Angular_Velocity_Calibration_Wizard.h \
+    ../../src/calibration/Magnetic_Field_Calibration_Wizard.h
 
 SOURCES += \
     ../../src/GS.cpp \
@@ -153,12 +157,28 @@ SOURCES += \
     ../../src/qnodeseditor/qneblock.cpp \
     ../../src/qnodeseditor/qneconnection.cpp \
     ../../src/qnodeseditor/qneport.cpp \
-    ../../src/qnodeseditor/qnodeseditor.cpp
+    ../../src/qnodeseditor/qnodeseditor.cpp \
+    ../../src/calibration/Acceleration_Calibration_Wizard.cpp \
+    ../../src/calibration/Angular_Velocity_Calibration_Wizard.cpp \
+    ../../src/calibration/Magnetic_Field_Calibration_Wizard.cpp
 
 FORMS += \
     ../../src/GS.ui \
     ../../src/UAV_Descriptor_Widget.ui \
-    ../../src/New_Node_Dialog.ui
+    ../../src/New_Node_Dialog.ui \
+    ../../src/calibration/Acceleration_Calibration_Wizard_Collect.ui \
+    ../../src/calibration/Acceleration_Calibration_Wizard_Done.ui \
+    ../../src/calibration/Acceleration_Calibration_Wizard_Instructions.ui \
+    ../../src/calibration/Acceleration_Calibration_Wizard_Intro.ui \
+    ../../src/calibration/Acceleration_Calibration_Wizard_Reset.ui \
+    ../../src/calibration/Angular_Velocity_Calibration_Wizard_Collect.ui \
+    ../../src/calibration/Angular_Velocity_Calibration_Wizard_Done.ui \
+    ../../src/calibration/Angular_Velocity_Calibration_Wizard_Instructions.ui \
+    ../../src/calibration/Angular_Velocity_Calibration_Wizard_Reset.ui \
+    ../../src/calibration/Magnetic_Field_Calibration_Wizard_Collect.ui \
+    ../../src/calibration/Magnetic_Field_Calibration_Wizard_Done.ui \
+    ../../src/calibration/Magnetic_Field_Calibration_Wizard_Instructions.ui \
+    ../../src/calibration/Magnetic_Field_Calibration_Wizard_Reset.ui
 
 DISTFILES += \
 

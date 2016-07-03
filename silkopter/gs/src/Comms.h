@@ -148,18 +148,21 @@ public:
     boost::signals2::signal<void()> sig_node_removed;
     boost::signals2::signal<void(Node const&)> sig_node_changed;
 
-//    boost::signals2::signal<void(std::string const& name, rapidjson::Value const& message)> sig_node_message_received;
-//    boost::signals2::signal<void(std::string const& name, rapidjson::Value const& json)> sig_node_config_received;
 
-    struct IStream_Data
+    struct ITelemetry_Stream
     {
+        virtual ~ITelemetry_Stream() = default;
+
+        std::string name;
         stream::Semantic type;
         uint32_t rate = 0;
-        //virtual void unpack(Comms::Telemetry_Channel& channel, uint32_t sample_count) = 0;
+
+    private:
+        virtual void unpack() = 0;
     };
 
     template<class Stream_T>
-    struct Stream_Data : public IStream_Data
+    struct Telemetry_Stream : public ITelemetry_Stream
     {
         static constexpr stream::Semantic TYPE = Stream_T::TYPE;
         typedef typename Stream_T::Value Value;
@@ -168,10 +171,12 @@ public:
 
         Samples samples;
     private:
-        //void unpack(Comms::Telemetry_Channel& channel, uint32_t sample_count) override;
+        void unpack() override;
     };
 
-    boost::signals2::signal<void(IStream_Data const&)> sig_stream_data_received;
+    boost::signals2::signal<void(ITelemetry_Stream const&)> sig_telemetry_samples_available;
+
+    //boost::signals2::signal<void(IStream_Data const&)> sig_stream_data_received;
 
 
 //    void request_node_config(std::string const& name);
@@ -188,7 +193,7 @@ private:
 
     void configure_channels();
 
-    std::map<stream::Type, std::unique_ptr<IStream_Data>> m_streams;
+    std::map<stream::Type, std::unique_ptr<ITelemetry_Stream>> m_streams;
 
     struct Dispatch_Res_Visitor;
     struct Dispatch_Req_Visitor;
