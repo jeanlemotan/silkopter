@@ -65,7 +65,7 @@ auto Throttle_To_PWM::get_outputs() const -> std::vector<Output>
     std::vector<Output> outputs(m_accumulators.size());
     for (size_t i = 0; i < outputs.size(); i++)
     {
-        outputs[i] = { q::util::format<std::string>("PWM {}", i), m_output_streams[i] };
+        outputs[i] = { q::util::format<std::string>("pwm_{}", i), m_output_streams[i] };
     }
     return outputs;
 }

@@ -288,7 +288,7 @@ Result<std::shared_ptr<IValue>> Vector_Value::insert_default_value(size_t idx)
         TS_ASSERT(false);
         return Error("Unconstructed value");
     }
-    std::shared_ptr<IValue> value = get_specialized_type()->get_inner_qualified_type()->get_type()->create_value();
+    std::shared_ptr<IValue> value = get_specialized_type()->get_inner_type()->create_value();
     auto result = insert_value(idx, value);
     if (result != success)
     {
@@ -313,9 +313,9 @@ Result<void> Vector_Value::insert_value(size_t idx, std::shared_ptr<IValue> valu
     {
         return Error("Cannot insert beyond the end");
     }
-    if (value->get_type() != get_specialized_type()->get_inner_qualified_type()->get_type())
+    if (value->get_type() != get_specialized_type()->get_inner_type())
     {
-        return Error("Cannot insert value of type '" + value->get_type()->get_name() + "'. Expected values of type '" + get_specialized_type()->get_inner_qualified_type()->get_type()->get_name() + "'");
+        return Error("Cannot insert value of type '" + value->get_type()->get_name() + "'. Expected values of type '" + get_specialized_type()->get_inner_type()->get_name() + "'");
     }
 
     m_values.insert(m_values.begin() + idx, std::move(value));

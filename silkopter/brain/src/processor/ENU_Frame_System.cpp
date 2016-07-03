@@ -55,7 +55,7 @@ auto ENU_Frame_System::get_outputs() const -> std::vector<Output>
 {
     std::vector<Output> outputs =
     {{
-         { "Frame (enu->ecef)", m_output_stream }
+         { "frame", m_output_stream }
     }};
     return outputs;
 }

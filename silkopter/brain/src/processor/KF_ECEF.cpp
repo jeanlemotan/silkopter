@@ -175,9 +175,9 @@ auto KF_ECEF::get_outputs() const -> std::vector<Output>
 {
     std::vector<Output> outputs =
     {{
-        { "Position (ecef)", m_position_output_stream },
-        { "Velocity (ecef)", m_velocity_output_stream },
-        { "Linear Acceleration (ecef)", m_linear_acceleration_output_stream },
+        { "position", m_position_output_stream },
+        { "velocity", m_velocity_output_stream },
+        { "linear_acceleration", m_linear_acceleration_output_stream },
     }};
     return outputs;
 }

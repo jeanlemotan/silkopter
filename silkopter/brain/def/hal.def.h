@@ -1743,6 +1743,31 @@ public:
     ufloat m_ground_distance = {0.010000f};
   };
 
+  struct Calibration
+  {
+  public:
+    virtual ~Calibration() = default;
+    void set_acceleration(std::vector<Acceleration_Calibration_Point> const& value);
+    void set_acceleration(std::vector<Acceleration_Calibration_Point>&& value);
+    auto get_acceleration() const -> std::vector<Acceleration_Calibration_Point> const&;
+    auto get_acceleration() -> std::vector<Acceleration_Calibration_Point>&;
+
+    void set_angular_velocity(std::vector<Angular_Velocity_Calibration_Point> const& value);
+    void set_angular_velocity(std::vector<Angular_Velocity_Calibration_Point>&& value);
+    auto get_angular_velocity() const -> std::vector<Angular_Velocity_Calibration_Point> const&;
+    auto get_angular_velocity() -> std::vector<Angular_Velocity_Calibration_Point>&;
+
+    void set_magnetic_field(std::vector<Magnetic_Field_Calibration_Point> const& value);
+    void set_magnetic_field(std::vector<Magnetic_Field_Calibration_Point>&& value);
+    auto get_magnetic_field() const -> std::vector<Magnetic_Field_Calibration_Point> const&;
+    auto get_magnetic_field() -> std::vector<Magnetic_Field_Calibration_Point>&;
+
+  private:
+    std::vector<Acceleration_Calibration_Point> m_acceleration;
+    std::vector<Angular_Velocity_Calibration_Point> m_angular_velocity;
+    std::vector<Magnetic_Field_Calibration_Point> m_magnetic_field;
+  };
+
   virtual ~Multirotor_Simulator_Config() = default;
   void set_simulation_enabled(bool const& value);
   void set_simulation_enabled(bool&& value);
@@ -1765,12 +1790,18 @@ public:
   auto get_noise() const -> Noise const&;
   auto get_noise() -> Noise&;
 
+  void set_calibration(Calibration const& value);
+  void set_calibration(Calibration&& value);
+  auto get_calibration() const -> Calibration const&;
+  auto get_calibration() -> Calibration&;
+
 private:
   bool m_simulation_enabled = {true};
   bool m_drag_enabled = {true};
   bool m_ground_enabled = {true};
   bool m_gravity_enabled = {true};
   Noise m_noise;
+  Calibration m_calibration;
 };
 
 struct Oscillator_Descriptor : public INode_Descriptor
@@ -3151,6 +3182,8 @@ ts::Result<void> deserialize(Multirotor_Simulator_Descriptor& value, ts::sz::Val
 ts::sz::Value serialize(Multirotor_Simulator_Descriptor const& value);
 ts::Result<void> deserialize(Multirotor_Simulator_Config::Noise& value, ts::sz::Value const& sz_value);
 ts::sz::Value serialize(Multirotor_Simulator_Config::Noise const& value);
+ts::Result<void> deserialize(Multirotor_Simulator_Config::Calibration& value, ts::sz::Value const& sz_value);
+ts::sz::Value serialize(Multirotor_Simulator_Config::Calibration const& value);
 ts::Result<void> deserialize(Multirotor_Simulator_Config& value, ts::sz::Value const& sz_value);
 ts::sz::Value serialize(Multirotor_Simulator_Config const& value);
 ts::Result<void> deserialize(Oscillator_Descriptor& value, ts::sz::Value const& sz_value);

@@ -84,9 +84,9 @@ auto Multirotor_Brain::get_outputs() const -> std::vector<Output>
 {
     std::vector<Output> outputs =
     {{
-         { "State",        m_state_output_stream },
-         { "Rate",         m_rate_output_stream },
-         { "Thrust",       m_thrust_output_stream },
+         { "state",        m_state_output_stream },
+         { "rate",         m_rate_output_stream },
+         { "thrust",       m_thrust_output_stream },
      }};
     return outputs;
 }

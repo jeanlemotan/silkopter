@@ -61,6 +61,8 @@ extern "C"
 #include "QData.h"
 
 #include "def_lang/Type_System.h"
+#include "def_lang/IVector_Value.h"
+#include "def_lang/IVector_Type.h"
 #include "def_lang/IStruct_Value.h"
 #include "def_lang/IStruct_Type.h"
 #include "def_lang/IPoly_Value.h"

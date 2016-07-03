@@ -54,7 +54,7 @@ auto Pressure_Velocity::get_outputs() const -> std::vector<Output>
 {
     std::vector<Output> outputs =
     {{
-        { "Velocity (enu)", m_output_stream },
+        { "velocity", m_output_stream },
     }};
     return outputs;
 }

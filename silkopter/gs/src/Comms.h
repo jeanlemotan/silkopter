@@ -88,14 +88,12 @@ public:
         {
             stream::Type type;
             std::string name;
-            //uint32_t rate = 0;
         };
         std::vector<Input> inputs;
         struct Output
         {
             stream::Type type;
             std::string name;
-            //uint32_t rate = 0;
         };
         std::vector<Output> outputs;
     };

@@ -57,7 +57,7 @@ auto Multirotor_Pilot::get_outputs() const -> std::vector<Output>
 {
     std::vector<Output> outputs =
     {{
-         { "Commands",        m_output_stream },
+         { "commands", m_output_stream },
     }};
     return outputs;
 }

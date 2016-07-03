@@ -56,7 +56,7 @@ auto Rate_Controller::get_outputs() const -> std::vector<Output>
 {
     std::vector<Output> outputs =
     {{
-         { "Torque", m_output_stream }
+         { "torque", m_output_stream }
     }};
     return outputs;
 }

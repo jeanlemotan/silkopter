@@ -198,7 +198,7 @@ Raspicam::~Raspicam()
 auto Raspicam::get_outputs() const -> std::vector<Output>
 {
     std::vector<Output> outputs(1);
-    outputs[0].name = "Video";
+    outputs[0].name = "video";
     outputs[0].stream = m_stream;
     return outputs;
 }

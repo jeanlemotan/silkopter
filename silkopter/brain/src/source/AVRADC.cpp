@@ -33,8 +33,8 @@ auto AVRADC::get_outputs() const -> std::vector<Output>
 {
     std::vector<Output> outputs =
     {{
-        { "ADC0", m_adcs[0] },
-        { "ADC1", m_adcs[1] }
+        { "adc_0", m_adcs[0] },
+        { "adc_1", m_adcs[1] }
      }};
     return outputs;
 }

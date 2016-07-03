@@ -459,13 +459,13 @@ auto MPU9250::akm_write_u8(Buses& buses, uint8_t reg, uint8_t t, size_t speed) -
 auto MPU9250::get_outputs() const -> std::vector<Output>
 {
     std::vector<Output> outputs(4);
-    outputs[0].name = "Angular Velocity";
+    outputs[0].name = "angular_velocity";
     outputs[0].stream = m_angular_velocity;
-    outputs[1].name = "Acceleration";
+    outputs[1].name = "acceleration";
     outputs[1].stream = m_acceleration;
-    outputs[2].name = "Magnetic Field";
+    outputs[2].name = "magnetic_field";
     outputs[2].stream = m_magnetic_field;
-    outputs[3].name = "Temperature";
+    outputs[3].name = "temperature";
     outputs[3].stream = m_temperature;
     return outputs;
 }

@@ -607,6 +607,15 @@ struct Multirotor_Simulator_Config : public INode_Config
     bool ground_enabled = true : [ ui_name = "Ground Enabled" ];
     bool gravity_enabled = true : [ ui_name = "Gravity Enabled" ];
     Noise noise : [ ui_name = "Noise" ];
+
+    struct Calibration
+    {
+        vector<Acceleration_Calibration_Point> acceleration : [ ui_name = "Acceleration" ];
+        vector<Angular_Velocity_Calibration_Point> angular_velocity : [ ui_name = "Angular Velocity" ];
+        vector<Magnetic_Field_Calibration_Point> magnetic_field : [ ui_name = "Magnetic Field" ];
+    };
+
+    Calibration calibration : [ ui_name = "Calibration" ];
 };
 
 //////////////////////////////////////////////////////////////

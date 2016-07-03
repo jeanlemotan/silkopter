@@ -145,7 +145,7 @@ auto Transformer<In_Stream_t, Out_Stream_t, Frame_Stream_t>::get_outputs() const
 {
     std::vector<Output> outputs =
     {{
-        { "Output", m_output_stream }
+        { "output", m_output_stream }
     }};
     return outputs;
 }

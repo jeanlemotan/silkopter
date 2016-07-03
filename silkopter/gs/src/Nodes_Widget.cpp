@@ -143,13 +143,16 @@ void Nodes_Widget::refresh()
     }
 
     m_uav_name.clear();
-    std::shared_ptr<const ts::IMember> member = result.payload()->find_member_by_name("name");
-    if (member)
+    if (result.payload())
     {
-        std::shared_ptr<const ts::IString_Value> name_value = std::dynamic_pointer_cast<const ts::IString_Value>(member->get_value());
-        if (name_value)
+        std::shared_ptr<const ts::IMember> member = result.payload()->find_member_by_name("name");
+        if (member)
         {
-            m_uav_name = name_value->get_value();
+            std::shared_ptr<const ts::IString_Value> name_value = std::dynamic_pointer_cast<const ts::IString_Value>(member->get_value());
+            if (name_value)
+            {
+                m_uav_name = name_value->get_value();
+            }
         }
     }
 
@@ -214,12 +217,18 @@ bool Nodes_Widget::supports_acceleration_calibration(Node const& node, Node::Out
         return false;
     }
 
-    std::shared_ptr<const ts::IValue> value = node.config->select(ts::Value_Selector("calibration/" + output.name));
+    std::shared_ptr<const ts::IValue> value = node.config->select(ts::Value_Selector("calibration." + output.name));
     if (!value)
     {
         return false;
     }
-    return value->get_type() == m_comms->get_type_system().get_root_scope()->find_symbol_by_name("Acceleration_Calibration_Point");
+    std::shared_ptr<const ts::IVector_Type> vector_type = std::dynamic_pointer_cast<const ts::IVector_Type>(value->get_type());
+    if (vector_type == nullptr)
+    {
+        return false;
+    }
+
+    return vector_type->get_inner_type() == m_comms->get_type_system().get_root_scope()->find_symbol_by_name("Acceleration_Calibration_Point");
 }
 
 bool Nodes_Widget::supports_angular_velocity_calibration(Node const& node, Node::Output const& output) const
@@ -228,12 +237,18 @@ bool Nodes_Widget::supports_angular_velocity_calibration(Node const& node, Node:
     {
         return false;
     }
-    std::shared_ptr<const ts::IValue> value = node.config->select(ts::Value_Selector("calibration/" + output.name));
+    std::shared_ptr<const ts::IValue> value = node.config->select(ts::Value_Selector("calibration." + output.name));
     if (!value)
     {
         return false;
     }
-    return value->get_type() == m_comms->get_type_system().get_root_scope()->find_symbol_by_name("Angular_Velocity_Calibration_Point");
+    std::shared_ptr<const ts::IVector_Type> vector_type = std::dynamic_pointer_cast<const ts::IVector_Type>(value->get_type());
+    if (vector_type == nullptr)
+    {
+        return false;
+    }
+
+    return vector_type->get_inner_type() == m_comms->get_type_system().get_root_scope()->find_symbol_by_name("Angular_Velocity_Calibration_Point");
 }
 
 bool Nodes_Widget::supports_magnetic_field_calibration(Node const& node, Node::Output const& output) const
@@ -242,12 +257,18 @@ bool Nodes_Widget::supports_magnetic_field_calibration(Node const& node, Node::O
     {
         return false;
     }
-    std::shared_ptr<const ts::IValue> value = node.config->select(ts::Value_Selector("calibration/" + output.name));
+    std::shared_ptr<const ts::IValue> value = node.config->select(ts::Value_Selector("calibration." + output.name));
     if (!value)
     {
         return false;
     }
-    return value->get_type() == m_comms->get_type_system().get_root_scope()->find_symbol_by_name("Magnetic_Field_Calibration_Point");
+    std::shared_ptr<const ts::IVector_Type> vector_type = std::dynamic_pointer_cast<const ts::IVector_Type>(value->get_type());
+    if (vector_type == nullptr)
+    {
+        return false;
+    }
+
+    return vector_type->get_inner_type() == m_comms->get_type_system().get_root_scope()->find_symbol_by_name("Magnetic_Field_Calibration_Point");
 }
 
 void Nodes_Widget::do_acceleration_calibration(Node const& node, size_t output_idx)
@@ -272,7 +293,7 @@ static std::string prettify_name(std::string const& name)
 {
     std::string new_name = name;
     boost::trim(new_name);
-    char old_c = 0;
+    char old_c = ' ';
     for (auto& c: new_name)
     {
         c = c == '_' ? ' ' : c;
@@ -377,6 +398,15 @@ void Nodes_Widget::show_block_context_menu(QGraphicsSceneMouseEvent* event, QNEB
             });
         }
 
+        QAction* action = menu.addAction(QIcon(":/icons/ui/minus.png"), q::util::format<std::string>("Remove {}", block->id().toLatin1().data()).c_str());
+        connect(action, &QAction::triggered, [this, node](bool)
+        {
+            remove_node_dialog(node);
+        });
+
+        menu.addSeparator();
+
+        bool supports_any_calibration = false;
         for (size_t i = 0; i < node->outputs.size(); i++)
         {
             Node::Output const& os = node->outputs[i];
@@ -389,6 +419,7 @@ void Nodes_Widget::show_block_context_menu(QGraphicsSceneMouseEvent* event, QNEB
                     do_acceleration_calibration(*node, i);
                 });
 
+                supports_any_calibration = true;
                 continue;
             }
             if (supports_angular_velocity_calibration(*node, os))
@@ -399,6 +430,7 @@ void Nodes_Widget::show_block_context_menu(QGraphicsSceneMouseEvent* event, QNEB
                     do_angular_velocity_calibration(*node, i);
                 });
 
+                supports_any_calibration = true;
                 continue;
             }
             if (supports_magnetic_field_calibration(*node, os))
@@ -409,15 +441,10 @@ void Nodes_Widget::show_block_context_menu(QGraphicsSceneMouseEvent* event, QNEB
                     do_magnetic_field_calibration(*node, i);
                 });
 
+                supports_any_calibration = true;
                 continue;
             }
         }
-
-        QAction* action = menu.addAction(QIcon(":/icons/ui/minus.png"), q::util::format<std::string>("Remove {}", block->id().toLatin1().data()).c_str());
-        connect(action, &QAction::triggered, [this, node](bool)
-        {
-            remove_node_dialog(node);
-        });
 
         menu.exec(event->screenPos());
     }
@@ -710,14 +737,7 @@ void Nodes_Widget::add_node(silk::Comms::Node const& src_node)
         port->setBrush(QBrush(QColor(0xe67e22)));
         port->setId(src_input.name.c_str());
         port->setToolTip(silk::stream::get_as_string(src_input.type, true).c_str());
-        if (src_input.rate > 0)
-        {
-            port->setName(q::util::format<std::string>("{} {}Hz", src_input.name, src_input.rate).c_str());
-        }
-        else
-        {
-            port->setName(q::util::format<std::string>("{}", src_input.name).c_str());
-        }
+        port->setName(q::util::format<std::string>("{} {}Hz", prettify_name(src_input.name), src_input.rate).c_str());
         port->setPortType(src_input.type.get_id());
         port->setPortRate(src_input.rate);
 
@@ -751,7 +771,7 @@ void Nodes_Widget::add_node(silk::Comms::Node const& src_node)
         port->setBrush(QBrush(QColor(0x9b59b6)));
         port->setId(src_output.name.c_str());
         port->setToolTip(silk::stream::get_as_string(src_output.type, true).c_str());
-        port->setName(q::util::format<std::string>("{} {}Hz", src_output.name, src_output.rate).c_str());
+        port->setName(q::util::format<std::string>("{} {}Hz", prettify_name(src_output.name), src_output.rate).c_str());
         port->setPortType(src_output.type.get_id());
         port->setPortRate(src_output.rate);
 

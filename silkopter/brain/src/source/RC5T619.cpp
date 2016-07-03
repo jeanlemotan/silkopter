@@ -135,9 +135,9 @@ RC5T619::RC5T619(HAL& hal)
 auto RC5T619::get_outputs() const -> std::vector<Output>
 {
     std::vector<Output> outputs(2);
-    outputs[0].name = "ADC0";
+    outputs[0].name = "adc_0";
     outputs[0].stream = m_adc[0];
-    outputs[1].name = "ADC1";
+    outputs[1].name = "adc_1";
     outputs[1].stream = m_adc[1];
     return outputs;
 }

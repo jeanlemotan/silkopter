@@ -160,7 +160,7 @@ template<class Stream_t>
 auto LPF<Stream_t>::get_outputs() const -> std::vector<Output>
 {
     std::vector<Output> outputs(1);
-    outputs[0].name = "Output";
+    outputs[0].name = "output";
     outputs[0].stream = m_output_stream;
     return outputs;
 }

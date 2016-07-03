@@ -56,7 +56,7 @@ auto Comp_AHRS::get_inputs() const -> std::vector<Input>
 auto Comp_AHRS::get_outputs() const -> std::vector<Output>
 {
     std::vector<Output> outputs(1);
-    outputs[0].name = "Frame";
+    outputs[0].name = "frame";
     outputs[0].stream = m_output_stream;
     return outputs;
 }

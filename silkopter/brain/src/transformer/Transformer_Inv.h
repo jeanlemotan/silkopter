@@ -143,9 +143,10 @@ auto Transformer_Inv<In_Stream_t, Out_Stream_t, Frame_Stream_t>::get_inputs() co
 template<class In_Stream_t, class Out_Stream_t, class Frame_Stream_t>
 auto Transformer_Inv<In_Stream_t, Out_Stream_t, Frame_Stream_t>::get_outputs() const -> std::vector<Output>
 {
-    std::vector<Output> outputs(1);
-    outputs[0].name = "Output";
-    outputs[0].stream = m_output_stream;
+    std::vector<Output> outputs =
+    {{
+        { "output", m_output_stream }
+    }};
     return outputs;
 }
 

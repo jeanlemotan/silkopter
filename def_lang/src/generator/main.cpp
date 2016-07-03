@@ -269,7 +269,7 @@ static ts::Symbol_Path get_native_type(ts::IDeclaration_Scope const& scope, ts::
     }
     else if (ts::IVector_Type const* t = dynamic_cast<ts::IVector_Type const*>(&type))
     {
-        return ts::Symbol_Path("std::vector<" + get_native_type(scope, *t->get_inner_qualified_type()->get_type()).to_string() + ">");
+        return ts::Symbol_Path("std::vector<" + get_native_type(scope, *t->get_inner_type()).to_string() + ">");
     }
     else if (ts::IPoly_Type const* t = dynamic_cast<ts::IPoly_Type const*>(&type))
     {

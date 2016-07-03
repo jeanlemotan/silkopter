@@ -124,7 +124,7 @@ auto Combiner<Stream_t>::get_outputs() const -> std::vector<Output>
 {
     std::vector<Output> outputs =
     {{
-         { "Output", m_output_stream }
+         { "output", m_output_stream }
     }};
     return outputs;
 }

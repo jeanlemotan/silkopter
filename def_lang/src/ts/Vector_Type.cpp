@@ -41,7 +41,7 @@ Result<void> Vector_Type::init(std::vector<std::shared_ptr<const ITemplate_Argum
         return Error("Invalid template argument. vectors don't support const types");
     }
 
-    m_inner_type = inner_type;
+    m_inner_type = inner_type->get_type();
 
     return success;
 }
@@ -89,7 +89,7 @@ std::shared_ptr<const IType> Vector_Type::get_aliased_type() const
     return m_aliased_type;
 }
 
-std::shared_ptr<const Qualified_Type> Vector_Type::get_inner_qualified_type() const
+std::shared_ptr<const IType> Vector_Type::get_inner_type() const
 {
     return m_inner_type;
 }

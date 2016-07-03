@@ -56,7 +56,7 @@ auto Gravity_Filter::get_outputs() const -> std::vector<Output>
 {
     std::vector<Output> outputs =
     {{
-         { "Linear Acceleration", m_output_stream }
+         { "linear_acceleration", m_output_stream }
     }};
     return outputs;
 }

@@ -115,15 +115,15 @@ auto Multirotor_Simulator::get_outputs() const -> std::vector<Output>
 {
     std::vector<Output> outputs =
     {
-        {"Angular Velocity", m_angular_velocity_stream},
-        {"Acceleration", m_acceleration_stream},
-        {"Magnetic Field", m_magnetic_field_stream},
-        {"Pressure", m_pressure_stream},
-        {"Temperature", m_temperature_stream},
-        {"Sonar Distance", m_distance_stream},
-        {"GPS Info", m_gps_info_stream},
-        {"GPS Position (ecef)", m_ecef_position_stream},
-        {"GPS Velocity (ecef)", m_ecef_velocity_stream},
+        {"angular_velocity", m_angular_velocity_stream},
+        {"acceleration", m_acceleration_stream},
+        {"magnetic_field", m_magnetic_field_stream},
+        {"pressure", m_pressure_stream},
+        {"temperature", m_temperature_stream},
+        {"sonar_distance", m_distance_stream},
+        {"gps_info", m_gps_info_stream},
+        {"gps_position", m_ecef_position_stream},
+        {"gps_velocity", m_ecef_velocity_stream},
     };
     return outputs;
 }

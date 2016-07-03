@@ -114,10 +114,10 @@ auto ADS1115::get_outputs() const -> std::vector<Output>
 {
     std::vector<Output> outputs =
     {{
-        { "ADC0", m_adcs[0] },
-        { "ADC1", m_adcs[1] },
-        { "ADC2", m_adcs[2] },
-        { "ADC3", m_adcs[3] }
+        { "adc_0", m_adcs[0] },
+        { "adc_1", m_adcs[1] },
+        { "adc_2", m_adcs[2] },
+        { "adc_3", m_adcs[3] }
      }};
     return outputs;
 }

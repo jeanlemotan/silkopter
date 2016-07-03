@@ -111,9 +111,9 @@ auto MS5611::bus_write(Buses& buses, uint8_t data) -> bool
 auto MS5611::get_outputs() const -> std::vector<Output>
 {
     std::vector<Output> outputs(2);
-    outputs[0].name = "Pressure";
+    outputs[0].name = "pressure";
     outputs[0].stream = m_pressure;
-    outputs[1].name = "Temperature";
+    outputs[1].name = "temperature";
     outputs[1].stream = m_temperature;
     return outputs;
 }

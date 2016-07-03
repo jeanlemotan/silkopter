@@ -57,7 +57,7 @@ auto Proximity::get_outputs() const -> std::vector<Output>
 {
     std::vector<Output> outputs =
     {{
-         { "Proximity", m_output_stream }
+         { "proximity", m_output_stream }
     }};
     return outputs;
 }

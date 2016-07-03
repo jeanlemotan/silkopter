@@ -62,9 +62,9 @@ auto Servo_Gimbal::get_outputs() const -> std::vector<Output>
 {
     std::vector<Output> outputs =
     {{
-         { "X PWM", m_x_output_stream },
-         { "Y PWM", m_y_output_stream },
-         { "Z PWM", m_z_output_stream }
+         { "x_pwm", m_x_output_stream },
+         { "y_pwm", m_y_output_stream },
+         { "z_pwm", m_z_output_stream }
     }};
     return outputs;
 }

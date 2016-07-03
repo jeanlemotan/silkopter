@@ -88,7 +88,7 @@ auto Motor_Mixer::get_outputs() const -> std::vector<Output>
     std::vector<Output> outputs(m_outputs.size());
     for (size_t i = 0; i < m_outputs.size(); i++)
     {
-        outputs[i].name = q::util::format<std::string>("Throttle {}", i);
+        outputs[i].name = q::util::format<std::string>("throttle_{}", i);
         outputs[i].stream = m_outputs[i];
     }
     return outputs;

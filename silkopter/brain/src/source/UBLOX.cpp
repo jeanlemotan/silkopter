@@ -299,9 +299,9 @@ auto UBLOX::get_outputs() const -> std::vector<Output>
 {
     std::vector<Output> outputs =
     {{
-         { "Position (ecef)", m_position_stream },
-         { "Velocity (ecef)", m_velocity_stream },
-         { "GPS Info", m_gps_info_stream },
+         { "position", m_position_stream },
+         { "velocity", m_velocity_stream },
+         { "gps_info", m_gps_info_stream },
     }};
     return outputs;
 }

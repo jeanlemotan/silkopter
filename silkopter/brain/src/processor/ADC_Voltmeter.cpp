@@ -53,7 +53,7 @@ auto ADC_Voltmeter::get_inputs() const -> std::vector<Input>
 auto ADC_Voltmeter::get_outputs() const -> std::vector<Output>
 {
     std::vector<Output> outputs(1);
-    outputs[0].name = "Voltage";
+    outputs[0].name = "voltage";
     outputs[0].stream = m_output_stream;
     return outputs;
 }
