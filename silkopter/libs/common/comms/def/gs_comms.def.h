@@ -505,6 +505,40 @@ private:
   setup::Node_Data m_node_data;
 };
 
+struct Set_Stream_Telemetry_Enabled_Req : public setup::IReq
+{
+public:
+  virtual ~Set_Stream_Telemetry_Enabled_Req() = default;
+  void set_req_id(uint32_t const& value);
+  void set_req_id(uint32_t&& value);
+  auto get_req_id() const -> uint32_t const&;
+
+  void set_stream_path(std::string const& value);
+  void set_stream_path(std::string&& value);
+  auto get_stream_path() const -> std::string const&;
+
+  void set_enabled(bool const& value);
+  void set_enabled(bool&& value);
+  auto get_enabled() const -> bool const&;
+
+private:
+  uint32_t m_req_id = {0};
+  std::string m_stream_path;
+  bool m_enabled = {false};
+};
+
+struct Set_Stream_Telemetry_Enabled_Res : public setup::IRes
+{
+public:
+  virtual ~Set_Stream_Telemetry_Enabled_Res() = default;
+  void set_req_id(uint32_t const& value);
+  void set_req_id(uint32_t&& value);
+  auto get_req_id() const -> uint32_t const&;
+
+private:
+  uint32_t m_req_id = {0};
+};
+
 struct Add_Node_Req : public setup::IReq
 {
 public:
@@ -550,6 +584,46 @@ private:
   setup::Node_Data m_node_data;
 };
 
+struct Set_Node_Config_Req : public setup::IReq
+{
+public:
+  virtual ~Set_Node_Config_Req() = default;
+  void set_req_id(uint32_t const& value);
+  void set_req_id(uint32_t&& value);
+  auto get_req_id() const -> uint32_t const&;
+
+  void set_name(std::string const& value);
+  void set_name(std::string&& value);
+  auto get_name() const -> std::string const&;
+
+  void set_config_data(setup::serialized_data_t const& value);
+  void set_config_data(setup::serialized_data_t&& value);
+  auto get_config_data() const -> setup::serialized_data_t const&;
+
+private:
+  uint32_t m_req_id = {0};
+  std::string m_name;
+  setup::serialized_data_t m_config_data;
+};
+
+struct Set_Node_Config_Res : public setup::IRes
+{
+public:
+  virtual ~Set_Node_Config_Res() = default;
+  void set_req_id(uint32_t const& value);
+  void set_req_id(uint32_t&& value);
+  auto get_req_id() const -> uint32_t const&;
+
+  void set_node_data(setup::Node_Data const& value);
+  void set_node_data(setup::Node_Data&& value);
+  auto get_node_data() const -> setup::Node_Data const&;
+  auto get_node_data() -> setup::Node_Data&;
+
+private:
+  uint32_t m_req_id = {0};
+  setup::Node_Data m_node_data;
+};
+
 struct Remove_Node_Req : public setup::IReq
 {
 public:
@@ -579,8 +653,8 @@ private:
   uint32_t m_req_id = {0};
 };
 
-typedef boost::variant<setup::Get_AST_Req,setup::Set_Clock_Req,setup::Set_UAV_Descriptor_Req,setup::Get_UAV_Descriptor_Req,setup::Get_Node_Defs_Req,setup::Remove_Node_Req,setup::Add_Node_Req,setup::Get_Nodes_Req,setup::Set_Node_Input_Stream_Path_Req> Brain_Req;
-typedef boost::variant<setup::Get_AST_Res,setup::Set_Clock_Res,setup::Set_UAV_Descriptor_Res,setup::Get_UAV_Descriptor_Res,setup::Get_Node_Defs_Res,setup::Remove_Node_Res,setup::Add_Node_Res,setup::Get_Nodes_Res,setup::Set_Node_Input_Stream_Path_Res,setup::Error> Brain_Res;
+typedef boost::variant<setup::Get_AST_Req,setup::Set_Clock_Req,setup::Set_UAV_Descriptor_Req,setup::Get_UAV_Descriptor_Req,setup::Get_Node_Defs_Req,setup::Remove_Node_Req,setup::Add_Node_Req,setup::Get_Nodes_Req,setup::Set_Node_Input_Stream_Path_Req,setup::Set_Stream_Telemetry_Enabled_Req,setup::Set_Node_Config_Req> Brain_Req;
+typedef boost::variant<setup::Get_AST_Res,setup::Set_Clock_Res,setup::Set_UAV_Descriptor_Res,setup::Get_UAV_Descriptor_Res,setup::Get_Node_Defs_Res,setup::Remove_Node_Res,setup::Add_Node_Res,setup::Get_Nodes_Res,setup::Set_Node_Input_Stream_Path_Res,setup::Set_Stream_Telemetry_Enabled_Res,setup::Set_Node_Config_Res,setup::Error> Brain_Res;
 }
 ts::Result<void> deserialize(bool& value, ts::sz::Value const& sz_value);
 ts::sz::Value serialize(bool const& value);
@@ -668,10 +742,18 @@ ts::Result<void> deserialize(setup::Set_Node_Input_Stream_Path_Req& value, ts::s
 ts::sz::Value serialize(setup::Set_Node_Input_Stream_Path_Req const& value);
 ts::Result<void> deserialize(setup::Set_Node_Input_Stream_Path_Res& value, ts::sz::Value const& sz_value);
 ts::sz::Value serialize(setup::Set_Node_Input_Stream_Path_Res const& value);
+ts::Result<void> deserialize(setup::Set_Stream_Telemetry_Enabled_Req& value, ts::sz::Value const& sz_value);
+ts::sz::Value serialize(setup::Set_Stream_Telemetry_Enabled_Req const& value);
+ts::Result<void> deserialize(setup::Set_Stream_Telemetry_Enabled_Res& value, ts::sz::Value const& sz_value);
+ts::sz::Value serialize(setup::Set_Stream_Telemetry_Enabled_Res const& value);
 ts::Result<void> deserialize(setup::Add_Node_Req& value, ts::sz::Value const& sz_value);
 ts::sz::Value serialize(setup::Add_Node_Req const& value);
 ts::Result<void> deserialize(setup::Add_Node_Res& value, ts::sz::Value const& sz_value);
 ts::sz::Value serialize(setup::Add_Node_Res const& value);
+ts::Result<void> deserialize(setup::Set_Node_Config_Req& value, ts::sz::Value const& sz_value);
+ts::sz::Value serialize(setup::Set_Node_Config_Req const& value);
+ts::Result<void> deserialize(setup::Set_Node_Config_Res& value, ts::sz::Value const& sz_value);
+ts::sz::Value serialize(setup::Set_Node_Config_Res const& value);
 ts::Result<void> deserialize(setup::Remove_Node_Req& value, ts::sz::Value const& sz_value);
 ts::sz::Value serialize(setup::Remove_Node_Req const& value);
 ts::Result<void> deserialize(setup::Remove_Node_Res& value, ts::sz::Value const& sz_value);

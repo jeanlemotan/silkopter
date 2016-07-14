@@ -24,7 +24,13 @@ Acceleration_Calibration_Wizard::Acceleration_Calibration_Wizard(silk::Comms& co
 {
     //    m_stream = std::static_pointer_cast<silk::stream::gs::Acceleration>(m_output.stream);
 
-    //m_comms.set_stream_telemetry_active(m_stream_name, true);
+    {
+        auto result = m_comms.set_stream_telemetry_enabled(m_stream_name, true);
+        if (result != ts::success)
+        {
+            QMessageBox::critical(this, "Error", ("Cannot activate telemetry:\n" + result.error().what()).c_str());
+        }
+    }
 
     m_crt_points = m_initial_points->get_specialized_type()->create_specialized_value();
     auto result = m_crt_points->construct();
@@ -45,7 +51,8 @@ Acceleration_Calibration_Wizard::Acceleration_Calibration_Wizard(silk::Comms& co
 
 Acceleration_Calibration_Wizard::~Acceleration_Calibration_Wizard()
 {
-    //m_comms.set_stream_telemetry_active(m_stream_name, false);
+    auto result = m_comms.set_stream_telemetry_enabled(m_stream_name, false);
+    QASSERT(result == ts::success);
 }
 
 void Acceleration_Calibration_Wizard::advance()
@@ -66,7 +73,11 @@ void Acceleration_Calibration_Wizard::advance()
     {
         m_connection.disconnect();
         m_collect_data_step++;
-        m_step = m_collect_data_step < 6 ? Step::SHOW_INSTRUCTIONS : Step::DONE;
+        m_step = m_collect_data_step < 6 ? Step::SHOW_INSTRUCTIONS : Step::SET_VALUE;
+    }
+    else if (m_step == Step::SET_VALUE)
+    {
+        m_step = Step::DONE;
     }
 
     prepare_step();
@@ -177,7 +188,7 @@ void Acceleration_Calibration_Wizard::prepare_step()
 
         m_connection = m_comms.sig_telemetry_samples_available.connect([this, info, progress](silk::Comms::ITelemetry_Stream const& _stream)
         {
-            if (_stream.name == m_stream_name)
+            if (_stream.stream_path == m_stream_name)
             {
                 auto const* stream = dynamic_cast<silk::Comms::Telemetry_Stream<silk::stream::IAcceleration> const*>(&_stream);
                 if (stream)
@@ -197,7 +208,7 @@ void Acceleration_Calibration_Wizard::prepare_step()
             }
         });
     }
-    else if (m_step == Step::DONE)
+    else if (m_step == Step::SET_VALUE)
     {
         math::vec3<double> bias, scale;
         compute_calibration_data(m_averages, bias, scale);
@@ -229,7 +240,8 @@ void Acceleration_Calibration_Wizard::prepare_step()
             QMessageBox::critical(this, "Error", "Invalid calibration point type: missing float 'temperature' member value");
             return;
         }
-        temperature_value->set_value(0);
+        auto set_result = temperature_value->set_value(0);
+        QASSERT(set_result == ts::success);
 
         std::shared_ptr<ts::IVec3f_Value> bias_value = point->select_specialized<ts::IVec3f_Value>("bias");
         if (!bias_value)
@@ -237,7 +249,8 @@ void Acceleration_Calibration_Wizard::prepare_step()
             QMessageBox::critical(this, "Error", "Invalid calibration point type: missing vec3f 'bias' member value");
             return;
         }
-        bias_value->set_value(ts::vec3f(bias.x, bias.y, bias.z));
+        set_result = bias_value->set_value(ts::vec3f(bias.x, bias.y, bias.z));
+        QASSERT(set_result == ts::success);
 
         std::shared_ptr<ts::IVec3f_Value> scale_value = point->select_specialized<ts::IVec3f_Value>("scale");
         if (!scale_value)
@@ -245,11 +258,13 @@ void Acceleration_Calibration_Wizard::prepare_step()
             QMessageBox::critical(this, "Error", "Invalid calibration point type: missing vec3f 'scale' member value");
             return;
         }
-        scale_value->set_value(ts::vec3f(scale.x, scale.y, scale.z));
+        set_result = scale_value->set_value(ts::vec3f(scale.x, scale.y, scale.z));
+        QASSERT(set_result == ts::success);
 
         QObject::connect(ui.temperature, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), [this, temperature_value](double value)
         {
-            temperature_value->set_value(static_cast<float>(value));
+            auto set_result = temperature_value->set_value(static_cast<float>(value));
+            QASSERT(set_result == ts::success);
         });
 
         QObject::connect(ui.buttonBox, &QDialogButtonBox::accepted, [this]()
@@ -261,7 +276,11 @@ void Acceleration_Calibration_Wizard::prepare_step()
         });
         QObject::connect(ui.buttonBox, &QDialogButtonBox::rejected, [this]() { cancel(); });
     }
-}
+    else if (m_step == Step::DONE)
+    {
+        //m_comms.
+        this->accept();
+    }}
 
 //void Acceleration_Calibration_Wizard::set_calibration_points(sz::calibration::Acceleration_Points const& data)
 //{

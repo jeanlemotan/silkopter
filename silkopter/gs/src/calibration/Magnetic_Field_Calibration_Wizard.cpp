@@ -1,9 +1,5 @@
-/*
- * #include "calibration/Magnetic_Field_Calibration_Wizard.h"
+#include "calibration/Magnetic_Field_Calibration_Wizard.h"
 #include <QPushButton>
-
-#include "sz_math.hpp"
-#include "sz_Calibration_Data.hpp"
 
 #include "ui_Magnetic_Field_Calibration_Wizard_Reset.h"
 #include "ui_Magnetic_Field_Calibration_Wizard_Instructions.h"
@@ -12,19 +8,34 @@
 
 constexpr std::chrono::seconds DATA_COLLECTION_DURATION(60);
 
-Magnetic_Field_Calibration_Wizard::Magnetic_Field_Calibration_Wizard(silk::HAL& hal, silk::Comms& comms, silk::node::gs::Node_ptr node, size_t output_idx, QWidget* parent)
+Magnetic_Field_Calibration_Wizard::Magnetic_Field_Calibration_Wizard(silk::Comms& comms,
+                                                                 std::string const& node_name,
+                                                                 std::string const& stream_name,
+                                                                 size_t stream_rate,
+                                                                 std::shared_ptr<ts::IVector_Value> points, QWidget* parent)
     : QDialog(parent)
-    , m_hal(hal)
     , m_comms(comms)
-    , m_node(node)
-    , m_output(node->outputs[output_idx])
+    , m_node_name(node_name)
+    , m_stream_name(stream_name)
+    , m_stream_rate(stream_rate)
+    , m_initial_points(points)
 {
-    m_stream = std::static_pointer_cast<silk::stream::gs::Magnetic_Field>(m_output.stream);
+//    m_stream = std::static_pointer_cast<silk::stream::gs::Magnetic_Field>(m_output.stream);
 
-    m_hal.set_stream_telemetry_active(m_output.stream->name, true);
+    {
+        auto result = m_comms.set_stream_telemetry_enabled(m_stream_name, true);
+        if (result != ts::success)
+        {
+            QMessageBox::critical(this, "Error", ("Cannot activate telemetry:\n" + result.error().what()).c_str());
+        }
+    }
 
-    m_initial_calibration = get_calibration_points();
-    set_calibration_points(sz::calibration::Magnetic_Field_Points());
+//    m_initial_calibration = get_calibration_points();
+//    set_calibration_points(sz::calibration::Magnetic_Field_Points());
+
+    m_crt_points = m_initial_points->get_specialized_type()->create_specialized_value();
+    auto result = m_crt_points->construct();
+    QASSERT(result == ts::success);
 
     m_step = Step::RESET;
 
@@ -34,6 +45,12 @@ Magnetic_Field_Calibration_Wizard::Magnetic_Field_Calibration_Wizard(silk::HAL& 
     layout()->setContentsMargins(4, 4, 4, 4);
 
     prepare_step();
+}
+
+Magnetic_Field_Calibration_Wizard::~Magnetic_Field_Calibration_Wizard()
+{
+    auto result = m_comms.set_stream_telemetry_enabled(m_stream_name, false);
+    QASSERT(result == ts::success);
 }
 
 void Magnetic_Field_Calibration_Wizard::advance()
@@ -49,6 +66,10 @@ void Magnetic_Field_Calibration_Wizard::advance()
     else if (m_step == Step::COLLECT)
     {
         m_connection.disconnect();
+        m_step = Step::SET_VALUE;
+    }
+    else if (m_step == Step::SET_VALUE)
+    {
         m_step = Step::DONE;
     }
 
@@ -59,7 +80,7 @@ void Magnetic_Field_Calibration_Wizard::cancel()
 {
     m_connection.disconnect();
 
-    set_calibration_points(m_initial_calibration);
+    //set_calibration_points(m_initial_calibration);
 
     close();
 }
@@ -76,15 +97,20 @@ void Magnetic_Field_Calibration_Wizard::prepare_step()
 
         Ui::Magnetic_Field_Calibration_Wizard_Reset ui;
         ui.setupUi(m_content);
-        if (m_initial_calibration.points.size() > 0)
+        if (m_initial_points->get_value_count() > 0)
         {
             ui.info->setText(q::util::format<std::string>("There are currently {} calibration points.\n"
-                                                           "Do you want to clear these points or keep them?", m_initial_calibration.points.size()).c_str());
+                                                           "Do you want to clear these points or keep them?", m_initial_points->get_value_count()).c_str());
             auto* clear = ui.buttonBox->addButton("Clear", QDialogButtonBox::ResetRole);
             QObject::connect(clear, &QPushButton::released, [this]() { advance(); });
 
             auto* keep = ui.buttonBox->addButton("Keep", QDialogButtonBox::AcceptRole);
-            QObject::connect(keep, &QPushButton::released, [this]() { m_crt_calibration = m_initial_calibration; advance(); });
+            QObject::connect(keep, &QPushButton::released, [this]()
+            {
+                auto result = m_crt_points->copy_assign(*m_initial_points);
+                QASSERT(result == ts::success);
+                advance();
+            });
         }
         else
         {
@@ -127,26 +153,33 @@ void Magnetic_Field_Calibration_Wizard::prepare_step()
 
         QObject::connect(ui.buttonBox, &QDialogButtonBox::rejected, [this]() { cancel(); });
 
-        m_connection = m_stream->samples_available_signal.connect([this, info, progress, bias, scale](silk::stream::gs::Magnetic_Field::Samples const& samples)
+        m_connection = m_comms.sig_telemetry_samples_available.connect([this, info, progress, bias, scale](silk::Comms::ITelemetry_Stream const& _stream)
         {
-            on_samples_received(samples);
-            info->setText(q::util::format<std::string>("Collected {} samples...", m_samples.size()).c_str());
-            size_t needed_samples = std::chrono::seconds(DATA_COLLECTION_DURATION).count() * m_output.rate;
-            progress->setValue(float(m_samples.size() * 100.f) / float(needed_samples));
-            bias->setText(q::util::format<std::string>("{}", m_box.get_center()).c_str());
-
-            auto extent = math::max(m_box.get_extent(), math::vec3f(1.f));
-            float avg = (extent.x + extent.y + extent.z) / 3.f;
-
-            scale->setText(q::util::format<std::string>("{}", avg / extent).c_str());
-
-            if (m_samples.size() >= needed_samples)
+            if (_stream.stream_path == m_stream_name)
             {
-                advance();
+                auto const* stream = dynamic_cast<silk::Comms::Telemetry_Stream<silk::stream::IMagnetic_Field> const*>(&_stream);
+                if (stream)
+                {
+                    on_samples_received(stream->samples);
+                    info->setText(q::util::format<std::string>("Collected {} samples...", m_samples.size()).c_str());
+                    size_t needed_samples = std::chrono::seconds(DATA_COLLECTION_DURATION).count() * m_stream_rate;
+                    progress->setValue(float(m_samples.size() * 100.f) / float(needed_samples));
+                    bias->setText(q::util::format<std::string>("{}", m_box.get_center()).c_str());
+
+                    auto extent = math::max(m_box.get_extent(), math::vec3f(1.f));
+                    float avg = (extent.x + extent.y + extent.z) / 3.f;
+
+                    scale->setText(q::util::format<std::string>("{}", avg / extent).c_str());
+
+                    if (m_samples.size() >= needed_samples)
+                    {
+                        advance();
+                    }
+                }
             }
         });
     }
-    else if (m_step == Step::DONE)
+    else if (m_step == Step::SET_VALUE)
     {
         math::vec3f bias = m_box.get_center();
 
@@ -165,73 +198,109 @@ void Magnetic_Field_Calibration_Wizard::prepare_step()
         ui.bias->setText(q::util::format<std::string>("{}", bias).c_str());
         ui.scale->setText(q::util::format<std::string>("{}", scale).c_str());
 
-        sz::calibration::Magnetic_Field point;
-        point.temperature = 0;
-        point.bias = bias;
-        point.scale = scale;
-        m_crt_calibration.points.push_back(point);
-
-        QObject::connect(ui.temperature, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), [this](double value)
+        ts::Result<std::shared_ptr<ts::IValue>> result = m_crt_points->insert_default_value(m_crt_points->get_value_count());
+        if (result != ts::success)
         {
-            m_crt_calibration.points.back().temperature = static_cast<float>(value);
+            QMessageBox::critical(this, "Error", ("Cannot insert calibration value: " + result.error().what()).c_str());
+            return;
+        }
+
+        std::shared_ptr<ts::IValue> point = result.extract_payload();
+
+        std::shared_ptr<ts::IFloat_Value> temperature_value = point->select_specialized<ts::IFloat_Value>("temperature");
+        if (!temperature_value)
+        {
+            QMessageBox::critical(this, "Error", "Invalid calibration point type: missing float 'temperature' member value");
+            return;
+        }
+        auto set_result = temperature_value->set_value(0);
+        QASSERT(set_result == ts::success);
+
+        std::shared_ptr<ts::IVec3f_Value> bias_value = point->select_specialized<ts::IVec3f_Value>("bias");
+        if (!bias_value)
+        {
+            QMessageBox::critical(this, "Error", "Invalid calibration point type: missing vec3f 'bias' member value");
+            return;
+        }
+        set_result = bias_value->set_value(ts::vec3f(bias.x, bias.y, bias.z));
+        QASSERT(set_result == ts::success);
+
+        std::shared_ptr<ts::IVec3f_Value> scale_value = point->select_specialized<ts::IVec3f_Value>("scale");
+        if (!scale_value)
+        {
+            QMessageBox::critical(this, "Error", "Invalid calibration point type: missing vec3f 'scale' member value");
+            return;
+        }
+        set_result = scale_value->set_value(ts::vec3f(scale.x, scale.y, scale.z));
+        QASSERT(set_result == ts::success);
+
+        QObject::connect(ui.temperature, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), [this, temperature_value](double value)
+        {
+            auto set_result = temperature_value->set_value(static_cast<float>(value));
+            QASSERT(set_result == ts::success);
         });
 
         QObject::connect(ui.buttonBox, &QDialogButtonBox::accepted, [this]()
         {
-            set_calibration_points(m_crt_calibration);
-            this->accept();
+            auto result = m_initial_points->copy_assign(*m_crt_points);
+            QASSERT(result == ts::success);
+            //set_calibration_points(m_crt_calibration);
+            advance();
         });
         QObject::connect(ui.buttonBox, &QDialogButtonBox::rejected, [this]() { cancel(); });
     }
+    else if (m_step == Step::DONE)
+    {
+        this->accept();
+    }
 }
 
-void Magnetic_Field_Calibration_Wizard::set_calibration_points(sz::calibration::Magnetic_Field_Points const& data)
-{
-    rapidjson::Document calibrationj;
-    calibrationj.SetObject();
-    autojsoncxx::to_document(data, calibrationj);
+//void Magnetic_Field_Calibration_Wizard::set_calibration_points(sz::calibration::Magnetic_Field_Points const& data)
+//{
+//    rapidjson::Document calibrationj;
+//    calibrationj.SetObject();
+//    autojsoncxx::to_document(data, calibrationj);
 
-    q::Path path("Calibration");
-    path += m_output.name;
+//    q::Path path("Calibration");
+//    path += m_output.name;
 
-    rapidjson::Document configj = jsonutil::clone_value(m_node->config);
-    if (!jsonutil::remove_value(configj, path))
-    {
-        QASSERT(0);
-        return;
-    }
+//    rapidjson::Document configj = jsonutil::clone_value(m_node->config);
+//    if (!jsonutil::remove_value(configj, path))
+//    {
+//        QASSERT(0);
+//        return;
+//    }
 
-    if (!jsonutil::add_value(configj, path, std::move(calibrationj), configj.GetAllocator()))
-    {
-        QASSERT(0);
-        return;
-    }
+//    if (!jsonutil::add_value(configj, path, std::move(calibrationj), configj.GetAllocator()))
+//    {
+//        QASSERT(0);
+//        return;
+//    }
 
-    m_hal.set_node_config(m_node, configj);
-}
+//    m_hal.set_node_config(m_node, configj);
+//}
 
-auto Magnetic_Field_Calibration_Wizard::get_calibration_points() const -> sz::calibration::Magnetic_Field_Points
-{
-    q::Path path("Calibration");
-    path += m_output.name;
-    auto const* calibrationj = jsonutil::find_value(m_node->config, path);
-    if (!calibrationj)
-    {
-        QASSERT(0);
-        return sz::calibration::Magnetic_Field_Points();
-    }
-    sz::calibration::Magnetic_Field_Points calibration;
-    autojsoncxx::error::ErrorStack result;
-    if (!autojsoncxx::from_value(calibration, *calibrationj, result))
-    {
-        QASSERT(0);
-        return sz::calibration::Magnetic_Field_Points();
-    }
-    return calibration;
-}
+//auto Magnetic_Field_Calibration_Wizard::get_calibration_points() const -> sz::calibration::Magnetic_Field_Points
+//{
+//    q::Path path("Calibration");
+//    path += m_output.name;
+//    auto const* calibrationj = jsonutil::find_value(m_node->config, path);
+//    if (!calibrationj)
+//    {
+//        QASSERT(0);
+//        return sz::calibration::Magnetic_Field_Points();
+//    }
+//    sz::calibration::Magnetic_Field_Points calibration;
+//    autojsoncxx::error::ErrorStack result;
+//    if (!autojsoncxx::from_value(calibration, *calibrationj, result))
+//    {
+//        QASSERT(0);
+//        return sz::calibration::Magnetic_Field_Points();
+//    }
+//    return calibration;
+//}
 
-
-void Magnetic_Field_Calibration_Wizard::on_samples_received(silk::stream::gs::Magnetic_Field::Samples const& samples)
+void Magnetic_Field_Calibration_Wizard::on_samples_received(std::vector<silk::stream::IMagnetic_Field::Sample> const& samples)
 {
     m_samples.reserve(m_samples.size() + samples.size());
     for (auto const& s: samples)
@@ -247,5 +316,3 @@ void Magnetic_Field_Calibration_Wizard::on_samples_received(silk::stream::gs::Ma
         m_samples.push_back(s.value);
     }
 }
-
-*/

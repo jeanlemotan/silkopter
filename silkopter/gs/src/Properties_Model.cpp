@@ -117,7 +117,7 @@ void Properties_Model::Tree_Item::build_children(std::shared_ptr<ts::IValue> val
         for (size_t i = 0; i < vector_value->get_value_count(); i++)
 		{
             std::shared_ptr<Tree_Item> item = std::make_shared<Tree_Item>(m_model, std::to_string(i), std::string());
-            item->build(value);
+            item->build(vector_value->get_value(i));
             add_child(std::move(item));
 		}
 	}

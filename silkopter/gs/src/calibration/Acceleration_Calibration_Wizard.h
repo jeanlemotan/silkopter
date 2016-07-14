@@ -50,6 +50,7 @@ private:
         RESET,
         SHOW_INSTRUCTIONS,
         COLLECT,
+        SET_VALUE,
         DONE,
     };
 

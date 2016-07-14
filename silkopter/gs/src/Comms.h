@@ -57,6 +57,8 @@ class Remove_Node_Res;
 class Get_Nodes_Res;
 class Add_Node_Res;
 class Set_Node_Input_Stream_Path_Res;
+class Set_Stream_Telemetry_Enabled_Res;
+class Set_Node_Config_Res;
 }
 }
 }
@@ -129,6 +131,10 @@ public:
 
     ts::Result<Comms::Node> set_node_input_stream_path(std::string const& node_name, std::string const& input_name, std::string const& stream_path, std::chrono::high_resolution_clock::duration timeout = std::chrono::milliseconds(1000));
 
+    ts::Result<void> set_stream_telemetry_enabled(std::string const& stream_path, bool enabled, std::chrono::high_resolution_clock::duration timeout = std::chrono::milliseconds(1000));
+
+    ts::Result<Node> set_node_config(std::string const& name, std::shared_ptr<ts::IStruct_Value> config, std::chrono::high_resolution_clock::duration timeout = std::chrono::milliseconds(1000));
+
     //----------------------------------------------------------------------
 
     boost::signals2::signal<void()> sig_reset;
@@ -149,16 +155,18 @@ public:
     boost::signals2::signal<void(Node const&)> sig_node_changed;
 
 
+    typedef util::Channel<uint32_t> Telemetry_Channel;
+
     struct ITelemetry_Stream
     {
         virtual ~ITelemetry_Stream() = default;
 
-        std::string name;
-        stream::Semantic type;
-        uint32_t rate = 0;
+        std::string stream_path;
+        stream::Type stream_type;
 
-    private:
-        virtual void unpack() = 0;
+    protected:
+        friend class Comms;
+        virtual bool unpack(Telemetry_Channel& channel, size_t sample_count) = 0;
     };
 
     template<class Stream_T>
@@ -171,10 +179,12 @@ public:
 
         Samples samples;
     private:
-        void unpack() override;
+        bool unpack(Telemetry_Channel& channel, size_t sample_count) override;
     };
 
     boost::signals2::signal<void(ITelemetry_Stream const&)> sig_telemetry_samples_available;
+
+    boost::signals2::signal<void()> sig_stream_telemetry_done;
 
     //boost::signals2::signal<void(IStream_Data const&)> sig_stream_data_received;
 
@@ -215,6 +225,10 @@ private:
     std::vector<uint8_t> m_setup_buffer;
     std::string m_base64_buffer;
 
+    Telemetry_Channel m_telemetry_channel;
+    void handle_telemetry_stream();
+    std::map<std::string, size_t> m_stream_telemetry_ref_count;
+
     bool handle_uav_descriptor(std::string const& serialized_data);
     ts::Result<Node> handle_node_data(gs_comms::setup::Node_Data const& node_data);
 
@@ -228,6 +242,8 @@ private:
     void handle_res(gs_comms::setup::Get_Nodes_Res const& res);
     void handle_res(gs_comms::setup::Add_Node_Res const& res);
     void handle_res(gs_comms::setup::Set_Node_Input_Stream_Path_Res const& res);
+    void handle_res(gs_comms::setup::Set_Stream_Telemetry_Enabled_Res const& res);
+    void handle_res(gs_comms::setup::Set_Node_Config_Res const& res);
 };
 
 }

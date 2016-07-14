@@ -44,11 +44,13 @@
 using namespace silk;
 
 constexpr uint8_t SETUP_CHANNEL = 10;
+constexpr uint8_t TELEMETRY_CHANNEL = 11;
 
 constexpr q::Clock::duration RCP_PERIOD = std::chrono::milliseconds(30);
 
 GS_Comms::GS_Comms(HAL& hal)
     : m_hal(hal)
+    , m_telemetry_channel(TELEMETRY_CHANNEL)
 {
 }
 
@@ -65,6 +67,7 @@ auto GS_Comms::start_udp(uint16_t send_port, uint16_t receive_port) -> bool
         {
             m_rcp->set_internal_socket_handle(handle);
             m_rcp->set_socket_handle(SETUP_CHANNEL, handle);
+            m_rcp->set_socket_handle(TELEMETRY_CHANNEL, handle);
 
             s->open(send_port, receive_port);
             s->start_listening();
@@ -106,6 +109,7 @@ auto GS_Comms::start_rfmon(std::string const& interface, uint8_t id) -> bool
         {
             m_rcp->set_internal_socket_handle(handle);
             m_rcp->set_socket_handle(SETUP_CHANNEL, handle);
+            m_rcp->set_socket_handle(TELEMETRY_CHANNEL, handle);
 
             m_is_connected = s->start();
         }
@@ -143,7 +147,19 @@ void GS_Comms::configure_channels()
         params.max_receive_time = std::chrono::seconds(999999);
         m_rcp->set_receive_params(SETUP_CHANNEL, params);
     }
-}
+
+    {
+        util::RCP::Send_Params params;
+        params.is_compressed = true;
+        params.is_reliable = true;
+        params.importance = 90;
+        m_rcp->set_send_params(TELEMETRY_CHANNEL, params);
+    }
+    {
+        util::RCP::Receive_Params params;
+        params.max_receive_time = std::chrono::seconds(10);
+        m_rcp->set_receive_params(TELEMETRY_CHANNEL, params);
+    }}
 
 auto GS_Comms::is_connected() const -> bool
 {
@@ -169,7 +185,7 @@ template<class Stream> auto GS_Comms::gather_telemetry_stream(Stream_Telemetry_D
         }
         else
         {
-            QLOGW("Too many samples accumulated in the telemetry buffer for stream {}: {}", ts.stream_name, ts.sample_count);
+            QLOGW("Too many samples accumulated in the telemetry buffer for stream {}: {}", ts.stream_path, ts.sample_count);
         }
         return true;
     }
@@ -216,67 +232,68 @@ void GS_Comms::gather_telemetry_data()
             }
             else
             {
-                QLOGE("Unrecognized stream type: {} / {}:{}", ts.stream_name, static_cast<int>(stream->get_type().get_semantic()), static_cast<int>(stream->get_type().get_space()));
+                QLOGE("Unrecognized stream type: {} / {}:{}", ts.stream_path, static_cast<int>(stream->get_type().get_semantic()), static_cast<int>(stream->get_type().get_space()));
             }
         }
     }
 
 
     //pack UAV telemetry
-    if (m_telemetry_data.is_enabled)
+    if (m_internal_telemetry_data.is_enabled)
     {
         HAL::Telemetry_Data const& telemetry_data = m_hal.get_telemetry_data();
 
-        m_telemetry_data.sample_count++;
-        size_t off = m_telemetry_data.data.size();
+        m_internal_telemetry_data.sample_count++;
+        size_t off = m_internal_telemetry_data.data.size();
 
         auto dt = static_cast<uint32_t>(std::chrono::duration_cast<std::chrono::microseconds>(telemetry_data.total_duration).count());
-        util::serialization::serialize(m_telemetry_data.data, dt, off);
-        util::serialization::serialize(m_telemetry_data.data, telemetry_data.rate, off);
-        util::serialization::serialize(m_telemetry_data.data, static_cast<uint32_t>(telemetry_data.nodes.size()), off);
+        util::serialization::serialize(m_internal_telemetry_data.data, dt, off);
+        util::serialization::serialize(m_internal_telemetry_data.data, telemetry_data.rate, off);
+        util::serialization::serialize(m_internal_telemetry_data.data, static_cast<uint32_t>(telemetry_data.nodes.size()), off);
 
         for (auto const& nt: telemetry_data.nodes)
         {
             auto const& node_name = nt.first;
             auto const& node_telemetry_data = nt.second;
 
-            util::serialization::serialize(m_telemetry_data.data, node_name, off);
+            util::serialization::serialize(m_internal_telemetry_data.data, node_name, off);
             auto dt = static_cast<uint32_t>(std::chrono::duration_cast<std::chrono::microseconds>(node_telemetry_data.process_duration).count());
-            util::serialization::serialize(m_telemetry_data.data, dt, off);
-            util::serialization::serialize(m_telemetry_data.data, node_telemetry_data.process_percentage, off);
+            util::serialization::serialize(m_internal_telemetry_data.data, dt, off);
+            util::serialization::serialize(m_internal_telemetry_data.data, node_telemetry_data.process_percentage, off);
         }
     }
 }
 
 void GS_Comms::pack_telemetry_data()
 {
-//    for (auto& ts: m_stream_telemetry_data)
-//    {
-//        if (!ts.data.empty() && ts.sample_count > 0)
-//        {
-//            m_channels->telemetry.begin_pack(rc_comms::Telemetry_Message::STREAM_DATA);
-//            m_channels->telemetry.pack_param(ts.stream_name);
-//            m_channels->telemetry.pack_param(ts.sample_count);
-//            m_channels->telemetry.pack_data(ts.data.data(), ts.data.size());
-//            m_channels->telemetry.end_pack();
-//        }
-//        ts.data.clear();
-//        ts.sample_count = 0;
-//    }
+    for (auto& ts: m_stream_telemetry_data)
+    {
+        if (!ts.data.empty() && ts.sample_count > 0)
+        {
+            m_telemetry_channel.begin_pack();
+            m_telemetry_channel.pack_param(ts.stream_path);
+            m_telemetry_channel.pack_param(ts.stream_type);
+            m_telemetry_channel.pack_param(ts.sample_count);
+            m_telemetry_channel.pack_data(ts.data.data(), ts.data.size());
+            m_telemetry_channel.end_pack();
+        }
+        ts.data.clear();
+        ts.sample_count = 0;
+    }
 
-//    if (m_telemetry_data.is_enabled)
-//    {
-//        auto& t = m_telemetry_data;
-//        if (!t.data.empty() && t.sample_count > 0)
-//        {
-//            m_channels->telemetry.begin_pack(comms::Telemetry_Message::STREAM_DATA);
-//            m_channels->telemetry.pack_param(t.sample_count);
-//            m_channels->telemetry.pack_data(t.data.data(), t.data.size());
-//            m_channels->telemetry.end_pack();
-//        }
-//        t.data.clear();
-//        t.sample_count = 0;
-//    }
+    if (m_internal_telemetry_data.is_enabled)
+    {
+        auto& t = m_internal_telemetry_data;
+        if (!t.data.empty() && t.sample_count > 0)
+        {
+            m_telemetry_channel.begin_pack();
+            m_telemetry_channel.pack_param(t.sample_count);
+            m_telemetry_channel.pack_data(t.data.data(), t.data.size());
+            m_telemetry_channel.end_pack();
+        }
+        t.data.clear();
+        t.sample_count = 0;
+    }
 }
 
 //template<class T>
@@ -691,10 +708,10 @@ void GS_Comms::pack_telemetry_data()
 //{
 //    auto& channel = m_channels->setup;
 
-//    std::string stream_name;
+//    std::string stream_path;
 //    bool is_active = false;
 //    if (!channel.begin_unpack() ||
-//        !channel.unpack_param(stream_name) ||
+//        !channel.unpack_param(stream_path) ||
 //        !channel.unpack_param(is_active))
 //    {
 //        QLOGE("Error in unpacking stream telemetry");
@@ -702,12 +719,12 @@ void GS_Comms::pack_telemetry_data()
 //    }
 //    channel.end_unpack();
 
-//    QLOGI("Stream '{}' telemetry: {}", stream_name, is_active ? "ON" : "OFF");
+//    QLOGI("Stream '{}' telemetry: {}", stream_path, is_active ? "ON" : "OFF");
 
 //    //remove the stream from the telemetry list (it's added again below if needed)
-//    m_stream_telemetry_data.erase(std::remove_if(m_stream_telemetry_data.begin(), m_stream_telemetry_data.end(), [&stream_name](Stream_Telemetry_Data const& ts)
+//    m_stream_telemetry_data.erase(std::remove_if(m_stream_telemetry_data.begin(), m_stream_telemetry_data.end(), [&stream_path](Stream_Telemetry_Data const& ts)
 //    {
-//        return ts.stream_name == stream_name;
+//        return ts.stream_path == stream_path;
 //    }), m_stream_telemetry_data.end());
 
 
@@ -715,12 +732,12 @@ void GS_Comms::pack_telemetry_data()
 
 //    if (is_active)
 //    {
-//        auto stream = m_uav.get_stream_registry().find_by_name<stream::IStream>(stream_name);
+//        auto stream = m_uav.get_stream_registry().find_by_name<stream::IStream>(stream_path);
 //        if (stream)
 //        {
 //            //add the stream to the telemetry list
 //            Stream_Telemetry_Data ts;
-//            ts.stream_name = stream_name;
+//            ts.stream_path = stream_path;
 //            ts.stream = stream;
 //            m_stream_telemetry_data.push_back(ts);
 
@@ -729,7 +746,7 @@ void GS_Comms::pack_telemetry_data()
 //        else
 //        {
 //            channel.pack_param(false);
-//            QLOGE("Cannot find stream '{}' for telemetry", stream_name);
+//            QLOGE("Cannot find stream '{}' for telemetry", stream_path);
 //        }
 //    }
 //    else
@@ -994,7 +1011,7 @@ void GS_Comms::handle_req(gs_comms::setup::Get_Node_Defs_Req const& req)
 
     //first disable all telemetry because the GS doesn't yet have all the streams
     m_stream_telemetry_data.clear();
-    m_telemetry_data.is_enabled = false;
+    m_internal_telemetry_data.is_enabled = false;
 
     std::vector<HAL::Node_Factory::Info> nodes = m_hal.get_node_factory().create_all();
 
@@ -1220,9 +1237,109 @@ void GS_Comms::handle_req(gs_comms::setup::Set_Node_Input_Stream_Path_Req const&
 
     response = make_error_response(req.get_req_id(), "Cannot find node '{}', input '{}'", node_name, input_name);
     serialize_and_send(SETUP_CHANNEL, response);
-    return;
 }
 
+void GS_Comms::handle_req(gs_comms::setup::Set_Stream_Telemetry_Enabled_Req const& req)
+{
+    TIMED_FUNCTION();
+    QLOGI("Set_Stream_Telemetry_Enabled_Req {}", req.get_req_id());
+
+    gs_comms::setup::Brain_Res response;
+    gs_comms::setup::Set_Stream_Telemetry_Enabled_Res res;
+    res.set_req_id(req.get_req_id());
+
+    std::string const& stream_path = req.get_stream_path();
+    bool wants_enabled = req.get_enabled();
+
+    std::shared_ptr<stream::IStream> stream = m_hal.get_stream_registry().find_by_name<stream::IStream>(stream_path);
+    if (!stream)
+    {
+        response = make_error_response(req.get_req_id(), "Cannot find stream '{}'", stream_path);
+        serialize_and_send(SETUP_CHANNEL, response);
+        return;
+    }
+
+    auto it = std::find_if(m_stream_telemetry_data.begin(), m_stream_telemetry_data.end(), [&stream_path](Stream_Telemetry_Data const& st) { return st.stream_path == stream_path; });
+    bool is_enabled = (it != m_stream_telemetry_data.end());
+    if (wants_enabled != is_enabled)
+    {
+        if (wants_enabled)
+        {
+            Stream_Telemetry_Data std;
+            std.stream_path = stream_path;
+            std.stream_type = stream->get_type();
+            std.stream = stream;
+            m_stream_telemetry_data.push_back(std);
+        }
+        else
+        {
+            m_stream_telemetry_data.erase(it);
+        }
+    }
+
+    //all good!!!
+    response = std::move(res);
+    serialize_and_send(SETUP_CHANNEL, response);
+}
+
+void GS_Comms::handle_req(gs_comms::setup::Set_Node_Config_Req const& req)
+{
+    TIMED_FUNCTION();
+    QLOGI("Set_Node_Config_Req {}", req.get_req_id());
+
+    gs_comms::setup::Brain_Res response;
+    gs_comms::setup::Set_Node_Config_Res res;
+    res.set_req_id(req.get_req_id());
+
+    std::string const& node_name = req.get_name();
+
+    std::string const& json = decode_json(req.get_config_data());
+    auto json_result = ts::sz::from_json(json);
+    if (json_result != ts::success)
+    {
+        response = make_error_response(req.get_req_id(), "Cannot deserialize node '{}'' config data: {}", node_name, json_result.error().what());
+        serialize_and_send(SETUP_CHANNEL, response);
+        return;
+    }
+    hal::Poly<const hal::INode_Config> config;
+    auto deserialize_result = hal::deserialize(config, json_result.payload());
+    if (deserialize_result != ts::success)
+    {
+        response = make_error_response(req.get_req_id(), "Cannot deserialize node '{}'' config json: {}", node_name, deserialize_result.error().what());
+        serialize_and_send(SETUP_CHANNEL, response);
+        return;
+    }
+
+    std::shared_ptr<node::INode> node = m_hal.get_node_registry().find_by_name<node::INode>(node_name);
+    if (!node)
+    {
+        response = make_error_response(req.get_req_id(), "Cannot find node '{}'", node_name);
+        serialize_and_send(SETUP_CHANNEL, response);
+        return;
+    }
+
+    auto set_config_result = node->set_config(*config);
+    if (set_config_result != ts::success)
+    {
+        response = make_error_response(req.get_req_id(), "Cannot set config for node '{}': {}", node_name, set_config_result.error().what());
+        serialize_and_send(SETUP_CHANNEL, response);
+        return;
+    }
+    m_hal.save_settings();
+
+    boost::variant<gs_comms::setup::Node_Data, gs_comms::setup::Error> result = get_node_data(node_name, *node);
+    if (auto* error = boost::get<gs_comms::setup::Error>(&result))
+    {
+        response = std::move(*error);
+        serialize_and_send(SETUP_CHANNEL, response);
+        return;
+    }
+
+    //all good!!!
+    res.set_node_data(std::move(boost::get<gs_comms::setup::Node_Data>(result)));
+    response = std::move(res);
+    serialize_and_send(SETUP_CHANNEL, response);
+}
 
 struct GS_Comms::Dispatch_Req_Visitor : boost::static_visitor<void>
 {
@@ -1275,6 +1392,7 @@ void GS_Comms::process()
         m_last_rcp_tp = now;
 
         pack_telemetry_data();
+        m_telemetry_channel.send(*m_rcp);
     }
 }
 

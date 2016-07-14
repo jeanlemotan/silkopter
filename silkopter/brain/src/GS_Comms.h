@@ -8,6 +8,8 @@
 #include "common/stream/IMultirotor_Commands.h"
 #include "common/stream/IMultirotor_State.h"
 #include "common/stream/IVideo.h"
+#include "utils/RCP.h"
+#include "utils/Channel.h"
 
 namespace util
 {
@@ -32,6 +34,8 @@ class Remove_Node_Req;
 class Get_Nodes_Req;
 class Add_Node_Req;
 class Set_Node_Input_Stream_Path_Req;
+class Set_Stream_Telemetry_Enabled_Req;
+class Set_Node_Config_Req;
 }
 }
 }
@@ -57,7 +61,8 @@ private:
 
     struct Stream_Telemetry_Data
     {
-        std::string stream_name;
+        std::string stream_path;
+        stream::Type stream_type;
         std::weak_ptr<stream::IStream> stream;
         uint32_t sample_count = 0;
         std::vector<uint8_t> data;
@@ -69,7 +74,7 @@ private:
         bool is_enabled = false;
         uint32_t sample_count = 0;
         std::vector<uint8_t> data;
-    } m_telemetry_data;
+    } m_internal_telemetry_data;
 
 
     template<class Stream> auto gather_telemetry_stream(Stream_Telemetry_Data& ts, stream::IStream const& _stream) -> bool;
@@ -101,6 +106,8 @@ private:
     void handle_req(gs_comms::setup::Get_Nodes_Req const& req);
     void handle_req(gs_comms::setup::Add_Node_Req const& req);
     void handle_req(gs_comms::setup::Set_Node_Input_Stream_Path_Req const& req);
+    void handle_req(gs_comms::setup::Set_Stream_Telemetry_Enabled_Req const& req);
+    void handle_req(gs_comms::setup::Set_Node_Config_Req const& req);
 
     HAL& m_hal;
     q::Clock::time_point m_uav_sent_tp = q::Clock::now();
@@ -111,6 +118,9 @@ private:
 
     std::shared_ptr<util::RCP_Socket> m_socket;
     std::shared_ptr<util::RCP> m_rcp;
+
+    typedef util::Channel<uint32_t> Telemetry_Channel;
+    Telemetry_Channel m_telemetry_channel;
 
     bool m_is_connected = false;
 

@@ -21,9 +21,11 @@ using namespace silk;
 //using namespace boost::asio;
 
 constexpr uint8_t SETUP_CHANNEL = 10;
+constexpr uint8_t TELEMETRY_CHANNEL = 11;
 
 Comms::Comms(ts::Type_System& ts)
     : m_ts(ts)
+    , m_telemetry_channel(TELEMETRY_CHANNEL)
 {
     m_streams[stream::IAcceleration::TYPE] =            std::unique_ptr<Comms::ITelemetry_Stream>(new Comms::Telemetry_Stream<stream::IAcceleration>());
     m_streams[stream::IENU_Acceleration::TYPE] =        std::unique_ptr<Comms::ITelemetry_Stream>(new Comms::Telemetry_Stream<stream::IENU_Acceleration>());
@@ -92,6 +94,7 @@ auto Comms::start_udp(boost::asio::ip::address const& address, uint16_t send_por
 
         m_rcp->set_internal_socket_handle(handle);
         m_rcp->set_socket_handle(SETUP_CHANNEL, handle);
+        m_rcp->set_socket_handle(TELEMETRY_CHANNEL, handle);
 
         s->open(send_port, receive_port);
         s->set_send_endpoint(address, send_port);
@@ -138,6 +141,19 @@ void Comms::configure_channels()
         util::RCP::Receive_Params params;
         params.max_receive_time = std::chrono::seconds(999999);
         m_rcp->set_receive_params(SETUP_CHANNEL, params);
+    }
+
+    {
+        util::RCP::Send_Params params;
+        params.is_compressed = true;
+        params.is_reliable = true;
+        params.importance = 90;
+        m_rcp->set_send_params(TELEMETRY_CHANNEL, params);
+    }
+    {
+        util::RCP::Receive_Params params;
+        params.max_receive_time = std::chrono::seconds(5);
+        m_rcp->set_receive_params(TELEMETRY_CHANNEL, params);
     }
 }
 
@@ -694,50 +710,58 @@ void Comms::request_all_data()
 //}
 
 template<typename Stream>
-void Comms::Telemetry_Stream<Stream>::unpack()
+bool Comms::Telemetry_Stream<Stream>::unpack(Telemetry_Channel& channel, size_t sample_count)
 {
     samples.clear();
-//    Sample sample;
-//    for (uint32_t i = 0; i < sample_count; i++)
-//    {
-//        if (!channel.unpack_param(sample))
-//        {
-//            QLOGE("Error unpacking samples!!!");
-//        }
-//        samples.push_back(sample);
-//    }
+    Sample sample;
+    for (uint32_t i = 0; i < sample_count; i++)
+    {
+        if (!channel.unpack_param(sample))
+        {
+            samples.clear();
+            QLOGE("Error unpacking samples!!!");
+            return false;
+        }
+        samples.push_back(sample);
+    }
+
+    return true;
 }
 
-//void Comms::handle_stream_data()
-//{
-//    std::string stream_name;
-//    stream::Type stream_type;
-//    uint32_t sample_count = 0;
-//    bool ok = m_telemetry_channel.begin_unpack() &&
-//              m_telemetry_channel.unpack_param(stream_name) &&
-//              m_telemetry_channel.unpack_param(stream_type) &&
-//              m_telemetry_channel.unpack_param(sample_count);
-//    if (!ok)
-//    {
-//        QLOGE("Failed to unpack stream telemetry");
-//        return;
-//    }
+void Comms::handle_telemetry_stream()
+{
+    std::string stream_path;
+    stream::Type stream_type;
+    uint32_t sample_count = 0;
+    bool ok = m_telemetry_channel.begin_unpack() &&
+              m_telemetry_channel.unpack_param(stream_path) &&
+              m_telemetry_channel.unpack_param(stream_type) &&
+              m_telemetry_channel.unpack_param(sample_count);
+    if (!ok)
+    {
+        QLOGE("Failed to unpack stream telemetry");
+        return;
+    }
 
-//    IStream_Data* stream_data = nullptr;
-//    auto it = m_streams.find(stream_type);
-//    if (it != m_streams.end())
-//    {
-//        stream_data = it->second.get();
-//    }
-//    else
-//    {
-//        QLOGE("Failed to find a stream data holder for semantic {}, space {} for stream {}", stream_type.get_semantic(), stream_type.get_space(), stream_name);
-//        return;
-//    }
+    ITelemetry_Stream* telemetry_stream = nullptr;
+    auto it = m_streams.find(stream_type);
+    if (it != m_streams.end())
+    {
+        telemetry_stream = it->second.get();
+    }
+    else
+    {
+        QLOGE("Failed to find a stream data holder for semantic {}, space {} for stream {}", stream_type.get_semantic(), stream_type.get_space(), stream_path);
+        return;
+    }
 
-//    stream_data->unpack(m_telemetry_channel, sample_count);
-//    sig_stream_data_received(*stream_data);
-//}
+    if (telemetry_stream->unpack(m_telemetry_channel, sample_count))
+    {
+        telemetry_stream->stream_type = stream_type;
+        telemetry_stream->stream_path = stream_path;
+        sig_telemetry_samples_available(*telemetry_stream);
+    }
+}
 
 //void Comms::handle_multirotor_state()
 //{
@@ -1153,6 +1177,30 @@ void Comms::handle_res(gs_comms::setup::Set_Node_Input_Stream_Path_Res const& re
     sig_node_changed(result.extract_payload());
 }
 
+void Comms::handle_res(gs_comms::setup::Set_Stream_Telemetry_Enabled_Res const& res)
+{
+    QLOGI("Set_Node_Input_Stream_Path_Res {}", res.get_req_id());
+
+    sig_stream_telemetry_done();
+}
+
+void Comms::handle_res(gs_comms::setup::Set_Node_Config_Res const& res)
+{
+    QLOGI("Set_Node_Config_Res {}", res.get_req_id());
+
+    auto result = handle_node_data(res.get_node_data());
+    if (result != ts::success)
+    {
+        QLOGE("Cannot handle node '{}' data: {}", res.get_node_data().get_name(), result.error().what());
+        return;
+    }
+
+    sig_node_changed(result.extract_payload());
+}
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 ts::Result<std::shared_ptr<ts::IStruct_Value>> Comms::request_uav_descriptor(std::chrono::high_resolution_clock::duration timeout)
 {
     ts::Result<std::shared_ptr<ts::IStruct_Value>> result = ts::Error("Timeout");
@@ -1459,6 +1507,135 @@ ts::Result<Comms::Node> Comms::set_node_input_stream_path(std::string const& nod
     return result;
 }
 
+ts::Result<void> Comms::set_stream_telemetry_enabled(std::string const& stream_path, bool enabled, std::chrono::high_resolution_clock::duration timeout)
+{
+    //check if it's already enabled
+    auto it = m_stream_telemetry_ref_count.find(stream_path);
+    if (it != m_stream_telemetry_ref_count.end())
+    {
+        if (enabled)
+        {
+            it->second++;
+            return ts::success;
+        }
+        else if (it->second > 1)
+        {
+            it->second--;
+            return ts::success;
+        }
+    }
+
+    ts::Result<void> result = ts::Error("Timeout");
+    bool done = false;
+
+    gs_comms::setup::Brain_Req request;
+    gs_comms::setup::Set_Stream_Telemetry_Enabled_Req req;
+    req.set_req_id(++m_last_req_id);
+    req.set_stream_path(stream_path);
+    req.set_enabled(enabled);
+
+    request = req;
+    serialize_and_send(SETUP_CHANNEL, request);
+
+    boost::signals2::scoped_connection c = sig_stream_telemetry_done.connect([this, &result, &done]()
+    {
+        result = ts::success;
+        done = true;
+    });
+    boost::signals2::scoped_connection ec = sig_error_received.connect([this, &result, &req, &done](uint32_t req_id, std::string const& message)
+    {
+        if (req_id == req.get_req_id())
+        {
+            result = ts::Error(message);
+            done = true;
+        }
+    });
+
+    auto start = std::chrono::high_resolution_clock::now();
+    while (!done && (std::chrono::high_resolution_clock::now() - start) < timeout)
+    {
+        process_rcp();
+        process();
+    }
+
+    if (result == ts::success)
+    {
+        if (enabled)
+        {
+            m_stream_telemetry_ref_count[stream_path] = 1;
+        }
+        else
+        {
+            m_stream_telemetry_ref_count.erase(stream_path);
+        }
+    }
+
+    return result;
+}
+
+ts::Result<Comms::Node> Comms::set_node_config(std::string const& name,
+                                         std::shared_ptr<ts::IStruct_Value> config,
+                                         std::chrono::high_resolution_clock::duration timeout)
+{
+    std::shared_ptr<ts::IPoly_Value> container_value = m_ts.create_specialized_value<ts::IPoly_Value>("Poly_INode_Config");
+    if (!container_value)
+    {
+        return ts::Error("Cannot find container type.");
+    }
+    auto construct_result = container_value->construct();
+    if (construct_result != ts::success)
+    {
+        return ts::Error("Cannot construct container value: " + construct_result.error().what());
+    }
+
+    auto set_result = container_value->set_value(config);
+    if (set_result != ts::success)
+    {
+        return ts::Error("Cannot set config in container value: " + set_result.error().what());
+    }
+
+    auto serialize_result = container_value->serialize();
+    if (serialize_result != ts::success)
+    {
+        return ts::Error("Cannot serialize container value: " + serialize_result.error().what());
+    }
+
+    ts::Result<Node> result = ts::Error("Timeout");
+    bool done = false;
+
+    gs_comms::setup::Brain_Req request;
+    gs_comms::setup::Set_Node_Config_Req req;
+    req.set_req_id(++m_last_req_id);
+    req.set_name(name);
+
+    req.set_config_data(encode_json(ts::sz::to_json(serialize_result.payload(), false)));
+    request = req;
+    serialize_and_send(SETUP_CHANNEL, request);
+
+    boost::signals2::scoped_connection c = sig_node_changed.connect([this, &result, &done](Node const& node)
+    {
+        result = node;
+        done = true;
+    });
+    boost::signals2::scoped_connection ec = sig_error_received.connect([this, &result, &req, &done](uint32_t req_id, std::string const& message)
+    {
+        if (req_id == req.get_req_id())
+        {
+            result = ts::Error(message);
+            done = true;
+        }
+    });
+
+    auto start = std::chrono::high_resolution_clock::now();
+    while (!done && (std::chrono::high_resolution_clock::now() - start) < timeout)
+    {
+        process_rcp();
+        process();
+    }
+
+    return result;
+}
+
 
 
 void Comms::process_rcp()
@@ -1519,6 +1696,11 @@ void Comms::process()
             boost::apply_visitor(dispatcher, res);
         }
         m_setup_buffer.clear();
+    }
+
+    while (m_telemetry_channel.get_next_message(*m_rcp))
+    {
+        handle_telemetry_stream();
     }
 
 //    while (auto msg = m_setup_channel.get_next_message(*m_rcp))

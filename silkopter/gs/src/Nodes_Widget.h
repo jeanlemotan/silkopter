@@ -109,9 +109,9 @@ private:
     bool supports_angular_velocity_calibration(Node const& node, Node::Output const& output) const;
     bool supports_magnetic_field_calibration(Node const& node, Node::Output const& output) const;
 
-    void do_acceleration_calibration(Node const& node, size_t output_idx);
-    void do_magnetic_field_calibration(Node const& node, size_t output_idx);
-    void do_angular_velocity_calibration(Node const& node, size_t output_idx);
+    void do_acceleration_calibration(Node& node, size_t output_idx);
+    void do_magnetic_field_calibration(Node& node, size_t output_idx);
+    void do_angular_velocity_calibration(Node& node, size_t output_idx);
 
 
     void show_context_menu(QGraphicsSceneMouseEvent*);

@@ -261,7 +261,7 @@ bool Nodes_Widget::supports_magnetic_field_calibration(Node const& node, Node::O
     return value->get_specialized_type()->get_inner_type() == m_comms->get_type_system().get_root_scope()->find_symbol_by_name("Magnetic_Field_Calibration_Point");
 }
 
-void Nodes_Widget::do_acceleration_calibration(Node const& node, size_t output_idx)
+void Nodes_Widget::do_acceleration_calibration(Node& node, size_t output_idx)
 {
     Node::Output const& output = node.outputs[output_idx];
     std::shared_ptr<ts::IVector_Value> value = node.config->select_specialized<ts::IVector_Value>(ts::Value_Selector("calibration." + output.name));
@@ -272,19 +272,68 @@ void Nodes_Widget::do_acceleration_calibration(Node const& node, size_t output_i
     }
 
     Acceleration_Calibration_Wizard wizard(*m_comms, node.name, node.name + "/" + output.name, output.rate, value, this);
-    wizard.exec();
+    if (wizard.exec() == QDialog::Accepted)
+    {
+        auto result = m_comms->set_node_config(node.name, node.config);
+        if (result != ts::success)
+        {
+            QMessageBox::critical(this, "Error", ("Cannot save calibration data for node '" + node.name + "':\n" + result.error().what()).c_str());
+        }
+        else
+        {
+            node.config = result.payload().config;
+        }
+    }
 }
 
-void Nodes_Widget::do_magnetic_field_calibration(Node const& node, size_t output_idx)
+void Nodes_Widget::do_magnetic_field_calibration(Node& node, size_t output_idx)
 {
-//    Magnetic_Field_Calibration_Wizard wizard(m_hal, m_comms, node, output_idx, this);
-//    wizard.exec();
+    Node::Output const& output = node.outputs[output_idx];
+    std::shared_ptr<ts::IVector_Value> value = node.config->select_specialized<ts::IVector_Value>(ts::Value_Selector("calibration." + output.name));
+    if (!value)
+    {
+        QASSERT(false);
+        return;
+    }
+
+    Magnetic_Field_Calibration_Wizard wizard(*m_comms, node.name, node.name + "/" + output.name, output.rate, value, this);
+    if (wizard.exec() == QDialog::Accepted)
+    {
+        auto result = m_comms->set_node_config(node.name, node.config);
+        if (result != ts::success)
+        {
+            QMessageBox::critical(this, "Error", ("Cannot save calibration data for node '" + node.name + "':\n" + result.error().what()).c_str());
+        }
+        else
+        {
+            node.config = result.payload().config;
+        }
+    }
 }
 
-void Nodes_Widget::do_angular_velocity_calibration(Node const& node, size_t output_idx)
+void Nodes_Widget::do_angular_velocity_calibration(Node& node, size_t output_idx)
 {
-//    Angular_Velocity_Calibration_Wizard wizard(m_hal, m_comms, node, output_idx, this);
-//    wizard.exec();
+    Node::Output const& output = node.outputs[output_idx];
+    std::shared_ptr<ts::IVector_Value> value = node.config->select_specialized<ts::IVector_Value>(ts::Value_Selector("calibration." + output.name));
+    if (!value)
+    {
+        QASSERT(false);
+        return;
+    }
+
+    Angular_Velocity_Calibration_Wizard wizard(*m_comms, node.name, node.name + "/" + output.name, output.rate, value, this);
+    if (wizard.exec() == QDialog::Accepted)
+    {
+        auto result = m_comms->set_node_config(node.name, node.config);
+        if (result != ts::success)
+        {
+            QMessageBox::critical(this, "Error", ("Cannot save calibration data for node '" + node.name + "':\n" + result.error().what()).c_str());
+        }
+        else
+        {
+            node.config = result.payload().config;
+        }
+    }
 }
 
 static std::string prettify_name(std::string const& name)
