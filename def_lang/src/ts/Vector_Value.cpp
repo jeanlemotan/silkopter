@@ -289,10 +289,15 @@ Result<std::shared_ptr<IValue>> Vector_Value::insert_default_value(size_t idx)
         return Error("Unconstructed value");
     }
     std::shared_ptr<IValue> value = get_specialized_type()->get_inner_type()->create_value();
-    auto result = insert_value(idx, value);
-    if (result != success)
+    auto construct_result = value->construct();
+    if (construct_result != success)
     {
-        return result.error();
+        return construct_result.error();
+    }
+    auto insert_result = insert_value(idx, value);
+    if (insert_result != success)
+    {
+        return insert_result.error();
     }
     return value;
 }
