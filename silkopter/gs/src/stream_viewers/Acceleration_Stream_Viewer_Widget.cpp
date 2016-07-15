@@ -28,29 +28,15 @@ void Acceleration_Stream_Viewer_Widget::init(silk::Comms& comms, std::string con
     auto result = m_comms->set_stream_telemetry_enabled(m_stream_path, true);
     QASSERT(result == ts::success);
 
-    QLineSeries* xseries = new QLineSeries();
-    xseries->setUseOpenGL(true);
-    QLineSeries* yseries = new QLineSeries();
-    yseries->setUseOpenGL(true);
-    QLineSeries* zseries = new QLineSeries();
-    zseries->setUseOpenGL(true);
+    m_ui.widget->init("x", m_stream_rate);
 
-    QChart* chart = new QChart();
-    chart->legend()->hide();
-    chart->addSeries(xseries);
-    chart->addSeries(yseries);
-    chart->addSeries(zseries);
-    chart->createDefaultAxes();
-    chart->setTitle("Simple line chart example");
-
-    QChartView* chartView = new QChartView(chart);
-    chartView->setRenderHint(QPainter::Antialiasing);
-
-    layout()->addWidget(chartView);
+    m_ui.widget->add_graph("x", "m/s^2", Qt::red);
+    m_ui.widget->add_graph("y", "m/s^2", Qt::green);
+    m_ui.widget->add_graph("z", "m/s^2", Qt::blue);
 
     //m_start_time_s = std::chrono::duration<float>(std::chrono::high_resolution_clock::now().tim).count();
 
-    m_connection = m_comms->sig_telemetry_samples_available.connect([this, chart, xseries, yseries, zseries](silk::Comms::ITelemetry_Stream const& _stream)
+    m_connection = m_comms->sig_telemetry_samples_available.connect([this](silk::Comms::ITelemetry_Stream const& _stream)
     {
         if (_stream.stream_path == m_stream_path)
         {
@@ -59,13 +45,12 @@ void Acceleration_Stream_Viewer_Widget::init(silk::Comms& comms, std::string con
             {
                 for (auto const& sample: stream->samples)
                 {
-                    xseries->append(m_start_time_s, sample.value.x);
-                    yseries->append(m_start_time_s, sample.value.y);
-                    zseries->append(m_start_time_s, sample.value.z);
+                    float values[3] = { sample.value.x, sample.value.y, sample.value.z };
+                    m_ui.widget->add_samples(values, sample.is_healthy);
                     m_start_time_s += 1.f / m_stream_rate;
                 }
-                chart->axisX()->setRange(std::max(0.f, m_start_time_s - 10.f), m_start_time_s);
-                chart->axisY()->setRange(-0.1, 0.1);
+
+                m_ui.widget->process();
             }
         }
     });

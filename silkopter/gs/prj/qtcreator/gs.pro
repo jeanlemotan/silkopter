@@ -18,6 +18,7 @@ CONFIG += c++11
 INCLUDEPATH += ../../src
 INCLUDEPATH += ../../src/qnodeseditor
 INCLUDEPATH += ../../src/calibration
+INCLUDEPATH += ../../src/stream_viewers
 INCLUDEPATH += ../../../../QMapControl/src
 INCLUDEPATH += ../../../../qbase/include
 INCLUDEPATH += ../../../../qdata/include
@@ -65,7 +66,7 @@ LIBS += -L$${ROOT_LIBS_PATH}/qmath/lib/$${DEST_FOLDER} -lqmath
 LIBS += -L$${ROOT_LIBS_PATH}/qbase/lib/$${DEST_FOLDER} -lqbase
 LIBS += -L$${ROOT_LIBS_PATH}/QMapControl/lib/$${DEST_FOLDER} -lqmapcontrol
 
-LIBS += -lfreetype -lboost_system -lavutil -lavcodec -lavformat -lswscale -lfftw3 -lz
+LIBS += -lfreetype -lboost_system -lavutil -lavcodec -lavformat -lswscale -lfftw3f -lz
 LIBS += -lboost_thread
 LIBS += -lpcap
 
@@ -123,7 +124,8 @@ HEADERS += \
     ../../src/calibration/Magnetic_Field_Calibration_Wizard.h \
     ../../src/Stream_Viewer_Window.h \
     ../../src/stream_viewers/Acceleration_Stream_Viewer_Widget.h \
-    ../../src/stream_viewers/IStream_Viewer_Widget.h
+    ../../src/stream_viewers/IStream_Viewer_Widget.h \
+    ../../src/stream_viewers/Numeric_Viewer_Widget.h
 
 SOURCES += \
     ../../src/GS.cpp \
@@ -165,7 +167,8 @@ SOURCES += \
     ../../src/calibration/Angular_Velocity_Calibration_Wizard.cpp \
     ../../src/calibration/Magnetic_Field_Calibration_Wizard.cpp \
     ../../src/Stream_Viewer_Window.cpp \
-    ../../src/stream_viewers/Acceleration_Stream_Viewer_Widget.cpp
+    ../../src/stream_viewers/Acceleration_Stream_Viewer_Widget.cpp \
+    ../../src/stream_viewers/Numeric_Viewer_Widget.cpp
 
 FORMS += \
     ../../src/GS.ui \
@@ -185,7 +188,8 @@ FORMS += \
     ../../src/calibration/Magnetic_Field_Calibration_Wizard_Instructions.ui \
     ../../src/calibration/Magnetic_Field_Calibration_Wizard_Reset.ui \
     ../../src/Stream_Viewer_Window.ui \
-    ../../src/stream_viewers/Acceleration_Stream_Viewer_Widget.ui
+    ../../src/stream_viewers/Acceleration_Stream_Viewer_Widget.ui \
+    ../../src/stream_viewers/Numeric_Viewer_Widget.ui
 
 DISTFILES += \
 

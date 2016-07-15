@@ -85,6 +85,29 @@
 			},
 			"input_paths":[
 			]
+		},
+		{
+			"name":"Acceleration RS",
+			"type":"Acceleration RS",
+			"descriptor":{
+				"type":"::Resampler_Descriptor",
+				"value":{
+					"input_rate":1000,
+					"output_rate":10000
+				}
+			},
+			"config":{
+				"type":"::Resampler_Config",
+				"value":{
+					"lpf":{
+						"poles":1,
+						"cutoff_frequency":490.000000
+					}
+				}
+			},
+			"input_paths":[
+				"Multirotor Simulator/acceleration"
+			]
 		}
 	]
 }
