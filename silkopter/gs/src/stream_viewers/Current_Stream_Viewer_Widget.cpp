@@ -1,4 +1,4 @@
-#include "Acceleration_Stream_Viewer_Widget.h"
+#include "Current_Stream_Viewer_Widget.h"
 #include "Comms.h"
 
 #include <QtCharts/QChartView>
@@ -7,18 +7,18 @@
 
 using namespace QtCharts;
 
-Acceleration_Stream_Viewer_Widget::Acceleration_Stream_Viewer_Widget(QWidget* parent)
+Current_Stream_Viewer_Widget::Current_Stream_Viewer_Widget(QWidget* parent)
 {
     setParent(parent);
 }
 
-Acceleration_Stream_Viewer_Widget::~Acceleration_Stream_Viewer_Widget()
+Current_Stream_Viewer_Widget::~Current_Stream_Viewer_Widget()
 {
     auto result = m_comms->set_stream_telemetry_enabled(m_stream_path, false);
     QASSERT(result == ts::success);
 }
 
-void Acceleration_Stream_Viewer_Widget::init(silk::Comms& comms, std::string const& stream_path, uint32_t stream_rate, silk::stream::Type stream_type)
+void Current_Stream_Viewer_Widget::init(silk::Comms& comms, std::string const& stream_path, uint32_t stream_rate, silk::stream::Type stream_type)
 {
     m_comms = &comms;
     m_stream_path = stream_path;
@@ -31,9 +31,7 @@ void Acceleration_Stream_Viewer_Widget::init(silk::Comms& comms, std::string con
     Numeric_Viewer_Widget* widget = new Numeric_Viewer_Widget(this);
     widget->init("x", m_stream_rate);
 
-    widget->add_graph("x", "m/s^2", Qt::red);
-    widget->add_graph("y", "m/s^2", Qt::green);
-    widget->add_graph("z", "m/s^2", Qt::blue);
+    widget->add_graph("Current", "A", Qt::red);
 
     setLayout(new QVBoxLayout());
     layout()->setMargin(0);
@@ -43,12 +41,12 @@ void Acceleration_Stream_Viewer_Widget::init(silk::Comms& comms, std::string con
     {
         if (_stream.stream_path == m_stream_path)
         {
-            auto const* stream = dynamic_cast<silk::Comms::Telemetry_Stream<silk::stream::IAcceleration> const*>(&_stream);
+            auto const* stream = dynamic_cast<silk::Comms::Telemetry_Stream<silk::stream::ICurrent> const*>(&_stream);
             if (stream)
             {
                 for (auto const& sample: stream->samples)
                 {
-                    float values[3] = { sample.value.x, sample.value.y, sample.value.z };
+                    float values[1] = { sample.value };
                     widget->add_samples(values, sample.is_healthy);
                 }
 

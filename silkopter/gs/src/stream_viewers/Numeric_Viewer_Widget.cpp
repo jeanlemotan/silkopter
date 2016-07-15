@@ -74,6 +74,7 @@ void Numeric_Viewer_Widget::init(std::string const& unit, uint32_t sample_rate)
             m_view.end_idx = math::clamp(static_cast<size_t>(ratio * end), size_t(2), end);
             update_view();
         }
+        process();
     });
 
     // myWidget is any QWidget-derived class
@@ -124,7 +125,11 @@ void Numeric_Viewer_Widget::show_context_menu(QPoint const& pos)
         action->setCheckable(true);
         action->setChecked(g->is_visible);
         Graph& graph = *g;
-        connect(action, &QAction::toggled, [&graph](bool yes) { graph.is_visible = yes; });
+        connect(action, &QAction::toggled, [this, &graph](bool yes)
+        {
+            graph.is_visible = yes;
+            process();
+        });
     }
 
     menu.addSeparator();
@@ -172,6 +177,8 @@ void Numeric_Viewer_Widget::show_context_menu(QPoint const& pos)
         {
             g->fft_series->attachAxis(m_fft_x_axis);
         }
+
+        process();
     });
 
     menu.exec(pos);

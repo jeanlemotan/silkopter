@@ -8,11 +8,11 @@ namespace silk
 class Comms;
 }
 
-class Acceleration_Stream_Viewer_Widget : public IStream_Viewer_Widget
+class Torque_Stream_Viewer_Widget : public IStream_Viewer_Widget
 {
 public:
-    Acceleration_Stream_Viewer_Widget(QWidget* parent);
-    ~Acceleration_Stream_Viewer_Widget();
+    Torque_Stream_Viewer_Widget(QWidget* parent);
+    ~Torque_Stream_Viewer_Widget();
 
     void init(silk::Comms& comms, std::string const& stream_path, uint32_t stream_rate, silk::stream::Type stream_type) override;
 

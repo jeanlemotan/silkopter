@@ -1,4 +1,4 @@
-#include "Acceleration_Stream_Viewer_Widget.h"
+#include "Linear_Acceleration_Stream_Viewer_Widget.h"
 #include "Comms.h"
 
 #include <QtCharts/QChartView>
@@ -7,18 +7,18 @@
 
 using namespace QtCharts;
 
-Acceleration_Stream_Viewer_Widget::Acceleration_Stream_Viewer_Widget(QWidget* parent)
+Linear_Acceleration_Stream_Viewer_Widget::Linear_Acceleration_Stream_Viewer_Widget(QWidget* parent)
 {
     setParent(parent);
 }
 
-Acceleration_Stream_Viewer_Widget::~Acceleration_Stream_Viewer_Widget()
+Linear_Acceleration_Stream_Viewer_Widget::~Linear_Acceleration_Stream_Viewer_Widget()
 {
     auto result = m_comms->set_stream_telemetry_enabled(m_stream_path, false);
     QASSERT(result == ts::success);
 }
 
-void Acceleration_Stream_Viewer_Widget::init(silk::Comms& comms, std::string const& stream_path, uint32_t stream_rate, silk::stream::Type stream_type)
+void Linear_Acceleration_Stream_Viewer_Widget::init(silk::Comms& comms, std::string const& stream_path, uint32_t stream_rate, silk::stream::Type stream_type)
 {
     m_comms = &comms;
     m_stream_path = stream_path;
@@ -43,7 +43,7 @@ void Acceleration_Stream_Viewer_Widget::init(silk::Comms& comms, std::string con
     {
         if (_stream.stream_path == m_stream_path)
         {
-            auto const* stream = dynamic_cast<silk::Comms::Telemetry_Stream<silk::stream::IAcceleration> const*>(&_stream);
+            auto const* stream = dynamic_cast<silk::Comms::Telemetry_Stream<silk::stream::ILinear_Acceleration> const*>(&_stream);
             if (stream)
             {
                 for (auto const& sample: stream->samples)

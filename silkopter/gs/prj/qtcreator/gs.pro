@@ -125,7 +125,31 @@ HEADERS += \
     ../../src/Stream_Viewer_Window.h \
     ../../src/stream_viewers/Acceleration_Stream_Viewer_Widget.h \
     ../../src/stream_viewers/IStream_Viewer_Widget.h \
-    ../../src/stream_viewers/Numeric_Viewer_Widget.h
+    ../../src/stream_viewers/Numeric_Viewer_Widget.h \
+    ../../src/stream_viewers/ADC_Stream_Viewer_Widget.h \
+    ../../src/stream_viewers/Angular_Velocity_Stream_Viewer_Widget.h \
+    ../../src/stream_viewers/Battery_State_Stream_Viewer_Widget.h \
+    ../../src/stream_viewers/Bool_Stream_Viewer_Widget.h \
+    ../../src/stream_viewers/Current_Stream_Viewer_Widget.h \
+    ../../src/stream_viewers/Distance_Stream_Viewer_Widget.h \
+    ../../src/stream_viewers/Float_Stream_Viewer_Widget.h \
+    ../../src/stream_viewers/Force_Stream_Viewer_Widget.h \
+    ../../src/stream_viewers/Frame_Stream_Viewer_Widget.h \
+    ../../src/stream_viewers/GPS_Info_Stream_Viewer_Widget.h \
+    ../../src/stream_viewers/Linear_Acceleration_Stream_Viewer_Widget.h \
+    ../../src/stream_viewers/Magnetic_Field_Stream_Viewer_Widget.h \
+    ../../src/stream_viewers/Multirotor_Commands_Stream_Viewer_Widget.h \
+    ../../src/stream_viewers/Multirotor_State_Stream_Viewer_Widget.h \
+    ../../src/stream_viewers/Position_Stream_Viewer_Widget.h \
+    ../../src/stream_viewers/Pressure_Stream_Viewer_Widget.h \
+    ../../src/stream_viewers/Proximity_Stream_Viewer_Widget.h \
+    ../../src/stream_viewers/PWM_Stream_Viewer_Widget.h \
+    ../../src/stream_viewers/Temperature_Stream_Viewer_Widget.h \
+    ../../src/stream_viewers/Throttle_Stream_Viewer_Widget.h \
+    ../../src/stream_viewers/Torque_Stream_Viewer_Widget.h \
+    ../../src/stream_viewers/Velocity_Stream_Viewer_Widget.h \
+    ../../src/stream_viewers/Video_Stream_Viewer_Widget.h \
+    ../../src/stream_viewers/Voltage_Stream_Viewer_Widget.h
 
 SOURCES += \
     ../../src/GS.cpp \
@@ -168,7 +192,31 @@ SOURCES += \
     ../../src/calibration/Magnetic_Field_Calibration_Wizard.cpp \
     ../../src/Stream_Viewer_Window.cpp \
     ../../src/stream_viewers/Acceleration_Stream_Viewer_Widget.cpp \
-    ../../src/stream_viewers/Numeric_Viewer_Widget.cpp
+    ../../src/stream_viewers/Numeric_Viewer_Widget.cpp \
+    ../../src/stream_viewers/ADC_Stream_Viewer_Widget.cpp \
+    ../../src/stream_viewers/Angular_Velocity_Stream_Viewer_Widget.cpp \
+    ../../src/stream_viewers/Battery_State_Stream_Viewer_Widget.cpp \
+    ../../src/stream_viewers/Bool_Stream_Viewer_Widget.cpp \
+    ../../src/stream_viewers/Current_Stream_Viewer_Widget.cpp \
+    ../../src/stream_viewers/Distance_Stream_Viewer_Widget.cpp \
+    ../../src/stream_viewers/Float_Stream_Viewer_Widget.cpp \
+    ../../src/stream_viewers/Force_Stream_Viewer_Widget.cpp \
+    ../../src/stream_viewers/Frame_Stream_Viewer_Widget.cpp \
+    ../../src/stream_viewers/GPS_Info_Stream_Viewer_Widget.cpp \
+    ../../src/stream_viewers/Linear_Acceleration_Stream_Viewer_Widget.cpp \
+    ../../src/stream_viewers/Magnetic_Field_Stream_Viewer_Widget.cpp \
+    ../../src/stream_viewers/Multirotor_Commands_Stream_Viewer_Widget.cpp \
+    ../../src/stream_viewers/Multirotor_State_Stream_Viewer_Widget.cpp \
+    ../../src/stream_viewers/Position_Stream_Viewer_Widget.cpp \
+    ../../src/stream_viewers/Pressure_Stream_Viewer_Widget.cpp \
+    ../../src/stream_viewers/Proximity_Stream_Viewer_Widget.cpp \
+    ../../src/stream_viewers/PWM_Stream_Viewer_Widget.cpp \
+    ../../src/stream_viewers/Temperature_Stream_Viewer_Widget.cpp \
+    ../../src/stream_viewers/Throttle_Stream_Viewer_Widget.cpp \
+    ../../src/stream_viewers/Torque_Stream_Viewer_Widget.cpp \
+    ../../src/stream_viewers/Velocity_Stream_Viewer_Widget.cpp \
+    ../../src/stream_viewers/Video_Stream_Viewer_Widget.cpp \
+    ../../src/stream_viewers/Voltage_Stream_Viewer_Widget.cpp
 
 FORMS += \
     ../../src/GS.ui \
@@ -188,7 +236,6 @@ FORMS += \
     ../../src/calibration/Magnetic_Field_Calibration_Wizard_Instructions.ui \
     ../../src/calibration/Magnetic_Field_Calibration_Wizard_Reset.ui \
     ../../src/Stream_Viewer_Window.ui \
-    ../../src/stream_viewers/Acceleration_Stream_Viewer_Widget.ui \
     ../../src/stream_viewers/Numeric_Viewer_Widget.ui
 
 DISTFILES += \
