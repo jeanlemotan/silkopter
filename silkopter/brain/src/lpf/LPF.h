@@ -152,7 +152,7 @@ auto LPF<Stream_t>::get_inputs() const -> std::vector<Input>
 {
     std::vector<Input> inputs =
     {{
-        { Stream_t::TYPE, m_descriptor->get_rate(), "Input", m_accumulator.get_stream_path(0) }
+        { Stream_t::TYPE, m_descriptor->get_rate(), "input", m_accumulator.get_stream_path(0) }
     }};
     return inputs;
 }

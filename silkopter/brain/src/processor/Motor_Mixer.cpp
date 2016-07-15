@@ -78,8 +78,8 @@ auto Motor_Mixer::get_inputs() const -> std::vector<Input>
 {
     std::vector<Input> inputs =
     {{
-        { stream::ITorque::TYPE, m_descriptor->get_rate(), "Torque", m_accumulator.get_stream_path(0) },
-        { stream::IFloat::TYPE, m_descriptor->get_rate(), "Collective Thrust", m_accumulator.get_stream_path(1) }
+        { stream::ITorque::TYPE, m_descriptor->get_rate(), "torque", m_accumulator.get_stream_path(0) },
+        { stream::IFloat::TYPE, m_descriptor->get_rate(), "collective_thrust", m_accumulator.get_stream_path(1) }
     }};
     return inputs;
 }

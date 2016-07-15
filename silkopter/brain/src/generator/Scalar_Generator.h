@@ -144,7 +144,7 @@ auto Scalar_Generator<Stream_t>::get_inputs() const -> std::vector<Input>
 {
     std::vector<Input> inputs =
     {{
-        { stream::IFloat::TYPE, m_descriptor->get_rate(), "Modulation", m_modulation_stream_path }
+        { stream::IFloat::TYPE, m_descriptor->get_rate(), "modulation", m_modulation_stream_path }
     }};
     return inputs;
 }

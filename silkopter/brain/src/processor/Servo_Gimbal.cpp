@@ -53,8 +53,8 @@ auto Servo_Gimbal::get_inputs() const -> std::vector<Input>
 {
     std::vector<Input> inputs =
     {{
-        { stream::IUAV_Frame::TYPE, m_descriptor->get_rate(), "UAV Frame", m_frame_accumulator.get_stream_path(0) },
-        { stream::IMultirotor_Commands::TYPE, m_descriptor->get_commands_rate(), "Commands", m_commands_accumulator.get_stream_path(0) }
+        { stream::IFrame::TYPE, m_descriptor->get_rate(), "frame", m_frame_accumulator.get_stream_path(0) },
+        { stream::IMultirotor_Commands::TYPE, m_descriptor->get_commands_rate(), "commands", m_commands_accumulator.get_stream_path(0) }
     }};
     return inputs;
 }
@@ -82,7 +82,7 @@ void Servo_Gimbal::process()
         m_commands_sample = i_commands;
     });
 
-    m_frame_accumulator.process([this](stream::IUAV_Frame::Sample const& i_sample)
+    m_frame_accumulator.process([this](stream::IFrame::Sample const& i_sample)
     {
         if (i_sample.is_healthy && m_commands_sample.is_healthy)
         {

@@ -47,8 +47,8 @@ auto Rate_Controller::get_inputs() const -> std::vector<Input>
 {
     std::vector<Input> inputs =
     {{
-        { stream::IAngular_Velocity::TYPE, m_descriptor->get_rate(), "Input", m_accumulator.get_stream_path(0) },
-        { stream::IAngular_Velocity::TYPE, m_descriptor->get_rate(), "Target", m_accumulator.get_stream_path(1) }
+        { stream::IAngular_Velocity::TYPE, m_descriptor->get_rate(), "input", m_accumulator.get_stream_path(0) },
+        { stream::IAngular_Velocity::TYPE, m_descriptor->get_rate(), "target", m_accumulator.get_stream_path(1) }
     }};
     return inputs;
 }

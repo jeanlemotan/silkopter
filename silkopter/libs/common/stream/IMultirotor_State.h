@@ -28,7 +28,7 @@ public:
     {
         q::Clock::time_point time_point;
         IBattery_State::Sample battery_state;
-        IUAV_Frame::Sample frame;
+        IFrame::Sample frame;
         IECEF_Linear_Acceleration::Sample linear_acceleration;
         IECEF_Position::Sample home_position;
         IECEF_Position::Sample position;

@@ -8,7 +8,8 @@ namespace silk
 namespace stream
 {
 
-class IGimbal_Frame : public ISpatial_Stream<Semantic::FRAME, Space::GIMBAL>
+template<Space SPACE_VALUE, Space PARENT_SPACE_VALUE>
+class IFrameT : public ISpatial_Stream<Semantic::FRAME, SPACE_VALUE>
 {
 public:
     typedef std::false_type can_be_filtered_t;
@@ -17,33 +18,13 @@ public:
     typedef stream::Sample<Value>     Sample;
     virtual auto get_samples() const -> std::vector<Sample> const& = 0;
 
-    static constexpr Space PARENT_SPACE = Space::UAV;
+    static constexpr Space PARENT_SPACE = PARENT_SPACE_VALUE;
 };
 
 
-class IUAV_Frame : public ISpatial_Stream<Semantic::FRAME, Space::UAV>
-{
-public:
-    typedef std::false_type can_be_filtered_t;
-
-    typedef math::quatf Value; //local to parent. vec local * rotation == vec parent
-    typedef stream::Sample<Value>     Sample;
-    virtual auto get_samples() const -> std::vector<Sample> const& = 0;
-
-    static constexpr Space PARENT_SPACE = Space::ENU;
-};
-
-class IENU_Frame : public ISpatial_Stream<Semantic::FRAME, Space::ENU>
-{
-public:
-    typedef std::false_type can_be_filtered_t;
-
-    typedef math::quatf Value; //local to parent. vec local * rotation == vec parent
-    typedef stream::Sample<Value>     Sample;
-    virtual auto get_samples() const -> std::vector<Sample> const& = 0;
-
-    static constexpr Space PARENT_SPACE = Space::ECEF;
-};
+typedef IFrameT<Space::GIMBAL, Space::LOCAL>    IGimbal_Frame;
+typedef IFrameT<Space::LOCAL, Space::ENU>       IFrame;
+typedef IFrameT<Space::ENU, Space::ECEF>        IENU_Frame;
 
 
 }

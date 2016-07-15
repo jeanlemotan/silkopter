@@ -13,7 +13,7 @@ enum class Space : uint8_t
     LLA,
     ECEF,
     ENU,
-    UAV,
+    LOCAL,
     GIMBAL
 };
 
@@ -27,7 +27,7 @@ inline auto get_as_string(Space s, bool details) -> std::string
     case Space::LLA: return GET_AS_STRING("LLA", "(Latitude Longitude Altitude)");
     case Space::ECEF: return GET_AS_STRING("ECEF", "(Earth Centered Earth Fixed)");
     case Space::ENU: return GET_AS_STRING("ENU", "(East North Up)");
-    case Space::UAV: return GET_AS_STRING("UAV", "(UAV Frame)");
+    case Space::LOCAL: return GET_AS_STRING("LOCAL", "(Local Frame)");
     case Space::GIMBAL: return GET_AS_STRING("Gimbal", "(Gimbal Frame)");
     default: QASSERT(false); return "Unknown";
     }
@@ -101,7 +101,7 @@ struct Type
         : id((static_cast<uint16_t>(semantic) << 8) | static_cast<uint16_t>(space))
     {
     }
-    Type() : Type(Semantic::ACCELERATION, Space::UAV) {}
+    Type() : Type(Semantic::ACCELERATION, Space::LOCAL) {}
 
     Semantic get_semantic() const { return static_cast<Semantic>((id >> 8) & 0xFF); }
     Space get_space() const { return static_cast<Space>((id) & 0xFF); }

@@ -47,8 +47,8 @@ auto Gravity_Filter::get_inputs() const -> std::vector<Input>
 {
     std::vector<Input> inputs =
     {{
-        { stream::IUAV_Frame::TYPE, m_descriptor->get_rate(), "UAV Frame", m_accumulator.get_stream_path(0) },
-        { stream::IAcceleration::TYPE, m_descriptor->get_rate(), "Acceleration", m_accumulator.get_stream_path(1) }
+        { stream::IFrame::TYPE, m_descriptor->get_rate(), "frame", m_accumulator.get_stream_path(0) },
+        { stream::IAcceleration::TYPE, m_descriptor->get_rate(), "acceleration", m_accumulator.get_stream_path(1) }
     }};
     return inputs;
 }
@@ -67,7 +67,7 @@ void Gravity_Filter::process()
 
     m_output_stream->clear();
 
-    m_accumulator.process([this](stream::IUAV_Frame::Sample const& f_sample,
+    m_accumulator.process([this](stream::IFrame::Sample const& f_sample,
                                 stream::IAcceleration::Sample const& a_sample)
     {
         if (f_sample.is_healthy & a_sample.is_healthy)

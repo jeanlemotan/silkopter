@@ -69,14 +69,14 @@ auto Multirotor_Brain::get_inputs() const -> std::vector<Input>
 {
     std::vector<Input> inputs =
     {{
-         { stream::IMultirotor_Commands::TYPE,    m_descriptor->get_commands_rate(), "Commands", m_commands_accumulator.get_stream_path(0) },
-         { stream::IUAV_Frame::TYPE,         m_descriptor->get_rate(), "UAV Frame", m_sensor_accumulator.get_stream_path(0) },
-         { stream::IECEF_Position::TYPE,     m_descriptor->get_rate(), "Position (ecef)", m_sensor_accumulator.get_stream_path(1) },
-         { stream::IECEF_Velocity::TYPE,     m_descriptor->get_rate(), "Velocity (ecef)", m_sensor_accumulator.get_stream_path(2) },
-         { stream::IECEF_Linear_Acceleration::TYPE, m_descriptor->get_rate(), "Linear Acceleration (ecef)", m_sensor_accumulator.get_stream_path(3) },
-         { stream::IProximity::TYPE,         m_descriptor->get_rate(), "Proximity", m_sensor_accumulator.get_stream_path(4) },
-         { stream::IVoltage::TYPE,           m_descriptor->get_rate(), "Voltage", m_sensor_accumulator.get_stream_path(5) },
-         { stream::ICurrent::TYPE,           m_descriptor->get_rate(), "Current", m_sensor_accumulator.get_stream_path(6) },
+         { stream::IMultirotor_Commands::TYPE,    m_descriptor->get_commands_rate(), "commands", m_commands_accumulator.get_stream_path(0) },
+         { stream::IFrame::TYPE,         m_descriptor->get_rate(), "local_frame", m_sensor_accumulator.get_stream_path(0) },
+         { stream::IECEF_Position::TYPE,     m_descriptor->get_rate(), "position", m_sensor_accumulator.get_stream_path(1) },
+         { stream::IECEF_Velocity::TYPE,     m_descriptor->get_rate(), "velocity", m_sensor_accumulator.get_stream_path(2) },
+         { stream::IECEF_Linear_Acceleration::TYPE, m_descriptor->get_rate(), "linear_acceleration", m_sensor_accumulator.get_stream_path(3) },
+         { stream::IProximity::TYPE,         m_descriptor->get_rate(), "proximity", m_sensor_accumulator.get_stream_path(4) },
+         { stream::IVoltage::TYPE,           m_descriptor->get_rate(), "voltage", m_sensor_accumulator.get_stream_path(5) },
+         { stream::ICurrent::TYPE,           m_descriptor->get_rate(), "current", m_sensor_accumulator.get_stream_path(6) },
      }};
     return inputs;
 }
@@ -467,7 +467,7 @@ void Multirotor_Brain::acquire_home_position()
     }
 }
 
-void Multirotor_Brain::refresh_inputs(stream::IUAV_Frame::Sample const& frame,
+void Multirotor_Brain::refresh_inputs(stream::IFrame::Sample const& frame,
                                 stream::IECEF_Position::Sample const& position,
                                 stream::IECEF_Velocity::Sample const& velocity,
                                 stream::IECEF_Linear_Acceleration::Sample const& linear_acceleration,
@@ -543,7 +543,7 @@ void Multirotor_Brain::process()
     stream::IMultirotor_Commands::apply(func, m_inputs.remote_commands.previous_sample.value, m_inputs.remote_commands.sample.value, m_inputs.local_commands.sample.value);
     m_inputs.remote_commands.previous_sample.value = m_inputs.remote_commands.sample.value;
 
-    m_sensor_accumulator.process([this](stream::IUAV_Frame::Sample const& i_frame,
+    m_sensor_accumulator.process([this](stream::IFrame::Sample const& i_frame,
                                       stream::IECEF_Position::Sample const& i_position,
                                       stream::IECEF_Velocity::Sample const& i_velocity,
                                       stream::IECEF_Linear_Acceleration::Sample const& i_linear_acceleration,

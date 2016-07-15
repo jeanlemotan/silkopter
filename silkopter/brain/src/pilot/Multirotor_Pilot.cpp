@@ -48,8 +48,8 @@ auto Multirotor_Pilot::get_inputs() const -> std::vector<Input>
 {
     std::vector<Input> inputs =
     {{
-        { stream::IMultirotor_State::TYPE,  m_descriptor->get_state_rate(), "State", m_state_accumulator.get_stream_path(0) },
-        { stream::IVideo::TYPE,        m_descriptor->get_video_rate(), "Video", m_video_accumulator.get_stream_path(0) },
+        { stream::IMultirotor_State::TYPE,  m_descriptor->get_state_rate(), "state", m_state_accumulator.get_stream_path(0) },
+        { stream::IVideo::TYPE,        m_descriptor->get_video_rate(), "video", m_video_accumulator.get_stream_path(0) },
     }};
     return inputs;
 }

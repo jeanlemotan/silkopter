@@ -113,8 +113,8 @@ auto Combiner<Stream_t>::get_inputs() const -> std::vector<Input>
 {
     std::vector<Input> inputs =
     {{
-        { Stream_t::TYPE, m_descriptor->get_rate(), "Input 1", m_accumulator.get_stream_path(0) },
-        { Stream_t::TYPE, m_descriptor->get_rate(), "Input 2", m_accumulator.get_stream_path(1) }
+        { Stream_t::TYPE, m_descriptor->get_rate(), "input_1", m_accumulator.get_stream_path(0) },
+        { Stream_t::TYPE, m_descriptor->get_rate(), "input_2", m_accumulator.get_stream_path(1) }
     }};
     return inputs;
 }

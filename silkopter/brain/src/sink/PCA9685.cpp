@@ -67,22 +67,22 @@ auto PCA9685::get_inputs() const -> std::vector<Input>
 {
     std::vector<Input> inputs =
     {{
-        { stream::IPWM::TYPE, m_descriptor->get_rate(), "Channel 1", m_pwm_channels[0].stream_path },
-        { stream::IPWM::TYPE, m_descriptor->get_rate(), "Channel 2", m_pwm_channels[1].stream_path },
-        { stream::IPWM::TYPE, m_descriptor->get_rate(), "Channel 3", m_pwm_channels[2].stream_path },
-        { stream::IPWM::TYPE, m_descriptor->get_rate(), "Channel 4", m_pwm_channels[3].stream_path },
-        { stream::IPWM::TYPE, m_descriptor->get_rate(), "Channel 5", m_pwm_channels[4].stream_path },
-        { stream::IPWM::TYPE, m_descriptor->get_rate(), "Channel 6", m_pwm_channels[5].stream_path },
-        { stream::IPWM::TYPE, m_descriptor->get_rate(), "Channel 7", m_pwm_channels[6].stream_path },
-        { stream::IPWM::TYPE, m_descriptor->get_rate(), "Channel 8", m_pwm_channels[7].stream_path },
-        { stream::IPWM::TYPE, m_descriptor->get_rate(), "Channel 9", m_pwm_channels[8].stream_path },
-        { stream::IPWM::TYPE, m_descriptor->get_rate(), "Channel 10",m_pwm_channels[9].stream_path },
-        { stream::IPWM::TYPE, m_descriptor->get_rate(), "Channel 11",m_pwm_channels[10].stream_path },
-        { stream::IPWM::TYPE, m_descriptor->get_rate(), "Channel 12",m_pwm_channels[11].stream_path },
-        { stream::IPWM::TYPE, m_descriptor->get_rate(), "Channel 13",m_pwm_channels[12].stream_path },
-        { stream::IPWM::TYPE, m_descriptor->get_rate(), "Channel 14",m_pwm_channels[13].stream_path },
-        { stream::IPWM::TYPE, m_descriptor->get_rate(), "Channel 15",m_pwm_channels[14].stream_path },
-        { stream::IPWM::TYPE, m_descriptor->get_rate(), "Channel 16",m_pwm_channels[15].stream_path },
+        { stream::IPWM::TYPE, m_descriptor->get_rate(), "channel_1", m_pwm_channels[0].stream_path },
+        { stream::IPWM::TYPE, m_descriptor->get_rate(), "channel_2", m_pwm_channels[1].stream_path },
+        { stream::IPWM::TYPE, m_descriptor->get_rate(), "channel_3", m_pwm_channels[2].stream_path },
+        { stream::IPWM::TYPE, m_descriptor->get_rate(), "channel_4", m_pwm_channels[3].stream_path },
+        { stream::IPWM::TYPE, m_descriptor->get_rate(), "channel_5", m_pwm_channels[4].stream_path },
+        { stream::IPWM::TYPE, m_descriptor->get_rate(), "channel_6", m_pwm_channels[5].stream_path },
+        { stream::IPWM::TYPE, m_descriptor->get_rate(), "channel_7", m_pwm_channels[6].stream_path },
+        { stream::IPWM::TYPE, m_descriptor->get_rate(), "channel_8", m_pwm_channels[7].stream_path },
+        { stream::IPWM::TYPE, m_descriptor->get_rate(), "channel_9", m_pwm_channels[8].stream_path },
+        { stream::IPWM::TYPE, m_descriptor->get_rate(), "channel_10",m_pwm_channels[9].stream_path },
+        { stream::IPWM::TYPE, m_descriptor->get_rate(), "channel_11",m_pwm_channels[10].stream_path },
+        { stream::IPWM::TYPE, m_descriptor->get_rate(), "channel_12",m_pwm_channels[11].stream_path },
+        { stream::IPWM::TYPE, m_descriptor->get_rate(), "channel_13",m_pwm_channels[12].stream_path },
+        { stream::IPWM::TYPE, m_descriptor->get_rate(), "channel_14",m_pwm_channels[13].stream_path },
+        { stream::IPWM::TYPE, m_descriptor->get_rate(), "channel_15",m_pwm_channels[14].stream_path },
+        { stream::IPWM::TYPE, m_descriptor->get_rate(), "channel_16",m_pwm_channels[15].stream_path },
     }};
     return inputs;
 }

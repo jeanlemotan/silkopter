@@ -7,7 +7,8 @@ namespace silk
 namespace stream
 {
 
-class IAngular_Velocity : public ISpatial_Stream<Semantic::ANGULAR_VELOCITY, Space::UAV>
+template<Space SPACE_VALUE>
+class IAngular_VelocityT : public ISpatial_Stream<Semantic::ANGULAR_VELOCITY, SPACE_VALUE>
 {
 public:
     typedef std::true_type can_be_filtered_t;
@@ -17,25 +18,10 @@ public:
     virtual auto get_samples() const -> std::vector<Sample> const& = 0;
 };
 
-class IENU_Angular_Velocity : public ISpatial_Stream<Semantic::ANGULAR_VELOCITY, Space::ENU>
-{
-public:
-    typedef std::true_type can_be_filtered_t;
+typedef IAngular_VelocityT<Space::LOCAL>    IAngular_Velocity;
+typedef IAngular_VelocityT<Space::ENU>      IENU_Angular_Velocity;
+typedef IAngular_VelocityT<Space::ECEF>     IECEF_Angular_Velocity;
 
-    typedef math::vec3f       Value; //radians per second
-    typedef stream::Sample<Value>     Sample;
-    virtual auto get_samples() const -> std::vector<Sample> const& = 0;
-};
-
-class IECEF_Angular_Velocity : public ISpatial_Stream<Semantic::ANGULAR_VELOCITY, Space::ECEF>
-{
-public:
-    typedef std::true_type can_be_filtered_t;
-
-    typedef math::vec3f       Value; //radians per second
-    typedef stream::Sample<Value>     Sample;
-    virtual auto get_samples() const -> std::vector<Sample> const& = 0;
-};
 
 }
 }

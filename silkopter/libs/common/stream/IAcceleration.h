@@ -7,7 +7,8 @@ namespace silk
 namespace stream
 {
 
-class IAcceleration : public ISpatial_Stream<Semantic::ACCELERATION, Space::UAV>
+template<Space SPACE_VALUE>
+class IAccelerationT : public ISpatial_Stream<Semantic::ACCELERATION, SPACE_VALUE>
 {
 public:
     typedef std::true_type can_be_filtered_t;
@@ -17,25 +18,9 @@ public:
     virtual auto get_samples() const -> std::vector<Sample> const& = 0;
 };
 
-class IENU_Acceleration : public ISpatial_Stream<Semantic::ACCELERATION, Space::ENU>
-{
-public:
-    typedef std::true_type can_be_filtered_t;
-
-    typedef math::vec3f             Value; //meters per second^2
-    typedef stream::Sample<Value>     Sample;
-    virtual auto get_samples() const -> std::vector<Sample> const& = 0;
-};
-
-class IECEF_Acceleration : public ISpatial_Stream<Semantic::ACCELERATION, Space::ECEF>
-{
-public:
-    typedef std::true_type can_be_filtered_t;
-
-    typedef math::vec3f             Value; //meters per second^2
-    typedef stream::Sample<Value>     Sample;
-    virtual auto get_samples() const -> std::vector<Sample> const& = 0;
-};
+typedef IAccelerationT<Space::LOCAL>    IAcceleration;
+typedef IAccelerationT<Space::ENU>      IENU_Acceleration;
+typedef IAccelerationT<Space::ECEF>     IECEF_Acceleration;
 
 }
 }

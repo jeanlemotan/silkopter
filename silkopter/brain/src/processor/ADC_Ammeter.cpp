@@ -47,7 +47,7 @@ auto ADC_Ammeter::get_inputs() const -> std::vector<Input>
 {
     std::vector<Input> inputs =
     {{
-        { stream::IADC::TYPE, m_descriptor->get_rate(), "ADC", m_accumulator.get_stream_path(0) }
+        { stream::IADC::TYPE, m_descriptor->get_rate(), "adc", m_accumulator.get_stream_path(0) }
     }};
     return inputs;
 }

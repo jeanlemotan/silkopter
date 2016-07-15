@@ -49,7 +49,7 @@ auto Proximity::get_inputs() const -> std::vector<Input>
     std::vector<Input> inputs(m_accumulators.size());
     for (size_t i = 0; i < inputs.size(); i++)
     {
-        inputs[i] = { stream::IDistance::TYPE, m_descriptor->get_rate(), q::util::format<std::string>("Distance {}", i), m_accumulators[i].get_stream_path(0) };
+        inputs[i] = { stream::IDistance::TYPE, m_descriptor->get_rate(), q::util::format<std::string>("distance_{}", i), m_accumulators[i].get_stream_path(0) };
     }
     return inputs;
 }

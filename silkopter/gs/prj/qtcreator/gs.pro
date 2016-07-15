@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui opengl network widgets
+QT       += core gui opengl network widgets charts
 
 TARGET = gs
 TEMPLATE = app
@@ -120,7 +120,10 @@ HEADERS += \
     ../../src/qnodeseditor/qnodeseditor.h \
     ../../src/calibration/Acceleration_Calibration_Wizard.h \
     ../../src/calibration/Angular_Velocity_Calibration_Wizard.h \
-    ../../src/calibration/Magnetic_Field_Calibration_Wizard.h
+    ../../src/calibration/Magnetic_Field_Calibration_Wizard.h \
+    ../../src/Stream_Viewer_Window.h \
+    ../../src/stream_viewers/Acceleration_Stream_Viewer_Widget.h \
+    ../../src/stream_viewers/IStream_Viewer_Widget.h
 
 SOURCES += \
     ../../src/GS.cpp \
@@ -160,7 +163,9 @@ SOURCES += \
     ../../src/qnodeseditor/qnodeseditor.cpp \
     ../../src/calibration/Acceleration_Calibration_Wizard.cpp \
     ../../src/calibration/Angular_Velocity_Calibration_Wizard.cpp \
-    ../../src/calibration/Magnetic_Field_Calibration_Wizard.cpp
+    ../../src/calibration/Magnetic_Field_Calibration_Wizard.cpp \
+    ../../src/Stream_Viewer_Window.cpp \
+    ../../src/stream_viewers/Acceleration_Stream_Viewer_Widget.cpp
 
 FORMS += \
     ../../src/GS.ui \
@@ -178,7 +183,9 @@ FORMS += \
     ../../src/calibration/Magnetic_Field_Calibration_Wizard_Collect.ui \
     ../../src/calibration/Magnetic_Field_Calibration_Wizard_Done.ui \
     ../../src/calibration/Magnetic_Field_Calibration_Wizard_Instructions.ui \
-    ../../src/calibration/Magnetic_Field_Calibration_Wizard_Reset.ui
+    ../../src/calibration/Magnetic_Field_Calibration_Wizard_Reset.ui \
+    ../../src/Stream_Viewer_Window.ui \
+    ../../src/stream_viewers/Acceleration_Stream_Viewer_Widget.ui
 
 DISTFILES += \
 

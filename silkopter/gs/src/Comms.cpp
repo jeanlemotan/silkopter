@@ -30,39 +30,50 @@ Comms::Comms(ts::Type_System& ts)
     m_streams[stream::IAcceleration::TYPE] =            std::unique_ptr<Comms::ITelemetry_Stream>(new Comms::Telemetry_Stream<stream::IAcceleration>());
     m_streams[stream::IENU_Acceleration::TYPE] =        std::unique_ptr<Comms::ITelemetry_Stream>(new Comms::Telemetry_Stream<stream::IENU_Acceleration>());
     m_streams[stream::IECEF_Acceleration::TYPE] =       std::unique_ptr<Comms::ITelemetry_Stream>(new Comms::Telemetry_Stream<stream::IECEF_Acceleration>());
-    m_streams[stream::IADC::TYPE] =                     std::unique_ptr<Comms::ITelemetry_Stream>(new Comms::Telemetry_Stream<stream::IADC>());
-    m_streams[stream::IAngular_Velocity::TYPE] =        std::unique_ptr<Comms::ITelemetry_Stream>(new Comms::Telemetry_Stream<stream::IAngular_Velocity>());
-    m_streams[stream::IENU_Angular_Velocity::TYPE] =    std::unique_ptr<Comms::ITelemetry_Stream>(new Comms::Telemetry_Stream<stream::IENU_Angular_Velocity>());
-    m_streams[stream::IECEF_Angular_Velocity::TYPE] =   std::unique_ptr<Comms::ITelemetry_Stream>(new Comms::Telemetry_Stream<stream::IECEF_Angular_Velocity>());
-    m_streams[stream::IBattery_State::TYPE] =           std::unique_ptr<Comms::ITelemetry_Stream>(new Comms::Telemetry_Stream<stream::IBattery_State>());
-    m_streams[stream::ICurrent::TYPE] =                 std::unique_ptr<Comms::ITelemetry_Stream>(new Comms::Telemetry_Stream<stream::ICurrent>());
-    m_streams[stream::IDistance::TYPE] =                std::unique_ptr<Comms::ITelemetry_Stream>(new Comms::Telemetry_Stream<stream::IDistance>());
-    m_streams[stream::IENU_Distance::TYPE] =            std::unique_ptr<Comms::ITelemetry_Stream>(new Comms::Telemetry_Stream<stream::IENU_Distance>());
-    m_streams[stream::IECEF_Distance::TYPE] =           std::unique_ptr<Comms::ITelemetry_Stream>(new Comms::Telemetry_Stream<stream::IECEF_Distance>());
-    m_streams[stream::IFloat::TYPE] =                   std::unique_ptr<Comms::ITelemetry_Stream>(new Comms::Telemetry_Stream<stream::IFloat>());
-    m_streams[stream::IBool::TYPE] =                    std::unique_ptr<Comms::ITelemetry_Stream>(new Comms::Telemetry_Stream<stream::IBool>());
-    m_streams[stream::IForce::TYPE] =                   std::unique_ptr<Comms::ITelemetry_Stream>(new Comms::Telemetry_Stream<stream::IForce>());
-    m_streams[stream::IENU_Force::TYPE] =               std::unique_ptr<Comms::ITelemetry_Stream>(new Comms::Telemetry_Stream<stream::IENU_Force>());
-    m_streams[stream::IECEF_Force::TYPE] =              std::unique_ptr<Comms::ITelemetry_Stream>(new Comms::Telemetry_Stream<stream::IECEF_Force>());
-    m_streams[stream::IUAV_Frame::TYPE] =               std::unique_ptr<Comms::ITelemetry_Stream>(new Comms::Telemetry_Stream<stream::IUAV_Frame>());
-    m_streams[stream::IGPS_Info::TYPE] =                std::unique_ptr<Comms::ITelemetry_Stream>(new Comms::Telemetry_Stream<stream::IGPS_Info>());
+
     m_streams[stream::ILinear_Acceleration::TYPE] =     std::unique_ptr<Comms::ITelemetry_Stream>(new Comms::Telemetry_Stream<stream::ILinear_Acceleration>());
     m_streams[stream::IENU_Linear_Acceleration::TYPE] = std::unique_ptr<Comms::ITelemetry_Stream>(new Comms::Telemetry_Stream<stream::IENU_Linear_Acceleration>());
     m_streams[stream::IECEF_Linear_Acceleration::TYPE] =std::unique_ptr<Comms::ITelemetry_Stream>(new Comms::Telemetry_Stream<stream::IECEF_Linear_Acceleration>());
-    m_streams[stream::IECEF_Position::TYPE] =           std::unique_ptr<Comms::ITelemetry_Stream>(new Comms::Telemetry_Stream<stream::IECEF_Position>());
-    m_streams[stream::IMagnetic_Field::TYPE] =          std::unique_ptr<Comms::ITelemetry_Stream>(new Comms::Telemetry_Stream<stream::IECEF_Magnetic_Field>());
+
+    m_streams[stream::IAngular_Velocity::TYPE] =        std::unique_ptr<Comms::ITelemetry_Stream>(new Comms::Telemetry_Stream<stream::IAngular_Velocity>());
+    m_streams[stream::IENU_Angular_Velocity::TYPE] =    std::unique_ptr<Comms::ITelemetry_Stream>(new Comms::Telemetry_Stream<stream::IENU_Angular_Velocity>());
+    m_streams[stream::IECEF_Angular_Velocity::TYPE] =   std::unique_ptr<Comms::ITelemetry_Stream>(new Comms::Telemetry_Stream<stream::IECEF_Angular_Velocity>());
+
+    m_streams[stream::IMagnetic_Field::TYPE] =          std::unique_ptr<Comms::ITelemetry_Stream>(new Comms::Telemetry_Stream<stream::IMagnetic_Field>());
     m_streams[stream::IENU_Magnetic_Field::TYPE] =      std::unique_ptr<Comms::ITelemetry_Stream>(new Comms::Telemetry_Stream<stream::IENU_Magnetic_Field>());
     m_streams[stream::IECEF_Magnetic_Field::TYPE] =     std::unique_ptr<Comms::ITelemetry_Stream>(new Comms::Telemetry_Stream<stream::IECEF_Magnetic_Field>());
+
+    m_streams[stream::IDistance::TYPE] =                std::unique_ptr<Comms::ITelemetry_Stream>(new Comms::Telemetry_Stream<stream::IDistance>());
+    m_streams[stream::IENU_Distance::TYPE] =            std::unique_ptr<Comms::ITelemetry_Stream>(new Comms::Telemetry_Stream<stream::IENU_Distance>());
+    m_streams[stream::IECEF_Distance::TYPE] =           std::unique_ptr<Comms::ITelemetry_Stream>(new Comms::Telemetry_Stream<stream::IECEF_Distance>());
+
+    m_streams[stream::IForce::TYPE] =                   std::unique_ptr<Comms::ITelemetry_Stream>(new Comms::Telemetry_Stream<stream::IForce>());
+    m_streams[stream::IENU_Force::TYPE] =               std::unique_ptr<Comms::ITelemetry_Stream>(new Comms::Telemetry_Stream<stream::IENU_Force>());
+    m_streams[stream::IECEF_Force::TYPE] =              std::unique_ptr<Comms::ITelemetry_Stream>(new Comms::Telemetry_Stream<stream::IECEF_Force>());
+
+    m_streams[stream::ITorque::TYPE] =                  std::unique_ptr<Comms::ITelemetry_Stream>(new Comms::Telemetry_Stream<stream::ITorque>());
+    m_streams[stream::IENU_Torque::TYPE] =              std::unique_ptr<Comms::ITelemetry_Stream>(new Comms::Telemetry_Stream<stream::IENU_Torque>());
+    m_streams[stream::IECEF_Torque::TYPE] =             std::unique_ptr<Comms::ITelemetry_Stream>(new Comms::Telemetry_Stream<stream::IECEF_Torque>());
+
+    m_streams[stream::IVelocity::TYPE] =                std::unique_ptr<Comms::ITelemetry_Stream>(new Comms::Telemetry_Stream<stream::IVelocity>());
+    m_streams[stream::IENU_Velocity::TYPE] =            std::unique_ptr<Comms::ITelemetry_Stream>(new Comms::Telemetry_Stream<stream::IENU_Velocity>());
+    m_streams[stream::IECEF_Velocity::TYPE] =           std::unique_ptr<Comms::ITelemetry_Stream>(new Comms::Telemetry_Stream<stream::IECEF_Velocity>());
+
+    m_streams[stream::IGimbal_Frame::TYPE] =            std::unique_ptr<Comms::ITelemetry_Stream>(new Comms::Telemetry_Stream<stream::IGimbal_Frame>());
+    m_streams[stream::IFrame::TYPE] =                   std::unique_ptr<Comms::ITelemetry_Stream>(new Comms::Telemetry_Stream<stream::IFrame>());
+    m_streams[stream::IENU_Frame::TYPE] =               std::unique_ptr<Comms::ITelemetry_Stream>(new Comms::Telemetry_Stream<stream::IENU_Frame>());
+
+    m_streams[stream::IADC::TYPE] =                     std::unique_ptr<Comms::ITelemetry_Stream>(new Comms::Telemetry_Stream<stream::IADC>());
+    m_streams[stream::IBattery_State::TYPE] =           std::unique_ptr<Comms::ITelemetry_Stream>(new Comms::Telemetry_Stream<stream::IBattery_State>());
+    m_streams[stream::ICurrent::TYPE] =                 std::unique_ptr<Comms::ITelemetry_Stream>(new Comms::Telemetry_Stream<stream::ICurrent>());
+    m_streams[stream::IFloat::TYPE] =                   std::unique_ptr<Comms::ITelemetry_Stream>(new Comms::Telemetry_Stream<stream::IFloat>());
+    m_streams[stream::IBool::TYPE] =                    std::unique_ptr<Comms::ITelemetry_Stream>(new Comms::Telemetry_Stream<stream::IBool>());
+    m_streams[stream::IGPS_Info::TYPE] =                std::unique_ptr<Comms::ITelemetry_Stream>(new Comms::Telemetry_Stream<stream::IGPS_Info>());
+    m_streams[stream::IECEF_Position::TYPE] =           std::unique_ptr<Comms::ITelemetry_Stream>(new Comms::Telemetry_Stream<stream::IECEF_Position>());
     m_streams[stream::IPressure::TYPE] =                std::unique_ptr<Comms::ITelemetry_Stream>(new Comms::Telemetry_Stream<stream::IPressure>());
     m_streams[stream::IPWM::TYPE] =                     std::unique_ptr<Comms::ITelemetry_Stream>(new Comms::Telemetry_Stream<stream::IPWM>());
     m_streams[stream::ITemperature::TYPE] =             std::unique_ptr<Comms::ITelemetry_Stream>(new Comms::Telemetry_Stream<stream::ITemperature>());
     m_streams[stream::IThrottle::TYPE] =                std::unique_ptr<Comms::ITelemetry_Stream>(new Comms::Telemetry_Stream<stream::IThrottle>());
-    m_streams[stream::ITorque::TYPE] =                  std::unique_ptr<Comms::ITelemetry_Stream>(new Comms::Telemetry_Stream<stream::ITorque>());
-    m_streams[stream::IENU_Torque::TYPE] =              std::unique_ptr<Comms::ITelemetry_Stream>(new Comms::Telemetry_Stream<stream::IENU_Torque>());
-    m_streams[stream::IECEF_Torque::TYPE] =             std::unique_ptr<Comms::ITelemetry_Stream>(new Comms::Telemetry_Stream<stream::IECEF_Torque>());
-    m_streams[stream::IVelocity::TYPE] =                std::unique_ptr<Comms::ITelemetry_Stream>(new Comms::Telemetry_Stream<stream::IVelocity>());
-    m_streams[stream::IENU_Velocity::TYPE] =            std::unique_ptr<Comms::ITelemetry_Stream>(new Comms::Telemetry_Stream<stream::IENU_Velocity>());
-    m_streams[stream::IECEF_Velocity::TYPE] =           std::unique_ptr<Comms::ITelemetry_Stream>(new Comms::Telemetry_Stream<stream::IECEF_Velocity>());
     m_streams[stream::IVoltage::TYPE] =                 std::unique_ptr<Comms::ITelemetry_Stream>(new Comms::Telemetry_Stream<stream::IVoltage>());
     m_streams[stream::IVideo::TYPE] =                   std::unique_ptr<Comms::ITelemetry_Stream>(new Comms::Telemetry_Stream<stream::IVideo>());
     m_streams[stream::IMultirotor_Commands::TYPE] =     std::unique_ptr<Comms::ITelemetry_Stream>(new Comms::Telemetry_Stream<stream::IMultirotor_Commands>());

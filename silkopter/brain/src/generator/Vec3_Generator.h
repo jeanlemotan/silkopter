@@ -151,9 +151,9 @@ auto Vec3_Generator<Stream_t>::get_inputs() const -> std::vector<Input>
 {
     std::vector<Input> inputs =
     {{
-        { stream::IFloat::TYPE, m_descriptor->get_rate(), "X Modulation", m_modulation_stream_paths[0] },
-        { stream::IFloat::TYPE, m_descriptor->get_rate(), "Y Modulation", m_modulation_stream_paths[1] },
-        { stream::IFloat::TYPE, m_descriptor->get_rate(), "Z Modulation", m_modulation_stream_paths[2] }
+        { stream::IFloat::TYPE, m_descriptor->get_rate(), "x_modulation", m_modulation_stream_paths[0] },
+        { stream::IFloat::TYPE, m_descriptor->get_rate(), "y_modulation", m_modulation_stream_paths[1] },
+        { stream::IFloat::TYPE, m_descriptor->get_rate(), "z_modulation", m_modulation_stream_paths[2] }
     }};
     return inputs;
 }

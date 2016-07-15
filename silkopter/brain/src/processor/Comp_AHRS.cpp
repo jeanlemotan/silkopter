@@ -47,9 +47,9 @@ auto Comp_AHRS::get_inputs() const -> std::vector<Input>
 {
     std::vector<Input> inputs =
     {{
-        { stream::IAngular_Velocity::TYPE, m_descriptor->get_rate(), "Angular Velocity", m_accumulator.get_stream_path(0) },
-        { stream::IAcceleration::TYPE, m_descriptor->get_rate(), "Acceleration", m_accumulator.get_stream_path(1) },
-        { stream::IMagnetic_Field::TYPE, m_descriptor->get_rate(), "Magnetic Field", m_accumulator.get_stream_path(2) }
+        { stream::IAngular_Velocity::TYPE, m_descriptor->get_rate(), "angular_velocity", m_accumulator.get_stream_path(0) },
+        { stream::IAcceleration::TYPE, m_descriptor->get_rate(), "acceleration", m_accumulator.get_stream_path(1) },
+        { stream::IMagnetic_Field::TYPE, m_descriptor->get_rate(), "magnetic_field", m_accumulator.get_stream_path(2) }
     }};
     return inputs;
 }

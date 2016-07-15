@@ -212,7 +212,7 @@ void GS_Comms::gather_telemetry_data()
                 gather_telemetry_stream<stream::IECEF_Position>(ts, *stream) ||
                 gather_telemetry_stream<stream::IECEF_Velocity>(ts, *stream) ||
                 gather_telemetry_stream<stream::IPWM>(ts, *stream) ||
-                gather_telemetry_stream<stream::IUAV_Frame>(ts, *stream) ||
+                gather_telemetry_stream<stream::IFrame>(ts, *stream) ||
                 gather_telemetry_stream<stream::IGimbal_Frame>(ts, *stream) ||
                 gather_telemetry_stream<stream::IGPS_Info>(ts, *stream) ||
                 gather_telemetry_stream<stream::ITemperature>(ts, *stream) ||

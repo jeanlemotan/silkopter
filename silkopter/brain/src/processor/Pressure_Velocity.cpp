@@ -46,7 +46,7 @@ auto Pressure_Velocity::get_inputs() const -> std::vector<Input>
 {
     std::vector<Input> inputs =
     {{
-        { stream::IPressure::TYPE, m_descriptor->get_rate(), "Pressure", m_accumulator.get_stream_path(0) }
+        { stream::IPressure::TYPE, m_descriptor->get_rate(), "pressure", m_accumulator.get_stream_path(0) }
     }};
     return inputs;
 }

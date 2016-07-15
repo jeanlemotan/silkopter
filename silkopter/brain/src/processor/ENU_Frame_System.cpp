@@ -47,7 +47,7 @@ auto ENU_Frame_System::get_inputs() const -> std::vector<Input>
 {
     std::vector<Input> inputs =
     {{
-        { stream::IECEF_Position::TYPE, m_descriptor->get_rate(), "Position (ecef)", m_accumulator.get_stream_path(0) }
+        { stream::IECEF_Position::TYPE, m_descriptor->get_rate(), "position", m_accumulator.get_stream_path(0) }
     }};
     return inputs;
 }

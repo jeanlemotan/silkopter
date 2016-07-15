@@ -26,6 +26,7 @@
 #include "Acceleration_Calibration_Wizard.h"
 #include "Magnetic_Field_Calibration_Wizard.h"
 
+#include "Stream_Viewer_Window.h"
 
 #include <QVBoxLayout>
 #include <QMessageBox>
@@ -497,6 +498,23 @@ void Nodes_Widget::show_block_context_menu(QGraphicsSceneMouseEvent* event, QNEB
     }
 }
 
+void Nodes_Widget::open_stream_viewer(std::string const& stream_path)
+{
+    auto it = m_streams.find(stream_path);
+    if (it == m_streams.end())
+    {
+        QASSERT(0);
+        return;
+    }
+
+    Stream const& stream = it->second;
+    Node::Output const& output = stream.node->outputs[stream.output_idx];
+
+    Stream_Viewer_Window* viewer = new Stream_Viewer_Window(nullptr);
+    viewer->init(*m_comms, stream_path, output.rate, output.type);
+    viewer->show();
+}
+
 void Nodes_Widget::show_port_context_menu(QGraphicsSceneMouseEvent* event, QNEPort* port)
 {
     QASSERT(port);
@@ -522,8 +540,8 @@ void Nodes_Widget::show_port_context_menu(QGraphicsSceneMouseEvent* event, QNEPo
 
     if (output_port)
     {
-        std::string stream_name = (output_port->block()->id() + "/" + output_port->id()).toLatin1().data();
-        //connect(view_stream_action, &QAction::triggered, [=](bool) { open_stream_viewer(stream_name); });
+        std::string stream_path = (output_port->block()->id() + "/" + output_port->id()).toLatin1().data();
+        connect(view_stream_action, &QAction::triggered, [=](bool) { open_stream_viewer(stream_path); });
     }
     else
     {

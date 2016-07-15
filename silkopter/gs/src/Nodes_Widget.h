@@ -97,6 +97,7 @@ private:
 
 //    Sim_Window* m_sim_window = nullptr;
 
+    void open_stream_viewer(std::string const& stream_path);
     std::string compute_unique_name(std::string const& name) const;
 
     void set_node_position(std::string const& node_name, QPointF const& pos);

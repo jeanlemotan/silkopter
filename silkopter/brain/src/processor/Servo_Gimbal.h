@@ -56,13 +56,13 @@ private:
     std::shared_ptr<hal::Servo_Gimbal_Descriptor> m_descriptor;
     std::shared_ptr<hal::Servo_Gimbal_Config> m_config;
 
-    Sample_Accumulator<stream::IUAV_Frame> m_frame_accumulator;
+    Sample_Accumulator<stream::IFrame> m_frame_accumulator;
     Sample_Accumulator<stream::IMultirotor_Commands> m_commands_accumulator;
 
     stream::IMultirotor_Commands::Sample m_commands_sample;
 
-    std::vector<stream::IUAV_Frame::Sample> m_frame_samples;
-    std::vector<stream::IUAV_Frame::Sample> m_target_frame_samples;
+    std::vector<stream::IFrame::Sample> m_frame_samples;
+    std::vector<stream::IFrame::Sample> m_target_frame_samples;
 
     typedef Basic_Output_Stream<stream::IPWM> Output_Stream;
     mutable std::shared_ptr<Output_Stream> m_x_output_stream;

@@ -53,7 +53,7 @@ private:
     std::shared_ptr<hal::Gravity_Filter_Descriptor> m_descriptor;
     std::shared_ptr<hal::Gravity_Filter_Config> m_config;
 
-    Sample_Accumulator<stream::IUAV_Frame, stream::IAcceleration> m_accumulator;
+    Sample_Accumulator<stream::IFrame, stream::IAcceleration> m_accumulator;
 
     typedef Basic_Output_Stream<stream::ILinear_Acceleration> Output_Stream;
     mutable std::shared_ptr<Output_Stream> m_output_stream;

@@ -135,8 +135,8 @@ auto Transformer<In_Stream_t, Out_Stream_t, Frame_Stream_t>::get_inputs() const 
 {
     std::vector<Input> inputs =
     {{
-        { In_Stream_t::TYPE, m_descriptor->get_rate(), "Input", m_accumulator.get_stream_path(0) },
-        { Frame_Stream_t::TYPE, m_descriptor->get_rate(), "Frame", m_accumulator.get_stream_path(1) }
+        { In_Stream_t::TYPE, m_descriptor->get_rate(), "input", m_accumulator.get_stream_path(0) },
+        { Frame_Stream_t::TYPE, m_descriptor->get_rate(), "frame", m_accumulator.get_stream_path(1) }
     }};
     return inputs;
 }

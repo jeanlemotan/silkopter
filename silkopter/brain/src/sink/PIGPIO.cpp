@@ -53,7 +53,7 @@ auto PIGPIO::get_inputs() const -> std::vector<Input>
     std::vector<Input> inputs;
     for (std::unique_ptr<Channel> const& channel: m_channels)
     {
-        inputs.push_back({stream::IPWM::TYPE, channel->rate, q::util::format<std::string>("GPIO {}", channel->gpio), channel->stream_path});
+        inputs.push_back({stream::IPWM::TYPE, channel->rate, q::util::format<std::string>("gpio_{}", channel->gpio), channel->stream_path});
     }
     return inputs;
 }
