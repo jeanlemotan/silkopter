@@ -163,7 +163,7 @@ void Comms::configure_channels()
     }
     {
         util::RCP::Receive_Params params;
-        params.max_receive_time = std::chrono::seconds(5);
+        params.max_receive_time = std::chrono::seconds(10);
         m_rcp->set_receive_params(TELEMETRY_CHANNEL, params);
     }
 }
@@ -1190,7 +1190,7 @@ void Comms::handle_res(gs_comms::setup::Set_Node_Input_Stream_Path_Res const& re
 
 void Comms::handle_res(gs_comms::setup::Set_Stream_Telemetry_Enabled_Res const& res)
 {
-    QLOGI("Set_Node_Input_Stream_Path_Res {}", res.get_req_id());
+    QLOGI("Set_Stream_Telemetry_Enabled_Res {}", res.get_req_id());
 
     sig_stream_telemetry_done();
 }

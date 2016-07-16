@@ -31,30 +31,40 @@ void Video_Stream_Viewer_Widget::init(silk::Comms& comms, std::string const& str
     auto result = m_comms->set_stream_telemetry_enabled(m_stream_path, true);
     QASSERT(result == ts::success);
 
-    Numeric_Viewer_Widget* widget = new Numeric_Viewer_Widget(this);
-    widget->init("x", m_stream_rate);
-
-    widget->add_graph("Frame Size", "bytes", Qt::red);
-
-    setLayout(new QVBoxLayout());
-    layout()->setMargin(0);
-    layout()->addWidget(widget);
-
-    m_connection = m_comms->sig_telemetry_samples_available.connect([this, widget](silk::Comms::ITelemetry_Stream const& _stream)
+    m_connection = m_comms->sig_telemetry_samples_available.connect([this](silk::Comms::ITelemetry_Stream const& _stream)
     {
         if (_stream.stream_path == m_stream_path)
         {
             auto const* stream = dynamic_cast<silk::Comms::Telemetry_Stream<silk::stream::IVideo> const*>(&_stream);
             if (stream)
             {
-                for (auto const& sample: stream->samples)
+                for (silk::stream::IVideo::Sample const& sample: stream->samples)
                 {
-                    float values[3] = { static_cast<float>(sample.value.data.size()) };
-                    widget->add_samples(values, sample.is_healthy);
-                }
+                    float ar = (float)sample.value.resolution.x / sample.value.resolution.y;
+                    int img_w = math::max(16, width());
+                    int img_h = img_w / ar;
+                    if (img_h > height())
+                    {
+                        img_h = height();
+                        img_w = img_h * ar;
+                    }
 
-                widget->process();
+                    if (m_decoder.decode_frame(sample.value, math::vec2u32(img_w, img_h), m_data, Video_Decoder::Format::BGRA))
+                    {
+                        m_image = QImage(m_data.data(), img_w, img_h, QImage::Format_ARGB32_Premultiplied);
+                        m_image_flipped = m_image;//.mirrored(false, false);
+                        update();
+                    }
+                }
             }
         }
     });
+}
+
+void Video_Stream_Viewer_Widget::paintEvent(QPaintEvent* ev)
+{
+    m_painter.begin(this);
+    m_painter.setCompositionMode(QPainter::CompositionMode_Source);
+    m_painter.drawImage(QRectF(0, 0, m_image.width(), m_image.height()), m_image_flipped);
+    m_painter.end();
 }

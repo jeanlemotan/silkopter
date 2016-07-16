@@ -54,7 +54,7 @@ private:
 
     static constexpr size_t MAX_CHANNEL_COUNT = 32;
 
-    struct GPIO_Callback_Data
+    struct Callback_Data
     {
         uint32_t gpio = 0;
         bool is_inverted = false;
@@ -95,7 +95,7 @@ private:
         uint32_t max_sync_pulse_us = 0;
 
         uint32_t last_tick = 0;
-    } m_gpio_callback_data;
+    } m_callback_data;
 
     static void gpio_callback_func(int gpio, int level, uint32_t tick, void* userdata);
 

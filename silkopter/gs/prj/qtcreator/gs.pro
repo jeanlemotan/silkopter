@@ -149,7 +149,8 @@ HEADERS += \
     ../../src/stream_viewers/Torque_Stream_Viewer_Widget.h \
     ../../src/stream_viewers/Velocity_Stream_Viewer_Widget.h \
     ../../src/stream_viewers/Video_Stream_Viewer_Widget.h \
-    ../../src/stream_viewers/Voltage_Stream_Viewer_Widget.h
+    ../../src/stream_viewers/Voltage_Stream_Viewer_Widget.h \
+    ../../src/stream_viewers/video/Video_Decoder.h
 
 SOURCES += \
     ../../src/GS.cpp \
@@ -216,7 +217,8 @@ SOURCES += \
     ../../src/stream_viewers/Torque_Stream_Viewer_Widget.cpp \
     ../../src/stream_viewers/Velocity_Stream_Viewer_Widget.cpp \
     ../../src/stream_viewers/Video_Stream_Viewer_Widget.cpp \
-    ../../src/stream_viewers/Voltage_Stream_Viewer_Widget.cpp
+    ../../src/stream_viewers/Voltage_Stream_Viewer_Widget.cpp \
+    ../../src/stream_viewers/video/Video_Decoder.cpp
 
 FORMS += \
     ../../src/GS.ui \

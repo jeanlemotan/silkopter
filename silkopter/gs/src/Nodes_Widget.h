@@ -30,25 +30,19 @@ private:
 
     void on_selection_changed();
 
+    void upload_config();
+
     //std::vector<q::util::Scoped_Connection> m_connections;
 
     QToolBar* m_toolbar = nullptr;
     QAction* m_refresh_action = nullptr;
+    QAction* m_upload_action = nullptr;
     silk::Comms* m_comms = nullptr;
     Properties_Browser* m_browser = nullptr;
 
     QNodesEditor* m_nodes_editor = nullptr;
     QGraphicsView* m_view = nullptr;
     QGraphicsScene* m_scene = nullptr;
-
-    struct Selection
-    {
-        //silk::Comms::Node node;
-        //QDockWidget* config_dock = nullptr;
-        //QTreeView* config_view = nullptr;
-        //rapidjson::Document config_json;
-        //JSON_Model* config_model = nullptr;
-    } m_selection;
 
     struct Node
     {
@@ -92,6 +86,15 @@ private:
     std::map<std::string, std::shared_ptr<Node>> m_nodes;
 
     std::vector<silk::Comms::Node_Def> m_node_defs;
+
+    struct Selection
+    {
+        std::shared_ptr<Node> node;
+        //QDockWidget* config_dock = nullptr;
+        //QTreeView* config_view = nullptr;
+        //rapidjson::Document config_json;
+        //JSON_Model* config_model = nullptr;
+    } m_selection;
 
     std::string m_uav_name;
 

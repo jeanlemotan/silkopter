@@ -143,8 +143,9 @@ RCP::Socket_Handle RCP::add_socket(RCP_Socket* socket)
 
     Socket_Data& socket_data = m_sockets.back();
     socket_data.socket = socket;
-    socket_data.mtu = socket->get_mtu();
-    QASSERT(socket_data.mtu < Header::MAX_SIZE);
+
+    size_t max_mtu_size = Header::MAX_SIZE;
+    socket_data.mtu = std::min(socket->get_mtu(), max_mtu_size);
 
     socket->receive_callback = std::bind(&RCP::handle_receive, this, std::placeholders::_1, std::placeholders::_2);
     socket->send_callback = std::bind(&RCP::handle_send, this, handle, std::placeholders::_1);

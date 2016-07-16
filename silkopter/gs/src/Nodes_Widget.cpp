@@ -107,6 +107,9 @@ void Nodes_Widget::init(QToolBar* toolbar, silk::Comms& comms, Properties_Browse
 
 void Nodes_Widget::set_active(bool active)
 {
+    m_browser->set_value(nullptr);
+    m_selection.node = nullptr;
+
     if (!active)
     {
         if (m_refresh_action)
@@ -114,8 +117,8 @@ void Nodes_Widget::set_active(bool active)
             delete m_refresh_action;
             m_refresh_action = nullptr;
 
-//            delete m_upload_action;
-//            m_upload_action = nullptr;
+            delete m_upload_action;
+            m_upload_action = nullptr;
 
 //            delete m_new_action;
 //            m_new_action = nullptr;
@@ -125,13 +128,36 @@ void Nodes_Widget::set_active(bool active)
     m_refresh_action = m_toolbar->addAction(QIcon(":/icons/ui/reconnect.png"), "Refresh");
     QObject::connect(m_refresh_action, &QAction::triggered, [this](bool) { refresh(); });
 
-//    m_upload_action = m_toolbar->addAction(QIcon(":/icons/ui/upload.png"), "Upload");
-//    QObject::connect(m_upload_action, &QAction::triggered, [this](bool) { upload(); });
+    m_upload_action = m_toolbar->addAction(QIcon(":/icons/ui/upload.png"), "Upload");
+    m_upload_action->setEnabled(false);
+    m_upload_action->setShortcut(QKeySequence("Ctrl+S"));
+    QObject::connect(m_upload_action, &QAction::triggered, [this](bool) { upload_config(); });
 
 //    m_new_action = m_toolbar->addAction(QIcon(":/icons/ui/new.png"), "New");
 //    QObject::connect(m_new_action, &QAction::triggered, [this](bool) { show_new_descriptor_menu(); });
+}
 
-    m_browser->set_value(nullptr);
+void Nodes_Widget::upload_config()
+{
+    if (!m_comms->is_connected())
+    {
+        QMessageBox::critical(this, "Error", "Not connected to any UAV");
+        return;
+    }
+
+    if (!m_selection.node)
+    {
+        return;
+    }
+
+    auto result = m_comms->set_node_config(m_selection.node->name, m_selection.node->config);
+    if (result != ts::success)
+    {
+        QMessageBox::critical(this, "Error", result.error().what().c_str());
+    }
+
+    m_uav_name.clear();
+    refresh_node(result.payload());
 }
 
 void Nodes_Widget::refresh()
@@ -699,7 +725,6 @@ bool Nodes_Widget::set_node_input_stream_path(Node const& node, std::string cons
         return false;
     }
 
-    //xxx add refresh_node here!!!
     refresh_node(result.payload());
 
     return true;
@@ -902,6 +927,9 @@ void Nodes_Widget::on_selection_changed()
 {
     m_browser->set_value(nullptr);
 
+    m_selection.node = nullptr;
+    m_upload_action->setEnabled(false);
+
     QList<QGraphicsItem*> items = m_scene->selectedItems();
     if (items.empty())
     {
@@ -921,6 +949,9 @@ void Nodes_Widget::on_selection_changed()
     }
     m_browser->set_value(it->second->config);
     m_browser->expandAll();
+
+    m_selection.node = it->second;
+    m_upload_action->setEnabled(true);
 }
 
 void Nodes_Widget::set_node_position(std::string const& node_name, QPointF const& pos)

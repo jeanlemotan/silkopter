@@ -866,7 +866,7 @@ struct Raspicam_Config : public INode_Config
     enum quality_t
     {
         LOW = 0 : [ ui_name = "Low" ],
-        HIGH = 0 : [ ui_name = "High" ],
+        HIGH : [ ui_name = "High" ],
     };
 
     enum awb_mode_t
@@ -885,11 +885,11 @@ struct Raspicam_Config : public INode_Config
 
     iso_t iso : [ ui_name = "Iso" ];
     shutter_speed_t shutter_speed : [ ui_name = "Shutter Speed", ui_suffix = "ms" ];
-    ev_t ev : [ ui_name = "Exposure Compensation" ];
-    sharpness_t sharpness : [ ui_name = "Sharpness" ];
-    contrast_t contrast : [ ui_name = "Contrast" ];
-    brightness_t brightness : [ ui_name = "Brightness" ];
-    saturation_t saturation : [ ui_name = "Saturation" ];
+    ev_t ev = 0: [ ui_name = "Exposure Compensation" ];
+    sharpness_t sharpness = 50 : [ ui_name = "Sharpness" ];
+    contrast_t contrast = 50 : [ ui_name = "Contrast" ];
+    brightness_t brightness = 50 : [ ui_name = "Brightness" ];
+    saturation_t saturation = 50 : [ ui_name = "Saturation" ];
     awb_mode_t awb_mode = awb_mode_t::AUTO : [ ui_name = "AWB Mode" ];
     quality_t quality = quality_t::HIGH : [ ui_name = "Quality" ];
     bool recording : [ ui_name = "Recording" ];

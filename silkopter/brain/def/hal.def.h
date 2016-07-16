@@ -2561,7 +2561,7 @@ public:
   enum class quality_t
   {
     LOW = 0,
-    HIGH = 0,
+    HIGH = 1,
   };
 
   enum class awb_mode_t
@@ -2623,10 +2623,10 @@ private:
   iso_t m_iso = {0};
   shutter_speed_t m_shutter_speed = {0};
   ev_t m_ev = {0};
-  sharpness_t m_sharpness = {0};
-  contrast_t m_contrast = {0};
-  brightness_t m_brightness = {0};
-  saturation_t m_saturation = {0};
+  sharpness_t m_sharpness = {50};
+  contrast_t m_contrast = {50};
+  brightness_t m_brightness = {50};
+  saturation_t m_saturation = {50};
   awb_mode_t m_awb_mode = {Raspicam_Config::awb_mode_t::AUTO};
   quality_t m_quality = {Raspicam_Config::quality_t::HIGH};
   bool m_recording = {false};

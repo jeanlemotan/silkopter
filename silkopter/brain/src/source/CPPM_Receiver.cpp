@@ -70,10 +70,10 @@ ts::Result<void> CPPM_Receiver::init()
     refresh_gpio_callback_data();
 
     uint32_t gpio = static_cast<uint32_t>(m_descriptor->get_gpio());
-    m_gpio_callback_data.gpio = gpio;
+    m_callback_data.gpio = gpio;
 
     QLOGI("Installing alert callback on gpio {}", gpio);
-    int res = gpioSetAlertFuncEx(gpio, &CPPM_Receiver::gpio_callback_func, &m_gpio_callback_data);
+    int res = gpioSetAlertFuncEx(gpio, &CPPM_Receiver::gpio_callback_func, &m_callback_data);
     if (res != 0)
     {
         return make_error("Cannot install gpio alert callback: {}", res);
@@ -104,7 +104,7 @@ void CPPM_Receiver::gpio_callback_func(int gpio, int level, uint32_t tick, void*
         return;
     }
 
-    GPIO_Callback_Data& data = *reinterpret_cast<GPIO_Callback_Data*>(userdata);
+    Callback_Data& data = *reinterpret_cast<Callback_Data*>(userdata);
     if (static_cast<uint32_t>(gpio) != data.gpio)
     {
         QASSERT(false);
@@ -120,61 +120,61 @@ void CPPM_Receiver::gpio_callback_func(int gpio, int level, uint32_t tick, void*
 
     switch (data.state)
     {
-    case GPIO_Callback_Data::State::WAITING_FOR_SYNC:
+    case Callback_Data::State::WAITING_FOR_SYNC:
     {
         //expecting a low level of sync_length duration
         if (level == 1 || delta < data.min_sync_pulse_us || delta > data.max_sync_pulse_us)
         {
             QLOGI("%%%Sync error, {}, {}", level, delta);
-            data.error = GPIO_Callback_Data::Error::ERROR_SYNC;
+            data.error = Callback_Data::Error::ERROR_SYNC;
             break;
         }
 
 //        QLOGI("*** Synced, {}, {}", level, delta);
         data.channel_idx = 0;
-        data.state = GPIO_Callback_Data::State::WAITING_FOR_GAP;
+        data.state = Callback_Data::State::WAITING_FOR_GAP;
         break;
     }
-    case GPIO_Callback_Data::State::WAITING_FOR_GAP:
+    case Callback_Data::State::WAITING_FOR_GAP:
     {
         //expecting a high level of sync_length duration
         if (level == 0 || delta < data.min_gap_pulse_us || delta > data.max_gap_pulse_us)
         {
             QLOGI("%%%Gap error, {}, {}", level, delta);
-            data.state = GPIO_Callback_Data::State::WAITING_FOR_SYNC;
-            data.error = GPIO_Callback_Data::Error::ERROR_GAP;
+            data.state = Callback_Data::State::WAITING_FOR_SYNC;
+            data.error = Callback_Data::Error::ERROR_GAP;
             break;
         }
 
         if (data.channel_idx >= data.channel_count)
         {
-            data.state = GPIO_Callback_Data::State::WAITING_FOR_SYNC;
+            data.state = Callback_Data::State::WAITING_FOR_SYNC;
         }
         else
         {
-            data.state = GPIO_Callback_Data::State::WAITING_FOR_CHANNEL;
+            data.state = Callback_Data::State::WAITING_FOR_CHANNEL;
         }
         break;
     }
-    case GPIO_Callback_Data::State::WAITING_FOR_CHANNEL:
+    case Callback_Data::State::WAITING_FOR_CHANNEL:
     {
         //expecting a high level of sync_length duration
         if (level == 1 || delta < data.min_channel_pulse_us || delta > data.max_channel_pulse_us)
         {
             QLOGI("%%%Channel error, {}, {}", level, delta);
-            data.state = GPIO_Callback_Data::State::WAITING_FOR_SYNC;
-            data.error = GPIO_Callback_Data::Error::ERROR_CHANNEL;
+            data.state = Callback_Data::State::WAITING_FOR_SYNC;
+            data.error = Callback_Data::Error::ERROR_CHANNEL;
             break;
         }
 
         data.channel_pulses_us[data.channel_idx++] = delta;
-        data.state = GPIO_Callback_Data::State::WAITING_FOR_GAP;
+        data.state = Callback_Data::State::WAITING_FOR_GAP;
         break;
     }
     default:
         QASSERT(0);
-        data.state = GPIO_Callback_Data::State::WAITING_FOR_SYNC;
-        data.error = GPIO_Callback_Data::Error::ERROR_UNKNOWN;
+        data.state = Callback_Data::State::WAITING_FOR_SYNC;
+        data.error = Callback_Data::Error::ERROR_UNKNOWN;
         break;
     }
 
@@ -204,11 +204,11 @@ void CPPM_Receiver::process()
 
     //first make a copy of the pulses - to avoid them changing while working with them
     //note that the pulses array in the gpio_callback_data is atomic so this operation is safe
-    int error = m_gpio_callback_data.error;
+    int error = m_callback_data.error;
     std::array<uint32_t, MAX_CHANNEL_COUNT> channel_pulses_us;
     for (size_t i = 0; i < m_pwms.size(); i++)
     {
-        channel_pulses_us[i] = m_gpio_callback_data.channel_pulses_us[i];
+        channel_pulses_us[i] = m_callback_data.channel_pulses_us[i];
     }
 
     float min_channel_pulse_length_ms = m_config->get_min_pulse_length();
@@ -225,13 +225,13 @@ void CPPM_Receiver::process()
 
             for (size_t s = 0; s < samples_needed; s++)
             {
-                pwm.push_sample(channel_value, error == GPIO_Callback_Data::Error::ERROR_NONE);
+                pwm.push_sample(channel_value, error == Callback_Data::Error::ERROR_NONE);
             }
         }
     }
 
     //reset the error
-    m_gpio_callback_data.error = GPIO_Callback_Data::Error::ERROR_NONE;
+    m_callback_data.error = Callback_Data::Error::ERROR_NONE;
 
     m_last_tp = now;
 }
@@ -303,24 +303,24 @@ void CPPM_Receiver::refresh_gpio_callback_data()
     float min_sync_pulse_ms = (max_channel_pulse_ms + gap_pulse_ms) * 2;
     float max_sync_pulse_ms = frame_length_ms - (min_channel_pulse_ms + gap_pulse_ms) * m_descriptor->get_channel_count();
 
-    m_gpio_callback_data.is_inverted = m_config->get_inverted();
+    m_callback_data.is_inverted = m_config->get_inverted();
 
-    m_gpio_callback_data.channel_count = m_pwms.size();
+    m_callback_data.channel_count = m_pwms.size();
 
-    m_gpio_callback_data.frame_length_us = static_cast<uint32_t>(frame_length_ms * 1000.f);
-    QLOGI("Frame length: {}us", m_gpio_callback_data.frame_length_us);
+    m_callback_data.frame_length_us = static_cast<uint32_t>(frame_length_ms * 1000.f);
+    QLOGI("Frame length: {}us", m_callback_data.frame_length_us);
 
-    m_gpio_callback_data.min_gap_pulse_us = static_cast<uint32_t>(min_gap_pulse_ms * 1000.f);
-    m_gpio_callback_data.max_gap_pulse_us = static_cast<uint32_t>(max_gap_pulse_ms * 1000.f);
-    QLOGI("Gap length: {}us - {}us", m_gpio_callback_data.min_gap_pulse_us, m_gpio_callback_data.max_gap_pulse_us);
+    m_callback_data.min_gap_pulse_us = static_cast<uint32_t>(min_gap_pulse_ms * 1000.f);
+    m_callback_data.max_gap_pulse_us = static_cast<uint32_t>(max_gap_pulse_ms * 1000.f);
+    QLOGI("Gap length: {}us - {}us", m_callback_data.min_gap_pulse_us, m_callback_data.max_gap_pulse_us);
 
-    m_gpio_callback_data.min_channel_pulse_us = static_cast<uint32_t>(min_channel_pulse_ms * 1000.f);
-    m_gpio_callback_data.max_channel_pulse_us = static_cast<uint32_t>(max_channel_pulse_ms * 1000.f);
-    QLOGI("Channel length: {}us - {}us", m_gpio_callback_data.min_channel_pulse_us, m_gpio_callback_data.max_channel_pulse_us);
+    m_callback_data.min_channel_pulse_us = static_cast<uint32_t>(min_channel_pulse_ms * 1000.f);
+    m_callback_data.max_channel_pulse_us = static_cast<uint32_t>(max_channel_pulse_ms * 1000.f);
+    QLOGI("Channel length: {}us - {}us", m_callback_data.min_channel_pulse_us, m_callback_data.max_channel_pulse_us);
 
-    m_gpio_callback_data.min_sync_pulse_us = static_cast<uint32_t>(min_sync_pulse_ms * 1000.f);
-    m_gpio_callback_data.max_sync_pulse_us = static_cast<uint32_t>(max_sync_pulse_ms * 1000.f);
-    QLOGI("Sync length: {}us - {}us", m_gpio_callback_data.min_sync_pulse_us, m_gpio_callback_data.max_sync_pulse_us);
+    m_callback_data.min_sync_pulse_us = static_cast<uint32_t>(min_sync_pulse_ms * 1000.f);
+    m_callback_data.max_sync_pulse_us = static_cast<uint32_t>(max_sync_pulse_ms * 1000.f);
+    QLOGI("Sync length: {}us - {}us", m_callback_data.min_sync_pulse_us, m_callback_data.max_sync_pulse_us);
 }
 
 auto CPPM_Receiver::get_config() const -> std::shared_ptr<const hal::INode_Config>

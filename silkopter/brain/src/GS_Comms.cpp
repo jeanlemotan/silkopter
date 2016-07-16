@@ -150,7 +150,7 @@ void GS_Comms::configure_channels()
 
     {
         util::RCP::Send_Params params;
-        params.is_compressed = true;
+        params.is_compressed = false;
         params.is_reliable = true;
         params.importance = 90;
         m_rcp->set_send_params(TELEMETRY_CHANNEL, params);
