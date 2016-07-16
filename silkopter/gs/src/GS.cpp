@@ -71,6 +71,11 @@ GS::GS(QWidget *parent)
     //set_remote_address("10.10.10.10");
     set_remote_address("127.0.0.1");
 
+    if (!m_remote_address.empty())
+    {
+        m_comms.start_udp(boost::asio::ip::address::from_string(m_remote_address), 8006, 8005);
+    }
+
     read_settings();
 }
 

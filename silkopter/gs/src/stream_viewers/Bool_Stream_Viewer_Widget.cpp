@@ -15,7 +15,10 @@ Bool_Stream_Viewer_Widget::Bool_Stream_Viewer_Widget(QWidget* parent)
 Bool_Stream_Viewer_Widget::~Bool_Stream_Viewer_Widget()
 {
     auto result = m_comms->set_stream_telemetry_enabled(m_stream_path, false);
-    QASSERT(result == ts::success);
+    if (result != ts::success)
+    {
+        QLOGE("Failed to disable stream '{}' telemetry: {}", m_stream_path, result.error().what());
+    }
 }
 
 void Bool_Stream_Viewer_Widget::init(silk::Comms& comms, std::string const& stream_path, uint32_t stream_rate, silk::stream::Type stream_type)

@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui opengl network widgets charts
+QT       += core gui opengl network widgets charts quick qml quickwidgets
 
 TARGET = gs
 TEMPLATE = app

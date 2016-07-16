@@ -235,8 +235,8 @@ void Numeric_Viewer_Widget::add_samples(float const* src, bool is_healthy)
         }
         else
         {
-            QASSERT(0);
-            *dst++ = 0.f;
+            //QASSERT(0);
+            *dst++ = std::numeric_limits<float>::max();
         }
     }
 

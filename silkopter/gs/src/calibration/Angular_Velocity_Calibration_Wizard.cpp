@@ -50,7 +50,10 @@ Angular_Velocity_Calibration_Wizard::Angular_Velocity_Calibration_Wizard(silk::C
 Angular_Velocity_Calibration_Wizard::~Angular_Velocity_Calibration_Wizard()
 {
     auto result = m_comms.set_stream_telemetry_enabled(m_stream_name, false);
-    QASSERT(result == ts::success);
+    if (result != ts::success)
+    {
+        QLOGE("Failed to disable stream '{}' telemetry: {}", m_stream_name, result.error().what());
+    }
 }
 
 void Angular_Velocity_Calibration_Wizard::advance()

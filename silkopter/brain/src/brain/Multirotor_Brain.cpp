@@ -69,14 +69,14 @@ auto Multirotor_Brain::get_inputs() const -> std::vector<Input>
 {
     std::vector<Input> inputs =
     {{
-         { stream::IMultirotor_Commands::TYPE,    m_descriptor->get_commands_rate(), "commands", m_commands_accumulator.get_stream_path(0) },
-         { stream::IFrame::TYPE,         m_descriptor->get_rate(), "local_frame", m_sensor_accumulator.get_stream_path(0) },
-         { stream::IECEF_Position::TYPE,     m_descriptor->get_rate(), "position", m_sensor_accumulator.get_stream_path(1) },
-         { stream::IECEF_Velocity::TYPE,     m_descriptor->get_rate(), "velocity", m_sensor_accumulator.get_stream_path(2) },
+         { stream::IMultirotor_Commands::TYPE,      m_descriptor->get_commands_rate(), "commands", m_commands_accumulator.get_stream_path(0) },
+         { stream::IFrame::TYPE,                    m_descriptor->get_rate(), "local_frame", m_sensor_accumulator.get_stream_path(0) },
+         { stream::IECEF_Position::TYPE,            m_descriptor->get_rate(), "position", m_sensor_accumulator.get_stream_path(1) },
+         { stream::IECEF_Velocity::TYPE,            m_descriptor->get_rate(), "velocity", m_sensor_accumulator.get_stream_path(2) },
          { stream::IECEF_Linear_Acceleration::TYPE, m_descriptor->get_rate(), "linear_acceleration", m_sensor_accumulator.get_stream_path(3) },
-         { stream::IProximity::TYPE,         m_descriptor->get_rate(), "proximity", m_sensor_accumulator.get_stream_path(4) },
-         { stream::IVoltage::TYPE,           m_descriptor->get_rate(), "voltage", m_sensor_accumulator.get_stream_path(5) },
-         { stream::ICurrent::TYPE,           m_descriptor->get_rate(), "current", m_sensor_accumulator.get_stream_path(6) },
+         { stream::IProximity::TYPE,                m_descriptor->get_rate(), "proximity", m_sensor_accumulator.get_stream_path(4) },
+         { stream::IVoltage::TYPE,                  m_descriptor->get_rate(), "voltage", m_sensor_accumulator.get_stream_path(5) },
+         { stream::ICurrent::TYPE,                  m_descriptor->get_rate(), "current", m_sensor_accumulator.get_stream_path(6) },
      }};
     return inputs;
 }

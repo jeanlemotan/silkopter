@@ -23,7 +23,7 @@ public:
         return make_error("Invalid stream index");
     }
     template<size_t N>
-    auto get_stream_path(size_t) const -> std::string const&
+    auto get_stream_path(size_t) const -> std::string
     {
         return std::string();
     }
@@ -130,11 +130,11 @@ public:
         }
     }
     template<size_t N>
-    auto get_stream_path(size_t idx) const -> std::string const&
+    auto get_stream_path(size_t idx) const -> std::string
     {
         if (idx == N)
         {
-            return m_stream_path;
+            return m_stream.lock() ? m_stream_path : std::string();
         }
         else
         {
@@ -217,7 +217,7 @@ public:
     {
         return m_storage.template set_stream_path<0>(idx, path, desired_rate, hal);
     }
-    auto get_stream_path(size_t idx) const -> std::string const&
+    auto get_stream_path(size_t idx) const -> std::string
     {
         return m_storage.template get_stream_path<0>(idx);
     }

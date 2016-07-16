@@ -1,5 +1,6 @@
 #include "GS.h"
 #include <QtWidgets/QApplication>
+#include <QNetworkProxyFactory>
 
 boost::asio::io_service s_async_io_service(4);
 
@@ -19,6 +20,8 @@ int main(int argc, char *argv[])
 
     QApplication a(argc, argv);
 //    QApplication::setStyle("fusion");
+
+    QNetworkProxyFactory::setUseSystemConfiguration(true);
 
     QCoreApplication::setOrganizationName("Silkopter");
     QCoreApplication::setOrganizationDomain("silkopter.com");

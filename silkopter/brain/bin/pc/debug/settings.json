@@ -18,6 +18,29 @@
 	],
 	"nodes":[
 		{
+			"name":"Acceleration RS",
+			"type":"Acceleration RS",
+			"descriptor":{
+				"type":"::Resampler_Descriptor",
+				"value":{
+					"input_rate":1000,
+					"output_rate":10000
+				}
+			},
+			"config":{
+				"type":"::Resampler_Config",
+				"value":{
+					"lpf":{
+						"poles":1,
+						"cutoff_frequency":490.000000
+					}
+				}
+			},
+			"input_paths":[
+				""
+			]
+		},
+		{
 			"name":"Multirotor Simulator",
 			"type":"Multirotor Simulator",
 			"descriptor":{
@@ -30,7 +53,7 @@
 					"pressure_rate":100,
 					"temperature_rate":10,
 					"distance_rate":12,
-					"gps_rate":5
+					"gps_rate":10
 				}
 			},
 			"config":{
@@ -59,54 +82,18 @@
 							{
 								"temperature":0.000000,
 								"bias":{
-									"x":0.000068,
-									"y":0.000108,
-									"z":0.000033
+									"x":0.000124,
+									"y":0.000094,
+									"z":0.000022
 								}
 							}
 						],
 						"magnetic_field":[
-							{
-								"temperature":0.000000,
-								"bias":{
-									"x":0.000005,
-									"y":49.999996,
-									"z":0.000004
-								},
-								"scale":{
-									"x":1.000000,
-									"y":1.000000,
-									"z":1.000000
-								}
-							}
 						]
 					}
 				}
 			},
 			"input_paths":[
-			]
-		},
-		{
-			"name":"Acceleration RS",
-			"type":"Acceleration RS",
-			"descriptor":{
-				"type":"::Resampler_Descriptor",
-				"value":{
-					"input_rate":1000,
-					"output_rate":10000
-				}
-			},
-			"config":{
-				"type":"::Resampler_Config",
-				"value":{
-					"lpf":{
-						"poles":1,
-						"cutoff_frequency":490.000000
-					}
-				}
-			},
-			"input_paths":[
-				"Multirotor Simulator/acceleration"
 			]
 		}
 	]

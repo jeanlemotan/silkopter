@@ -15,7 +15,10 @@ Angular_Velocity_Stream_Viewer_Widget::Angular_Velocity_Stream_Viewer_Widget(QWi
 Angular_Velocity_Stream_Viewer_Widget::~Angular_Velocity_Stream_Viewer_Widget()
 {
     auto result = m_comms->set_stream_telemetry_enabled(m_stream_path, false);
-    QASSERT(result == ts::success);
+    if (result != ts::success)
+    {
+        QLOGE("Failed to disable stream '{}' telemetry: {}", m_stream_path, result.error().what());
+    }
 }
 
 void Angular_Velocity_Stream_Viewer_Widget::init(silk::Comms& comms, std::string const& stream_path, uint32_t stream_rate, silk::stream::Type stream_type)
