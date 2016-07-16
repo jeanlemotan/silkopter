@@ -200,7 +200,7 @@ ts::Result<void> PIGPIO::init()
         }
     }
 
-    return true;
+    return ts::success;
 #else
     return make_error("PIGPIO only supported on the raspberry pi");
 #endif

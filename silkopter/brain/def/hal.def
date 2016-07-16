@@ -1054,4 +1054,55 @@ struct Vec3_Generator_Config : public INode_Config
     vec3f value : [ ui_name = "Value" ];
 };
 
+//////////////////////////////////////////////////////////////
+
+struct CPPM_Receiver_Descriptor : public INode_Descriptor
+{
+    enum gpio_t
+    {
+        _2  = 2 : [ ui_name = "2" ],
+        _3  = 3 : [ ui_name = "3" ],
+        _4  = 4 : [ ui_name = "4" ],
+        _5  = 5 : [ ui_name = "5" ],
+        _6  = 6 : [ ui_name = "6" ],
+        _7  = 7 : [ ui_name = "7" ],
+        _8  = 8 : [ ui_name = "8" ],
+        _9  = 9 : [ ui_name = "9" ],
+        _10 = 10 : [ ui_name = "10" ],
+        _11 = 11 : [ ui_name = "11" ],
+        _12 = 12 : [ ui_name = "12" ],
+        _13 = 13 : [ ui_name = "13" ],
+        _14 = 14 : [ ui_name = "14" ],
+        _15 = 15 : [ ui_name = "15" ],
+        _16 = 16 : [ ui_name = "16" ],
+        _17 = 17 : [ ui_name = "17" ],
+        _18 = 18 : [ ui_name = "18" ],
+        _19 = 19 : [ ui_name = "19" ],
+        _20 = 20 : [ ui_name = "20" ],
+        _21 = 21 : [ ui_name = "21" ],
+        _22 = 22 : [ ui_name = "22" ],
+        _23 = 23 : [ ui_name = "23" ],
+        _24 = 24 : [ ui_name = "24" ],
+        _25 = 25 : [ ui_name = "25" ],
+        _26 = 26 : [ ui_name = "26" ],
+        _27 = 27 : [ ui_name = "27" ],
+    };
+
+    gpio_t gpio = gpio_t::_26 : [ ui_name = "CPPM GPIO" ];
+
+    alias channel_count_t = uint32_t : [ min = 1, max = 16, native_type = "uint32_t" ];
+    channel_count_t channel_count = 8 : [ ui_name = "Channels" ];
+
+    alias rate_t = uint32_t : [ min = 1, max = 10000, native_type = "uint32_t" ];
+    rate_t rate = 50 : [ ui_name = "Rate", ui_suffix = "Hz" ];
+};
+
+struct CPPM_Receiver_Config : public INode_Config
+{
+    bool inverted = false : [ ui_name = "Inverted Signal" ];
+    ufloat frame_length = 27.f : [ ui_name = "Frame Length", ui_suffix = "ms" ];
+    ufloat gap_pulse_length = 0.4f : [ ui_name = "Gap Pulse Length", ui_suffix = "ms" ];
+    ufloat min_pulse_length = 0.6f : [ ui_name = "Min Pulse Length", ui_suffix = "ms" ];
+    ufloat max_pulse_length = 1.6f : [ ui_name = "Max Pulse Length", ui_suffix = "ms" ];
+};
 

@@ -2964,6 +2964,92 @@ private:
   vec3f m_value = {0, 0, 0};
 };
 
+struct CPPM_Receiver_Descriptor : public INode_Descriptor
+{
+public:
+  enum class gpio_t
+  {
+    _2 = 2,
+    _3 = 3,
+    _4 = 4,
+    _5 = 5,
+    _6 = 6,
+    _7 = 7,
+    _8 = 8,
+    _9 = 9,
+    _10 = 10,
+    _11 = 11,
+    _12 = 12,
+    _13 = 13,
+    _14 = 14,
+    _15 = 15,
+    _16 = 16,
+    _17 = 17,
+    _18 = 18,
+    _19 = 19,
+    _20 = 20,
+    _21 = 21,
+    _22 = 22,
+    _23 = 23,
+    _24 = 24,
+    _25 = 25,
+    _26 = 26,
+    _27 = 27,
+  };
+
+  typedef uint32_t channel_count_t;
+  typedef uint32_t rate_t;
+  virtual ~CPPM_Receiver_Descriptor() = default;
+  void set_gpio(gpio_t const& value);
+  void set_gpio(gpio_t&& value);
+  auto get_gpio() const -> gpio_t const&;
+
+  void set_channel_count(uint32_t const& value);
+  void set_channel_count(uint32_t&& value);
+  auto get_channel_count() const -> uint32_t const&;
+
+  void set_rate(uint32_t const& value);
+  void set_rate(uint32_t&& value);
+  auto get_rate() const -> uint32_t const&;
+
+private:
+  gpio_t m_gpio = {CPPM_Receiver_Descriptor::gpio_t::_26};
+  uint32_t m_channel_count = {8};
+  uint32_t m_rate = {50};
+};
+
+struct CPPM_Receiver_Config : public INode_Config
+{
+public:
+  virtual ~CPPM_Receiver_Config() = default;
+  void set_inverted(bool const& value);
+  void set_inverted(bool&& value);
+  auto get_inverted() const -> bool const&;
+
+  void set_frame_length(ufloat const& value);
+  void set_frame_length(ufloat&& value);
+  auto get_frame_length() const -> ufloat const&;
+
+  void set_gap_pulse_length(ufloat const& value);
+  void set_gap_pulse_length(ufloat&& value);
+  auto get_gap_pulse_length() const -> ufloat const&;
+
+  void set_min_pulse_length(ufloat const& value);
+  void set_min_pulse_length(ufloat&& value);
+  auto get_min_pulse_length() const -> ufloat const&;
+
+  void set_max_pulse_length(ufloat const& value);
+  void set_max_pulse_length(ufloat&& value);
+  auto get_max_pulse_length() const -> ufloat const&;
+
+private:
+  bool m_inverted = {false};
+  ufloat m_frame_length = {27.000000f};
+  ufloat m_gap_pulse_length = {0.400000f};
+  ufloat m_min_pulse_length = {0.600000f};
+  ufloat m_max_pulse_length = {1.600000f};
+};
+
 ts::Result<void> deserialize(bool& value, ts::sz::Value const& sz_value);
 ts::sz::Value serialize(bool const& value);
 ts::Result<void> deserialize(std::string& value, ts::sz::Value const& sz_value);
@@ -3298,5 +3384,11 @@ ts::Result<void> deserialize(Vec3_Generator_Descriptor& value, ts::sz::Value con
 ts::sz::Value serialize(Vec3_Generator_Descriptor const& value);
 ts::Result<void> deserialize(Vec3_Generator_Config& value, ts::sz::Value const& sz_value);
 ts::sz::Value serialize(Vec3_Generator_Config const& value);
+ts::Result<void> deserialize(CPPM_Receiver_Descriptor::gpio_t& value, ts::sz::Value const& sz_value);
+ts::sz::Value serialize(CPPM_Receiver_Descriptor::gpio_t const& value);
+ts::Result<void> deserialize(CPPM_Receiver_Descriptor& value, ts::sz::Value const& sz_value);
+ts::sz::Value serialize(CPPM_Receiver_Descriptor const& value);
+ts::Result<void> deserialize(CPPM_Receiver_Config& value, ts::sz::Value const& sz_value);
+ts::sz::Value serialize(CPPM_Receiver_Config const& value);
 }
 }

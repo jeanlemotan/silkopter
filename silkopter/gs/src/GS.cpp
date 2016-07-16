@@ -57,7 +57,7 @@ GS::GS(QWidget *parent)
         QString text = QInputDialog::getText(this, "Enter UAV IP", "IP", QLineEdit::Normal, m_remote_address.c_str(), &ok);
         if (ok)
         {
-            m_remote_address = text.toLatin1().data();
+            set_remote_address(text.toLatin1().data());
             m_comms.start_udp(boost::asio::ip::address::from_string(m_remote_address), 8006, 8005);
         }
     });
@@ -69,7 +69,7 @@ GS::GS(QWidget *parent)
     });
 
     //set_remote_address("10.10.10.10");
-    set_remote_address("127.0.0.1");
+    //set_remote_address("127.0.0.1");
 
     if (!m_remote_address.empty())
     {

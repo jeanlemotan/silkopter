@@ -281,7 +281,7 @@ ts::Result<void> Raspicam::init()
 
     activate_streams();
 
-    return true;
+    return ts::success;
 #else
     return make_error("Raspicam is only supported on the Raspberry pi.");
 #endif

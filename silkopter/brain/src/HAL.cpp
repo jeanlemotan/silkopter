@@ -24,6 +24,7 @@
 #include "source/SRF02.h"
 #include "source/MaxSonar.h"
 #include "source/UBLOX.h"
+#include "source/CPPM_Receiver.h"
 #include "sink/PIGPIO.h"
 #include "sink/PCA9685.h"
 
@@ -781,6 +782,7 @@ auto HAL::init(RC_Comms& rc_comms, GS_Comms& gs_comms) -> bool
     m_node_factory.add<ADS1115>("ADS1115", *this);
     m_node_factory.add<AVRADC>("AVRADC", *this);
     m_node_factory.add<UBLOX>("UBLOX", *this);
+    m_node_factory.add<CPPM_Receiver>("CPPM Receiver", *this);
 
     m_node_factory.add<PIGPIO>("PIGPIO", *this);
     m_node_factory.add<PCA9685>("PCA9685", *this);

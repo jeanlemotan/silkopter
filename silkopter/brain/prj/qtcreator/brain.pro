@@ -160,7 +160,8 @@ SOURCES += \
     ../../src/uav_properties/Octo_Multirotor_Properties.cpp \
     ../../src/uav_properties/Octoquad_Multirotor_Properties.cpp \
     ../../src/uav_properties/Quad_Multirotor_Properties.cpp \
-    ../../src/uav_properties/Tri_Multirotor_Properties.cpp
+    ../../src/uav_properties/Tri_Multirotor_Properties.cpp \
+    ../../src/source/CPPM_Receiver.cpp
 
 HEADERS += \
     ../../src/BrainStdAfx.h \
@@ -305,7 +306,8 @@ HEADERS += \
     ../../src/uav_properties/Octo_Multirotor_Properties.h \
     ../../src/uav_properties/Octoquad_Multirotor_Properties.h \
     ../../src/uav_properties/Quad_Multirotor_Properties.h \
-    ../../src/uav_properties/Tri_Multirotor_Properties.h
+    ../../src/uav_properties/Tri_Multirotor_Properties.h \
+    ../../src/source/CPPM_Receiver.h
 
 DISTFILES +=
 

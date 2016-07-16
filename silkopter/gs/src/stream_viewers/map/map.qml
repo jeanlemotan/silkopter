@@ -5,23 +5,6 @@ import QtLocation 5.6
 
 Rectangle
 {
-    color: "red"
-
-    //    Map {
-    //        id: map
-    //        anchors.fill: parent
-    //        anchors.leftMargin: 32
-
-    //        zoomLevel: (maximumZoomLevel - minimumZoomLevel)/2
-    //        center {
-    //            latitude: -27.5796
-    //            longitude: 153.1003
-    //        }
-    //        // Enable pinch gestures to zoom in and out
-    //        gesture.flickDeceleration: 3000
-    //        gesture.enabled: true
-    //    }
-
     Plugin {
         id: osmplugin
 
@@ -38,9 +21,9 @@ Rectangle
         name: "here"
         PluginParameter { name: "here.app_id"; value: "Z5ZvL9i1ZOjQhZsGxVR6" }
         PluginParameter { name: "here.token"; value: "owBddrRguz4pZxOyTlc37g" }
-//        PluginParameter { name: "here.mapping.cache.disk.size"; value: "300" }
-//        PluginParameter { name: "here.mapping.cache.memory.size"; value: "100" }
-//        PluginParameter { name: "here.mapping.cache.texture.size"; value: "100" }
+        PluginParameter { name: "here.mapping.cache.disk.size"; value: "300" }
+        PluginParameter { name: "here.mapping.cache.memory.size"; value: "100" }
+        PluginParameter { name: "here.mapping.cache.texture.size"; value: "100" }
     }
 
     GroupBox{
@@ -48,6 +31,7 @@ Rectangle
         anchors.top: parent.top
         title:"Map Types"
         ComboBox {
+            width: 150
             model:map.supportedMapTypes
             textRole: "description"
             onCurrentIndexChanged: map.activeMapType = map.supportedMapTypes[currentIndex]

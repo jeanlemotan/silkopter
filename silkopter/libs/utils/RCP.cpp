@@ -317,7 +317,7 @@ auto RCP::_send_locked(uint8_t channel_idx, Send_Params const& params, void cons
                                              1);
         if (ret > 0 && static_cast<size_t>(ret) < uncompressed_size)
         {
-            QLOGI("Compressed {}B -> {}B. {}% : {}", static_cast<int>(uncompressed_size), ret, ret * 100.f / uncompressed_size, q::Clock::now() - start);
+            //QLOGI("Compressed {}B -> {}B. {}% : {}", static_cast<int>(uncompressed_size), ret, ret * 100.f / uncompressed_size, q::Clock::now() - start);
             channel_data.comp_state.buffer.resize(ret);
             data = channel_data.comp_state.buffer.data();
             size = ret;
