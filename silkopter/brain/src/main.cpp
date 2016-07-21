@@ -41,25 +41,25 @@ void execute_async_call(std::function<void()> f)
 }
 }
 
-static void* malloc_hook(size_t size, const void* caller)
-{
-    s_memory.allocation_count++;
-    __malloc_hook = nullptr;
-    printf("\n%d, %d", int(s_memory.allocation_count), int(s_memory.free_count));
-    fflush(stdout);
-    void* ptr = malloc(size);
-    __malloc_hook = &malloc_hook;
-    return ptr;
-}
-void free_hook(void* ptr, const void* caller)
-{
-    s_memory.free_count++;
-    __free_hook = nullptr;
-    printf("\n%d, %d", int(s_memory.allocation_count), int(s_memory.free_count));
-    fflush(stdout);
-    free(ptr);
-    __free_hook = &free_hook;
-}
+//static void* malloc_hook(size_t size, const void* caller)
+//{
+//    s_memory.allocation_count++;
+//    __malloc_hook = nullptr;
+//    printf("\n%d, %d", int(s_memory.allocation_count), int(s_memory.free_count));
+//    fflush(stdout);
+//    void* ptr = malloc(size);
+//    __malloc_hook = &malloc_hook;
+//    return ptr;
+//}
+//void free_hook(void* ptr, const void* caller)
+//{
+//    s_memory.free_count++;
+//    __free_hook = nullptr;
+//    printf("\n%d, %d", int(s_memory.allocation_count), int(s_memory.free_count));
+//    fflush(stdout);
+//    free(ptr);
+//    __free_hook = &free_hook;
+//}
 
 
 // Define the function to be called when ctrl-c (SIGINT) signal is sent to process
@@ -165,7 +165,7 @@ int main(int argc, char const* argv[])
 //            goto exit;
 //        }
 //#else
-        if (!rc_comms.start_udp(8000, 8001))
+        if (!rc_comms.start_rfmon("wlan1", 3))
         {
             QLOGE("Cannot start rc communication channel! Aborting");
             goto exit;

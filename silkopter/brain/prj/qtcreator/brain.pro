@@ -19,6 +19,8 @@ CONFIG *= precompile_header
 
 rpi {
     DEFINES+=RASPBERRY_PI
+    QMAKE_MAKEFILE = "Makefile.rpi"
+    MAKEFILE = "Makefile.rpi"
     CONFIG(debug, debug|release) {
         DEST_FOLDER = rpi/debug
     }
@@ -27,6 +29,7 @@ rpi {
         DEFINES += NDEBUG
     }
 } else {
+    QMAKE_MAKEFILE = "Makefile"
     CONFIG(debug, debug|release) {
         DEST_FOLDER = pc/debug
     }

@@ -11,6 +11,7 @@ public:
                                     std::string const& node_name,
                                     std::string const& stream_name,
                                     size_t stream_rate,
+                                    std::shared_ptr<ts::IStruct_Value> config,
                                     std::shared_ptr<ts::IVector_Value> points,
                                     QWidget* parent = 0);
     ~Acceleration_Calibration_Wizard();
@@ -36,8 +37,10 @@ private:
     std::string m_node_name;
     std::string m_stream_name;
     size_t m_stream_rate = 0;
+    std::shared_ptr<ts::IStruct_Value> m_config;
+    std::shared_ptr<ts::IVector_Value> m_points;
     std::shared_ptr<ts::IVector_Value> m_initial_points;
-    std::shared_ptr<ts::IVector_Value> m_crt_points;
+    std::shared_ptr<ts::IVector_Value> m_new_points;
 
     QWidget* m_content = nullptr;
 

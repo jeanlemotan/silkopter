@@ -3,7 +3,7 @@
 Comms_QML_Proxy::Comms_QML_Proxy(QObject *parent)
     : QObject(parent)
 {
-    m_connectionType = ConnectionType::UDP;
+    m_connectionType = ConnectionType::RFMON;
 }
 
 void Comms_QML_Proxy::init(silk::Comms& comms)

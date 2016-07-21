@@ -12,13 +12,16 @@ Magnetic_Field_Calibration_Wizard::Magnetic_Field_Calibration_Wizard(silk::Comms
                                                                  std::string const& node_name,
                                                                  std::string const& stream_name,
                                                                  size_t stream_rate,
-                                                                 std::shared_ptr<ts::IVector_Value> points, QWidget* parent)
+                                                                 std::shared_ptr<ts::IStruct_Value> config,
+                                                                 std::shared_ptr<ts::IVector_Value> points,
+                                                                 QWidget* parent)
     : QDialog(parent)
     , m_comms(comms)
     , m_node_name(node_name)
     , m_stream_name(stream_name)
     , m_stream_rate(stream_rate)
-    , m_initial_points(points)
+    , m_config(config)
+    , m_points(points)
 {
 //    m_stream = std::static_pointer_cast<silk::stream::gs::Magnetic_Field>(m_output.stream);
 
@@ -30,12 +33,29 @@ Magnetic_Field_Calibration_Wizard::Magnetic_Field_Calibration_Wizard(silk::Comms
         }
     }
 
-//    m_initial_calibration = get_calibration_points();
-//    set_calibration_points(sz::calibration::Magnetic_Field_Points());
+    //make a clone of the initial points
+    {
+        m_initial_points = points->get_specialized_type()->create_specialized_value();
+        auto result = m_initial_points->copy_construct(*points);
+        QASSERT(result == ts::success);
+    }
 
-    m_crt_points = m_initial_points->get_specialized_type()->create_specialized_value();
-    auto result = m_crt_points->construct();
-    QASSERT(result == ts::success);
+    //create the new points - empty
+    {
+        m_new_points = m_initial_points->get_specialized_type()->create_specialized_value();
+        auto result = m_new_points->construct();
+        QASSERT(result == ts::success);
+    }
+
+    //clear the current points
+    {
+        m_points->clear();
+        auto result = m_comms.set_node_config(node_name, m_config);
+        if (result != ts::success)
+        {
+            QMessageBox::critical(this, "Error", ("Cannot reset calibration data for node '" + node_name + "':\n" + result.error().what()).c_str());
+        }
+    }
 
     m_step = Step::RESET;
 
@@ -83,7 +103,8 @@ void Magnetic_Field_Calibration_Wizard::cancel()
 {
     m_connection.disconnect();
 
-    //set_calibration_points(m_initial_calibration);
+    auto result = m_points->copy_assign(*m_initial_points);
+    QASSERT(result == ts::success);
 
     close();
 }
@@ -110,7 +131,7 @@ void Magnetic_Field_Calibration_Wizard::prepare_step()
             auto* keep = ui.buttonBox->addButton("Keep", QDialogButtonBox::AcceptRole);
             QObject::connect(keep, &QPushButton::released, [this]()
             {
-                auto result = m_crt_points->copy_assign(*m_initial_points);
+                auto result = m_new_points->copy_assign(*m_initial_points);
                 QASSERT(result == ts::success);
                 advance();
             });
@@ -201,7 +222,7 @@ void Magnetic_Field_Calibration_Wizard::prepare_step()
         ui.bias->setText(q::util::format<std::string>("{}", bias).c_str());
         ui.scale->setText(q::util::format<std::string>("{}", scale).c_str());
 
-        ts::Result<std::shared_ptr<ts::IValue>> result = m_crt_points->insert_default_value(m_crt_points->get_value_count());
+        ts::Result<std::shared_ptr<ts::IValue>> result = m_new_points->insert_default_value(m_new_points->get_value_count());
         if (result != ts::success)
         {
             QMessageBox::critical(this, "Error", ("Cannot insert calibration value: " + result.error().what()).c_str());
@@ -245,9 +266,8 @@ void Magnetic_Field_Calibration_Wizard::prepare_step()
 
         QObject::connect(ui.buttonBox, &QDialogButtonBox::accepted, [this]()
         {
-            auto result = m_initial_points->copy_assign(*m_crt_points);
+            auto result = m_points->copy_assign(*m_new_points);
             QASSERT(result == ts::success);
-            //set_calibration_points(m_crt_calibration);
             advance();
         });
         QObject::connect(ui.buttonBox, &QDialogButtonBox::rejected, [this]() { cancel(); });

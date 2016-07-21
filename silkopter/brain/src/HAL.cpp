@@ -136,8 +136,8 @@ static auto initialize_bcm() -> bool
 static auto shutdown_bcm() -> bool
 {
     QLOGI("Shutting down bcm2835");
-    bcm2835_spi_end();
-    bcm2835_i2c_end();
+    //bcm2835_spi_end(); //cannot call this as it breaks the SPI because it sets all the pins to inputs
+    //bcm2835_i2c_end(); //cannot call this as it breaks the I2C because it sets all the pins to inputs
     bcm2835_close();
     return true;
 }

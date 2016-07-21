@@ -2,12 +2,24 @@ import QtQuick 2.0
 import QtQuick.Controls 1.4
 import QtQuick.Controls.Styles 1.4
 import com.silk.Comms 1.0
+import com.silk.VideoRenderer 1.0
 
 
-Rectangle {
+Item {
     id: root
     width: 800; height: 600
-    color: "#2c3e50"
+//    color: "#2c503e"
+
+    VideoRenderer {
+        id: renderer
+        anchors.fill: parent
+        SequentialAnimation on t {
+                    NumberAnimation { to: 1; duration: 2500; easing.type: Easing.InQuad }
+                    NumberAnimation { to: 0; duration: 2500; easing.type: Easing.OutQuad }
+                    loops: Animation.Infinite
+                    running: true
+                }
+    }
 
     TopBar {
         id: topBar
@@ -81,13 +93,13 @@ Rectangle {
         }
     }
 
-    UAVInfo {
-        id: uavInfo
-        anchors.margins: 20
-        anchors.top: topBar.bottom
-        anchors.left: sideBar.right
-        anchors.right: root.right
-        anchors.bottom: root.bottom
-    }
+//    UAVInfo {
+//        id: uavInfo
+//        anchors.margins: 20
+//        anchors.top: topBar.bottom
+//        anchors.left: sideBar.right
+//        anchors.right: root.right
+//        anchors.bottom: root.bottom
+//    }
 
 }

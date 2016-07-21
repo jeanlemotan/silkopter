@@ -23,6 +23,12 @@ Video_Stream_Viewer_Widget::~Video_Stream_Viewer_Widget()
 
 void Video_Stream_Viewer_Widget::init(silk::Comms& comms, std::string const& stream_path, uint32_t stream_rate, silk::stream::Type stream_type)
 {
+    Numeric_Viewer_Widget* stats_widget = new Numeric_Viewer_Widget(nullptr);
+    stats_widget->show();
+    stats_widget->init("x", m_stream_rate);
+
+    stats_widget->add_graph("Frame Size", "KB", QColor(0xe74c3c));
+
     m_comms = &comms;
     m_stream_path = stream_path;
     m_stream_rate = stream_rate;
@@ -31,7 +37,7 @@ void Video_Stream_Viewer_Widget::init(silk::Comms& comms, std::string const& str
     auto result = m_comms->set_stream_telemetry_enabled(m_stream_path, true);
     QASSERT(result == ts::success);
 
-    m_connection = m_comms->sig_telemetry_samples_available.connect([this](silk::Comms::ITelemetry_Stream const& _stream)
+    m_connection = m_comms->sig_telemetry_samples_available.connect([this, stats_widget](silk::Comms::ITelemetry_Stream const& _stream)
     {
         if (_stream.stream_path == m_stream_path)
         {
@@ -40,6 +46,9 @@ void Video_Stream_Viewer_Widget::init(silk::Comms& comms, std::string const& str
             {
                 for (silk::stream::IVideo::Sample const& sample: stream->samples)
                 {
+                    float values[1] = { static_cast<float>(sample.value.data.size()) / 1024.f };
+                    stats_widget->add_samples(values, true);
+
                     float ar = (float)sample.value.resolution.x / sample.value.resolution.y;
                     int img_w = math::max(16, width());
                     int img_h = img_w / ar;
@@ -56,6 +65,7 @@ void Video_Stream_Viewer_Widget::init(silk::Comms& comms, std::string const& str
                         update();
                     }
                 }
+                stats_widget->process();
             }
         }
     });

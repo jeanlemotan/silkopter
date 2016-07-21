@@ -172,6 +172,7 @@ void Nodes_Widget::refresh()
     if (result != ts::success)
     {
         QMessageBox::critical(this, "Error", result.error().what().c_str());
+        return;
     }
 
     m_uav_name.clear();
@@ -298,7 +299,7 @@ void Nodes_Widget::do_acceleration_calibration(Node& node, size_t output_idx)
         return;
     }
 
-    Acceleration_Calibration_Wizard wizard(*m_comms, node.name, node.name + "/" + output.name, output.rate, value, this);
+    Acceleration_Calibration_Wizard wizard(*m_comms, node.name, node.name + "/" + output.name, output.rate, node.config, value, this);
     if (wizard.exec() == QDialog::Accepted)
     {
         auto result = m_comms->set_node_config(node.name, node.config);
@@ -323,7 +324,7 @@ void Nodes_Widget::do_magnetic_field_calibration(Node& node, size_t output_idx)
         return;
     }
 
-    Magnetic_Field_Calibration_Wizard wizard(*m_comms, node.name, node.name + "/" + output.name, output.rate, value, this);
+    Magnetic_Field_Calibration_Wizard wizard(*m_comms, node.name, node.name + "/" + output.name, output.rate, node.config, value, this);
     if (wizard.exec() == QDialog::Accepted)
     {
         auto result = m_comms->set_node_config(node.name, node.config);
@@ -348,7 +349,7 @@ void Nodes_Widget::do_angular_velocity_calibration(Node& node, size_t output_idx
         return;
     }
 
-    Angular_Velocity_Calibration_Wizard wizard(*m_comms, node.name, node.name + "/" + output.name, output.rate, value, this);
+    Angular_Velocity_Calibration_Wizard wizard(*m_comms, node.name, node.name + "/" + output.name, output.rate, node.config, value, this);
     if (wizard.exec() == QDialog::Accepted)
     {
         auto result = m_comms->set_node_config(node.name, node.config);

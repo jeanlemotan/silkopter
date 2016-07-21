@@ -42,6 +42,8 @@ ROOT_LIBS_PATH = ../../../..
 
 rpi {
     DEFINES+=RASPBERRY_PI
+    QMAKE_MAKEFILE = "Makefile.rpi"
+    MAKEFILE = "Makefile.rpi"
     CONFIG(debug, debug|release) {
         DEST_FOLDER = rpi/debug
     }
@@ -57,6 +59,7 @@ rpi {
     LIBS += -lGLESv2
     LIBS += -lEGL
 } else {
+    QMAKE_MAKEFILE = "Makefile"
     CONFIG(debug, debug|release) {
         DEST_FOLDER = pc/debug
     }
@@ -149,14 +152,12 @@ HEADERS += \
     ../../../libs/common/stream/IMultirotor_Commands.h \
     ../../../libs/common/stream/IMultirotor_State.h \
     ../../src/Comms_Slots.h \
-    ../../src/NodeEditor/NodeDefModel.h \
     ../../src/OS_QML_Proxy.h \
     ../../src/Menus_QML_Proxy.h \
     ../../src/Comms_QML_Proxy.h \
-    ../../../libs/common/comms/def/comms.def.h \
-    ../../../libs/common/comms/def/gen_support.h \
-    ../../src/NodeEditor/HALNodeEditor.h \
-    ../../src/HAL_QML_Proxy.h
+    ../../src/HAL_QML_Proxy.h \
+    ../../src/Video_Decoder.h \
+    ../../src/Video_Renderer.h
 
 SOURCES += \
     ../../src/main.cpp \
@@ -169,13 +170,12 @@ SOURCES += \
     ../../../libs/utils/RCP_RFMON_Socket.cpp \
     ../../../libs/utils/radiotap/radiotap.cpp \
     ../../src/Comms_Slots.cpp \
-    ../../src/NodeEditor/NodeDefModel.cpp \
     ../../src/Comms_QML_Proxy.cpp \
     ../../src/Menus_QML_Proxy.cpp \
     ../../src/OS_QML_Proxy.cpp \
-    ../../../libs/common/comms/def/comms.def.cpp \
-    ../../src/NodeEditor/HALNodeEditor.cpp \
-    ../../src/HAL_QML_Proxy.cpp
+    ../../src/HAL_QML_Proxy.cpp \
+    ../../src/Video_Decoder.cpp \
+    ../../src/Video_Renderer.cpp
 
 DISTFILES += \
     ../../src/node.png \

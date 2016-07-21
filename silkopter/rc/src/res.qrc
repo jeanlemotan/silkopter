@@ -25,7 +25,6 @@
         <file>qml/TopBar.qml</file>
         <file>qml/Setup.qml</file>
         <file>qml/MenuButton.qml</file>
-        <file>qml/HALNodeEditor.qml</file>
         <file>qml/SideBar.qml</file>
         <file>qml/UAVInfo.qml</file>
         <file>qml/CommsSetup.qml</file>
@@ -70,7 +69,6 @@
         <file>icons/ui/waypoints.png</file>
         <file>icons/ui/waypoints-destination.png</file>
         <file>icons/ui/wifi.png</file>
-        <file>NodeEditor/qml/Node.qml</file>
         <file>icons/nodes/Brain.png</file>
         <file>icons/nodes/Combiner.png</file>
         <file>icons/nodes/Controller.png</file>
@@ -83,8 +81,5 @@
         <file>icons/nodes/Sink.png</file>
         <file>icons/nodes/Source.png</file>
         <file>icons/nodes/Transformer.png</file>
-        <file>NodeEditor/qml/NodeDefTree.qml</file>
-        <file>qml/UAVConfig.qml</file>
-        <file>qml/MultirotorConfig.qml</file>
     </qresource>
 </RCC>

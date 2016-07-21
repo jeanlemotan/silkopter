@@ -8,12 +8,15 @@
 #include "OS_QML_Proxy.h"
 #include "Menus_QML_Proxy.h"
 #include "HAL_QML_Proxy.h"
-#include "NodeEditor/HALNodeEditor.h"
+#include "Video_Renderer.h"
+#include "Video_Decoder.h"
+
+#include <QtGui/QOpenGLTexture>
 
 //boost::asio::io_service s_async_io_service(4);
 
-ts::Type_System s_type_system;
-silk::Comms s_comms(s_type_system);
+silk::Comms s_comms;
+Video_Decoder s_video_decoder;
 
 int main(int argc, char *argv[])
 {
@@ -69,11 +72,13 @@ int main(int argc, char *argv[])
     Comms_QML_Proxy comms_proxy;
     comms_proxy.init(s_comms);
 
+    s_video_decoder.init();
+
     HAL_QML_Proxy hal_proxy;
 
     qmlRegisterType<Comms_QML_Proxy>("com.silk.Comms", 1, 0, "Comms");
     qmlRegisterType<HAL_QML_Proxy>("com.silk.HAL", 1, 0, "HAL");
-    qmlRegisterType<HALNodeEditor>("com.silk.HALNodeEditor", 1, 0, "HALNodeEditor");
+    qmlRegisterType<Video_Renderer>("com.silk.VideoRenderer", 1, 0, "VideoRenderer");
     view.engine()->rootContext()->setContextProperty("s_comms", &comms_proxy);
     view.engine()->rootContext()->setContextProperty("s_os", &os_proxy);
     view.engine()->rootContext()->setContextProperty("s_menus", &menus_proxy);
@@ -93,6 +98,8 @@ int main(int argc, char *argv[])
     {
        s_comms.process_rcp();
        s_comms.process();
+
+       s_video_decoder.decode_samples(s_comms.get_video_samples());
     });
     timer.start();
 

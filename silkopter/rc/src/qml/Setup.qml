@@ -37,51 +37,6 @@ Rectangle {
             anchors.right: parent.right
             height: 50
         }
-
-        function getUAVIconName() {
-            if (s_hal.uavType === HAL.UAV_NONE) return "uav.png";
-            if (s_hal.uavType === HAL.UAV_MULTIROTOR) return "uav-multirotor.png";
-            if (s_hal.uavType === HAL.UAV_COPTER) return "uav-copter.png";
-            if (s_hal.uavType === HAL.UAV_PLANE) return "uav-plane.png";
-            if (s_hal.uavType === HAL.UAV_BOAT) return "uav-boat.png";
-            if (s_hal.uavType === HAL.UAV_ROVER) return "uav-rover.png";
-            return "uav.png"
-        }
-        function getUAVConfigQMLName() {
-            if (s_hal.uavType === HAL.UAV_NONE) return "UAVConfig.qml";
-            if (s_hal.uavType === HAL.UAV_MULTIROTOR) return "MultirotorConfig.qml";
-            if (s_hal.uavType === HAL.UAV_COPTER) return "CopterConfig.qml";
-            if (s_hal.uavType === HAL.UAV_PLANE) return "PlaneConfig.qml";
-            if (s_hal.uavType === HAL.UAV_BOAT) return "BoatConfig.qml";
-            if (s_hal.uavType === HAL.UAV_ROVER) return "RoverConfig.qml";
-            return ""
-        }
-
-
-        MenuButton {
-            id: editConfigButton
-            enabled: s_comms.connectionStatus === Comms.CONNECTED
-            text: s_hal.uavType === HAL.UAV_NONE ? "New Config" : "Config";
-            icon: "qrc:/icons/ui/" + parent.getUAVIconName()
-            onClicked: s_menus.push(parent.getUAVConfigQMLName())
-            anchors.margins: 10
-            anchors.top: commsSetupButton.bottom
-            anchors.left: parent.left
-            anchors.right: parent.right
-            height: 50
-        }
-        MenuButton {
-            id: editNodesButton
-            //enabled: s_hal.uavType !== HAL.UAV_NONE && s_comms.connectionStatus === Comms.CONNECTED
-            text: "Edit Nodes"
-            icon: "qrc:/icons/ui/" + parent.getUAVIconName()
-            onClicked: s_menus.push("HALNodeEditor.qml")
-            anchors.margins: 10
-            anchors.top: editConfigButton.bottom
-            anchors.left: parent.left
-            anchors.right: parent.right
-            height: 50
-        }
     }
 
     Rectangle {

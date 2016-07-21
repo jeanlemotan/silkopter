@@ -765,9 +765,7 @@ static Result<Value> parse_number_value(char const*& json_ptr, char const* json_
 
     json_ptr = ptr;
 
-    whole *= sign;
-
-    if (decimal_digit_count == 0)
+    if (decimal_digit_count == 0 && exponent_sign > 0)
     {
         static constexpr int64_t s_pow[19] = {
                 1,
@@ -791,7 +789,7 @@ static Result<Value> parse_number_value(char const*& json_ptr, char const* json_
                 1000000000000000000,
         };
 
-        int64_t value = whole * exponent_sign * s_pow[exponent];
+        int64_t value = whole * sign * s_pow[exponent];
         if (value >= 0)
         {
             if (value <= 255)
@@ -859,7 +857,16 @@ static Result<Value> parse_number_value(char const*& json_ptr, char const* json_
     double value = static_cast<double>(whole);
     value += static_cast<double>(decimal) / s_pow[decimal_digit_count];
 
-    value *= exponent_sign * s_pow[exponent];
+    if (exponent_sign > 0)
+    {
+        value *= s_pow[exponent];
+    }
+    else
+    {
+        value /= s_pow[exponent];
+    }
+
+    value *= sign;
 
     return Value(value);
 }
