@@ -89,6 +89,36 @@ Item {
         anchors.left: sideBar.right
         anchors.right: root.right
         anchors.bottom: root.bottom
+
+        MouseArea {
+            property bool fullscreen: false;
+            anchors.fill: parent
+            onClicked: {
+                if (fullscreen)
+                {
+                    sideBar.visible = true
+                    topBar.visible = true
+
+                    renderer.anchors.top = topBar.bottom
+                    renderer.anchors.left = sideBar.right
+                    renderer.anchors.right = root.right
+                    renderer.anchors.bottom = root.bottom
+                    fullscreen = false;
+                }
+                else
+                {
+                    sideBar.visible = false
+                    topBar.visible = false
+
+                    renderer.anchors.top = root.top
+                    renderer.anchors.left = root.left
+                    renderer.anchors.right = root.right
+                    renderer.anchors.bottom = root.bottom
+                    fullscreen = true;
+                }
+            }
+        }
+
     }
 
 //    UAVInfo {

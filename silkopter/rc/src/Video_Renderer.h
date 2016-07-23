@@ -4,26 +4,27 @@
 #include <QtGui/QOpenGLShaderProgram>
 #include <QtGui/QOpenGLFunctions>
 
+
+class Video_Renderer;
+
 class Video_Renderer_OpenGL : public QObject, protected QOpenGLFunctions
 {
     Q_OBJECT
 public:
+    Video_Renderer_OpenGL(Video_Renderer* video_renderer);
+
     ~Video_Renderer_OpenGL();
 
-    void setViewportSize(const QSize& size) { m_viewportSize = size; }
-    void setViewportOrigin(const QPoint& origin) { m_viewportOrigin = origin; }
-    void setWindow(QQuickWindow *window) { m_window = window; }
+    void setWindow(QQuickWindow *window);
 
 public slots:
     void paint();
 
 private:
-    QPoint m_viewportOrigin;
-    QSize m_viewportSize;
-    QOpenGLShaderProgram *m_program = nullptr;
+    Video_Renderer* m_video_renderer = nullptr;
     QQuickWindow *m_window = nullptr;
 
-    bool m_initialized = false;
+    bool m_is_initialized = false;
 
     uint32_t m_vertex_shader = 0;
     uint32_t m_fragment_shader = 0;
@@ -31,6 +32,9 @@ private:
     int32_t m_position_location = 0;
     int32_t m_texture_location = 0;
 };
+
+////////////////////////////////////////////////////////////////////////
+
 
 class Video_Renderer : public QQuickItem
 {
@@ -47,7 +51,7 @@ private slots:
     void handleWindowChanged(QQuickWindow *win);
 
 private:
-    Video_Renderer_OpenGL *m_renderer = nullptr;
+    Video_Renderer_OpenGL* m_renderer = nullptr;
 };
 
 
