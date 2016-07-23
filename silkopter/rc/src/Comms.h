@@ -60,8 +60,8 @@ public:
     typedef util::Channel<uint32_t> Video_Channel;
     typedef util::Channel<uint32_t> Telemetry_Channel;
 
-    auto get_video_samples() const -> std::vector<stream::IVideo::Sample> const&;
-    auto get_multirotor_state_samples() const -> std::vector<stream::IMultirotor_State::Sample> const&;
+    auto get_video_samples() -> std::vector<stream::IVideo::Sample>;
+    auto get_multirotor_state_samples() -> std::vector<stream::IMultirotor_State::Sample>;
     void send_multirotor_commands_value(stream::IMultirotor_Commands::Value const& value);
 
     void process_rcp();
@@ -82,6 +82,7 @@ private:
     mutable Video_Channel m_video_channel;
     mutable Telemetry_Channel m_telemetry_channel;
 
+    mutable std::mutex m_samples_mutex;
     std::vector<stream::IVideo::Sample> m_video_samples;
     std::vector<stream::IMultirotor_State::Sample> m_multirotor_state_samples;
 

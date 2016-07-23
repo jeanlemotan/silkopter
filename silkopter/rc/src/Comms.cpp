@@ -171,6 +171,7 @@ void Comms::handle_multirotor_state()
         return;
     }
 
+    std::lock_guard<std::mutex> lg(m_samples_mutex);
     m_multirotor_state_samples.push_back(sample);
 }
 void Comms::handle_video()
@@ -184,16 +185,23 @@ void Comms::handle_video()
         return;
     }
 
+    std::lock_guard<std::mutex> lg(m_samples_mutex);
     m_video_samples.push_back(sample);
 }
 
-auto Comms::get_video_samples() const -> std::vector<stream::IVideo::Sample> const&
+auto Comms::get_video_samples() -> std::vector<stream::IVideo::Sample>
 {
-    return m_video_samples;
+    std::lock_guard<std::mutex> lg(m_samples_mutex);
+    std::vector<stream::IVideo::Sample> samples = std::move(m_video_samples);
+    m_video_samples.clear();
+    return samples;
 }
-auto Comms::get_multirotor_state_samples() const -> std::vector<stream::IMultirotor_State::Sample> const&
+auto Comms::get_multirotor_state_samples() -> std::vector<stream::IMultirotor_State::Sample>
 {
-    return m_multirotor_state_samples;
+    std::lock_guard<std::mutex> lg(m_samples_mutex);
+    std::vector<stream::IMultirotor_State::Sample> samples = std::move(m_multirotor_state_samples);
+    m_multirotor_state_samples.clear();
+    return samples;
 }
 void Comms::send_multirotor_commands_value(stream::IMultirotor_Commands::Value const& value)
 {
@@ -224,8 +232,11 @@ void Comms::process()
         return;
     }
 
-    m_multirotor_state_samples.clear();
-    m_video_samples.clear();
+//    {
+//        std::lock_guard<std::mutex> lg(m_samples_mutex);
+//        m_multirotor_state_samples.clear();
+//        m_video_samples.clear();
+//    }
 
     while (m_pilot_channel.get_next_message(*m_rcp))
     {

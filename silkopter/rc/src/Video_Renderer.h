@@ -8,36 +8,36 @@ class Video_Renderer_OpenGL : public QObject, protected QOpenGLFunctions
 {
     Q_OBJECT
 public:
-    Video_Renderer_OpenGL() : m_t(0), m_program(0) { }
     ~Video_Renderer_OpenGL();
 
-    void setT(qreal t) { m_t = t; }
-    void setViewportSize(const QSize &size) { m_viewportSize = size; }
+    void setViewportSize(const QSize& size) { m_viewportSize = size; }
+    void setViewportOrigin(const QPoint& origin) { m_viewportOrigin = origin; }
     void setWindow(QQuickWindow *window) { m_window = window; }
 
 public slots:
     void paint();
 
 private:
+    QPoint m_viewportOrigin;
     QSize m_viewportSize;
-    qreal m_t;
-    QOpenGLShaderProgram *m_program;
-    QQuickWindow *m_window;
+    QOpenGLShaderProgram *m_program = nullptr;
+    QQuickWindow *m_window = nullptr;
+
+    bool m_initialized = false;
+
+    uint32_t m_vertex_shader = 0;
+    uint32_t m_fragment_shader = 0;
+    uint32_t m_shader_program = 0;
+    int32_t m_position_location = 0;
+    int32_t m_texture_location = 0;
 };
 
 class Video_Renderer : public QQuickItem
 {
     Q_OBJECT
-    Q_PROPERTY(qreal t READ t WRITE setT NOTIFY tChanged)
 
 public:
     Video_Renderer();
-
-    qreal t() const { return m_t; }
-    void setT(qreal t);
-
-signals:
-    void tChanged();
 
 public slots:
     void sync();
@@ -47,8 +47,7 @@ private slots:
     void handleWindowChanged(QQuickWindow *win);
 
 private:
-    qreal m_t;
-    Video_Renderer_OpenGL *m_renderer;
+    Video_Renderer_OpenGL *m_renderer = nullptr;
 };
 
 

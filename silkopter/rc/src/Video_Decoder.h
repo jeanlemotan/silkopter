@@ -2,7 +2,9 @@
 
 #include "common/stream/IVideo.h"
 #include <memory>
-#include <QtGui/QOpenGLTexture>
+#include <QOpenGLFunctions>
+#include <QOffscreenSurface>
+
 
 class Video_Decoder
 {
@@ -11,16 +13,21 @@ public:
     ~Video_Decoder();
 
 
-    bool init();
     bool decode_samples(std::vector<silk::stream::IVideo::Sample> const& samples);
 
-    QOpenGLTexture* get_video_texture();
+    bool init();
+
+    void release_buffers();
+
+    uint32_t get_video_texture_id();
 
     struct Impl;
 
 private:
-    bool create_components();
+    bool create_components(math::vec2u32 const& resolution);
+    void process_output();
 
+    uint32_t m_video_texture = 0;
     std::unique_ptr<Impl> m_impl;
-    QOpenGLTexture* m_video_texture = nullptr;
+    math::vec2u32 m_resolution;
 };

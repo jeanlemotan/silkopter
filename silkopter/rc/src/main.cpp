@@ -18,6 +18,7 @@
 silk::Comms s_comms;
 Video_Decoder s_video_decoder;
 
+
 int main(int argc, char *argv[])
 {
 	q::logging::add_logger(q::logging::Logger_uptr(new q::logging::Console_Logger()));
@@ -72,8 +73,6 @@ int main(int argc, char *argv[])
     Comms_QML_Proxy comms_proxy;
     comms_proxy.init(s_comms);
 
-    s_video_decoder.init();
-
     HAL_QML_Proxy hal_proxy;
 
     qmlRegisterType<Comms_QML_Proxy>("com.silk.Comms", 1, 0, "Comms");
@@ -84,29 +83,66 @@ int main(int argc, char *argv[])
     view.engine()->rootContext()->setContextProperty("s_menus", &menus_proxy);
     view.engine()->rootContext()->setContextProperty("s_hal", &hal_proxy);
 
+    size_t render_frames = 0;
+
+    QObject::connect(&view, &QQuickView::frameSwapped, [&render_frames]()
+    {
+        s_video_decoder.release_buffers();
+        render_frames++;
+    });
+
+    QObject::connect(&view, &QQuickView::sceneGraphInitialized, []()
+    {
+        bool res = s_video_decoder.init();
+        QASSERT(res);
+    });
+
+    QObject::connect(&view, &QQuickView::beforeRendering, []()
+    {
+        s_video_decoder.decode_samples(s_comms.get_video_samples());
+    });
+
+    QSurfaceFormat format = view.format();
+    format.setAlphaBufferSize(0);
+    format.setRedBufferSize(8);
+    format.setGreenBufferSize(8);
+    format.setBlueBufferSize(8);
+    format.setSamples(1);
+    format.setSwapBehavior(QSurfaceFormat::TripleBuffer);
+    format.setSwapInterval(0);
+    view.setFormat(format);
+
+    view.setClearBeforeRendering(false);
     view.resize(800, 480);
     view.setResizeMode(QQuickView::SizeRootObjectToView);
+    view.setPersistentOpenGLContext(true);
+    view.create();
     view.show();
 
     menus_proxy.push("Splash.qml");
 
+    q::Clock::time_point last_tp = q::Clock::now();
+    size_t process_frames = 0;
 
-    QTimer timer;
-    timer.setInterval(1);
-    timer.setSingleShot(false);
-    QObject::connect(&timer, &QTimer::timeout, []()
+    while (true)
     {
-       s_comms.process_rcp();
-       s_comms.process();
+        view.update();
+        s_comms.process_rcp();
+        s_comms.process();
 
-       s_video_decoder.decode_samples(s_comms.get_video_samples());
-    });
-    timer.start();
+        app.processEvents();
 
-    auto res = app.exec();
+        process_frames++;
+        if (q::Clock::now() - last_tp >= std::chrono::seconds(1))
+        {
+            last_tp = q::Clock::now();
+            QLOGI("P FPS: {}, R FPS: {}", process_frames, render_frames);
+            process_frames = 0;
+            render_frames = 0;
+        }
 
-//    work.reset();
-//    worker_threads.join_all();
+        std::this_thread::sleep_for(std::chrono::microseconds(1));
+    }
 
-    return res;
+    return 0;
 }
