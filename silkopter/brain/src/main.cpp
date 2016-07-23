@@ -158,19 +158,11 @@ int main(int argc, char const* argv[])
             goto exit;
         }
 
-//#if defined RASPBERRY_PI
-//        if (!comms.start_rfmon("mon0", 5))
-//        {
-//            QLOGE("Cannot start rc communication channel! Aborting");
-//            goto exit;
-//        }
-//#else
         if (!rc_comms.start_rfmon("wlan1", 3))
         {
-            QLOGE("Cannot start rc communication channel! Aborting");
-            goto exit;
+            QLOGW("Cannot start rc communication channel!");
+//            goto exit;
         }
-//#endif
 
         if (!gs_comms.start_udp(8005, 8006))
         {

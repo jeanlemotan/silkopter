@@ -87,7 +87,13 @@ private:
     double		m_c5 = 0;
     double		m_c6 = 0;
 
-    uint8_t         m_stage = 0;
+    enum class Stage
+    {
+        PRESSURE,
+        TEMPERATURE
+    };
+
+    Stage         m_stage = Stage::PRESSURE;
     q::Clock::time_point m_last_process_tp = q::Clock::now();
     q::Clock::time_point m_last_temperature_reading_tp = q::Clock::now();
     q::Clock::time_point m_last_pressure_reading_tp = q::Clock::now();

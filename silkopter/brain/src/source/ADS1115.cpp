@@ -172,7 +172,7 @@ ts::Result<void> ADS1115::init()
     bool res = set_config_register(*i2c);
 
     uint8_t data;
-    res &= i2c->read_register_u8(ADS1115_DEFAULT_ADDRESS, ADS1115_RA_CONFIG, data);
+    res &= i2c->read_register_u8(m_descriptor->get_i2c_address(), ADS1115_RA_CONFIG, data);
 
     //start first measurement
     m_crt_adc = 0;
@@ -196,7 +196,7 @@ auto ADS1115::set_config_register(bus::II2C& i2c) -> bool
                         m_config_register.polarity |
                         m_config_register.latch |
                         m_config_register.queue;
-    return i2c.write_register_u16(ADS1115_DEFAULT_ADDRESS, ADS1115_RA_CONFIG, config);
+    return i2c.write_register_u16(m_descriptor->get_i2c_address(), ADS1115_RA_CONFIG, config);
 }
 
 ts::Result<void> ADS1115::start(q::Clock::time_point tp)
@@ -244,7 +244,7 @@ void ADS1115::process()
     if (m_config_register.mode == ADS1115_MODE_SINGLESHOT)
     {
         uint16_t cr = 0;
-        if (!i2c->read_register_u16(ADS1115_DEFAULT_ADDRESS, ADS1115_RA_CONFIG, cr))
+        if (!i2c->read_register_u16(m_descriptor->get_i2c_address(), ADS1115_RA_CONFIG, cr))
         {
             return;
         }
@@ -256,7 +256,7 @@ void ADS1115::process()
     }
 
     uint16_t ufvalue = 0;
-    if (!i2c->read_register_u16(ADS1115_DEFAULT_ADDRESS, ADS1115_RA_CONVERSION, ufvalue))
+    if (!i2c->read_register_u16(m_descriptor->get_i2c_address(), ADS1115_RA_CONVERSION, ufvalue))
     {
         return;
     }

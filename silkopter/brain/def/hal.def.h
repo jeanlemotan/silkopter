@@ -934,10 +934,15 @@ struct ADS1115_Descriptor : public INode_Descriptor
 {
 public:
   typedef uint32_t rate_t;
+  typedef uint8_t i2c_address_t;
   virtual ~ADS1115_Descriptor() = default;
   void set_bus(std::string const& value);
   void set_bus(std::string&& value);
   auto get_bus() const -> std::string const&;
+
+  void set_i2c_address(uint8_t const& value);
+  void set_i2c_address(uint8_t&& value);
+  auto get_i2c_address() const -> uint8_t const&;
 
   void set_adc0_rate(uint32_t const& value);
   void set_adc0_rate(uint32_t&& value);
@@ -957,6 +962,7 @@ public:
 
 private:
   std::string m_bus;
+  uint8_t m_i2c_address = {72};
   uint32_t m_adc0_rate = {200};
   uint32_t m_adc1_rate = {200};
   uint32_t m_adc2_rate = {200};
@@ -974,10 +980,15 @@ struct AVRADC_Descriptor : public INode_Descriptor
 {
 public:
   typedef uint32_t rate_t;
+  typedef uint8_t i2c_address_t;
   virtual ~AVRADC_Descriptor() = default;
   void set_bus(std::string const& value);
   void set_bus(std::string&& value);
   auto get_bus() const -> std::string const&;
+
+  void set_i2c_address(uint8_t const& value);
+  void set_i2c_address(uint8_t&& value);
+  auto get_i2c_address() const -> uint8_t const&;
 
   void set_rate(uint32_t const& value);
   void set_rate(uint32_t&& value);
@@ -985,6 +996,7 @@ public:
 
 private:
   std::string m_bus;
+  uint8_t m_i2c_address = {23};
   uint32_t m_rate = {200};
 };
 
@@ -1291,6 +1303,7 @@ struct MPU9250_Descriptor : public INode_Descriptor
 {
 public:
   typedef uint32_t rate_t;
+  typedef uint8_t i2c_address_t;
   enum class imu_rate_t
   {
     _250 = 250,
@@ -1319,6 +1332,10 @@ public:
   void set_bus(std::string&& value);
   auto get_bus() const -> std::string const&;
 
+  void set_i2c_address(uint8_t const& value);
+  void set_i2c_address(uint8_t&& value);
+  auto get_i2c_address() const -> uint8_t const&;
+
   void set_imu_rate(imu_rate_t const& value);
   void set_imu_rate(imu_rate_t&& value);
   auto get_imu_rate() const -> imu_rate_t const&;
@@ -1341,6 +1358,7 @@ public:
 
 private:
   std::string m_bus;
+  uint8_t m_i2c_address = {104};
   imu_rate_t m_imu_rate = {MPU9250_Descriptor::imu_rate_t::_1000};
   uint32_t m_magnetometer_rate = {100};
   uint32_t m_thermometer_rate = {10};
@@ -1395,10 +1413,15 @@ struct MS5611_Descriptor : public INode_Descriptor
 {
 public:
   typedef uint32_t rate_t;
+  typedef uint8_t i2c_address_t;
   virtual ~MS5611_Descriptor() = default;
   void set_bus(std::string const& value);
   void set_bus(std::string&& value);
   auto get_bus() const -> std::string const&;
+
+  void set_i2c_address(uint8_t const& value);
+  void set_i2c_address(uint8_t&& value);
+  auto get_i2c_address() const -> uint8_t const&;
 
   void set_pressure_rate(uint32_t const& value);
   void set_pressure_rate(uint32_t&& value);
@@ -1410,6 +1433,7 @@ public:
 
 private:
   std::string m_bus;
+  uint8_t m_i2c_address = {119};
   uint32_t m_pressure_rate = {100};
   uint32_t m_temperature_rate = {10};
 };

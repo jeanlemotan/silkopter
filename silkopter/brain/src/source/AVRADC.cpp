@@ -115,7 +115,7 @@ void AVRADC::process()
 
     //TODO - add healthy indication
     uint8_t data[4] = {0};
-    if (i2c->read(AVRADC_ADDRESS, data, sizeof(data)))
+    if (i2c->read(m_descriptor->get_i2c_address(), data, sizeof(data)))
     {
         for (size_t i = 0; i < m_adcs.size(); i++)
         {

@@ -33,6 +33,8 @@ constexpr uint8_t CMD_CONVERT_D2_OSR1024 = 0x54;
 constexpr uint8_t CMD_CONVERT_D2_OSR2048 = 0x56;
 constexpr uint8_t CMD_CONVERT_D2_OSR4096 = 0x58;
 
+constexpr q::Clock::duration MIN_CONVERSION_TIME = std::chrono::milliseconds(10);
+
 constexpr uint8_t ADDR_MS5611 = 0x77;
 
 
@@ -77,7 +79,7 @@ auto MS5611::bus_read_u24(Buses& buses, uint8_t reg, uint32_t& dst) -> bool
 {
     uint8_t tx_data[3] = {0};
     uint8_t rx_data[3];
-    bool res = buses.i2c ? buses.i2c->read_register(ADDR_MS5611, reg, rx_data, 3)
+    bool res = buses.i2c ? buses.i2c->read_register(m_descriptor->get_i2c_address(), reg, rx_data, 3)
                 : buses.spi ? buses.spi->transfer_register(reg, tx_data, rx_data, 3)
                 : false;
     if (res)
@@ -89,21 +91,21 @@ auto MS5611::bus_read_u24(Buses& buses, uint8_t reg, uint32_t& dst) -> bool
 auto MS5611::bus_read_u8(Buses& buses, uint8_t reg, uint8_t& rx_data) -> bool
 {
     uint8_t dummy_data = 0;
-    return buses.i2c ? buses.i2c->read_register_u8(ADDR_MS5611, reg, rx_data)
+    return buses.i2c ? buses.i2c->read_register_u8(m_descriptor->get_i2c_address(), reg, rx_data)
          : buses.spi ? buses.spi->transfer_register_u8(reg, dummy_data, rx_data)
          : false;
 }
 auto MS5611::bus_read_u16(Buses& buses, uint8_t reg, uint16_t& rx_data) -> bool
 {
     uint16_t dummy_data = 0;
-    return buses.i2c ? buses.i2c->read_register_u16(ADDR_MS5611, reg, rx_data)
+    return buses.i2c ? buses.i2c->read_register_u16(m_descriptor->get_i2c_address(), reg, rx_data)
          : buses.spi ? buses.spi->transfer_register_u16(reg, dummy_data, rx_data)
          : false;
 }
 auto MS5611::bus_write(Buses& buses, uint8_t data) -> bool
 {
     uint8_t dummy_data;
-    return buses.i2c ? buses.i2c->write(ADDR_MS5611, &data, 1)
+    return buses.i2c ? buses.i2c->write(m_descriptor->get_i2c_address(), &data, 1)
          : buses.spi ? buses.spi->transfer(&data, &dummy_data, 1)
          : false;
 }
@@ -184,7 +186,8 @@ ts::Result<void> MS5611::init()
         return make_error("MS5611 seems broken!");
     }
 
-    res = bus_write(buses, CMD_CONVERT_D2_OSR256);
+    m_stage = Stage::PRESSURE;
+    res = bus_write(buses, CMD_CONVERT_D1_OSR256);
     if (!res)
     {
         return make_error("cannot start conversion");
@@ -198,7 +201,8 @@ ts::Result<void> MS5611::init()
 
 ts::Result<void> MS5611::start(q::Clock::time_point tp)
 {
-    m_last_process_tp = tp;
+    m_last_temperature_reading_tp = tp;
+    m_last_pressure_reading_tp = tp;
     m_pressure->set_tp(tp);
     m_temperature->set_tp(tp);
     return ts::success;
@@ -223,37 +227,13 @@ void MS5611::process()
 
     QLOG_TOPIC("ms5611::process");
     auto now = q::Clock::now();
-    if (now - m_last_process_tp < m_pressure->get_dt())
+    if (now - m_last_process_tp < MIN_CONVERSION_TIME)
     {
         return;
     }
     m_last_process_tp = now;
 
-    if (m_stage == 0)
-    {
-        uint32_t data = 0;
-        //read temperature
-        if (bus_read_u24(buses, 0x00, data))
-        {
-            m_last_temperature_reading_tp = now;
-            m_temperature->reading = static_cast<double>(data);
-        }
-        else
-        {
-            m_stats.bus_failures++;
-        }
-
-        //next
-        if (bus_write(buses, CMD_CONVERT_D1_OSR256)) //read pressure next
-        {
-            m_stage++;
-        }
-        else
-        {
-            m_stats.bus_failures++;
-        }
-    }
-    else
+    if (m_stage == Stage::PRESSURE)
     {
         uint32_t data = 0;
         //read pressure
@@ -266,28 +246,46 @@ void MS5611::process()
         {
             m_stats.bus_failures++;
         }
+    }
+    else
+    {
+        uint32_t data = 0;
+        //read temperature
+        if (bus_read_u24(buses, 0x00, data))
+        {
+            m_last_temperature_reading_tp = now;
+            m_temperature->reading = static_cast<double>(data);
+        }
+        else
+        {
+            m_stats.bus_failures++;
+        }
+    }
 
-        //next
-        //todo - implement the pressure_rate and temperature_rate instead of the ratio
-//        if (m_stage >= m_descriptor->temperature_rate_ratio)
-//        {
-//            if (bus_write(buses, CMD_CONVERT_D2_OSR256)) //read temp next
-//            {
-//                m_stage = 0;
-//            }
-//            else
-//            {
-//                m_stats.bus_failures++;
-//            }
-//        }
-//        else if (bus_write(buses, CMD_CONVERT_D1_OSR256)) //read pressure next
-//        {
-//            m_stage++;
-//        }
-//        else
-//        {
-//            m_stats.bus_failures++;
-//        }
+    //figure out what to read next
+    auto future_tp_p = m_last_pressure_reading_tp + m_pressure->get_dt();
+    auto future_tp_t = m_last_temperature_reading_tp + m_temperature->get_dt();
+    if (future_tp_p < future_tp_t)
+    {
+        if (bus_write(buses, CMD_CONVERT_D1_OSR256)) //read pressure next
+        {
+            m_stage = Stage::PRESSURE;
+        }
+        else
+        {
+            m_stats.bus_failures++;
+        }
+    }
+    else
+    {
+        if (bus_write(buses, CMD_CONVERT_D2_OSR256)) //read temp next
+        {
+            m_stage = Stage::TEMPERATURE;
+        }
+        else
+        {
+            m_stats.bus_failures++;
+        }
     }
 
     {
