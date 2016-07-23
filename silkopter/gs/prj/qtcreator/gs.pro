@@ -19,7 +19,6 @@ INCLUDEPATH += ../../src
 INCLUDEPATH += ../../src/qnodeseditor
 INCLUDEPATH += ../../src/calibration
 INCLUDEPATH += ../../src/stream_viewers
-INCLUDEPATH += ../../../../QMapControl/src
 INCLUDEPATH += ../../../../qbase/include
 INCLUDEPATH += ../../../../qdata/include
 INCLUDEPATH += ../../../../qmath/include
@@ -64,7 +63,6 @@ LIBS += -L$${ROOT_LIBS_PATH}/def_lang/lib/$${DEST_FOLDER} -ldef_lang
 LIBS += -L$${ROOT_LIBS_PATH}/qdata/lib/$${DEST_FOLDER} -lqdata
 LIBS += -L$${ROOT_LIBS_PATH}/qmath/lib/$${DEST_FOLDER} -lqmath
 LIBS += -L$${ROOT_LIBS_PATH}/qbase/lib/$${DEST_FOLDER} -lqbase
-LIBS += -L$${ROOT_LIBS_PATH}/QMapControl/lib/$${DEST_FOLDER} -lqmapcontrol
 
 LIBS += -lfreetype -lboost_system -lavutil -lavcodec -lavformat -lswscale -lfftw3f -lz
 LIBS += -lboost_thread

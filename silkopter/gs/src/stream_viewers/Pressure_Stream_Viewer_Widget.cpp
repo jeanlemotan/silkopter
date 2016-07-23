@@ -49,7 +49,7 @@ void Pressure_Stream_Viewer_Widget::init(silk::Comms& comms, std::string const& 
             {
                 for (auto const& sample: stream->samples)
                 {
-                    float values[1] = { sample.value };
+                    float values[1] = { static_cast<float>(sample.value) };
                     widget->add_samples(values, sample.is_healthy);
                 }
 

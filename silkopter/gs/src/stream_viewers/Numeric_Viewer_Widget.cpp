@@ -1,6 +1,6 @@
 #include "Numeric_Viewer_Widget.h"
 #include "Comms.h"
-#include "ui_Numeric_Viewer.h"
+#include "ui_Numeric_Viewer_Widget.h"
 
 #include <QtCharts>
 

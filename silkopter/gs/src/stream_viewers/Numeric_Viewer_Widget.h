@@ -2,7 +2,7 @@
 
 #include <boost/thread.hpp>
 #include "Comms.h"
-#include "ui_Numeric_Viewer.h"
+#include "ui_Numeric_Viewer_Widget.h"
 
 #include <QtCharts/QLineSeries>
 
@@ -23,7 +23,7 @@ private:
 
     void setup_axis(QtCharts::QAbstractAxis* axis);
 
-    Ui::Numeric_Viewer m_ui;
+    Ui::Numeric_Viewer_Wdgiet m_ui;
     size_t m_sample_rate = 0;
     float m_tp = 0.0;
     float m_dts = 0.0;
