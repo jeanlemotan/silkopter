@@ -7,7 +7,7 @@ import com.silk.VideoRenderer 1.0
 
 Item {
     id: root
-    width: 800; height: 600
+//    width: 800; height: 600
 //    color: "#2c503e"
 
     TopBar {
@@ -51,13 +51,13 @@ Item {
         x: 0
         anchors.top: topBar.bottom
         anchors.bottom: root.bottom
-        width: 200
+        width: topBar.height * (root.width / root.height)
 
         MenuButton
         {
             id: hudButton
             enabled: s_comms.connectionStatus == Comms.CONNECTED
-            text: "HUD"
+            //text: "HUD"
             icon: "qrc:/icons/ui/hud.png"
             //color: "#bdc3c7"
             onClicked: s_menus.push("HUD.qml")
@@ -70,7 +70,7 @@ Item {
         MenuButton
         {
             id: setupButton
-            text: "Setup"
+            //text: "Setup"
             icon: "qrc:/icons/ui/setup.png"
             //color: "#bdc3c7"
             onClicked: s_menus.push("Setup.qml")

@@ -164,7 +164,11 @@ SOURCES += \
     ../../src/uav_properties/Octoquad_Multirotor_Properties.cpp \
     ../../src/uav_properties/Quad_Multirotor_Properties.cpp \
     ../../src/uav_properties/Tri_Multirotor_Properties.cpp \
-    ../../src/source/CPPM_Receiver.cpp
+    ../../src/source/CPPM_Receiver.cpp \
+    ../../../libs/utils/RCP_RF4463F30_Socket.cpp \
+    ../../../libs/utils/RF4463F30.cpp \
+    ../../../libs/utils/Si4463.cpp \
+    ../../../libs/utils/SPI_Dev.cpp
 
 HEADERS += \
     ../../src/BrainStdAfx.h \
@@ -310,7 +314,11 @@ HEADERS += \
     ../../src/uav_properties/Octoquad_Multirotor_Properties.h \
     ../../src/uav_properties/Quad_Multirotor_Properties.h \
     ../../src/uav_properties/Tri_Multirotor_Properties.h \
-    ../../src/source/CPPM_Receiver.h
+    ../../src/source/CPPM_Receiver.h \
+    ../../../libs/utils/RCP_RF4463F30_Socket.h \
+    ../../../libs/utils/SPI_Dev.h \
+    ../../../libs/utils/Si4463.h \
+    ../../../libs/utils/RF4463F30.h
 
 DISTFILES +=
 

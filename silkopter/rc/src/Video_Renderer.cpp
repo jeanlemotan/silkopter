@@ -175,6 +175,11 @@ Video_Renderer::Video_Renderer()
     connect(this, &QQuickItem::windowChanged, this, &Video_Renderer::handleWindowChanged);
 }
 
+Video_Renderer::~Video_Renderer()
+{
+    delete m_renderer;
+}
+
 void Video_Renderer::handleWindowChanged(QQuickWindow* win)
 {
     if (win)

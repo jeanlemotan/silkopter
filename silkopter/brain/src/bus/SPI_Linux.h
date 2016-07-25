@@ -1,6 +1,7 @@
 #pragma once
 
 #include "common/bus/ISPI.h"
+#include "utils/SPI_Dev.h"
 
 namespace silk
 {
@@ -33,17 +34,9 @@ public:
 
 private:
     ts::Result<void> init(std::string const& dev, uint32_t speed);
-    ts::Result<void> open(std::string const& dev, uint32_t speed);
-    void close();
-
-    auto do_transfer(uint8_t const* tx_data, uint8_t* rx_data, size_t size, uint32_t speed) -> bool;
 
     std::shared_ptr<hal::SPI_Linux_Descriptor> m_descriptor;
-
-    int m_fd = -1;
-    uint32_t m_speed = 100000;
-    std::vector<uint8_t> m_tx_buffer;
-    std::vector<uint8_t> m_rx_buffer;
+    util::SPI_Dev m_spi_dev;
 };
 
 }

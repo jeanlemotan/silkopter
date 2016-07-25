@@ -42,6 +42,7 @@ class Video_Renderer : public QQuickItem
 
 public:
     Video_Renderer();
+    ~Video_Renderer();
 
 public slots:
     void sync();

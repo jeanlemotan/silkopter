@@ -49,7 +49,8 @@ private:
 
     q::Clock::time_point m_last_rcp_tp = q::Clock::now();
 
-    std::shared_ptr<util::RCP_Socket> m_socket;
+    std::shared_ptr<util::RCP_Socket> m_video_socket;
+    std::shared_ptr<util::RCP_Socket> m_rc_socket;
     std::shared_ptr<util::RCP> m_rcp;
 
     std::shared_ptr<Channels> m_channels;

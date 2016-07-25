@@ -4,12 +4,13 @@ import QtQuick.Controls.Styles 1.4
 import Qt.labs.settings 1.0
 import com.silk.HAL 1.0
 import com.silk.Comms 1.0
+import com.silk.VideoRenderer 1.0
 
 
-Rectangle {
+Item {
     id: root
-    width: 320; height: 480
-    color: "#2c3e50"
+    width: 800; height: 480
+    //color: "#2c3e50"
 
     TopBar {
         id: topBar
@@ -23,11 +24,11 @@ Rectangle {
         x: 0
         anchors.top: topBar.bottom
         anchors.bottom: root.bottom
-        width: 200
+        width: topBar.height * (root.width / root.height)
 
         MenuButton {
             id: commsSetupButton
-            text: "Comms"
+//            text: "Comms"
             icon: "qrc:/icons/ui/wifi.png"
             //color: "#bdc3c7"
             onClicked: s_menus.push("CommsSetup.qml")
@@ -75,7 +76,14 @@ Rectangle {
                 maximumValue: 1
             }
         }
+    }
 
+    VideoRenderer {
+        id: renderer
+        anchors.top: topBar.bottom
+        anchors.left: sideBar.right
+        anchors.right: root.right
+        anchors.bottom: root.bottom
     }
 
 
