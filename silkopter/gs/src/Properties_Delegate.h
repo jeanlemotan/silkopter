@@ -19,6 +19,8 @@ public:
 
     std::shared_ptr<Value_Editor_Factory> get_editor_factory();
 
+    boost::signals2::signal<void()> sig_value_changed;
+
 protected:
 	QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const override;
 	void paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const override;
@@ -36,15 +38,13 @@ private:
 
     struct Editor_Data
 	{
-        Editor_Data(std::shared_ptr<IValue_Editor> editor, std::shared_ptr<ts::IValue> backup)
+        Editor_Data(std::shared_ptr<IValue_Editor> editor)
 			: editor(std::move(editor))
-			, backup(std::move(backup))
 		{}
         std::shared_ptr<IValue_Editor> editor;
-        std::shared_ptr<ts::IValue> backup;
         bool value_was_commited = false;
-        //q::util::Scoped_Connection editingFinishedConnection;
-        //q::util::Scoped_Connection linkPressedConnection;
+        boost::signals2::scoped_connection value_changed_connection;
+        boost::signals2::scoped_connection editing_finished_connection;
 	};
 
     mutable std::shared_ptr<Editor_Data> m_editor_data;

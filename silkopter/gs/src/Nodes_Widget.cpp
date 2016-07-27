@@ -75,17 +75,6 @@ Nodes_Widget::Nodes_Widget()
     m_nodes_editor = new QNodesEditor(this);
     m_nodes_editor->install(m_scene);
 
-    //    m_selection.config_dock = new QDockWidget(this);
-    //    m_selection.config_view = new QTreeView(m_selection.config_dock);
-    //    m_selection.config_model = new JSON_Model(m_selection.config_view);
-    //    connect(m_selection.config_model, &QAbstractItemModel::dataChanged, this, &Nodes_Widget::on_config_changed);
-
-    //    m_selection.config_dock->setWidget(m_selection.config_view);
-    //    m_selection.config_view->setModel(m_selection.config_model);
-    //    m_selection.config_view->setItemDelegate(new Custom_Item_Delegate(m_selection.config_view));
-
-    //    addDockWidget(Qt::RightDockWidgetArea, m_selection.config_dock);
-
     connect(m_scene, &QGraphicsScene::selectionChanged, [this]() { on_selection_changed(); });
     connect(m_nodes_editor, &QNodesEditor::contextMenu, this, &Nodes_Widget::show_context_menu);
     connect(m_nodes_editor, &QNodesEditor::portContextMenu, this, &Nodes_Widget::show_port_context_menu);
@@ -109,6 +98,7 @@ void Nodes_Widget::set_active(bool active)
 {
     m_browser->set_value(nullptr);
     m_selection.node = nullptr;
+    on_selection_changed();
 
     if (!active)
     {
@@ -123,6 +113,9 @@ void Nodes_Widget::set_active(bool active)
 //            delete m_new_action;
 //            m_new_action = nullptr;
         }
+
+        m_connections.value_changed_connection.disconnect();
+
         return;
     }
     m_refresh_action = m_toolbar->addAction(QIcon(":/icons/ui/reconnect.png"), "Refresh");
@@ -131,13 +124,34 @@ void Nodes_Widget::set_active(bool active)
     m_upload_action = m_toolbar->addAction(QIcon(":/icons/ui/upload.png"), "Upload");
     m_upload_action->setEnabled(false);
     m_upload_action->setShortcut(QKeySequence("Ctrl+S"));
-    QObject::connect(m_upload_action, &QAction::triggered, [this](bool) { upload_config(); });
+    QObject::connect(m_upload_action, &QAction::triggered, [this](bool)
+    {
+        if (m_selection.node)
+        {
+            upload_config(m_selection.node);
+        }
+    });
+
+    m_connections.value_changed_connection = m_browser->sig_value_changed.connect([this]()
+    {
+        on_browser_value_changed();
+    });
 
 //    m_new_action = m_toolbar->addAction(QIcon(":/icons/ui/new.png"), "New");
 //    QObject::connect(m_new_action, &QAction::triggered, [this](bool) { show_new_descriptor_menu(); });
 }
 
-void Nodes_Widget::upload_config()
+void Nodes_Widget::on_browser_value_changed()
+{
+    if (!m_selection.node)
+    {
+        return;
+    }
+
+    upload_config(m_selection.node);
+}
+
+void Nodes_Widget::upload_config(std::shared_ptr<Node> node)
 {
     if (!m_comms->is_connected())
     {
@@ -145,12 +159,7 @@ void Nodes_Widget::upload_config()
         return;
     }
 
-    if (!m_selection.node)
-    {
-        return;
-    }
-
-    auto result = m_comms->set_node_config(m_selection.node->name, m_selection.node->config);
+    auto result = m_comms->set_node_config(node->name, node->config);
     if (result != ts::success)
     {
         QMessageBox::critical(this, "Error", result.error().what().c_str());
@@ -309,7 +318,7 @@ void Nodes_Widget::do_acceleration_calibration(Node& node, size_t output_idx)
         }
         else
         {
-            node.config = result.payload().config;
+            refresh_node(result.payload());
         }
     }
 }
@@ -334,7 +343,7 @@ void Nodes_Widget::do_magnetic_field_calibration(Node& node, size_t output_idx)
         }
         else
         {
-            node.config = result.payload().config;
+            refresh_node(result.payload());
         }
     }
 }
@@ -359,7 +368,7 @@ void Nodes_Widget::do_angular_velocity_calibration(Node& node, size_t output_idx
         }
         else
         {
-            node.config = result.payload().config;
+            refresh_node(result.payload());
         }
     }
 }
@@ -895,8 +904,11 @@ void Nodes_Widget::refresh_node(silk::Comms::Node const& src_node)
 
     std::shared_ptr<Node> const& dst_node = it->second;
 
-    dst_node->descriptor = src_node.descriptor;
-    dst_node->config = src_node.config;
+    auto result = dst_node->descriptor->copy_assign(*src_node.descriptor);
+    QASSERT(result == ts::success);
+
+    result = dst_node->config->copy_assign(*src_node.config);
+    QASSERT(result == ts::success);
 
     QASSERT(src_node.inputs.size() == dst_node->inputs.size());
 
@@ -929,7 +941,10 @@ void Nodes_Widget::on_selection_changed()
     m_browser->set_value(nullptr);
 
     m_selection.node = nullptr;
-    m_upload_action->setEnabled(false);
+    if (m_upload_action)
+    {
+        m_upload_action->setEnabled(false);
+    }
 
     QList<QGraphicsItem*> items = m_scene->selectedItems();
     if (items.empty())
@@ -952,7 +967,10 @@ void Nodes_Widget::on_selection_changed()
     m_browser->expandAll();
 
     m_selection.node = it->second;
-    m_upload_action->setEnabled(true);
+    if (m_upload_action)
+    {
+        m_upload_action->setEnabled(true);
+    }
 }
 
 void Nodes_Widget::set_node_position(std::string const& node_name, QPointF const& pos)

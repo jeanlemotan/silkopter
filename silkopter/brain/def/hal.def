@@ -376,7 +376,7 @@ struct LPF_Descriptor : public INode_Descriptor
 
 struct LPF_Config : public INode_Config
 {
-    alias poles_t = uint32_t : [ max = 6 ];
+    alias poles_t = uint32_t : [ min = 1, max = 6 ];
 
     poles_t poles = 1 : [ ui_name = "LPF Poles" ];
     ufloat cutoff_frequency = 1.f : [ ui_name = "LPF Cutoff Frequency", ui_suffix = "Hz" ];

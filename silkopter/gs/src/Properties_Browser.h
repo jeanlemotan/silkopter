@@ -26,6 +26,8 @@ public:
     void reset();
 
     void set_value(std::shared_ptr<ts::IStruct_Value> value);
+
+    boost::signals2::signal<void()> sig_value_changed;
 	
 protected:
 	void defaultExpand();
@@ -43,14 +45,10 @@ private:
 
     void root_item_changed(Properties_Model& model);
 
-//	struct Connections
-//	{
-//		q::util::Scoped_Connection rootNodeChanged;
-//		q::util::Scoped_Connection childrenWillBeRemoved;
-//		q::util::Scoped_Connection childrenRemoved;
-//		q::util::Scoped_Connection handleChanged;
-//		q::util::Scoped_Connection linkPressed;
-//	} m_connections;
+    struct Connections
+    {
+        boost::signals2::scoped_connection value_changed_connection;
+    } m_connections;
 
     std::shared_ptr<Properties_Model> m_model;
     std::shared_ptr<Properties_Delegate> m_delegate;

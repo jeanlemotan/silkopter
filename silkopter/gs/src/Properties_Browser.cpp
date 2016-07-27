@@ -31,6 +31,11 @@ void Properties_Browser::init(std::shared_ptr<Value_Editor_Factory> editor_facto
     QTreeView::setItemDelegate(m_delegate.get());
     QTreeView::setModel(m_model.get());
 
+    m_connections.value_changed_connection = m_delegate->sig_value_changed.connect([this]()
+    {
+        sig_value_changed();
+    });
+
 	// setup vertical scrollbar
 	setVerticalScrollMode(QAbstractItemView::ScrollMode::ScrollPerPixel);
 	setVerticalScrollBarPolicy(Qt::ScrollBarPolicy::ScrollBarAsNeeded);

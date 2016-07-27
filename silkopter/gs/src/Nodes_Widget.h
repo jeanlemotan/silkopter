@@ -30,8 +30,6 @@ private:
 
     void on_selection_changed();
 
-    void upload_config();
-
     //std::vector<q::util::Scoped_Connection> m_connections;
 
     QToolBar* m_toolbar = nullptr;
@@ -97,6 +95,15 @@ private:
     } m_selection;
 
     std::string m_uav_name;
+
+    struct Connections
+    {
+        boost::signals2::scoped_connection value_changed_connection;
+    } m_connections;
+
+    void on_browser_value_changed();
+
+    void upload_config(std::shared_ptr<Node> node);
 
 //    Sim_Window* m_sim_window = nullptr;
 
