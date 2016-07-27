@@ -12,6 +12,10 @@ class IValue;
 class IType : virtual public ISymbol, virtual public IAttribute_Container
 {
 public:
+    IType() = default;
+    IType(IType const&) = delete;
+    IType& operator=(IType const&) = delete;
+
     virtual ~IType() = default;
 
     virtual std::string const& get_ui_name() const = 0;

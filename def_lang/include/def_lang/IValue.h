@@ -16,6 +16,10 @@ class Value_Selector;
 class IValue
 {
 public:
+    IValue() = default;
+    IValue(IValue const&) = delete;
+    IValue& operator=(IValue const&) = delete;
+
     virtual ~IValue() = default;
 
     virtual bool is_constructed() const = 0;
