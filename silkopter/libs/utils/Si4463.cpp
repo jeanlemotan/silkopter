@@ -29,6 +29,11 @@ Si4463::~Si4463()
 
 bool Si4463::init(std::string const& device, uint32_t speed, uint8_t sdn_gpio, uint8_t nirq_gpio)
 {
+    if (m_is_initialized)
+    {
+        return true;
+    }
+
     auto result = m_spi_dev.init(device, speed);
     if (result != ts::success)
     {
@@ -84,6 +89,8 @@ bool Si4463::init(std::string const& device, uint32_t speed, uint8_t sdn_gpio, u
     }
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
+    m_is_initialized = true; //set to true so we can call call_api
+
     {
         uint8_t data[6] = { 0x01, 0x00, 0x01, 0xC9, 0xC3, 0x80 }; //bot up to main application, use xtal, 30MHz
         if (!call_api(Command::POWER_UP, data, 6, nullptr, 0))
@@ -111,9 +118,15 @@ bool Si4463::init(std::string const& device, uint32_t speed, uint8_t sdn_gpio, u
         }
     }
 
+    m_is_initialized = true;
+
     return true;
 
 error:
+    shutdown();
+
+    m_is_initialized = false;
+
     gpioSetMode(m_sdn_gpio, sdn_gpio_mode);
     gpioSetMode(m_nirq_gpio, nirq_gpio_mode);
     return false;
@@ -121,6 +134,10 @@ error:
 
 bool Si4463::shutdown()
 {
+    if (!m_is_initialized)
+    {
+        return false;
+    }
     int res = gpioWrite(m_sdn_gpio, 1);
     if (res != 0)
     {
@@ -132,6 +149,10 @@ bool Si4463::shutdown()
 
 bool Si4463::wait_for_cts()
 {
+    if (!m_is_initialized)
+    {
+        return false;
+    }
     uint8_t tx_data[] = { (uint8_t)Command::READ_CMD_BUFF, 0 };
     uint8_t rx_data[] = { 0, 0 };
     while (1)
@@ -149,7 +170,10 @@ bool Si4463::wait_for_cts()
 
 bool Si4463::call_api(Command cmd, void const* tx_data, size_t tx_size, void* rx_data, size_t rx_size)
 {
-    auto start = std::chrono::high_resolution_clock::now();
+    if (!m_is_initialized)
+    {
+        return false;
+    }
 
     //compose tx message
     m_tx_data.resize(1 + tx_size);
@@ -159,6 +183,17 @@ bool Si4463::call_api(Command cmd, void const* tx_data, size_t tx_size, void* rx
         memcpy(m_tx_data.data() + 1, tx_data, tx_size);
     }
 
+    return call_api_raw(m_tx_data.data(), m_tx_data.size(), rx_data, rx_size);
+}
+
+bool Si4463::call_api_raw(void const* tx_data, size_t tx_size, void* rx_data, size_t rx_size)
+{
+    if (!m_is_initialized)
+    {
+        return false;
+    }
+    auto start = std::chrono::high_resolution_clock::now();
+
     //wait forthe chip to be ready
     if (!wait_for_cts())
     {
@@ -166,7 +201,7 @@ bool Si4463::call_api(Command cmd, void const* tx_data, size_t tx_size, void* rx
     }
 
     //send command
-    if (!m_spi_dev.transfer(m_tx_data.data(), nullptr, m_tx_data.size()))
+    if (!m_spi_dev.transfer(tx_data, nullptr, tx_size))
     {
         return false;
     }
@@ -208,6 +243,10 @@ bool Si4463::set_property(Property prop, void const* tx_data, size_t tx_size)
 
 bool Si4463::set_properties(Property start_prop, size_t prop_count, void const* tx_data, size_t tx_size)
 {
+    if (!m_is_initialized)
+    {
+        return false;
+    }
     auto start = std::chrono::high_resolution_clock::now();
 
     //compose tx message
@@ -243,6 +282,45 @@ bool Si4463::set_properties(Property start_prop, size_t prop_count, void const* 
     QLOGI("DURATIONNNNNN: {}", std::chrono::duration_cast<std::chrono::microseconds>(now - start).count());
 
     return true;
+}
+
+bool Si4463::tx(void const* data, uint8_t size)
+{
+    if (!m_is_initialized)
+    {
+        return false;
+    }
+
+    return false;
+}
+
+bool Si4463::rx()
+{
+    if (!m_is_initialized)
+    {
+        return false;
+    }
+
+    return false;
+}
+
+bool Si4463::has_received_packet()
+{
+    if (!m_is_initialized)
+    {
+        return false;
+    }
+
+    return false;
+}
+bool Si4463::get_packet_data(void* data, size_t& size)
+{
+    if (!m_is_initialized)
+    {
+        return false;
+    }
+
+    return false;
 }
 
 
