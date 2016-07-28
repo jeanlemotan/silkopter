@@ -502,6 +502,7 @@ void Properties_Model::set_value(std::shared_ptr<ts::IStruct_Value> value)
 
 	beginResetModel();
     m_rootValue.reset();
+    m_root = std::make_shared<Tree_Item>(this, "root", "");
 	endResetModel();
 
     m_rootValue = value;
