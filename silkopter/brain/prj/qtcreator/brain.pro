@@ -138,14 +138,11 @@ SOURCES += \
     ../../../libs/utils/Coordinates.cpp \
     ../../src/processor/Comp_ECEF.cpp \
     ../../src/processor/KF_ECEF.cpp \
-    ../../src/hw/bcm2835.c \
     ../../src/processor/Proximity.cpp \
     ../../../libs/utils/RCP.cpp \
-    ../../src/hw/pigpio.c \
     ../../src/bus/I2C_BCM.cpp \
     ../../src/bus/SPI_BCM.cpp \
     ../../src/bus/UART_BBang.cpp \
-    ../../src/hw/command.c \
     ../../src/source/AVRADC.cpp \
     ../../src/processor/Pressure_Velocity.cpp \
     ../../src/processor/ENU_Frame_System.cpp \
@@ -168,7 +165,10 @@ SOURCES += \
     ../../../libs/utils/RCP_RF4463F30_Socket.cpp \
     ../../../libs/utils/RF4463F30.cpp \
     ../../../libs/utils/Si4463.cpp \
-    ../../../libs/utils/SPI_Dev.cpp
+    ../../../libs/utils/SPI_Dev.cpp \
+    ../../../libs/utils/hw/bcm2835.c \
+    ../../../libs/utils/hw/command.c \
+    ../../../libs/utils/hw/pigpio.c
 
 HEADERS += \
     ../../src/BrainStdAfx.h \
@@ -284,10 +284,8 @@ HEADERS += \
     ../../../libs/kalman/kvector_impl.hpp \
     ../../src/processor/Comp_ECEF.h \
     ../../src/processor/KF_ECEF.h \
-    ../../src/hw/bcm2835.h \
     ../../src/processor/Proximity.h \
     ../../../libs/common/stream/IMultirotor_Commands.h \
-    ../../src/hw/pigpio.h \
     ../../src/bus/I2C_BCM.h \
     ../../src/bus/SPI_BCM.h \
     ../../src/bus/UART_BBang.h \
@@ -318,7 +316,10 @@ HEADERS += \
     ../../../libs/utils/RCP_RF4463F30_Socket.h \
     ../../../libs/utils/SPI_Dev.h \
     ../../../libs/utils/Si4463.h \
-    ../../../libs/utils/RF4463F30.h
+    ../../../libs/utils/RF4463F30.h \
+    ../../../libs/utils/hw/bcm2835.h \
+    ../../../libs/utils/hw/command.h \
+    ../../../libs/utils/hw/pigpio.h
 
 DISTFILES +=
 

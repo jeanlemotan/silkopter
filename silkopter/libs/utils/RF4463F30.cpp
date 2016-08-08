@@ -158,39 +158,155 @@ error:
     return false;
 }
 
-bool RF4463F30::tx(void const* data, uint8_t size)
+
+bool RF4463F30::write_tx_fifo(void const* data, uint8_t size)
 {
     if (!m_is_initialized)
     {
         return false;
     }
-    return m_chip.tx(data, size);
+    return m_chip.write_tx_fifo(data, size);
+}
+bool RF4463F30::begin_tx(size_t size, uint8_t channel)
+{
+    if (!m_is_initialized)
+    {
+        return false;
+    }
+
+    //set the packet size
+//    uint8_t args[2] = { (uint8_t)(size >> 8), (uint8_t)(size & 0xFF) };
+//    if (!m_chip.set_properties(Si4463::Property::PKT_FIELD_1_LENGTH_12_8, 2, args, sizeof(args)))
+//    {
+//        return false;
+//    }
+
+    //enter tx state
+    uint8_t condition =
+            3 << 4 | //ready state
+            0 << 0; //start immediately
+
+    if (!m_chip.call_api_raw(
+            {
+                (uint8_t)Si4463::Command::START_TX,
+                channel,
+                condition,
+                (uint8_t)(size >> 8), (uint8_t)(size & 0xFF)//0x00, 0x00 //use the field1 length
+            }))
+    {
+        return false;
+    }
+
+    m_tx_started = true;
+
+    return true;
 }
 
-bool RF4463F30::rx()
+bool RF4463F30::end_tx()
 {
     if (!m_is_initialized)
     {
         return false;
     }
-    return m_chip.rx();
+    if (!m_tx_started)
+    {
+        QASSERT(false);
+        return false;
+    }
+
+    auto start = std::chrono::high_resolution_clock::now();
+
+    uint8_t response[2] = { 0 };
+
+    do
+    {
+        if (!m_chip.call_api(Si4463::Command::GET_PH_STATUS, nullptr, 0, response, sizeof(response)))
+        {
+            return false;
+        }
+        if ((response[1] & (1 << 5)) != 0)
+        {
+            break;
+        }
+
+        if (std::chrono::high_resolution_clock::now() - start > std::chrono::milliseconds(1000))
+        {
+            QLOGE("Timeout");
+            return false;
+        }
+
+        std::this_thread::sleep_for(std::chrono::microseconds(10));
+    } while (true);
+
+    m_tx_started = false;
+
+    return true;
 }
 
-bool RF4463F30::has_received_packet()
+bool RF4463F30::tx(size_t size, uint8_t channel)
 {
-    if (!m_is_initialized)
+    if (!begin_tx(size, channel))
     {
         return false;
     }
-    return m_chip.has_received_packet();
+    return end_tx();
 }
-bool RF4463F30::get_packet_data(void* data, size_t& size)
+
+bool RF4463F30::begin_rx(uint8_t channel)
 {
     if (!m_is_initialized)
     {
         return false;
     }
-    return m_chip.get_packet_data(data, size);
+
+    return m_chip.call_api_raw(
+    {
+        (uint8_t)Si4463::Command::START_RX,
+        channel,
+        0x00, //start immediately
+        0x00, 0x00, //size = 0
+    });
+}
+bool RF4463F30::end_rx(size_t& size)
+{
+    if (!m_is_initialized)
+    {
+        return false;
+    }
+
+    //first check if we got a packet
+    {
+        uint8_t response[2] = { 0 };
+        if (!m_chip.call_api(Si4463::Command::GET_PH_STATUS, nullptr, 0, response, sizeof(response)))
+        {
+            return false;
+        }
+        if ((response[1] & (1 << 4)) == 0)
+        {
+            size = 0;
+            return true; //no error but no packet either
+        }
+    }
+
+    uint8_t response[2];
+    if (!m_chip.call_api(Si4463::Command::PACKET_INFO, nullptr, 0, response, sizeof(response)))
+    {
+        return false;
+    }
+
+    size = ((uint16_t)response[0] << 8) & 0xFF00;
+    size |= (uint16_t)response[1] & 0x00FF;
+
+    return true;
+}
+bool RF4463F30::read_rx_fifo(void* data, size_t& size)
+{
+    if (!m_is_initialized)
+    {
+        return false;
+    }
+
+    return m_chip.read_rx_fifo(data, size);
 }
 
 

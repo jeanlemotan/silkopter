@@ -48,10 +48,10 @@ auto RC_Comms::start_udp(uint16_t send_port, uint16_t receive_port) -> bool
     try
     {
         auto s = new util::RCP_UDP_Socket();
-        m_video_socket.reset(s);
+        m_rc_socket.reset(s);
         m_rcp.reset(new util::RCP());
 
-        util::RCP::Socket_Handle handle = m_rcp->add_socket(m_video_socket.get());
+        util::RCP::Socket_Handle handle = m_rcp->add_socket(m_rc_socket.get());
         if (handle >= 0)
         {
             m_rcp->set_internal_socket_handle(handle);
@@ -73,7 +73,7 @@ auto RC_Comms::start_udp(uint16_t send_port, uint16_t receive_port) -> bool
 
     if (!m_is_connected)
     {
-        m_video_socket.reset();
+        m_rc_socket.reset();
         m_rcp.reset();
         QLOGW("Cannot start comms on ports s:{} r:{}", send_port, receive_port);
         return false;
@@ -95,34 +95,32 @@ auto RC_Comms::start_rfmon(std::string const& interface, uint8_t id) -> bool
         {
             auto s = new util::RCP_RFMON_Socket(interface, id);
             m_video_socket.reset(s);
+            if (!s->start())
+            {
+                throw std::exception();
+            }
 
             util::RCP::Socket_Handle handle = m_rcp->add_socket(m_video_socket.get());
             if (handle >= 0)
             {
-                m_rcp->set_internal_socket_handle(handle);
                 m_rcp->set_socket_handle(VIDEO_CHANNEL, handle);
                 m_rcp->set_socket_handle(TELEMETRY_CHANNEL, handle);
-
-                if (!s->start())
-                {
-                    throw std::exception();
-                }
             }
         }
 
         {
-            auto s = new util::RCP_RF4463F30_Socket("/dev/spidev1.0", 8000000);
+            auto s = new util::RCP_RF4463F30_Socket("/dev/spidev1.0", 10000000, false);
             m_rc_socket.reset(s);
+            if (!s->start())
+            {
+                throw std::exception();
+            }
 
             util::RCP::Socket_Handle handle = m_rcp->add_socket(m_rc_socket.get());
             if (handle >= 0)
             {
+                m_rcp->set_internal_socket_handle(handle);
                 m_rcp->set_socket_handle(PILOT_CHANNEL, handle);
-
-                if (!s->start())
-                {
-                    throw std::exception();
-                }
             }
         }
 
@@ -220,13 +218,19 @@ auto RC_Comms::get_multirotor_commands_values() const -> std::vector<stream::IMu
 }
 void RC_Comms::add_multirotor_state_sample(stream::IMultirotor_State::Sample const& sample)
 {
-    m_channels->pilot.pack_all(silk::rc_comms::Pilot_Message::MULTIROTOR_STATE, sample);
-    m_channels->pilot.send(*m_rcp);
+    if (m_rcp)
+    {
+        m_channels->pilot.pack_all(silk::rc_comms::Pilot_Message::MULTIROTOR_STATE, sample);
+        m_channels->pilot.send(*m_rcp);
+    }
 }
 void RC_Comms::add_video_sample(stream::IVideo::Sample const& sample)
 {
-    m_channels->video.pack_all(silk::rc_comms::Video_Message::FRAME_DATA, sample);
-    m_channels->video.send(*m_rcp);
+    if (m_rcp)
+    {
+        m_channels->video.pack_all(silk::rc_comms::Video_Message::FRAME_DATA, sample);
+        m_channels->video.send(*m_rcp);
+    }
 }
 
 //void Comms::handle_multirotor_commands()
@@ -264,10 +268,13 @@ void RC_Comms::process()
 //    }
 
 
-    auto result = m_video_socket->process();
-    if (result != util::RCP_Socket::Result::OK)
+    if (m_video_socket)
     {
-        m_rcp->reconnect();
+        auto result = m_video_socket->process();
+        if (result != util::RCP_Socket::Result::OK)
+        {
+//            m_rcp->reconnect();
+        }
     }
 
     if (m_rc_socket)

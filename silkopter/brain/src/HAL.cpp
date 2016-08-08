@@ -76,8 +76,8 @@
 
 extern "C"
 {
-    #include "hw/pigpio.h"
-    #include "hw/bcm2835.h"
+    #include "utils/hw/pigpio.h"
+    #include "utils/hw/bcm2835.h"
 }
 
 ///////////////////////////////////////////////////////////////////

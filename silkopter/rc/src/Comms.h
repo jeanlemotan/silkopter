@@ -72,7 +72,8 @@ private:
 
     void reset();
 
-    std::shared_ptr<util::RCP_Socket> m_socket;
+    std::shared_ptr<util::RCP_Socket> m_video_socket;
+    std::shared_ptr<util::RCP_Socket> m_rc_socket;
     std::shared_ptr<util::RCP> m_rcp;
 
     uint32_t m_last_req_id = 0;

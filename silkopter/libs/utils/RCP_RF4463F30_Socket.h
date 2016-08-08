@@ -3,6 +3,7 @@
 #include "RCP.h"
 #include <vector>
 #include <string>
+#include <chrono>
 #include <boost/thread.hpp>
 
 namespace util
@@ -11,7 +12,7 @@ namespace util
 class RCP_RF4463F30_Socket : public RCP_Socket
 {
 public:
-    RCP_RF4463F30_Socket(std::string const& device, uint32_t speed);
+    RCP_RF4463F30_Socket(std::string const& device, uint32_t speed, bool master);
     ~RCP_RF4463F30_Socket();
 
     Result process() override;
@@ -26,17 +27,20 @@ public:
     void unlock() override;
 
 private:
-    bool initialize();
-
     std::atomic_bool m_send_in_progress = {false};
+
+    void master_thread_proc();
+    void slave_thread_proc();
 
     struct Impl;
     std::unique_ptr<Impl> m_impl;
     std::string m_device;
     uint32_t m_speed = 0;
     bool m_exit = false;
-    boost::thread m_rx_thread;
-    boost::thread m_tx_thread;
+    bool m_is_master = false;
+    boost::thread m_thread;
+    q::Clock::time_point m_last_tx_tp = q::Clock::now();
+    q::Clock::time_point m_last_rx_tp = q::Clock::now();
     uint8_t m_id = 0;
 
     bool m_is_initialized = false;

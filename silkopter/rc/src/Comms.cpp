@@ -7,6 +7,7 @@
 
 #include "utils/RCP_UDP_Socket.h"
 #include "utils/RCP_RFMON_Socket.h"
+#include "utils/RCP_RF4463F30_Socket.h"
 
 using namespace silk;
 //using namespace boost::asio;
@@ -28,10 +29,10 @@ auto Comms::start_udp(boost::asio::ip::address const& address, uint16_t send_por
     try
     {
         auto s = new util::RCP_UDP_Socket();
-        m_socket.reset(s);
+        m_rc_socket.reset(s);
         m_rcp.reset(new util::RCP());
 
-        util::RCP::Socket_Handle handle = m_rcp->add_socket(m_socket.get());
+        util::RCP::Socket_Handle handle = m_rcp->add_socket(m_rc_socket.get());
         if (handle < 0)
         {
             QASSERT(0);
@@ -51,7 +52,7 @@ auto Comms::start_udp(boost::asio::ip::address const& address, uint16_t send_por
     }
     catch(...)
     {
-        m_socket.reset();
+        m_rc_socket.reset();
         m_rcp.reset();
         QLOGW("Connect failed");
         return false;
@@ -68,23 +69,41 @@ auto Comms::start_rfmon(std::string const& interface, uint8_t id) -> bool
     bool is_connected = false;
     try
     {
-        auto s = new util::RCP_RFMON_Socket(interface, id);
-        m_socket.reset(s);
-        m_rcp.reset(new util::RCP());
+        m_rcp.reset(new util::RCP);
 
-        util::RCP::Socket_Handle handle = m_rcp->add_socket(m_socket.get());
-        if (handle < 0)
         {
-            QASSERT(0);
-            throw std::exception();
+            auto s = new util::RCP_RFMON_Socket(interface, id);
+            m_video_socket.reset(s);
+            if (!s->start())
+            {
+                throw std::exception();
+            }
+
+            util::RCP::Socket_Handle handle = m_rcp->add_socket(m_video_socket.get());
+            if (handle >= 0)
+            {
+                m_rcp->set_socket_handle(VIDEO_CHANNEL, handle);
+                m_rcp->set_socket_handle(TELEMETRY_CHANNEL, handle);
+            }
         }
 
-        m_rcp->set_internal_socket_handle(handle);
-        m_rcp->set_socket_handle(PILOT_CHANNEL, handle);
-        m_rcp->set_socket_handle(VIDEO_CHANNEL, handle);
-        m_rcp->set_socket_handle(TELEMETRY_CHANNEL, handle);
+        {
+            auto s = new util::RCP_RF4463F30_Socket("/dev/spidev1.0", 10000000, true);
+            m_rc_socket.reset(s);
+            if (!s->start())
+            {
+                throw std::exception();
+            }
 
-        is_connected = s->start();
+            util::RCP::Socket_Handle handle = m_rcp->add_socket(m_rc_socket.get());
+            if (handle >= 0)
+            {
+                m_rcp->set_internal_socket_handle(handle);
+                m_rcp->set_socket_handle(PILOT_CHANNEL, handle);
+            }
+        }
+
+        is_connected = true;
     }
     catch(std::exception e)
     {
@@ -93,7 +112,8 @@ auto Comms::start_rfmon(std::string const& interface, uint8_t id) -> bool
 
     if (!is_connected)
     {
-        m_socket.reset();
+        m_video_socket.reset();
+        m_rc_socket.reset();
         m_rcp.reset();
         QLOGW("Cannot start comms on interface {}", interface);
         return false;
@@ -108,7 +128,8 @@ auto Comms::start_rfmon(std::string const& interface, uint8_t id) -> bool
 void Comms::disconnect()
 {
     reset();
-    m_socket.reset();
+    m_rc_socket.reset();
+    m_video_socket.reset();
 }
 
 auto Comms::is_connected() const -> bool
@@ -216,10 +237,22 @@ void Comms::process_rcp()
         return;
     }
 
-    auto result = m_socket->process();
-    if (result != util::RCP_Socket::Result::OK)
+    if (m_video_socket)
     {
-        m_rcp->reconnect();
+        auto result = m_video_socket->process();
+        if (result != util::RCP_Socket::Result::OK)
+        {
+//            m_rcp->reconnect();
+        }
+    }
+
+    if (m_rc_socket)
+    {
+        auto result = m_rc_socket->process();
+        if (result != util::RCP_Socket::Result::OK)
+        {
+            m_rcp->reconnect();
+        }
     }
 
     m_rcp->process();

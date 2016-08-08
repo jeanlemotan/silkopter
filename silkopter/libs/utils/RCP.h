@@ -39,7 +39,7 @@ namespace detail
 class RCP_Socket
 {
 public:
-    virtual ~RCP_Socket() {}
+    virtual ~RCP_Socket() = default;
 
     enum class Result
     {

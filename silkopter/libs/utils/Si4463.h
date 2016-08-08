@@ -234,20 +234,23 @@ public:
     bool shutdown();
 
     bool call_api(Command cmd, void const* tx_data, size_t tx_size, void* rx_data, size_t rx_size);
+    bool call_api_no_cts(Command cmd, void const* tx_data, size_t tx_size, void* rx_data, size_t rx_size);
+
     bool call_api_raw(void const* tx_data, size_t tx_size, void* rx_data, size_t rx_size);
+    bool call_api_raw_no_cts(void const* tx_data, size_t tx_size, void* rx_data, size_t rx_size);
+
     bool set_property(Property prop, void const* tx_data, size_t tx_size);
     bool set_properties(Property start_prop, size_t prop_count, void const* tx_data, size_t tx_size);
 
     bool call_api_raw(std::initializer_list<uint8_t> const& tx_data);
 
-
-    bool tx(void const* data, uint8_t size);
-    bool rx();
-
-    bool has_received_packet();
-    bool get_packet_data(void* data, size_t& size);
+    bool write_tx_fifo(void const* data, size_t size);
+    bool read_rx_fifo(void* data, size_t size);
 
 private:
+    bool _call_api(bool cts, Command cmd, void const* tx_data, size_t tx_size, void* rx_data, size_t rx_size);
+    bool _call_api_raw(bool cts, void const* tx_data, size_t tx_size, void* rx_data, size_t rx_size);
+
     bool wait_for_cts();
 
     uint8_t m_sdn_gpio = 0;

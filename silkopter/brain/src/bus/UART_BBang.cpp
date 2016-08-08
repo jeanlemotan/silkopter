@@ -4,7 +4,7 @@
 #ifdef RASPBERRY_PI
 extern "C"
 {
-    #include "hw/pigpio.h"
+    #include "utils/hw/pigpio.h"
 }
 #endif
 

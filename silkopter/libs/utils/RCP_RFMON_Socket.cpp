@@ -121,6 +121,8 @@ RCP_RFMON_Socket::RCP_RFMON_Socket(std::string const& interface, uint8_t id)
 RCP_RFMON_Socket::~RCP_RFMON_Socket()
 {
     m_exit = true;
+    m_impl->tx_buffer_cv.notify_all(); //to wake up the thread
+
     if (m_tx_thread.joinable())
     {
         m_tx_thread.join();
@@ -482,7 +484,11 @@ auto RCP_RFMON_Socket::start() -> bool
                 std::unique_lock<std::mutex> lg(m_impl->tx_buffer_mutex);
                 if (!m_impl->tx_buffer_has_data)
                 {
-                    m_impl->tx_buffer_cv.wait(lg, [this]{ return m_impl->tx_buffer_has_data == true; });
+                    m_impl->tx_buffer_cv.wait(lg, [this]{ return m_impl->tx_buffer_has_data == true || m_exit == true; });
+                }
+                if (m_exit)
+                {
+                    break;
                 }
 
                 //inject packets

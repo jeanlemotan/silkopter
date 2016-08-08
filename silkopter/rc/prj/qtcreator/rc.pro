@@ -157,7 +157,15 @@ HEADERS += \
     ../../src/Comms_QML_Proxy.h \
     ../../src/HAL_QML_Proxy.h \
     ../../src/Video_Decoder.h \
-    ../../src/Video_Renderer.h
+    ../../src/Video_Renderer.h \
+    ../../../libs/utils/RCP_RF4463F30_Socket.h \
+    ../../../libs/utils/RF4463F30.h \
+    ../../../libs/utils/Si4463.h \
+    ../../../libs/utils/RF4463F30_Config.h \
+    ../../../libs/utils/hw/bcm2835.h \
+    ../../../libs/utils/hw/command.h \
+    ../../../libs/utils/hw/pigpio.h \
+    ../../../libs/utils/SPI_Dev.h
 
 SOURCES += \
     ../../src/main.cpp \
@@ -175,7 +183,14 @@ SOURCES += \
     ../../src/OS_QML_Proxy.cpp \
     ../../src/HAL_QML_Proxy.cpp \
     ../../src/Video_Decoder.cpp \
-    ../../src/Video_Renderer.cpp
+    ../../src/Video_Renderer.cpp \
+    ../../../libs/utils/RCP_RF4463F30_Socket.cpp \
+    ../../../libs/utils/RF4463F30.cpp \
+    ../../../libs/utils/Si4463.cpp \
+    ../../../libs/utils/hw/bcm2835.c \
+    ../../../libs/utils/hw/command.c \
+    ../../../libs/utils/hw/pigpio.c \
+    ../../../libs/utils/SPI_Dev.cpp
 
 DISTFILES += \
     ../../src/node.png \

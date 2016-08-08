@@ -153,6 +153,9 @@ bool Si4463::wait_for_cts()
     {
         return false;
     }
+
+    auto start = std::chrono::high_resolution_clock::now();
+
     uint8_t tx_data[] = { (uint8_t)Command::READ_CMD_BUFF, 0 };
     uint8_t rx_data[] = { 0, 0 };
     while (1)
@@ -165,10 +168,27 @@ bool Si4463::wait_for_cts()
         {
             return true;
         }
+
+        std::this_thread::sleep_for(std::chrono::microseconds(10));
+
+        if (std::chrono::high_resolution_clock::now() - start > std::chrono::milliseconds(1000))
+        {
+            QLOGE("Timeout");
+            return false;
+        }
     }
 }
 
 bool Si4463::call_api(Command cmd, void const* tx_data, size_t tx_size, void* rx_data, size_t rx_size)
+{
+    return _call_api(true, cmd, tx_data, tx_size, rx_data, rx_size);
+}
+bool Si4463::call_api_no_cts(Command cmd, void const* tx_data, size_t tx_size, void* rx_data, size_t rx_size)
+{
+    return _call_api(false, cmd, tx_data, tx_size, rx_data, rx_size);
+}
+
+bool Si4463::_call_api(bool cts, Command cmd, void const* tx_data, size_t tx_size, void* rx_data, size_t rx_size)
 {
     if (!m_is_initialized)
     {
@@ -183,19 +203,28 @@ bool Si4463::call_api(Command cmd, void const* tx_data, size_t tx_size, void* rx
         memcpy(m_tx_data.data() + 1, tx_data, tx_size);
     }
 
-    return call_api_raw(m_tx_data.data(), m_tx_data.size(), rx_data, rx_size);
+    return _call_api_raw(cts, m_tx_data.data(), m_tx_data.size(), rx_data, rx_size);
 }
 
 bool Si4463::call_api_raw(void const* tx_data, size_t tx_size, void* rx_data, size_t rx_size)
+{
+    return _call_api_raw(true, tx_data, tx_size, rx_data, rx_size);
+}
+
+bool Si4463::call_api_raw_no_cts(void const* tx_data, size_t tx_size, void* rx_data, size_t rx_size)
+{
+    return _call_api_raw(false, tx_data, tx_size, rx_data, rx_size);
+}
+
+bool Si4463::_call_api_raw(bool cts, void const* tx_data, size_t tx_size, void* rx_data, size_t rx_size)
 {
     if (!m_is_initialized)
     {
         return false;
     }
-    auto start = std::chrono::high_resolution_clock::now();
 
     //wait forthe chip to be ready
-    if (!wait_for_cts())
+    if (cts && !wait_for_cts())
     {
         return false;
     }
@@ -206,34 +235,41 @@ bool Si4463::call_api_raw(void const* tx_data, size_t tx_size, void* rx_data, si
         return false;
     }
 
-    //compose CTS request
-    m_tx_data.clear();
-    m_tx_data.resize(2 + rx_size); //this will zero out all the data
-    m_rx_data.resize(m_tx_data.size());
-
-    m_tx_data[0] = static_cast<uint8_t>(Command::READ_CMD_BUFF);
-
-    //wait for CTS and then read the message
-    //This is needed because after getting the CTS the NSEL line has to be kept active.
-    while (1)
+    if (rx_size > 0)
     {
-        if (!m_spi_dev.transfer(m_tx_data.data(), m_rx_data.data(), m_tx_data.size()))
+        //compose CTS request
+        m_tx_data.clear();
+        m_tx_data.resize(2 + rx_size); //this will zero out all the data
+        m_rx_data.resize(m_tx_data.size());
+
+        m_tx_data[0] = static_cast<uint8_t>(Command::READ_CMD_BUFF);
+
+        auto start = std::chrono::high_resolution_clock::now();
+
+        //wait for CTS and then read the message
+        //This is needed because after getting the CTS the NSEL line has to be kept active.
+        while (1)
         {
-            return false;
-        }
-        if (m_rx_data[1] == 0xFF) //CTS clear
-        {
-            if (rx_size > 0)
+            if (!m_spi_dev.transfer(m_tx_data.data(), m_rx_data.data(), m_tx_data.size()))
+            {
+                return false;
+            }
+            if (m_rx_data[1] == 0xFF) //CTS clear
             {
                 memcpy(rx_data, m_rx_data.data() + 2, rx_size);
+                return true;
             }
 
-            auto now = std::chrono::high_resolution_clock::now();
-            QLOGI("DURATIONNNNNN: {}", std::chrono::duration_cast<std::chrono::microseconds>(now - start).count());
-
-            return true;
+            if (std::chrono::high_resolution_clock::now() - start > std::chrono::milliseconds(1000))
+            {
+                QLOGE("Timeout");
+                return false;
+            }
+            std::this_thread::sleep_for(std::chrono::microseconds(10));
         }
     }
+
+    return true;
 }
 
 bool Si4463::set_property(Property prop, void const* tx_data, size_t tx_size)
@@ -284,44 +320,65 @@ bool Si4463::set_properties(Property start_prop, size_t prop_count, void const* 
     return true;
 }
 
-bool Si4463::tx(void const* data, uint8_t size)
+bool Si4463::write_tx_fifo(void const* data, size_t size)
 {
     if (!m_is_initialized)
     {
         return false;
     }
 
-    return false;
+    if (data == nullptr || size == 0 || size > 64)
+    {
+        QASSERT(false);
+        return false;
+    }
+
+    //wait forthe chip to be ready
+    if (!wait_for_cts())
+    {
+        return false;
+    }
+
+    m_tx_data.resize(1 + size);
+    memcpy(m_tx_data.data() + 1, data, size);
+
+    m_tx_data[0] = static_cast<uint8_t>(Command::WRITE_TX_FIFO);
+
+    return m_spi_dev.transfer(m_tx_data.data(), nullptr, m_tx_data.size());
 }
 
-bool Si4463::rx()
+bool Si4463::read_rx_fifo(void* data, size_t size)
 {
     if (!m_is_initialized)
     {
         return false;
     }
 
-    return false;
-}
+    if (data == nullptr || size == 0 || size > 64)
+    {
+        QASSERT(false);
+        return false;
+    }
 
-bool Si4463::has_received_packet()
-{
-    if (!m_is_initialized)
+    //wait forthe chip to be ready
+    if (!wait_for_cts())
     {
         return false;
     }
 
-    return false;
-}
-bool Si4463::get_packet_data(void* data, size_t& size)
-{
-    if (!m_is_initialized)
+    m_tx_data.clear();
+    m_tx_data.resize(1 + size, 0xFF);
+    m_rx_data.resize(m_tx_data.size());
+
+    m_tx_data[0] = static_cast<uint8_t>(Command::READ_RX_FIFO);
+
+    if (!m_spi_dev.transfer(m_tx_data.data(), m_rx_data.data(), m_tx_data.size()))
     {
         return false;
     }
 
-    return false;
+    memcpy(data, m_rx_data.data() + 1, size);
+    return true;
 }
-
 
 }

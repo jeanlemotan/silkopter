@@ -5,7 +5,7 @@
 
 extern "C"
 {
-    #include "hw/bcm2835.h"
+    #include "utils/hw/bcm2835.h"
 }
 
 #endif

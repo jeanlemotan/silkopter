@@ -18,6 +18,49 @@
 silk::Comms s_comms;
 Video_Decoder s_video_decoder;
 
+#ifdef RASPBERRY_PI
+
+extern "C"
+{
+    #include "utils/hw/pigpio.h"
+    #include "utils/hw/bcm2835.h"
+}
+
+///////////////////////////////////////////////////////////////////
+
+std::chrono::microseconds PIGPIO_PERIOD(5);
+
+static auto initialize_pigpio() -> bool
+{
+    static bool initialized = false;
+    if (initialized)
+    {
+        return true;
+    }
+
+    QLOGI("Initializing pigpio");
+    if (gpioCfgClock(PIGPIO_PERIOD.count(), 1, 0) < 0 ||
+        gpioCfgPermissions(static_cast<uint64_t>(-1)))
+    {
+        QLOGE("Cannot configure pigpio");
+        return false;
+    }
+    if (gpioInitialise() < 0)
+    {
+        QLOGE("Cannot initialize pigpio");
+        return false;
+    }
+
+    initialized = true;
+    return true;
+}
+static auto shutdown_pigpio() -> bool
+{
+    gpioTerminate();
+    return true;
+}
+
+#endif
 
 int main(int argc, char *argv[])
 {
@@ -31,6 +74,14 @@ int main(int argc, char *argv[])
 //    {
 //        worker_threads.create_thread(boost::bind(&boost::asio::io_service::run, &s_async_io_service));
 //    }
+
+#if defined (RASPBERRY_PI)
+    if (!initialize_pigpio())
+    {
+        QLOGE("Cannot initialize pigpio");
+        return false;
+    }
+#endif
 
     Q_INIT_RESOURCE(res);
 
@@ -143,6 +194,10 @@ int main(int argc, char *argv[])
 
         std::this_thread::sleep_for(std::chrono::microseconds(1));
     }
+
+#if defined (RASPBERRY_PI)
+    shutdown_pigpio();
+#endif
 
     return 0;
 }
