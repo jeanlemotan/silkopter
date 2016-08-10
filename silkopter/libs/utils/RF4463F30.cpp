@@ -117,7 +117,6 @@ bool RF4463F30::init(const std::string& device, uint32_t speed, uint8_t sdn_gpio
     }
 
     if (!m_chip.call_api_raw({RF_INT_CTL_ENABLE_2}) ||
-        !m_chip.call_api_raw({RF_INT_CTL_CHIP_ENABLE_1}) ||
         !m_chip.call_api_raw({RF_FRR_CTL_A_MODE_4}) ||
         !m_chip.call_api_raw({RF_PREAMBLE_TX_LENGTH_9}) ||
         !m_chip.call_api_raw({RF_SYNC_CONFIG_6}) ||
@@ -221,15 +220,15 @@ bool RF4463F30::end_tx()
 
     auto start = std::chrono::high_resolution_clock::now();
 
-    uint8_t response[2] = { 0 };
-
     do
     {
-        if (!m_chip.call_api(Si4463::Command::GET_PH_STATUS, nullptr, 0, response, sizeof(response)))
+        bool got_it = false;
+        uint8_t status = 0;
+        if (!m_chip.wait_for_ph_interrupt(got_it, status, std::chrono::milliseconds(1000)))
         {
             return false;
         }
-        if ((response[1] & (1 << 5)) != 0)
+        if (got_it && (status & (1 << 5)) != 0)
         {
             break;
         }
@@ -331,17 +330,17 @@ bool RF4463F30::rx(size_t& size, uint8_t channel, std::chrono::high_resolution_c
     bool received = false;
     do
     {
-        uint8_t response[2] = { 0 };
-        if (!m_chip.call_api(Si4463::Command::GET_PH_STATUS, nullptr, 0, response, sizeof(response)))
+        bool got_it = false;
+        uint8_t status = 0;
+        if (!m_chip.wait_for_ph_interrupt(got_it, status, timeout))
         {
             return false;
         }
-        if ((response[1] & (1 << 4)) != 0) //got a packet
+        if (got_it && (status & (1 << 4)) != 0) //got a packet
         {
             received = true;
             break;
         }
-        //std::this_thread::sleep_for(std::chrono::microseconds(50));
     }
     while (std::chrono::high_resolution_clock::now() - start < timeout);
 

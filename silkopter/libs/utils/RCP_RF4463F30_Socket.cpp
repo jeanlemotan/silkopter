@@ -88,7 +88,7 @@ bool RCP_RF4463F30_Socket::start()
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
             }
             //QLOGI("Done {}", i);
-            std::this_thread::sleep_for(std::chrono::milliseconds(1));
+            std::this_thread::sleep_for(std::chrono::milliseconds(2));
             i++;
 
             if (std::chrono::high_resolution_clock::now() - start > std::chrono::milliseconds(1000))

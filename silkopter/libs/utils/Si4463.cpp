@@ -147,14 +147,25 @@ bool Si4463::shutdown()
     return true;
 }
 
-bool Si4463::wait_for_ph_interrupt(uint8_t& intr, std::chrono::high_resolution_clock::duration timeout)
+bool Si4463::wait_for_ph_interrupt(bool& got_it, uint8_t& status, std::chrono::high_resolution_clock::duration timeout)
 {
     auto start = std::chrono::high_resolution_clock::now();
 
+    got_it = false;
+    status = 0;
+
+    //clear non-PH interrupts first
+    if (!call_api_raw({(uint8_t)Command::GET_INT_STATUS, 0xFF, 0, 0}))
+    {
+        return false;
+    }
+
     do
     {
+        int spin = 0;
         do
         {
+            spin++;
             int level = gpioRead(m_nirq_gpio);
             if (level == 0) //active is LOW
             {
@@ -162,19 +173,22 @@ bool Si4463::wait_for_ph_interrupt(uint8_t& intr, std::chrono::high_resolution_c
             }
             if (std::chrono::high_resolution_clock::now() - start > timeout)
             {
-                QLOGE("Timeout");
-                return false;
+                return true; //not error, but no interrupt either
             }
         } while (true);
 
+        //QLOGI("spin = {}", spin);
+
+        got_it = true;
+
         uint8_t response[2] = { 0 };
-        if (!m_chip.call_api(Si4463::Command::GET_PH_STATUS, nullptr, 0, response, sizeof(response)))
+        if (!call_api(Si4463::Command::GET_PH_STATUS, nullptr, 0, response, sizeof(response)))
         {
             return false;
         }
         if (response[0] != 0)
         {
-            intr = response[1];
+            status = response[1];
             return true;
         }
 
@@ -186,11 +200,6 @@ bool Si4463::wait_for_ph_interrupt(uint8_t& intr, std::chrono::high_resolution_c
     } while (true);
 
     return false;
-}
-
-bool Si4463::wait_for_cs_interrupt(uint8_t& intr, std::chrono::high_resolution_clock::duration timeout)
-{
-    return true;
 }
 
 bool Si4463::wait_for_cts()
