@@ -247,11 +247,15 @@ public:
     bool write_tx_fifo(void const* data, size_t size);
     bool read_rx_fifo(void* data, size_t size);
 
+    bool wait_for_ph_interrupt(uint8_t& intr, std::chrono::high_resolution_clock::duration timeout);
+    bool wait_for_cs_interrupt(uint8_t& intr, std::chrono::high_resolution_clock::duration timeout);
+
 private:
     bool _call_api(bool cts, Command cmd, void const* tx_data, size_t tx_size, void* rx_data, size_t rx_size);
     bool _call_api_raw(bool cts, void const* tx_data, size_t tx_size, void* rx_data, size_t rx_size);
 
     bool wait_for_cts();
+
 
     uint8_t m_sdn_gpio = 0;
     uint8_t m_nirq_gpio = 0;

@@ -147,6 +147,52 @@ bool Si4463::shutdown()
     return true;
 }
 
+bool Si4463::wait_for_ph_interrupt(uint8_t& intr, std::chrono::high_resolution_clock::duration timeout)
+{
+    auto start = std::chrono::high_resolution_clock::now();
+
+    do
+    {
+        do
+        {
+            int level = gpioRead(m_nirq_gpio);
+            if (level == 0) //active is LOW
+            {
+                break;
+            }
+            if (std::chrono::high_resolution_clock::now() - start > timeout)
+            {
+                QLOGE("Timeout");
+                return false;
+            }
+        } while (true);
+
+        uint8_t response[2] = { 0 };
+        if (!m_chip.call_api(Si4463::Command::GET_PH_STATUS, nullptr, 0, response, sizeof(response)))
+        {
+            return false;
+        }
+        if (response[0] != 0)
+        {
+            intr = response[1];
+            return true;
+        }
+
+        if (std::chrono::high_resolution_clock::now() - start > timeout)
+        {
+            QLOGE("Timeout");
+            return false;
+        }
+    } while (true);
+
+    return false;
+}
+
+bool Si4463::wait_for_cs_interrupt(uint8_t& intr, std::chrono::high_resolution_clock::duration timeout)
+{
+    return true;
+}
+
 bool Si4463::wait_for_cts()
 {
     if (!m_is_initialized)
@@ -169,7 +215,7 @@ bool Si4463::wait_for_cts()
             return true;
         }
 
-        std::this_thread::sleep_for(std::chrono::microseconds(10));
+        //std::this_thread::sleep_for(std::chrono::microseconds(10));
 
         if (std::chrono::high_resolution_clock::now() - start > std::chrono::milliseconds(1000))
         {
@@ -265,7 +311,7 @@ bool Si4463::_call_api_raw(bool cts, void const* tx_data, size_t tx_size, void* 
                 QLOGE("Timeout");
                 return false;
             }
-            std::this_thread::sleep_for(std::chrono::microseconds(10));
+            //std::this_thread::sleep_for(std::chrono::microseconds(10));
         }
     }
 
@@ -283,7 +329,6 @@ bool Si4463::set_properties(Property start_prop, size_t prop_count, void const* 
     {
         return false;
     }
-    auto start = std::chrono::high_resolution_clock::now();
 
     //compose tx message
     m_tx_data.resize(4 + tx_size);
@@ -314,8 +359,8 @@ bool Si4463::set_properties(Property start_prop, size_t prop_count, void const* 
         return false;
     }
 
-    auto now = std::chrono::high_resolution_clock::now();
-    QLOGI("DURATIONNNNNN: {}", std::chrono::duration_cast<std::chrono::microseconds>(now - start).count());
+    //auto now = std::chrono::high_resolution_clock::now();
+    //QLOGI("DURATIONNNNNN: {}", std::chrono::duration_cast<std::chrono::microseconds>(now - start).count());
 
     return true;
 }
@@ -378,6 +423,7 @@ bool Si4463::read_rx_fifo(void* data, size_t size)
     }
 
     memcpy(data, m_rx_data.data() + 1, size);
+
     return true;
 }
 

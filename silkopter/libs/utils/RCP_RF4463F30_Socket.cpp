@@ -60,36 +60,89 @@ bool RCP_RF4463F30_Socket::start()
         return false;
     }
 
-//    auto start = std::chrono::high_resolution_clock::now();
+    if (m_is_master)
+    {
+        auto start = std::chrono::high_resolution_clock::now();
+        size_t i = 0;
 
-//    size_t i = 0;
-//    while (true)
-//    {
-//        std::string str = q::util::format<std::string>("counter: {}", i);
+        std::vector<char> data;
 
-//        //QLOGI("FIFO {}", i);
-//        if (!m_impl->rf_chip.write_tx_fifo(str.data(), str.size()))
-//        {
-//            QLOGE("Failed to fill fifo");
-//            std::this_thread::sleep_for(std::chrono::milliseconds(100));
-//        }
-//        //QLOGI("Send {}", i);
-//        if (!m_impl->rf_chip.start_tx(str.size(), 0))
-//        {
-//            QLOGE("Failed to send");
-//            std::this_thread::sleep_for(std::chrono::milliseconds(100));
-//        }
-//        //QLOGI("Done {}", i);
-//        std::this_thread::sleep_for(std::chrono::microseconds(3000));
-//        i++;
+        while (true)
+        {
+            std::string str = q::util::format<std::string>("counter: {} 123 456 789 abc def ghi jkl mno pqr stu vxy zx", i & 7);
 
-//        if (std::chrono::high_resolution_clock::now() - start > std::chrono::milliseconds(1000))
-//        {
-//            start = std::chrono::high_resolution_clock::now();
-//            QLOGI("{} / {} bytes per second", i, i * str.size());
-//            i = 0;
-//        }
-//    }
+            data.resize(str.size() + 1);
+            data[0] = str.size();
+            std::copy(str.begin(), str.end(), data.begin() + 1);
+
+            //QLOGI("FIFO {}", i);
+            if (!m_impl->rf_chip.write_tx_fifo(data.data(), data.size()))
+            {
+                QLOGE("Failed to fill fifo");
+                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            }
+            //QLOGI("Send {}", i);
+            if (!m_impl->rf_chip.tx(data.size() - 1, 0))
+            {
+                QLOGE("Failed to send");
+                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            }
+            //QLOGI("Done {}", i);
+            std::this_thread::sleep_for(std::chrono::milliseconds(1));
+            i++;
+
+            if (std::chrono::high_resolution_clock::now() - start > std::chrono::milliseconds(1000))
+            {
+                start = std::chrono::high_resolution_clock::now();
+                QLOGI("{} / {} bytes per second", i, i * str.size());
+                i = 0;
+            }
+        }
+    }
+
+    else
+    {
+        auto start = std::chrono::high_resolution_clock::now();
+        size_t i = 0;
+        size_t bps = 0;
+
+        size_t rx_size = 0;
+        while (!m_exit)
+        {
+            if (m_impl->rf_chip.rx(rx_size, CHANNEL, std::chrono::milliseconds(100)))
+            {
+                if (rx_size > 0 && rx_size <= get_mtu())
+                {
+                    m_impl->rx_buffer.resize(rx_size);
+                    if (m_impl->rf_chip.read_rx_fifo(m_impl->rx_buffer.data(), rx_size))
+                    {
+                        i++;
+                        bps += rx_size;
+                        //std::string str(m_impl->rx_buffer.begin(), m_impl->rx_buffer.end());
+                        //QLOGI("RCV: {} / {}", rx_size, str);
+                    }
+                    else
+                    {
+                        QLOGE("Failed to read fifo");
+                    }
+                }
+            }
+            else
+            {
+                QLOGE("Failed to retrieve packet info");
+            }
+
+            //std::this_thread::sleep_for(std::chrono::microseconds(100));
+
+            if (std::chrono::high_resolution_clock::now() - start > std::chrono::milliseconds(1000))
+            {
+                start = std::chrono::high_resolution_clock::now();
+                QLOGI("{} / {} bytes per second", i, bps);
+                i = 0;
+                bps = 0;
+            }
+        }
+    }
 
     if (m_is_master)
     {
@@ -123,79 +176,75 @@ void RCP_RF4463F30_Socket::master_thread_proc()
 {
     while (!m_exit)
     {
-        //wait for data
-        std::unique_lock<std::mutex> lg(m_impl->tx_buffer_mutex);
-        if (!m_impl->tx_buffer_has_data)
-        {
-            m_impl->tx_buffer_cv.wait(lg, [this]{ return m_impl->tx_buffer_has_data == true || m_exit == true; });
-        }
-        if (m_exit)
-        {
-            break;
-        }
+        Result result = Result::ERROR;
+        bool sent = false;
 
-        if (m_impl->tx_buffer_has_data)
         {
-            Result result = Result::OK;
-
-            auto now = q::Clock::now();
-            auto diff = now - m_last_tx_tp;
-            if (diff < TX_DURATION)
+            //wait for data
+            std::unique_lock<std::mutex> lg(m_impl->tx_buffer_mutex);
+            if (!m_impl->tx_buffer_has_data)
             {
-                std::this_thread::sleep_for(diff);
+                m_impl->tx_buffer_cv.wait(lg, [this]{ return m_impl->tx_buffer_has_data == true || m_exit == true; });
+            }
+            if (m_exit)
+            {
+                break;
             }
 
-            //wait a bit so the other end has time to setup its RX state
-            std::this_thread::sleep_for(std::chrono::microseconds(500));
-
-            if (m_impl->rf_chip.write_tx_fifo(m_impl->tx_buffer.data(), m_impl->tx_buffer.size()))
+            if (m_impl->tx_buffer_has_data)
             {
-                if (m_impl->rf_chip.tx(m_impl->tx_buffer.size(), CHANNEL))
+                auto now = q::Clock::now();
+                auto diff = now - m_last_tx_tp;
+                if (diff < TX_DURATION)
                 {
-                    result = Result::OK;
+                    std::this_thread::sleep_for(diff);
                 }
-                else
+
+                //wait a bit so the other end has time to setup its RX state
+                std::this_thread::sleep_for(std::chrono::microseconds(500));
+
+                //The first byte is the length. The rest are payload
+                if (m_impl->rf_chip.write_tx_fifo(m_impl->tx_buffer.data(), m_impl->tx_buffer.size()))
                 {
-                    result = Result::ERROR;
-                }
-            }
-            else
-            {
-                result = Result::ERROR;
-            }
-
-            m_last_tx_tp = q::Clock::now();
-            m_impl->tx_buffer_has_data = false;
-
-            if (send_callback)
-            {
-                send_callback(result);
-            }
-        }
-
-        {
-            if (m_impl->rf_chip.begin_rx(CHANNEL))
-            {
-                std::this_thread::sleep_for(RX_DURATION);
-
-                size_t rx_size = 0;
-                if (m_impl->rf_chip.end_rx(rx_size))
-                {
-                    if (rx_size > 0)
+                    //The first byte is the length. The actual payload is size - 1
+                    if (m_impl->rf_chip.tx(m_impl->tx_buffer.size() - 1, CHANNEL))
                     {
-                        m_impl->rx_buffer.resize(rx_size);
-                        if (m_impl->rf_chip.read_rx_fifo(m_impl->rx_buffer.data(), rx_size))
-                        {
-                            if (receive_callback)
-                            {
-                                receive_callback(m_impl->rx_buffer.data(), m_impl->rx_buffer.size());
-                            }
-
-                            std::string str(m_impl->rx_buffer.begin(), m_impl->rx_buffer.end());
-                            QLOGI("RCV: {}", str);
-                        }
+                        result = Result::OK;
                     }
                 }
+
+                m_last_tx_tp = q::Clock::now();
+                m_impl->tx_buffer_has_data = false;
+                sent = true;
+            }
+        }
+
+        if (sent && send_callback)
+        {
+            send_callback(result);
+        }
+
+
+        {
+            size_t rx_size = 0;
+            if (m_impl->rf_chip.rx(rx_size, CHANNEL, RX_DURATION))
+            {
+                if (rx_size > 0)
+                {
+                    m_impl->rx_buffer.resize(rx_size);
+                    if (m_impl->rf_chip.read_rx_fifo(m_impl->rx_buffer.data(), rx_size))
+                    {
+                        if (receive_callback)
+                        {
+                            receive_callback(m_impl->rx_buffer.data(), m_impl->rx_buffer.size());
+                        }
+
+                        std::string str(m_impl->rx_buffer.begin(), m_impl->rx_buffer.end());
+                        QLOGI("RCV: {}", str);
+                        break;
+                    }
+                }
+                std::this_thread::sleep_for(std::chrono::microseconds(100));
             }
         }
     }
@@ -214,22 +263,24 @@ void RCP_RF4463F30_Socket::slave_thread_proc()
                 {
                     if (m_impl->rf_chip.end_rx(rx_size))
                     {
-                        if (rx_size > 0)
+                        if (rx_size > 0 && rx_size <= get_mtu())
                         {
                             m_impl->rx_buffer.resize(rx_size);
                             if (m_impl->rf_chip.read_rx_fifo(m_impl->rx_buffer.data(), rx_size))
                             {
-                                receive_callback(m_impl->rx_buffer.data(), m_impl->rx_buffer.size());
+                                if (receive_callback)
+                                {
+                                    receive_callback(m_impl->rx_buffer.data(), m_impl->rx_buffer.size());
+                                }
 
                                 std::string str(m_impl->rx_buffer.begin(), m_impl->rx_buffer.end());
                                 QLOGI("RCV: {}", str);
+                                break;
                             }
                         }
                     }
-                    if (rx_size == 0)
-                    {
-                        std::this_thread::sleep_for(std::chrono::microseconds(100));
-                    }
+
+                    std::this_thread::sleep_for(std::chrono::microseconds(100));
                 }
             }
         }
@@ -239,13 +290,14 @@ void RCP_RF4463F30_Socket::slave_thread_proc()
             break;
         }
 
+        Result result = Result::ERROR;
+        bool sent = false;
+
         //if packet received, respond
         {
             std::unique_lock<std::mutex> lg(m_impl->tx_buffer_mutex);
             if (m_impl->tx_buffer_has_data)
             {
-                Result result = Result::OK;
-
                 auto now = q::Clock::now();
                 auto diff = now - m_last_tx_tp;
                 if (diff < TX_DURATION)
@@ -256,30 +308,25 @@ void RCP_RF4463F30_Socket::slave_thread_proc()
                 //wait a bit so the other end has time to setup its RX state
                 std::this_thread::sleep_for(std::chrono::microseconds(500));
 
+                //The first byte is the length. The rest are payload
                 if (m_impl->rf_chip.write_tx_fifo(m_impl->tx_buffer.data(), m_impl->tx_buffer.size()))
                 {
-                    if (m_impl->rf_chip.tx(m_impl->tx_buffer.size(), CHANNEL))
+                    //The first byte is the length. The actual payload is size - 1
+                    if (m_impl->rf_chip.tx(m_impl->tx_buffer.size() - 1, CHANNEL))
                     {
                         result = Result::OK;
                     }
-                    else
-                    {
-                        result = Result::ERROR;
-                    }
-                }
-                else
-                {
-                    result = Result::ERROR;
                 }
 
                 m_last_tx_tp = q::Clock::now();
                 m_impl->tx_buffer_has_data = false;
-
-                if (send_callback)
-                {
-                    send_callback(result);
-                }
+                sent = true;
             }
+        }
+
+        if (sent && send_callback)
+        {
+            send_callback(result);
         }
     }
 }
@@ -287,19 +334,22 @@ void RCP_RF4463F30_Socket::slave_thread_proc()
 void RCP_RF4463F30_Socket::async_send(void const* _data, size_t size)
 {
     QASSERT(size <= get_mtu());
-    QASSERT(m_send_in_progress == true);
-
-    uint8_t const* data = reinterpret_cast<uint8_t const*>(_data);
+    QASSERT(m_is_locked == true);
 
     {
         std::unique_lock<std::mutex> lg(m_impl->tx_buffer_mutex);
 
         QASSERT(!m_impl->tx_buffer_has_data);
-        m_impl->tx_buffer.resize(size);
-        std::copy(data, data + size, m_impl->tx_buffer.begin());
+        m_impl->tx_buffer.resize(1 + size);
+
+        m_impl->tx_buffer[0] = size;
+
+        uint8_t const* data = reinterpret_cast<uint8_t const*>(_data);
+        std::copy(data, data + size, m_impl->tx_buffer.data() + 1);
+
+        m_impl->tx_buffer_has_data = true;
     }
 
-    m_impl->tx_buffer_has_data = true;
     if (m_is_master)
     {
         m_impl->tx_buffer_cv.notify_all();
@@ -308,22 +358,27 @@ void RCP_RF4463F30_Socket::async_send(void const* _data, size_t size)
 
 size_t RCP_RF4463F30_Socket::get_mtu() const
 {
-    return 64;
+    return 63;
 }
 
 bool RCP_RF4463F30_Socket::lock()
 {
-    if (m_send_in_progress.exchange(true))
+    if (m_is_locked.exchange(true))
     {
         //already locked
         return false;
     }
+
+    //now locked
     return true;
 }
 
 void RCP_RF4463F30_Socket::unlock()
 {
-    m_send_in_progress = false;
+    if (m_is_locked.exchange(false) == false)
+    {
+        QASSERT(false);
+    }
 }
 
 

@@ -82,29 +82,29 @@ bool RF4463F30::init(const std::string& device, uint32_t speed, uint8_t sdn_gpio
         }
     }
 
-    //configure fast registers
-    {
-        uint8_t tx_data[] =
-        {
-            0x00, //disabled
-            0x00, //disabled
-            0x00, //disabled
-            0x00, //disabled
-        };
+//    //configure fast registers
+//    {
+//        uint8_t tx_data[] =
+//        {
+//            0x00, //disabled
+//            0x00, //disabled
+//            0x00, //disabled
+//            0x00, //disabled
+//        };
 
-        if (!m_chip.set_properties(Si4463::Property::FRR_CTL_A_MODE, 4, tx_data, sizeof(tx_data)))
-        {
-            QLOGI("Failed to set properties");
-            goto error;
-        }
-    }
+//        if (!m_chip.set_properties(Si4463::Property::FRR_CTL_A_MODE, 4, tx_data, sizeof(tx_data)))
+//        {
+//            QLOGI("Failed to set properties");
+//            goto error;
+//        }
+//    }
 
     //PA - important!!!
     {
         uint8_t tx_data[] =
         {
             0x08,
-            0x7F, //max power
+            0x0F, //max power
             0x00,
             0x3d,
         };
@@ -116,7 +116,10 @@ bool RF4463F30::init(const std::string& device, uint32_t speed, uint8_t sdn_gpio
         }
     }
 
-    if (!m_chip.call_api_raw({RF_PREAMBLE_TX_LENGTH_9}) ||
+    if (!m_chip.call_api_raw({RF_INT_CTL_ENABLE_2}) ||
+        !m_chip.call_api_raw({RF_INT_CTL_CHIP_ENABLE_1}) ||
+        !m_chip.call_api_raw({RF_FRR_CTL_A_MODE_4}) ||
+        !m_chip.call_api_raw({RF_PREAMBLE_TX_LENGTH_9}) ||
         !m_chip.call_api_raw({RF_SYNC_CONFIG_6}) ||
         !m_chip.call_api_raw({RF_PKT_CRC_CONFIG_7}) ||
         !m_chip.call_api_raw({RF_PKT_LEN_12}) ||
@@ -175,11 +178,11 @@ bool RF4463F30::begin_tx(size_t size, uint8_t channel)
     }
 
     //set the packet size
-//    uint8_t args[2] = { (uint8_t)(size >> 8), (uint8_t)(size & 0xFF) };
-//    if (!m_chip.set_properties(Si4463::Property::PKT_FIELD_1_LENGTH_12_8, 2, args, sizeof(args)))
-//    {
-//        return false;
-//    }
+    uint8_t args[2] = { (uint8_t)(size >> 8), (uint8_t)(size & 0xFF) };
+    if (!m_chip.set_properties(Si4463::Property::PKT_FIELD_2_LENGTH_12_8, 2, args, sizeof(args)))
+    {
+        return false;
+    }
 
     //enter tx state
     uint8_t condition =
@@ -191,7 +194,7 @@ bool RF4463F30::begin_tx(size_t size, uint8_t channel)
                 (uint8_t)Si4463::Command::START_TX,
                 channel,
                 condition,
-                (uint8_t)(size >> 8), (uint8_t)(size & 0xFF)//0x00, 0x00 //use the field1 length
+                0, 0 //(uint8_t)(size >> 8), (uint8_t)(size & 0xFF)//0x00, 0x00 //use the field1 length
             }))
     {
         return false;
@@ -214,6 +217,8 @@ bool RF4463F30::end_tx()
         return false;
     }
 
+    m_tx_started = false;
+
     auto start = std::chrono::high_resolution_clock::now();
 
     uint8_t response[2] = { 0 };
@@ -235,10 +240,8 @@ bool RF4463F30::end_tx()
             return false;
         }
 
-        std::this_thread::sleep_for(std::chrono::microseconds(10));
+        //std::this_thread::sleep_for(std::chrono::microseconds(10));
     } while (true);
-
-    m_tx_started = false;
 
     return true;
 }
@@ -259,12 +262,20 @@ bool RF4463F30::begin_rx(uint8_t channel)
         return false;
     }
 
+    if (!m_chip.call_api_raw({ static_cast<uint8_t>(Si4463::Command::FIFO_INFO), 0x03 }))
+    {
+        return false;
+    }
+
     return m_chip.call_api_raw(
     {
         (uint8_t)Si4463::Command::START_RX,
         channel,
         0x00, //start immediately
         0x00, 0x00, //size = 0
+        8, //preamble timeout -> rx state
+        3, //valid packet -> ready state
+        8  //invalid packet -> rx state
     });
 }
 bool RF4463F30::end_rx(size_t& size)
@@ -274,18 +285,70 @@ bool RF4463F30::end_rx(size_t& size)
         return false;
     }
 
-    //first check if we got a packet
+    size = 0;
+
     {
         uint8_t response[2] = { 0 };
         if (!m_chip.call_api(Si4463::Command::GET_PH_STATUS, nullptr, 0, response, sizeof(response)))
         {
             return false;
         }
-        if ((response[1] & (1 << 4)) == 0)
+        if ((response[1] & (1 << 4)) == 0) //no packet yet
         {
             size = 0;
-            return true; //no error but no packet either
+            return true; //no error, but no packet either
         }
+    }
+
+    uint8_t response[2];
+    if (!m_chip.call_api(Si4463::Command::PACKET_INFO, nullptr, 0, response, sizeof(response)))
+    {
+        return false;
+    }
+
+    size = ((uint16_t)response[0] << 8) & 0xFF00;
+    size |= (uint16_t)response[1] & 0x00FF;
+
+    return true;
+}
+
+bool RF4463F30::rx(size_t& size, uint8_t channel, std::chrono::high_resolution_clock::duration timeout)
+{
+    if (!m_is_initialized)
+    {
+        return false;
+    }
+
+    if (!begin_rx(channel))
+    {
+        return false;
+    }
+
+    size = 0;
+
+    auto start = std::chrono::high_resolution_clock::now();
+
+    bool received = false;
+    do
+    {
+        uint8_t response[2] = { 0 };
+        if (!m_chip.call_api(Si4463::Command::GET_PH_STATUS, nullptr, 0, response, sizeof(response)))
+        {
+            return false;
+        }
+        if ((response[1] & (1 << 4)) != 0) //got a packet
+        {
+            received = true;
+            break;
+        }
+        //std::this_thread::sleep_for(std::chrono::microseconds(50));
+    }
+    while (std::chrono::high_resolution_clock::now() - start < timeout);
+
+    if (!received)
+    {
+        size = 0;
+        return true; //no error, but no packet either
     }
 
     uint8_t response[2];

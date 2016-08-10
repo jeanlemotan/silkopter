@@ -1,5 +1,6 @@
 #pragma once
 
+#include <chrono>
 #include <string>
 #include "Si4463.h"
 
@@ -23,6 +24,9 @@ public:
 
     bool begin_rx(uint8_t channel);
     bool end_rx(size_t& size);
+
+    bool rx(size_t& size, uint8_t channel, std::chrono::high_resolution_clock::duration timeout);
+
     bool read_rx_fifo(void* data, size_t& size);
 
 private:

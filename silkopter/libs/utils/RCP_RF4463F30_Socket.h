@@ -27,7 +27,7 @@ public:
     void unlock() override;
 
 private:
-    std::atomic_bool m_send_in_progress = {false};
+    std::atomic_bool m_is_locked = {false};
 
     void master_thread_proc();
     void slave_thread_proc();

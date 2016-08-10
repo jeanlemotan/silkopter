@@ -295,7 +295,7 @@ auto RCP::_send_locked(uint8_t channel_idx, Send_Params const& params, void cons
     size_t uncompressed_size = size;
     if (is_compressed)
     {
-        auto start = q::Clock::now();
+//        auto start = q::Clock::now();
 
 //        uLongf comp_size = compressBound(size);
 //        channel_data.comp_state.buffer.resize(comp_size);
@@ -845,9 +845,11 @@ void RCP::send_datagram(Socket_Handle socket_handle)
     {
         return;
     }
+    //QLOGI("locking for sending");
 
     if (!compute_next_transit_datagram(socket_handle))
     {
+        //QLOGI("unlocking - no data");
         socket->unlock();
         return;
     }
@@ -861,6 +863,7 @@ void RCP::handle_send(Socket_Handle socket_handle, RCP_Socket::Result)
     RCP_Socket* socket = socket_data.socket;
     QASSERT(socket != nullptr);
 
+    //QLOGI("unlocking - done sending");
     socket->unlock();
 
     send_datagram(socket_handle);
