@@ -73,7 +73,6 @@ bool Si4463::init(std::string const& device, uint32_t speed, uint8_t sdn_gpio, u
     }
 
     //power on procedure
-
     res = gpioWrite(m_sdn_gpio, 1);
     if (res != 0)
     {
@@ -90,6 +89,81 @@ bool Si4463::init(std::string const& device, uint32_t speed, uint8_t sdn_gpio, u
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
     m_is_initialized = true; //set to true so we can call call_api
+
+    return true;
+
+error:
+    shutdown();
+
+    m_is_initialized = false;
+
+    gpioSetMode(m_sdn_gpio, sdn_gpio_mode);
+    gpioSetMode(m_nirq_gpio, nirq_gpio_mode);
+    return false;
+}
+
+bool Si4463::upload_patch(void const* _data)
+{
+    return upload_config(_data);
+}
+
+bool Si4463::upload_config(void const* _data)
+{
+    if (!m_is_initialized)
+    {
+        return false;
+    }
+
+    QASSERT(_data != nullptr);
+
+    uint8_t const* data = reinterpret_cast<uint8_t const*>(_data);
+
+    // While cycle as far as the pointer points to a command
+    while (*data != 0x00)
+    {
+        // Commands structure in the array:
+        //--------------------------------
+        // LEN | <LEN length of data>
+        //
+
+        uint8_t count = *data++;
+        if (count > 16u)
+        {
+            QLOGE("Number of command bytes exceeds maximal allowable length");
+            return false;
+        }
+
+        if (!call_api_raw(data, count, nullptr, 0))
+        {
+            return false;
+        }
+        data += count;
+
+        if (get_nirq_level() == false)
+        {
+            uint8_t response[8] = { 0 };
+            // Get and clear all interrupts.  An error has occured...
+            if (!call_api(Si4463::Command::GET_INT_STATUS, nullptr, 0, response, sizeof(response)))
+            {
+                QLOGE("Failed to clear interrupts");
+                return false;
+            }
+            if (response[7] & 8) //cmd error
+            {
+                return false;
+            }
+        }
+    }
+
+    return true;
+}
+
+bool Si4463::powerup()
+{
+    if (!m_is_initialized)
+    {
+        return false;
+    }
 
     {
         uint8_t data[6] = { 0x01, 0x00, 0x01, 0xC9, 0xC3, 0x80 }; //bot up to main application, use xtal, 30MHz
@@ -118,17 +192,11 @@ bool Si4463::init(std::string const& device, uint32_t speed, uint8_t sdn_gpio, u
         }
     }
 
-    m_is_initialized = true;
-
     return true;
 
 error:
-    shutdown();
+//    shutdown();
 
-    m_is_initialized = false;
-
-    gpioSetMode(m_sdn_gpio, sdn_gpio_mode);
-    gpioSetMode(m_nirq_gpio, nirq_gpio_mode);
     return false;
 }
 
@@ -147,18 +215,38 @@ bool Si4463::shutdown()
     return true;
 }
 
+bool Si4463::get_nirq_level()
+{
+    QASSERT(m_is_initialized);
+    return gpioRead(m_nirq_gpio) != 0;
+}
+
 bool Si4463::wait_for_ph_interrupt(bool& got_it, uint8_t& status, std::chrono::high_resolution_clock::duration timeout)
 {
+    QASSERT(m_is_initialized);
+
     auto start = std::chrono::high_resolution_clock::now();
 
     got_it = false;
     status = 0;
 
+    uint8_t response[2] = { 0 };
+
     //clear non-PH interrupts first
-    if (!call_api_raw({(uint8_t)Command::GET_INT_STATUS, 0xFF, 0, 0}))
-    {
-        return false;
-    }
+//    if (!call_api_raw({(uint8_t)Command::GET_INT_STATUS, 0xFF, 0, 0}))
+//    {
+//        return false;
+//    }
+
+//    if (!call_api(Si4463::Command::GET_PH_STATUS, nullptr, 0, response, sizeof(response)))
+//    {
+//        return false;
+//    }
+//    if (response[0] != 0)
+//    {
+//        status = response[1];
+//        return true;
+//    }
 
     do
     {
@@ -181,7 +269,6 @@ bool Si4463::wait_for_ph_interrupt(bool& got_it, uint8_t& status, std::chrono::h
 
         got_it = true;
 
-        uint8_t response[2] = { 0 };
         if (!call_api(Si4463::Command::GET_PH_STATUS, nullptr, 0, response, sizeof(response)))
         {
             return false;
@@ -211,10 +298,12 @@ bool Si4463::wait_for_cts()
 
     auto start = std::chrono::high_resolution_clock::now();
 
+    int spin = 0;
     uint8_t tx_data[] = { (uint8_t)Command::READ_CMD_BUFF, 0 };
     uint8_t rx_data[] = { 0, 0 };
     while (1)
     {
+        spin++;
         if (!m_spi_dev.transfer(tx_data, rx_data, 2))
         {
             return false;
@@ -223,6 +312,7 @@ bool Si4463::wait_for_cts()
         {
             return true;
         }
+        //QLOGI("spin = {}", spin);
 
         //std::this_thread::sleep_for(std::chrono::microseconds(10));
 
@@ -235,15 +325,6 @@ bool Si4463::wait_for_cts()
 }
 
 bool Si4463::call_api(Command cmd, void const* tx_data, size_t tx_size, void* rx_data, size_t rx_size)
-{
-    return _call_api(true, cmd, tx_data, tx_size, rx_data, rx_size);
-}
-bool Si4463::call_api_no_cts(Command cmd, void const* tx_data, size_t tx_size, void* rx_data, size_t rx_size)
-{
-    return _call_api(false, cmd, tx_data, tx_size, rx_data, rx_size);
-}
-
-bool Si4463::_call_api(bool cts, Command cmd, void const* tx_data, size_t tx_size, void* rx_data, size_t rx_size)
 {
     if (!m_is_initialized)
     {
@@ -258,28 +339,18 @@ bool Si4463::_call_api(bool cts, Command cmd, void const* tx_data, size_t tx_siz
         memcpy(m_tx_data.data() + 1, tx_data, tx_size);
     }
 
-    return _call_api_raw(cts, m_tx_data.data(), m_tx_data.size(), rx_data, rx_size);
+    return call_api_raw(m_tx_data.data(), m_tx_data.size(), rx_data, rx_size);
 }
 
 bool Si4463::call_api_raw(void const* tx_data, size_t tx_size, void* rx_data, size_t rx_size)
-{
-    return _call_api_raw(true, tx_data, tx_size, rx_data, rx_size);
-}
-
-bool Si4463::call_api_raw_no_cts(void const* tx_data, size_t tx_size, void* rx_data, size_t rx_size)
-{
-    return _call_api_raw(false, tx_data, tx_size, rx_data, rx_size);
-}
-
-bool Si4463::_call_api_raw(bool cts, void const* tx_data, size_t tx_size, void* rx_data, size_t rx_size)
 {
     if (!m_is_initialized)
     {
         return false;
     }
 
-    //wait forthe chip to be ready
-    if (cts && !wait_for_cts())
+    //wait for the chip to be ready
+    if (!wait_for_cts())
     {
         return false;
     }
@@ -327,6 +398,7 @@ bool Si4463::_call_api_raw(bool cts, void const* tx_data, size_t tx_size, void* 
     return true;
 }
 
+
 bool Si4463::set_property(Property prop, void const* tx_data, size_t tx_size)
 {
     return set_properties(prop, 1, tx_data, tx_size);
@@ -350,7 +422,7 @@ bool Si4463::set_properties(Property start_prop, size_t prop_count, void const* 
         memcpy(m_tx_data.data() + 4, tx_data, tx_size);
     }
 
-    //wait forthe chip to be ready
+    //wait for the chip to be ready
     if (!wait_for_cts())
     {
         return false;
@@ -362,11 +434,11 @@ bool Si4463::set_properties(Property start_prop, size_t prop_count, void const* 
         return false;
     }
 
-    //wait forthe chip to be ready
-    if (!wait_for_cts())
-    {
-        return false;
-    }
+    //wait for the chip to be ready
+//    if (!wait_for_cts())
+//    {
+//        return false;
+//    }
 
     //auto now = std::chrono::high_resolution_clock::now();
     //QLOGI("DURATIONNNNNN: {}", std::chrono::duration_cast<std::chrono::microseconds>(now - start).count());
@@ -387,7 +459,7 @@ bool Si4463::write_tx_fifo(void const* data, size_t size)
         return false;
     }
 
-    //wait forthe chip to be ready
+    //wait for the chip to be ready
     if (!wait_for_cts())
     {
         return false;
@@ -414,7 +486,7 @@ bool Si4463::read_rx_fifo(void* data, size_t size)
         return false;
     }
 
-    //wait forthe chip to be ready
+    //wait for the chip to be ready
     if (!wait_for_cts())
     {
         return false;
@@ -435,5 +507,40 @@ bool Si4463::read_rx_fifo(void* data, size_t size)
 
     return true;
 }
+
+bool Si4463::read_frr_a(uint8_t& value)
+{
+    if (!m_is_initialized)
+    {
+        return false;
+    }
+    return call_api(Si4463::Command::FRR_A_READ, nullptr, 0, &value, 1);
+}
+
+bool Si4463::read_frr_b(uint8_t& value)
+{
+    if (!m_is_initialized)
+    {
+        return false;
+    }
+    return call_api(Si4463::Command::FRR_B_READ, nullptr, 0, &value, 1);
+}
+bool Si4463::read_frr_c(uint8_t& value)
+{
+    if (!m_is_initialized)
+    {
+        return false;
+    }
+    return call_api(Si4463::Command::FRR_C_READ, nullptr, 0, &value, 1);
+}
+bool Si4463::read_frr_d(uint8_t& value)
+{
+    if (!m_is_initialized)
+    {
+        return false;
+    }
+    return call_api(Si4463::Command::FRR_D_READ, nullptr, 0, &value, 1);
+}
+
 
 }

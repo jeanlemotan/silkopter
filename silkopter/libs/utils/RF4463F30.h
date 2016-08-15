@@ -23,7 +23,7 @@ public:
     bool tx(size_t size, uint8_t channel);
 
     bool begin_rx(uint8_t channel);
-    bool end_rx(size_t& size);
+    bool end_rx(size_t& size, std::chrono::high_resolution_clock::duration timeout);
 
     bool rx(size_t& size, uint8_t channel, std::chrono::high_resolution_clock::duration timeout);
 

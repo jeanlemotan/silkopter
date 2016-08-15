@@ -231,13 +231,15 @@ public:
         RX_HOP_TABLE_ENTRY_63 = 0x5041, //0x63 No.64 entry in RX hopping table.
     };
 
+
+    bool upload_patch(void const* data);
+    bool upload_config(void const* data);
+
+    bool powerup();
     bool shutdown();
 
     bool call_api(Command cmd, void const* tx_data, size_t tx_size, void* rx_data, size_t rx_size);
-    bool call_api_no_cts(Command cmd, void const* tx_data, size_t tx_size, void* rx_data, size_t rx_size);
-
     bool call_api_raw(void const* tx_data, size_t tx_size, void* rx_data, size_t rx_size);
-    bool call_api_raw_no_cts(void const* tx_data, size_t tx_size, void* rx_data, size_t rx_size);
 
     bool set_property(Property prop, void const* tx_data, size_t tx_size);
     bool set_properties(Property start_prop, size_t prop_count, void const* tx_data, size_t tx_size);
@@ -249,12 +251,14 @@ public:
 
     bool wait_for_ph_interrupt(bool& got_it, uint8_t& status, std::chrono::high_resolution_clock::duration timeout);
 
+    bool read_frr_a(uint8_t& value);
+    bool read_frr_b(uint8_t& value);
+    bool read_frr_c(uint8_t& value);
+    bool read_frr_d(uint8_t& value);
+
 private:
-    bool _call_api(bool cts, Command cmd, void const* tx_data, size_t tx_size, void* rx_data, size_t rx_size);
-    bool _call_api_raw(bool cts, void const* tx_data, size_t tx_size, void* rx_data, size_t rx_size);
-
     bool wait_for_cts();
-
+    bool get_nirq_level();
 
     uint8_t m_sdn_gpio = 0;
     uint8_t m_nirq_gpio = 0;
