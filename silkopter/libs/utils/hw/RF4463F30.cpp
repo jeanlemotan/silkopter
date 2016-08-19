@@ -4,8 +4,8 @@
 
 namespace util
 {
-
-
+namespace hw
+{
 
 
 RF4463F30::RF4463F30()
@@ -449,5 +449,16 @@ bool RF4463F30::read_rx_fifo(void* data, size_t& size)
     return m_chip.read_rx_fifo(data, size);
 }
 
+bool RF4463F30::get_dBm(int8_t& dBm)
+{
+    if (!m_is_initialized)
+    {
+        return false;
+    }
 
+    return m_chip.read_frr_a(reinterpret_cast<uint8_t&>(dBm));
+}
+
+
+}
 }

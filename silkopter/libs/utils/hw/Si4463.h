@@ -5,6 +5,8 @@
 
 namespace util
 {
+namespace hw
+{
 
 class Si4463
 {
@@ -278,4 +280,5 @@ inline bool Si4463::call_api_raw(std::initializer_list<uint8_t> const& tx_data)
 }
 
 
+}
 }

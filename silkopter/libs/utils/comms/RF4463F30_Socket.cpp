@@ -1,7 +1,9 @@
-#include "RCP_RF4463F30_Socket.h"
-#include "RF4463F30.h"
+#include "RF4463F30_Socket.h"
+#include "utils/hw/RF4463F30.h"
 
 namespace util
+{
+namespace comms
 {
 
 constexpr uint8_t CHANNEL = 0;
@@ -9,9 +11,9 @@ constexpr uint8_t CHANNEL = 0;
 constexpr q::Clock::duration TX_DURATION = std::chrono::milliseconds(5);
 constexpr q::Clock::duration RX_DURATION = std::chrono::milliseconds(5);
 
-struct RCP_RF4463F30_Socket::Impl
+struct RF4463F30_Socket::Impl
 {
-    RF4463F30 rf_chip;
+    hw::RF4463F30 rf_chip;
 
     std::mutex tx_buffer_mutex;
     std::vector<uint8_t> tx_buffer;
@@ -24,7 +26,7 @@ struct RCP_RF4463F30_Socket::Impl
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
-RCP_RF4463F30_Socket::RCP_RF4463F30_Socket(std::string const& device, uint32_t speed, bool master)
+RF4463F30_Socket::RF4463F30_Socket(std::string const& device, uint32_t speed, bool master)
     : m_impl(new Impl)
     , m_device(device)
     , m_speed(speed)
@@ -33,7 +35,7 @@ RCP_RF4463F30_Socket::RCP_RF4463F30_Socket(std::string const& device, uint32_t s
 
 }
 
-RCP_RF4463F30_Socket::~RCP_RF4463F30_Socket()
+RF4463F30_Socket::~RF4463F30_Socket()
 {
     m_exit = true;
     m_impl->tx_buffer_cv.notify_all(); //to wake up the thread
@@ -44,12 +46,12 @@ RCP_RF4463F30_Socket::~RCP_RF4463F30_Socket()
     }
 }
 
-RCP_RF4463F30_Socket::Result RCP_RF4463F30_Socket::process()
+RF4463F30_Socket::Result RF4463F30_Socket::process()
 {
     return Result::OK;
 }
 
-bool RCP_RF4463F30_Socket::start()
+bool RF4463F30_Socket::start()
 {
     if (m_is_initialized)
     {
@@ -87,8 +89,15 @@ bool RCP_RF4463F30_Socket::start()
                 QLOGE("Failed to send");
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
             }
+
+//            size_t rx_size = 0;
+//            if (!m_impl->rf_chip.rx(rx_size, CHANNEL, std::chrono::milliseconds(1)))
+//            {
+//                QLOGE("Cannot enter RX state");
+//            }
+
             //QLOGI("Done {}", i);
-            std::this_thread::sleep_for(std::chrono::milliseconds(2));
+            //std::this_thread::sleep_for(std::chrono::milliseconds(0));
             i++;
 
             if (std::chrono::high_resolution_clock::now() - start > std::chrono::milliseconds(1000))
@@ -105,11 +114,12 @@ bool RCP_RF4463F30_Socket::start()
         auto start = std::chrono::high_resolution_clock::now();
         size_t i = 0;
         size_t bps = 0;
+        size_t err_invs = 0;
 
         size_t rx_size = 0;
         while (!m_exit)
         {
-            if (m_impl->rf_chip.rx(rx_size, CHANNEL, std::chrono::milliseconds(100)))
+            if (m_impl->rf_chip.rx(rx_size, CHANNEL, std::chrono::milliseconds(1000)))
             {
                 if (rx_size > 0 && rx_size <= get_mtu())
                 {
@@ -118,13 +128,18 @@ bool RCP_RF4463F30_Socket::start()
                     {
                         i++;
                         bps += rx_size;
-                        //std::string str(m_impl->rx_buffer.begin(), m_impl->rx_buffer.end());
-                        //QLOGI("RCV: {} / {}", rx_size, str);
+                        std::string str(m_impl->rx_buffer.begin(), m_impl->rx_buffer.end());
+                        QLOGI("RCV: {} / {}", rx_size, str);
                     }
                     else
                     {
                         QLOGE("Failed to read fifo");
                     }
+                }
+                else
+                {
+                    err_invs++;
+                    //QLOGE("Invalid packet size: {}", rx_size);
                 }
             }
             else
@@ -137,9 +152,10 @@ bool RCP_RF4463F30_Socket::start()
             if (std::chrono::high_resolution_clock::now() - start > std::chrono::milliseconds(1000))
             {
                 start = std::chrono::high_resolution_clock::now();
-                QLOGI("{} / {} bytes per second", i, bps);
+                QLOGI("{} / {} bytes per second. {}", i, bps, err_invs);
                 i = 0;
                 bps = 0;
+                err_invs = 0;
             }
         }
     }
@@ -172,7 +188,7 @@ bool RCP_RF4463F30_Socket::start()
     return true;
 }
 
-void RCP_RF4463F30_Socket::master_thread_proc()
+void RF4463F30_Socket::master_thread_proc()
 {
     while (!m_exit)
     {
@@ -229,7 +245,7 @@ void RCP_RF4463F30_Socket::master_thread_proc()
             size_t rx_size = 0;
             if (m_impl->rf_chip.rx(rx_size, CHANNEL, RX_DURATION))
             {
-                if (rx_size > 0)
+                if (rx_size > 0 && rx_size <= get_mtu())
                 {
                     m_impl->rx_buffer.resize(rx_size);
                     if (m_impl->rf_chip.read_rx_fifo(m_impl->rx_buffer.data(), rx_size))
@@ -240,8 +256,7 @@ void RCP_RF4463F30_Socket::master_thread_proc()
                         }
 
                         std::string str(m_impl->rx_buffer.begin(), m_impl->rx_buffer.end());
-                        QLOGI("RCV: {}", str);
-                        break;
+                        QLOGI("RCV: {}: {}", rx_size, str);
                     }
                 }
                 std::this_thread::sleep_for(std::chrono::microseconds(100));
@@ -250,37 +265,32 @@ void RCP_RF4463F30_Socket::master_thread_proc()
     }
 }
 
-void RCP_RF4463F30_Socket::slave_thread_proc()
+void RF4463F30_Socket::slave_thread_proc()
 {
     while (!m_exit)
     {
         //wait for a packet indefinitely
         {
             size_t rx_size = 0;
-            if (m_impl->rf_chip.begin_rx(CHANNEL))
+            while (!m_exit)
             {
-                while (!m_exit && rx_size == 0)
+                if (m_impl->rf_chip.rx(rx_size, CHANNEL, std::chrono::seconds(500)))
                 {
-                    if (m_impl->rf_chip.end_rx(rx_size))
+                    if (rx_size > 0 && rx_size <= get_mtu())
                     {
-                        if (rx_size > 0 && rx_size <= get_mtu())
+                        m_impl->rx_buffer.resize(rx_size);
+                        if (m_impl->rf_chip.read_rx_fifo(m_impl->rx_buffer.data(), rx_size))
                         {
-                            m_impl->rx_buffer.resize(rx_size);
-                            if (m_impl->rf_chip.read_rx_fifo(m_impl->rx_buffer.data(), rx_size))
+                            if (receive_callback)
                             {
-                                if (receive_callback)
-                                {
-                                    receive_callback(m_impl->rx_buffer.data(), m_impl->rx_buffer.size());
-                                }
-
-                                std::string str(m_impl->rx_buffer.begin(), m_impl->rx_buffer.end());
-                                QLOGI("RCV: {}", str);
-                                break;
+                                receive_callback(m_impl->rx_buffer.data(), m_impl->rx_buffer.size());
                             }
+
+                            std::string str(m_impl->rx_buffer.begin(), m_impl->rx_buffer.end());
+                            QLOGI("RCV: {}: {}", rx_size, str);
+                            break;
                         }
                     }
-
-                    std::this_thread::sleep_for(std::chrono::microseconds(100));
                 }
             }
         }
@@ -331,7 +341,7 @@ void RCP_RF4463F30_Socket::slave_thread_proc()
     }
 }
 
-void RCP_RF4463F30_Socket::async_send(void const* _data, size_t size)
+void RF4463F30_Socket::async_send(void const* _data, size_t size)
 {
     QASSERT(size <= get_mtu());
     QASSERT(m_is_locked == true);
@@ -356,12 +366,12 @@ void RCP_RF4463F30_Socket::async_send(void const* _data, size_t size)
     }
 }
 
-size_t RCP_RF4463F30_Socket::get_mtu() const
+size_t RF4463F30_Socket::get_mtu() const
 {
     return 63;
 }
 
-bool RCP_RF4463F30_Socket::lock()
+bool RF4463F30_Socket::lock()
 {
     if (m_is_locked.exchange(true))
     {
@@ -373,7 +383,7 @@ bool RCP_RF4463F30_Socket::lock()
     return true;
 }
 
-void RCP_RF4463F30_Socket::unlock()
+void RF4463F30_Socket::unlock()
 {
     if (m_is_locked.exchange(false) == false)
     {
@@ -382,4 +392,5 @@ void RCP_RF4463F30_Socket::unlock()
 }
 
 
+}
 }

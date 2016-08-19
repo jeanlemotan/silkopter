@@ -1,11 +1,13 @@
-#include "RCP_RFMON_Socket.h"
+#include "RFMON_Socket.h"
 
 #include <pcap.h>
 
-#include "utils/radiotap/radiotap.h"
+#include "utils/hw/radiotap/radiotap.h"
 
 
 namespace util
+{
+namespace comms
 {
 
 //#define DEBUG_PCAP
@@ -50,7 +52,7 @@ struct Penumbra_Radiotap_Header
 typedef std::shared_ptr<std::vector<uint8_t>> Buffer;
 
 
-struct RCP_RFMON_Socket::Impl
+struct RFMON_Socket::Impl
 {
     std::mutex pcap_mutex;
     pcap_t* pcap = nullptr;
@@ -67,7 +69,7 @@ struct RCP_RFMON_Socket::Impl
 
 //////////////////////////////////////////////
 
-std::vector<std::string> RCP_RFMON_Socket::enumerate_interfaces()
+std::vector<std::string> RFMON_Socket::enumerate_interfaces()
 {
     std::vector<std::string> res;
 
@@ -104,7 +106,7 @@ std::vector<std::string> RCP_RFMON_Socket::enumerate_interfaces()
 
 //////////////////////////////////////////////
 
-RCP_RFMON_Socket::RCP_RFMON_Socket(std::string const& interface, uint8_t id)
+RFMON_Socket::RFMON_Socket(std::string const& interface, uint8_t id)
     : m_interface(interface)
     , m_id(id)
 {
@@ -118,7 +120,7 @@ RCP_RFMON_Socket::RCP_RFMON_Socket(std::string const& interface, uint8_t id)
     QLOGI("Radiocap header size: {}, IEEE header size: {}", RADIOTAP_HEADER.size(), sizeof(IEEE_HEADER));
 }
 
-RCP_RFMON_Socket::~RCP_RFMON_Socket()
+RFMON_Socket::~RFMON_Socket()
 {
     m_exit = true;
     m_impl->tx_buffer_cv.notify_all(); //to wake up the thread
@@ -133,7 +135,7 @@ RCP_RFMON_Socket::~RCP_RFMON_Socket()
     }
 }
 
-auto RCP_RFMON_Socket::prepare_filter() -> bool
+auto RFMON_Socket::prepare_filter() -> bool
 {
     struct bpf_program program;
     char program_src[512];
@@ -193,7 +195,7 @@ static void radiotap_add_u16(uint8_t*& dst, size_t& idx, uint16_t data)
     idx += 2;
 }
 
-void RCP_RFMON_Socket::prepare_radiotap_header(size_t rate_hz)
+void RFMON_Socket::prepare_radiotap_header(size_t rate_hz)
 {
     RADIOTAP_HEADER.resize(1024);
     ieee80211_radiotap_header& hdr = reinterpret_cast<ieee80211_radiotap_header&>(*RADIOTAP_HEADER.data());
@@ -241,7 +243,7 @@ void RCP_RFMON_Socket::prepare_radiotap_header(size_t rate_hz)
 //    memcpy(RADIOTAP_HEADER.data(), RADIOTAP_HEADER_original, sizeof(RADIOTAP_HEADER_original));
 }
 
-void RCP_RFMON_Socket::prepare_tx_packet_header(uint8_t* buffer)
+void RFMON_Socket::prepare_tx_packet_header(uint8_t* buffer)
 {
     //prepare the buffers with headers
     uint8_t* pu8 = buffer;
@@ -253,7 +255,7 @@ void RCP_RFMON_Socket::prepare_tx_packet_header(uint8_t* buffer)
     pu8 += sizeof (IEEE_HEADER);
 }
 
-auto RCP_RFMON_Socket::process_rx_packet() -> bool
+auto RFMON_Socket::process_rx_packet() -> bool
 {
     struct pcap_pkthdr* pcap_packet_header = nullptr;
 
@@ -363,7 +365,7 @@ auto RCP_RFMON_Socket::process_rx_packet() -> bool
 }
 
 
-auto RCP_RFMON_Socket::start() -> bool
+auto RFMON_Socket::start() -> bool
 {
     char pcap_error[PCAP_ERRBUF_SIZE] = {0};
 
@@ -575,7 +577,7 @@ auto RCP_RFMON_Socket::start() -> bool
     return true;
 }
 
-auto RCP_RFMON_Socket::lock() -> bool
+auto RFMON_Socket::lock() -> bool
 {
     if (m_send_in_progress.exchange(true))
     {
@@ -585,12 +587,12 @@ auto RCP_RFMON_Socket::lock() -> bool
     return true;
 }
 
-void RCP_RFMON_Socket::unlock()
+void RFMON_Socket::unlock()
 {
     m_send_in_progress = false;
 }
 
-void RCP_RFMON_Socket::async_send(void const* _data, size_t size)
+void RFMON_Socket::async_send(void const* _data, size_t size)
 {
     QASSERT(m_send_in_progress == true);
 
@@ -610,15 +612,16 @@ void RCP_RFMON_Socket::async_send(void const* _data, size_t size)
     m_impl->tx_buffer_cv.notify_all();
 }
 
-auto RCP_RFMON_Socket::get_mtu() const -> size_t
+auto RFMON_Socket::get_mtu() const -> size_t
 {
     return MAX_USER_PACKET_SIZE;
 }
 
-auto RCP_RFMON_Socket::process() -> Result
+auto RFMON_Socket::process() -> Result
 {
     return Result::OK;
 }
 
 
+}
 }

@@ -6,13 +6,15 @@
 #ifdef RASPBERRY_PI
 extern "C"
 {
-    #include "hw/pigpio.h"
+    #include "pigpio.h"
 }
 extern std::chrono::microseconds PIGPIO_PERIOD;
 
 #endif
 
 namespace util
+{
+namespace hw
 {
 
 /////////////////////////////////////////////////////////////////
@@ -543,4 +545,5 @@ bool Si4463::read_frr_d(uint8_t& value)
 }
 
 
+}
 }

@@ -1,8 +1,10 @@
-#include "RCP_UDP_Socket.h"
+#include "UDP_Socket.h"
 #include <boost/asio.hpp>
 #include <boost/thread.hpp>
 
 namespace util
+{
+namespace comms
 {
 
 static constexpr uint8_t MARKER_DATA = 0;
@@ -10,7 +12,7 @@ static constexpr uint8_t MARKER_ACK = 1;
 
 static constexpr std::chrono::milliseconds MAX_ACK_TIMEOUT(100);
 
-struct RCP_UDP_Socket::ASIO_Impl
+struct UDP_Socket::ASIO_Impl
 {
     ASIO_Impl()
         : io_service()
@@ -30,18 +32,18 @@ struct RCP_UDP_Socket::ASIO_Impl
 };
 
 
-RCP_UDP_Socket::RCP_UDP_Socket()
+UDP_Socket::UDP_Socket()
 {
     m_asio_impl.reset(new ASIO_Impl);
 
     m_rx_buffer.resize(100 * 1024);
-    m_asio_send_callback = boost::bind(&RCP_UDP_Socket::handle_send, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred);
-    m_asio_receive_callback = boost::bind(&RCP_UDP_Socket::handle_receive, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred);
+    m_asio_send_callback = boost::bind(&UDP_Socket::handle_send, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred);
+    m_asio_receive_callback = boost::bind(&UDP_Socket::handle_receive, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred);
 
     m_io_thread = boost::thread([this]() { m_asio_impl->io_service.run(); });
 }
 
-RCP_UDP_Socket::~RCP_UDP_Socket()
+UDP_Socket::~UDP_Socket()
 {
     m_asio_impl->io_service.stop();
 
@@ -54,7 +56,7 @@ RCP_UDP_Socket::~RCP_UDP_Socket()
     m_asio_impl = nullptr;
 }
 
-void RCP_UDP_Socket::open(uint16_t send_port, uint16_t receive_port)
+void UDP_Socket::open(uint16_t send_port, uint16_t receive_port)
 {
     m_asio_impl->socket.open(boost::asio::ip::udp::v4());
     m_asio_impl->socket.set_option(boost::asio::ip::udp::socket::reuse_address(true));
@@ -64,17 +66,17 @@ void RCP_UDP_Socket::open(uint16_t send_port, uint16_t receive_port)
     m_receive_port = receive_port;
 }
 
-void RCP_UDP_Socket::start_listening()
+void UDP_Socket::start_listening()
 {
     m_asio_impl->socket.async_receive_from(boost::asio::buffer(m_rx_buffer), m_asio_impl->rx_endpoint, m_asio_receive_callback);
 }
 
-void RCP_UDP_Socket::set_send_endpoint(boost::asio::ip::address const& address, uint16_t port)
+void UDP_Socket::set_send_endpoint(boost::asio::ip::address const& address, uint16_t port)
 {
     m_asio_impl->tx_endpoint = boost::asio::ip::udp::endpoint(address, port);
 }
 
-auto RCP_UDP_Socket::acquire_tx_buffer_locked(size_t size) -> Buffer
+auto UDP_Socket::acquire_tx_buffer_locked(size_t size) -> Buffer
 {
     Buffer buffer;
     if (m_tx_buffer_pool.empty())
@@ -91,7 +93,7 @@ auto RCP_UDP_Socket::acquire_tx_buffer_locked(size_t size) -> Buffer
     return buffer;
 }
 
-auto RCP_UDP_Socket::lock() -> bool
+auto UDP_Socket::lock() -> bool
 {
     if (m_send_in_progress.exchange(true))
     {
@@ -101,12 +103,12 @@ auto RCP_UDP_Socket::lock() -> bool
     return true;
 }
 
-void RCP_UDP_Socket::unlock()
+void UDP_Socket::unlock()
 {
     m_send_in_progress = false;
 }
 
-void RCP_UDP_Socket::async_send(void const* _data, size_t size)
+void UDP_Socket::async_send(void const* _data, size_t size)
 {
     QASSERT(m_send_in_progress == true);
 
@@ -125,7 +127,7 @@ void RCP_UDP_Socket::async_send(void const* _data, size_t size)
     send_next_packet_locked();
 }
 
-void RCP_UDP_Socket::send_next_packet_locked()
+void UDP_Socket::send_next_packet_locked()
 {
     if (!m_tx_buffer_queue.empty() && !m_tx_buffer_in_transit)
     {
@@ -142,7 +144,7 @@ void RCP_UDP_Socket::send_next_packet_locked()
     }
 }
 
-void RCP_UDP_Socket::handle_receive(const boost::system::error_code& error, std::size_t bytes_transferred)
+void UDP_Socket::handle_receive(const boost::system::error_code& error, std::size_t bytes_transferred)
 {
     if (error)
     {
@@ -187,7 +189,7 @@ void RCP_UDP_Socket::handle_receive(const boost::system::error_code& error, std:
         start_listening();
     }
 }
-void RCP_UDP_Socket::handle_send(const boost::system::error_code& error, std::size_t bytes_transferred)
+void UDP_Socket::handle_send(const boost::system::error_code& error, std::size_t bytes_transferred)
 {
     std::lock_guard<std::mutex> lg(m_tx_buffer_mutex);
 
@@ -212,12 +214,12 @@ void RCP_UDP_Socket::handle_send(const boost::system::error_code& error, std::si
 //    }
 }
 
-auto RCP_UDP_Socket::get_mtu() const -> size_t
+auto UDP_Socket::get_mtu() const -> size_t
 {
     return 2040;
 }
 
-auto RCP_UDP_Socket::process() -> Result
+auto UDP_Socket::process() -> Result
 {
     if (m_asio_impl->tx_endpoint.address().is_unspecified() && !m_asio_impl->rx_endpoint.address().is_unspecified())
     {
@@ -243,4 +245,5 @@ auto RCP_UDP_Socket::process() -> Result
 }
 
 
+}
 }

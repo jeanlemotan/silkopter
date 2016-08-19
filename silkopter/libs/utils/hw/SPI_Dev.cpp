@@ -9,6 +9,8 @@
 
 namespace util
 {
+namespace hw
+{
 
 SPI_Dev::SPI_Dev()
 {
@@ -96,4 +98,5 @@ bool SPI_Dev::transfer_register(uint8_t reg, void const* tx_data, void* rx_data,
     return true;
 }
 
+}
 }

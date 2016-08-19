@@ -4,9 +4,13 @@
 #include <map>
 #include <vector>
 #include <boost/intrusive_ptr.hpp>
+#include "ISocket.h"
 
 namespace util
 {
+namespace comms
+{
+
 namespace detail
 {
     struct Pool_Item_Base
@@ -34,33 +38,6 @@ namespace detail
     };
 }
 
-
-//socket interface
-class RCP_Socket
-{
-public:
-    virtual ~RCP_Socket() = default;
-
-    enum class Result
-    {
-        OK,
-        ERROR,
-        RECONNECTED,
-    };
-
-    virtual auto process() -> Result = 0;
-
-    std::function<void(uint8_t* data, size_t size)> receive_callback;
-    std::function<void(Result)> send_callback;
-
-    virtual void async_send(void const* data, size_t size) = 0;
-
-    virtual auto get_mtu() const -> size_t = 0;
-
-    virtual auto lock() -> bool = 0;
-    virtual void unlock() = 0;
-};
-
 //Reliable Channel Protocol
 class RCP : q::util::Noncopyable
 {
@@ -83,7 +60,7 @@ public:
     auto get_send_params(uint8_t channel_idx) const -> Send_Params const&;
 
     typedef int32_t Socket_Handle;
-    Socket_Handle add_socket(RCP_Socket* socket);
+    Socket_Handle add_socket(ISocket* socket);
 
     void set_socket_handle(uint8_t channel_idx, Socket_Handle socket_handle);
     void set_internal_socket_handle(Socket_Handle socket_handle);
@@ -205,7 +182,7 @@ private:
 
     struct Socket_Data
     {
-        RCP_Socket* socket = nullptr;
+        ISocket* socket = nullptr;
         size_t mtu = 0;
         std::vector<uint8_t> buffer;
     };
@@ -392,7 +369,7 @@ private:
     auto compute_next_transit_datagram(Socket_Handle socket_handle) -> bool;
     void send_datagram(Socket_Handle socket_handle);
 
-    void handle_send(Socket_Handle socket_handle, RCP_Socket::Result reult);
+    void handle_send(Socket_Handle socket_handle, ISocket::Result reult);
     void handle_receive(uint8_t* data, size_t size);
 
     void add_fragment_confirmation(uint8_t channel_idx, uint32_t id, uint16_t fragment_idx);
@@ -489,4 +466,5 @@ namespace detail
     }
 
 } //detail
+} //comms
 } //util

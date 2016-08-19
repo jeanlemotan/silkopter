@@ -5,6 +5,8 @@
 
 namespace util
 {
+namespace comms
+{
 
 auto RCP::acquire_tx_datagram(size_t data_size) -> RCP::TX::Datagram_ptr
 {
@@ -136,7 +138,7 @@ RCP::RCP()
     m_tx.confirmations_comp_state.lz4_state.resize(LZ4_sizeofState());
 }
 
-RCP::Socket_Handle RCP::add_socket(RCP_Socket* socket)
+RCP::Socket_Handle RCP::add_socket(ISocket* socket)
 {
     Socket_Handle handle = static_cast<int>(m_sockets.size());
     m_sockets.resize(m_sockets.size() + 1);
@@ -628,7 +630,7 @@ void RCP::process()
         {
             tp = q::Clock::now();
             std::lock_guard<std::mutex> lg(m_tx.packet_queue_mutex);
-            //QLOGI("{}: txd {} / tdf {} / rx {} / rxf {} / cf {}", m_tx.packet_queue.size(), m_global_stats.tx_datagrams, m_global_stats.tx_fragments, m_global_stats.rx_datagrams, m_global_stats.rx_fragments, m_global_stats.tx_confirmed_fragments);
+            QLOGI("{}: txd {} / tdf {} / rx {} / rxf {} / cf {}", m_tx.packet_queue.size(), m_global_stats.tx_datagrams, m_global_stats.tx_fragments, m_global_stats.rx_datagrams, m_global_stats.rx_fragments, m_global_stats.tx_confirmed_fragments);
         }
     }
 
@@ -832,7 +834,7 @@ auto RCP::compute_next_transit_datagram(Socket_Handle socket_handle) -> bool
 void RCP::send_datagram(Socket_Handle socket_handle)
 {
     Socket_Data& socket_data = m_sockets[socket_handle];
-    RCP_Socket* socket = socket_data.socket;
+    ISocket* socket = socket_data.socket;
     QASSERT(socket != nullptr);
 
 //    if (m_is_sending.exchange(true))
@@ -857,10 +859,10 @@ void RCP::send_datagram(Socket_Handle socket_handle)
     socket->async_send(socket_data.buffer.data(), socket_data.buffer.size());
 }
 
-void RCP::handle_send(Socket_Handle socket_handle, RCP_Socket::Result)
+void RCP::handle_send(Socket_Handle socket_handle, ISocket::Result)
 {
     Socket_Data& socket_data = m_sockets[socket_handle];
-    RCP_Socket* socket = socket_data.socket;
+    ISocket* socket = socket_data.socket;
     QASSERT(socket != nullptr);
 
     //QLOGI("unlocking - done sending");
@@ -1413,4 +1415,5 @@ void RCP::connect()
 }
 
 
+}
 }

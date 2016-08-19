@@ -1,6 +1,6 @@
 #pragma once
 
-#include "RCP.h"
+#include "ISocket.h"
 #include <boost/thread.hpp>
 
 namespace boost
@@ -20,13 +20,15 @@ class address;
 
 namespace util
 {
+namespace comms
+{
 
 
-class RCP_UDP_Socket : public RCP_Socket
+class UDP_Socket : public ISocket
 {
 public:
-    RCP_UDP_Socket();
-    ~RCP_UDP_Socket();
+    UDP_Socket();
+    ~UDP_Socket();
 
     auto process() -> Result override;
 
@@ -76,4 +78,5 @@ private:
 };
 
 
+}
 }

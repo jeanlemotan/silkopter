@@ -1,18 +1,20 @@
 #pragma once
 
-#include "RCP.h"
+#include "ISocket.h"
 #include <vector>
 #include <string>
 #include <boost/thread.hpp>
 
 namespace util
 {
+namespace comms
+{
 
-class RCP_RFMON_Socket : public RCP_Socket
+class RFMON_Socket : public ISocket
 {
 public:
-    RCP_RFMON_Socket(std::string const& interface, uint8_t id);
-    ~RCP_RFMON_Socket();
+    RFMON_Socket(std::string const& interface, uint8_t id);
+    ~RFMON_Socket();
 
     auto process() -> Result;
 
@@ -45,4 +47,5 @@ private:
     uint8_t m_id = 0;
 };
 
+}
 }

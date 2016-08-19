@@ -6,6 +6,8 @@
 
 namespace util
 {
+namespace hw
+{
 
 class RF4463F30
 {
@@ -29,6 +31,8 @@ public:
 
     bool read_rx_fifo(void* data, size_t& size);
 
+    bool get_dBm(int8_t& dBm);
+
 private:
     bool m_is_initialized = false;
     bool m_tx_started = false;
@@ -36,4 +40,4 @@ private:
 };
 
 }
-
+}

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "RCP.h"
+#include "ISocket.h"
 #include <vector>
 #include <string>
 #include <chrono>
@@ -8,12 +8,14 @@
 
 namespace util
 {
+namespace comms
+{
 
-class RCP_RF4463F30_Socket : public RCP_Socket
+class RF4463F30_Socket : public ISocket
 {
 public:
-    RCP_RF4463F30_Socket(std::string const& device, uint32_t speed, bool master);
-    ~RCP_RF4463F30_Socket();
+    RF4463F30_Socket(std::string const& device, uint32_t speed, bool master);
+    ~RF4463F30_Socket();
 
     Result process() override;
 
@@ -46,4 +48,5 @@ private:
     bool m_is_initialized = false;
 };
 
+}
 }

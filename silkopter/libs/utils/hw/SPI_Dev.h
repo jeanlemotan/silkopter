@@ -2,6 +2,8 @@
 
 namespace util
 {
+namespace hw
+{
 
 class SPI_Dev
 {
@@ -25,4 +27,5 @@ private:
     std::vector<uint8_t> m_rx_buffer;
 };
 
+}
 }

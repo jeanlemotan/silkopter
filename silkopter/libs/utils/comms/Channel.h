@@ -2,8 +2,11 @@
 
 #include <boost/optional.hpp>
 #include "utils/Serialization.h"
+#include "RCP.h"
 
 namespace util
+{
+namespace comms
 {
 
 template<class MESSAGE_SIZE_T>
@@ -82,7 +85,7 @@ public:
         return !m_rx_buffer.empty();
     }
 
-    void send(util::RCP& rcp)
+    void send(RCP& rcp)
     {
         if (!m_tx_buffer.empty())
         {
@@ -94,7 +97,7 @@ public:
             m_tx_buffer.clear();
         }
     }
-    void try_sending(util::RCP& rcp)
+    void try_sending(RCP& rcp)
     {
         if (!m_tx_buffer.empty())
         {
@@ -120,7 +123,7 @@ public:
 
     //returns the nest message or nothing.
     //the message, if any, has to be decoded with decode_next_message(...)
-    auto get_next_message(util::RCP& rcp) -> bool  { return _get_next_message(rcp); }
+    auto get_next_message(RCP& rcp) -> bool  { return _get_next_message(rcp); }
 
     //////////////////////////////////////////////////////////////////////////
 
@@ -210,7 +213,7 @@ private:
 
     //returns the nest message or nothing.
     //the message, if any, has to be decoded with decode_next_message(...)
-    auto _get_next_message(util::RCP& rcp) -> bool
+    auto _get_next_message(RCP& rcp) -> bool
     {
         if (m_decoded.data_size > 0)
         {
@@ -314,4 +317,5 @@ private:
     size_t m_data_start_off = 0;
 };
 
+}
 }
