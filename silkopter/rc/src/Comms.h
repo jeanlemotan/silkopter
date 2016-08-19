@@ -28,8 +28,6 @@
 #include "common/stream/IMultirotor_Commands.h"
 #include "common/stream/IMultirotor_State.h"
 
-#include "utils/RCP.h"
-#include "utils/Channel.h"
 #include "common/Manual_Clock.h"
 
 #include "common/node/INode.h"
@@ -37,6 +35,7 @@
 #include "common/stream/IMultirotor_State.h"
 
 #include "common/Comm_Data.h"
+#include "utils/comms/RC.h"
 
 #include <boost/asio.hpp>
 
@@ -48,40 +47,27 @@ class Comms : q::util::Noncopyable
 public:
     Comms();
 
-    auto start_udp(boost::asio::ip::address const& address, uint16_t send_port, uint16_t receive_port) -> bool;
-    auto start_rfmon(std::string const& interface, uint8_t id) -> bool;
+    auto start(std::string const& interface, uint8_t id) -> bool;
 
     void disconnect();
     auto is_connected() const -> bool;
 
     //----------------------------------------------------------------------
 
-    typedef util::Channel<uint32_t> Pilot_Channel;
-    typedef util::Channel<uint32_t> Video_Channel;
-    typedef util::Channel<uint32_t> Telemetry_Channel;
-
     auto get_video_samples() -> std::vector<stream::IVideo::Sample>;
     auto get_multirotor_state_samples() -> std::vector<stream::IMultirotor_State::Sample>;
     void send_multirotor_commands_value(stream::IMultirotor_Commands::Value const& value);
 
-    void process_rcp();
     void process();
 
 private:
-    void configure_channels();
-
     void reset();
 
-    std::shared_ptr<util::RCP_Socket> m_video_socket;
-    std::shared_ptr<util::RCP_Socket> m_rc_socket;
-    std::shared_ptr<util::RCP> m_rcp;
+    util::comms::RC m_rc;
+
+    bool m_is_connected = false;
 
     uint32_t m_last_req_id = 0;
-
-    //mutable Setup_Channel m_setup_channel;
-    mutable Pilot_Channel m_pilot_channel;
-    mutable Video_Channel m_video_channel;
-    mutable Telemetry_Channel m_telemetry_channel;
 
     mutable std::mutex m_samples_mutex;
     std::vector<stream::IVideo::Sample> m_video_samples;

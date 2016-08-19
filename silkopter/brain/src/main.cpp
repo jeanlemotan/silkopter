@@ -158,7 +158,7 @@ int main(int argc, char const* argv[])
             goto exit;
         }
 
-        if (!rc_comms.start_rfmon("wlan1", 3))
+        if (!rc_comms.start("wlan1", 3))
         {
             QLOGW("Cannot start rc communication channel!");
 //            goto exit;

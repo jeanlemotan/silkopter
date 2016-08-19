@@ -11,8 +11,11 @@
 
 namespace util
 {
+namespace comms
+{
 class RCP;
-class RCP_Socket;
+class ISocket;
+}
 }
 
 namespace silk
@@ -23,8 +26,7 @@ class RC_Comms : q::util::Noncopyable
 public:
     RC_Comms(HAL& hal);
 
-    auto start_udp(uint16_t send_port, uint16_t receive_port) -> bool;
-    auto start_rfmon(std::string const& interface, uint8_t id) -> bool;
+    auto start(std::string const& interface, uint8_t id) -> bool;
 
     auto is_connected() const -> bool;
 
@@ -36,8 +38,7 @@ public:
 
     struct Channels; //this needs to be public...
 private:
-    void configure_channels();
-
+    void handle_multirotor_commands();
     //void handle_accept(boost::system::error_code const& error);
 
 //    auto send_video_stream(Stream_Telemetry_Data& ts, stream::IStream const& _stream) -> bool;
@@ -46,12 +47,6 @@ private:
     q::Clock::time_point m_uav_sent_tp = q::Clock::now();
 
     std::vector<stream::IMultirotor_Commands::Value> m_multirotor_commands_values;
-
-    q::Clock::time_point m_last_rcp_tp = q::Clock::now();
-
-    std::shared_ptr<util::RCP_Socket> m_video_socket;
-    std::shared_ptr<util::RCP_Socket> m_rc_socket;
-    std::shared_ptr<util::RCP> m_rcp;
 
     std::shared_ptr<Channels> m_channels;
 

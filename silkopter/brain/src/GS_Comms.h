@@ -8,13 +8,16 @@
 #include "common/stream/IMultirotor_Commands.h"
 #include "common/stream/IMultirotor_State.h"
 #include "common/stream/IVideo.h"
-#include "utils/RCP.h"
-#include "utils/Channel.h"
+#include "utils/comms/RCP.h"
+#include "utils/comms/Channel.h"
 
 namespace util
 {
+namespace comms
+{
 class RCP;
-class RCP_Socket;
+class ISocket;
+}
 }
 
 namespace silk
@@ -116,10 +119,10 @@ private:
 
     q::Clock::time_point m_last_rcp_tp = q::Clock::now();
 
-    std::shared_ptr<util::RCP_Socket> m_socket;
-    std::shared_ptr<util::RCP> m_rcp;
+    std::shared_ptr<util::comms::ISocket> m_socket;
+    std::shared_ptr<util::comms::RCP> m_rcp;
 
-    typedef util::Channel<uint32_t> Telemetry_Channel;
+    typedef util::comms::Channel<uint32_t> Telemetry_Channel;
     Telemetry_Channel m_telemetry_channel;
 
     bool m_is_connected = false;

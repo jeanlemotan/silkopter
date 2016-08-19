@@ -126,9 +126,6 @@ SOURCES += \
     ../../src/source/ADS1115.cpp \
     ../../src/sink/PCA9685.cpp \
     ../../src/generator/Oscillator.cpp \
-    ../../../libs/utils/RCP_UDP_Socket.cpp \
-    ../../../libs/utils/RCP_RFMON_Socket.cpp \
-    ../../../libs/utils/radiotap/radiotap.cpp \
     ../../../libs/lz4/lz4.c \
     ../../src/source/OpenCV_Capture.cpp \
     ../../src/source/SRF01.cpp \
@@ -139,7 +136,6 @@ SOURCES += \
     ../../src/processor/Comp_ECEF.cpp \
     ../../src/processor/KF_ECEF.cpp \
     ../../src/processor/Proximity.cpp \
-    ../../../libs/utils/RCP.cpp \
     ../../src/bus/I2C_BCM.cpp \
     ../../src/bus/SPI_BCM.cpp \
     ../../src/bus/UART_BBang.cpp \
@@ -162,21 +158,24 @@ SOURCES += \
     ../../src/uav_properties/Quad_Multirotor_Properties.cpp \
     ../../src/uav_properties/Tri_Multirotor_Properties.cpp \
     ../../src/source/CPPM_Receiver.cpp \
-    ../../../libs/utils/RCP_RF4463F30_Socket.cpp \
-    ../../../libs/utils/RF4463F30.cpp \
-    ../../../libs/utils/Si4463.cpp \
-    ../../../libs/utils/SPI_Dev.cpp \
     ../../../libs/utils/hw/bcm2835.c \
     ../../../libs/utils/hw/command.c \
-    ../../../libs/utils/hw/pigpio.c
+    ../../../libs/utils/hw/pigpio.c \
+    ../../../libs/utils/comms/RC.cpp \
+    ../../../libs/utils/comms/RCP.cpp \
+    ../../../libs/utils/comms/RF4463F30_Socket.cpp \
+    ../../../libs/utils/comms/RFMON_Socket.cpp \
+    ../../../libs/utils/comms/UDP_Socket.cpp \
+    ../../../libs/utils/hw/radiotap/radiotap.cpp \
+    ../../../libs/utils/hw/RF4463F30.cpp \
+    ../../../libs/utils/hw/Si4463.cpp \
+    ../../../libs/utils/hw/SPI_Dev.cpp
 
 HEADERS += \
     ../../src/BrainStdAfx.h \
     ../../src/Toggle.h \
-    ../../../libs/utils/Channel.h \
     ../../../libs/utils/chrono.h \
     ../../../libs/utils/PID.h \
-    ../../../libs/utils/Serial_Channel.h \
     ../../../libs/utils/Timed_Scope.h \
     ../../../libs/physics/constants.h \
     ../../../libs/common/Comm_Data.h \
@@ -228,11 +227,6 @@ HEADERS += \
     ../../src/Sample_Accumulator.h \
     ../../src/MPL_Helper.h \
     ../../src/Basic_Output_Stream.h \
-    ../../../libs/utils/RCP.h \
-    ../../../libs/utils/RCP_UDP_Socket.h \
-    ../../../libs/utils/radiotap/ieee80211_radiotap.h \
-    ../../../libs/utils/radiotap/radiotap.h \
-    ../../../libs/utils/RCP_RFMON_Socket.h \
     ../../../libs/lz4/lz4.h \
     ../../src/source/OpenCV_Capture.h \
     ../../../libs/utils/Serialization.h \
@@ -313,13 +307,24 @@ HEADERS += \
     ../../src/uav_properties/Quad_Multirotor_Properties.h \
     ../../src/uav_properties/Tri_Multirotor_Properties.h \
     ../../src/source/CPPM_Receiver.h \
-    ../../../libs/utils/RCP_RF4463F30_Socket.h \
-    ../../../libs/utils/SPI_Dev.h \
-    ../../../libs/utils/Si4463.h \
-    ../../../libs/utils/RF4463F30.h \
+    ../../../libs/utils/comms/Channel.h \
+    ../../../libs/utils/comms/ISocket.h \
+    ../../../libs/utils/comms/RC.h \
+    ../../../libs/utils/comms/RCP.h \
+    ../../../libs/utils/comms/RF4463F30_Socket.h \
+    ../../../libs/utils/comms/RFMON_Socket.h \
+    ../../../libs/utils/comms/UDP_Socket.h \
+    ../../../libs/utils/hw/radiotap/ieee80211_radiotap.h \
+    ../../../libs/utils/hw/radiotap/radiotap.h \
     ../../../libs/utils/hw/bcm2835.h \
     ../../../libs/utils/hw/command.h \
-    ../../../libs/utils/hw/pigpio.h
+    ../../../libs/utils/hw/pigpio.h \
+    ../../../libs/utils/hw/RF4463F30_Config_old.h \
+    ../../../libs/utils/hw/RF4463F30_Config.h \
+    ../../../libs/utils/hw/RF4463F30.h \
+    ../../../libs/utils/hw/si446x_patch.h \
+    ../../../libs/utils/hw/Si4463.h \
+    ../../../libs/utils/hw/SPI_Dev.h
 
 DISTFILES +=
 

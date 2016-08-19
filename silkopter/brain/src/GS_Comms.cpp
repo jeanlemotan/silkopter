@@ -30,10 +30,10 @@
 
 #include "common/node/IBrain.h"
 
-#include "utils/RCP.h"
-#include "utils/RCP_UDP_Socket.h"
-#include "utils/RCP_RFMON_Socket.h"
-#include "utils/Channel.h"
+#include "utils/comms/RCP.h"
+#include "utils/comms/UDP_Socket.h"
+#include "utils/comms/RFMON_Socket.h"
+#include "utils/comms/Channel.h"
 
 #include "hal.def.h"
 #include "gs_comms.def.h"
@@ -58,11 +58,11 @@ auto GS_Comms::start_udp(uint16_t send_port, uint16_t receive_port) -> bool
 {
     try
     {
-        auto s = new util::RCP_UDP_Socket();
+        auto s = new util::comms::UDP_Socket();
         m_socket.reset(s);
-        m_rcp.reset(new util::RCP());
+        m_rcp.reset(new util::comms::RCP());
 
-        util::RCP::Socket_Handle handle = m_rcp->add_socket(m_socket.get());
+        util::comms::RCP::Socket_Handle handle = m_rcp->add_socket(m_socket.get());
         if (handle >= 0)
         {
             m_rcp->set_internal_socket_handle(handle);
@@ -100,11 +100,11 @@ auto GS_Comms::start_rfmon(std::string const& interface, uint8_t id) -> bool
 {
     try
     {
-        auto s = new util::RCP_RFMON_Socket(interface, id);
+        auto s = new util::comms::RFMON_Socket(interface, id);
         m_socket.reset(s);
-        m_rcp.reset(new util::RCP);
+        m_rcp.reset(new util::comms::RCP);
 
-        util::RCP::Socket_Handle handle = m_rcp->add_socket(m_socket.get());
+        util::comms::RCP::Socket_Handle handle = m_rcp->add_socket(m_socket.get());
         if (handle >= 0)
         {
             m_rcp->set_internal_socket_handle(handle);
@@ -136,27 +136,27 @@ auto GS_Comms::start_rfmon(std::string const& interface, uint8_t id) -> bool
 void GS_Comms::configure_channels()
 {
     {
-        util::RCP::Send_Params params;
+        util::comms::RCP::Send_Params params;
         params.is_compressed = true;
         params.is_reliable = true;
         params.importance = 100;
         m_rcp->set_send_params(SETUP_CHANNEL, params);
     }
     {
-        util::RCP::Receive_Params params;
+        util::comms::RCP::Receive_Params params;
         params.max_receive_time = std::chrono::seconds(999999);
         m_rcp->set_receive_params(SETUP_CHANNEL, params);
     }
 
     {
-        util::RCP::Send_Params params;
+        util::comms::RCP::Send_Params params;
         params.is_compressed = false;
         params.is_reliable = true;
         params.importance = 90;
         m_rcp->set_send_params(TELEMETRY_CHANNEL, params);
     }
     {
-        util::RCP::Receive_Params params;
+        util::comms::RCP::Receive_Params params;
         params.max_receive_time = std::chrono::seconds(10);
         m_rcp->set_receive_params(TELEMETRY_CHANNEL, params);
     }}
@@ -1379,7 +1379,7 @@ void GS_Comms::process()
     gather_telemetry_data();
 
     auto result = m_socket->process();
-    if (result != util::RCP_Socket::Result::OK)
+    if (result != util::comms::ISocket::Result::OK)
     {
         m_rcp->reconnect();
     }

@@ -135,9 +135,6 @@ HEADERS += \
     ../../../libs/common/stream/IBool.h \
     ../../../libs/common/stream/IPosition.h \
     ../../../libs/common/stream/IGPS_Info.h \
-    ../../../libs/utils/RCP_RFMON_Socket.h \
-    ../../../libs/utils/RCP_UDP_Socket.h \
-    ../../../libs/utils/RCP.h \
     ../../../libs/lz4/lz4.h \
     ../../../libs/common/stream/IFloat.h \
     ../../../libs/common/stream/IMultirotor_Commands.h \
@@ -145,8 +142,6 @@ HEADERS += \
     ../../../libs/common/stream/IProximity.h \
     ../../../libs/common/stream/Stream_Base.h \
     ../../../libs/utils/Coordinates.h \
-    ../../../libs/utils/radiotap/ieee80211_radiotap.h \
-    ../../../libs/utils/radiotap/radiotap.h \
     ../../../libs/common/node/ICombiner.h \
     ../../src/Nodes.h \
     ../../../libs/common/stream/IMultirotor_Commands.h \
@@ -158,25 +153,31 @@ HEADERS += \
     ../../src/HAL_QML_Proxy.h \
     ../../src/Video_Decoder.h \
     ../../src/Video_Renderer.h \
-    ../../../libs/utils/RCP_RF4463F30_Socket.h \
-    ../../../libs/utils/RF4463F30.h \
-    ../../../libs/utils/Si4463.h \
-    ../../../libs/utils/RF4463F30_Config.h \
     ../../../libs/utils/hw/bcm2835.h \
     ../../../libs/utils/hw/command.h \
     ../../../libs/utils/hw/pigpio.h \
-    ../../../libs/utils/SPI_Dev.h
+    ../../../libs/utils/comms/Channel.h \
+    ../../../libs/utils/comms/RC.h \
+    ../../../libs/utils/comms/RCP.h \
+    ../../../libs/utils/comms/ISocket.h \
+    ../../../libs/utils/comms/RF4463F30_Socket.h \
+    ../../../libs/utils/comms/RFMON_Socket.h \
+    ../../../libs/utils/comms/UDP_Socket.h \
+    ../../../libs/utils/hw/RF4463F30.h \
+    ../../../libs/utils/hw/Si4463.h \
+    ../../../libs/utils/hw/SPI_Dev.h \
+    ../../../libs/utils/hw/RF4463F30_Config_old.h \
+    ../../../libs/utils/hw/RF4463F30_Config.h \
+    ../../../libs/utils/hw/si446x_patch.h \
+    ../../../libs/utils/hw/radiotap/ieee80211_radiotap.h \
+    ../../../libs/utils/hw/radiotap/radiotap.h
 
 SOURCES += \
     ../../src/main.cpp \
     ../../src/Comms.cpp \
     ../../src/HAL.cpp \
-    ../../../libs/utils/RCP_UDP_Socket.cpp \
     ../../../libs/lz4/lz4.c \
     ../../../libs/utils/Coordinates.cpp \
-    ../../../libs/utils/RCP.cpp \
-    ../../../libs/utils/RCP_RFMON_Socket.cpp \
-    ../../../libs/utils/radiotap/radiotap.cpp \
     ../../src/Comms_Slots.cpp \
     ../../src/Comms_QML_Proxy.cpp \
     ../../src/Menus_QML_Proxy.cpp \
@@ -184,13 +185,18 @@ SOURCES += \
     ../../src/HAL_QML_Proxy.cpp \
     ../../src/Video_Decoder.cpp \
     ../../src/Video_Renderer.cpp \
-    ../../../libs/utils/RCP_RF4463F30_Socket.cpp \
-    ../../../libs/utils/RF4463F30.cpp \
-    ../../../libs/utils/Si4463.cpp \
     ../../../libs/utils/hw/bcm2835.c \
     ../../../libs/utils/hw/command.c \
     ../../../libs/utils/hw/pigpio.c \
-    ../../../libs/utils/SPI_Dev.cpp
+    ../../../libs/utils/comms/RC.cpp \
+    ../../../libs/utils/comms/RCP.cpp \
+    ../../../libs/utils/comms/RF4463F30_Socket.cpp \
+    ../../../libs/utils/comms/RFMON_Socket.cpp \
+    ../../../libs/utils/comms/UDP_Socket.cpp \
+    ../../../libs/utils/hw/RF4463F30.cpp \
+    ../../../libs/utils/hw/Si4463.cpp \
+    ../../../libs/utils/hw/SPI_Dev.cpp \
+    ../../../libs/utils/hw/radiotap/radiotap.cpp
 
 DISTFILES += \
     ../../src/node.png \

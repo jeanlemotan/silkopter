@@ -178,7 +178,7 @@ int main(int argc, char *argv[])
     while (true)
     {
         view.update();
-        s_comms.process_rcp();
+        //s_comms.process_rcp();
         s_comms.process();
 
         app.processEvents();
