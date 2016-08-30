@@ -88,7 +88,7 @@ auto I2C_BCM::read(uint8_t address, uint8_t* data, size_t size) -> bool
     int res = bcm2835_i2c_read(reinterpret_cast<char*>(data), size);
     if (res != BCM2835_I2C_REASON_OK)
     {
-        QLOGW("read {} failed: {}", res);
+        QLOGW("read failed: {}", res);
         return false;
     }
 
@@ -106,7 +106,7 @@ auto I2C_BCM::write(uint8_t address, uint8_t const* data, size_t size) -> bool
     int res = bcm2835_i2c_write(reinterpret_cast<const char*>(data), size);
     if (res != BCM2835_I2C_REASON_OK)
     {
-        QLOGW("write {} failed: {}", res);
+        QLOGW("write failed: {}", res);
         return false;
     }
 
