@@ -90,7 +90,8 @@ private:
     enum class Stage
     {
         PRESSURE,
-        TEMPERATURE
+        TEMPERATURE,
+        UNKNOWN
     };
 
     Stage         m_stage = Stage::PRESSURE;

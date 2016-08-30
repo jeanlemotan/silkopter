@@ -247,7 +247,7 @@ void MS5611::process()
             m_stats.bus_failures++;
         }
     }
-    else
+    else if (m_stage == Stage::TEMPERATURE)
     {
         uint32_t data = 0;
         //read temperature
@@ -273,6 +273,7 @@ void MS5611::process()
         }
         else
         {
+            m_stage = Stage::UNKNOWN;
             m_stats.bus_failures++;
         }
     }
@@ -284,6 +285,7 @@ void MS5611::process()
         }
         else
         {
+            m_stage = Stage::UNKNOWN;
             m_stats.bus_failures++;
         }
     }
