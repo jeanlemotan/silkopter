@@ -21,7 +21,7 @@ static constexpr size_t MAX_USER_PACKET_SIZE = 1470;
 
 static constexpr size_t DEFAULT_RATE_HZ = 26000000;
 
-std::vector<uint8_t> RADIOTAP_HEADER;
+static std::vector<uint8_t> RADIOTAP_HEADER;
 
 static constexpr size_t SRC_MAC_LASTBYTE  = 15;
 static constexpr size_t DST_MAC_LASTBYTE  = 21;

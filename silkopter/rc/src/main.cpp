@@ -148,9 +148,12 @@ int main(int argc, char *argv[])
         QASSERT(res);
     });
 
-    QObject::connect(&view, &QQuickView::beforeRendering, []()
+    std::vector<uint8_t> video_data;
+    QObject::connect(&view, &QQuickView::beforeRendering, [&video_data]()
     {
-        s_video_decoder.decode_samples(s_comms.get_video_samples());
+        video_data.clear();
+        s_comms.get_video_data(video_data);
+        s_video_decoder.decode_data(video_data);
     });
 
     QSurfaceFormat format = view.format();

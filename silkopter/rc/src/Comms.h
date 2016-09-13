@@ -36,6 +36,7 @@
 
 #include "common/Comm_Data.h"
 #include "utils/comms/RC.h"
+#include "utils/comms/Video_Streamer.h"
 
 #include <boost/asio.hpp>
 
@@ -54,7 +55,7 @@ public:
 
     //----------------------------------------------------------------------
 
-    auto get_video_samples() -> std::vector<stream::IVideo::Sample>;
+    void get_video_data(std::vector<uint8_t>& dst);
     auto get_multirotor_state_samples() -> std::vector<stream::IMultirotor_State::Sample>;
     void send_multirotor_commands_value(stream::IMultirotor_Commands::Value const& value);
 
@@ -64,17 +65,18 @@ private:
     void reset();
 
     util::comms::RC m_rc;
+    util::comms::Video_Streamer m_video_streamer;
 
     bool m_is_connected = false;
 
     uint32_t m_last_req_id = 0;
 
     mutable std::mutex m_samples_mutex;
-    std::vector<stream::IVideo::Sample> m_video_samples;
+    std::vector<uint8_t> m_video_data;
     std::vector<stream::IMultirotor_State::Sample> m_multirotor_state_samples;
 
     void handle_multirotor_state();
-    void handle_video();
+    void handle_video(void const* data, size_t size);
 };
 
 }

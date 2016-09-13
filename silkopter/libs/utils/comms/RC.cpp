@@ -30,7 +30,7 @@ RC::RC(bool master)
     : m_is_master(master)
 {
     m_hw.reset(new HW);
-    set_rate(100);
+    set_rate(30);
 }
 
 RC::~RC()

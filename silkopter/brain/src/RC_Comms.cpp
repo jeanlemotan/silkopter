@@ -3,25 +3,26 @@
 #include "utils/Timed_Scope.h"
 
 #include "utils/comms/RC.h"
-
-//#include "hal.def.h"
-
-//#include <boost/asio.hpp>
+#include "utils/comms/Video_Streamer.h"
 
 using namespace silk;
 
-struct RC_Comms::Channels
+struct RC_Comms::Impl
 {
-    Channels()
+    Impl()
         : rc(false)
+        , video_streamer("wlan1", util::comms::Video_Streamer::Master_Descriptor{1, 2})
     {}
 
     util::comms::RC rc;
+    util::comms::Video_Streamer video_streamer;
+
+    std::vector<uint8_t> serialization_buffer;
 };
 
 RC_Comms::RC_Comms(HAL& hal)
     : m_hal(hal)
-    , m_channels(new Channels())
+    , m_impl(new Impl())
 {
 }
 
@@ -63,7 +64,7 @@ auto RC_Comms::start(std::string const& interface, uint8_t id) -> bool
 //            }
 //        }
 
-        m_is_connected = m_channels->rc.init();
+        m_is_connected = m_impl->rc.init() && m_impl->video_streamer.init();
     }
     catch(std::exception e)
     {
@@ -86,27 +87,6 @@ auto RC_Comms::is_connected() const -> bool
     return m_is_connected;
 }
 
-//auto Comms::send_video_stream(Stream_Telemetry_Data& ts, stream::IStream const& _stream) -> bool
-//{
-//    if (_stream.get_type() != stream::IVideo::TYPE)
-//    {
-//        return false;
-//    }
-
-//    auto const& stream = static_cast<stream::IVideo const&>(_stream);
-//    auto const& samples = stream.get_samples();
-
-//    for (auto const& s: samples)
-//    {
-//        m_channels->video.begin_pack(comms::Video_Message::FRAME_DATA);
-//        m_channels->video.pack_param(ts.stream_name);
-//        m_channels->video.pack_param(s);
-//        m_channels->video.end_pack();
-//        m_channels->video.try_sending(*m_rcp);
-//    }
-//    return true;
-//}
-
 auto RC_Comms::get_multirotor_commands_values() const -> std::vector<stream::IMultirotor_Commands::Value> const&
 {
     return m_multirotor_commands_values;
@@ -118,11 +98,9 @@ void RC_Comms::add_multirotor_state_sample(stream::IMultirotor_State::Sample con
 }
 void RC_Comms::add_video_sample(stream::IVideo::Sample const& sample)
 {
-//    if (m_rcp)
-//    {
-//        m_channels->video.pack_all(silk::rc_comms::Video_Message::FRAME_DATA, sample);
-//        m_channels->video.send(*m_rcp);
-//    }
+    //size_t off = 0;
+    //util::serialization::serialize(m_impl->serialization_buffer, sample, off);
+    m_impl->video_streamer.send(sample.value.data.data(), sample.value.data.size());
 }
 
 void RC_Comms::handle_multirotor_commands()
@@ -163,11 +141,11 @@ void RC_Comms::process()
         static Data tx_data;
         tx_data.yaw++;
 
-        m_channels->rc.set_tx_data(&tx_data, sizeof(tx_data));
+        m_impl->rc.set_tx_data(&tx_data, sizeof(tx_data));
 
         Data rx_data;
         util::comms::RC::Data rc_rx_data;
-        m_channels->rc.get_rx_data(rc_rx_data);
+        m_impl->rc.get_rx_data(rc_rx_data);
         if (rc_rx_data.rx_data.size() == sizeof(Data))
         {
             rx_data = *reinterpret_cast<Data const*>(rc_rx_data.rx_data.data());

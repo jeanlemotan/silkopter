@@ -152,19 +152,20 @@ void Video_Decoder::release_buffers()
     }
 }
 
-bool Video_Decoder::decode_samples(std::vector<silk::stream::IVideo::Sample> const& samples)
+bool Video_Decoder::decode_data(std::vector<uint8_t> const& data)
 {
     process_output();
 
-    for (silk::stream::IVideo::Sample const& sample: samples)
-    {
-        uint8_t const* data_ptr = sample.value.data.data();
-        size_t data_size = sample.value.data.size();
+//    for (silk::stream::IVideo::Sample const& sample: samples)
+//    {
+//        uint8_t const* data_ptr = sample.value.data.data();
+//        size_t data_size = sample.value.data.size();
         size_t buffer_count = 0;
 
-        if (m_resolution != sample.value.resolution)
+        math::vec2u32 resolution(800, 450);
+        if (m_resolution != resolution)
         {
-            m_resolution = sample.value.resolution;
+            m_resolution = resolution;
             if (!create_components(m_resolution))
             {
                 QLOGE("Cannot create components for resolution: {}", m_resolution);
@@ -172,6 +173,9 @@ bool Video_Decoder::decode_samples(std::vector<silk::stream::IVideo::Sample> con
                 return false;
             }
         }
+
+        uint8_t const* data_ptr = data.data();
+        size_t data_size = data.size();
 
         while (data_size > 0)
         {
@@ -203,7 +207,7 @@ bool Video_Decoder::decode_samples(std::vector<silk::stream::IVideo::Sample> con
 
             process_output();
         }
-    }
+//    }
 
     return true;
 }
@@ -356,7 +360,7 @@ bool Video_Decoder::create_components(math::vec2u32 const& resolution)
 
     /* The format of both ports is now set so we can get their buffer requirements and create
         * our buffer headers. We use the buffer pool API to create these. */
-    input_port->buffer_num = input_port->buffer_num_min;
+    input_port->buffer_num = input_port->buffer_num_recommended;
     input_port->buffer_size = input_port->buffer_size_recommended;
     output_port->buffer_num = output_port->buffer_num_min;
     output_port->buffer_size = output_port->buffer_size_recommended;

@@ -169,7 +169,8 @@ SOURCES += \
     ../../../libs/utils/hw/radiotap/radiotap.cpp \
     ../../../libs/utils/hw/RF4463F30.cpp \
     ../../../libs/utils/hw/Si4463.cpp \
-    ../../../libs/utils/hw/SPI_Dev.cpp
+    ../../../libs/utils/hw/SPI_Dev.cpp \
+    ../../../libs/utils/comms/Video_Streamer.cpp
 
 HEADERS += \
     ../../src/BrainStdAfx.h \
@@ -324,7 +325,9 @@ HEADERS += \
     ../../../libs/utils/hw/RF4463F30.h \
     ../../../libs/utils/hw/si446x_patch.h \
     ../../../libs/utils/hw/Si4463.h \
-    ../../../libs/utils/hw/SPI_Dev.h
+    ../../../libs/utils/hw/SPI_Dev.h \
+    ../../../libs/utils/comms/Video_Streamer.h \
+    ../../../libs/utils/Pool.h
 
 DISTFILES +=
 

@@ -36,7 +36,7 @@ public:
     void add_multirotor_state_sample(stream::IMultirotor_State::Sample const& sample);
     void add_video_sample(stream::IVideo::Sample const& sample);
 
-    struct Channels; //this needs to be public...
+    struct Impl; //this needs to be public...
 private:
     void handle_multirotor_commands();
     //void handle_accept(boost::system::error_code const& error);
@@ -48,7 +48,7 @@ private:
 
     std::vector<stream::IMultirotor_Commands::Value> m_multirotor_commands_values;
 
-    std::shared_ptr<Channels> m_channels;
+    std::shared_ptr<Impl> m_impl;
 
     bool m_is_connected = false;
 

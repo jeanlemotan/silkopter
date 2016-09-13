@@ -13,7 +13,7 @@ public:
     ~Video_Decoder();
 
 
-    bool decode_samples(std::vector<silk::stream::IVideo::Sample> const& samples);
+    bool decode_data(std::vector<uint8_t> const& data);
 
     bool init();
 
