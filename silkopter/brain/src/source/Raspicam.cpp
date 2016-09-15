@@ -74,9 +74,6 @@ struct Raspicam::Impl
         Component_ptr resizer;
         Connection_ptr resizer_connection;
 
-        std::vector<uint8_t> data;
-        std::mutex data_mutex;
-
         std::atomic<bool> is_active{false};
 
         q::Clock::time_point start;
@@ -389,7 +386,7 @@ void Raspicam::process()
 }
 
 
-void Raspicam::recording_callback(uint8_t const* data, size_t size, math::vec2u32 const& resolution, bool is_keyframe)
+void Raspicam::recording_callback(uint8_t const* data, size_t size, math::vec2u16 const& resolution, bool is_keyframe)
 {
     if (!data || size == 0)
     {
@@ -409,7 +406,7 @@ void Raspicam::recording_callback(uint8_t const* data, size_t size, math::vec2u3
     }
 }
 
-void Raspicam::streaming_callback(uint8_t const* data, size_t size, math::vec2u32 const& resolution, bool is_keyframe)
+void Raspicam::streaming_callback(uint8_t const* data, size_t size, math::vec2u16 const& resolution, bool is_keyframe)
 {
     if (!data || size == 0)
     {
@@ -426,7 +423,6 @@ void Raspicam::streaming_callback(uint8_t const* data, size_t size, math::vec2u3
     auto& sample = m_sample_queue.samples[m_sample_queue.count];
     sample.is_healthy = true;
     sample.value.type = Stream::Value::Type::H264;
-    sample.value.is_keyframe = is_keyframe;
     sample.value.resolution = resolution;
     sample.value.data.resize(size);
     std::copy(data, data + size, sample.value.data.begin());
@@ -808,7 +804,7 @@ static Pool_ptr create_output_port_pool(MMAL_PORT_T* port, MMAL_PORT_USERDATA_T*
     return o_pool;
 }
 
-static bool setup_encoder_component(Component_ptr encoder, MMAL_PORT_T* src, math::vec2u32 const& resolution, size_t bitrate)
+static bool setup_encoder_component(Component_ptr encoder, MMAL_PORT_T* src, math::vec2u16 const& resolution, size_t bitrate)
 {
     //    SCOPED_PINS_GUARD;;
 
@@ -866,7 +862,7 @@ static bool setup_encoder_component(Component_ptr encoder, MMAL_PORT_T* src, mat
     return res;
 }
 
-static Component_ptr create_encoder_component_for_recording(MMAL_PORT_T* src, math::vec2u32 const& resolution, size_t bitrate)
+static Component_ptr create_encoder_component_for_recording(MMAL_PORT_T* src, math::vec2u16 const& resolution, size_t bitrate)
 {
     //    SCOPED_PINS_GUARD;;
 
@@ -925,7 +921,7 @@ static Component_ptr create_encoder_component_for_recording(MMAL_PORT_T* src, ma
     return encoder;
 }
 
-static Component_ptr create_encoder_component_for_streaming(MMAL_PORT_T* src, math::vec2u32 const& resolution, size_t bitrate)
+static Component_ptr create_encoder_component_for_streaming(MMAL_PORT_T* src, math::vec2u16 const& resolution, size_t bitrate)
 {
     //    SCOPED_PINS_GUARD;;
 
@@ -1054,7 +1050,7 @@ static Component_ptr create_encoder_component_for_streaming(MMAL_PORT_T* src, ma
     return encoder;
 }
 
-static void setup_video_format(MMAL_ES_FORMAT_T* format, math::vec2u32 const& resolution, bool align, size_t fps)
+static void setup_video_format(MMAL_ES_FORMAT_T* format, math::vec2u16 const& resolution, bool align, size_t fps)
 {
     //    SCOPED_PINS_GUARD;;
 
@@ -1109,7 +1105,7 @@ static Component_ptr create_splitter_component(MMAL_PORT_T* src)
     return splitter;
 }
 
-static Component_ptr create_resizer_component(MMAL_PORT_T* src, math::vec2u32 const& resolution, size_t fps)
+static Component_ptr create_resizer_component(MMAL_PORT_T* src, math::vec2u16 const& resolution, size_t fps)
 {
     //    SCOPED_PINS_GUARD;;
 
@@ -1189,42 +1185,17 @@ static void encoder_buffer_callback_fn(Raspicam::Impl& impl,
 
     impl.frame_idx++;
 
-    bool sent = false;
-
-    math::vec2u32 resolution(encoder_data.quality->get_resolution());
+    math::vec2u16 resolution(encoder_data.quality->get_resolution());
 
     MMAL_CALL(mmal_buffer_header_mem_lock(buffer));
+    if (encoder_data.is_active)
     {
-        size_t off = encoder_data.data.size();
-        if (off == 0 && is_end_frame) //complete frame and the data is empty - send the buffer directly to avoid a copy
-        {
-            if (encoder_data.is_active)
-            {
-                encoder_data.callback(buffer->data, buffer->length, resolution, is_keyframe);
-            }
-            sent = true;
-        }
-        else
-        {
-            std::lock_guard<std::mutex> lg(encoder_data.data_mutex);
-            encoder_data.data.resize(encoder_data.data.size() + buffer->length);
-            std::copy(buffer->data, buffer->data + buffer->length, encoder_data.data.data() + off);
-        }
+        encoder_data.callback(buffer->data, buffer->length, resolution, is_keyframe);
     }
     MMAL_CALL(mmal_buffer_header_mem_unlock(buffer));
 
     // release buffer back to the pool
     MMAL_CALL(mmal_buffer_header_release(buffer));
-
-    if (!sent && is_end_frame)
-    {
-        std::lock_guard<std::mutex> lg(encoder_data.data_mutex);
-        if (encoder_data.is_active)
-        {
-            encoder_data.callback(encoder_data.data.data(), encoder_data.data.size(), resolution, is_keyframe);
-        }
-        encoder_data.data.clear();
-    }
 
 //    if (is_end_frame)
 //    {
@@ -1292,9 +1263,9 @@ auto Raspicam::create_components() -> bool
     auto camera_preview_port = m_impl->camera->output[MMAL_CAMERA_PREVIEW_PORT];
     auto camera_capture_port = m_impl->camera->output[MMAL_CAMERA_CAPTURE_PORT];
 
-    math::vec2u32 recording_resolution(m_descriptor->get_recording().get_resolution());
-    math::vec2u32 high_resolution(m_descriptor->get_streaming_high().get_resolution());
-    math::vec2u32 low_resolution(m_descriptor->get_streaming_low().get_resolution());
+    math::vec2u16 recording_resolution(m_descriptor->get_recording().get_resolution());
+    math::vec2u16 high_resolution(m_descriptor->get_streaming_high().get_resolution());
+    math::vec2u16 low_resolution(m_descriptor->get_streaming_low().get_resolution());
 
     //  set up the camera configuration
     {

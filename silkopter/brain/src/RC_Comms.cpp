@@ -100,7 +100,7 @@ void RC_Comms::add_video_sample(stream::IVideo::Sample const& sample)
 {
     //size_t off = 0;
     //util::serialization::serialize(m_impl->serialization_buffer, sample, off);
-    m_impl->video_streamer.send(sample.value.data.data(), sample.value.data.size());
+    m_impl->video_streamer.send(sample.value.data.data(), sample.value.data.size(), sample.value.resolution);
 }
 
 void RC_Comms::handle_multirotor_commands()

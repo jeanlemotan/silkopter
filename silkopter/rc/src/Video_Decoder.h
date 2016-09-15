@@ -13,7 +13,7 @@ public:
     ~Video_Decoder();
 
 
-    bool decode_data(std::vector<uint8_t> const& data);
+    bool decode_data(std::vector<uint8_t> const& data, math::vec2u16 const& resolution);
 
     bool init();
 
@@ -24,10 +24,10 @@ public:
     struct Impl;
 
 private:
-    bool create_components(math::vec2u32 const& resolution);
+    bool create_components(math::vec2u16 const& resolution);
     void process_output();
 
     uint32_t m_video_texture = 0;
     std::unique_ptr<Impl> m_impl;
-    math::vec2u32 m_resolution;
+    math::vec2u16 m_resolution;
 };

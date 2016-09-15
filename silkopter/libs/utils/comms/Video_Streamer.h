@@ -23,9 +23,10 @@ public:
 
     struct Slave_Descriptor
     {
-        uint32_t coding_k;
-        uint32_t coding_n;
-        q::Clock::duration max_latency;
+        uint32_t coding_k = 1;
+        uint32_t coding_n = 2;
+        q::Clock::duration max_latency = std::chrono::milliseconds(100);
+        q::Clock::duration reset_duration = std::chrono::milliseconds(1000);
     };
     Video_Streamer(std::string const& interface, Slave_Descriptor const& descriptor);
 
@@ -35,9 +36,9 @@ public:
 
     bool init();
 
-    void send(void const* data, size_t size);
+    void send(void const* data, size_t size, math::vec2u16 const& resolution);
 
-    std::function<void(void const* data, size_t size)> on_data_received;
+    std::function<void(void const* data, size_t size, math::vec2u16 const& resolution)> on_data_received;
 
     size_t get_mtu() const;
 

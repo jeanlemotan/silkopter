@@ -51,7 +51,7 @@ public:
     struct Impl;
     void process();
 
-    typedef std::function<void(uint8_t const* data, size_t size, math::vec2u32 const& resolution, bool is_keyframe)> Data_Available_Callback;
+    typedef std::function<void(uint8_t const* data, size_t size, math::vec2u16 const& resolution, bool is_keyframe)> Data_Available_Callback;
 
 private:
     HAL& m_hal;
@@ -65,8 +65,8 @@ private:
 
     std::shared_ptr<Impl> m_impl;
 
-    void streaming_callback(uint8_t const* data, size_t size, math::vec2u32 const& resolution, bool is_keyframe);
-    void recording_callback(uint8_t const* data, size_t size, math::vec2u32 const& resolution, bool is_keyframe);
+    void streaming_callback(uint8_t const* data, size_t size, math::vec2u16 const& resolution, bool is_keyframe);
+    void recording_callback(uint8_t const* data, size_t size, math::vec2u16 const& resolution, bool is_keyframe);
     void create_file_sink();
 
     auto create_components() -> bool;

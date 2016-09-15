@@ -152,8 +152,9 @@ int main(int argc, char *argv[])
     QObject::connect(&view, &QQuickView::beforeRendering, [&video_data]()
     {
         video_data.clear();
-        s_comms.get_video_data(video_data);
-        s_video_decoder.decode_data(video_data);
+        math::vec2u16 resolution;
+        s_comms.get_video_data(video_data, resolution);
+        s_video_decoder.decode_data(video_data, resolution);
     });
 
     QSurfaceFormat format = view.format();

@@ -53,6 +53,8 @@ struct Datagram_Header
     uint32_t datagram_index : 8;
     uint16_t is_fec : 1;
     uint16_t size : 15;
+    uint16_t width;
+    uint16_t height;
 };
 
 #pragma pack(pop)
@@ -78,8 +80,8 @@ struct TX
 
     Datagram_ptr crt_datagram;
 
-    uint32_t last_block = 1;
-    uint32_t last_index = 0;
+    uint32_t last_block_index = 1;
+    uint32_t last_datagram_index = 0;
 };
 
 
@@ -89,6 +91,7 @@ struct RX
     {
         bool is_processed = false;
         uint32_t index = 0;
+        math::vec2u16 resolution;
         std::vector<uint8_t> data;
     };
 
@@ -110,10 +113,12 @@ struct RX
     std::deque<Block_ptr> block_queue;
 
     q::Clock::time_point last_block_tp = q::Clock::now();
+    q::Clock::time_point last_datagram_tp = q::Clock::now();
+    uint32_t next_seq_number = 0;
 };
 
 
-static void seal_datagram(TX::Datagram& datagram, size_t header_offset, uint32_t block_index, uint8_t datagram_index, bool is_fec)
+static void seal_datagram(TX::Datagram& datagram, size_t header_offset, uint32_t block_index, uint8_t datagram_index, math::vec2u16 const& resolution, bool is_fec)
 {
     QASSERT(datagram.data.size() >= header_offset + sizeof(TX::Datagram));
 
@@ -123,6 +128,8 @@ static void seal_datagram(TX::Datagram& datagram, size_t header_offset, uint32_t
     header.block_index = block_index;
     header.datagram_index = datagram_index;
     header.is_fec = is_fec ? 1 : 0;
+    header.width = resolution.x;
+    header.height = resolution.y;
 
 //    header.crc = q::util::murmur_hash(datagram.data.data() + header_offset, header.size, 0);
 }
@@ -447,6 +454,13 @@ bool Video_Streamer::process_rx_packet()
 
             std::lock_guard<std::mutex> lg(rx.block_queue_mutex);
 
+            uint32_t seq_number = block_index * m_slave_descriptor.coding_k + datagram_index;
+            if (seq_number < rx.next_seq_number)
+            {
+                //QLOGW("Old datagram: {} < {}", seq_number, rx.next_seq_number);
+                return true;
+            }
+
             RX::Block_ptr block;
 
             //find the block
@@ -467,6 +481,7 @@ bool Video_Streamer::process_rx_packet()
             RX::Datagram_ptr datagram = rx.datagram_pool.acquire();
             datagram->data.resize(bytes - sizeof(Datagram_Header));
             datagram->index = datagram_index;
+            datagram->resolution.set(header.width, header.height);
             memcpy(datagram->data.data(), payload + sizeof(Datagram_Header), bytes - sizeof(Datagram_Header));
 
             //store datagram
@@ -479,7 +494,7 @@ bool Video_Streamer::process_rx_packet()
                 auto iter = std::lower_bound(block->datagrams.begin(), block->datagrams.end(), datagram_index, [](RX::Datagram_ptr const& l, uint32_t index) { return l->index < index; });
                 if (iter != block->datagrams.end() && (*iter)->index == datagram_index)
                 {
-                    QLOGW("Duplicated datagram {} from block {} (index {})", datagram_index, block_index, block_index * m_slave_descriptor.coding_k + datagram_index);
+                    //QLOGW("Duplicated datagram {} from block {} (index {})", datagram_index, block_index, block_index * m_slave_descriptor.coding_k + datagram_index);
                     return true;
                 }
                 else
@@ -775,11 +790,11 @@ void Video_Streamer::master_thread_proc()
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-void Video_Streamer::send(void const* _data, size_t size)
+void Video_Streamer::send(void const* _data, size_t size, math::vec2u16 const& resolution)
 {
     TX& tx = m_impl->tx;
 
-    TX::Datagram_ptr datagram = tx.crt_datagram;
+    TX::Datagram_ptr& datagram = tx.crt_datagram;
 
     uint8_t const* data = reinterpret_cast<uint8_t const*>(_data);
 
@@ -799,17 +814,22 @@ void Video_Streamer::send(void const* _data, size_t size)
 
         if (datagram->data.size() >= get_mtu())
         {
-            seal_datagram(*datagram, m_impl->tx_packet_header_length, tx.last_block, tx.last_index++, false);
-            if (tx.last_index >= m_master_descriptor.coding_k)
+            seal_datagram(*datagram, m_impl->tx_packet_header_length, tx.last_block_index, tx.last_datagram_index++, resolution, false);
+            if (tx.last_datagram_index >= m_master_descriptor.coding_k)
             {
-                tx.last_block++;
-                tx.last_index = 0;
+                tx.last_block_index++;
+                tx.last_datagram_index = 0;
                 //generate fec datagrams
                 //......
             }
 
             {
                 std::unique_lock<std::mutex> lg(tx.datagram_queue_mutex);
+                tx.datagram_queue.push_back(datagram);
+                tx.datagram_queue.push_back(datagram);
+                tx.datagram_queue.push_back(datagram);
+                tx.datagram_queue.push_back(datagram);
+                tx.datagram_queue.push_back(datagram);
                 tx.datagram_queue.push_back(datagram);
             }
             tx.datagram_queue_cv.notify_all();
@@ -838,6 +858,11 @@ void Video_Streamer::process()
     RX& rx = m_impl->rx;
     std::lock_guard<std::mutex> lg(rx.block_queue_mutex);
 
+    if (q::Clock::now() - rx.last_datagram_tp > m_slave_descriptor.reset_duration)
+    {
+        rx.next_seq_number = 0;
+    }
+
     if (rx.block_queue.empty())
     {
         return;
@@ -845,66 +870,90 @@ void Video_Streamer::process()
 
     RX::Block_ptr block = rx.block_queue.front();
 
-    //entire block received
-    if (block->datagrams.size() >= m_slave_descriptor.coding_k)
+    uint32_t next_block_index = rx.next_seq_number / m_slave_descriptor.coding_k;
+
+    if (block->index == next_block_index || next_block_index == 0)
     {
-        for (RX::Datagram_ptr const& d: block->datagrams)
+        //entire block received
+        if (block->datagrams.size() >= m_slave_descriptor.coding_k)
         {
-            if (!d->is_processed)
+            for (RX::Datagram_ptr const& d: block->datagrams)
             {
-                if (on_data_received)
+                uint32_t seq_number = block->index * m_slave_descriptor.coding_k + d->index;
+                if (!d->is_processed)
                 {
-                    on_data_received(d->data.data(), d->data.size());
+                    //QLOGI("Datagram {}", seq_number);
+                    if (on_data_received)
+                    {
+                        on_data_received(d->data.data(), d->data.size(), d->resolution);
+                    }
+                    rx.next_seq_number = seq_number + 1;
+                    rx.last_datagram_tp = q::Clock::now();
+                    d->is_processed = true;
                 }
-                d->is_processed = true;
             }
+
+            rx.last_block_tp = q::Clock::now();
+
+            rx.block_queue.pop_front();
+            return;
         }
 
-        rx.last_block_tp = q::Clock::now();
-
-        rx.block_queue.pop_front();
-        return;
-    }
-
-    //try to process consecutive datagrams before the block is finished to minimize latency
-    for (size_t i = 0; i < block->datagrams.size(); i++)
-    {
-        RX::Datagram_ptr const& d = block->datagrams[i];
-        if (d->index == i)
+        //try to process consecutive datagrams before the block is finished to minimize latency
+        for (size_t i = 0; i < block->datagrams.size(); i++)
         {
-            if (!d->is_processed)
+            RX::Datagram_ptr const& d = block->datagrams[i];
+            if (d->index == i)
             {
-                if (on_data_received)
+                uint32_t seq_number = block->index * m_slave_descriptor.coding_k + d->index;
+                if (!d->is_processed)
                 {
-                    on_data_received(d->data.data(), d->data.size());
+                    //QLOGI("Datagram {}", seq_number);
+                    if (on_data_received)
+                    {
+                        on_data_received(d->data.data(), d->data.size(), d->resolution);
+                    }
+                    rx.next_seq_number = seq_number + 1;
+                    rx.last_datagram_tp = q::Clock::now();
+                    d->is_processed = true;
                 }
-                d->is_processed = true;
             }
-        }
-        else
-        {
-            break;
-        }
-    }
-
-    //check if we're out of time
-    auto now = q::Clock::now();
-    if (now - rx.last_block_tp >= m_slave_descriptor.max_latency)
-    {
-        //if we have valid future data, skip this block
-        bool has_future_data = false;
-        for (size_t i = 1; i < rx.block_queue.size(); i++)
-        {
-            if (rx.block_queue[i]->datagrams.size() + rx.block_queue[i]->fec_datagrams.size() >= m_slave_descriptor.coding_k)
+            else
             {
-                has_future_data = true;
                 break;
             }
         }
 
-        if (has_future_data)
+        //check if we're out of time and skip the current incomplete block
+        if (q::Clock::now() - rx.last_block_tp >= m_slave_descriptor.max_latency)
         {
-            rx.block_queue.pop_front();
+            //if we have valid future data, skip this block
+            bool has_future_data = false;
+            for (size_t i = 1; i < rx.block_queue.size(); i++)
+            {
+                if (rx.block_queue[i]->datagrams.size() + rx.block_queue[i]->fec_datagrams.size() >= m_slave_descriptor.coding_k)
+                {
+                    has_future_data = true;
+                    break;
+                }
+            }
+
+            if (has_future_data)
+            {
+//                rx.last_block_tp = q::Clock::now();
+                rx.next_seq_number = rx.block_queue.front()->index * m_slave_descriptor.coding_k + m_slave_descriptor.coding_k;
+                rx.block_queue.pop_front();
+                return;
+            }
+        }
+    }
+    else
+    {
+        //check if we're out of time and skip the current block
+        if (q::Clock::now() - rx.last_block_tp >= m_slave_descriptor.max_latency)
+        {
+//            rx.last_block_tp = q::Clock::now();
+            rx.next_seq_number = rx.block_queue.front()->index * m_slave_descriptor.coding_k;
             return;
         }
     }

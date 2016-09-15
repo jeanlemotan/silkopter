@@ -21,8 +21,7 @@ public:
 
         q::Clock::time_point time_point;
         Type type;
-        bool is_keyframe = false;
-        math::vec2u32 resolution;
+        math::vec2u16 resolution;
         std::vector<uint8_t> data;
     };
     typedef stream::Sample<Value>     Sample;
@@ -44,7 +43,6 @@ template<> inline void serialize(Buffer_t& buffer, silk::stream::IVideo::Value c
     serialize(buffer, value.time_point.time_since_epoch().count(), off);
     serialize(buffer, value.type, off);
     serialize(buffer, value.resolution, off);
-    serialize(buffer, value.is_keyframe, off);
     serialize(buffer, static_cast<uint32_t>(value.data.size()), off);
     if (buffer.size() < off + value.data.size())
     {
@@ -61,7 +59,6 @@ template<> inline auto deserialize(Buffer_t const& buffer, silk::stream::IVideo:
     if (!deserialize(buffer, time_point, off) ||
         !deserialize(buffer, value.type, off) ||
         !deserialize(buffer, value.resolution, off) ||
-        !deserialize(buffer, value.is_keyframe, off) ||
         !deserialize(buffer, size, off) ||
         size + off > buffer.size())
     {

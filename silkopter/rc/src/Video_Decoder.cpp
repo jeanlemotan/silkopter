@@ -152,7 +152,7 @@ void Video_Decoder::release_buffers()
     }
 }
 
-bool Video_Decoder::decode_data(std::vector<uint8_t> const& data)
+bool Video_Decoder::decode_data(std::vector<uint8_t> const& data, math::vec2u16 const& resolution)
 {
     process_output();
 
@@ -162,14 +162,13 @@ bool Video_Decoder::decode_data(std::vector<uint8_t> const& data)
 //        size_t data_size = sample.value.data.size();
         size_t buffer_count = 0;
 
-        math::vec2u32 resolution(800, 450);
         if (m_resolution != resolution)
         {
             m_resolution = resolution;
             if (!create_components(m_resolution))
             {
                 QLOGE("Cannot create components for resolution: {}", m_resolution);
-                m_resolution = math::vec2u32::zero;
+                m_resolution = math::vec2u16::zero;
                 return false;
             }
         }
@@ -260,7 +259,7 @@ void Video_Decoder::process_output()
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool Video_Decoder::create_components(math::vec2u32 const& resolution)
+bool Video_Decoder::create_components(math::vec2u16 const& resolution)
 {
     MMAL_STATUS_T status = MMAL_EINVAL;
 
