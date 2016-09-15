@@ -854,7 +854,7 @@ struct Raspicam_Descriptor : public INode_Descriptor
         bitrate_t bitrate : [ ui_name = "Bitrate", ui_suffix = "bps" ];
     };
 
-    alias fps_t = int32_t : [ min = 10, max = 60 ];
+    alias fps_t = int32_t : [ min = 10, max = 120 ];
 
     fps_t fps : [ ui_name = "FPS", ui_suffix = "Hz" ];
     Quality streaming_low : [ ui_name = "Streaming Low" ];
