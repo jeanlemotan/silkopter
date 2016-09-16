@@ -7,6 +7,7 @@
 #include <atomic>
 #include <boost/intrusive_ptr.hpp>
 #include "utils/Pool.h"
+#include "fec.h"
 
 #include "QBase.h"
 
@@ -14,6 +15,10 @@ namespace util
 {
 namespace comms
 {
+
+static constexpr unsigned BLOCK_NUMS[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
+                                           10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
+                                           21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31 };
 
 static constexpr size_t MAX_PACKET_SIZE = 4192;
 static constexpr size_t MAX_USER_PACKET_SIZE = 1470;
@@ -74,14 +79,18 @@ struct TX
 
     Pool<Datagram> datagram_pool;
 
+    ////////
     std::mutex datagram_queue_mutex;
     std::deque<Datagram_ptr> datagram_queue;
     std::condition_variable datagram_queue_cv;
+    ////////
+
+    std::vector<Datagram_ptr> block_datagrams;
+    std::vector<Datagram_ptr> block_fec_datagrams;
 
     Datagram_ptr crt_datagram;
 
     uint32_t last_block_index = 1;
-    uint32_t last_datagram_index = 0;
 };
 
 
@@ -109,12 +118,13 @@ struct RX
     typedef Pool<Block>::Ptr Block_ptr;
     Pool<Block> block_pool;
 
-    std::mutex block_queue_mutex;
+    std::mutex mutex;
     std::deque<Block_ptr> block_queue;
 
     q::Clock::time_point last_block_tp = q::Clock::now();
     q::Clock::time_point last_datagram_tp = q::Clock::now();
-    uint32_t next_seq_number = 0;
+
+    uint32_t next_block_index = 0;
 };
 
 
@@ -218,6 +228,8 @@ Video_Streamer::~Video_Streamer()
     {
         m_thread.join();
     }
+
+    fec_free(m_fec);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////
@@ -446,18 +458,17 @@ bool Video_Streamer::process_rx_packet()
             Datagram_Header& header = *reinterpret_cast<Datagram_Header*>(payload);
             uint32_t block_index = header.block_index;
             uint32_t datagram_index = header.datagram_index;
-            if (datagram_index >= m_slave_descriptor.coding_k)
+            if (datagram_index >= m_coding_n)
             {
-                QLOGE("datagram index out of range: {} > {}", datagram_index, m_slave_descriptor.coding_k);
+                QLOGE("datagram index out of range: {} > {}", datagram_index, m_coding_n);
                 return true;
             }
 
-            std::lock_guard<std::mutex> lg(rx.block_queue_mutex);
+            std::lock_guard<std::mutex> lg(rx.mutex);
 
-            uint32_t seq_number = block_index * m_slave_descriptor.coding_k + datagram_index;
-            if (seq_number < rx.next_seq_number)
+            if (block_index < rx.next_block_index)
             {
-                //QLOGW("Old datagram: {} < {}", seq_number, rx.next_seq_number);
+                //QLOGW("Old datagram: {} < {}", block_index, rx.next_block_index);
                 return true;
             }
 
@@ -494,7 +505,7 @@ bool Video_Streamer::process_rx_packet()
                 auto iter = std::lower_bound(block->datagrams.begin(), block->datagrams.end(), datagram_index, [](RX::Datagram_ptr const& l, uint32_t index) { return l->index < index; });
                 if (iter != block->datagrams.end() && (*iter)->index == datagram_index)
                 {
-                    //QLOGW("Duplicated datagram {} from block {} (index {})", datagram_index, block_index, block_index * m_slave_descriptor.coding_k + datagram_index);
+                    //QLOGW("Duplicated datagram {} from block {} (index {})", datagram_index, block_index, block_index * m_coding_k + datagram_index);
                     return true;
                 }
                 else
@@ -532,8 +543,20 @@ bool Video_Streamer::process_rx_packet()
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-bool Video_Streamer::init()
+bool Video_Streamer::init(uint32_t coding_k, uint32_t coding_n)
 {
+    if (coding_k == 0 || coding_n < coding_k || coding_k > m_fec_src_datagram_ptrs.size() || coding_n > m_fec_dst_datagram_ptrs.size())
+    {
+        QLOGE("Invalid coding params: {} / {}" ,coding_k, coding_n);
+        return false;
+    }
+
+    m_coding_k = coding_k;
+    m_coding_n = coding_n;
+
+    m_fec = fec_new(m_coding_k, m_coding_n);
+
+
     char pcap_error[PCAP_ERRBUF_SIZE] = {0};
 
     m_impl.reset(new Impl);
@@ -545,16 +568,28 @@ bool Video_Streamer::init()
     m_impl->tx_packet_header_length = RADIOTAP_HEADER.size() + sizeof(IEEE_HEADER);
     QLOGI("Radiocap header size: {}, IEEE header size: {}", RADIOTAP_HEADER.size(), sizeof(IEEE_HEADER));
 
+
+    /////////////////////
+    //calculate some offsets and sizes
+    m_datagram_header_offset = m_impl->tx_packet_header_length;
+    m_payload_offset = m_datagram_header_offset + sizeof(Datagram_Header);
+
+    m_transport_datagram_size = m_payload_offset + get_mtu();
+    m_streaming_datagram_size = m_transport_datagram_size - m_impl->tx_packet_header_length;
+    m_payload_size = get_mtu();
+    /////////////////////
+
+
     m_impl->tx.datagram_pool.on_acquire = [this](TX::Datagram& datagram)
     {
         if (datagram.data.empty())
         {
-            datagram.data.resize(m_impl->tx_packet_header_length + sizeof(Datagram_Header));
+            datagram.data.resize(m_payload_offset);
             prepare_tx_packet_header(datagram.data.data());
         }
         else
         {
-            datagram.data.resize(m_impl->tx_packet_header_length + sizeof(Datagram_Header));
+            datagram.data.resize(m_payload_offset);
         }
     };
 
@@ -562,17 +597,23 @@ bool Video_Streamer::init()
     {
         datagram.index = 0;
         datagram.is_processed = false;
-        datagram.data.resize(MAX_USER_PACKET_SIZE);
+        datagram.data.clear();
+        datagram.data.reserve(m_transport_datagram_size);
     };
     m_impl->rx.block_pool.on_acquire = [this](RX::Block& block)
     {
         block.index = 0;
 
         block.datagrams.clear();
-        block.datagrams.reserve(m_slave_descriptor.coding_k);
+        block.datagrams.reserve(m_coding_k);
 
         block.fec_datagrams.clear();
-        block.fec_datagrams.reserve(m_slave_descriptor.coding_n - m_slave_descriptor.coding_k);
+        block.fec_datagrams.reserve(m_coding_n - m_coding_k);
+    };
+    m_impl->rx.block_pool.on_release = [this](RX::Block& block)
+    {
+        block.datagrams.clear();
+        block.fec_datagrams.clear();
     };
 
 
@@ -805,36 +846,70 @@ void Video_Streamer::send(void const* _data, size_t size, math::vec2u16 const& r
             datagram = tx.datagram_pool.acquire();
         }
 
-        size_t s = std::min(size, get_mtu() - datagram->data.size());
+        size_t s = std::min(size, m_transport_datagram_size - datagram->data.size());
         size_t offset = datagram->data.size();
         datagram->data.resize(offset + s);
         memcpy(datagram->data.data() + offset, data, s);
         data += s;
         size -= s;
 
-        if (datagram->data.size() >= get_mtu())
+        if (datagram->data.size() >= m_transport_datagram_size)
         {
-            seal_datagram(*datagram, m_impl->tx_packet_header_length, tx.last_block_index, tx.last_datagram_index++, resolution, false);
-            if (tx.last_datagram_index >= m_master_descriptor.coding_k)
-            {
-                tx.last_block_index++;
-                tx.last_datagram_index = 0;
-                //generate fec datagrams
-                //......
-            }
+            seal_datagram(*datagram, m_datagram_header_offset, tx.last_block_index, tx.block_datagrams.size(), resolution, false);
+            tx.block_datagrams.push_back(datagram);
 
+            //send the current datagram
             {
                 std::unique_lock<std::mutex> lg(tx.datagram_queue_mutex);
                 tx.datagram_queue.push_back(datagram);
-                tx.datagram_queue.push_back(datagram);
-                tx.datagram_queue.push_back(datagram);
-                tx.datagram_queue.push_back(datagram);
-                tx.datagram_queue.push_back(datagram);
-                tx.datagram_queue.push_back(datagram);
             }
-            tx.datagram_queue_cv.notify_all();
-
             datagram = tx.datagram_pool.acquire();
+
+
+            if (tx.block_datagrams.size() >= m_coding_k)
+            {
+                if (1)
+                {
+                    //init data for the fec_encode
+                    for (size_t i = 0; i < m_coding_k; i++)
+                    {
+                        m_fec_src_datagram_ptrs[i] = tx.block_datagrams[i]->data.data() + m_payload_offset;
+                    }
+
+                    size_t fec_count = m_coding_n - m_coding_k;
+                    tx.block_fec_datagrams.resize(fec_count);
+                    for (size_t i = 0; i < fec_count; i++)
+                    {
+                        tx.block_fec_datagrams[i] = tx.datagram_pool.acquire();
+                        tx.block_fec_datagrams[i]->data.resize(m_transport_datagram_size);
+                        m_fec_dst_datagram_ptrs[i] = tx.block_fec_datagrams[i]->data.data() + m_payload_offset;
+                    }
+
+                    //encode
+                    fec_encode(m_fec, m_fec_src_datagram_ptrs.data(), m_fec_dst_datagram_ptrs.data(), BLOCK_NUMS + m_coding_k, m_coding_n - m_coding_k, m_payload_size);
+
+                    //seal the result
+                    for (size_t i = 0; i < fec_count; i++)
+                    {
+                        seal_datagram(*tx.block_fec_datagrams[i], m_datagram_header_offset, tx.last_block_index, m_coding_k + i, resolution, true);
+                    }
+
+                    //send
+                    {
+                        std::unique_lock<std::mutex> lg(tx.datagram_queue_mutex);
+                        for (size_t i = 0; i < fec_count; i++)
+                        {
+                            tx.datagram_queue.push_back(tx.block_fec_datagrams[i]);
+                        }
+                    }
+                }
+
+                tx.block_datagrams.clear();
+                tx.block_fec_datagrams.clear();
+                tx.last_block_index++;
+            }
+
+            tx.datagram_queue_cv.notify_all();
         }
     }
 }
@@ -843,7 +918,7 @@ void Video_Streamer::send(void const* _data, size_t size, math::vec2u16 const& r
 
 size_t Video_Streamer::get_mtu() const
 {
-    return MAX_USER_PACKET_SIZE;
+    return std::min(512u, MAX_USER_PACKET_SIZE);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////
@@ -856,11 +931,11 @@ void Video_Streamer::process()
     }
 
     RX& rx = m_impl->rx;
-    std::lock_guard<std::mutex> lg(rx.block_queue_mutex);
+    std::lock_guard<std::mutex> lg(rx.mutex);
 
     if (q::Clock::now() - rx.last_datagram_tp > m_slave_descriptor.reset_duration)
     {
-        rx.next_seq_number = 0;
+        rx.next_block_index = 0;
     }
 
     if (rx.block_queue.empty())
@@ -870,93 +945,131 @@ void Video_Streamer::process()
 
     RX::Block_ptr block = rx.block_queue.front();
 
-    uint32_t next_block_index = rx.next_seq_number / m_slave_descriptor.coding_k;
-
-    if (block->index == next_block_index || next_block_index == 0)
+    //entire block received
+    if (block->datagrams.size() >= m_coding_k)
     {
-        //entire block received
-        if (block->datagrams.size() >= m_slave_descriptor.coding_k)
+        for (RX::Datagram_ptr const& d: block->datagrams)
         {
-            for (RX::Datagram_ptr const& d: block->datagrams)
+            uint32_t seq_number = block->index * m_coding_k + d->index;
+            if (!d->is_processed)
             {
-                uint32_t seq_number = block->index * m_slave_descriptor.coding_k + d->index;
-                if (!d->is_processed)
+                //QLOGI("Datagram {}", seq_number);
+                if (on_data_received)
                 {
-                    //QLOGI("Datagram {}", seq_number);
-                    if (on_data_received)
-                    {
-                        on_data_received(d->data.data(), d->data.size(), d->resolution);
-                    }
-                    rx.next_seq_number = seq_number + 1;
-                    rx.last_datagram_tp = q::Clock::now();
-                    d->is_processed = true;
+                    on_data_received(d->data.data(), d->data.size(), d->resolution);
                 }
+                rx.last_datagram_tp = q::Clock::now();
+                d->is_processed = true;
             }
-
-            rx.last_block_tp = q::Clock::now();
-
-            rx.block_queue.pop_front();
-            return;
         }
 
-        //try to process consecutive datagrams before the block is finished to minimize latency
-        for (size_t i = 0; i < block->datagrams.size(); i++)
+        rx.last_block_tp = q::Clock::now();
+
+        rx.next_block_index = block->index + 1;
+        rx.block_queue.pop_front();
+        return;
+    }
+
+    //try to process consecutive datagrams before the block is finished to minimize latency
+    for (size_t i = 0; i < block->datagrams.size(); i++)
+    {
+        RX::Datagram_ptr const& d = block->datagrams[i];
+        if (d->index == i)
         {
-            RX::Datagram_ptr const& d = block->datagrams[i];
-            if (d->index == i)
+            uint32_t seq_number = block->index * m_coding_k + d->index;
+            if (!d->is_processed)
             {
-                uint32_t seq_number = block->index * m_slave_descriptor.coding_k + d->index;
-                if (!d->is_processed)
+                //QLOGI("Datagram {}", seq_number);
+                if (on_data_received)
                 {
-                    //QLOGI("Datagram {}", seq_number);
-                    if (on_data_received)
-                    {
-                        on_data_received(d->data.data(), d->data.size(), d->resolution);
-                    }
-                    rx.next_seq_number = seq_number + 1;
-                    rx.last_datagram_tp = q::Clock::now();
-                    d->is_processed = true;
+                    on_data_received(d->data.data(), d->data.size(), d->resolution);
                 }
+                rx.last_datagram_tp = q::Clock::now();
+                d->is_processed = true;
+            }
+        }
+        else
+        {
+            break;
+        }
+    }
+
+    //can we fec decode?
+    if (block->datagrams.size() + block->fec_datagrams.size() >= m_coding_k)
+    {
+        std::array<unsigned int, 32> indices;
+        size_t primary_index = 0;
+        size_t used_fec_index = 0;
+        for (size_t i = 0; i < m_coding_k; i++)
+        {
+            if (primary_index < block->datagrams.size() && i == block->datagrams[primary_index]->index)
+            {
+                m_fec_src_datagram_ptrs[i] = block->datagrams[primary_index]->data.data();
+                indices[i] = i;
+                primary_index++;
             }
             else
             {
-                break;
+                m_fec_src_datagram_ptrs[i] = block->fec_datagrams[used_fec_index]->data.data();
+                indices[i] = block->fec_datagrams[used_fec_index]->index;
+                used_fec_index++;
             }
         }
 
-        //check if we're out of time and skip the current incomplete block
-        if (q::Clock::now() - rx.last_block_tp >= m_slave_descriptor.max_latency)
+        //insert the missing datagrams, they will be filled with data by the fec_decode below
+        size_t fec_index = 0;
+        for (size_t i = 0; i < m_coding_k; i++)
         {
-            //if we have valid future data, skip this block
-            bool has_future_data = false;
-            for (size_t i = 1; i < rx.block_queue.size(); i++)
+            if (i >= block->datagrams.size() || i != block->datagrams[i]->index)
             {
-                if (rx.block_queue[i]->datagrams.size() + rx.block_queue[i]->fec_datagrams.size() >= m_slave_descriptor.coding_k)
+                block->datagrams.insert(block->datagrams.begin() + i, rx.datagram_pool.acquire());
+                block->datagrams[i]->data.resize(m_payload_size);
+                block->datagrams[i]->index = i;
+                m_fec_dst_datagram_ptrs[fec_index++] = block->datagrams[i]->data.data();
+            }
+        }
+
+        fec_decode(m_fec, m_fec_src_datagram_ptrs.data(), m_fec_dst_datagram_ptrs.data(), indices.data(), m_payload_size);
+
+        //now dispatch them
+        for (size_t i = 0; i < block->datagrams.size(); i++)
+        {
+            RX::Datagram_ptr const& d = block->datagrams[i];
+            uint32_t seq_number = block->index * m_coding_k + d->index;
+            if (!d->is_processed)
+            {
+                //QLOGI("Datagram F {}", seq_number);
+                if (on_data_received)
                 {
-                    has_future_data = true;
-                    break;
+                    on_data_received(d->data.data(), d->data.size(), d->resolution);
                 }
+                rx.last_datagram_tp = q::Clock::now();
+                d->is_processed = true;
             }
+        }
 
-            if (has_future_data)
+        rx.last_block_tp = q::Clock::now();
+        rx.next_block_index = block->index + 1;
+        rx.block_queue.pop_front();
+        return;
+    }
+
+    //skip if too much buffering
+    if (rx.block_queue.size() > 3)
+    {
+        for (size_t i = 0; i < block->datagrams.size(); i++)
+        {
+            RX::Datagram_ptr const& d = block->datagrams[i];
+            if (!d->is_processed)
             {
-//                rx.last_block_tp = q::Clock::now();
-                rx.next_seq_number = rx.block_queue.front()->index * m_slave_descriptor.coding_k + m_slave_descriptor.coding_k;
-                rx.block_queue.pop_front();
-                return;
+                uint32_t seq_number = block->index * m_coding_k + d->index;
+                //QLOGI("Skipping {}", seq_number);
             }
         }
+        rx.next_block_index = block->index + 1;
+        rx.block_queue.pop_front();
     }
-    else
-    {
-        //check if we're out of time and skip the current block
-        if (q::Clock::now() - rx.last_block_tp >= m_slave_descriptor.max_latency)
-        {
-//            rx.last_block_tp = q::Clock::now();
-            rx.next_seq_number = rx.block_queue.front()->index * m_slave_descriptor.coding_k;
-            return;
-        }
-    }
+
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////

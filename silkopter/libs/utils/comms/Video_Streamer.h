@@ -4,6 +4,8 @@
 #include <string>
 #include <boost/thread.hpp>
 
+struct fec_t;
+
 namespace util
 {
 namespace comms
@@ -15,17 +17,13 @@ public:
 
     struct Master_Descriptor
     {
-        uint32_t coding_k;
-        uint32_t coding_n;
     };
     Video_Streamer(std::string const& interface, Master_Descriptor const& descriptor);
 
 
     struct Slave_Descriptor
     {
-        uint32_t coding_k = 1;
-        uint32_t coding_n = 2;
-        q::Clock::duration max_latency = std::chrono::milliseconds(100);
+        q::Clock::duration max_latency = std::chrono::milliseconds(500);
         q::Clock::duration reset_duration = std::chrono::milliseconds(1000);
     };
     Video_Streamer(std::string const& interface, Slave_Descriptor const& descriptor);
@@ -34,7 +32,7 @@ public:
 
     void process();
 
-    bool init();
+    bool init(uint32_t coding_k, uint32_t coding_n);
 
     void send(void const* data, size_t size, math::vec2u16 const& resolution);
 
@@ -59,10 +57,24 @@ private:
     Master_Descriptor m_master_descriptor;
     Slave_Descriptor m_slave_descriptor;
 
+    uint32_t m_coding_k = 1;
+    uint32_t m_coding_n = 2;
+
     struct Impl;
     std::unique_ptr<Impl> m_impl;
     bool m_exit = false;
     boost::thread m_thread;
+
+    fec_t* m_fec = nullptr;
+    std::array<uint8_t const*, 16> m_fec_src_datagram_ptrs;
+    std::array<uint8_t*, 32> m_fec_dst_datagram_ptrs;
+
+    size_t m_transport_datagram_size = 0;
+    size_t m_streaming_datagram_size = 0;
+    size_t m_payload_size = 0;
+
+    size_t m_datagram_header_offset = 0;
+    size_t m_payload_offset = 0;
 };
 
 

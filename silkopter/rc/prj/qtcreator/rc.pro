@@ -171,7 +171,8 @@ HEADERS += \
     ../../../libs/utils/hw/si446x_patch.h \
     ../../../libs/utils/hw/radiotap/ieee80211_radiotap.h \
     ../../../libs/utils/hw/radiotap/radiotap.h \
-    ../../../libs/utils/comms/Video_Streamer.h
+    ../../../libs/utils/comms/Video_Streamer.h \
+    ../../../libs/utils/comms/fec.h
 
 SOURCES += \
     ../../src/main.cpp \
@@ -198,7 +199,8 @@ SOURCES += \
     ../../../libs/utils/hw/Si4463.cpp \
     ../../../libs/utils/hw/SPI_Dev.cpp \
     ../../../libs/utils/hw/radiotap/radiotap.cpp \
-    ../../../libs/utils/comms/Video_Streamer.cpp
+    ../../../libs/utils/comms/Video_Streamer.cpp \
+    ../../../libs/utils/comms/fec.cpp
 
 DISTFILES += \
     ../../src/node.png \

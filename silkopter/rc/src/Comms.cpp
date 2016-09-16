@@ -19,7 +19,7 @@ constexpr uint8_t TELEMETRY_CHANNEL = 20;
 
 Comms::Comms()
     : m_rc(true)
-    , m_video_streamer("wlan1", util::comms::Video_Streamer::Slave_Descriptor{1, 2, q::Clock::duration(std::chrono::milliseconds(200))})
+    , m_video_streamer("wlan1", util::comms::Video_Streamer::Slave_Descriptor())
 {
 }
 
@@ -63,7 +63,7 @@ auto Comms::start(std::string const& interface, uint8_t id) -> bool
 //            }
 //        }
 
-        m_is_connected = m_rc.init() && m_video_streamer.init();
+        m_is_connected = m_rc.init() && m_video_streamer.init(3, 9);
     }
     catch(std::exception e)
     {
@@ -76,7 +76,7 @@ auto Comms::start(std::string const& interface, uint8_t id) -> bool
         return false;
     }
 
-    m_video_streamer.on_data_received = std::bind(&Comms::handle_video, this, std::placeholders::_1, std::placeholders::_2);
+    m_video_streamer.on_data_received = std::bind(&Comms::handle_video, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
 
     QLOGI("Started sending on interface {}", interface);
 
@@ -114,9 +114,15 @@ void Comms::handle_multirotor_state()
 //    std::lock_guard<std::mutex> lg(m_samples_mutex);
 //    m_multirotor_state_samples.push_back(sample);
 }
-void Comms::handle_video(void const* _data, size_t size)
+void Comms::handle_video(void const* _data, size_t size, math::vec2u16 const& resolution)
 {
     std::lock_guard<std::mutex> lg(m_samples_mutex);
+
+    if (resolution != m_video_resolution)
+    {
+        m_video_resolution = resolution;
+        m_video_data.clear();
+    }
 
     if (size > 0)
     {
@@ -127,7 +133,7 @@ void Comms::handle_video(void const* _data, size_t size)
     }
 }
 
-void Comms::get_video_data(std::vector<uint8_t>& dst)
+void Comms::get_video_data(std::vector<uint8_t>& dst, math::vec2u16& resolution)
 {
     std::lock_guard<std::mutex> lg(m_samples_mutex);
     size_t offset = dst.size();
@@ -138,6 +144,7 @@ void Comms::get_video_data(std::vector<uint8_t>& dst)
         memcpy(dst.data() + offset, m_video_data.data(), size);
         m_video_data.clear();
     }
+    resolution = m_video_resolution;
 }
 auto Comms::get_multirotor_state_samples() -> std::vector<stream::IMultirotor_State::Sample>
 {

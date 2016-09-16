@@ -55,7 +55,7 @@ public:
 
     //----------------------------------------------------------------------
 
-    void get_video_data(std::vector<uint8_t>& dst);
+    void get_video_data(std::vector<uint8_t>& dst, math::vec2u16& resolution);
     auto get_multirotor_state_samples() -> std::vector<stream::IMultirotor_State::Sample>;
     void send_multirotor_commands_value(stream::IMultirotor_Commands::Value const& value);
 
@@ -72,11 +72,12 @@ private:
     uint32_t m_last_req_id = 0;
 
     mutable std::mutex m_samples_mutex;
+    math::vec2u16 m_video_resolution;
     std::vector<uint8_t> m_video_data;
     std::vector<stream::IMultirotor_State::Sample> m_multirotor_state_samples;
 
     void handle_multirotor_state();
-    void handle_video(void const* data, size_t size);
+    void handle_video(void const* data, size_t size, math::vec2u16 const& resolution);
 };
 
 }

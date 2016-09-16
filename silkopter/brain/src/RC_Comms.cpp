@@ -11,7 +11,7 @@ struct RC_Comms::Impl
 {
     Impl()
         : rc(false)
-        , video_streamer("wlan1", util::comms::Video_Streamer::Master_Descriptor{1, 2})
+        , video_streamer("wlan1", util::comms::Video_Streamer::Master_Descriptor())
     {}
 
     util::comms::RC rc;
@@ -64,7 +64,7 @@ auto RC_Comms::start(std::string const& interface, uint8_t id) -> bool
 //            }
 //        }
 
-        m_is_connected = m_impl->rc.init() && m_impl->video_streamer.init();
+        m_is_connected = m_impl->rc.init() && m_impl->video_streamer.init(3, 9);
     }
     catch(std::exception e)
     {
