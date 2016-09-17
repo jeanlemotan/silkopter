@@ -310,6 +310,7 @@ void Video_Streamer::prepare_radiotap_header(size_t rate_hz)
                     | (1 << IEEE80211_RADIOTAP_TX_FLAGS)
                     | (1 << IEEE80211_RADIOTAP_RTS_RETRIES)
                     | (1 << IEEE80211_RADIOTAP_DATA_RETRIES)
+                    | (1 << IEEE80211_RADIOTAP_CHANNEL)
 //                    | (1 << IEEE80211_RADIOTAP_MCS)
                     ;
 
@@ -337,6 +338,11 @@ void Video_Streamer::prepare_radiotap_header(size_t rate_hz)
         radiotap_add_u8(dst, idx, IEEE80211_RADIOTAP_MCS_HAVE_MCS);
         radiotap_add_u8(dst, idx, 0);
         radiotap_add_u8(dst, idx, 18);
+    }
+    if (hdr.it_present & (1 << IEEE80211_RADIOTAP_CHANNEL))
+    {
+        radiotap_add_u16(dst, idx, 2467);
+        radiotap_add_u16(dst, idx, 0);
     }
 
     //finish it
@@ -772,8 +778,8 @@ void Video_Streamer::master_thread_proc()
             //inject packets
             if (!tx.datagram_queue.empty())
             {
-                datagram = tx.datagram_queue.back();
-                tx.datagram_queue.pop_back();
+                datagram = tx.datagram_queue.front();
+                tx.datagram_queue.pop_front();
             }
         }
 
@@ -870,6 +876,8 @@ void Video_Streamer::send(void const* _data, size_t size, math::vec2u16 const& r
             {
                 if (1)
                 {
+                    auto start = q::Clock::now();
+
                     //init data for the fec_encode
                     for (size_t i = 0; i < m_coding_k; i++)
                     {
@@ -902,6 +910,8 @@ void Video_Streamer::send(void const* _data, size_t size, math::vec2u16 const& r
                             tx.datagram_queue.push_back(tx.block_fec_datagrams[i]);
                         }
                     }
+
+                    //QLOGI("Encoded fec: {}", q::Clock::now() - start);
                 }
 
                 tx.block_datagrams.clear();
@@ -918,7 +928,7 @@ void Video_Streamer::send(void const* _data, size_t size, math::vec2u16 const& r
 
 size_t Video_Streamer::get_mtu() const
 {
-    return std::min(512u, MAX_USER_PACKET_SIZE);
+    return std::min(400u, MAX_USER_PACKET_SIZE);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////
@@ -997,6 +1007,8 @@ void Video_Streamer::process()
     //can we fec decode?
     if (block->datagrams.size() + block->fec_datagrams.size() >= m_coding_k)
     {
+        auto start = q::Clock::now();
+
         std::array<unsigned int, 32> indices;
         size_t primary_index = 0;
         size_t used_fec_index = 0;
@@ -1047,6 +1059,8 @@ void Video_Streamer::process()
                 d->is_processed = true;
             }
         }
+
+        //QLOGI("Decoded fac: {}", q::Clock::now() - start);
 
         rx.last_block_tp = q::Clock::now();
         rx.next_block_index = block->index + 1;

@@ -64,7 +64,7 @@ auto RC_Comms::start(std::string const& interface, uint8_t id) -> bool
 //            }
 //        }
 
-        m_is_connected = m_impl->rc.init() && m_impl->video_streamer.init(3, 9);
+        m_is_connected = m_impl->rc.init() && m_impl->video_streamer.init(12, 20);
     }
     catch(std::exception e)
     {
