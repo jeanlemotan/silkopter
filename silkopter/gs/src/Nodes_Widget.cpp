@@ -613,7 +613,7 @@ void Nodes_Widget::show_connection_context_menu(QGraphicsSceneMouseEvent* event,
     connect(action, &QAction::triggered, [=](bool)
     {
         std::string input_name = input_port->id().toLatin1().data();
-        //m_hal.set_node_input_stream_path(node, input_name, std::string());
+        set_node_input_stream_path(*node, input_name, std::string());
     });
 
     menu.exec(event->screenPos());
