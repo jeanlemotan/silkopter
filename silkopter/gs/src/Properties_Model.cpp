@@ -86,7 +86,19 @@ void Properties_Model::Tree_Item::build(std::shared_ptr<ts::IValue> value)
             build_children(inner_value);
 		}
 	}
-	else
+    else if (std::shared_ptr<ts::IPoly_Value> poly_value = std::dynamic_pointer_cast<ts::IPoly_Value>(value))
+    {
+        m_connections.push_back(poly_value->sig_type_will_change.connect(std::bind(&Properties_Model::on_poly_type_will_change, m_model, poly_value)));
+        m_connections.push_back(poly_value->sig_type_has_changed.connect(std::bind(&Properties_Model::on_poly_type_has_changed, m_model, poly_value)));
+
+        std::shared_ptr<ts::IValue> inner_value = poly_value->get_value();
+        if (inner_value)
+        {
+            m_secondary_value = inner_value; //as it is wrapped
+            build_children(inner_value);
+        }
+    }
+    else
 	{
         build_children(value);
 	}
@@ -801,6 +813,56 @@ void Properties_Model::on_variant_type_index_has_changed(std::shared_ptr<ts::IVa
 //////////////////////////////////////////////////////////////////////////
 
 void Properties_Model::on_variant_type_index_will_change(std::shared_ptr<ts::IVariant_Value> parent)
+{
+    std::lock_guard<std::recursive_mutex> sm(m_tree_mutex);
+    std::shared_ptr<Tree_Item> parent_ti = m_root->find_by_primary_or_secondary(*parent);
+    if (parent_ti)
+    {
+        size_t count = parent_ti->get_child_count();
+        if (count > 0)
+        {
+            beginRemoveRows(parent_ti->m_model_index, static_cast<int>(0), static_cast<int>(count - 1));
+            parent_ti->m_children.clear();
+            endRemoveRows();
+        }
+    }
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+void Properties_Model::on_poly_type_has_changed(std::shared_ptr<ts::IPoly_Value> parent)
+{
+    std::lock_guard<std::recursive_mutex> sm(m_tree_mutex);
+
+    if (parent->get_value())
+    {
+        std::shared_ptr<Tree_Item> parent_ti = m_root->find_by_primary_or_secondary(*parent);
+        if (parent_ti)
+        {
+            //assign the wrapped value now, as it changed. This makes the TreeItem findable using both values (the Variant and the Inner value).
+            parent_ti->m_secondary_value = parent->get_value();
+
+            //first we build in a temp tree item to be able to count the children. Qt demands we know the count before actually adding them!
+            std::shared_ptr<Tree_Item> temp = std::make_shared<Tree_Item>(this, std::string(), std::string());
+            temp->build_children(parent->get_value());
+
+            size_t count = temp->get_child_count();
+            if (count > 0)
+            {
+                beginInsertRows(parent_ti->m_model_index, static_cast<int>(0), static_cast<int>(count - 1));
+                for (size_t c = 0; c < count; c++)
+                {
+                    parent_ti->add_child(std::move(temp->m_children[c]));
+                }
+                endInsertRows();
+            }
+        }
+    }
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+void Properties_Model::on_poly_type_will_change(std::shared_ptr<ts::IPoly_Value> parent)
 {
     std::lock_guard<std::recursive_mutex> sm(m_tree_mutex);
     std::shared_ptr<Tree_Item> parent_ti = m_root->find_by_primary_or_secondary(*parent);

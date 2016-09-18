@@ -18,6 +18,9 @@ public:
     virtual std::shared_ptr<const IValue> get_value() const = 0;
     virtual std::shared_ptr<IValue> get_value() = 0;
     virtual Result<void> set_value(std::shared_ptr<IValue>) = 0;
+
+    boost::signals2::signal<void()> sig_type_will_change;
+    boost::signals2::signal<void()> sig_type_has_changed;
 };
 
 }

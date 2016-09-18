@@ -7,6 +7,7 @@
 #include "def_lang/IOptional_Value.h"
 #include "def_lang/IVariant_Value.h"
 #include "def_lang/IVector_Value.h"
+#include "def_lang/IPoly_Value.h"
 
 class Properties_Model : public QAbstractItemModel
 {
@@ -59,6 +60,9 @@ protected:
 
     void on_variant_type_index_will_change(std::shared_ptr<ts::IVariant_Value> parent);
     void on_variant_type_index_has_changed(std::shared_ptr<ts::IVariant_Value> parent);
+
+    void on_poly_type_will_change(std::shared_ptr<ts::IPoly_Value> parent);
+    void on_poly_type_has_changed(std::shared_ptr<ts::IPoly_Value> parent);
 
     void on_elements_added(std::shared_ptr<ts::IVector_Value> parent, size_t idx, size_t count);
     void on_elements_will_be_removed(std::shared_ptr<ts::IVector_Value> parent, size_t idx, size_t count);
