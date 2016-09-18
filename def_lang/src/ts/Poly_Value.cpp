@@ -331,9 +331,40 @@ Result<void> Poly_Value::set_value(std::shared_ptr<IValue> value)
 
     if (m_value != value)
     {
+
+        bool type_changes = false;
+        if (value != nullptr && m_value != nullptr)
+        {
+            type_changes = value->get_type() != m_value->get_type();
+        }
+        else if (value == nullptr && m_value == nullptr)
+        {
+            type_changes = false;
+        }
+        else
+        {
+            type_changes = true;
+        }
+
+        //first notify that the type will change
+        if (type_changes)
+        {
+            sig_type_will_change();
+        }
+
+        //the actual assignment
         m_value = value;
+
+        //now that the type changed
+        if (type_changes)
+        {
+            sig_type_has_changed();
+        }
+
+        //notify the value changed as well
         sig_value_changed();
     }
+
     return success;
 }
 
