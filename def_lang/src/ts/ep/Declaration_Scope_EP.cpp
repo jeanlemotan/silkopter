@@ -15,6 +15,14 @@ Declaration_Scope_EP::Declaration_Scope_EP(Declaration_Scope_EP const& other, st
 {
 }
 
+Declaration_Scope_EP::~Declaration_Scope_EP()
+{
+    for (std::shared_ptr<ISymbol> symbol: m_symbols)
+    {
+        symbol->set_parent_scope(nullptr);
+    }
+}
+
 std::string const& Declaration_Scope_EP::get_name() const
 {
     return m_name;
@@ -59,7 +67,14 @@ Result<std::shared_ptr<const ISymbol>> Declaration_Scope_EP::add_symbol(std::sha
         return Error("Duplicated symbol '" + symbol->get_name() + "'");
     }
 
-    symbol->set_parent_scope(this);
+    if (symbol->get_parent_scope() != nullptr)
+    {
+        return Error("Symbol '" + symbol->get_name() + "' already has a parent scope: '" + symbol->get_parent_scope()->get_symbol_path().to_string() + "'");
+    }
+    else
+    {
+        symbol->set_parent_scope(this);
+    }
 
     m_symbols.push_back(std::move(symbol));
 

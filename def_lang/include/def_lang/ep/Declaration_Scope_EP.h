@@ -14,6 +14,7 @@ class Declaration_Scope_EP : virtual public IDeclaration_Scope
 public:
     Declaration_Scope_EP(std::string const& name);
     Declaration_Scope_EP(Declaration_Scope_EP const& other, std::string const& name);
+    ~Declaration_Scope_EP();
 
     Result<std::shared_ptr<const ISymbol>> add_symbol(std::shared_ptr<ISymbol> symbol) override;
 
