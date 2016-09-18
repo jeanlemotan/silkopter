@@ -11,7 +11,10 @@ Numeric_Viewer_Widget::Numeric_Viewer_Widget(QWidget *parent)
 
 Numeric_Viewer_Widget::~Numeric_Viewer_Widget()
 {
-    m_task.future.wait();
+    if (m_task.future.valid())
+    {
+        m_task.future.wait();
+    }
 }
 
 void Numeric_Viewer_Widget::init(std::string const& unit, uint32_t sample_rate)

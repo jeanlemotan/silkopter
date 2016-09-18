@@ -1,6 +1,9 @@
 #include "GS.h"
-#include <QInputDialog>
+
 #include "value_editors/Value_Editor_Factory.h"
+
+#include <QInputDialog>
+#include <QMessageBox>
 
 
 GS::GS(QWidget *parent)
@@ -44,11 +47,7 @@ GS::GS(QWidget *parent)
 
     {
         QSettings settings;
-        m_remote_address = settings.value("address", "").toString().toLatin1().data();
-        if (m_remote_address.size() > 15)
-        {
-            m_remote_address.clear();
-        }
+        set_remote_address(settings.value("address", "").toString().toLatin1().data());
     }
 
     QObject::connect(m_ui.action_connect, &QAction::triggered, [this] (bool triggered)
@@ -58,7 +57,6 @@ GS::GS(QWidget *parent)
         if (ok)
         {
             set_remote_address(text.toLatin1().data());
-            m_comms.start_udp(boost::asio::ip::address::from_string(m_remote_address), 8006, 8005);
         }
     });
 
@@ -70,11 +68,6 @@ GS::GS(QWidget *parent)
 
     //set_remote_address("10.10.10.10");
     //set_remote_address("127.0.0.1");
-
-    if (!m_remote_address.empty())
-    {
-        m_comms.start_udp(boost::asio::ip::address::from_string(m_remote_address), 8006, 8005);
-    }
 
     read_settings();
 }
@@ -115,11 +108,26 @@ void GS::read_settings()
 
 void GS::set_remote_address(std::string const& address)
 {
-    m_remote_address = address;
-    QSettings settings;
-    settings.setValue("address", address.c_str());
+    if (address.empty())
+    {
+        m_remote_address = address;
+    }
+    else
+    {
+        try
+        {
+            boost::asio::ip::address ip_address = boost::asio::ip::address::from_string(address);
+            m_comms.start_udp(ip_address, 8006, 8005);
 
-//    m_ui.statusBar->showMessage(q::util::format<std::string>("Connecting to {}", address).c_str(), 2000);
+            m_remote_address = address;
+            QSettings settings;
+            settings.setValue("address", address.c_str());
+        }
+        catch(std::exception const& e)
+        {
+            QMessageBox::critical(this, "Error", ("Address '" + m_remote_address + "' is invalid: " + e.what()).c_str());
+        }
+    }
 }
 
 void GS::process()

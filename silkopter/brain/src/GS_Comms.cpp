@@ -32,7 +32,6 @@
 
 #include "utils/comms/RCP.h"
 #include "utils/comms/UDP_Socket.h"
-//#include "utils/comms/RFMON_Socket.h"
 #include "utils/comms/Channel.h"
 
 #include "hal.def.h"
@@ -92,43 +91,6 @@ auto GS_Comms::start_udp(uint16_t send_port, uint16_t receive_port) -> bool
     QLOGI("Started sending on ports s:{} r:{}", send_port, receive_port);
 
     configure_channels();
-
-    return true;
-}
-
-auto GS_Comms::start_rfmon(std::string const& interface, uint8_t id) -> bool
-{
-//    try
-//    {
-//        auto s = new util::comms::RFMON_Socket(interface, id);
-//        m_socket.reset(s);
-//        m_rcp.reset(new util::comms::RCP);
-
-//        util::comms::RCP::Socket_Handle handle = m_rcp->add_socket(m_socket.get());
-//        if (handle >= 0)
-//        {
-//            m_rcp->set_internal_socket_handle(handle);
-//            m_rcp->set_socket_handle(SETUP_CHANNEL, handle);
-//            m_rcp->set_socket_handle(TELEMETRY_CHANNEL, handle);
-
-//            m_is_connected = s->start();
-//        }
-//    }
-//    catch(std::exception e)
-//    {
-//        m_is_connected = false;
-//    }
-
-//    if (!m_is_connected)
-//    {
-//        m_socket.reset();
-//        m_rcp.reset();
-//        QLOGW("Cannot start comms on interface {}", interface);
-//        return false;
-//    }
-
-//    QLOGI("Started sending on interface {}", interface);
-//    configure_channels();
 
     return true;
 }

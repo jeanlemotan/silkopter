@@ -82,8 +82,6 @@ HEADERS += \
     ../../src/stdafx.h \
     ../../src/Nodes_Widget.h \
     ../../src/Comms.h \
-    ../../../libs/utils/RCP_UDP_Socket.h \
-    ../../../libs/utils/RCP.h \
     ../../../libs/common/comms/def/gs_comms.def.h \
     ../../../libs/lz4/lz4.h \
     ../../src/Properties_Delegate.h \
@@ -148,15 +146,16 @@ HEADERS += \
     ../../src/stream_viewers/Velocity_Stream_Viewer_Widget.h \
     ../../src/stream_viewers/Video_Stream_Viewer_Widget.h \
     ../../src/stream_viewers/Voltage_Stream_Viewer_Widget.h \
-    ../../src/stream_viewers/video/Video_Decoder.h
+    ../../src/stream_viewers/video/Video_Decoder.h \
+    ../../../libs/utils/comms/Channel.h \
+    ../../../libs/utils/comms/RCP.h \
+    ../../../libs/utils/comms/UDP_Socket.h
 
 SOURCES += \
     ../../src/GS.cpp \
     ../../src/main.cpp \
     ../../src/Nodes_Widget.cpp \
     ../../src/Comms.cpp \
-    ../../../libs/utils/RCP_UDP_Socket.cpp \
-    ../../../libs/utils/RCP.cpp \
     ../../../libs/common/comms/def/gs_comms.def.cpp \
     ../../../libs/lz4/lz4.c \
     ../../src/Properties_Delegate.cpp \
@@ -216,7 +215,9 @@ SOURCES += \
     ../../src/stream_viewers/Velocity_Stream_Viewer_Widget.cpp \
     ../../src/stream_viewers/Video_Stream_Viewer_Widget.cpp \
     ../../src/stream_viewers/Voltage_Stream_Viewer_Widget.cpp \
-    ../../src/stream_viewers/video/Video_Decoder.cpp
+    ../../src/stream_viewers/video/Video_Decoder.cpp \
+    ../../../libs/utils/comms/RCP.cpp \
+    ../../../libs/utils/comms/UDP_Socket.cpp
 
 FORMS += \
     ../../src/GS.ui \

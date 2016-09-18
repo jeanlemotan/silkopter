@@ -28,8 +28,8 @@
 #include "common/stream/IMultirotor_Commands.h"
 #include "common/stream/IMultirotor_State.h"
 
-#include "utils/RCP.h"
-#include "utils/Channel.h"
+#include "utils/comms/RCP.h"
+#include "utils/comms/Channel.h"
 #include "common/Manual_Clock.h"
 
 #include "common/node/INode.h"
@@ -155,7 +155,7 @@ public:
     boost::signals2::signal<void(Node const&)> sig_node_changed;
 
 
-    typedef util::Channel<uint32_t> Telemetry_Channel;
+    typedef util::comms::Channel<uint32_t> Telemetry_Channel;
 
     struct ITelemetry_Stream
     {
@@ -214,8 +214,8 @@ private:
     template<typename T>
     void serialize_and_send(size_t channel_idx, T const& message);
 
-    std::shared_ptr<util::RCP_Socket> m_socket;
-    std::shared_ptr<util::RCP> m_rcp;
+    std::shared_ptr<util::comms::ISocket> m_socket;
+    std::shared_ptr<util::comms::RCP> m_rcp;
 
     uint32_t m_last_req_id = 0;
 
