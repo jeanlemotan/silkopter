@@ -11,7 +11,7 @@ class Value_Editor_Factory;
 class Optional_Value_Editor : public IValue_Editor
 {
 public:
-    Optional_Value_Editor(const Qualified_Value<ts::IOptional_Value>& qualified_value, std::shared_ptr<Value_Editor_Factory> valueEditorFactory);
+    Optional_Value_Editor(const Qualified_Value<ts::IOptional_Value>& qualified_value, std::string const& editor_str, std::string const& suffix_str, std::shared_ptr<Value_Editor_Factory> valueEditorFactory);
 	~Optional_Value_Editor();
 
     QWidget*	get_widget() override;
@@ -34,5 +34,8 @@ private:
     QMetaObject::Connection m_toggled_connection;
     std::shared_ptr<IValue_Editor> m_inner_editor;
     bool m_read_only_override = false;
+
+    std::string m_editor_str;
+    std::string m_suffix_str;
 };
 

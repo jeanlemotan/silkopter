@@ -12,6 +12,7 @@
 #include "def_lang/impl/Poly_Type.h"
 #include "def_lang/impl/Variant_Type.h"
 #include "def_lang/impl/Optional_Type.h"
+#include "def_lang/impl/Literal_Attribute.h"
 
 namespace ts
 {
@@ -22,89 +23,89 @@ Type_System::Type_System()
 
 }
 
+void Type_System::set_native_type(IType& type, std::string const& native_type)
+{
+    std::shared_ptr<IString_Value> value = create_specialized_value<IString_Value>("string");
+    TS_ASSERT(value);
+    auto result = value->construct();
+    TS_ASSERT(result == success);
+    result = value->set_value(native_type);
+    TS_ASSERT(result == success);
+
+    std::shared_ptr<ILiteral_Attribute> att = std::make_shared<Literal_Attribute>("native_type", value);
+    result = type.add_attribute(att);
+    TS_ASSERT(result == success);
+}
+
 void Type_System::populate_builtin_types()
 {
-    std::shared_ptr<IType> type = std::make_shared<Bool_Type>("bool");
-    auto att_result = type->add_attribute(std::make_shared<Native_Type_Attribute>("bool"));
-    TS_ASSERT(att_result == success);
+    std::shared_ptr<IType> type = std::make_shared<String_Type>("string");
     auto sym_result = m_root_scope->add_symbol(type);
     TS_ASSERT(sym_result == success);
+    set_native_type(*type, "std::string");
 
-    type = std::make_shared<String_Type>("string");
-    att_result = type->add_attribute(std::make_shared<Native_Type_Attribute>("std::string"));
-    TS_ASSERT(att_result == success);
+    type = std::make_shared<Bool_Type>("bool");
+    set_native_type(*type, "bool");
     sym_result = m_root_scope->add_symbol(type);
     TS_ASSERT(sym_result == success);
 
     type = std::make_shared<Int_Type>("int");
-    att_result = type->add_attribute(std::make_shared<Native_Type_Attribute>("int64_t"));
-    TS_ASSERT(att_result == success);
+    set_native_type(*type, "int64_t");
     sym_result = m_root_scope->add_symbol(type);
     TS_ASSERT(sym_result == success);
 
     type = std::make_shared<Float_Type>("float");
-    att_result = type->add_attribute(std::make_shared<Native_Type_Attribute>("float"));
-    TS_ASSERT(att_result == success);
+    set_native_type(*type, "float");
     sym_result = m_root_scope->add_symbol(type);
     TS_ASSERT(sym_result == success);
 
     type = std::make_shared<Double_Type>("double");
-    att_result = type->add_attribute(std::make_shared<Native_Type_Attribute>("double"));
-    TS_ASSERT(att_result == success);
+    set_native_type(*type, "double");
     sym_result = m_root_scope->add_symbol(type);
     TS_ASSERT(sym_result == success);
 
     type = std::make_shared<Vec2f_Type>("vec2f");
-    att_result = type->add_attribute(std::make_shared<Native_Type_Attribute>("vec2f"));
-    TS_ASSERT(att_result == success);
+    set_native_type(*type, "vec2f");
     sym_result = m_root_scope->add_symbol(type);
     TS_ASSERT(sym_result == success);
 
     type = std::make_shared<Vec2d_Type>("vec2d");
-    att_result = type->add_attribute(std::make_shared<Native_Type_Attribute>("vec2d"));
-    TS_ASSERT(att_result == success);
+    set_native_type(*type, "vec2d");
     sym_result = m_root_scope->add_symbol(type);
     TS_ASSERT(sym_result == success);
 
     type = std::make_shared<Vec2i_Type>("vec2i");
-    att_result = type->add_attribute(std::make_shared<Native_Type_Attribute>("vec2i"));
-    TS_ASSERT(att_result == success);
+    set_native_type(*type, "vec2i");
     sym_result = m_root_scope->add_symbol(type);
     TS_ASSERT(sym_result == success);
 
     type = std::make_shared<Vec3f_Type>("vec3f");
-    att_result = type->add_attribute(std::make_shared<Native_Type_Attribute>("vec3f"));
-    TS_ASSERT(att_result == success);
+    set_native_type(*type, "vec3f");
     sym_result = m_root_scope->add_symbol(type);
     TS_ASSERT(sym_result == success);
 
     type = std::make_shared<Vec3d_Type>("vec3d");
-    att_result = type->add_attribute(std::make_shared<Native_Type_Attribute>("vec3d"));
-    TS_ASSERT(att_result == success);
+    set_native_type(*type, "vec3d");
     sym_result = m_root_scope->add_symbol(type);
     TS_ASSERT(sym_result == success);
 
     type = std::make_shared<Vec3i_Type>("vec3i");
-    att_result = type->add_attribute(std::make_shared<Native_Type_Attribute>("vec3i"));
-    TS_ASSERT(att_result == success);
+    set_native_type(*type, "vec3i");
     sym_result = m_root_scope->add_symbol(type);
     TS_ASSERT(sym_result == success);
 
     type = std::make_shared<Vec4f_Type>("vec4f");
-    att_result = type->add_attribute(std::make_shared<Native_Type_Attribute>("vec4f"));
-    TS_ASSERT(att_result == success);
+    set_native_type(*type, "vec4f");
     sym_result = m_root_scope->add_symbol(type);
     TS_ASSERT(sym_result == success);
 
     type = std::make_shared<Vec4d_Type>("vec4d");
-    att_result = type->add_attribute(std::make_shared<Native_Type_Attribute>("vec4d"));
-    TS_ASSERT(att_result == success);
+    set_native_type(*type, "vec4d");
     sym_result = m_root_scope->add_symbol(type);
     TS_ASSERT(sym_result == success);
 
     type = std::make_shared<Vec4i_Type>("vec4i");
-    att_result = type->add_attribute(std::make_shared<Native_Type_Attribute>("vec4i"));
-    TS_ASSERT(att_result == success);
+    set_native_type(*type, "vec4i");
     sym_result = m_root_scope->add_symbol(type);
     TS_ASSERT(sym_result == success);
 }

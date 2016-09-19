@@ -3,6 +3,8 @@
 #include "yy_parser.hpp"
 
 #include <sstream>
+#include <unordered_set>
+#include <unordered_map>
 
 #include <boost/optional.hpp>
 
@@ -26,14 +28,9 @@
 #include "def_lang/impl/Enum_Item_Initializer.h"
 #include "def_lang/impl/Literal_Expression.h"
 #include "def_lang/impl/Literal.h"
-#include "def_lang/impl/Max_Attribute.h"
-#include "def_lang/impl/Min_Attribute.h"
-#include "def_lang/impl/Decimals_Attribute.h"
-#include "def_lang/impl/Default_Attribute.h"
-#include "def_lang/impl/UI_Name_Attribute.h"
-#include "def_lang/impl/UI_Suffix_Attribute.h"
-#include "def_lang/impl/Public_Attribute.h"
-#include "def_lang/impl/Native_Type_Attribute.h"
+#include "def_lang/impl/Literal_Attribute.h"
+#include "def_lang/impl/Type_Attribute.h"
+#include "def_lang/impl/Name_Attribute.h"
 #include "def_lang/impl/String_Type.h"
 #include "def_lang/impl/String_Value.h"
 #include "def_lang/impl/Enum_Type.h"
@@ -44,6 +41,26 @@ namespace ts
 {
 namespace ast
 {
+
+std::unordered_map<std::string, std::string> s_literal_attributes =
+{
+    { "min", "" },
+    { "max", "" },
+    { "decimals", "int" },
+    { "native_type", "string" },
+    { "ui_name", "string" },
+    { "ui_suffix", "string" },
+    { "ui_editor", "string" }
+};
+std::unordered_set<std::string> s_name_attributes =
+{
+    "public",
+    "default",
+};
+std::unordered_set<std::string> s_type_attributes =
+{
+};
+
 
 Builder::Builder()
     : m_root_node(Node::Type::ROOT, Source_Location())
@@ -437,8 +454,7 @@ static Result<std::shared_ptr<const IInitializer_List>> create_initializer_list(
     return Error(node.get_source_location().to_string() + "Unknown initializer");
 }
 
-
-static Result<void> create_type_attributes(Type_System& ts, IType& type, Node const& node)
+static Result<void> create_attributes(Type_System& ts, IType* default_attribute_type, IAttribute_Container& dst, Node const& node)
 {
     std::vector<Node> attribute_nodes = node.get_all_children_of_type(Node::Type::ATTRIBUTE);
     for (Node const& attribute_node: attribute_nodes)
@@ -468,83 +484,56 @@ static Result<void> create_type_attributes(Type_System& ts, IType& type, Node co
         }
         if (!initializer_list)
         {
-            return Error(attribute_node.get_source_location().to_string() + "Missing initializer for attribute");
+            return Error(attribute_node.get_source_location().to_string() + "Missing initializer for attribute '" + attribute_name + "'");
         }
 
         std::shared_ptr<IAttribute> attribute;
 
-        if (attribute_name == "min")
+        auto it = s_literal_attributes.find(attribute_name);
+        if (it != s_literal_attributes.end())
         {
-            std::shared_ptr<IValue> value = type.create_value();
+            std::string const& type_name = it->second;
+            std::shared_ptr<IValue> value;
+            if (type_name.empty())
+            {
+                if (!default_attribute_type)
+                {
+                    return Error(attribute_node.get_source_location().to_string() + "Literal attribute '" + attribute_name + "' not supported");
+                }
+                value = default_attribute_type->create_value();
+            }
+            else
+            {
+                std::shared_ptr<IType> attribute_type = ts.get_root_scope()->find_specialized_symbol_by_name<IType>(type_name);
+                if (!attribute_type)
+                {
+                    return Error(attribute_node.get_source_location().to_string() + "Cannot find type '" + type_name + "' for literal attribute '" + attribute_name + "'");
+                }
+                value = attribute_type->create_value();
+            }
+
             auto result = value->construct(*initializer_list);
             if (result != success)
             {
-                return Error(attribute_node.get_source_location().to_string() + "Cannot initialize attribute: " + result.error().what());
+                return Error(attribute_node.get_source_location().to_string() + "Cannot initialize literal attribute '" + attribute_name + "': " + result.error().what());
             }
 
-            attribute = std::make_shared<Min_Attribute>(std::move(value));
+            attribute = std::make_shared<Literal_Attribute>(attribute_name, std::move(value));
         }
-        else if (attribute_name == "max")
+        else if (s_name_attributes.find(attribute_name) != s_name_attributes.end())
         {
-            std::shared_ptr<IValue> value = type.create_value();
-            auto result = value->construct(*initializer_list);
-            if (result != success)
-            {
-                return Error(attribute_node.get_source_location().to_string() + "Cannot initialize attribute: " + result.error().what());
-            }
-
-            attribute = std::make_shared<Max_Attribute>(std::move(value));
+            attribute = std::make_shared<Name_Attribute>(attribute_name);
         }
-        else if (attribute_name == "decimals")
+        else if (s_type_attributes.find(attribute_name) != s_type_attributes.end())
         {
-            std::shared_ptr<IInt_Value> value = ts.get_root_scope()->find_specialized_symbol_by_name<IInt_Type>("int")->create_specialized_value();
-            auto result = value->construct(*initializer_list);
-            if (result != success)
-            {
-                return Error(attribute_node.get_source_location().to_string() + "Cannot initialize attribute: " + result.error().what());
-            }
-
-            attribute = std::make_shared<Decimals_Attribute>(value->get_value());
-        }
-        else if (attribute_name == "ui_name")
-        {
-            std::shared_ptr<IString_Value> value = ts.get_root_scope()->find_specialized_symbol_by_name<IString_Type>("string")->create_specialized_value();
-            auto result = value->construct(*initializer_list);
-            if (result != success)
-            {
-                return Error(attribute_node.get_source_location().to_string() + "Cannot initialize attribute: " + result.error().what());
-            }
-
-            attribute = std::make_shared<UI_Name_Attribute>(value->get_value());
-        }
-        else if (attribute_name == "public")
-        {
-            std::shared_ptr<IBool_Value> value = ts.get_root_scope()->find_specialized_symbol_by_name<IBool_Type>("bool")->create_specialized_value();
-            auto result = value->construct(*initializer_list);
-            if (result != success)
-            {
-                return Error(attribute_node.get_source_location().to_string() + "Cannot initialize attribute: " + result.error().what());
-            }
-
-            attribute = std::make_shared<Public_Attribute>(value->get_value());
-        }
-        else if (attribute_name == "native_type")
-        {
-            std::shared_ptr<IString_Value> value = ts.get_root_scope()->find_specialized_symbol_by_name<IString_Type>("string")->create_specialized_value();
-            auto result = value->construct(*initializer_list);
-            if (result != success)
-            {
-                return Error(attribute_node.get_source_location().to_string() + "Cannot initialize attribute: " + result.error().what());
-            }
-
-            attribute = std::make_shared<Native_Type_Attribute>(value->get_value());
+            return Error("Type attributes are not implemented!");
         }
         else
         {
-            return Error(attribute_node.get_source_location().to_string() + "Unknown attribute " + attribute_name);
+            return Error(attribute_node.get_source_location().to_string() + "Unknown attribute '" + attribute_name + "'");
         }
 
-        auto add_result = type.add_attribute(std::move(attribute));
+        auto add_result = dst.add_attribute(std::move(attribute));
         if (add_result != success)
         {
             return Error(attribute_node.get_source_location().to_string() + "Bad attribute: " + add_result.error().what());
@@ -554,148 +543,384 @@ static Result<void> create_type_attributes(Type_System& ts, IType& type, Node co
     return success;
 }
 
-static Result<void> create_member_def_attributes(Type_System& ts, IMember_Def& member_def, Node const& node)
-{
-    std::vector<Node> attribute_nodes = node.get_all_children_of_type(Node::Type::ATTRIBUTE);
-    for (Node const& attribute_node: attribute_nodes)
-    {
-        auto name_result = get_name_identifier(attribute_node);
-        if (name_result != success)
-        {
-            return name_result.error();
-        }
+//static Result<void> create_type_attributes(Type_System& ts, IType& type, Node const& node)
+//{
+//    std::vector<Node> attribute_nodes = node.get_all_children_of_type(Node::Type::ATTRIBUTE);
+//    for (Node const& attribute_node: attribute_nodes)
+//    {
+//        auto name_result = get_name_identifier(attribute_node);
+//        if (name_result != success)
+//        {
+//            return name_result.error();
+//        }
 
-        std::string attribute_name = name_result.payload();
+//        std::string attribute_name = name_result.payload();
 
-        std::shared_ptr<const IInitializer_List> initializer_list;
-        Node const* initializer_node = attribute_node.find_first_child_by_type(Node::Type::INITIALIZER);
-        if (!initializer_node)
-        {
-            initializer_node = attribute_node.find_first_child_by_type(Node::Type::INITIALIZER_LIST);
-        }
-        if (initializer_node)
-        {
-            auto result = create_initializer_list(ts, *ts.get_root_scope(), *initializer_node);
-            if (result != success)
-            {
-                return Error(attribute_node.get_source_location().to_string() + "Cannot create initializer: " + result.error().what());
-            }
-            initializer_list = result.extract_payload();
-        }
-        if (!initializer_list)
-        {
-            return Error(attribute_node.get_source_location().to_string() + "Missing initializer for attribute");
-        }
+//        std::shared_ptr<const IInitializer_List> initializer_list;
+//        Node const* initializer_node = attribute_node.find_first_child_by_type(Node::Type::INITIALIZER);
+//        if (!initializer_node)
+//        {
+//            initializer_node = attribute_node.find_first_child_by_type(Node::Type::INITIALIZER_LIST);
+//        }
+//        if (initializer_node)
+//        {
+//            auto result = create_initializer_list(ts, *ts.get_root_scope(), *initializer_node);
+//            if (result != success)
+//            {
+//                return Error(attribute_node.get_source_location().to_string() + "Cannot create initializer: " + result.error().what());
+//            }
+//            initializer_list = result.extract_payload();
+//        }
+//        if (!initializer_list)
+//        {
+//            return Error(attribute_node.get_source_location().to_string() + "Missing initializer for attribute '" + attribute_name + "'");
+//        }
 
-        std::shared_ptr<IAttribute> attribute;
+//        std::shared_ptr<IAttribute> attribute;
 
-        if (attribute_name == "ui_name")
-        {
-            std::shared_ptr<IString_Value> value = ts.get_root_scope()->find_specialized_symbol_by_name<IString_Type>("string")->create_specialized_value();
-            auto result = value->construct(*initializer_list);
-            if (result != success)
-            {
-                return Error(attribute_node.get_source_location().to_string() + "Cannot initialize attribute: " + result.error().what());
-            }
+//        auto it = s_literal_attributes.find(attribute_name);
+//        if (it != s_literal_attributes.end())
+//        {
+//            std::string const& type_name = it->second;
+//            std::shared_ptr<IValue> value;
+//            if (type_name.empty())
+//            {
+//                value = type.create_value();
+//            }
+//            else
+//            {
+//                std::shared_ptr<IType> attribute_type = ts.get_root_scope()->find_specialized_symbol_by_name<IType>(type_name);
+//                if (!attribute_type)
+//                {
+//                    return Error(attribute_node.get_source_location().to_string() + "Cannot find type '" + type_name + "' for literal attribute '" + attribute_name + "'");
+//                }
+//                value = attribute_type->create_value();
+//            }
 
-            attribute = std::make_shared<UI_Name_Attribute>(value->get_value());
-        }
-        else if (attribute_name == "ui_suffix")
-        {
-            std::shared_ptr<IString_Value> value = ts.get_root_scope()->find_specialized_symbol_by_name<IString_Type>("string")->create_specialized_value();
-            auto result = value->construct(*initializer_list);
-            if (result != success)
-            {
-                return Error(attribute_node.get_source_location().to_string() + "Cannot initialize attribute: " + result.error().what());
-            }
+//            auto result = value->construct(*initializer_list);
+//            if (result != success)
+//            {
+//                return Error(attribute_node.get_source_location().to_string() + "Cannot initialize literal attribute '" + attribute_name + "': " + result.error().what());
+//            }
 
-            attribute = std::make_shared<UI_Suffix_Attribute>(value->get_value());
-        }
-        else
-        {
-            return Error(attribute_node.get_source_location().to_string() + "Unknown attribute " + attribute_name);
-        }
+//            attribute = std::make_shared<Literal_Attribute>(attribute_name, std::move(value));
+//        }
+//        else if (s_name_attributes.find(attribute_name) != s_name_attributes.end())
+//        {
+//            attribute = std::make_shared<Name_Attribute>(attribute_name);
+//        }
+//        else if (s_type_attributes.find(attribute_name) != s_type_attributes.end())
+//        {
+//            return Error("Type attributes are not implemented!");
+//        }
+//        else
+//        {
+//            return Error(attribute_node.get_source_location().to_string() + "Unknown attribute '" + attribute_name + "'");
+//        }
 
-        auto add_result = member_def.add_attribute(std::move(attribute));
-        if (add_result != success)
-        {
-            return Error(attribute_node.get_source_location().to_string() + "Bad attribute: " + add_result.error().what());
-        }
-    }
+////        if (attribute_name == "min")
+////        {
+////            std::shared_ptr<IValue> value = type.create_value();
+////            auto result = value->construct(*initializer_list);
+////            if (result != success)
+////            {
+////                return Error(attribute_node.get_source_location().to_string() + "Cannot initialize attribute: " + result.error().what());
+////            }
 
-    return success;
-}
+////            attribute = std::make_shared<Min_Attribute>(std::move(value));
+////        }
+////        else if (attribute_name == "max")
+////        {
+////            std::shared_ptr<IValue> value = type.create_value();
+////            auto result = value->construct(*initializer_list);
+////            if (result != success)
+////            {
+////                return Error(attribute_node.get_source_location().to_string() + "Cannot initialize attribute: " + result.error().what());
+////            }
 
-static Result<void> create_enum_item_attributes(Type_System& ts, IEnum_Item& enum_item, Node const& node)
-{
-    std::vector<Node> attribute_nodes = node.get_all_children_of_type(Node::Type::ATTRIBUTE);
-    for (Node const& attribute_node: attribute_nodes)
-    {
-        auto name_result = get_name_identifier(attribute_node);
-        if (name_result != success)
-        {
-            return name_result.error();
-        }
+////            attribute = std::make_shared<Max_Attribute>(std::move(value));
+////        }
+////        else if (attribute_name == "decimals")
+////        {
+////            std::shared_ptr<IInt_Value> value = ts.get_root_scope()->find_specialized_symbol_by_name<IInt_Type>("int")->create_specialized_value();
+////            auto result = value->construct(*initializer_list);
+////            if (result != success)
+////            {
+////                return Error(attribute_node.get_source_location().to_string() + "Cannot initialize attribute: " + result.error().what());
+////            }
 
-        std::string attribute_name = name_result.payload();
+////            attribute = std::make_shared<Decimals_Attribute>(value->get_value());
+////        }
+////        else if (attribute_name == "ui_name")
+////        {
+////            std::shared_ptr<IString_Value> value = ts.get_root_scope()->find_specialized_symbol_by_name<IString_Type>("string")->create_specialized_value();
+////            auto result = value->construct(*initializer_list);
+////            if (result != success)
+////            {
+////                return Error(attribute_node.get_source_location().to_string() + "Cannot initialize attribute: " + result.error().what());
+////            }
 
-        std::shared_ptr<const IInitializer_List> initializer_list;
-        Node const* initializer_node = attribute_node.find_first_child_by_type(Node::Type::INITIALIZER);
-        if (!initializer_node)
-        {
-            initializer_node = attribute_node.find_first_child_by_type(Node::Type::INITIALIZER_LIST);
-        }
-        if (initializer_node)
-        {
-            auto result = create_initializer_list(ts, *ts.get_root_scope(), *initializer_node);
-            if (result != success)
-            {
-                return Error(attribute_node.get_source_location().to_string() + "Cannot create initializer: " + result.error().what());
-            }
-            initializer_list = result.extract_payload();
-        }
+////            attribute = std::make_shared<UI_Name_Attribute>(value->get_value());
+////        }
+////        else if (attribute_name == "public")
+////        {
+////            std::shared_ptr<IBool_Value> value = ts.get_root_scope()->find_specialized_symbol_by_name<IBool_Type>("bool")->create_specialized_value();
+////            auto result = value->construct(*initializer_list);
+////            if (result != success)
+////            {
+////                return Error(attribute_node.get_source_location().to_string() + "Cannot initialize attribute: " + result.error().what());
+////            }
 
-        std::shared_ptr<IAttribute> attribute;
+////            attribute = std::make_shared<Public_Attribute>(value->get_value());
+////        }
+////        else if (attribute_name == "native_type")
+////        {
+////            std::shared_ptr<IString_Value> value = ts.get_root_scope()->find_specialized_symbol_by_name<IString_Type>("string")->create_specialized_value();
+////            auto result = value->construct(*initializer_list);
+////            if (result != success)
+////            {
+////                return Error(attribute_node.get_source_location().to_string() + "Cannot initialize attribute: " + result.error().what());
+////            }
 
-        if (attribute_name == "default")
-        {
-            if (initializer_list)
-            {
-                return Error(attribute_node.get_source_location().to_string() + "Initializer for default attribute not supported");
-            }
+////            attribute = std::make_shared<Native_Type_Attribute>(value->get_value());
+////        }
+////        else
+////        {
+////            return Error(attribute_node.get_source_location().to_string() + "Unknown attribute " + attribute_name);
+////        }
 
-            attribute = std::make_shared<Default_Attribute>();
-        }
-        else if (attribute_name == "ui_name")
-        {
-            if (!initializer_list)
-            {
-                return Error(attribute_node.get_source_location().to_string() + "Missing initializer for attribute");
-            }
+//        auto add_result = type.add_attribute(std::move(attribute));
+//        if (add_result != success)
+//        {
+//            return Error(attribute_node.get_source_location().to_string() + "Bad attribute: " + add_result.error().what());
+//        }
+//    }
 
-            std::shared_ptr<IString_Value> value = ts.get_root_scope()->find_specialized_symbol_by_name<IString_Type>("string")->create_specialized_value();
-            auto result = value->construct(*initializer_list);
-            if (result != success)
-            {
-                return Error(attribute_node.get_source_location().to_string() + "Cannot initialize attribute: " + result.error().what());
-            }
+//    return success;
+//}
 
-            attribute = std::make_shared<UI_Name_Attribute>(value->get_value());
-        }
-        else
-        {
-            return Error(attribute_node.get_source_location().to_string() + "Unknown attribute " + attribute_name);
-        }
+//static Result<void> create_member_def_attributes(Type_System& ts, IMember_Def& member_def, Node const& node)
+//{
+//    std::vector<Node> attribute_nodes = node.get_all_children_of_type(Node::Type::ATTRIBUTE);
+//    for (Node const& attribute_node: attribute_nodes)
+//    {
+//        auto name_result = get_name_identifier(attribute_node);
+//        if (name_result != success)
+//        {
+//            return name_result.error();
+//        }
 
-        auto add_result = enum_item.add_attribute(std::move(attribute));
-        if (add_result != success)
-        {
-            return Error(attribute_node.get_source_location().to_string() + "Bad attribute: " + add_result.error().what());
-        }
-    }
+//        std::string attribute_name = name_result.payload();
 
-    return success;
-}
+//        std::shared_ptr<const IInitializer_List> initializer_list;
+//        Node const* initializer_node = attribute_node.find_first_child_by_type(Node::Type::INITIALIZER);
+//        if (!initializer_node)
+//        {
+//            initializer_node = attribute_node.find_first_child_by_type(Node::Type::INITIALIZER_LIST);
+//        }
+//        if (initializer_node)
+//        {
+//            auto result = create_initializer_list(ts, *ts.get_root_scope(), *initializer_node);
+//            if (result != success)
+//            {
+//                return Error(attribute_node.get_source_location().to_string() + "Cannot create initializer: " + result.error().what());
+//            }
+//            initializer_list = result.extract_payload();
+//        }
+//        if (!initializer_list)
+//        {
+//            return Error(attribute_node.get_source_location().to_string() + "Missing initializer for attribute '" + attribute_name + "'");
+//        }
+
+//        std::shared_ptr<IAttribute> attribute;
+
+//        auto it = s_literal_attributes.find(attribute_name);
+//        if (it != s_literal_attributes.end())
+//        {
+//            std::string const& type_name = it->second;
+//            std::shared_ptr<IValue> value;
+//            if (type_name.empty())
+//            {
+//                return Error(attribute_node.get_source_location().to_string() + "Literal attribute '" + attribute_name + "' not supported");
+//            }
+//            else
+//            {
+//                std::shared_ptr<IType> attribute_type = ts.get_root_scope()->find_specialized_symbol_by_name<IType>(type_name);
+//                if (!attribute_type)
+//                {
+//                    return Error(attribute_node.get_source_location().to_string() + "Cannot find type '" + type_name + "' for literal attribute '" + attribute_name + "':");
+//                }
+//                value = attribute_type->create_value();
+//            }
+
+//            auto result = value->construct(*initializer_list);
+//            if (result != success)
+//            {
+//                return Error(attribute_node.get_source_location().to_string() + "Cannot initialize literal attribute '" + attribute_name + "': " + result.error().what());
+//            }
+
+//            attribute = std::make_shared<Literal_Attribute>(attribute_name, std::move(value));
+//        }
+//        else if (s_name_attributes.find(attribute_name) != s_name_attributes.end())
+//        {
+//            attribute = std::make_shared<Name_Attribute>(attribute_name);
+//        }
+//        else if (s_type_attributes.find(attribute_name) != s_type_attributes.end())
+//        {
+//            return Error("Type attributes are not implemented!");
+//        }
+//        else
+//        {
+//            return Error(attribute_node.get_source_location().to_string() + "Unknown attribute '" + attribute_name + "'");
+//        }
+
+////        if (attribute_name == "ui_name")
+////        {
+////            std::shared_ptr<IString_Value> value = ts.get_root_scope()->find_specialized_symbol_by_name<IString_Type>("string")->create_specialized_value();
+////            auto result = value->construct(*initializer_list);
+////            if (result != success)
+////            {
+////                return Error(attribute_node.get_source_location().to_string() + "Cannot initialize attribute: " + result.error().what());
+////            }
+
+////            attribute = std::make_shared<UI_Name_Attribute>(value->get_value());
+////        }
+////        else if (attribute_name == "ui_suffix")
+////        {
+////            std::shared_ptr<IString_Value> value = ts.get_root_scope()->find_specialized_symbol_by_name<IString_Type>("string")->create_specialized_value();
+////            auto result = value->construct(*initializer_list);
+////            if (result != success)
+////            {
+////                return Error(attribute_node.get_source_location().to_string() + "Cannot initialize attribute: " + result.error().what());
+////            }
+
+////            attribute = std::make_shared<UI_Suffix_Attribute>(value->get_value());
+////        }
+////        else
+////        {
+////            return Error(attribute_node.get_source_location().to_string() + "Unknown attribute " + attribute_name);
+////        }
+
+//        auto add_result = member_def.add_attribute(std::move(attribute));
+//        if (add_result != success)
+//        {
+//            return Error(attribute_node.get_source_location().to_string() + "Bad attribute: " + add_result.error().what());
+//        }
+//    }
+
+//    return success;
+//}
+
+//static Result<void> create_enum_item_attributes(Type_System& ts, IEnum_Item& enum_item, Node const& node)
+//{
+//    std::vector<Node> attribute_nodes = node.get_all_children_of_type(Node::Type::ATTRIBUTE);
+//    for (Node const& attribute_node: attribute_nodes)
+//    {
+//        auto name_result = get_name_identifier(attribute_node);
+//        if (name_result != success)
+//        {
+//            return name_result.error();
+//        }
+
+//        std::string attribute_name = name_result.payload();
+
+//        std::shared_ptr<const IInitializer_List> initializer_list;
+//        Node const* initializer_node = attribute_node.find_first_child_by_type(Node::Type::INITIALIZER);
+//        if (!initializer_node)
+//        {
+//            initializer_node = attribute_node.find_first_child_by_type(Node::Type::INITIALIZER_LIST);
+//        }
+//        if (initializer_node)
+//        {
+//            auto result = create_initializer_list(ts, *ts.get_root_scope(), *initializer_node);
+//            if (result != success)
+//            {
+//                return Error(attribute_node.get_source_location().to_string() + "Cannot create initializer: " + result.error().what());
+//            }
+//            initializer_list = result.extract_payload();
+//        }
+
+//        std::shared_ptr<IAttribute> attribute;
+
+//        auto it = s_literal_attributes.find(attribute_name);
+//        if (it != s_literal_attributes.end())
+//        {
+//            std::string const& type_name = it->second;
+//            std::shared_ptr<IValue> value;
+//            if (type_name.empty())
+//            {
+//                return Error(attribute_node.get_source_location().to_string() + "Literal attribute '" + attribute_name + "' not supported");
+//            }
+//            else
+//            {
+//                std::shared_ptr<IType> attribute_type = ts.get_root_scope()->find_specialized_symbol_by_name<IType>(type_name);
+//                if (!attribute_type)
+//                {
+//                    return Error(attribute_node.get_source_location().to_string() + "Cannot find type '" + type_name + "' for literal attribute '" + attribute_name + "':");
+//                }
+//                value = attribute_type->create_value();
+//            }
+
+//            auto result = value->construct(*initializer_list);
+//            if (result != success)
+//            {
+//                return Error(attribute_node.get_source_location().to_string() + "Cannot initialize literal attribute '" + attribute_name + "': " + result.error().what());
+//            }
+
+//            attribute = std::make_shared<Literal_Attribute>(attribute_name, std::move(value));
+//        }
+//        else if (s_name_attributes.find(attribute_name) != s_name_attributes.end())
+//        {
+//            attribute = std::make_shared<Name_Attribute>(attribute_name);
+//        }
+//        else if (s_type_attributes.find(attribute_name) != s_type_attributes.end())
+//        {
+//            return Error("Type attributes are not implemented!");
+//        }
+//        else
+//        {
+//            return Error(attribute_node.get_source_location().to_string() + "Unknown attribute '" + attribute_name + "'");
+//        }
+
+////        if (attribute_name == "default")
+////        {
+////            if (initializer_list)
+////            {
+////                return Error(attribute_node.get_source_location().to_string() + "Initializer for default attribute not supported");
+////            }
+
+////            attribute = std::make_shared<Default_Attribute>();
+////        }
+////        else if (attribute_name == "ui_name")
+////        {
+////            if (!initializer_list)
+////            {
+////                return Error(attribute_node.get_source_location().to_string() + "Missing initializer for attribute");
+////            }
+
+////            std::shared_ptr<IString_Value> value = ts.get_root_scope()->find_specialized_symbol_by_name<IString_Type>("string")->create_specialized_value();
+////            auto result = value->construct(*initializer_list);
+////            if (result != success)
+////            {
+////                return Error(attribute_node.get_source_location().to_string() + "Cannot initialize attribute: " + result.error().what());
+////            }
+
+////            attribute = std::make_shared<UI_Name_Attribute>(value->get_value());
+////        }
+////        else
+////        {
+////            return Error(attribute_node.get_source_location().to_string() + "Unknown attribute " + attribute_name);
+////        }
+
+//        auto add_result = enum_item.add_attribute(std::move(attribute));
+//        if (add_result != success)
+//        {
+//            return Error(attribute_node.get_source_location().to_string() + "Bad attribute: " + add_result.error().what());
+//        }
+//    }
+
+//    return success;
+//}
 
 
 static Result<std::shared_ptr<IMember_Def>> create_member_def(Type_System& ts, IDeclaration_Scope& scope, Node const& node)
@@ -750,7 +975,7 @@ static Result<std::shared_ptr<IMember_Def>> create_member_def(Type_System& ts, I
 
     std::shared_ptr<IMember_Def> def = std::make_shared<Member_Def>(name, type, std::move(value));
 
-    auto create_result = create_member_def_attributes(ts, *def, node);
+    auto create_result = create_attributes(ts, nullptr, *def, node);
     if (create_result != success)
     {
         return create_result.error();
@@ -780,7 +1005,7 @@ static Result<void> create_alias(Type_System& ts, IDeclaration_Scope& scope, Nod
 
     std::shared_ptr<IType> aliased_type = type->alias(name);
 
-    auto create_result = create_type_attributes(ts, *aliased_type, node);
+    auto create_result = create_attributes(ts, aliased_type.get(), *aliased_type, node);
     if (create_result != success)
     {
         return Error(node.get_source_location().to_string() + "Cannot create alias attributes: " + create_result.error().what());
@@ -913,7 +1138,7 @@ static Result<void> create_enum_item(Type_System& ts, IEnum_Type& type, Node con
     }
 
     std::shared_ptr<Enum_Item> item = std::make_shared<Enum_Item>(name, io_integral_value);
-    auto create_result = create_enum_item_attributes(ts, *item, node);
+    auto create_result = create_attributes(ts, nullptr, *item, node);
     if (create_result != success)
     {
         return create_result.error();

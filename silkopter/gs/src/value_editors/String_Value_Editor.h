@@ -8,7 +8,7 @@ class QLineEdit;
 class String_Value_Editor : public IValue_Editor
 {
 public:
-    String_Value_Editor(const Qualified_Value<ts::IString_Value>& qualified_value);
+    String_Value_Editor(const Qualified_Value<ts::IString_Value>& qualified_value, std::string const& editor_str, std::string const& suffix_str);
 	~String_Value_Editor();
 
     QWidget*	get_widget() override;

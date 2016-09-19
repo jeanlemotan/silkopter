@@ -9,7 +9,7 @@ class QSlider;
 class Int_Value_Editor : public IValue_Editor
 {
 public:
-    Int_Value_Editor(const Qualified_Value<ts::IInt_Value>& qualified_value);
+    Int_Value_Editor(const Qualified_Value<ts::IInt_Value>& qualified_value, std::string const& editor_str, std::string const& suffix_str);
     ~Int_Value_Editor();
 
     QWidget*	get_widget() override;

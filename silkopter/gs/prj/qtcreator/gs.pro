@@ -149,7 +149,8 @@ HEADERS += \
     ../../src/stream_viewers/video/Video_Decoder.h \
     ../../../libs/utils/comms/Channel.h \
     ../../../libs/utils/comms/RCP.h \
-    ../../../libs/utils/comms/UDP_Socket.h
+    ../../../libs/utils/comms/UDP_Socket.h \
+    ../../src/QHexSpinBox.h
 
 SOURCES += \
     ../../src/GS.cpp \

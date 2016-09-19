@@ -63,15 +63,39 @@ std::shared_ptr<typename Traits::value_interface> Type_Template_EP<Traits>::crea
 template<typename Traits>
 Result<void> Type_Template_EP<Traits>::validate_attribute(IAttribute const& attribute)
 {
-    if (UI_Name_Attribute const* att = dynamic_cast<UI_Name_Attribute const*>(&attribute))
+    if (attribute.get_name() == "ui_name")
     {
-        m_ui_name = att->get_ui_name();
-        return success;
+        if (ILiteral_Attribute const* att = dynamic_cast<ILiteral_Attribute const*>(&attribute))
+        {
+            IString_Value const* value = dynamic_cast<IString_Value const*>(&att->get_value());
+            if (!value)
+            {
+                return Error("Attribute '" + attribute.get_name() + "' has to be a string.");
+            }
+            m_ui_name = value->get_value();
+            return success;
+        }
+        else
+        {
+            return Error("Attribute '" + attribute.get_name() + "' has to be a string literal.");
+        }
     }
-    else if (Native_Type_Attribute const* att = dynamic_cast<Native_Type_Attribute const*>(&attribute))
+    else if (attribute.get_name() == "native_type")
     {
-        m_native_type = att->get_native_type();
-        return success;
+        if (ILiteral_Attribute const* att = dynamic_cast<ILiteral_Attribute const*>(&attribute))
+        {
+            IString_Value const* value = dynamic_cast<IString_Value const*>(&att->get_value());
+            if (!value)
+            {
+                return Error("Attribute '" + attribute.get_name() + "' has to be a string.");
+            }
+            m_native_type = value->get_value();
+            return success;
+        }
+        else
+        {
+            return Error("Attribute '" + attribute.get_name() + "' has to be a string literal.");
+        }
     }
     else
     {

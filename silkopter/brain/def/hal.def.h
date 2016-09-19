@@ -3074,10 +3074,10 @@ private:
   ufloat m_max_pulse_length = {1.600000f};
 };
 
-ts::Result<void> deserialize(bool& value, ts::sz::Value const& sz_value);
-ts::sz::Value serialize(bool const& value);
 ts::Result<void> deserialize(std::string& value, ts::sz::Value const& sz_value);
 ts::sz::Value serialize(std::string const& value);
+ts::Result<void> deserialize(bool& value, ts::sz::Value const& sz_value);
+ts::sz::Value serialize(bool const& value);
 ts::Result<void> deserialize(int64_t& value, ts::sz::Value const& sz_value);
 ts::sz::Value serialize(int64_t const& value);
 ts::Result<void> deserialize(float& value, ts::sz::Value const& sz_value);

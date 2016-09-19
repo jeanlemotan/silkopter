@@ -1,11 +1,12 @@
 #include "value_editors/Int_Value_Editor.h"
 
+#include "QHexSpinBox.h"
 #include <QSpinBox>
 #include <QSlider>
 #include <QHBoxLayout>
 
 
-Int_Value_Editor::Int_Value_Editor(const Qualified_Value<ts::IInt_Value>& qualified_value)
+Int_Value_Editor::Int_Value_Editor(const Qualified_Value<ts::IInt_Value>& qualified_value, std::string const& editor_str, std::string const& suffix_str)
     : m_qualified_value(qualified_value)
 {
     std::shared_ptr<const ts::IInt_Type> type = m_qualified_value.get_const_value()->get_specialized_type();
@@ -15,7 +16,14 @@ Int_Value_Editor::Int_Value_Editor(const Qualified_Value<ts::IInt_Value>& qualif
 	layout->setMargin(0);
 	layout->setSpacing(0);
 
-	m_spinbox = new QSpinBox(m_editor);
+    if (editor_str == "hex")
+    {
+        m_spinbox = new HexSpinBox(m_editor);
+    }
+    else
+    {
+        m_spinbox = new QSpinBox(m_editor);
+    }
     m_spinbox->setMinimum(type->get_min_value());
     m_spinbox->setMaximum(std::min<int64_t>(type->get_max_value(), std::numeric_limits<int>::max()));
     m_spinbox->setSingleStep(1);//type->GetStep());

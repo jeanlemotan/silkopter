@@ -2,10 +2,10 @@
 
 #include <memory>
 #include "def_lang/IValue.h"
+#include "def_lang/IString_Value.h"
 #include "def_lang/ep/Symbol_EP.h"
 #include "def_lang/ep/Attribute_Container_EP.h"
-#include "def_lang/impl/UI_Name_Attribute.h"
-#include "def_lang/impl/Native_Type_Attribute.h"
+#include "def_lang/ILiteral_Attribute.h"
 
 namespace ts
 {

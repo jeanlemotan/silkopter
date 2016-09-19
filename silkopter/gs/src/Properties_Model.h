@@ -27,6 +27,15 @@ public:
 
 	//////////////////////////////////////////////////////////////////////////
 
+    struct Editor_Data
+    {
+        std::string editor;
+        std::string suffix;
+        std::shared_ptr<ts::IValue> value;
+    };
+
+    Editor_Data get_editor_data_from_index(QModelIndex index) const;
+
     QModelIndex get_root_index() const;
 
     QModelIndex get_index_from_value(ts::IValue const& value) const;
@@ -70,7 +79,7 @@ protected:
 
     struct Tree_Item : public std::enable_shared_from_this<Tree_Item>
 	{
-        Tree_Item(Properties_Model* model, const std::string& name, const std::string& suffix);
+        Tree_Item(Properties_Model* model, const std::string& name, const std::string& suffix, const std::string& editor);
         ~Tree_Item();
         void build_root(ts::IStruct_Value& struct_value);
         void build(std::shared_ptr<ts::IValue> value);
@@ -94,6 +103,7 @@ protected:
 
         std::string m_name;
         std::string m_suffix;
+        std::string m_editor;
         std::shared_ptr<ts::IValue> m_value;
 
 		//some items represent 2 values - a primary one (m_value) and this secondary one.

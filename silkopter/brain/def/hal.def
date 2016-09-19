@@ -266,7 +266,7 @@ struct ADS1115_Descriptor : public INode_Descriptor
     alias i2c_address_t = uint8_t : [ min = 0, max = 127, native_type = "uint8_t" ];
 
     string bus : [ ui_name = "Bus" ];
-    i2c_address_t i2c_address = 72 : [ ui_name = "I2C Address" ];
+    i2c_address_t i2c_address = 72 : [ ui_name = "I2C Address", ui_editor = "hex" ];
     rate_t adc0_rate = 200 : [ ui_name = "ADC0 Rate", ui_suffix = "Hz" ];
     rate_t adc1_rate = 200 : [ ui_name = "ADC1 Rate", ui_suffix = "Hz" ];
     rate_t adc2_rate = 200 : [ ui_name = "ADC2 Rate", ui_suffix = "Hz" ];
@@ -285,7 +285,7 @@ struct AVRADC_Descriptor : public INode_Descriptor
     alias i2c_address_t = uint8_t : [ min = 0, max = 127, native_type = "uint8_t" ];
 
     string bus : [ ui_name = "Bus" ];
-    i2c_address_t i2c_address = 23 : [ ui_name = "I2C Address" ];
+    i2c_address_t i2c_address = 23 : [ ui_name = "I2C Address", ui_editor = "hex" ];
     rate_t rate = 200 : [ ui_name = "Rate", ui_suffix = "Hz" ];
 };
 
@@ -462,7 +462,7 @@ struct MPU9250_Descriptor : public INode_Descriptor
     };
 
     string bus : [ ui_name = "Bus" ];
-    i2c_address_t i2c_address = 104 : [ui_name = "I2C Address" ];
+    i2c_address_t i2c_address = 104 : [ui_name = "I2C Address", ui_editor = "hex" ];
     imu_rate_t imu_rate = imu_rate_t::_1000 : [ ui_name = "IMU Rate", ui_suffix = "Hz" ];
     rate_t magnetometer_rate = 100 : [ ui_name = "Magnetometer Rate", ui_suffix = "Hz" ];
     rate_t thermometer_rate = 10 : [ ui_name = "Thermometer Rate", ui_suffix = "Hz" ];
@@ -491,7 +491,7 @@ struct MS5611_Descriptor : public INode_Descriptor
     alias i2c_address_t = uint8_t : [ min = 0, max = 127, native_type = "uint8_t" ];
 
     string bus : [ ui_name = "Bus" ];
-    i2c_address_t i2c_address = 119 : [ui_name = "I2C Address" ];
+    i2c_address_t i2c_address = 119 : [ui_name = "I2C Address", ui_editor = "hex" ];
     rate_t pressure_rate = 100 : [ ui_name = "Pressure Rate", ui_suffix = "Hz" ];
     rate_t temperature_rate = 10 : [ ui_name = "Temperature Rate", ui_suffix = "Hz" ];
 };
@@ -659,7 +659,7 @@ struct PCA9685_Descriptor : public INode_Descriptor
 
     string bus : [ ui_name = "Bus" ];
     rate_t rate = 30 : [ ui_name = "Rate", ui_suffix = "Hz" ];
-    uint8_t address = 64 : [ ui_name = "Address" ];
+    uint8_t address = 64 : [ ui_name = "Address", ui_editor = "hex" ];
 
     struct Channel
     {

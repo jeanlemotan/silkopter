@@ -26,7 +26,9 @@ public:
     std::shared_ptr<IDeclaration_Scope> get_root_scope();
     std::shared_ptr<const IDeclaration_Scope> get_root_scope() const;
 
-protected:
+private:
+    void set_native_type(IType& type, std::string const& native_type);
+
     std::shared_ptr<Namespace> m_root_scope;
 };
 

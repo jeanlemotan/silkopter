@@ -4,9 +4,7 @@
 #include "def_lang/All_INumeric_Values.h"
 #include "def_lang/ep/Type_Template_EP.h"
 #include "def_lang/IAttribute.h"
-#include "def_lang/impl/Min_Attribute.h"
-#include "def_lang/impl/Max_Attribute.h"
-#include "def_lang/impl/Decimals_Attribute.h"
+#include "def_lang/ILiteral_Attribute.h"
 
 namespace ts
 {

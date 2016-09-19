@@ -45,15 +45,19 @@ QWidget* Properties_Delegate::createEditor(QWidget* parent, const QStyleOptionVi
         return nullptr;
     }
 
-    std::shared_ptr<ts::IValue> value = model->get_value_from_index(index);
-    QASSERT(value);
+    Properties_Model::Editor_Data ed = model->get_editor_data_from_index(index);
+    QASSERT(ed.value);
+    if (!ed.value)
+    {
+        return nullptr;
+    }
 
     m_editor_data.reset();
 
-    std::shared_ptr<IValue_Editor> value_editor = m_editor_factory->create_editor(value);
+    std::shared_ptr<IValue_Editor> value_editor = m_editor_factory->create_editor(ed.value, ed.editor, ed.suffix);
     if (!value_editor)
     {
-        value_editor = std::make_shared<Empty_Value_Editor>(value);
+        value_editor = std::make_shared<Empty_Value_Editor>(ed.value, ed.editor, ed.suffix);
     }
 
     m_editor_data = std::make_shared<Editor_Data>(std::move(value_editor));
@@ -64,7 +68,7 @@ QWidget* Properties_Delegate::createEditor(QWidget* parent, const QStyleOptionVi
         m_editor_data->editor->set_read_only_override(true);
     }
 
-    m_editor_data->value_changed_connection = value->sig_value_changed.connect([this]()
+    m_editor_data->value_changed_connection = ed.value->sig_value_changed.connect([this]()
     {
         sig_value_changed();
     });

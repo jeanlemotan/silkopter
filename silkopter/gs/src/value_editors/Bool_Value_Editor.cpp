@@ -2,7 +2,7 @@
 
 #include <QCheckBox>
 
-Bool_Value_Editor::Bool_Value_Editor(const Qualified_Value<ts::IBool_Value>& qualified_value)
+Bool_Value_Editor::Bool_Value_Editor(const Qualified_Value<ts::IBool_Value>& qualified_value, std::string const& editor_str, std::string const& suffix_str)
     : m_qualified_value(qualified_value)
 {
 	m_editor = new QCheckBox();

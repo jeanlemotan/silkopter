@@ -1,7 +1,7 @@
 #include "def_lang/impl/Member_Def.h"
 #include "def_lang/IValue.h"
-#include "def_lang/impl/UI_Name_Attribute.h"
-#include "def_lang/impl/UI_Suffix_Attribute.h"
+#include "def_lang/IString_Value.h"
+#include "def_lang/ILiteral_Attribute.h"
 
 namespace ts
 {
@@ -39,15 +39,63 @@ std::string const& Member_Def::get_ui_suffix() const
     return m_ui_suffix;
 }
 
+std::string const& Member_Def::get_ui_editor() const
+{
+    return m_ui_editor;
+}
+
 Result<void> Member_Def::validate_attribute(IAttribute const& attribute)
 {
-    if (UI_Name_Attribute const* att = dynamic_cast<UI_Name_Attribute const*>(&attribute))
+    if (attribute.get_name() == "ui_name")
     {
-        m_ui_name = att->get_ui_name();
+        if (ILiteral_Attribute const* att = dynamic_cast<ILiteral_Attribute const*>(&attribute))
+        {
+            IString_Value const* value = dynamic_cast<IString_Value const*>(&att->get_value());
+            if (!value)
+            {
+                return Error("Attribute '" + attribute.get_name() + "' has to be a string.");
+            }
+            m_ui_name = value->get_value();
+            return success;
+        }
+        else
+        {
+            return Error("Attribute '" + attribute.get_name() + "' has to be a string literal.");
+        }
     }
-    else if (UI_Suffix_Attribute const* att = dynamic_cast<UI_Suffix_Attribute const*>(&attribute))
+    else if (attribute.get_name() == "ui_suffix")
     {
-        m_ui_suffix = att->get_ui_suffix();
+        if (ILiteral_Attribute const* att = dynamic_cast<ILiteral_Attribute const*>(&attribute))
+        {
+            IString_Value const* value = dynamic_cast<IString_Value const*>(&att->get_value());
+            if (!value)
+            {
+                return Error("Attribute '" + attribute.get_name() + "' has to be a string.");
+            }
+            m_ui_suffix = value->get_value();
+            return success;
+        }
+        else
+        {
+            return Error("Attribute '" + attribute.get_name() + "' has to be a string literal.");
+        }
+    }
+    else if (attribute.get_name() == "ui_editor")
+    {
+        if (ILiteral_Attribute const* att = dynamic_cast<ILiteral_Attribute const*>(&attribute))
+        {
+            IString_Value const* value = dynamic_cast<IString_Value const*>(&att->get_value());
+            if (!value)
+            {
+                return Error("Attribute '" + attribute.get_name() + "' has to be a string.");
+            }
+            m_ui_editor = value->get_value();
+            return success;
+        }
+        else
+        {
+            return Error("Attribute '" + attribute.get_name() + "' has to be a string literal.");
+        }
     }
     else
     {

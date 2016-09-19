@@ -37,41 +37,63 @@ size_t Numeric_Type_Template<Traits>::get_decimals() const
 template<typename Traits>
 Result<void> Numeric_Type_Template<Traits>::validate_attribute_impl(IAttribute const& attribute)
 {
-    if (Min_Attribute const* att = dynamic_cast<Min_Attribute const*>(&attribute))
+    if (attribute.get_name() == "min")
     {
-        typename Traits::value_interface const* v = dynamic_cast<typename Traits::value_interface const*>(&att->get_min_value());
-        if (!v)
+        if (ILiteral_Attribute const* att = dynamic_cast<ILiteral_Attribute const*>(&attribute))
         {
-            return Error("Min attribute is not of the correct type. Expected " + this->get_name() + ", got " + att->get_min_value().get_type()->get_name());
-        }
+            typename Traits::value_interface const* v = dynamic_cast<typename Traits::value_interface const*>(&att->get_value());
+            if (!v)
+            {
+                return Error("Min attribute is not of the correct type. Expected " + this->get_name() + ", got " + att->get_value().get_type()->get_name());
+            }
 
-        if (detail::is_smaller(v->get_value(), Traits::min_value))
-        {
-            return Error("Attribute min is too small. Minimum value is : " + std::to_string(Traits::min_value));
+            if (detail::is_smaller(v->get_value(), Traits::min_value))
+            {
+                return Error("Attribute min is too small. Minimum value is : " + std::to_string(Traits::min_value));
+            }
+            m_min_value = v->get_value();
         }
-        m_min_value = v->get_value();
+        else
+        {
+            return Error("Attribute '" + attribute.get_name() + "' has to be a literal.");
+        }
     }
-    else if (Max_Attribute const* att = dynamic_cast<Max_Attribute const*>(&attribute))
+    else if (attribute.get_name() == "max")
     {
-        typename Traits::value_interface const* v = dynamic_cast<typename Traits::value_interface const*>(&att->get_max_value());
-        if (!v)
+        if (ILiteral_Attribute const* att = dynamic_cast<ILiteral_Attribute const*>(&attribute))
         {
-            return Error("Attribute max is not of the correct type. Expected " + this->get_name() + ", got " + att->get_max_value().get_type()->get_name());
-        }
+            typename Traits::value_interface const* v = dynamic_cast<typename Traits::value_interface const*>(&att->get_value());
+            if (!v)
+            {
+                return Error("Max attribute is not of the correct type. Expected " + this->get_name() + ", got " + att->get_value().get_type()->get_name());
+            }
 
-        if (detail::is_greater(v->get_value(), Traits::max_value))
-        {
-            return Error("Attribute max is too big. Maximum value is : " + std::to_string(Traits::max_value));
+            if (detail::is_greater(v->get_value(), Traits::max_value))
+            {
+                return Error("Attribute max is too big. Maximum value is : " + std::to_string(Traits::max_value));
+            }
+            m_max_value = v->get_value();
         }
-        m_max_value = v->get_value();
+        else
+        {
+            return Error("Attribute '" + attribute.get_name() + "' has to be a literal.");
+        }
     }
-    else if (Decimals_Attribute const* att = dynamic_cast<Decimals_Attribute const*>(&attribute))
+    else if (attribute.get_name() == "decimals")
     {
-        if (!Traits::supports_decimals_attribute)
+        if (ILiteral_Attribute const* att = dynamic_cast<ILiteral_Attribute const*>(&attribute))
         {
-            return Error("Attribute decimals not supported on integral types");
+            IInt_Value const* v = dynamic_cast<IInt_Value const*>(&att->get_value());
+            if (!v)
+            {
+                return Error("Decimals attribute is not an int literal");
+            }
+            m_decimals = v->get_value();
         }
-        m_decimals = att->get_decimals();
+        else
+        {
+            return Error("Attribute '" + attribute.get_name() + "' has to be an int literal.");
+        }
     }
     else
     {

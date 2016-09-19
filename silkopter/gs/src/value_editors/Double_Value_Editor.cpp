@@ -2,7 +2,7 @@
 #include "value_editors/details/Numeric_Value_Editor_Helper.h"
 
 
-Double_Value_Editor::Double_Value_Editor(const Qualified_Value<ts::IDouble_Value>& qualified_value)
+Double_Value_Editor::Double_Value_Editor(const Qualified_Value<ts::IDouble_Value>& qualified_value, std::string const& editor_str, std::string const& suffix_str)
     : m_qualified_value(qualified_value)
 {
     std::shared_ptr<const ts::IDouble_Type> type = m_qualified_value.get_const_value()->get_specialized_type();

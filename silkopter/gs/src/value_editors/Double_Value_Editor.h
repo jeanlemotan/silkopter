@@ -8,7 +8,7 @@ class Numeric_Value_Editor_Helper;
 class Double_Value_Editor : public IValue_Editor
 {
 public:
-    Double_Value_Editor(const Qualified_Value<ts::IDouble_Value>& qualified_value);
+    Double_Value_Editor(const Qualified_Value<ts::IDouble_Value>& qualified_value, std::string const& editor_str, std::string const& suffix_str);
 
     QWidget*	get_widget() override;
     Qualified_Value<ts::IValue> get_qualified_value() override;

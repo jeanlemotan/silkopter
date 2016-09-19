@@ -97,14 +97,11 @@ HEADERS += \
     ../../include/def_lang/impl/All_Numeric_Values.h \
     ../../include/def_lang/impl/Bool_Type.h \
     ../../include/def_lang/impl/Bool_Value.h \
-    ../../include/def_lang/impl/Decimals_Attribute.h \
     ../../include/def_lang/impl/Initializer_List.h \
     ../../include/def_lang/impl/Literal.h \
     ../../include/def_lang/impl/Literal_Expression.h \
-    ../../include/def_lang/impl/Max_Attribute.h \
     ../../include/def_lang/impl/Member.h \
     ../../include/def_lang/impl/Member_Def.h \
-    ../../include/def_lang/impl/Min_Attribute.h \
     ../../include/def_lang/impl/Namespace.h \
     ../../include/def_lang/impl/Numeric_Type_Template.h \
     ../../include/def_lang/impl/Numeric_Value_Template.h \
@@ -112,7 +109,6 @@ HEADERS += \
     ../../include/def_lang/impl/String_Value.h \
     ../../include/def_lang/impl/Struct_Type.h \
     ../../include/def_lang/impl/Struct_Value.h \
-    ../../include/def_lang/impl/UI_Name_Attribute.h \
     ../../include/def_lang/impl/Vector_Type.h \
     ../../include/def_lang/impl/Vector_Value.h \
     ../../src/location.hh \
@@ -144,7 +140,6 @@ HEADERS += \
     ../../include/def_lang/impl/Enum_Type.h \
     ../../include/def_lang/impl/Enum_Item.h \
     ../../include/def_lang/impl/Enum_Value.h \
-    ../../include/def_lang/impl/Default_Attribute.h \
     ../../include/def_lang/IVariant_Type.h \
     ../../include/def_lang/IVariant_Value.h \
     ../../include/def_lang/impl/Variant_Type.h \
@@ -153,14 +148,16 @@ HEADERS += \
     ../../include/def_lang/IEnum_Item_Initializer.h \
     ../../include/def_lang/impl/Literal_Initializer.h \
     ../../include/def_lang/impl/Enum_Item_Initializer.h \
-    ../../include/def_lang/impl/Native_Type_Attribute.h \
     ../../include/def_lang/IOptional_Type.h \
     ../../include/def_lang/IOptional_Value.h \
     ../../include/def_lang/impl/Optional_Type.h \
     ../../include/def_lang/impl/Optional_Value.h \
     ../../include/def_lang/Qualified_Type.h \
-    ../../include/def_lang/impl/Public_Attribute.h \
-    ../../include/def_lang/impl/UI_Suffix_Attribute.h
+    ../../include/def_lang/IName_Attribute.h \
+    ../../include/def_lang/impl/Literal_Attribute.h \
+    ../../include/def_lang/ILiteral_Attribute.h \
+    ../../include/def_lang/IType_Attribute.h \
+    ../../include/def_lang/impl/Type_Attribute.h
 
 SOURCES += \
     ../../src/yy_lexer.cpp \
@@ -171,14 +168,11 @@ SOURCES += \
     ../../src/ts/ast/Node.cpp \
     ../../src/ts/Bool_Type.cpp \
     ../../src/ts/Bool_Value.cpp \
-    ../../src/ts/Decimals_Attribute.cpp \
     ../../src/ts/Initializer_List.cpp \
     ../../src/ts/Literal.cpp \
     ../../src/ts/Literal_Expression.cpp \
-    ../../src/ts/Max_Attribute.cpp \
     ../../src/ts/Member.cpp \
     ../../src/ts/Member_Def.cpp \
-    ../../src/ts/Min_Attribute.cpp \
     ../../src/ts/Namespace.cpp \
     ../../src/ts/Source_Location.cpp \
     ../../src/ts/String_Type.cpp \
@@ -187,7 +181,6 @@ SOURCES += \
     ../../src/ts/Struct_Value.cpp \
     ../../src/ts/Symbol_Path.cpp \
     ../../src/ts/Type_System.cpp \
-    ../../src/ts/UI_Name_Attribute.cpp \
     ../../src/ts/Vector_Type.cpp \
     ../../src/ts/Vector_Value.cpp \
     ../../src/ts/ep/Attribute_Container_EP.cpp \
@@ -203,15 +196,14 @@ SOURCES += \
     ../../src/ts/Enum_Type.cpp \
     ../../src/ts/Enum_Value.cpp \
     ../../src/ts/Enum_Item.cpp \
-    ../../src/ts/Default_Attribute.cpp \
     ../../src/ts/Variant_Type.cpp \
     ../../src/ts/Variant_Value.cpp \
     ../../src/ts/Literal_Initializer.cpp \
     ../../src/ts/Enum_Item_Initializer.cpp \
-    ../../src/ts/Native_Type_Attribute.cpp \
     ../../src/ts/Optional_Type.cpp \
     ../../src/ts/Optional_Value.cpp \
     ../../src/ts/Qualified_Type.cpp \
-    ../../src/ts/Public_Attribute.cpp \
-    ../../src/ts/UI_Suffix_Attribute.cpp
+    ../../src/ts/Name_Attribute.cpp \
+    ../../src/ts/Literal_Attribute.cpp \
+    ../../src/ts/Type_Attribute.cpp
 

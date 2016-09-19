@@ -44,13 +44,13 @@ void Value_Editor_Factory::register_standard_editors()
 
 //////////////////////////////////////////////////////////////////////////
 
-std::shared_ptr<IValue_Editor> Value_Editor_Factory::create_editor(std::shared_ptr<ts::IValue> value) const
+std::shared_ptr<IValue_Editor> Value_Editor_Factory::create_editor(std::shared_ptr<ts::IValue> value, std::string const& editor_str, std::string const& suffix_str) const
 {
     std::shared_ptr<const ts::IType> type = value->get_type();
 
     for (const Creators& creators: m_registered_editors)
 	{
-        std::shared_ptr<IValue_Editor> editor = creators.mutable_creator(value);
+        std::shared_ptr<IValue_Editor> editor = creators.mutable_creator(value, editor_str, suffix_str);
 		if (editor)
 		{
 			return editor;
@@ -61,13 +61,13 @@ std::shared_ptr<IValue_Editor> Value_Editor_Factory::create_editor(std::shared_p
 
 //////////////////////////////////////////////////////////////////////////
 
-std::shared_ptr<IValue_Editor> Value_Editor_Factory::create_editor(std::shared_ptr<const ts::IValue> value) const
+std::shared_ptr<IValue_Editor> Value_Editor_Factory::create_editor(std::shared_ptr<const ts::IValue> value, std::string const& editor_str, std::string const& suffix_str) const
 {
     std::shared_ptr<const ts::IType> type = value->get_type();
 
     for (const Creators& creators : m_registered_editors)
 	{
-        std::shared_ptr<IValue_Editor> editor = creators.const_creator(value);
+        std::shared_ptr<IValue_Editor> editor = creators.const_creator(value, editor_str, suffix_str);
 		if (editor)
 		{
 			return editor;
