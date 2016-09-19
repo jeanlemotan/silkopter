@@ -13,11 +13,10 @@
 
 //////////////////////////////////////////////////////////////////////////
 
-Properties_Model::Tree_Item::Tree_Item(Properties_Model* model, const std::string& name, const std::string& suffix, const std::string& editor)
+Properties_Model::Tree_Item::Tree_Item(Properties_Model* model, const std::string& name, const std::string& suffix)
 	: m_model(model)
 	, m_name(name)
     , m_suffix(suffix)
-    , m_editor(editor)
 {
 }
 
@@ -45,9 +44,8 @@ void Properties_Model::Tree_Item::build_root(ts::IStruct_Value& root)
 
         const std::string& ui_name = member_def->get_ui_name();
         const std::string& ui_suffix = member_def->get_ui_suffix();
-        const std::string& ui_editor = member_def->get_ui_editor();
 
-        std::shared_ptr<Tree_Item> item = std::make_shared<Tree_Item>(m_model, ui_name, ui_suffix, ui_editor);
+        std::shared_ptr<Tree_Item> item = std::make_shared<Tree_Item>(m_model, ui_name, ui_suffix);
 
         item->build(member->get_value());
         add_child(std::move(item));
@@ -117,7 +115,7 @@ void Properties_Model::Tree_Item::build_children(std::shared_ptr<ts::IValue> val
 		{
             const std::shared_ptr<ts::IMember> member = member_container->get_member(i);
 
-            std::shared_ptr<Tree_Item> item = std::make_shared<Tree_Item>(m_model, member->get_member_def()->get_ui_name(), member->get_member_def()->get_ui_suffix(), member->get_member_def()->get_ui_editor());
+            std::shared_ptr<Tree_Item> item = std::make_shared<Tree_Item>(m_model, member->get_member_def()->get_ui_name(), member->get_member_def()->get_ui_suffix());
             item->build(member->get_value());
             add_child(std::move(item));
 		}
@@ -130,7 +128,7 @@ void Properties_Model::Tree_Item::build_children(std::shared_ptr<ts::IValue> val
         m_children.reserve(vector_value->get_value_count());
         for (size_t i = 0; i < vector_value->get_value_count(); i++)
 		{
-            std::shared_ptr<Tree_Item> item = std::make_shared<Tree_Item>(m_model, std::to_string(i), std::string(), std::string());
+            std::shared_ptr<Tree_Item> item = std::make_shared<Tree_Item>(m_model, std::to_string(i), std::string());
             item->build(vector_value->get_value(i));
             add_child(std::move(item));
 		}
@@ -265,7 +263,7 @@ void Properties_Model::Tree_Item::insert_child(size_t off, std::shared_ptr<Tree_
 
 Properties_Model::Properties_Model(QWidget* parent)
 	: QAbstractItemModel(parent)
-    , m_root(std::make_shared<Tree_Item>(this, "root", "", ""))
+    , m_root(std::make_shared<Tree_Item>(this, "root", std::string()))
 {
 }
 
@@ -516,7 +514,7 @@ void Properties_Model::set_value(std::shared_ptr<ts::IStruct_Value> value)
 
 	beginResetModel();
     m_rootValue.reset();
-    m_root = std::make_shared<Tree_Item>(this, "root", "", "");
+    m_root = std::make_shared<Tree_Item>(this, "root", std::string());
 	endResetModel();
 
     m_rootValue = value;
@@ -634,7 +632,6 @@ Properties_Model::Editor_Data Properties_Model::get_editor_data_from_index(QMode
     }
     ed.value = ti->m_value;
     ed.suffix = ti->m_suffix;
-    ed.editor = ti->m_editor;
     return ed;
 }
 
@@ -761,7 +758,7 @@ void Properties_Model::on_optional_was_set(std::shared_ptr<ts::IOptional_Value> 
         parent_ti->m_secondary_value = parent->get_value();
 
         //first we build in a temp tree item to be able to count the children. Qt demands we know the count before actually adding them!
-        std::shared_ptr<Tree_Item> temp = std::make_shared<Tree_Item>(this, std::string(), std::string(), std::string());
+        std::shared_ptr<Tree_Item> temp = std::make_shared<Tree_Item>(this, std::string(), std::string());
         temp->build_children(parent->get_value());
 
         size_t count = temp->get_child_count();
@@ -815,7 +812,7 @@ void Properties_Model::on_variant_type_index_has_changed(std::shared_ptr<ts::IVa
             parent_ti->m_secondary_value = parent->get_value();
 
             //first we build in a temp tree item to be able to count the children. Qt demands we know the count before actually adding them!
-            std::shared_ptr<Tree_Item> temp = std::make_shared<Tree_Item>(this, std::string(), std::string(), std::string());
+            std::shared_ptr<Tree_Item> temp = std::make_shared<Tree_Item>(this, std::string(), std::string());
             temp->build_children(parent->get_value());
 
             size_t count = temp->get_child_count();
@@ -865,7 +862,7 @@ void Properties_Model::on_poly_type_has_changed(std::shared_ptr<ts::IPoly_Value>
             parent_ti->m_secondary_value = parent->get_value();
 
             //first we build in a temp tree item to be able to count the children. Qt demands we know the count before actually adding them!
-            std::shared_ptr<Tree_Item> temp = std::make_shared<Tree_Item>(this, std::string(), std::string(), std::string());
+            std::shared_ptr<Tree_Item> temp = std::make_shared<Tree_Item>(this, std::string(), std::string());
             temp->build_children(parent->get_value());
 
             size_t count = temp->get_child_count();

@@ -54,10 +54,10 @@ QWidget* Properties_Delegate::createEditor(QWidget* parent, const QStyleOptionVi
 
     m_editor_data.reset();
 
-    std::shared_ptr<IValue_Editor> value_editor = m_editor_factory->create_editor(ed.value, ed.editor, ed.suffix);
+    std::shared_ptr<IValue_Editor> value_editor = m_editor_factory->create_editor(ed.value, ed.suffix);
     if (!value_editor)
     {
-        value_editor = std::make_shared<Empty_Value_Editor>(ed.value, ed.editor, ed.suffix);
+        value_editor = std::make_shared<Empty_Value_Editor>(ed.value, ed.suffix);
     }
 
     m_editor_data = std::make_shared<Editor_Data>(std::move(value_editor));

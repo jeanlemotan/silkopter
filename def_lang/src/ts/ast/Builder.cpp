@@ -50,12 +50,12 @@ std::unordered_map<std::string, std::string> s_literal_attributes =
     { "native_type", "string" },
     { "ui_name", "string" },
     { "ui_suffix", "string" },
-    { "ui_editor", "string" }
 };
 std::unordered_set<std::string> s_name_attributes =
 {
     "public",
     "default",
+    "hex"
 };
 std::unordered_set<std::string> s_type_attributes =
 {
@@ -482,16 +482,17 @@ static Result<void> create_attributes(Type_System& ts, IType* default_attribute_
             }
             initializer_list = result.extract_payload();
         }
-        if (!initializer_list)
-        {
-            return Error(attribute_node.get_source_location().to_string() + "Missing initializer for attribute '" + attribute_name + "'");
-        }
 
         std::shared_ptr<IAttribute> attribute;
 
         auto it = s_literal_attributes.find(attribute_name);
         if (it != s_literal_attributes.end())
         {
+            if (!initializer_list)
+            {
+                return Error(attribute_node.get_source_location().to_string() + "Missing initializer for attribute '" + attribute_name + "'");
+            }
+
             std::string const& type_name = it->second;
             std::shared_ptr<IValue> value;
             if (type_name.empty())

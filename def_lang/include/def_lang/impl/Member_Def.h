@@ -23,7 +23,6 @@ public:
 
     std::string const& get_ui_name() const override;
     std::string const& get_ui_suffix() const override;
-    std::string const& get_ui_editor() const override;
 
 protected:
     Result<void> validate_attribute(IAttribute const& attribute);
@@ -33,7 +32,6 @@ private:
     std::shared_ptr<const IValue> m_default_value;
     std::string m_ui_name;
     std::string m_ui_suffix;
-    std::string m_ui_editor;
 };
 
 }

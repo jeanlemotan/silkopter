@@ -35,6 +35,12 @@ size_t Numeric_Type_Template<Traits>::get_decimals() const
 }
 
 template<typename Traits>
+bool Numeric_Type_Template<Traits>::is_hex() const
+{
+    return m_is_hex;
+}
+
+template<typename Traits>
 Result<void> Numeric_Type_Template<Traits>::validate_attribute_impl(IAttribute const& attribute)
 {
     if (attribute.get_name() == "min")
@@ -93,6 +99,23 @@ Result<void> Numeric_Type_Template<Traits>::validate_attribute_impl(IAttribute c
         else
         {
             return Error("Attribute '" + attribute.get_name() + "' has to be an int literal.");
+        }
+    }
+    else if (attribute.get_name() == "hex")
+    {
+        if (dynamic_cast<IName_Attribute const*>(&attribute))
+        {
+            if (std::is_floating_point<typename Traits::component_type>::value ||
+                    Traits::component_count > 1)
+            {
+                return Error("'" + attribute.get_name() + "' attribute is only for scalar integral types.");
+            }
+
+            m_is_hex = true;
+        }
+        else
+        {
+            return Error("Attribute '" + attribute.get_name() + "' doesn't support a value.");
         }
     }
     else

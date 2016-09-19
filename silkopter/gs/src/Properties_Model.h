@@ -29,7 +29,6 @@ public:
 
     struct Editor_Data
     {
-        std::string editor;
         std::string suffix;
         std::shared_ptr<ts::IValue> value;
     };
@@ -79,7 +78,7 @@ protected:
 
     struct Tree_Item : public std::enable_shared_from_this<Tree_Item>
 	{
-        Tree_Item(Properties_Model* model, const std::string& name, const std::string& suffix, const std::string& editor);
+        Tree_Item(Properties_Model* model, const std::string& name, const std::string& suffix);
         ~Tree_Item();
         void build_root(ts::IStruct_Value& struct_value);
         void build(std::shared_ptr<ts::IValue> value);
@@ -103,7 +102,6 @@ protected:
 
         std::string m_name;
         std::string m_suffix;
-        std::string m_editor;
         std::shared_ptr<ts::IValue> m_value;
 
 		//some items represent 2 values - a primary one (m_value) and this secondary one.

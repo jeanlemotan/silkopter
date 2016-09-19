@@ -5,6 +5,7 @@
 #include "def_lang/ep/Type_Template_EP.h"
 #include "def_lang/IAttribute.h"
 #include "def_lang/ILiteral_Attribute.h"
+#include "def_lang/IName_Attribute.h"
 
 namespace ts
 {
@@ -23,11 +24,13 @@ protected:
     typename Traits::fundamental_type const& get_min_value() const override;
     typename Traits::fundamental_type const& get_max_value() const override;
     size_t get_decimals() const override;
+    bool is_hex() const override;
 
 private:
     typename Traits::fundamental_type m_min_value = typename Traits::fundamental_type(Traits::min_value);
     typename Traits::fundamental_type m_max_value = typename Traits::fundamental_type(Traits::max_value);
     size_t m_decimals = 3;
+    bool m_is_hex = false;
 };
 
 }

@@ -5,10 +5,9 @@
 #include <QHBoxLayout>
 
 
-Optional_Value_Editor::Optional_Value_Editor(const Qualified_Value<ts::IOptional_Value>& qualified_value, std::string const& editor_str, std::string const& suffix_str, std::shared_ptr<Value_Editor_Factory> value_editor_factory)
+Optional_Value_Editor::Optional_Value_Editor(const Qualified_Value<ts::IOptional_Value>& qualified_value, std::string const& suffix_str, std::shared_ptr<Value_Editor_Factory> value_editor_factory)
     : m_value_editor_factory(value_editor_factory)
     , m_qualified_value(qualified_value)
-    , m_editor_str(editor_str)
     , m_suffix_str(suffix_str)
 {
     std::shared_ptr<const ts::IOptional_Value> value = m_qualified_value.get_const_value();
@@ -126,11 +125,11 @@ void Optional_Value_Editor::create_inner_editor()
     {
         if (m_qualified_value.get_mutable_value())
         {
-            m_inner_editor = m_value_editor_factory->create_editor(m_qualified_value.get_mutable_value()->get_value(), m_editor_str, m_suffix_str);
+            m_inner_editor = m_value_editor_factory->create_editor(m_qualified_value.get_mutable_value()->get_value(), m_suffix_str);
         }
         else
         {
-            m_inner_editor = m_value_editor_factory->create_editor(m_qualified_value.get_const_value()->get_value(), m_editor_str, m_suffix_str);
+            m_inner_editor = m_value_editor_factory->create_editor(m_qualified_value.get_const_value()->get_value(), m_suffix_str);
         }
 
         if (m_inner_editor)

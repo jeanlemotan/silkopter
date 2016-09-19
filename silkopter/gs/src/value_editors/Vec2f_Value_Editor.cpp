@@ -1,7 +1,7 @@
 #include "value_editors/Vec2f_Value_Editor.h"
 #include "value_editors/details/VecX_Value_Editor_Helper.h"
 
-Vec2f_Value_Editor::Vec2f_Value_Editor(const Qualified_Value<ts::IVec2f_Value>& qualified_value, std::string const& editor_str, std::string const& suffix_str)
+Vec2f_Value_Editor::Vec2f_Value_Editor(const Qualified_Value<ts::IVec2f_Value>& qualified_value, std::string const& suffix_str)
     : m_qualified_value(qualified_value)
 {
     std::shared_ptr<const ts::IVec2f_Type> type = m_qualified_value.get_const_value()->get_specialized_type();

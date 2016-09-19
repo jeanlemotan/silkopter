@@ -39,11 +39,6 @@ std::string const& Member_Def::get_ui_suffix() const
     return m_ui_suffix;
 }
 
-std::string const& Member_Def::get_ui_editor() const
-{
-    return m_ui_editor;
-}
-
 Result<void> Member_Def::validate_attribute(IAttribute const& attribute)
 {
     if (attribute.get_name() == "ui_name")
@@ -73,23 +68,6 @@ Result<void> Member_Def::validate_attribute(IAttribute const& attribute)
                 return Error("Attribute '" + attribute.get_name() + "' has to be a string.");
             }
             m_ui_suffix = value->get_value();
-            return success;
-        }
-        else
-        {
-            return Error("Attribute '" + attribute.get_name() + "' has to be a string literal.");
-        }
-    }
-    else if (attribute.get_name() == "ui_editor")
-    {
-        if (ILiteral_Attribute const* att = dynamic_cast<ILiteral_Attribute const*>(&attribute))
-        {
-            IString_Value const* value = dynamic_cast<IString_Value const*>(&att->get_value());
-            if (!value)
-            {
-                return Error("Attribute '" + attribute.get_name() + "' has to be a string.");
-            }
-            m_ui_editor = value->get_value();
             return success;
         }
         else

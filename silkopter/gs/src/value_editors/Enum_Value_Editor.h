@@ -9,7 +9,7 @@ class QComboBox;
 class Enum_Value_Editor : public IValue_Editor
 {
 public:
-    Enum_Value_Editor(const Qualified_Value<ts::IEnum_Value>& qualified_value, std::string const& editor_str, std::string const& suffix_str);
+    Enum_Value_Editor(const Qualified_Value<ts::IEnum_Value>& qualified_value, std::string const& suffix_str);
 	~Enum_Value_Editor();
 
     QWidget*	get_widget() override;

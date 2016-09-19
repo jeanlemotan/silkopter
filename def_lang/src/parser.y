@@ -75,6 +75,7 @@
 %token <float> TFLOAT_LITERAL "float literal"
 %token <double> TDOUBLE_LITERAL "double literal"
 %token <int64_t> TINTEGER_LITERAL "integer literal"
+%token <int64_t> THEX_LITERAL "hex literal"
 %token <std::string> TSTRING_LITERAL "string literal"
 
 %type <ts::ast::Node> top_level_declaration_list
@@ -145,6 +146,7 @@ top_level_declaration_list  : top_level_declaration
                             }
                             | top_level_declaration_list top_level_declaration
                             {
+                                $$ = ts::ast::Node(ts::ast::Node::Type::LIST, builder.get_location());
                                 $$.move_children_from(std::move($1));
                                 $$.add_child($2);
                             }
@@ -203,6 +205,7 @@ enum_body_item_list : enum_body_item
                     }
                     | enum_body_item_list enum_body_item
                     {
+                        $$ = ts::ast::Node(ts::ast::Node::Type::LIST, builder.get_location());
                         $$.move_children_from(std::move($1));
                         $$.add_child($2);
                     }
@@ -300,6 +303,7 @@ struct_body_declaration_list    : struct_body_declaration
                                 }
                                 | struct_body_declaration_list struct_body_declaration
                                 {
+                                    $$ = ts::ast::Node(ts::ast::Node::Type::LIST, builder.get_location());
                                     $$.move_children_from(std::move($1));
                                     $$.add_child($2);
                                 }
@@ -351,6 +355,7 @@ namespace_body_declaration_list : namespace_body_declaration
                                 }
                                 | namespace_body_declaration_list namespace_body_declaration
                                 {
+                                    $$ = ts::ast::Node(ts::ast::Node::Type::LIST, builder.get_location());
                                     $$.move_children_from(std::move($1));
                                     $$.add_child($2);
                                 }
@@ -441,12 +446,18 @@ attribute_body  : attribute
                 }
                 | attribute_body TCOMMA attribute
                 {
+                    $$ = ts::ast::Node(ts::ast::Node::Type::LIST, builder.get_location());
                     $$.move_children_from(std::move($1));
                     $$.add_child($3);
                 }
                 ;
 
-attribute   : identifier TEQUAL initializer
+attribute   : identifier
+            {
+                $$ = ts::ast::Node(ts::ast::Node::Type::ATTRIBUTE, builder.get_location());
+                $$.add_child($1);
+            }
+            | identifier TEQUAL initializer
             {
                 $$ = ts::ast::Node(ts::ast::Node::Type::ATTRIBUTE, builder.get_location());
                 $$.add_child($1);
@@ -535,6 +546,7 @@ template_argument_list  : template_argument
                         }
                         | template_argument_list TCOMMA template_argument
                         {
+                            $$ = ts::ast::Node(ts::ast::Node::Type::LIST, builder.get_location());
                             $$.move_children_from(std::move($1));
                             $$.add_child($3);
                         }
@@ -576,6 +588,12 @@ literal : TFLOAT_LITERAL
         {
             $$ = ts::ast::Node(ts::ast::Node::Type::LITERAL, builder.get_location());
             $$.add_attribute(ts::ast::Attribute("value", $1));
+        }
+        | THEX_LITERAL
+        {
+            $$ = ts::ast::Node(ts::ast::Node::Type::LITERAL, builder.get_location());
+            $$.add_attribute(ts::ast::Attribute("value", $1));
+            $$.add_attribute(ts::ast::Attribute("hex", true));
         }
         | TSTRING_LITERAL
         {

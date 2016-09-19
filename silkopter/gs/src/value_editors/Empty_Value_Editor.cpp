@@ -1,7 +1,7 @@
 #include "value_editors/Empty_Value_Editor.h"
 
 
-Empty_Value_Editor::Empty_Value_Editor(const Qualified_Value<ts::IValue>& qualified_value, std::string const& editor_str, std::string const& suffix_str)
+Empty_Value_Editor::Empty_Value_Editor(const Qualified_Value<ts::IValue>& qualified_value, std::string const& suffix_str)
     : m_qualified_value(qualified_value)
 {
 	m_editor = new QWidget();

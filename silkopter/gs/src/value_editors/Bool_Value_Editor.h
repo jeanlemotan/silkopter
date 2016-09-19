@@ -8,7 +8,7 @@ class QCheckBox;
 class Bool_Value_Editor : public IValue_Editor
 {
 public:
-    Bool_Value_Editor(const Qualified_Value<ts::IBool_Value>& qualified_value, std::string const& editor_str, std::string const& suffix_str);
+    Bool_Value_Editor(const Qualified_Value<ts::IBool_Value>& qualified_value, std::string const& suffix_str);
     ~Bool_Value_Editor();
 
     QWidget*	get_widget() override;

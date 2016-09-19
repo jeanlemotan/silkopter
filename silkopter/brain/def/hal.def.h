@@ -1358,7 +1358,7 @@ public:
 
 private:
   std::string m_bus;
-  uint8_t m_i2c_address = {104};
+  uint8_t m_i2c_address = {105};
   imu_rate_t m_imu_rate = {MPU9250_Descriptor::imu_rate_t::_1000};
   uint32_t m_magnetometer_rate = {100};
   uint32_t m_thermometer_rate = {10};
@@ -1896,6 +1896,7 @@ struct PCA9685_Descriptor : public INode_Descriptor
 {
 public:
   typedef uint32_t rate_t;
+  typedef uint8_t i2c_address_t;
   struct Channel
   {
   public:

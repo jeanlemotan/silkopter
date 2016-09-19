@@ -20,7 +20,6 @@ public:
 
     virtual std::string const& get_ui_name() const = 0;
     virtual std::string const& get_ui_suffix() const = 0;
-    virtual std::string const& get_ui_editor() const = 0;
 };
 
 }

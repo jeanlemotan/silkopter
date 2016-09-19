@@ -12,7 +12,7 @@ class Value_Editor_Factory;
 class Variant_Value_Editor : public IValue_Editor
 {
 public:
-    Variant_Value_Editor(const Qualified_Value<ts::IVariant_Value>& qualified_value, std::string const& editor_str, std::string const& suffix_str, std::shared_ptr<Value_Editor_Factory> value_editor_factory);
+    Variant_Value_Editor(const Qualified_Value<ts::IVariant_Value>& qualified_value, std::string const& suffix_str, std::shared_ptr<Value_Editor_Factory> value_editor_factory);
 	~Variant_Value_Editor();
 
     QWidget*	get_widget() override;
@@ -35,7 +35,6 @@ private:
     std::shared_ptr<IValue_Editor> m_inner_editor;
     bool m_read_only_override = false;
 
-    std::string m_editor_str;
     std::string m_suffix_str;
 };
 

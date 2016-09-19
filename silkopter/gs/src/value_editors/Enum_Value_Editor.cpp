@@ -3,7 +3,7 @@
 #include <QComboBox>
 
 
-Enum_Value_Editor::Enum_Value_Editor(const Qualified_Value<ts::IEnum_Value>& qualified_value, std::string const& editor_str, std::string const& suffix_str)
+Enum_Value_Editor::Enum_Value_Editor(const Qualified_Value<ts::IEnum_Value>& qualified_value, std::string const& suffix_str)
     : m_qualified_value(qualified_value)
 {
 	m_editor = new QComboBox();

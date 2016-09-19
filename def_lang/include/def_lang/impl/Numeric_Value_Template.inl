@@ -161,6 +161,18 @@ Result<std::string> Numeric_Value_Template<Traits>::get_ui_string() const
     {
         return Error("Unconstructed value");
     }
+
+    if (Traits::component_count == 1 &&
+            std::is_floating_point<typename Traits::component_type>::value == false &&
+            this->get_specialized_type()->is_hex())
+    {
+        char buf[32];
+        auto comp = detail::get_component(this->get_value(), 0);
+        bool is_negative = comp < 0;
+        sprintf(buf, "%s0x%x", is_negative ? "-" : "", static_cast<uint32_t>(std::abs(comp)));
+        return std::string(buf);
+    }
+
     return detail::to_string(this->get_value(), this->get_specialized_type()->get_decimals());
 }
 

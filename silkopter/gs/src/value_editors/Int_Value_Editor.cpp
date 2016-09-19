@@ -6,7 +6,7 @@
 #include <QHBoxLayout>
 
 
-Int_Value_Editor::Int_Value_Editor(const Qualified_Value<ts::IInt_Value>& qualified_value, std::string const& editor_str, std::string const& suffix_str)
+Int_Value_Editor::Int_Value_Editor(const Qualified_Value<ts::IInt_Value>& qualified_value, std::string const& suffix_str)
     : m_qualified_value(qualified_value)
 {
     std::shared_ptr<const ts::IInt_Type> type = m_qualified_value.get_const_value()->get_specialized_type();
@@ -16,7 +16,7 @@ Int_Value_Editor::Int_Value_Editor(const Qualified_Value<ts::IInt_Value>& qualif
 	layout->setMargin(0);
 	layout->setSpacing(0);
 
-    if (editor_str == "hex")
+    if (type->is_hex())
     {
         m_spinbox = new HexSpinBox(m_editor);
     }
