@@ -114,12 +114,20 @@ protected:
 
     struct Telemetry_Data
     {
+        size_t version = 0;
+        q::Clock::duration crt_total_duration;
+        q::Clock::duration crt_max_total_duration;
+
         q::Clock::duration total_duration;
+        q::Clock::duration max_total_duration;
         float rate = 0;
         struct Node
         {
+            q::Clock::duration crt_process_duration;
+            q::Clock::duration crt_max_process_duration;
+
             q::Clock::duration process_duration;
-            float process_percentage = 0;
+            q::Clock::duration max_process_duration;
         };
         std::map<std::string, Node> nodes;
     };
@@ -148,7 +156,7 @@ private:
 
     q::Clock::time_point m_last_process_tp = q::Clock::now();
 
-
+    q::Clock::time_point m_last_telemetry_data_latch_tp = q::Clock::now();
     Telemetry_Data m_telemetry_data;
 };
 

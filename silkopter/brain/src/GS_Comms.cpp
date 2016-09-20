@@ -201,16 +201,19 @@ void GS_Comms::gather_telemetry_data()
 
 
     //pack UAV telemetry
-    if (m_internal_telemetry_data.is_enabled)
+    HAL::Telemetry_Data const& telemetry_data = m_hal.get_telemetry_data();
+    if (m_internal_telemetry_data.is_enabled && m_internal_telemetry_data.version != telemetry_data.version)
     {
-        HAL::Telemetry_Data const& telemetry_data = m_hal.get_telemetry_data();
-
+        m_internal_telemetry_data.version = telemetry_data.version;
         m_internal_telemetry_data.sample_count++;
         size_t off = m_internal_telemetry_data.data.size();
 
         auto dt = static_cast<uint32_t>(std::chrono::duration_cast<std::chrono::microseconds>(telemetry_data.total_duration).count());
         util::serialization::serialize(m_internal_telemetry_data.data, dt, off);
-        util::serialization::serialize(m_internal_telemetry_data.data, telemetry_data.rate, off);
+
+        dt = static_cast<uint32_t>(std::chrono::duration_cast<std::chrono::microseconds>(telemetry_data.max_total_duration).count());
+        util::serialization::serialize(m_internal_telemetry_data.data, dt, off);
+
         util::serialization::serialize(m_internal_telemetry_data.data, static_cast<uint32_t>(telemetry_data.nodes.size()), off);
 
         for (auto const& nt: telemetry_data.nodes)
@@ -219,9 +222,12 @@ void GS_Comms::gather_telemetry_data()
             auto const& node_telemetry_data = nt.second;
 
             util::serialization::serialize(m_internal_telemetry_data.data, node_name, off);
+
             auto dt = static_cast<uint32_t>(std::chrono::duration_cast<std::chrono::microseconds>(node_telemetry_data.process_duration).count());
             util::serialization::serialize(m_internal_telemetry_data.data, dt, off);
-            util::serialization::serialize(m_internal_telemetry_data.data, node_telemetry_data.process_percentage, off);
+
+            dt = static_cast<uint32_t>(std::chrono::duration_cast<std::chrono::microseconds>(node_telemetry_data.max_process_duration).count());
+            util::serialization::serialize(m_internal_telemetry_data.data, dt, off);
         }
     }
 }
@@ -249,6 +255,7 @@ void GS_Comms::pack_telemetry_data()
         if (!t.data.empty() && t.sample_count > 0)
         {
             m_telemetry_channel.begin_pack();
+            m_telemetry_channel.pack_param(std::string("#hal"));
             m_telemetry_channel.pack_param(t.sample_count);
             m_telemetry_channel.pack_data(t.data.data(), t.data.size());
             m_telemetry_channel.end_pack();
@@ -704,29 +711,36 @@ void GS_Comms::handle_req(gs_comms::setup::Set_Stream_Telemetry_Enabled_Req cons
     std::string const& stream_path = req.get_stream_path();
     bool wants_enabled = req.get_enabled();
 
-    std::shared_ptr<stream::IStream> stream = m_hal.get_stream_registry().find_by_name<stream::IStream>(stream_path);
-    if (!stream)
+    if (stream_path == "#hal")
     {
-        response = make_error_response(req.get_req_id(), "Cannot find stream '{}'", stream_path);
-        serialize_and_send(SETUP_CHANNEL, response);
-        return;
+        m_internal_telemetry_data.is_enabled = wants_enabled;
     }
-
-    auto it = std::find_if(m_stream_telemetry_data.begin(), m_stream_telemetry_data.end(), [&stream_path](Stream_Telemetry_Data const& st) { return st.stream_path == stream_path; });
-    bool is_enabled = (it != m_stream_telemetry_data.end());
-    if (wants_enabled != is_enabled)
+    else
     {
-        if (wants_enabled)
+        std::shared_ptr<stream::IStream> stream = m_hal.get_stream_registry().find_by_name<stream::IStream>(stream_path);
+        if (!stream)
         {
-            Stream_Telemetry_Data std;
-            std.stream_path = stream_path;
-            std.stream_type = stream->get_type();
-            std.stream = stream;
-            m_stream_telemetry_data.push_back(std);
+            response = make_error_response(req.get_req_id(), "Cannot find stream '{}'", stream_path);
+            serialize_and_send(SETUP_CHANNEL, response);
+            return;
         }
-        else
+
+        auto it = std::find_if(m_stream_telemetry_data.begin(), m_stream_telemetry_data.end(), [&stream_path](Stream_Telemetry_Data const& st) { return st.stream_path == stream_path; });
+        bool is_enabled = (it != m_stream_telemetry_data.end());
+        if (wants_enabled != is_enabled)
         {
-            m_stream_telemetry_data.erase(it);
+            if (wants_enabled)
+            {
+                Stream_Telemetry_Data std;
+                std.stream_path = stream_path;
+                std.stream_type = stream->get_type();
+                std.stream = stream;
+                m_stream_telemetry_data.push_back(std);
+            }
+            else
+            {
+                m_stream_telemetry_data.erase(it);
+            }
         }
     }
 

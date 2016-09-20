@@ -150,7 +150,8 @@ HEADERS += \
     ../../../libs/utils/comms/Channel.h \
     ../../../libs/utils/comms/RCP.h \
     ../../../libs/utils/comms/UDP_Socket.h \
-    ../../src/QHexSpinBox.h
+    ../../src/QHexSpinBox.h \
+    ../../src/Internal_Telemetry_Widget.h
 
 SOURCES += \
     ../../src/GS.cpp \
@@ -218,7 +219,8 @@ SOURCES += \
     ../../src/stream_viewers/Voltage_Stream_Viewer_Widget.cpp \
     ../../src/stream_viewers/video/Video_Decoder.cpp \
     ../../../libs/utils/comms/RCP.cpp \
-    ../../../libs/utils/comms/UDP_Socket.cpp
+    ../../../libs/utils/comms/UDP_Socket.cpp \
+    ../../src/Internal_Telemetry_Widget.cpp
 
 FORMS += \
     ../../src/GS.ui \

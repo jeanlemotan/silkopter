@@ -124,6 +124,7 @@ private:
     void do_magnetic_field_calibration(Node& node, size_t output_idx);
     void do_angular_velocity_calibration(Node& node, size_t output_idx);
 
+    void show_internal_telementry();
 
     void show_context_menu(QGraphicsSceneMouseEvent*);
     void show_port_context_menu(QGraphicsSceneMouseEvent* event, QNEPort* port);

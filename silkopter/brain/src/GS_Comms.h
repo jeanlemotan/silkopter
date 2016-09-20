@@ -73,6 +73,7 @@ private:
 
     struct Telemetry
     {
+        size_t version = 0;
         bool is_enabled = false;
         uint32_t sample_count = 0;
         std::vector<uint8_t> data;

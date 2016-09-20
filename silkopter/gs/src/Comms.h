@@ -186,6 +186,23 @@ public:
 
     boost::signals2::signal<void()> sig_stream_telemetry_done;
 
+
+    struct Internal_Telementry_Sample
+    {
+        q::Clock::duration total_duration;
+        q::Clock::duration max_total_duration;
+        struct Node
+        {
+            std::string name;
+            q::Clock::duration duration;
+            q::Clock::duration max_duration;
+        };
+        std::vector<Node> nodes;
+    };
+
+    boost::signals2::signal<void(std::vector<Internal_Telementry_Sample> const&)> sig_internal_telemetry_samples_available;
+
+
     //boost::signals2::signal<void(IStream_Data const&)> sig_stream_data_received;
 
 
@@ -228,6 +245,9 @@ private:
     Telemetry_Channel m_telemetry_channel;
     void handle_telemetry_stream();
     std::map<std::string, size_t> m_stream_telemetry_ref_count;
+
+    void handle_internal_telemetry_stream();
+    std::vector<Internal_Telementry_Sample> m_internal_telemetry_samples;
 
     bool handle_uav_descriptor(std::string const& serialized_data);
     ts::Result<Node> handle_node_data(gs_comms::setup::Node_Data const& node_data);

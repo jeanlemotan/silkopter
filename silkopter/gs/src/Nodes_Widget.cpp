@@ -27,6 +27,7 @@
 #include "Magnetic_Field_Calibration_Wizard.h"
 
 #include "Stream_Viewer_Window.h"
+#include "Internal_Telemetry_Widget.h"
 
 #include <QVBoxLayout>
 #include <QMessageBox>
@@ -716,6 +717,13 @@ void Nodes_Widget::show_context_menu(QGraphicsSceneMouseEvent* event)
         }
     }
 
+    menu.addSeparator();
+    QAction* internal_telemetry = menu.addAction(QIcon(":/icons/ui/graph.png"), "Show Internal Telemetry");
+    connect(internal_telemetry, &QAction::triggered, [this](bool)
+    {
+        show_internal_telementry();
+    });
+
     menu.exec(event->screenPos());
 }
 
@@ -1019,4 +1027,20 @@ void Nodes_Widget::load_editor_data()
 void Nodes_Widget::save_editor_data()
 {
 
+}
+
+void Nodes_Widget::show_internal_telementry()
+{
+    Internal_Telemetry_Widget* widget = new Internal_Telemetry_Widget();
+    widget->setAttribute(Qt::WA_DeleteOnClose);
+
+    std::vector<std::string> node_names;
+    node_names.reserve(m_nodes.size());
+    for (auto node: m_nodes)
+    {
+        node_names.push_back(node.first);
+    }
+
+    widget->init(*m_comms, node_names);
+    widget->show();
 }

@@ -6,7 +6,7 @@
 #include "ui_Angular_Velocity_Calibration_Wizard_Collect.h"
 #include "ui_Angular_Velocity_Calibration_Wizard_Done.h"
 
-constexpr std::chrono::seconds DATA_COLLECTION_DURATION(1);
+constexpr std::chrono::seconds DATA_COLLECTION_DURATION(10);
 
 Angular_Velocity_Calibration_Wizard::Angular_Velocity_Calibration_Wizard(silk::Comms& comms,
                                                                  std::string const& node_name,

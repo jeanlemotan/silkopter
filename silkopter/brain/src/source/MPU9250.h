@@ -93,7 +93,6 @@ private:
     std::shared_ptr<hal::MPU9250_Config> m_config;
 
     mutable std::vector<uint8_t> m_fifo_buffer;
-    size_t m_fifo_sample_size = 999999;
 
     uint8_t m_user_ctrl_value = 0;
 

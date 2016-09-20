@@ -331,7 +331,7 @@ void HAL::save_settings()
     //autojsoncxx::to_pretty_json_file("sensors_pi.cfg", config);
 }
 
-auto HAL::get_telemetry_data() const -> Telemetry_Data const&
+HAL::Telemetry_Data const& HAL::get_telemetry_data() const
 {
     return m_telemetry_data;
 }
@@ -1199,9 +1199,6 @@ void HAL::process()
 //    }
 
     auto now = q::Clock::now();
-    auto dt = now - m_last_process_tp;
-    m_telemetry_data.rate = dt.count() > 0 ? 1.f / std::chrono::duration<float>(dt).count() : 0.f;
-
 
     auto total_start = now;
     auto node_start = total_start;
@@ -1211,25 +1208,45 @@ void HAL::process()
         n.ptr->process();
 
         auto now = q::Clock::now();
-        m_telemetry_data.nodes[n.name].process_duration = now - node_start;
+        Telemetry_Data::Node& node_telemetry = m_telemetry_data.nodes[n.name];
+        node_telemetry.crt_process_duration += now - node_start;
+        node_telemetry.crt_max_process_duration = std::max(node_telemetry.crt_max_process_duration, now - node_start);
         node_start = now;
     }
 
-    m_telemetry_data.total_duration = q::Clock::now() - total_start;
-    //calculate percentages
-    for (auto& nt: m_telemetry_data.nodes)
     {
-        float p = std::chrono::duration<float>(nt.second.process_duration).count() / std::chrono::duration<float>(m_telemetry_data.total_duration).count();
-        nt.second.process_percentage = math::lerp(nt.second.process_percentage, p, 0.1f);
+        auto dt = q::Clock::now() - total_start;
+        m_telemetry_data.crt_total_duration += dt;
+        m_telemetry_data.crt_max_total_duration = std::max(m_telemetry_data.crt_max_total_duration, dt);
     }
 
-    //display time
-//    for (auto const& n: m_nodes.get_all())
-//    {
-//        auto& nt = m_telemetry_data.nodes[n.name];
-//        QLOGI("{.2}%, {}/{} -> {}", nt.process_percentage*100.f, nt.process_duration, m_telemetry_data.total_duration, n.name);
-//    }
 
+    {
+        auto now = q::Clock::now();
+        auto dt = now - m_last_telemetry_data_latch_tp;
+        if (dt >= std::chrono::milliseconds(100))
+        {
+            m_last_telemetry_data_latch_tp = now;
+            m_telemetry_data.version++;
+
+            float mu = 1.f / std::chrono::duration<float>(dt).count();
+            m_telemetry_data.total_duration = std::chrono::duration_cast<q::Clock::duration>(m_telemetry_data.crt_total_duration * mu);
+            m_telemetry_data.max_total_duration = std::chrono::duration_cast<q::Clock::duration>(m_telemetry_data.crt_max_total_duration);
+
+            m_telemetry_data.crt_total_duration = q::Clock::duration(0);
+            m_telemetry_data.crt_max_total_duration = q::Clock::duration(0);
+
+            for (auto& pair: m_telemetry_data.nodes)
+            {
+                Telemetry_Data::Node& node = pair.second;
+                node.process_duration = std::chrono::duration_cast<q::Clock::duration>(node.crt_process_duration * mu);
+                node.max_process_duration = std::chrono::duration_cast<q::Clock::duration>(node.crt_max_process_duration);
+
+                node.crt_process_duration = q::Clock::duration(0);
+                node.crt_max_process_duration = q::Clock::duration(0);
+            }
+        }
+    }
 }
 
 

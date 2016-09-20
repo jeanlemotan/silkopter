@@ -745,9 +745,21 @@ void Comms::handle_telemetry_stream()
     stream::Type stream_type;
     uint32_t sample_count = 0;
     bool ok = m_telemetry_channel.begin_unpack() &&
-              m_telemetry_channel.unpack_param(stream_path) &&
-              m_telemetry_channel.unpack_param(stream_type) &&
-              m_telemetry_channel.unpack_param(sample_count);
+              m_telemetry_channel.unpack_param(stream_path);
+    if (!ok)
+    {
+        QLOGE("Failed to unpack stream telemetry");
+        return;
+    }
+
+    if (stream_path == "#hal")
+    {
+        handle_internal_telemetry_stream();
+        return;
+    }
+
+    ok = m_telemetry_channel.unpack_param(stream_type) &&
+         m_telemetry_channel.unpack_param(sample_count);
     if (!ok)
     {
         QLOGE("Failed to unpack stream telemetry");
@@ -772,6 +784,53 @@ void Comms::handle_telemetry_stream()
         telemetry_stream->stream_path = stream_path;
         sig_telemetry_samples_available(*telemetry_stream);
     }
+}
+
+void Comms::handle_internal_telemetry_stream()
+{
+    auto& channel = m_telemetry_channel;
+
+    uint32_t sample_count = 0;
+    if (!channel.unpack_param(sample_count))
+    {
+        QLOGE("Failed to unpack stream telemetry");
+        return;
+    }
+
+    m_internal_telemetry_samples.resize(sample_count);
+    for (uint32_t i = 0; i < sample_count; i++)
+    {
+        Internal_Telementry_Sample& sample = m_internal_telemetry_samples[i];
+        uint32_t micros;
+        uint32_t max_micros;
+        uint32_t node_count;
+        if (!channel.unpack_param(micros) ||
+            !channel.unpack_param(max_micros) ||
+            !channel.unpack_param(node_count))
+        {
+            QLOGE("Error unpacking samples!!!");
+            return;
+        }
+        sample.total_duration = std::chrono::microseconds(micros);
+        sample.max_total_duration = std::chrono::microseconds(max_micros);
+        sample.nodes.resize(node_count);
+
+        for (uint32_t n = 0; n < node_count; n++)
+        {
+            Internal_Telementry_Sample::Node& node = sample.nodes[n];
+            if (!channel.unpack_param(node.name) ||
+                !channel.unpack_param(micros) ||
+                !channel.unpack_param(max_micros))
+            {
+                QLOGE("Error unpacking samples!!!");
+                return;
+            }
+            node.duration = std::chrono::microseconds(micros);
+            node.max_duration = std::chrono::microseconds(max_micros);
+        }
+    }
+
+    sig_internal_telemetry_samples_available(m_internal_telemetry_samples);
 }
 
 //void Comms::handle_multirotor_state()

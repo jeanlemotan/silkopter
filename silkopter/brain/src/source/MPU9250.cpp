@@ -303,6 +303,9 @@ constexpr size_t CONFIG_REGISTER_SPEED = 100000;
 constexpr size_t MISC_REGISTER_SPEED = 1000000;
 constexpr size_t SENSOR_REGISTER_SPEED = 1000000;
 
+constexpr uint8_t FIFO_STREAMS = MPU_BIT_GYRO_XO_UT | MPU_BIT_GYRO_YO_UT | MPU_BIT_GYRO_ZO_UT | MPU_BIT_ACCEL;
+constexpr uint8_t FIFO_SAMPLE_SIZE = 12;
+
 
 MPU9250::MPU9250(HAL& hal)
     : m_hal(hal)
@@ -652,7 +655,7 @@ ts::Result<void> MPU9250::init()
         div = 0;//8000 / m_descriptor->acceleration_angular_velocity_rate - 1;
     }
 
-    res &= mpu_write_u8(buses, MPU_REG_CONFIG, g_dlpf, CONFIG_REGISTER_SPEED);
+    res &= mpu_write_u8(buses, MPU_REG_CONFIG, g_dlpf | MPU_BIT_CONFIG_FIFO_MODE, CONFIG_REGISTER_SPEED);
     std::this_thread::sleep_for(std::chrono::milliseconds(5));
 
     res &= mpu_write_u8(buses, MPU_REG_SMPLRT_DIV, div, CONFIG_REGISTER_SPEED);
@@ -661,8 +664,7 @@ ts::Result<void> MPU9250::init()
     res &= mpu_write_u8(buses, MPU_REG_ACCEL_CONFIG2, MPU_BIT_FIFO_SIZE_4096 | 0x8 | a_dlpf, CONFIG_REGISTER_SPEED);
     std::this_thread::sleep_for(std::chrono::milliseconds(5));
 
-    res &= mpu_write_u8(buses, MPU_REG_FIFO_EN, MPU_BIT_GYRO_XO_UT | MPU_BIT_GYRO_YO_UT | MPU_BIT_GYRO_ZO_UT | MPU_BIT_ACCEL, CONFIG_REGISTER_SPEED);
-    m_fifo_sample_size = 12;
+    res &= mpu_write_u8(buses, MPU_REG_FIFO_EN, FIFO_STREAMS, CONFIG_REGISTER_SPEED);
 
     m_user_ctrl_value = MPU_BIT_FIFO_EN;
     if (buses.i2c)
@@ -923,7 +925,7 @@ void MPU9250::reset_fifo(Buses& buses)
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
     mpu_write_u8(buses, MPU_REG_USER_CTRL, m_user_ctrl_value | MPU_BIT_FIFO_RST, CONFIG_REGISTER_SPEED);
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
-    mpu_write_u8(buses, MPU_REG_FIFO_EN, MPU_BIT_GYRO_XO_UT | MPU_BIT_GYRO_YO_UT | MPU_BIT_GYRO_ZO_UT | MPU_BIT_ACCEL, CONFIG_REGISTER_SPEED);
+    mpu_write_u8(buses, MPU_REG_FIFO_EN, FIFO_STREAMS, CONFIG_REGISTER_SPEED);
 }
 
 template<class Calibration_Data>
@@ -1019,7 +1021,7 @@ void MPU9250::process()
    // LOG_INFO("{.2}b/ms", xxx);
 
     //uint16_t fc2 = 0;
-    if (res && fifo_count >= m_fifo_sample_size)
+    if (res && fifo_count >= FIFO_SAMPLE_SIZE)
     {
         if (fifo_count >= 4000)
         {
@@ -1029,8 +1031,8 @@ void MPU9250::process()
         }
         else
         {
-            auto sample_count = fifo_count / m_fifo_sample_size;
-            auto to_read = sample_count * m_fifo_sample_size;
+            auto sample_count = fifo_count / FIFO_SAMPLE_SIZE;
+            auto to_read = sample_count * FIFO_SAMPLE_SIZE;
             QASSERT(sample_count >= 1);
 
             m_fifo_buffer.resize(to_read);
@@ -1054,40 +1056,54 @@ void MPU9250::process()
                 auto acc_dt = m_acceleration->get_dt();
                 auto av_dt = m_angular_velocity->get_dt();
 
-                auto* data = m_fifo_buffer.data();
+                uint8_t const* data = m_fifo_buffer.data();
                 for (size_t i = 0; i < sample_count; i++)
                 {
-                    int16_t x = static_cast<int16_t>((data[0] << 8) | data[1]); data += 2;
-                    int16_t y = static_cast<int16_t>((data[0] << 8) | data[1]); data += 2;
-                    int16_t z = static_cast<int16_t>((data[0] << 8) | data[1]); data += 2;
-
-                    if (m_acceleration->get_tp() > now + acc_dt*k_max_sample_difference)
+                    if (FIFO_STREAMS & MPU_BIT_SLV2)
                     {
-                        m_stats.acc.skipped++;
+                        data += 2;
                     }
-                    else
+                    if (FIFO_STREAMS & MPU_BIT_ACCEL)
                     {
-                        math::vec3f value(x, y, z);
-                        value = math::transform(m_imu_rotation, value);
-                        value = value * m_acceleration_scale - m_acceleration_bias;
-                        m_acceleration->push_sample(value, true);
+                        int16_t x = static_cast<int16_t>((data[0] << 8) | data[1]); data += 2;
+                        int16_t y = static_cast<int16_t>((data[0] << 8) | data[1]); data += 2;
+                        int16_t z = static_cast<int16_t>((data[0] << 8) | data[1]); data += 2;
+
+                        if (m_acceleration->get_tp() > now + acc_dt*k_max_sample_difference)
+                        {
+                            m_stats.acc.skipped++;
+                        }
+                        else
+                        {
+                            math::vec3f value(x, y, z);
+                            value = math::transform(m_imu_rotation, value);
+                            value = value * m_acceleration_scale - m_acceleration_bias;
+                            m_acceleration->push_sample(value, true);
+                        }
                     }
 
-                    x = static_cast<int16_t>((data[0] << 8) | data[1]); data += 2;
-                    y = static_cast<int16_t>((data[0] << 8) | data[1]); data += 2;
-                    z = static_cast<int16_t>((data[0] << 8) | data[1]); data += 2;
+                    if (FIFO_STREAMS & MPU_BIT_GYRO_XO_UT)
+                    {
+                        int16_t x = static_cast<int16_t>((data[0] << 8) | data[1]); data += 2;
+                        int16_t y = static_cast<int16_t>((data[0] << 8) | data[1]); data += 2;
+                        int16_t z = static_cast<int16_t>((data[0] << 8) | data[1]); data += 2;
 
-                    if (m_angular_velocity->get_tp() > now + av_dt*k_max_sample_difference)
-                    {
-                        m_stats.av.skipped++;
+                        if (m_angular_velocity->get_tp() > now + av_dt*k_max_sample_difference)
+                        {
+                            m_stats.av.skipped++;
+                        }
+                        else
+                        {
+                            math::vec3f value(x, y, z);
+                            value = value * m_angular_velocity_sensor_scale;
+                            value = math::transform(m_imu_rotation, value);
+                            value = value - m_angular_velocity_bias;
+                            m_angular_velocity->push_sample(value, true);
+                        }
                     }
-                    else
+                    if (FIFO_STREAMS & MPU_BIT_TEMP_FIFO_EN)
                     {
-                        math::vec3f value(x, y, z);
-                        value = value * m_angular_velocity_sensor_scale;
-                        value = math::transform(m_imu_rotation, value);
-                        value = value - m_angular_velocity_bias;
-                        m_angular_velocity->push_sample(value, true);
+                        data += 2;
                     }
 
 //                    if (math::length(m_samples.angular_velocity[i]) > 1.f)
