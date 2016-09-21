@@ -39,6 +39,11 @@ ts::Result<void> Motor_Mixer::init()
         return make_error("No multirotor properties found");
     }
 
+    if (multirotor_properties->get_motors().empty())
+    {
+        return make_error("No motors found");
+    }
+
     //check symmetry
     math::vec3f center;
     math::vec3f torque;

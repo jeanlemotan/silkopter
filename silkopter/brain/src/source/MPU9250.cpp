@@ -1023,7 +1023,7 @@ void MPU9250::process()
     //uint16_t fc2 = 0;
     if (res && fifo_count >= FIFO_SAMPLE_SIZE)
     {
-        if (fifo_count >= 4000)
+        if (fifo_count > 4000)
         {
             QLOGW("Resetting FIFO: {}", fifo_count);
             reset_fifo(buses);
@@ -1059,10 +1059,6 @@ void MPU9250::process()
                 uint8_t const* data = m_fifo_buffer.data();
                 for (size_t i = 0; i < sample_count; i++)
                 {
-                    if (FIFO_STREAMS & MPU_BIT_SLV2)
-                    {
-                        data += 2;
-                    }
                     if (FIFO_STREAMS & MPU_BIT_ACCEL)
                     {
                         int16_t x = static_cast<int16_t>((data[0] << 8) | data[1]); data += 2;
@@ -1080,6 +1076,11 @@ void MPU9250::process()
                             value = value * m_acceleration_scale - m_acceleration_bias;
                             m_acceleration->push_sample(value, true);
                         }
+                    }
+
+                    if (FIFO_STREAMS & MPU_BIT_TEMP_FIFO_EN)
+                    {
+                        data += 2;
                     }
 
                     if (FIFO_STREAMS & MPU_BIT_GYRO_XO_UT)
@@ -1101,7 +1102,8 @@ void MPU9250::process()
                             m_angular_velocity->push_sample(value, true);
                         }
                     }
-                    if (FIFO_STREAMS & MPU_BIT_TEMP_FIFO_EN)
+
+                    if (FIFO_STREAMS & MPU_BIT_SLV2)
                     {
                         data += 2;
                     }

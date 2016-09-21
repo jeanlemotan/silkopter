@@ -31,7 +31,7 @@ public:
     virtual std::vector<Motor> const& get_motors() const = 0;
 
 protected:
-    std::vector<Motor> create_motors(size_t rows, size_t columns, bool plus_configuration);
+    static std::vector<Motor> create_motors(size_t arm_count, float radius, bool plus_config, bool double_config);
 };
 
 

@@ -23,7 +23,7 @@ ts::Result<void> Quad_Multirotor_Properties::init(hal::Quad_Multirotor_Descripto
         m_moment_of_inertia = (1.f / 12.f) * m_mass * (3.f * math::square(m_radius) + math::square(m_height));
     }
 
-    m_motors = create_motors(4, 1, descriptor.get_plus_configuration());
+    m_motors = create_motors(4, m_radius, descriptor.get_plus_configuration(), false);
 
     return ts::success;
 }
