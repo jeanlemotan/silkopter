@@ -13,6 +13,9 @@
 
 #include <QtGui/QOpenGLTexture>
 
+#include "Sticks_ADS1115.h"
+#include "Stick_Actuators_Throttle_DRV883x.h"
+
 //boost::asio::io_service s_async_io_service(4);
 
 silk::Comms s_comms;
@@ -179,6 +182,14 @@ int main(int argc, char *argv[])
     q::Clock::time_point last_tp = q::Clock::now();
     size_t process_frames = 0;
 
+    silk::Sticks_ADS1115 sticks;
+    auto res = sticks.init();
+    QASSERT(res == ts::success);
+
+    silk::Stick_Actuators_Throttle_DRV883x stick_actuators(sticks);
+    res = stick_actuators.init();
+    QASSERT(res == ts::success);
+
     while (true)
     {
         view.update();
@@ -195,6 +206,11 @@ int main(int argc, char *argv[])
             process_frames = 0;
             render_frames = 0;
         }
+
+        stick_actuators.set_target_throttle(sticks.get_yaw());
+
+        sticks.process();
+        stick_actuators.process();
 
         std::this_thread::sleep_for(std::chrono::microseconds(1));
     }

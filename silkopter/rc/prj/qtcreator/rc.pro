@@ -172,7 +172,12 @@ HEADERS += \
     ../../../libs/utils/hw/radiotap/ieee80211_radiotap.h \
     ../../../libs/utils/hw/radiotap/radiotap.h \
     ../../../libs/utils/comms/Video_Streamer.h \
-    ../../../libs/utils/comms/fec.h
+    ../../../libs/utils/comms/fec.h \
+    ../../src/ISticks.h \
+    ../../../libs/utils/hw/I2C_Dev.h \
+    ../../src/Sticks_ADS1115.h \
+    ../../src/IStick_Actuators.h \
+    ../../src/Stick_Actuators_Throttle_DRV883x.h
 
 SOURCES += \
     ../../src/main.cpp \
@@ -200,7 +205,10 @@ SOURCES += \
     ../../../libs/utils/hw/SPI_Dev.cpp \
     ../../../libs/utils/hw/radiotap/radiotap.cpp \
     ../../../libs/utils/comms/Video_Streamer.cpp \
-    ../../../libs/utils/comms/fec.cpp
+    ../../../libs/utils/comms/fec.cpp \
+    ../../src/Sticks_ADS1115.cpp \
+    ../../../libs/utils/hw/I2C_Dev.cpp \
+    ../../src/Stick_Actuators_Throttle_DRV883x.cpp
 
 DISTFILES += \
     ../../src/node.png \
