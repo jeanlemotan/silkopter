@@ -177,7 +177,12 @@ HEADERS += \
     ../../../libs/utils/hw/I2C_Dev.h \
     ../../src/Sticks_ADS1115.h \
     ../../src/IStick_Actuators.h \
-    ../../src/Stick_Actuators_Throttle_DRV883x.h
+    ../../src/Stick_Actuators_Throttle_DRV883x.h \
+    ../../src/IRotary_Encoder.h \
+    ../../src/ISwitch.h \
+    ../../src/Rotary_Encoder_PIGPIO.h \
+    ../../src/Switch_PIGPIO.h \
+    ../../src/IInput_Device.h
 
 SOURCES += \
     ../../src/main.cpp \
@@ -208,7 +213,9 @@ SOURCES += \
     ../../../libs/utils/comms/fec.cpp \
     ../../src/Sticks_ADS1115.cpp \
     ../../../libs/utils/hw/I2C_Dev.cpp \
-    ../../src/Stick_Actuators_Throttle_DRV883x.cpp
+    ../../src/Stick_Actuators_Throttle_DRV883x.cpp \
+    ../../src/Switch_PIGPIO.cpp \
+    ../../src/Rotary_Encoder_PIGPIO.cpp
 
 DISTFILES += \
     ../../src/node.png \

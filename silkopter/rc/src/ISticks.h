@@ -1,9 +1,11 @@
 #pragma once
 
+#include "IInput_Device.h"
+
 namespace silk
 {
 
-class ISticks
+class ISticks : public IInput_Device
 {
 public:
     virtual ~ISticks() = default;
@@ -12,7 +14,6 @@ public:
     virtual float get_pitch() const = 0;
     virtual float get_roll() const = 0;
     virtual float get_throttle() const = 0;
-    virtual void process() = 0;
 };
 
 }
