@@ -24,19 +24,35 @@ class IMultirotor_State : public IScalar_Stream<Semantic::MULTIROTOR_STATE>
 public:
     typedef std::false_type can_be_filtered_t;
 
+    typedef IMultirotor_Commands::Mode Mode;
+
     struct Value
     {
-        q::Clock::time_point time_point;
-        IBattery_State::Sample battery_state;
-        IFrame::Sample frame;
-        IECEF_Linear_Acceleration::Sample linear_acceleration;
-        IECEF_Position::Sample home_position;
-        IECEF_Position::Sample position;
-        IECEF_Velocity::Sample velocity;
-        IProximity::Sample proximity;
-        IFloat::Sample thrust;
+//        q::Clock::time_point time_point;
+//        IBattery_State::Sample battery_state;
+//        IFrame::Sample frame;
+//        IECEF_Linear_Acceleration::Sample linear_acceleration;
+//        IECEF_Position::Sample home_position;
+//        IECEF_Position::Sample position;
+//        IECEF_Velocity::Sample velocity;
+//        IProximity::Sample proximity;
+//        IFloat::Sample thrust;
 
-        IMultirotor_Commands::Value commands;
+//        IMultirotor_Commands::Value commands;
+        struct Battery_State
+        {
+            float charge_used = 0; // Amperes-Hour (Ah)
+            float average_voltage = 0; // Volts, averaged over one second
+            float average_current = 0; // Amperes, averaged over one second
+            float capacity_left = 0; //0 is Empty, 1 is Full
+        } battery_state;
+
+        math::quatf local_frame; //local space to enu space
+        double longitude = 0;
+        double latitude = 0;
+        math::vec3f enu_velocity;
+
+        Mode mode;
     };
 
     typedef stream::Sample<Value>     Sample;
@@ -59,36 +75,158 @@ namespace serialization
 
 template<> inline void serialize(Buffer_t& buffer, silk::stream::IMultirotor_State::Value const& value, size_t& off)
 {
-    serialize(buffer, value.time_point.time_since_epoch().count(), off);
-    serialize(buffer, value.battery_state, off);
-    serialize(buffer, value.frame, off);
-    serialize(buffer, value.linear_acceleration, off);
-    serialize(buffer, value.position, off);
-    serialize(buffer, value.home_position, off);
-    serialize(buffer, value.velocity, off);
-    serialize(buffer, value.proximity, off);
-    serialize(buffer, value.thrust, off);
-    serialize(buffer, value.commands, off);
+//    serialize(buffer, value.time_point.time_since_epoch().count(), off);
+//    serialize(buffer, value.battery_state, off);
+//    serialize(buffer, value.frame, off);
+//    serialize(buffer, value.linear_acceleration, off);
+//    serialize(buffer, value.position, off);
+//    serialize(buffer, value.home_position, off);
+//    serialize(buffer, value.velocity, off);
+//    serialize(buffer, value.proximity, off);
+//    serialize(buffer, value.thrust, off);
+//    serialize(buffer, value.commands, off);
+    serialize(buffer, static_cast<uint8_t>(math::clamp(value.battery_state.charge_used, 0.f, 25.5f) * 10.f), off);
+    serialize(buffer, static_cast<uint8_t>(math::clamp(value.battery_state.average_voltage, 0.f, 25.5f) * 10.f), off);
+    serialize(buffer, static_cast<uint8_t>(math::clamp(value.battery_state.average_current, 0.f, 51.0f) * 5.f), off);
+    serialize(buffer, static_cast<uint8_t>(math::clamp(value.battery_state.capacity_left, 0.f, 1.f) * 255.f), off);
+
+    {
+        math::vec4<int16_t> v(math::clamp(value.local_frame.x, -1.f, 1.f) * 32767.f,
+                              math::clamp(value.local_frame.y, -1.f, 1.f) * 32767.f,
+                              math::clamp(value.local_frame.z, -1.f, 1.f) * 32767.f,
+                              math::clamp(value.local_frame.w, -1.f, 1.f) * 32767.f);
+        serialize(buffer, v, off);
+    }
+
+    {
+        int64_t v = value.latitude * 100000000.0; //8 decimal places
+        uint8_t const* data = reinterpret_cast<uint8_t const*>(&v);
+        serialize(buffer, data[0], off);
+        serialize(buffer, data[1], off);
+        serialize(buffer, data[2], off);
+        serialize(buffer, data[3], off);
+        serialize(buffer, data[4], off);
+    }
+    {
+        int64_t v = value.longitude * 100000000.0; //8 decimal places
+        uint8_t const* data = reinterpret_cast<uint8_t const*>(&v);
+        serialize(buffer, data[0], off);
+        serialize(buffer, data[1], off);
+        serialize(buffer, data[2], off);
+        serialize(buffer, data[3], off);
+        serialize(buffer, data[4], off);
+    }
+
+    {
+        math::vec3<int16_t> v(math::clamp(value.enu_velocity.x, -327.f, 327.f) * 100.f,
+                              math::clamp(value.enu_velocity.y, -327.f, 327.f) * 100.f,
+                              math::clamp(value.enu_velocity.z, -327.f, 327.f) * 100.f);
+        serialize(buffer, v, off);
+    }
+
+    serialize(buffer, value.mode, off);
 }
 
 template<> inline auto deserialize(Buffer_t const& buffer, silk::stream::IMultirotor_State::Value& value, size_t& off) -> bool
 {
-    q::Clock::time_point::rep time_point;
-    if (!deserialize(buffer, time_point, off) ||
-        !deserialize(buffer, value.battery_state, off) ||
-        !deserialize(buffer, value.frame, off) ||
-        !deserialize(buffer, value.linear_acceleration, off) ||
-        !deserialize(buffer, value.position, off) ||
-        !deserialize(buffer, value.home_position, off) ||
-        !deserialize(buffer, value.velocity, off) ||
-        !deserialize(buffer, value.proximity, off) ||
-        !deserialize(buffer, value.thrust, off) ||
-        !deserialize(buffer, value.commands, off))
+    //battery state
+    uint8_t v1, v2, v3, v4, v5;
+    if (!deserialize(buffer, v1, off) ||
+        !deserialize(buffer, v2, off) ||
+        !deserialize(buffer, v3, off) ||
+        !deserialize(buffer, v4, off))
     {
         return false;
     }
 
-    value.time_point = q::Clock::time_point(q::Clock::duration(time_point));
+    value.battery_state.charge_used = v1 / 10.f;
+    value.battery_state.average_voltage = v2 / 10.f;
+    value.battery_state.average_current = v3 / 5.f;
+    value.battery_state.capacity_left = v4 / 255.f;
+
+    //local frame
+    int16_t s1, s2, s3, s4;
+    if (!deserialize(buffer, s1, off) ||
+        !deserialize(buffer, s2, off) ||
+        !deserialize(buffer, s3, off) ||
+        !deserialize(buffer, s4, off))
+    {
+        return false;
+    }
+
+    {
+        math::quatf v(s1 / 32767.f, s2 / 32767.f, s3 / 32767.f, s4 / 32767.f);
+        value.local_frame = math::normalized<float, math::safe>(v);
+    }
+
+    //latitude
+    if (!deserialize(buffer, v1, off) ||
+        !deserialize(buffer, v2, off) ||
+        !deserialize(buffer, v3, off) ||
+        !deserialize(buffer, v4, off) ||
+        !deserialize(buffer, v5, off))
+    {
+        return false;
+    }
+
+    {
+        int64_t v = 0;
+        if (((v5 >> 7) & 1) == 1)
+        {
+            v = -1;
+        }
+        uint8_t* data = reinterpret_cast<uint8_t*>(&v);
+        data[0] = v1;
+        data[1] = v2;
+        data[2] = v3;
+        data[3] = v4;
+        data[4] = v5;
+        value.latitude = v / 100000000.0;
+    }
+
+    //longitude
+    if (!deserialize(buffer, v1, off) ||
+        !deserialize(buffer, v2, off) ||
+        !deserialize(buffer, v3, off) ||
+        !deserialize(buffer, v4, off) ||
+        !deserialize(buffer, v5, off))
+    {
+        return false;
+    }
+
+    {
+        int64_t v = 0;
+        if (((v5 >> 7) & 1) == 1)
+        {
+            v = -1;
+        }
+        uint8_t* data = reinterpret_cast<uint8_t*>(&v);
+        data[0] = v1;
+        data[1] = v2;
+        data[2] = v3;
+        data[3] = v4;
+        data[4] = v5;
+        value.longitude = v / 100000000.0;
+    }
+
+    //enu velocity
+    if (!deserialize(buffer, s1, off) ||
+        !deserialize(buffer, s2, off) ||
+        !deserialize(buffer, s3, off))
+    {
+        return false;
+    }
+
+    {
+        math::vec3f v(s1 / 100.f, s2 / 100.f, s3 / 100.f);
+        value.enu_velocity = v;
+    }
+
+    if (!deserialize(buffer, value.mode, off))
+    {
+        return false;
+    }
+
     return true;
 }
 

@@ -265,6 +265,7 @@ bool Si4463::wait_for_ph_interrupt(bool& got_it, uint8_t& status, std::chrono::h
             {
                 return true; //not error, but no interrupt either
             }
+            std::this_thread::sleep_for(std::chrono::microseconds(100));
         } while (true);
 
         //QLOGI("spin = {}", spin);
@@ -286,6 +287,7 @@ bool Si4463::wait_for_ph_interrupt(bool& got_it, uint8_t& status, std::chrono::h
             QLOGE("Timeout");
             return false;
         }
+        std::this_thread::sleep_for(std::chrono::microseconds(100));
     } while (true);
 
     return false;

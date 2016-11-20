@@ -14,10 +14,22 @@ public:
     ~Sticks_ADS1115();
 
     ts::Result<void> init();
+    float get_raw_yaw() const override;
     float get_yaw() const override;
+    void set_yaw_calibration(float center, float min, float max) override;
+
+    float get_raw_pitch() const override;
     float get_pitch() const override;
+    void set_pitch_calibration(float center, float min, float max) override;
+
+    float get_raw_roll() const override;
     float get_roll() const override;
+    void set_roll_calibration(float center, float min, float max) override;
+
+    float get_raw_throttle() const override;
     float get_throttle() const override;
+    void set_throttle_calibration(float center, float min, float max) override;
+
     void process() override;
 
 private:
@@ -41,7 +53,15 @@ private:
         uint16_t queue = 0;
     } m_config_register;
 
-    std::array<float, 4> m_adcs;
+    struct ADC
+    {
+        float value = 0.f;
+        float center = 0.5f;
+        float min = 1.f;
+        float max = 1.f;
+    };
+
+    std::array<ADC, 4> m_adcs;
 
     uint8_t m_crt_adc = 0;
 };

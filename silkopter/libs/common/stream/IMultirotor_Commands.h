@@ -54,97 +54,49 @@ class IMultirotor_Commands : public IScalar_Stream<Semantic::MULTIROTOR_COMMANDS
 public:
     typedef std::false_type can_be_filtered_t;
 
-    struct Toggles
-    {
-        Input_Value<bool> take_off;
-        Input_Value<bool> land;
-        Input_Value<bool> return_home;
-    };
-
     enum class Mode : uint8_t
     {
         IDLE,
         ARMED,
+        TAKE_OFF,
+        FLY,
+        RETURN_HOME,
+        LAND
     };
 
-    struct Vertical
+    enum class Vertical_Mode : uint8_t
     {
-        Vertical() = default;
-
-        enum class Mode : uint8_t
-        {
-            THRUST_RATE,
-            THRUST,
-            ALTITUDE,
-        };
-        Input_Value<Mode> mode = Mode::THRUST;
-
-        Input_Value<float> thrust_rate; //Newtons per second
-        Input_Value<float> thrust;      //Newtons
-        Input_Value<float> altitude;    //meters
+        THRUST,
+        ALTITUDE,
     };
-
-    struct Horizontal
+    enum class Horizontal_Mode : uint8_t
     {
-        Horizontal() = default;
-
-        enum class Mode : uint8_t
-        {
-            ANGLE_RATE,
-            ANGLE,
-            POSITION,
-        };
-        Input_Value<Mode> mode = Mode::ANGLE;
-
-        Input_Value<math::vec2f> angle_rate;   //angle rate of change - radians per second
-        Input_Value<math::vec2f> angle;        //angle from horizontal. zero means horizontal
-        Input_Value<math::vec2f> position;     //meters
+        ANGLE_RATE,
+        ANGLE,
+        VELOCITY,
     };
-
-    struct Yaw
+    enum class Yaw_Mode : uint8_t
     {
-        enum class Mode : uint8_t
-        {
-            ANGLE_RATE,
-            ANGLE,
-        };
-        Input_Value<Mode> mode = Mode::ANGLE_RATE;
-
-        Input_Value<float> angle_rate;  //radians per second
-        Input_Value<float> angle;       //radians
-    };
-
-    struct Gimbal
-    {
-        enum class Reference_Frame : uint8_t
-        {
-            GIMBAL,
-            UAV,
-        };
-        Input_Value<Reference_Frame> reference_frame = Reference_Frame::UAV;
-        Input_Value<math::quatf> target_frame;
-    };
-
-    struct Camera
-    {
-//        Input_Value<float> shutter_speed; //ms
-    };
-
-    //the reference frame for the user controls
-    enum class Reference_Frame : uint8_t
-    {
-        LOCAL, 	//normal mode - back means back of uav
-        USER,	//simple mode - back means towards the user, front away from her.
+        ANGLE_RATE,
+        ANGLE,
     };
 
     struct Helpers
     {
-        Input_Value<bool> stay_in_range; //avoid out of range situations.
-        Input_Value<bool> stay_in_battery_range; //avoid going too far considering current battery.
-        Input_Value<bool> stay_in_perimeter; //stay in a configured perimeter.
-        Input_Value<bool> avoid_altitude_drop; //avoid dropping too much altitude too fast.
-        Input_Value<bool> avoid_the_user; //avoid getting too close to the launch position (the user).
-        Input_Value<bool> avoid_proximity; //maintains a min distance from all objects around.
+        uint8_t stay_in_range : 1; //avoid out of range situations.
+        uint8_t stay_in_battery_range : 1; //avoid going too far considering current battery.
+        uint8_t stay_in_perimeter : 1; //stay in a configured perimeter.
+        uint8_t avoid_altitude_drop : 1; //avoid dropping too much altitude too fast.
+        uint8_t avoid_the_user : 1; //avoid getting too close to the launch position (the user).
+        uint8_t avoid_proximity : 1; //maintains a min distance from all objects around.
+    };
+
+    struct Sticks
+    {
+        float yaw = 0;
+        float pitch = 0.f;
+        float roll = 0.f;
+        float throttle = 0.f;
     };
 
     ///////////////////////////////
@@ -152,15 +104,21 @@ public:
 
     struct Value
     {
-        Toggles toggles;
-        Vertical vertical;
-        Horizontal horizontal;
-        Yaw yaw;
-        Gimbal gimbal;
+        Mode mode = Mode::IDLE;
 
-        Input_Value<Mode> mode = Mode::IDLE;
-        Input_Value<Reference_Frame> reference_frame = Reference_Frame::LOCAL;
-        Helpers assists;
+        Sticks sticks;
+
+        Vertical_Mode vertical_mode = Vertical_Mode::THRUST;
+        Horizontal_Mode horizontal_mode = Horizontal_Mode::ANGLE;
+        Yaw_Mode yaw_mode = Yaw_Mode::ANGLE_RATE;
+
+        float gimbal_pitch = 0.f; //+- radians
+
+        union
+        {
+            Helpers helpers;
+            uint8_t all_helpers = 0;
+        };
     };
 
     typedef stream::Sample<Value>     Sample;
@@ -168,54 +126,6 @@ public:
     virtual ~IMultirotor_Commands() = default;
 
     virtual auto get_samples() const -> std::vector<Sample> const& = 0;
-
-
-    //helper function that applies a functor on every member of the value
-    template<class F, class... V>
-    static bool apply(F& functor, V&&... values)
-    {
-        return     functor("toggles.land", values.toggles.land...)
-                && functor("toggles.return_home", values.toggles.return_home...)
-                && functor("toggles.take_off", values.toggles.take_off...)
-                && functor("vertical.mode", values.vertical.mode...)
-                && functor("vertical.thrust_rate", values.vertical.thrust_rate...)
-                && functor("vertical.thrust", values.vertical.thrust...)
-                && functor("vertical.altitude", values.vertical.altitude...)
-                && functor("horizontal.mode", values.horizontal.mode...)
-                && functor("horizontal.angle_rate", values.horizontal.angle_rate...)
-                && functor("horizontal.angle", values.horizontal.angle...)
-                && functor("horizontal.position", values.horizontal.position...)
-                && functor("yaw.mode", values.yaw.mode...)
-                && functor("yaw.angle_rate", values.yaw.angle_rate...)
-                && functor("yaw.angle", values.yaw.angle...)
-                && functor("gimbal.reference_frame", values.gimbal.reference_frame...)
-                && functor("gimbal.target_frame", values.gimbal.target_frame...)
-                && functor("mode", values.mode...)
-                && functor("reference_frame", values.reference_frame...)
-                && functor("assists.stay_in_battery_range", values.assists.stay_in_battery_range...)
-                && functor("assists.stay_in_perimeter", values.assists.stay_in_perimeter...)
-                && functor("assists.stay_in_range", values.assists.stay_in_range...)
-                && functor("assists.avoid_altitude_drop", values.assists.avoid_altitude_drop...)
-                && functor("assists.avoid_proximity", values.assists.avoid_proximity...)
-                && functor("assists.avoid_the_user", values.assists.avoid_the_user...);
-    }
-
-    struct Equality_Functor
-    {
-        template<class T> bool operator()(T const& v1, T const& v2) { return v1.value == v2.value; }
-    };
-    struct Equality_Version_Functor
-    {
-        template<class T> bool operator()(T const& v1, T const& v2) { return v1.value == v2.value && v1.version == v2.version; }
-    };
-    struct Assignment_Functor
-    {
-        template<class T> bool operator()(T& v1, T const& v2) { v1.value = v2.value; return true; }
-    };
-    struct Assignment_Version_Functor
-    {
-        template<class T> bool operator()(T& v1, T const& v2) { v1.value = v2.value; v1.version = v2.version; return true; }
-    };
 };
 DECLARE_CLASS_PTR(IMultirotor_Commands);
 
@@ -229,70 +139,78 @@ namespace util
 namespace serialization
 {
 
-namespace detail
-{
-struct Serializer
-{
-    Serializer(Buffer_t& buffer, size_t& off) : m_buffer(buffer), m_off(off) {}
-    Buffer_t& m_buffer;
-    size_t& m_off;
-
-    template<class T>
-    bool operator()(const char*, T const& v)
-    {
-        serialize(m_buffer, v.get(), m_off);
-        serialize(m_buffer, v.version, m_off);
-        return true;
-    }
-    bool operator()(const char*, silk::stream::Input_Value<bool> const& v)
-    {
-        uint8_t x = v.version & 0x7F;
-        x |= v.get() << 7;
-        serialize(m_buffer, x, m_off);
-        return true;
-    }
-};
-struct Deserializer
-{
-    Deserializer(Buffer_t const& buffer, size_t& off) : m_buffer(buffer), m_off(off) {}
-    Buffer_t const& m_buffer;
-    size_t& m_off;
-
-    template<class T>
-    bool operator()(const char*, T& v)
-    {
-        typename T::Value x;
-        bool res = deserialize(m_buffer, x, m_off) && deserialize(m_buffer, v.version, m_off);
-        if (res)
-        {
-            v.set_unversioned(x);
-        }
-        return res;
-    }
-    bool operator()(const char*, silk::stream::Input_Value<bool>& v)
-    {
-        uint8_t x = 0;
-        if (!deserialize(m_buffer, x, m_off))
-        {
-            return false;
-        }
-        v.version = x & 0x7F;
-        v.set_unversioned(x >> 7);
-        return true;
-    }
-};
-}
-
 template<> inline void serialize(Buffer_t& buffer, silk::stream::IMultirotor_Commands::Value const& value, size_t& off)
 {
-    detail::Serializer serializer(buffer, off);
-    silk::stream::IMultirotor_Commands::apply(serializer, value);
+    serialize(buffer, value.mode, off);
+
+    serialize(buffer, static_cast<uint8_t>((math::clamp(value.sticks.yaw, 0.f, 1.f) * 255.f)), off);
+    serialize(buffer, static_cast<uint8_t>((math::clamp(value.sticks.pitch, 0.f, 1.f) * 255.f)), off);
+    serialize(buffer, static_cast<uint8_t>((math::clamp(value.sticks.roll, 0.f, 1.f) * 255.f)), off);
+    serialize(buffer, static_cast<uint8_t>((math::clamp(value.sticks.throttle, 0.f, 1.f) * 255.f)), off);
+
+    serialize(buffer, value.vertical_mode, off);
+    serialize(buffer, value.horizontal_mode, off);
+    serialize(buffer, value.yaw_mode, off);
+
+    serialize(buffer, static_cast<int8_t>((math::clamp(value.gimbal_pitch, -math::anglef::pi, math::anglef::pi) * 40.f)), off);
+
+    serialize(buffer, value.all_helpers, off);
 }
 
 template<> inline auto deserialize(Buffer_t const& buffer, silk::stream::IMultirotor_Commands::Value& value, size_t& off) -> bool
 {
-    detail::Deserializer deserializer(buffer, off);
-    return silk::stream::IMultirotor_Commands::apply(deserializer, value);
+    if (!deserialize(buffer, value.mode, off))
+    {
+        return false;
+    }
+
+    //sticks
+    uint8_t v1, v2, v3, v4;
+    if (!deserialize(buffer, v1, off) ||
+        !deserialize(buffer, v2, off) ||
+        !deserialize(buffer, v3, off) ||
+        !deserialize(buffer, v4, off))
+    {
+        return false;
+    }
+
+    value.sticks.yaw = v1 / 255.f;
+    value.sticks.pitch = v2 / 255.f;
+    value.sticks.roll = v3 / 255.f;
+    value.sticks.throttle = v4 / 255.f;
+
+    //vertical mode
+    if (!deserialize(buffer, value.vertical_mode, off))
+    {
+        return false;
+    }
+
+    //horizontal mode
+    if (!deserialize(buffer, value.horizontal_mode, off))
+    {
+        return false;
+    }
+
+    //yaw mode
+    if (!deserialize(buffer, value.yaw_mode, off))
+    {
+        return false;
+    }
+
+    //gimbal pitch
+    if (!deserialize(buffer, v1, off))
+    {
+        return false;
+    }
+    value.gimbal_pitch = v1 / 40.f;
+
+    //helpers
+    if (!deserialize(buffer, value.all_helpers, off))
+    {
+        return false;
+    }
+
+    return true;
 }
 
 

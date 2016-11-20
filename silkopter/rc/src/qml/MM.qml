@@ -3,6 +3,7 @@ import QtQuick.Controls 1.4
 import QtQuick.Controls.Styles 1.4
 import com.silk.Comms 1.0
 import com.silk.VideoRenderer 1.0
+import com.silk.Input 1.0
 
 
 Item {
@@ -117,6 +118,43 @@ Item {
                     fullscreen = true;
                 }
             }
+        }
+
+        ProgressBar {
+            id: pitchStick
+            anchors.margins: 4
+            anchors.top: parent.top
+            anchors.left: parent.left
+            width: 100
+            height: 16
+            value: s_input.pitchStick
+        }
+        ProgressBar {
+            id: rollStick
+            anchors.margins: 4
+            anchors.top: pitchStick.bottom
+            anchors.left: parent.left
+            width: 100
+            height: 16
+            value: s_input.rollStick
+        }
+        ProgressBar {
+            id: yawStick
+            anchors.margins: 4
+            anchors.top: rollStick.bottom
+            anchors.left: parent.left
+            width: 100
+            height: 16
+            value: s_input.yawStick
+        }
+        ProgressBar {
+            id: throttleStick
+            anchors.margins: 4
+            anchors.top: yawStick.bottom
+            anchors.left: parent.left
+            width: 100
+            height: 16
+            value: s_input.throttleStick
         }
 
     }

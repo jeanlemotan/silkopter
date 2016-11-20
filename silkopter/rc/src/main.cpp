@@ -1,37 +1,50 @@
-#include <QGuiApplication>
-#include <QQuickView>
-#include <QQmlEngine>
-#include <QQmlContext>
-#include <QTimer>
+//#include <QGuiApplication>
+//#include <QQuickView>
+//#include <QQmlEngine>
+//#include <QQmlContext>
+//#include <QTimer>
 #include "Comms.h"
-#include "Comms_QML_Proxy.h"
-#include "OS_QML_Proxy.h"
-#include "Menus_QML_Proxy.h"
-#include "HAL_QML_Proxy.h"
-#include "Video_Renderer.h"
+//#include "Comms_QML_Proxy.h"
+//#include "OS_QML_Proxy.h"
+//#include "Menus_QML_Proxy.h"
+//#include "HAL_QML_Proxy.h"
 #include "Video_Decoder.h"
+#include "Menu_System.h"
+#include "Splash_Menu_Page.h"
 
-#include <QtGui/QOpenGLTexture>
+//#include <QtGui/QOpenGLTexture>
 
-#include "Sticks_ADS1115.h"
-#include "Stick_Actuators_Throttle_DRV883x.h"
+#include "ISticks.h"
+#include "IStick_Actuators.h"
+#include "IRotary_Encoder.h"
+#include "IButton.h"
+#include "IButton_Matrix.h"
+
+#include "Input.h"
+//#include "Input_QML_Proxy.h"
+
+#include "Adafruit_GFX.h"
+#include "ArduiPi_OLED.h"
+
+//#include "common/stream/IMultirotor_Commands.h"
+//#include "common/stream/IMultirotor_State.h"
 
 //boost::asio::io_service s_async_io_service(4);
 
-silk::Comms s_comms;
-Video_Decoder s_video_decoder;
+int s_version_major = 1;
+int s_version_minor = 0;
 
 #ifdef RASPBERRY_PI
 
 extern "C"
 {
-    #include "utils/hw/pigpio.h"
-    #include "utils/hw/bcm2835.h"
+#include "utils/hw/pigpio.h"
+#include "utils/hw/bcm2835.h"
 }
 
 ///////////////////////////////////////////////////////////////////
 
-std::chrono::microseconds PIGPIO_PERIOD(5);
+std::chrono::microseconds PIGPIO_PERIOD(2);
 
 static auto initialize_pigpio() -> bool
 {
@@ -43,7 +56,7 @@ static auto initialize_pigpio() -> bool
 
     QLOGI("Initializing pigpio");
     if (gpioCfgClock(PIGPIO_PERIOD.count(), 1, 0) < 0 ||
-        gpioCfgPermissions(static_cast<uint64_t>(-1)))
+            gpioCfgPermissions(static_cast<uint64_t>(-1)))
     {
         QLOGE("Cannot configure pigpio");
         return false;
@@ -67,16 +80,16 @@ static auto shutdown_pigpio() -> bool
 
 int main(int argc, char *argv[])
 {
-	q::logging::add_logger(q::logging::Logger_uptr(new q::logging::Console_Logger()));
+    q::logging::add_logger(q::logging::Logger_uptr(new q::logging::Console_Logger()));
     q::logging::set_decorations(q::logging::Decorations(q::logging::Decoration::TIMESTAMP, q::logging::Decoration::LEVEL, q::logging::Decoration::TOPIC));
 
 
-//    boost::shared_ptr<boost::asio::io_service::work> work(new boost::asio::io_service::work(s_async_io_service));
-//    boost::thread_group worker_threads;
-//    for(int x = 0; x < 4; ++x)
-//    {
-//        worker_threads.create_thread(boost::bind(&boost::asio::io_service::run, &s_async_io_service));
-//    }
+    //    boost::shared_ptr<boost::asio::io_service::work> work(new boost::asio::io_service::work(s_async_io_service));
+    //    boost::thread_group worker_threads;
+    //    for(int x = 0; x < 4; ++x)
+    //    {
+    //        worker_threads.create_thread(boost::bind(&boost::asio::io_service::run, &s_async_io_service));
+    //    }
 
 #if defined (RASPBERRY_PI)
     if (!initialize_pigpio())
@@ -86,117 +99,34 @@ int main(int argc, char *argv[])
     }
 #endif
 
-    Q_INIT_RESOURCE(res);
+    silk::Comms comms;
+    silk::Menu_System menu_system;
 
-    QGuiApplication app(argc, argv);
-//    QApplication::setStyle("fusion");
+    silk::Input input;
+    input.init(comms);
 
-    QCoreApplication::setOrganizationName("Silkopter");
-    QCoreApplication::setOrganizationDomain("silkopter.com");
-	QCoreApplication::setApplicationName("Silkopter");
+    ArduiPi_OLED display;
 
-
-    app.setQuitOnLastWindowClosed(true);
-
-    QPalette palette = app.palette();
-    palette.setColor(QPalette::Window, QColor(53,53,53));
-    palette.setColor(QPalette::WindowText, QColor(0xECF0F1));
-    palette.setColor(QPalette::Base, QColor(25,25,25));
-    palette.setColor(QPalette::AlternateBase, QColor(53,53,53));
-    palette.setColor(QPalette::ToolTipBase, QColor(0xECF0F1));
-    palette.setColor(QPalette::ToolTipText, QColor(0xECF0F1));
-    palette.setColor(QPalette::Text, QColor(0xECF0F1));
-    palette.setColor(QPalette::Button, QColor(53,53,53));
-    palette.setColor(QPalette::ButtonText, QColor(0xECF0F1));
-    palette.setColor(QPalette::BrightText, Qt::white);
-    palette.setColor(QPalette::Link, QColor(42, 130, 218));
-
-    palette.setColor(QPalette::Highlight, QColor(42, 130, 218));
-    palette.setColor(QPalette::HighlightedText, Qt::black);
-
-    app.setPalette(palette);
-
-    QQuickView view;
-
-
-    OS_QML_Proxy os_proxy;
-
-    Menus_QML_Proxy menus_proxy;
-    menus_proxy.init(view);
-
-    Comms_QML_Proxy comms_proxy;
-    comms_proxy.init(s_comms);
-
-    HAL_QML_Proxy hal_proxy;
-
-    qmlRegisterType<Comms_QML_Proxy>("com.silk.Comms", 1, 0, "Comms");
-    qmlRegisterType<HAL_QML_Proxy>("com.silk.HAL", 1, 0, "HAL");
-    qmlRegisterType<Video_Renderer>("com.silk.VideoRenderer", 1, 0, "VideoRenderer");
-    view.engine()->rootContext()->setContextProperty("s_comms", &comms_proxy);
-    view.engine()->rootContext()->setContextProperty("s_os", &os_proxy);
-    view.engine()->rootContext()->setContextProperty("s_menus", &menus_proxy);
-    view.engine()->rootContext()->setContextProperty("s_hal", &hal_proxy);
+    menu_system.push_page(std::unique_ptr<silk::IMenu_Page>(new silk::Splash_Menu_Page));
 
     size_t render_frames = 0;
 
-    QObject::connect(&view, &QQuickView::frameSwapped, [&render_frames]()
-    {
-        s_video_decoder.release_buffers();
-        render_frames++;
-    });
-
-    QObject::connect(&view, &QQuickView::sceneGraphInitialized, []()
-    {
-        bool res = s_video_decoder.init();
-        QASSERT(res);
-    });
-
-    std::vector<uint8_t> video_data;
-    QObject::connect(&view, &QQuickView::beforeRendering, [&video_data]()
-    {
-        video_data.clear();
-        math::vec2u16 resolution;
-        s_comms.get_video_data(video_data, resolution);
-        s_video_decoder.decode_data(video_data, resolution);
-    });
-
-    QSurfaceFormat format = view.format();
-    format.setAlphaBufferSize(0);
-    format.setRedBufferSize(8);
-    format.setGreenBufferSize(8);
-    format.setBlueBufferSize(8);
-    format.setSamples(1);
-    format.setSwapBehavior(QSurfaceFormat::TripleBuffer);
-    format.setSwapInterval(0);
-    view.setFormat(format);
-
-    view.setClearBeforeRendering(false);
-    view.resize(800, 480);
-    view.setResizeMode(QQuickView::SizeRootObjectToView);
-    view.setPersistentOpenGLContext(true);
-    view.create();
-    view.show();
-
-    menus_proxy.push("Splash.qml");
+    display.init(OLED_ADAFRUIT_I2C_128x64);
 
     q::Clock::time_point last_tp = q::Clock::now();
     size_t process_frames = 0;
 
-    silk::Sticks_ADS1115 sticks;
-    auto res = sticks.init();
-    QASSERT(res == ts::success);
+    display.begin();
 
-    silk::Stick_Actuators_Throttle_DRV883x stick_actuators(sticks);
-    res = stick_actuators.init();
-    QASSERT(res == ts::success);
+    // init done
+    display.clearDisplay();   // clears the screen  buffer
+    display.display();   		// display it (clear display)
 
     while (true)
     {
-        view.update();
-        //s_comms.process_rcp();
-        s_comms.process();
-
-        app.processEvents();
+        input.process();
+        comms.process();
+        menu_system.process(input);
 
         process_frames++;
         if (q::Clock::now() - last_tp >= std::chrono::seconds(1))
@@ -207,10 +137,13 @@ int main(int argc, char *argv[])
             render_frames = 0;
         }
 
-        stick_actuators.set_target_throttle(sticks.get_yaw());
+        if (display.displayIncremental(1000))
+        {
+            render_frames++;
+            display.clearDisplay();
 
-        sticks.process();
-        stick_actuators.process();
+            menu_system.render(display);
+        }
 
         std::this_thread::sleep_for(std::chrono::microseconds(1));
     }

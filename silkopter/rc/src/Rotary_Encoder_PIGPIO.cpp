@@ -90,6 +90,10 @@ void Rotary_Encoder_PIGPIO::encoder_pulse(int gpio, int level, uint32_t tick, vo
    }
 }
 
+int32_t Rotary_Encoder_PIGPIO::get_delta() const
+{
+    return m_delta;
+}
 int32_t Rotary_Encoder_PIGPIO::get_clicks() const
 {
     return m_clicks;
@@ -97,7 +101,12 @@ int32_t Rotary_Encoder_PIGPIO::get_clicks() const
 
 void Rotary_Encoder_PIGPIO::process()
 {
-
+    if (m_last_clicks == std::numeric_limits<int32_t>::lowest())
+    {
+        m_last_clicks = get_clicks();
+    }
+    m_delta = get_clicks() - m_last_clicks;
+    m_last_clicks = get_clicks();
 }
 
 

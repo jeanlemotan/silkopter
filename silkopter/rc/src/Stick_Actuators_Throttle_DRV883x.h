@@ -21,6 +21,8 @@ public:
     bool set_target_throttle(boost::optional<float> value) override;
     void process() override;
 
+//    void set_p(float a, float b);
+
 private:
     ts::Result<void> detect_direction();
 

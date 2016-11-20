@@ -4,8 +4,6 @@
 #
 #-------------------------------------------------
 
-QT       += core quick qml quickcontrols2
-
 TARGET = rc
 TEMPLATE = app
 
@@ -13,12 +11,7 @@ TARGET = rc
 target.path = rc
 INSTALLS = target
 
-#qmlFiles.path = rc/data
-#qmlFiles.files = ../../src/qml/*
-#qmlFiles.files = ../../src/NodeEditor/qml/*
-#INSTALLS += qmlFiles
-
-
+CONFIG -= qt
 CONFIG += c++11
 
 INCLUDEPATH += ../../src
@@ -28,7 +21,6 @@ INCLUDEPATH += ../../../../qmath/include
 INCLUDEPATH += ../../../../qinput/include
 INCLUDEPATH += ../../../../def_lang/include
 INCLUDEPATH += ../../../libs
-INCLUDEPATH += ../../../../eigen
 INCLUDEPATH += ../../../libs/common/comms/def
 
 
@@ -51,13 +43,6 @@ rpi {
         DEST_FOLDER = rpi/release
         DEFINES += NDEBUG
     }
-    LIBS += -lmmal_core
-    LIBS += -lmmal_util
-    LIBS += -lmmal_vc_client
-    LIBS += -lvcos
-    LIBS += -lbcm_host
-    LIBS += -lGLESv2
-    LIBS += -lEGL
 } else {
     QMAKE_MAKEFILE = "Makefile"
     CONFIG(debug, debug|release) {
@@ -67,12 +52,10 @@ rpi {
         DEST_FOLDER = pc/release
         DEFINES += NDEBUG
     }
-    LIBS += -lavutil -lavcodec -lavformat -lswscale
 }
 
-LIBS += -lfreetype
 LIBS += -lboost_system -lboost_thread
-LIBS += -lfftw3 -lpcap -lz
+LIBS += -lfftw3 -lpcap -lz -lpthread
 LIBS += -L$${ROOT_LIBS_PATH}/qinput/lib/$${DEST_FOLDER} -lqinput
 LIBS += -L$${ROOT_LIBS_PATH}/qdata/lib/$${DEST_FOLDER} -lqdata
 LIBS += -L$${ROOT_LIBS_PATH}/qmath/lib/$${DEST_FOLDER} -lqmath
@@ -85,8 +68,7 @@ RCC_DIR = ./.rcc/$${DEST_FOLDER}
 UI_DIR = ./.ui/$${DEST_FOLDER}
 DESTDIR = ../../bin
 
-RESOURCES += \
-    ../../src/res.qrc
+RESOURCES +=
 
 HEADERS += \
     ../../src/Comms.h \
@@ -147,12 +129,7 @@ HEADERS += \
     ../../../libs/common/stream/IMultirotor_Commands.h \
     ../../../libs/common/stream/IMultirotor_State.h \
     ../../src/Comms_Slots.h \
-    ../../src/OS_QML_Proxy.h \
-    ../../src/Menus_QML_Proxy.h \
-    ../../src/Comms_QML_Proxy.h \
-    ../../src/HAL_QML_Proxy.h \
     ../../src/Video_Decoder.h \
-    ../../src/Video_Renderer.h \
     ../../../libs/utils/hw/bcm2835.h \
     ../../../libs/utils/hw/command.h \
     ../../../libs/utils/hw/pigpio.h \
@@ -179,10 +156,23 @@ HEADERS += \
     ../../src/IStick_Actuators.h \
     ../../src/Stick_Actuators_Throttle_DRV883x.h \
     ../../src/IRotary_Encoder.h \
-    ../../src/ISwitch.h \
     ../../src/Rotary_Encoder_PIGPIO.h \
-    ../../src/Switch_PIGPIO.h \
-    ../../src/IInput_Device.h
+    ../../src/IInput_Device.h \
+    ../../src/Input.h \
+    ../../src/Adafruit_GFX.h \
+    ../../src/ArduiPi_OLED.h \
+    ../../src/IButton_Matrix.h \
+    ../../src/Button_Matrix_PIGPIO.h \
+    ../../src/IButton.h \
+    ../../src/Button_PIGPIO.h \
+    ../../src/IMenu_Page.h \
+    ../../src/Splash_Menu_Page.h \
+    ../../src/Fly_Menu_Page.h \
+    ../../src/Menu_System.h \
+    ../../src/Main_Menu_Page.h \
+    ../../src/Menu.h \
+    ../../src/Stick_Calibration_Menu_Page.h \
+    ../../src/Info_Menu_Page.h
 
 SOURCES += \
     ../../src/main.cpp \
@@ -191,12 +181,7 @@ SOURCES += \
     ../../../libs/lz4/lz4.c \
     ../../../libs/utils/Coordinates.cpp \
     ../../src/Comms_Slots.cpp \
-    ../../src/Comms_QML_Proxy.cpp \
-    ../../src/Menus_QML_Proxy.cpp \
-    ../../src/OS_QML_Proxy.cpp \
-    ../../src/HAL_QML_Proxy.cpp \
     ../../src/Video_Decoder.cpp \
-    ../../src/Video_Renderer.cpp \
     ../../../libs/utils/hw/bcm2835.c \
     ../../../libs/utils/hw/command.c \
     ../../../libs/utils/hw/pigpio.c \
@@ -214,8 +199,19 @@ SOURCES += \
     ../../src/Sticks_ADS1115.cpp \
     ../../../libs/utils/hw/I2C_Dev.cpp \
     ../../src/Stick_Actuators_Throttle_DRV883x.cpp \
-    ../../src/Switch_PIGPIO.cpp \
-    ../../src/Rotary_Encoder_PIGPIO.cpp
+    ../../src/Rotary_Encoder_PIGPIO.cpp \
+    ../../src/Input.cpp \
+    ../../src/Adafruit_GFX.cpp \
+    ../../src/ArduiPi_OLED.cpp \
+    ../../src/Button_Matrix_PIGPIO.cpp \
+    ../../src/Button_PIGPIO.cpp \
+    ../../src/Splash_Menu_Page.cpp \
+    ../../src/Fly_Menu_Page.cpp \
+    ../../src/Menu_System.cpp \
+    ../../src/Main_Menu_Page.cpp \
+    ../../src/Menu.cpp \
+    ../../src/Stick_Calibration_Menu_Page.cpp \
+    ../../src/Info_Menu_Page.cpp
 
 DISTFILES += \
     ../../src/node.png \

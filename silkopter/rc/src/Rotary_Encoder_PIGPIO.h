@@ -1,5 +1,6 @@
 #pragma once
 
+#include <limits>
 #include <atomic>
 #include "IRotary_Encoder.h"
 
@@ -14,6 +15,7 @@ public:
 
     ts::Result<void> init(uint8_t gpio1, uint8_t gpio2);
 
+    int32_t get_delta() const override;
     int32_t get_clicks() const override;
     void process() override;
 
@@ -26,6 +28,8 @@ private:
     uint8_t m_gpio1 = 0;
     uint8_t m_gpio2 = 0;
     std::atomic_int m_clicks = { 0 };
+    int32_t m_last_clicks = std::numeric_limits<int32_t>::lowest();
+    int32_t m_delta = 0;
 };
 
 }

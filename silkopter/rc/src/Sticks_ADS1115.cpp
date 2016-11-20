@@ -81,12 +81,11 @@ constexpr uint16_t ADS1115_COMP_QUE_DISABLE    = 0x03 << ADS1115_COMP_QUE_SHIFT;
 
 
 
-constexpr std::chrono::milliseconds MIN_CONVERSION_DURATION(5);
+constexpr std::chrono::milliseconds MIN_CONVERSION_DURATION(2);
 
 
 
 Sticks_ADS1115::Sticks_ADS1115()
-    : m_adcs{0}
 {
 }
 
@@ -143,21 +142,136 @@ auto Sticks_ADS1115::set_config_register() -> bool
     return m_dev.write_register_u16(m_address, ADS1115_RA_CONFIG, config);
 }
 
+float Sticks_ADS1115::get_raw_yaw() const
+{
+    ADC const& adc = m_adcs[0];
+    return math::clamp(adc.value, 0.f, 1.f);
+}
 float Sticks_ADS1115::get_yaw() const
 {
-    return m_adcs[0];
+    ADC const& adc = m_adcs[0];
+    float value = adc.value;
+    if (value <= adc.center)
+    {
+        float range = adc.center - adc.min;
+        value = value - adc.min; //now the value goes betwee 0 and (center - min)
+        value = value / range;//now the value is 0 - 1
+        value *= 0.5f; //rescale back to 0 - 0.5
+    }
+    else
+    {
+        float range = adc.max - adc.center;
+        value = value - adc.center; //value is > 0
+        value = value / range; //value is > 0, with 0 being center value and 1 being max value
+        value = value * 0.5f + 0.5f; //rescale back to 0.5 - 1
+    }
+    return math::clamp(value, 0.f, 1.f);
+}
+void Sticks_ADS1115::set_yaw_calibration(float center, float min, float max)
+{
+    ADC& adc = m_adcs[0];
+    adc.center = center;
+    adc.min = min;
+    adc.max = max;
+}
+
+float Sticks_ADS1115::get_raw_pitch() const
+{
+    ADC const& adc = m_adcs[1];
+    return math::clamp(adc.value, 0.f, 1.f);
 }
 float Sticks_ADS1115::get_pitch() const
 {
-    return m_adcs[1];
+    ADC const& adc = m_adcs[1];
+    float value = adc.value;
+    if (value <= adc.center)
+    {
+        float range = adc.center - adc.min;
+        value = value - adc.min; //now the value goes betwee 0 and (center - min)
+        value = value / range;//now the value is 0 - 1
+        value *= 0.5f; //rescale back to 0 - 0.5
+    }
+    else
+    {
+        float range = adc.max - adc.center;
+        value = value - adc.center; //value is > 0
+        value = value / range; //value is > 0, with 0 being center value and 1 being max value
+        value = value * 0.5f + 0.5f; //rescale back to 0.5 - 1
+    }
+    return math::clamp(value, 0.f, 1.f);
+}
+void Sticks_ADS1115::set_pitch_calibration(float center, float min, float max)
+{
+    ADC& adc = m_adcs[1];
+    adc.center = center;
+    adc.min = min;
+    adc.max = max;
+}
+
+float Sticks_ADS1115::get_raw_roll() const
+{
+    ADC const& adc = m_adcs[2];
+    return math::clamp(adc.value, 0.f, 1.f);
 }
 float Sticks_ADS1115::get_roll() const
 {
-    return m_adcs[2];
+    ADC const& adc = m_adcs[2];
+    float value = adc.value;
+    if (value <= adc.center)
+    {
+        float range = adc.center - adc.min;
+        value = value - adc.min; //now the value goes betwee 0 and (center - min)
+        value = value / range;//now the value is 0 - 1
+        value *= 0.5f; //rescale back to 0 - 0.5
+    }
+    else
+    {
+        float range = adc.max - adc.center;
+        value = value - adc.center; //value is > 0
+        value = value / range; //value is > 0, with 0 being center value and 1 being max value
+        value = value * 0.5f + 0.5f; //rescale back to 0.5 - 1
+    }
+    return math::clamp(value, 0.f, 1.f);
+}
+void Sticks_ADS1115::set_roll_calibration(float center, float min, float max)
+{
+    ADC& adc = m_adcs[2];
+    adc.center = center;
+    adc.min = min;
+    adc.max = max;
+}
+
+float Sticks_ADS1115::get_raw_throttle() const
+{
+    ADC const& adc = m_adcs[3];
+    return math::clamp(adc.value, 0.f, 1.f);
 }
 float Sticks_ADS1115::get_throttle() const
 {
-    return m_adcs[3];
+    ADC const& adc = m_adcs[3];
+    float value = adc.value;
+    if (value <= adc.center)
+    {
+        float range = adc.center - adc.min;
+        value = value - adc.min; //now the value goes betwee 0 and (center - min)
+        value = value / range;//now the value is 0 - 1
+        value *= 0.5f; //rescale back to 0 - 0.5
+    }
+    else
+    {
+        float range = adc.max - adc.center;
+        value = value - adc.center; //value is > 0
+        value = value / range; //value is > 0, with 0 being center value and 1 being max value
+        value = value * 0.5f + 0.5f; //rescale back to 0.5 - 1
+    }
+    return math::clamp(value, 0.f, 1.f);
+}
+void Sticks_ADS1115::set_throttle_calibration(float center, float min, float max)
+{
+    ADC& adc = m_adcs[3];
+    adc.center = center;
+    adc.min = min;
+    adc.max = max;
 }
 
 void Sticks_ADS1115::process()
@@ -217,11 +331,12 @@ void Sticks_ADS1115::process()
     }
 
     //scale 0..3.3v to 0..1
-    value = math::clamp(value / 3.3f, 0.f, 1.f);
+    //value = math::clamp(value / 3.3f, 0.f, 1.f);
+    value = math::clamp(fvalue / 32768.f, 0.f, 1.f);
 
-    m_adcs[m_crt_adc] = value;
+    m_adcs[m_crt_adc].value = value;
 
-    //QLOGI("ADC: {} : {} : {} : {}", m_adcs[0], m_adcs[1], m_adcs[2], m_adcs[3]);
+//    QLOGI("ADC: {} : {} : {} : {}", m_adcs[0].value, m_adcs[1].value, m_adcs[2].value, m_adcs[3].value);
 
     ///////////////////////////////////////////////////////
     //advance to next ADC

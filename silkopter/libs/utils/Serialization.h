@@ -51,6 +51,13 @@ template<class T> inline auto deserialize(Buffer_t const& buffer, math::vec3<T>&
            deserialize(buffer, val.y, off) &&
            deserialize(buffer, val.z, off);
 }
+template<class T> inline auto deserialize(Buffer_t const& buffer, math::vec4<T>& val, size_t& off) -> bool
+{
+    return deserialize(buffer, val.x, off) &&
+           deserialize(buffer, val.y, off) &&
+           deserialize(buffer, val.z, off) &&
+           deserialize(buffer, val.w, off);
+}
 template<class T> inline auto deserialize(Buffer_t const& buffer, math::quat<T>& val, size_t& off) -> bool
 {
     return deserialize(buffer, val.x, off) &&
@@ -126,6 +133,13 @@ template<class T> inline void serialize(Buffer_t& buffer, math::vec3<T> const& v
     serialize(buffer, val.x, off);
     serialize(buffer, val.y, off);
     serialize(buffer, val.z, off);
+}
+template<class T> inline void serialize(Buffer_t& buffer, math::vec4<T> const& val, size_t& off)
+{
+    serialize(buffer, val.x, off);
+    serialize(buffer, val.y, off);
+    serialize(buffer, val.z, off);
+    serialize(buffer, val.w, off);
 }
 template<class T> inline void serialize(Buffer_t& buffer, math::quat<T> const& val, size_t& off)
 {

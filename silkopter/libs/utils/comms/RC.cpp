@@ -51,14 +51,14 @@ bool RC::init()
 
     m_tx_buffer.resize(1 + sizeof(Header));
 
-    if (m_is_master)
-    {
-        m_thread = boost::thread([this]() { master_thread_proc(); });
-    }
-    else
-    {
-        m_thread = boost::thread([this]() { slave_thread_proc(); });
-    }
+//    if (m_is_master)
+//    {
+//        m_thread = boost::thread([this]() { master_thread_proc(); });
+//    }
+//    else
+//    {
+//        m_thread = boost::thread([this]() { slave_thread_proc(); });
+//    }
 
     return true;
 }
