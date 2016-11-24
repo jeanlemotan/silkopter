@@ -57,7 +57,7 @@ private:
     {
         float value = 0.f;
         float center = 0.5f;
-        float min = 1.f;
+        float min = 0.f;
         float max = 1.f;
     };
 
