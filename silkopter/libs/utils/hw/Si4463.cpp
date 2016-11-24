@@ -256,8 +256,7 @@ bool Si4463::wait_for_ph_interrupt(bool& got_it, uint8_t& status, std::chrono::h
         do
         {
             spin++;
-            int level = gpioRead(m_nirq_gpio);
-            if (level == 0) //active is LOW
+            if (gpioRead(m_nirq_gpio) == 0) //active is LOW
             {
                 break;
             }
@@ -265,7 +264,7 @@ bool Si4463::wait_for_ph_interrupt(bool& got_it, uint8_t& status, std::chrono::h
             {
                 return true; //not error, but no interrupt either
             }
-            std::this_thread::sleep_for(std::chrono::microseconds(100));
+            std::this_thread::sleep_for(std::chrono::microseconds(1));
         } while (true);
 
         //QLOGI("spin = {}", spin);
@@ -287,7 +286,7 @@ bool Si4463::wait_for_ph_interrupt(bool& got_it, uint8_t& status, std::chrono::h
             QLOGE("Timeout");
             return false;
         }
-        std::this_thread::sleep_for(std::chrono::microseconds(100));
+        std::this_thread::sleep_for(std::chrono::microseconds(1));
     } while (true);
 
     return false;
