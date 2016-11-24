@@ -19,7 +19,7 @@ public:
     RC(bool master);
     ~RC();
 
-    bool init();
+    bool init(std::string const& device, uint32_t speed, uint8_t sdn_gpio, uint8_t nirq_gpio);
 
     size_t get_mtu() const;
 

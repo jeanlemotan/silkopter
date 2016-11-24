@@ -8,14 +8,13 @@ namespace util
 namespace comms
 {
 
-constexpr uint8_t SDN_GPIO = 6;
-constexpr uint8_t NIRQ_GPIO = 5;
-constexpr char const* SPI_DEVICE = "/dev/spidev1.0";
-constexpr size_t SPEED = 16000000;
+//constexpr uint8_t SDN_GPIO = 6;
+//constexpr uint8_t NIRQ_GPIO = 5;
+//constexpr char const* SPI_DEVICE = "/dev/spidev1.0";
+//constexpr size_t SPEED = 16000000;
 constexpr size_t MTU = 64;
 constexpr uint8_t CHANNEL = 0;
 constexpr q::Clock::duration MIN_TX_DURATION = std::chrono::milliseconds(5);
-
 
 
 
@@ -42,23 +41,23 @@ RC::~RC()
     }
 }
 
-bool RC::init()
+bool RC::init(std::string const& device, uint32_t speed, uint8_t sdn_gpio, uint8_t nirq_gpio)
 {
-    if (!m_hw->chip.init(SPI_DEVICE, SPEED, SDN_GPIO, NIRQ_GPIO))
+    if (!m_hw->chip.init(device, speed, sdn_gpio, nirq_gpio))
     {
         return false;
     }
 
     m_tx_buffer.resize(1 + sizeof(Header));
 
-//    if (m_is_master)
-//    {
-//        m_thread = boost::thread([this]() { master_thread_proc(); });
-//    }
-//    else
-//    {
-//        m_thread = boost::thread([this]() { slave_thread_proc(); });
-//    }
+    if (m_is_master)
+    {
+        m_thread = boost::thread([this]() { master_thread_proc(); });
+    }
+    else
+    {
+        m_thread = boost::thread([this]() { slave_thread_proc(); });
+    }
 
     return true;
 }

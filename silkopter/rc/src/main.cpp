@@ -1,18 +1,7 @@
-//#include <QGuiApplication>
-//#include <QQuickView>
-//#include <QQmlEngine>
-//#include <QQmlContext>
-//#include <QTimer>
 #include "Comms.h"
-//#include "Comms_QML_Proxy.h"
-//#include "OS_QML_Proxy.h"
-//#include "Menus_QML_Proxy.h"
-//#include "HAL_QML_Proxy.h"
 #include "Video_Decoder.h"
 #include "Menu_System.h"
 #include "Splash_Menu_Page.h"
-
-//#include <QtGui/QOpenGLTexture>
 
 #include "ISticks.h"
 #include "IStick_Actuators.h"
@@ -21,7 +10,6 @@
 #include "IButton_Matrix.h"
 
 #include "Input.h"
-//#include "Input_QML_Proxy.h"
 
 #include "Adafruit_GFX.h"
 #include "ArduiPi_OLED.h"
@@ -122,6 +110,13 @@ int main(int argc, char *argv[])
     display.clearDisplay();   // clears the screen  buffer
     display.display();   		// display it (clear display)
 
+    if (!comms.start())
+    {
+        display.print("Cannot start comms.");
+        display.display();
+        exit(1);
+    }
+
     while (true)
     {
         input.process();
@@ -145,7 +140,7 @@ int main(int argc, char *argv[])
             menu_system.render(display);
         }
 
-        std::this_thread::sleep_for(std::chrono::microseconds(1));
+        //std::this_thread::sleep_for(std::chrono::microseconds(1));
     }
 
 #if defined (RASPBERRY_PI)
