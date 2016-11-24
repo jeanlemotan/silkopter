@@ -104,18 +104,25 @@ size_t Button_Matrix_PIGPIO::get_button_index(size_t row, size_t column) const
     return row + column * get_row_count();
 }
 
+static void microsleep(uint32_t us)
+{
+    auto start = q::Clock::now();
+    while (std::chrono::duration_cast<std::chrono::microseconds>(q::Clock::now() - start).count() < us);
+}
+
 void Button_Matrix_PIGPIO::process()
 {
     //first gpio
     uint8_t column_gpio = m_column_gpios[0];
     gpioSetMode(column_gpio, PI_OUTPUT);
     gpioWrite(column_gpio, 1);
-    //to allow the pin to ramp up
-    std::this_thread::sleep_for(std::chrono::microseconds(20));
 
     //read
     for (size_t c = 0; c < m_column_gpios.size(); c++)
     {
+        //to allow the pin to ramp up
+        microsleep(5);
+
         for (size_t r = 0; r < m_row_gpios.size(); r++)
         {
             uint8_t row_gpio = m_row_gpios[r];
@@ -169,9 +176,6 @@ void Button_Matrix_PIGPIO::process()
             gpioSetMode(column_gpio, PI_OUTPUT);
 
             gpioWrite(column_gpio, 1);
-
-            //to allow the pin to ramp up/down
-            std::this_thread::sleep_for(std::chrono::microseconds(20));
         }
     }
 
