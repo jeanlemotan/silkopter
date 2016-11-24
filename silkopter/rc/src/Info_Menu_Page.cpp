@@ -13,7 +13,7 @@ namespace silk
 
 Info_Menu_Page::Info_Menu_Page()
 {
-    m_menu.push_submenu({"Back", "Sticks", "Battery", "About"}, 0, 34);
+    m_menu.push_submenu({"<-", "Sticks", "Battery", "About"}, 0, 34);
 }
 
 bool Info_Menu_Page::process(Input& input, Menu_System& menu_system)
