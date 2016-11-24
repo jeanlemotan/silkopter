@@ -16,54 +16,28 @@ constexpr uint8_t PILOT_CHANNEL = 15;
 constexpr uint8_t VIDEO_CHANNEL = 16;
 constexpr uint8_t TELEMETRY_CHANNEL = 20;
 
+constexpr char const* VIDEO_INTERFACE = "wlan2";
+
+constexpr uint8_t RC_SDN_GPIO = 6;
+constexpr uint8_t RC_NIRQ_GPIO = 26;
+constexpr char const* RC_SPI_DEVICE = "/dev/spidev0.0";
+constexpr size_t RC_SPEED = 16000000;
+
 
 Comms::Comms()
     : m_rc(true)
-    , m_video_streamer("wlan1", util::comms::Video_Streamer::Slave_Descriptor())
+    , m_video_streamer(VIDEO_INTERFACE, util::comms::Video_Streamer::Slave_Descriptor())
 {
 }
 
-auto Comms::start(std::string const& interface, uint8_t id) -> bool
+auto Comms::start() -> bool
 {
     disconnect();
 
     try
     {
-//        m_rcp.reset(new util::comms::RCP);
-
-//        {
-//            auto s = new util::RCP_RFMON_Socket(interface, id);
-//            m_video_socket.reset(s);
-//            if (!s->start())
-//            {
-//                throw std::exception();
-//            }
-
-//            util::RCP::Socket_Handle handle = m_rcp->add_socket(m_video_socket.get());
-//            if (handle >= 0)
-//            {
-//                m_rcp->set_socket_handle(VIDEO_CHANNEL, handle);
-//                m_rcp->set_socket_handle(TELEMETRY_CHANNEL, handle);
-//            }
-//        }
-
-//        {
-//            auto s = new util::comms::RF4463F30_Socket("/dev/spidev1.0", 16000000, true);
-//            m_rc_socket.reset(s);
-//            if (!s->start())
-//            {
-//                throw std::exception();
-//            }
-
-//            util::comms::RCP::Socket_Handle handle = m_rcp->add_socket(m_rc_socket.get());
-//            if (handle >= 0)
-//            {
-//                m_rcp->set_internal_socket_handle(handle);
-//                m_rcp->set_socket_handle(PILOT_CHANNEL, handle);
-//            }
-//        }
-
-        m_is_connected = m_rc.init() && m_video_streamer.init(12, 20);
+        m_is_connected = m_rc.init(RC_SPI_DEVICE, RC_SPEED, RC_SDN_GPIO, RC_NIRQ_GPIO)
+                && m_video_streamer.init(12, 20);
     }
     catch(std::exception e)
     {
@@ -72,13 +46,13 @@ auto Comms::start(std::string const& interface, uint8_t id) -> bool
 
     if (!m_is_connected)
     {
-        QLOGW("Cannot start comms on interface {}", interface);
+        QLOGW("Cannot start comms on interface {}", VIDEO_INTERFACE);
         return false;
     }
 
     m_video_streamer.on_data_received = std::bind(&Comms::handle_video, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
 
-    QLOGI("Started sending on interface {}", interface);
+    QLOGI("Started sending on interface {}", VIDEO_INTERFACE);
 
     return true;
 }
@@ -169,7 +143,7 @@ void Comms::process()
 //    }
 
     static q::Clock::time_point s_tp = q::Clock::now();
-    if (q::Clock::now() - s_tp > std::chrono::milliseconds(500))
+    if (q::Clock::now() - s_tp >= std::chrono::milliseconds(50))
     {
         s_tp = q::Clock::now();
 

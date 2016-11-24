@@ -48,7 +48,7 @@ class Comms : q::util::Noncopyable
 public:
     Comms();
 
-    auto start(std::string const& interface, uint8_t id) -> bool;
+    auto start() -> bool;
 
     void disconnect();
     auto is_connected() const -> bool;
