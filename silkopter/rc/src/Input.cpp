@@ -39,15 +39,15 @@ void Input::init(Comms &comms)
     m_input_devices.push_back(actuators);
 
     Rotary_Encoder_PIGPIO* encoder = new Rotary_Encoder_PIGPIO();
-    result = encoder->init(24, 25);
+    result = encoder->init(12, 13);
     QASSERT(result == ts::success);
-    m_param_encoder1.reset(encoder);
+    m_menu_encoder.reset(encoder);
     m_input_devices.push_back(encoder);
 
     encoder = new Rotary_Encoder_PIGPIO();
-    result = encoder->init(12, 13);
+    result = encoder->init(24, 25);
     QASSERT(result == ts::success);
-    m_param_encoder2.reset(encoder);
+    m_param_encoder.reset(encoder);
     m_input_devices.push_back(encoder);
 
     Button_Matrix_PIGPIO* button_matrix = new Button_Matrix_PIGPIO();
@@ -85,41 +85,41 @@ IStick_Actuators const& Input::get_stick_actuators() const
     return *m_stick_actuators;
 }
 
-IRotary_Encoder const& Input::get_param_encoder1() const
+IRotary_Encoder const& Input::get_menu_encoder() const
 {
-    return *m_param_encoder1;
+    return *m_menu_encoder;
 }
-IButton const& Input::get_param_switch1() const
-{
-    return m_button_matrix->get_button(1, 2);
-}
-IRotary_Encoder const& Input::get_param_encoder2() const
-{
-    return *m_param_encoder2;
-}
-IButton const& Input::get_param_switch2() const
+IButton const& Input::get_menu_switch() const
 {
     return m_button_matrix->get_button(0, 2);
+}
+IRotary_Encoder const& Input::get_param_encoder() const
+{
+    return *m_param_encoder;
+}
+IButton const& Input::get_param_switch() const
+{
+    return m_button_matrix->get_button(1, 2);
 }
 IButton_Matrix const& Input::get_button_matrix() const
 {
     return *m_button_matrix;
 }
 
-IButton const& Input::get_param_switch1_up() const
+IButton const& Input::get_switch1_up() const
 {
     return m_button_matrix->get_button(2, 0);
 }
-IButton const& Input::get_param_switch1_down() const
+IButton const& Input::get_switch1_down() const
 {
     return m_button_matrix->get_button(3, 0);
 }
 
-IButton const& Input::get_param_switch2_up() const
+IButton const& Input::get_switch2_up() const
 {
     return m_button_matrix->get_button(0, 0);
 }
-IButton const& Input::get_param_switch2_down() const
+IButton const& Input::get_switch2_down() const
 {
     return m_button_matrix->get_button(1, 0);
 }

@@ -75,20 +75,17 @@ LIBS += -L$${ROOT_LIBS_PATH}/qbase/lib/$${DEST_FOLDER} -lqbase
 LIBS += -lpthread
 LIBS += -lboost_system
 LIBS += -lboost_thread
-#LIBS += -lboost_program_options
 LIBS += -lrt
 LIBS += -lz
 LIBS += -lpcap
 rpi {
-    #LIBS += -lnl-3
-    #LIBS += -lnl-genl-3
     LIBS += -lmmal_core
     LIBS += -lmmal_util
     LIBS += -lmmal_vc_client
     LIBS += -lvcos
     LIBS += -lbcm_host
-    LIBS += -lGLESv2
-    LIBS += -lEGL
+#    LIBS += -lGLESv2
+#    LIBS += -lEGL
 } else {
     LIBS += -lBulletCollision
     LIBS += -lBulletDynamics

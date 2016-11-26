@@ -8,7 +8,7 @@ namespace silk
 
 bool Fly_Menu_Page::process(Input& input, Menu_System& menu_system)
 {
-    if (input.get_param_switch1().was_released())
+    if (input.get_menu_switch().was_released())
     {
         return false;
     }

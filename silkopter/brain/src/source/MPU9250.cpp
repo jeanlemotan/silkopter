@@ -322,7 +322,7 @@ MPU9250::~MPU9250()
 {
 }
 
-auto MPU9250::lock(Buses& buses) -> bool
+bool MPU9250::lock(Buses& buses)
 {
     if (buses.i2c)
     {
@@ -350,42 +350,42 @@ void MPU9250::unlock(Buses& buses)
     }
 }
 
-auto MPU9250::mpu_read(Buses& buses, uint8_t reg, uint8_t* rx_data, uint32_t size, size_t speed) -> bool
+bool MPU9250::mpu_read(Buses& buses, uint8_t reg, uint8_t* rx_data, uint32_t size, size_t speed)
 {
     m_dummy_tx_data.resize(size);
     return buses.i2c ? buses.i2c->read_register(m_descriptor->get_i2c_address(), reg, rx_data, size)
          : buses.spi ? buses.spi->transfer_register(reg | READ_FLAG, m_dummy_tx_data.data(), rx_data, size, speed)
          : false;
 }
-auto MPU9250::mpu_read_u8(Buses& buses, uint8_t reg, uint8_t& rx_data, size_t speed) -> bool
+bool MPU9250::mpu_read_u8(Buses& buses, uint8_t reg, uint8_t& rx_data, size_t speed)
 {
     uint8_t dummy_data = 0;
     return buses.i2c ? buses.i2c->read_register_u8(m_descriptor->get_i2c_address(), reg, rx_data)
          : buses.spi ? buses.spi->transfer_register_u8(reg | READ_FLAG, dummy_data, rx_data, speed)
          : false;
 }
-auto MPU9250::mpu_read_u16(Buses& buses, uint8_t reg, uint16_t& rx_data, size_t speed) -> bool
+bool MPU9250::mpu_read_u16(Buses& buses, uint8_t reg, uint16_t& rx_data, size_t speed)
 {
     uint16_t dummy_data = 0;
     return buses.i2c ? buses.i2c->read_register_u16(m_descriptor->get_i2c_address(), reg, rx_data)
          : buses.spi ? buses.spi->transfer_register_u16(reg | READ_FLAG, dummy_data, rx_data, speed)
          : false;
 }
-auto MPU9250::mpu_write_u8(Buses& buses, uint8_t reg, uint8_t tx_data, size_t speed) -> bool
+bool MPU9250::mpu_write_u8(Buses& buses, uint8_t reg, uint8_t tx_data, size_t speed)
 {
     uint8_t dummy_data = 0;
     return buses.i2c ? buses.i2c->write_register_u8(m_descriptor->get_i2c_address(), reg, tx_data)
          : buses.spi ? buses.spi->transfer_register_u8(reg, tx_data, dummy_data, speed)
          : false;
 }
-auto MPU9250::mpu_write_u16(Buses& buses, uint8_t reg, uint16_t tx_data, size_t speed) -> bool
+bool MPU9250::mpu_write_u16(Buses& buses, uint8_t reg, uint16_t tx_data, size_t speed)
 {
     uint16_t dummy_data = 0;
     return buses.i2c ? buses.i2c->write_register_u16(m_descriptor->get_i2c_address(), reg, tx_data)
          : buses.spi ? buses.spi->transfer_register_u16(reg, tx_data, dummy_data, speed)
          : false;
 }
-auto MPU9250::akm_read(Buses& buses, uint8_t reg, uint8_t* rx_data, uint32_t size, size_t speed) -> bool
+bool MPU9250::akm_read(Buses& buses, uint8_t reg, uint8_t* rx_data, uint32_t size, size_t speed)
 {
     if (buses.i2c)
     {
@@ -409,11 +409,11 @@ auto MPU9250::akm_read(Buses& buses, uint8_t reg, uint8_t* rx_data, uint32_t siz
     res &= mpu_read(buses, MPU_REG_EXT_SENS_DATA_00, rx_data, size, speed);
     return res;
 }
-auto MPU9250::akm_read_u8(Buses& buses, uint8_t reg, uint8_t& dst, size_t speed) -> bool
+bool MPU9250::akm_read_u8(Buses& buses, uint8_t reg, uint8_t& dst, size_t speed)
 {
     return akm_read(buses, reg, &dst, sizeof(dst), speed);
 }
-auto MPU9250::akm_read_u16(Buses& buses, uint8_t reg, uint16_t& dst, size_t speed) -> bool
+bool MPU9250::akm_read_u16(Buses& buses, uint8_t reg, uint16_t& dst, size_t speed)
 {
     if (buses.i2c)
     {
@@ -436,7 +436,7 @@ auto MPU9250::akm_read_u16(Buses& buses, uint8_t reg, uint16_t& dst, size_t spee
     res &= mpu_read_u16(buses, MPU_REG_EXT_SENS_DATA_00, dst, speed);
     return res;
 }
-auto MPU9250::akm_write_u8(Buses& buses, uint8_t reg, uint8_t t, size_t speed) -> bool
+bool MPU9250::akm_write_u8(Buses& buses, uint8_t reg, uint8_t t, size_t speed)
 {
     if (buses.i2c)
     {
@@ -459,7 +459,7 @@ auto MPU9250::akm_write_u8(Buses& buses, uint8_t reg, uint8_t t, size_t speed) -
     return res;
 }
 
-auto MPU9250::get_outputs() const -> std::vector<Output>
+std::vector<MPU9250::Output> MPU9250::get_outputs() const
 {
     std::vector<Output> outputs(4);
     outputs[0].name = "angular_velocity";
@@ -600,7 +600,7 @@ ts::Result<void> MPU9250::init()
         }
     }
 
-    auto res = mpu_write_u8(buses, MPU_REG_PWR_MGMT_1, MPU_BIT_H_RESET, CONFIG_REGISTER_SPEED);
+    bool res = mpu_write_u8(buses, MPU_REG_PWR_MGMT_1, MPU_BIT_H_RESET, CONFIG_REGISTER_SPEED);
     std::this_thread::sleep_for(std::chrono::milliseconds(120));
 
     if (buses.spi)
@@ -712,7 +712,7 @@ ts::Result<void> MPU9250::init()
     return ts::success;
 }
 
-auto MPU9250::setup_magnetometer(Buses& buses) -> bool
+bool MPU9250::setup_magnetometer(Buses& buses)
 {
     if (buses.i2c)
     {
@@ -725,7 +725,7 @@ auto MPU9250::setup_magnetometer(Buses& buses) -> bool
     return false;
 }
 
-auto MPU9250::setup_magnetometer_i2c(Buses& buses) -> bool
+bool MPU9250::setup_magnetometer_i2c(Buses& buses)
 {
     QLOG_TOPIC("mpu9250::setup_magnetometer_i2c");
 
@@ -743,7 +743,7 @@ auto MPU9250::setup_magnetometer_i2c(Buses& buses) -> bool
     for (m_akm_address = 0x0C; m_akm_address <= 0x0F; m_akm_address++)
     {
         uint8_t data;
-        auto res = akm_read_u8(buses, AKM_REG_WHOAMI, data, CONFIG_REGISTER_SPEED);
+        bool res = akm_read_u8(buses, AKM_REG_WHOAMI, data, CONFIG_REGISTER_SPEED);
         if (res && data == AKM_WHOAMI)
         {
             break;
@@ -783,7 +783,7 @@ auto MPU9250::setup_magnetometer_i2c(Buses& buses) -> bool
     return true;
 }
 
-auto MPU9250::setup_magnetometer_spi(Buses& buses) -> bool
+bool MPU9250::setup_magnetometer_spi(Buses& buses)
 {
     QLOG_TOPIC("mpu9250::setup_magnetometer_spi");
 
@@ -929,7 +929,7 @@ void MPU9250::reset_fifo(Buses& buses)
 }
 
 template<class Calibration_Data>
-auto get_calibration_scale(Calibration_Data const& points, float temperature) -> math::vec3f
+math::vec3f get_calibration_scale(Calibration_Data const& points, float temperature)
 {
     if (points.empty())
     {
@@ -956,7 +956,7 @@ auto get_calibration_scale(Calibration_Data const& points, float temperature) ->
 }
 
 template<class Calibration_Data>
-auto get_calibration_bias(Calibration_Data const& points, float temperature) -> math::vec3f
+math::vec3f get_calibration_bias(Calibration_Data const& points, float temperature)
 {
     if (points.empty())
     {
@@ -1011,7 +1011,7 @@ void MPU9250::process()
    // last_timestamp = now;
 
     uint16_t fifo_count;
-    auto res = mpu_read_u16(buses, MPU_REG_FIFO_COUNTH, fifo_count, MISC_REGISTER_SPEED);
+    bool res = mpu_read_u16(buses, MPU_REG_FIFO_COUNTH, fifo_count, MISC_REGISTER_SPEED);
     if (!res)
     {
         m_stats.bus_failures++;
@@ -1031,8 +1031,8 @@ void MPU9250::process()
         }
         else
         {
-            auto sample_count = fifo_count / FIFO_SAMPLE_SIZE;
-            auto to_read = sample_count * FIFO_SAMPLE_SIZE;
+            size_t sample_count = fifo_count / FIFO_SAMPLE_SIZE;
+            size_t to_read = sample_count * FIFO_SAMPLE_SIZE;
             QASSERT(sample_count >= 1);
 
             m_fifo_buffer.resize(to_read);
@@ -1052,9 +1052,9 @@ void MPU9250::process()
 //                m_acceleration->samples.resize(sample_count);
 
                 constexpr size_t k_max_sample_difference = 3;
-                auto now = q::Clock::now();
-                auto acc_dt = m_acceleration->get_dt();
-                auto av_dt = m_angular_velocity->get_dt();
+                q::Clock::time_point now = q::Clock::now();
+                q::Clock::duration acc_dt = m_acceleration->get_dt();
+                q::Clock::duration av_dt = m_angular_velocity->get_dt();
 
                 uint8_t const* data = m_fifo_buffer.data();
                 for (size_t i = 0; i < sample_count; i++)
@@ -1121,13 +1121,13 @@ void MPU9250::process()
         }
     }
 
-    auto now = q::Clock::now();
+    q::Clock::time_point now = q::Clock::now();
 
     //handle and report the slow clock
     {
         constexpr size_t k_max_sample_difference = 8;
         {
-            auto dt = m_acceleration->get_dt();
+            q::Clock::duration dt = m_acceleration->get_dt();
             if (m_acceleration->get_tp() <= now - dt * k_max_sample_difference)
             {
                 while (m_acceleration->get_tp() <= now - dt)
@@ -1138,7 +1138,7 @@ void MPU9250::process()
             }
         }
         {
-            auto dt = m_angular_velocity->get_dt();
+            q::Clock::duration dt = m_angular_velocity->get_dt();
             if (m_angular_velocity->get_tp() <= now - dt * k_max_sample_difference)
             {
                 while (m_angular_velocity->get_tp() <= now - dt)
@@ -1231,9 +1231,9 @@ void MPU9250::process_magnetometer(Buses& buses)
     QLOG_TOPIC("mpu9250::process_magnetometer");
 
 #ifdef USE_AK8963
-    auto now = q::Clock::now();
+    q::Clock::time_point now = q::Clock::now();
 
-    auto dt = now - m_last_magnetic_field_tp;
+    q::Clock::duration dt = now - m_last_magnetic_field_tp;
     if (dt >= std::chrono::seconds(5))
     {
         m_stats.mf.reset++;
@@ -1342,7 +1342,7 @@ ts::Result<void> MPU9250::set_config(hal::INode_Config const& config)
 
     //sort so we can lower_bound search the point quickly
     {
-        auto points = calibration.get_acceleration();
+        std::vector<hal::Acceleration_Calibration_Point>& points = calibration.get_acceleration();
         std::sort(points.begin(), points.end(), [](const hal::Acceleration_Calibration_Point& a, const hal::Acceleration_Calibration_Point& b)
         {
             return a.get_temperature() < b.get_temperature();
@@ -1351,7 +1351,7 @@ ts::Result<void> MPU9250::set_config(hal::INode_Config const& config)
     }
 
     {
-        auto points = calibration.get_angular_velocity();
+        std::vector<hal::Angular_Velocity_Calibration_Point>& points = calibration.get_angular_velocity();
         std::sort(points.begin(), points.end(), [](const hal::Angular_Velocity_Calibration_Point& a, const hal::Angular_Velocity_Calibration_Point& b)
         {
             return a.get_temperature() < b.get_temperature();
@@ -1360,7 +1360,7 @@ ts::Result<void> MPU9250::set_config(hal::INode_Config const& config)
     }
 
     {
-        auto points = calibration.get_magnetic_field();
+        std::vector<hal::Magnetic_Field_Calibration_Point>& points = calibration.get_magnetic_field();
         std::sort(points.begin(), points.end(), [](const hal::Magnetic_Field_Calibration_Point& a, const hal::Magnetic_Field_Calibration_Point& b)
         {
             return a.get_temperature() < b.get_temperature();
@@ -1383,12 +1383,12 @@ ts::Result<void> MPU9250::set_config(hal::INode_Config const& config)
 
     return ts::success;
 }
-auto MPU9250::get_config() const -> std::shared_ptr<const hal::INode_Config>
+std::shared_ptr<const hal::INode_Config> MPU9250::get_config() const
 {
     return m_config;
 }
 
-auto MPU9250::get_descriptor() const -> std::shared_ptr<const hal::INode_Descriptor>
+std::shared_ptr<const hal::INode_Descriptor> MPU9250::get_descriptor() const
 {
     return m_descriptor;
 }

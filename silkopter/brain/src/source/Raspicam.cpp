@@ -717,7 +717,7 @@ static bool commit_format(MMAL_PORT_T* port)
     }
 
     port->buffer_size = math::max(port->buffer_size_recommended, port->buffer_size_min);
-    port->buffer_num = math::max(port->buffer_num_recommended, port->buffer_num_min);
+    port->buffer_num = math::min(port->buffer_num_recommended, port->buffer_num_min);
 //    dump_format_info(1, port->format);
 
     return true;
@@ -758,7 +758,7 @@ static Pool_ptr create_output_port_pool(MMAL_PORT_T* port, MMAL_PORT_USERDATA_T*
 
     //setup video port buffer and a pool to hold them
     port->buffer_size = math::max(port->buffer_size_recommended, port->buffer_size_min);
-    port->buffer_num = math::max(port->buffer_num_recommended, port->buffer_num_min);
+    port->buffer_num = math::min(port->buffer_num_recommended, port->buffer_num_min);
     port->buffer_num = math::max(port->buffer_num, buffer_count);
 
     QLOGI("Creating port {} pool with {} buffers of size {}", port->name, port->buffer_num, port->buffer_size);
@@ -1124,7 +1124,7 @@ static Component_ptr create_resizer_component(MMAL_PORT_T* src, math::vec2u16 co
     copy_format(resizer->output[0], src);
     setup_video_format(resizer->output[0]->format, resolution, false, fps);
 
-    auto* format = resizer->output[0]->format;
+    MMAL_ES_FORMAT_T* format = resizer->output[0]->format;
     format->es->video.width = resolution.x;
     format->es->video.height = resolution.y;
     format->es->video.crop.x = 0;
@@ -1135,6 +1135,7 @@ static Component_ptr create_resizer_component(MMAL_PORT_T* src, math::vec2u16 co
     format->es->video.frame_rate.den = 1;
     format->es->video.par.num = 1;
     format->es->video.par.den = 1;
+
     if (!commit_format(resizer->output[0]))
     {
         return Component_ptr();

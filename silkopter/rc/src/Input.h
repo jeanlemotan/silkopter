@@ -37,18 +37,19 @@ public:
 
     IStick_Actuators const& get_stick_actuators() const;
 
-    IRotary_Encoder const& get_param_encoder1() const;
-    IButton const& get_param_switch1() const;
-    IRotary_Encoder const& get_param_encoder2() const;
-    IButton const& get_param_switch2() const;
+    IRotary_Encoder const& get_menu_encoder() const;
+    IButton const& get_menu_switch() const;
+
+    IRotary_Encoder const& get_param_encoder() const;
+    IButton const& get_param_switch() const;
 
     IButton_Matrix const& get_button_matrix() const;
 
-    IButton const& get_param_switch1_up() const;
-    IButton const& get_param_switch1_down() const;
+    IButton const& get_switch1_up() const;
+    IButton const& get_switch1_down() const;
 
-    IButton const& get_param_switch2_up() const;
-    IButton const& get_param_switch2_down() const;
+    IButton const& get_switch2_up() const;
+    IButton const& get_switch2_down() const;
 
     IButton const& get_vertical_mode_switch() const;
     IButton const& get_yaw_mode_switch() const;
@@ -71,8 +72,8 @@ private:
     std::unique_ptr<ISticks> m_sticks;
     std::unique_ptr<IStick_Actuators> m_stick_actuators;
 
-    std::unique_ptr<IRotary_Encoder> m_param_encoder1;
-    std::unique_ptr<IRotary_Encoder> m_param_encoder2;
+    std::unique_ptr<IRotary_Encoder> m_menu_encoder;
+    std::unique_ptr<IRotary_Encoder> m_param_encoder;
 
     std::unique_ptr<IButton_Matrix> m_button_matrix;
 };

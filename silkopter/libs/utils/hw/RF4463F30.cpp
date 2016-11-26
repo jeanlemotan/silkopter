@@ -321,7 +321,7 @@ bool RF4463F30::end_tx()
 
         if (std::chrono::high_resolution_clock::now() - start > std::chrono::milliseconds(1000))
         {
-            QLOGE("Timeout");
+            QLOGW("Timeout");
             return false;
         }
 

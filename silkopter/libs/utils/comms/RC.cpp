@@ -8,10 +8,6 @@ namespace util
 namespace comms
 {
 
-//constexpr uint8_t SDN_GPIO = 6;
-//constexpr uint8_t NIRQ_GPIO = 5;
-//constexpr char const* SPI_DEVICE = "/dev/spidev1.0";
-//constexpr size_t SPEED = 16000000;
 constexpr size_t MTU = 64;
 constexpr uint8_t CHANNEL = 0;
 constexpr q::Clock::duration MIN_TX_DURATION = std::chrono::milliseconds(5);

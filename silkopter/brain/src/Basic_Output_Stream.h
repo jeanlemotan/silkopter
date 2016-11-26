@@ -15,9 +15,9 @@ public:
     typedef typename Base::Sample Sample;
     typedef typename Sample::Value Value;
 
-    auto get_last_sample() const -> Sample const& { return m_last_sample; }
-    auto get_samples() const -> std::vector<Sample> const& { return m_samples; }
-    auto get_rate() const -> uint32_t { return m_rate; }
+    Sample const& get_last_sample() const { return m_last_sample; }
+    std::vector<Sample> const& get_samples() const { return m_samples; }
+    uint32_t get_rate() const { return m_rate; }
 
     void set_rate(uint32_t rate)
     {
@@ -36,11 +36,11 @@ public:
         m_tp = tp;
     }
 
-    auto get_dt() const -> q::Clock::duration
+    q::Clock::duration get_dt() const
     {
         return m_dt;
     }
-    auto get_tp() const -> q::Clock::time_point
+    q::Clock::time_point get_tp() const
     {
         return m_tp;
     }
@@ -81,7 +81,7 @@ public:
         m_future_warning = false;
     }
 
-    auto compute_samples_needed() -> size_t
+    size_t compute_samples_needed()
     {
         auto dt = q::Clock::now() - m_tp;
         if (dt < q::Clock::duration(0))

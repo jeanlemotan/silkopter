@@ -22,8 +22,6 @@
 int s_version_major = 1;
 int s_version_minor = 0;
 
-#ifdef RASPBERRY_PI
-
 extern "C"
 {
 #include "utils/hw/pigpio.h"
@@ -64,7 +62,6 @@ static auto shutdown_pigpio() -> bool
     return true;
 }
 
-#endif
 
 int main(int argc, char *argv[])
 {
@@ -79,13 +76,11 @@ int main(int argc, char *argv[])
     //        worker_threads.create_thread(boost::bind(&boost::asio::io_service::run, &s_async_io_service));
     //    }
 
-#if defined (RASPBERRY_PI)
     if (!initialize_pigpio())
     {
         QLOGE("Cannot initialize pigpio");
         return false;
     }
-#endif
 
     silk::Comms comms;
     silk::Menu_System menu_system;
@@ -143,9 +138,7 @@ int main(int argc, char *argv[])
         //std::this_thread::sleep_for(std::chrono::microseconds(1));
     }
 
-#if defined (RASPBERRY_PI)
     shutdown_pigpio();
-#endif
 
     return 0;
 }

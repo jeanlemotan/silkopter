@@ -16,7 +16,8 @@ constexpr uint8_t PILOT_CHANNEL = 15;
 constexpr uint8_t VIDEO_CHANNEL = 16;
 constexpr uint8_t TELEMETRY_CHANNEL = 20;
 
-constexpr char const* VIDEO_INTERFACE = "wlan2";
+constexpr char const* VIDEO_INTERFACE1 = "wlan2";
+constexpr char const* VIDEO_INTERFACE2 = "wlan3";
 
 constexpr uint8_t RC_SDN_GPIO = 6;
 constexpr uint8_t RC_NIRQ_GPIO = 26;
@@ -26,7 +27,7 @@ constexpr size_t RC_SPEED = 16000000;
 
 Comms::Comms()
     : m_rc(true)
-    , m_video_streamer(VIDEO_INTERFACE, util::comms::Video_Streamer::Slave_Descriptor())
+    , m_video_streamer({ VIDEO_INTERFACE1, VIDEO_INTERFACE2 }, util::comms::Video_Streamer::RX_Descriptor())
 {
 }
 
@@ -46,13 +47,13 @@ auto Comms::start() -> bool
 
     if (!m_is_connected)
     {
-        QLOGW("Cannot start comms on interface {}", VIDEO_INTERFACE);
+        QLOGW("Cannot start comms");
         return false;
     }
 
     m_video_streamer.on_data_received = std::bind(&Comms::handle_video, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
 
-    QLOGI("Started sending on interface {}", VIDEO_INTERFACE);
+    QLOGI("Started receiving video");
 
     return true;
 }

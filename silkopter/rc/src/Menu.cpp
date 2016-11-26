@@ -69,7 +69,7 @@ boost::optional<size_t> Menu::process(Input& input)
 
     Submenu& crt_submenu = m_submenus[m_crt_submenu_idx];
 
-    int32_t delta = input.get_param_encoder1().get_delta();
+    int32_t delta = input.get_menu_encoder().get_delta();
 
     int32_t entry = static_cast<int>(crt_submenu.crt_entry) + delta;
     if (entry < 0)
@@ -83,7 +83,7 @@ boost::optional<size_t> Menu::process(Input& input)
         crt_submenu.crt_entry = 0;
     }
 
-    if (input.get_param_switch1().was_released())
+    if (input.get_menu_switch().was_released())
     {
         return crt_submenu.crt_entry;
     }

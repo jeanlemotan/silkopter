@@ -5,13 +5,20 @@
 #include "utils/comms/RC.h"
 #include "utils/comms/Video_Streamer.h"
 
-using namespace silk;
+namespace silk
+{
+
+constexpr uint8_t SDN_GPIO = 6;
+constexpr uint8_t NIRQ_GPIO = 5;
+constexpr char const* SPI_DEVICE = "/dev/spidev1.0";
+constexpr size_t SPEED = 16000000;
+
 
 struct RC_Comms::Impl
 {
     Impl()
         : rc(false)
-        , video_streamer("wlan1", util::comms::Video_Streamer::Master_Descriptor())
+        , video_streamer("wlan1", util::comms::Video_Streamer::TX_Descriptor())
     {}
 
     util::comms::RC rc;
@@ -64,7 +71,7 @@ auto RC_Comms::start(std::string const& interface, uint8_t id) -> bool
 //            }
 //        }
 
-        m_is_connected = m_impl->rc.init() && m_impl->video_streamer.init(12, 20);
+        m_is_connected = m_impl->rc.init(SPI_DEVICE, SPEED, SDN_GPIO, NIRQ_GPIO) && m_impl->video_streamer.init(12, 20);
     }
     catch(std::exception e)
     {
@@ -204,3 +211,4 @@ void RC_Comms::process()
 //    }
 }
 
+}

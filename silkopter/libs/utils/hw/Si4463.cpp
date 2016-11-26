@@ -283,7 +283,7 @@ bool Si4463::wait_for_ph_interrupt(bool& got_it, uint8_t& status, std::chrono::h
 
         if (std::chrono::high_resolution_clock::now() - start > timeout)
         {
-            QLOGE("Timeout");
+            QLOGW("Timeout");
             return false;
         }
         std::this_thread::sleep_for(std::chrono::microseconds(1));
@@ -321,7 +321,7 @@ bool Si4463::wait_for_cts()
 
         if (std::chrono::high_resolution_clock::now() - start > std::chrono::milliseconds(1000))
         {
-            QLOGE("Timeout");
+            QLOGW("Timeout");
             return false;
         }
     }
@@ -391,7 +391,7 @@ bool Si4463::call_api_raw(void const* tx_data, size_t tx_size, void* rx_data, si
 
             if (std::chrono::high_resolution_clock::now() - start > std::chrono::milliseconds(1000))
             {
-                QLOGE("Timeout");
+                QLOGW("Timeout");
                 return false;
             }
             //std::this_thread::sleep_for(std::chrono::microseconds(10));

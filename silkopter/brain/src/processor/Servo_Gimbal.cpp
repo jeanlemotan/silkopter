@@ -88,15 +88,14 @@ void Servo_Gimbal::process()
         {
             math::quatf rotation;
 
-
-            if (m_commands_sample.value.gimbal.reference_frame.get() == stream::IMultirotor_Commands::Gimbal::Reference_Frame::GIMBAL)
+//            if (m_commands_sample.value.gimbal.reference_frame.get() == stream::IMultirotor_Commands::Gimbal::Reference_Frame::GIMBAL)
+//            {
+//                rotation = m_commands_sample.value.gimbal.target_frame.get();
+//            }
+//            else
             {
-                rotation = m_commands_sample.value.gimbal.target_frame.get();
-            }
-            else
-            {
-                math::quatf const& target_rotation = m_commands_sample.value.gimbal.target_frame.get();
-                rotation = math::inverse(i_sample.value) * target_rotation;
+//                math::quatf const& target_rotation = m_commands_sample.value.gimbal.target_frame.get();
+//                rotation = math::inverse(i_sample.value) * target_rotation;
             }
 
 
