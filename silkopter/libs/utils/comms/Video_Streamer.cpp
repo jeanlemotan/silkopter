@@ -67,9 +67,21 @@ struct Datagram_Header
 //A     B       C       D       E       F
 //A     Bx      Cx      Dx      Ex      Fx
 
-
-struct TX
+struct Video_Streamer::PCap
 {
+    std::mutex mutex;
+    pcap_t* pcap = nullptr;
+    char error_buffer[PCAP_ERRBUF_SIZE] = {0};
+    int rx_pcap_selectable_fd = 0;
+
+    size_t _80211_header_length = 0;
+};
+
+
+struct Video_Streamer::TX
+{
+    PCap pcap;
+
     struct Datagram : public Pool_Item_Base
     {
         std::vector<uint8_t> data;
@@ -94,8 +106,10 @@ struct TX
 };
 
 
-struct RX
+struct Video_Streamer::RX
 {
+    std::unique_ptr<PCap[]> pcaps;
+
     struct Datagram : public Pool_Item_Base
     {
         bool is_processed = false;
@@ -128,9 +142,9 @@ struct RX
 };
 
 
-static void seal_datagram(TX::Datagram& datagram, size_t header_offset, uint32_t block_index, uint8_t datagram_index, math::vec2u16 const& resolution, bool is_fec)
+static void seal_datagram(Video_Streamer::TX::Datagram& datagram, size_t header_offset, uint32_t block_index, uint8_t datagram_index, math::vec2u16 const& resolution, bool is_fec)
 {
-    QASSERT(datagram.data.size() >= header_offset + sizeof(TX::Datagram));
+    QASSERT(datagram.data.size() >= header_offset + sizeof(Video_Streamer::TX::Datagram));
 
     Datagram_Header& header = *reinterpret_cast<Datagram_Header*>(datagram.data.data() + header_offset);
 //    header.crc = 0;
@@ -146,16 +160,7 @@ static void seal_datagram(TX::Datagram& datagram, size_t header_offset, uint32_t
 
 struct Video_Streamer::Impl
 {
-    std::mutex pcap_mutex;
-    pcap_t* pcap = nullptr;
-    int rx_pcap_selectable_fd = 0;
-
-    size_t _80211_header_length = 0;
     size_t tx_packet_header_length = 0;
-
-//    std::mutex tx_buffer_mutex;
-//    std::vector<uint8_t> tx_buffer;
-//    bool tx_buffer_has_data = false;
 
     TX tx;
     RX rx;
@@ -200,20 +205,21 @@ std::vector<std::string> Video_Streamer::enumerate_interfaces()
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-Video_Streamer::Video_Streamer(std::string const& interface, Master_Descriptor const& descriptor)
-    : m_interface(interface)
-    , m_is_master(true)
-    , m_master_descriptor(descriptor)
+Video_Streamer::Video_Streamer(std::string const& interface, TX_Descriptor const& descriptor)
+    : m_tx_interface(interface)
+    , m_is_tx(true)
+    , m_tx_descriptor(descriptor)
 {
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-Video_Streamer::Video_Streamer(std::string const& interface, Slave_Descriptor const& descriptor)
-    : m_interface(interface)
-    , m_is_master(false)
-    , m_slave_descriptor(descriptor)
+Video_Streamer::Video_Streamer(std::vector<std::string> const& interfaces, RX_Descriptor const& descriptor)
+    : m_rx_interfaces(interfaces)
+    , m_is_tx(false)
+    , m_rx_descriptor(descriptor)
 {
+    QASSERT(!m_rx_interfaces.empty());
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////
@@ -234,24 +240,24 @@ Video_Streamer::~Video_Streamer()
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-bool Video_Streamer::prepare_filter()
+bool Video_Streamer::prepare_filter(PCap& pcap)
 {
     struct bpf_program program;
     char program_src[512];
 
-    int link_encap = pcap_datalink(m_impl->pcap);
+    int link_encap = pcap_datalink(pcap.pcap);
 
     switch (link_encap)
     {
     case DLT_PRISM_HEADER:
         QLOGI("DLT_PRISM_HEADER Encap");
-        m_impl->_80211_header_length = 0x20; // ieee80211 comes after this
+        pcap._80211_header_length = 0x20; // ieee80211 comes after this
         sprintf(program_src, "radio[0x4a:4]==0x13223344 && radio[0x4e:2] == 0x5566");
         break;
 
     case DLT_IEEE802_11_RADIO:
         QLOGI("DLT_IEEE802_11_RADIO Encap");
-        m_impl->_80211_header_length = 0x18; // ieee80211 comes after this
+        pcap._80211_header_length = 0x18; // ieee80211 comes after this
         sprintf(program_src, "ether[0x0a:4]==0x13223344 && ether[0x0e:2] == 0x5566");
         break;
 
@@ -260,20 +266,23 @@ bool Video_Streamer::prepare_filter()
         return false;
     }
 
-    if (pcap_compile(m_impl->pcap, &program, program_src, 1, 0) == -1)
+    if (pcap_compile(pcap.pcap, &program, program_src, 1, 0) == -1)
     {
-        QLOGE("Failed to compile program: {} : {}", program_src, pcap_geterr(m_impl->pcap));
+        QLOGE("Failed to compile program: {} : {}", program_src, pcap_geterr(pcap.pcap));
         return false;
     }
-    if (pcap_setfilter(m_impl->pcap, &program) == -1)
+    if (pcap_setfilter(pcap.pcap, &program) == -1)
     {
         pcap_freecode(&program);
-        QLOGE("Failed to set program: {} : {}", program_src, pcap_geterr(m_impl->pcap));
+        QLOGE("Failed to set program: {} : {}", program_src, pcap_geterr(pcap.pcap));
         return false;
     }
     pcap_freecode(&program);
 
-    m_impl->rx_pcap_selectable_fd = pcap_get_selectable_fd(m_impl->pcap);
+    if (!m_is_tx)
+    {
+        pcap.rx_pcap_selectable_fd = pcap_get_selectable_fd(pcap.pcap);
+    }
     return true;
 }
 
@@ -370,7 +379,7 @@ void Video_Streamer::prepare_tx_packet_header(uint8_t* buffer)
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-bool Video_Streamer::process_rx_packet()
+bool Video_Streamer::process_rx_packet(PCap& pcap)
 {
     struct pcap_pkthdr* pcap_packet_header = nullptr;
 
@@ -380,11 +389,11 @@ bool Video_Streamer::process_rx_packet()
     while (true)
     {
         {
-            std::lock_guard<std::mutex> lg(m_impl->pcap_mutex);
-            int retval = pcap_next_ex(m_impl->pcap, &pcap_packet_header, (const u_char**)&payload);
+            std::lock_guard<std::mutex> lg(pcap.mutex);
+            int retval = pcap_next_ex(pcap.pcap, &pcap_packet_header, (const u_char**)&payload);
             if (retval < 0)
             {
-                QLOGE("Socket broken: {}", pcap_geterr(m_impl->pcap));
+                QLOGE("Socket broken: {}", pcap_geterr(pcap.pcap));
                 return false;
             }
             if (retval != 1)
@@ -394,13 +403,13 @@ bool Video_Streamer::process_rx_packet()
         }
 
         size_t header_len = (payload[2] + (payload[3] << 8));
-        if (pcap_packet_header->len < (header_len + m_impl->_80211_header_length))
+        if (pcap_packet_header->len < (header_len + pcap._80211_header_length))
         {
             QLOGW("packet too small");
             return true;
         }
 
-        size_t bytes = pcap_packet_header->len - (header_len + m_impl->_80211_header_length);
+        size_t bytes = pcap_packet_header->len - (header_len + pcap._80211_header_length);
 
         ieee80211_radiotap_iterator rti;
         if (ieee80211_radiotap_iterator_init(&rti, (struct ieee80211_radiotap_header *)payload, pcap_packet_header->len) < 0)
@@ -434,7 +443,7 @@ bool Video_Streamer::process_rx_packet()
                 break;
             }
         }
-        payload += header_len + m_impl->_80211_header_length;
+        payload += header_len + pcap._80211_header_length;
 
         if (prh.radiotap_flags & IEEE80211_RADIOTAP_F_FCS)
         {
@@ -549,6 +558,86 @@ bool Video_Streamer::process_rx_packet()
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 
+bool Video_Streamer::prepare_pcap(std::string const& interface, PCap& pcap)
+{
+    pcap.pcap = pcap_create(interface.c_str(), pcap.error_buffer);
+    if (pcap.pcap == nullptr)
+    {
+        QLOGE("Unable to open interface {}: {}", interface, pcap_geterr(pcap.pcap));
+        return false;
+    }
+    if (pcap_set_snaplen(pcap.pcap, 1800) < 0)
+    {
+        QLOGE("Error setting pcap_set_snaplen: {}", pcap_geterr(pcap.pcap));
+        return false;
+    }
+    if (pcap_set_promisc(pcap.pcap, 1) < 0)
+    {
+        QLOGE("Error setting pcap_set_promisc: {}", pcap_geterr(pcap.pcap));
+        return false;
+    }
+    if (pcap_set_rfmon(pcap.pcap, 1) < 0)
+    {
+        QLOGE("Error setting pcap_set_rfmon: {}", pcap_geterr(pcap.pcap));
+        return false;
+    }
+    if (pcap_set_timeout(pcap.pcap, -1) < 0)
+    {
+        QLOGE("Error setting pcap_set_timeout: {}", pcap_geterr(pcap.pcap));
+        return false;
+    }
+    if (pcap_set_immediate_mode(pcap.pcap, 1) < 0)
+    {
+        QLOGE("Error setting pcap_set_immediate_mode: {}", pcap_geterr(pcap.pcap));
+        return false;
+    }
+    if (pcap_set_buffer_size(pcap.pcap, 16000000) < 0)
+    {
+        QLOGE("Error setting pcap_set_buffer_size: {}", pcap_geterr(pcap.pcap));
+        return false;
+    }
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    int res = pcap_activate(pcap.pcap);
+    if (res < 0)
+    {
+        QLOGE("Error in pcap_activate: {}", pcap_geterr(pcap.pcap));
+        return false;
+    }
+    else if (res == PCAP_WARNING_PROMISC_NOTSUP)
+    {
+        QLOGE("Error in pcap_activate - not promiscous: {}", pcap_geterr(pcap.pcap));
+        return false;
+    }
+    else if (res == PCAP_WARNING_TSTAMP_TYPE_NOTSUP)
+    {
+        //nothing, we don't care about timestamps
+    }
+    else if (res == PCAP_WARNING)
+    {
+        QLOGW("Warning in pcap_activate: {}", pcap_geterr(pcap.pcap));
+    }
+
+//    if (pcap_setnonblock(pcap.pcap, 1, pcap_error) < 0)
+//    {
+//        QLOGE("Error setting pcap_set_snaplen: {}", pcap_geterr(pcap.pcap));
+//        return false;
+//    }
+    if (pcap_setdirection(pcap.pcap, PCAP_D_IN) < 0)
+    {
+        QLOGE("Error setting pcap_setdirection: {}", pcap_geterr(pcap.pcap));
+        return false;
+    }
+
+    if (!prepare_filter(pcap))
+    {
+        return false;
+    }
+
+    return true;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////
+
 bool Video_Streamer::init(uint32_t coding_k, uint32_t coding_n)
 {
     if (coding_k == 0 || coding_n < coding_k || coding_k > m_fec_src_datagram_ptrs.size() || coding_n > m_fec_dst_datagram_ptrs.size())
@@ -562,8 +651,6 @@ bool Video_Streamer::init(uint32_t coding_k, uint32_t coding_n)
 
     m_fec = fec_new(m_coding_k, m_coding_n);
 
-
-    char pcap_error[PCAP_ERRBUF_SIZE] = {0};
 
     m_impl.reset(new Impl);
 
@@ -642,71 +729,26 @@ bool Video_Streamer::init(uint32_t coding_k, uint32_t coding_n)
 //        return false;
 //    }
 
-    m_impl->pcap = pcap_create(m_interface.c_str(), pcap_error);
-    if (m_impl->pcap == nullptr)
+    if (m_is_tx)
     {
-        QLOGE("Unable to open interface {}: {}", m_interface, pcap_geterr(m_impl->pcap));
-        return false;
-    }
-    if (pcap_set_snaplen(m_impl->pcap, 1800) < 0)
-    {
-        QLOGE("Error setting pcap_set_snaplen: {}", pcap_geterr(m_impl->pcap));
-        return false;
-    }
-    if (pcap_set_promisc(m_impl->pcap, 1) < 0)
-    {
-        QLOGE("Error setting pcap_set_promisc: {}", pcap_geterr(m_impl->pcap));
-        return false;
-    }
-    if (pcap_set_rfmon(m_impl->pcap, 1) < 0)
-    {
-        QLOGE("Error setting pcap_set_rfmon: {}", pcap_geterr(m_impl->pcap));
-        return false;
-    }
-    if (pcap_set_timeout(m_impl->pcap, -1) < 0)
-    {
-        QLOGE("Error setting pcap_set_timeout: {}", pcap_geterr(m_impl->pcap));
-        return false;
-    }
-    if (pcap_set_immediate_mode(m_impl->pcap, 1) < 0)
-    {
-        QLOGE("Error setting pcap_set_immediate_mode: {}", pcap_geterr(m_impl->pcap));
-        return false;
-    }
-    if (pcap_set_buffer_size(m_impl->pcap, 16000000) < 0)
-    {
-        QLOGE("Error setting pcap_set_buffer_size: {}", pcap_geterr(m_impl->pcap));
-        return false;
-    }
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));
-    if (pcap_activate(m_impl->pcap) < 0)
-    {
-        QLOGE("Error in pcap_activate: {}", pcap_geterr(m_impl->pcap));
-        return false;
-    }
-//    if (pcap_setnonblock(m_impl->pcap, 1, pcap_error) < 0)
-//    {
-//        QLOGE("Error setting pcap_set_snaplen: {}", pcap_geterr(m_impl->pcap));
-//        return false;
-//    }
-    if (pcap_setdirection(m_impl->pcap, PCAP_D_IN) < 0)
-    {
-        QLOGE("Error setting pcap_setdirection: {}", pcap_geterr(m_impl->pcap));
-        return false;
-    }
-
-    if (!prepare_filter())
-    {
-        return false;
-    }
-
-    if (m_is_master)
-    {
-        m_thread = boost::thread([this]() { master_thread_proc(); });
+        if (!prepare_pcap(m_tx_interface, m_impl->tx.pcap))
+        {
+            return false;
+        }
+        m_thread = boost::thread([this]() { tx_thread_proc(); });
     }
     else
     {
-        m_thread = boost::thread([this]() { slave_thread_proc(); });
+        m_impl->rx.pcaps.reset(new PCap[m_rx_interfaces.size()]);
+        for (size_t i = 0; i < m_rx_interfaces.size(); i++)
+        {
+            if (!prepare_pcap(m_rx_interfaces[i], m_impl->rx.pcaps[i]))
+            {
+                return false;
+            }
+        }
+
+        m_thread = boost::thread([this]() { rx_thread_proc(); });
     }
 
 #if defined RASPBERRY_PI
@@ -729,8 +771,10 @@ bool Video_Streamer::init(uint32_t coding_k, uint32_t coding_n)
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-void Video_Streamer::slave_thread_proc()
+void Video_Streamer::rx_thread_proc()
 {
+    RX& rx = m_impl->rx;
+
     while (!m_exit)
     {
         fd_set readset;
@@ -740,15 +784,20 @@ void Video_Streamer::slave_thread_proc()
         to.tv_usec = 1e3;
 
         FD_ZERO(&readset);
-        FD_SET(m_impl->rx_pcap_selectable_fd, &readset);
+        for (size_t i = 0; i < m_rx_interfaces.size(); i++)
+        {
+            FD_SET(rx.pcaps[i].rx_pcap_selectable_fd, &readset);
+        }
 
         int n = select(30, &readset, nullptr, nullptr, &to);
         if (n != 0)
         {
-            if (FD_ISSET(m_impl->rx_pcap_selectable_fd, &readset))
+            for (size_t i = 0; i < m_rx_interfaces.size(); i++)
             {
-                process_rx_packet();
-                //std::this_thread::yield();
+                if (FD_ISSET(rx.pcaps[i].rx_pcap_selectable_fd, &readset))
+                {
+                    process_rx_packet(rx.pcaps[i]);
+                }
             }
         }
     }
@@ -756,7 +805,7 @@ void Video_Streamer::slave_thread_proc()
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-void Video_Streamer::master_thread_proc()
+void Video_Streamer::tx_thread_proc()
 {
     TX& tx = m_impl->tx;
 
@@ -785,10 +834,10 @@ void Video_Streamer::master_thread_proc()
 
         if (datagram)
         {
-            std::lock_guard<std::mutex> lg(m_impl->pcap_mutex);
+            std::lock_guard<std::mutex> lg(tx.pcap.mutex);
 
             int isize = static_cast<int>(datagram->data.size());
-            int r = pcap_inject(m_impl->pcap, datagram->data.data(), isize);
+            int r = pcap_inject(tx.pcap.pcap, datagram->data.data(), isize);
 //                    if (r <= 0 && (errno == EAGAIN || errno == EWOULDBLOCK))
 //                    {
 //                        break;
@@ -797,7 +846,7 @@ void Video_Streamer::master_thread_proc()
             {
                 if (r <= 0)
                 {
-                    QLOGW("Trouble injecting packet: {} / {}: {}", r, isize, pcap_geterr(m_impl->pcap));
+                    QLOGW("Trouble injecting packet: {} / {}: {}", r, isize, pcap_geterr(tx.pcap.pcap));
                     //result = Result::ERROR;
                 }
                 if (r > 0 && r != isize)
@@ -935,7 +984,7 @@ size_t Video_Streamer::get_mtu() const
 
 void Video_Streamer::process()
 {
-    if (!m_impl || m_is_master)
+    if (!m_impl || m_is_tx)
     {
         return;
     }
@@ -943,7 +992,7 @@ void Video_Streamer::process()
     RX& rx = m_impl->rx;
     std::lock_guard<std::mutex> lg(rx.mutex);
 
-    if (q::Clock::now() - rx.last_datagram_tp > m_slave_descriptor.reset_duration)
+    if (q::Clock::now() - rx.last_datagram_tp > m_rx_descriptor.reset_duration)
     {
         rx.next_block_index = 0;
     }

@@ -15,18 +15,18 @@ class Video_Streamer
 {
 public:
 
-    struct Master_Descriptor
+    struct TX_Descriptor
     {
     };
-    Video_Streamer(std::string const& interface, Master_Descriptor const& descriptor);
+    Video_Streamer(std::string const& interface, TX_Descriptor const& descriptor);
 
 
-    struct Slave_Descriptor
+    struct RX_Descriptor
     {
         q::Clock::duration max_latency = std::chrono::milliseconds(500);
         q::Clock::duration reset_duration = std::chrono::milliseconds(1000);
     };
-    Video_Streamer(std::string const& interface, Slave_Descriptor const& descriptor);
+    Video_Streamer(std::vector<std::string> const& interfaces, RX_Descriptor const& descriptor);
 
     ~Video_Streamer();
 
@@ -42,20 +42,29 @@ public:
 
     static std::vector<std::string> enumerate_interfaces();
 
+    struct PCap;
+    struct RX;
+    struct TX;
+
 private:
 
-    bool prepare_filter();
+    bool prepare_pcap(std::string const& interface, PCap& pcap);
+
+    bool prepare_filter(PCap& pcap);
     void prepare_radiotap_header(size_t rate_hz);
     void prepare_tx_packet_header(uint8_t* buffer);
-    bool process_rx_packet();
+    bool process_rx_packet(PCap& pcap);
 
-    void master_thread_proc();
-    void slave_thread_proc();
+    void tx_thread_proc();
+    void rx_thread_proc();
 
-    std::string m_interface;
-    bool m_is_master = false;
-    Master_Descriptor m_master_descriptor;
-    Slave_Descriptor m_slave_descriptor;
+    std::string m_tx_interface;
+    std::vector<std::string> m_rx_interfaces;
+
+    bool m_is_tx = false;
+
+    TX_Descriptor m_tx_descriptor;
+    RX_Descriptor m_rx_descriptor;
 
     uint32_t m_coding_k = 1;
     uint32_t m_coding_n = 2;
