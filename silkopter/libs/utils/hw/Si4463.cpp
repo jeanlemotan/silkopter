@@ -264,7 +264,7 @@ bool Si4463::wait_for_ph_interrupt(bool& got_it, uint8_t& status, std::chrono::h
             {
                 return true; //not error, but no interrupt either
             }
-            std::this_thread::sleep_for(std::chrono::microseconds(1));
+            //std::this_thread::sleep_for(std::chrono::microseconds(1));
         } while (true);
 
         //QLOGI("spin = {}", spin);
@@ -285,7 +285,7 @@ bool Si4463::wait_for_ph_interrupt(bool& got_it, uint8_t& status, std::chrono::h
         {
             return true; //not error, but no interrupt either
         }
-        std::this_thread::sleep_for(std::chrono::microseconds(1));
+        std::this_thread::sleep_for(std::chrono::microseconds(10));
     } while (true);
 
     return false;
@@ -316,7 +316,7 @@ bool Si4463::wait_for_cts()
         }
         //QLOGI("spin = {}", spin);
 
-        //std::this_thread::sleep_for(std::chrono::microseconds(10));
+        std::this_thread::sleep_for(std::chrono::microseconds(1));
 
         if (std::chrono::high_resolution_clock::now() - start > std::chrono::milliseconds(1000))
         {
@@ -393,7 +393,7 @@ bool Si4463::call_api_raw(void const* tx_data, size_t tx_size, void* rx_data, si
                 QLOGW("Timeout");
                 return false;
             }
-            //std::this_thread::sleep_for(std::chrono::microseconds(10));
+            std::this_thread::sleep_for(std::chrono::microseconds(1));
         }
     }
 
