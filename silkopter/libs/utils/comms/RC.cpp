@@ -145,7 +145,6 @@ void RC::master_thread_proc()
             if (m_hw->chip.rx(rx_size, CHANNEL, rx_duration))
             {
                 read_fifo(rx_size);
-                std::this_thread::sleep_for(std::chrono::microseconds(100));
             }
             else
             {
