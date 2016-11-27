@@ -12,7 +12,7 @@ public:
     Numeric_Viewer_Widget(QWidget *parent);
     ~Numeric_Viewer_Widget();
 
-    void init(std::string const& unit, uint32_t sample_rate);
+    void init(std::string const& unit, uint32_t sample_rate, bool fft = true);
 
     void add_graph(std::string const& name, std::string const& unit, QColor color);
     void add_samples(float const* src, bool is_healthy);

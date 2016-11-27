@@ -17,7 +17,7 @@ Numeric_Viewer_Widget::~Numeric_Viewer_Widget()
     }
 }
 
-void Numeric_Viewer_Widget::init(std::string const& unit, uint32_t sample_rate)
+void Numeric_Viewer_Widget::init(std::string const& unit, uint32_t sample_rate, bool fft)
 {
     m_sample_rate = sample_rate;
     m_dts = q::Seconds(1.f / float(sample_rate)).count();
@@ -44,22 +44,24 @@ void Numeric_Viewer_Widget::init(std::string const& unit, uint32_t sample_rate)
 
     m_ui.plot->setChart(m_plot_chart);
 
+    if (fft)
+    {
+        m_fft_x_axis = new QtCharts::QValueAxis();
+        setup_axis(m_fft_x_axis);
 
-    m_fft_x_axis = new QtCharts::QValueAxis();
-    setup_axis(m_fft_x_axis);
+        m_fft_y_axis = new QtCharts::QValueAxis();
+        setup_axis(m_fft_y_axis);
 
-    m_fft_y_axis = new QtCharts::QValueAxis();
-    setup_axis(m_fft_y_axis);
+        m_fft_chart = new QtCharts::QChart();
+        m_fft_chart->setMargins(QMargins(2, 2, 2, 2));
 
-    m_fft_chart = new QtCharts::QChart();
-    m_fft_chart->setMargins(QMargins(2, 2, 2, 2));
+        m_fft_chart->addAxis(m_fft_x_axis, Qt::AlignBottom);
+        m_fft_chart->addAxis(m_fft_y_axis, Qt::AlignLeft);
 
-    m_fft_chart->addAxis(m_fft_x_axis, Qt::AlignBottom);
-    m_fft_chart->addAxis(m_fft_y_axis, Qt::AlignLeft);
+        m_ui.fft->setChart(m_fft_chart);
 
-    m_ui.fft->setChart(m_fft_chart);
-
-    m_fft_x_axis->setRange(0.1f, m_sample_rate / 2.f);
+        m_fft_x_axis->setRange(0.1f, m_sample_rate / 2.f);
+    }
 
     m_ui.progress->setValue(m_ui.progress->maximum());
     connect(m_ui.progress, &QScrollBar::valueChanged, [this](int pos)
@@ -93,11 +95,19 @@ void Numeric_Viewer_Widget::init(std::string const& unit, uint32_t sample_rate)
         show_context_menu(m_ui.plot->mapToGlobal(pos));
     });
 
-    m_ui.fft->setContextMenuPolicy(Qt::CustomContextMenu);
-    connect(m_ui.fft, &QWidget::customContextMenuRequested, [this](QPoint const& pos)
+    if (fft)
     {
-        show_context_menu(m_ui.fft->mapToGlobal(pos));
-    });
+        m_ui.fft->setContextMenuPolicy(Qt::CustomContextMenu);
+        connect(m_ui.fft, &QWidget::customContextMenuRequested, [this](QPoint const& pos)
+        {
+            show_context_menu(m_ui.fft->mapToGlobal(pos));
+        });
+    }
+    else
+    {
+        delete m_ui.fft;
+        m_ui.fft = nullptr;
+    }
 
     //m_ui.window->setSingleStep(1.0 / float(m_sample_rate));
 }
@@ -137,52 +147,41 @@ void Numeric_Viewer_Widget::show_context_menu(QPoint const& pos)
 
     menu.addSeparator();
 
-    QAction* action = menu.addAction(QIcon(":/icons/fft.png"), "Logarithmic FFT");
-    action->setCheckable(true);
-    action->setChecked(dynamic_cast<QtCharts::QLogValueAxis*>(m_fft_x_axis) != nullptr);
-    connect(action, &QAction::toggled, [this](bool yes)
+    if (m_ui.fft)
     {
-        m_fft_chart->removeAxis(m_fft_x_axis);
-        delete m_fft_x_axis;
-
-        if (yes)
+        QAction* action = menu.addAction(QIcon(":/icons/fft.png"), "Logarithmic FFT");
+        action->setCheckable(true);
+        action->setChecked(dynamic_cast<QtCharts::QLogValueAxis*>(m_fft_x_axis) != nullptr);
+        connect(action, &QAction::toggled, [this](bool yes)
         {
-            QtCharts::QLogValueAxis* axis = new QtCharts::QLogValueAxis();
-            setup_axis(axis);
-            //axisY->setLabelFormat("%g");
-            //axisY->setTitleText("Values");
-            axis->setBase(10);
-            m_fft_x_axis = axis;
+            m_fft_chart->removeAxis(m_fft_x_axis);
+            delete m_fft_x_axis;
 
-//            m_ui.fft->xAxis->setScaleType(QCPAxis::stLogarithmic);
-//            m_ui.fft->xAxis->setScaleLogBase(10);
-//            m_ui.fft->xAxis->setNumberFormat("fb");
-//            m_ui.fft->xAxis->setNumberPrecision(0);
-//            m_ui.fft->xAxis->setSubTickCount(10);
-        }
-        else
-        {
-            QtCharts::QValueAxis* axis = new QtCharts::QValueAxis();
-            setup_axis(axis);
-            //axisY->setLabelFormat("%g");
-            //axisY->setTitleText("Values");
-            m_fft_x_axis = axis;
-//            m_ui.fft->xAxis->setScaleType(QCPAxis::stLinear);
-//            m_ui.fft->xAxis->setNumberFormat(m_ui.fft->yAxis->numberFormat());
-//            m_ui.fft->xAxis->setNumberPrecision(m_ui.fft->yAxis->numberPrecision());
-//            m_ui.fft->xAxis->setSubTickCount(m_ui.fft->yAxis->subTickCount());
-        }
+            if (yes)
+            {
+                QtCharts::QLogValueAxis* axis = new QtCharts::QLogValueAxis();
+                setup_axis(axis);
+                axis->setBase(10);
+                m_fft_x_axis = axis;
+            }
+            else
+            {
+                QtCharts::QValueAxis* axis = new QtCharts::QValueAxis();
+                setup_axis(axis);
+                m_fft_x_axis = axis;
+            }
 
-        m_fft_chart->addAxis(m_fft_x_axis, Qt::AlignBottom);
-        m_fft_x_axis->setRange(0.1f, m_sample_rate / 2.f);
+            m_fft_chart->addAxis(m_fft_x_axis, Qt::AlignBottom);
+            m_fft_x_axis->setRange(0.1f, m_sample_rate / 2.f);
 
-        for (std::unique_ptr<Graph>& g: m_graphs)
-        {
-            g->fft_series->attachAxis(m_fft_x_axis);
-        }
+            for (std::unique_ptr<Graph>& g: m_graphs)
+            {
+                g->fft_series->attachAxis(m_fft_x_axis);
+            }
 
-        process();
-    });
+            process();
+        });
+    }
 
     menu.exec(pos);
 }
@@ -195,6 +194,12 @@ void Numeric_Viewer_Widget::add_graph(std::string const& name, std::string const
         return;
     }
 
+    m_graphs.emplace_back(new Graph());
+    Graph& graph = *m_graphs.back();
+    graph.name = name;
+    graph.unit = unit;
+    graph.color = color;
+
     QLineSeries* plot_series = new QLineSeries();
     plot_series->setUseOpenGL(true);
     plot_series->setPen(QPen(color, 2));
@@ -204,22 +209,21 @@ void Numeric_Viewer_Widget::add_graph(std::string const& name, std::string const
     plot_series->attachAxis(m_plot_x_axis);
     plot_series->attachAxis(m_plot_y_axis);
 
-    QLineSeries* fft_series = new QLineSeries();
-    fft_series->setUseOpenGL(true);
-    fft_series->setPen(QPen(color, 2));
-    fft_series->setName((name + " " + unit).c_str());
-
-    m_fft_chart->addSeries(fft_series);
-    fft_series->attachAxis(m_fft_x_axis);
-    fft_series->attachAxis(m_fft_y_axis);
-
-    m_graphs.emplace_back(new Graph());
-    Graph& graph = *m_graphs.back();
-    graph.name = name;
-    graph.unit = unit;
-    graph.color = color;
     graph.plot_series = plot_series;
-    graph.fft_series = fft_series;
+
+    if (m_ui.fft)
+    {
+        QLineSeries* fft_series = new QLineSeries();
+        fft_series->setUseOpenGL(true);
+        fft_series->setPen(QPen(color, 2));
+        fft_series->setName((name + " " + unit).c_str());
+
+        m_fft_chart->addSeries(fft_series);
+        fft_series->attachAxis(m_fft_x_axis);
+        fft_series->attachAxis(m_fft_y_axis);
+
+        graph.fft_series = fft_series;
+    }
 }
 
 void Numeric_Viewer_Widget::add_samples(float const* src, bool is_healthy)
@@ -417,7 +421,7 @@ void Numeric_Viewer_Widget::start_task()
         task.is_visible = graph.is_visible; //copy this in case it changes when we thread
         if (graph.is_visible)
         {
-            if (sample_count != task.fft.plan_sample_count)
+            if (m_ui.fft && sample_count != task.fft.plan_sample_count)
             {
                 task.fft.temp_input.reset(static_cast<float*>(fftwf_malloc(sample_count * sizeof(float))), fftwf_free);
                 task.fft.temp_output.reset(static_cast<fftwf_complex*>(fftwf_malloc(sample_count * sizeof(fftwf_complex))), fftwf_free);
@@ -429,7 +433,10 @@ void Numeric_Viewer_Widget::start_task()
         else
         {
             graph.plot_series->clear();
-            graph.fft_series->clear();
+            if (m_ui.fft)
+            {
+                graph.fft_series->clear();
+            }
         }
     }
 
@@ -448,7 +455,10 @@ void Numeric_Viewer_Widget::start_task()
             if (task.is_visible)
             {
                 process_plot_task(i, view);
-                process_fft_task(i, view);
+                if (m_ui.fft)
+                {
+                    process_fft_task(i, view);
+                }
             }
         }
     });
@@ -492,20 +502,29 @@ void Numeric_Viewer_Widget::finish_task()
     if (math::is_zero(display_range, math::epsilon<float>()))
     {
         m_plot_y_axis->setRange(min_value, max_value);
-        m_fft_y_axis->setRange(0, max_value - min_value);
+        if (m_ui.fft)
+        {
+            m_fft_y_axis->setRange(0, max_value - min_value);
+        }
     }
     else
     {
         float average_value = (max_value + min_value) * 0.5;
         m_plot_y_axis->setRange(average_value - display_range / 2, average_value + display_range / 2);
-        m_fft_y_axis->setRange(0, display_range);
+        if (m_ui.fft)
+        {
+            m_fft_y_axis->setRange(0, display_range);
+        }
     }
 
     for (size_t i = 0; i < m_graphs.size(); i++)
     {
         Graph& graph = *m_graphs[i];
         m_graphs[i]->plot_series->replace(graph.task.plot_points);
-        m_graphs[i]->fft_series->replace(graph.task.fft_points);
+        if (m_ui.fft)
+        {
+            m_graphs[i]->fft_series->replace(graph.task.fft_points);
+        }
     }
 
 //    m_ui.fft->update();

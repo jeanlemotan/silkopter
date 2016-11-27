@@ -62,10 +62,10 @@ void Internal_Telemetry_Widget::init(silk::Comms& comms, std::vector<std::string
     }};
 
     Numeric_Viewer_Widget* widget = new Numeric_Viewer_Widget(this);
-    widget->init("average", 10);
+    widget->init("average", 10, false);
 
     Numeric_Viewer_Widget* max_widget = new Numeric_Viewer_Widget(this);
-    max_widget->init("max", 10);
+    max_widget->init("max", 10, false);
 
     uint32_t index = 0;
     for (std::string const& node_name: node_names)
