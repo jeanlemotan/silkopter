@@ -526,7 +526,7 @@
 //   PA_BIAS_CLKDUTY - Configuration of the PA Bias and duty cycle of the TX clock source.
 //   PA_TC - Configuration of PA ramping parameters.
 */
-#define RF_PA_MODE_4 0x11, 0x22, 0x04, 0x00, 0x08, 0x1F, 0x00, 0x5D
+#define RF_PA_MODE_4 0x11, 0x22, 0x04, 0x00, 0x08, 0x3F, 0x00, 0x5D
 
 /*
 // Set properties:           RF_SYNTH_PFDCP_CPFF_7
