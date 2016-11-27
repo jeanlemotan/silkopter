@@ -235,10 +235,11 @@ _invert_mat(gf* src, unsigned k) {
     unsigned icol = 0;
     unsigned row, col, i, ix;
 
-    unsigned* indxc = (unsigned*) malloc (k * sizeof(unsigned));
-    unsigned* indxr = (unsigned*) malloc (k * sizeof(unsigned));
-    unsigned* ipiv = (unsigned*) malloc (k * sizeof(unsigned));
-    gf *id_row = NEW_GF_MATRIX (1, k);
+    unsigned* indxc = (unsigned*) alloca (k * sizeof(unsigned));
+    unsigned* indxr = (unsigned*) alloca (k * sizeof(unsigned));
+    unsigned* ipiv = (unsigned*) alloca (k * sizeof(unsigned));
+    gf *id_row = (gf*)alloca(1 * k);
+    //gf *id_row = NEW_GF_MATRIX (1, k);
 
     memset (id_row, '\0', k * sizeof (gf));
     /*
