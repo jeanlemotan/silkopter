@@ -105,7 +105,19 @@ void Comms::handle_video(void const* _data, size_t size, math::vec2u16 const& re
         size_t offset = m_video_data.size();
         m_video_data.resize(offset + size);
         memcpy(m_video_data.data() + offset, data, size);
+
+        //keep the buffer from growing too much
+        constexpr size_t MAX_VIDEO_DATA_SIZE = 1024*1024;
+        if (m_video_data.size() > MAX_VIDEO_DATA_SIZE)
+        {
+            size_t del = m_video_data.size() - MAX_VIDEO_DATA_SIZE;
+            m_video_data.erase(m_video_data.begin(), m_video_data.begin() + del);
+        }
     }
+
+//    FILE* f = fopen("a.h264", "a+");
+//    fwrite(_data, size, 1, f);
+//    fclose(f);
 }
 
 void Comms::get_video_data(std::vector<uint8_t>& dst, math::vec2u16& resolution)
