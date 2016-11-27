@@ -64,11 +64,18 @@ private:
 
     std::atomic_bool m_exit = { false };
 
+    //-----------------
+    //these are accessed from both threads so need to be locked
     mutable std::mutex m_mutex;
-    std::vector<uint8_t> m_tx_buffer;
     Data m_rx_data;
+    std::vector<uint8_t> m_tx_data;
+    //-----------------
 
+    //-----------------
+    //these are accessed only from the RX/TX threads
+    std::vector<uint8_t> m_tx_buffer;
     std::vector<uint8_t> m_rx_buffer;
+    //-----------------
 
     void master_thread_proc();
     void slave_thread_proc();

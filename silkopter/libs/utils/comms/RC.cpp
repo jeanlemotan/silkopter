@@ -44,8 +44,6 @@ bool RC::init(std::string const& device, uint32_t speed, uint8_t sdn_gpio, uint8
         return false;
     }
 
-    m_tx_buffer.resize(1 + sizeof(Header));
-
     if (m_is_master)
     {
         m_thread = boost::thread([this]() { master_thread_proc(); });
@@ -76,13 +74,12 @@ void RC::set_rate(size_t rate)
 void RC::set_tx_data(void const* data, size_t size)
 {
     std::lock_guard<std::mutex> lg(m_mutex);
-    m_tx_buffer.resize(1 + sizeof(Header) + size);
+    m_tx_data.resize(size);
 
     if (size > 0 && data)
     {
-        memcpy(m_tx_buffer.data() + 1 + sizeof(Header), data, size);
+        memcpy(m_tx_data.data(), data, size);
     }
-    m_tx_buffer[0] = sizeof(Header) + size;
 }
 
 void RC::get_rx_data(Data& data) const
@@ -107,6 +104,13 @@ void RC::master_thread_proc()
 
             start_tx_tp = q::Clock::now();
 
+            {
+                std::lock_guard<std::mutex> lg(m_mutex);
+                m_tx_buffer.resize(1 + sizeof(Header) + m_tx_data.size());
+                memcpy(m_tx_buffer.data() + 1 + sizeof(Header), m_tx_data.data(), m_tx_data.size());
+                m_tx_buffer[0] = sizeof(Header) + m_tx_data.size();
+            }
+
             Header& header = *reinterpret_cast<Header*>(m_tx_buffer.data() + 1);
             header.crc = 0;
             m_hw->chip.get_dBm(header.dBm);
@@ -125,10 +129,7 @@ void RC::master_thread_proc()
                 }
             }
 
-            {
-                std::lock_guard<std::mutex> lg(m_mutex);
-                m_rx_data.tx_timepoint = q::Clock::now();
-            }
+            m_rx_data.tx_timepoint = q::Clock::now();
 
             tx_duration = q::Clock::now() - start_tx_tp;
         }
@@ -182,6 +183,13 @@ void RC::slave_thread_proc()
 
         //if packet received, respond
         {
+            {
+                std::lock_guard<std::mutex> lg(m_mutex);
+                m_tx_buffer.resize(1 + sizeof(Header) + m_tx_data.size());
+                memcpy(m_tx_buffer.data() + 1 + sizeof(Header), m_tx_data.data(), m_tx_data.size());
+                m_tx_buffer[0] = sizeof(Header) + m_tx_data.size();
+            }
+
             //auto start_tx_tp = q::Clock::now();
 
             Header& header = *reinterpret_cast<Header*>(m_tx_buffer.data() + 1);
@@ -202,10 +210,7 @@ void RC::slave_thread_proc()
                 }
             }
 
-            {
-                std::lock_guard<std::mutex> lg(m_mutex);
-                m_rx_data.tx_timepoint = q::Clock::now();
-            }
+            m_rx_data.tx_timepoint = q::Clock::now();
         }
     }
 }
@@ -228,14 +233,19 @@ bool RC::read_fifo(size_t rx_size)
             uint16_t computed_crc = q::util::compute_murmur_hash16(m_rx_buffer.data(), m_rx_buffer.size());
             if (crc == computed_crc)
             {
-                std::lock_guard<std::mutex> lg(m_mutex);
-                m_rx_data.tx_dBm = header.dBm;
-                m_hw->chip.get_dBm(m_rx_data.rx_dBm);
-                m_rx_data.rx_timepoint = q::Clock::now();
-                m_rx_data.rx_data.resize(m_rx_buffer.size() - sizeof(Header));
-                if (!m_rx_data.rx_data.empty())
+                int8_t dBm = 0;
+                m_hw->chip.get_dBm(dBm);
+
                 {
-                    memcpy(m_rx_data.rx_data.data(), m_rx_buffer.data() + sizeof(Header), m_rx_data.rx_data.size());
+                    std::lock_guard<std::mutex> lg(m_mutex);
+                    m_rx_data.tx_dBm = header.dBm;
+                    m_rx_data.rx_dBm = dBm;
+                    m_rx_data.rx_timepoint = q::Clock::now();
+                    m_rx_data.rx_data.resize(m_rx_buffer.size() - sizeof(Header));
+                    if (!m_rx_data.rx_data.empty())
+                    {
+                        memcpy(m_rx_data.rx_data.data(), m_rx_buffer.data() + sizeof(Header), m_rx_data.rx_data.size());
+                    }
                 }
                 return true;
             }
