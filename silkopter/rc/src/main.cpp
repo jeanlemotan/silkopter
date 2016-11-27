@@ -62,6 +62,12 @@ static auto shutdown_pigpio() -> bool
     return true;
 }
 
+/* This prints an "Assertion failed" message and aborts.  */
+void __assert_fail (const char *__assertion, const char *__file, unsigned int __line, const char *__function)
+{
+    QASSERT_MSG(false, "assert: {}:{}: {}: {}", __file, __line, __function, __assertion);
+}
+
 
 int main(int argc, char *argv[])
 {
