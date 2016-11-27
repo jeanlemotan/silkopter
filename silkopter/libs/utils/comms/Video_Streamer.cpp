@@ -513,7 +513,16 @@ bool Video_Streamer::process_rx_packet(PCap& pcap)
             //store datagram
             if (header.is_fec)
             {
-                block->fec_datagrams.push_back(datagram);
+                auto iter = std::lower_bound(block->fec_datagrams.begin(), block->fec_datagrams.end(), datagram_index, [](RX::Datagram_ptr const& l, uint32_t index) { return l->index < index; });
+                if (iter != block->fec_datagrams.end() && (*iter)->index == datagram_index)
+                {
+                    //QLOGW("Duplicated datagram {} from block {} (index {})", datagram_index, block_index, block_index * m_coding_k + datagram_index);
+                    return true;
+                }
+                else
+                {
+                    block->fec_datagrams.insert(iter, datagram);
+                }
             }
             else
             {
@@ -1066,7 +1075,7 @@ void Video_Streamer::process()
             if (primary_index < block->datagrams.size() && i == block->datagrams[primary_index]->index)
             {
                 m_fec_src_datagram_ptrs[i] = block->datagrams[primary_index]->data.data();
-                indices[i] = i;
+                indices[i] = block->datagrams[primary_index]->index;
                 primary_index++;
             }
             else
