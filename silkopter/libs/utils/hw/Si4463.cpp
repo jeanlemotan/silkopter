@@ -269,22 +269,21 @@ bool Si4463::wait_for_ph_interrupt(bool& got_it, uint8_t& status, std::chrono::h
 
         //QLOGI("spin = {}", spin);
 
-        got_it = true;
-
-        if (!call_api(Si4463::Command::GET_PH_STATUS, nullptr, 0, response, sizeof(response)))
+        uint8_t request[1] = { 0xFF };
+        if (!call_api(Si4463::Command::GET_PH_STATUS, request, sizeof(request), response, sizeof(response)))
         {
             return false;
         }
         if (response[0] != 0)
         {
+            got_it = true;
             status = response[1];
             return true;
         }
 
         if (std::chrono::high_resolution_clock::now() - start > timeout)
         {
-            QLOGW("Timeout");
-            return false;
+            return true; //not error, but no interrupt either
         }
         std::this_thread::sleep_for(std::chrono::microseconds(1));
     } while (true);
