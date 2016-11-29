@@ -5,11 +5,11 @@
 
 #include "Menu_System.h"
 
+namespace silk
+{
 extern int s_version_major;
 extern int s_version_minor;
 
-namespace silk
-{
 
 Info_Menu_Page::Info_Menu_Page()
 {

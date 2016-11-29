@@ -133,8 +133,38 @@ public:
     Sticks_Calibration m_sticks_calibration;
   };
 
+  struct HW
+  {
+  public:
+    typedef uint32_t pigpio_period_us_t;
+    virtual ~HW() = default;
+    void set_pigpio_period_us(pigpio_period_us_t const& value);
+    void set_pigpio_period_us(pigpio_period_us_t&& value);
+    auto get_pigpio_period_us() const -> pigpio_period_us_t const&;
+
+    void set_display_incremental_step_us(uint32_t const& value);
+    void set_display_incremental_step_us(uint32_t&& value);
+    auto get_display_incremental_step_us() const -> uint32_t const&;
+
+  private:
+    pigpio_period_us_t m_pigpio_period_us = {1};
+    uint32_t m_display_incremental_step_us = {1000};
+  };
+
   virtual ~Settings() = default;
+  void set_input(Input const& value);
+  void set_input(Input&& value);
+  auto get_input() const -> Input const&;
+  auto get_input() -> Input&;
+
+  void set_hw(HW const& value);
+  void set_hw(HW&& value);
+  auto get_hw() const -> HW const&;
+  auto get_hw() -> HW&;
+
 private:
+  Input m_input;
+  HW m_hw;
 };
 
 ts::Result<void> deserialize(std::string& value, ts::sz::Value const& sz_value);
@@ -181,6 +211,8 @@ ts::Result<void> deserialize(Settings::Input::Sticks_Calibration& value, ts::sz:
 ts::sz::Value serialize(Settings::Input::Sticks_Calibration const& value);
 ts::Result<void> deserialize(Settings::Input& value, ts::sz::Value const& sz_value);
 ts::sz::Value serialize(Settings::Input const& value);
+ts::Result<void> deserialize(Settings::HW& value, ts::sz::Value const& sz_value);
+ts::sz::Value serialize(Settings::HW const& value);
 ts::Result<void> deserialize(Settings& value, ts::sz::Value const& sz_value);
 ts::sz::Value serialize(Settings const& value);
 }

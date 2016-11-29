@@ -5,8 +5,14 @@
 
 #include "Menu_System.h"
 
+#include "settings.def.h"
+
 namespace silk
 {
+
+extern settings::Settings s_settings;
+extern void save_settings();
+
 
 Stick_Calibration_Menu_Page::Stick_Calibration_Menu_Page()
 {
@@ -52,6 +58,23 @@ bool Stick_Calibration_Menu_Page::process(Input& input, Menu_System& menu_system
                 input.get_sticks().set_pitch_calibration(m_pitch.center, m_pitch.min, m_pitch.max);
                 input.get_sticks().set_roll_calibration(m_roll.center, m_roll.min, m_roll.max);
                 input.get_sticks().set_throttle_calibration(m_throttle.center, m_throttle.min, m_throttle.max);
+
+                settings::Settings::Input::Sticks_Calibration& sc = s_settings.get_input().get_sticks_calibration();
+                sc.set_yaw_center(m_yaw.center);
+                sc.set_yaw_min(m_yaw.min);
+                sc.set_yaw_max(m_yaw.max);
+                sc.set_pitch_center(m_pitch.center);
+                sc.set_pitch_min(m_pitch.min);
+                sc.set_pitch_max(m_pitch.max);
+                sc.set_roll_center(m_roll.center);
+                sc.set_roll_min(m_roll.min);
+                sc.set_roll_max(m_roll.max);
+                sc.set_throttle_center(m_throttle.center);
+                sc.set_throttle_min(m_throttle.min);
+                sc.set_throttle_max(m_throttle.max);
+
+                save_settings();
+
                 return false;
             }
             break;

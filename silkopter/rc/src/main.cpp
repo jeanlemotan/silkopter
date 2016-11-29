@@ -14,13 +14,28 @@
 #include "Adafruit_GFX.h"
 #include "ArduiPi_OLED.h"
 
+#include "settings.def.h"
+
+#include "def_lang/Serialization.h"
+#include "def_lang/JSON_Serializer.h"
+#include "QData.h"
+
 //#include "common/stream/IMultirotor_Commands.h"
 //#include "common/stream/IMultirotor_State.h"
 
 //boost::asio::io_service s_async_io_service(4);
 
+namespace silk
+{
+
 int s_version_major = 1;
 int s_version_minor = 0;
+
+const q::Path k_settings_path("settings.json");
+
+settings::Settings s_settings;
+
+}
 
 extern "C"
 {
@@ -41,7 +56,7 @@ static auto initialize_pigpio() -> bool
     }
 
     QLOGI("Initializing pigpio");
-    if (gpioCfgClock(PIGPIO_PERIOD.count(), 1, 0) < 0 ||
+    if (gpioCfgClock(PIGPIO_PERIOD.count(), silk::s_settings.get_hw().get_pigpio_period_us(), 0) < 0 ||
             gpioCfgPermissions(static_cast<uint64_t>(-1)))
     {
         QLOGE("Cannot configure pigpio");
@@ -68,6 +83,67 @@ void __assert_fail (const char *__assertion, const char *__file, unsigned int __
     QASSERT_MSG(false, "assert: {}:{}: {}: {}", __file, __line, __function, __assertion);
 }
 
+namespace silk
+{
+
+void save_settings();
+
+void generate_settings_file()
+{
+    save_settings();
+}
+
+bool load_settings()
+{
+    //read the data
+    q::data::File_Source fs(k_settings_path);
+    if (!fs.is_open())
+    {
+        QLOGW("Failed to load '{}'", k_settings_path);
+        generate_settings_file();
+        return false;
+    }
+
+    std::string data = q::data::read_whole_source_as_string<std::string>(fs);
+
+    ts::Result<ts::sz::Value> json_result = ts::sz::from_json(data);
+    if (json_result != ts::success)
+    {
+        QLOGE("Failed to load '{}': {}", k_settings_path, json_result.error().what());
+        return false;
+    }
+
+    settings::Settings settings;
+    auto reserialize_result = settings::deserialize(settings, json_result.payload());
+    if (reserialize_result != ts::success)
+    {
+        QLOGE("Failed to deserialize settings: {}", reserialize_result.error().what());
+        return false;
+    }
+
+    s_settings = settings;
+
+    return true;
+}
+
+void save_settings()
+{
+    ts::sz::Value sz_value = settings::serialize(s_settings);
+
+    std::string json = ts::sz::to_json(sz_value, true);
+
+    q::data::File_Sink fs(k_settings_path);
+    if (fs.is_open())
+    {
+        fs.write(reinterpret_cast<uint8_t const*>(json.data()), json.size());
+        fs.flush();
+    }
+    else
+    {
+        QLOGE("Cannot open '{}' to save settings.", k_settings_path);
+    }
+}
+}
 
 int main(int argc, char *argv[])
 {
@@ -133,7 +209,7 @@ int main(int argc, char *argv[])
             render_frames = 0;
         }
 
-        if (display.displayIncremental(1000))
+        if (display.displayIncremental(silk::s_settings.get_hw().get_display_incremental_step_us()))
         {
             render_frames++;
             display.clearDisplay();

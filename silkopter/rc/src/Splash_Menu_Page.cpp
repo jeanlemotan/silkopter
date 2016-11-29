@@ -5,11 +5,11 @@
 #include "Menu_System.h"
 #include "Main_Menu_Page.h"
 
-extern int s_version_major;
-extern int s_version_minor;
-
 namespace silk
 {
+
+extern int s_version_major;
+extern int s_version_minor;
 
 //Created with: http://manytools.org/hacker-tools/image-to-byte-array/
 static const uint8_t s_splash_img[128*64] =

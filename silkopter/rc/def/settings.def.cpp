@@ -207,6 +207,72 @@ T max(T v, T max)
     }
 
 ////////////////////////////////////////////////////////////
+    void Settings::HW::set_pigpio_period_us(pigpio_period_us_t const& value)
+    {
+      m_pigpio_period_us = clamp(value, pigpio_period_us_t(1), pigpio_period_us_t(10));
+    }
+    void Settings::HW::set_pigpio_period_us(pigpio_period_us_t&& value)
+    {
+      m_pigpio_period_us = clamp(std::move(value), pigpio_period_us_t(1), pigpio_period_us_t(10));
+    }
+    auto Settings::HW::get_pigpio_period_us() const -> pigpio_period_us_t const& 
+    {
+      return m_pigpio_period_us;
+    }
+
+////////////////////////////////////////////////////////////
+    void Settings::HW::set_display_incremental_step_us(uint32_t const& value)
+    {
+      m_display_incremental_step_us = value;
+    }
+    void Settings::HW::set_display_incremental_step_us(uint32_t&& value)
+    {
+      m_display_incremental_step_us = std::move(value);
+    }
+    auto Settings::HW::get_display_incremental_step_us() const -> uint32_t const& 
+    {
+      return m_display_incremental_step_us;
+    }
+
+////////////////////////////////////////////////////////////
+  void Settings::set_input(Input const& value)
+  {
+    m_input = value;
+  }
+  void Settings::set_input(Input&& value)
+  {
+    m_input = std::move(value);
+  }
+  auto Settings::get_input() const -> Input const& 
+  {
+    return m_input;
+  }
+
+  auto Settings::get_input() -> Input& 
+  {
+    return m_input;
+  }
+
+////////////////////////////////////////////////////////////
+  void Settings::set_hw(HW const& value)
+  {
+    m_hw = value;
+  }
+  void Settings::set_hw(HW&& value)
+  {
+    m_hw = std::move(value);
+  }
+  auto Settings::get_hw() const -> HW const& 
+  {
+    return m_hw;
+  }
+
+  auto Settings::get_hw() -> HW& 
+  {
+    return m_hw;
+  }
+
+////////////////////////////////////////////////////////////
 ts::Result<void> deserialize(std::string& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_string()) { return ts::Error("Expected string value when deserializing"); }
@@ -744,15 +810,62 @@ ts::sz::Value serialize(Settings::Input const& value)
   sz_value.add_object_member("sticks_calibration", serialize(value.get_sticks_calibration()));
   return sz_value;
 }
+ts::Result<void> deserialize(Settings::HW& value, ts::sz::Value const& sz_value)
+{
+  if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  {
+    auto const* member_sz_value = sz_value.find_object_member_by_name("pigpio_period_us");
+    if (!member_sz_value) { return ts::Error("Cannot find member value 'pigpio_period_us'"); }
+    std::remove_cv<std::remove_reference<decltype(value.get_pigpio_period_us())>::type>::type v;
+    auto result = deserialize(v, *member_sz_value);
+    if (result != ts::success) { return result; }
+    value.set_pigpio_period_us(std::move(v));
+  }
+  {
+    auto const* member_sz_value = sz_value.find_object_member_by_name("display_incremental_step_us");
+    if (!member_sz_value) { return ts::Error("Cannot find member value 'display_incremental_step_us'"); }
+    std::remove_cv<std::remove_reference<decltype(value.get_display_incremental_step_us())>::type>::type v;
+    auto result = deserialize(v, *member_sz_value);
+    if (result != ts::success) { return result; }
+    value.set_display_incremental_step_us(std::move(v));
+  }
+  return ts::success;
+}
+ts::sz::Value serialize(Settings::HW const& value)
+{
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
+  sz_value.reserve_object_members(2);
+  sz_value.add_object_member("pigpio_period_us", serialize(value.get_pigpio_period_us()));
+  sz_value.add_object_member("display_incremental_step_us", serialize(value.get_display_incremental_step_us()));
+  return sz_value;
+}
 ts::Result<void> deserialize(Settings& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  {
+    auto const* member_sz_value = sz_value.find_object_member_by_name("input");
+    if (!member_sz_value) { return ts::Error("Cannot find member value 'input'"); }
+    std::remove_cv<std::remove_reference<decltype(value.get_input())>::type>::type v;
+    auto result = deserialize(v, *member_sz_value);
+    if (result != ts::success) { return result; }
+    value.set_input(std::move(v));
+  }
+  {
+    auto const* member_sz_value = sz_value.find_object_member_by_name("hw");
+    if (!member_sz_value) { return ts::Error("Cannot find member value 'hw'"); }
+    std::remove_cv<std::remove_reference<decltype(value.get_hw())>::type>::type v;
+    auto result = deserialize(v, *member_sz_value);
+    if (result != ts::success) { return result; }
+    value.set_hw(std::move(v));
+  }
   return ts::success;
 }
 ts::sz::Value serialize(Settings const& value)
 {
   ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
-  sz_value.reserve_object_members(0);
+  sz_value.reserve_object_members(2);
+  sz_value.add_object_member("input", serialize(value.get_input()));
+  sz_value.add_object_member("hw", serialize(value.get_hw()));
   return sz_value;
 }
 }

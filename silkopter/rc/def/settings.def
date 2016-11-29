@@ -39,5 +39,17 @@ struct Settings
 
         Sticks_Calibration sticks_calibration;
     };
+
+    Input input;
+
+    struct HW
+    {
+    	alias pigpio_period_us_t = uint32_t : [ min = 1, max = 10 ];
+    	pigpio_period_us_t pigpio_period_us = 1;
+    	
+    	uint32_t display_incremental_step_us = 1000;
+    };
+
+    HW hw;
 };
 

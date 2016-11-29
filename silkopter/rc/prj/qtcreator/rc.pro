@@ -15,6 +15,7 @@ CONFIG -= qt
 CONFIG += c++11
 
 INCLUDEPATH += ../../src
+INCLUDEPATH += ../../def
 INCLUDEPATH += ../../../../qbase/include
 INCLUDEPATH += ../../../../qdata/include
 INCLUDEPATH += ../../../../qmath/include
@@ -172,7 +173,9 @@ HEADERS += \
     ../../src/Main_Menu_Page.h \
     ../../src/Menu.h \
     ../../src/Stick_Calibration_Menu_Page.h \
-    ../../src/Info_Menu_Page.h
+    ../../src/Info_Menu_Page.h \
+    ../../def/settings.def.h \
+    ../../def/gen_support.h
 
 SOURCES += \
     ../../src/main.cpp \
@@ -211,7 +214,8 @@ SOURCES += \
     ../../src/Main_Menu_Page.cpp \
     ../../src/Menu.cpp \
     ../../src/Stick_Calibration_Menu_Page.cpp \
-    ../../src/Info_Menu_Page.cpp
+    ../../src/Info_Menu_Page.cpp \
+    ../../def/settings.def.cpp
 
 DISTFILES += \
     ../../src/node.png \

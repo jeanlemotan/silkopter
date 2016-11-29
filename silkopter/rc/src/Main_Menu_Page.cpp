@@ -9,11 +9,12 @@
 #include "Info_Menu_Page.h"
 #include "Stick_Calibration_Menu_Page.h"
 
+namespace silk
+{
+
 extern int s_version_major;
 extern int s_version_minor;
 
-namespace silk
-{
 
 Main_Menu_Page::Main_Menu_Page()
 {
