@@ -9,25 +9,24 @@
 #include "utils/comms/RFMON_Socket.h"
 #include "utils/comms/RF4463F30_Socket.h"
 
-using namespace silk;
-//using namespace boost::asio;
+#include "settings.def.h"
 
-constexpr uint8_t PILOT_CHANNEL = 15;
-constexpr uint8_t VIDEO_CHANNEL = 16;
-constexpr uint8_t TELEMETRY_CHANNEL = 20;
+namespace silk
+{
 
-constexpr char const* VIDEO_INTERFACE1 = "wlan2";
-constexpr char const* VIDEO_INTERFACE2 = "wlan3";
+//constexpr char const* VIDEO_INTERFACE1 = "wlan2";
+//constexpr char const* VIDEO_INTERFACE2 = "wlan3";
 
-constexpr uint8_t RC_SDN_GPIO = 6;
-constexpr uint8_t RC_NIRQ_GPIO = 26;
-constexpr char const* RC_SPI_DEVICE = "/dev/spidev0.0";
-constexpr size_t RC_SPEED = 16000000;
+//constexpr uint8_t RC_SDN_GPIO = 6;
+//constexpr uint8_t RC_NIRQ_GPIO = 26;
+//constexpr char const* RC_SPI_DEVICE = "/dev/spidev0.0";
+//constexpr size_t RC_SPEED = 16000000;
 
+extern settings::Settings s_settings;
 
 Comms::Comms()
     : m_rc(true)
-    , m_video_streamer({ VIDEO_INTERFACE1, VIDEO_INTERFACE2 }, util::comms::Video_Streamer::RX_Descriptor())
+    , m_video_streamer()
 {
 }
 
@@ -35,10 +34,19 @@ auto Comms::start() -> bool
 {
     disconnect();
 
+    settings::Settings::Comms const& comms = s_settings.get_comms();
+
+    util::comms::Video_Streamer::RX_Descriptor rx_descriptor;
+    rx_descriptor.interfaces = comms.get_video_interfaces();
+    rx_descriptor.coding_k = comms.get_video_coding_k();
+    rx_descriptor.coding_n = comms.get_video_coding_n();
+    rx_descriptor.max_latency = std::chrono::milliseconds(comms.get_video_max_latency_ms());
+    rx_descriptor.reset_duration = std::chrono::milliseconds(comms.get_video_reset_duration_ms());
+
     try
     {
-        m_is_connected = m_rc.init(RC_SPI_DEVICE, RC_SPEED, RC_SDN_GPIO, RC_NIRQ_GPIO)
-                && m_video_streamer.init(12, 20);
+        m_is_connected = m_rc.init(comms.get_rc_spi_device(), comms.get_rc_spi_speed(), comms.get_rc_sdn_gpio(), comms.get_rc_nirq_gpio())
+                && m_video_streamer.init_rx(rx_descriptor);
     }
     catch(std::exception e)
     {
@@ -236,3 +244,4 @@ void Comms::process()
 //    m_telemetry_channel.try_sending(*m_rcp);
 }
 
+}

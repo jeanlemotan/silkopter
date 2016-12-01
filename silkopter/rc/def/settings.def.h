@@ -50,6 +50,7 @@ typedef float muf_t;
 typedef vec3f direction_t;
 typedef float euler_t;
 typedef vec3f euler3_t;
+typedef uint32_t gpio_t;
 struct Settings
 {
 public:
@@ -151,6 +152,59 @@ public:
     uint32_t m_display_incremental_step_us = {1000};
   };
 
+  struct Comms
+  {
+  public:
+    virtual ~Comms() = default;
+    void set_video_interfaces(std::vector<std::string> const& value);
+    void set_video_interfaces(std::vector<std::string>&& value);
+    auto get_video_interfaces() const -> std::vector<std::string> const&;
+    auto get_video_interfaces() -> std::vector<std::string>&;
+
+    void set_video_coding_k(uint32_t const& value);
+    void set_video_coding_k(uint32_t&& value);
+    auto get_video_coding_k() const -> uint32_t const&;
+
+    void set_video_coding_n(uint32_t const& value);
+    void set_video_coding_n(uint32_t&& value);
+    auto get_video_coding_n() const -> uint32_t const&;
+
+    void set_video_max_latency_ms(uint32_t const& value);
+    void set_video_max_latency_ms(uint32_t&& value);
+    auto get_video_max_latency_ms() const -> uint32_t const&;
+
+    void set_video_reset_duration_ms(uint32_t const& value);
+    void set_video_reset_duration_ms(uint32_t&& value);
+    auto get_video_reset_duration_ms() const -> uint32_t const&;
+
+    void set_rc_sdn_gpio(gpio_t const& value);
+    void set_rc_sdn_gpio(gpio_t&& value);
+    auto get_rc_sdn_gpio() const -> gpio_t const&;
+
+    void set_rc_nirq_gpio(gpio_t const& value);
+    void set_rc_nirq_gpio(gpio_t&& value);
+    auto get_rc_nirq_gpio() const -> gpio_t const&;
+
+    void set_rc_spi_device(std::string const& value);
+    void set_rc_spi_device(std::string&& value);
+    auto get_rc_spi_device() const -> std::string const&;
+
+    void set_rc_spi_speed(uint32_t const& value);
+    void set_rc_spi_speed(uint32_t&& value);
+    auto get_rc_spi_speed() const -> uint32_t const&;
+
+  private:
+    std::vector<std::string> m_video_interfaces;
+    uint32_t m_video_coding_k = {12};
+    uint32_t m_video_coding_n = {20};
+    uint32_t m_video_max_latency_ms = {500};
+    uint32_t m_video_reset_duration_ms = {1000};
+    gpio_t m_rc_sdn_gpio = {6};
+    gpio_t m_rc_nirq_gpio = {26};
+    std::string m_rc_spi_device = {"/dev/spidev0.0"};
+    uint32_t m_rc_spi_speed = {16000000};
+  };
+
   virtual ~Settings() = default;
   void set_input(Input const& value);
   void set_input(Input&& value);
@@ -162,9 +216,15 @@ public:
   auto get_hw() const -> HW const&;
   auto get_hw() -> HW&;
 
+  void set_comms(Comms const& value);
+  void set_comms(Comms&& value);
+  auto get_comms() const -> Comms const&;
+  auto get_comms() -> Comms&;
+
 private:
   Input m_input;
   HW m_hw;
+  Comms m_comms;
 };
 
 ts::Result<void> deserialize(std::string& value, ts::sz::Value const& sz_value);
@@ -213,7 +273,11 @@ ts::Result<void> deserialize(Settings::Input& value, ts::sz::Value const& sz_val
 ts::sz::Value serialize(Settings::Input const& value);
 ts::Result<void> deserialize(Settings::HW& value, ts::sz::Value const& sz_value);
 ts::sz::Value serialize(Settings::HW const& value);
+ts::Result<void> deserialize(Settings::Comms& value, ts::sz::Value const& sz_value);
+ts::sz::Value serialize(Settings::Comms const& value);
 ts::Result<void> deserialize(Settings& value, ts::sz::Value const& sz_value);
 ts::sz::Value serialize(Settings const& value);
+ts::Result<void> deserialize(std::vector<std::string>& value, ts::sz::Value const& sz_value);
+ts::sz::Value serialize(std::vector<std::string> const& value);
 }
 }

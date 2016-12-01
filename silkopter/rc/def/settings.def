@@ -12,6 +12,8 @@ alias direction_t = vec3f;// : [ normalized = true ];
 alias euler_t = float : [ min = -180.f, max = 180.f ];
 alias euler3_t = vec3f : [ min = {-180.f, -180.f, -180.f}, max = {180.f, 180.f, 180.f} ];
 
+alias gpio_t = uint32_t : [ min =  0, max = 40 ];
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -46,10 +48,26 @@ struct Settings
     {
     	alias pigpio_period_us_t = uint32_t : [ min = 1, max = 10 ];
     	pigpio_period_us_t pigpio_period_us = 1;
-    	
+
     	uint32_t display_incremental_step_us = 1000;
     };
 
     HW hw;
+
+    struct Comms
+    {
+    	vector<string> video_interfaces;
+    	uint32_t video_coding_k = 12;
+    	uint32_t video_coding_n = 20;
+    	uint32_t video_max_latency_ms = 500;
+    	uint32_t video_reset_duration_ms = 1000;
+
+    	gpio_t rc_sdn_gpio = 6;
+    	gpio_t rc_nirq_gpio = 26;
+    	string rc_spi_device = "/dev/spidev0.0";
+    	uint32_t rc_spi_speed = 16000000;
+    };
+
+    Comms comms;
 };
 

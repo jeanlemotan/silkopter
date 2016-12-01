@@ -15,24 +15,29 @@ class Video_Streamer
 {
 public:
 
+    Video_Streamer();
+    ~Video_Streamer();
+
     struct TX_Descriptor
     {
+        std::string interface;
+        uint32_t coding_k = 12;
+        uint32_t coding_n = 20;
     };
-    Video_Streamer(std::string const& interface, TX_Descriptor const& descriptor);
-
 
     struct RX_Descriptor
     {
+        std::vector<std::string> interfaces;
         q::Clock::duration max_latency = std::chrono::milliseconds(500);
         q::Clock::duration reset_duration = std::chrono::milliseconds(1000);
+        uint32_t coding_k = 12;
+        uint32_t coding_n = 20;
     };
-    Video_Streamer(std::vector<std::string> const& interfaces, RX_Descriptor const& descriptor);
 
-    ~Video_Streamer();
+    bool init_tx(TX_Descriptor const& descriptor);
+    bool init_rx(RX_Descriptor const& descriptor);
 
     void process();
-
-    bool init(uint32_t coding_k, uint32_t coding_n);
 
     void send(void const* data, size_t size, math::vec2u16 const& resolution);
 
@@ -48,6 +53,8 @@ public:
 
 private:
 
+    bool init();
+
     bool prepare_pcap(std::string const& interface, PCap& pcap);
 
     bool prepare_filter(PCap& pcap);
@@ -57,9 +64,6 @@ private:
 
     void tx_thread_proc();
     void rx_thread_proc();
-
-    std::string m_tx_interface;
-    std::vector<std::string> m_rx_interfaces;
 
     bool m_is_tx = false;
 

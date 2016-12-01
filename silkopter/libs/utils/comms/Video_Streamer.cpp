@@ -205,21 +205,8 @@ std::vector<std::string> Video_Streamer::enumerate_interfaces()
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-Video_Streamer::Video_Streamer(std::string const& interface, TX_Descriptor const& descriptor)
-    : m_tx_interface(interface)
-    , m_is_tx(true)
-    , m_tx_descriptor(descriptor)
+Video_Streamer::Video_Streamer()
 {
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////
-
-Video_Streamer::Video_Streamer(std::vector<std::string> const& interfaces, RX_Descriptor const& descriptor)
-    : m_rx_interfaces(interfaces)
-    , m_is_tx(false)
-    , m_rx_descriptor(descriptor)
-{
-    QASSERT(!m_rx_interfaces.empty());
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////
@@ -647,19 +634,55 @@ bool Video_Streamer::prepare_pcap(std::string const& interface, PCap& pcap)
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-bool Video_Streamer::init(uint32_t coding_k, uint32_t coding_n)
+bool Video_Streamer::init_tx(TX_Descriptor const& descriptor)
 {
-    if (coding_k == 0 || coding_n < coding_k || coding_k > m_fec_src_datagram_ptrs.size() || coding_n > m_fec_dst_datagram_ptrs.size())
+    if (descriptor.interface.empty())
     {
-        QLOGE("Invalid coding params: {} / {}" ,coding_k, coding_n);
+        QLOGE("Invalid interface");
         return false;
     }
 
-    m_coding_k = coding_k;
-    m_coding_n = coding_n;
+    m_is_tx = true;
 
+    m_coding_k = descriptor.coding_k;
+    m_coding_n = descriptor.coding_n;
+
+    return init();
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////
+
+bool Video_Streamer::init_rx(RX_Descriptor const& descriptor)
+{
+    if (descriptor.interfaces.empty())
+    {
+        QLOGE("Invalid interfaces");
+        return false;
+    }
+
+    m_is_tx = false;
+
+    m_coding_k = descriptor.coding_k;
+    m_coding_n = descriptor.coding_n;
+
+    return init();
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////
+
+bool Video_Streamer::init()
+{
+    if (m_coding_k == 0 || m_coding_n < m_coding_k || m_coding_k > m_fec_src_datagram_ptrs.size() || m_coding_n > m_fec_dst_datagram_ptrs.size())
+    {
+        QLOGE("Invalid coding params: {} / {}" , m_coding_k, m_coding_n);
+        return false;
+    }
+
+    if (m_fec)
+    {
+        fec_free(m_fec);
+    }
     m_fec = fec_new(m_coding_k, m_coding_n);
-
 
     m_impl.reset(new Impl);
 
@@ -740,7 +763,7 @@ bool Video_Streamer::init(uint32_t coding_k, uint32_t coding_n)
 
     if (m_is_tx)
     {
-        if (!prepare_pcap(m_tx_interface, m_impl->tx.pcap))
+        if (!prepare_pcap(m_tx_descriptor.interface, m_impl->tx.pcap))
         {
             return false;
         }
@@ -748,10 +771,10 @@ bool Video_Streamer::init(uint32_t coding_k, uint32_t coding_n)
     }
     else
     {
-        m_impl->rx.pcaps.reset(new PCap[m_rx_interfaces.size()]);
-        for (size_t i = 0; i < m_rx_interfaces.size(); i++)
+        m_impl->rx.pcaps.reset(new PCap[m_rx_descriptor.interfaces.size()]);
+        for (size_t i = 0; i < m_rx_descriptor.interfaces.size(); i++)
         {
-            if (!prepare_pcap(m_rx_interfaces[i], m_impl->rx.pcaps[i]))
+            if (!prepare_pcap(m_rx_descriptor.interfaces[i], m_impl->rx.pcaps[i]))
             {
                 return false;
             }
@@ -793,7 +816,7 @@ void Video_Streamer::rx_thread_proc()
         to.tv_usec = 1e3;
 
         FD_ZERO(&readset);
-        for (size_t i = 0; i < m_rx_interfaces.size(); i++)
+        for (size_t i = 0; i < m_rx_descriptor.interfaces.size(); i++)
         {
             FD_SET(rx.pcaps[i].rx_pcap_selectable_fd, &readset);
         }
@@ -801,7 +824,7 @@ void Video_Streamer::rx_thread_proc()
         int n = select(30, &readset, nullptr, nullptr, &to);
         if (n != 0)
         {
-            for (size_t i = 0; i < m_rx_interfaces.size(); i++)
+            for (size_t i = 0; i < m_rx_descriptor.interfaces.size(); i++)
             {
                 if (FD_ISSET(rx.pcaps[i].rx_pcap_selectable_fd, &readset))
                 {
