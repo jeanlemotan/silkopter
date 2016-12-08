@@ -11,20 +11,21 @@ namespace silk
 constexpr uint8_t SDN_GPIO = 6;
 constexpr uint8_t NIRQ_GPIO = 5;
 constexpr char const* SPI_DEVICE = "/dev/spidev1.0";
-constexpr size_t SPEED = 16000000;
+constexpr size_t SPEED = 2000000;
 
 
 struct RC_Comms::Impl
 {
     Impl()
         : rc(false)
-        , video_streamer("wlan1", util::comms::Video_Streamer::TX_Descriptor())
+        , video_streamer()
     {}
 
     util::comms::RC rc;
     util::comms::Video_Streamer video_streamer;
 
     std::vector<uint8_t> serialization_buffer;
+    util::comms::RC::Data rc_rx_data;
 };
 
 RC_Comms::RC_Comms(HAL& hal)
@@ -71,7 +72,12 @@ auto RC_Comms::start(std::string const& interface, uint8_t id) -> bool
 //            }
 //        }
 
-        m_is_connected = m_impl->rc.init(SPI_DEVICE, SPEED, SDN_GPIO, NIRQ_GPIO) && m_impl->video_streamer.init(12, 20);
+        util::comms::Video_Streamer::TX_Descriptor descriptor;
+        descriptor.interface = "wlan1";
+        descriptor.coding_k = 12;
+        descriptor.coding_n = 20;
+
+        m_is_connected = m_impl->rc.init(SPI_DEVICE, SPEED, SDN_GPIO, NIRQ_GPIO) && m_impl->video_streamer.init_tx(descriptor);
     }
     catch(std::exception e)
     {
@@ -132,36 +138,25 @@ void RC_Comms::process()
         return;
     }
 
-    static q::Clock::time_point s_tp = q::Clock::now();
-    if (q::Clock::now() - s_tp > std::chrono::milliseconds(100))
-    {
-        s_tp = q::Clock::now();
-
-        struct Data
-        {
-            int8_t throttle = 0;
-            int8_t yaw = 0;
-            int8_t pitch = 0;
-            int8_t roll = 0;
-        };
-
-        static Data tx_data;
-        tx_data.yaw++;
-
-        m_impl->rc.set_tx_data(&tx_data, sizeof(tx_data));
-
-        Data rx_data;
-        util::comms::RC::Data rc_rx_data;
-        m_impl->rc.get_rx_data(rc_rx_data);
-        if (rc_rx_data.rx_data.size() == sizeof(Data))
-        {
-            rx_data = *reinterpret_cast<Data const*>(rc_rx_data.rx_data.data());
-        }
-
-        QLOGI("^{}dBm, v{}dBm, throttle: {}", rc_rx_data.tx_dBm, rc_rx_data.tx_dBm, rx_data.throttle);
-    }
-
     m_multirotor_commands_values.clear();
+
+    {
+        silk::stream::IMultirotor_Commands::Value commands;
+
+        util::comms::RC::Data& rc_rx_data = m_impl->rc_rx_data;
+        m_impl->rc.get_rx_data(rc_rx_data);
+
+        size_t off = 0;
+        if (util::serialization::deserialize(rc_rx_data.rx_data, commands, off))
+        {
+            m_multirotor_commands_values.push_back(commands);
+            QLOGI("^{}dBm, v{}dBm, throttle: {}", rc_rx_data.tx_dBm, rc_rx_data.tx_dBm, commands.sticks.pitch);
+        }
+        else
+        {
+            QLOGW("error deserializing commands");
+        }
+    }
 
 //    while (m_channels->pilot.get_next_message(*m_rcp))
 //    {
