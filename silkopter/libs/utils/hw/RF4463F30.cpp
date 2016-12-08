@@ -364,6 +364,13 @@ bool RF4463F30::begin_rx(uint8_t channel)
         return false;
     }
 
+    //set the packet size
+    uint8_t args[2] = { (uint8_t)(0), (uint8_t)(64) };
+    if (!m_chip.set_properties(Si4463::Property::PKT_FIELD_2_LENGTH_12_8, 2, args, sizeof(args)))
+    {
+        return false;
+    }
+
     return m_chip.call_api_raw(
     {
         (uint8_t)Si4463::Command::START_RX,
