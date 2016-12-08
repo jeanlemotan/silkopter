@@ -644,6 +644,8 @@ bool Video_Streamer::init_tx(TX_Descriptor const& descriptor)
 
     m_is_tx = true;
 
+    m_tx_descriptor = descriptor;
+
     m_coding_k = descriptor.coding_k;
     m_coding_n = descriptor.coding_n;
 
@@ -661,6 +663,8 @@ bool Video_Streamer::init_rx(RX_Descriptor const& descriptor)
     }
 
     m_is_tx = false;
+
+    m_rx_descriptor = descriptor;
 
     m_coding_k = descriptor.coding_k;
     m_coding_n = descriptor.coding_n;
