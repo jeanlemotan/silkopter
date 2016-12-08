@@ -90,6 +90,8 @@ void save_settings();
 
 void generate_settings_file()
 {
+    s_settings = settings::Settings();
+    s_settings.get_comms().set_video_interfaces({"wlan2", "wlan3"});
     save_settings();
 }
 
@@ -101,7 +103,7 @@ bool load_settings()
     {
         QLOGW("Failed to load '{}'", k_settings_path);
         generate_settings_file();
-        return false;
+        return true;
     }
 
     std::string data = q::data::read_whole_source_as_string<std::string>(fs);
@@ -158,41 +160,50 @@ int main(int argc, char *argv[])
     //        worker_threads.create_thread(boost::bind(&boost::asio::io_service::run, &s_async_io_service));
     //    }
 
+    ArduiPi_OLED display;
+    display.init(OLED_ADAFRUIT_I2C_128x64);
+    display.begin();
+
+    if (!silk::load_settings())
+    {
+        QLOGE("Cannot load settings.");
+        display.print("Cannot load settings.");
+        display.display();
+        exit(1);
+    }
+
     if (!initialize_pigpio())
     {
         QLOGE("Cannot initialize pigpio");
-        return false;
+        display.print("Cannot initialize pigpio.");
+        display.display();
+        exit(1);
     }
 
     silk::Comms comms;
+    if (!comms.start())
+    {
+        QLOGE("Cannot start comms.");
+        display.print("Cannot start comms.");
+        display.display();
+        exit(1);
+    }
+
     silk::Menu_System menu_system;
 
     silk::Input input;
     input.init(comms);
 
-    ArduiPi_OLED display;
-
-    menu_system.push_page(std::unique_ptr<silk::IMenu_Page>(new silk::Splash_Menu_Page));
-
     size_t render_frames = 0;
-
-    display.init(OLED_ADAFRUIT_I2C_128x64);
 
     q::Clock::time_point last_tp = q::Clock::now();
     size_t process_frames = 0;
-
-    display.begin();
 
     // init done
     display.clearDisplay();   // clears the screen  buffer
     display.display();   		// display it (clear display)
 
-    if (!comms.start())
-    {
-        display.print("Cannot start comms.");
-        display.display();
-        exit(1);
-    }
+    menu_system.push_page(std::unique_ptr<silk::IMenu_Page>(new silk::Splash_Menu_Page));
 
     while (true)
     {
