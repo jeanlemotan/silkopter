@@ -365,6 +365,8 @@ bool RF4463F30::begin_rx(uint8_t channel)
     }
 
     //set the packet size
+    //this needs to be maximum otherwise the rx fifo will not get data.
+    //The actual data that is in the rx fifo will be the max(this value, actual data size received)
     uint8_t args[2] = { (uint8_t)(0), (uint8_t)(64) };
     if (!m_chip.set_properties(Si4463::Property::PKT_FIELD_2_LENGTH_12_8, 2, args, sizeof(args)))
     {
