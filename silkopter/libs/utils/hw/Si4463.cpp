@@ -120,6 +120,7 @@ bool Si4463::upload_config(void const* _data)
 
     uint8_t const* data = reinterpret_cast<uint8_t const*>(_data);
 
+    size_t items = 0;
     // While cycle as far as the pointer points to a command
     while (*data != 0x00)
     {
@@ -140,6 +141,7 @@ bool Si4463::upload_config(void const* _data)
             return false;
         }
         data += count;
+        items++;
 
         if (get_nirq_level() == false)
         {
@@ -155,6 +157,8 @@ bool Si4463::upload_config(void const* _data)
                 return false;
             }
         }
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(5));
     }
 
     return true;
@@ -267,7 +271,11 @@ bool Si4463::wait_for_ph_interrupt(bool& got_it, uint8_t& status, std::chrono::h
             //std::this_thread::sleep_for(std::chrono::microseconds(1));
         } while (true);
 
-        //QLOGI("spin = {}", spin);
+        if (spin > 1)
+        {
+            int a = 0;
+        }
+        //QLOGI("xspin = {}", spin);
 
         uint8_t request[1] = { 0xFF };
         if (!call_api(Si4463::Command::GET_PH_STATUS, request, sizeof(request), response, sizeof(response)))
@@ -312,9 +320,9 @@ bool Si4463::wait_for_cts()
         }
         if (rx_data[1] == 0xFF)
         {
+            //QLOGI("spin = {}", spin);
             return true;
         }
-        //QLOGI("spin = {}", spin);
 
         std::this_thread::sleep_for(std::chrono::microseconds(1));
 
