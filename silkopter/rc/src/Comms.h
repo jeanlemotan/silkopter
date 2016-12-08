@@ -74,6 +74,7 @@ private:
     mutable std::mutex m_samples_mutex;
     math::vec2u16 m_video_resolution;
     std::vector<uint8_t> m_video_data;
+    std::vector<uint8_t> m_rc_data;
     std::vector<stream::IMultirotor_State::Sample> m_multirotor_state_samples;
 
     void handle_multirotor_state();

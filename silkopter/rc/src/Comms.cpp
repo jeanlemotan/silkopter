@@ -150,6 +150,11 @@ auto Comms::get_multirotor_state_samples() -> std::vector<stream::IMultirotor_St
 }
 void Comms::send_multirotor_commands_value(stream::IMultirotor_Commands::Value const& value)
 {
+    size_t off = 0;
+    util::serialization::serialize(m_rc_data, value, off);
+
+    m_rc.set_tx_data(m_rc_data.data(), m_rc_data.size());
+
     //m_pilot_channel.pack_all(silk::rc_comms::Pilot_Message::MULTIROTOR_COMMANDS, value);
     //m_pilot_channel.try_sending(*m_rcp);
 }
@@ -163,34 +168,34 @@ void Comms::process()
 //        m_video_samples.clear();
 //    }
 
-    static q::Clock::time_point s_tp = q::Clock::now();
-    if (q::Clock::now() - s_tp >= std::chrono::milliseconds(50))
-    {
-        s_tp = q::Clock::now();
+//    static q::Clock::time_point s_tp = q::Clock::now();
+//    if (q::Clock::now() - s_tp >= std::chrono::milliseconds(50))
+//    {
+//        s_tp = q::Clock::now();
 
-        struct Data
-        {
-            int8_t throttle = 0;
-            int8_t yaw = 0;
-            int8_t pitch = 0;
-            int8_t roll = 0;
-        };
+//        struct Data
+//        {
+//            int8_t throttle = 0;
+//            int8_t yaw = 0;
+//            int8_t pitch = 0;
+//            int8_t roll = 0;
+//        };
 
-        static Data tx_data;
-        tx_data.throttle++;
+//        static Data tx_data;
+//        tx_data.throttle++;
 
-        m_rc.set_tx_data(&tx_data, sizeof(tx_data));
+//        m_rc.set_tx_data(&tx_data, sizeof(tx_data));
 
-        Data rx_data;
-        util::comms::RC::Data rc_rx_data;
-        m_rc.get_rx_data(rc_rx_data);
-        if (rc_rx_data.rx_data.size() == sizeof(Data))
-        {
-            rx_data = *reinterpret_cast<Data const*>(rc_rx_data.rx_data.data());
-        }
+//        Data rx_data;
+//        util::comms::RC::Data rc_rx_data;
+//        m_rc.get_rx_data(rc_rx_data);
+//        if (rc_rx_data.rx_data.size() == sizeof(Data))
+//        {
+//            rx_data = *reinterpret_cast<Data const*>(rc_rx_data.rx_data.data());
+//        }
 
-        QLOGI("^{}dBm, v{}dBm, yaw: {}", rc_rx_data.tx_dBm, rc_rx_data.tx_dBm, rx_data.yaw);
-    }
+//        QLOGI("^{}dBm, v{}dBm, yaw: {}", rc_rx_data.tx_dBm, rc_rx_data.tx_dBm, rx_data.yaw);
+//    }
 
 //    while (m_pilot_channel.get_next_message(*m_rcp))
 //    {
