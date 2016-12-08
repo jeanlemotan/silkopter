@@ -169,7 +169,7 @@ Result<std::string> Numeric_Value_Template<Traits>::get_ui_string() const
         char buf[32];
         auto comp = detail::get_component(this->get_value(), 0);
         bool is_negative = comp < 0;
-        sprintf(buf, "%s0x%x", is_negative ? "-" : "", static_cast<uint32_t>(std::abs(comp)));
+        sprintf(buf, "%s0x%x", is_negative ? "-" : "", static_cast<uint32_t>(std::abs(static_cast<int32_t>(comp))));
         return std::string(buf);
     }
 
