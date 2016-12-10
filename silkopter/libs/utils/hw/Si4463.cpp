@@ -81,7 +81,7 @@ bool Si4463::init(std::string const& device, uint32_t speed, uint8_t sdn_gpio, u
         QLOGE("Failed to set SDN");
         goto error;
     }
-    std::this_thread::sleep_for(std::chrono::milliseconds(2));
+    std::this_thread::sleep_for(std::chrono::milliseconds(7));
     res = gpioWrite(m_sdn_gpio, 0);
     if (res != 0)
     {
@@ -158,13 +158,13 @@ bool Si4463::upload_config(void const* _data)
             }
         }
 
-        std::this_thread::sleep_for(std::chrono::milliseconds(5));
+        //std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
 
     return true;
 }
 
-bool Si4463::powerup()
+bool Si4463::boot()
 {
     if (!m_is_initialized)
     {
@@ -218,6 +218,30 @@ bool Si4463::shutdown()
         QLOGE("Failed to shutdown");
         return false;
     }
+    return true;
+}
+
+bool Si4463::reset()
+{
+    if (!m_is_initialized)
+    {
+        return false;
+    }
+    //power on procedure
+    int res = gpioWrite(m_sdn_gpio, 1);
+    if (res != 0)
+    {
+        QLOGE("Failed to set SDN");
+        return false;
+    }
+    std::this_thread::sleep_for(std::chrono::milliseconds(7));
+    res = gpioWrite(m_sdn_gpio, 0);
+    if (res != 0)
+    {
+        QLOGE("Failed to set SDN");
+        return false;
+    }
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
     return true;
 }
 

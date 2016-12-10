@@ -237,8 +237,9 @@ public:
     bool upload_patch(void const* data);
     bool upload_config(void const* data);
 
-    bool powerup();
+    bool boot();
     bool shutdown();
+    bool reset();
 
     bool call_api(Command cmd, void const* tx_data, size_t tx_size, void* rx_data, size_t rx_size);
     bool call_api_raw(void const* tx_data, size_t tx_size, void* rx_data, size_t rx_size);
@@ -258,9 +259,10 @@ public:
     bool read_frr_c(uint8_t& value);
     bool read_frr_d(uint8_t& value);
 
-private:
     bool wait_for_cts();
     bool get_nirq_level();
+
+private:
 
     uint8_t m_sdn_gpio = 0;
     uint8_t m_nirq_gpio = 0;
