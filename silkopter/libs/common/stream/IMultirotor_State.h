@@ -48,9 +48,8 @@ public:
         } battery_state;
 
         math::quatf local_frame; //local space to enu space
-        double longitude = 0;
-        double latitude = 0;
-        math::vec3f enu_velocity;
+        IECEF_Position::Value ecef_position;
+        IENU_Velocity::Value enu_velocity;
 
         Mode mode;
     };
@@ -98,8 +97,10 @@ template<> inline void serialize(Buffer_t& buffer, silk::stream::IMultirotor_Sta
         serialize(buffer, v, off);
     }
 
+    util::coordinates::LLA lla_position = util::coordinates::ecef_to_lla(value.ecef_position);
+
     {
-        int64_t v = value.latitude * 100000000.0; //8 decimal places
+        int64_t v = lla_position.latitude * 100000000.0; //8 decimal places
         uint8_t const* data = reinterpret_cast<uint8_t const*>(&v);
         serialize(buffer, data[0], off);
         serialize(buffer, data[1], off);
@@ -108,13 +109,17 @@ template<> inline void serialize(Buffer_t& buffer, silk::stream::IMultirotor_Sta
         serialize(buffer, data[4], off);
     }
     {
-        int64_t v = value.longitude * 100000000.0; //8 decimal places
+        int64_t v = lla_position.longitude * 100000000.0; //8 decimal places
         uint8_t const* data = reinterpret_cast<uint8_t const*>(&v);
         serialize(buffer, data[0], off);
         serialize(buffer, data[1], off);
         serialize(buffer, data[2], off);
         serialize(buffer, data[3], off);
         serialize(buffer, data[4], off);
+    }
+    {
+        int16_t v = static_cast<int16_t>(math::clamp(lla_position.altitude, -327.0, 327.0) * 10.0);
+        serialize(buffer, v, off);
     }
 
     {
@@ -159,6 +164,8 @@ template<> inline auto deserialize(Buffer_t const& buffer, silk::stream::IMultir
         value.local_frame = math::normalized<float, math::safe>(v);
     }
 
+    util::coordinates::LLA lla_position;
+
     //latitude
     if (!deserialize(buffer, v1, off) ||
         !deserialize(buffer, v2, off) ||
@@ -181,7 +188,7 @@ template<> inline auto deserialize(Buffer_t const& buffer, silk::stream::IMultir
         data[2] = v3;
         data[3] = v4;
         data[4] = v5;
-        value.latitude = v / 100000000.0;
+        lla_position.latitude = v / 100000000.0;
     }
 
     //longitude
@@ -206,8 +213,22 @@ template<> inline auto deserialize(Buffer_t const& buffer, silk::stream::IMultir
         data[2] = v3;
         data[3] = v4;
         data[4] = v5;
-        value.longitude = v / 100000000.0;
+        lla_position.longitude = v / 100000000.0;
     }
+
+    //altitude
+    if (!deserialize(buffer, s1, off))
+    {
+        return false;
+    }
+
+    {
+        double v = s1 / 100.0;
+        lla_position.altitude = v;
+    }
+
+    value.ecef_position = util::coordinates::lla_to_ecef(lla_position);
+
 
     //enu velocity
     if (!deserialize(buffer, s1, off) ||
