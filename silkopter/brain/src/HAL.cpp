@@ -833,6 +833,9 @@ auto HAL::init(RC_Comms& rc_comms, GS_Comms& gs_comms) -> bool
     m_node_factory.add<Vec3_Generator<stream::IVelocity>>("Velocity Generator", *this);
     m_node_factory.add<Vec3_Generator<stream::IENU_Velocity>>("Velocity Generator (ENU)", *this);
     m_node_factory.add<Vec3_Generator<stream::IECEF_Velocity>>("Velocity Generator (ECEF)", *this);
+//    m_node_factory.add<Vec3_Generator<stream::IPosition>>("Position Generator", *this);
+//    m_node_factory.add<Vec3_Generator<stream::IENU_Position>>("Position Generator (ENU)", *this);
+    m_node_factory.add<Vec3_Generator<stream::IECEF_Position>>("Position Generator (ECEF)", *this);
 
     m_node_factory.add<Combiner<stream::IAcceleration>>("Acceleration CMB", *this);
     m_node_factory.add<Combiner<stream::IENU_Acceleration>>("Acceleration CMB (ENU)", *this);
