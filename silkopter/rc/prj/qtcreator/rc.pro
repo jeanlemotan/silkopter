@@ -175,7 +175,8 @@ HEADERS += \
     ../../src/Stick_Calibration_Menu_Page.h \
     ../../src/Info_Menu_Page.h \
     ../../def/settings.def.h \
-    ../../def/gen_support.h
+    ../../def/gen_support.h \
+    ../../../libs/utils/hw/RFM22B.h
 
 SOURCES += \
     ../../src/main.cpp \
@@ -215,7 +216,8 @@ SOURCES += \
     ../../src/Menu.cpp \
     ../../src/Stick_Calibration_Menu_Page.cpp \
     ../../src/Info_Menu_Page.cpp \
-    ../../def/settings.def.cpp
+    ../../def/settings.def.cpp \
+    ../../../libs/utils/hw/RFM22B.cpp
 
 DISTFILES += \
     ../../src/node.png \

@@ -168,7 +168,8 @@ SOURCES += \
     ../../../libs/utils/hw/Si4463.cpp \
     ../../../libs/utils/hw/SPI_Dev.cpp \
     ../../../libs/utils/comms/Video_Streamer.cpp \
-    ../../../libs/utils/comms/fec.cpp
+    ../../../libs/utils/comms/fec.cpp \
+    ../../../libs/utils/hw/RFM22B.cpp
 
 HEADERS += \
     ../../src/BrainStdAfx.h \
@@ -326,7 +327,8 @@ HEADERS += \
     ../../../libs/utils/hw/SPI_Dev.h \
     ../../../libs/utils/comms/Video_Streamer.h \
     ../../../libs/utils/Pool.h \
-    ../../../libs/utils/comms/fec.h
+    ../../../libs/utils/comms/fec.h \
+    ../../../libs/utils/hw/RFM22B.h
 
 DISTFILES +=
 

@@ -46,7 +46,7 @@ ts::Result<void> SPI_Dev::init(std::string const& device, uint32_t speed)
     return ts::success;
 }
 
-bool SPI_Dev::do_transfer(void const* tx_data, void* rx_data, size_t size, uint32_t speed)
+bool SPI_Dev::do_transfer(void const* tx_data, void* rx_data, size_t size, uint32_t speed) const
 {
     QASSERT(m_fd >= 0 && size > 0);
     if (m_fd < 0 || size == 0)
@@ -74,13 +74,13 @@ bool SPI_Dev::do_transfer(void const* tx_data, void* rx_data, size_t size, uint3
     return true;
 }
 
-bool SPI_Dev::transfer(void const* tx_data, void* rx_data, size_t size, uint32_t speed)
+bool SPI_Dev::transfer(void const* tx_data, void* rx_data, size_t size, uint32_t speed) const
 {
     QLOG_TOPIC("SPI_Dev::transfer");
     return do_transfer(tx_data, rx_data, size, speed);
 }
 
-bool SPI_Dev::transfer_register(uint8_t reg, void const* tx_data, void* rx_data, size_t size, uint32_t speed)
+bool SPI_Dev::transfer_register(uint8_t reg, void const* tx_data, void* rx_data, size_t size, uint32_t speed) const
 {
     QLOG_TOPIC("SPI_Dev::transfer_register");
 
