@@ -198,7 +198,7 @@ void Vec3_Generator<Stream_t>::process()
 
     for (size_t i = 0; i < count; i++)
     {
-        math::vec3f value = m_config->get_value();
+        typename Stream_t::Value value = typename Stream_t::Value(m_config->get_value());
 
         if (m_modulation_samples[0].size() > i)
         {
