@@ -1,7 +1,14 @@
 #include "RC.h"
 #include "utils/hw/RF4463F30.h"
+#include "utils/hw/RFM22B.h"
 #include <string>
 #include "util/murmurhash.h"
+
+#define CHIP_RF4463F30  1
+#define CHIP_RFM22B     2
+
+#define USE_CHIP CHIP_RFM22B
+
 
 namespace util
 {
@@ -10,13 +17,20 @@ namespace comms
 
 constexpr size_t MTU = 64;
 constexpr uint8_t CHANNEL = 0;
-constexpr q::Clock::duration MIN_TX_DURATION = std::chrono::milliseconds(5);
+constexpr q::Clock::duration MIN_TX_DURATION = std::chrono::microseconds(1);
 
 
 
 struct RC::HW
 {
+
+#if USE_CHIP == CHIP_RF4463F30
     hw::RF4463F30 chip;
+#elif USE_CHIP == CHIP_RFM22B
+    hw::RFM22B chip;
+#else
+#   error "Choose a RF chip"
+#endif
 };
 
 
@@ -43,6 +57,57 @@ bool RC::init(std::string const& device, uint32_t speed, uint8_t sdn_gpio, uint8
     {
         return false;
     }
+
+#if USE_CHIP == CHIP_RFM22B
+    uint8_t modem_config[42] =
+    {
+        0x16,
+        0x40,
+        0x3F,
+        0x02,
+        0x0C,
+        0x4A,
+        0x07,
+        0xFF,
+        0x1B,
+        0x28,
+        0x27,
+        0x29,
+        0xC9,
+        0x00,
+        0x02,
+        0x08,
+        0x22,
+        0x2D,
+        0xD4,
+        0x00,
+        0x00,
+        0x00,
+        0x00,
+        0x00,
+        0x00,
+        0x40,
+        0x00,
+        0x00,
+        0x00,
+        0x00,
+        0xFF,
+        0xFF,
+        0xFF,
+        0xFF,
+        0x08,
+        0x31,
+        0x0C,
+        0x22,
+        0x1A,
+        0x53,
+        0x64,
+        0x00,
+    };
+
+    m_hw->chip.set_modem_configuration(modem_config);
+    m_hw->chip.set_tx_power_dBm(20);
+#endif
 
     if (m_is_master)
     {
@@ -106,15 +171,14 @@ void RC::master_thread_proc()
 
             {
                 std::lock_guard<std::mutex> lg(m_mutex);
-                m_tx_buffer.resize(1 + sizeof(Header) + m_tx_data.size());
-                memcpy(m_tx_buffer.data() + 1 + sizeof(Header), m_tx_data.data(), m_tx_data.size());
-                m_tx_buffer[0] = sizeof(Header) + m_tx_data.size();
+                m_tx_buffer.resize(sizeof(Header) + m_tx_data.size());
+                memcpy(m_tx_buffer.data() + sizeof(Header), m_tx_data.data(), m_tx_data.size());
             }
 
-            Header& header = *reinterpret_cast<Header*>(m_tx_buffer.data() + 1);
+            Header& header = *reinterpret_cast<Header*>(m_tx_buffer.data());
             header.crc = 0;
-            m_hw->chip.get_dBm(header.dBm);
-            header.crc = q::util::compute_murmur_hash16(m_tx_buffer.data() + 1, m_tx_buffer.size() - 1);
+            header.dBm = m_hw->chip.get_input_dBm();
+            header.crc = q::util::compute_murmur_hash16(m_tx_buffer.data(), m_tx_buffer.size());
 
             //wait a bit so the other end has time to setup its RX state
             std::this_thread::sleep_for(std::chrono::microseconds(500));
@@ -123,7 +187,7 @@ void RC::master_thread_proc()
             if (m_hw->chip.write_tx_fifo(m_tx_buffer.data(), m_tx_buffer.size()))
             {
                 //The first byte is the length. The actual payload is size - 1
-                if (m_hw->chip.tx(m_tx_buffer.size() - 1, CHANNEL))
+                if (m_hw->chip.tx(m_tx_buffer.size(), CHANNEL))
                 {
 
                 }
@@ -185,16 +249,15 @@ void RC::slave_thread_proc()
             {
                 std::lock_guard<std::mutex> lg(m_mutex);
                 m_tx_buffer.resize(1 + sizeof(Header) + m_tx_data.size());
-                memcpy(m_tx_buffer.data() + 1 + sizeof(Header), m_tx_data.data(), m_tx_data.size());
-                m_tx_buffer[0] = sizeof(Header) + m_tx_data.size();
+                memcpy(m_tx_buffer.data() + sizeof(Header), m_tx_data.data(), m_tx_data.size());
             }
 
             //auto start_tx_tp = q::Clock::now();
 
-            Header& header = *reinterpret_cast<Header*>(m_tx_buffer.data() + 1);
+            Header& header = *reinterpret_cast<Header*>(m_tx_buffer.data());
             header.crc = 0;
-            m_hw->chip.get_dBm(header.dBm);
-            header.crc = q::util::compute_murmur_hash16(m_tx_buffer.data() + 1, m_tx_buffer.size() - 1);
+            header.dBm = m_hw->chip.get_input_dBm();
+            header.crc = q::util::compute_murmur_hash16(m_tx_buffer.data(), m_tx_buffer.size());
 
             //wait a bit so the other end has time to setup its RX state
             std::this_thread::sleep_for(std::chrono::microseconds(500));
@@ -203,7 +266,7 @@ void RC::slave_thread_proc()
             if (m_hw->chip.write_tx_fifo(m_tx_buffer.data(), m_tx_buffer.size()))
             {
                 //The first byte is the length. The actual payload is size - 1
-                if (m_hw->chip.tx(m_tx_buffer.size() - 1, CHANNEL))
+                if (m_hw->chip.tx(m_tx_buffer.size(), CHANNEL))
                 {
 
                 }
@@ -232,8 +295,7 @@ bool RC::read_fifo(size_t rx_size)
             uint16_t computed_crc = q::util::compute_murmur_hash16(m_rx_buffer.data(), m_rx_buffer.size());
             if (crc == computed_crc)
             {
-                int8_t dBm = 0;
-                m_hw->chip.get_dBm(dBm);
+                int8_t dBm = m_hw->chip.get_input_dBm();
 
                 {
                     std::lock_guard<std::mutex> lg(m_mutex);
