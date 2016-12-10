@@ -113,8 +113,8 @@ void Multirotor_Brain::process_state_mode_idle()
 //    commands.yaw.angle_rate.set(0);
 //    commands.yaw.angle.set(0);
 
-//    m_rate_output_stream->push_sample(stream::IAngular_Velocity::Value(), true);
-//    m_thrust_output_stream->push_sample(stream::IFloat::Value(), true);
+    m_rate_output_stream->push_sample(stream::IAngular_Velocity::Value(), true);
+    m_thrust_output_stream->push_sample(stream::IFloat::Value(), true);
 }
 
 float Multirotor_Brain::compute_ff_thrust(float target_altitude)
@@ -502,84 +502,82 @@ void Multirotor_Brain::refresh_inputs(stream::IFrame::Sample const& frame,
 
 void Multirotor_Brain::process()
 {
-//    QLOG_TOPIC("Multirotor_Brain::process");
+    QLOG_TOPIC("Multirotor_Brain::process");
 
-//    {
-//        static q::Clock::time_point last_timestamp = q::Clock::now();
-//        auto now = q::Clock::now();
-//        auto dt = now - last_timestamp;
-//        last_timestamp = now;
-//        static q::Clock::duration min_dt, max_dt, avg_dt;
-//        static int xxx = 0;
-//        min_dt = std::min(min_dt, dt);
-//        max_dt = std::max(max_dt, dt);
-//        avg_dt += dt;
-//        xxx++;
-//        static q::Clock::time_point xxx_timestamp = q::Clock::now();
-//        if (now - xxx_timestamp >= std::chrono::milliseconds(1000))
-//        {
-//            xxx_timestamp = now;
+    {
+        static q::Clock::time_point last_timestamp = q::Clock::now();
+        auto now = q::Clock::now();
+        auto dt = now - last_timestamp;
+        last_timestamp = now;
+        static q::Clock::duration min_dt, max_dt, avg_dt;
+        static int xxx = 0;
+        min_dt = std::min(min_dt, dt);
+        max_dt = std::max(max_dt, dt);
+        avg_dt += dt;
+        xxx++;
+        static q::Clock::time_point xxx_timestamp = q::Clock::now();
+        if (now - xxx_timestamp >= std::chrono::milliseconds(1000))
+        {
+            xxx_timestamp = now;
 
-//            QLOGI("min {}, max {}, avg {}", min_dt, max_dt, avg_dt/ xxx);
-//            min_dt = dt;
-//            max_dt = dt;
-//            avg_dt = std::chrono::milliseconds(0);
+            QLOGI("min {}, max {}, avg {}", min_dt, max_dt, avg_dt/ xxx);
+            min_dt = dt;
+            max_dt = dt;
+            avg_dt = std::chrono::milliseconds(0);
 
-//            xxx = 0;
-//        }
-//    }
+            xxx = 0;
+        }
+    }
 
-//    m_state_output_stream->clear();
-//    m_rate_output_stream->clear();
-//    m_thrust_output_stream->clear();
+    m_state_output_stream->clear();
+    m_rate_output_stream->clear();
+    m_thrust_output_stream->clear();
 
-//    m_commands_accumulator.process([this](stream::IMultirotor_Commands::Sample const& i_commands)
-//    {
-//        m_inputs.remote_commands.sample = i_commands;
-//        m_inputs.remote_commands.last_valid_tp = i_commands.is_healthy ? q::Clock::now() : m_inputs.remote_commands.last_valid_tp;
-//    });
+    m_commands_accumulator.process([this](stream::IMultirotor_Commands::Sample const& i_commands)
+    {
+        m_inputs.remote_commands.sample = i_commands;
+        m_inputs.remote_commands.last_valid_tp = i_commands.is_healthy ? q::Clock::now() : m_inputs.remote_commands.last_valid_tp;
+    });
 
 //    Merge_Commands func;
 //    stream::IMultirotor_Commands::apply(func, m_inputs.remote_commands.previous_sample.value, m_inputs.remote_commands.sample.value, m_inputs.local_commands.sample.value);
 //    m_inputs.remote_commands.previous_sample.value = m_inputs.remote_commands.sample.value;
 
-//    m_sensor_accumulator.process([this](stream::IFrame::Sample const& i_frame,
-//                                      stream::IECEF_Position::Sample const& i_position,
-//                                      stream::IECEF_Velocity::Sample const& i_velocity,
-//                                      stream::IECEF_Linear_Acceleration::Sample const& i_linear_acceleration,
-//                                      stream::IProximity::Sample const& i_proximity,
-//                                      stream::IVoltage::Sample const& i_voltage,
-//                                      stream::ICurrent::Sample const& i_current)
-//    {
-//        m_battery_state_sample = m_battery.process(i_voltage, i_current);
+    m_sensor_accumulator.process([this](stream::IFrame::Sample const& i_frame,
+                                      stream::IECEF_Position::Sample const& i_position,
+                                      stream::IECEF_Velocity::Sample const& i_velocity,
+                                      stream::IECEF_Linear_Acceleration::Sample const& i_linear_acceleration,
+                                      stream::IProximity::Sample const& i_proximity,
+                                      stream::IVoltage::Sample const& i_voltage,
+                                      stream::ICurrent::Sample const& i_current)
+    {
+        m_battery_state_sample = m_battery.process(i_voltage, i_current);
 
-//        refresh_inputs(i_frame, i_position, i_velocity, i_linear_acceleration, i_proximity);
-//        process_state();
-//    });
+        refresh_inputs(i_frame, i_position, i_velocity, i_linear_acceleration, i_proximity);
+        process_state();
+    });
 
-//    acquire_home_position();
+    acquire_home_position();
 
-//    size_t samples_needed = m_state_output_stream->compute_samples_needed();
-//    if (samples_needed > 0)
-//    {
-//        stream::IMultirotor_State::Value state;
+    size_t samples_needed = m_state_output_stream->compute_samples_needed();
+    if (samples_needed > 0)
+    {
+        stream::IMultirotor_State::Value state;
 //        state.time_point = q::Clock::now();
-//        state.position = m_inputs.position.sample;
-//        state.velocity = m_inputs.velocity.sample;
-//        state.home_position.value = m_home.position;
-//        state.home_position.is_healthy = m_home.is_acquired;
-//        state.frame = m_inputs.frame.sample;
-//        state.battery_state = m_battery_state_sample;
+        state.ecef_position = m_inputs.position.sample.value;
+        state.enu_velocity = m_enu_velocity;
+        state.battery_state.average_current = m_battery_state_sample.value.average_current;
+        state.battery_state.average_voltage = m_battery_state_sample.value.average_voltage;
+        state.battery_state.capacity_left = m_battery_state_sample.value.capacity_left;
+        state.battery_state.charge_used = m_battery_state_sample.value.charge_used;
+        state.local_frame = m_inputs.frame.sample.value;
+        //state.mode = m_mode
 
-//        state.commands = m_inputs.local_commands.sample.value;
-
-//        state.proximity = m_inputs.proximity.sample;
-
-//        for (size_t i = 0; i < samples_needed; i++)
-//        {
-//            m_state_output_stream->push_sample(state, true);
-//        }
-//    }
+        for (size_t i = 0; i < samples_needed; i++)
+        {
+            m_state_output_stream->push_sample(state, true);
+        }
+    }
 }
 
 ts::Result<void> Multirotor_Brain::set_input_stream_path(size_t idx, std::string const& path)
