@@ -26,6 +26,7 @@ struct RC_Comms::Impl
 
     std::vector<uint8_t> serialization_buffer;
     util::comms::RC::Data rc_rx_data;
+    std::vector<uint8_t> rc_data;
 };
 
 RC_Comms::RC_Comms(HAL& hal)
@@ -106,8 +107,10 @@ auto RC_Comms::get_multirotor_commands_values() const -> std::vector<stream::IMu
 }
 void RC_Comms::add_multirotor_state_sample(stream::IMultirotor_State::Sample const& sample)
 {
-//    m_channels->pilot.pack_all(silk::rc_comms::Pilot_Message::MULTIROTOR_STATE, sample);
-//    m_channels->pilot.send(*m_rcp);
+    size_t off = 0;
+    util::serialization::serialize(m_impl->rc_data, sample.value, off);
+
+    m_impl->rc.set_tx_data(m_impl->rc_data.data(), m_impl->rc_data.size());
 }
 void RC_Comms::add_video_sample(stream::IVideo::Sample const& sample)
 {
