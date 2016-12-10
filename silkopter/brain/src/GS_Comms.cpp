@@ -163,28 +163,51 @@ void GS_Comms::gather_telemetry_data()
         if (stream)
         {
             if (gather_telemetry_stream<stream::IAcceleration>(ts, *stream) ||
+                gather_telemetry_stream<stream::IENU_Acceleration>(ts, *stream) ||
+                gather_telemetry_stream<stream::IECEF_Acceleration>(ts, *stream) ||
+
                 gather_telemetry_stream<stream::IAngular_Velocity>(ts, *stream) ||
+                gather_telemetry_stream<stream::IENU_Angular_Velocity>(ts, *stream) ||
+                gather_telemetry_stream<stream::IECEF_Angular_Velocity>(ts, *stream) ||
+
                 gather_telemetry_stream<stream::IMagnetic_Field>(ts, *stream) ||
+                gather_telemetry_stream<stream::IENU_Magnetic_Field>(ts, *stream) ||
+                gather_telemetry_stream<stream::IECEF_Magnetic_Field>(ts, *stream) ||
+
+                gather_telemetry_stream<stream::ILinear_Acceleration>(ts, *stream) ||
+                gather_telemetry_stream<stream::IENU_Linear_Acceleration>(ts, *stream) ||
+                gather_telemetry_stream<stream::IECEF_Linear_Acceleration>(ts, *stream) ||
+
+                gather_telemetry_stream<stream::IECEF_Position>(ts, *stream) ||
+
+                gather_telemetry_stream<stream::IVelocity>(ts, *stream) ||
+                gather_telemetry_stream<stream::IENU_Velocity>(ts, *stream) ||
+                gather_telemetry_stream<stream::IECEF_Velocity>(ts, *stream) ||
+
+                gather_telemetry_stream<stream::IGimbal_Frame>(ts, *stream) ||
+                gather_telemetry_stream<stream::IFrame>(ts, *stream) ||
+                gather_telemetry_stream<stream::IENU_Frame>(ts, *stream) ||
+
+                gather_telemetry_stream<stream::IForce>(ts, *stream) ||
+                gather_telemetry_stream<stream::IENU_Force>(ts, *stream) ||
+                gather_telemetry_stream<stream::IECEF_Force>(ts, *stream) ||
+
+                gather_telemetry_stream<stream::ITorque>(ts, *stream) ||
+                gather_telemetry_stream<stream::IENU_Torque>(ts, *stream) ||
+                gather_telemetry_stream<stream::IECEF_Torque>(ts, *stream) ||
+
                 gather_telemetry_stream<stream::IPressure>(ts, *stream) ||
                 gather_telemetry_stream<stream::IBattery_State>(ts, *stream) ||
-                gather_telemetry_stream<stream::ILinear_Acceleration>(ts, *stream) ||
                 gather_telemetry_stream<stream::ICurrent>(ts, *stream) ||
                 gather_telemetry_stream<stream::IVoltage>(ts, *stream) ||
                 gather_telemetry_stream<stream::IDistance>(ts, *stream) ||
-                gather_telemetry_stream<stream::IECEF_Position>(ts, *stream) ||
-                gather_telemetry_stream<stream::IECEF_Velocity>(ts, *stream) ||
                 gather_telemetry_stream<stream::IPWM>(ts, *stream) ||
-                gather_telemetry_stream<stream::IFrame>(ts, *stream) ||
-                gather_telemetry_stream<stream::IGimbal_Frame>(ts, *stream) ||
                 gather_telemetry_stream<stream::IGPS_Info>(ts, *stream) ||
                 gather_telemetry_stream<stream::ITemperature>(ts, *stream) ||
                 gather_telemetry_stream<stream::IADC>(ts, *stream) ||
                 gather_telemetry_stream<stream::IFloat>(ts, *stream) ||
                 gather_telemetry_stream<stream::IBool>(ts, *stream) ||
-                gather_telemetry_stream<stream::IForce>(ts, *stream) ||
-                gather_telemetry_stream<stream::IVelocity>(ts, *stream) ||
                 gather_telemetry_stream<stream::IThrottle>(ts, *stream) ||
-                gather_telemetry_stream<stream::ITorque>(ts, *stream) ||
                 gather_telemetry_stream<stream::IMultirotor_Commands>(ts, *stream) ||
                 gather_telemetry_stream<stream::IMultirotor_State>(ts, *stream) ||
                 gather_telemetry_stream<stream::IProximity>(ts, *stream) ||
