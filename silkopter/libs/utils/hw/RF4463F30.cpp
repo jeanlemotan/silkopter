@@ -15,11 +15,7 @@ RF4463F30::RF4463F30()
 
 RF4463F30::~RF4463F30()
 {
-    if (m_is_initialized)
-    {
-        m_chip.shutdown();
-        m_is_initialized = false;
-    }
+    shutdown();
 }
 
 bool RF4463F30::init(const std::string& device, uint32_t speed, uint8_t sdn_gpio, uint8_t nirq_gpio)
@@ -34,6 +30,13 @@ bool RF4463F30::init(const std::string& device, uint32_t speed, uint8_t sdn_gpio
         return false;
     }
 
+    m_is_initialized = true;
+
+    return init();
+}
+
+bool RF4463F30::init()
+{
 #if 1
     uint8_t config[] = RADIO_CONFIGURATION_DATA_ARRAY;
 
@@ -109,7 +112,7 @@ bool RF4463F30::init(const std::string& device, uint32_t speed, uint8_t sdn_gpio
         return false;
     }
 
-    if (!m_chip.powerup())
+    if (!m_chip.boot())
     {
         return false;
     }
@@ -230,13 +233,27 @@ bool RF4463F30::init(const std::string& device, uint32_t speed, uint8_t sdn_gpio
     }
 #endif
 
-    m_is_initialized = true;
-
     return true;
 
 error:
     m_chip.shutdown();
     return false;
+}
+
+void RF4463F30::shutdown()
+{
+    if (m_is_initialized)
+    {
+        m_chip.shutdown();
+    }
+}
+
+void RF4463F30::reset()
+{
+    if (m_is_initialized)
+    {
+        m_chip.reset();
+    }
 }
 
 
@@ -284,6 +301,10 @@ bool RF4463F30::begin_tx(size_t size, uint8_t channel)
     {
         return false;
     }
+    if (!m_chip.wait_for_cts())
+    {
+        return false;
+    }
 
     m_tx_started = true;
 
@@ -310,7 +331,7 @@ bool RF4463F30::end_tx()
     {
         bool got_it = false;
         uint8_t status = 0;
-        if (!m_chip.wait_for_ph_interrupt(got_it, status, std::chrono::milliseconds(1000)))
+        if (!m_chip.wait_for_ph_interrupt(got_it, status, std::chrono::milliseconds(100)))
         {
             return false;
         }
@@ -319,8 +340,17 @@ bool RF4463F30::end_tx()
             break;
         }
 
-        if (std::chrono::high_resolution_clock::now() - start > std::chrono::milliseconds(1000))
+        if (std::chrono::high_resolution_clock::now() - start > std::chrono::milliseconds(100))
         {
+//            uint8_t response[2];
+//            if (!m_chip.call_api(Si4463::Command::REQUEST_DEVICE_STATE, nullptr, 0, response, sizeof(response)))
+//            {
+//                return false;
+//            }
+
+            reset();
+            init();
+
             QLOGW("Timeout");
             return false;
         }
@@ -458,14 +488,20 @@ bool RF4463F30::read_rx_fifo(void* data, size_t& size)
     return m_chip.read_rx_fifo(data, size);
 }
 
-bool RF4463F30::get_dBm(int8_t& dBm)
+int8_t RF4463F30::get_input_dBm()
 {
     if (!m_is_initialized)
     {
         return false;
     }
 
-    return m_chip.read_frr_a(reinterpret_cast<uint8_t&>(dBm));
+    int8_t dBm = 0;
+
+    if (!m_chip.read_frr_a(reinterpret_cast<uint8_t&>(dBm)))
+    {
+        return 0;
+    }
+    return dBm;
 }
 
 

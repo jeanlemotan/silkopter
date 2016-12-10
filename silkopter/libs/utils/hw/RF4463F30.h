@@ -31,9 +31,13 @@ public:
 
     bool read_rx_fifo(void* data, size_t& size);
 
-    bool get_dBm(int8_t& dBm);
+    int8_t get_input_dBm();
 
 private:
+    bool init();
+    void shutdown();
+    void reset();
+
     bool m_is_initialized = false;
     bool m_tx_started = false;
     Si4463 m_chip;
