@@ -30,7 +30,7 @@ inline mat2<T>::mat2(angle<T> const& rotation)
 , column1(math::uninitialized)
 {
 	T s, c;
-    sin_cos(rotation, s, c);
+    sin_cos(rotation.radians, s, c);
 
 	m[0] = c;
 	m[1] = s;
