@@ -51,7 +51,7 @@ public:
         IECEF_Position::Value ecef_position;
         IENU_Velocity::Value enu_velocity;
 
-        Mode mode;
+        Mode mode = Mode::IDLE;
     };
 
     typedef stream::Sample<Value>     Sample;
