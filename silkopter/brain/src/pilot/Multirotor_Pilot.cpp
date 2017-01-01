@@ -96,12 +96,12 @@ void Multirotor_Pilot::process()
     //write back the state
     m_state_accumulator.process([this](stream::IMultirotor_State::Sample const& i_state)
     {
-        m_rc_comms.add_multirotor_state_sample(i_state);
+        m_rc_comms.set_multirotor_state(i_state.value);
     });
     //write back the video
     m_video_accumulator.process([this](stream::IVideo::Sample const& i_video)
     {
-        m_rc_comms.add_video_sample(i_video);
+        m_rc_comms.add_video_data(i_video.value);
     });
 }
 
