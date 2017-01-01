@@ -128,6 +128,15 @@ void Comms::handle_video(void const* _data, size_t size, math::vec2u16 const& re
 //    fclose(f);
 }
 
+int8_t Comms::get_rx_dBm() const
+{
+    return m_rc_rx_data.rx_dBm;
+}
+int8_t Comms::get_tx_dBm() const
+{
+    return m_rc_rx_data.tx_dBm;
+}
+
 void Comms::get_video_data(std::vector<uint8_t>& dst, math::vec2u16& resolution)
 {
     std::lock_guard<std::mutex> lg(m_samples_mutex);
@@ -141,19 +150,17 @@ void Comms::get_video_data(std::vector<uint8_t>& dst, math::vec2u16& resolution)
     }
     resolution = m_video_resolution;
 }
-auto Comms::get_multirotor_state_samples() -> std::vector<stream::IMultirotor_State::Sample>
+stream::IMultirotor_State::Value Comms::get_multirotor_state() const
 {
     std::lock_guard<std::mutex> lg(m_samples_mutex);
-    std::vector<stream::IMultirotor_State::Sample> samples = std::move(m_multirotor_state_samples);
-    m_multirotor_state_samples.clear();
-    return samples;
+    return m_multirotor_state;
 }
 void Comms::send_multirotor_commands_value(stream::IMultirotor_Commands::Value const& value)
 {
     size_t off = 0;
-    util::serialization::serialize(m_rc_data, value, off);
+    util::serialization::serialize(m_serialization_buffer, value, off);
 
-    m_rc.set_tx_data(m_rc_data.data(), m_rc_data.size());
+    m_rc.set_tx_data(m_serialization_buffer.data(), m_serialization_buffer.size());
 
     //m_pilot_channel.pack_all(silk::rc_comms::Pilot_Message::MULTIROTOR_COMMANDS, value);
     //m_pilot_channel.try_sending(*m_rcp);
@@ -162,91 +169,22 @@ void Comms::send_multirotor_commands_value(stream::IMultirotor_Commands::Value c
 void Comms::process()
 {
     m_video_streamer.process();
-//    {
-//        std::lock_guard<std::mutex> lg(m_samples_mutex);
-//        m_multirotor_state_samples.clear();
-//        m_video_samples.clear();
-//    }
 
-//    static q::Clock::time_point s_tp = q::Clock::now();
-//    if (q::Clock::now() - s_tp >= std::chrono::milliseconds(50))
-//    {
-//        s_tp = q::Clock::now();
-
-//        struct Data
-//        {
-//            int8_t throttle = 0;
-//            int8_t yaw = 0;
-//            int8_t pitch = 0;
-//            int8_t roll = 0;
-//        };
-
-//        static Data tx_data;
-//        tx_data.throttle++;
-
-//        m_rc.set_tx_data(&tx_data, sizeof(tx_data));
-
-//        Data rx_data;
-//        util::comms::RC::Data rc_rx_data;
-//        m_rc.get_rx_data(rc_rx_data);
-//        if (rc_rx_data.rx_data.size() == sizeof(Data))
-//        {
-//            rx_data = *reinterpret_cast<Data const*>(rc_rx_data.rx_data.data());
-//        }
-
-//        QLOGI("^{}dBm, v{}dBm, yaw: {}", rc_rx_data.tx_dBm, rc_rx_data.tx_dBm, rx_data.yaw);
-//    }
-
-//    while (m_pilot_channel.get_next_message(*m_rcp))
-//    {
-//        rc_comms::Pilot_Message msg;
-//        if (!m_pilot_channel.begin_unpack() || !m_pilot_channel.unpack_param(msg))
-//        {
-//            QASSERT(0);
-//            m_pilot_channel.end_unpack();
-//            break;
-//        }
-
-//        switch (msg)
-//        {
-//        case rc_comms::Pilot_Message::MULTIROTOR_STATE : handle_multirotor_state(); break;
-//        default: break;
-//        }
-
-//        m_pilot_channel.end_unpack();
-//    }
-//    while (m_video_channel.get_next_message(*m_rcp))
-//    {
-//        rc_comms::Video_Message msg;
-//        if (!m_video_channel.begin_unpack() || !m_video_channel.unpack_param(msg))
-//        {
-//            QASSERT(0);
-//            m_video_channel.end_unpack();
-//            break;
-//        }
-
-//        switch (msg)
-//        {
-//        case rc_comms::Video_Message::FRAME_DATA : handle_video(); break;
-//        default: break;
-//        }
-//    }
-
-//    auto start = q::Clock::now();
-//    while (m_telemetry_channel.get_next_message(*m_rcp))
-//    {
-//        //process only the first 10 ms worh of data and discard the rest
-//        if (q::Clock::now() - start < std::chrono::milliseconds(100))
-//        {
-////            switch (msg.get())
-////            {
-//////            case comms::Telemetry_Message::STREAM_DATA : handle_stream_data(); break;
-////            default: break;
-////            }
-//        }
-//    }
-
-//    m_telemetry_channel.try_sending(*m_rcp);
+    m_rc.get_rx_data(m_rc_rx_data);
+    if (!m_rc_rx_data.rx_data.empty())
+    {
+        size_t off = 0;
+        stream::IMultirotor_State::Value value;
+        if (util::serialization::deserialize(m_rc_rx_data.rx_data, value, off))
+        {
+            std::lock_guard<std::mutex> lg(m_samples_mutex);
+            m_multirotor_state = value;
+        }
+        else
+        {
+            QLOGW("Cannot deserialize incoming multirotor state value");
+        }
+    }
 }
 
 }

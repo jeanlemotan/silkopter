@@ -55,8 +55,11 @@ public:
 
     //----------------------------------------------------------------------
 
+    int8_t get_rx_dBm() const;
+    int8_t get_tx_dBm() const;
+
     void get_video_data(std::vector<uint8_t>& dst, math::vec2u16& resolution);
-    auto get_multirotor_state_samples() -> std::vector<stream::IMultirotor_State::Sample>;
+    stream::IMultirotor_State::Value get_multirotor_state() const;
     void send_multirotor_commands_value(stream::IMultirotor_Commands::Value const& value);
 
     void process();
@@ -65,6 +68,8 @@ private:
     void reset();
 
     util::comms::RC m_rc;
+    util::comms::RC::Data m_rc_rx_data;
+
     util::comms::Video_Streamer m_video_streamer;
 
     bool m_is_connected = false;
@@ -74,8 +79,8 @@ private:
     mutable std::mutex m_samples_mutex;
     math::vec2u16 m_video_resolution;
     std::vector<uint8_t> m_video_data;
-    std::vector<uint8_t> m_rc_data;
-    std::vector<stream::IMultirotor_State::Sample> m_multirotor_state_samples;
+    std::vector<uint8_t> m_serialization_buffer;
+    stream::IMultirotor_State::Value m_multirotor_state;
 
     void handle_multirotor_state();
     void handle_video(void const* data, size_t size, math::vec2u16 const& resolution);
