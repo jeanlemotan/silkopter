@@ -164,6 +164,7 @@ void Nodes_Widget::upload_config(std::shared_ptr<Node> node)
     if (result != ts::success)
     {
         QMessageBox::critical(this, "Error", result.error().what().c_str());
+        return;
     }
 
     m_uav_name.clear();
