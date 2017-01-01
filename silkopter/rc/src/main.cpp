@@ -13,6 +13,7 @@
 
 #include "Adafruit_GFX.h"
 #include "ArduiPi_OLED.h"
+#include "Main_Menu_Page.h"
 
 #include "settings.def.h"
 
@@ -78,7 +79,7 @@ static auto shutdown_pigpio() -> bool
 }
 
 /* This prints an "Assertion failed" message and aborts.  */
-void __assert_fail (const char *__assertion, const char *__file, unsigned int __line, const char *__function)
+void __assert_fail(const char *__assertion, const char *__file, unsigned int __line, const char *__function)
 {
     QASSERT_MSG(false, "assert: {}:{}: {}: {}", __file, __line, __function, __assertion);
 }
@@ -192,7 +193,7 @@ int main(int argc, char *argv[])
     silk::Menu_System menu_system;
 
     silk::Input input;
-    input.init(comms);
+    input.init();
 
     size_t render_frames = 0;
 
@@ -203,7 +204,9 @@ int main(int argc, char *argv[])
     display.clearDisplay();   // clears the screen  buffer
     display.display();   		// display it (clear display)
 
-    menu_system.push_page(std::unique_ptr<silk::IMenu_Page>(new silk::Splash_Menu_Page));
+    std::unique_ptr<silk::IMenu_Page> mm(new silk::Main_Menu_Page(comms));
+
+    menu_system.push_page(std::unique_ptr<silk::IMenu_Page>(new silk::Splash_Menu_Page(std::move(mm))));
 
     while (true)
     {
