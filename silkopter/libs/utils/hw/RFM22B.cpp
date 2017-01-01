@@ -77,11 +77,17 @@ bool RFM22B::init(std::string const& device, uint32_t speed, uint8_t sdn_gpio, u
     }
 
     shutdown();
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+
     powerup();
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
     // Software reset the device
     reset();
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+
     idle_mode();
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
     // Get the device type and check it
     // This also tests whether we are really connected to a device
@@ -123,7 +129,6 @@ bool RFM22B::shutdown()
         QLOGE("Failed to shutdown");
         return false;
     }
-    std::this_thread::sleep_for(std::chrono::milliseconds(7));
     return true;
 }
 
@@ -140,14 +145,12 @@ bool RFM22B::powerup()
         QLOGE("Failed to powerup");
         return false;
     }
-    std::this_thread::sleep_for(std::chrono::milliseconds(10));
     return true;
 }
 
 void RFM22B::reset()
 {
     set_operating_mode((uint16_t)Operating_Mode::READY_MODE | (uint16_t)Operating_Mode::RESET);
-    std::this_thread::sleep_for(std::chrono::milliseconds(10));
 }
 
 
