@@ -64,9 +64,9 @@ LIBS += -L$${ROOT_LIBS_PATH}/qdata/lib/$${DEST_FOLDER} -lqdata
 LIBS += -L$${ROOT_LIBS_PATH}/qmath/lib/$${DEST_FOLDER} -lqmath
 LIBS += -L$${ROOT_LIBS_PATH}/qbase/lib/$${DEST_FOLDER} -lqbase
 
-LIBS += -lfreetype -lboost_system -lavutil -lavcodec -lavformat -lswscale -lfftw3f -lz
+LIBS += -lboost_system -lavutil -lavcodec -lavformat -lswscale -lfftw3f -lz
 LIBS += -lboost_thread
-LIBS += -lpcap
+#LIBS += -lpcap
 
 OBJECTS_DIR = ./.obj/$${DEST_FOLDER}
 MOC_DIR = ./.moc/$${DEST_FOLDER}
@@ -151,7 +151,8 @@ HEADERS += \
     ../../../libs/utils/comms/RCP.h \
     ../../../libs/utils/comms/UDP_Socket.h \
     ../../src/QHexSpinBox.h \
-    ../../src/Internal_Telemetry_Widget.h
+    ../../src/Internal_Telemetry_Widget.h \
+    ../../../libs/utils/Coordinates.h
 
 SOURCES += \
     ../../src/GS.cpp \
@@ -220,7 +221,8 @@ SOURCES += \
     ../../src/stream_viewers/video/Video_Decoder.cpp \
     ../../../libs/utils/comms/RCP.cpp \
     ../../../libs/utils/comms/UDP_Socket.cpp \
-    ../../src/Internal_Telemetry_Widget.cpp
+    ../../src/Internal_Telemetry_Widget.cpp \
+    ../../../libs/utils/Coordinates.cpp
 
 FORMS += \
     ../../src/GS.ui \
