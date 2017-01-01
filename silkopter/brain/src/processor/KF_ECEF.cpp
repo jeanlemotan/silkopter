@@ -40,14 +40,14 @@ KF_ECEF::KF<St, Me>::KF()
 }
 
 template<size_t St, size_t Me>
-void KF_ECEF::KF<St, Me>::predict()
+__attribute__((optimize("O3"))) void KF_ECEF::KF<St, Me>::predict()
 {
     x = A * x + B * u; //state prediction
     P = A * P * A.transpose() + Q; //covariance prediction
 }
 
 template<size_t St, size_t Me>
-void KF_ECEF::KF<St, Me>::update()
+__attribute__((optimize("O3"))) void KF_ECEF::KF<St, Me>::update()
 {
     auto HT = H.transpose();
 
