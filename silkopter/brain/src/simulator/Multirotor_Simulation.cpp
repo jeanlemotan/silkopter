@@ -2,10 +2,10 @@
 #include "Multirotor_Simulation.h"
 #include "physics/constants.h"
 
+#if !defined RASPBERRY_PI
+
 #include "btBulletCollisionCommon.h"
 #include "btBulletDynamicsCommon.h"
-
-#if !defined RASPBERRY_PI
 
 static math::vec3f bt_to_vec3f(btVector3 const& v)
 {
