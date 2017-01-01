@@ -190,7 +190,11 @@ int main(int argc, char const* argv[])
                 auto start = q::Clock::now();
                 auto dt = start - last;
                 last = start;
+#ifdef NDEBUG
                 if (dt > std::chrono::milliseconds(5))
+#else
+                if (dt > std::chrono::milliseconds(20))
+#endif
                 {
                     QLOGW("Process Latency of {}!!!!!", dt);
                 }
