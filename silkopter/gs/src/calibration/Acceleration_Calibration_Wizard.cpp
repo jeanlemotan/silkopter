@@ -22,6 +22,7 @@ Acceleration_Calibration_Wizard::Acceleration_Calibration_Wizard(silk::Comms& co
     , m_node_name(node_name)
     , m_stream_name(stream_name)
     , m_stream_rate(stream_rate)
+    , m_config(config)
     , m_points(points)
 {
     //    m_stream = std::static_pointer_cast<silk::stream::gs::Acceleration>(m_output.stream);
