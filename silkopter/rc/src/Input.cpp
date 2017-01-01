@@ -1,5 +1,4 @@
 #include "Input.h"
-#include "Comms.h"
 
 #include "Sticks_ADS1115.h"
 #include "Stick_Actuators_Throttle_DRV883x.h"
@@ -24,10 +23,8 @@ Input::~Input()
     m_input_devices.clear();
 }
 
-void Input::init(Comms &comms)
+void Input::init()
 {
-    m_comms = &comms;
-
     Sticks_ADS1115* sticks = new Sticks_ADS1115();
     auto result = sticks->init();
     QASSERT(result == ts::success);
@@ -66,10 +63,10 @@ void Input::init(Comms &comms)
     m_sticks->set_throttle_calibration(sc.get_throttle_center(), sc.get_throttle_min(), sc.get_throttle_max());
 }
 
-silk::stream::IMultirotor_Commands::Value const& Input::get_commands() const
-{
-    return m_commands;
-}
+//silk::stream::IMultirotor_Commands::Value const& Input::get_commands() const
+//{
+//    return m_commands;
+//}
 
 size_t Input::get_input_devices_count() const
 {
@@ -170,14 +167,8 @@ void Input::process()
         device->process();
     }
 
-    m_commands.sticks.yaw = m_sticks->get_yaw();
-    m_commands.sticks.pitch = m_sticks->get_pitch();
-    m_commands.sticks.roll = m_sticks->get_roll();
-    m_commands.sticks.throttle = m_sticks->get_throttle();
 
-    m_comms->send_multirotor_commands_value(m_commands);
-
-    m_stick_actuators->set_target_throttle(m_sticks->get_yaw());
+//    m_stick_actuators->set_target_throttle(m_sticks->get_yaw());
 
 //    QLOGI("Y:{}, P:{}, R:{}, T:{}, R1:{}, R2:{}", m_sticks->get_yaw(), m_sticks->get_pitch(), m_sticks->get_roll(), m_sticks->get_throttle(),
 //          m_param_encoder1->get_clicks(), m_param_encoder2->get_clicks());

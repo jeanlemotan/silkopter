@@ -3,13 +3,9 @@
 #include <vector>
 #include <memory>
 
-#include "common/stream/IMultirotor_Commands.h"
-
 
 namespace silk
 {
-
-class Comms;
 
 class IInput_Device;
 class ISticks;
@@ -25,9 +21,9 @@ public:
     Input();
     ~Input();
 
-    void init(Comms& comms);
+    void init();
 
-    silk::stream::IMultirotor_Commands::Value const& get_commands() const;
+    //silk::stream::IMultirotor_Commands::Value const& get_commands() const;
 
     size_t get_input_devices_count() const;
     IInput_Device const& get_input_device(size_t index) const;
@@ -63,10 +59,6 @@ public:
     void process();
 
 private:
-    Comms* m_comms = nullptr;
-
-    silk::stream::IMultirotor_Commands::Value m_commands;
-
     std::vector<IInput_Device*> m_input_devices;
 
     std::unique_ptr<ISticks> m_sticks;
