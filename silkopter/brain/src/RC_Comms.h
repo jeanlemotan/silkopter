@@ -33,8 +33,8 @@ public:
     void process();
 
     auto get_multirotor_commands_values() const -> std::vector<stream::IMultirotor_Commands::Value> const&;
-    void add_multirotor_state_sample(stream::IMultirotor_State::Sample const& sample);
-    void add_video_sample(stream::IVideo::Sample const& sample);
+    void set_multirotor_state(stream::IMultirotor_State::Value const& value);
+    void add_video_data(stream::IVideo::Value const& value);
 
     struct Impl; //this needs to be public...
 private:

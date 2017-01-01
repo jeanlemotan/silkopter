@@ -26,7 +26,7 @@ struct RC_Comms::Impl
 
     std::vector<uint8_t> serialization_buffer;
     util::comms::RC::Data rc_rx_data;
-    std::vector<uint8_t> rc_data;
+    //std::vector<uint8_t> serialization_buffer;
 };
 
 RC_Comms::RC_Comms(HAL& hal)
@@ -105,18 +105,18 @@ auto RC_Comms::get_multirotor_commands_values() const -> std::vector<stream::IMu
 {
     return m_multirotor_commands_values;
 }
-void RC_Comms::add_multirotor_state_sample(stream::IMultirotor_State::Sample const& sample)
+void RC_Comms::set_multirotor_state(stream::IMultirotor_State::Value const& value)
 {
     size_t off = 0;
-    util::serialization::serialize(m_impl->rc_data, sample.value, off);
+    util::serialization::serialize(m_impl->serialization_buffer, value, off);
 
-    m_impl->rc.set_tx_data(m_impl->rc_data.data(), m_impl->rc_data.size());
+    m_impl->rc.set_tx_data(m_impl->serialization_buffer.data(), m_impl->serialization_buffer.size());
 }
-void RC_Comms::add_video_sample(stream::IVideo::Sample const& sample)
+void RC_Comms::add_video_data(stream::IVideo::Value const& value)
 {
     //size_t off = 0;
     //util::serialization::serialize(m_impl->serialization_buffer, sample, off);
-    m_impl->video_streamer.send(sample.value.data.data(), sample.value.data.size(), sample.value.resolution);
+    m_impl->video_streamer.send(value.data.data(), value.data.size(), value.resolution);
 }
 
 void RC_Comms::handle_multirotor_commands()
@@ -149,15 +149,18 @@ void RC_Comms::process()
         util::comms::RC::Data& rc_rx_data = m_impl->rc_rx_data;
         m_impl->rc.get_rx_data(rc_rx_data);
 
-        size_t off = 0;
-        if (util::serialization::deserialize(rc_rx_data.rx_data, commands, off))
+        if (!rc_rx_data.rx_data.empty())
         {
-            m_multirotor_commands_values.push_back(commands);
-            QLOGI("^{}dBm, v{}dBm, throttle: {}", rc_rx_data.tx_dBm, rc_rx_data.tx_dBm, commands.sticks.pitch);
-        }
-        else
-        {
-            QLOGW("error deserializing commands");
+            size_t off = 0;
+            if (util::serialization::deserialize(rc_rx_data.rx_data, commands, off))
+            {
+                m_multirotor_commands_values.push_back(commands);
+                QLOGI("^{}dBm, v{}dBm, throttle: {}", rc_rx_data.tx_dBm, rc_rx_data.tx_dBm, commands.sticks.pitch);
+            }
+            else
+            {
+                QLOGW("error deserializing commands");
+            }
         }
     }
 
