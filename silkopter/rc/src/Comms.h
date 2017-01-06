@@ -58,6 +58,9 @@ public:
     int8_t get_rx_dBm() const;
     int8_t get_tx_dBm() const;
 
+    q::Clock::time_point get_last_rx_tp() const;
+    q::Clock::time_point get_last_tx_tp() const;
+
     void get_video_data(std::vector<uint8_t>& dst, math::vec2u16& resolution);
     stream::IMultirotor_State::Value get_multirotor_state() const;
     void send_multirotor_commands_value(stream::IMultirotor_Commands::Value const& value);
@@ -68,7 +71,7 @@ private:
     void reset();
 
     util::comms::RC m_rc;
-    util::comms::RC::Data m_rc_rx_data;
+    util::comms::RC::Data m_rc_data;
 
     util::comms::Video_Streamer m_video_streamer;
 

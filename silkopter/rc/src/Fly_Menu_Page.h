@@ -30,6 +30,9 @@ private:
     float m_slow_tx_strength = 0.f;
 
     q::Clock::time_point m_last_tp = q::Clock::now();
+
+    q::Clock::time_point m_last_blink_tp = q::Clock::now();
+    uint16_t m_blink_color = 0;
 };
 
 }

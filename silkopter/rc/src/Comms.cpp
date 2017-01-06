@@ -130,12 +130,22 @@ void Comms::handle_video(void const* _data, size_t size, math::vec2u16 const& re
 
 int8_t Comms::get_rx_dBm() const
 {
-    return m_rc_rx_data.rx_dBm;
+    return m_rc_data.rx_dBm;
 }
 int8_t Comms::get_tx_dBm() const
 {
-    return m_rc_rx_data.tx_dBm;
+    return m_rc_data.tx_dBm;
 }
+
+q::Clock::time_point Comms::get_last_rx_tp() const
+{
+    return m_rc_data.rx_timepoint;
+}
+q::Clock::time_point Comms::get_last_tx_tp() const
+{
+    return m_rc_data.tx_timepoint;
+}
+
 
 void Comms::get_video_data(std::vector<uint8_t>& dst, math::vec2u16& resolution)
 {
@@ -170,12 +180,12 @@ void Comms::process()
 {
     m_video_streamer.process();
 
-    m_rc.get_rx_data(m_rc_rx_data);
-    if (!m_rc_rx_data.rx_data.empty())
+    m_rc.get_rx_data(m_rc_data);
+    if (!m_rc_data.rx_data.empty())
     {
         size_t off = 0;
         stream::IMultirotor_State::Value value;
-        if (util::serialization::deserialize(m_rc_rx_data.rx_data, value, off))
+        if (util::serialization::deserialize(m_rc_data.rx_data, value, off))
         {
             std::lock_guard<std::mutex> lg(m_samples_mutex);
             m_multirotor_state = value;
