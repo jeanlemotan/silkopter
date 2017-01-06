@@ -89,6 +89,10 @@ IStick_Actuators const& Input::get_stick_actuators() const
 {
     return *m_stick_actuators;
 }
+IStick_Actuators& Input::get_stick_actuators()
+{
+    return *m_stick_actuators;
+}
 
 IRotary_Encoder const& Input::get_menu_encoder() const
 {

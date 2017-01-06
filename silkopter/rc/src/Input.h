@@ -32,6 +32,7 @@ public:
     ISticks& get_sticks();
 
     IStick_Actuators const& get_stick_actuators() const;
+    IStick_Actuators& get_stick_actuators();
 
     IRotary_Encoder const& get_menu_encoder() const;
     IButton const& get_menu_switch() const;
