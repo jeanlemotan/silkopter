@@ -295,6 +295,45 @@ ts::Result<void> PIGPIO::set_config(hal::INode_Config const& config)
     }
     *m_config = *specialized;
 
+    std::map<size_t, hal::PIGPIO_Config::IChannel const*> channel_configs_by_gpio;
+
+#define ADD_CHANNEL(GPIO)\
+    channel_configs_by_gpio[GPIO] = m_config->get_gpio_##GPIO().get();
+
+    ADD_CHANNEL(2);
+    ADD_CHANNEL(3);
+    ADD_CHANNEL(4);
+    ADD_CHANNEL(5);
+    ADD_CHANNEL(6);
+    ADD_CHANNEL(7);
+    ADD_CHANNEL(8);
+    ADD_CHANNEL(9);
+    ADD_CHANNEL(10);
+    ADD_CHANNEL(11);
+    ADD_CHANNEL(12);
+    ADD_CHANNEL(13);
+    ADD_CHANNEL(14);
+    ADD_CHANNEL(15);
+    ADD_CHANNEL(16);
+    ADD_CHANNEL(17);
+    ADD_CHANNEL(18);
+    ADD_CHANNEL(19);
+    ADD_CHANNEL(20);
+    ADD_CHANNEL(21);
+    ADD_CHANNEL(22);
+    ADD_CHANNEL(23);
+    ADD_CHANNEL(24);
+    ADD_CHANNEL(25);
+    ADD_CHANNEL(26);
+    ADD_CHANNEL(27);
+#undef ADD_CHANNEL
+
+    //relink channels, as they have changed pointer for sure after reassigning them from the *specialized data structure!
+    for (std::unique_ptr<Channel>& channel: m_channels)
+    {
+        channel->config = channel_configs_by_gpio[channel->gpio];
+    }
+
     return ts::success;
 }
 auto PIGPIO::get_config() const -> std::shared_ptr<const hal::INode_Config>
