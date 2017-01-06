@@ -128,7 +128,7 @@ void Stick_Actuators_Throttle_DRV883x::process()
 //        crt_throttle = target_throttle;
 //    }
 
-    float factor = -m_throttle_pid.process(crt_throttle, target_throttle);
+    float factor = m_throttle_pid.process(crt_throttle, target_throttle);
 
     int pwm = static_cast<int>(factor * 128.f) + 127;
     pwm = math::clamp(pwm, 0, 255);
