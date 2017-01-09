@@ -53,9 +53,8 @@ public:
     IButton const& get_horizontal_mode_switch_up() const;
     IButton const& get_horizontal_mode_switch_down() const;
 
-    IButton const& get_take_off_land_switch() const;
     IButton const& get_return_home_switch() const;
-    IButton const& get_arm_switch() const;
+    IButton const& get_mode_switch() const;
 
     void process();
 

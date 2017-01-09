@@ -137,7 +137,7 @@ IButton const& Input::get_vertical_mode_switch() const
 {
     return m_button_matrix->get_button(0, 3);
 }
-IButton const& Input::get_yaw_mode_switch() const
+IButton const& Input::get_horizontal_mode_switch_down() const
 {
     return m_button_matrix->get_button(1, 3);
 }
@@ -145,20 +145,16 @@ IButton const& Input::get_horizontal_mode_switch_up() const
 {
     return m_button_matrix->get_button(2, 3);
 }
-IButton const& Input::get_horizontal_mode_switch_down() const
+IButton const& Input::get_yaw_mode_switch() const
 {
     return m_button_matrix->get_button(3, 3);
 }
 
-IButton const& Input::get_take_off_land_switch() const
-{
-    return m_button_matrix->get_button(0, 1);
-}
 IButton const& Input::get_return_home_switch() const
 {
     return m_button_matrix->get_button(1, 1);
 }
-IButton const& Input::get_arm_switch() const
+IButton const& Input::get_mode_switch() const
 {
     return m_button_matrix->get_button(2, 1);
 }
