@@ -103,6 +103,15 @@ bool Stick_Actuators_Throttle_DRV883x::set_target_roll(boost::optional<float> va
 bool Stick_Actuators_Throttle_DRV883x::set_target_throttle(boost::optional<float> value)
 {
     m_target_throttle = value;
+    if (!value)
+    {
+        gpioWrite(m_enable_gpio, 0);
+        gpioPWM(m_phase_gpio, 127);
+    }
+    else
+    {
+        gpioWrite(m_enable_gpio, 1);
+    }
     return true;
 }
 
