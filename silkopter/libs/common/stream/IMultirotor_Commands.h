@@ -57,7 +57,6 @@ public:
     enum class Mode : uint8_t
     {
         IDLE,
-        ARMED,
         TAKE_OFF,
         FLY,
         RETURN_HOME,
