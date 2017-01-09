@@ -27,8 +27,19 @@ Fly_Menu_Page::Fly_Menu_Page(Comms& comms)
 {
 }
 
+void Fly_Menu_Page::init(Input& input)
+{
+    set_mode(input, stream::IMultirotor_State::Mode::IDLE);
+    m_is_initialized = true;
+}
+
 bool Fly_Menu_Page::process(Input& input, Menu_System& menu_system)
 {
+    if (!m_is_initialized)
+    {
+        init(input);
+    }
+
     q::Clock::time_point now = q::Clock::now();
     q::Clock::duration dt = now - m_last_tp;
     m_last_tp = now;
@@ -46,48 +57,237 @@ bool Fly_Menu_Page::process(Input& input, Menu_System& menu_system)
 
     m_multirotor_state = m_comms.get_multirotor_state();
 
-    m_rx_strength = math::lerp(m_rx_strength, dBm_to_strength(m_comms.get_rx_dBm()), std::chrono::duration<float>(dt).count());
-    m_slow_rx_strength = math::lerp(m_slow_rx_strength, m_rx_strength, std::chrono::duration<float>(dt).count() / 5.f);
+    m_rx_strength = math::lerp<math::safe>(m_rx_strength, dBm_to_strength(m_comms.get_rx_dBm()), std::chrono::duration<float>(dt).count());
+    m_slow_rx_strength = math::lerp<math::safe>(m_slow_rx_strength, m_rx_strength, std::chrono::duration<float>(dt).count() / 5.f);
 
-    m_tx_strength = math::lerp(m_tx_strength, dBm_to_strength(m_comms.get_tx_dBm()), std::chrono::duration<float>(dt).count());
-    m_slow_tx_strength = math::lerp(m_slow_tx_strength, m_tx_strength, std::chrono::duration<float>(dt).count() / 5.f);
+    m_tx_strength = math::lerp<math::safe>(m_tx_strength, dBm_to_strength(m_comms.get_tx_dBm()), std::chrono::duration<float>(dt).count());
+    m_slow_tx_strength = math::lerp<math::safe>(m_slow_tx_strength, m_tx_strength, std::chrono::duration<float>(dt).count() / 5.f);
 
-    input.get_stick_actuators().set_target_throttle(input.get_sticks().get_yaw());
+    stream::IMultirotor_State::Value const& state = m_multirotor_state;
+
+    //switch (state.mode)
+    switch (m_commands.mode)
+    {
+    case stream::IMultirotor_State::Mode::IDLE: process_mode_idle(input); break;
+    case stream::IMultirotor_State::Mode::TAKE_OFF: process_mode_take_off(input); break;
+    case stream::IMultirotor_State::Mode::FLY: process_mode_fly(input); break;
+    case stream::IMultirotor_State::Mode::RETURN_HOME: process_mode_return_home(input); break;
+    case stream::IMultirotor_State::Mode::LAND: process_mode_land(input); break;
+    }
 
     return true;
+}
+
+void Fly_Menu_Page::set_mode(Input& input, stream::IMultirotor_Commands::Mode mode)
+{
+    if (mode == stream::IMultirotor_State::Mode::IDLE)
+    {
+        input.get_stick_actuators().set_target_throttle(0.f);
+        m_idle_mode_data.is_pressed = false;
+    }
+    else
+    {
+        input.get_stick_actuators().set_target_throttle(boost::none);
+    }
+
+    m_commands.mode = mode;
+}
+
+void Fly_Menu_Page::set_vertical_mode(Input& input, stream::IMultirotor_Commands::Vertical_Mode mode)
+{
+    m_commands.vertical_mode = mode;
+}
+
+void Fly_Menu_Page::set_horizontal_mode(Input& input, stream::IMultirotor_Commands::Horizontal_Mode mode)
+{
+    m_commands.horizontal_mode = mode;
+}
+
+void Fly_Menu_Page::set_yaw_mode(Input& input, stream::IMultirotor_Commands::Yaw_Mode mode)
+{
+    m_commands.yaw_mode = mode;
+}
+
+void Fly_Menu_Page::process_mode_idle(Input& input)
+{
+    q::Clock::time_point now = q::Clock::now();
+
+    stream::IMultirotor_State::Value const& state = m_multirotor_state;
+//    QASSERT(state.mode == stream::IMultirotor_State::Mode::IDLE);
+
+    set_horizontal_mode(input, silk::stream::IMultirotor_Commands::Horizontal_Mode::ANGLE);
+
+    if (input.get_mode_switch().was_pressed())
+    {
+        m_idle_mode_data.is_pressed = true;
+        m_idle_mode_data.pressed_tp = now;
+    }
+
+    if (m_idle_mode_data.is_pressed && input.get_mode_switch().was_released())
+    {
+        if (now - m_idle_mode_data.pressed_tp >= std::chrono::seconds(2))
+        {
+            QLOGI("ARMED!!!");
+            set_mode(input, stream::IMultirotor_Commands::Mode::FLY);
+            return;
+        }
+        m_idle_mode_data.is_pressed = false;
+    }
+}
+
+void Fly_Menu_Page::process_mode_fly(Input& input)
+{
+    stream::IMultirotor_State::Value const& state = m_multirotor_state;
+//    QASSERT(state.mode == stream::IMultirotor_State::Mode::FLY);
+
+    ISticks const& sticks = input.get_sticks();
+    if (input.get_mode_switch().is_pressed())
+    {
+        m_commands.sticks.yaw = 0.5f;
+        m_commands.sticks.pitch = 0.5f;
+        m_commands.sticks.roll = 0.5f;
+        m_commands.sticks.throttle = sticks.get_throttle();
+    }
+    else
+    {
+        if (input.get_mode_switch().was_released())
+        {
+            if (sticks.get_roll() < 0.1f && sticks.get_pitch() < 0.1f)
+            {
+                QLOGI("DISARMED!!!");
+                set_mode(input, stream::IMultirotor_Commands::Mode::IDLE);
+                return;
+            }
+
+            if (sticks.get_roll() >= 0.4f && sticks.get_roll() <= 0.6f)
+            {
+                if (sticks.get_pitch() <= 0.1f)
+                {
+                    QLOGI("LANDING!!!");
+                    set_mode(input, stream::IMultirotor_Commands::Mode::LAND);
+                    return;
+                }
+                if (sticks.get_pitch() >= 0.9f)
+                {
+                    QLOGI("TAKE OFF!!!");
+                    set_mode(input, stream::IMultirotor_Commands::Mode::TAKE_OFF);
+                    return;
+                }
+            }
+        }
+
+        m_commands.sticks.yaw = sticks.get_yaw();
+        m_commands.sticks.pitch = sticks.get_pitch();
+        m_commands.sticks.roll = sticks.get_roll();
+        m_commands.sticks.throttle = sticks.get_throttle();
+    }
+
+    if (input.get_horizontal_mode_switch_up().was_released())
+    {
+        if (m_commands.horizontal_mode < stream::IMultirotor_Commands::Horizontal_Mode::VELOCITY)
+        {
+            set_horizontal_mode(input, static_cast<stream::IMultirotor_Commands::Horizontal_Mode>(static_cast<int>(m_commands.horizontal_mode) + 1));
+        }
+    }
+
+    if (input.get_horizontal_mode_switch_down().was_released())
+    {
+        if (m_commands.horizontal_mode > stream::IMultirotor_Commands::Horizontal_Mode::ANGLE_RATE)
+        {
+            set_horizontal_mode(input, static_cast<stream::IMultirotor_Commands::Horizontal_Mode>(static_cast<int>(m_commands.horizontal_mode) - 1));
+        }
+    }
+
+    if (input.get_vertical_mode_switch().was_released())
+    {
+        set_vertical_mode(input, m_commands.vertical_mode == stream::IMultirotor_Commands::Vertical_Mode::THRUST
+                          ? stream::IMultirotor_Commands::Vertical_Mode::ALTITUDE
+                          : stream::IMultirotor_Commands::Vertical_Mode::THRUST);
+    }
+
+    if (input.get_yaw_mode_switch().was_released())
+    {
+        set_yaw_mode(input, m_commands.yaw_mode == stream::IMultirotor_Commands::Yaw_Mode::ANGLE_RATE
+                     ? stream::IMultirotor_Commands::Yaw_Mode::ANGLE
+                     : stream::IMultirotor_Commands::Yaw_Mode::ANGLE_RATE);
+    }
+
+    if (input.get_return_home_switch().was_released())
+    {
+        QLOGI("RTH!!!");
+        set_mode(input, stream::IMultirotor_Commands::Mode::RETURN_HOME);
+        return;
+    }
+}
+
+void Fly_Menu_Page::process_mode_take_off(Input& input)
+{
+    stream::IMultirotor_State::Value const& state = m_multirotor_state;
+//    QASSERT(state.mode == stream::IMultirotor_State::Mode::TAKE_OFF);
+
+    ISticks const& sticks = input.get_sticks();
+    if (input.get_mode_switch().was_released())
+    {
+        QLOGI("CANCELLED TAKE OFF!!!");
+        set_mode(input, stream::IMultirotor_Commands::Mode::FLY);
+        return;
+    }
+}
+
+void Fly_Menu_Page::process_mode_return_home(Input& input)
+{
+    if (input.get_return_home_switch().was_released())
+    {
+        QLOGI("CANCELLED RTH!!!");
+        set_mode(input, stream::IMultirotor_Commands::Mode::FLY);
+        return;
+    }
+}
+
+void Fly_Menu_Page::process_mode_land(Input& input)
+{
+    stream::IMultirotor_State::Value const& state = m_multirotor_state;
+//    QASSERT(state.mode == stream::IMultirotor_State::Mode::LAND);
+
+    ISticks const& sticks = input.get_sticks();
+    if (input.get_mode_switch().was_released())
+    {
+        QLOGI("CANCELLED LANDING!!!");
+        set_mode(input, stream::IMultirotor_Commands::Mode::FLY);
+        return;
+    }
 }
 
 void Fly_Menu_Page::render(Adafruit_GFX& display)
 {
     q::Clock::time_point now = q::Clock::now();
 
-    stream::IMultirotor_State::Value& state = m_multirotor_state;
-//    sample.value.
+    stream::IMultirotor_State::Value const& state = m_multirotor_state;
 
-    {
-        math::vec3f euler;
-        state.local_frame.get_as_euler_zxy(euler);
+//    {
+//        math::vec3f euler;
+//        state.local_frame.get_as_euler_zxy(euler);
 
-        math::trans2df rot;
-        rot.set_rotation(math::anglef(euler.y));
+//        math::trans2df rot;
+//        rot.set_rotation(math::anglef(euler.y));
 
-        float length = 20.f;
-        math::vec2f center(display.width() - length * 0.5f, 30);
-        math::vec2f dir = math::rotate(rot, math::vec2f(length * 0.5f, 0));
-        math::vec2f p0 = center - dir;
-        math::vec2f p1 = center + dir;
-        display.drawLine(p0.x, p0.y, p1.x, p1.y, 1);
-    }
+//        float length = 20.f;
+//        math::vec2f center(display.width() - length * 0.5f, 30);
+//        math::vec2f dir = math::rotate(rot, math::vec2f(length * 0.5f, 0));
+//        math::vec2f p0 = center - dir;
+//        math::vec2f p1 = center + dir;
+//        display.drawLine(p0.x, p0.y, p1.x, p1.y, 1);
+//    }
 
     int16_t y = 0;
 
     //mode
     {
         const char* mode_str = "N/A";
-        switch (state.mode)
+        //switch (state.mode)
+        switch (m_commands.mode)
         {
         case stream::IMultirotor_State::Mode::IDLE: mode_str = "IDLE"; break;
-        case stream::IMultirotor_State::Mode::ARMED: mode_str = "ARMED"; break;
         case stream::IMultirotor_State::Mode::TAKE_OFF: mode_str = "TAKE OFF"; break;
         case stream::IMultirotor_State::Mode::FLY: mode_str = "FLY"; break;
         case stream::IMultirotor_State::Mode::RETURN_HOME: mode_str = "RTH"; break;
@@ -194,7 +394,14 @@ void Fly_Menu_Page::render(Adafruit_GFX& display)
         }
 
         display.setCursor(0, y);
-        display.printf("V: %s", mode_str);
+        display.printf("V:%s", mode_str);
+    }
+    //altitude
+    {
+        //TODO - compute real altitude
+        float altitude = state.enu_velocity.z;
+        display.setCursor(display.width() - 80, y);
+        display.printf("ALT:%.1fm", altitude);
     }
 
     y += 10;
@@ -209,7 +416,13 @@ void Fly_Menu_Page::render(Adafruit_GFX& display)
         }
 
         display.setCursor(0, y);
-        display.printf("H: %s", mode_str);
+        display.printf("H:%s", mode_str);
+    }
+    //v speed
+    {
+        float speed = state.enu_velocity.z;
+        display.setCursor(display.width() - 80, y);
+        display.printf("VSP:%.1fm/s", speed);
     }
 
     y += 10;
@@ -223,7 +436,13 @@ void Fly_Menu_Page::render(Adafruit_GFX& display)
         }
 
         display.setCursor(0, y);
-        display.printf("Y: %s", mode_str);
+        display.printf("Y:%s", mode_str);
+    }
+    //h speed
+    {
+        float speed = math::length(math::vec2f(state.enu_velocity));
+        display.setCursor(display.width() - 80, y);
+        display.printf("HSP:%.1fm/s", speed);
     }
 }
 
