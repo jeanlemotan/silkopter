@@ -47,6 +47,14 @@ private:
 
     q::Clock::time_point m_last_blink_tp = q::Clock::now();
     uint16_t m_blink_color = 0;
+    q::Clock::time_point m_last_fast_blink_tp = q::Clock::now();
+    uint16_t m_fast_blink_color = 0;
+
+    q::Clock::time_point m_last_mode_change_tp = q::Clock::now();
+    q::Clock::time_point m_last_vertical_mode_change_tp = q::Clock::now();
+    q::Clock::time_point m_last_horizontal_mode_change_tp = q::Clock::now();
+    q::Clock::time_point m_last_yaw_mode_change_tp = q::Clock::now();
+
 
     struct Idle_Mode_Data
     {

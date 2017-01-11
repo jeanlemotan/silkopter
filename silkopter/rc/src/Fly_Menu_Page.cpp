@@ -20,18 +20,22 @@ static float dBm_to_strength(int8_t dBm)
     return math::clamp(factor, 0.f, 1.f);
 }
 
-
+///////////////////////////////////////////////////////////////////////////////////////////////////
 
 Fly_Menu_Page::Fly_Menu_Page(Comms& comms)
     : m_comms(comms)
 {
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
 void Fly_Menu_Page::init(Input& input)
 {
     set_mode(input, stream::IMultirotor_State::Mode::IDLE);
     m_is_initialized = true;
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
 
 bool Fly_Menu_Page::process(Input& input, Menu_System& menu_system)
 {
@@ -48,6 +52,11 @@ bool Fly_Menu_Page::process(Input& input, Menu_System& menu_system)
     {
         m_blink_color = !m_blink_color;
         m_last_blink_tp = now;
+    }
+    if (now - m_last_fast_blink_tp >= std::chrono::milliseconds(50))
+    {
+        m_fast_blink_color = !m_fast_blink_color;
+        m_last_fast_blink_tp = now;
     }
 
     if (input.get_menu_switch().was_released())
@@ -78,8 +87,15 @@ bool Fly_Menu_Page::process(Input& input, Menu_System& menu_system)
     return true;
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
 void Fly_Menu_Page::set_mode(Input& input, stream::IMultirotor_Commands::Mode mode)
 {
+    if (m_commands.mode != mode)
+    {
+        m_last_mode_change_tp = q::Clock::now();
+    }
+
     if (mode == stream::IMultirotor_State::Mode::IDLE)
     {
         input.get_stick_actuators().set_target_throttle(0.f);
@@ -93,20 +109,53 @@ void Fly_Menu_Page::set_mode(Input& input, stream::IMultirotor_Commands::Mode mo
     m_commands.mode = mode;
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
 void Fly_Menu_Page::set_vertical_mode(Input& input, stream::IMultirotor_Commands::Vertical_Mode mode)
 {
+    if (m_commands.vertical_mode != mode)
+    {
+        m_last_vertical_mode_change_tp = q::Clock::now();
+    }
+
+    if (mode == stream::IMultirotor_Commands::Vertical_Mode::ALTITUDE)
+    {
+        m_commands.sticks.throttle = 0.5f;
+    }
+    else
+    {
+        m_commands.sticks.throttle = m_multirotor_state.throttle;
+    }
+    input.get_stick_actuators().set_target_throttle(m_commands.sticks.throttle);
+
     m_commands.vertical_mode = mode;
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
 void Fly_Menu_Page::set_horizontal_mode(Input& input, stream::IMultirotor_Commands::Horizontal_Mode mode)
 {
+    if (m_commands.horizontal_mode != mode)
+    {
+        m_last_horizontal_mode_change_tp = q::Clock::now();
+    }
+
     m_commands.horizontal_mode = mode;
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
 void Fly_Menu_Page::set_yaw_mode(Input& input, stream::IMultirotor_Commands::Yaw_Mode mode)
 {
+    if (m_commands.yaw_mode != mode)
+    {
+        m_last_yaw_mode_change_tp = q::Clock::now();
+    }
+
     m_commands.yaw_mode = mode;
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
 
 void Fly_Menu_Page::process_mode_idle(Input& input)
 {
@@ -134,6 +183,8 @@ void Fly_Menu_Page::process_mode_idle(Input& input)
         m_idle_mode_data.is_pressed = false;
     }
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
 
 void Fly_Menu_Page::process_mode_fly(Input& input)
 {
@@ -179,8 +230,19 @@ void Fly_Menu_Page::process_mode_fly(Input& input)
         m_commands.sticks.yaw = sticks.get_yaw();
         m_commands.sticks.pitch = sticks.get_pitch();
         m_commands.sticks.roll = sticks.get_roll();
-        m_commands.sticks.throttle = sticks.get_throttle();
+
+        //only apply the throttle some time after the mode chang, to let the actuator settle
+        if (q::Clock::now() - m_last_vertical_mode_change_tp > std::chrono::milliseconds(500))
+        {
+            if (m_commands.vertical_mode == stream::IMultirotor_Commands::Vertical_Mode::THRUST)
+            {
+                input.get_stick_actuators().set_target_throttle(boost::none);
+            }
+
+            m_commands.sticks.throttle = sticks.get_throttle();
+        }
     }
+
 
     if (input.get_horizontal_mode_switch_up().was_released())
     {
@@ -220,10 +282,14 @@ void Fly_Menu_Page::process_mode_fly(Input& input)
     }
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
 void Fly_Menu_Page::process_mode_take_off(Input& input)
 {
     stream::IMultirotor_State::Value const& state = m_multirotor_state;
 //    QASSERT(state.mode == stream::IMultirotor_State::Mode::TAKE_OFF);
+
+    input.get_stick_actuators().set_target_throttle(state.throttle);
 
     ISticks const& sticks = input.get_sticks();
     if (input.get_mode_switch().was_released())
@@ -233,6 +299,8 @@ void Fly_Menu_Page::process_mode_take_off(Input& input)
         return;
     }
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
 
 void Fly_Menu_Page::process_mode_return_home(Input& input)
 {
@@ -244,10 +312,14 @@ void Fly_Menu_Page::process_mode_return_home(Input& input)
     }
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
 void Fly_Menu_Page::process_mode_land(Input& input)
 {
     stream::IMultirotor_State::Value const& state = m_multirotor_state;
 //    QASSERT(state.mode == stream::IMultirotor_State::Mode::LAND);
+
+    input.get_stick_actuators().set_target_throttle(state.throttle);
 
     ISticks const& sticks = input.get_sticks();
     if (input.get_mode_switch().was_released())
@@ -258,9 +330,13 @@ void Fly_Menu_Page::process_mode_land(Input& input)
     }
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
 void Fly_Menu_Page::render(Adafruit_GFX& display)
 {
     q::Clock::time_point now = q::Clock::now();
+
+    const q::Clock::duration k_mode_change_blink_duration = std::chrono::milliseconds(300);
 
     stream::IMultirotor_State::Value const& state = m_multirotor_state;
 
@@ -294,8 +370,13 @@ void Fly_Menu_Page::render(Adafruit_GFX& display)
         case stream::IMultirotor_State::Mode::LAND: mode_str = "LAND"; break;
         }
 
+        bool blink = (now - m_last_mode_change_tp) < k_mode_change_blink_duration;
+        uint16_t color = blink ? m_fast_blink_color : 1;
+
+        display.setTextColor(color);
         display.setCursor(0, y);
         display.print(mode_str);
+        display.setTextColor(1);
     }
 
     //signal strength
@@ -392,8 +473,13 @@ void Fly_Menu_Page::render(Adafruit_GFX& display)
         case silk::stream::IMultirotor_Commands::Vertical_Mode::THRUST: mode_str = "THR"; break;
         }
 
+        bool blink = (now - m_last_vertical_mode_change_tp) < k_mode_change_blink_duration;
+        uint16_t color = blink ? m_fast_blink_color : 1;
+
+        display.setTextColor(color);
         display.setCursor(0, y);
         display.printf("V:%s", mode_str);
+        display.setTextColor(1);
     }
     //altitude
     {
@@ -414,8 +500,13 @@ void Fly_Menu_Page::render(Adafruit_GFX& display)
         case silk::stream::IMultirotor_Commands::Horizontal_Mode::VELOCITY: mode_str = "VEL"; break;
         }
 
+        bool blink = (now - m_last_horizontal_mode_change_tp) < k_mode_change_blink_duration;
+        uint16_t color = blink ? m_fast_blink_color : 1;
+
+        display.setTextColor(color);
         display.setCursor(0, y);
         display.printf("H:%s", mode_str);
+        display.setTextColor(1);
     }
     //v speed
     {
@@ -434,8 +525,13 @@ void Fly_Menu_Page::render(Adafruit_GFX& display)
         case silk::stream::IMultirotor_Commands::Yaw_Mode::ANGLE: mode_str = "ANG"; break;
         }
 
+        bool blink = (now - m_last_yaw_mode_change_tp) < k_mode_change_blink_duration;
+        uint16_t color = blink ? m_fast_blink_color : 1;
+
+        display.setTextColor(color);
         display.setCursor(0, y);
         display.printf("Y:%s", mode_str);
+        display.setTextColor(1);
     }
     //h speed
     {
@@ -444,5 +540,7 @@ void Fly_Menu_Page::render(Adafruit_GFX& display)
         display.printf("HSP:%.1fm/s", speed);
     }
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
 
 }
