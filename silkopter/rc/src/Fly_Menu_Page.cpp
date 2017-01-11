@@ -4,6 +4,7 @@
 #include "IButton.h"
 #include "IStick_Actuators.h"
 #include "ISticks.h"
+#include "IHaptic.h"
 
 #include "Comms.h"
 
@@ -73,16 +74,28 @@ bool Fly_Menu_Page::process(Input& input, Menu_System& menu_system)
     m_slow_tx_strength = math::lerp<math::safe>(m_slow_tx_strength, m_tx_strength, std::chrono::duration<float>(dt).count() / 5.f);
 
     stream::IMultirotor_State::Value const& state = m_multirotor_state;
-
-    //switch (state.mode)
-    switch (m_commands.mode)
+    if (state.mode != m_commands.mode)
     {
-    case stream::IMultirotor_State::Mode::IDLE: process_mode_idle(input); break;
-    case stream::IMultirotor_State::Mode::TAKE_OFF: process_mode_take_off(input); break;
-    case stream::IMultirotor_State::Mode::FLY: process_mode_fly(input); break;
-    case stream::IMultirotor_State::Mode::RETURN_HOME: process_mode_return_home(input); break;
-    case stream::IMultirotor_State::Mode::LAND: process_mode_land(input); break;
+        if (now - m_last_mode_change_tp >= std::chrono::seconds(2))
+        {
+            QLOGI("REVERTED to mode {}!!!", state.mode);
+            set_mode(input, state.mode);
+            return true;
+        }
     }
+    else
+    {
+        switch (m_commands.mode)
+        {
+        case stream::IMultirotor_State::Mode::IDLE: process_mode_idle(input); break;
+        case stream::IMultirotor_State::Mode::TAKE_OFF: process_mode_take_off(input); break;
+        case stream::IMultirotor_State::Mode::FLY: process_mode_fly(input); break;
+        case stream::IMultirotor_State::Mode::RETURN_HOME: process_mode_return_home(input); break;
+        case stream::IMultirotor_State::Mode::LAND: process_mode_land(input); break;
+        }
+    }
+
+    m_comms.send_multirotor_commands_value(m_commands);
 
     return true;
 }
@@ -94,6 +107,15 @@ void Fly_Menu_Page::set_mode(Input& input, stream::IMultirotor_Commands::Mode mo
     if (m_commands.mode != mode)
     {
         m_last_mode_change_tp = q::Clock::now();
+
+        input.get_haptic().vibrate({{
+                                     { 100u, std::chrono::milliseconds(30) },
+                                     { 0, std::chrono::milliseconds(30) },
+                                     { 100u, std::chrono::milliseconds(30) },
+                                     { 0, std::chrono::milliseconds(30) },
+                                     { 100u, std::chrono::milliseconds(30) },
+                                     { 0, std::chrono::milliseconds(30) }
+                                   }});
     }
 
     if (mode == stream::IMultirotor_State::Mode::IDLE)
@@ -116,6 +138,15 @@ void Fly_Menu_Page::set_vertical_mode(Input& input, stream::IMultirotor_Commands
     if (m_commands.vertical_mode != mode)
     {
         m_last_vertical_mode_change_tp = q::Clock::now();
+
+        input.get_haptic().vibrate({{
+                                     { 100u, std::chrono::milliseconds(30) },
+                                     { 0, std::chrono::milliseconds(30) },
+                                     { 100u, std::chrono::milliseconds(30) },
+                                     { 0, std::chrono::milliseconds(30) },
+                                     { 100u, std::chrono::milliseconds(30) },
+                                     { 0, std::chrono::milliseconds(30) }
+                                   }});
     }
 
     if (mode == stream::IMultirotor_Commands::Vertical_Mode::ALTITUDE)
@@ -138,6 +169,15 @@ void Fly_Menu_Page::set_horizontal_mode(Input& input, stream::IMultirotor_Comman
     if (m_commands.horizontal_mode != mode)
     {
         m_last_horizontal_mode_change_tp = q::Clock::now();
+
+        input.get_haptic().vibrate({{
+                                     { 100u, std::chrono::milliseconds(30) },
+                                     { 0, std::chrono::milliseconds(30) },
+                                     { 100u, std::chrono::milliseconds(30) },
+                                     { 0, std::chrono::milliseconds(30) },
+                                     { 100u, std::chrono::milliseconds(30) },
+                                     { 0, std::chrono::milliseconds(30) }
+                                   }});
     }
 
     m_commands.horizontal_mode = mode;
@@ -150,6 +190,15 @@ void Fly_Menu_Page::set_yaw_mode(Input& input, stream::IMultirotor_Commands::Yaw
     if (m_commands.yaw_mode != mode)
     {
         m_last_yaw_mode_change_tp = q::Clock::now();
+
+        input.get_haptic().vibrate({{
+                                     { 100u, std::chrono::milliseconds(30) },
+                                     { 0, std::chrono::milliseconds(30) },
+                                     { 100u, std::chrono::milliseconds(30) },
+                                     { 0, std::chrono::milliseconds(30) },
+                                     { 100u, std::chrono::milliseconds(30) },
+                                     { 0, std::chrono::milliseconds(30) }
+                                   }});
     }
 
     m_commands.yaw_mode = mode;
@@ -160,9 +209,6 @@ void Fly_Menu_Page::set_yaw_mode(Input& input, stream::IMultirotor_Commands::Yaw
 void Fly_Menu_Page::process_mode_idle(Input& input)
 {
     q::Clock::time_point now = q::Clock::now();
-
-    stream::IMultirotor_State::Value const& state = m_multirotor_state;
-//    QASSERT(state.mode == stream::IMultirotor_State::Mode::IDLE);
 
     set_horizontal_mode(input, silk::stream::IMultirotor_Commands::Horizontal_Mode::ANGLE);
 
@@ -189,7 +235,7 @@ void Fly_Menu_Page::process_mode_idle(Input& input)
 void Fly_Menu_Page::process_mode_fly(Input& input)
 {
     stream::IMultirotor_State::Value const& state = m_multirotor_state;
-//    QASSERT(state.mode == stream::IMultirotor_State::Mode::FLY);
+    QASSERT(state.mode == stream::IMultirotor_State::Mode::FLY);
 
     ISticks const& sticks = input.get_sticks();
     if (input.get_mode_switch().is_pressed())
@@ -287,7 +333,7 @@ void Fly_Menu_Page::process_mode_fly(Input& input)
 void Fly_Menu_Page::process_mode_take_off(Input& input)
 {
     stream::IMultirotor_State::Value const& state = m_multirotor_state;
-//    QASSERT(state.mode == stream::IMultirotor_State::Mode::TAKE_OFF);
+    QASSERT(state.mode == stream::IMultirotor_State::Mode::TAKE_OFF);
 
     input.get_stick_actuators().set_target_throttle(state.throttle);
 
@@ -317,7 +363,7 @@ void Fly_Menu_Page::process_mode_return_home(Input& input)
 void Fly_Menu_Page::process_mode_land(Input& input)
 {
     stream::IMultirotor_State::Value const& state = m_multirotor_state;
-//    QASSERT(state.mode == stream::IMultirotor_State::Mode::LAND);
+    QASSERT(state.mode == stream::IMultirotor_State::Mode::LAND);
 
     input.get_stick_actuators().set_target_throttle(state.throttle);
 
@@ -360,8 +406,7 @@ void Fly_Menu_Page::render(Adafruit_GFX& display)
     //mode
     {
         const char* mode_str = "N/A";
-        //switch (state.mode)
-        switch (m_commands.mode)
+        switch (state.mode)
         {
         case stream::IMultirotor_State::Mode::IDLE: mode_str = "IDLE"; break;
         case stream::IMultirotor_State::Mode::TAKE_OFF: mode_str = "TAKE OFF"; break;
@@ -370,7 +415,8 @@ void Fly_Menu_Page::render(Adafruit_GFX& display)
         case stream::IMultirotor_State::Mode::LAND: mode_str = "LAND"; break;
         }
 
-        bool blink = (now - m_last_mode_change_tp) < k_mode_change_blink_duration;
+        bool blink = (now - m_last_mode_change_tp) < k_mode_change_blink_duration ||
+                state.mode != m_commands.mode;
         uint16_t color = blink ? m_fast_blink_color : 1;
 
         display.setTextColor(color);

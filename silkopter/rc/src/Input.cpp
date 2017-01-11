@@ -94,6 +94,11 @@ IStick_Actuators& Input::get_stick_actuators()
     return *m_stick_actuators;
 }
 
+IHaptic& Input::get_haptic()
+{
+    return *dynamic_cast<IHaptic*>(m_stick_actuators.get());
+}
+
 IRotary_Encoder const& Input::get_menu_encoder() const
 {
     return *m_menu_encoder;

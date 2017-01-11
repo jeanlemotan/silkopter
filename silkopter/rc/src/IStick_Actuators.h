@@ -5,7 +5,7 @@
 namespace silk
 {
 
-class IStick_Actuators : public IInput_Device
+class IStick_Actuators : public virtual IInput_Device
 {
 public:
     virtual ~IStick_Actuators() = default;

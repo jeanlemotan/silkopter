@@ -39,8 +39,9 @@ ts::Result<void> Stick_Actuators_Throttle_DRV883x::init()
 
     gpioPWM(m_phase_gpio, 0);
     gpioSetPWMfrequency(m_phase_gpio, 20000);
+    //gpioSetPWMfrequency(m_phase_gpio, 250);
 
-    gpioWrite(m_enable_gpio, 1);
+    gpioWrite(m_enable_gpio, 0);
     gpioPWM(m_phase_gpio, 127);
 
     PID::Params params;
@@ -102,49 +103,126 @@ bool Stick_Actuators_Throttle_DRV883x::set_target_roll(boost::optional<float> va
 
 bool Stick_Actuators_Throttle_DRV883x::set_target_throttle(boost::optional<float> value)
 {
-    m_target_throttle = value;
-    if (!value)
+    if (value.is_initialized() != m_target_throttle.is_initialized())
     {
-        gpioWrite(m_enable_gpio, 0);
-        gpioPWM(m_phase_gpio, 127);
+        set_enabled(value.is_initialized());
+    }
+
+    m_target_throttle = value;
+    return true;
+}
+
+void Stick_Actuators_Throttle_DRV883x::set_enabled(bool yes)
+{
+    if (yes)
+    {
+        m_enabled_ref_count++;
+        if (m_enabled_ref_count == 1)
+        {
+            gpioWrite(m_enable_gpio, 1);
+            gpioPWM(m_phase_gpio, 127);
+        }
     }
     else
     {
-        gpioWrite(m_enable_gpio, 1);
+        if (m_enabled_ref_count > 0)
+        {
+            m_enabled_ref_count--;
+            if (m_enabled_ref_count == 0)
+            {
+                gpioWrite(m_enable_gpio, 0);
+                gpioPWM(m_phase_gpio, 127);
+            }
+        }
+        else
+        {
+            QASSERT(false);
+        }
     }
-    return true;
+}
+void Stick_Actuators_Throttle_DRV883x::vibrate(std::vector<Note> const& notes)
+{
+    //stop the old vibration
+    if (!m_haptic_notes.empty())
+    {
+        set_enabled(false);
+    }
+
+    m_haptic_notes = notes;
+    m_last_note_tp = q::Clock::now();
+
+    if (!m_haptic_notes.empty())
+    {
+        set_enabled(true);
+
+        Note const& note = m_haptic_notes.front();
+        if (note.frequency > 0)
+        {
+            gpioSetPWMfrequency(m_phase_gpio, note.frequency);
+        }
+        else
+        {
+            gpioSetPWMfrequency(m_phase_gpio, 20000);
+        }
+    }
 }
 
 void Stick_Actuators_Throttle_DRV883x::process()
 {
-    if (!m_target_throttle)
-    {
-        return;
-    }
-
     auto now = q::Clock::now();
-    auto dt = now - m_last_tp;
-    if (dt <= std::chrono::milliseconds(10))
+    if (m_target_throttle)
     {
-        return;
+        auto dt = now - m_last_tp;
+        if (dt <= std::chrono::milliseconds(1))
+        {
+            return;
+        }
+
+        float crt_throttle = m_sticks.get_throttle();
+        float target_throttle = *m_target_throttle;
+
+    //    if (math::abs(target_throttle - crt_throttle) < 0.01f)
+    //    {
+    //        crt_throttle = target_throttle;
+    //    }
+
+        float factor = m_throttle_pid.process(crt_throttle, target_throttle);
+
+        int pwm = static_cast<int>(factor * 128.f) + 127;
+        pwm = math::clamp(pwm, 0, 255);
+
+        gpioPWM(m_phase_gpio, pwm);
+
+        m_last_tp = now;
     }
 
-    float crt_throttle = m_sticks.get_throttle();
-    float target_throttle = *m_target_throttle;
+    if (!m_haptic_notes.empty())
+    {
+        if (now - m_last_note_tp >= m_haptic_notes.front().duration)
+        {
+            m_haptic_notes.erase(m_haptic_notes.begin());
 
-//    if (math::abs(target_throttle - crt_throttle) < 0.01f)
-//    {
-//        crt_throttle = target_throttle;
-//    }
+            if (!m_haptic_notes.empty())
+            {
+                Note const& note = m_haptic_notes.front();
+                if (note.frequency > 0)
+                {
+                    gpioSetPWMfrequency(m_phase_gpio, note.frequency);
+                }
+                else
+                {
+                    gpioSetPWMfrequency(m_phase_gpio, 20000);
+                }
+            }
+            else
+            {
+                gpioSetPWMfrequency(m_phase_gpio, 20000);
+                set_enabled(false);
+            }
 
-    float factor = m_throttle_pid.process(crt_throttle, target_throttle);
-
-    int pwm = static_cast<int>(factor * 128.f) + 127;
-    pwm = math::clamp(pwm, 0, 255);
-
-    gpioPWM(m_phase_gpio, pwm);
-
-    m_last_tp = now;
+            m_last_note_tp = now;
+        }
+    }
 }
 
 }

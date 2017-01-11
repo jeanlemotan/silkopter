@@ -177,7 +177,8 @@ HEADERS += \
     ../../def/gen_support.h \
     ../../../libs/utils/hw/RFM22B.h \
     ../../../libs/utils/comms/RC_Phy.h \
-    ../../../libs/utils/comms/RC_Protocol.h
+    ../../../libs/utils/comms/RC_Protocol.h \
+    ../../src/IHaptic.h
 
 SOURCES += \
     ../../src/main.cpp \

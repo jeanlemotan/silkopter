@@ -5,7 +5,7 @@ namespace util
 namespace comms
 {
 
-#define LOG
+//#define LOG
 
 RC_Protocol::RC_Protocol(RC_Phy& phy, RX_Callback rx_callback)
     : m_phy(phy)

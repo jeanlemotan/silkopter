@@ -13,7 +13,7 @@ class IStick_Actuators;
 class IRotary_Encoder;
 class IButton;
 class IButton_Matrix;
-
+class IHaptic;
 
 class Input
 {
@@ -33,6 +33,8 @@ public:
 
     IStick_Actuators const& get_stick_actuators() const;
     IStick_Actuators& get_stick_actuators();
+
+    IHaptic& get_haptic();
 
     IRotary_Encoder const& get_menu_encoder() const;
     IButton const& get_menu_switch() const;

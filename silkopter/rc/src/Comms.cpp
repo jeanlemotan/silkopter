@@ -64,6 +64,7 @@ bool Comms::start()
         return false;
     }
 
+    m_rc_phy.set_rate(100);
     m_rc_protocol.add_periodic_packet(std::chrono::milliseconds(30), std::bind(&Comms::compute_multirotor_commands_packet, this, std::placeholders::_1, std::placeholders::_2));
 
     m_video_streamer.on_data_received = std::bind(&Comms::handle_video, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
@@ -214,6 +215,21 @@ void Comms::send_multirotor_commands_value(stream::IMultirotor_Commands::Value c
 void Comms::process()
 {
     m_video_streamer.process();
+
+    static q::Clock::time_point xxx = q::Clock::time_point(q::Clock::duration::zero());
+    if (m_multirotor_state.mode != m_multirotor_commands.mode)
+    {
+        if (xxx.time_since_epoch().count() == 0)
+        {
+            xxx = q::Clock::now();
+        }
+        if (q::Clock::now() - xxx > std::chrono::seconds(1))
+        {
+            QLOGI("Simulated mode switch from {} to {}", m_multirotor_state.mode, m_multirotor_commands.mode);
+            m_multirotor_state.mode = m_multirotor_commands.mode;
+            xxx = q::Clock::time_point(q::Clock::duration::zero());
+        }
+    }
 }
 
 }
