@@ -28,6 +28,8 @@ public:
 
     RC_Protocol(RC_Phy& phy, RX_Callback rx_callback);
 
+    bool init();
+
     size_t get_mtu() const;
 
     typedef std::function<size_t(uint8_t* data, uint8_t& packet_type)> TX_Callback;

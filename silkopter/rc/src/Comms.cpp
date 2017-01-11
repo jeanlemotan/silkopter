@@ -26,7 +26,7 @@ extern settings::Settings s_settings;
 
 Comms::Comms()
     : m_rc_phy(true)
-    , m_rc_protocol(m_rc_phy, [this](util::comms::RC_Protocol::RX_Packet const& packet) { process_rx_packet(packet); })
+    , m_rc_protocol(m_rc_phy, std::bind(&Comms::process_rx_packet, this, std::placeholders::_1))
     , m_video_streamer()
 {
 }
@@ -50,6 +50,7 @@ bool Comms::start()
                                        comms.get_rc_spi_speed(),
                                        comms.get_rc_sdn_gpio(),
                                        comms.get_rc_nirq_gpio())
+                && m_rc_protocol.init()
                 && m_video_streamer.init_rx(rx_descriptor);
     }
     catch(std::exception e)
@@ -63,7 +64,7 @@ bool Comms::start()
         return false;
     }
 
-    m_rc_protocol.add_periodic_packet(std::chrono::milliseconds(30), [this](uint8_t* data, uint8_t& packet_type) { return compute_multirotor_commands_packet(data, packet_type); });
+    m_rc_protocol.add_periodic_packet(std::chrono::milliseconds(30), std::bind(&Comms::compute_multirotor_commands_packet, this, std::placeholders::_1, std::placeholders::_2));
 
     m_video_streamer.on_data_received = std::bind(&Comms::handle_video, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
 

@@ -5,15 +5,22 @@ namespace util
 namespace comms
 {
 
+#define LOG
+
 RC_Protocol::RC_Protocol(RC_Phy& phy, RX_Callback rx_callback)
     : m_phy(phy)
     , m_rx_callback(rx_callback)
 {
-    m_phy.set_callbacks([this](uint8_t* data) { return compute_tx_data(data); },
-                        [this](util::comms::RC_Phy::RX_Data const& data) { process_rx_data(data); });
+    m_phy.set_callbacks(std::bind(&RC_Protocol::compute_tx_data, this, std::placeholders::_1),
+                        std::bind(&RC_Protocol::process_rx_data, this, std::placeholders::_1));
 
     //std::atomic_init(&m_crt_sent_packet_index, 0);
     //std::atomic_init(&m_received_packet_index, 0);
+}
+
+bool RC_Protocol::init()
+{
+    return true;
 }
 
 size_t RC_Protocol::get_mtu() const
@@ -67,6 +74,10 @@ size_t RC_Protocol::compute_tx_data(uint8_t* data)
                 header.packet_index = 0;
                 header.packet_type = packet_type;
 
+#ifdef LOG
+                QLOGI("Send periodic packet type {}, size {}", packet_type, size);
+#endif
+
                 return sizeof(Header) + size;
             }
         }
@@ -85,6 +96,9 @@ size_t RC_Protocol::compute_tx_data(uint8_t* data)
             header.packet_type = packet.packet_type;
             header.packet_index = m_crt_sent_packet_index;
 
+#ifdef LOG
+            QLOGI("Sent fragment {} - {} out of {}KB", packet.offset, packet.offset + size, packet.payload.size());
+#endif
             return sizeof(Header) + size;
         }
     }
@@ -124,7 +138,16 @@ void RC_Protocol::process_rx_data(util::comms::RC_Phy::RX_Data const& data)
                 packet.offset += size;
                 if (packet.offset >= packet.payload.size())
                 {
+#ifdef LOG
+                    QLOGI("Confirmed packet size {}KB. {} packets pending", packet.payload.size(), m_tx_packet_queue.size());
+#endif
                     m_tx_packet_queue.pop_front();
+                }
+                else
+                {
+#ifdef LOG
+                    QLOGI("Confirmed fragment {} - {} out of {}KB", packet.offset - size, packet.offset, packet.payload.size());
+#endif
                 }
             }
         }
