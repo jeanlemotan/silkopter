@@ -134,8 +134,9 @@ template<> inline void serialize(Buffer_t& buffer, silk::stream::IMultirotor_Sta
 
 template<> inline auto deserialize(Buffer_t const& buffer, silk::stream::IMultirotor_State::Value& value, size_t& off) -> bool
 {
-    //battery state
     uint8_t v1, v2, v3, v4, v5;
+
+    //battery state
     if (!deserialize(buffer, v1, off) ||
         !deserialize(buffer, v2, off) ||
         !deserialize(buffer, v3, off) ||

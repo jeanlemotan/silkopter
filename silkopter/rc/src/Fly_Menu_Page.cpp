@@ -329,8 +329,7 @@ void Fly_Menu_Page::render(Adafruit_GFX& display)
             display.drawFastHLine(arrow_x - 1, line_y + 1, 3, 1);
             display.drawFastHLine(arrow_x,     line_y,     1, 1);
 
-            bool error = m_tx_strength < k_min_signal_strength ||
-                    (now - m_comms.get_last_tx_tp()) >= k_timeout_duration;
+            bool error = m_tx_strength < k_min_signal_strength;
             uint16_t color = error ? m_blink_color : 1;
 
             display.fillRect(x, line_y, static_cast<int16_t>(m_tx_strength * w), h, color);
