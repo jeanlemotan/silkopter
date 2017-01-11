@@ -50,6 +50,7 @@ public:
         math::quatf local_frame; //local space to enu space
         IECEF_Position::Value ecef_position;
         IENU_Velocity::Value enu_velocity;
+        float throttle = 0;
 
         Mode mode = Mode::IDLE;
     };
@@ -129,6 +130,7 @@ template<> inline void serialize(Buffer_t& buffer, silk::stream::IMultirotor_Sta
         serialize(buffer, v, off);
     }
 
+    serialize(buffer, static_cast<uint8_t>((math::clamp(value.throttle, 0.f, 1.f) * 255.f)), off);
     serialize(buffer, value.mode, off);
 }
 
@@ -243,6 +245,14 @@ template<> inline auto deserialize(Buffer_t const& buffer, silk::stream::IMultir
         math::vec3f v(s1 / 100.f, s2 / 100.f, s3 / 100.f);
         value.enu_velocity = v;
     }
+
+    //sticks
+
+    if (!deserialize(buffer, v1, off))
+    {
+        return false;
+    }
+    value.throttle = v1 / 255.f;
 
     if (!deserialize(buffer, value.mode, off))
     {
