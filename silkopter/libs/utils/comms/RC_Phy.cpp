@@ -1,4 +1,4 @@
-#include "RC.h"
+#include "RC_Phy.h"
 #include "utils/hw/RF4463F30.h"
 #include "utils/hw/RFM22B.h"
 #include <string>
@@ -21,7 +21,7 @@ constexpr q::Clock::duration MIN_TX_DURATION = std::chrono::microseconds(1);
 
 
 
-struct RC::HW
+struct RC_Phy::HW
 {
 
 #if USE_CHIP == CHIP_RF4463F30
@@ -35,14 +35,14 @@ struct RC::HW
 
 
 
-RC::RC(bool master)
+RC_Phy::RC_Phy(bool master)
     : m_is_master(master)
 {
     m_hw.reset(new HW);
     set_rate(30);
 }
 
-RC::~RC()
+RC_Phy::~RC_Phy()
 {
     m_exit = true;
     if (m_thread.joinable())
@@ -51,7 +51,7 @@ RC::~RC()
     }
 }
 
-bool RC::init(std::string const& device, uint32_t speed, uint8_t sdn_gpio, uint8_t nirq_gpio)
+bool RC_Phy::init(std::string const& device, uint32_t speed, uint8_t sdn_gpio, uint8_t nirq_gpio)
 {
     if (!m_hw->chip.init(device, speed, sdn_gpio, nirq_gpio))
     {
@@ -121,12 +121,19 @@ bool RC::init(std::string const& device, uint32_t speed, uint8_t sdn_gpio, uint8
     return true;
 }
 
-size_t RC::get_mtu() const
+void RC_Phy::set_callbacks(TX_Callback txcb, RX_Callback rxcb)
+{
+    m_tx_callback = txcb;
+    m_rx_callback = rxcb;
+}
+
+
+size_t RC_Phy::get_mtu() const
 {
     return MTU - sizeof(Header);
 }
 
-void RC::set_rate(size_t rate)
+void RC_Phy::set_rate(size_t rate)
 {
     m_desired_rate = std::max(rate, 1u);
     m_desired_duration = std::chrono::microseconds(1000000 / rate);
@@ -136,24 +143,26 @@ void RC::set_rate(size_t rate)
     }
 }
 
-void RC::set_tx_data(void const* data, size_t size)
-{
-    std::lock_guard<std::mutex> lg(m_mutex);
-    m_tx_data.resize(size);
+//void RC::set_tx_data(void const* data, size_t size)
+//{
+//    std::lock_guard<std::mutex> lg(m_mutex);
+//    m_tx_data.resize(size);
 
-    if (size > 0 && data)
-    {
-        memcpy(m_tx_data.data(), data, size);
-    }
-}
+//    if (size > 0 && data)
+//    {
+//        memcpy(m_tx_data.data(), data, size);
+//    }
+//}
 
-void RC::get_rx_data(Data& data) const
-{
-    std::lock_guard<std::mutex> lg(m_mutex);
-    data = m_rx_data;
-}
+//bool RC::get_rx_data(RX_Data& rx_data) const
+//{
+//    std::lock_guard<std::mutex> lg(m_mutex);
+//    bool is_new = m_rx_data.index > rx_data.index;
+//    rx_data = m_rx_data;
+//    return is_new;
+//}
 
-void RC::master_thread_proc()
+void RC_Phy::master_thread_proc()
 {
     while (!m_exit)
     {
@@ -170,9 +179,10 @@ void RC::master_thread_proc()
             start_tx_tp = q::Clock::now();
 
             {
-                std::lock_guard<std::mutex> lg(m_mutex);
-                m_tx_buffer.resize(sizeof(Header) + m_tx_data.size());
-                memcpy(m_tx_buffer.data() + sizeof(Header), m_tx_data.data(), m_tx_data.size());
+                //std::lock_guard<std::mutex> lg(m_mutex);
+                m_tx_buffer.resize(sizeof(Header) + get_mtu());
+                size_t size = m_tx_callback(m_tx_buffer.data() + sizeof(Header));
+                m_tx_buffer.resize(sizeof(Header) + size);
             }
 
             Header& header = *reinterpret_cast<Header*>(m_tx_buffer.data());
@@ -218,7 +228,7 @@ void RC::master_thread_proc()
     }
 }
 
-void RC::slave_thread_proc()
+void RC_Phy::slave_thread_proc()
 {
     while (!m_exit)
     {
@@ -247,9 +257,12 @@ void RC::slave_thread_proc()
         //if packet received, respond
         {
             {
-                std::lock_guard<std::mutex> lg(m_mutex);
-                m_tx_buffer.resize(1 + sizeof(Header) + m_tx_data.size());
-                memcpy(m_tx_buffer.data() + sizeof(Header), m_tx_data.data(), m_tx_data.size());
+//                std::lock_guard<std::mutex> lg(m_mutex);
+//                m_tx_buffer.resize(1 + sizeof(Header) + m_tx_data.size());
+//                memcpy(m_tx_buffer.data() + sizeof(Header), m_tx_data.data(), m_tx_data.size());
+                m_tx_buffer.resize(sizeof(Header) + get_mtu());
+                size_t size = m_tx_callback(m_tx_buffer.data() + sizeof(Header));
+                m_tx_buffer.resize(sizeof(Header) + size);
             }
 
             //auto start_tx_tp = q::Clock::now();
@@ -277,7 +290,7 @@ void RC::slave_thread_proc()
     }
 }
 
-bool RC::read_fifo(size_t rx_size)
+bool RC_Phy::read_fifo(size_t rx_size)
 {
     if (rx_size == 0)
     {
@@ -286,27 +299,27 @@ bool RC::read_fifo(size_t rx_size)
 
     if (rx_size >= sizeof(Header) && rx_size <= MTU)
     {
-        m_rx_buffer.resize(rx_size);
-        if (m_hw->chip.read_rx_fifo(m_rx_buffer.data(), rx_size))
+        //m_rx_buffer.resize(rx_size);
+        m_rx_data.payload.resize(rx_size);
+
+        if (m_hw->chip.read_rx_fifo(m_rx_data.payload.data(), rx_size))
         {
-            Header& header = *reinterpret_cast<Header*>(m_rx_buffer.data());
+            Header& header = *reinterpret_cast<Header*>(m_rx_data.payload.data());
             uint16_t crc = header.crc;
             header.crc = 0;
-            uint16_t computed_crc = q::util::compute_murmur_hash16(m_rx_buffer.data(), m_rx_buffer.size());
+            uint16_t computed_crc = q::util::compute_murmur_hash16(m_rx_data.payload.data(), m_rx_data.payload.size());
             if (crc == computed_crc)
             {
                 int8_t dBm = m_hw->chip.get_input_dBm();
 
                 {
-                    std::lock_guard<std::mutex> lg(m_mutex);
+                    //std::lock_guard<std::mutex> lg(m_mutex);
+                    m_rx_data.index++;
                     m_rx_data.tx_dBm = header.dBm;
                     m_rx_data.rx_dBm = dBm;
                     m_rx_data.rx_timepoint = q::Clock::now();
-                    m_rx_data.rx_data.resize(m_rx_buffer.size() - sizeof(Header));
-                    if (!m_rx_data.rx_data.empty())
-                    {
-                        memcpy(m_rx_data.rx_data.data(), m_rx_buffer.data() + sizeof(Header), m_rx_data.rx_data.size());
-                    }
+                    m_rx_data.payload.erase(m_rx_data.payload.begin(), m_rx_data.payload.begin() + sizeof(Header));
+                    m_rx_callback(m_rx_data);
                 }
                 return true;
             }

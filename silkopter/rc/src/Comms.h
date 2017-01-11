@@ -35,7 +35,8 @@
 #include "common/stream/IMultirotor_State.h"
 
 #include "common/Comm_Data.h"
-#include "utils/comms/RC.h"
+#include "utils/comms/RC_Phy.h"
+#include "utils/comms/RC_Protocol.h"
 #include "utils/comms/Video_Streamer.h"
 
 #include <boost/asio.hpp>
@@ -59,10 +60,16 @@ public:
     int8_t get_tx_dBm() const;
 
     q::Clock::time_point get_last_rx_tp() const;
-    q::Clock::time_point get_last_tx_tp() const;
 
     void get_video_data(std::vector<uint8_t>& dst, math::vec2u16& resolution);
     stream::IMultirotor_State::Value get_multirotor_state() const;
+
+    struct Home_Data
+    {
+        util::coordinates::ECEF ecef_position;
+    };
+    boost::optional<Home_Data> get_home_data() const;
+
     void send_multirotor_commands_value(stream::IMultirotor_Commands::Value const& value);
 
     void process();
@@ -70,9 +77,21 @@ public:
 private:
     void reset();
 
-    util::comms::RC m_rc;
-    util::comms::RC::Data m_rc_data;
+    size_t compute_multirotor_commands_packet(uint8_t* data, uint8_t& packet_type);
+    void process_rx_packet(util::comms::RC_Protocol::RX_Packet const& packet);
 
+    util::comms::RC_Phy m_rc_phy;
+    util::comms::RC_Protocol m_rc_protocol;
+    util::comms::RC_Protocol::RX_Packet m_rx_packet;
+
+    enum class Packet_Type : uint8_t
+    {
+        MULTIROTOR_COMMANDS,
+        MULTIROTOR_STATE,
+        HOME,
+    };
+
+    boost::optional<Home_Data> m_home_data;
     util::comms::Video_Streamer m_video_streamer;
 
     bool m_is_connected = false;
@@ -84,9 +103,120 @@ private:
     std::vector<uint8_t> m_video_data;
     std::vector<uint8_t> m_serialization_buffer;
     stream::IMultirotor_State::Value m_multirotor_state;
+    stream::IMultirotor_Commands::Value m_multirotor_commands;
 
-    void handle_multirotor_state();
     void handle_video(void const* data, size_t size, math::vec2u16 const& resolution);
 };
 
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+namespace util
+{
+namespace serialization
+{
+
+template<> inline void serialize(Buffer_t& buffer, silk::Comms::Home_Data const& value, size_t& off)
+{
+    util::coordinates::LLA lla_position = util::coordinates::ecef_to_lla(value.ecef_position);
+
+    {
+        int64_t v = lla_position.latitude * 100000000.0; //8 decimal places
+        uint8_t const* data = reinterpret_cast<uint8_t const*>(&v);
+        serialize(buffer, data[0], off);
+        serialize(buffer, data[1], off);
+        serialize(buffer, data[2], off);
+        serialize(buffer, data[3], off);
+        serialize(buffer, data[4], off);
+    }
+    {
+        int64_t v = lla_position.longitude * 100000000.0; //8 decimal places
+        uint8_t const* data = reinterpret_cast<uint8_t const*>(&v);
+        serialize(buffer, data[0], off);
+        serialize(buffer, data[1], off);
+        serialize(buffer, data[2], off);
+        serialize(buffer, data[3], off);
+        serialize(buffer, data[4], off);
+    }
+    {
+        int16_t v = static_cast<int16_t>(math::clamp(lla_position.altitude, -327.0, 327.0) * 10.0);
+        serialize(buffer, v, off);
+    }
+}
+
+template<> inline auto deserialize(Buffer_t const& buffer, silk::Comms::Home_Data& value, size_t& off) -> bool
+{
+    uint8_t v1, v2, v3, v4, v5;
+    int16_t s1;
+
+    util::coordinates::LLA lla_position;
+
+    //latitude
+    if (!deserialize(buffer, v1, off) ||
+        !deserialize(buffer, v2, off) ||
+        !deserialize(buffer, v3, off) ||
+        !deserialize(buffer, v4, off) ||
+        !deserialize(buffer, v5, off))
+    {
+        return false;
+    }
+
+    {
+        int64_t v = 0;
+        if (((v5 >> 7) & 1) == 1)
+        {
+            v = -1;
+        }
+        uint8_t* data = reinterpret_cast<uint8_t*>(&v);
+        data[0] = v1;
+        data[1] = v2;
+        data[2] = v3;
+        data[3] = v4;
+        data[4] = v5;
+        lla_position.latitude = v / 100000000.0;
+    }
+
+    //longitude
+    if (!deserialize(buffer, v1, off) ||
+        !deserialize(buffer, v2, off) ||
+        !deserialize(buffer, v3, off) ||
+        !deserialize(buffer, v4, off) ||
+        !deserialize(buffer, v5, off))
+    {
+        return false;
+    }
+
+    {
+        int64_t v = 0;
+        if (((v5 >> 7) & 1) == 1)
+        {
+            v = -1;
+        }
+        uint8_t* data = reinterpret_cast<uint8_t*>(&v);
+        data[0] = v1;
+        data[1] = v2;
+        data[2] = v3;
+        data[3] = v4;
+        data[4] = v5;
+        lla_position.longitude = v / 100000000.0;
+    }
+
+    //altitude
+    if (!deserialize(buffer, s1, off))
+    {
+        return false;
+    }
+
+    {
+        double v = s1 / 100.0;
+        lla_position.altitude = v;
+    }
+
+    value.ecef_position = util::coordinates::lla_to_ecef(lla_position);
+
+    return true;
+}
+
+}
 }

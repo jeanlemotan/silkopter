@@ -13,36 +13,38 @@ namespace util
 namespace comms
 {
 
-class RC
+class RC_Phy
 {
 public:
-    RC(bool master);
-    ~RC();
+    RC_Phy(bool master);
+    ~RC_Phy();
 
-    bool init(std::string const& device, uint32_t speed, uint8_t sdn_gpio, uint8_t nirq_gpio);
-
-    size_t get_mtu() const;
-
-    void set_rate(size_t rate);
-
-    void set_tx_data(void const* data, size_t size);
-
-    struct Data
+    struct RX_Data
     {
+        size_t index = 0;
         size_t rate = 0;
         q::Clock::time_point tx_timepoint;
         q::Clock::time_point rx_timepoint;
         int8_t tx_dBm = 0;
         int8_t rx_dBm = 0;
-        std::vector<uint8_t> rx_data;
+        std::vector<uint8_t> payload;
     };
 
-    void get_rx_data(Data& data) const;
+    typedef std::function<size_t(uint8_t* data)> TX_Callback;
+    typedef std::function<void(RX_Data const& data)> RX_Callback;
+
+    bool init(std::string const& device, uint32_t speed, uint8_t sdn_gpio, uint8_t nirq_gpio);
+    void set_callbacks(TX_Callback txcb, RX_Callback rxcb);
+
+    size_t get_mtu() const;
+
+    void set_rate(size_t rate);
 
 private:
     struct HW;
     std::unique_ptr<HW> m_hw;
-
+    TX_Callback m_tx_callback;
+    RX_Callback m_rx_callback;
 
 #pragma pack(push, 1)
 
@@ -64,18 +66,8 @@ private:
 
     std::atomic_bool m_exit = { false };
 
-    //-----------------
-    //these are accessed from both threads so need to be locked
-    mutable std::mutex m_mutex;
-    Data m_rx_data;
-    std::vector<uint8_t> m_tx_data;
-    //-----------------
-
-    //-----------------
-    //these are accessed only from the RX/TX threads
+    RX_Data m_rx_data;
     std::vector<uint8_t> m_tx_buffer;
-    std::vector<uint8_t> m_rx_buffer;
-    //-----------------
 
     void master_thread_proc();
     void slave_thread_proc();

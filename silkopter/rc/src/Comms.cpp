@@ -25,12 +25,13 @@ namespace silk
 extern settings::Settings s_settings;
 
 Comms::Comms()
-    : m_rc(true)
+    : m_rc_phy(true)
+    , m_rc_protocol(m_rc_phy, [this](util::comms::RC_Protocol::RX_Packet const& packet) { process_rx_packet(packet); })
     , m_video_streamer()
 {
 }
 
-auto Comms::start() -> bool
+bool Comms::start()
 {
     disconnect();
 
@@ -45,7 +46,10 @@ auto Comms::start() -> bool
 
     try
     {
-        m_is_connected = m_rc.init(comms.get_rc_spi_device(), comms.get_rc_spi_speed(), comms.get_rc_sdn_gpio(), comms.get_rc_nirq_gpio())
+        m_is_connected = m_rc_phy.init(comms.get_rc_spi_device(),
+                                       comms.get_rc_spi_speed(),
+                                       comms.get_rc_sdn_gpio(),
+                                       comms.get_rc_nirq_gpio())
                 && m_video_streamer.init_rx(rx_descriptor);
     }
     catch(std::exception e)
@@ -58,6 +62,8 @@ auto Comms::start() -> bool
         QLOGW("Cannot start comms");
         return false;
     }
+
+    m_rc_protocol.add_periodic_packet(std::chrono::milliseconds(30), [this](uint8_t* data, uint8_t& packet_type) { return compute_multirotor_commands_packet(data, packet_type); });
 
     m_video_streamer.on_data_received = std::bind(&Comms::handle_video, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
 
@@ -83,20 +89,58 @@ void Comms::reset()
     m_last_req_id = 0;
 }
 
-void Comms::handle_multirotor_state()
+size_t Comms::compute_multirotor_commands_packet(uint8_t* data, uint8_t& packet_type)
 {
-//    auto& channel = m_pilot_channel;
+    packet_type = static_cast<uint8_t>(Packet_Type::MULTIROTOR_COMMANDS);
 
-//    stream::IMultirotor_State::Sample sample;
-//    if (!channel.unpack_param(sample))
-//    {
-//        QLOGE("Error in unpacking multirotor state");
-//        return;
-//    }
+    size_t off = 0;
+    util::serialization::serialize(m_serialization_buffer, m_multirotor_commands, off);
 
-//    std::lock_guard<std::mutex> lg(m_samples_mutex);
-//    m_multirotor_state_samples.push_back(sample);
+    memcpy(data, m_serialization_buffer.data(), off);
+
+    return off;
 }
+
+void Comms::process_rx_packet(util::comms::RC_Protocol::RX_Packet const& packet)
+{
+    m_rx_packet.rx_dBm = packet.rx_dBm;
+    m_rx_packet.tx_dBm = packet.tx_dBm;
+    m_rx_packet.rx_timepoint = packet.rx_timepoint;
+
+    if (packet.packet_type == static_cast<uint8_t>(Packet_Type::MULTIROTOR_STATE))
+    {
+        size_t off = 0;
+        stream::IMultirotor_State::Value value;
+        if (util::serialization::deserialize(packet.payload, value, off))
+        {
+            std::lock_guard<std::mutex> lg(m_samples_mutex);
+            m_multirotor_state = value;
+        }
+        else
+        {
+            QLOGW("Cannot deserialize incoming multirotor state value");
+        }
+    }
+    else if (packet.packet_type == static_cast<uint8_t>(Packet_Type::HOME))
+    {
+        size_t off = 0;
+        Home_Data data;
+        if (util::serialization::deserialize(packet.payload, data, off))
+        {
+            std::lock_guard<std::mutex> lg(m_samples_mutex);
+            m_home_data = data;
+        }
+        else
+        {
+            QLOGW("Cannot deserialize incoming home data");
+        }
+    }
+    else
+    {
+        QLOGW("Unknown incoming packet type: {}", static_cast<int>(packet.packet_type));
+    }
+}
+
 void Comms::handle_video(void const* _data, size_t size, math::vec2u16 const& resolution)
 {
     std::lock_guard<std::mutex> lg(m_samples_mutex);
@@ -130,20 +174,16 @@ void Comms::handle_video(void const* _data, size_t size, math::vec2u16 const& re
 
 int8_t Comms::get_rx_dBm() const
 {
-    return m_rc_data.rx_dBm;
+    return m_rx_packet.rx_dBm;
 }
 int8_t Comms::get_tx_dBm() const
 {
-    return m_rc_data.tx_dBm;
+    return m_rx_packet.tx_dBm;
 }
 
 q::Clock::time_point Comms::get_last_rx_tp() const
 {
-    return m_rc_data.rx_timepoint;
-}
-q::Clock::time_point Comms::get_last_tx_tp() const
-{
-    return m_rc_data.tx_timepoint;
+    return m_rx_packet.rx_timepoint;
 }
 
 
@@ -167,34 +207,12 @@ stream::IMultirotor_State::Value Comms::get_multirotor_state() const
 }
 void Comms::send_multirotor_commands_value(stream::IMultirotor_Commands::Value const& value)
 {
-    size_t off = 0;
-    util::serialization::serialize(m_serialization_buffer, value, off);
-
-    m_rc.set_tx_data(m_serialization_buffer.data(), m_serialization_buffer.size());
-
-    //m_pilot_channel.pack_all(silk::rc_comms::Pilot_Message::MULTIROTOR_COMMANDS, value);
-    //m_pilot_channel.try_sending(*m_rcp);
+    m_multirotor_commands = value;
 }
 
 void Comms::process()
 {
     m_video_streamer.process();
-
-    m_rc.get_rx_data(m_rc_data);
-    if (!m_rc_data.rx_data.empty())
-    {
-        size_t off = 0;
-        stream::IMultirotor_State::Value value;
-        if (util::serialization::deserialize(m_rc_data.rx_data, value, off))
-        {
-            std::lock_guard<std::mutex> lg(m_samples_mutex);
-            m_multirotor_state = value;
-        }
-        else
-        {
-            QLOGW("Cannot deserialize incoming multirotor state value");
-        }
-    }
 }
 
 }
