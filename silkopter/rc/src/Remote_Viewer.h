@@ -1,0 +1,4 @@
+#ifndef REMOTE_VIEWER_H
+#define REMOTE_VIEWER_H
+
+#endif // REMOTE_VIEWER_H
