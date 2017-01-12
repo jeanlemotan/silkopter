@@ -7,17 +7,23 @@ constexpr q::Clock::duration PERIOD = std::chrono::milliseconds(10);
 namespace silk
 {
 
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
 Stick_Actuators_Throttle_DRV883x::Stick_Actuators_Throttle_DRV883x(ISticks const& sticks)
     : m_sticks(sticks)
 {
 
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
 Stick_Actuators_Throttle_DRV883x::~Stick_Actuators_Throttle_DRV883x()
 {
     gpioSetMode(m_enable_gpio, PI_INPUT);
     gpioSetMode(m_phase_gpio, PI_INPUT);
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
 
 ts::Result<void> Stick_Actuators_Throttle_DRV883x::init()
 {
@@ -67,6 +73,8 @@ ts::Result<void> Stick_Actuators_Throttle_DRV883x::init()
     return detect_direction();
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
 //void Stick_Actuators_Throttle_DRV883x::set_p(float a, float b)
 //{
 //    PID::Params params;
@@ -81,25 +89,35 @@ ts::Result<void> Stick_Actuators_Throttle_DRV883x::init()
 //    QLOGI("a = {}, b = {}", a, b);
 //}
 
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
 ts::Result<void> Stick_Actuators_Throttle_DRV883x::detect_direction()
 {
     return ts::success;
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
 
 bool Stick_Actuators_Throttle_DRV883x::set_target_yaw(boost::optional<float> value)
 {
     return false;
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
 bool Stick_Actuators_Throttle_DRV883x::set_target_pitch(boost::optional<float> value)
 {
     return false;
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
 bool Stick_Actuators_Throttle_DRV883x::set_target_roll(boost::optional<float> value)
 {
     return false;
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
 
 bool Stick_Actuators_Throttle_DRV883x::set_target_throttle(boost::optional<float> value)
 {
@@ -111,6 +129,8 @@ bool Stick_Actuators_Throttle_DRV883x::set_target_throttle(boost::optional<float
     m_target_throttle = value;
     return true;
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
 
 void Stick_Actuators_Throttle_DRV883x::set_enabled(bool yes)
 {
@@ -140,6 +160,9 @@ void Stick_Actuators_Throttle_DRV883x::set_enabled(bool yes)
         }
     }
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
 void Stick_Actuators_Throttle_DRV883x::vibrate(std::vector<Note> const& notes)
 {
     //stop the old vibration
@@ -166,6 +189,8 @@ void Stick_Actuators_Throttle_DRV883x::vibrate(std::vector<Note> const& notes)
         }
     }
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
 
 void Stick_Actuators_Throttle_DRV883x::process()
 {
@@ -224,5 +249,7 @@ void Stick_Actuators_Throttle_DRV883x::process()
         }
     }
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
 
 }

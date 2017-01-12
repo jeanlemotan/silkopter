@@ -3,6 +3,8 @@
 namespace silk
 {
 
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
 void Menu_System::push_page(std::unique_ptr<IMenu_Page> page)
 {
     QASSERT(page);
@@ -14,6 +16,8 @@ void Menu_System::push_page(std::unique_ptr<IMenu_Page> page)
     QLOGI("Pushing menu page");
     m_pages.push_back(std::move(page));
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
 
 void Menu_System::process(Input& input)
 {
@@ -31,6 +35,8 @@ void Menu_System::process(Input& input)
         }
     }
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
 
 void Menu_System::render(Adafruit_GFX& display)
 {

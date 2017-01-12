@@ -11,6 +11,25 @@
 namespace silk
 {
 
+
+std::vector<IHaptic::Note> k_mode_change_haptic =
+{{
+    { 1000u, std::chrono::milliseconds(30) },
+    { 0, std::chrono::milliseconds(30) },
+}};
+
+std::vector<IHaptic::Note> k_alert_haptic =
+{{
+    { 1000u, std::chrono::milliseconds(100) },
+    { 0, std::chrono::milliseconds(30) },
+    { 1000u, std::chrono::milliseconds(100) },
+    { 0, std::chrono::milliseconds(30) },
+    { 1000u, std::chrono::milliseconds(100) },
+    { 0, std::chrono::milliseconds(30) }
+}};
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
 static float dBm_to_strength(int8_t dBm)
 {
     //return math::pow(10.f, static_cast<float>(dBm) / 10.f);
@@ -80,6 +99,7 @@ bool Fly_Menu_Page::process(Input& input, Menu_System& menu_system)
         {
             QLOGI("REVERTED to mode {}!!!", state.mode);
             set_mode(input, state.mode);
+            input.get_haptic().vibrate(k_alert_haptic);
             return true;
         }
     }
@@ -108,14 +128,14 @@ void Fly_Menu_Page::set_mode(Input& input, stream::IMultirotor_Commands::Mode mo
     {
         m_last_mode_change_tp = q::Clock::now();
 
-        input.get_haptic().vibrate({{
-                                     { 100u, std::chrono::milliseconds(30) },
-                                     { 0, std::chrono::milliseconds(30) },
-                                     { 100u, std::chrono::milliseconds(30) },
-                                     { 0, std::chrono::milliseconds(30) },
-                                     { 100u, std::chrono::milliseconds(30) },
-                                     { 0, std::chrono::milliseconds(30) }
-                                   }});
+        if (mode == stream::IMultirotor_State::Mode::IDLE)
+        {
+            input.get_haptic().vibrate(k_alert_haptic);
+        }
+        else if (m_commands.mode == stream::IMultirotor_State::Mode::IDLE)
+        {
+            input.get_haptic().vibrate(k_alert_haptic);
+        }
     }
 
     if (mode == stream::IMultirotor_State::Mode::IDLE)
@@ -139,14 +159,7 @@ void Fly_Menu_Page::set_vertical_mode(Input& input, stream::IMultirotor_Commands
     {
         m_last_vertical_mode_change_tp = q::Clock::now();
 
-        input.get_haptic().vibrate({{
-                                     { 100u, std::chrono::milliseconds(30) },
-                                     { 0, std::chrono::milliseconds(30) },
-                                     { 100u, std::chrono::milliseconds(30) },
-                                     { 0, std::chrono::milliseconds(30) },
-                                     { 100u, std::chrono::milliseconds(30) },
-                                     { 0, std::chrono::milliseconds(30) }
-                                   }});
+        input.get_haptic().vibrate(k_mode_change_haptic);
     }
 
     if (mode == stream::IMultirotor_Commands::Vertical_Mode::ALTITUDE)
@@ -170,14 +183,7 @@ void Fly_Menu_Page::set_horizontal_mode(Input& input, stream::IMultirotor_Comman
     {
         m_last_horizontal_mode_change_tp = q::Clock::now();
 
-        input.get_haptic().vibrate({{
-                                     { 100u, std::chrono::milliseconds(30) },
-                                     { 0, std::chrono::milliseconds(30) },
-                                     { 100u, std::chrono::milliseconds(30) },
-                                     { 0, std::chrono::milliseconds(30) },
-                                     { 100u, std::chrono::milliseconds(30) },
-                                     { 0, std::chrono::milliseconds(30) }
-                                   }});
+        input.get_haptic().vibrate(k_mode_change_haptic);
     }
 
     m_commands.horizontal_mode = mode;
@@ -191,14 +197,7 @@ void Fly_Menu_Page::set_yaw_mode(Input& input, stream::IMultirotor_Commands::Yaw
     {
         m_last_yaw_mode_change_tp = q::Clock::now();
 
-        input.get_haptic().vibrate({{
-                                     { 100u, std::chrono::milliseconds(30) },
-                                     { 0, std::chrono::milliseconds(30) },
-                                     { 100u, std::chrono::milliseconds(30) },
-                                     { 0, std::chrono::milliseconds(30) },
-                                     { 100u, std::chrono::milliseconds(30) },
-                                     { 0, std::chrono::milliseconds(30) }
-                                   }});
+        input.get_haptic().vibrate(k_mode_change_haptic);
     }
 
     m_commands.yaw_mode = mode;

@@ -10,11 +10,14 @@ namespace silk
 extern int s_version_major;
 extern int s_version_minor;
 
+///////////////////////////////////////////////////////////////////////////////////////////////////
 
 Info_Menu_Page::Info_Menu_Page()
 {
     m_menu.push_submenu({"<-", "Sticks", "Battery", "About"}, 0, 34);
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
 
 bool Info_Menu_Page::process(Input& input, Menu_System& menu_system)
 {
@@ -38,6 +41,8 @@ bool Info_Menu_Page::process(Input& input, Menu_System& menu_system)
     return true;
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
 void Info_Menu_Page::draw_axis(Adafruit_GFX& display, int16_t y, const char* name, Axis_Data const& axis)
 {
     int16_t w = display.width();
@@ -59,6 +64,8 @@ void Info_Menu_Page::draw_axis(Adafruit_GFX& display, int16_t y, const char* nam
     y += 8;
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
 void Info_Menu_Page::render(Adafruit_GFX& display)
 {
     if (m_section == Section::STICKS)
@@ -77,5 +84,7 @@ void Info_Menu_Page::render(Adafruit_GFX& display)
 
     m_menu.render(display, 0);
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
 
 }

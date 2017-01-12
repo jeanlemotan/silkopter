@@ -13,6 +13,7 @@ namespace silk
 extern settings::Settings s_settings;
 extern void save_settings();
 
+///////////////////////////////////////////////////////////////////////////////////////////////////
 
 Stick_Calibration_Menu_Page::Stick_Calibration_Menu_Page()
 {
@@ -20,11 +21,15 @@ Stick_Calibration_Menu_Page::Stick_Calibration_Menu_Page()
     m_phase_start_tp = q::Clock::now();
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
 void Stick_Calibration_Menu_Page::next_phase()
 {
     m_phase_start_tp = q::Clock::now();
     m_phase = static_cast<Phase>(static_cast<int>(m_phase) + 1);
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
 
 bool Stick_Calibration_Menu_Page::process(Input& input, Menu_System& menu_system)
 {
@@ -114,6 +119,8 @@ bool Stick_Calibration_Menu_Page::process(Input& input, Menu_System& menu_system
     return true;
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
 void Stick_Calibration_Menu_Page::draw_axis(Adafruit_GFX& display, int16_t y, const char* name, Axis_Data const& axis)
 {
     int16_t w = display.width();
@@ -144,6 +151,8 @@ void Stick_Calibration_Menu_Page::draw_axis(Adafruit_GFX& display, int16_t y, co
     display.drawLine(value_x, axis_y - 2, value_x, axis_y + 2, 1);
     y += 8;
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
 
 void Stick_Calibration_Menu_Page::render(Adafruit_GFX& display)
 {
@@ -187,5 +196,7 @@ void Stick_Calibration_Menu_Page::render(Adafruit_GFX& display)
 
     m_menu.render(display, 0);
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
 
 }

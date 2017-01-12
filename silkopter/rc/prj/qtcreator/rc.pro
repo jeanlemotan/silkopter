@@ -79,7 +79,6 @@ HEADERS += \
     ../../../libs/utils/Butterworth.h \
     ../../../libs/utils/Channel.h \
     ../../../libs/utils/PID.h \
-    ../../../libs/utils/Serial_Channel.h \
     ../../../libs/utils/Timed_Scope.h \
     ../../../libs/common/bus/IBus.h \
     ../../../libs/common/bus/II2C.h \
@@ -178,7 +177,10 @@ HEADERS += \
     ../../../libs/utils/hw/RFM22B.h \
     ../../../libs/utils/comms/RC_Phy.h \
     ../../../libs/utils/comms/RC_Protocol.h \
-    ../../src/IHaptic.h
+    ../../src/IHaptic.h \
+    ../../src/Remote_Viewer.h \
+    ../../src/Remote_Viewer_Server.h \
+    ../../../libs/utils/ASIO_Channel.h
 
 SOURCES += \
     ../../src/main.cpp \
@@ -220,7 +222,9 @@ SOURCES += \
     ../../def/settings.def.cpp \
     ../../../libs/utils/hw/RFM22B.cpp \
     ../../../libs/utils/comms/RC_Phy.cpp \
-    ../../../libs/utils/comms/RC_Protocol.cpp
+    ../../../libs/utils/comms/RC_Protocol.cpp \
+    ../../src/Remote_Viewer.cpp \
+    ../../src/Remote_Viewer_Server.cpp
 
 DISTFILES += \
     ../../src/node.png \

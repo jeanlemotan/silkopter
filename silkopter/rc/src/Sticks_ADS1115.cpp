@@ -83,15 +83,20 @@ constexpr uint16_t ADS1115_COMP_QUE_DISABLE    = 0x03 << ADS1115_COMP_QUE_SHIFT;
 
 constexpr std::chrono::milliseconds MIN_CONVERSION_DURATION(2);
 
+///////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 Sticks_ADS1115::Sticks_ADS1115()
 {
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
 Sticks_ADS1115::~Sticks_ADS1115()
 {
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
 
 ts::Result<void> Sticks_ADS1115::init()
 {
@@ -128,6 +133,8 @@ ts::Result<void> Sticks_ADS1115::init()
     return ts::success;
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
 auto Sticks_ADS1115::set_config_register() -> bool
 {
     uint16_t config =   m_config_register.gain |
@@ -142,11 +149,16 @@ auto Sticks_ADS1115::set_config_register() -> bool
     return m_dev.write_register_u16(m_address, ADS1115_RA_CONFIG, config);
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
 float Sticks_ADS1115::get_raw_yaw() const
 {
     ADC const& adc = m_adcs[0];
     return math::clamp(adc.value, 0.f, 1.f);
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
 float Sticks_ADS1115::get_yaw() const
 {
     ADC const& adc = m_adcs[0];
@@ -167,6 +179,9 @@ float Sticks_ADS1115::get_yaw() const
     }
     return math::clamp(value, 0.f, 1.f);
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
 void Sticks_ADS1115::set_yaw_calibration(float center, float min, float max)
 {
     ADC& adc = m_adcs[0];
@@ -175,11 +190,16 @@ void Sticks_ADS1115::set_yaw_calibration(float center, float min, float max)
     adc.max = max;
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
 float Sticks_ADS1115::get_raw_pitch() const
 {
     ADC const& adc = m_adcs[1];
     return math::clamp(adc.value, 0.f, 1.f);
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
 float Sticks_ADS1115::get_pitch() const
 {
     ADC const& adc = m_adcs[1];
@@ -200,6 +220,9 @@ float Sticks_ADS1115::get_pitch() const
     }
     return math::clamp(value, 0.f, 1.f);
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
 void Sticks_ADS1115::set_pitch_calibration(float center, float min, float max)
 {
     ADC& adc = m_adcs[1];
@@ -208,11 +231,16 @@ void Sticks_ADS1115::set_pitch_calibration(float center, float min, float max)
     adc.max = max;
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
 float Sticks_ADS1115::get_raw_roll() const
 {
     ADC const& adc = m_adcs[2];
     return math::clamp(adc.value, 0.f, 1.f);
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
 float Sticks_ADS1115::get_roll() const
 {
     ADC const& adc = m_adcs[2];
@@ -233,6 +261,9 @@ float Sticks_ADS1115::get_roll() const
     }
     return math::clamp(value, 0.f, 1.f);
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
 void Sticks_ADS1115::set_roll_calibration(float center, float min, float max)
 {
     ADC& adc = m_adcs[2];
@@ -241,11 +272,16 @@ void Sticks_ADS1115::set_roll_calibration(float center, float min, float max)
     adc.max = max;
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
 float Sticks_ADS1115::get_raw_throttle() const
 {
     ADC const& adc = m_adcs[3];
     return math::clamp(adc.value, 0.f, 1.f);
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
 float Sticks_ADS1115::get_throttle() const
 {
     ADC const& adc = m_adcs[3];
@@ -266,6 +302,9 @@ float Sticks_ADS1115::get_throttle() const
     }
     return math::clamp(value, 0.f, 1.f);
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
 void Sticks_ADS1115::set_throttle_calibration(float center, float min, float max)
 {
     ADC& adc = m_adcs[3];
@@ -273,6 +312,8 @@ void Sticks_ADS1115::set_throttle_calibration(float center, float min, float max
     adc.min = min;
     adc.max = max;
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
 
 void Sticks_ADS1115::process()
 {
@@ -352,5 +393,7 @@ void Sticks_ADS1115::process()
 
     m_last_tp = now;
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
 
 }

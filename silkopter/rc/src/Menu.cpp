@@ -9,10 +9,14 @@ namespace silk
 
 constexpr size_t MENU_WIDTH = 200;
 
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
 Menu::Menu()
 {
 
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
 
 void Menu::push_submenu(std::vector<std::string> const& entries, size_t selected, int16_t y)
 {
@@ -41,6 +45,8 @@ void Menu::push_submenu(std::vector<std::string> const& entries, size_t selected
     m_target_x = static_cast<float>(m_crt_submenu_idx * MENU_WIDTH);
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
 void Menu::pop_submenu()
 {
     if (m_submenus.empty())
@@ -59,6 +65,8 @@ void Menu::pop_submenu()
         m_target_x = static_cast<float>(m_crt_submenu_idx * MENU_WIDTH);
     }
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
 
 boost::optional<size_t> Menu::process(Input& input)
 {
@@ -91,6 +99,8 @@ boost::optional<size_t> Menu::process(Input& input)
     return boost::none;
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
 void Menu::render(Adafruit_GFX& display, size_t max_entries)
 {
     if (m_submenus.empty())
@@ -119,6 +129,8 @@ void Menu::render(Adafruit_GFX& display, size_t max_entries)
     auto it = std::remove_if(m_submenus.begin(), m_submenus.end(), [](Submenu const& submenu) { return submenu.finished; });
     m_submenus.erase(it, m_submenus.end());
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
 
 void Menu::render(Adafruit_GFX& display, Submenu& submenu, size_t max_entries)
 {
@@ -188,6 +200,8 @@ void Menu::render(Adafruit_GFX& display, Submenu& submenu, size_t max_entries)
 
     display.setTextColor(1, 0);
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 }

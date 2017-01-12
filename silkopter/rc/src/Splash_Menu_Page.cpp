@@ -11,6 +11,8 @@ namespace silk
 extern int s_version_major;
 extern int s_version_minor;
 
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
 //Created with: http://manytools.org/hacker-tools/image-to-byte-array/
 static const uint8_t s_splash_img[128*64] =
 {
@@ -85,11 +87,15 @@ static const uint8_t s_splash_img[128*64] =
     0x0, 0x0, 0x0, 0x0,
 };
 
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
 Splash_Menu_Page::Splash_Menu_Page(std::unique_ptr<IMenu_Page> mm)
     : m_mm(std::move(mm))
 {
     m_start_tp = q::Clock::now();
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
 
 bool Splash_Menu_Page::process(Input& input, Menu_System& menu_system)
 {
@@ -109,6 +115,8 @@ bool Splash_Menu_Page::process(Input& input, Menu_System& menu_system)
 
     return true;
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
 
 void Splash_Menu_Page::render(Adafruit_GFX& display)
 {

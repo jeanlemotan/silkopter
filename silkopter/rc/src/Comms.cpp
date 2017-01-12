@@ -24,12 +24,16 @@ namespace silk
 
 extern settings::Settings s_settings;
 
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
 Comms::Comms()
     : m_rc_phy(true)
     , m_rc_protocol(m_rc_phy, std::bind(&Comms::process_rx_packet, this, std::placeholders::_1))
     , m_video_streamer()
 {
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
 
 bool Comms::start()
 {
@@ -74,22 +78,29 @@ bool Comms::start()
     return true;
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
 void Comms::disconnect()
 {
     reset();
     m_is_connected = false;
 }
 
-auto Comms::is_connected() const -> bool
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+bool Comms::is_connected() const
 {
     return m_is_connected;//m_rcp != nullptr && m_rcp->is_connected();
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////
 
 void Comms::reset()
 {
     m_last_req_id = 0;
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
 
 size_t Comms::compute_multirotor_commands_packet(uint8_t* data, uint8_t& packet_type)
 {
@@ -102,6 +113,8 @@ size_t Comms::compute_multirotor_commands_packet(uint8_t* data, uint8_t& packet_
 
     return off;
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
 
 void Comms::process_rx_packet(util::comms::RC_Protocol::RX_Packet const& packet)
 {
@@ -143,6 +156,8 @@ void Comms::process_rx_packet(util::comms::RC_Protocol::RX_Packet const& packet)
     }
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
 void Comms::handle_video(void const* _data, size_t size, math::vec2u16 const& resolution)
 {
     std::lock_guard<std::mutex> lg(m_samples_mutex);
@@ -174,23 +189,46 @@ void Comms::handle_video(void const* _data, size_t size, math::vec2u16 const& re
 //    fclose(f);
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
 int8_t Comms::get_rx_dBm() const
 {
     return m_rx_packet.rx_dBm;
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
 int8_t Comms::get_tx_dBm() const
 {
     return m_rx_packet.tx_dBm;
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
 
 q::Clock::time_point Comms::get_last_rx_tp() const
 {
     return m_rx_packet.rx_timepoint;
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////
 
 void Comms::get_video_data(std::vector<uint8_t>& dst, math::vec2u16& resolution)
 {
+    static FILE* fff = nullptr;
+    if (!fff)
+    {
+        srand(time(nullptr));
+        fff = fopen("a.h264", "rb");
+        if (!fff)
+        {
+            exit(1);
+        }
+    }
+
+    m_video_data.resize((rand() % 3280) + 512);
+    int r = fread(m_video_data.data(), 1, m_video_data.size(), fff);
+    m_video_data.resize(r);
+
     std::lock_guard<std::mutex> lg(m_samples_mutex);
     size_t offset = dst.size();
     size_t size = m_video_data.size();
@@ -201,16 +239,35 @@ void Comms::get_video_data(std::vector<uint8_t>& dst, math::vec2u16& resolution)
         m_video_data.clear();
     }
     resolution = m_video_resolution;
+
+//    std::lock_guard<std::mutex> lg(m_samples_mutex);
+//    size_t offset = dst.size();
+//    size_t size = m_video_data.size();
+//    if (size > 0)
+//    {
+//        dst.resize(offset + size);
+//        memcpy(dst.data() + offset, m_video_data.data(), size);
+//        m_video_data.clear();
+//    }
+//    resolution = m_video_resolution;
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
 stream::IMultirotor_State::Value Comms::get_multirotor_state() const
 {
     std::lock_guard<std::mutex> lg(m_samples_mutex);
     return m_multirotor_state;
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
 void Comms::send_multirotor_commands_value(stream::IMultirotor_Commands::Value const& value)
 {
     m_multirotor_commands = value;
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
 
 void Comms::process()
 {
@@ -231,5 +288,7 @@ void Comms::process()
         }
     }
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
 
 }

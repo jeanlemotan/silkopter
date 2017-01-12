@@ -2,6 +2,7 @@
 #include "Video_Decoder.h"
 #include "Menu_System.h"
 #include "Splash_Menu_Page.h"
+#include "Remote_Viewer_Server.h"
 
 #include "ISticks.h"
 #include "IStick_Actuators.h"
@@ -72,11 +73,16 @@ static auto initialize_pigpio() -> bool
     initialized = true;
     return true;
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
 static auto shutdown_pigpio() -> bool
 {
     gpioTerminate();
     return true;
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
 
 /* This prints an "Assertion failed" message and aborts.  */
 void __assert_fail(const char *__assertion, const char *__file, unsigned int __line, const char *__function)
@@ -84,10 +90,16 @@ void __assert_fail(const char *__assertion, const char *__file, unsigned int __l
     QASSERT_MSG(false, "assert: {}:{}: {}: {}", __file, __line, __function, __assertion);
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
 namespace silk
 {
 
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
 void save_settings();
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
 
 void generate_settings_file()
 {
@@ -95,6 +107,8 @@ void generate_settings_file()
     s_settings.get_comms().set_video_interfaces({"wlan2", "wlan3"});
     save_settings();
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
 
 bool load_settings()
 {
@@ -129,6 +143,8 @@ bool load_settings()
     return true;
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
 void save_settings()
 {
     ts::sz::Value sz_value = settings::serialize(s_settings);
@@ -147,6 +163,8 @@ void save_settings()
     }
 }
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
 
 int main(int argc, char *argv[])
 {
@@ -190,6 +208,8 @@ int main(int argc, char *argv[])
         exit(1);
     }
 
+    silk::Remote_Viewer_Server remote_viewer_server;
+
     silk::Menu_System menu_system;
 
     silk::Input input;
@@ -208,11 +228,22 @@ int main(int argc, char *argv[])
 
     menu_system.push_page(std::unique_ptr<silk::IMenu_Page>(new silk::Splash_Menu_Page(std::move(mm))));
 
+    std::vector<uint8_t> video_data;
+    math::vec2u16 video_resolution;
+
     while (true)
     {
         input.process();
         comms.process();
+        remote_viewer_server.process();
         menu_system.process(input);
+
+        comms.get_video_data(video_data, video_resolution);
+        if (!video_data.empty())
+        {
+            remote_viewer_server.send_data(video_data.data(), video_data.size(), video_resolution, comms.get_multirotor_state());
+            video_data.clear();
+        }
 
         process_frames++;
         if (q::Clock::now() - last_tp >= std::chrono::seconds(1))

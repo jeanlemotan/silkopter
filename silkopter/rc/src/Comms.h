@@ -49,10 +49,10 @@ class Comms : q::util::Noncopyable
 public:
     Comms();
 
-    auto start() -> bool;
+    bool start();
 
     void disconnect();
-    auto is_connected() const -> bool;
+    bool is_connected() const;
 
     //----------------------------------------------------------------------
 
@@ -145,7 +145,7 @@ template<> inline void serialize(Buffer_t& buffer, silk::Comms::Home_Data const&
     }
 }
 
-template<> inline auto deserialize(Buffer_t const& buffer, silk::Comms::Home_Data& value, size_t& off) -> bool
+template<> inline bool deserialize(Buffer_t const& buffer, silk::Comms::Home_Data& value, size_t& off)
 {
     uint8_t v1, v2, v3, v4, v5;
     int16_t s1;

@@ -15,12 +15,15 @@ namespace silk
 extern int s_version_major;
 extern int s_version_minor;
 
+///////////////////////////////////////////////////////////////////////////////////////////////////
 
 Main_Menu_Page::Main_Menu_Page(Comms& comms)
     : m_comms(comms)
 {
     set_submenu(Submenu::MAIN_MENU);
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
 
 void Main_Menu_Page::set_submenu(Submenu submenu)
 {
@@ -44,6 +47,8 @@ void Main_Menu_Page::set_submenu(Submenu submenu)
 
     m_submenu = submenu;
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
 
 bool Main_Menu_Page::process(Input& input, Menu_System& menu_system)
 {
@@ -76,6 +81,8 @@ bool Main_Menu_Page::process(Input& input, Menu_System& menu_system)
     return true;
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
 void Main_Menu_Page::render(Adafruit_GFX& display)
 {
     display.setCursor(0, 0);
@@ -90,5 +97,7 @@ void Main_Menu_Page::render(Adafruit_GFX& display)
 
     m_menu.render(display, 0);
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
 
 }
