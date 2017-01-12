@@ -24,11 +24,19 @@ Remote_Viewer::~Remote_Viewer()
 
 void Remote_Viewer::start()
 {
+    m_socket_adapter.start();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-void Remote_Viewer::send_data(uint8_t const* video_data, size_t video_data_size, math::vec2u16 const& resolution,
+bool Remote_Viewer::is_alive() const
+{
+    return m_socket.is_open();
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+void Remote_Viewer::send_data(void const* video_data, size_t video_data_size, math::vec2u16 const& resolution,
                stream::IMultirotor_State::Value const& multirotor_state)
 {
     m_socket_adapter.write(video_data, video_data_size);

@@ -28,12 +28,20 @@ Remote_Viewer_Server::Remote_Viewer_Server()
 Remote_Viewer_Server::~Remote_Viewer_Server()
 {
     m_io_service_work.reset();
+    m_io_service.stop();
     m_io_service_thread.join();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-void Remote_Viewer_Server::send_data(uint8_t const* video_data, size_t video_data_size, math::vec2u16 const& resolution, stream::IMultirotor_State::Value const& multirotor_state)
+size_t Remote_Viewer_Server::get_remote_viewer_count() const
+{
+    return m_viewers.size();
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+void Remote_Viewer_Server::send_data(void const* video_data, size_t video_data_size, math::vec2u16 const& resolution, stream::IMultirotor_State::Value const& multirotor_state)
 {
     for (std::unique_ptr<Remote_Viewer>& viewer: m_viewers)
     {
@@ -67,9 +75,19 @@ void Remote_Viewer_Server::start_accept()
 
 void Remote_Viewer_Server::process()
 {
-    for (std::unique_ptr<Remote_Viewer>& viewer: m_viewers)
+    for (auto it = m_viewers.begin(); it != m_viewers.end();)
     {
-        viewer->process();
+        Remote_Viewer& viewer = *(*it);
+        if (viewer.is_alive())
+        {
+            viewer.process();
+            ++it;
+        }
+        else
+        {
+            QLOGI("Remote Viewer disconnected");
+            m_viewers.erase(it);
+        }
     }
 }
 

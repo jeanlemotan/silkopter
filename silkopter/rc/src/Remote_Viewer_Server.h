@@ -17,7 +17,9 @@ public:
     Remote_Viewer_Server();
     ~Remote_Viewer_Server();
 
-    void send_data(uint8_t const* video_data, size_t video_data_size, math::vec2u16 const& resolution,
+    size_t get_remote_viewer_count() const;
+
+    void send_data(void const* video_data, size_t video_data_size, math::vec2u16 const& resolution,
                    stream::IMultirotor_State::Value const& multirotor_state);
 
     void process();

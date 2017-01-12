@@ -20,8 +20,9 @@ protected:
     Remote_Viewer(boost::asio::ip::tcp::socket socket, bool master);
 
     void start();
+    bool is_alive() const;
 
-    void send_data(uint8_t const* video_data, size_t video_data_size, math::vec2u16 const& resolution,
+    void send_data(void const* video_data, size_t video_data_size, math::vec2u16 const& resolution,
                    stream::IMultirotor_State::Value const& multirotor_state);
 
     void process();
