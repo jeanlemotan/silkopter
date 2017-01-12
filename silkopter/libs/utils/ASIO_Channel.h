@@ -309,6 +309,7 @@ public:
             {
                 std::lock_guard<std::mutex> lg(m_tx_buffer_queue_mutex);
                 m_tx_buffer_queue.push_back(buffer_ptr);
+                //QLOGI("++ buffer queue {}", m_tx_buffer_queue.size());
             }
 
             if (m_is_sending.exchange(true) == false)
@@ -324,32 +325,40 @@ public:
 
 private:
     void handle_send(std::shared_ptr<TX_Buffer_t> buffer_ptr,
-                     const boost::system::error_code& /*error*/,
-                     std::size_t /*bytes_transferred*/)
+                     const boost::system::error_code& error,
+                     std::size_t bytes_transferred)
     {
+        if (error)
         {
-            std::lock_guard<std::mutex> lg(m_tx_buffer_queue_mutex);
-            QASSERT(m_tx_buffer_queue.front() == buffer_ptr);
-            m_tx_buffer_queue.pop_front();
-
-            if (!m_tx_buffer_queue.empty())
-            {
-                std::shared_ptr<TX_Buffer_t> new_buffer_ptr = m_tx_buffer_queue.front();
-                m_socket.async_write_some(boost::asio::buffer(*new_buffer_ptr),
-                                          boost::bind(&ASIO_Socket_Adapter<Socket_t>::handle_send, this,
-                                                      new_buffer_ptr,
-                                                      boost::asio::placeholders::error,
-                                                      boost::asio::placeholders::bytes_transferred));
-            }
-            else
-            {
-                m_is_sending.exchange(false);
-            }
+            m_socket.close();
         }
-
+        else
         {
-            std::lock_guard<std::mutex> lg(m_tx_buffer_pool_mutex);
-            m_tx_buffer_pool.push_back(buffer_ptr);
+            {
+                std::lock_guard<std::mutex> lg(m_tx_buffer_pool_mutex);
+                m_tx_buffer_pool.push_back(buffer_ptr);
+            }
+
+            {
+                std::lock_guard<std::mutex> lg(m_tx_buffer_queue_mutex);
+                QASSERT(m_tx_buffer_queue.front() == buffer_ptr);
+                m_tx_buffer_queue.pop_front();
+                //QLOGI("-- buffer queue {}", m_tx_buffer_queue.size());
+
+                if (!m_tx_buffer_queue.empty())
+                {
+                    buffer_ptr = m_tx_buffer_queue.front();
+                    m_socket.async_write_some(boost::asio::buffer(*buffer_ptr),
+                                              boost::bind(&ASIO_Socket_Adapter<Socket_t>::handle_send, this,
+                                                          buffer_ptr,
+                                                          boost::asio::placeholders::error,
+                                                          boost::asio::placeholders::bytes_transferred));
+                }
+                else
+                {
+                    m_is_sending.exchange(false);
+                }
+            }
         }
     }
 
