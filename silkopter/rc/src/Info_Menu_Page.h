@@ -5,17 +5,19 @@
 
 namespace silk
 {
+class Comms;
 
 class Info_Menu_Page : public IMenu_Page
 {
 public:
-    Info_Menu_Page();
+    Info_Menu_Page(Comms& comms);
 
     bool process(Input& input, Menu_System& menu_system) override;
     void render(Adafruit_GFX& display);
 
 private:
     Menu m_menu;
+    Comms& m_comms;
 
     struct Axis_Data
     {
@@ -30,6 +32,7 @@ private:
     enum class Section
     {
         STICKS,
+        COMMS,
         BATTERY,
         ABOUT,
     } m_section = Section::STICKS;

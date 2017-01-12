@@ -102,6 +102,20 @@ void Comms::reset()
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
+Remote_Viewer_Server const& Comms::get_remote_viewer_server() const
+{
+    return m_remote_viewer_server;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+Remote_Viewer_Server& Comms::get_remote_viewer_server()
+{
+    return m_remote_viewer_server;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
 size_t Comms::compute_multirotor_commands_packet(uint8_t* data, uint8_t& packet_type)
 {
     packet_type = static_cast<uint8_t>(Packet_Type::MULTIROTOR_COMMANDS);
@@ -158,7 +172,7 @@ void Comms::process_rx_packet(util::comms::RC_Protocol::RX_Packet const& packet)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-void Comms::handle_video(void const* _data, size_t size, math::vec2u16 const& resolution)
+void Comms::handle_video(void const* data, size_t size, math::vec2u16 const& resolution)
 {
     std::lock_guard<std::mutex> lg(m_samples_mutex);
 
@@ -170,18 +184,19 @@ void Comms::handle_video(void const* _data, size_t size, math::vec2u16 const& re
 
     if (size > 0)
     {
-        uint8_t const* data = reinterpret_cast<uint8_t const*>(_data);
-        size_t offset = m_video_data.size();
-        m_video_data.resize(offset + size);
-        memcpy(m_video_data.data() + offset, data, size);
+        m_remote_viewer_server.send_data(data, size, resolution, m_multirotor_state);
+//        uint8_t const* data = reinterpret_cast<uint8_t const*>(_data);
+//        size_t offset = m_video_data.size();
+//        m_video_data.resize(offset + size);
+//        memcpy(m_video_data.data() + offset, data, size);
 
-        //keep the buffer from growing too much
-        constexpr size_t MAX_VIDEO_DATA_SIZE = 1024*1024;
-        if (m_video_data.size() > MAX_VIDEO_DATA_SIZE)
-        {
-            size_t del = m_video_data.size() - MAX_VIDEO_DATA_SIZE;
-            m_video_data.erase(m_video_data.begin(), m_video_data.begin() + del);
-        }
+//        //keep the buffer from growing too much
+//        constexpr size_t MAX_VIDEO_DATA_SIZE = 1024*1024;
+//        if (m_video_data.size() > MAX_VIDEO_DATA_SIZE)
+//        {
+//            size_t del = m_video_data.size() - MAX_VIDEO_DATA_SIZE;
+//            m_video_data.erase(m_video_data.begin(), m_video_data.begin() + del);
+//        }
     }
 
 //    FILE* f = fopen("a.h264", "a+");
@@ -212,34 +227,8 @@ q::Clock::time_point Comms::get_last_rx_tp() const
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-void Comms::get_video_data(std::vector<uint8_t>& dst, math::vec2u16& resolution)
-{
-    static FILE* fff = nullptr;
-    if (!fff)
-    {
-        srand(time(nullptr));
-        fff = fopen("a.h264", "rb");
-        if (!fff)
-        {
-            exit(1);
-        }
-    }
-
-    m_video_data.resize((rand() % 3280) + 512);
-    int r = fread(m_video_data.data(), 1, m_video_data.size(), fff);
-    m_video_data.resize(r);
-
-    std::lock_guard<std::mutex> lg(m_samples_mutex);
-    size_t offset = dst.size();
-    size_t size = m_video_data.size();
-    if (size > 0)
-    {
-        dst.resize(offset + size);
-        memcpy(dst.data() + offset, m_video_data.data(), size);
-        m_video_data.clear();
-    }
-    resolution = m_video_resolution;
-
+//void Comms::get_video_data(std::vector<uint8_t>& dst, math::vec2u16& resolution)
+//{
 //    std::lock_guard<std::mutex> lg(m_samples_mutex);
 //    size_t offset = dst.size();
 //    size_t size = m_video_data.size();
@@ -250,7 +239,7 @@ void Comms::get_video_data(std::vector<uint8_t>& dst, math::vec2u16& resolution)
 //        m_video_data.clear();
 //    }
 //    resolution = m_video_resolution;
-}
+//}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -272,6 +261,32 @@ void Comms::send_multirotor_commands_value(stream::IMultirotor_Commands::Value c
 void Comms::process()
 {
     m_video_streamer.process();
+    m_remote_viewer_server.process();
+
+    {
+        static FILE* fff = nullptr;
+        if (!fff)
+        {
+            srand(time(nullptr));
+            fff = fopen("a.h264", "rb");
+            if (!fff)
+            {
+                exit(1);
+            }
+        }
+
+        static std::vector<uint8_t> video_data;
+        video_data.resize((rand() % 3280) + 512);
+        int r = fread(video_data.data(), 1, video_data.size(), fff);
+        if (r == 0)
+        {
+            QLOGI("DONE, REWIND!!!!!");
+            fseek(fff, 0, SEEK_SET);
+        }
+        video_data.resize(r);
+
+        m_remote_viewer_server.send_data(video_data.data(), video_data.size(), math::vec2u16(0, 0), m_multirotor_state);
+    }
 
     static q::Clock::time_point xxx = q::Clock::time_point(q::Clock::duration::zero());
     if (m_multirotor_state.mode != m_multirotor_commands.mode)

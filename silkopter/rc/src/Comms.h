@@ -38,6 +38,7 @@
 #include "utils/comms/RC_Phy.h"
 #include "utils/comms/RC_Protocol.h"
 #include "utils/comms/Video_Streamer.h"
+#include "Remote_Viewer_Server.h"
 
 #include <boost/asio.hpp>
 
@@ -61,7 +62,10 @@ public:
 
     q::Clock::time_point get_last_rx_tp() const;
 
-    void get_video_data(std::vector<uint8_t>& dst, math::vec2u16& resolution);
+    Remote_Viewer_Server const& get_remote_viewer_server() const;
+    Remote_Viewer_Server& get_remote_viewer_server();
+
+//    void get_video_data(std::vector<uint8_t>& dst, math::vec2u16& resolution);
     stream::IMultirotor_State::Value get_multirotor_state() const;
 
     struct Home_Data
@@ -79,6 +83,8 @@ private:
 
     size_t compute_multirotor_commands_packet(uint8_t* data, uint8_t& packet_type);
     void process_rx_packet(util::comms::RC_Protocol::RX_Packet const& packet);
+
+    Remote_Viewer_Server m_remote_viewer_server;
 
     util::comms::RC_Phy m_rc_phy;
     util::comms::RC_Protocol m_rc_protocol;

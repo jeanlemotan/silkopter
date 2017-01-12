@@ -60,7 +60,7 @@ bool Main_Menu_Page::process(Input& input, Menu_System& menu_system)
             switch (*selected_entry)
             {
             case 0: menu_system.push_page(std::unique_ptr<IMenu_Page>(new Fly_Menu_Page(m_comms))); break;
-            case 1: menu_system.push_page(std::unique_ptr<IMenu_Page>(new Info_Menu_Page)); break;
+            case 1: menu_system.push_page(std::unique_ptr<IMenu_Page>(new Info_Menu_Page(m_comms))); break;
             case 2: set_submenu(Submenu::CONFIG);
             }
         }
