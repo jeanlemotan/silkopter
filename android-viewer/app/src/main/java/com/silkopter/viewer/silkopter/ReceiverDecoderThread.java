@@ -24,22 +24,22 @@ For Testing, replace "receiveFromUDP" by "receiveFromFile" , and add the path to
  */
 public class ReceiverDecoderThread extends Thread {
     //SharedPreferences settings;
-    int m_port;
-    Context m_context;
-    boolean m_running = true;
-    long m_timeB = 0;
-    long m_timeA = 0;
-    long m_presentationTimeMs = 0;
-    long m_averageHWDecoderLatency = 0;
-    long m_HWDecoderlatencySum = 0;
-    int m_outputCount = 0;
+    private int m_port;
+    private Context m_context;
+    private boolean m_running = true;
+    private long m_timeB = 0;
+    private long m_timeA = 0;
+    private long m_presentationTimeMs = 0;
+    private long m_averageHWDecoderLatency = 0;
+    private long m_HWDecoderlatencySum = 0;
+    private int m_outputCount = 0;
     //time we have to wait for an Buffer to fill
-    long m_averageWaitForInputBufferLatency = 0;
-    long m_waitForInputBufferLatencySum = 0;
-    long m_naluCount = 0;
-    ByteBuffer[] m_inputBuffers;
+    private long m_averageWaitForInputBufferLatency = 0;
+    private long m_waitForInputBufferLatencySum = 0;
+    private long m_naluCount = 0;
+    private ByteBuffer[] m_inputBuffers;
     //ByteBuffer[] m_outputBuffers;
-    MediaCodec.BufferInfo m_info;
+    private MediaCodec.BufferInfo m_info;
     private int m_naluSearchState = 0;
     private byte[] m_naluData;
     //String s = "Time between output buffers: ";
