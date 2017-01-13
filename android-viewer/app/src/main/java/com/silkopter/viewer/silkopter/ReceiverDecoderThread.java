@@ -31,7 +31,7 @@ public class ReceiverDecoderThread extends Thread {
     private long m_timeA = 0;
     private long m_presentationTimeMs = 0;
     private long m_averageHWDecoderLatency = 0;
-    private long m_HWDecoderlatencySum = 0;
+    private long m_HWDecoderLatencySum = 0;
     private int m_outputCount = 0;
     //time we have to wait for an Buffer to fill
     private long m_averageWaitForInputBufferLatency = 0;
@@ -242,8 +242,8 @@ public class ReceiverDecoderThread extends Thread {
                 long latency = System.currentTimeMillis() - m_info.presentationTimeUs;
                 if (latency >= 0 && latency <= 200) {
                     m_outputCount++;
-                    m_HWDecoderlatencySum += latency;
-                    m_averageHWDecoderLatency = m_HWDecoderlatencySum / m_outputCount;
+                    m_HWDecoderLatencySum += latency;
+                    m_averageHWDecoderLatency = m_HWDecoderLatencySum / m_outputCount;
                     //Log.w("checkOutput 2","hw decoder latency:"+latency);
                     //Log.w("checkOutput 1","Average HW decoder latency:"+averageHWDecoderLatency);
                 }
@@ -290,7 +290,7 @@ public class ReceiverDecoderThread extends Thread {
         lf += "\n Average time waiting for an input Buffer:" + m_averageWaitForInputBufferLatency;
         lf += "\n Average time HW encoding:" + m_averageHWDecoderLatency;
         lf += "\n .";
-        //Todo: measure time between realeasing output buffer and rendering it onto Screen
+        //Todo: measure time between releasing output buffer and rendering it onto Screen
         try {
             out = new java.io.PrintWriter(Environment.getExternalStorageDirectory() + "/latencyFile.txt");
             out.println(lf);
