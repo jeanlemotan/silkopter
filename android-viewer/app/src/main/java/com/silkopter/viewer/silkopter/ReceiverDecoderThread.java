@@ -26,30 +26,25 @@ public class ReceiverDecoderThread extends Thread {
     //SharedPreferences settings;
     int m_port;
     Context m_context;
-
-    private int m_naluSearchState = 0;
-    private byte[] m_naluData;
-    private int m_naluDataPosition;
-    private int NALU_MAXLEN = 1024 * 1024;
-
     boolean m_running = true;
-
     long m_timeB = 0;
     long m_timeA = 0;
     long m_presentationTimeMs = 0;
-    long m_averageHWDecoderLatency= 0;
+    long m_averageHWDecoderLatency = 0;
     long m_HWDecoderlatencySum = 0;
     int m_outputCount = 0;
     //time we have to wait for an Buffer to fill
     long m_averageWaitForInputBufferLatency = 0;
     long m_waitForInputBufferLatencySum = 0;
     long m_naluCount = 0;
-    //String s = "Time between output buffers: ";
-
     ByteBuffer[] m_inputBuffers;
-    ByteBuffer[] m_outputBuffers;
+    //ByteBuffer[] m_outputBuffers;
     MediaCodec.BufferInfo m_info;
-
+    private int m_naluSearchState = 0;
+    private byte[] m_naluData;
+    //String s = "Time between output buffers: ";
+    private int m_naluDataPosition;
+    private int NALU_MAXLEN = 1024 * 1024;
     private MediaCodec m_decoder;
 
 
@@ -87,9 +82,10 @@ public class ReceiverDecoderThread extends Thread {
 
         m_decoder.start();
     }
+
     @Override
-    public void interrupt(){
-        m_running =false;
+    public void interrupt() {
+        m_running = false;
         writeLatencyFile();
     }
 
@@ -118,8 +114,8 @@ public class ReceiverDecoderThread extends Thread {
                     ByteBuffer inputBuffer = m_inputBuffers[inputBufferIndex];
                     inputBuffer.put(n, 0, len);
                     //decoder.queueInputBuffer(inputBufferIndex, 0, len, 0, 0);
-                    m_presentationTimeMs =System.currentTimeMillis();
-                    m_decoder.queueInputBuffer(inputBufferIndex, 0, len, m_presentationTimeMs,0);
+                    m_presentationTimeMs = System.currentTimeMillis();
+                    m_decoder.queueInputBuffer(inputBufferIndex, 0, len, m_presentationTimeMs, 0);
                     break;
                 }
             } catch (Exception e) {
@@ -140,11 +136,11 @@ public class ReceiverDecoderThread extends Thread {
 
     private void interpretNalu(byte[] n, int len) {
         //Here is the right place to do some changes to the data (f.e sps fix up )
-        m_timeB =System.currentTimeMillis();
+        m_timeB = System.currentTimeMillis();
         feedDecoder(n, len); //takes beteen 2 and 40ms (1ms,1ms,46ms,1ms,1ms,40ms,... in this order),
         // beacause there isn't always an input buffer available immediately;
-        long time=System.currentTimeMillis() - m_timeB;
-        if(time>=0 && time<=200){
+        long time = System.currentTimeMillis() - m_timeB;
+        if (time >= 0 && time <= 200) {
             m_naluCount++;
             m_waitForInputBufferLatencySum += time;
             m_averageWaitForInputBufferLatency = (m_waitForInputBufferLatencySum / m_naluCount);
@@ -203,7 +199,7 @@ public class ReceiverDecoderThread extends Thread {
             for (int i = 0; i < plen; ++i) {
                 m_naluData[m_naluDataPosition++] = p[i];
                 if (m_naluDataPosition == NALU_MAXLEN - 1) {
-                    Log.w("parseDatagram","NALU Overflow");
+                    Log.w("parseDatagram", "NALU Overflow");
                     m_naluDataPosition = 0;
                 }
                 switch (m_naluSearchState) {
@@ -243,10 +239,10 @@ public class ReceiverDecoderThread extends Thread {
             //outputBuffers = decoder.getOutputBuffers();
             int outputBufferIndex = m_decoder.dequeueOutputBuffer(m_info, 0);
             if (outputBufferIndex >= 0) {
-                long latency=System.currentTimeMillis() - m_info.presentationTimeUs;
-                if(latency>=0 && latency<=200){
+                long latency = System.currentTimeMillis() - m_info.presentationTimeUs;
+                if (latency >= 0 && latency <= 200) {
                     m_outputCount++;
-                    m_HWDecoderlatencySum +=latency;
+                    m_HWDecoderlatencySum += latency;
                     m_averageHWDecoderLatency = m_HWDecoderlatencySum / m_outputCount;
                     //Log.w("checkOutput 2","hw decoder latency:"+latency);
                     //Log.w("checkOutput 1","Average HW decoder latency:"+averageHWDecoderLatency);
@@ -257,7 +253,7 @@ public class ReceiverDecoderThread extends Thread {
             } else if (outputBufferIndex == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED) {
                 Log.d("UDP", "output format changed");
             }
-        }catch(Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -275,7 +271,8 @@ public class ReceiverDecoderThread extends Thread {
         while (!Thread.interrupted() && socket != null) {
             try {
                 socket.receive(packet);
-            } catch (IOException e) {}
+            } catch (IOException e) {
+            }
             parseDatagram(message, packet.getLength());
         }
         if (socket != null) {
@@ -286,18 +283,20 @@ public class ReceiverDecoderThread extends Thread {
         m_decoder.release();
     }
 
-    public void writeLatencyFile(){
+    public void writeLatencyFile() {
         java.io.PrintWriter out;
-        String lf="everything in ms:";
-        lf+="\n Average measured app Latency: " + (m_averageWaitForInputBufferLatency + m_averageHWDecoderLatency);
-        lf+="\n Average time waiting for an input Buffer:" + m_averageWaitForInputBufferLatency;
-        lf+="\n Average time HW encoding:" + m_averageHWDecoderLatency;
-        lf+="\n .";
+        String lf = "everything in ms:";
+        lf += "\n Average measured app Latency: " + (m_averageWaitForInputBufferLatency + m_averageHWDecoderLatency);
+        lf += "\n Average time waiting for an input Buffer:" + m_averageWaitForInputBufferLatency;
+        lf += "\n Average time HW encoding:" + m_averageHWDecoderLatency;
+        lf += "\n .";
         //Todo: measure time between realeasing output buffer and rendering it onto Screen
         try {
-            out=new java.io.PrintWriter(Environment.getExternalStorageDirectory()+"/latencyFile.txt");
+            out = new java.io.PrintWriter(Environment.getExternalStorageDirectory() + "/latencyFile.txt");
             out.println(lf);
             out.close();
-        } catch (Exception e) {e.printStackTrace();}
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
