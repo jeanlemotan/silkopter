@@ -7,3 +7,5 @@
 /build
 /captures
 .externalNativeBuild
+*.pro.user.ea89e42
+*.pro.user

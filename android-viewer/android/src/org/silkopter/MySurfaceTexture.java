@@ -22,5 +22,5 @@ public class MySurfaceTexture extends SurfaceTexture {
                 //Log.d(TAG, "Updating tex image.");
         }
 
-        private static final String TAG = "TextureStreaming";
+        private static final String TAG = "Skptr";
 }

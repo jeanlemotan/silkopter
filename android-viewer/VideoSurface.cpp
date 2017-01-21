@@ -23,36 +23,40 @@
 
 #include <QThread>
 
+#include <chrono>
+
 #define EGL_SYNC_FENCE_KHR                      0x30F9
 
-
+static const size_t NALU_MAXLEN = 1024 * 1024;
 
 
 
 /*----------------------------------------------------------------------
 |    definitions
 +---------------------------------------------------------------------*/
-#define ATTACH_TO_CURRENT_THREAD_THEN_RET(ret_statement)     \
-    JNIEnv* env;                                              \
-    if (s_javaVM->AttachCurrentThread(&env, NULL) < 0)  \
-{                                                               \
-    qCritical() << "Failed to attach to current thread."; \
-    ret_statement;                                        \
+#define ATTACH_TO_CURRENT_THREAD_THEN_RET(ret_statement)    \
+    JNIEnv* env;                                            \
+    if (s_javaVM->AttachCurrentThread(&env, NULL) < 0)      \
+    {                                                       \
+        qCritical() << "Failed to attach to current thread.";   \
+        ret_statement;                                          \
     }
 
-#define DETACH_FROM_CURRENT_THREAD_THEN_RET(ret_statement)       \
-    if (!s_javaVM->DetachCurrentThread() < 0)                   \
-{                                                           \
-    qCritical() << "Failed to deattach from current thread."; \
-    ret_statement;                                            \
+#define DETACH_FROM_CURRENT_THREAD_THEN_RET(ret_statement)  \
+    if (!s_javaVM->DetachCurrentThread() < 0)               \
+    {                                                       \
+        qCritical() << "Failed to deattach from current thread.";   \
+        ret_statement;                                              \
     }
 
 static JavaVM* s_javaVM;
 static JNIEnv* s_env;
-static jmethodID mid_loadVideoTexture;
+static jmethodID mid_setupDecoder;
+static jmethodID mid_feedDecoder;
 static jmethodID mid_updateTexture;
-static jclass class_TextureHelper;
+static jclass class_VideoDecoder;
 static jclass class_SurfaceTexture;
+
 
 
 /*----------------------------------------------------------------------
@@ -60,31 +64,35 @@ static jclass class_SurfaceTexture;
 +---------------------------------------------------------------------*/
 int load_custom_java_classes(JNIEnv* env)
 {
-    const char* classNameTexHelper =   "org/silkopter/TextureHelper";
+    const char* classNameDecoder =   "org/silkopter/VideoDecoder";
     const char* classNameSurfTexture = "org/silkopter/MySurfaceTexture";
 
     // TODO: remember to free.
-    jclass local_class_java_delegate = env->FindClass(classNameTexHelper);
-    jclass local_class_surf_texture  = env->FindClass(classNameSurfTexture);
-    if (!local_class_java_delegate)
+    jclass cls = env->FindClass(classNameDecoder);
+    if (!cls)
     {
-        __android_log_print(ANDROID_LOG_FATAL, "Qt", "Unable to find class %s.", classNameTexHelper);
+        __android_log_print(ANDROID_LOG_FATAL, "Qt", "Unable to find class %s.", classNameDecoder);
         return JNI_FALSE;
     }
-    if (!local_class_surf_texture)
+    class_VideoDecoder  = (jclass)env->NewGlobalRef(cls);
+    env->DeleteLocalRef(cls);
+
+    cls = env->FindClass(classNameSurfTexture);
+    if (!cls)
     {
         __android_log_print(ANDROID_LOG_FATAL, "Qt", "Unable to find class %s.", classNameSurfTexture);
         return JNI_FALSE;
     }
 
-    class_TextureHelper  = (jclass)env->NewGlobalRef(local_class_java_delegate);
-    class_SurfaceTexture = (jclass)env->NewGlobalRef(local_class_surf_texture);
-    env->DeleteLocalRef(local_class_java_delegate);
-    env->DeleteLocalRef(local_class_surf_texture);
+    class_SurfaceTexture = (jclass)env->NewGlobalRef(cls);
+    env->DeleteLocalRef(cls);
 
-    mid_loadVideoTexture = env->GetStaticMethodID(class_TextureHelper,
-                                                  "loadVideoTexture",
+    mid_setupDecoder = env->GetStaticMethodID(class_VideoDecoder,
+                                                  "setupDecoder",
                                                   "(I)Landroid/graphics/SurfaceTexture;");
+    mid_feedDecoder = env->GetStaticMethodID(class_VideoDecoder,
+                                                  "feedDecoder",
+                                                  "([BI)V");
     mid_updateTexture    = env->GetMethodID(class_SurfaceTexture,
                                             "updateTexImage",
                                             "()V");
@@ -178,7 +186,8 @@ QRectF VideoTexture::normalizedTextureSubRect() const
 
 void VideoTexture::bind()
 {
-    if (m_textureId) {
+    if (m_textureId != 0)
+    {
         glBindTexture(GL_TEXTURE_EXTERNAL_OES, m_textureId);
     }
 }
@@ -188,13 +197,15 @@ bool VideoTexture::updateTexture()
 //    static const PFNGLEGLIMAGETARGETTEXTURE2DOESPROC glEGLImageTargetTexture2DOES
 //            = reinterpret_cast<PFNGLEGLIMAGETARGETTEXTURE2DOESPROC>(eglGetProcAddress("glEGLImageTargetTexture2DOES"));
 
-//    if (m_updated) {
+//    if (m_updated)
+//    {
 //        return true;
 //    }
 
 //    NemoGstVideoTexture *sink = NEMO_GST_VIDEO_TEXTURE(m_sink);
 
-//    if (!nemo_gst_video_texture_acquire_frame(sink)) {
+//    if (!nemo_gst_video_texture_acquire_frame(sink))
+//    {
 //        return false;
 //    }
 
@@ -202,8 +213,8 @@ bool VideoTexture::updateTexture()
 //    int top = 0;
 //    int right = 0;
 //    int bottom = 0;
-//    if (GstMeta *meta = nemo_gst_video_texture_get_frame_meta (sink,
-//                                                               GST_VIDEO_CROP_META_API_TYPE)) {
+//    if (GstMeta *meta = nemo_gst_video_texture_get_frame_meta (sink, GST_VIDEO_CROP_META_API_TYPE))
+//    {
 //        GstVideoCropMeta *crop = (GstVideoCropMeta *) meta;
 //        left = crop->x;
 //        top = crop->y;
@@ -218,12 +229,14 @@ bool VideoTexture::updateTexture()
 
 //    // This value is taken from Android GLConsumer
 //    qreal shrinkAmount = 1.0;
-//    if (right - left < m_textureSize.width()) {
+//    if (right - left < m_textureSize.width())
+//    {
 //        x = (left + shrinkAmount) / m_textureSize.width();
 //        width = ((right - left) - (2.0f * shrinkAmount)) / m_textureSize.width();
 //    }
 
-//    if (bottom - top < m_textureSize.height()) {
+//    if (bottom - top < m_textureSize.height())
+//    {
 //        y = (top + shrinkAmount) / m_textureSize.height();
 //        height = (bottom - top - (2.0 * shrinkAmount)) / m_textureSize.height();
 //    }
@@ -231,8 +244,10 @@ bool VideoTexture::updateTexture()
 //    m_subRect = QRectF(x, y, width, height);
 
 //    EGLImageKHR image;
-//    if (!nemo_gst_video_texture_bind_frame(sink, &image)) {
-//        if (m_textureId) {
+//    if (!nemo_gst_video_texture_bind_frame(sink, &image))
+//    {
+//        if (m_textureId)
+//        {
 //            glDeleteTextures(1, &m_textureId);
 //            m_textureId = 0;
 //        }
@@ -258,7 +273,8 @@ bool VideoTexture::updateTexture()
 
 void VideoTexture::invalidateTexture()
 {
-    if (m_textureId) {
+    if (m_textureId != 0)
+    {
         glDeleteTextures(1, &m_textureId);
         m_textureId = 0;
     }
@@ -266,13 +282,11 @@ void VideoTexture::invalidateTexture()
 
 void VideoTexture::releaseTexture()
 {
-//    static const PFNEGLCREATESYNCKHRPROC eglCreateSyncKHR
-//            = reinterpret_cast<PFNEGLCREATESYNCKHRPROC>(eglGetProcAddress("eglCreateSyncKHR"));
-
-    if (m_updated) {
+    if (m_updated)
+    {
         m_updated = false;
-
-        if (m_textureId) {
+        if (m_textureId != 0)
+        {
             glDeleteTextures(1, &m_textureId);
             m_textureId = 0;
         }
@@ -294,31 +308,33 @@ protected:
     const char *fragmentShader() const;
 
 private:
-    int id_matrix;
-    int id_subrect;
-    int id_opacity;
-    int id_texture;
+    int m_id_matrix = 0;
+    int m_id_subrect = 0;
+    int m_id_opacity = 0;
+    int m_id_texture = 0;
 };
 
 void VideoMaterialShader::updateState(const RenderState &state, QSGMaterial *newEffect, QSGMaterial *oldEffect)
 {
     VideoMaterial *material = static_cast<VideoMaterial *>(newEffect);
 
-    if (state.isMatrixDirty()) {
-        program()->setUniformValue(id_matrix, state.combinedMatrix());
+    if (state.isMatrixDirty())
+    {
+        program()->setUniformValue(m_id_matrix, state.combinedMatrix());
     }
 
-    if (state.isOpacityDirty()) {
-        program()->setUniformValue(id_opacity, state.opacity());
+    if (state.isOpacityDirty())
+    {
+        program()->setUniformValue(m_id_opacity, state.opacity());
     }
 
-    if (!oldEffect) {
-        program()->setUniformValue(id_texture, 0);
+    if (!oldEffect)
+    {
+        program()->setUniformValue(m_id_texture, 0);
     }
 
     const QRectF subRect = material->m_texture->normalizedTextureSubRect();
-    program()->setUniformValue(
-                id_subrect, QVector4D(subRect.x(), subRect.y(), subRect.width(), subRect.height()));
+    program()->setUniformValue(m_id_subrect, QVector4D(subRect.x(), subRect.y(), subRect.width(), subRect.height()));
 
     glActiveTexture(GL_TEXTURE0);
     material->m_texture->bind();
@@ -332,18 +348,17 @@ char const *const *VideoMaterialShader::attributeNames() const
 
 void VideoMaterialShader::initialize()
 {
-    id_matrix = program()->uniformLocation("matrix");
-    id_subrect = program()->uniformLocation("subrect");
-    id_opacity = program()->uniformLocation("opacity");
-    id_texture = program()->uniformLocation("texture");
+    m_id_matrix = program()->uniformLocation("matrix");
+    m_id_subrect = program()->uniformLocation("subrect");
+    m_id_opacity = program()->uniformLocation("opacity");
+    m_id_texture = program()->uniformLocation("texture");
 }
 
 QSGMaterialType VideoMaterialShader::type;
 
 const char *VideoMaterialShader::vertexShader() const
 {
-    return  "\n#version 140"
-            "\n uniform highp mat4 matrix;"
+    return  "\n uniform highp mat4 matrix;"
             "\n uniform highp vec4 subrect;"
             "\n attribute highp vec4 position;"
             "\n attribute highp vec2 texcoord;"
@@ -357,15 +372,13 @@ const char *VideoMaterialShader::vertexShader() const
 
 const char *VideoMaterialShader::fragmentShader() const
 {
-    return  "\n#version 140"
-            "\n #extension GL_OES_EGL_image_external : require"
+    return  "\n #extension GL_OES_EGL_image_external : require"
             "\n uniform samplerExternalOES texture;"
             "\n uniform lowp float opacity;\n"
             "\n varying highp vec2 frag_tx;"
             "\n void main(void)"
             "\n {"
             "\n     gl_FragColor = opacity * texture2D(texture, frag_tx.st);"
-            "\n     gl_FragColor.g = 1.0;"
             "\n }";
 }
 
@@ -412,8 +425,7 @@ void VideoNode::preprocess()
     }
 }
 
-void VideoNode::setBoundingRect(
-        const QRectF &rect, int orientation, bool horizontalMirror, bool verticalMirror)
+void VideoNode::setBoundingRect(const QRectF &rect, int orientation, bool horizontalMirror, bool verticalMirror)
 {
     // Texture vertices clock wise from top left: or tl, tr, br, lf
     // Vertex order is tl, bl, tr, br. So unrotated the texture indexes are [0, 3, 1, 2] and
@@ -428,7 +440,8 @@ void VideoNode::setBoundingRect(
     const float vm = verticalMirror ? 1 : 0;
 
     const int offset = orientation / 90;
-    QSGGeometry::TexturedPoint2D vertices[] = {
+    QSGGeometry::TexturedPoint2D vertices[] =
+    {
         { (float)rect.left() , (float)rect.top()   , qAbs(hm - tx[(0 + offset) % 4]), qAbs(vm - ty[(0 + offset) % 4]) },
         { (float)rect.left() , (float)rect.bottom(), qAbs(hm - tx[(3 + offset) % 4]), qAbs(vm - ty[(3 + offset) % 4]) },
         { (float)rect.right(), (float)rect.top()   , qAbs(hm - tx[(1 + offset) % 4]), qAbs(vm - ty[(1 + offset) % 4]) },
@@ -446,10 +459,10 @@ VideoSurface::VideoSurface(QQuickItem *parent)
 {
     setFlag(QQuickItem::ItemHasContents, true);
 
-    QTimer* timer = new QTimer;
-    connect(timer, SIGNAL(timeout()), this, SLOT(doUpdate()));
-    timer->setSingleShot(false);
-    timer->start(40);
+//    QTimer* timer = new QTimer;
+//    connect(timer, SIGNAL(timeout()), this, SLOT(doUpdate()));
+//    timer->setSingleShot(false);
+//    timer->start(1);
 }
 
 /*----------------------------------------------------------------------
@@ -459,37 +472,125 @@ QSGNode *VideoSurface::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *)
 {
     VideoNode* node = static_cast<VideoNode*>(oldNode);
 
+//    static std::chrono::high_resolution_clock::time_point tp = std::chrono::high_resolution_clock::now();
+//    int dt = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - tp).count();
+//    tp = std::chrono::high_resolution_clock::now();
+//    __android_log_print(ANDROID_LOG_INFO, "Qt", "dt %dms", dt);
+
     if (!node)
     {
         VideoTexture* texture = new VideoTexture();
         node = new VideoNode(texture);
 
+        {
+            const QRectF br = boundingRect();
+            QRectF rect = br;//(QPointF(0, 0), QSizeF(m_nativeSize).scaled(br.size(), Qt::KeepAspectRatio));
+            rect.moveCenter(br.center());
+            int orientation = 0;//(m_orientation - m_textureOrientation) % 360;
+            if (orientation < 0)
+                orientation += 360;
+            node->setBoundingRect(
+                        rect,
+                        orientation,
+                        false,
+                        false);
+            node->markDirty(QSGNode::DirtyGeometry);
+        }
+
         ATTACH_TO_CURRENT_THREAD_THEN_RET((void)0);
-        jobject surfTexture = env->CallStaticObjectMethod(class_TextureHelper, mid_loadVideoTexture, texture->textureId());
+        jobject surfTexture = env->CallStaticObjectMethod(class_VideoDecoder, mid_setupDecoder, texture->textureId());
         if (!surfTexture)
         {
             qWarning("Failed to instantiate SurfaceTexture.");
         }
-        mSurfaceTexture = env->NewGlobalRef(surfTexture);
+        m_surfaceTexture = env->NewGlobalRef(surfTexture);
         DETACH_FROM_CURRENT_THREAD_THEN_RET((void)0);
     }
 
-    if (mSurfaceTexture)
     {
         ATTACH_TO_CURRENT_THREAD_THEN_RET(return node);
-        env->CallVoidMethod(mSurfaceTexture, mid_updateTexture);
+        if (m_surfaceTexture)
+        {
+            env->CallVoidMethod(m_surfaceTexture, mid_updateTexture);
+        }
+
+        parseNALUs([&env, this](uint8_t const* data, size_t size)
+        {
+            if (!m_frameData)
+            {
+                m_frameData = reinterpret_cast<jbyteArray>(env->NewGlobalRef(env->NewByteArray(size)));
+            }
+
+            if (env->GetArrayLength(m_frameData) < static_cast<int>(size))
+            {
+                env->DeleteGlobalRef(m_frameData);
+                m_frameData = reinterpret_cast<jbyteArray>(env->NewGlobalRef(env->NewByteArray(size)));
+            }
+
+            env->SetByteArrayRegion(m_frameData, 0, static_cast<int>(size), reinterpret_cast<jbyte const*>(data));
+            env->CallStaticVoidMethod(class_VideoDecoder, mid_feedDecoder, m_frameData, (int)size);
+        });
+
         DETACH_FROM_CURRENT_THREAD_THEN_RET(return node);
     }
 
-    node->markDirty(QSGNode::DirtyGeometry | QSGNode::DirtyMaterial);
+    node->markDirty(QSGNode::DirtyMaterial);
+    update();
 
     return node;
 }
 
-/*----------------------------------------------------------------------
-|    VideoSurface::doUpdate
-+---------------------------------------------------------------------*/
-void VideoSurface::doUpdate()
+void VideoSurface::parseNALUs(std::function<void(uint8_t const*, size_t)> callback)
 {
-    update();
+    static int frames = 0;
+    {
+        static std::chrono::high_resolution_clock::time_point tp = std::chrono::high_resolution_clock::now();
+
+        static FILE* fff = nullptr;
+        if (!fff)
+        {
+            srand(time(nullptr));
+            fff = fopen("/storage/emulated/0/Download/sample3.h264", "rb");
+            if (!fff)
+            {
+                exit(1);
+            }
+        }
+
+        size_t offset = m_videoData.size();
+        if (offset < 5000000)
+        {
+            __android_log_print(ANDROID_LOG_INFO, "Skptr", "Reading...");
+
+            size_t size = 1000000;
+            m_videoData.resize(offset + size);
+            int r = fread(m_videoData.data() + offset, 1, size, fff);
+            if (r == 0)
+            {
+                int dt = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - tp).count();
+
+                __android_log_print(ANDROID_LOG_INFO, "Skptr", "DONE, REWIND!!!!! %dms, %d frames, %d FPS", dt, frames, frames * 1000 / dt);
+                fseek(fff, 0, SEEK_SET);
+
+                tp = std::chrono::high_resolution_clock::now();
+                frames = 0;
+            }
+            m_videoData.resize(offset + r);
+        }
+    }
+
+    if (m_videoData.size() > 4)
+    {
+        uint8_t const* src = m_videoData.data();
+        uint8_t const* p = reinterpret_cast<uint8_t const*>(memmem(src + 4, m_videoData.size() - 4, "\0\0\0\1", 4));
+        if (p)
+        {
+            //nalupacket found
+            size_t size = p - src;
+            callback(src, size);
+            m_videoData.erase(m_videoData.begin(), m_videoData.begin() + size);
+            frames++;
+        }
+    }
 }
+

@@ -6,6 +6,8 @@
 #include <QSGGeometryNode>
 #include <QSGGeometry>
 #include <jni.h>
+#include <vector>
+#include <functional>
 
 class VideoTexture : public QSGDynamicTexture
 {
@@ -79,11 +81,12 @@ public:
 
     QSGNode *updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *paintNodeData) override;
 
-public slots:
-    void doUpdate();
-
 private:
+    void parseNALUs(std::function<void(uint8_t const*, size_t)> callback);
+
     QSGNode* m_node = nullptr;
-    jobject mSurfaceTexture = nullptr;
+    jobject m_surfaceTexture = nullptr;
+    jbyteArray m_frameData = nullptr;
+    std::vector<uint8_t> m_videoData;
 };
 

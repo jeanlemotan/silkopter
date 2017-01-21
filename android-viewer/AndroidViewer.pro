@@ -46,7 +46,8 @@ DISTFILES += \
     android/build.gradle \
     android/gradle/wrapper/gradle-wrapper.properties \
     android/gradlew.bat \
-    android/src/org/silkopter/TextureHelper.java \
-    android/src/org/silkopter/MySurfaceTexture.java
+    android/src/org/silkopter/VideoDecoder.java \
+    android/src/org/silkopter/MySurfaceTexture.java \
+    android/src/org/silkopter/VideoDecoder.java
 
 ANDROID_PACKAGE_SOURCE_DIR = $$PWD/android
