@@ -90,13 +90,6 @@ private:
     util::comms::RC_Protocol m_rc_protocol;
     util::comms::RC_Protocol::RX_Packet m_rx_packet;
 
-    enum class Packet_Type : uint8_t
-    {
-        MULTIROTOR_COMMANDS,
-        MULTIROTOR_STATE,
-        HOME,
-    };
-
     boost::optional<Home_Data> m_home_data;
     util::comms::Video_Streamer m_video_streamer;
 

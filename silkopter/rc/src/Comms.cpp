@@ -118,7 +118,7 @@ Remote_Viewer_Server& Comms::get_remote_viewer_server()
 
 size_t Comms::compute_multirotor_commands_packet(uint8_t* data, uint8_t& packet_type)
 {
-    packet_type = static_cast<uint8_t>(Packet_Type::MULTIROTOR_COMMANDS);
+    packet_type = static_cast<uint8_t>(rc_comms::Packet_Type::MULTIROTOR_COMMANDS);
 
     size_t off = 0;
     util::serialization::serialize(m_serialization_buffer, m_multirotor_commands, off);
@@ -136,7 +136,7 @@ void Comms::process_rx_packet(util::comms::RC_Protocol::RX_Packet const& packet)
     m_rx_packet.tx_dBm = packet.tx_dBm;
     m_rx_packet.rx_timepoint = packet.rx_timepoint;
 
-    if (packet.packet_type == static_cast<uint8_t>(Packet_Type::MULTIROTOR_STATE))
+    if (packet.packet_type == static_cast<uint8_t>(rc_comms::Packet_Type::MULTIROTOR_STATE))
     {
         size_t off = 0;
         stream::IMultirotor_State::Value value;
@@ -150,7 +150,7 @@ void Comms::process_rx_packet(util::comms::RC_Protocol::RX_Packet const& packet)
             QLOGW("Cannot deserialize incoming multirotor state value");
         }
     }
-    else if (packet.packet_type == static_cast<uint8_t>(Packet_Type::HOME))
+    else if (packet.packet_type == static_cast<uint8_t>(rc_comms::Packet_Type::HOME))
     {
         size_t off = 0;
         Home_Data data;

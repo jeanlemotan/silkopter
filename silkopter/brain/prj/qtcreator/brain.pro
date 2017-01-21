@@ -158,7 +158,6 @@ SOURCES += \
     ../../../libs/utils/hw/bcm2835.c \
     ../../../libs/utils/hw/command.c \
     ../../../libs/utils/hw/pigpio.c \
-    ../../../libs/utils/comms/RC.cpp \
     ../../../libs/utils/comms/RCP.cpp \
     ../../../libs/utils/comms/RF4463F30_Socket.cpp \
     ../../../libs/utils/comms/RFMON_Socket.cpp \
@@ -169,7 +168,9 @@ SOURCES += \
     ../../../libs/utils/hw/SPI_Dev.cpp \
     ../../../libs/utils/comms/Video_Streamer.cpp \
     ../../../libs/utils/comms/fec.cpp \
-    ../../../libs/utils/hw/RFM22B.cpp
+    ../../../libs/utils/hw/RFM22B.cpp \
+    ../../../libs/utils/comms/RC_Phy.cpp \
+    ../../../libs/utils/comms/RC_Protocol.cpp
 
 HEADERS += \
     ../../src/BrainStdAfx.h \
@@ -309,7 +310,6 @@ HEADERS += \
     ../../src/source/CPPM_Receiver.h \
     ../../../libs/utils/comms/Channel.h \
     ../../../libs/utils/comms/ISocket.h \
-    ../../../libs/utils/comms/RC.h \
     ../../../libs/utils/comms/RCP.h \
     ../../../libs/utils/comms/RF4463F30_Socket.h \
     ../../../libs/utils/comms/RFMON_Socket.h \
@@ -328,7 +328,9 @@ HEADERS += \
     ../../../libs/utils/comms/Video_Streamer.h \
     ../../../libs/utils/Pool.h \
     ../../../libs/utils/comms/fec.h \
-    ../../../libs/utils/hw/RFM22B.h
+    ../../../libs/utils/hw/RFM22B.h \
+    ../../../libs/utils/comms/RC_Phy.h \
+    ../../../libs/utils/comms/RC_Protocol.h
 
 DISTFILES +=
 
