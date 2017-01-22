@@ -82,7 +82,7 @@ public:
     QSGNode *updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *paintNodeData) override;
     void geometryChanged(const QRectF &newGeometry, const QRectF &oldGeometry) override;
 
-    static void addVideoData(uint8_t const* data, size_t size);
+    static void addVideoData(void const* data, size_t size);
 
 private:
     bool m_isGeomertyDirty = true;

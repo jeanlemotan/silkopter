@@ -1,21 +1,21 @@
-#include "MenusQmlProxy.h"
+#include "Menus.h"
 
 #include <QQmlEngine>
 #include <QQmlContext>
 #include <QTimer>
 
 
-MenusQmlProxy::MenusQmlProxy(QObject *parent)
+Menus::Menus(QObject *parent)
     : QObject(parent)
 {
 }
 
-void MenusQmlProxy::init(QQuickView& view)
+void Menus::init(QQuickView& view)
 {
     m_view = &view;
 }
 
-void MenusQmlProxy::pop()
+void Menus::pop()
 {
     Q_ASSERT(m_stack.size() >= 1);
     Q_ASSERT(!m_isLocked);
@@ -34,7 +34,7 @@ void MenusQmlProxy::pop()
     }
 }
 
-void MenusQmlProxy::push(const QString& qml)
+void Menus::push(const QString& qml)
 {
     Q_ASSERT(!m_isLocked);
     if (!m_isLocked)
@@ -50,7 +50,7 @@ void MenusQmlProxy::push(const QString& qml)
     }
 }
 
-void MenusQmlProxy::setView()
+void Menus::setView()
 {
     Q_ASSERT(m_isLocked);
     m_view->setSource(m_stack.back());

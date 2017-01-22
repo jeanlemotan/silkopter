@@ -11,6 +11,7 @@ Item {
 
     TopBar {
         id: topBar
+        height: 100
         width: parent.width
         title: "Slkptr"
         onBackPressed: s_menus.pop()
@@ -19,13 +20,14 @@ Item {
             function getConnectionIcon() {
                 if (s_comms.connectionStatus === Comms.CONNECTED) return "qrc:/icons/ui/connected.png";
                 if (s_comms.connectionStatus === Comms.DISCONNECTED) return "qrc:/icons/ui/disconnected.png";
+                if (s_comms.connectionStatus === Comms.CONNECTING) return "qrc:/icons/ui/reconnect.png";
                 return ""
             }
 
             id: connectionButton
             icon: getConnectionIcon()
             //color: "#bdc3c7"
-            enabled: s_comms.connectionType != Comms.NONE
+            enabled: true
             onClicked: {
                 if (s_comms.connectionStatus === Comms.DISCONNECTED) s_comms.connect();
                 else s_comms.disconnect();

@@ -579,7 +579,7 @@ QSGNode* VideoSurface::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *)
             {
                 //nalupacket found
                 const size_t naluSize = p - src;
-                //__android_log_print(ANDROID_LOG_INFO, "Skptr", "NALU @ %d, %d left", (int)naluSize, (int)s_videoData.size());
+                __android_log_print(ANDROID_LOG_INFO, "Skptr", "NALU @ %d, %d left", (int)naluSize, (int)s_videoData.size());
 
                 jbyteArray frameData = m_env->NewByteArray(naluSize);
 
@@ -608,7 +608,7 @@ QSGNode* VideoSurface::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *)
     return node;
 }
 
-void VideoSurface::addVideoData(uint8_t const* data, size_t size)
+void VideoSurface::addVideoData(void const* data, size_t size)
 {
     Q_ASSERT(data && size > 0);
     if (!data || size == 0)

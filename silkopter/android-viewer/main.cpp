@@ -4,9 +4,9 @@
 #include <QQmlApplicationEngine>
 
 #include "VideoSurface.h"
-#include "CommsQmlProxy.h"
-#include "OSQmlProxy.h"
-#include "MenusQmlProxy.h"
+#include "Comms.h"
+#include "OS.h"
+#include "Menus.h"
 
 #include <android/log.h>
 #include <thread>
@@ -40,18 +40,18 @@ int main(int argc, char *argv[])
 
     QQuickView view;
 
-    OSQmlProxy osProxy;
+    OS os;
 
-    MenusQmlProxy menusProxy;
-    menusProxy.init(view);
+    Menus menus;
+    menus.init(view);
 
-    CommsQmlProxy comms_proxy;
-    comms_proxy.init(/*s_comms*/);
+    Comms comms;
+    comms.init("192.168.42.1", 3333);
 
-    qmlRegisterType<CommsQmlProxy>("com.silk.Comms", 1, 0, "Comms");
-    view.engine()->rootContext()->setContextProperty("s_comms", &comms_proxy);
-    view.engine()->rootContext()->setContextProperty("s_os", &osProxy);
-    view.engine()->rootContext()->setContextProperty("s_menus", &menusProxy);
+    qmlRegisterType<Comms>("com.silk.Comms", 1, 0, "Comms");
+    view.engine()->rootContext()->setContextProperty("s_comms", &comms);
+    view.engine()->rootContext()->setContextProperty("s_os", &os);
+    view.engine()->rootContext()->setContextProperty("s_menus", &menus);
     qmlRegisterType<VideoSurface>("com.silk.VideoSurface", 0, 1, "VideoSurface");
 
     QSurfaceFormat format = view.format();
@@ -68,8 +68,8 @@ int main(int argc, char *argv[])
     //view.setSource(QUrl(QStringLiteral("qrc:/main.qml")));
     view.show();
 
-    //menusProxy.push("Splash.qml");
-    menusProxy.push("MM.qml");
+    //menus.push("Splash.qml");
+    menus.push("MM.qml");
 
     while (true)
     {
@@ -100,6 +100,13 @@ int main(int argc, char *argv[])
 //                VideoSurface::decodeVideo(data, r);
 //            }
 //        }
+
+        comms.process();
+        std::pair<void const*, size_t> videoData = comms.getVideoData();
+        if (videoData.second > 0)
+        {
+            VideoSurface::addVideoData(videoData.first, videoData.second);
+        }
 
         std::this_thread::sleep_for(std::chrono::microseconds(1));
     }

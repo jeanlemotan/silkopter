@@ -8,7 +8,6 @@
         <file>qml/MenuButton.qml</file>
         <file>qml/SideBar.qml</file>
         <file>qml/UAVInfo.qml</file>
-        <file>qml/CommsSetup.qml</file>
         <file>qml/TrayButton.qml</file>
         <file>icons/ui/back.png</file>
         <file>icons/ui/battery.png</file>

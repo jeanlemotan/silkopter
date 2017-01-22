@@ -1,14 +1,16 @@
 TEMPLATE = app
 
-QT += qml quick opengl androidextras
+QT += qml quick opengl androidextras network
 CONFIG += c++11
+
+INCLUDEPATH += ../libs
+INCLUDEPATH += ../../../../qmath/include
 
 SOURCES += main.cpp \
     VideoSurface.cpp \
-    OSQmlProxy.cpp \
-    MenusQmlProxy.cpp \
-    CommsQmlProxy.cpp \
-    Comms.cpp
+    Comms.cpp \
+    Menus.cpp \
+    OS.cpp
 
 OTHER_FILES += \
     main.qml
@@ -41,10 +43,10 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 HEADERS += \
     VideoSurface.h \
-    MenusQmlProxy.h \
-    OSQmlProxy.h \
-    CommsQmlProxy.h \
-    Comms.h
+    Comms.h \
+    QTcpSocketAdapter.h \
+    Menus.h \
+    OS.h
 
 DISTFILES += \
     android/AndroidManifest.xml \

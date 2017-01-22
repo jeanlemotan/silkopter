@@ -1,8 +1,8 @@
-#include "OSQmlProxy.h"
+#include "OS.h"
 #include <QSettings>
 #include <QProcess>
 
-OSQmlProxy::OSQmlProxy(QObject *parent)
+OS::OS(QObject *parent)
     : QObject(parent)
 {
     QSettings settings;
@@ -15,16 +15,16 @@ OSQmlProxy::OSQmlProxy(QObject *parent)
     }
 }
 
-void OSQmlProxy::poweroffSystem()
+void OS::poweroffSystem()
 {
 }
 
-float OSQmlProxy::getBrightness() const
+float OS::getBrightness() const
 {
     return m_brightness;
 }
 
-void OSQmlProxy::setBrightness(float v)
+void OS::setBrightness(float v)
 {
     v = std::min(std::max(v, 0.1f), 1.f);
     if (m_brightness != v)
