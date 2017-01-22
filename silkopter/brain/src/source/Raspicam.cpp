@@ -990,6 +990,21 @@ static Component_ptr create_encoder_component_for_streaming(MMAL_PORT_T* src, ma
 //    }
 
     {
+        MMAL_PARAMETER_VIDEO_NALUNITFORMAT_T param;
+        param.hdr.id = MMAL_PARAMETER_NALUNITFORMAT;
+        param.hdr.size = sizeof(param);
+        param.format = MMAL_VIDEO_NALUNITFORMAT_STARTCODES;
+
+        MMAL_STATUS_T status;
+        status = MMAL_CALL(mmal_port_parameter_set(output, &param.hdr));
+        if (status != MMAL_SUCCESS)
+        {
+            QLOGW("Failed to set NAL units");
+            return Component_ptr();
+        }
+    }
+
+    {
         MMAL_PARAMETER_UINT32_T param = {{ MMAL_PARAMETER_INTRAPERIOD, sizeof(param)}, 30};
         if (mmal_port_parameter_set(output, &param.hdr) != MMAL_SUCCESS)
         {
@@ -1409,6 +1424,11 @@ auto Raspicam::create_components() -> bool
         return false;
     }
     high.encoder = create_encoder_component_for_streaming(high.resizer->output[0], high_resolution, m_descriptor->get_streaming_high().get_bitrate());
+    if (!high.encoder)
+    {
+        QLOGE("Cannot create high bitrate encoder");
+        return false;
+    }
     high.encoder_connection = connect_ports(high.resizer->output[0], high.encoder->input[0]);
     if (!high.encoder_connection || !set_connection_enabled(high.encoder_connection, true))
     {
@@ -1425,6 +1445,11 @@ auto Raspicam::create_components() -> bool
     //low
     auto& low = m_impl->low;
     low.resizer = create_resizer_component(m_impl->camera_splitter->output[2], low_resolution, m_descriptor->get_fps());
+    if (!low.resizer)
+    {
+        QLOGE("Cannot create low bitrate resizer");
+        return false;
+    }
     low.resizer_connection = connect_ports(m_impl->camera_splitter->output[2], low.resizer->input[0]);
     if (!low.resizer_connection)
     {
@@ -1432,6 +1457,11 @@ auto Raspicam::create_components() -> bool
         return false;
     }
     low.encoder = create_encoder_component_for_streaming(low.resizer->output[0], low_resolution, m_descriptor->get_streaming_low().get_bitrate());
+    if (!low.encoder)
+    {
+        QLOGE("Cannot create low bitrate encoder");
+        return false;
+    }
     low.encoder_connection = connect_ports(low.resizer->output[0], low.encoder->input[0]);
     if (!low.encoder_connection || !set_connection_enabled(low.encoder_connection, true))
     {
