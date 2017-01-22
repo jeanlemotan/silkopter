@@ -1,6 +1,11 @@
 #pragma once
 
-#include "QBase.h"
+//#include "QBase.h"
+
+#if !defined MATH_ASSERT
+#   include <assert.h>
+#   define MATH_ASSERT assert
+#endif
 
 #include <algorithm>
 #include <limits>

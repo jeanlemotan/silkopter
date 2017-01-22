@@ -9,7 +9,7 @@ namespace math
 template<typename T> inline trans3d<T>::trans3d()
 {
 	set_identity();
-    QASSERT(is_valid());
+    MATH_ASSERT(is_valid());
 }
 template<typename T> inline trans3d<T>::trans3d(math::ZUninitialized)
 	: mat(math::uninitialized)
@@ -18,7 +18,7 @@ template<typename T> inline trans3d<T>::trans3d(math::ZUninitialized)
 template<typename T> template<typename U> inline trans3d<T>::trans3d(trans3d<U> const& other)
 	: mat(other.mat)
 {
-    QASSERT(is_valid());
+    MATH_ASSERT(is_valid());
 }
 template<typename T> inline trans3d<T>::trans3d(vec3<T> const& translation, quat<T> const& rotation, vec3<T> const& scale)
 {
@@ -43,7 +43,7 @@ template<typename T> inline trans3d<T>::trans3d(vec3<T> const& translation, mat3
 template<typename T> inline trans3d<T>& trans3d<T>::set_identity()
 {
 	mat.set_identity();
-    QASSERT(is_valid());
+    MATH_ASSERT(is_valid());
 	return *this;
 }
 template<typename T> inline trans3d<T>& trans3d<T>::set_rotation_identity()
@@ -60,7 +60,7 @@ template<typename T> inline trans3d<T>& trans3d<T>::set_rotation_identity()
 	mat.m[ 9] = 0;
 	mat.m[10] = 1;
 
-    QASSERT(is_valid());
+    MATH_ASSERT(is_valid());
 	return *this;
 }
 template<typename T> template<typename Policy> inline bool trans3d<T>::invert()
@@ -92,25 +92,25 @@ template<typename T> inline vec3<T> trans3d<T>::get_scale() const
 template<typename T> inline trans3d<T>& trans3d<T>::set_axis_x(vec3<T> const& axis)
 {
 	mat.set_axis_x(vec4<T>(axis, 0));
-    QASSERT(is_valid());
+    MATH_ASSERT(is_valid());
 	return *this;
 }
 template<typename T> inline trans3d<T>& trans3d<T>::set_axis_y(vec3<T> const& axis)
 {
 	mat.set_axis_y(vec4<T>(axis, 0));
-    QASSERT(is_valid());
+    MATH_ASSERT(is_valid());
 	return *this;
 }
 template<typename T> inline trans3d<T>& trans3d<T>::set_axis_z(vec3<T> const& axis)
 {
 	mat.set_axis_z(vec4<T>(axis, 0));
-    QASSERT(is_valid());
+    MATH_ASSERT(is_valid());
 	return *this;
 }
 template<typename T> inline trans3d<T>& trans3d<T>::set_translation(vec3<T> const& p)
 {
 	mat.set_axis_w(vec4<T>(p, T(1)));
-    QASSERT(is_valid());
+    MATH_ASSERT(is_valid());
 	return *this;
 }
 template<typename T> inline trans3d<T>& trans3d<T>::set_scale(vec3<T> const& s)
@@ -118,7 +118,7 @@ template<typename T> inline trans3d<T>& trans3d<T>::set_scale(vec3<T> const& s)
 	mat.m[ 0] = s.x;
 	mat.m[ 5] = s.y;
 	mat.m[10] = s.z;
-    QASSERT(is_valid());
+    MATH_ASSERT(is_valid());
 	return *this;
 }
 template<typename T> inline mat3<T> trans3d<T>::get_rotation() const
@@ -130,7 +130,7 @@ template<typename T> inline trans3d<T>& trans3d<T>::set_rotation(mat3<T> const& 
     mat.columns[0] = vec4<T>(rotation.m[0], rotation.m[1], rotation.m[2], 0);
     mat.columns[1] = vec4<T>(rotation.m[3], rotation.m[4], rotation.m[5], 0);
     mat.columns[2] = vec4<T>(rotation.m[6], rotation.m[7], rotation.m[8], 0);
-    QASSERT(is_valid());
+    MATH_ASSERT(is_valid());
 	return *this;
 }
 template<typename T> inline trans3d<T>& trans3d<T>::set_rotation(quat<T> const& rotation)
@@ -163,7 +163,7 @@ template<typename T> inline trans3d<T>& trans3d<T>::post_translate(vec3<T> const
 {
 	vec4<T> t4(translation, T(0));
     mat.columns[3] = vec4<T>(vec3<T>(mat.columns[0])*t4 + vec3<T>(mat.columns[1])*t4 + vec3<T>(mat.columns[2])*t4, T(1));
-    QASSERT(is_valid());
+    MATH_ASSERT(is_valid());
 
 // 	mat.m[12] += mat.m[0]*translation.x + mat.m[4]*translation.y + mat.m[ 8]*translation.z;
 // 	mat.m[13] += mat.m[1]*translation.x + mat.m[5]*translation.y + mat.m[ 9]*translation.z;
@@ -201,14 +201,14 @@ template<typename T> inline trans3d<T> trans3d<T>::operator*(trans3d<T> const& o
 {
 	trans3d<T> ret;
 	multiply(ret, *this, other);
-    QASSERT(ret.is_valid());
+    MATH_ASSERT(ret.is_valid());
 	return ret;
 }
 template<typename T> inline trans3d<T>& trans3d<T>::operator*=(trans3d<T> const& other)
 {
 	trans3d<T> a(*this);
 	multiply(*this, a, other);
-    QASSERT(is_valid());
+    MATH_ASSERT(is_valid());
 	return *this;
 }
 

@@ -61,7 +61,7 @@ template<typename T> inline angle<T> angle<T>::operator*(angle<T> const& v) cons
 }
 template<typename T> inline angle<T> angle<T>::operator/(angle<T> const& v) const
 {
-	QASSERT(v.radians != 0);
+	MATH_ASSERT(v.radians != 0);
 	return angle<T>(radians / v.radians);
 }
 template<typename T> inline angle<T>& angle<T>::operator=(angle<T> const& v)
@@ -89,7 +89,7 @@ template<typename T> inline angle<T>& angle<T>::operator*=(angle<T> const& v)
 }
 template<typename T> inline angle<T>& angle<T>::operator/=(angle<T> const& v)
 {
-	QASSERT(v.radians != 0);
+	MATH_ASSERT(v.radians != 0);
 	radians /= v.radians;
 	normalize();
 	return *this;
@@ -112,7 +112,7 @@ template<typename T> inline angle<T> angle<T>::operator*(T v) const
 }
 template<typename T> inline angle<T> angle<T>::operator/(T v) const
 {
-	QASSERT(v != 0);
+	MATH_ASSERT(v != 0);
 	return angle<T>(radians / v);
 }
 template<typename T> inline angle<T>& angle<T>::operator=(T v)
@@ -140,7 +140,7 @@ template<typename T> inline angle<T>& angle<T>::operator*=(T v)
 }
 template<typename T> inline angle<T>& angle<T>::operator/=(T v)
 {
-	QASSERT(v != 0);
+	MATH_ASSERT(v != 0);
 	radians /= v;
 	normalize();
 	return *this;

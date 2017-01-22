@@ -5,7 +5,7 @@ namespace math
 		T const* m1 = a.mat.data();
 		T const* m2 = b.mat.data();
 		T * m3 = result.mat.data();
-        QASSERT(m3 != m1 && m3 != m2);
+        MATH_ASSERT(m3 != m1 && m3 != m2);
 
 		m3[0] = m1[0]*m2[0] + m1[4]*m2[1] + m1[8]*m2[2];// + m1[12]*0;
 		m3[1] = m1[1]*m2[0] + m1[5]*m2[1] + m1[9]*m2[2];// + m1[13]*0;
@@ -37,7 +37,7 @@ namespace math
 		T const* m1 = a.mat.data();
 		T const* m2 = b.mat.data();
 		T * m3 = result.mat.data();
-        QASSERT(&result != &a && &result != &b);
+        MATH_ASSERT(&result != &a && &result != &b);
 
 		m3[0] = m1[0]*m2[0] + m1[3]*m2[1] + m1[6]*m2[2];
 		m3[1] = m1[1]*m2[0] + m1[4]*m2[1] + m1[7]*m2[2];
@@ -62,7 +62,7 @@ namespace math
 		T const* m1 = a.data();
 		T const* m2 = b.data();
 		T * m3 = result.data();
-        QASSERT(&result != &a && &result != &b);
+        MATH_ASSERT(&result != &a && &result != &b);
 
 		m3[0] = m1[0]*m2[0] + m1[4]*m2[1] + m1[8]*m2[2] + m1[12]*m2[3];
 		m3[1] = m1[1]*m2[0] + m1[5]*m2[1] + m1[9]*m2[2] + m1[13]*m2[3];
@@ -92,7 +92,7 @@ namespace math
 		T const* m1 = a.data();
 		T const* m2 = b.data();
 		T * m3 = result.data();
-        QASSERT(&result != &a && &result != &b);
+        MATH_ASSERT(&result != &a && &result != &b);
 
 		m3[0] = m1[0]*m2[0] + m1[3]*m2[1] + m1[6]*m2[2];
 		m3[1] = m1[1]*m2[0] + m1[4]*m2[1] + m1[7]*m2[2];
@@ -116,7 +116,7 @@ namespace math
 		T const* m1 = a.data();
 		T const* m2 = b.data();
 		T * m3 = result.data();
-        QASSERT(&result != &a && &result != &b);
+        MATH_ASSERT(&result != &a && &result != &b);
 
 		m3[0] = m1[0]*m2[0] + m1[2]*m2[1];
 		m3[1] = m1[1]*m2[0] + m1[3]*m2[1];
@@ -493,7 +493,7 @@ namespace math
 
 //        quat<T> qconj(-q.x, -q.y, -q.z, q.w);
 //        auto res1 = q * quat<T>(vect.x, vect.y, vect.z, T(0)) * qconj;
-//        QASSERT(std::abs(res.x - res1.x) < 0.0001f && std::abs(res.y - res1.y) < 0.0001f && std::abs(res.z - res1.z) < 0.0001f);
+//        MATH_ASSERT(std::abs(res.x - res1.x) < 0.0001f && std::abs(res.y - res1.y) < 0.0001f && std::abs(res.z - res1.z) < 0.0001f);
 
 //        return vec3<T>(res1.x, res1.y, res1.z);
 	}
@@ -519,7 +519,7 @@ namespace math
 		}
 		template<typename T> void transform(mat4<T> const& m, vec3<T>* dst, size_t dstStride, vec3<T> const* src, size_t srcStride, size_t count)
 		{
-            QASSERT(src && dst && count);
+            MATH_ASSERT(src && dst && count);
 			for (size_t i = 0; i < count; ++i)
 			{
 				*dst = transform(m, *src);
@@ -529,7 +529,7 @@ namespace math
 		}
 		template<typename T> void transform(mat4<T> const& m, vec4<T>* dst, size_t dstStride, vec4<T> const* src, size_t srcStride, size_t count)
 		{
-            QASSERT(src && dst && count);
+            MATH_ASSERT(src && dst && count);
 			for (size_t i = 0; i < count; ++i)
 			{
 				*dst = transform(m, *src);
@@ -542,7 +542,7 @@ namespace math
 
 		template<typename T> void multiply(mat4<T> const& m, mat4<T>* dst, size_t dstStride, mat4<T> const* src, size_t srcStride, size_t count)
 		{
-            QASSERT(src && dst && count);
+            MATH_ASSERT(src && dst && count);
 			for (size_t i = 0; i < count; ++i)
 			{
 				multiply(*dst, m, *src);
@@ -552,7 +552,7 @@ namespace math
 		}
 		template<typename T> void multiply(trans3d<T> const& m, trans3d<T>* dst, size_t dstStride, trans3d<T> const* src, size_t srcStride, size_t count)
 		{
-            QASSERT(src && dst && count);
+            MATH_ASSERT(src && dst && count);
 			for (size_t i = 0; i < count; ++i)
 			{
 				multiply(*dst, m, *src);

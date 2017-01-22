@@ -9,7 +9,7 @@ namespace math
 
 void bind_to_lua(lua_State* L, const std::string& /*module_name*/)
 {
-    QASSERT(L);
+    MATH_ASSERT(L);
     if (!L)
     {
         return;
