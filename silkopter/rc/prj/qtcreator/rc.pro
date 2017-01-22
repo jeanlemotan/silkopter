@@ -180,7 +180,8 @@ HEADERS += \
     ../../src/IHaptic.h \
     ../../src/Remote_Viewer.h \
     ../../src/Remote_Viewer_Server.h \
-    ../../../libs/utils/ASIO_Channel.h
+    ../../../libs/utils/comms/ASIO_Socket_Adapter.h \
+    ../../../libs/utils/comms/RCP_Channel.h
 
 SOURCES += \
     ../../src/main.cpp \

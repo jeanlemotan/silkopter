@@ -3,7 +3,8 @@
 #include <memory>
 #include <boost/asio.hpp>
 #include "common/stream/IMultirotor_State.h"
-#include "utils/ASIO_Channel.h"
+#include "utils/comms/Channel.h"
+#include "utils/comms/ASIO_Socket_Adapter.h"
 
 namespace silk
 {
@@ -38,9 +39,9 @@ private:
         MULTIROTOR_STATE
     };
 
-    typedef util::ASIO_Socket_Adapter<boost::asio::ip::tcp::socket> Socket_Adapter;
+    typedef util::comms::ASIO_Socket_Adapter<boost::asio::ip::tcp::socket> Socket_Adapter;
     Socket_Adapter m_socket_adapter;
-    util::ASIO_Channel<Message, Socket_Adapter> m_channel;
+    util::comms::Channel<Message, Socket_Adapter> m_channel;
 
     std::vector<uint8_t> m_serialization_buffer;
 };
