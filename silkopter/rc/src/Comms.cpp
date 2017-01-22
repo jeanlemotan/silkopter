@@ -68,7 +68,7 @@ bool Comms::start()
         return false;
     }
 
-    m_rc_phy.set_rate(100);
+    //m_rc_phy.set_rate(100);
     m_rc_protocol.add_periodic_packet(std::chrono::milliseconds(30), std::bind(&Comms::compute_multirotor_commands_packet, this, std::placeholders::_1, std::placeholders::_2));
 
     m_video_streamer.on_data_received = std::bind(&Comms::handle_video, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
@@ -263,30 +263,31 @@ void Comms::process()
     m_video_streamer.process();
     m_remote_viewer_server.process();
 
-    {
-        static FILE* fff = nullptr;
-        if (!fff)
-        {
-            srand(time(nullptr));
-            fff = fopen("a.h264", "rb");
-            if (!fff)
-            {
-                exit(1);
-            }
-        }
+//    if (q::Clock::now() - get_last_rx_tp() > std::chrono::seconds(5))
+//    {
+//        static FILE* fff = nullptr;
+//        if (!fff)
+//        {
+//            srand(time(nullptr));
+//            fff = fopen("a.h264", "rb");
+//            if (!fff)
+//            {
+//                exit(1);
+//            }
+//        }
 
-        static std::vector<uint8_t> video_data;
-        video_data.resize((rand() % 3280) + 512);
-        int r = fread(video_data.data(), 1, video_data.size(), fff);
-        if (r == 0)
-        {
-            QLOGI("DONE, REWIND!!!!!");
-            fseek(fff, 0, SEEK_SET);
-        }
-        video_data.resize(r);
+//        static std::vector<uint8_t> video_data;
+//        video_data.resize((rand() % 3280) + 512);
+//        int r = fread(video_data.data(), 1, video_data.size(), fff);
+//        if (r == 0)
+//        {
+//            QLOGI("DONE, REWIND!!!!!");
+//            fseek(fff, 0, SEEK_SET);
+//        }
+//        video_data.resize(r);
 
-        m_remote_viewer_server.send_data(video_data.data(), video_data.size(), math::vec2u16(0, 0), m_multirotor_state);
-    }
+//        m_remote_viewer_server.send_data(video_data.data(), video_data.size(), math::vec2u16(0, 0), m_multirotor_state);
+//    }
 
     static q::Clock::time_point xxx = q::Clock::time_point(q::Clock::duration::zero());
     if (m_multirotor_state.mode != m_multirotor_commands.mode)
