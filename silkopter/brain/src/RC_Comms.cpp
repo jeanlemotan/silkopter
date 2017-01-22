@@ -43,7 +43,7 @@ auto RC_Comms::start(std::string const& interface, uint8_t id) -> bool
         return false;
     }
 
-    m_rc_phy.set_rate(100);
+    //m_rc_phy.set_rate(100);
     m_rc_protocol.add_periodic_packet(std::chrono::milliseconds(30), std::bind(&RC_Comms::compute_multirotor_state_packet, this, std::placeholders::_1, std::placeholders::_2));
 
     QLOGI("Started sending on interface {}", interface);
