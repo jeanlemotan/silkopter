@@ -3,7 +3,7 @@
 #ifdef Q_AVR
 #	include <util/crc16.h>
 #else
-    inline uint16_t _crc16_update(uint16_t crc, uint8_t data)
+    inline uint16_t q_crc16_update(uint16_t crc, uint8_t data)
 	{
         crc ^= data;
         for (int i = 7; i >= 0; --i)
@@ -19,7 +19,7 @@
 		}
 		return crc;
 	}
-    inline uint8_t _crc_ibutton_update(uint8_t crc, uint8_t data)
+    inline uint8_t q_crc_ibutton_update(uint8_t crc, uint8_t data)
     {
         crc ^= data;
         for (int i = 7; i >= 0; --i)
@@ -48,11 +48,19 @@ namespace util
 	
     template<> inline void update_crc(crc8_t& crc, uint8_t v)
 	{
+#ifdef Q_AVR
         crc = _crc_ibutton_update(crc, v);
+#else
+        crc = q_crc_ibutton_update(crc, v);
+#endif
 	}
     template<> inline void update_crc(crc16_t& crc, uint8_t v)
     {
+#ifdef Q_AVR
         crc = _crc16_update(crc, v);
+#else
+        crc = q_crc16_update(crc, v);
+#endif
     }
 
     template<typename T> inline void update_crc(T& crc, int8_t v)
