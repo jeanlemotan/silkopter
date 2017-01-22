@@ -22,6 +22,8 @@
 //#include <gst/video/gstvideometa.h>
 
 #include <QThread>
+#include <QAndroidJniObject>
+//#include <qpa/qplatformnativeinterface.h>
 
 #include <chrono>
 
@@ -123,6 +125,20 @@ Q_DECL_EXPORT jint JNICALL JNI_OnLoad(JavaVM* vm, void* /*reserved*/)
     {
         __android_log_print(ANDROID_LOG_FATAL, "Qt", "Couldn't register user defined classes.");
         return JNI_ERR;
+    }
+
+    {
+        QAndroidJniObject activity = QAndroidJniObject::callStaticObjectMethod("org/qtproject/qt5/android/QtNative", "activity", "()Landroid/app/Activity;");
+        QAndroidJniObject window = activity.callObjectMethod("getWindow", "()Landroid/view/Window;");
+        QAndroidJniObject decorView = window.callObjectMethod("getDecorView", "()Landroid/view/View;");
+
+        int flagFullscreen = QAndroidJniObject::getStaticField<int>("android/view/View", "SYSTEM_UI_FLAG_FULLSCREEN");
+        int flagHideNavigation = QAndroidJniObject::getStaticField<int>("android/view/View", "SYSTEM_UI_FLAG_HIDE_NAVIGATION");
+        int flagImmersiveSticky = QAndroidJniObject::getStaticField<int>("android/view/View", "SYSTEM_UI_FLAG_IMMERSIVE_STICKY");
+
+        int flag = flagFullscreen | flagHideNavigation | flagImmersiveSticky;
+
+        decorView.callMethod<void>("setSystemUiVisibility", "(I)V", flag);
     }
 
     return JNI_VERSION_1_4;
@@ -477,6 +493,15 @@ QSGNode *VideoSurface::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *)
 //    tp = std::chrono::high_resolution_clock::now();
 //    __android_log_print(ANDROID_LOG_INFO, "Qt", "dt %dms", dt);
 
+    if (!m_env)
+    {
+        if (s_javaVM->AttachCurrentThread(&m_env, NULL) < 0)
+        {
+            qCritical() << "Failed to attach to current thread.";
+            return nullptr;
+        }
+    }
+
     if (!node)
     {
         VideoTexture* texture = new VideoTexture();
@@ -497,41 +522,43 @@ QSGNode *VideoSurface::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *)
             node->markDirty(QSGNode::DirtyGeometry);
         }
 
-        ATTACH_TO_CURRENT_THREAD_THEN_RET((void)0);
-        jobject surfTexture = env->CallStaticObjectMethod(class_VideoDecoder, mid_setupDecoder, texture->textureId());
+        jobject surfTexture = m_env->CallStaticObjectMethod(class_VideoDecoder, mid_setupDecoder, texture->textureId());
         if (!surfTexture)
         {
             qWarning("Failed to instantiate SurfaceTexture.");
         }
-        m_surfaceTexture = env->NewGlobalRef(surfTexture);
-        DETACH_FROM_CURRENT_THREAD_THEN_RET((void)0);
+        m_surfaceTexture = m_env->NewGlobalRef(surfTexture);
     }
 
     {
-        ATTACH_TO_CURRENT_THREAD_THEN_RET(return node);
+        static int frames = 0;
+        frames++;
+        static std::chrono::high_resolution_clock::time_point tp = std::chrono::high_resolution_clock::now();
+        int dt = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - tp).count();
+        if (dt > 1000)
+        {
+            __android_log_print(ANDROID_LOG_INFO, "Skptr", "%d frames, %d FPS", frames, frames * 1000 / dt);
+            tp = std::chrono::high_resolution_clock::now();
+            frames = 0;
+        }
+    }
+
+
+    {
         if (m_surfaceTexture)
         {
-            env->CallVoidMethod(m_surfaceTexture, mid_updateTexture);
+            m_env->CallVoidMethod(m_surfaceTexture, mid_updateTexture);
         }
 
-        parseNALUs([&env, this](uint8_t const* data, size_t size)
+        parseNALUs([this](uint8_t const* data, size_t size)
         {
-            if (!m_frameData)
-            {
-                m_frameData = reinterpret_cast<jbyteArray>(env->NewGlobalRef(env->NewByteArray(size)));
-            }
+            jbyteArray frameData = m_env->NewByteArray(size);
 
-            if (env->GetArrayLength(m_frameData) < static_cast<int>(size))
-            {
-                env->DeleteGlobalRef(m_frameData);
-                m_frameData = reinterpret_cast<jbyteArray>(env->NewGlobalRef(env->NewByteArray(size)));
-            }
+            m_env->SetByteArrayRegion(frameData, 0, static_cast<int>(size), reinterpret_cast<jbyte const*>(data));
+            m_env->CallStaticVoidMethod(class_VideoDecoder, mid_feedDecoder, frameData, (int)size);
 
-            env->SetByteArrayRegion(m_frameData, 0, static_cast<int>(size), reinterpret_cast<jbyte const*>(data));
-            env->CallStaticVoidMethod(class_VideoDecoder, mid_feedDecoder, m_frameData, (int)size);
+            m_env->DeleteLocalRef(frameData);
         });
-
-        DETACH_FROM_CURRENT_THREAD_THEN_RET(return node);
     }
 
     node->markDirty(QSGNode::DirtyMaterial);
@@ -542,15 +569,12 @@ QSGNode *VideoSurface::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *)
 
 void VideoSurface::parseNALUs(std::function<void(uint8_t const*, size_t)> callback)
 {
-    static int frames = 0;
     {
-        static std::chrono::high_resolution_clock::time_point tp = std::chrono::high_resolution_clock::now();
-
         static FILE* fff = nullptr;
         if (!fff)
         {
             srand(time(nullptr));
-            fff = fopen("/storage/emulated/0/Download/sample3.h264", "rb");
+            fff = fopen("/storage/emulated/0/Download/sample.h264", "rb");
             if (!fff)
             {
                 exit(1);
@@ -558,22 +582,17 @@ void VideoSurface::parseNALUs(std::function<void(uint8_t const*, size_t)> callba
         }
 
         size_t offset = m_videoData.size();
-        if (offset < 5000000)
+        if (offset < 500000)
         {
             __android_log_print(ANDROID_LOG_INFO, "Skptr", "Reading...");
 
-            size_t size = 1000000;
+            size_t size = 100000;
             m_videoData.resize(offset + size);
             int r = fread(m_videoData.data() + offset, 1, size, fff);
             if (r == 0)
             {
-                int dt = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - tp).count();
-
-                __android_log_print(ANDROID_LOG_INFO, "Skptr", "DONE, REWIND!!!!! %dms, %d frames, %d FPS", dt, frames, frames * 1000 / dt);
+                __android_log_print(ANDROID_LOG_INFO, "Skptr", "DONE, REWIND!!!!!");
                 fseek(fff, 0, SEEK_SET);
-
-                tp = std::chrono::high_resolution_clock::now();
-                frames = 0;
             }
             m_videoData.resize(offset + r);
         }
@@ -587,9 +606,14 @@ void VideoSurface::parseNALUs(std::function<void(uint8_t const*, size_t)> callba
         {
             //nalupacket found
             size_t size = p - src;
+            //__android_log_print(ANDROID_LOG_INFO, "Skptr", "NALU @ %d, %d left", (int)size, (int)m_videoData.size());
+
             callback(src, size);
             m_videoData.erase(m_videoData.begin(), m_videoData.begin() + size);
-            frames++;
+        }
+        else
+        {
+            //__android_log_print(ANDROID_LOG_INFO, "Skptr", "NALU not found");
         }
     }
 }

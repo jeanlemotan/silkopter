@@ -86,7 +86,7 @@ private:
 
     QSGNode* m_node = nullptr;
     jobject m_surfaceTexture = nullptr;
-    jbyteArray m_frameData = nullptr;
     std::vector<uint8_t> m_videoData;
+    JNIEnv* m_env = nullptr;
 };
 
