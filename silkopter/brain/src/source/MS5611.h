@@ -71,6 +71,7 @@ private:
     template<class Base>
     struct Common : public Base
     {
+        Common() = default;
         double      reading = 0;
     };
 

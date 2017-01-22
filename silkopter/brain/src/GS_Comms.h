@@ -9,7 +9,7 @@
 #include "common/stream/IMultirotor_State.h"
 #include "common/stream/IVideo.h"
 #include "utils/comms/RCP.h"
-#include "utils/comms/Channel.h"
+#include "utils/comms/RCP_Channel.h"
 
 namespace util
 {
@@ -122,7 +122,7 @@ private:
     std::shared_ptr<util::comms::ISocket> m_socket;
     std::shared_ptr<util::comms::RCP> m_rcp;
 
-    typedef util::comms::Channel<uint32_t> Telemetry_Channel;
+    typedef util::comms::RCP_Channel<uint32_t> Telemetry_Channel;
     Telemetry_Channel m_telemetry_channel;
 
     bool m_is_connected = false;

@@ -15,6 +15,8 @@ public:
     typedef typename Base::Sample Sample;
     typedef typename Sample::Value Value;
 
+    Basic_Output_Stream() = default;
+
     Sample const& get_last_sample() const { return m_last_sample; }
     std::vector<Sample> const& get_samples() const { return m_samples; }
     uint32_t get_rate() const { return m_rate; }
