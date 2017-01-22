@@ -1,209 +1,98 @@
 #pragma once
 
-#include <boost/optional.hpp>
-#include "utils/Serialization.h"
-#include "RCP.h"
+#include <vector>
+#include <deque>
+#include <mutex>
 
 namespace util
 {
 namespace comms
 {
 
-template<class MESSAGE_SIZE_T>
+template<class MESSAGE_T, class SOCKET_T>
 class Channel : q::util::Noncopyable
 {
-    static const size_t SIZE_OFFSET = 0;
-    static const size_t HEADER_SIZE = SIZE_OFFSET + sizeof(MESSAGE_SIZE_T);
-
 public:
-    typedef MESSAGE_SIZE_T Message_Size_t;
+    typedef MESSAGE_T Message_t;
+    typedef SOCKET_T Socket_t;
 
-    typedef std::vector<uint8_t> TX_Buffer_t;
-    typedef std::vector<uint8_t> RX_Buffer_t;
+    Channel(Socket_t& socket) : m_socket(socket) {}
 
-    Channel(uint8_t channel_idx) : m_channel_idx(channel_idx) {}
-
-    //////////////////////////////////////////////////////////////////////////
-
-    //sends a message with confirmation
-    template<typename... Params>
-    void pack_all(Params&&... params)
-    {
-        begin_pack();
-        _pack(std::forward<Params>(params)...);
-        end_pack();
-    }
-
-    void begin_pack()
-    {
-        auto off = m_tx_buffer.size();
-        m_size_off = off;
-        serialization::serialize(m_tx_buffer, Message_Size_t(0), off);
-        m_data_start_off = off;
-    }
-    template<class Param> void pack_param_at(size_t off, Param const& p)
-    {
-        QASSERT(m_tx_buffer.size() >= m_data_start_off + off + sizeof(p));
-        QASSERT(m_data_start_off > m_size_off);
-        serialization::serialize(m_tx_buffer, p, m_data_start_off + off);
-    }
-    template<class Param> void pack_param(Param const& p)
-    {
-        QASSERT(m_tx_buffer.size() >= m_data_start_off);
-        QASSERT(m_data_start_off > m_size_off);
-        auto off = m_tx_buffer.size();
-        serialization::serialize(m_tx_buffer, p, off);
-    }
-    void pack_data(uint8_t const* src, size_t size)
-    {
-        QASSERT(src);
-        QASSERT(m_tx_buffer.size() >= m_data_start_off);
-        QASSERT(m_data_start_off > m_size_off);
-        auto off = m_tx_buffer.size();
-        m_tx_buffer.resize(off + size);
-        std::copy(src, src + size, m_tx_buffer.begin() + off);
-    }
-    void end_pack()
-    {
-        QASSERT(m_tx_buffer.size() >= m_data_start_off);
-        QASSERT(m_data_start_off > m_size_off);
-        size_t data_size = m_tx_buffer.size() - m_data_start_off;
-        //header
-        serialization::serialize(m_tx_buffer, Message_Size_t(data_size), m_size_off);
-
-        //q::quick_logf("sending msg {}, size {}, hcrc {}, dcrc {}", message, data_size, header_crc, data_crc);
-        m_size_off = 0;
-        m_data_start_off = 0;
-    }
-
-    auto has_tx_data() const -> bool
-    {
-        return !m_tx_buffer.empty();
-    }
-    auto has_rx_data() const -> bool
-    {
-        return !m_rx_buffer.empty();
-    }
-
-    void send(RCP& rcp)
-    {
-        if (!m_tx_buffer.empty())
-        {
-            //q::quick_logf("Sending {} bytes", m_tx_buffer.size());
-            if (rcp.is_connected())
-            {
-                rcp.send(m_channel_idx, m_tx_buffer.data(), m_tx_buffer.size());
-            }
-            m_tx_buffer.clear();
-        }
-    }
-    void try_sending(RCP& rcp)
-    {
-        if (!m_tx_buffer.empty())
-        {
-            //q::quick_logf("Sending {} bytes", m_tx_buffer.size());
-            if (rcp.is_connected())
-            {
-                rcp.try_sending(m_channel_idx, m_tx_buffer.data(), m_tx_buffer.size());
-            }
-            m_tx_buffer.clear();
-        }
-    }
-
-    auto get_tx_buffer() -> TX_Buffer_t const&
-    {
-        return m_tx_buffer;
-    }
-    void clear_tx_buffer()
-    {
-        m_tx_buffer.clear();
-    }
+    void process()  { Message_t message; get_next_message(message); }
 
     //////////////////////////////////////////////////////////////////////////
 
-    //returns the nest message or nothing.
-    //the message, if any, has to be decoded with decode_next_message(...)
-    auto get_next_message(RCP& rcp) -> bool  { return _get_next_message(rcp); }
+    void send(Message_t message, void const* data, size_t size)
+    {
+        return _send(message, data, size);
+    }
 
-    //////////////////////////////////////////////////////////////////////////
+    bool get_next_message(Message_t& message)  { return _get_next_message(message); }
 
-    auto begin_unpack() -> bool
+    enum class Unpack_Result : uint8_t
     {
-        QASSERT_MSG(m_decoded.data_size <= m_rx_buffer.size() && m_decoded.offset == HEADER_SIZE, "{}, {}", m_decoded.data_size, m_rx_buffer.size());
-        //q::quick_logf("begin_decode: {}, {}", m_decoded.data_size, m_rx_buffer.size());
-        return (m_decoded.data_size > HEADER_SIZE && m_decoded.offset == HEADER_SIZE);
-    }
-    template<class Param> auto unpack_param(Param& p) -> bool
-    {
-        //            QASSERT_MSG(m_decoded.data_size <= m_rx_buffer.size(), "{}, {}", m_decoded.data_size, m_rx_buffer.size());
-        //            //q::quick_logf("unpack_param: {}, {}", m_decoded.data_size, m_rx_buffer.size());
-        //            constexpr auto sz = sizeof(Param);
-        //            if (m_decoded.offset + sz > m_decoded.data_size || m_decoded.offset + sz > m_rx_buffer.size())
-        //            {
-        //                return false;
-        //            }
-        return serialization::deserialize(m_rx_buffer, p, m_decoded.offset);
-    }
-    inline auto unpack_data(uint8_t* dst, size_t size) -> bool
-    {
-        QASSERT(dst);
-        if (size == 0)
-        {
-            return true;
-        }
-        QASSERT_MSG(m_decoded.data_size <= m_rx_buffer.size(), "{}, {}", m_decoded.data_size, m_rx_buffer.size());
-        if (m_decoded.offset + size > m_decoded.data_size || m_decoded.offset + size > m_rx_buffer.size())
-        {
-            return false;
-        }
-        std::copy(m_rx_buffer.begin() + m_decoded.offset, m_rx_buffer.begin() + m_decoded.offset + size, dst);
-        m_decoded.offset += size;
-        return true;
-    }
-    inline auto unpack_remaining_data(std::vector<uint8_t>& dst) -> bool
-    {
-        QASSERT_MSG(m_decoded.data_size <= m_rx_buffer.size(), "{}, {}", m_decoded.data_size, m_rx_buffer.size());
-        if (m_decoded.offset > m_decoded.data_size || m_decoded.offset > m_rx_buffer.size())
-        {
-            return false;
-        }
-        dst.reserve(dst.size() + (m_decoded.data_size - m_decoded.offset));
-        std::copy(m_rx_buffer.begin() + m_decoded.offset, m_rx_buffer.begin() + m_decoded.data_size, std::back_inserter(dst));
-        m_decoded.offset = m_decoded.data_size;
-        return true;
-    }
-    void end_unpack()
-    {
-        QASSERT_MSG(m_decoded.data_size <= m_rx_buffer.size() && m_decoded.offset == m_decoded.data_size, "{}, {}", m_decoded.data_size, m_rx_buffer.size());
-        if (m_decoded.data_size > 0)
-        {
-            pop_front(m_decoded.data_size);
-            m_decoded.data_size = 0;
-        }
-    }
+        OK = 0,				//all good
+        FAILED,				//a generic error
+    };
 
     //decodes the next message
-    template<typename... Params>
-    auto unpack_all(Params&... params) -> bool
-    {
-        auto res = begin_unpack() && _unpack(params...);
-        end_unpack();
-        return res;
-    }
-
-
-    auto get_remaining_message_size() const -> size_t { return m_decoded.data_size - m_decoded.offset; }
-    auto get_message_size() const -> size_t { return m_decoded.data_size - HEADER_SIZE; }
+    template<class Dst>
+    Unpack_Result unpack(Dst& dst) { return _unpack(dst); }
 
     //////////////////////////////////////////////////////////////////////////
 
+    size_t get_pending_data_size() const { return m_rx_buffer.size(); }
+    size_t get_error_count() const { return m_error_count; }
+
 private:
+    typedef uint8_t Magic_t;
+    typedef uint8_t Message_Size_t;
+    typedef uint8_t Header_Crc_t;
+    typedef uint16_t Data_Crc_t;
+
+    static const uint8_t MAGIC = 0x3F;
+
+    static const size_t MAGIC_OFFSET = 0;
+    static const size_t MESSAGE_OFFSET = MAGIC_OFFSET + sizeof(Magic_t);
+    static const size_t SIZE_OFFSET = MESSAGE_OFFSET + sizeof(Message_t);
+    static const size_t HEADER_CRC_OFFSET = SIZE_OFFSET + sizeof(Message_Size_t);
+    static const size_t DATA_CRC_OFFSET = HEADER_CRC_OFFSET + sizeof(Header_Crc_t);
+    static const size_t HEADER_SIZE = DATA_CRC_OFFSET + sizeof(Data_Crc_t);
+
+    typedef std::vector<uint8_t> RX_Buffer_t;
+    typedef std::vector<uint8_t> TX_Buffer_t;
+    typedef Channel<MESSAGE_T, SOCKET_T> This_t;
+
+
     struct Decoded
     {
-        bool is_valid = false;
+        Magic_t magic = 0;
+        Message_t message;
         Message_Size_t data_size = 0;
-        size_t offset = 0;
+        Header_Crc_t header_crc = 0;
+        Data_Crc_t data_crc = 0;
     } m_decoded;
+
+    template<class T> T get_value_fixed(RX_Buffer_t const& t, size_t off)
+    {
+        QASSERT(off + sizeof(T) <= t.size());
+        T val;
+        uint8_t* dst = reinterpret_cast<uint8_t*>(&val);
+        for (uint8_t i = 0, sz = sizeof(T); i < sz; i++)
+        {
+            *dst++ = t[off + i];
+        }
+        return val;
+    }
+    template<class Container, class T> void set_value_fixed(Container& t, T const& val, size_t off)
+    {
+        QASSERT_MSG(off + sizeof(T) <= t.size(), "off {}, sizet {}, t.size {}", off, sizeof(T), t.size());
+        uint8_t const* src = reinterpret_cast<uint8_t const*>(&val);
+        for (size_t i = 0, sz = sizeof(T); i < sz; i++)
+        {
+            t[off + i] = *src++;
+        }
+    }
 
     void pop_front(size_t size)
     {
@@ -213,108 +102,163 @@ private:
 
     //returns the nest message or nothing.
     //the message, if any, has to be decoded with decode_next_message(...)
-    auto _get_next_message(RCP& rcp) -> bool
+    bool _get_next_message(Message_t& message)
     {
         if (m_decoded.data_size > 0)
         {
             QASSERT_MSG(m_decoded.data_size <= m_rx_buffer.size(), "{}, {}", m_decoded.data_size, m_rx_buffer.size());
             pop_front(m_decoded.data_size);
             m_decoded.data_size = 0;
-            m_decoded.is_valid = false;
         }
 
-        rcp.receive(m_channel_idx, m_temp_rx_buffer);
-        if (!m_temp_rx_buffer.empty())
+        //check for incoming messages
+        while (decode_message()) {}
+        if (m_decoded.magic == 0)
         {
-            //q::quick_logf("Received {} bytes", m_temp_rx_buffer.size());
-            auto off = m_rx_buffer.size();
-            m_rx_buffer.resize(off + m_temp_rx_buffer.size());
-            std::copy(m_temp_rx_buffer.begin(), m_temp_rx_buffer.end(), m_rx_buffer.begin() + off);
-            m_temp_rx_buffer.clear();
+            //read from the socket
+            m_socket.read(m_rx_buffer);
+            return false;
         }
 
-        return decode_message();
-    }
-
-    //decodes the next message
-    auto _unpack() -> bool
-    {
+        message = m_decoded.message;
         return true;
     }
 
     //decodes the next message
-    template<typename Param, typename... Params>
-    auto _unpack(Param& p, Params&... params) -> bool
+    template<typename Dst>
+    Unpack_Result _unpack(Dst& dst)
     {
-        //            QASSERT(m_decoded.offset + sizeof(p) <= m_decoded.data_size && m_decoded.data_size <= m_rx_buffer.size());
-        //            if (m_decoded.offset + sizeof(p) > m_decoded.data_size || m_decoded.data_size > m_rx_buffer.size())
-        //            {
-        //                return false;
-        //            }
-        if (!serialization::deserialize(m_rx_buffer, p, m_decoded.offset))
+        QASSERT_MSG(m_decoded.data_size <= m_rx_buffer.size(), "{}, {}", m_decoded.data_size, m_rx_buffer.size());
+        if (m_decoded.data_size == 0)
         {
-            return false;
+            return Unpack_Result::FAILED;
         }
-        return _unpack(params...);
+        size_t offset = dst.size();
+        dst.resize(offset + m_decoded.data_size);
+        std::copy(m_rx_buffer.begin(), m_rx_buffer.begin() + m_decoded.data_size, dst.begin() + offset);
+        return Unpack_Result::OK;
     }
 
     bool decode_message()
     {
-        m_decoded.is_valid = false;
+        m_decoded.magic = 0;
         m_decoded.data_size = 0;
-        m_decoded.offset = 0;
 
         //check if we have enough data
         if (m_rx_buffer.size() < HEADER_SIZE)
         {
-            return false;
+            //read from the socket and check again
+            m_socket.read(m_rx_buffer);
+            if (m_rx_buffer.size() < HEADER_SIZE)
+            {
+                return false;
+            }
         }
 
         //try to decode a message HEADER
-        Message_Size_t size;
-        size_t size_offset = SIZE_OFFSET;
-        if (!serialization::deserialize(m_rx_buffer, size, size_offset))
+        Magic_t magic = get_value_fixed<Magic_t>(m_rx_buffer, MAGIC_OFFSET);
+        if (magic != MAGIC)
         {
-            return false;
+            m_error_count++;
+            q::quick_logf("malformed package magic {}", magic);
+            pop_front(1);
+            return true;
         }
+        Message_t message = get_value_fixed<Message_t>(m_rx_buffer, MESSAGE_OFFSET);
+        Message_Size_t size = get_value_fixed<Message_Size_t>(m_rx_buffer, SIZE_OFFSET);
+        Header_Crc_t header_crc = get_value_fixed<Header_Crc_t>(m_rx_buffer, HEADER_CRC_OFFSET);
+
+        //verify header crc
+        {
+            Header_Crc_t computed_header_crc = q::util::compute_crc<Header_Crc_t>(m_rx_buffer, HEADER_CRC_OFFSET);
+            if (header_crc != computed_header_crc)
+            {
+                m_error_count++;
+                q::quick_logf("header crc failed {} / {} for msg {} size {}", header_crc, computed_header_crc, message, size);
+                pop_front(1);
+                return true;
+            }
+        }
+
         if (m_rx_buffer.size() < HEADER_SIZE + size)
         {
-            return false;
+            //read from the socket and check again
+            m_socket.read(m_rx_buffer);
+            if (m_rx_buffer.size() < HEADER_SIZE + size)
+            {
+                return false;
+            }
         }
 
-        //pop_front(HEADER_SIZE);
+        Data_Crc_t data_crc = get_value_fixed<Data_Crc_t>(m_rx_buffer, DATA_CRC_OFFSET);
 
-        m_decoded.offset = HEADER_SIZE;
-        m_decoded.data_size = m_decoded.offset + size;
+        //clear crc bytes and compute crc
+        set_value_fixed(m_rx_buffer, Data_Crc_t(0), DATA_CRC_OFFSET);
+        Data_Crc_t computed_data_crc = q::util::compute_crc<Data_Crc_t>(m_rx_buffer, HEADER_SIZE + size);
+        if (data_crc != computed_data_crc)
+        {
+            m_error_count++;
+            q::quick_logf("data crc failed {} / {} for msg {} size {}", data_crc, computed_data_crc, message, size);
+            set_value_fixed(m_rx_buffer, data_crc, DATA_CRC_OFFSET);
+            pop_front(1);
+            return true;
+        }
+        pop_front(HEADER_SIZE);
 
-        m_decoded.is_valid = true;
+        m_decoded.magic = magic;
+        m_decoded.message = message;
+        m_decoded.data_size = size;
+        m_decoded.header_crc = header_crc;
+        m_decoded.data_crc = data_crc;
 
         QASSERT_MSG(m_decoded.data_size <= m_rx_buffer.size(), "{}, {}", m_decoded.data_size, m_rx_buffer.size());
-        return true;
+
+        //q::quick_logf("received msg {}, size {}, hcrc {}, dcrc {}", m_decoded.message, m_decoded.data_size, m_decoded.header_crc, m_decoded.data_crc);
+
+        return false;
+    }
+
+    void _send(Message_t message, size_t total_size)
+    {
+        QASSERT(total_size < 255);
+        QASSERT(total_size >= HEADER_SIZE);
+        size_t data_size = total_size - HEADER_SIZE;
+        //header
+        Magic_t magic = MAGIC;
+        set_value_fixed(m_tx_buffer, magic, MAGIC_OFFSET);
+        set_value_fixed(m_tx_buffer, message, MESSAGE_OFFSET);
+        set_value_fixed(m_tx_buffer, Message_Size_t(data_size), SIZE_OFFSET);
+        set_value_fixed(m_tx_buffer, Header_Crc_t(0), HEADER_CRC_OFFSET);
+
+        //header crc
+        Header_Crc_t header_crc = q::util::compute_crc<Header_Crc_t>(m_tx_buffer, HEADER_CRC_OFFSET);
+        set_value_fixed(m_tx_buffer, header_crc, HEADER_CRC_OFFSET);
+
+        //data crc
+        set_value_fixed(m_tx_buffer, Data_Crc_t(0), DATA_CRC_OFFSET);
+        Data_Crc_t data_crc = q::util::compute_crc<Data_Crc_t>(m_tx_buffer, total_size);
+        set_value_fixed(m_tx_buffer, data_crc, DATA_CRC_OFFSET);
+
+        //q::quick_logf("sending msg {}, size {}, hcrc {}, dcrc {}", message, data_size, header_crc, data_crc);
+
+        //send
+        m_socket.write(m_tx_buffer, total_size);
     }
 
     //sends a message with confirmation
-    void _pack()
+    void _send(Message_t message, void const* data, size_t size)
     {
-    }
-
-    //sends a message with confirmation
-    template<typename Param, typename... Params>
-    void _pack(Param const& param, Params&&... params)
-    {
-        auto off = m_tx_buffer.size();
-        serialization::serialize(m_tx_buffer, param, off);
-        return _pack(std::forward<Params>(params)...);
+        m_tx_buffer.resize(HEADER_SIZE + size);
+        std::copy(reinterpret_cast<uint8_t const*>(data), reinterpret_cast<uint8_t const*>(data) + size, m_tx_buffer.begin() + HEADER_SIZE);
+        _send(message, m_tx_buffer.size());
     }
 
     //////////////////////////////////////////////////////////////////////////
 
-    uint8_t m_channel_idx = 0;
+    Socket_t& m_socket;
     RX_Buffer_t m_rx_buffer;
-    std::vector<uint8_t> m_temp_rx_buffer;
     TX_Buffer_t m_tx_buffer;
-    size_t m_size_off = 0;
-    size_t m_data_start_off = 0;
+    size_t m_error_count = 0;
 };
 
 }
