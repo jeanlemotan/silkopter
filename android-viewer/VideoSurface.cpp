@@ -481,10 +481,19 @@ VideoSurface::VideoSurface(QQuickItem *parent)
 //    timer->start(1);
 }
 
+void VideoSurface::geometryChanged(const QRectF &newGeometry, const QRectF &oldGeometry)
+{
+    QQuickItem::geometryChanged(newGeometry, oldGeometry);
+    if (newGeometry != oldGeometry)
+    {
+        m_isGeomertyDirty = true;
+    }
+}
+
 /*----------------------------------------------------------------------
 |    VideoSurface::paint
 +---------------------------------------------------------------------*/
-QSGNode *VideoSurface::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *)
+QSGNode* VideoSurface::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *)
 {
     VideoNode* node = static_cast<VideoNode*>(oldNode);
 
@@ -506,21 +515,7 @@ QSGNode *VideoSurface::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *)
     {
         VideoTexture* texture = new VideoTexture();
         node = new VideoNode(texture);
-
-        {
-            const QRectF br = boundingRect();
-            QRectF rect = br;//(QPointF(0, 0), QSizeF(m_nativeSize).scaled(br.size(), Qt::KeepAspectRatio));
-            rect.moveCenter(br.center());
-            int orientation = 0;//(m_orientation - m_textureOrientation) % 360;
-            if (orientation < 0)
-                orientation += 360;
-            node->setBoundingRect(
-                        rect,
-                        orientation,
-                        false,
-                        false);
-            node->markDirty(QSGNode::DirtyGeometry);
-        }
+        m_isGeomertyDirty = true;
 
         jobject surfTexture = m_env->CallStaticObjectMethod(class_VideoDecoder, mid_setupDecoder, texture->textureId());
         if (!surfTexture)
@@ -528,6 +523,24 @@ QSGNode *VideoSurface::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *)
             qWarning("Failed to instantiate SurfaceTexture.");
         }
         m_surfaceTexture = m_env->NewGlobalRef(surfTexture);
+    }
+
+    if (m_isGeomertyDirty)
+    {
+        const QRectF br = boundingRect();
+        QRectF rect = br;//(QPointF(0, 0), QSizeF(m_nativeSize).scaled(br.size(), Qt::KeepAspectRatio));
+        rect.moveCenter(br.center());
+        int orientation = 0;//(m_orientation - m_textureOrientation) % 360;
+        if (orientation < 0)
+            orientation += 360;
+        node->setBoundingRect(
+                    rect,
+                    orientation,
+                    false,
+                    false);
+        node->markDirty(QSGNode::DirtyGeometry);
+
+        m_isGeomertyDirty = false;
     }
 
     {

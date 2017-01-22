@@ -1,5 +1,5 @@
 import QtQuick 2.5
-import com.silkopter.VideoSurface 0.1
+import com.silk.VideoSurface 0.1
 
 Rectangle {
     id: main

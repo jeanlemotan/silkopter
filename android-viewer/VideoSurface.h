@@ -80,11 +80,12 @@ public:
     explicit VideoSurface(QQuickItem *parent = 0);
 
     QSGNode *updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *paintNodeData) override;
+    void geometryChanged(const QRectF &newGeometry, const QRectF &oldGeometry) override;
 
 private:
     void parseNALUs(std::function<void(uint8_t const*, size_t)> callback);
 
-    QSGNode* m_node = nullptr;
+    bool m_isGeomertyDirty = true;
     jobject m_surfaceTexture = nullptr;
     std::vector<uint8_t> m_videoData;
     JNIEnv* m_env = nullptr;

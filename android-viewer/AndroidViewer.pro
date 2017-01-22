@@ -4,7 +4,10 @@ QT += qml quick opengl androidextras
 CONFIG += c++11
 
 SOURCES += main.cpp \
-    VideoSurface.cpp
+    VideoSurface.cpp \
+    OSQmlProxy.cpp \
+    MenusQmlProxy.cpp \
+    CommsQmlProxy.cpp
 
 OTHER_FILES += \
     main.qml
@@ -36,7 +39,10 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 HEADERS += \
-    VideoSurface.h
+    VideoSurface.h \
+    MenusQmlProxy.h \
+    OSQmlProxy.h \
+    CommsQmlProxy.h
 
 DISTFILES += \
     android/AndroidManifest.xml \
