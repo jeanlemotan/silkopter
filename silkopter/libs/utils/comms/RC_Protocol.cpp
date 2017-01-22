@@ -164,16 +164,29 @@ void RC_Protocol::process_rx_data(util::comms::RC_Phy::RX_Data const& data)
             memcpy(m_incoming_packet.payload.data() + offset, data.payload.data() + sizeof(Header), size);
         }
 
-        if (header.packet_type < Header::EMPTY_PACKET)
+        bool done = false;
+
+        if (header.packet_type < Header::EMPTY_PACKET) //starting a new packet stream?
         {
             m_incoming_packet.packet_type = header.packet_type;
+
+            //packet index 0 is special - it indicates a periodic packet
+            if (header.packet_index == 0)
+            {
+                done = true;
+            }
         }
-        else if (header.packet_type == Header::EMPTY_PACKET)
+        else if (header.packet_type == Header::EMPTY_PACKET) //just a ping
         {
             m_incoming_packet.payload.clear();
             m_incoming_packet.packet_type = static_cast<uint8_t>(-1);
         }
-        else if (header.packet_type == Header::LAST_PACKET)
+        else if (header.packet_type == Header::LAST_PACKET) //the last packet of a stream
+        {
+            done = true;
+        }
+
+        if (done)
         {
             m_incoming_packet.rx_dBm = data.rx_dBm;
             m_incoming_packet.tx_dBm = data.tx_dBm;

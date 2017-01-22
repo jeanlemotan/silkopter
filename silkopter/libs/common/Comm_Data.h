@@ -5,7 +5,6 @@ namespace silk
 namespace rc_comms
 {
 
-
 enum class Video_Message : uint8_t
 {
     FRAME_DATA,
@@ -67,6 +66,16 @@ enum class Packet_Type : uint8_t
     HOME,
 };
 
-
 }
+
+namespace viewer
+{
+enum class Packet_Type : uint8_t
+{
+    MULTIROTOR_COMMANDS,
+    MULTIROTOR_STATE,
+    VIDEO_DATA,
+};
+}
+
 }

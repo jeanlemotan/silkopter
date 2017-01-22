@@ -3,6 +3,8 @@
 #include <vector>
 #include <deque>
 #include <mutex>
+#include <cassert>
+#include "utils/Crc.h"
 
 namespace util
 {
@@ -10,8 +12,10 @@ namespace comms
 {
 
 template<class MESSAGE_T, class SOCKET_T>
-class Channel : q::util::Noncopyable
+class Channel
 {
+    Channel(Channel<MESSAGE_T, SOCKET_T> const&) = delete;
+    Channel<MESSAGE_T, SOCKET_T>& operator=(Channel<MESSAGE_T, SOCKET_T> const&) = delete;
 public:
     typedef MESSAGE_T Message_t;
     typedef SOCKET_T Socket_t;
@@ -75,7 +79,7 @@ private:
 
     template<class T> T get_value_fixed(RX_Buffer_t const& t, size_t off)
     {
-        QASSERT(off + sizeof(T) <= t.size());
+        assert(off + sizeof(T) <= t.size());
         T val;
         uint8_t* dst = reinterpret_cast<uint8_t*>(&val);
         for (uint8_t i = 0, sz = sizeof(T); i < sz; i++)
@@ -86,7 +90,7 @@ private:
     }
     template<class Container, class T> void set_value_fixed(Container& t, T const& val, size_t off)
     {
-        QASSERT_MSG(off + sizeof(T) <= t.size(), "off {}, sizet {}, t.size {}", off, sizeof(T), t.size());
+        assert(off + sizeof(T) <= t.size());
         uint8_t const* src = reinterpret_cast<uint8_t const*>(&val);
         for (size_t i = 0, sz = sizeof(T); i < sz; i++)
         {
@@ -96,7 +100,7 @@ private:
 
     void pop_front(size_t size)
     {
-        QASSERT(size <= m_rx_buffer.size());
+        assert(size <= m_rx_buffer.size());
         m_rx_buffer.erase(m_rx_buffer.begin(), m_rx_buffer.begin() + size);
     }
 
@@ -106,7 +110,7 @@ private:
     {
         if (m_decoded.data_size > 0)
         {
-            QASSERT_MSG(m_decoded.data_size <= m_rx_buffer.size(), "{}, {}", m_decoded.data_size, m_rx_buffer.size());
+            assert(m_decoded.data_size <= m_rx_buffer.size());
             pop_front(m_decoded.data_size);
             m_decoded.data_size = 0;
         }
@@ -128,7 +132,7 @@ private:
     template<typename Dst>
     Unpack_Result _unpack(Dst& dst)
     {
-        QASSERT_MSG(m_decoded.data_size <= m_rx_buffer.size(), "{}, {}", m_decoded.data_size, m_rx_buffer.size());
+        assert(m_decoded.data_size <= m_rx_buffer.size());
         if (m_decoded.data_size == 0)
         {
             return Unpack_Result::FAILED;
@@ -160,7 +164,7 @@ private:
         if (magic != MAGIC)
         {
             m_error_count++;
-            q::quick_logf("malformed package magic {}", magic);
+            assert(0 && "malformed package magic");
             pop_front(1);
             return true;
         }
@@ -170,11 +174,11 @@ private:
 
         //verify header crc
         {
-            Header_Crc_t computed_header_crc = q::util::compute_crc<Header_Crc_t>(m_rx_buffer, HEADER_CRC_OFFSET);
+            Header_Crc_t computed_header_crc = util::compute_crc<Header_Crc_t>(m_rx_buffer, HEADER_CRC_OFFSET);
             if (header_crc != computed_header_crc)
             {
                 m_error_count++;
-                q::quick_logf("header crc failed {} / {} for msg {} size {}", header_crc, computed_header_crc, message, size);
+                assert(0 && "header crc failed");
                 pop_front(1);
                 return true;
             }
@@ -194,11 +198,11 @@ private:
 
         //clear crc bytes and compute crc
         set_value_fixed(m_rx_buffer, Data_Crc_t(0), DATA_CRC_OFFSET);
-        Data_Crc_t computed_data_crc = q::util::compute_crc<Data_Crc_t>(m_rx_buffer, HEADER_SIZE + size);
+        Data_Crc_t computed_data_crc = util::compute_crc<Data_Crc_t>(m_rx_buffer, HEADER_SIZE + size);
         if (data_crc != computed_data_crc)
         {
             m_error_count++;
-            q::quick_logf("data crc failed {} / {} for msg {} size {}", data_crc, computed_data_crc, message, size);
+            assert(0 && "data crc failed");
             set_value_fixed(m_rx_buffer, data_crc, DATA_CRC_OFFSET);
             pop_front(1);
             return true;
@@ -211,17 +215,15 @@ private:
         m_decoded.header_crc = header_crc;
         m_decoded.data_crc = data_crc;
 
-        QASSERT_MSG(m_decoded.data_size <= m_rx_buffer.size(), "{}, {}", m_decoded.data_size, m_rx_buffer.size());
-
-        //q::quick_logf("received msg {}, size {}, hcrc {}, dcrc {}", m_decoded.message, m_decoded.data_size, m_decoded.header_crc, m_decoded.data_crc);
+        assert(m_decoded.data_size <= m_rx_buffer.size());
 
         return false;
     }
 
     void _send(Message_t message, size_t total_size)
     {
-        QASSERT(total_size < 255);
-        QASSERT(total_size >= HEADER_SIZE);
+        assert(total_size < 255);
+        assert(total_size >= HEADER_SIZE);
         size_t data_size = total_size - HEADER_SIZE;
         //header
         Magic_t magic = MAGIC;
@@ -231,15 +233,13 @@ private:
         set_value_fixed(m_tx_buffer, Header_Crc_t(0), HEADER_CRC_OFFSET);
 
         //header crc
-        Header_Crc_t header_crc = q::util::compute_crc<Header_Crc_t>(m_tx_buffer, HEADER_CRC_OFFSET);
+        Header_Crc_t header_crc = util::compute_crc<Header_Crc_t>(m_tx_buffer, HEADER_CRC_OFFSET);
         set_value_fixed(m_tx_buffer, header_crc, HEADER_CRC_OFFSET);
 
         //data crc
         set_value_fixed(m_tx_buffer, Data_Crc_t(0), DATA_CRC_OFFSET);
-        Data_Crc_t data_crc = q::util::compute_crc<Data_Crc_t>(m_tx_buffer, total_size);
+        Data_Crc_t data_crc = util::compute_crc<Data_Crc_t>(m_tx_buffer, total_size);
         set_value_fixed(m_tx_buffer, data_crc, DATA_CRC_OFFSET);
-
-        //q::quick_logf("sending msg {}, size {}, hcrc {}, dcrc {}", message, data_size, header_crc, data_crc);
 
         //send
         m_socket.write(m_tx_buffer, total_size);

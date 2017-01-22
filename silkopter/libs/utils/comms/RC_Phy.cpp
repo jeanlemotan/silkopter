@@ -191,7 +191,7 @@ void RC_Phy::master_thread_proc()
             header.crc = q::util::compute_murmur_hash16(m_tx_buffer.data(), m_tx_buffer.size());
 
             //wait a bit so the other end has time to setup its RX state
-            std::this_thread::sleep_for(std::chrono::microseconds(500));
+            //std::this_thread::sleep_for(std::chrono::microseconds(500));
 
             //The first byte is the length. The rest are payload
             if (m_hw->chip.write_tx_fifo(m_tx_buffer.data(), m_tx_buffer.size()))
@@ -273,7 +273,7 @@ void RC_Phy::slave_thread_proc()
             header.crc = q::util::compute_murmur_hash16(m_tx_buffer.data(), m_tx_buffer.size());
 
             //wait a bit so the other end has time to setup its RX state
-            std::this_thread::sleep_for(std::chrono::microseconds(500));
+            //std::this_thread::sleep_for(std::chrono::microseconds(500));
 
             //The first byte is the length. The rest are payload
             if (m_hw->chip.write_tx_fifo(m_tx_buffer.data(), m_tx_buffer.size()))

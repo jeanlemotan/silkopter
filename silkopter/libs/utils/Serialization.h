@@ -1,5 +1,9 @@
 #pragma once
 
+#include <vector>
+#include <string>
+#include "qmath.h"
+
 //#include "rapidjson/document.h"
 //#include "rapidjson/stringbuffer.h"
 //#include "rapidjson/writer.h"

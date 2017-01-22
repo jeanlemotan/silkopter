@@ -20,9 +20,9 @@ template<class T> struct Input_Value
     void set_unversioned(Value const& v) { value = v; }
     T const& get() const { return value; }
 
-//    bool operator==(Input_Value const& other) = delete;//{ return value == other.value; }
-//    bool operator!=(Input_Value const& other) = delete;//{ return !operator==(other); }
-//    Input_Value const& operator=(Input_Value const& other)  = delete;//{ value = other.value; return *this; }
+    //    bool operator==(Input_Value const& other) = delete;//{ return value == other.value; }
+    //    bool operator!=(Input_Value const& other) = delete;//{ return !operator==(other); }
+    //    Input_Value const& operator=(Input_Value const& other)  = delete;//{ value = other.value; return *this; }
 
     uint8_t version = 0;
 private:
@@ -39,9 +39,9 @@ template<> struct Input_Value<bool>
     void set_unversioned(Value const& v) { value = v; }
     bool get() const { return value != 0; }
 
-//    bool operator==(Input_Value const& other) = delete;// { return value == other.value; }
-//    bool operator!=(Input_Value const& other) = delete;// { return !operator==(other); }
-//    Input_Value const& operator=(Input_Value const& other) = delete;// { value = other.value; return *this; }
+    //    bool operator==(Input_Value const& other) = delete;// { return value == other.value; }
+    //    bool operator!=(Input_Value const& other) = delete;// { return !operator==(other); }
+    //    Input_Value const& operator=(Input_Value const& other) = delete;// { value = other.value; return *this; }
 
     uint8_t version : 7;
 private:
@@ -126,7 +126,6 @@ public:
 
     virtual auto get_samples() const -> std::vector<Sample> const& = 0;
 };
-DECLARE_CLASS_PTR(IMultirotor_Commands);
 
 
 }
@@ -166,9 +165,9 @@ template<> inline auto deserialize(Buffer_t const& buffer, silk::stream::IMultir
     //sticks
     uint8_t v1, v2, v3, v4;
     if (!deserialize(buffer, v1, off) ||
-        !deserialize(buffer, v2, off) ||
-        !deserialize(buffer, v3, off) ||
-        !deserialize(buffer, v4, off))
+            !deserialize(buffer, v2, off) ||
+            !deserialize(buffer, v3, off) ||
+            !deserialize(buffer, v4, off))
     {
         return false;
     }

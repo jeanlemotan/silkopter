@@ -16,16 +16,16 @@ template<class T> bool equals(T const& a, T const& b)
 template<class T> void apply_coefficients(T& x, T& w0, T& w1, T& w2, double d1, double d2, double A)
 {
     w0 = static_cast<T>(d1*w1 + d2*w2 + x);
-    QASSERT(math::is_finite(w0));
+    MATH_ASSERT(math::is_finite(w0));
 
     x = static_cast<T>(A*(w0 + 2.0*w1 + w2));
-    QASSERT(math::is_finite(x));
+    MATH_ASSERT(math::is_finite(x));
 
     w2 = w1;
-    QASSERT(math::is_finite(w2));
+    MATH_ASSERT(math::is_finite(w2));
 
     w1 = w0;
-    QASSERT(math::is_finite(w1));
+    MATH_ASSERT(math::is_finite(w1));
 }
 
 template<> inline void apply_coefficients(math::vec3f& x, math::vec3f& w0, math::vec3f& w1, math::vec3f& w2, double d1, double d2, double A)
@@ -35,16 +35,16 @@ template<> inline void apply_coefficients(math::vec3f& x, math::vec3f& w0, math:
 
     const math::vec3d w0d = d1*w1d + d2*w2d + math::vec3d(x);
     w0 = math::vec3f(w0d);
-    QASSERT(math::is_finite(w0));
+    MATH_ASSERT(math::is_finite(w0));
 
     x = math::vec3f(A*(w0d + 2.0*w1d + w2d));
-    QASSERT(math::is_finite(x));
+    MATH_ASSERT(math::is_finite(x));
 
     w2 = w1;
-    QASSERT(math::is_finite(w2));
+    MATH_ASSERT(math::is_finite(w2));
 
     w1 = w0;
-    QASSERT(math::is_finite(w1));
+    MATH_ASSERT(math::is_finite(w1));
 }
 
 template<> inline void apply_coefficients(math::vec2f& x, math::vec2f& w0, math::vec2f& w1, math::vec2f& w2, double d1, double d2, double A)
@@ -54,16 +54,16 @@ template<> inline void apply_coefficients(math::vec2f& x, math::vec2f& w0, math:
 
     const math::vec2d w0d = d1*w1d + d2*w2d + math::vec2d(x);
     w0 = math::vec2f(w0d);
-    QASSERT(math::is_finite(w0));
+    MATH_ASSERT(math::is_finite(w0));
 
     x = math::vec2f(A*(w0d + 2.0*w1d + w2d));
-    QASSERT(math::is_finite(x));
+    MATH_ASSERT(math::is_finite(x));
 
     w2 = w1;
-    QASSERT(math::is_finite(w2));
+    MATH_ASSERT(math::is_finite(w2));
 
     w1 = w0;
-    QASSERT(math::is_finite(w1));
+    MATH_ASSERT(math::is_finite(w1));
 }
 
 }
@@ -71,10 +71,14 @@ template<> inline void apply_coefficients(math::vec2f& x, math::vec2f& w0, math:
 
 
 template<class T>
-class Butterworth : q::util::Noncopyable
+class Butterworth
 {
+    Butterworth(Butterworth<T> const&) = delete;
+    Butterworth<T>& operator=(Butterworth<T> const&) = delete;
 public:
-    auto setup(size_t order, float rate, float cutoff_frequency) -> bool
+    Butterworth() = default;
+
+    bool setup(size_t order, float rate, float cutoff_frequency)
     {
         if (rate < math::epsilon<float>() ||
                 cutoff_frequency < math::epsilon<float>() ||
@@ -82,18 +86,18 @@ public:
         {
             return false;
         }
-//        m_dsp.setup(poles, rate, cutoff_frequency);
+        //        m_dsp.setup(poles, rate, cutoff_frequency);
         m_rate = rate;
         m_order = order;
 
-//        printf("  n = filter order 2,4,6,...\n");
-//        printf("  s = sampling frequency\n");
-//        printf("  f = half power frequency\n");
+        //        printf("  n = filter order 2,4,6,...\n");
+        //        printf("  s = sampling frequency\n");
+        //        printf("  f = half power frequency\n");
 
-//        double s = rate;
-//        double f = cutoff_frequency;
+        //        double s = rate;
+        //        double f = cutoff_frequency;
         double a = math::tan(math::angled::pi*cutoff_frequency/rate);
-        QASSERT(!math::is_nan(a));
+        MATH_ASSERT(!math::is_nan(a));
 
         double a2 = a*a;
         A.resize(m_order);
@@ -106,9 +110,9 @@ public:
         for(size_t i = 0; i < m_order; ++i)
         {
             double r = math::sin(math::angled::pi*(2.0*i+1.0)/(4.0*m_order));
-            QASSERT(!math::is_nan(r));
+            MATH_ASSERT(!math::is_nan(r));
             double s = a2 + 2.0*a*r + 1.0;
-            QASSERT(!math::is_nan(s));
+            MATH_ASSERT(!math::is_nan(s));
             A[i] = a2/s;
             d1[i] = 2.0*(1.0-a2)/s;
             d2[i] = -(a2 - 2.0*a*r + 1.0)/s;
@@ -147,7 +151,7 @@ public:
     void reset()
     {
         auto t = m_last; //need to make a copy as reset will change it
-        QASSERT(math::is_finite(t));
+        MATH_ASSERT(math::is_finite(t));
         reset(t);
     }
 

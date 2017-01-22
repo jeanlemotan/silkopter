@@ -17,7 +17,7 @@ enum class Space : uint8_t
     GIMBAL
 };
 
-#define GET_AS_STRING(str, details_str) q::util::format<std::string>(str "{}", (details) ? (" " details_str) : "")
+#define GET_AS_STRING(str, details_str) details ? std::string(str) + details_str : std::string(str)
 
 inline auto get_as_string(Space s, bool details) -> std::string
 {
@@ -29,7 +29,7 @@ inline auto get_as_string(Space s, bool details) -> std::string
     case Space::ENU: return GET_AS_STRING("ENU", "(East North Up)");
     case Space::LOCAL: return GET_AS_STRING("LOCAL", "(Local Frame)");
     case Space::GIMBAL: return GET_AS_STRING("Gimbal", "(Gimbal Frame)");
-    default: QASSERT(false); return "Unknown";
+    default: assert(false); return "Unknown";
     }
 }
 
@@ -91,7 +91,7 @@ inline auto get_as_string(Semantic type, bool details) -> std::string
     case Semantic::VOLTAGE: return GET_AS_STRING("Voltage", "(float, V)");
     case Semantic::FLOAT: return GET_AS_STRING("Float", "(float)");
     case Semantic::BOOL: return GET_AS_STRING("Bool", "(bool)");
-    default: QASSERT(false); return "Unknown";
+    default: assert(false); return "Unknown";
     }
 }
 
@@ -124,9 +124,13 @@ inline auto get_as_string(Type type, bool details) -> std::string
 #undef GET_AS_STRING
 
 //for streams of data with a fixed sample rate
-class IStream : q::util::Noncopyable
+class IStream
 {
+    IStream(IStream const&) = delete;
+    IStream& operator=(IStream const&) = delete;
 public:
+    IStream() = default;
+
     virtual auto get_rate() const -> uint32_t = 0;
     virtual auto get_type() const -> Type = 0;
 };

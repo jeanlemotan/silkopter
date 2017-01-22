@@ -64,8 +64,8 @@ public:
     std::mutex m_tx_packet_queue_mutex;
     std::deque<TX_Packet> m_tx_packet_queue;
 
-    std::atomic_uint m_crt_sent_packet_index = { 0 };
-    std::atomic_uint m_received_packet_index = { 0 };
+    std::atomic_uint m_crt_sent_packet_index = { 1 };
+    std::atomic_uint m_received_packet_index = { 1 };
 
 #pragma pack(push, 1)
 

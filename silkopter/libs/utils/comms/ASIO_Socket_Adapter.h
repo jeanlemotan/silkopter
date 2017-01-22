@@ -49,31 +49,36 @@ public:
     {
         if (size)
         {
-            std::shared_ptr<TX_Buffer_t> buffer_ptr = get_tx_buffer();
-            buffer_ptr->resize(size);
-            std::copy(reinterpret_cast<uint8_t const*>(data), reinterpret_cast<uint8_t const*>(data) + size, buffer_ptr->begin());
+            m_pending_to_send_size += size;
 
-            {
-                std::lock_guard<std::mutex> lg(m_tx_buffer_queue_mutex);
-                m_tx_buffer_queue.push_back(buffer_ptr);
-                //QLOGI("++ buffer queue {}", m_tx_buffer_queue.size());
-            }
+            std::lock_guard<std::mutex> lg(m_tx_buffer_mutex);
+            size_t offset = m_tx_pending_buffer.size();
+            m_tx_pending_buffer.resize(offset + size);
+            std::copy(reinterpret_cast<uint8_t const*>(data), reinterpret_cast<uint8_t const*>(data) + size, m_tx_pending_buffer.begin() + offset);
 
-            if (m_is_sending.exchange(true) == false)
+            if (!m_is_sending)
             {
-                m_socket.async_write_some(boost::asio::buffer(*buffer_ptr),
+                size_t mtu_size = std::min(32768u, m_tx_pending_buffer.size());
+                m_tx_crt_buffer.resize(mtu_size);
+
+                std::copy(m_tx_pending_buffer.begin(), m_tx_pending_buffer.begin() + mtu_size, m_tx_crt_buffer.begin());
+
+                m_is_sending = true;
+                m_socket.async_write_some(boost::asio::buffer(m_tx_crt_buffer),
                                           boost::bind(&ASIO_Socket_Adapter<Socket_t>::handle_send, this,
-                                                      buffer_ptr,
                                                       boost::asio::placeholders::error,
                                                       boost::asio::placeholders::bytes_transferred));
             }
         }
     }
 
+    size_t get_send_buffer_size() const
+    {
+        return m_pending_to_send_size;
+    }
+
 private:
-    void handle_send(std::shared_ptr<TX_Buffer_t> buffer_ptr,
-                     const boost::system::error_code& error,
-                     std::size_t bytes_transferred)
+    void handle_send(const boost::system::error_code& error, std::size_t bytes_transferred)
     {
         if (error)
         {
@@ -81,30 +86,30 @@ private:
         }
         else
         {
+            std::lock_guard<std::mutex> lg(m_tx_buffer_mutex);
+
+            QASSERT(bytes_transferred <= m_tx_pending_buffer.size());
+            bytes_transferred = std::min(bytes_transferred, m_tx_pending_buffer.size());
+            m_pending_to_send_size -= bytes_transferred;
+
+            m_tx_pending_buffer.erase(m_tx_pending_buffer.begin(), m_tx_pending_buffer.begin() + bytes_transferred);
+
+            if (!m_tx_pending_buffer.empty())
             {
-                std::lock_guard<std::mutex> lg(m_tx_buffer_pool_mutex);
-                m_tx_buffer_pool.push_back(buffer_ptr);
+                size_t mtu_size = std::min(32768u, m_tx_pending_buffer.size());
+                m_tx_crt_buffer.resize(mtu_size);
+
+                std::copy(m_tx_pending_buffer.begin(), m_tx_pending_buffer.begin() + mtu_size, m_tx_crt_buffer.begin());
+
+                m_is_sending = true;
+                m_socket.async_write_some(boost::asio::buffer(m_tx_crt_buffer),
+                                          boost::bind(&ASIO_Socket_Adapter<Socket_t>::handle_send, this,
+                                                      boost::asio::placeholders::error,
+                                                      boost::asio::placeholders::bytes_transferred));
             }
-
+            else
             {
-                std::lock_guard<std::mutex> lg(m_tx_buffer_queue_mutex);
-                QASSERT(m_tx_buffer_queue.front() == buffer_ptr);
-                m_tx_buffer_queue.pop_front();
-                //QLOGI("-- buffer queue {}", m_tx_buffer_queue.size());
-
-                if (!m_tx_buffer_queue.empty())
-                {
-                    buffer_ptr = m_tx_buffer_queue.front();
-                    m_socket.async_write_some(boost::asio::buffer(*buffer_ptr),
-                                              boost::bind(&ASIO_Socket_Adapter<Socket_t>::handle_send, this,
-                                                          buffer_ptr,
-                                                          boost::asio::placeholders::error,
-                                                          boost::asio::placeholders::bytes_transferred));
-                }
-                else
-                {
-                    m_is_sending.exchange(false);
-                }
+                m_is_sending = false;
             }
         }
     }
@@ -150,9 +155,12 @@ private:
     std::array<uint8_t, 512> m_rx_temp_buffer;
     std::mutex m_rx_mutex;
 
-    std::atomic_bool m_is_sending = { false };
-    std::deque<std::shared_ptr<TX_Buffer_t>> m_tx_buffer_queue;
-    std::mutex m_tx_buffer_queue_mutex;
+    std::atomic_uint m_pending_to_send_size = { 0 };
+
+    std::mutex m_tx_buffer_mutex;
+    std::vector<uint8_t> m_tx_crt_buffer;
+    std::deque<uint8_t> m_tx_pending_buffer;
+    bool m_is_sending = false;
 
     std::vector<std::shared_ptr<TX_Buffer_t>> m_tx_buffer_pool;
     std::mutex m_tx_buffer_pool_mutex;
