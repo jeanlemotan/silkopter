@@ -29,7 +29,7 @@
 #include "common/stream/IMultirotor_State.h"
 
 #include "utils/comms/RCP.h"
-#include "utils/comms/Channel.h"
+#include "utils/comms/RCP_Channel.h"
 #include "common/Manual_Clock.h"
 
 #include "common/node/INode.h"
@@ -155,7 +155,7 @@ public:
     boost::signals2::signal<void(Node const&)> sig_node_changed;
 
 
-    typedef util::comms::Channel<uint32_t> Telemetry_Channel;
+    typedef util::comms::RCP_Channel<uint32_t> Telemetry_Channel;
 
     struct ITelemetry_Stream
     {
