@@ -29,6 +29,8 @@ int main(int argc, char *argv[])
 
     a.setQuitOnLastWindowClosed(true);
 
+    QLOGI("Current locale is '{}', changing to 'C'", setlocale(LC_ALL, "C"));
+
     GS w;
     w.show();
     auto res = a.exec();
