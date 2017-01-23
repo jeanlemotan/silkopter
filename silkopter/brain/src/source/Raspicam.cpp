@@ -309,27 +309,14 @@ ts::Result<void> Raspicam::set_config(hal::INode_Config const& config)
 #if defined RASPBERRY_PI
     m_config->set_shutter_speed(math::clamp(m_config->get_shutter_speed(), 0.f, 1000.f / m_descriptor->get_fps()));
     raspicamcontrol_set_shutter_speed(m_impl->camera.get(), static_cast<uint32_t>(m_config->get_shutter_speed() * 1000.f));
-
     raspicamcontrol_set_ISO(m_impl->camera.get(), m_config->get_iso());
-
-    //m_config->ev = math::clamp(m_config->ev, -10, 10);
     raspicamcontrol_set_exposure_compensation(m_impl->camera.get(), m_config->get_ev());
-
-    //m_config->sharpness = math::clamp(m_config->sharpness, 0u, 100u);
     raspicamcontrol_set_sharpness(m_impl->camera.get(), int(m_config->get_sharpness()) * 2 - 100);
-
-    //m_config->contrast = math::clamp(m_config->contrast, 0u, 100u);
     raspicamcontrol_set_contrast(m_impl->camera.get(), int(m_config->get_contrast()) * 2 - 100);
-
-    //m_config->brightness = math::clamp(m_config->brightness, 0u, 100u);
     raspicamcontrol_set_brightness(m_impl->camera.get(), int(m_config->get_brightness()));
-
-    //m_config->saturation = math::clamp(m_config->saturation, 0u, 100u);
     raspicamcontrol_set_saturation(m_impl->camera.get(), int(m_config->get_saturation()) * 2 - 100);
-
-    //m_config->awb_mode = math::clamp(m_config->awb_mode, 0u, 8u);
     raspicamcontrol_set_awb_mode(m_impl->camera.get(), static_cast<MMAL_PARAM_AWBMODE_T>(static_cast<uint32_t>(MMAL_PARAM_AWBMODE_AUTO) + static_cast<int>(m_config->get_awb_mode())));
-    //raspicamcontrol_set_awb_gains(m_impl->camera.get(), m_config->awb_rb_gains.x, m_config->awb_rb_gains.y);
+    raspicamcontrol_set_flips(m_impl->camera.get(), m_config->get_hflip(), m_config->get_vflip());
 #endif
 
     return ts::success;

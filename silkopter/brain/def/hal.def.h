@@ -2636,6 +2636,14 @@ public:
   void set_awb_mode(awb_mode_t&& value);
   auto get_awb_mode() const -> awb_mode_t const&;
 
+  void set_hflip(bool const& value);
+  void set_hflip(bool&& value);
+  auto get_hflip() const -> bool const&;
+
+  void set_vflip(bool const& value);
+  void set_vflip(bool&& value);
+  auto get_vflip() const -> bool const&;
+
   void set_quality(quality_t const& value);
   void set_quality(quality_t&& value);
   auto get_quality() const -> quality_t const&;
@@ -2653,6 +2661,8 @@ private:
   brightness_t m_brightness = {50};
   saturation_t m_saturation = {50};
   awb_mode_t m_awb_mode = {Raspicam_Config::awb_mode_t::AUTO};
+  bool m_hflip = {false};
+  bool m_vflip = {false};
   quality_t m_quality = {Raspicam_Config::quality_t::HIGH};
   bool m_recording = {false};
 };
