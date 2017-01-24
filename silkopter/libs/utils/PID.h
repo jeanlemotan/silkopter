@@ -97,7 +97,7 @@ auto PID<Scalar, Value, Factor>::process(Value_t const& input, Value_t const& ta
     Factor_t derivative = Factor_t();
     if (m_has_kd)
     {
-        if (!m_is_last_input_valid || std::isnan(m_last_derivative) || std::isnan(m_last_input))
+        if (!m_is_last_input_valid || math::is_nan(m_last_derivative) || math::is_nan(m_last_input))
         {
             m_last_input = input;
             m_is_last_input_valid = true;

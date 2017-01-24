@@ -73,6 +73,7 @@ public:
         ANGLE_RATE,
         ANGLE,
         VELOCITY,
+        POSITION,
     };
     enum class Yaw_Mode : uint8_t
     {
