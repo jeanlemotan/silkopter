@@ -91,16 +91,31 @@ auto Multirotor_Brain::get_outputs() const -> std::vector<Output>
     return outputs;
 }
 
-void Multirotor_Brain::set_mode(stream::IMultirotor_State::Mode mode)
+void Multirotor_Brain::set_mode(Mode mode)
 {
     m_mode = mode;
 
-    if (mode == stream::IMultirotor_State::Mode::IDLE)
+    if (mode == Mode::IDLE)
     {
         QLOGI("Reacquiring Home");
         m_home.is_acquired = false;
         m_home.position_history.clear();
     }
+}
+
+void Multirotor_Brain::set_vertical_mode(Vertical_Mode mode)
+{
+    m_vertical_mode = mode;
+}
+
+void Multirotor_Brain::set_horizontal_mode(Horizontal_Mode mode)
+{
+    m_horizontal_mode = mode;
+}
+
+void Multirotor_Brain::set_yaw_mode(Yaw_Mode mode)
+{
+    m_yaw_mode = mode;
 }
 
 ts::Result<void> Multirotor_Brain::check_pre_flight_conditions() const
@@ -154,9 +169,9 @@ void Multirotor_Brain::process_idle_mode()
 
 //    stream::IMultirotor_Commands::Value& prev_commands = m_inputs.local_commands.previous_sample.value;
 //    stream::IMultirotor_Commands::Value& commands = m_inputs.local_commands.sample.value;
-//    QASSERT(commands.mode.get() == stream::IMultirotor_Commands::Mode::IDLE);
+//    QASSERT(commands.mode.get() == Mode::IDLE);
 
-//    if (prev_commands.mode.get() != stream::IMultirotor_Commands::Mode::IDLE)
+//    if (prev_commands.mode.get() != Mode::IDLE)
 //    {
 //    }
 
@@ -172,12 +187,12 @@ void Multirotor_Brain::process_idle_mode()
     m_rate_output_stream->push_sample(stream::IAngular_Velocity::Value(), true);
     m_thrust_output_stream->push_sample(stream::IFloat::Value(), true);
 
-    if (m_inputs.commands.sample.value.mode == stream::IMultirotor_Commands::Mode::FLY)
+    if (m_inputs.commands.sample.value.mode == Mode::FLY)
     {
         ts::Result<void> result = check_pre_flight_conditions();
         if (result == ts::success)
         {
-            set_mode(stream::IMultirotor_State::Mode::FLY);
+            set_mode(Mode::FLY);
             return;
         }
         else
@@ -240,216 +255,46 @@ math::vec2f Multirotor_Brain::compute_horizontal_rate_for_angle(math::vec2f cons
     float diff_x, diff_y, _;
     diff.get_as_euler_zxy(diff_x, diff_y, _);
 
-    float max_speed = math::radians(m_config->get_horizontal_angle().get_max_speed_deg());
+    float max_speed = math::radians(m_config->get_horizontal().get_max_rate_deg());
 
-    float rx = m_horizontal_angle_data.x_pid.process(-diff_x, 0.f);
+    float rx = m_horizontal_mode_data.rate_x_pid.process(-diff_x, 0.f);
     rx = math::clamp(rx, -max_speed, max_speed);
-    float ry = m_horizontal_angle_data.y_pid.process(-diff_y, 0.f);
+    float ry = m_horizontal_mode_data.rate_y_pid.process(-diff_y, 0.f);
     ry = math::clamp(ry, -max_speed, max_speed);
 
     return math::vec2f(rx, ry);
 }
 
-void Multirotor_Brain::mode_armed_apply_commands(const stream::IMultirotor_Commands::Value& prev_commands, stream::IMultirotor_Commands::Value& commands)
+void Multirotor_Brain::process_return_home_mode()
 {
-//    QASSERT(commands.mode.get() == stream::IMultirotor_Commands::Mode::ARMED);
+    const stream::IMultirotor_Commands::Value& prev_commands = m_inputs.commands.previous_sample.value;
+    stream::IMultirotor_Commands::Value& commands = m_inputs.commands.sample.value;
+    QASSERT(m_home.is_acquired);
 
-//    if (!m_home.is_acquired)
-//    {
-//        QLOGW("Trying to arm but Home is not acquired yet. Ignoring request");
-//        commands.mode.set(stream::IMultirotor_Commands::Mode::IDLE);
-//        return;
-//    }
+    set_vertical_mode(Vertical_Mode::ALTITUDE);
+    float distance_2d = math::length(math::vec2f(m_enu_position));
+    if (distance_2d < 10.f)
+    {
+        m_vertical_mode_data.target_altitude = 5.f;
+    }
 
-//    stream::IFloat::Value thrust = m_thrust_output_stream->get_last_sample().value;
-//    stream::IAngular_Velocity::Value rate = m_rate_output_stream->get_last_sample().value;
-
-//    //////////////////////////////////////////////////////////////
-//    // Verticals
-
-//    if (commands.vertical.mode.get() == stream::IMultirotor_Commands::Vertical::Mode::THRUST_RATE)
-//    {
-//        thrust += commands.vertical.thrust_rate.get() * m_dts;
-//    }
-//    else if (commands.vertical.mode.get() == stream::IMultirotor_Commands::Vertical::Mode::THRUST)
-//    {
-//        if (prev_commands.vertical.mode.get() != commands.vertical.mode.get())
-//        {
-//            commands.vertical.thrust.set(thrust);
-//            QLOGI("Vertical mode changed to THRUST. Initializing thrust to {}N", thrust);
-//        }
-
-//        thrust = commands.vertical.thrust.get();
-//    }
-//    else if (commands.vertical.mode.get() == stream::IMultirotor_Commands::Vertical::Mode::ALTITUDE)
-//    {
-//        if (prev_commands.vertical.mode.get() != commands.vertical.mode.get())
-//        {
-//            commands.vertical.altitude.set(m_enu_position.z);
-//            QLOGI("Vertical mode changed to ALTITUDE. Initializing altitude to {}m", m_enu_position.z);
-//        }
-
-//        {
-//            //float output = compute_ff_thrust(commands.vertical.altitude.get());
-//            //thrust = output;
-//        }
-
-//        {
-//            float target_alt = commands.vertical.altitude.get();
-//            float crt_alt = m_enu_position.z;
-
-//            //cascaded PIDS: position P(ID) -> speed PI(D)
-//            float speed_output = m_vertical_altitude_data.position_p.process(crt_alt, target_alt);
-//            speed_output = math::clamp(speed_output, -m_config->get_altitude().get_max_speed(), m_config->get_altitude().get_max_speed());
-
-//            float output = m_vertical_altitude_data.speed_pi.process(m_enu_velocity.z, speed_output);
-
-
-////            float output = m_vertical_altitude_data.pid.process_ex(crt_alt, target_alt, m_enu_velocity.z);
-//            output = math::clamp(output, -1.f, 1.f);
-//            m_vertical_altitude_data.dsp.process(output);
-
-//            float hover_thrust = m_multirotor_properties->get_mass() * physics::constants::g;
-//            float max_thrust_range = math::max(hover_thrust, m_config->get_max_thrust() - hover_thrust);
-
-//            thrust = output * max_thrust_range + hover_thrust;
-//        }
-//    }
-
-//    //clamp thrust
-//    thrust = math::clamp(thrust, m_config->get_min_thrust(), m_config->get_max_thrust());
-
-//    ////////////////////////////////////////////////////////////
-//    // Horizontals
-
-//    if (commands.horizontal.mode.get() == stream::IMultirotor_Commands::Horizontal::Mode::ANGLE_RATE)
-//    {
-//        rate.x = commands.horizontal.angle_rate.get().x;
-//        rate.y = commands.horizontal.angle_rate.get().y;
-//    }
-//    else if (commands.horizontal.mode.get() == stream::IMultirotor_Commands::Horizontal::Mode::ANGLE)
-//    {
-//        math::vec2f hrate = compute_horizontal_rate_for_angle(commands.horizontal.angle.get());
-//        rate.x = hrate.x;
-//        rate.y = hrate.y;
-//    }
-//    else if (commands.horizontal.mode.get() == stream::IMultirotor_Commands::Horizontal::Mode::POSITION)
-//    {
-//        if (prev_commands.horizontal.mode.get() != commands.horizontal.mode.get())
-//        {
-//            commands.horizontal.position.set(math::vec2f(m_enu_position));
-//            QLOGI("Horizontal mode changed to POSITION. Initializing position to {}", math::vec2f(m_enu_position));
-//        }
-
-//        {
-//            math::vec2f target_pos = commands.horizontal.position.get();
-//            math::vec2f crt_pos(m_enu_position);
-
-//            //cascaded PIDS: position P(ID) -> speed PI(D)
-//            math::vec2f velocity_output = m_horizontal_position_data.position_p.process(crt_pos, target_pos);
-//            if (math::length(velocity_output) > m_config->get_horizontal_position().get_max_speed())
-//            {
-//                velocity_output.set_length(m_config->get_horizontal_position().get_max_speed());
-//            }
-
-//            math::vec2f output = m_horizontal_position_data.velocity_pi.process(math::vec2f(m_enu_velocity.x, m_enu_velocity.y), velocity_output);
-
-//            output = math::clamp(output, -math::vec2f(math::radians(20.f)), math::vec2f(math::radians(20.f)));
-//            m_horizontal_position_data.dsp.process(output);
-
-//            //compute the front/right in enu space
-//            math::vec3f front_vector = math::rotate(m_inputs.frame.sample.value, physics::constants::uav_front_vector);
-//            math::vec3f right_vector = math::rotate(m_inputs.frame.sample.value, physics::constants::uav_right_vector);
-
-//            //figure out how the delta displacement maps over the axis
-//            float dx = math::dot(math::vec3f(output, 0.f), right_vector);
-//            float dy = math::dot(math::vec3f(output, 0.f), front_vector);
-
-//            //movement along X axis is obtained by rotation along the Y
-//            //movement along Y axis is obtained by rotation along the -X
-//            math::vec2f angle = math::vec2f(-dy, dx);
-
-//            math::vec2f hrate = compute_horizontal_rate_for_angle(angle);
-//            rate.x = hrate.x;
-//            rate.y = hrate.y;
-//        }
-//    }
-
-//    ///////////////////////////////////////////////////////////
-//    // Yaw
-
-//    if (commands.yaw.mode.get() == stream::IMultirotor_Commands::Yaw::Mode::ANGLE_RATE)
-//    {
-//        rate.z = commands.yaw.angle_rate.get();
-//    }
-//    else if (commands.yaw.mode.get() == stream::IMultirotor_Commands::Yaw::Mode::ANGLE)
-//    {
-//        float fx, fy, fz;
-//        m_inputs.frame.sample.value.get_as_euler_zxy(fx, fy, fz);
-
-//        if (prev_commands.yaw.mode.get() != commands.yaw.mode.get())
-//        {
-//            commands.yaw.angle.set(fz);
-//            QLOGI("Yaw mode changed to ANGLE. Initializing angle to {}m", fz);
-//        }
-
-//        math::quatf target;
-//        target.set_from_euler_zxy(fx, fy, commands.yaw.angle.get());
-//        math::quatf diff = math::inverse(m_inputs.frame.sample.value) * target;
-//        float _, diff_z;
-//        diff.get_as_euler_zxy(_, _, diff_z);
-
-//        float max_speed = math::radians(m_config->get_yaw_angle().get_max_speed_deg());
-
-//        float z = m_yaw_stable_angle_rate_data.pid.process(-diff_z, 0.f);
-//        z = math::clamp(z, -max_speed, max_speed);
-
-//        rate.z = z;
-//    }
-
-//    ///////////////////////////////////////////////////////////
-
-//    m_rate_output_stream->push_sample(rate, true);
-//    m_thrust_output_stream->push_sample(thrust, true);
-}
-
-void Multirotor_Brain::process_return_home_toggle(const stream::IMultirotor_Commands::Value& prev_commands, stream::IMultirotor_Commands::Value& commands)
-{
-//    commands.vertical.mode.set(stream::IMultirotor_Commands::Vertical::Mode::ALTITUDE);
-//    float distance_2d = math::length(math::vec2f(m_enu_position));
-//    if (distance_2d < 10.f)
-//    {
-//        commands.vertical.altitude.set(5.f);
-//    }
-
-//    commands.horizontal.mode.set(stream::IMultirotor_Commands::Horizontal::Mode::POSITION);
-//    commands.horizontal.position.set(math::vec2f::zero);
+    set_horizontal_mode(Horizontal_Mode::POSITION);
+    m_horizontal_mode_data.target_enu_position = math::vec2f::zero;
 }
 
 void Multirotor_Brain::process_fly_mode()
 {
-//    const stream::IMultirotor_Commands::Value& prev_commands = m_inputs.local_commands.previous_sample.value;
-//    stream::IMultirotor_Commands::Value& commands = m_inputs.local_commands.sample.value;
-//    if (!m_home.is_acquired)
-//    {
-//        QLOGW("Trying to arm but Home is not acquired yet. Ignoring request");
-//        commands.mode.set(stream::IMultirotor_Commands::Mode::IDLE);
-//        return;
-//    }
+    const stream::IMultirotor_Commands::Value& prev_commands = m_inputs.commands.previous_sample.value;
+    stream::IMultirotor_Commands::Value& commands = m_inputs.commands.sample.value;
+    QASSERT(m_home.is_acquired);
 
-//    auto now = q::Clock::now();
-//    if (commands.toggles.return_home.get() == false && now - m_inputs.remote_commands.last_valid_tp > std::chrono::seconds(2))
-//    {
-//        QLOGW("No input received for {}. Heading home", now - m_inputs.remote_commands.last_valid_tp);
-//        commands.toggles.return_home.set(true);
-//    }
-
-//    if (commands.toggles.return_home.get())
-//    {
-//        process_return_home_toggle(prev_commands, commands);
-//    }
-
-//    state_mode_armed_apply_commands(prev_commands, commands);
+    auto now = q::Clock::now();
+    if (now - m_inputs.commands.last_valid_tp > std::chrono::seconds(2))
+    {
+        QLOGW("No input received for {}. Heading home", now - m_inputs.commands.last_valid_tp);
+        set_mode(Mode::RETURN_HOME);
+        return;
+    }
 }
 
 //struct Increment_Version
@@ -467,19 +312,190 @@ void Multirotor_Brain::process_fly_mode()
 
 void Multirotor_Brain::process_flight_modes()
 {
+    const stream::IMultirotor_Commands::Value& prev_commands = m_inputs.commands.previous_sample.value;
+    stream::IMultirotor_Commands::Value& commands = m_inputs.commands.sample.value;
+
     m_enu_position = math::vec3f(math::transform(m_home.ecef_to_enu_transform, m_inputs.position.sample.value));
     m_enu_velocity = math::vec3f(math::rotate(m_home.ecef_to_enu_transform, math::vec3d(m_inputs.velocity.sample.value)));
 
-    if (m_mode == stream::IMultirotor_Commands::Mode::FLY)
+    if (m_mode == Mode::FLY)
     {
         process_fly_mode();
     }
+    else if (m_mode == Mode::RETURN_HOME)
+    {
+        process_return_home_mode();
+    }
+
+    QASSERT(m_mode == Mode::FLY ||
+            m_mode == Mode::RETURN_HOME ||
+            m_mode == Mode::LAND ||
+            m_mode == Mode::TAKE_OFF);
+
+    QASSERT(m_home.is_acquired);
+
+//    if (!m_home.is_acquired)
+//    {
+//        QLOGW("Trying to arm but Home is not acquired yet. Ignoring request");
+//        commands.mode.set(Mode::IDLE);
+//        return;
+//    }
+
+    stream::IFloat::Value thrust = m_thrust_output_stream->get_last_sample().value;
+    stream::IAngular_Velocity::Value rate = m_rate_output_stream->get_last_sample().value;
+
+    //////////////////////////////////////////////////////////////
+    // Verticals
+
+    if (m_vertical_mode == stream::IMultirotor_Commands::Vertical_Mode::THRUST)
+    {
+//        if (prev_commands.vertical_mode != commands.vertical.mode)
+//        {
+//            commands.vertical.thrust.set(thrust);
+//            QLOGI("Vertical mode changed to THRUST. Initializing thrust to {}N", thrust);
+//        }
+
+        thrust = commands.sticks.throttle * m_config->get_max_thrust();
+    }
+    else if (m_vertical_mode == stream::IMultirotor_Commands::Vertical_Mode::ALTITUDE)
+    {
+//        if (prev_commands.vertical_mode != commands.vertical_mode)
+//        {
+//            commands.vertical.altitude.set(m_enu_position.z);
+//            QLOGI("Vertical mode changed to ALTITUDE. Initializing altitude to {}m", m_enu_position.z);
+//        }
+
+        {
+            float output = compute_ff_thrust(commands.sticks.throttle * m_config->get_vertical().get_max_speed() * 2.f);
+            thrust = output;
+        }
+
+        {
+            float target_alt = m_vertical_mode_data.target_altitude;
+            float crt_alt = m_enu_position.z;
+
+            //cascaded PIDS: position P(ID) -> speed PI(D)
+            float speed_output = m_vertical_mode_data.altitude_p.process(crt_alt, target_alt);
+            speed_output = math::clamp(speed_output, -m_config->get_vertical().get_max_speed(), m_config->get_vertical().get_max_speed());
+
+            float output = m_vertical_mode_data.speed_pi.process(m_enu_velocity.z, speed_output);
+
+
+//            float output = m_vertical_altitude_data.pid.process_ex(crt_alt, target_alt, m_enu_velocity.z);
+            output = math::clamp(output, -1.f, 1.f);
+            m_vertical_mode_data.altitude_dsp.process(output);
+
+            float hover_thrust = m_multirotor_properties->get_mass() * physics::constants::g;
+            float max_thrust_range = math::max(hover_thrust, m_config->get_max_thrust() - hover_thrust);
+
+            thrust = output * max_thrust_range + hover_thrust;
+        }
+    }
+
+    //clamp thrust
+    thrust = math::clamp(thrust, m_config->get_min_thrust(), m_config->get_max_thrust());
+
+    ////////////////////////////////////////////////////////////
+    // Horizontals
+
+    if (m_horizontal_mode == stream::IMultirotor_Commands::Horizontal_Mode::ANGLE_RATE)
+    {
+        float max_speed = math::radians(m_config->get_horizontal().get_max_rate_deg());
+        rate.x = commands.sticks.pitch * max_speed * 2.f;
+        rate.y = commands.sticks.roll * max_speed * 2.f;
+    }
+    else if (m_horizontal_mode == stream::IMultirotor_Commands::Horizontal_Mode::ANGLE)
+    {
+        math::vec2f const& max_angle = math::radians(m_config->get_horizontal().get_max_angle_deg());
+        math::vec2f hrate = compute_horizontal_rate_for_angle(math::vec2f(commands.sticks.pitch * max_angle.x * 2.f, commands.sticks.roll * max_angle.y * 2.f));
+        rate.x = hrate.x;
+        rate.y = hrate.y;
+    }
+    else if (m_horizontal_mode == stream::IMultirotor_Commands::Horizontal_Mode::POSITION)
+    {
+//        if (prev_commands.horizontal_mode != commands.horizontal_mode)
+//        {
+//            commands.horizontal.position.set(math::vec2f(m_enu_position));
+//            QLOGI("Horizontal mode changed to POSITION. Initializing position to {}", math::vec2f(m_enu_position));
+//        }
+
+        {
+            math::vec2f target_pos = m_horizontal_mode_data.target_enu_position;
+            math::vec2f crt_pos(m_enu_position);
+
+            //cascaded PIDS: position P(ID) -> speed PI(D)
+            math::vec2f velocity_output = m_horizontal_mode_data.position_p.process(crt_pos, target_pos);
+            if (math::length(velocity_output) > m_config->get_horizontal().get_max_speed())
+            {
+                velocity_output.set_length(m_config->get_horizontal().get_max_speed());
+            }
+
+            math::vec2f output = m_horizontal_mode_data.velocity_pi.process(math::vec2f(m_enu_velocity.x, m_enu_velocity.y), velocity_output);
+
+            output = math::clamp(output, -math::vec2f(math::radians(20.f)), math::vec2f(math::radians(20.f)));
+            m_horizontal_mode_data.position_dsp.process(output);
+
+            //compute the front/right in enu space
+            math::vec3f front_vector = math::rotate(m_inputs.frame.sample.value, physics::constants::uav_front_vector);
+            math::vec3f right_vector = math::rotate(m_inputs.frame.sample.value, physics::constants::uav_right_vector);
+
+            //figure out how the delta displacement maps over the axis
+            float dx = math::dot(math::vec3f(output, 0.f), right_vector);
+            float dy = math::dot(math::vec3f(output, 0.f), front_vector);
+
+            //movement along X axis is obtained by rotation along the Y
+            //movement along Y axis is obtained by rotation along the -X
+            math::vec2f angle = math::vec2f(-dy, dx);
+
+            math::vec2f hrate = compute_horizontal_rate_for_angle(angle);
+            rate.x = hrate.x;
+            rate.y = hrate.y;
+        }
+    }
+
+    ///////////////////////////////////////////////////////////
+    // Yaw
+
+    if (m_yaw_mode == stream::IMultirotor_Commands::Yaw_Mode::ANGLE_RATE)
+    {
+        float max_speed = math::radians(m_config->get_yaw().get_max_rate_deg());
+        rate.z = commands.sticks.yaw * max_speed * 2.f;
+    }
+    else if (m_yaw_mode == stream::IMultirotor_Commands::Yaw_Mode::ANGLE)
+    {
+        float fx, fy, fz;
+        m_inputs.frame.sample.value.get_as_euler_zxy(fx, fy, fz);
+
+//        if (prev_commands.yaw_mode != commands.yaw_mode)
+//        {
+//            commands.yaw.angle.set(fz);
+//            QLOGI("Yaw mode changed to ANGLE. Initializing angle to {}m", fz);
+//        }
+
+        math::quatf target;
+//        target.set_from_euler_zxy(fx, fy, commands.yaw.angle);
+        math::quatf diff = math::inverse(m_inputs.frame.sample.value) * target;
+        float _, diff_z;
+        diff.get_as_euler_zxy(_, _, diff_z);
+
+        float max_speed = math::radians(m_config->get_yaw().get_max_rate_deg());
+
+        float z = m_yaw_mode_data.rate_pid.process(-diff_z, 0.f);
+        z = math::clamp(z, -max_speed, max_speed);
+
+        rate.z = z;
+    }
+
+    ///////////////////////////////////////////////////////////
+
+    m_rate_output_stream->push_sample(rate, true);
+    m_thrust_output_stream->push_sample(thrust, true);
 }
 
 
 void Multirotor_Brain::process_mode()
 {
-    if (m_mode == stream::IMultirotor_Commands::Mode::IDLE)
+    if (m_mode == Mode::IDLE)
     {
         process_idle_mode();
     }
@@ -500,7 +516,7 @@ void Multirotor_Brain::process_mode()
 
 void Multirotor_Brain::acquire_home_position()
 {
-    QASSERT(m_mode == stream::IMultirotor_Commands::Mode::IDLE);
+    QASSERT(m_mode == Mode::IDLE);
 
     if (m_home.is_acquired && math::distance(m_home.position, m_inputs.position.sample.value) > 10.f)
     {
@@ -697,84 +713,84 @@ ts::Result<void> Multirotor_Brain::set_config(hal::INode_Config const& config)
     m_config->set_max_thrust(math::clamp(m_config->get_max_thrust(), m_config->get_min_thrust(), m_multirotor_properties->get_motor_thrust() * m_multirotor_properties->get_motors().size()));
 
     {
-        hal::Multirotor_Brain_Config::Horizontal_Angle const& descriptor = m_config->get_horizontal_angle();
-        PID::Params x_params, y_params;
-        if (auto combined_pids = boost::get<hal::Multirotor_Brain_Config::Horizontal_Angle::Combined_XY_PIDs>(&descriptor.get_xy_pids()))
+        hal::Multirotor_Brain_Config::Horizontal const& descriptor = m_config->get_horizontal();
+        PID::Params rate_x_params, rate_y_params;
+        if (auto combined_pids = boost::get<hal::Multirotor_Brain_Config::Horizontal::Combined_Rate_PIDs>(&descriptor.get_rate_pids()))
         {
-            fill_pid_params(x_params, *combined_pids, output_rate);
-            fill_pid_params(y_params, *combined_pids, output_rate);
+            fill_pid_params(rate_x_params, *combined_pids, output_rate);
+            fill_pid_params(rate_y_params, *combined_pids, output_rate);
         }
         else
         {
-            auto separate_pids = boost::get<hal::Multirotor_Brain_Config::Horizontal_Angle::Separate_XY_PIDs>(&descriptor.get_xy_pids());
-            fill_pid_params(x_params, separate_pids->get_x_pid(), output_rate);
-            fill_pid_params(y_params, separate_pids->get_y_pid(), output_rate);
+            auto separate_pids = boost::get<hal::Multirotor_Brain_Config::Horizontal::Separate_Rate_PIDs>(&descriptor.get_rate_pids());
+            fill_pid_params(rate_x_params, separate_pids->get_x_pid(), output_rate);
+            fill_pid_params(rate_y_params, separate_pids->get_y_pid(), output_rate);
         }
 
-        if (!m_horizontal_angle_data.x_pid.set_params(x_params) ||
-                !m_horizontal_angle_data.y_pid.set_params(y_params))
+        if (!m_horizontal_mode_data.rate_x_pid.set_params(rate_x_params) ||
+            !m_horizontal_mode_data.rate_y_pid.set_params(rate_y_params))
         {
-            return make_error("Bad horizontal PID params");
+            return make_error("Bad horizontal rate PID params");
         }
     }
 
     {
         PID::Params params;
-        fill_pid_params(params, m_config->get_yaw_angle().get_pid(), output_rate);
-        if (!m_yaw_stable_angle_rate_data.pid.set_params(params))
+        fill_pid_params(params, m_config->get_yaw().get_rate_pid(), output_rate);
+        if (!m_yaw_mode_data.rate_pid.set_params(params))
         {
-            return make_error("Bad yaw PID params");
+            return make_error("Bad yaw rate PID params");
         }
     }
 
     //altitude
     {
-        PID::Params speed_pi_params, position_p_params;
-        fill_pi_params(speed_pi_params, m_config->get_altitude().get_speed_pi(), output_rate);
-        fill_p_params(position_p_params, m_config->get_altitude().get_position_p(), output_rate);
-        if (!m_vertical_altitude_data.speed_pi.set_params(speed_pi_params))
+        PID::Params speed_pi_params, altitude_p_params;
+        fill_pi_params(speed_pi_params, m_config->get_vertical().get_speed_pid(), output_rate);
+        fill_p_params(altitude_p_params, m_config->get_vertical().get_altitude_pid(), output_rate);
+        if (!m_vertical_mode_data.speed_pi.set_params(speed_pi_params))
         {
-            return make_error("Bad altitude PID params");
+            return make_error("Bad vertical speed PID params");
         }
-        if (!m_vertical_altitude_data.position_p.set_params(position_p_params))
+        if (!m_vertical_mode_data.altitude_p.set_params(altitude_p_params))
         {
-            return make_error("Bad altitude PID params");
+            return make_error("Bad vertical altitude PID params");
         }
     }
 
     {
-        hal::LPF_Config& lpf_config = m_config->get_altitude().get_lpf();
+        hal::LPF_Config& lpf_config = m_config->get_vertical().get_altitude_lpf();
         lpf_config.set_cutoff_frequency(math::clamp(lpf_config.get_cutoff_frequency(), 0.1f, output_rate / 2.f));
-        if (!m_vertical_altitude_data.dsp.setup(lpf_config.get_poles(), output_rate, lpf_config.get_cutoff_frequency()))
+        if (!m_vertical_mode_data.altitude_dsp.setup(lpf_config.get_poles(), output_rate, lpf_config.get_cutoff_frequency()))
         {
-            return make_error("Cannot setup dsp filter.");
+            return make_error("Cannot setup vertical altitude dsp filter.");
         }
-        m_vertical_altitude_data.dsp.reset();
+        m_vertical_mode_data.altitude_dsp.reset();
     }
 
-    //horizontal position
+    //horizontal
     {
         PID2::Params velocity_pi_params, position_p_params;
-        fill_pi_params(velocity_pi_params, m_config->get_horizontal_position().get_velocity_pi(), output_rate);
-        fill_p_params(position_p_params, m_config->get_horizontal_position().get_position_p(), output_rate);
-        if (!m_horizontal_position_data.velocity_pi.set_params(velocity_pi_params))
+        fill_pi_params(velocity_pi_params, m_config->get_horizontal().get_velocity_pid(), output_rate);
+        fill_p_params(position_p_params, m_config->get_horizontal().get_position_pid(), output_rate);
+        if (!m_horizontal_mode_data.velocity_pi.set_params(velocity_pi_params))
         {
-            return make_error("Bad horizontal position PID params");
+            return make_error("Bad horizontal velocity PID params");
         }
-        if (!m_horizontal_position_data.position_p.set_params(position_p_params))
+        if (!m_horizontal_mode_data.position_p.set_params(position_p_params))
         {
             return make_error("Bad horizontal position PID params");
         }
     }
 
     {
-        hal::LPF_Config& lpf_config = m_config->get_horizontal_position().get_lpf();
+        hal::LPF_Config& lpf_config = m_config->get_horizontal().get_position_lpf();
         lpf_config.set_cutoff_frequency(math::clamp(lpf_config.get_cutoff_frequency(), 0.1f, output_rate / 2.f));
-        if (!m_horizontal_position_data.dsp.setup(lpf_config.get_poles(), output_rate, lpf_config.get_cutoff_frequency()))
+        if (!m_horizontal_mode_data.position_dsp.setup(lpf_config.get_poles(), output_rate, lpf_config.get_cutoff_frequency()))
         {
-            return make_error("Cannot setup dsp filter.");
+            return make_error("Cannot setup position dsp filter.");
         }
-        m_horizontal_position_data.dsp.reset();
+        m_horizontal_mode_data.position_dsp.reset();
     }
 
     return ts::success;

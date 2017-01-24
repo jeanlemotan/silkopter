@@ -513,54 +513,56 @@ struct Multirotor_Brain_Descriptor : public INode_Descriptor
 
 struct Multirotor_Brain_Config : public INode_Config
 {
-    struct Horizontal_Angle
+    struct Horizontal
     {
         alias speed_deg_t = ufloat : [ min = 10.f, max = 3000.f ];
+        speed_deg_t max_rate_deg = 180.f : [ ui_name = "Max Rate", ui_suffix = "°/s" ];
 
-        speed_deg_t max_speed_deg = 180.f : [ ui_name = "Max Speed", ui_suffix = "°/s" ];
-
-        alias Combined_XY_PIDs = PID_Controller_Descriptor : [ ui_name = "Combined" ];
-        struct Separate_XY_PIDs : [ ui_name = "Separate" ]
+        alias Combined_Rate_PIDs = PID_Controller_Descriptor : [ ui_name = "Combined" ];
+        struct Separate_Rate_PIDs : [ ui_name = "Separate" ]
         {
             PID_Controller_Descriptor x_pid : [ ui_name = "X" ];
             PID_Controller_Descriptor y_pid : [ ui_name = "Y" ];
         };
+        variant<Combined_Rate_PIDs, Separate_Rate_PIDs> rate_pids : [ ui_name = "Rate PIDs" ];
 
-        variant<Combined_XY_PIDs, Separate_XY_PIDs> xy_pids : [ ui_name = "PIDs" ];
-    };
-    struct Horizontal_Position
-    {
+		alias max_angle_t = vec2f : [ min = {-90.f, -90.f}, max = {90.f, 90.f} ];
+        max_angle_t max_angle_deg = { 60.f, 60.f } : [ ui_name = "Max Angle", ui_suffix = "°" ];
+
         alias speed_t = ufloat : [ max = 10.f ];
-
         speed_t max_speed = 2.f : [ ui_name = "Max Speed", ui_suffix = "m/s" ];
 
-        LPF_Config lpf : [ ui_name = "LPF" ];
-        PI_Controller_Descriptor velocity_pi : [ ui_name = "Velocity PI" ];
-        P_Controller_Descriptor position_p : [ ui_name = "Position P" ];
+        LPF_Config position_lpf : [ ui_name = "Position LPF" ];
+
+        PI_Controller_Descriptor velocity_pid : [ ui_name = "Velocity PID" ];
+        P_Controller_Descriptor position_pid : [ ui_name = "Position PID" ];
     };
-    struct Yaw_Angle
+    struct Yaw
     {
         alias speed_deg_t = ufloat : [ min = 10.f, max = 3000.f ];
+        speed_deg_t max_rate_deg = 180.f : [ ui_name = "Max Rate", ui_suffix = "°/s" ];
 
-        speed_deg_t max_speed_deg = 180.f : [ ui_name = "Max Speed", ui_suffix = "°/s" ];
-        PID_Controller_Descriptor pid : [ ui_name = "PID" ];
+        PID_Controller_Descriptor rate_pid : [ ui_name = "Rate PID" ];
     };
-    struct Altitude
+    struct Vertical
     {
         alias speed_t = ufloat : [ max = 10.f ];
-
         speed_t max_speed = 2.f : [ ui_name = "Max Speed", ui_suffix = "m/s" ];
-        LPF_Config lpf : [ ui_name = "LPF" ];
-        PI_Controller_Descriptor speed_pi : [ ui_name = "Speed PI" ];
-        P_Controller_Descriptor position_p : [ ui_name = "Position P" ];
+
+        LPF_Config altitude_lpf : [ ui_name = "Altitude LPF" ];
+
+        PI_Controller_Descriptor speed_pid : [ ui_name = "Speed PID" ];
+        P_Controller_Descriptor altitude_pid : [ ui_name = "Altitude PID" ];
     };
+
+    ufloat max_allowed_position_variation = 10.f : [ ui_name = "Max Allowed Position Variation", ui_suffix = "m" ];
 
     ufloat max_thrust = 2.f : [ ui_name ="Max Thrust", ui_suffix = "N" ];
     ufloat min_thrust = 1.f : [ ui_name ="Min Thrust", ui_suffix = "N" ];
-    Horizontal_Angle horizontal_angle : [ ui_name = "Horizontal Angle" ];
-    Horizontal_Position horizontal_position : [ ui_name = "Horizontal Position" ];
-    Yaw_Angle yaw_angle : [ ui_name = "Yaw Angle" ];
-    Altitude altitude : [ ui_name = "Altitude" ];
+
+    Vertical vertical : [ ui_name = "Vertical" ];
+    Horizontal horizontal : [ ui_name = "Horizontal" ];
+    Yaw yaw : [ ui_name = "Yaw" ];
 };
 
 //////////////////////////////////////////////////////////////

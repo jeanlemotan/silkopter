@@ -127,14 +127,27 @@ private:
 
     void process_flight_modes();
     void process_fly_mode();
-
-    void mode_armed_apply_commands(const stream::IMultirotor_Commands::Value& prev_commands, stream::IMultirotor_Commands::Value& commands);
-    void process_return_home_toggle(const stream::IMultirotor_Commands::Value& prev_commands, stream::IMultirotor_Commands::Value& commands);
+    void process_return_home_mode();
 
     void process_mode();
-    void set_mode(stream::IMultirotor_State::Mode mode);
 
-    stream::IMultirotor_State::Mode m_mode = stream::IMultirotor_State::Mode::IDLE;
+    typedef stream::IMultirotor_Commands::Mode Mode;
+    typedef stream::IMultirotor_Commands::Vertical_Mode Vertical_Mode;
+    typedef stream::IMultirotor_Commands::Horizontal_Mode Horizontal_Mode;
+    typedef stream::IMultirotor_Commands::Yaw_Mode Yaw_Mode;
+
+    Mode m_mode = Mode::IDLE;
+    void set_mode(Mode mode);
+
+    Vertical_Mode m_vertical_mode = Vertical_Mode::THRUST;
+    void set_vertical_mode(Vertical_Mode mode);
+
+    Horizontal_Mode m_horizontal_mode = Horizontal_Mode::ANGLE;
+    void set_horizontal_mode(Horizontal_Mode mode);
+
+    Yaw_Mode m_yaw_mode = Yaw_Mode::ANGLE_RATE;
+    void set_yaw_mode(Yaw_Mode mode);
+
 
     ts::Result<void> check_pre_flight_conditions() const;
 
@@ -158,30 +171,31 @@ private:
     typedef util::PID<float, float, float> PID;
     typedef util::PID<float, math::vec2f, math::vec2f> PID2;
 
-    struct Vertical_Altitude_Data
+    struct Vertical_Mode_Data
     {
+        float target_altitude = 0;
+
         PID speed_pi;
-        PID position_p;
-        util::Butterworth<float> dsp;
-    } m_vertical_altitude_data;
+        PID altitude_p;
+        util::Butterworth<float> altitude_dsp;
+    } m_vertical_mode_data;
 
-    struct Horizontal_Angle_Data
+    struct Horizontal_Mode_Data
     {
-        PID x_pid;
-        PID y_pid;
-    } m_horizontal_angle_data;
+        math::vec2f target_enu_position;
 
-    struct Horizontal_Position_Data
-    {
+        PID rate_x_pid;
+        PID rate_y_pid;
+
         PID2 velocity_pi;
         PID2 position_p;
-        util::Butterworth<math::vec2f> dsp;
-    } m_horizontal_position_data;
+        util::Butterworth<math::vec2f> position_dsp;
+    } m_horizontal_mode_data;
 
-    struct Yaw_Stable_Angle_Rate_Data
+    struct Yaw_Mode_Data
     {
-        PID pid;
-    } m_yaw_stable_angle_rate_data;
+        PID rate_pid;
+    } m_yaw_mode_data;
 };
 
 

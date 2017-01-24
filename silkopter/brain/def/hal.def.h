@@ -1471,15 +1471,15 @@ private:
 struct Multirotor_Brain_Config : public INode_Config
 {
 public:
-  struct Horizontal_Angle
+  struct Horizontal
   {
   public:
     typedef float speed_deg_t;
-    typedef PID_Controller_Descriptor Combined_XY_PIDs;
-    struct Separate_XY_PIDs
+    typedef PID_Controller_Descriptor Combined_Rate_PIDs;
+    struct Separate_Rate_PIDs
     {
     public:
-      virtual ~Separate_XY_PIDs() = default;
+      virtual ~Separate_Rate_PIDs() = default;
       void set_x_pid(PID_Controller_Descriptor const& value);
       void set_x_pid(PID_Controller_Descriptor&& value);
       auto get_x_pid() const -> PID_Controller_Descriptor const&;
@@ -1495,103 +1495,106 @@ public:
       PID_Controller_Descriptor m_y_pid;
     };
 
-    virtual ~Horizontal_Angle() = default;
-    void set_max_speed_deg(speed_deg_t const& value);
-    void set_max_speed_deg(speed_deg_t&& value);
-    auto get_max_speed_deg() const -> speed_deg_t const&;
-
-    void set_xy_pids(boost::variant<Combined_XY_PIDs,Separate_XY_PIDs> const& value);
-    void set_xy_pids(boost::variant<Combined_XY_PIDs,Separate_XY_PIDs>&& value);
-    auto get_xy_pids() const -> boost::variant<Combined_XY_PIDs,Separate_XY_PIDs> const&;
-    auto get_xy_pids() -> boost::variant<Combined_XY_PIDs,Separate_XY_PIDs>&;
-
-  private:
-    speed_deg_t m_max_speed_deg = {180.000000f};
-    boost::variant<Combined_XY_PIDs,Separate_XY_PIDs> m_xy_pids;
-  };
-
-  struct Horizontal_Position
-  {
-  public:
+    typedef vec2f max_angle_t;
     typedef float speed_t;
-    virtual ~Horizontal_Position() = default;
+    virtual ~Horizontal() = default;
+    void set_max_rate_deg(speed_deg_t const& value);
+    void set_max_rate_deg(speed_deg_t&& value);
+    auto get_max_rate_deg() const -> speed_deg_t const&;
+
+    void set_rate_pids(boost::variant<Combined_Rate_PIDs,Separate_Rate_PIDs> const& value);
+    void set_rate_pids(boost::variant<Combined_Rate_PIDs,Separate_Rate_PIDs>&& value);
+    auto get_rate_pids() const -> boost::variant<Combined_Rate_PIDs,Separate_Rate_PIDs> const&;
+    auto get_rate_pids() -> boost::variant<Combined_Rate_PIDs,Separate_Rate_PIDs>&;
+
+    void set_max_angle_deg(max_angle_t const& value);
+    void set_max_angle_deg(max_angle_t&& value);
+    auto get_max_angle_deg() const -> max_angle_t const&;
+
     void set_max_speed(speed_t const& value);
     void set_max_speed(speed_t&& value);
     auto get_max_speed() const -> speed_t const&;
 
-    void set_lpf(LPF_Config const& value);
-    void set_lpf(LPF_Config&& value);
-    auto get_lpf() const -> LPF_Config const&;
-    auto get_lpf() -> LPF_Config&;
+    void set_position_lpf(LPF_Config const& value);
+    void set_position_lpf(LPF_Config&& value);
+    auto get_position_lpf() const -> LPF_Config const&;
+    auto get_position_lpf() -> LPF_Config&;
 
-    void set_velocity_pi(PI_Controller_Descriptor const& value);
-    void set_velocity_pi(PI_Controller_Descriptor&& value);
-    auto get_velocity_pi() const -> PI_Controller_Descriptor const&;
-    auto get_velocity_pi() -> PI_Controller_Descriptor&;
+    void set_velocity_pid(PI_Controller_Descriptor const& value);
+    void set_velocity_pid(PI_Controller_Descriptor&& value);
+    auto get_velocity_pid() const -> PI_Controller_Descriptor const&;
+    auto get_velocity_pid() -> PI_Controller_Descriptor&;
 
-    void set_position_p(P_Controller_Descriptor const& value);
-    void set_position_p(P_Controller_Descriptor&& value);
-    auto get_position_p() const -> P_Controller_Descriptor const&;
-    auto get_position_p() -> P_Controller_Descriptor&;
+    void set_position_pid(P_Controller_Descriptor const& value);
+    void set_position_pid(P_Controller_Descriptor&& value);
+    auto get_position_pid() const -> P_Controller_Descriptor const&;
+    auto get_position_pid() -> P_Controller_Descriptor&;
 
   private:
+    speed_deg_t m_max_rate_deg = {180.000000f};
+    boost::variant<Combined_Rate_PIDs,Separate_Rate_PIDs> m_rate_pids;
+    max_angle_t m_max_angle_deg = {60.000000f, 60.000000f};
     speed_t m_max_speed = {2.000000f};
-    LPF_Config m_lpf;
-    PI_Controller_Descriptor m_velocity_pi;
-    P_Controller_Descriptor m_position_p;
+    LPF_Config m_position_lpf;
+    PI_Controller_Descriptor m_velocity_pid;
+    P_Controller_Descriptor m_position_pid;
   };
 
-  struct Yaw_Angle
+  struct Yaw
   {
   public:
     typedef float speed_deg_t;
-    virtual ~Yaw_Angle() = default;
-    void set_max_speed_deg(speed_deg_t const& value);
-    void set_max_speed_deg(speed_deg_t&& value);
-    auto get_max_speed_deg() const -> speed_deg_t const&;
+    virtual ~Yaw() = default;
+    void set_max_rate_deg(speed_deg_t const& value);
+    void set_max_rate_deg(speed_deg_t&& value);
+    auto get_max_rate_deg() const -> speed_deg_t const&;
 
-    void set_pid(PID_Controller_Descriptor const& value);
-    void set_pid(PID_Controller_Descriptor&& value);
-    auto get_pid() const -> PID_Controller_Descriptor const&;
-    auto get_pid() -> PID_Controller_Descriptor&;
+    void set_rate_pid(PID_Controller_Descriptor const& value);
+    void set_rate_pid(PID_Controller_Descriptor&& value);
+    auto get_rate_pid() const -> PID_Controller_Descriptor const&;
+    auto get_rate_pid() -> PID_Controller_Descriptor&;
 
   private:
-    speed_deg_t m_max_speed_deg = {180.000000f};
-    PID_Controller_Descriptor m_pid;
+    speed_deg_t m_max_rate_deg = {180.000000f};
+    PID_Controller_Descriptor m_rate_pid;
   };
 
-  struct Altitude
+  struct Vertical
   {
   public:
     typedef float speed_t;
-    virtual ~Altitude() = default;
+    virtual ~Vertical() = default;
     void set_max_speed(speed_t const& value);
     void set_max_speed(speed_t&& value);
     auto get_max_speed() const -> speed_t const&;
 
-    void set_lpf(LPF_Config const& value);
-    void set_lpf(LPF_Config&& value);
-    auto get_lpf() const -> LPF_Config const&;
-    auto get_lpf() -> LPF_Config&;
+    void set_altitude_lpf(LPF_Config const& value);
+    void set_altitude_lpf(LPF_Config&& value);
+    auto get_altitude_lpf() const -> LPF_Config const&;
+    auto get_altitude_lpf() -> LPF_Config&;
 
-    void set_speed_pi(PI_Controller_Descriptor const& value);
-    void set_speed_pi(PI_Controller_Descriptor&& value);
-    auto get_speed_pi() const -> PI_Controller_Descriptor const&;
-    auto get_speed_pi() -> PI_Controller_Descriptor&;
+    void set_speed_pid(PI_Controller_Descriptor const& value);
+    void set_speed_pid(PI_Controller_Descriptor&& value);
+    auto get_speed_pid() const -> PI_Controller_Descriptor const&;
+    auto get_speed_pid() -> PI_Controller_Descriptor&;
 
-    void set_position_p(P_Controller_Descriptor const& value);
-    void set_position_p(P_Controller_Descriptor&& value);
-    auto get_position_p() const -> P_Controller_Descriptor const&;
-    auto get_position_p() -> P_Controller_Descriptor&;
+    void set_altitude_pid(P_Controller_Descriptor const& value);
+    void set_altitude_pid(P_Controller_Descriptor&& value);
+    auto get_altitude_pid() const -> P_Controller_Descriptor const&;
+    auto get_altitude_pid() -> P_Controller_Descriptor&;
 
   private:
     speed_t m_max_speed = {2.000000f};
-    LPF_Config m_lpf;
-    PI_Controller_Descriptor m_speed_pi;
-    P_Controller_Descriptor m_position_p;
+    LPF_Config m_altitude_lpf;
+    PI_Controller_Descriptor m_speed_pid;
+    P_Controller_Descriptor m_altitude_pid;
   };
 
   virtual ~Multirotor_Brain_Config() = default;
+  void set_max_allowed_position_variation(ufloat const& value);
+  void set_max_allowed_position_variation(ufloat&& value);
+  auto get_max_allowed_position_variation() const -> ufloat const&;
+
   void set_max_thrust(ufloat const& value);
   void set_max_thrust(ufloat&& value);
   auto get_max_thrust() const -> ufloat const&;
@@ -1600,33 +1603,28 @@ public:
   void set_min_thrust(ufloat&& value);
   auto get_min_thrust() const -> ufloat const&;
 
-  void set_horizontal_angle(Horizontal_Angle const& value);
-  void set_horizontal_angle(Horizontal_Angle&& value);
-  auto get_horizontal_angle() const -> Horizontal_Angle const&;
-  auto get_horizontal_angle() -> Horizontal_Angle&;
+  void set_vertical(Vertical const& value);
+  void set_vertical(Vertical&& value);
+  auto get_vertical() const -> Vertical const&;
+  auto get_vertical() -> Vertical&;
 
-  void set_horizontal_position(Horizontal_Position const& value);
-  void set_horizontal_position(Horizontal_Position&& value);
-  auto get_horizontal_position() const -> Horizontal_Position const&;
-  auto get_horizontal_position() -> Horizontal_Position&;
+  void set_horizontal(Horizontal const& value);
+  void set_horizontal(Horizontal&& value);
+  auto get_horizontal() const -> Horizontal const&;
+  auto get_horizontal() -> Horizontal&;
 
-  void set_yaw_angle(Yaw_Angle const& value);
-  void set_yaw_angle(Yaw_Angle&& value);
-  auto get_yaw_angle() const -> Yaw_Angle const&;
-  auto get_yaw_angle() -> Yaw_Angle&;
-
-  void set_altitude(Altitude const& value);
-  void set_altitude(Altitude&& value);
-  auto get_altitude() const -> Altitude const&;
-  auto get_altitude() -> Altitude&;
+  void set_yaw(Yaw const& value);
+  void set_yaw(Yaw&& value);
+  auto get_yaw() const -> Yaw const&;
+  auto get_yaw() -> Yaw&;
 
 private:
+  ufloat m_max_allowed_position_variation = {10.000000f};
   ufloat m_max_thrust = {2.000000f};
   ufloat m_min_thrust = {1.000000f};
-  Horizontal_Angle m_horizontal_angle;
-  Horizontal_Position m_horizontal_position;
-  Yaw_Angle m_yaw_angle;
-  Altitude m_altitude;
+  Vertical m_vertical;
+  Horizontal m_horizontal;
+  Yaw m_yaw;
 };
 
 struct Multirotor_Pilot_Descriptor : public INode_Descriptor
@@ -3281,20 +3279,18 @@ ts::Result<void> deserialize(MS5611_Config& value, ts::sz::Value const& sz_value
 ts::sz::Value serialize(MS5611_Config const& value);
 ts::Result<void> deserialize(Multirotor_Brain_Descriptor& value, ts::sz::Value const& sz_value);
 ts::sz::Value serialize(Multirotor_Brain_Descriptor const& value);
-ts::Result<void> deserialize(Multirotor_Brain_Config::Horizontal_Angle::Separate_XY_PIDs& value, ts::sz::Value const& sz_value);
-ts::sz::Value serialize(Multirotor_Brain_Config::Horizontal_Angle::Separate_XY_PIDs const& value);
-ts::Result<void> deserialize(Multirotor_Brain_Config::Horizontal_Angle& value, ts::sz::Value const& sz_value);
-ts::sz::Value serialize(Multirotor_Brain_Config::Horizontal_Angle const& value);
-ts::Result<void> deserialize(Multirotor_Brain_Config::Horizontal_Position& value, ts::sz::Value const& sz_value);
-ts::sz::Value serialize(Multirotor_Brain_Config::Horizontal_Position const& value);
-ts::Result<void> deserialize(Multirotor_Brain_Config::Yaw_Angle& value, ts::sz::Value const& sz_value);
-ts::sz::Value serialize(Multirotor_Brain_Config::Yaw_Angle const& value);
-ts::Result<void> deserialize(Multirotor_Brain_Config::Altitude& value, ts::sz::Value const& sz_value);
-ts::sz::Value serialize(Multirotor_Brain_Config::Altitude const& value);
+ts::Result<void> deserialize(Multirotor_Brain_Config::Horizontal::Separate_Rate_PIDs& value, ts::sz::Value const& sz_value);
+ts::sz::Value serialize(Multirotor_Brain_Config::Horizontal::Separate_Rate_PIDs const& value);
+ts::Result<void> deserialize(Multirotor_Brain_Config::Horizontal& value, ts::sz::Value const& sz_value);
+ts::sz::Value serialize(Multirotor_Brain_Config::Horizontal const& value);
+ts::Result<void> deserialize(Multirotor_Brain_Config::Yaw& value, ts::sz::Value const& sz_value);
+ts::sz::Value serialize(Multirotor_Brain_Config::Yaw const& value);
+ts::Result<void> deserialize(Multirotor_Brain_Config::Vertical& value, ts::sz::Value const& sz_value);
+ts::sz::Value serialize(Multirotor_Brain_Config::Vertical const& value);
 ts::Result<void> deserialize(Multirotor_Brain_Config& value, ts::sz::Value const& sz_value);
 ts::sz::Value serialize(Multirotor_Brain_Config const& value);
-ts::Result<void> deserialize(boost::variant<Multirotor_Brain_Config::Horizontal_Angle::Combined_XY_PIDs,Multirotor_Brain_Config::Horizontal_Angle::Separate_XY_PIDs>& value, ts::sz::Value const& sz_value);
-ts::sz::Value serialize(boost::variant<Multirotor_Brain_Config::Horizontal_Angle::Combined_XY_PIDs,Multirotor_Brain_Config::Horizontal_Angle::Separate_XY_PIDs> const& value);
+ts::Result<void> deserialize(boost::variant<Multirotor_Brain_Config::Horizontal::Combined_Rate_PIDs,Multirotor_Brain_Config::Horizontal::Separate_Rate_PIDs>& value, ts::sz::Value const& sz_value);
+ts::sz::Value serialize(boost::variant<Multirotor_Brain_Config::Horizontal::Combined_Rate_PIDs,Multirotor_Brain_Config::Horizontal::Separate_Rate_PIDs> const& value);
 ts::Result<void> deserialize(Multirotor_Pilot_Descriptor& value, ts::sz::Value const& sz_value);
 ts::sz::Value serialize(Multirotor_Pilot_Descriptor const& value);
 ts::Result<void> deserialize(Multirotor_Pilot_Config& value, ts::sz::Value const& sz_value);
