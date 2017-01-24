@@ -106,8 +106,7 @@ private:
             q::Clock::time_point last_valid_tp;
         };
 
-        Data<stream::IMultirotor_Commands::Sample> local_commands;
-        Data<stream::IMultirotor_Commands::Sample> remote_commands;
+        Data<stream::IMultirotor_Commands::Sample> commands;
         Data<stream::IFrame::Sample> frame;
         Data<stream::IECEF_Position::Sample> position;
         Data<stream::IECEF_Velocity::Sample> velocity;
@@ -124,12 +123,20 @@ private:
     float compute_ff_thrust(float target_altitude);
     math::vec2f compute_horizontal_rate_for_angle(math::vec2f const& angle);
 
-    void process_state_mode_idle();
-    void process_state_mode_armed();
-    void state_mode_armed_apply_commands(const stream::IMultirotor_Commands::Value& prev_commands, stream::IMultirotor_Commands::Value& commands);
+    void process_idle_mode();
+
+    void process_flight_modes();
+    void process_fly_mode();
+
+    void mode_armed_apply_commands(const stream::IMultirotor_Commands::Value& prev_commands, stream::IMultirotor_Commands::Value& commands);
     void process_return_home_toggle(const stream::IMultirotor_Commands::Value& prev_commands, stream::IMultirotor_Commands::Value& commands);
 
-    void process_state();
+    void process_mode();
+    void set_mode(stream::IMultirotor_State::Mode mode);
+
+    stream::IMultirotor_State::Mode m_mode = stream::IMultirotor_State::Mode::IDLE;
+
+    ts::Result<void> check_pre_flight_conditions() const;
 
     void acquire_home_position();
     struct Home

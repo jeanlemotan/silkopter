@@ -193,7 +193,7 @@ int main(int argc, char const* argv[])
 #ifdef NDEBUG
                 if (dt > std::chrono::milliseconds(5))
 #else
-                if (dt > std::chrono::milliseconds(20))
+                if (dt > std::chrono::milliseconds(50))
 #endif
                 {
                     QLOGW("Process Latency of {}!!!!!", dt);
@@ -207,6 +207,31 @@ int main(int argc, char const* argv[])
 #ifndef RASPBERRY_PI
                 std::this_thread::sleep_for(std::chrono::milliseconds(1));
 #endif
+
+                {
+                    static q::Clock::time_point last_timestamp = q::Clock::now();
+                    auto now = q::Clock::now();
+                    auto dt = now - last_timestamp;
+                    last_timestamp = now;
+                    static q::Clock::duration min_dt, max_dt, avg_dt;
+                    static int xxx = 0;
+                    min_dt = std::min(min_dt, dt);
+                    max_dt = std::max(max_dt, dt);
+                    avg_dt += dt;
+                    xxx++;
+                    static q::Clock::time_point xxx_timestamp = q::Clock::now();
+                    if (now - xxx_timestamp >= std::chrono::milliseconds(1000))
+                    {
+                        xxx_timestamp = now;
+
+                        QLOGI("min {}, max {}, avg {}", min_dt, max_dt, avg_dt/ xxx);
+                        min_dt = dt;
+                        max_dt = dt;
+                        avg_dt = std::chrono::milliseconds(0);
+
+                        xxx = 0;
+                    }
+                }
             }
         }
 

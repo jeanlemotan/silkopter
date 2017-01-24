@@ -91,17 +91,73 @@ auto Multirotor_Brain::get_outputs() const -> std::vector<Output>
     return outputs;
 }
 
-void Multirotor_Brain::process_state_mode_idle()
+void Multirotor_Brain::set_mode(stream::IMultirotor_State::Mode mode)
 {
+    m_mode = mode;
+
+    if (mode == stream::IMultirotor_State::Mode::IDLE)
+    {
+        QLOGI("Reacquiring Home");
+        m_home.is_acquired = false;
+        m_home.position_history.clear();
+    }
+}
+
+ts::Result<void> Multirotor_Brain::check_pre_flight_conditions() const
+{
+    if (!m_home.is_acquired)
+    {
+        return make_error("Home is not acquired!");
+    }
+
+    auto now = q::Clock::now();
+
+    if (now - m_inputs.commands.last_valid_tp > std::chrono::milliseconds(100))
+    {
+        return make_error("Command stream is failing!");
+    }
+    if (now - m_inputs.frame.last_valid_tp > std::chrono::milliseconds(100))
+    {
+        return make_error("Frame stream is failing!");
+    }
+    if (now - m_inputs.linear_acceleration.last_valid_tp > std::chrono::milliseconds(100))
+    {
+        return make_error("Linear acceleration stream is failing!");
+    }
+    if (now - m_inputs.position.last_valid_tp > std::chrono::milliseconds(100))
+    {
+        return make_error("Proximity stream is failing!");
+    }
+    if (now - m_inputs.velocity.last_valid_tp > std::chrono::milliseconds(100))
+    {
+        return make_error("Velocity stream is failing!");
+    }
+    if (now - m_inputs.position.last_valid_tp > std::chrono::milliseconds(100))
+    {
+        return make_error("Position stream is failing!");
+    }
+
+    if (math::length(m_enu_velocity) > 1.f)
+    {
+        return make_error("The UAV seems to be moving!");
+    }
+
+    return ts::success;
+}
+
+void Multirotor_Brain::process_idle_mode()
+{
+    acquire_home_position();
+
+    m_enu_position = math::vec3f::zero;
+    m_enu_velocity = math::vec3f::zero;
+
 //    stream::IMultirotor_Commands::Value& prev_commands = m_inputs.local_commands.previous_sample.value;
 //    stream::IMultirotor_Commands::Value& commands = m_inputs.local_commands.sample.value;
 //    QASSERT(commands.mode.get() == stream::IMultirotor_Commands::Mode::IDLE);
 
 //    if (prev_commands.mode.get() != stream::IMultirotor_Commands::Mode::IDLE)
 //    {
-//        QLOGI("Reacquiring Home");
-//        m_home.is_acquired = false;
-//        m_home.position_history.clear();
 //    }
 
 //    commands.vertical.thrust_rate.set(0);
@@ -115,6 +171,20 @@ void Multirotor_Brain::process_state_mode_idle()
 
     m_rate_output_stream->push_sample(stream::IAngular_Velocity::Value(), true);
     m_thrust_output_stream->push_sample(stream::IFloat::Value(), true);
+
+    if (m_inputs.commands.sample.value.mode == stream::IMultirotor_Commands::Mode::FLY)
+    {
+        ts::Result<void> result = check_pre_flight_conditions();
+        if (result == ts::success)
+        {
+            set_mode(stream::IMultirotor_State::Mode::FLY);
+            return;
+        }
+        else
+        {
+            QLOGW("Cannot set FLY mode, preflight checks failed: {}", result.error().what());
+        }
+    }
 }
 
 float Multirotor_Brain::compute_ff_thrust(float target_altitude)
@@ -180,7 +250,7 @@ math::vec2f Multirotor_Brain::compute_horizontal_rate_for_angle(math::vec2f cons
     return math::vec2f(rx, ry);
 }
 
-void Multirotor_Brain::state_mode_armed_apply_commands(const stream::IMultirotor_Commands::Value& prev_commands, stream::IMultirotor_Commands::Value& commands)
+void Multirotor_Brain::mode_armed_apply_commands(const stream::IMultirotor_Commands::Value& prev_commands, stream::IMultirotor_Commands::Value& commands)
 {
 //    QASSERT(commands.mode.get() == stream::IMultirotor_Commands::Mode::ARMED);
 
@@ -356,7 +426,7 @@ void Multirotor_Brain::process_return_home_toggle(const stream::IMultirotor_Comm
 //    commands.horizontal.position.set(math::vec2f::zero);
 }
 
-void Multirotor_Brain::process_state_mode_armed()
+void Multirotor_Brain::process_fly_mode()
 {
 //    const stream::IMultirotor_Commands::Value& prev_commands = m_inputs.local_commands.previous_sample.value;
 //    stream::IMultirotor_Commands::Value& commands = m_inputs.local_commands.sample.value;
@@ -394,36 +464,29 @@ void Multirotor_Brain::process_state_mode_armed()
 //        return true;
 //    }
 //};
-struct Merge_Commands
+
+void Multirotor_Brain::process_flight_modes()
 {
-    template<class T>
-    bool operator()(const char* name, T const& remote_prev, T const& remote_crt, T& local)
+    m_enu_position = math::vec3f(math::transform(m_home.ecef_to_enu_transform, m_inputs.position.sample.value));
+    m_enu_velocity = math::vec3f(math::rotate(m_home.ecef_to_enu_transform, math::vec3d(m_inputs.velocity.sample.value)));
+
+    if (m_mode == stream::IMultirotor_Commands::Mode::FLY)
     {
-        if (remote_crt.version != remote_prev.version)
-        {
-            local.set(remote_crt.get());
-        }
-        return true;
+        process_fly_mode();
     }
-};
+}
 
 
-void Multirotor_Brain::process_state()
+void Multirotor_Brain::process_mode()
 {
-//    if (m_inputs.local_commands.sample.value.mode.get() == stream::IMultirotor_Commands::Mode::IDLE)
-//    {
-//        m_enu_position = math::vec3f::zero;
-//        m_enu_velocity = math::vec3f::zero;
-
-//        process_state_mode_idle();
-//    }
-//    else if (m_inputs.local_commands.sample.value.mode.get() == stream::IMultirotor_Commands::Mode::ARMED)
-//    {
-//        m_enu_position = math::vec3f(math::transform(m_home.ecef_to_enu_transform, m_inputs.position.sample.value));
-//        m_enu_velocity = math::vec3f(math::rotate(m_home.ecef_to_enu_transform, math::vec3d(m_inputs.velocity.sample.value)));
-
-//        process_state_mode_armed();
-//    }
+    if (m_mode == stream::IMultirotor_Commands::Mode::IDLE)
+    {
+        process_idle_mode();
+    }
+    else
+    {
+        process_flight_modes();
+    }
 
 
 
@@ -437,34 +500,61 @@ void Multirotor_Brain::process_state()
 
 void Multirotor_Brain::acquire_home_position()
 {
-//    if (m_inputs.local_commands.sample.value.mode.get() == stream::IMultirotor_Commands::Mode::IDLE)
-//    {
-//        std::deque<util::coordinates::ECEF>& history = m_home.position_history;
-//        size_t per_second = static_cast<size_t>(1.f / m_dts);
-//        while (history.size() > 5 * per_second + 1)
-//        {
-//            if (!m_home.is_acquired)
-//            {
-//                QLOGI("Home acquired!!!");
-//                m_home.is_acquired = true;
-//            }
+    QASSERT(m_mode == stream::IMultirotor_Commands::Mode::IDLE);
 
-//            history.pop_front();
-//        }
-//        util::coordinates::ECEF avg;
-//        double mul = 1.0 / double(history.size());
-//        for (util::coordinates::ECEF const& h: history)
-//        {
-//            avg += h * mul;
-//        }
-//        //auto avg_ = std::accumulate(history.begin(), history.end(), util::coordinates::ECEF(0));
-//        //avg_ /= double(history.size());
+    if (m_home.is_acquired && math::distance(m_home.position, m_inputs.position.sample.value) > 10.f)
+    {
+        m_home.is_acquired = false;
+    }
 
-//        m_home.position = avg;
-//        util::coordinates::LLA lla_position = util::coordinates::ecef_to_lla(m_home.position);
-//        util::coordinates::enu_to_ecef_transform_and_inv(lla_position, m_home.enu_to_ecef_transform, m_home.ecef_to_enu_transform);
-//        util::coordinates::enu_to_ecef_rotation_and_inv(lla_position, m_home.enu_to_ecef_rotation, m_home.ecef_to_enu_rotation);
-//    }
+    bool is_stable = true;
+
+    std::deque<util::coordinates::ECEF>& history = m_home.position_history;
+
+    //check if the position is stable
+    for (size_t i = 1; i < history.size(); i++)
+    {
+        if (math::distance(history[0], history[1]) > m_config->get_max_allowed_position_variation())
+        {
+            if (m_home.is_acquired)
+            {
+                QLOGI("Home un-acquired. Too instable!!!");
+                m_home.is_acquired = false;
+            }
+
+            is_stable = false;
+            break;
+        }
+    }
+
+    //clamp the history size
+    size_t per_second = static_cast<size_t>(1.f / m_dts);
+    while (history.size() > 5 * per_second + 1)
+    {
+        if (is_stable && !m_home.is_acquired)
+        {
+            QLOGI("Home acquired!!!");
+            m_home.is_acquired = true;
+        }
+
+        history.pop_front();
+    }
+
+    //compute the average
+    util::coordinates::ECEF avg;
+    double mul = 1.0 / double(history.size());
+    for (util::coordinates::ECEF const& h: history)
+    {
+        avg += h * mul;
+    }
+
+    //auto avg_ = std::accumulate(history.begin(), history.end(), util::coordinates::ECEF(0));
+    //avg_ /= double(history.size());
+
+    m_home.position = avg;
+    util::coordinates::LLA lla_position = util::coordinates::ecef_to_lla(m_home.position);
+    util::coordinates::enu_to_ecef_transform_and_inv(lla_position, m_home.enu_to_ecef_transform, m_home.ecef_to_enu_transform);
+    util::coordinates::enu_to_ecef_rotation_and_inv(lla_position, m_home.enu_to_ecef_rotation, m_home.ecef_to_enu_rotation);
 }
 
 void Multirotor_Brain::refresh_inputs(stream::IFrame::Sample const& frame,
@@ -504,39 +594,14 @@ void Multirotor_Brain::process()
 {
     QLOG_TOPIC("Multirotor_Brain::process");
 
-    {
-        static q::Clock::time_point last_timestamp = q::Clock::now();
-        auto now = q::Clock::now();
-        auto dt = now - last_timestamp;
-        last_timestamp = now;
-        static q::Clock::duration min_dt, max_dt, avg_dt;
-        static int xxx = 0;
-        min_dt = std::min(min_dt, dt);
-        max_dt = std::max(max_dt, dt);
-        avg_dt += dt;
-        xxx++;
-        static q::Clock::time_point xxx_timestamp = q::Clock::now();
-        if (now - xxx_timestamp >= std::chrono::milliseconds(1000))
-        {
-            xxx_timestamp = now;
-
-            QLOGI("min {}, max {}, avg {}", min_dt, max_dt, avg_dt/ xxx);
-            min_dt = dt;
-            max_dt = dt;
-            avg_dt = std::chrono::milliseconds(0);
-
-            xxx = 0;
-        }
-    }
-
     m_state_output_stream->clear();
     m_rate_output_stream->clear();
     m_thrust_output_stream->clear();
 
     m_commands_accumulator.process([this](stream::IMultirotor_Commands::Sample const& i_commands)
     {
-        m_inputs.remote_commands.sample = i_commands;
-        m_inputs.remote_commands.last_valid_tp = i_commands.is_healthy ? q::Clock::now() : m_inputs.remote_commands.last_valid_tp;
+        m_inputs.commands.sample = i_commands;
+        m_inputs.commands.last_valid_tp = i_commands.is_healthy ? q::Clock::now() : m_inputs.commands.last_valid_tp;
     });
 
 //    Merge_Commands func;
@@ -554,16 +619,13 @@ void Multirotor_Brain::process()
         m_battery_state_sample = m_battery.process(i_voltage, i_current);
 
         refresh_inputs(i_frame, i_position, i_velocity, i_linear_acceleration, i_proximity);
-        process_state();
+        process_mode();
     });
-
-    acquire_home_position();
 
     size_t samples_needed = m_state_output_stream->compute_samples_needed();
     if (samples_needed > 0)
     {
         stream::IMultirotor_State::Value state;
-//        state.time_point = q::Clock::now();
         state.ecef_position = m_inputs.position.sample.value;
         state.enu_velocity = m_enu_velocity;
         state.battery_state.average_current = m_battery_state_sample.value.average_current;
@@ -571,7 +633,7 @@ void Multirotor_Brain::process()
         state.battery_state.capacity_left = m_battery_state_sample.value.capacity_left;
         state.battery_state.charge_used = m_battery_state_sample.value.charge_used;
         state.local_frame = m_inputs.frame.sample.value;
-        //state.mode = m_mode
+        state.mode = m_mode;
 
         for (size_t i = 0; i < samples_needed; i++)
         {
