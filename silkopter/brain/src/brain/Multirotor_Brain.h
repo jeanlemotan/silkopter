@@ -120,8 +120,11 @@ private:
                         stream::IECEF_Linear_Acceleration::Sample const& linear_acceleration,
                         stream::IProximity::Sample const& proximity);
 
-    float compute_ff_thrust(float target_altitude);
-    math::vec2f compute_horizontal_rate_for_angle(math::vec2f const& angle);
+    float compute_ff_thrust(float target_altitude) const;
+    math::vec2f compute_horizontal_rate_for_angle(math::vec2f const& target_angle);
+    math::vec2f compute_horizontal_rate_for_position(math::vec2f const& target_pos);
+    float compute_thrust_for_altitude(float target_alt);
+    float compute_yaw_rate_for_angle(float target_angle);
 
     void process_idle_mode();
 
@@ -194,6 +197,8 @@ private:
 
     struct Yaw_Mode_Data
     {
+        float target_angle = 0.f;
+
         PID rate_pid;
     } m_yaw_mode_data;
 };

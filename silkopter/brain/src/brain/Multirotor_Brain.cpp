@@ -11,6 +11,8 @@ namespace silk
 namespace node
 {
 
+//////////////////////////////////////////////////////////////////////////////////////////
+
 Multirotor_Brain::Multirotor_Brain(HAL& hal)
     : m_hal(hal)
     , m_descriptor(new hal::Multirotor_Brain_Descriptor())
@@ -20,6 +22,8 @@ Multirotor_Brain::Multirotor_Brain(HAL& hal)
     m_rate_output_stream = std::make_shared<Rate_Output_Stream>();
     m_thrust_output_stream = std::make_shared<Thrust_Output_Stream>();
 }
+
+//////////////////////////////////////////////////////////////////////////////////////////
 
 ts::Result<void> Multirotor_Brain::init(hal::INode_Descriptor const& descriptor)
 {
@@ -34,6 +38,8 @@ ts::Result<void> Multirotor_Brain::init(hal::INode_Descriptor const& descriptor)
 
     return init();
 }
+
+//////////////////////////////////////////////////////////////////////////////////////////
 
 ts::Result<void> Multirotor_Brain::init()
 {
@@ -57,6 +63,8 @@ ts::Result<void> Multirotor_Brain::init()
     return ts::success;
 }
 
+//////////////////////////////////////////////////////////////////////////////////////////
+
 ts::Result<void> Multirotor_Brain::start(q::Clock::time_point tp)
 {
     m_state_output_stream->set_tp(tp);
@@ -65,7 +73,9 @@ ts::Result<void> Multirotor_Brain::start(q::Clock::time_point tp)
     return ts::success;
 }
 
-auto Multirotor_Brain::get_inputs() const -> std::vector<Input>
+//////////////////////////////////////////////////////////////////////////////////////////
+
+std::vector<Multirotor_Brain::Input> Multirotor_Brain::get_inputs() const
 {
     std::vector<Input> inputs =
     {{
@@ -80,7 +90,10 @@ auto Multirotor_Brain::get_inputs() const -> std::vector<Input>
      }};
     return inputs;
 }
-auto Multirotor_Brain::get_outputs() const -> std::vector<Output>
+
+//////////////////////////////////////////////////////////////////////////////////////////
+
+std::vector<Multirotor_Brain::Output> Multirotor_Brain::get_outputs() const
 {
     std::vector<Output> outputs =
     {{
@@ -90,6 +103,8 @@ auto Multirotor_Brain::get_outputs() const -> std::vector<Output>
      }};
     return outputs;
 }
+
+//////////////////////////////////////////////////////////////////////////////////////////
 
 void Multirotor_Brain::set_mode(Mode mode)
 {
@@ -103,20 +118,61 @@ void Multirotor_Brain::set_mode(Mode mode)
     }
 }
 
+//////////////////////////////////////////////////////////////////////////////////////////
+
 void Multirotor_Brain::set_vertical_mode(Vertical_Mode mode)
 {
+    if (m_vertical_mode == mode)
+    {
+        return;
+    }
     m_vertical_mode = mode;
+
+    if (mode == Vertical_Mode::ALTITUDE)
+    {
+        m_vertical_mode_data.target_altitude = m_enu_position.z;
+        QLOGI("Vertical mode changed to ALTITUDE. Initializing altitude to {}m", m_vertical_mode_data.target_altitude);
+    }
 }
+
+//////////////////////////////////////////////////////////////////////////////////////////
 
 void Multirotor_Brain::set_horizontal_mode(Horizontal_Mode mode)
 {
+    if (m_horizontal_mode == mode)
+    {
+        return;
+    }
     m_horizontal_mode = mode;
+
+    if (mode == Horizontal_Mode::VELOCITY)
+    {
+        m_horizontal_mode_data.target_enu_position = math::vec2f(m_enu_position);
+        QLOGI("Horizontal mode changed to VELOCITY. Initializing position to {}", m_horizontal_mode_data.target_enu_position);
+    }
 }
+
+//////////////////////////////////////////////////////////////////////////////////////////
 
 void Multirotor_Brain::set_yaw_mode(Yaw_Mode mode)
 {
+    if (m_yaw_mode == mode)
+    {
+        return;
+    }
     m_yaw_mode = mode;
+
+    if (mode == Yaw_Mode::ANGLE)
+    {
+        float _, fz;
+        m_inputs.frame.sample.value.get_as_euler_zxy(_, _, fz);
+
+        m_yaw_mode_data.target_angle = fz;
+        QLOGI("Yaw mode changed to ANGLE. Initializing angle to {}", m_yaw_mode_data.target_angle);
+    }
 }
+
+//////////////////////////////////////////////////////////////////////////////////////////
 
 ts::Result<void> Multirotor_Brain::check_pre_flight_conditions() const
 {
@@ -160,29 +216,14 @@ ts::Result<void> Multirotor_Brain::check_pre_flight_conditions() const
     return ts::success;
 }
 
+//////////////////////////////////////////////////////////////////////////////////////////
+
 void Multirotor_Brain::process_idle_mode()
 {
     acquire_home_position();
 
     m_enu_position = math::vec3f::zero;
     m_enu_velocity = math::vec3f::zero;
-
-//    stream::IMultirotor_Commands::Value& prev_commands = m_inputs.local_commands.previous_sample.value;
-//    stream::IMultirotor_Commands::Value& commands = m_inputs.local_commands.sample.value;
-//    QASSERT(commands.mode.get() == Mode::IDLE);
-
-//    if (prev_commands.mode.get() != Mode::IDLE)
-//    {
-//    }
-
-//    commands.vertical.thrust_rate.set(0);
-//    commands.vertical.thrust.set(0);
-//    commands.vertical.altitude.set(0);
-//    commands.horizontal.angle_rate.set(math::vec2f::zero);
-//    commands.horizontal.angle.set(math::vec2f::zero);
-//    commands.horizontal.position.set(math::vec2f::zero);
-//    commands.yaw.angle_rate.set(0);
-//    commands.yaw.angle.set(0);
 
     m_rate_output_stream->push_sample(stream::IAngular_Velocity::Value(), true);
     m_thrust_output_stream->push_sample(stream::IFloat::Value(), true);
@@ -202,7 +243,9 @@ void Multirotor_Brain::process_idle_mode()
     }
 }
 
-float Multirotor_Brain::compute_ff_thrust(float target_altitude)
+//////////////////////////////////////////////////////////////////////////////////////////
+
+float Multirotor_Brain::compute_ff_thrust(float target_altitude) const
 {
     float mass = m_multirotor_properties->get_mass();
 
@@ -244,13 +287,15 @@ float Multirotor_Brain::compute_ff_thrust(float target_altitude)
     }
 }
 
-math::vec2f Multirotor_Brain::compute_horizontal_rate_for_angle(math::vec2f const& angle)
+//////////////////////////////////////////////////////////////////////////////////////////
+
+math::vec2f Multirotor_Brain::compute_horizontal_rate_for_angle(math::vec2f const& target_angle)
 {
     float fx, fy, fz;
     m_inputs.frame.sample.value.get_as_euler_zxy(fx, fy, fz);
 
     math::quatf target;
-    target.set_from_euler_zxy(angle.x, angle.y, fz);
+    target.set_from_euler_zxy(target_angle.x, target_angle.y, fz);
     math::quatf diff = math::inverse(m_inputs.frame.sample.value) * target;
     float diff_x, diff_y, _;
     diff.get_as_euler_zxy(diff_x, diff_y, _);
@@ -265,6 +310,85 @@ math::vec2f Multirotor_Brain::compute_horizontal_rate_for_angle(math::vec2f cons
     return math::vec2f(rx, ry);
 }
 
+//////////////////////////////////////////////////////////////////////////////////////////
+
+math::vec2f Multirotor_Brain::compute_horizontal_rate_for_position(math::vec2f const& target_pos)
+{
+    math::vec2f crt_pos(m_enu_position);
+
+    //cascaded PIDS: position P(ID) -> speed PI(D)
+    math::vec2f velocity_output = m_horizontal_mode_data.position_p.process(crt_pos, target_pos);
+    if (math::length(velocity_output) > m_config->get_horizontal().get_max_speed())
+    {
+        velocity_output.set_length(m_config->get_horizontal().get_max_speed());
+    }
+
+    math::vec2f output = m_horizontal_mode_data.velocity_pi.process(math::vec2f(m_enu_velocity.x, m_enu_velocity.y), velocity_output);
+
+    output = math::clamp(output, -math::vec2f(math::radians(20.f)), math::vec2f(math::radians(20.f)));
+    m_horizontal_mode_data.position_dsp.process(output);
+
+    //compute the front/right in enu space
+    math::vec3f front_vector = math::rotate(m_inputs.frame.sample.value, physics::constants::uav_front_vector);
+    math::vec3f right_vector = math::rotate(m_inputs.frame.sample.value, physics::constants::uav_right_vector);
+
+    //figure out how the delta displacement maps over the axis
+    float dx = math::dot(math::vec3f(output, 0.f), right_vector);
+    float dy = math::dot(math::vec3f(output, 0.f), front_vector);
+
+    //movement along X axis is obtained by rotation along the Y
+    //movement along Y axis is obtained by rotation along the -X
+    math::vec2f angle = math::vec2f(-dy, dx);
+
+    return compute_horizontal_rate_for_angle(angle);
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////
+
+float Multirotor_Brain::compute_thrust_for_altitude(float target_alt)
+{
+    float crt_alt = m_enu_position.z;
+
+    //cascaded PIDS: position P(ID) -> speed PI(D)
+    float speed_output = m_vertical_mode_data.altitude_p.process(crt_alt, target_alt);
+    speed_output = math::clamp(speed_output, -m_config->get_vertical().get_max_speed(), m_config->get_vertical().get_max_speed());
+
+    float output = m_vertical_mode_data.speed_pi.process(m_enu_velocity.z, speed_output);
+
+
+//            float output = m_vertical_altitude_data.pid.process_ex(crt_alt, target_alt, m_enu_velocity.z);
+    output = math::clamp(output, -1.f, 1.f);
+    m_vertical_mode_data.altitude_dsp.process(output);
+
+    float hover_thrust = m_multirotor_properties->get_mass() * physics::constants::g;
+    float max_thrust_range = math::max(hover_thrust, m_config->get_max_thrust() - hover_thrust);
+
+    return output * max_thrust_range + hover_thrust;
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////
+
+float Multirotor_Brain::compute_yaw_rate_for_angle(float target_angle)
+{
+    float fx, fy, fz;
+    m_inputs.frame.sample.value.get_as_euler_zxy(fx, fy, fz);
+
+    math::quatf target;
+    target.set_from_euler_zxy(fx, fy, target_angle);
+    math::quatf diff = math::inverse(m_inputs.frame.sample.value) * target;
+    float _, diff_z;
+    diff.get_as_euler_zxy(_, _, diff_z);
+
+    float max_speed = math::radians(m_config->get_yaw().get_max_rate_deg());
+
+    float z = m_yaw_mode_data.rate_pid.process(-diff_z, 0.f);
+    z = math::clamp(z, -max_speed, max_speed);
+
+    return z;
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////
+
 void Multirotor_Brain::process_return_home_mode()
 {
     const stream::IMultirotor_Commands::Value& prev_commands = m_inputs.commands.previous_sample.value;
@@ -278,9 +402,52 @@ void Multirotor_Brain::process_return_home_mode()
         m_vertical_mode_data.target_altitude = 5.f;
     }
 
-    set_horizontal_mode(Horizontal_Mode::POSITION);
+    set_horizontal_mode(Horizontal_Mode::VELOCITY);
     m_horizontal_mode_data.target_enu_position = math::vec2f::zero;
+
+    stream::IFloat::Value thrust = m_thrust_output_stream->get_last_sample().value;
+    stream::IAngular_Velocity::Value rate = m_rate_output_stream->get_last_sample().value;
+
+    //////////////////////////////////////////////////////////////
+    // Verticals
+
+    {
+        //apply command
+        thrust = compute_thrust_for_altitude(m_vertical_mode_data.target_altitude);
+    }
+
+    //clamp thrust
+    thrust = math::clamp(thrust, m_config->get_min_thrust(), m_config->get_max_thrust());
+
+    ////////////////////////////////////////////////////////////
+    // Horizontals
+
+    if (m_horizontal_mode == stream::IMultirotor_Commands::Horizontal_Mode::VELOCITY)
+    {
+        //apply command
+        rate = compute_horizontal_rate_for_position(m_horizontal_mode_data.target_enu_position);
+    }
+
+    ///////////////////////////////////////////////////////////
+    // Yaw
+
+    if (m_yaw_mode == stream::IMultirotor_Commands::Yaw_Mode::ANGLE)
+    {
+        float max_speed = math::radians(m_config->get_yaw().get_max_rate_deg());
+        float speed = commands.sticks.yaw * max_speed * 2.f;
+
+        m_yaw_mode_data.target_angle += speed * m_dts;
+
+        rate.z = compute_yaw_rate_for_angle(m_yaw_mode_data.target_angle);
+    }
+
+    ///////////////////////////////////////////////////////////
+
+    m_rate_output_stream->push_sample(rate, true);
+    m_thrust_output_stream->push_sample(thrust, true);
 }
+
+//////////////////////////////////////////////////////////////////////////////////////////
 
 void Multirotor_Brain::process_fly_mode()
 {
@@ -295,20 +462,88 @@ void Multirotor_Brain::process_fly_mode()
         set_mode(Mode::RETURN_HOME);
         return;
     }
+
+    stream::IFloat::Value thrust = m_thrust_output_stream->get_last_sample().value;
+    stream::IAngular_Velocity::Value rate = m_rate_output_stream->get_last_sample().value;
+
+    //////////////////////////////////////////////////////////////
+    // Verticals
+
+    if (m_vertical_mode == stream::IMultirotor_Commands::Vertical_Mode::THRUST)
+    {
+        thrust = commands.sticks.throttle * m_config->get_max_thrust();
+    }
+    else if (m_vertical_mode == stream::IMultirotor_Commands::Vertical_Mode::ALTITUDE)
+    {
+        {
+            //float output = compute_ff_thrust(commands.sticks.throttle * m_config->get_vertical().get_max_speed() * 2.f);
+            //thrust = output;
+        }
+
+        //apply command
+        float speed = m_config->get_vertical().get_max_speed() * commands.sticks.throttle * 2.f;
+        m_vertical_mode_data.target_altitude += speed * m_dts;
+
+        thrust = compute_thrust_for_altitude(m_vertical_mode_data.target_altitude);
+    }
+
+    //clamp thrust
+    thrust = math::clamp(thrust, m_config->get_min_thrust(), m_config->get_max_thrust());
+
+    ////////////////////////////////////////////////////////////
+    // Horizontals
+
+    if (m_horizontal_mode == stream::IMultirotor_Commands::Horizontal_Mode::ANGLE_RATE)
+    {
+        float max_speed = math::radians(m_config->get_horizontal().get_max_rate_deg());
+        rate.x = commands.sticks.pitch * max_speed * 2.f;
+        rate.y = commands.sticks.roll * max_speed * 2.f;
+    }
+    else if (m_horizontal_mode == stream::IMultirotor_Commands::Horizontal_Mode::ANGLE)
+    {
+        math::vec2f const& max_angle = math::radians(m_config->get_horizontal().get_max_angle_deg());
+        math::vec2f hrate = compute_horizontal_rate_for_angle(math::vec2f(commands.sticks.pitch * max_angle.x * 2.f, commands.sticks.roll * max_angle.y * 2.f));
+        rate.x = hrate.x;
+        rate.y = hrate.y;
+    }
+    else if (m_horizontal_mode == stream::IMultirotor_Commands::Horizontal_Mode::VELOCITY)
+    {
+        //apply command
+        math::vec2f velocity_local(commands.sticks.pitch * m_config->get_horizontal().get_max_speed() * 2.f,
+                                   commands.sticks.roll * m_config->get_horizontal().get_max_speed() * 2.f);
+
+        math::vec2f velocity_enu(math::rotate(m_inputs.frame.sample.value, math::vec3f(velocity_local)));
+
+        m_horizontal_mode_data.target_enu_position += velocity_enu * m_dts;
+
+        rate = compute_horizontal_rate_for_position(m_horizontal_mode_data.target_enu_position);
+    }
+
+    ///////////////////////////////////////////////////////////
+    // Yaw
+
+    if (m_yaw_mode == stream::IMultirotor_Commands::Yaw_Mode::ANGLE_RATE)
+    {
+        float max_speed = math::radians(m_config->get_yaw().get_max_rate_deg());
+        rate.z = commands.sticks.yaw * max_speed * 2.f;
+    }
+    else if (m_yaw_mode == stream::IMultirotor_Commands::Yaw_Mode::ANGLE)
+    {
+        float max_speed = math::radians(m_config->get_yaw().get_max_rate_deg());
+        float speed = commands.sticks.yaw * max_speed * 2.f;
+
+        m_yaw_mode_data.target_angle += speed * m_dts;
+
+        rate.z = compute_yaw_rate_for_angle(m_yaw_mode_data.target_angle);
+    }
+
+    ///////////////////////////////////////////////////////////
+
+    m_rate_output_stream->push_sample(rate, true);
+    m_thrust_output_stream->push_sample(thrust, true);
 }
 
-//struct Increment_Version
-//{
-//    template<class T>
-//    bool operator()(const char* name, T const& prev, T& crt)
-//    {
-//        if (crt.get() != prev.get())
-//        {
-//            crt.version++;
-//        }
-//        return true;
-//    }
-//};
+//////////////////////////////////////////////////////////////////////////////////////////
 
 void Multirotor_Brain::process_flight_modes()
 {
@@ -340,158 +575,9 @@ void Multirotor_Brain::process_flight_modes()
 //        commands.mode.set(Mode::IDLE);
 //        return;
 //    }
-
-    stream::IFloat::Value thrust = m_thrust_output_stream->get_last_sample().value;
-    stream::IAngular_Velocity::Value rate = m_rate_output_stream->get_last_sample().value;
-
-    //////////////////////////////////////////////////////////////
-    // Verticals
-
-    if (m_vertical_mode == stream::IMultirotor_Commands::Vertical_Mode::THRUST)
-    {
-//        if (prev_commands.vertical_mode != commands.vertical.mode)
-//        {
-//            commands.vertical.thrust.set(thrust);
-//            QLOGI("Vertical mode changed to THRUST. Initializing thrust to {}N", thrust);
-//        }
-
-        thrust = commands.sticks.throttle * m_config->get_max_thrust();
-    }
-    else if (m_vertical_mode == stream::IMultirotor_Commands::Vertical_Mode::ALTITUDE)
-    {
-//        if (prev_commands.vertical_mode != commands.vertical_mode)
-//        {
-//            commands.vertical.altitude.set(m_enu_position.z);
-//            QLOGI("Vertical mode changed to ALTITUDE. Initializing altitude to {}m", m_enu_position.z);
-//        }
-
-        {
-            float output = compute_ff_thrust(commands.sticks.throttle * m_config->get_vertical().get_max_speed() * 2.f);
-            thrust = output;
-        }
-
-        {
-            float target_alt = m_vertical_mode_data.target_altitude;
-            float crt_alt = m_enu_position.z;
-
-            //cascaded PIDS: position P(ID) -> speed PI(D)
-            float speed_output = m_vertical_mode_data.altitude_p.process(crt_alt, target_alt);
-            speed_output = math::clamp(speed_output, -m_config->get_vertical().get_max_speed(), m_config->get_vertical().get_max_speed());
-
-            float output = m_vertical_mode_data.speed_pi.process(m_enu_velocity.z, speed_output);
-
-
-//            float output = m_vertical_altitude_data.pid.process_ex(crt_alt, target_alt, m_enu_velocity.z);
-            output = math::clamp(output, -1.f, 1.f);
-            m_vertical_mode_data.altitude_dsp.process(output);
-
-            float hover_thrust = m_multirotor_properties->get_mass() * physics::constants::g;
-            float max_thrust_range = math::max(hover_thrust, m_config->get_max_thrust() - hover_thrust);
-
-            thrust = output * max_thrust_range + hover_thrust;
-        }
-    }
-
-    //clamp thrust
-    thrust = math::clamp(thrust, m_config->get_min_thrust(), m_config->get_max_thrust());
-
-    ////////////////////////////////////////////////////////////
-    // Horizontals
-
-    if (m_horizontal_mode == stream::IMultirotor_Commands::Horizontal_Mode::ANGLE_RATE)
-    {
-        float max_speed = math::radians(m_config->get_horizontal().get_max_rate_deg());
-        rate.x = commands.sticks.pitch * max_speed * 2.f;
-        rate.y = commands.sticks.roll * max_speed * 2.f;
-    }
-    else if (m_horizontal_mode == stream::IMultirotor_Commands::Horizontal_Mode::ANGLE)
-    {
-        math::vec2f const& max_angle = math::radians(m_config->get_horizontal().get_max_angle_deg());
-        math::vec2f hrate = compute_horizontal_rate_for_angle(math::vec2f(commands.sticks.pitch * max_angle.x * 2.f, commands.sticks.roll * max_angle.y * 2.f));
-        rate.x = hrate.x;
-        rate.y = hrate.y;
-    }
-    else if (m_horizontal_mode == stream::IMultirotor_Commands::Horizontal_Mode::POSITION)
-    {
-//        if (prev_commands.horizontal_mode != commands.horizontal_mode)
-//        {
-//            commands.horizontal.position.set(math::vec2f(m_enu_position));
-//            QLOGI("Horizontal mode changed to POSITION. Initializing position to {}", math::vec2f(m_enu_position));
-//        }
-
-        {
-            math::vec2f target_pos = m_horizontal_mode_data.target_enu_position;
-            math::vec2f crt_pos(m_enu_position);
-
-            //cascaded PIDS: position P(ID) -> speed PI(D)
-            math::vec2f velocity_output = m_horizontal_mode_data.position_p.process(crt_pos, target_pos);
-            if (math::length(velocity_output) > m_config->get_horizontal().get_max_speed())
-            {
-                velocity_output.set_length(m_config->get_horizontal().get_max_speed());
-            }
-
-            math::vec2f output = m_horizontal_mode_data.velocity_pi.process(math::vec2f(m_enu_velocity.x, m_enu_velocity.y), velocity_output);
-
-            output = math::clamp(output, -math::vec2f(math::radians(20.f)), math::vec2f(math::radians(20.f)));
-            m_horizontal_mode_data.position_dsp.process(output);
-
-            //compute the front/right in enu space
-            math::vec3f front_vector = math::rotate(m_inputs.frame.sample.value, physics::constants::uav_front_vector);
-            math::vec3f right_vector = math::rotate(m_inputs.frame.sample.value, physics::constants::uav_right_vector);
-
-            //figure out how the delta displacement maps over the axis
-            float dx = math::dot(math::vec3f(output, 0.f), right_vector);
-            float dy = math::dot(math::vec3f(output, 0.f), front_vector);
-
-            //movement along X axis is obtained by rotation along the Y
-            //movement along Y axis is obtained by rotation along the -X
-            math::vec2f angle = math::vec2f(-dy, dx);
-
-            math::vec2f hrate = compute_horizontal_rate_for_angle(angle);
-            rate.x = hrate.x;
-            rate.y = hrate.y;
-        }
-    }
-
-    ///////////////////////////////////////////////////////////
-    // Yaw
-
-    if (m_yaw_mode == stream::IMultirotor_Commands::Yaw_Mode::ANGLE_RATE)
-    {
-        float max_speed = math::radians(m_config->get_yaw().get_max_rate_deg());
-        rate.z = commands.sticks.yaw * max_speed * 2.f;
-    }
-    else if (m_yaw_mode == stream::IMultirotor_Commands::Yaw_Mode::ANGLE)
-    {
-        float fx, fy, fz;
-        m_inputs.frame.sample.value.get_as_euler_zxy(fx, fy, fz);
-
-//        if (prev_commands.yaw_mode != commands.yaw_mode)
-//        {
-//            commands.yaw.angle.set(fz);
-//            QLOGI("Yaw mode changed to ANGLE. Initializing angle to {}m", fz);
-//        }
-
-        math::quatf target;
-//        target.set_from_euler_zxy(fx, fy, commands.yaw.angle);
-        math::quatf diff = math::inverse(m_inputs.frame.sample.value) * target;
-        float _, diff_z;
-        diff.get_as_euler_zxy(_, _, diff_z);
-
-        float max_speed = math::radians(m_config->get_yaw().get_max_rate_deg());
-
-        float z = m_yaw_mode_data.rate_pid.process(-diff_z, 0.f);
-        z = math::clamp(z, -max_speed, max_speed);
-
-        rate.z = z;
-    }
-
-    ///////////////////////////////////////////////////////////
-
-    m_rate_output_stream->push_sample(rate, true);
-    m_thrust_output_stream->push_sample(thrust, true);
 }
 
+//////////////////////////////////////////////////////////////////////////////////////////
 
 void Multirotor_Brain::process_mode()
 {
@@ -513,6 +599,8 @@ void Multirotor_Brain::process_mode()
 //    //back up the current commands
 //    m_inputs.local_commands.previous_sample = m_inputs.local_commands.sample;
 }
+
+//////////////////////////////////////////////////////////////////////////////////////////
 
 void Multirotor_Brain::acquire_home_position()
 {
@@ -573,6 +661,8 @@ void Multirotor_Brain::acquire_home_position()
     util::coordinates::enu_to_ecef_rotation_and_inv(lla_position, m_home.enu_to_ecef_rotation, m_home.ecef_to_enu_rotation);
 }
 
+//////////////////////////////////////////////////////////////////////////////////////////
+
 void Multirotor_Brain::refresh_inputs(stream::IFrame::Sample const& frame,
                                 stream::IECEF_Position::Sample const& position,
                                 stream::IECEF_Velocity::Sample const& velocity,
@@ -605,6 +695,8 @@ void Multirotor_Brain::refresh_inputs(stream::IFrame::Sample const& frame,
     m_inputs.proximity.sample = proximity;
     m_inputs.proximity.last_valid_tp = proximity.is_healthy ? now : m_inputs.proximity.last_valid_tp;
 }
+
+//////////////////////////////////////////////////////////////////////////////////////////
 
 void Multirotor_Brain::process()
 {
@@ -658,6 +750,8 @@ void Multirotor_Brain::process()
     }
 }
 
+//////////////////////////////////////////////////////////////////////////////////////////
+
 ts::Result<void> Multirotor_Brain::set_input_stream_path(size_t idx, std::string const& path)
 {
     if (idx == 0)
@@ -670,6 +764,8 @@ ts::Result<void> Multirotor_Brain::set_input_stream_path(size_t idx, std::string
     }
     return ts::success;
 }
+
+//////////////////////////////////////////////////////////////////////////////////////////
 
 template<class T, class PID>
 void fill_pid_params(T& dst, PID const& src, size_t rate)
@@ -695,6 +791,8 @@ void fill_p_params(T& dst, P const& src, size_t rate)
     dst.kp = src.get_kp();
     dst.rate = rate;
 }
+
+//////////////////////////////////////////////////////////////////////////////////////////
 
 ts::Result<void> Multirotor_Brain::set_config(hal::INode_Config const& config)
 {
@@ -795,52 +893,20 @@ ts::Result<void> Multirotor_Brain::set_config(hal::INode_Config const& config)
 
     return ts::success;
 }
-auto Multirotor_Brain::get_config() const -> std::shared_ptr<const hal::INode_Config>
+
+//////////////////////////////////////////////////////////////////////////////////////////
+
+std::shared_ptr<const hal::INode_Config> Multirotor_Brain::get_config() const
 {
     return m_config;
 }
 
-auto Multirotor_Brain::get_descriptor() const -> std::shared_ptr<const hal::INode_Descriptor>
+//////////////////////////////////////////////////////////////////////////////////////////
+
+std::shared_ptr<const hal::INode_Descriptor> Multirotor_Brain::get_descriptor() const
 {
     return m_descriptor;
 }
-
-//auto Multirotor_Brain::send_message(rapidjson::Value const& json) -> rapidjson::Document
-//{
-//    rapidjson::Document response;
-
-//    auto* messagej = jsonutil::find_value(json, std::string("message"));
-//    if (!messagej && messagej->IsString())
-//    {
-//        jsonutil::add_value(response, std::string("error"), rapidjson::Value("Message not found"), response.GetAllocator());
-//        return std::move(response);
-//    }
-
-//    std::string message = messagej->GetString();
-//    if (message == "reset battery")
-//    {
-//        m_battery.reset();
-//    }
-//    else if (message == "battery capacity")
-//    {
-//        auto* capacityj = jsonutil::find_value(json, std::string("capacity"));
-//        if (!capacityj || capacityj->IsNumber())
-//        {
-//            jsonutil::add_value(response, std::string("error"), rapidjson::Value("Capacity not found"), response.GetAllocator());
-//            return std::move(response);
-//        }
-
-//        LiPo_Battery::Config config;
-//        config.full_charge = capacityj->GetDouble();
-//        m_battery.set_config(config);
-//    }
-//    else
-//    {
-//        jsonutil::add_value(response, std::string("error"), rapidjson::Value("Unknown command"), response.GetAllocator());
-//    }
-
-//    return std::move(response);
-//}
 
 }
 }
