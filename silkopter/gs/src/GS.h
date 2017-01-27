@@ -4,6 +4,7 @@
 #include "ui_GS.h"
 
 #include "Comms.h"
+#include "utils/Clock.h"
 
 class Value_Editor_Factory;
 
@@ -23,7 +24,7 @@ private:
 
     void read_settings();
 
-    q::Clock::time_point m_process_last_tp;
+    Clock::time_point m_process_last_tp;
 
     Ui::GS m_ui;
 

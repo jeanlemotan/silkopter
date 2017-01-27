@@ -20,7 +20,7 @@ Numeric_Viewer_Widget::~Numeric_Viewer_Widget()
 void Numeric_Viewer_Widget::init(std::string const& unit, uint32_t sample_rate, bool fft)
 {
     m_sample_rate = sample_rate;
-    m_dts = q::Seconds(1.f / float(sample_rate)).count();
+    m_dts = std::chrono::duration<float>(1.f / float(sample_rate)).count();
 
     m_ui.setupUi(this);
 

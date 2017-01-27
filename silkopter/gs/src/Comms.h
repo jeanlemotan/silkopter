@@ -28,6 +28,7 @@
 #include "common/stream/IMultirotor_Commands.h"
 #include "common/stream/IMultirotor_State.h"
 
+#include "utils/Clock.h"
 #include "utils/comms/RCP.h"
 #include "utils/comms/RCP_Channel.h"
 #include "common/Manual_Clock.h"
@@ -189,13 +190,13 @@ public:
 
     struct Internal_Telementry_Sample
     {
-        q::Clock::duration total_duration;
-        q::Clock::duration max_total_duration;
+        Clock::duration total_duration;
+        Clock::duration max_total_duration;
         struct Node
         {
             std::string name;
-            q::Clock::duration duration;
-            q::Clock::duration max_duration;
+            Clock::duration duration;
+            Clock::duration max_duration;
         };
         std::vector<Node> nodes;
     };

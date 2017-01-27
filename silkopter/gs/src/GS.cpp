@@ -1,6 +1,7 @@
 #include "GS.h"
 
 #include "value_editors/Value_Editor_Factory.h"
+#include "utils/Clock.h"
 
 #include <QInputDialog>
 #include <QMessageBox>
@@ -36,7 +37,7 @@ GS::GS(QWidget *parent)
     m_ui.nodes_widget->init(m_ui.toolbar, m_comms, *m_ui.properties_browser);
     m_ui.properties_browser->init(m_editor_factory);
 
-    m_process_last_tp = q::Clock::now();
+    m_process_last_tp = Clock::now();
 
     auto* timer = new QTimer(this);
     timer->setSingleShot(false);
@@ -148,7 +149,7 @@ void GS::process()
 
     m_comms.process_rcp();
 
-    auto now = q::Clock::now();
+    auto now = Clock::now();
     auto dt = now - m_process_last_tp;
     if (dt >= std::chrono::milliseconds(33))
     {

@@ -58,7 +58,6 @@ extern "C"
 
 #include "_qmath.h"
 #include "QBase.h"
-#include "QData.h"
 
 #include "def_lang/Type_System.h"
 #include "def_lang/IVector_Value.h"
