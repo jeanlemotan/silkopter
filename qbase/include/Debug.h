@@ -11,11 +11,7 @@ namespace q
 {
 	namespace debug
 	{
-#if defined Q_AVR
-#	define DBG_STRING q::FString<64>
-#else
-#	define DBG_STRING q::String
-#endif
+#define DBG_STRING std::string
 
 		//The assert handler is called whenever an assert fails and shoud present a message to the user.
 		// 	condition contains a stringified condition that failed
@@ -33,11 +29,9 @@ namespace q
 			//this is responsible of formatting the messages and calling the handler
 			void call_handler(const char* condition, const char* file, int line, const char* msg);
 
-#if !defined Q_AVR
 			//uset to mark/test once asserts as being taken or not
 			bool is_assert_enabled(const char* file, int line);
 			void set_assert_enabled(const char* file, int line, bool enabled);
-#endif
 		}
 
         void dump_stacktrace();

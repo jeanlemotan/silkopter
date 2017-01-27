@@ -44,32 +44,21 @@ UI_DIR = ./.ui/$${DEST_FOLDER}
 DESTDIR = ../../lib/$${DEST_FOLDER}
 
 SOURCES += \
-    ../../src/Clock.cpp \
     ../../src/Console_Logger.cpp \
     ../../src/Debug.cpp \
-    ../../src/Interned_String.cpp \
-    ../../src/Interned_String_DB.cpp \
     ../../src/Log.cpp \
     ../../src/Path.cpp \
     ../../src/Profiler.cpp \
-    ../../src/thread/Scheduler.cpp \
-    ../../src/thread/Task.cpp \
-    ../../src/thread/Worker_Thread.cpp \
-    ../../src/util/Class_Factory.cpp \
     ../../src/util/Encoder.cpp \
     ../../src/util/File_System_Utils.cpp \
     ../../src/util/Format.cpp \
-    ../../src/util/Rand.cpp \
     ../../src/util/Util.cpp \
     ../../include/util/Iterators.inl
 
 HEADERS += \
-    ../../include/Clock.h \
     ../../include/Console_Logger.h \
     ../../include/Debug.h \
     ../../include/FString.h \
-    ../../include/Interned_String.h \
-    ../../include/Interned_String_DB.h \
     ../../include/Log.h \
     ../../include/Logger.h \
     ../../include/Path.h \
@@ -81,11 +70,7 @@ HEADERS += \
     ../../include/mem/auto_buffer.h \
     ../../include/mem/Embedded_Allocator.h \
     ../../include/mem/FSBAllocator.hh \
-    ../../include/thread/Scheduler.h \
-    ../../include/thread/Task.h \
-    ../../include/thread/Worker_Thread.h \
     ../../include/util/Circular_Buffer.h \
-    ../../include/util/Class_Factory.h \
     ../../include/util/crc.h \
     ../../include/util/Delayer.h \
     ../../include/util/Encoder.h \
@@ -96,10 +81,7 @@ HEADERS += \
     ../../include/util/Iterators.h \
     ../../include/util/murmurhash.h \
     ../../include/util/Noncopyable.h \
-    ../../include/util/qrtti.h \
-    ../../include/util/Rand.h \
     ../../include/util/Signals.h \
-    ../../include/util/Singleton.h \
     ../../include/util/Tween.h \
     ../../include/util/Util.h
 

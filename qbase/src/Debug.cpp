@@ -1,14 +1,9 @@
 #include "QBaseStdAfx.h"
 #include "QBase.h"
 
-#if defined Q_AVR
-#	include <avr/interrupt.h>
-#	include "board/board.h"
-#else
-#	include <set>
-#   if defined _MSC_VER
-#       pragma warning( disable : 4996)
-#   endif
+#include <set>
+#if defined _MSC_VER
+#    pragma warning( disable : 4996)
 #endif
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -22,41 +17,9 @@ namespace detail
 
     static void default_handler(const char* condition, const char* file, int line, const char* msg)
 	{
-#if defined Q_AVR
-		board::scheduler::stop();
-
-		if (stderr)
-		{
-			board::UART* uart = reinterpret_cast<board::UART*>(fdev_get_udata(stderr));
-			if (uart)
-			{
-				uart->set_blocking(true);
-				uart->set_buffered(false);
-			}
-
-			cli();
-			q::util::format(*stderr, F_STR("\n#"));
-			if (msg)
-			{
-				q::util::format(*stderr, F_STR("{}"), msg);
-			}
-			if (file)
-			{
-				q::util::format(*stderr, F_STR("\n@ {}:{}"), file, line);
-			}
-			if (condition)
-			{
-				q::util::format(*stderr, F_STR("\n{}"), condition);
-			}
-		}
-		//make sure nothing else happens
-		//freeze
-		while (true);
-#else
         quick_logf("Assert '{}' in {}:{} :: {}", condition ? condition : "N/A", file, line, msg ? msg : "N/A");
         dump_stacktrace();
         QBREAK();
-#endif
 	}
 
 	static q::debug::Assert_handler s_handler = &default_handler;
@@ -90,7 +53,6 @@ namespace debug
 namespace detail
 {
 
-#if !defined Q_AVR
 	//the const char* is built using the __FILE__ macro so it's safe to compare the pointer
 	typedef std::pair<const char*, int> Assert_Key;
 
@@ -103,12 +65,11 @@ namespace detail
 	};
 
 	static std::set<Assert_Key, Assert_Key_Compare> s_disabled_asserts;
-#endif
+
 }
 }
 }
 
-#if !defined Q_AVR
 bool q::debug::detail::is_assert_enabled(const char* file, int line)
 {
 	QASSERT(file);
@@ -170,9 +131,6 @@ bool q::volatile_false()
 {
     return false;
 }
-
-
-#endif
 
 
 

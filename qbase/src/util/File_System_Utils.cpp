@@ -104,11 +104,11 @@ size_t get_file_size(Path const& path)
 
 //////////////////////////////////////////////////////////////////////////
 
-Clock::time_point get_file_time(Path const& path)
+time_t get_file_time(Path const& path)
 {
 	if (path.is_empty())
 	{
-		return Clock::from_time_t(0);
+        return time_t(0);
 	}
 
 #if defined(Q_WINDOWS)
@@ -117,7 +117,7 @@ Clock::time_point get_file_time(Path const& path)
 	int err = _stat64(path.get_as_string().c_str(), &s);
 	if (err == 0)
 	{
-		return Clock::from_time_t(s.st_mtime);
+        return s.st_mtime;
 	}
 
 #elif defined(Q_POSIX_API)
@@ -126,37 +126,35 @@ Clock::time_point get_file_time(Path const& path)
 	int err = stat(path.get_as_string().c_str(), &s);
 	if (err == 0)
 	{
-		return Clock::from_time_t(s.st_mtime);
+        return s.st_mtime;
 	}
 
 #endif
-	return Clock::from_time_t(0);
+    return time_t(0);
 }
 
 //////////////////////////////////////////////////////////////////////////
 
-bool set_file_time(Path const& path, Clock::time_point t)
+bool set_file_time(Path const& path, time_t t)
 {
 	if (path.is_empty())
 	{
 		return false;
 	}
 
-	time_t tt = Clock::to_time_t(t);
-
 #if defined(Q_WINDOWS)
 
 	struct _utimbuf b;
-	b.actime = tt;
-	b.modtime = tt;
+    b.actime = t;
+    b.modtime = t;
 	int err = _utime(path.get_as_string().c_str(), &b);
 	return err == 0;
 
 #elif defined(Q_POSIX_API)
 
 	struct utimbuf b;
-	b.actime = tt;
-	b.modtime = tt;
+    b.actime = t;
+    b.modtime = t;
 	int err = utime(path.get_as_string().c_str(), &b);
 	return err == 0;
 
@@ -239,7 +237,7 @@ Path get_absolute_folder(Path const& path)
 
 #if defined Q_WINDOWS
 
-	if (path[0].find(':') == String::npos)
+    if (path[0].find(':') == std::string::npos)
 	{
 		return cwd + path;
 	}
@@ -254,26 +252,6 @@ Path get_absolute_folder(Path const& path)
 #endif
 
 	return path;
-}
-
-//////////////////////////////////////////////////////////////////////////
-
-String get_disk_id(Path const& path)
-{
-    auto abs_path(get_absolute_folder(path));
-    if (abs_path.empty())
-	{
-		return String::null;
-	}
-    return abs_path[0];
-}
-
-//////////////////////////////////////////////////////////////////////////
-
-
-bool are_on_same_disk(Path const& path1, Path const& path2)
-{
-	return get_disk_id(path1) == get_disk_id(path2);
 }
 
 //////////////////////////////////////////////////////////////////////////

@@ -19,7 +19,7 @@ namespace detail
 		int decorations;
 	};
 
-    static std::map<String, Topic> s_topics;
+    static std::map<std::string, Topic> s_topics;
     static std::vector<std::unique_ptr<q::logging::Logger>> s_loggers;
 
     static q::logging::Decorations s_decorations(q::logging::Decoration::LOCATION, q::logging::Decoration::TOPIC, q::logging::Decoration::TIME, q::logging::Decoration::LEVEL);
@@ -27,7 +27,7 @@ namespace detail
     static std::mutex s_mutex;
     static __thread std::vector<char const*>* s_topic_stack = nullptr;
 
-    static q::Clock::time_point s_start_tp = q::Clock::now();
+    static std::chrono::high_resolution_clock::time_point s_start_tp = std::chrono::high_resolution_clock::now();
 }
 }
 }
@@ -70,7 +70,7 @@ void q::logging::set_logger(std::unique_ptr<Logger> logger)
         detail::s_loggers.push_back(std::move(logger));
 	}
 }
-void q::logging::set_topic_enabled(const String& topic, bool enabled)
+void q::logging::set_topic_enabled(const std::string& topic, bool enabled)
 {
     std::lock_guard<std::mutex> lg(detail::s_mutex);
 
@@ -82,7 +82,7 @@ void q::logging::set_decorations(Decorations decorations)
 
     detail::s_decorations = decorations;
 }
-void q::logging::set_decorations(const String& topic, Decorations decorations)
+void q::logging::set_decorations(const std::string& topic, Decorations decorations)
 {
     std::lock_guard<std::mutex> lg(detail::s_mutex);
 
@@ -94,7 +94,7 @@ void q::logging::set_level(Level level)
 
     detail::s_level = level;
 }
-void q::logging::set_level(const String& topic, Level level)
+void q::logging::set_level(const std::string& topic, Level level)
 {
     std::lock_guard<std::mutex> lg(detail::s_mutex);
 
@@ -182,7 +182,7 @@ void q::log(logging::Level level, const char* file, int line, const std::string&
     if (decorations.test(Decoration::TIMESTAMP))
     {
         char mbstr[100];
-        auto d = q::Clock::now() - detail::s_start_tp;
+        auto d = std::chrono::high_resolution_clock::now() - detail::s_start_tp;
         uint32_t us = static_cast<uint32_t>(std::chrono::duration_cast<std::chrono::microseconds>(d).count());
         uint32_t _us = us % 1000;
         uint32_t ms = us / 1000;

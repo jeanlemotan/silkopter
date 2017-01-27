@@ -17,6 +17,4 @@
 #elif defined (__linux)
 #	define Q_LINUX
 #	define Q_POSIX_API
-#elif defined (__AVR__)
-#	define Q_AVR
 #endif

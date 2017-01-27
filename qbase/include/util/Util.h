@@ -4,61 +4,7 @@ namespace q
 {
 namespace util
 {
-
-	inline int toupper_ascii(int c)
-	{
-		return (c >= 'a' && c <= 'z') ? c & (~32) : c;
-	}
-	inline int tolower_ascii(int c)
-	{
-		return (c >= 'A' && c <= 'Z') ? c | 32 : c;
-	}
-	inline size_t strlen(char const* s)
-	{
-		return ::strlen(s);
-	}
-	inline int strcmp(char const* s1, char const* s2)
-	{
-		return ::strcmp(s1, s2); //this should be implemented in ASM by the OS
-	}
-	inline int memcmp(char const* s1, char const* s2, size_t n)
-	{
-		return ::memcmp(s1, s2, n); //this should be implemented in ASM by the OS
-	}
-	inline char const* memchr(char const* s, char ch, size_t n)
-	{
-		return (char const*)::memchr(s, ch, n);
-	}
-	inline char const* strstr(char const* in, char const* str)
-	{
-		return ::strstr(in, str);
-	}
-
-	extern int stricmp(char const* s1, char const* s2);
-	extern int strnicmp(char const* s1, char const* s2, size_t len);
-	extern int memicmp(char const* s1, char const* s2, size_t n);
-	extern char const* memichr(char const* s, char ch, size_t n);
-	extern char const* stristr(char const* in, char const* str);
-
-	//-----------------------------------------------------------------------------
-	// MurmurHash2, by Austin Appleby
-
-	// Note - This code makes a few assumptions about how your machine behaves -
-
-	// 1. We can read a 4-byte value from any address without crashing
-	// 2. sizeof(int) == 4
-
-	// And it has a few limitations -
-
-	// 1. It will not work incrementally.
-	// 2. It will not produce the same results on little-endian and big-endian
-	//    machines.
-
-	extern uint32_t murmur_hash(const void* key, int length, uint32_t seed);
-	extern uint32_t murmur_hash_cs(const void* key, int length, uint32_t seed);
-
 	extern void memcpy(uint8_t* dst, size_t dstStrideBytes, uint8_t const* src, size_t srcStrideBytes, size_t elementSizeBytes, size_t count);
-
 
 	template<class T>
 	std::pair<size_t, size_t> find_line_char_by_offset(T const& str, size_t off)

@@ -3,6 +3,7 @@
 #include "boost/optional.hpp"
 #include <set>
 #include <vector>
+#include <FString.h>
 
 namespace q
 {
@@ -129,13 +130,13 @@ namespace formatting
 		FILE& m_dst;
 	};
 
-	template<class Dst_Adapter, class Placeholder, size_t SIZE>
-	void format_string(Dst_Adapter& dst, Placeholder const&, FString<SIZE> const& p)
-	{
-		dst.append(p.begin(), p.end());
-	}
+    template<class Dst_Adapter, class Placeholder, size_t SIZE>
+    void format_string(Dst_Adapter& dst, Placeholder const&, FString<SIZE> const& p)
+    {
+        dst.append(p.begin(), p.end());
+    }
 
-	template<class Dst_Adapter, class Placeholder>
+    template<class Dst_Adapter, class Placeholder>
 	void format_string(Dst_Adapter& dst, Placeholder const&, std::string const& p)
 	{
 		if (!p.empty())
@@ -417,11 +418,7 @@ namespace formatting
 		bool is_negative = value < 0.0;
 		value = is_negative ? -value : value;
 
-#ifdef Q_AVR
-		double whole = floorf(value); //avr is missing floor
-#else
 		double whole = floor(value);
-#endif
 		double frac = value - whole;
 
 		//store the whole parts
@@ -586,7 +583,6 @@ namespace formatting
         dst.append(']');
     }
 
-#ifndef Q_AVR
 	template<class Dst_String, class Placeholder, class rep, class period>
 	void format_string(Dst_String& dst, Placeholder const& ph, std::chrono::duration<rep, period> const& duration)
 	{
@@ -669,8 +665,6 @@ namespace formatting
     {
         format_string(dst, ph, static_cast<int>(e));
     }
-
-#endif
 
 	template<class Dst_Adapter, class P>
 	struct Argument_Parser
@@ -762,7 +756,7 @@ namespace formatting
 		bool found_placeholder = _copy_until_placeholder(dst, fmt_adapter);
 		if (found_placeholder)
 		{
-			QASSERT(0);
+            assert(0);
 		}
 	}
 
@@ -780,16 +774,12 @@ namespace formatting
 			bool ok = _read_placeholder(ph, fmt_adapter);
 			if (!ok)
 			{
-				QASSERT(0);
+                assert(0);
 				return;
 			}
 
 			util::formatting::Argument_Parser<Dst_Adapter, P>().execute(dst, ph, p);
-#if defined Q_AVR
-            _format(dst, fmt_adapter, params...);
-#else
             _format(dst, fmt_adapter, std::forward<Params>(params)...);
-#endif
 		}
 	}
 }
@@ -810,11 +800,7 @@ Dst& format_emplace(Dst& dst, Format_String const& fmt, Params&&... params) // r
 		return dst;
 	}
 
-#if defined Q_AVR
-    formatting::_format(dst_adapter, fmt_adapter, params...);
-#else
     formatting::_format(dst_adapter, fmt_adapter, std::forward<Params>(params)...);
-#endif
 	dst_adapter.finish();
 
 	return dst;
@@ -834,11 +820,7 @@ Dst format(Format_String const& fmt, Params&&... params) // recursive variadic f
 		return dst;
 	}
 
-#if defined Q_AVR
-    formatting::_format(dst_adapter, fmt_adapter, params...);
-#else
     formatting::_format(dst_adapter, fmt_adapter, std::forward<Params>(params)...);
-#endif
 	dst_adapter.finish();
 
 	return dst;

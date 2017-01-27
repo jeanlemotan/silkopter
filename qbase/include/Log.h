@@ -3,12 +3,9 @@
 namespace q
 {
 
-#if !defined Q_AVR
-
 namespace logging
 {
 	class Logger;
-	DECLARE_CLASS_PTR(Logger);
 
 /////////////////////////////////////////////////////////////////////////////////////
 // Loggers
@@ -26,7 +23,7 @@ namespace logging
 
 
 	//This function turns on/off various topics
-	extern void set_topic_enabled(String const& topic, bool enabled);
+    extern void set_topic_enabled(std::string const& topic, bool enabled);
 
 /////////////////////////////////////////////////////////////////////////////////////
 // Decoration
@@ -45,7 +42,7 @@ namespace logging
 	typedef q::util::Flag_Set<Decoration, uint8_t> Decorations;
 
 	extern void set_decorations(Decorations decorations);
-	extern void set_decorations(String const& topic, Decorations decorations);
+    extern void set_decorations(std::string const& topic, Decorations decorations);
 
 
 /////////////////////////////////////////////////////////////////////////////////////
@@ -65,7 +62,7 @@ namespace logging
 	//Logs smaller than the level are not sent to loggers.
 	//SetLevel(Level::INFO) will print info, warning and critical logs but not debug
 	extern void set_level(Level level);
-	extern void set_level(String const& topic, Level level);
+    extern void set_level(std::string const& topic, Level level);
 
 /////////////////////////////////////////////////////////////////////////////////////
 // Scoped topics
@@ -117,25 +114,6 @@ namespace logging
 #   define QLOGI(fmt, ...) 		q::logf(q::logging::Level::INFO, __FILE__, __LINE__, fmt, ##__VA_ARGS__)
 #   define QLOGW(fmt, ...)      q::logf(q::logging::Level::WARNING, __FILE__, __LINE__, fmt, ##__VA_ARGS__)
 #   define QLOGE(fmt, ...)      q::logf(q::logging::Level::ERR, __FILE__, __LINE__, fmt, ##__VA_ARGS__)
-
-#else
-
-	template<class Fmt, typename... Params>
-    void quick_logf(Fmt const& fmt, Params&&... params)
-	{
-		if (stdout)
-		{
-            fputc('\n', stdout);
-            q::util::format(*stdout, fmt, params...);
-		}
-	}
-
-#   define QLOGD(topic, fmt, ...) 	q::quick_logf(fmt, ##__VA_ARGS__)
-#   define QLOGI(topic, fmt, ...) 	q::quick_logf(fmt, ##__VA_ARGS__)
-#   define QLOGW(topic, fmt, ...)   q::quick_logf(fmt, ##__VA_ARGS__)
-#   define QLOGE(topic, fmt, ...) 	q::quick_logf(fmt, ##__VA_ARGS__)
-
-#endif
 
 }
 

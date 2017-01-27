@@ -1,41 +1,37 @@
 #pragma once
 
-#ifdef Q_AVR
-#	include <util/crc16.h>
-#else
-    inline uint16_t q_crc16_update(uint16_t crc, uint8_t data)
-	{
-        crc ^= data;
-        for (int i = 7; i >= 0; --i)
-		{
-			if (crc & 1)
-			{
-				crc = (crc >> 1) ^ 0xA001;
-			}
-			else
-			{
-                crc >>= 1;
-			}
-		}
-		return crc;
-	}
-    inline uint8_t q_crc_ibutton_update(uint8_t crc, uint8_t data)
+inline uint16_t q_crc16_update(uint16_t crc, uint8_t data)
+{
+    crc ^= data;
+    for (int i = 7; i >= 0; --i)
     {
-        crc ^= data;
-        for (int i = 7; i >= 0; --i)
+        if (crc & 1)
         {
-            if (crc & 0x01)
-            {
-                crc = (crc >> 1) ^ 0x8C;
-            }
-            else
-            {
-                crc >>= 1;
-            }
+            crc = (crc >> 1) ^ 0xA001;
         }
-        return crc;
+        else
+        {
+            crc >>= 1;
+        }
     }
-#endif
+    return crc;
+}
+inline uint8_t q_crc_ibutton_update(uint8_t crc, uint8_t data)
+{
+    crc ^= data;
+    for (int i = 7; i >= 0; --i)
+    {
+        if (crc & 0x01)
+        {
+            crc = (crc >> 1) ^ 0x8C;
+        }
+        else
+        {
+            crc >>= 1;
+        }
+    }
+    return crc;
+}
 
 namespace q
 {
@@ -48,19 +44,11 @@ namespace util
 	
     template<> inline void update_crc(crc8_t& crc, uint8_t v)
 	{
-#ifdef Q_AVR
-        crc = _crc_ibutton_update(crc, v);
-#else
         crc = q_crc_ibutton_update(crc, v);
-#endif
 	}
     template<> inline void update_crc(crc16_t& crc, uint8_t v)
     {
-#ifdef Q_AVR
-        crc = _crc16_update(crc, v);
-#else
         crc = q_crc16_update(crc, v);
-#endif
     }
 
     template<typename T> inline void update_crc(T& crc, int8_t v)
