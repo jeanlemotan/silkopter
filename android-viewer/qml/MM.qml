@@ -50,7 +50,7 @@ Item {
         x: 0
         anchors.top: topBar.bottom
         anchors.bottom: root.bottom
-        width: topBar.height * (root.width / root.height)
+        width: root.width / 10
 
         MenuButton
         {
@@ -64,7 +64,7 @@ Item {
             anchors.top: parent.top
             anchors.left: parent.left
             anchors.right: parent.right
-            height: 50
+            height: root.height / 10
         }
         MenuButton
         {
@@ -77,7 +77,7 @@ Item {
             anchors.top: hudButton.bottom
             anchors.left: parent.left
             anchors.right: parent.right
-            height: 50
+            height: root.height / 10
         }
     }
 

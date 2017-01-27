@@ -8,6 +8,7 @@
 #include "OSQmlProxy.h"
 #include "MenusQmlProxy.h"
 
+#include <android/log.h>
 #include <thread>
 
 int main(int argc, char *argv[])
@@ -67,11 +68,39 @@ int main(int argc, char *argv[])
     //view.setSource(QUrl(QStringLiteral("qrc:/main.qml")));
     view.show();
 
-    menusProxy.push("Splash.qml");
+    //menusProxy.push("Splash.qml");
+    menusProxy.push("MM.qml");
 
     while (true)
     {
         app.processEvents();
+
+//        {
+//            static FILE* fff = nullptr;
+//            if (!fff)
+//            {
+//                srand(time(nullptr));
+//                fff = fopen("/storage/emulated/0/Download/sample.h264", "rb");
+//                if (!fff)
+//                {
+//                    exit(1);
+//                }
+//            }
+
+//            uint8_t data[32768];
+//            size_t size = 100;
+//            int r = fread(data, 1, size, fff);
+//            if (r == 0)
+//            {
+//                __android_log_print(ANDROID_LOG_INFO, "Skptr", "DONE, REWIND!!!!!");
+//                fseek(fff, 0, SEEK_SET);
+//            }
+//            if (r > 0)
+//            {
+//                VideoSurface::decodeVideo(data, r);
+//            }
+//        }
+
         std::this_thread::sleep_for(std::chrono::microseconds(1));
     }
 

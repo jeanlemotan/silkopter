@@ -2,9 +2,8 @@ import QtQuick 2.0
 import QtQuick.Controls 1.4
 import QtQuick.Controls.Styles 1.4
 import Qt.labs.settings 1.0
-import com.silk.HAL 1.0
 import com.silk.Comms 1.0
-import com.silk.VideoRenderer 1.0
+//import com.silk.VideoSurface 0.1
 
 
 Item {
@@ -24,7 +23,7 @@ Item {
         x: 0
         anchors.top: topBar.bottom
         anchors.bottom: root.bottom
-        width: topBar.height * (root.width / root.height)
+        width: root.width / 10
 
         MenuButton {
             id: commsSetupButton
@@ -77,16 +76,6 @@ Item {
             }
         }
     }
-
-    VideoRenderer {
-        id: renderer
-        anchors.top: topBar.bottom
-        anchors.left: sideBar.right
-        anchors.right: root.right
-        anchors.bottom: root.bottom
-    }
-
-
 
 //    UAVInfo {
 //        id: uavInfo

@@ -5,7 +5,6 @@ import QtQuick.Dialogs 1.2
 
 Rectangle {
     id: root
-    width: 800; height: 480
     color: "#2c3e50"
 
     Text {
@@ -24,7 +23,7 @@ Rectangle {
         anchors.top: title.bottom
         anchors.topMargin: 40
         anchors.horizontalCenter: parent.horizontalCenter
-        width: 100
+        width: root.width / 10
         height: width
         Image {
             source: "qrc:/icons/ui/fly.png"

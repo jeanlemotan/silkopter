@@ -7,7 +7,8 @@ SOURCES += main.cpp \
     VideoSurface.cpp \
     OSQmlProxy.cpp \
     MenusQmlProxy.cpp \
-    CommsQmlProxy.cpp
+    CommsQmlProxy.cpp \
+    Comms.cpp
 
 OTHER_FILES += \
     main.qml
@@ -42,7 +43,8 @@ HEADERS += \
     VideoSurface.h \
     MenusQmlProxy.h \
     OSQmlProxy.h \
-    CommsQmlProxy.h
+    CommsQmlProxy.h \
+    Comms.h
 
 DISTFILES += \
     android/AndroidManifest.xml \

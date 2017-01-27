@@ -26,6 +26,8 @@
 //#include <qpa/qplatformnativeinterface.h>
 
 #include <chrono>
+#include <thread>
+#include <mutex>
 
 #define EGL_SYNC_FENCE_KHR                      0x30F9
 
@@ -51,15 +53,20 @@ static const size_t NALU_MAXLEN = 1024 * 1024;
         ret_statement;                                              \
     }
 
-static JavaVM* s_javaVM;
-static JNIEnv* s_env;
-static jmethodID mid_setupDecoder;
-static jmethodID mid_feedDecoder;
-static jmethodID mid_updateTexture;
-static jclass class_VideoDecoder;
-static jclass class_SurfaceTexture;
+static JavaVM* s_javaVM = nullptr;
+static JNIEnv* s_env = nullptr;
+static jmethodID s_midSetupDecoder = nullptr;
+static jmethodID s_midFeedDecoder = nullptr;
+static jmethodID s_midUpdateTexture = nullptr;
+static jclass s_classVideoDecoder = nullptr;
+static jclass s_classSurfaceTexture = nullptr;
 
+static VideoTexture* s_videoTexture = nullptr;
+static jobject s_surfaceTexture = nullptr;
+static std::vector<uint8_t> s_videoData;
+static std::mutex s_videoDataMutex;
 
+static const uint8_t naluSeparator[4] = { 0, 0, 0, 1 };
 
 /*----------------------------------------------------------------------
 |    load_custom_java_classes
@@ -76,7 +83,7 @@ int load_custom_java_classes(JNIEnv* env)
         __android_log_print(ANDROID_LOG_FATAL, "Qt", "Unable to find class %s.", classNameDecoder);
         return JNI_FALSE;
     }
-    class_VideoDecoder  = (jclass)env->NewGlobalRef(cls);
+    s_classVideoDecoder  = (jclass)env->NewGlobalRef(cls);
     env->DeleteLocalRef(cls);
 
     cls = env->FindClass(classNameSurfTexture);
@@ -86,19 +93,19 @@ int load_custom_java_classes(JNIEnv* env)
         return JNI_FALSE;
     }
 
-    class_SurfaceTexture = (jclass)env->NewGlobalRef(cls);
+    s_classSurfaceTexture = (jclass)env->NewGlobalRef(cls);
     env->DeleteLocalRef(cls);
 
-    mid_setupDecoder = env->GetStaticMethodID(class_VideoDecoder,
+    s_midSetupDecoder = env->GetStaticMethodID(s_classVideoDecoder,
                                                   "setupDecoder",
                                                   "(I)Landroid/graphics/SurfaceTexture;");
-    mid_feedDecoder = env->GetStaticMethodID(class_VideoDecoder,
+    s_midFeedDecoder = env->GetStaticMethodID(s_classVideoDecoder,
                                                   "feedDecoder",
                                                   "([BI)V");
-    mid_updateTexture    = env->GetMethodID(class_SurfaceTexture,
+    s_midUpdateTexture    = env->GetMethodID(s_classSurfaceTexture,
                                             "updateTexImage",
                                             "()V");
-    if (!mid_updateTexture)
+    if (!s_midUpdateTexture)
     {
         exit(-1);
     }
@@ -429,7 +436,7 @@ VideoNode::VideoNode(VideoTexture *texture)
 
 VideoNode::~VideoNode()
 {
-    m_material.m_texture->deleteLater();
+    //m_material.m_texture->deleteLater();
 }
 
 void VideoNode::preprocess()
@@ -513,16 +520,20 @@ QSGNode* VideoSurface::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *)
 
     if (!node)
     {
-        VideoTexture* texture = new VideoTexture();
-        node = new VideoNode(texture);
-        m_isGeomertyDirty = true;
-
-        jobject surfTexture = m_env->CallStaticObjectMethod(class_VideoDecoder, mid_setupDecoder, texture->textureId());
-        if (!surfTexture)
+        if (!s_surfaceTexture)
         {
-            qWarning("Failed to instantiate SurfaceTexture.");
+            s_videoTexture = new VideoTexture();
+
+            jobject surfTexture = m_env->CallStaticObjectMethod(s_classVideoDecoder, s_midSetupDecoder, s_videoTexture->textureId());
+            if (!surfTexture)
+            {
+                qWarning("Failed to instantiate SurfaceTexture.");
+            }
+            s_surfaceTexture = m_env->NewGlobalRef(surfTexture);
         }
-        m_surfaceTexture = m_env->NewGlobalRef(surfTexture);
+
+        node = new VideoNode(s_videoTexture);
+        m_isGeomertyDirty = true;
     }
 
     if (m_isGeomertyDirty)
@@ -556,22 +567,39 @@ QSGNode* VideoSurface::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *)
         }
     }
 
-
+    //parse NALU packets
     {
-        if (m_surfaceTexture)
+        constexpr size_t naluSeparatorSize = sizeof(naluSeparator);
+        std::lock_guard<std::mutex> lg(s_videoDataMutex);
+        if (s_videoData.size() > naluSeparatorSize)
         {
-            m_env->CallVoidMethod(m_surfaceTexture, mid_updateTexture);
+            uint8_t const* src = s_videoData.data();
+            uint8_t const* p = reinterpret_cast<uint8_t const*>(memmem(src + naluSeparatorSize, s_videoData.size() - naluSeparatorSize, naluSeparator, naluSeparatorSize));
+            if (p)
+            {
+                //nalupacket found
+                const size_t naluSize = p - src;
+                //__android_log_print(ANDROID_LOG_INFO, "Skptr", "NALU @ %d, %d left", (int)naluSize, (int)s_videoData.size());
+
+                jbyteArray frameData = m_env->NewByteArray(naluSize);
+
+                m_env->SetByteArrayRegion(frameData, 0, static_cast<int>(naluSize), reinterpret_cast<jbyte const*>(src));
+                m_env->CallStaticVoidMethod(s_classVideoDecoder, s_midFeedDecoder, frameData, (int)naluSize);
+
+                m_env->DeleteLocalRef(frameData);
+
+                s_videoData.erase(s_videoData.begin(), s_videoData.begin() + naluSize);
+            }
+            else
+            {
+                //__android_log_print(ANDROID_LOG_INFO, "Skptr", "NALU not found");
+            }
         }
+    }
 
-        parseNALUs([this](uint8_t const* data, size_t size)
-        {
-            jbyteArray frameData = m_env->NewByteArray(size);
-
-            m_env->SetByteArrayRegion(frameData, 0, static_cast<int>(size), reinterpret_cast<jbyte const*>(data));
-            m_env->CallStaticVoidMethod(class_VideoDecoder, mid_feedDecoder, frameData, (int)size);
-
-            m_env->DeleteLocalRef(frameData);
-        });
+    if (s_surfaceTexture)
+    {
+        m_env->CallVoidMethod(s_surfaceTexture, s_midUpdateTexture);
     }
 
     node->markDirty(QSGNode::DirtyMaterial);
@@ -580,54 +608,19 @@ QSGNode* VideoSurface::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *)
     return node;
 }
 
-void VideoSurface::parseNALUs(std::function<void(uint8_t const*, size_t)> callback)
+void VideoSurface::addVideoData(uint8_t const* data, size_t size)
 {
+    Q_ASSERT(data && size > 0);
+    if (!data || size == 0)
     {
-        static FILE* fff = nullptr;
-        if (!fff)
-        {
-            srand(time(nullptr));
-            fff = fopen("/storage/emulated/0/Download/sample.h264", "rb");
-            if (!fff)
-            {
-                exit(1);
-            }
-        }
-
-        size_t offset = m_videoData.size();
-        if (offset < 500000)
-        {
-            __android_log_print(ANDROID_LOG_INFO, "Skptr", "Reading...");
-
-            size_t size = 100000;
-            m_videoData.resize(offset + size);
-            int r = fread(m_videoData.data() + offset, 1, size, fff);
-            if (r == 0)
-            {
-                __android_log_print(ANDROID_LOG_INFO, "Skptr", "DONE, REWIND!!!!!");
-                fseek(fff, 0, SEEK_SET);
-            }
-            m_videoData.resize(offset + r);
-        }
+        return;
     }
 
-    if (m_videoData.size() > 4)
-    {
-        uint8_t const* src = m_videoData.data();
-        uint8_t const* p = reinterpret_cast<uint8_t const*>(memmem(src + 4, m_videoData.size() - 4, "\0\0\0\1", 4));
-        if (p)
-        {
-            //nalupacket found
-            size_t size = p - src;
-            //__android_log_print(ANDROID_LOG_INFO, "Skptr", "NALU @ %d, %d left", (int)size, (int)m_videoData.size());
+    std::lock_guard<std::mutex> lg(s_videoDataMutex);
 
-            callback(src, size);
-            m_videoData.erase(m_videoData.begin(), m_videoData.begin() + size);
-        }
-        else
-        {
-            //__android_log_print(ANDROID_LOG_INFO, "Skptr", "NALU not found");
-        }
-    }
+    size_t offset = s_videoData.size();
+    s_videoData.resize(offset + size);
+    memcpy(s_videoData.data() + offset, data, size);
 }
+
 
