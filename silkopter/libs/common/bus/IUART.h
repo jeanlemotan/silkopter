@@ -9,9 +9,8 @@ namespace bus
 
 class IUART: public IBus
 {
-    DEFINE_RTTI_CLASS(IUART, IBus);
 public:
-    virtual ~IUART() {}
+    virtual ~IUART() = default;
 
     virtual void lock() = 0;
     virtual auto try_lock() -> bool = 0;

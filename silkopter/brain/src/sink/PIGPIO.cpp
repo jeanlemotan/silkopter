@@ -206,7 +206,7 @@ ts::Result<void> PIGPIO::init()
 #endif
 }
 
-ts::Result<void> PIGPIO::start(q::Clock::time_point tp)
+ts::Result<void> PIGPIO::start(Clock::time_point tp)
 {
     return ts::success;
 }

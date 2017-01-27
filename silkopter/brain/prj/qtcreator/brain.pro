@@ -59,7 +59,6 @@ INCLUDEPATH += ../../../libs
 INCLUDEPATH += ../../../libs/common/comms/def
 INCLUDEPATH += ../../../../def_lang/include
 INCLUDEPATH += ../../../../qbase/include
-INCLUDEPATH += ../../../../qdata/include
 INCLUDEPATH += ../../../../qmath/include
 INCLUDEPATH += ../../../../eigen
 
@@ -68,7 +67,6 @@ LIBS += -L=/opt/vc/lib/
 ROOT_LIBS_PATH = ../../../..
 
 LIBS += -L$${ROOT_LIBS_PATH}/def_lang/lib/$${DEST_FOLDER} -ldef_lang
-LIBS += -L$${ROOT_LIBS_PATH}/qdata/lib/$${DEST_FOLDER} -lqdata
 LIBS += -L$${ROOT_LIBS_PATH}/qmath/lib/$${DEST_FOLDER} -lqmath
 LIBS += -L$${ROOT_LIBS_PATH}/qbase/lib/$${DEST_FOLDER} -lqbase
 
@@ -174,7 +172,6 @@ SOURCES += \
 
 HEADERS += \
     ../../src/BrainStdAfx.h \
-    ../../src/Toggle.h \
     ../../../libs/utils/chrono.h \
     ../../../libs/utils/PID.h \
     ../../../libs/utils/Timed_Scope.h \

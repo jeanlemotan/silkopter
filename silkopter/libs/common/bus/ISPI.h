@@ -9,9 +9,8 @@ namespace bus
 
 class ISPI: public IBus
 {
-    DEFINE_RTTI_CLASS(ISPI, IBus);
 public:
-    virtual ~ISPI() {}
+    virtual ~ISPI() = default;
 
     virtual void lock() = 0;
     virtual auto try_lock() -> bool = 0;

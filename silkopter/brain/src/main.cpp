@@ -2,6 +2,7 @@
 #include "HAL.h"
 #include "RC_Comms.h"
 #include "GS_Comms.h"
+#include "utils/Clock.h"
 
 #include <boost/asio.hpp>
 #include <boost/thread.hpp>
@@ -184,10 +185,10 @@ int main(int argc, char const* argv[])
 
         {
             constexpr std::chrono::microseconds PERIOD(5000);
-            auto last = q::Clock::now();
+            auto last = Clock::now();
             while (!s_exit)
             {
-                auto start = q::Clock::now();
+                auto start = Clock::now();
                 auto dt = start - last;
                 last = start;
 #ifdef NDEBUG
@@ -209,17 +210,17 @@ int main(int argc, char const* argv[])
 #endif
 
                 {
-                    static q::Clock::time_point last_timestamp = q::Clock::now();
-                    auto now = q::Clock::now();
+                    static Clock::time_point last_timestamp = Clock::now();
+                    auto now = Clock::now();
                     auto dt = now - last_timestamp;
                     last_timestamp = now;
-                    static q::Clock::duration min_dt, max_dt, avg_dt;
+                    static Clock::duration min_dt, max_dt, avg_dt;
                     static int xxx = 0;
                     min_dt = std::min(min_dt, dt);
                     max_dt = std::max(max_dt, dt);
                     avg_dt += dt;
                     xxx++;
-                    static q::Clock::time_point xxx_timestamp = q::Clock::now();
+                    static Clock::time_point xxx_timestamp = Clock::now();
                     if (now - xxx_timestamp >= std::chrono::milliseconds(1000))
                     {
                         xxx_timestamp = now;

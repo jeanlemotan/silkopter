@@ -442,8 +442,8 @@ bool RFM22B::tx(size_t size, uint8_t channel)
     tx_mode();
 
     // Timing for the interrupt loop timeout
-    auto start = std::chrono::high_resolution_clock::now();
-    auto elapsed = std::chrono::high_resolution_clock::now() - start;
+    auto start = Clock::now();
+    auto elapsed = Clock::now() - start;
     std::chrono::milliseconds timeout(100);
 
     uint32_t count = 0;
@@ -452,7 +452,7 @@ bool RFM22B::tx(size_t size, uint8_t channel)
     while (((get_register(Register::OPERATING_MODE_AND_FUNCTION_CONTROL_1_07)>>3) & 1) && elapsed < timeout)
     {
         count++;
-        elapsed = std::chrono::high_resolution_clock::now() - start;
+        elapsed = Clock::now() - start;
     }
 
     // If timeout occured, return -1
@@ -466,7 +466,7 @@ bool RFM22B::tx(size_t size, uint8_t channel)
 
     return true;
 }
-bool RFM22B::rx(size_t& size, uint8_t channel, std::chrono::high_resolution_clock::duration timeout)
+bool RFM22B::rx(size_t& size, uint8_t channel, Clock::duration timeout)
 {
     //Toggle ffclrrx bit high and low to clear RX FIFO
     set_register(Register::OPERATING_MODE_AND_FUNCTION_CONTROL_2_08, 2);
@@ -474,8 +474,8 @@ bool RFM22B::rx(size_t& size, uint8_t channel, std::chrono::high_resolution_cloc
 
     rx_mode();
 
-    auto start = std::chrono::high_resolution_clock::now();
-    auto elapsed = std::chrono::high_resolution_clock::now() - start;
+    auto start = Clock::now();
+    auto elapsed = Clock::now() - start;
 
     uint32_t count = 0;
 
@@ -486,7 +486,7 @@ bool RFM22B::rx(size_t& size, uint8_t channel, std::chrono::high_resolution_cloc
     while (((get_register(Register::OPERATING_MODE_AND_FUNCTION_CONTROL_1_07)>>2) & 1) && elapsed < timeout)
     {
         count++;
-        elapsed = std::chrono::high_resolution_clock::now() - start;
+        elapsed = Clock::now() - start;
     }
 
     // If timeout occured, return -1

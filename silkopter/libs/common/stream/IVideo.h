@@ -20,7 +20,7 @@ public:
             H264
         };
 
-        std::chrono::high_resolution_clock::time_point time_point;
+        Clock::time_point time_point;
         Type type;
         math::vec2u16 resolution;
         std::vector<uint8_t> data;
@@ -56,7 +56,7 @@ template<> inline void serialize(Buffer_t& buffer, silk::stream::IVideo::Value c
 template<> inline auto deserialize(Buffer_t const& buffer, silk::stream::IVideo::Value& value, size_t& off) -> bool
 {
     uint32_t size = 0;
-    std::chrono::high_resolution_clock::time_point::rep time_point;
+    Clock::time_point::rep time_point;
     if (!deserialize(buffer, time_point, off) ||
         !deserialize(buffer, value.type, off) ||
         !deserialize(buffer, value.resolution, off) ||
@@ -65,7 +65,7 @@ template<> inline auto deserialize(Buffer_t const& buffer, silk::stream::IVideo:
     {
         return false;
     }
-    value.time_point = std::chrono::high_resolution_clock::time_point(std::chrono::high_resolution_clock::duration(time_point));
+    value.time_point = Clock::time_point(Clock::duration(time_point));
     value.data.resize(size);
     std::copy(buffer.begin() + off, buffer.begin() + off + size, value.data.begin());
     off += size;

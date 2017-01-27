@@ -38,7 +38,7 @@ ts::Result<void> Proximity::init()
     return ts::success;
 }
 
-ts::Result<void> Proximity::start(q::Clock::time_point tp)
+ts::Result<void> Proximity::start(Clock::time_point tp)
 {
     m_output_stream->set_tp(tp);
     return ts::success;

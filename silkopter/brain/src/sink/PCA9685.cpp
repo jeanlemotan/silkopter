@@ -178,7 +178,7 @@ ts::Result<void> PCA9685::init()
     return ts::success;
 }
 
-ts::Result<void> PCA9685::start(q::Clock::time_point tp)
+ts::Result<void> PCA9685::start(Clock::time_point tp)
 {
     if (!set_all_pwm_enabled(true))
     {

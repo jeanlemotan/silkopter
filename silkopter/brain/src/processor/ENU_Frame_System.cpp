@@ -37,7 +37,7 @@ ts::Result<void> ENU_Frame_System::init()
     return ts::success;
 }
 
-ts::Result<void> ENU_Frame_System::start(q::Clock::time_point tp)
+ts::Result<void> ENU_Frame_System::start(Clock::time_point tp)
 {
     m_output_stream->set_tp(tp);
     return ts::success;

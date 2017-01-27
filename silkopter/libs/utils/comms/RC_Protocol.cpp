@@ -28,7 +28,7 @@ size_t RC_Protocol::get_mtu() const
     return m_phy.get_mtu() - sizeof(Header);
 }
 
-void RC_Protocol::add_periodic_packet(q::Clock::duration period, TX_Callback tx_callback)
+void RC_Protocol::add_periodic_packet(Clock::duration period, TX_Callback tx_callback)
 {
     Periodic_Packet pp;
     pp.period = period;
@@ -57,7 +57,7 @@ size_t RC_Protocol::compute_tx_data(uint8_t* data)
     Header& header = *reinterpret_cast<Header*>(data);
     header.last_received_packet_index = m_received_packet_index;
 
-    q::Clock::time_point now = q::Clock::now();
+    Clock::time_point now = Clock::now();
 
     {
         std::lock_guard<std::mutex> lg(m_periodic_packets_mutex);

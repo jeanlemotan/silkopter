@@ -10,6 +10,7 @@
 #include "common/stream/IVideo.h"
 #include "utils/comms/RCP.h"
 #include "utils/comms/RCP_Channel.h"
+#include "utils/Clock.h"
 
 namespace util
 {
@@ -47,8 +48,11 @@ class Set_Node_Config_Req;
 namespace silk
 {
 
-class GS_Comms : q::util::Noncopyable
+class GS_Comms
 {
+    GS_Comms(GS_Comms const&) = delete;
+    GS_Comms operator=(GS_Comms const&) = delete;
+
 public:
     GS_Comms(HAL& hal);
 
@@ -113,11 +117,11 @@ private:
     void handle_req(gs_comms::setup::Set_Node_Config_Req const& req);
 
     HAL& m_hal;
-    q::Clock::time_point m_uav_sent_tp = q::Clock::now();
+    Clock::time_point m_uav_sent_tp = Clock::now();
 
     std::vector<stream::IMultirotor_Commands::Value> m_multirotor_commands_values;
 
-    q::Clock::time_point m_last_rcp_tp = q::Clock::now();
+    Clock::time_point m_last_rcp_tp = Clock::now();
 
     std::shared_ptr<util::comms::ISocket> m_socket;
     std::shared_ptr<util::comms::RCP> m_rcp;

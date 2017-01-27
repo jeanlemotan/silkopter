@@ -8,8 +8,8 @@ namespace comms
 
 constexpr uint8_t CHANNEL = 0;
 
-constexpr q::Clock::duration TX_DURATION = std::chrono::milliseconds(5);
-constexpr q::Clock::duration RX_DURATION = std::chrono::milliseconds(5);
+constexpr Clock::duration TX_DURATION = std::chrono::milliseconds(5);
+constexpr Clock::duration RX_DURATION = std::chrono::milliseconds(5);
 
 struct RF4463F30_Socket::Impl
 {
@@ -64,7 +64,7 @@ bool RF4463F30_Socket::start()
 
     if (m_is_master)
     {
-        auto start = std::chrono::high_resolution_clock::now();
+        auto start = Clock::now();
         size_t i = 0;
 
         std::vector<char> data;
@@ -100,9 +100,9 @@ bool RF4463F30_Socket::start()
             //std::this_thread::sleep_for(std::chrono::milliseconds(0));
             i++;
 
-            if (std::chrono::high_resolution_clock::now() - start > std::chrono::milliseconds(1000))
+            if (Clock::now() - start > std::chrono::milliseconds(1000))
             {
-                start = std::chrono::high_resolution_clock::now();
+                start = Clock::now();
                 QLOGI("{} / {} bytes per second", i, i * str.size());
                 i = 0;
             }
@@ -111,7 +111,7 @@ bool RF4463F30_Socket::start()
 
     else
     {
-        auto start = std::chrono::high_resolution_clock::now();
+        auto start = Clock::now();
         size_t i = 0;
         size_t bps = 0;
         size_t err_invs = 0;
@@ -149,9 +149,9 @@ bool RF4463F30_Socket::start()
 
             //std::this_thread::sleep_for(std::chrono::microseconds(100));
 
-            if (std::chrono::high_resolution_clock::now() - start > std::chrono::milliseconds(1000))
+            if (Clock::now() - start > std::chrono::milliseconds(1000))
             {
-                start = std::chrono::high_resolution_clock::now();
+                start = Clock::now();
                 QLOGI("{} / {} bytes per second. {}", i, bps, err_invs);
                 i = 0;
                 bps = 0;
@@ -209,7 +209,7 @@ void RF4463F30_Socket::master_thread_proc()
 
             if (m_impl->tx_buffer_has_data)
             {
-                auto now = q::Clock::now();
+                auto now = Clock::now();
                 auto diff = now - m_last_tx_tp;
                 if (diff < TX_DURATION)
                 {
@@ -229,7 +229,7 @@ void RF4463F30_Socket::master_thread_proc()
                     }
                 }
 
-                m_last_tx_tp = q::Clock::now();
+                m_last_tx_tp = Clock::now();
                 m_impl->tx_buffer_has_data = false;
                 sent = true;
             }
@@ -308,7 +308,7 @@ void RF4463F30_Socket::slave_thread_proc()
             std::unique_lock<std::mutex> lg(m_impl->tx_buffer_mutex);
             if (m_impl->tx_buffer_has_data)
             {
-                auto now = q::Clock::now();
+                auto now = Clock::now();
                 auto diff = now - m_last_tx_tp;
                 if (diff < TX_DURATION)
                 {
@@ -328,7 +328,7 @@ void RF4463F30_Socket::slave_thread_proc()
                     }
                 }
 
-                m_last_tx_tp = q::Clock::now();
+                m_last_tx_tp = Clock::now();
                 m_impl->tx_buffer_has_data = false;
                 sent = true;
             }

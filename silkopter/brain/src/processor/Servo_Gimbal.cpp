@@ -41,7 +41,7 @@ ts::Result<void> Servo_Gimbal::init()
     return ts::success;
 }
 
-ts::Result<void> Servo_Gimbal::start(q::Clock::time_point tp)
+ts::Result<void> Servo_Gimbal::start(Clock::time_point tp)
 {
     m_x_output_stream->set_tp(tp);
     m_y_output_stream->set_tp(tp);

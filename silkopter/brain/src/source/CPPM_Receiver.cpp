@@ -86,7 +86,7 @@ ts::Result<void> CPPM_Receiver::init()
 #endif
 }
 
-ts::Result<void> CPPM_Receiver::start(q::Clock::time_point tp)
+ts::Result<void> CPPM_Receiver::start(Clock::time_point tp)
 {
     m_last_tp = tp;
     for (auto& pwm: m_pwms)
@@ -196,7 +196,7 @@ void CPPM_Receiver::process()
         return;
     }
 
-    auto now = q::Clock::now();
+    auto now = Clock::now();
     if (now - m_last_tp < m_pwms[0]->get_dt())
     {
         return;

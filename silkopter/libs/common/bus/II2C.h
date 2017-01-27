@@ -9,7 +9,6 @@ namespace bus
 
 class II2C: public IBus
 {
-    DEFINE_RTTI_CLASS(II2C, IBus);
 public:
     virtual ~II2C() = default;
 

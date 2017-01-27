@@ -65,7 +65,7 @@ ts::Result<void> Multirotor_Brain::init()
 
 //////////////////////////////////////////////////////////////////////////////////////////
 
-ts::Result<void> Multirotor_Brain::start(q::Clock::time_point tp)
+ts::Result<void> Multirotor_Brain::start(Clock::time_point tp)
 {
     m_state_output_stream->set_tp(tp);
     m_rate_output_stream->set_tp(tp);
@@ -181,7 +181,7 @@ ts::Result<void> Multirotor_Brain::check_pre_flight_conditions() const
         return make_error("Home is not acquired!");
     }
 
-    auto now = q::Clock::now();
+    auto now = Clock::now();
 
     if (now - m_inputs.commands.last_valid_tp > std::chrono::milliseconds(100))
     {
@@ -455,7 +455,7 @@ void Multirotor_Brain::process_fly_mode()
     stream::IMultirotor_Commands::Value& commands = m_inputs.commands.sample.value;
     QASSERT(m_home.is_acquired);
 
-    auto now = q::Clock::now();
+    auto now = Clock::now();
     if (now - m_inputs.commands.last_valid_tp > std::chrono::seconds(2))
     {
         QLOGW("No input received for {}. Heading home", now - m_inputs.commands.last_valid_tp);
@@ -669,7 +669,7 @@ void Multirotor_Brain::refresh_inputs(stream::IFrame::Sample const& frame,
                                 stream::IECEF_Linear_Acceleration::Sample const& linear_acceleration,
                                 stream::IProximity::Sample const& proximity)
 {
-    auto now = q::Clock::now();
+    auto now = Clock::now();
 
     m_inputs.frame.previous_sample = m_inputs.frame.sample;
     m_inputs.frame.sample = frame;
@@ -709,7 +709,7 @@ void Multirotor_Brain::process()
     m_commands_accumulator.process([this](stream::IMultirotor_Commands::Sample const& i_commands)
     {
         m_inputs.commands.sample = i_commands;
-        m_inputs.commands.last_valid_tp = i_commands.is_healthy ? q::Clock::now() : m_inputs.commands.last_valid_tp;
+        m_inputs.commands.last_valid_tp = i_commands.is_healthy ? Clock::now() : m_inputs.commands.last_valid_tp;
     });
 
 //    Merge_Commands func;

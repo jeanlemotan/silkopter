@@ -508,7 +508,7 @@ struct Multirotor_Brain_Descriptor : public INode_Descriptor
 
     rate_t rate = 100 : [ ui_name = "Rate", ui_suffix = "Hz" ];
     rate_t commands_rate = 30 : [ ui_name = "Commands Rate", ui_suffix = "Hz" ];
-    rate_t state_rate = 30 : [ ui_name = "Commands Rate", ui_suffix = "Hz" ];
+    rate_t state_rate = 30 : [ ui_name = "State Rate", ui_suffix = "Hz" ];
 };
 
 struct Multirotor_Brain_Config : public INode_Config

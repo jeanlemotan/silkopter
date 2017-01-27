@@ -460,7 +460,7 @@ ts::Result<void> UBLOX::setup()
     return ts::success;
 }
 
-ts::Result<void> UBLOX::start(q::Clock::time_point tp)
+ts::Result<void> UBLOX::start(Clock::time_point tp)
 {
     m_position_stream->set_tp(tp);
     m_velocity_stream->set_tp(tp);
@@ -472,7 +472,7 @@ ts::Result<void> UBLOX::start(q::Clock::time_point tp)
 
 void UBLOX::poll_for_data(Buses& buses)
 {
-    auto now = q::Clock::now();
+    auto now = Clock::now();
     //if (now - m_last_poll_tp > std::chrono::milliseconds(200))
     {
         m_last_poll_tp = now;
@@ -486,7 +486,7 @@ void UBLOX::poll_for_data(Buses& buses)
 
 void UBLOX::reset(Buses& buses)
 {
-    auto now = q::Clock::now();
+    auto now = Clock::now();
     if (now - m_last_reset_tp > std::chrono::seconds(5))
     {
         m_last_reset_tp = now;
@@ -506,7 +506,7 @@ void UBLOX::process()
     m_velocity_stream->clear();
     m_gps_info_stream->clear();
 
-    auto now = q::Clock::now();
+    auto now = Clock::now();
     if (now - m_last_process_tp < m_position_stream->get_dt())
     {
         return;
@@ -572,7 +572,7 @@ void UBLOX::process()
     bool is_gps_info_healthy = true;
     {
         size_t samples_needed = m_gps_info_stream->compute_samples_needed();
-        is_gps_info_healthy = q::Clock::now() - m_last_gps_info_tp <= m_gps_info_stream->get_dt() * k_max_sample_difference;
+        is_gps_info_healthy = Clock::now() - m_last_gps_info_tp <= m_gps_info_stream->get_dt() * k_max_sample_difference;
         if (!is_gps_info_healthy)
         {
             m_stats.info.added += samples_needed;
@@ -586,7 +586,7 @@ void UBLOX::process()
 
     {
         size_t samples_needed = m_position_stream->compute_samples_needed();
-        bool is_healthy = q::Clock::now() - m_last_position_tp <= m_position_stream->get_dt() * k_max_sample_difference;
+        bool is_healthy = Clock::now() - m_last_position_tp <= m_position_stream->get_dt() * k_max_sample_difference;
         if (!is_healthy)
         {
             m_stats.pos.added += samples_needed;
@@ -602,7 +602,7 @@ void UBLOX::process()
 
     {
         size_t samples_needed = m_velocity_stream->compute_samples_needed();
-        bool is_healthy = q::Clock::now() - m_last_velocity_tp <= m_velocity_stream->get_dt() * k_max_sample_difference;
+        bool is_healthy = Clock::now() - m_last_velocity_tp <= m_velocity_stream->get_dt() * k_max_sample_difference;
         if (!is_healthy)
         {
             m_stats.vel.added += samples_needed;
@@ -632,10 +632,10 @@ void UBLOX::process()
 
 void UBLOX::read_data(Buses& buses)
 {
-    auto start = q::Clock::now();
+    auto start = Clock::now();
     constexpr std::chrono::milliseconds MAX_DURATION(1);
 
-    while (q::Clock::now() - start < MAX_DURATION)
+    while (Clock::now() - start < MAX_DURATION)
     {
         auto result = decode_packet(m_packet, m_buffer);
         if (result == Decoder_State::Result::FOUND_PACKET)
@@ -799,12 +799,12 @@ auto UBLOX::decode_packet(Packet& packet, std::deque<uint8_t>& buffer) -> Decode
 }
 
 
-auto UBLOX::wait_for_ack(Buses& buses, q::Clock::duration d) -> bool
+auto UBLOX::wait_for_ack(Buses& buses, Clock::duration d) -> bool
 {
     QLOG_TOPIC("ublox::wait_for_ack");
 
     m_ack.reset();
-    auto start = q::Clock::now();
+    auto start = Clock::now();
     do
     {
         read_data(buses);
@@ -813,7 +813,7 @@ auto UBLOX::wait_for_ack(Buses& buses, q::Clock::duration d) -> bool
             return true;
         }
         std::this_thread::sleep_for(std::chrono::milliseconds(5));
-    } while (q::Clock::now() - start < d);
+    } while (Clock::now() - start < d);
 
     return false;
 }
@@ -902,7 +902,7 @@ void UBLOX::process_nav_status_packet(Buses& buses, Packet& packet)
             m_last_gps_info_value.fix = stream::IGPS_Info::Value::Fix::INVALID;
         }
     }
-    m_last_gps_info_tp = q::Clock::now();
+    m_last_gps_info_tp = Clock::now();
 }
 
 void UBLOX::process_nav_sol_packet(Buses& buses, Packet& packet)
@@ -951,9 +951,9 @@ void UBLOX::process_nav_sol_packet(Buses& buses, Packet& packet)
         m_last_gps_info_value.fix = stream::IGPS_Info::Value::Fix::INVALID;
     }
 
-    m_last_position_tp = q::Clock::now();
-    m_last_velocity_tp = q::Clock::now();
-    m_last_gps_info_tp = q::Clock::now();
+    m_last_position_tp = Clock::now();
+    m_last_velocity_tp = Clock::now();
+    m_last_gps_info_tp = Clock::now();
 }
 
 void UBLOX::process_nav_posecef_packet(Buses& buses, Packet& packet)
@@ -964,7 +964,7 @@ void UBLOX::process_nav_posecef_packet(Buses& buses, Packet& packet)
     m_last_position_value = math::vec3d(data.ecefX, data.ecefY, data.ecefZ) / 100.0;
     m_last_gps_info_value.pacc = (data.pAcc / 100.f) / 1.18f; //converting to cm and then to std dev
 
-    m_last_position_tp = q::Clock::now();
+    m_last_position_tp = Clock::now();
 }
 
 void UBLOX::process_nav_velecef_packet(Buses& buses, Packet& packet)
@@ -975,7 +975,7 @@ void UBLOX::process_nav_velecef_packet(Buses& buses, Packet& packet)
     m_last_velocity_value = math::vec3f(data.ecefVX, data.ecefVY, data.ecefVZ) / 100.f;
     m_last_gps_info_value.vacc = (data.sAcc / 100.f) / 1.18f; //converting to cm and then to std dev
 
-    m_last_velocity_tp = q::Clock::now();
+    m_last_velocity_tp = Clock::now();
 }
 
 void UBLOX::process_cfg_prt_packet(Buses& buses, Packet& packet)
@@ -1129,7 +1129,7 @@ template<class T> auto UBLOX::send_packet(Buses& buses, uint16_t msg, T const& d
     return res;
 }
 
-template<class T> auto UBLOX::send_packet_with_retry(Buses& buses, uint16_t msg, T const& data, q::Clock::duration timeout, size_t retries) -> bool
+template<class T> auto UBLOX::send_packet_with_retry(Buses& buses, uint16_t msg, T const& data, Clock::duration timeout, size_t retries) -> bool
 {
     m_ack.reset();
     for (size_t i = 0; i <= retries; i++)

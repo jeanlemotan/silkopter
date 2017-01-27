@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Clock.h"
+
 namespace util
 {
 	class Timed_Scope
@@ -8,19 +10,19 @@ namespace util
         Timed_Scope(char const* file, int line)
             : m_file(file)
             , m_line(line)
-            , m_start(q::Clock::now())
+            , m_start(Clock::now())
         {
         }
 
         ~Timed_Scope()
         {
-            QLOGI("Scope {}:{} took {}", m_file, m_line, q::Clock::now() - m_start);
+            QLOGI("Scope {}:{} took {}", m_file, m_line, Clock::now() - m_start);
         }
 
 	private:
         char const* m_file = nullptr;
         int m_line = 0;
-        q::Clock::time_point m_start;
+        Clock::time_point m_start;
 	};
 }
 

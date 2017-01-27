@@ -251,11 +251,11 @@ bool Si4463::get_nirq_level()
     return gpioRead(m_nirq_gpio) != 0;
 }
 
-bool Si4463::wait_for_ph_interrupt(bool& got_it, uint8_t& status, std::chrono::high_resolution_clock::duration timeout)
+bool Si4463::wait_for_ph_interrupt(bool& got_it, uint8_t& status, Clock::duration timeout)
 {
     QASSERT(m_is_initialized);
 
-    auto start = std::chrono::high_resolution_clock::now();
+    auto start = Clock::now();
 
     got_it = false;
     status = 0;
@@ -288,7 +288,7 @@ bool Si4463::wait_for_ph_interrupt(bool& got_it, uint8_t& status, std::chrono::h
             {
                 break;
             }
-            if (std::chrono::high_resolution_clock::now() - start > timeout)
+            if (Clock::now() - start > timeout)
             {
                 return true; //not error, but no interrupt either
             }
@@ -313,7 +313,7 @@ bool Si4463::wait_for_ph_interrupt(bool& got_it, uint8_t& status, std::chrono::h
             return true;
         }
 
-        if (std::chrono::high_resolution_clock::now() - start > timeout)
+        if (Clock::now() - start > timeout)
         {
             return true; //not error, but no interrupt either
         }
@@ -330,7 +330,7 @@ bool Si4463::wait_for_cts()
         return false;
     }
 
-    auto start = std::chrono::high_resolution_clock::now();
+    auto start = Clock::now();
 
     int spin = 0;
     uint8_t tx_data[] = { (uint8_t)Command::READ_CMD_BUFF, 0 };
@@ -350,7 +350,7 @@ bool Si4463::wait_for_cts()
 
         std::this_thread::sleep_for(std::chrono::microseconds(1));
 
-        if (std::chrono::high_resolution_clock::now() - start > std::chrono::milliseconds(1000))
+        if (Clock::now() - start > std::chrono::milliseconds(1000))
         {
             QLOGW("Timeout");
             return false;
@@ -404,7 +404,7 @@ bool Si4463::call_api_raw(void const* tx_data, size_t tx_size, void* rx_data, si
 
         m_tx_data[0] = static_cast<uint8_t>(Command::READ_CMD_BUFF);
 
-        auto start = std::chrono::high_resolution_clock::now();
+        auto start = Clock::now();
 
         //wait for CTS and then read the message
         //This is needed because after getting the CTS the NSEL line has to be kept active.
@@ -420,7 +420,7 @@ bool Si4463::call_api_raw(void const* tx_data, size_t tx_size, void* rx_data, si
                 return true;
             }
 
-            if (std::chrono::high_resolution_clock::now() - start > std::chrono::milliseconds(1000))
+            if (Clock::now() - start > std::chrono::milliseconds(1000))
             {
                 QLOGW("Timeout");
                 return false;
@@ -474,7 +474,7 @@ bool Si4463::set_properties(Property start_prop, size_t prop_count, void const* 
 //        return false;
 //    }
 
-    //auto now = std::chrono::high_resolution_clock::now();
+    //auto now = Clock::now();
     //QLOGI("DURATIONNNNNN: {}", std::chrono::duration_cast<std::chrono::microseconds>(now - start).count());
 
     return true;

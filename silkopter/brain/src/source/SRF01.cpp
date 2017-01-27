@@ -104,7 +104,7 @@ ts::Result<void> SRF01::init()
     return ts::success;
 }
 
-ts::Result<void> SRF01::start(q::Clock::time_point tp)
+ts::Result<void> SRF01::start(Clock::time_point tp)
 {
     m_last_trigger_tp = tp;
     m_output_stream->set_tp(tp);
@@ -164,7 +164,7 @@ auto SRF01::read_response_u16(bus::IUART& bus, uint8_t sent_command, uint16_t& r
 
 void SRF01::trigger(bus::IUART& bus)
 {
-    m_last_trigger_tp = q::Clock::now();
+    m_last_trigger_tp = Clock::now();
     send_command(bus, REAL_RANGING_CM_TX);
 }
 
@@ -175,7 +175,7 @@ void SRF01::process()
     m_output_stream->clear();
 
     //wait for echo
-    auto now = q::Clock::now();
+    auto now = Clock::now();
     if (now - m_last_trigger_tp < MAX_MEASUREMENT_DURATION ||
         now - m_last_trigger_tp < m_output_stream->get_dt())
     {

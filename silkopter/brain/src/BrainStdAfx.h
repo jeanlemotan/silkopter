@@ -9,7 +9,6 @@
 #include <boost/optional.hpp>
 
 #include "QBase.h"
-#include "QData.h"
 #include "qmath.h"
 
 #include "def_lang/Result.h"

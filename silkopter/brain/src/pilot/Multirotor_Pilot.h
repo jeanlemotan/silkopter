@@ -40,7 +40,7 @@ public:
 
     //auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
 
-    ts::Result<void> start(q::Clock::time_point tp) override;
+    ts::Result<void> start(Clock::time_point tp) override;
 
     ts::Result<void> set_input_stream_path(size_t idx, std::string const& path);
     auto get_inputs() const -> std::vector<Input>;
@@ -56,7 +56,7 @@ private:
     RC_Comms& m_rc_comms;
 
     stream::IMultirotor_Commands::Value m_last_commands_value;
-    q::Clock::time_point m_last_received_commands_value_tp = q::Clock::now();
+    Clock::time_point m_last_received_commands_value_tp = Clock::now();
 
     std::shared_ptr<hal::Multirotor_Pilot_Descriptor> m_descriptor;
     std::shared_ptr<hal::Multirotor_Pilot_Config> m_config;

@@ -28,7 +28,7 @@ public:
 
     //auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
 
-    ts::Result<void> start(q::Clock::time_point tp) override;
+    ts::Result<void> start(Clock::time_point tp) override;
 
     ts::Result<void> set_input_stream_path(size_t idx, std::string const& path);
     auto get_inputs() const -> std::vector<Input>;
@@ -124,7 +124,7 @@ auto Transformer<In_Stream_t, Out_Stream_t, Frame_Stream_t>::get_config() const 
 }
 
 template<class In_Stream_t, class Out_Stream_t, class Frame_Stream_t>
-ts::Result<void> Transformer<In_Stream_t, Out_Stream_t, Frame_Stream_t>::start(q::Clock::time_point tp)
+ts::Result<void> Transformer<In_Stream_t, Out_Stream_t, Frame_Stream_t>::start(Clock::time_point tp)
 {
     m_output_stream->set_tp(tp);
     return ts::success;

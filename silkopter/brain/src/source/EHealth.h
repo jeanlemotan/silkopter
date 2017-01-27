@@ -26,7 +26,7 @@ public:
 
     //auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
 
-    ts::Result<void> start(q::Clock::time_point tp) override;
+    ts::Result<void> start(Clock::time_point tp) override;
 
     auto get_outputs() const -> std::vector<Output>;
 
@@ -47,7 +47,7 @@ private:
     std::array<char, 1024> m_temp_buffer;
     std::string m_buffer;
 
-    q::Clock::time_point m_last_tp;
+    Clock::time_point m_last_tp;
 
     struct Stream : public stream::IAcceleration
     {

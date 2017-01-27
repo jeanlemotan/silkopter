@@ -37,7 +37,7 @@ public:
 
     //auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
 
-    ts::Result<void> start(q::Clock::time_point tp) override;
+    ts::Result<void> start(Clock::time_point tp) override;
 
     auto get_outputs() const -> std::vector<Output>;
 
@@ -52,7 +52,7 @@ private:
     std::shared_ptr<hal::ADS1115_Descriptor> m_descriptor;
     std::shared_ptr<hal::ADS1115_Config> m_config;
 
-    q::Clock::time_point m_last_tp = q::Clock::now();
+    Clock::time_point m_last_tp = Clock::now();
 
     typedef Basic_Output_Stream<stream::IADC> Output_Stream;
     mutable std::array<std::shared_ptr<Output_Stream>, 4> m_adcs;

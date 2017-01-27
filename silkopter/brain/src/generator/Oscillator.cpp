@@ -42,7 +42,7 @@ ts::Result<void> Oscillator::init()
     return ts::success;
 }
 
-ts::Result<void> Oscillator::start(q::Clock::time_point tp)
+ts::Result<void> Oscillator::start(Clock::time_point tp)
 {
     m_output_stream->set_tp(tp);
     return ts::success;

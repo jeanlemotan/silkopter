@@ -1,8 +1,7 @@
 #pragma once
 
 #include <type_traits>
-
-
+#include "utils/Clock.h"
 
 namespace silk
 {
@@ -33,21 +32,21 @@ public:
         }
         m_rate = rate;
     }
-    void set_tp(q::Clock::time_point tp)
+    void set_tp(Clock::time_point tp)
     {
         m_tp = tp;
     }
 
-    q::Clock::duration get_dt() const
+    Clock::duration get_dt() const
     {
         return m_dt;
     }
-    q::Clock::time_point get_tp() const
+    Clock::time_point get_tp() const
     {
         return m_tp;
     }
 
-//    void push_sample(Value const& value, q::Clock::duration dt, q::Clock::time_point tp, bool is_healthy)
+//    void push_sample(Value const& value, Clock::duration dt, Clock::time_point tp, bool is_healthy)
 //    {
 //        m_last_sample.value = value;
 //        m_last_sample.dt = dt;
@@ -65,11 +64,11 @@ public:
     {
         m_tp += m_dt;
 
-        auto future = q::Clock::now() + m_dt * 5;
+        auto future = Clock::now() + m_dt * 5;
         if (m_tp > future && !m_future_warning)
         {
             m_future_warning = true;
-            QLOGW("Samples from the future: {}", m_tp - q::Clock::now());
+            QLOGW("Samples from the future: {}", m_tp - Clock::now());
         }
 
         m_last_sample.value = value;
@@ -85,8 +84,8 @@ public:
 
     size_t compute_samples_needed()
     {
-        auto dt = q::Clock::now() - m_tp;
-        if (dt < q::Clock::duration(0))
+        auto dt = Clock::now() - m_tp;
+        if (dt < Clock::duration(0))
         {
             return 0;
         }
@@ -96,8 +95,8 @@ public:
     }
 
 private:
-    q::Clock::duration m_dt;
-    q::Clock::time_point m_tp = q::Clock::now();
+    Clock::duration m_dt;
+    Clock::time_point m_tp = Clock::now();
     uint32_t m_rate = 0;
     std::vector<Sample> m_samples;
     Sample m_last_sample;

@@ -325,7 +325,7 @@ bool RF4463F30::end_tx()
 
     m_tx_started = false;
 
-    auto start = std::chrono::high_resolution_clock::now();
+    auto start = Clock::now();
 
     do
     {
@@ -340,7 +340,7 @@ bool RF4463F30::end_tx()
             break;
         }
 
-        if (std::chrono::high_resolution_clock::now() - start > std::chrono::milliseconds(100))
+        if (Clock::now() - start > std::chrono::milliseconds(100))
         {
 //            uint8_t response[2];
 //            if (!m_chip.call_api(Si4463::Command::REQUEST_DEVICE_STATE, nullptr, 0, response, sizeof(response)))
@@ -414,7 +414,7 @@ bool RF4463F30::begin_rx(uint8_t channel)
         0  //invalid packet -> rx state
     });
 }
-bool RF4463F30::end_rx(size_t& size, std::chrono::high_resolution_clock::duration timeout)
+bool RF4463F30::end_rx(size_t& size, Clock::duration timeout)
 {
     if (!m_is_initialized)
     {
@@ -423,7 +423,7 @@ bool RF4463F30::end_rx(size_t& size, std::chrono::high_resolution_clock::duratio
 
     size = 0;
 
-    auto start = std::chrono::high_resolution_clock::now();
+    auto start = Clock::now();
 
     bool received = false;
     do
@@ -440,7 +440,7 @@ bool RF4463F30::end_rx(size_t& size, std::chrono::high_resolution_clock::duratio
             break;
         }
     }
-    while (std::chrono::high_resolution_clock::now() - start < timeout);
+    while (Clock::now() - start < timeout);
 
     if (!received)
     {
@@ -460,7 +460,7 @@ bool RF4463F30::end_rx(size_t& size, std::chrono::high_resolution_clock::duratio
     return true;
 }
 
-bool RF4463F30::rx(size_t& size, uint8_t channel, std::chrono::high_resolution_clock::duration timeout)
+bool RF4463F30::rx(size_t& size, uint8_t channel, Clock::duration timeout)
 {
     if (!m_is_initialized)
     {

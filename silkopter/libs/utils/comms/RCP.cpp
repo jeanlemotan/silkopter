@@ -2,6 +2,7 @@
 #include "utils/Timed_Scope.h"
 #include "lz4/lz4.h"
 #include <zlib.h>
+#include "utils/Clock.h"
 
 namespace util
 {
@@ -22,8 +23,8 @@ auto RCP::acquire_tx_datagram(size_t zero_size, size_t data_size) -> RCP::TX::Da
 
     std::fill(datagram->data.begin(), datagram->data.begin() + zero_size, 0);
 
-    datagram->sent_tp = q::Clock::time_point(q::Clock::duration{0});
-    datagram->added_tp = q::Clock::time_point(q::Clock::duration{0});
+    datagram->sent_tp = Clock::time_point(Clock::duration{0});
+    datagram->added_tp = Clock::time_point(Clock::duration{0});
     datagram->sent_count = 0;
 
     return datagram;
@@ -45,7 +46,7 @@ auto RCP::RX::acquire_packet() -> RCP::RX::Packet_ptr
 {
     auto packet = packet_pool.acquire();
     packet->received_fragment_count = 0;
-    packet->added_tp = q::Clock::now();
+    packet->added_tp = Clock::now();
     return packet;
 }
 
@@ -128,7 +129,7 @@ RCP::RCP()
 
     m_global_receive_params.max_receive_time = std::chrono::seconds(5);
 
-    m_init_tp = q::Clock::now();
+    m_init_tp = Clock::now();
 
     for (auto& ch: m_tx.channel_data)
     {
@@ -214,7 +215,7 @@ void RCP::reconnect()
 {
     std::lock_guard<std::mutex> lg(m_connection.mutex);
     disconnect();
-    m_connection.last_sent_tp = q::Clock::now() - RECONNECT_BEACON_TIMEOUT;
+    m_connection.last_sent_tp = Clock::now() - RECONNECT_BEACON_TIMEOUT;
 }
 auto RCP::is_connected() const -> bool
 {
@@ -297,14 +298,14 @@ auto RCP::_send_locked(uint8_t channel_idx, Send_Params const& params, void cons
     size_t uncompressed_size = size;
     if (is_compressed)
     {
-//        auto start = q::Clock::now();
+//        auto start = Clock::now();
 
 //        uLongf comp_size = compressBound(size);
 //        channel_data.comp_state.buffer.resize(comp_size);
 //        int ret = compress2(reinterpret_cast<Bytef*>(channel_data.comp_state.buffer.data()), &comp_size, data, size, 1);
 //        if (ret == Z_OK)// && static_cast<size_t>(comp_size) < uncompressed_size)
 //        {
-//            QLOGI("Compressed {}B -> {}B. {}% : {}", static_cast<int>(uncompressed_size), (int)comp_size, comp_size * 100.f / uncompressed_size, q::Clock::now() - start);
+//            QLOGI("Compressed {}B -> {}B. {}% : {}", static_cast<int>(uncompressed_size), (int)comp_size, comp_size * 100.f / uncompressed_size, Clock::now() - start);
 //            channel_data.comp_state.buffer.resize(comp_size);
 //            data = channel_data.comp_state.buffer.data();
 //            size = comp_size;
@@ -320,7 +321,7 @@ auto RCP::_send_locked(uint8_t channel_idx, Send_Params const& params, void cons
                                              1);
         if (ret > 0 && static_cast<size_t>(ret) < uncompressed_size)
         {
-            //QLOGI("Compressed {}B -> {}B. {}% : {}", static_cast<int>(uncompressed_size), ret, ret * 100.f / uncompressed_size, q::Clock::now() - start);
+            //QLOGI("Compressed {}B -> {}B. {}% : {}", static_cast<int>(uncompressed_size), ret, ret * 100.f / uncompressed_size, Clock::now() - start);
             channel_data.comp_state.buffer.resize(ret);
             data = channel_data.comp_state.buffer.data();
             size = ret;
@@ -357,7 +358,7 @@ auto RCP::_send_locked(uint8_t channel_idx, Send_Params const& params, void cons
         return false;
     }
 
-    auto now = q::Clock::now();
+    auto now = Clock::now();
 
     auto id = ++m_last_id[channel_idx];
 
@@ -513,7 +514,7 @@ bool RCP::receive(uint8_t channel_idx, std::vector<uint8_t>& data)
             continue;
         }
 
-        auto now = q::Clock::now();
+        auto now = Clock::now();
         auto max_receive_time = params.max_receive_time.count() > 0 ? params.max_receive_time : m_global_receive_params.max_receive_time;
         bool is_late = (max_receive_time.count() > 0 && now - packet->added_tp >= max_receive_time);
 
@@ -611,7 +612,7 @@ void RCP::process_connection()
 
     std::lock_guard<std::mutex> lg(m_connection.mutex);
 
-    auto now = q::Clock::now();
+    auto now = Clock::now();
     if (now - m_connection.last_sent_tp < RECONNECT_BEACON_TIMEOUT)
     {
         return;
@@ -625,10 +626,10 @@ void RCP::process_connection()
 void RCP::process()
 {
     {
-        static q::Clock::time_point tp = q::Clock::now();
-        if (q::Clock::now() - tp > std::chrono::seconds(1))
+        static Clock::time_point tp = Clock::now();
+        if (Clock::now() - tp > std::chrono::seconds(1))
         {
-            tp = q::Clock::now();
+            tp = Clock::now();
             std::lock_guard<std::mutex> lg(m_tx.packet_queue_mutex);
             QLOGI("{}: txd {} / tdf {} / rx {} / rxf {} / cf {}", m_tx.packet_queue.size(), m_global_stats.tx_datagrams, m_global_stats.tx_fragments, m_global_stats.rx_datagrams, m_global_stats.rx_fragments, m_global_stats.tx_confirmed_fragments);
         }
@@ -654,7 +655,7 @@ void RCP::prepare_to_send_datagram(TX::Datagram& datagram)
 
     if (datagram.added_tp.time_since_epoch().count() == 0)
     {
-        datagram.added_tp = q::Clock::now();
+        datagram.added_tp = Clock::now();
     }
 
 //            if (header.crc == 0)
@@ -694,7 +695,7 @@ auto RCP::add_datagram_to_send_buffer(Socket_Data& socket_data, TX::Datagram_ptr
     {
         update_stats(m_global_stats, *datagram);
 
-//        QLOGI("Sending after {}", q::Clock::now() - datagram->added_tp);
+//        QLOGI("Sending after {}", Clock::now() - datagram->added_tp);
 
         socket_data.buffer.resize(tx_send_buffer_size + datagram->data.size());
         auto dst_it = socket_data.buffer.begin() + tx_send_buffer_size;
@@ -752,7 +753,7 @@ auto RCP::compute_next_transit_datagram(Socket_Handle socket_handle) -> bool
 
         m_tx.reinsert_queue.clear();
 
-        auto now = q::Clock::now();
+        auto now = Clock::now();
 
 //        std::string dbg;
 //        dbg.reserve(1024);
@@ -840,7 +841,7 @@ void RCP::send_datagram(Socket_Handle socket_handle)
 //    if (m_is_sending.exchange(true))
 //    {
 //        //was already sending, return
-//        //QLOGI("send blocked {}", q::Clock::now());
+//        //QLOGI("send blocked {}", Clock::now());
 //        return;
 //    }
     if (!socket->lock())
@@ -908,7 +909,7 @@ void RCP::send_pending_confirmations()
 
         //don't send confirmations too often otherwise we spam the channel and the other end cannot send data
         //Send often enough to avoid resends though
-        auto now = q::Clock::now();
+        auto now = Clock::now();
         if (now - m_tx.confirmations_last_time_point < MIN_RESEND_DURATION / 2)
         {
             return;
@@ -1241,7 +1242,7 @@ void RCP::process_confirmations_data(uint8_t* data_ptr, size_t data_size)
             {
 //                if (hdr.channel_idx == 20)
 //                {
-//                    QLOGI("Confirming fragment {} for packet {}: {} / {}", hdr.fragment_idx, hdr.id, q::Clock::now() - datagram->added_tp, q::Clock::now() - datagram->sent_tp);
+//                    QLOGI("Confirming fragment {} for packet {}: {} / {}", hdr.fragment_idx, hdr.id, Clock::now() - datagram->added_tp, Clock::now() - datagram->sent_tp);
 //                }
                 it = queue.erase(it);
                 m_global_stats.tx_confirmed_fragments++;
@@ -1256,7 +1257,7 @@ void RCP::process_confirmations_data(uint8_t* data_ptr, size_t data_size)
             {
 //                if (hdr.channel_idx == 20)
 //                {
-//                    QLOGI("Confirming packet {}: {} / {}", hdr.id, q::Clock::now() - datagram->added_tp, q::Clock::now() - datagram->sent_tp);
+//                    QLOGI("Confirming packet {}: {} / {}", hdr.id, Clock::now() - datagram->added_tp, Clock::now() - datagram->sent_tp);
 //                }
                 it = queue.erase(it);
                 m_global_stats.tx_confirmed_fragments++;
@@ -1292,7 +1293,7 @@ void RCP::process_confirmations_data(uint8_t* data_ptr, size_t data_size)
 //                {
 ////                  if (hdr.channel_idx == 20)
 ////                  {
-////                      QLOGI("Confirming packet {}: {} / {}", hdr.id, q::Clock::now() - datagram->added_tp, q::Clock::now() - datagram->sent_tp);
+////                      QLOGI("Confirming packet {}: {} / {}", hdr.id, Clock::now() - datagram->added_tp, Clock::now() - datagram->sent_tp);
 ////                  }
 //                    queue.erase(it);
 //                    m_global_stats.tx_confirmed_fragments++;
@@ -1301,7 +1302,7 @@ void RCP::process_confirmations_data(uint8_t* data_ptr, size_t data_size)
 //                {
 ////                  if (hdr.channel_idx == 20)
 ////                  {
-////                      QLOGI("Confirming fragment {} for packet {}: {} / {}", hdr.fragment_idx, hdr.id, q::Clock::now() - datagram->added_tp, q::Clock::now() - datagram->sent_tp);
+////                      QLOGI("Confirming fragment {} for packet {}: {} / {}", hdr.fragment_idx, hdr.id, Clock::now() - datagram->added_tp, Clock::now() - datagram->sent_tp);
 ////                  }
 //                    queue.erase(it);
 //                    m_global_stats.tx_confirmed_fragments++;

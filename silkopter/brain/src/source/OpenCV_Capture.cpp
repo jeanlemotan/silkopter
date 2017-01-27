@@ -35,7 +35,7 @@ struct OpenCV_Capture::Impl
 
         std::atomic<bool> is_active{false};
 
-        q::Clock::time_point start;
+        Clock::time_point start;
 
         OpenCV_Capture::Data_Available_Callback callback;
     };
@@ -144,7 +144,7 @@ auto OpenCV_Capture::init() -> bool
 #endif
 }
 
-auto OpenCV_Capture::start(q::Clock::time_point tp) -> bool
+auto OpenCV_Capture::start(Clock::time_point tp) -> bool
 {
     return true;
 }

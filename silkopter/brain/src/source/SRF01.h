@@ -36,7 +36,7 @@ public:
 
     //auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
 
-    ts::Result<void> start(q::Clock::time_point tp) override;
+    ts::Result<void> start(Clock::time_point tp) override;
 
     auto get_outputs() const -> std::vector<Output>;
 
@@ -61,7 +61,7 @@ private:
 
     typedef Basic_Output_Stream<stream::IDistance> Output_Stream;
     mutable std::shared_ptr<Output_Stream> m_output_stream;
-    q::Clock::time_point m_last_trigger_tp;
+    Clock::time_point m_last_trigger_tp;
 
     std::deque<uint8_t> m_read_data;
 

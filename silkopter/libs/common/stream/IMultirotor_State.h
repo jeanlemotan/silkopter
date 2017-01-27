@@ -28,7 +28,7 @@ public:
 
     struct Value
     {
-//        q::Clock::time_point time_point;
+//        Clock::time_point time_point;
 //        IBattery_State::Sample battery_state;
 //        IFrame::Sample frame;
 //        IECEF_Linear_Acceleration::Sample linear_acceleration;

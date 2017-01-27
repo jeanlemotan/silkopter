@@ -31,7 +31,7 @@ public:
 
     //auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
 
-    ts::Result<void> start(q::Clock::time_point tp) override;
+    ts::Result<void> start(Clock::time_point tp) override;
 
     ts::Result<void> set_input_stream_path(size_t idx, std::string const& path);
     auto get_inputs() const -> std::vector<Input>;
@@ -50,8 +50,8 @@ private:
 
     Sample_Accumulator<Stream_t> m_accumulator;
 
-    q::Clock::duration m_input_stream_dt;
-    q::Clock::duration m_processed_dt = q::Clock::duration(0);
+    Clock::duration m_input_stream_dt;
+    Clock::duration m_processed_dt = Clock::duration(0);
 
     typename Stream_t::Sample m_last_input_sample;
 
@@ -204,7 +204,7 @@ auto Resampler<Stream_t>::get_config() const -> std::shared_ptr<const hal::INode
 }
 
 template<class Stream_t>
-ts::Result<void> Resampler<Stream_t>::start(q::Clock::time_point tp)
+ts::Result<void> Resampler<Stream_t>::start(Clock::time_point tp)
 {
     m_output_stream->set_tp(tp);
     return ts::success;
@@ -269,7 +269,7 @@ void Resampler<Stream_t>::resample()
 //            m_input_samples.pop_front();
 //            if (m_input_samples.empty())
 //            {
-//                m_input_accumulated_dt = q::Clock::duration(0);
+//                m_input_accumulated_dt = Clock::duration(0);
 //                break;
 //            }
 //        }

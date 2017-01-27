@@ -1,5 +1,7 @@
 ﻿#include "BrainStdAfx.h"
 
+#include <fstream>
+
 #include "HAL.h"
 #include "RC_Comms.h"
 #include "GS_Comms.h"
@@ -148,11 +150,12 @@ static auto shutdown_bcm() -> bool
 namespace silk
 {
 
-static const q::Path k_settings_path("settings.json");
+static const std::string k_settings_path("settings.json");
 
 //wrapper to keep all nodes in the same container
-struct INode_Wrapper : q::util::Noncopyable
+class INode_Wrapper
 {
+public:
     virtual void process() = 0;
 };
 template<class T> struct Node_Wrapper : public INode_Wrapper
@@ -221,10 +224,10 @@ void HAL::save_settings()
 
         std::string json = ts::sz::to_json(sz_value, true);
 
-        q::data::File_Sink fs(k_settings_path);
+        std::ofstream fs(k_settings_path);
         if (fs.is_open())
         {
-            fs.write(reinterpret_cast<uint8_t const*>(json.data()), json.size());
+            fs.write(json.data(), json.size());
             fs.flush();
         }
         else
@@ -232,103 +235,6 @@ void HAL::save_settings()
             QLOGE("Cannot open '{}' to save settings.", k_settings_path);
         }
     }));
-
-
-
-//    auto settingsj = std::make_shared<rapidjson::Document>();
-//    settingsj->SetObject();
-
-//    auto& allocator = settingsj->GetAllocator();
-
-//    std::shared_ptr<const Multirotor_Config> multirotor_config = get_specialized_uav_descriptor<Multirotor_Config>();
-//    if (multirotor_config)
-//    {
-//        auto* configj = jsonutil::get_or_add_value(*settingsj, q::Path("uav/multirotor_config"), rapidjson::kObjectType, allocator);
-//        if (!configj)
-//        {
-//            QLOGE("Cannot create multirotor config node.");
-//            return;
-//        }
-//        rapidjson::Document json;
-//        autojsoncxx::to_document(*multirotor_config, json);
-//        jsonutil::clone_value(*configj, json, allocator);
-//    }
-
-//    {
-//        auto busesj = jsonutil::get_or_add_value(*settingsj, q::Path("uav/buses"), rapidjson::kObjectType, allocator);
-//        if (!busesj)
-//        {
-//            QLOGE("Cannot create buses settings node.");
-//            return;
-//        }
-////        auto const& nodes = get_buses().get_all();
-////        for (auto const& n: nodes)
-////        {
-////            if (!jsonutil::add_value(*busesj, q::Path(n.name + "/type"), rapidjson::Value(n.type.c_str(), n.type.size(), allocator), allocator) ||
-////                !jsonutil::add_value(*busesj, q::Path(n.name + "/init_params"), jsonutil::clone_value(n.ptr->get_init_params(), allocator), allocator) ||
-////                !jsonutil::add_value(*busesj, q::Path(n.name + "/config"), jsonutil::clone_value(n.ptr->get_config(), allocator), allocator))
-////            {
-////                QLOGE("Cannot create settings node.");
-////                return;
-////            }
-////        }
-//    }
-//    {
-//        auto nodesj = jsonutil::get_or_add_value(*settingsj, q::Path("uav/nodes"), rapidjson::kArrayType, allocator);
-//        if (!nodesj)
-//        {
-//            QLOGE("Cannot create nodes settings node.");
-//            return;
-//        }
-//        auto const& nodes = get_nodes().get_all();
-//        for (auto const& n: nodes)
-//        {
-//            rapidjson::Value nodej;
-//            nodej.SetObject();
-
-//            rapidjson::Value input_pathsj;
-//            {
-//                auto inputs = n.ptr->get_inputs();
-//                input_pathsj.SetArray();
-//                for (auto const& si: inputs)
-//                {
-//                    input_pathsj.PushBack(rapidjson::Value(si.stream_path, allocator), allocator);
-//                }
-//            }
-
-////            if (!jsonutil::add_value(nodej, std::string("name"), rapidjson::Value(n.name.c_str(), n.name.size(), allocator), allocator) ||
-////                !jsonutil::add_value(nodej, std::string("type"), rapidjson::Value(n.type.c_str(), n.type.size(), allocator), allocator) ||
-////                !jsonutil::add_value(nodej, std::string("init_params"), jsonutil::clone_value(n.ptr->get_init_params(), allocator), allocator) ||
-////                !jsonutil::add_value(nodej, std::string("config"), jsonutil::clone_value(n.ptr->get_config(), allocator), allocator) ||
-////                !jsonutil::add_value(nodej, std::string("input_paths"), std::move(input_pathsj), allocator))
-////            {
-////                QLOGE("Cannot create settings node.");
-////                return;
-////            }
-
-//            nodesj->PushBack(nodej, allocator);
-//        }
-//    }
-
-//    silk::async(std::function<void()>([=]()
-//    {
-//        TIMED_FUNCTION();
-
-////        rapidjson::StringBuffer s;
-////        rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(s);
-////        settingsj->Accept(writer);    // Accept() traverses the DOM and generates Handler events.
-////        q::data::File_Sink fs(k_settings_path);
-////        if (fs.is_open())
-////        {
-////            fs.write(reinterpret_cast<uint8_t const*>(s.GetString()), s.GetSize());
-////        }
-////        else
-////        {
-////            QLOGE("Cannot open '{}' to save settings.", k_settings_path);
-////        }
-//    }));
-
-    //autojsoncxx::to_pretty_json_file("sensors_pi.cfg", config);
 }
 
 HAL::Telemetry_Data const& HAL::get_telemetry_data() const
@@ -411,8 +317,6 @@ ts::Result<void> HAL::set_uav_descriptor(std::shared_ptr<const hal::IUAV_Descrip
     m_uav_descriptor = descriptor;
     std::swap(m_uav_properties, new_properties);
 
-    uav_properties_changed_signal.execute(*this);
-
     return ts::success;
 }
 //auto hal::set_multirotor_descriptor(hal::Multirotor_Descriptor const& descriptor) -> bool
@@ -463,9 +367,9 @@ auto HAL::remove_node(std::shared_ptr<node::INode> node) -> bool
 template<class T>
 void write_gnu_plot(std::string const& name, std::vector<T> const& samples)
 {
-    q::data::File_Sink fs((q::Path(name)));
+    std::ofstream fs(name);
     std::string header("#x y\n");
-    fs.write((uint8_t const*)header.c_str(), header.size());
+    fs.write(header.c_str(), header.size());
 
     for(size_t i = 0; i < samples.size(); i++)
     {
@@ -532,128 +436,6 @@ ts::Result<std::shared_ptr<node::INode>> HAL::create_node(std::string const& typ
     return node;
 }
 
-//auto hal::create_buses(rapidjson::Value& json) -> bool
-//{
-//    if (!json.IsObject())
-//    {
-//        QLOGE("Wrong json type: {}", json.GetType());
-//        return false;
-//    }
-//    auto it = json.MemberBegin();
-//    for (; it != json.MemberEnd(); ++it)
-//    {
-//        std::string name(it->name.GetString());
-//        auto* typej = jsonutil::find_value(it->value, std::string("type"));
-//        if (!typej || typej->GetType() != rapidjson::kStringType)
-//        {
-//            QLOGE("Node {} is missing the type", name);
-//            return false;
-//        }
-//        std::string type(typej->GetString());
-//        auto* init_paramsj = jsonutil::find_value(it->value, std::string("init_params"));
-//        if (!init_paramsj)
-//        {
-//            QLOGE("Node {} of type {} is missing the init_params", name, type);
-//            return false;
-//        }
-//        auto node = create_bus(type, name, *init_paramsj);
-//        if (!node)
-//        {
-//            QLOGE("Failed to create node {} of type '{}'", name, type);
-//            return false;
-//        }
-//    }
-//    return true;
-//}
-
-//static bool read_input_stream_paths(std::string const& node_name, silk::node::INode& node, rapidjson::Value const& value)
-//{
-//    auto* input_pathsj = jsonutil::find_value(value, std::string("input_paths"));
-//    if (!input_pathsj || !input_pathsj->IsArray())
-//    {
-//        QLOGE("Node {} is missing the stream input paths", node_name);
-//        return false;
-//    }
-//    size_t input_idx = 0;
-//    for (auto it = input_pathsj->Begin(); it != input_pathsj->End(); ++it, input_idx++)
-//    {
-//        if (!it->IsString())
-//        {
-//            QLOGE("Node {} has a bad stream input paths", node_name);
-//            return false;
-//        }
-//        node.set_input_stream_path(input_idx, q::Path(it->GetString()));
-//    }
-//    return true;
-//}
-
-//auto hal::create_nodes(rapidjson::Value& json) -> bool
-//{
-//    if (!json.IsArray())
-//    {
-//        QLOGE("Wrong json type: {}", json.GetType());
-//        return false;
-//    }
-//    for (auto it = json.Begin(); it != json.End(); ++it)
-//    {
-//        auto* namej = jsonutil::find_value(*it, std::string("name"));
-//        if (!namej || namej->GetType() != rapidjson::kStringType)
-//        {
-//            QLOGE("Node is missing the name");
-//            return false;
-//        }
-//        std::string name(namej->GetString());
-
-//        auto* typej = jsonutil::find_value(*it, std::string("type"));
-//        if (!typej || typej->GetType() != rapidjson::kStringType)
-//        {
-//            QLOGE("Node {} is missing the type", name);
-//            return false;
-//        }
-//        std::string type(typej->GetString());
-
-//        auto* init_paramsj = jsonutil::find_value(*it, std::string("init_params"));
-//        if (!init_paramsj)
-//        {
-//            QLOGE("Node {} of type {} is missing the init_params", name, type);
-//            return false;
-//        }
-//        auto node = create_node(type, name, *init_paramsj);
-//        if (!node)
-//        {
-//            QLOGE("Failed to create node {} of type '{}'", name, type);
-//            return false;
-//        }
-//    }
-
-//    auto nodes = m_nodes.get_all();
-//    for (auto it = json.Begin(); it != json.End(); ++it)
-//    {
-//        const auto& item = nodes[std::distance(json.Begin(), it)];
-//        const std::string& name = item.name;
-//        std::shared_ptr<node::INode> node = item.ptr;
-//        QASSERT(node);
-
-//        if (!read_input_stream_paths(name, *node, *it))
-//        {
-//            return false;
-//        }
-
-//        auto* configj = jsonutil::find_value(*it, std::string("config"));
-//        if (!configj)
-//        {
-//            QLOGE("Node {} is missing the config", name);
-//            return false;
-//        }
-////        if (!node->set_config(*configj))
-////        {
-////            QLOGE("Failed to set config for node '{}'", name);
-////            return false;
-////        }
-//    }
-//    return true;
-//}
-
 void HAL::sort_nodes(std::shared_ptr<node::INode> first_node)
 {
     QASSERT(first_node);
@@ -661,84 +443,7 @@ void HAL::sort_nodes(std::shared_ptr<node::INode> first_node)
     {
         return;
     }
-
-//    typedef Registry<node::INode>::Item Item;
-
-//    std::vector<Item> items = m_nodes.get_all();
-//    auto it = std::find_if(items.begin(), items.end(), [first_node](const Item& item) { return item.ptr == first_node; });
-//    QASSERT(it != items.end());
-//    if (it == items.end())
-//    {
-//        return;
-//    }
-
-//    std::vector<Item> sorted;
-//    sorted.reserve(items.size() * 2); //to avoid allocations
-
-//    Item first_item = *it;
-//    items.erase(it);
-
-//    sorted.push_back(first_item);
-//    for (auto it = sorted.begin(); it != sorted.end(); ++it)
-//    {
-//        const std::string& node_name = it->name;
-
-//        //now find all the nodes that this node uses as input
-//        if (it->ptr != first_node)
-//        {
-//            std::vector<node::INode::Input> inputs = it->ptr->get_inputs();
-//            for (const node::INode::Input& input : inputs)
-//            {
-//                if (input.stream_path.empty())
-//                {
-//                    continue;
-//                }
-//                for (auto nit = items.begin(); nit != items.end();)
-//                {
-//                    if (input.stream_path[0] == nit->name)
-//                    {
-//                        sorted.push_back(*nit);
-//                        items.erase(nit);
-//                    }
-//                    else
-//                    {
-//                        ++nit;
-//                    }
-//                }
-//            }
-//        }
-
-//        //now find all the nodes that use this node as an input
-//        for (auto nit = items.begin(); nit != items.end();)
-//        {
-//            bool found = false;
-//            std::vector<node::INode::Input> inputs = nit->ptr->get_inputs();
-//            for (const node::INode::Input& input : inputs)
-//            {
-//                if (!input.stream_path.empty() && input.stream_path[0] == node_name)
-//                {
-//                    sorted.push_back(*nit);
-//                    items.erase(nit);
-//                    found = true;
-//                    break;
-//                }
-//            }
-//            if (!found)
-//            {
-//                ++nit;
-//            }
-//        }
-//    }
-
-//    //add all the remainding nodes
-//    for (Item const& item: items)
-//    {
-//        sorted.push_back(item);
-//    }
-
-//    m_nodes.set_all(sorted);
 }
-
 
 auto HAL::init(RC_Comms& rc_comms, GS_Comms& gs_comms) -> bool
 {
@@ -994,16 +699,25 @@ auto HAL::init(RC_Comms& rc_comms, GS_Comms& gs_comms) -> bool
     m_streams.remove_all();
     m_nodes.remove_all();
 
-    //read the data
-    q::data::File_Source fs(k_settings_path);
-    if (!fs.is_open())
-    {
-        QLOGW("Failed to load '{}'", k_settings_path);
-        generate_settings_file();
-        return false;
-    }
+    std::string data;
 
-    std::string data = q::data::read_whole_source_as_string<std::string>(fs);
+    {
+        //read the data
+        std::ifstream fs(k_settings_path, std::ifstream::in | std::ifstream::binary);
+        if (!fs.is_open())
+        {
+            QLOGW("Failed to load '{}'", k_settings_path);
+            generate_settings_file();
+            return false;
+        }
+
+        fs.seekg (0, fs.end);
+        size_t size = fs.tellg();
+        fs.seekg (0, fs.beg);
+
+        data.resize(size + 1);
+        fs.read(&data[0], size);
+    }
 
     ts::Result<ts::sz::Value> json_result = ts::sz::from_json(data);
     if (json_result != ts::success)
@@ -1079,7 +793,7 @@ auto HAL::init(RC_Comms& rc_comms, GS_Comms& gs_comms) -> bool
     }
 
     //start the system
-    auto now = q::Clock::now();
+    auto now = Clock::now();
     for (auto const& n: m_nodes.get_all())
     {
         auto result = n.ptr->start(now);
@@ -1201,7 +915,7 @@ void HAL::process()
 //        n->process();
 //    }
 
-    auto now = q::Clock::now();
+    auto now = Clock::now();
 
     auto total_start = now;
     auto node_start = total_start;
@@ -1210,7 +924,7 @@ void HAL::process()
     {
         n.ptr->process();
 
-        auto now = q::Clock::now();
+        auto now = Clock::now();
         Telemetry_Data::Node& node_telemetry = m_telemetry_data.nodes[n.name];
         node_telemetry.crt_process_duration += now - node_start;
         node_telemetry.crt_max_process_duration = std::max(node_telemetry.crt_max_process_duration, now - node_start);
@@ -1218,14 +932,14 @@ void HAL::process()
     }
 
     {
-        auto dt = q::Clock::now() - total_start;
+        auto dt = Clock::now() - total_start;
         m_telemetry_data.crt_total_duration += dt;
         m_telemetry_data.crt_max_total_duration = std::max(m_telemetry_data.crt_max_total_duration, dt);
     }
 
 
     {
-        auto now = q::Clock::now();
+        auto now = Clock::now();
         auto dt = now - m_last_telemetry_data_latch_tp;
         if (dt >= std::chrono::milliseconds(100))
         {
@@ -1233,20 +947,20 @@ void HAL::process()
             m_telemetry_data.version++;
 
             float mu = 1.f / std::chrono::duration<float>(dt).count();
-            m_telemetry_data.total_duration = std::chrono::duration_cast<q::Clock::duration>(m_telemetry_data.crt_total_duration * mu);
-            m_telemetry_data.max_total_duration = std::chrono::duration_cast<q::Clock::duration>(m_telemetry_data.crt_max_total_duration);
+            m_telemetry_data.total_duration = std::chrono::duration_cast<Clock::duration>(m_telemetry_data.crt_total_duration * mu);
+            m_telemetry_data.max_total_duration = std::chrono::duration_cast<Clock::duration>(m_telemetry_data.crt_max_total_duration);
 
-            m_telemetry_data.crt_total_duration = q::Clock::duration(0);
-            m_telemetry_data.crt_max_total_duration = q::Clock::duration(0);
+            m_telemetry_data.crt_total_duration = Clock::duration(0);
+            m_telemetry_data.crt_max_total_duration = Clock::duration(0);
 
             for (auto& pair: m_telemetry_data.nodes)
             {
                 Telemetry_Data::Node& node = pair.second;
-                node.process_duration = std::chrono::duration_cast<q::Clock::duration>(node.crt_process_duration * mu);
-                node.max_process_duration = std::chrono::duration_cast<q::Clock::duration>(node.crt_max_process_duration);
+                node.process_duration = std::chrono::duration_cast<Clock::duration>(node.crt_process_duration * mu);
+                node.max_process_duration = std::chrono::duration_cast<Clock::duration>(node.crt_max_process_duration);
 
-                node.crt_process_duration = q::Clock::duration(0);
-                node.crt_max_process_duration = q::Clock::duration(0);
+                node.crt_process_duration = Clock::duration(0);
+                node.crt_max_process_duration = Clock::duration(0);
             }
         }
     }

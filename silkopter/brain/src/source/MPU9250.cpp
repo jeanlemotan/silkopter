@@ -904,7 +904,7 @@ bool MPU9250::setup_magnetometer_spi(Buses& buses)
 //    }
 //}
 
-ts::Result<void> MPU9250::start(q::Clock::time_point tp)
+ts::Result<void> MPU9250::start(Clock::time_point tp)
 {
     m_magnetic_field->set_tp(tp);
     m_acceleration->set_tp(tp);
@@ -1005,8 +1005,8 @@ void MPU9250::process()
 
     //TODO - add health indication
 
-    //auto now = q::Clock::now();
-    //static q::Clock::time_point last_timestamp = q::Clock::now();
+    //auto now = Clock::now();
+    //static Clock::time_point last_timestamp = Clock::now();
    // auto dt = now - last_timestamp;
    // last_timestamp = now;
 
@@ -1038,7 +1038,7 @@ void MPU9250::process()
             m_fifo_buffer.resize(to_read);
             if (mpu_read(buses, MPU_REG_FIFO_R_W, m_fifo_buffer.data(), m_fifo_buffer.size(), MISC_REGISTER_SPEED))
             {
-//                static q::Clock::time_point s_last_stat_tp = q::Clock::now();
+//                static Clock::time_point s_last_stat_tp = Clock::now();
 //                static size_t s_sample_count = 0;
 //                s_sample_count += sample_count;
 //                if (now - s_last_stat_tp >= std::chrono::seconds(1))
@@ -1052,9 +1052,9 @@ void MPU9250::process()
 //                m_acceleration->samples.resize(sample_count);
 
                 constexpr size_t k_max_sample_difference = 3;
-                q::Clock::time_point now = q::Clock::now();
-                q::Clock::duration acc_dt = m_acceleration->get_dt();
-                q::Clock::duration av_dt = m_angular_velocity->get_dt();
+                Clock::time_point now = Clock::now();
+                Clock::duration acc_dt = m_acceleration->get_dt();
+                Clock::duration av_dt = m_angular_velocity->get_dt();
 
                 uint8_t const* data = m_fifo_buffer.data();
                 for (size_t i = 0; i < sample_count; i++)
@@ -1121,13 +1121,13 @@ void MPU9250::process()
         }
     }
 
-    q::Clock::time_point now = q::Clock::now();
+    Clock::time_point now = Clock::now();
 
     //handle and report the slow clock
     {
         constexpr size_t k_max_sample_difference = 8;
         {
-            q::Clock::duration dt = m_acceleration->get_dt();
+            Clock::duration dt = m_acceleration->get_dt();
             if (m_acceleration->get_tp() <= now - dt * k_max_sample_difference)
             {
                 while (m_acceleration->get_tp() <= now - dt)
@@ -1138,7 +1138,7 @@ void MPU9250::process()
             }
         }
         {
-            q::Clock::duration dt = m_angular_velocity->get_dt();
+            Clock::duration dt = m_angular_velocity->get_dt();
             if (m_angular_velocity->get_tp() <= now - dt * k_max_sample_difference)
             {
                 while (m_angular_velocity->get_tp() <= now - dt)
@@ -1189,7 +1189,7 @@ void MPU9250::process_thermometer(Buses& buses)
         if (temp > -55.f && temp < 90.f)
         {
             m_last_temperature_value = temp;
-            m_last_temperature_tp = q::Clock::now();
+            m_last_temperature_tp = Clock::now();
 
             m_acceleration_scale = get_calibration_scale(m_config->get_calibration().get_acceleration(), temp);
             m_acceleration_bias = get_calibration_bias(m_config->get_calibration().get_acceleration(), temp) * m_acceleration_scale;
@@ -1212,7 +1212,7 @@ void MPU9250::process_thermometer(Buses& buses)
     }
 
     constexpr size_t k_max_sample_difference = 5;
-    bool is_healthy = q::Clock::now() - m_last_temperature_tp <= m_temperature->get_dt() * k_max_sample_difference;
+    bool is_healthy = Clock::now() - m_last_temperature_tp <= m_temperature->get_dt() * k_max_sample_difference;
 
     if (!is_healthy)
     {
@@ -1231,9 +1231,9 @@ void MPU9250::process_magnetometer(Buses& buses)
     QLOG_TOPIC("mpu9250::process_magnetometer");
 
 #ifdef USE_AK8963
-    q::Clock::time_point now = q::Clock::now();
+    Clock::time_point now = Clock::now();
 
-    q::Clock::duration dt = now - m_last_magnetic_field_tp;
+    Clock::duration dt = now - m_last_magnetic_field_tp;
     if (dt >= std::chrono::seconds(5))
     {
         m_stats.mf.reset++;
@@ -1299,7 +1299,7 @@ void MPU9250::process_magnetometer(Buses& buses)
                 value = math::transform(m_magnetometer_rotation, value);
                 m_last_magnetic_field_value = value * m_magnetic_field_scale - m_magnetic_field_bias;
 
-                m_last_magnetic_field_tp = q::Clock::now();
+                m_last_magnetic_field_tp = Clock::now();
             }
             else
             {
@@ -1309,7 +1309,7 @@ void MPU9250::process_magnetometer(Buses& buses)
     }
 
     constexpr size_t k_max_sample_difference = 5;
-    bool is_healthy = q::Clock::now() - m_last_magnetic_field_tp <= m_magnetic_field->get_dt() * k_max_sample_difference;
+    bool is_healthy = Clock::now() - m_last_magnetic_field_tp <= m_magnetic_field->get_dt() * k_max_sample_difference;
 
     size_t samples_needed = m_magnetic_field->compute_samples_needed();
 

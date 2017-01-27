@@ -199,7 +199,7 @@ auto ADS1115::set_config_register(bus::II2C& i2c) -> bool
     return i2c.write_register_u16(m_descriptor->get_i2c_address(), ADS1115_RA_CONFIG, config);
 }
 
-ts::Result<void> ADS1115::start(q::Clock::time_point tp)
+ts::Result<void> ADS1115::start(Clock::time_point tp)
 {
     m_last_tp = tp;
     for (auto& adc: m_adcs)
@@ -233,7 +233,7 @@ void ADS1115::process()
 
     auto& adc = *m_adcs[m_crt_adc];
     auto samples_needed = adc.compute_samples_needed();
-    auto now = q::Clock::now();
+    auto now = Clock::now();
     if (samples_needed == 0 || now - m_last_tp < MIN_CONVERSION_DURATION)
     {
         return;

@@ -76,7 +76,7 @@ struct Raspicam::Impl
 
         std::atomic<bool> is_active{false};
 
-        q::Clock::time_point start;
+        Clock::time_point start;
 
         Raspicam::Data_Available_Callback callback;
     };
@@ -236,11 +236,11 @@ ts::Result<void> Raspicam::init()
 
             if (!m_recording_data.data_out.empty())
             {
-                std::shared_ptr<q::data::File_Sink> sink = m_recording_data.file_sink;
-                if (sink != nullptr && sink->is_open())
+                std::ofstream& stream = m_recording_data.file_sink;
+                if (stream.is_open())
                 {
-                    sink->write(m_recording_data.data_out.data(), m_recording_data.data_out.size());
-                    sink->flush();
+                    stream.write(reinterpret_cast<const char*>(m_recording_data.data_out.data()), m_recording_data.data_out.size());
+                    stream.flush();
                 }
                 m_recording_data.data_out.clear();
             }
@@ -343,7 +343,7 @@ void Raspicam::shutdown()
 #endif
 }
 
-ts::Result<void> Raspicam::start(q::Clock::time_point tp)
+ts::Result<void> Raspicam::start(Clock::time_point tp)
 {
     return ts::success;
 }
@@ -422,7 +422,7 @@ void Raspicam::activate_streams()
 #if defined RASPBERRY_PI
     std::lock_guard<std::mutex> lg(m_impl->mutex);
 
-    bool recording = m_recording_data.file_sink != nullptr;
+    bool recording = m_recording_data.file_sink.is_open();
     bool high = m_config->get_quality() == hal::Raspicam_Config::quality_t::HIGH;
     bool low = m_config->get_quality() == hal::Raspicam_Config::quality_t::LOW;
 
@@ -481,22 +481,22 @@ void Raspicam::create_file_sink()
         q::util::format_emplace(filepath, "capture/{}-{}", mbstr, file_idx);
         if (!q::util::fs::exists(q::Path(filepath)))
         {
-            m_recording_data.file_sink.reset(new q::data::File_Sink(q::Path(filepath)));
-            if (m_recording_data.file_sink->is_open())
+            m_recording_data.file_sink.open(filepath, std::ofstream::out | std::ofstream::binary);
+            if (m_recording_data.file_sink.is_open())
             {
                 return;
             }
-            m_recording_data.file_sink.reset();
+            m_recording_data.file_sink.close();
         }
         file_idx++;
     } while (file_idx < 16);
 
     QLOGW("Failed to create capture file.");
-    m_recording_data.file_sink.reset();
+    m_recording_data.file_sink.close();
 }
 
 
-auto Raspicam::start_recording() -> bool
+bool Raspicam::start_recording()
 {
 #if defined RASPBERRY_PI
     if (!q::util::fs::is_folder(q::Path("capture")) && !q::util::fs::create_folder(q::Path("capture")))
@@ -505,7 +505,7 @@ auto Raspicam::start_recording() -> bool
         return false;
     }
 
-    if (!m_recording_data.file_sink)
+    if (!m_recording_data.file_sink.is_open())
     {
         create_file_sink();
     }
@@ -517,7 +517,7 @@ auto Raspicam::start_recording() -> bool
 void Raspicam::stop_recording()
 {
 #if defined RASPBERRY_PI
-    m_recording_data.file_sink.reset();
+    m_recording_data.file_sink.close();
 
     activate_streams();
 #endif
@@ -1202,9 +1202,9 @@ static void encoder_buffer_callback_fn(Raspicam::Impl& impl,
 
 //    if (is_end_frame)
 //    {
-//        size_t ms = (q::Clock::now() - encoder_data.start).count() / 1000;
+//        size_t ms = (Clock::now() - encoder_data.start).count() / 1000;
 //        LOG_INFO("ENCODER {}: {}", encoder_data.resolution, ms);
-//        encoder_data.start = q::Clock::now();
+//        encoder_data.start = Clock::now();
 //    }
 }
 

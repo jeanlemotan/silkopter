@@ -35,7 +35,7 @@ constexpr size_t SUBSTEPS = 10;
 
 Multirotor_Simulation::Multirotor_Simulation()
 {
-    auto now = q::Clock::now();
+    auto now = Clock::now();
 
     m_physics_timestamp = now;
     //    m_last_accelerometer_time_point = now;
@@ -188,10 +188,10 @@ void Multirotor_Simulation::stop_motion()
 
 }
 
-void Multirotor_Simulation::process(q::Clock::duration dt, std::function<void(Multirotor_Simulation&, q::Clock::duration)> const& callback)
+void Multirotor_Simulation::process(Clock::duration dt, std::function<void(Multirotor_Simulation&, Clock::duration)> const& callback)
 {
     m_physics_duration += dt;
-    //m_duration_to_simulate = math::min(m_duration_to_simulate, q::Clock::duration(std::chrono::milliseconds(100)));
+    //m_duration_to_simulate = math::min(m_duration_to_simulate, Clock::duration(std::chrono::milliseconds(100)));
 
     float dts = std::chrono::duration<float>(m_dt).count();
     while (m_physics_duration >= m_dt)
@@ -269,7 +269,7 @@ void Multirotor_Simulation::set_motor_throttle(size_t motor, float throttle)
 }
 
 
-void Multirotor_Simulation::process_uav(q::Clock::duration dt)
+void Multirotor_Simulation::process_uav(Clock::duration dt)
 {
     if (!m_uav.body)
     {
@@ -383,7 +383,7 @@ void Multirotor_Simulation::process_uav(q::Clock::duration dt)
     }
 }
 
-void Multirotor_Simulation::process_uav_sensors(q::Clock::duration dt)
+void Multirotor_Simulation::process_uav_sensors(Clock::duration dt)
 {
     if (!m_uav.body)
     {

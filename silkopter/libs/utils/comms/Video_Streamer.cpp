@@ -135,8 +135,8 @@ struct Video_Streamer::RX
     std::mutex mutex;
     std::deque<Block_ptr> block_queue;
 
-    q::Clock::time_point last_block_tp = q::Clock::now();
-    q::Clock::time_point last_datagram_tp = q::Clock::now();
+    Clock::time_point last_block_tp = Clock::now();
+    Clock::time_point last_datagram_tp = Clock::now();
 
     uint32_t next_block_index = 0;
 };
@@ -961,7 +961,7 @@ void Video_Streamer::send(void const* _data, size_t size, math::vec2u16 const& r
             {
                 if (1)
                 {
-                    auto start = q::Clock::now();
+                    auto start = Clock::now();
 
                     //init data for the fec_encode
                     for (size_t i = 0; i < m_coding_k; i++)
@@ -996,7 +996,7 @@ void Video_Streamer::send(void const* _data, size_t size, math::vec2u16 const& r
                         }
                     }
 
-                    //QLOGI("Encoded fec: {}", q::Clock::now() - start);
+                    //QLOGI("Encoded fec: {}", Clock::now() - start);
                 }
 
                 tx.block_datagrams.clear();
@@ -1028,7 +1028,7 @@ void Video_Streamer::process()
     RX& rx = m_impl->rx;
     std::lock_guard<std::mutex> lg(rx.mutex);
 
-    if (q::Clock::now() - rx.last_datagram_tp > m_rx_descriptor.reset_duration)
+    if (Clock::now() - rx.last_datagram_tp > m_rx_descriptor.reset_duration)
     {
         rx.next_block_index = 0;
     }
@@ -1053,12 +1053,12 @@ void Video_Streamer::process()
                 {
                     on_data_received(d->data.data(), d->data.size(), d->resolution);
                 }
-                rx.last_datagram_tp = q::Clock::now();
+                rx.last_datagram_tp = Clock::now();
                 d->is_processed = true;
             }
         }
 
-        rx.last_block_tp = q::Clock::now();
+        rx.last_block_tp = Clock::now();
 
         rx.next_block_index = block->index + 1;
         rx.block_queue.pop_front();
@@ -1079,7 +1079,7 @@ void Video_Streamer::process()
                 {
                     on_data_received(d->data.data(), d->data.size(), d->resolution);
                 }
-                rx.last_datagram_tp = q::Clock::now();
+                rx.last_datagram_tp = Clock::now();
                 d->is_processed = true;
             }
         }
@@ -1092,7 +1092,7 @@ void Video_Streamer::process()
     //can we fec decode?
     if (block->datagrams.size() + block->fec_datagrams.size() >= m_coding_k)
     {
-        auto start = q::Clock::now();
+        auto start = Clock::now();
 
         std::array<unsigned int, 32> indices;
         size_t primary_index = 0;
@@ -1140,14 +1140,14 @@ void Video_Streamer::process()
                 {
                     on_data_received(d->data.data(), d->data.size(), d->resolution);
                 }
-                rx.last_datagram_tp = q::Clock::now();
+                rx.last_datagram_tp = Clock::now();
                 d->is_processed = true;
             }
         }
 
-        //QLOGI("Decoded fac: {}", q::Clock::now() - start);
+        //QLOGI("Decoded fac: {}", Clock::now() - start);
 
-        rx.last_block_tp = q::Clock::now();
+        rx.last_block_tp = Clock::now();
         rx.next_block_index = block->index + 1;
         rx.block_queue.pop_front();
         return;

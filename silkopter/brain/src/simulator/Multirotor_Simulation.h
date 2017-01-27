@@ -2,6 +2,7 @@
 
 #include "common/node/IMultirotor_Simulator.h"
 #include "uav_properties/IMultirotor_Properties.h"
+#include "utils/Clock.h"
 
 class btCylinderShapeZ;
 class btMotionState;
@@ -33,7 +34,7 @@ public:
     void reset();
     void stop_motion();
 
-    void process(q::Clock::duration dt, std::function<void(Multirotor_Simulation&, q::Clock::duration)> const& callback);
+    void process(Clock::duration dt, std::function<void(Multirotor_Simulation&, Clock::duration)> const& callback);
 
     void set_gravity_enabled(bool yes);
     void set_ground_enabled(bool yes);
@@ -45,7 +46,7 @@ public:
     void set_motor_throttle(size_t motor, float throttle);
 
 private:
-    void process_world(q::Clock::duration dt);
+    void process_world(Clock::duration dt);
 
     bool m_is_simulation_enabled = true;
     bool m_is_ground_enabled = true;
@@ -53,7 +54,7 @@ private:
     bool m_is_drag_enabled = true;
 
     uint32_t m_rate = 0;
-    q::Clock::duration m_dt;
+    Clock::duration m_dt;
 
     struct UAV
     {
@@ -68,25 +69,25 @@ private:
 //    math::quatf m_old_rotation;
 
 //    silk::Accelerometer_Sample m_accelerometer_sample;
-//    q::Clock::time_point m_last_accelerometer_time_point;
+//    Clock::time_point m_last_accelerometer_time_point;
 
 //    silk::Gyroscope_Sample m_gyroscope_sample;
-//    q::Clock::time_point m_last_gyroscope_time_point;
+//    Clock::time_point m_last_gyroscope_time_point;
 
 //    silk::Compass_Sample m_compass_sample;
-//    q::Clock::time_point m_last_compass_time_point;
+//    Clock::time_point m_last_compass_time_point;
 
 //    silk::Barometer_Sample m_barometer_sample;
-//    q::Clock::time_point m_last_barometer_time_point;
+//    Clock::time_point m_last_barometer_time_point;
 
 //    silk::Thermometer_Sample m_thermometer_sample;
-//    q::Clock::time_point m_last_thermometer_time_point;
+//    Clock::time_point m_last_thermometer_time_point;
 
 //    silk::Sonar_Sample m_sonar_sample;
-//    q::Clock::time_point m_last_sonar_time_point;
+//    Clock::time_point m_last_sonar_time_point;
 
 //    silk::GPS_Sample m_gps_sample;
-//    q::Clock::time_point m_last_gps_time_point;
+//    Clock::time_point m_last_gps_time_point;
 
     std::shared_ptr<btDefaultCollisionConfiguration> m_collision_configuration;
     std::shared_ptr<btCollisionDispatcher> m_dispatcher;
@@ -99,11 +100,11 @@ private:
     std::shared_ptr<btDiscreteDynamicsWorld> m_world;
 
 
-    q::Clock::time_point m_physics_timestamp;
-    q::Clock::duration m_physics_duration{0};
-//	q::Clock::duration m_uav_duration;
+    Clock::time_point m_physics_timestamp;
+    Clock::duration m_physics_duration{0};
+//	Clock::duration m_uav_duration;
 
-    void process_uav(q::Clock::duration dt);
+    void process_uav(Clock::duration dt);
     struct
     {
         math::vec3f enu_velocity_sum;
@@ -112,8 +113,8 @@ private:
         math::vec3f angular_velocity_sum;
     } m_accumulated_data;
 
-    void process_uav_sensors(q::Clock::duration dt);
-    void process_air_drag(q::Clock::duration dt);
+    void process_uav_sensors(Clock::duration dt);
+    void process_air_drag(Clock::duration dt);
 };
 
 

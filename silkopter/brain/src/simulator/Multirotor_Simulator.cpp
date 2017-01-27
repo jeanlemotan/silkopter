@@ -93,7 +93,7 @@ ts::Result<void> Multirotor_Simulator::init()
     return ts::success;
 }
 
-ts::Result<void> Multirotor_Simulator::start(q::Clock::time_point tp)
+ts::Result<void> Multirotor_Simulator::start(Clock::time_point tp)
 {
     m_last_tp = tp;
     return ts::success;
@@ -155,7 +155,7 @@ void Multirotor_Simulator::process()
         }
     }
 
-    auto now = q::Clock::now();
+    auto now = Clock::now();
     auto dt = now - m_last_tp;
     if (dt < std::chrono::milliseconds(1))
     {
@@ -167,7 +167,7 @@ void Multirotor_Simulator::process()
     auto enu_to_ecef_trans = util::coordinates::enu_to_ecef_transform(origin_lla);
     auto enu_to_ecef_rotation = util::coordinates::enu_to_ecef_rotation(origin_lla);
 
-    m_simulation.process(dt, [this, &enu_to_ecef_trans, &enu_to_ecef_rotation](Multirotor_Simulation& simulation, q::Clock::duration simulation_dt)
+    m_simulation.process(dt, [this, &enu_to_ecef_trans, &enu_to_ecef_rotation](Multirotor_Simulation& simulation, Clock::duration simulation_dt)
     {
         auto const& uav_state = simulation.get_uav_state();
         {

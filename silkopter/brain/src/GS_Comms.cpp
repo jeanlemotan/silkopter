@@ -40,12 +40,13 @@
 
 #include <boost/asio.hpp>
 
-using namespace silk;
+namespace silk
+{
 
 constexpr uint8_t SETUP_CHANNEL = 10;
 constexpr uint8_t TELEMETRY_CHANNEL = 11;
 
-constexpr q::Clock::duration RCP_PERIOD = std::chrono::milliseconds(30);
+constexpr Clock::duration RCP_PERIOD = std::chrono::milliseconds(30);
 
 GS_Comms::GS_Comms(HAL& hal)
     : m_hal(hal)
@@ -876,7 +877,7 @@ void GS_Comms::process()
 
     m_rcp->process();
 
-    auto now = q::Clock::now();
+    auto now = Clock::now();
     if (now - m_last_rcp_tp >= RCP_PERIOD)
     {
         m_last_rcp_tp = now;
@@ -886,3 +887,5 @@ void GS_Comms::process()
     }
 }
 
+
+}

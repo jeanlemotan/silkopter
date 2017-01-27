@@ -2,8 +2,7 @@
 
 #include "HAL.h"
 #include "common/node/ICombiner.h"
-
-#include "HAL.h"
+#include "utils/Clock.h"
 
 #include "Sample_Accumulator.h"
 #include "Basic_Output_Stream.h"
@@ -41,7 +40,7 @@ public:
 
     //auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
 
-    ts::Result<void> start(q::Clock::time_point tp) override;
+    ts::Result<void> start(Clock::time_point tp) override;
 
     ts::Result<void> set_input_stream_path(size_t idx, std::string const& path);
     auto get_inputs() const -> std::vector<Input>;
@@ -102,7 +101,7 @@ ts::Result<void> Combiner<Stream_t>::init()
 }
 
 template<class Stream_t>
-ts::Result<void> Combiner<Stream_t>::start(q::Clock::time_point tp)
+ts::Result<void> Combiner<Stream_t>::start(Clock::time_point tp)
 {
     m_output_stream->set_tp(tp);
     return ts::success;

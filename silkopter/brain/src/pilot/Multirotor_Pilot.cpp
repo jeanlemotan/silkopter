@@ -38,7 +38,7 @@ ts::Result<void> Multirotor_Pilot::init()
     return ts::success;
 }
 
-ts::Result<void> Multirotor_Pilot::start(q::Clock::time_point tp)
+ts::Result<void> Multirotor_Pilot::start(Clock::time_point tp)
 {
     m_output_stream->set_tp(tp);
     return ts::success;
@@ -74,7 +74,7 @@ void Multirotor_Pilot::process()
     {
         auto const& commandsOpt = m_rc_comms.get_multirotor_commands();
 
-        auto now = q::Clock::now();
+        auto now = Clock::now();
 
         stream::IMultirotor_Commands::Value& commands_value = m_last_commands_value;
         if (commandsOpt)

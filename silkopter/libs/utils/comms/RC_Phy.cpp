@@ -17,7 +17,7 @@ namespace comms
 
 constexpr size_t MTU = 64;
 constexpr uint8_t CHANNEL = 0;
-constexpr q::Clock::duration MIN_TX_DURATION = std::chrono::microseconds(1);
+constexpr Clock::duration MIN_TX_DURATION = std::chrono::microseconds(1);
 
 
 
@@ -166,17 +166,17 @@ void RC_Phy::master_thread_proc()
 {
     while (!m_exit)
     {
-        q::Clock::duration tx_duration;
+        Clock::duration tx_duration;
 
         {
-            auto start_tx_tp = q::Clock::now();
+            auto start_tx_tp = Clock::now();
             auto diff = start_tx_tp - m_rx_data.tx_timepoint;
             if (diff < m_desired_duration)
             {
                 std::this_thread::sleep_for(diff);
             }
 
-            start_tx_tp = q::Clock::now();
+            start_tx_tp = Clock::now();
 
             {
                 //std::lock_guard<std::mutex> lg(m_mutex);
@@ -203,13 +203,13 @@ void RC_Phy::master_thread_proc()
                 }
             }
 
-            m_rx_data.tx_timepoint = q::Clock::now();
+            m_rx_data.tx_timepoint = Clock::now();
 
-            tx_duration = q::Clock::now() - start_tx_tp;
+            tx_duration = Clock::now() - start_tx_tp;
         }
 
         {
-            q::Clock::duration rx_duration = m_desired_duration - tx_duration;
+            Clock::duration rx_duration = m_desired_duration - tx_duration;
             if (rx_duration < m_desired_duration / 2)
             {
                 rx_duration = m_desired_duration / 2;
@@ -265,7 +265,7 @@ void RC_Phy::slave_thread_proc()
                 m_tx_buffer.resize(sizeof(Header) + size);
             }
 
-            //auto start_tx_tp = q::Clock::now();
+            //auto start_tx_tp = Clock::now();
 
             Header& header = *reinterpret_cast<Header*>(m_tx_buffer.data());
             header.crc = 0;
@@ -285,7 +285,7 @@ void RC_Phy::slave_thread_proc()
                 }
             }
 
-            m_rx_data.tx_timepoint = q::Clock::now();
+            m_rx_data.tx_timepoint = Clock::now();
         }
     }
 }
@@ -317,7 +317,7 @@ bool RC_Phy::read_fifo(size_t rx_size)
                     m_rx_data.index++;
                     m_rx_data.tx_dBm = header.dBm;
                     m_rx_data.rx_dBm = dBm;
-                    m_rx_data.rx_timepoint = q::Clock::now();
+                    m_rx_data.rx_timepoint = Clock::now();
                     m_rx_data.payload.erase(m_rx_data.payload.begin(), m_rx_data.payload.begin() + sizeof(Header));
                     m_rx_callback(m_rx_data);
                 }

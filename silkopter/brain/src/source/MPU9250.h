@@ -42,7 +42,7 @@ public:
 
     //auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
 
-    ts::Result<void> start(q::Clock::time_point tp) override;
+    ts::Result<void> start(Clock::time_point tp) override;
 
     void process();
 
@@ -119,18 +119,18 @@ private:
     math::mat3f m_magnetometer_rotation;
 
     math::vec3f m_last_magnetic_field_value;
-    q::Clock::time_point m_last_magnetic_field_tp = q::Clock::now();
+    Clock::time_point m_last_magnetic_field_tp = Clock::now();
 
     typedef Basic_Output_Stream<stream::ITemperature> Temperature_Stream;
     mutable std::shared_ptr<Temperature_Stream> m_temperature;
 
     float m_last_temperature_value = 0;
-    q::Clock::time_point m_last_temperature_tp = q::Clock::now();
+    Clock::time_point m_last_temperature_tp = Clock::now();
 
 
     struct Stats
     {
-        q::Clock::time_point last_report_tp = q::Clock::now();
+        Clock::time_point last_report_tp = Clock::now();
         struct Acceleration
         {
             bool operator==(Acceleration const& o) const { return memcmp(this, &o, sizeof(*this)) == 0; }

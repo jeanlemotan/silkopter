@@ -153,7 +153,7 @@ ts::Result<void> KF_ECEF::init()
     return ts::success;
 }
 
-ts::Result<void> KF_ECEF::start(q::Clock::time_point tp)
+ts::Result<void> KF_ECEF::start(Clock::time_point tp)
 {
     m_position_output_stream->set_tp(tp);
     m_velocity_output_stream->set_tp(tp);

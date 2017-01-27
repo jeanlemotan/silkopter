@@ -2,6 +2,7 @@
 
 #include "ISocket.h"
 #include <boost/thread.hpp>
+#include "utils/Clock.h"
 
 namespace boost
 {
@@ -69,7 +70,7 @@ private:
     std::deque<Buffer> m_tx_buffer_queue; //to send
 
     Buffer m_tx_buffer_in_transit;
-    q::Clock::time_point m_tx_data_sent_tp;
+    Clock::time_point m_tx_data_sent_tp;
 
     std::vector<uint8_t> m_rx_buffer;
 

@@ -42,11 +42,15 @@ template<typename Res> auto async(std::function<Res()> f) -> std::future<Res>
 }
 
 
-struct At_Exit : q::util::Noncopyable
+struct At_Exit
 {
-    At_Exit(std::function<void()> at_exit) : m_at_exit(at_exit) {}
-    ~At_Exit() { QASSERT(m_at_exit); m_at_exit(); }
+    At_Exit(std::function<void()> at_exit) : m_at_exit(at_exit) { assert(m_at_exit); }
+    ~At_Exit() { m_at_exit(); }
+
 private:
+    At_Exit(At_Exit const&) = delete;
+    At_Exit& operator=(At_Exit const&) = delete;
+
     std::function<void()> m_at_exit;
 };
 

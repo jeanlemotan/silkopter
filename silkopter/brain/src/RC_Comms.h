@@ -11,7 +11,7 @@
 #include "utils/comms/RC_Phy.h"
 #include "utils/comms/RC_Protocol.h"
 #include "utils/comms/Video_Streamer.h"
-
+#include "utils/Clock.h"
 
 namespace util
 {
@@ -46,7 +46,7 @@ private:
     void process_rx_packet(util::comms::RC_Protocol::RX_Packet const& packet);
 
     HAL& m_hal;
-    q::Clock::time_point m_uav_sent_tp = q::Clock::now();
+    Clock::time_point m_uav_sent_tp = Clock::now();
 
     mutable std::mutex m_samples_mutex;
 

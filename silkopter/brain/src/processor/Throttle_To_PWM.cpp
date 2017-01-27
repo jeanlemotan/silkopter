@@ -42,7 +42,7 @@ ts::Result<void> Throttle_To_PWM::init()
     return ts::success;
 }
 
-ts::Result<void> Throttle_To_PWM::start(q::Clock::time_point tp)
+ts::Result<void> Throttle_To_PWM::start(Clock::time_point tp)
 {
     for (auto& o: m_output_streams)
     {

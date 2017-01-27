@@ -35,7 +35,7 @@ public:
 
     //auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
 
-    ts::Result<void> start(q::Clock::time_point tp) override;
+    ts::Result<void> start(Clock::time_point tp) override;
 
     auto get_outputs() const -> std::vector<Output>;
 
@@ -51,8 +51,8 @@ private:
     std::shared_ptr<hal::RC5T619_Descriptor> m_descriptor;
     std::shared_ptr<hal::RC5T619_Config> m_config;
 
-    q::Clock::time_point m_last_tp = q::Clock::now();
-    q::Clock::duration m_dt;
+    Clock::time_point m_last_tp = Clock::now();
+    Clock::duration m_dt;
 
     size_t m_stage = 0;
 
@@ -62,7 +62,7 @@ private:
         auto get_rate() const -> uint32_t { return rate; }
 
         std::vector<Sample> samples;
-        q::Clock::time_point last_tp = q::Clock::now();
+        Clock::time_point last_tp = Clock::now();
         Sample last_sample;
         uint32_t rate = 0;
     };

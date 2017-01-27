@@ -1,6 +1,7 @@
 #pragma once
 
 #include "common/stream/IStream.h"
+#include "utils/Clock.h"
 
 namespace silk
 {
@@ -52,12 +53,12 @@ inline auto get_as_string(Type s) -> std::string
     case Type::GENERATOR: return "Generator";
     case Type::SIMULATOR: return "Simulator";
     case Type::CONFIG: return "Config";
-    default: QASSERT(false); return "Unknown";
+    default: assert(false); return "Unknown";
     }
 }
 
 
-class INode : q::util::Noncopyable
+class INode
 {
 public:
     virtual ~INode() = default;
@@ -70,7 +71,7 @@ public:
     virtual ts::Result<void> set_config(hal::INode_Config const& config) = 0;
     virtual std::shared_ptr<const hal::INode_Config> get_config() const = 0;
 
-    virtual ts::Result<void> start(q::Clock::time_point tp) = 0;
+    virtual ts::Result<void> start(Clock::time_point tp) = 0;
 
     //virtual auto send_message(rapidjson::Value const& json) -> rapidjson::Document = 0;
 

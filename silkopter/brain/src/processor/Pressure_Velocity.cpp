@@ -36,7 +36,7 @@ ts::Result<void> Pressure_Velocity::init()
     return ts::success;
 }
 
-ts::Result<void> Pressure_Velocity::start(q::Clock::time_point tp)
+ts::Result<void> Pressure_Velocity::start(Clock::time_point tp)
 {
     m_output_stream->set_tp(tp);
     return ts::success;
@@ -65,7 +65,7 @@ void Pressure_Velocity::process()
 
     m_output_stream->clear();
 
-    q::Seconds dt(m_output_stream->get_dt());
+    std::chrono::duration<float> dt(m_output_stream->get_dt());
     float dts = dt.count();
 
     m_accumulator.process([this, dts](stream::IPressure::Sample const& sample)

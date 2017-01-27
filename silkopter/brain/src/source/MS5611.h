@@ -38,7 +38,7 @@ public:
 
     //auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
 
-    ts::Result<void> start(q::Clock::time_point tp) override;
+    ts::Result<void> start(Clock::time_point tp) override;
 
     auto get_outputs() const -> std::vector<Output>;
 
@@ -96,13 +96,13 @@ private:
     };
 
     Stage         m_stage = Stage::PRESSURE;
-    q::Clock::time_point m_last_process_tp = q::Clock::now();
-    q::Clock::time_point m_last_temperature_reading_tp = q::Clock::now();
-    q::Clock::time_point m_last_pressure_reading_tp = q::Clock::now();
+    Clock::time_point m_last_process_tp = Clock::now();
+    Clock::time_point m_last_temperature_reading_tp = Clock::now();
+    Clock::time_point m_last_pressure_reading_tp = Clock::now();
 
     struct Stats
     {
-        q::Clock::time_point last_report_tp = q::Clock::now();
+        Clock::time_point last_report_tp = Clock::now();
         struct Pressure
         {
             bool operator==(Pressure const& o) const { return memcmp(this, &o, sizeof(*this)) == 0; }

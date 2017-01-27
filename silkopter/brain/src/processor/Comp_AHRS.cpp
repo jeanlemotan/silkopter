@@ -37,7 +37,7 @@ ts::Result<void> Comp_AHRS::init()
     return ts::success;
 }
 
-ts::Result<void> Comp_AHRS::start(q::Clock::time_point tp)
+ts::Result<void> Comp_AHRS::start(Clock::time_point tp)
 {
     m_output_stream->set_tp(tp);
     return ts::success;

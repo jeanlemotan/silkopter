@@ -43,7 +43,7 @@ public:
 
     //auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
 
-    ts::Result<void> start(q::Clock::time_point tp) override;
+    ts::Result<void> start(Clock::time_point tp) override;
 
     ts::Result<void> set_input_stream_path(size_t idx, std::string const& path);
     auto get_inputs() const -> std::vector<Input>;
@@ -59,7 +59,7 @@ private:
     std::shared_ptr<hal::KF_ECEF_Descriptor> m_descriptor;
     std::shared_ptr<hal::KF_ECEF_Config> m_config;
 
-    q::Clock::duration m_dt = q::Clock::duration(0);
+    Clock::duration m_dt = Clock::duration(0);
 
     Sample_Accumulator<stream::IECEF_Position,
                        stream::IECEF_Velocity,

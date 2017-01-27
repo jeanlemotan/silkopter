@@ -3,6 +3,7 @@
 #include <vector>
 #include <string>
 #include <boost/thread.hpp>
+#include "utils/Clock.h"
 
 struct fec_t;
 
@@ -28,8 +29,8 @@ public:
     struct RX_Descriptor
     {
         std::vector<std::string> interfaces;
-        q::Clock::duration max_latency = std::chrono::milliseconds(500);
-        q::Clock::duration reset_duration = std::chrono::milliseconds(1000);
+        Clock::duration max_latency = std::chrono::milliseconds(500);
+        Clock::duration reset_duration = std::chrono::milliseconds(1000);
         uint32_t coding_k = 12;
         uint32_t coding_n = 20;
     };

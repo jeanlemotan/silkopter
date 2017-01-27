@@ -36,7 +36,7 @@ ts::Result<void> ADC_Voltmeter::init()
     return ts::success;
 }
 
-ts::Result<void> ADC_Voltmeter::start(q::Clock::time_point tp)
+ts::Result<void> ADC_Voltmeter::start(Clock::time_point tp)
 {
     m_output_stream->set_tp(tp);
     return ts::success;

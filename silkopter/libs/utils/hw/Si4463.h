@@ -2,6 +2,7 @@
 
 #include <string>
 #include "SPI_Dev.h"
+#include "utils/Clock.h"
 
 namespace util
 {
@@ -252,7 +253,7 @@ public:
     bool write_tx_fifo(void const* data, size_t size);
     bool read_rx_fifo(void* data, size_t size);
 
-    bool wait_for_ph_interrupt(bool& got_it, uint8_t& status, std::chrono::high_resolution_clock::duration timeout);
+    bool wait_for_ph_interrupt(bool& got_it, uint8_t& status, Clock::duration timeout);
 
     bool read_frr_a(uint8_t& value);
     bool read_frr_b(uint8_t& value);

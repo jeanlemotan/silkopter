@@ -37,7 +37,7 @@ ts::Result<void> Gravity_Filter::init()
     return ts::success;
 }
 
-ts::Result<void> Gravity_Filter::start(q::Clock::time_point tp)
+ts::Result<void> Gravity_Filter::start(Clock::time_point tp)
 {
     m_output_stream->set_tp(tp);
     return ts::success;

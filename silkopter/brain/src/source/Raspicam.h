@@ -5,6 +5,7 @@
 #include "common/Comm_Data.h"
 #include "common/stream/IVideo.h"
 #include <boost/thread.hpp>
+#include <fstream>
 
 namespace silk
 {
@@ -36,7 +37,7 @@ public:
 
     //auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
 
-    ts::Result<void> start(q::Clock::time_point tp) override;
+    ts::Result<void> start(Clock::time_point tp) override;
 
     void shutdown();
 
@@ -96,7 +97,7 @@ private:
         std::atomic_bool should_stop = {false};
         std::vector<uint8_t> data_in;
         std::vector<uint8_t> data_out;
-        std::shared_ptr<q::data::File_Sink> file_sink;
+        std::ofstream file_sink;
     } m_recording_data;
 
 };

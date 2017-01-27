@@ -7,6 +7,7 @@
 #include <atomic>
 #include <boost/thread.hpp>
 #include "ISocket.h"
+#include "utils/Clock.h"
 
 namespace util
 {
@@ -23,8 +24,8 @@ public:
     {
         size_t index = 0;
         size_t rate = 0;
-        q::Clock::time_point tx_timepoint;
-        q::Clock::time_point rx_timepoint;
+        Clock::time_point tx_timepoint;
+        Clock::time_point rx_timepoint;
         int8_t tx_dBm = 0;
         int8_t rx_dBm = 0;
         std::vector<uint8_t> payload;
@@ -60,7 +61,7 @@ private:
     bool m_is_master = false;
 
     size_t m_desired_rate = 0;
-    q::Clock::duration m_desired_duration;
+    Clock::duration m_desired_duration;
 
     boost::thread m_thread;
 

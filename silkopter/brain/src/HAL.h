@@ -1,11 +1,15 @@
 #pragma once
 
 #include <memory>
+#include <map>
+#include <vector>
+#include <chrono>
 
 #include "uav_properties/IUAV_Properties.h"
 #include "common/bus/IBus.h"
 #include "common/node/INode.h"
 #include "common/stream/IStream.h"
+#include "utils/Clock.h"
 
 #include "MPL_Helper.h"
 
@@ -20,7 +24,7 @@ struct Multirotor_Descriptor;
 class HAL;
 
 template<class Base>
-class Factory : q::util::Noncopyable
+class Factory
 {
 public:
     template <class T, typename... Params> void add(std::string const& class_name, Params&&... params);
@@ -45,7 +49,7 @@ private:
 
 
 template<class Base>
-class Registry : q::util::Noncopyable
+class Registry
 {
 public:
     struct Item
@@ -69,7 +73,7 @@ class RC_Comms;
 class GS_Comms;
 
 
-class HAL : q::util::Noncopyable
+class HAL
 {
     friend class RC_Comms;
     friend class GS_Comms;
@@ -90,8 +94,6 @@ public:
 
     template<class Properties>
     auto get_specialized_uav_properties() const   -> std::shared_ptr<const Properties>;
-
-    q::util::Signal<void(HAL&)> uav_properties_changed_signal;
 
     typedef Factory<bus::IBus> Bus_Factory;
     Bus_Factory const& get_bus_factory() const;
@@ -115,19 +117,19 @@ protected:
     struct Telemetry_Data
     {
         size_t version = 0;
-        q::Clock::duration crt_total_duration;
-        q::Clock::duration crt_max_total_duration;
+        Clock::duration crt_total_duration;
+        Clock::duration crt_max_total_duration;
 
-        q::Clock::duration total_duration;
-        q::Clock::duration max_total_duration;
+        Clock::duration total_duration;
+        Clock::duration max_total_duration;
         float rate = 0;
         struct Node
         {
-            q::Clock::duration crt_process_duration;
-            q::Clock::duration crt_max_process_duration;
+            Clock::duration crt_process_duration;
+            Clock::duration crt_max_process_duration;
 
-            q::Clock::duration process_duration;
-            q::Clock::duration max_process_duration;
+            Clock::duration process_duration;
+            Clock::duration max_process_duration;
         };
         std::map<std::string, Node> nodes;
     };
@@ -154,9 +156,9 @@ private:
     Bus_Factory m_bus_factory;
     Node_Factory m_node_factory;
 
-    q::Clock::time_point m_last_process_tp = q::Clock::now();
+    Clock::time_point m_last_process_tp = Clock::now();
 
-    q::Clock::time_point m_last_telemetry_data_latch_tp = q::Clock::now();
+    Clock::time_point m_last_telemetry_data_latch_tp = Clock::now();
     Telemetry_Data m_telemetry_data;
 };
 
@@ -218,26 +220,6 @@ template<class Base>
 template <class T, typename... Params>
 void Factory<Base>::add(std::string const& class_name, Params&&... params)
 {
-//    T instance(uav);
-
-//    //write the jsons for testing - to see the structure
-//    {
-//        rapidjson::StringBuffer s;
-//        rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(s);
-//        instance.get_init_params().Accept(writer);    // Accept() traverses the DOM and generates Handler events.
-//        q::data::File_Sink fs((q::Path(class_name + "_init_params.json")));
-//        std::string data = s.GetString();
-//        fs.write((uint8_t const* )data.data(), data.size());
-//    }
-//    {
-//        rapidjson::StringBuffer s;
-//        rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(s);
-//        instance.get_config().Accept(writer);    // Accept() traverses the DOM and generates Handler events.
-//        q::data::File_Sink fs((q::Path(class_name + "_config.json")));
-//        std::string data = s.GetString();
-//        fs.write((uint8_t const* )data.data(), data.size());
-//    }
-
     if (class_name.empty())
     {
         return;

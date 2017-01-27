@@ -45,7 +45,7 @@ auto Comp_ECEF::init() -> bool
     return true;
 }
 
-auto Comp_ECEF::start(q::Clock::time_point tp) -> bool
+auto Comp_ECEF::start(Clock::time_point tp) -> bool
 {
     m_position_output_stream->set_tp(tp);
     m_velocity_output_stream->set_tp(tp);

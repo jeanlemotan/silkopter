@@ -36,7 +36,7 @@ public:
     ts::Result<void> set_config(hal::INode_Config const& config) override;
     std::shared_ptr<const hal::INode_Config> get_config() const override;
 
-    ts::Result<void> start(q::Clock::time_point tp) override;
+    ts::Result<void> start(Clock::time_point tp) override;
 
     auto get_outputs() const -> std::vector<Output>;
 
@@ -50,7 +50,7 @@ private:
     std::shared_ptr<hal::CPPM_Receiver_Descriptor> m_descriptor;
     std::shared_ptr<hal::CPPM_Receiver_Config> m_config;
 
-    q::Clock::time_point m_last_tp = q::Clock::now();
+    Clock::time_point m_last_tp = Clock::now();
 
     static constexpr size_t MAX_CHANNEL_COUNT = 32;
 

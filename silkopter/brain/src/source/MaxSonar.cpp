@@ -63,7 +63,7 @@ ts::Result<void> MaxSonar::init()
     return ts::success;
 }
 
-ts::Result<void> MaxSonar::start(q::Clock::time_point tp)
+ts::Result<void> MaxSonar::start(Clock::time_point tp)
 {
     m_output_stream->set_tp(tp);
     return ts::success;
@@ -101,7 +101,7 @@ void MaxSonar::process()
         m_read_data.pop_front();
     }
 
-    auto now = q::Clock::now();
+    auto now = Clock::now();
 
     //parse the entire buffer to get the latest data
     while (m_read_data.size() >= 5) //R + XXX + New Line
@@ -125,7 +125,7 @@ void MaxSonar::process()
         float max_distance = m_config->get_max_distance();
 
         bool is_healthy = m_last_distance >= min_distance && m_last_distance <= max_distance &&
-                        q::Clock::now() - m_last_reading_tp <= m_output_stream->get_dt() * k_max_sample_difference;
+                        Clock::now() - m_last_reading_tp <= m_output_stream->get_dt() * k_max_sample_difference;
         if (!is_healthy)
         {
             m_stats.added += samples_needed;

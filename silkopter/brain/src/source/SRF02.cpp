@@ -116,11 +116,11 @@ ts::Result<void> SRF02::init()
 
 void SRF02::trigger(bus::II2C& bus)
 {
-    m_last_trigger_tp = q::Clock::now();
+    m_last_trigger_tp = Clock::now();
     bus.write_register_u8(ADDR, SW_REV_CMD, REAL_RAGING_MODE_CM);
 }
 
-ts::Result<void> SRF02::start(q::Clock::time_point tp)
+ts::Result<void> SRF02::start(Clock::time_point tp)
 {
     m_last_trigger_tp = tp;
     m_output_stream->set_tp(tp);
@@ -134,7 +134,7 @@ void SRF02::process()
     m_output_stream->clear();
 
     //wait for echo
-    auto now = q::Clock::now();
+    auto now = Clock::now();
     if (now - m_last_trigger_tp < MAX_MEASUREMENT_DURATION ||
         now - m_last_trigger_tp < m_output_stream->get_dt())
     {

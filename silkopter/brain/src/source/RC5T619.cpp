@@ -205,7 +205,7 @@ ts::Result<void> RC5T619::init()
     return ts::success;
 }
 
-ts::Result<void> RC5T619::start(q::Clock::time_point tp)
+ts::Result<void> RC5T619::start(Clock::time_point tp)
 {
     m_last_tp = tp;
     return ts::success;
@@ -224,7 +224,7 @@ void RC5T619::process()
         return;
     }
 
-    auto now = q::Clock::now();
+    auto now = Clock::now();
     if (now - m_last_tp < m_dt)
     {
         return;

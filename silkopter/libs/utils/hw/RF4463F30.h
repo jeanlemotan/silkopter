@@ -3,6 +3,7 @@
 #include <chrono>
 #include <string>
 #include "Si4463.h"
+#include "utils/Clock.h"
 
 namespace util
 {
@@ -25,9 +26,9 @@ public:
     bool tx(size_t size, uint8_t channel);
 
     bool begin_rx(uint8_t channel);
-    bool end_rx(size_t& size, std::chrono::high_resolution_clock::duration timeout);
+    bool end_rx(size_t& size, Clock::duration timeout);
 
-    bool rx(size_t& size, uint8_t channel, std::chrono::high_resolution_clock::duration timeout);
+    bool rx(size_t& size, uint8_t channel, Clock::duration timeout);
 
     bool read_rx_fifo(void* data, size_t& size);
 

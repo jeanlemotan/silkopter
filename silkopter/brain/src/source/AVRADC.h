@@ -37,7 +37,7 @@ public:
 
     //auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
 
-    ts::Result<void> start(q::Clock::time_point tp) override;
+    ts::Result<void> start(Clock::time_point tp) override;
 
     auto get_outputs() const -> std::vector<Output>;
 
@@ -52,8 +52,8 @@ private:
     std::shared_ptr<hal::AVRADC_Descriptor> m_descriptor;
     std::shared_ptr<hal::AVRADC_Config> m_config;
 
-    q::Clock::time_point m_last_process_tp = q::Clock::now();
-    q::Clock::time_point m_last_reading_tp = q::Clock::now();
+    Clock::time_point m_last_process_tp = Clock::now();
+    Clock::time_point m_last_reading_tp = Clock::now();
 
     typedef Basic_Output_Stream<stream::IADC> Output_Stream;
     mutable std::array<std::shared_ptr<Output_Stream>, 2> m_adcs;
@@ -61,7 +61,7 @@ private:
 
     struct Stats
     {
-        q::Clock::time_point last_report_tp = q::Clock::now();
+        Clock::time_point last_report_tp = Clock::now();
         size_t added = 0;
         size_t bus_failures = 0;
 

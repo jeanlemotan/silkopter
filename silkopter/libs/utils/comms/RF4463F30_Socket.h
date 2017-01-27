@@ -5,6 +5,7 @@
 #include <string>
 #include <chrono>
 #include <boost/thread.hpp>
+#include "utils/Clock.h"
 
 namespace util
 {
@@ -41,8 +42,8 @@ private:
     bool m_exit = false;
     bool m_is_master = false;
     boost::thread m_thread;
-    q::Clock::time_point m_last_tx_tp = q::Clock::now();
-    q::Clock::time_point m_last_rx_tp = q::Clock::now();
+    Clock::time_point m_last_tx_tp = Clock::now();
+    Clock::time_point m_last_rx_tp = Clock::now();
     uint8_t m_id = 0;
 
     bool m_is_initialized = false;

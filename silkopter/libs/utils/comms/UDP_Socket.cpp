@@ -122,7 +122,7 @@ void UDP_Socket::async_send(void const* _data, size_t size)
     std::copy(data, data + size, buffer->data() + 1);
 
     m_tx_buffer_queue.push_back(std::move(buffer));
-    m_tx_data_sent_tp = q::Clock::now();
+    m_tx_data_sent_tp = Clock::now();
 
     send_next_packet_locked();
 }
@@ -137,7 +137,7 @@ void UDP_Socket::send_next_packet_locked()
 
         if (m_tx_buffer_in_transit->front() == MARKER_DATA)
         {
-            m_tx_data_sent_tp = q::Clock::now();
+            m_tx_data_sent_tp = Clock::now();
         }
 
         m_asio_impl->socket.async_send_to(boost::asio::buffer(*m_tx_buffer_in_transit), m_asio_impl->tx_endpoint, m_asio_send_callback);
@@ -232,7 +232,7 @@ auto UDP_Socket::process() -> Result
     //check if the ACK is too late. If it is, we issue an error to give the caller a chance to retry
     //This happens a lot when starting one endpoint before the other. The first endpoint sends some data and waits
     // for the ACK but the second one never received the data (as it was started after) and never sends the ACK
-    auto now = q::Clock::now();
+    auto now = Clock::now();
     if (m_send_in_progress && now - m_tx_data_sent_tp > MAX_ACK_TIMEOUT)
     {
         if (send_callback)

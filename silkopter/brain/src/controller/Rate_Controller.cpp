@@ -37,7 +37,7 @@ ts::Result<void> Rate_Controller::init()
     return ts::success;
 }
 
-ts::Result<void> Rate_Controller::start(q::Clock::time_point tp)
+ts::Result<void> Rate_Controller::start(Clock::time_point tp)
 {
     m_output_stream->set_tp(tp);
     return ts::success;

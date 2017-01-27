@@ -4,6 +4,7 @@
 #include <vector>
 #include <atomic>
 #include "RC_Phy.h"
+#include "utils/Clock.h"
 
 
 namespace util
@@ -18,7 +19,7 @@ public:
     struct RX_Packet
     {
         uint8_t packet_type;
-        q::Clock::time_point rx_timepoint;
+        Clock::time_point rx_timepoint;
         int8_t tx_dBm = 0;
         int8_t rx_dBm = 0;
         std::vector<uint8_t> payload;
@@ -33,7 +34,7 @@ public:
     size_t get_mtu() const;
 
     typedef std::function<size_t(uint8_t* data, uint8_t& packet_type)> TX_Callback;
-    void add_periodic_packet(q::Clock::duration period, TX_Callback tx_callback);
+    void add_periodic_packet(Clock::duration period, TX_Callback tx_callback);
 
     void send_packet(uint8_t packet_type, uint8_t const* data, size_t size);
 
@@ -47,8 +48,8 @@ public:
 
     struct Periodic_Packet
     {
-        q::Clock::time_point last_tp = q::Clock::now();
-        q::Clock::duration period;
+        Clock::time_point last_tp = Clock::now();
+        Clock::duration period;
         TX_Callback tx_callback;
     };
     std::mutex m_periodic_packets_mutex;

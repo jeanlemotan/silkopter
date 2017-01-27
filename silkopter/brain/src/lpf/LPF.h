@@ -28,7 +28,7 @@ public:
 
     //auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
 
-    ts::Result<void> start(q::Clock::time_point tp) override;
+    ts::Result<void> start(Clock::time_point tp) override;
 
     ts::Result<void> set_input_stream_path(size_t idx, std::string const& path);
     auto get_inputs() const -> std::vector<Input>;
@@ -141,7 +141,7 @@ auto LPF<Stream_t>::get_config() const -> std::shared_ptr<const hal::INode_Confi
 }
 
 template<class Stream_t>
-ts::Result<void> LPF<Stream_t>::start(q::Clock::time_point tp)
+ts::Result<void> LPF<Stream_t>::start(Clock::time_point tp)
 {
     m_output_stream->set_tp(tp);
     return ts::success;

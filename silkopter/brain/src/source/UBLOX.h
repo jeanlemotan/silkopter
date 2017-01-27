@@ -42,7 +42,7 @@ public:
 
     //auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
 
-    ts::Result<void> start(q::Clock::time_point tp) override;
+    ts::Result<void> start(Clock::time_point tp) override;
 
     auto get_outputs() const -> std::vector<Output>;
 
@@ -127,10 +127,10 @@ private:
     void process_mon_ver_packet(Buses& buses, Packet& packet);
 
     template<class T> auto send_packet(Buses& buses, uint16_t mgs, T const& payload) -> bool;
-    template<class T> auto send_packet_with_retry(Buses& buses, uint16_t msg, T const& data, q::Clock::duration timeout, size_t retries) -> bool;
+    template<class T> auto send_packet_with_retry(Buses& buses, uint16_t msg, T const& data, Clock::duration timeout, size_t retries) -> bool;
     auto send_packet(Buses& buses, uint16_t mgs, uint8_t const* payload, size_t payload_size) -> bool;
 
-    auto wait_for_ack(Buses& buses, q::Clock::duration d) -> bool;
+    auto wait_for_ack(Buses& buses, Clock::duration d) -> bool;
     boost::optional<bool> m_ack;
 
     enum class Setup_State
@@ -159,21 +159,21 @@ private:
     mutable std::shared_ptr<GPS_Info_Stream> m_gps_info_stream;
 
     Position_Stream::Value m_last_position_value;
-    q::Clock::time_point m_last_position_tp = q::Clock::time_point(q::Clock::duration::zero());
+    Clock::time_point m_last_position_tp = Clock::time_point(Clock::duration::zero());
 
     Velocity_Stream::Value m_last_velocity_value;
-    q::Clock::time_point m_last_velocity_tp = q::Clock::time_point(q::Clock::duration::zero());
+    Clock::time_point m_last_velocity_tp = Clock::time_point(Clock::duration::zero());
 
     GPS_Info_Stream::Value m_last_gps_info_value;
-    q::Clock::time_point m_last_gps_info_tp = q::Clock::time_point(q::Clock::duration::zero());
+    Clock::time_point m_last_gps_info_tp = Clock::time_point(Clock::duration::zero());
 
-    q::Clock::time_point m_last_process_tp = q::Clock::time_point(q::Clock::duration::zero());
-    q::Clock::time_point m_last_reset_tp = q::Clock::now() - std::chrono::seconds(1000);
-    q::Clock::time_point m_last_poll_tp = q::Clock::now() - std::chrono::seconds(1000);
+    Clock::time_point m_last_process_tp = Clock::time_point(Clock::duration::zero());
+    Clock::time_point m_last_reset_tp = Clock::now() - std::chrono::seconds(1000);
+    Clock::time_point m_last_poll_tp = Clock::now() - std::chrono::seconds(1000);
 
     struct Stats
     {
-        q::Clock::time_point last_report_tp = q::Clock::now();
+        Clock::time_point last_report_tp = Clock::now();
         struct Position
         {
             bool operator==(Position const& o) const { return memcmp(this, &o, sizeof(*this)) == 0; }

@@ -5,6 +5,7 @@
 #include <vector>
 #include <boost/intrusive_ptr.hpp>
 #include "ISocket.h"
+#include "utils/Clock.h"
 
 namespace util
 {
@@ -54,7 +55,7 @@ public:
         bool is_compressed = true;
         bool cancel_previous_data = false; //if true, new packets cancel old-unsent packets
         uint8_t unreliable_retransmit_count = 0; //for unreliable channels, retransmit data this many times to increase the chances of arrival. Zero means just the main transmission and no retransmit
-        q::Clock::duration cancel_after = q::Clock::duration{0}; //zero means never
+        Clock::duration cancel_after = Clock::duration{0}; //zero means never
     };
     void set_send_params(uint8_t channel_idx, Send_Params const& params);
     auto get_send_params(uint8_t channel_idx) const -> Send_Params const&;
@@ -67,7 +68,7 @@ public:
 
     struct Receive_Params
     {
-        q::Clock::duration max_receive_time = q::Clock::duration{0}; //how long to wait for late packets. Zero meand the global defaults
+        Clock::duration max_receive_time = Clock::duration{0}; //how long to wait for late packets. Zero meand the global defaults
     };
     void set_receive_params(uint8_t channel_idx, Receive_Params const& params);
     void set_global_receive_params(Receive_Params const& params);
@@ -89,7 +90,7 @@ private:
     auto _send_locked(uint8_t channel_idx, Send_Params const& params, void const* data, size_t size) -> bool;
 
     static const uint8_t VERSION = 1;
-    const q::Clock::duration RECONNECT_BEACON_TIMEOUT = std::chrono::milliseconds(1000);
+    const Clock::duration RECONNECT_BEACON_TIMEOUT = std::chrono::milliseconds(1000);
 
     enum Type
     {
@@ -200,8 +201,8 @@ private:
         struct Datagram : public detail::Pool_Item_Base
         {
             Send_Params params;
-            q::Clock::time_point added_tp = q::Clock::time_point(q::Clock::duration{0});
-            q::Clock::time_point sent_tp = q::Clock::time_point(q::Clock::duration{0});
+            Clock::time_point added_tp = Clock::time_point(Clock::duration{0});
+            Clock::time_point sent_tp = Clock::time_point(Clock::duration{0});
             uint32_t sent_count = 0; //how many times it was sent - for unreliable only
 
             Buffer_t data;
@@ -223,7 +224,7 @@ private:
         /////
         std::mutex confirmations_mutex;
         std::deque<Confirmation> confirmations;
-        q::Clock::time_point confirmations_last_time_point = q::Clock::now();
+        Clock::time_point confirmations_last_time_point = Clock::now();
         Compression_State confirmations_comp_state;
         /////
 
@@ -280,7 +281,7 @@ private:
         struct Packet : public detail::Pool_Item_Base
         {
             size_t received_fragment_count = 0;
-            q::Clock::time_point added_tp = q::Clock::time_point(q::Clock::duration{0});
+            Clock::time_point added_tp = Clock::time_point(Clock::duration{0});
             Packet_Main_Header main_header;
             Packet_Header any_header;
             std::map<uint16_t, Datagram_ptr> fragments;
@@ -332,7 +333,7 @@ private:
 
         ////
         mutable std::mutex mutex;
-        q::Clock::time_point last_sent_tp = q::Clock::time_point(q::Clock::duration{0});
+        Clock::time_point last_sent_tp = Clock::time_point(Clock::duration{0});
         ////
     } m_connection;
 
@@ -341,11 +342,11 @@ private:
 
     void purge();
 
-    q::Clock::time_point m_init_tp = q::Clock::time_point(q::Clock::duration{0});
+    Clock::time_point m_init_tp = Clock::time_point(Clock::duration{0});
     std::array<std::atomic_int, MAX_CHANNELS> m_last_id;
     Stats m_global_stats;
 
-    const q::Clock::duration MIN_RESEND_DURATION = std::chrono::milliseconds(20);
+    const Clock::duration MIN_RESEND_DURATION = std::chrono::milliseconds(20);
 
     std::array<Send_Params, MAX_CHANNELS> m_send_params;
     std::array<Receive_Params, MAX_CHANNELS> m_receive_params;

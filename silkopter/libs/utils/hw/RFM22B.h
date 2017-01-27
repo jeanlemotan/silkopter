@@ -2,6 +2,7 @@
 
 #include <string>
 #include "SPI_Dev.h"
+#include "utils/Clock.h"
 
 namespace util
 {
@@ -381,7 +382,7 @@ public:
     bool read_rx_fifo(void* data, size_t size);
 
     bool tx(size_t size, uint8_t channel);
-    bool rx(size_t& size, uint8_t channel, std::chrono::high_resolution_clock::duration timeout);
+    bool rx(size_t& size, uint8_t channel, Clock::duration timeout);
 
     bool get_nirq_level();
 

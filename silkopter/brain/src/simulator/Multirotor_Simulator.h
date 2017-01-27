@@ -43,7 +43,7 @@ public:
 
     //auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
 
-    ts::Result<void> start(q::Clock::time_point tp) override;
+    ts::Result<void> start(Clock::time_point tp) override;
 
     ts::Result<void> set_input_stream_path(size_t idx, std::string const& path);
     auto get_inputs() const -> std::vector<Input>;
@@ -59,7 +59,7 @@ private:
     std::shared_ptr<hal::Multirotor_Simulator_Descriptor> m_descriptor;
     std::shared_ptr<hal::Multirotor_Simulator_Config> m_config;
 
-    q::Clock::time_point m_last_tp = q::Clock::now();
+    Clock::time_point m_last_tp = Clock::now();
 
     struct Noise
     {
@@ -84,8 +84,8 @@ private:
         auto get_samples() const -> std::vector<Sample> const& { return samples; }
         auto get_rate() const -> uint32_t { return rate; }
         uint32_t rate = 0;
-        q::Clock::duration accumulated_dt = q::Clock::duration{0};
-        q::Clock::duration dt = q::Clock::duration{0};
+        Clock::duration accumulated_dt = Clock::duration{0};
+        Clock::duration dt = Clock::duration{0};
         std::vector<Sample> samples;
         Sample last_sample;
     };
@@ -94,8 +94,8 @@ private:
         auto get_samples() const -> std::vector<Sample> const& { return samples; }
         auto get_rate() const -> uint32_t { return rate; }
         uint32_t rate = 0;
-        q::Clock::duration accumulated_dt = q::Clock::duration{0};
-        q::Clock::duration dt = q::Clock::duration{0};
+        Clock::duration accumulated_dt = Clock::duration{0};
+        Clock::duration dt = Clock::duration{0};
         std::vector<Sample> samples;
         Sample last_sample;
     };
@@ -104,8 +104,8 @@ private:
         auto get_samples() const -> std::vector<Sample> const& { return samples; }
         auto get_rate() const -> uint32_t { return rate; }
         uint32_t rate = 0;
-        q::Clock::duration accumulated_dt = q::Clock::duration{0};
-        q::Clock::duration dt = q::Clock::duration{0};
+        Clock::duration accumulated_dt = Clock::duration{0};
+        Clock::duration dt = Clock::duration{0};
         std::vector<Sample> samples;
         Sample last_sample;
     };
@@ -114,8 +114,8 @@ private:
         auto get_samples() const -> std::vector<Sample> const& { return samples; }
         auto get_rate() const -> uint32_t { return rate; }
         uint32_t rate = 0;
-        q::Clock::duration accumulated_dt = q::Clock::duration{0};
-        q::Clock::duration dt = q::Clock::duration{0};
+        Clock::duration accumulated_dt = Clock::duration{0};
+        Clock::duration dt = Clock::duration{0};
         std::vector<Sample> samples;
         Sample last_sample;
     };
@@ -124,8 +124,8 @@ private:
         auto get_samples() const -> std::vector<Sample> const& { return samples; }
         auto get_rate() const -> uint32_t { return rate; }
         uint32_t rate = 0;
-        q::Clock::duration accumulated_dt = q::Clock::duration{0};
-        q::Clock::duration dt = q::Clock::duration{0};
+        Clock::duration accumulated_dt = Clock::duration{0};
+        Clock::duration dt = Clock::duration{0};
         std::vector<Sample> samples;
         Sample last_sample;
     };
@@ -134,8 +134,8 @@ private:
         auto get_samples() const -> std::vector<Sample> const& { return samples; }
         auto get_rate() const -> uint32_t { return rate; }
         uint32_t rate = 0;
-        q::Clock::duration accumulated_dt = q::Clock::duration{0};
-        q::Clock::duration dt = q::Clock::duration{0};
+        Clock::duration accumulated_dt = Clock::duration{0};
+        Clock::duration dt = Clock::duration{0};
         std::vector<Sample> samples;
         Sample last_sample;
     };
@@ -144,8 +144,8 @@ private:
         auto get_samples() const -> std::vector<Sample> const& { return samples; }
         auto get_rate() const -> uint32_t { return rate; }
         uint32_t rate = 0;
-        q::Clock::duration accumulated_dt = q::Clock::duration{0};
-        q::Clock::duration dt = q::Clock::duration{0};
+        Clock::duration accumulated_dt = Clock::duration{0};
+        Clock::duration dt = Clock::duration{0};
         std::vector<Sample> samples;
         Sample last_sample;
     };
@@ -154,8 +154,8 @@ private:
         auto get_samples() const -> std::vector<Sample> const& { return samples; }
         auto get_rate() const -> uint32_t { return rate; }
         uint32_t rate = 0;
-        q::Clock::duration accumulated_dt = q::Clock::duration{0};
-        q::Clock::duration dt = q::Clock::duration{0};
+        Clock::duration accumulated_dt = Clock::duration{0};
+        Clock::duration dt = Clock::duration{0};
         std::vector<Sample> samples;
         Sample last_sample;
     };
@@ -164,8 +164,8 @@ private:
         auto get_samples() const -> std::vector<Sample> const& { return samples; }
         auto get_rate() const -> uint32_t { return rate; }
         uint32_t rate = 0;
-        q::Clock::duration accumulated_dt = q::Clock::duration{0};
-        q::Clock::duration dt = q::Clock::duration{0};
+        Clock::duration accumulated_dt = Clock::duration{0};
+        Clock::duration dt = Clock::duration{0};
         std::vector<Sample> samples;
         Sample last_sample;
     };

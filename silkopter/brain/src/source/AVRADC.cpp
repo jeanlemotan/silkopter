@@ -74,7 +74,7 @@ ts::Result<void> AVRADC::init()
     return ts::success;
 }
 
-ts::Result<void> AVRADC::start(q::Clock::time_point tp)
+ts::Result<void> AVRADC::start(Clock::time_point tp)
 {
     m_last_process_tp = tp;
     for (auto& adc: m_adcs)
@@ -106,7 +106,7 @@ void AVRADC::process()
         i2c->unlock();
     });
 
-    auto now = q::Clock::now();
+    auto now = Clock::now();
     if (now - m_last_process_tp < MIN_CONVERSION_DURATION)
     {
         return;
@@ -136,7 +136,7 @@ void AVRADC::process()
     {
         //add samples up to the sample rate
         size_t samples_needed = m_adcs[i]->compute_samples_needed();
-        bool is_healthy = q::Clock::now() - m_last_reading_tp <= m_adcs[0]->get_dt() * k_max_sample_difference;
+        bool is_healthy = Clock::now() - m_last_reading_tp <= m_adcs[0]->get_dt() * k_max_sample_difference;
         if (!is_healthy)
         {
             m_stats.added += samples_needed;

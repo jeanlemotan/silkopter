@@ -49,7 +49,7 @@ auto EHealth::init() -> bool
     return true;
 }
 
-auto EHealth::start(q::Clock::time_point tp) -> bool
+auto EHealth::start(Clock::time_point tp) -> bool
 {
     m_last_tp = tp;
     return true;
@@ -82,7 +82,7 @@ void EHealth::process()
 
     const auto m_dt = std::chrono::milliseconds(10);
 
-    auto now = q::Clock::now();
+    auto now = Clock::now();
     auto tp = m_last_tp + m_dt;
     m_last_tp = now;
 

@@ -33,7 +33,7 @@ constexpr uint8_t CMD_CONVERT_D2_OSR1024 = 0x54;
 constexpr uint8_t CMD_CONVERT_D2_OSR2048 = 0x56;
 constexpr uint8_t CMD_CONVERT_D2_OSR4096 = 0x58;
 
-constexpr q::Clock::duration MIN_CONVERSION_TIME = std::chrono::milliseconds(10);
+constexpr Clock::duration MIN_CONVERSION_TIME = std::chrono::milliseconds(10);
 
 constexpr uint8_t ADDR_MS5611 = 0x77;
 
@@ -199,7 +199,7 @@ ts::Result<void> MS5611::init()
     return ts::success;
 }
 
-ts::Result<void> MS5611::start(q::Clock::time_point tp)
+ts::Result<void> MS5611::start(Clock::time_point tp)
 {
     m_last_temperature_reading_tp = tp;
     m_last_pressure_reading_tp = tp;
@@ -226,7 +226,7 @@ void MS5611::process()
     });
 
     QLOG_TOPIC("ms5611::process");
-    auto now = q::Clock::now();
+    auto now = Clock::now();
     if (now - m_last_process_tp < MIN_CONVERSION_TIME)
     {
         return;
@@ -319,7 +319,7 @@ void MS5611::process()
 
         {
             size_t samples_needed = m_pressure->compute_samples_needed();
-            bool is_healthy = q::Clock::now() - m_last_pressure_reading_tp <= m_pressure->get_dt() * k_max_sample_difference;
+            bool is_healthy = Clock::now() - m_last_pressure_reading_tp <= m_pressure->get_dt() * k_max_sample_difference;
             if (!is_healthy)
             {
                 m_stats.pres.added += samples_needed;
@@ -332,7 +332,7 @@ void MS5611::process()
         }
         {
             size_t samples_needed = m_temperature->compute_samples_needed();
-            bool is_healthy = q::Clock::now() - m_last_temperature_reading_tp <= m_temperature->get_dt() * k_max_sample_difference;
+            bool is_healthy = Clock::now() - m_last_temperature_reading_tp <= m_temperature->get_dt() * k_max_sample_difference;
             if (!is_healthy)
             {
                 m_stats.temp.added += samples_needed;

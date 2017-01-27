@@ -73,7 +73,7 @@ ts::Result<void> Motor_Mixer::init()
     return ts::success;
 }
 
-ts::Result<void> Motor_Mixer::start(q::Clock::time_point tp)
+ts::Result<void> Motor_Mixer::start(Clock::time_point tp)
 {
     //TODO - use an basic_output_stream instead of the ad-hoc streams
     return ts::success;
