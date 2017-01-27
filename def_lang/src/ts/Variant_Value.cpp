@@ -2,7 +2,6 @@
 #include "def_lang/Value_Selector.h"
 #include "def_lang/Serialization.h"
 #include "def_lang/IDeclaration_Scope.h"
-#include "def_lang/impl/Initializer_List.h"
 #include "def_lang/Qualified_Type.h"
 
 namespace ts
