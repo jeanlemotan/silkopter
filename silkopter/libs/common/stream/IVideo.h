@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Stream_Base.h"
-#include <chrono>
+#include "utils/Clock.h"
 
 namespace silk
 {
