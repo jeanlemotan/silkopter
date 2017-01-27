@@ -19,7 +19,9 @@
 
 #include "def_lang/Serialization.h"
 #include "def_lang/JSON_Serializer.h"
-#include "QData.h"
+#include "utils/Clock.h"
+
+#include <fstream>
 
 //#include "common/stream/IMultirotor_Commands.h"
 //#include "common/stream/IMultirotor_State.h"
@@ -32,7 +34,7 @@ namespace silk
 int s_version_major = 1;
 int s_version_minor = 0;
 
-const q::Path k_settings_path("settings.json");
+const std::string k_settings_path("settings.json");
 
 settings::Settings s_settings;
 
@@ -111,16 +113,25 @@ void generate_settings_file()
 
 bool load_settings()
 {
-    //read the data
-    q::data::File_Source fs(k_settings_path);
-    if (!fs.is_open())
-    {
-        QLOGW("Failed to load '{}'", k_settings_path);
-        generate_settings_file();
-        return true;
-    }
+    std::string data;
 
-    std::string data = q::data::read_whole_source_as_string<std::string>(fs);
+    {
+        //read the data
+        std::ifstream fs(k_settings_path, std::ifstream::in | std::ifstream::binary);
+        if (!fs.is_open())
+        {
+            QLOGW("Failed to load '{}'", k_settings_path);
+            generate_settings_file();
+            return false;
+        }
+
+        fs.seekg (0, fs.end);
+        size_t size = fs.tellg();
+        fs.seekg (0, fs.beg);
+
+        data.resize(size + 1);
+        fs.read(&data[0], size);
+    }
 
     ts::Result<ts::sz::Value> json_result = ts::sz::from_json(data);
     if (json_result != ts::success)
@@ -150,10 +161,10 @@ void save_settings()
 
     std::string json = ts::sz::to_json(sz_value, true);
 
-    q::data::File_Sink fs(k_settings_path);
+    std::ofstream fs(k_settings_path);
     if (fs.is_open())
     {
-        fs.write(reinterpret_cast<uint8_t const*>(json.data()), json.size());
+        fs.write(json.data(), json.size());
         fs.flush();
     }
     else
@@ -214,7 +225,7 @@ int main(int argc, char *argv[])
 
     size_t render_frames = 0;
 
-    q::Clock::time_point last_tp = q::Clock::now();
+    Clock::time_point last_tp = Clock::now();
     size_t process_frames = 0;
 
     // init done
@@ -232,9 +243,9 @@ int main(int argc, char *argv[])
         menu_system.process(input);
 
         process_frames++;
-        if (q::Clock::now() - last_tp >= std::chrono::seconds(1))
+        if (Clock::now() - last_tp >= std::chrono::seconds(1))
         {
-            last_tp = q::Clock::now();
+            last_tp = Clock::now();
             QLOGI("P FPS: {}, R FPS: {}", process_frames, render_frames);
             process_frames = 0;
             render_frames = 0;

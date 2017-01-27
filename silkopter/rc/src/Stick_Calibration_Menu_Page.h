@@ -2,6 +2,7 @@
 
 #include "IMenu_Page.h"
 #include "Menu.h"
+#include "utils/Clock.h"
 
 namespace silk
 {
@@ -40,7 +41,7 @@ private:
         DONE,
     } m_phase = Phase::CENTER_QUESTIION;
 
-    q::Clock::time_point m_phase_start_tp;
+    Clock::time_point m_phase_start_tp;
     size_t m_sample_count = 0;
 
     void next_phase();

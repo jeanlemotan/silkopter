@@ -28,7 +28,7 @@
 #include "common/stream/IMultirotor_Commands.h"
 #include "common/stream/IMultirotor_State.h"
 
-#include "common/Manual_Clock.h"
+#include "utils/Clock.h"
 
 #include "common/node/INode.h"
 #include "common/stream/IVideo.h"
@@ -60,7 +60,7 @@ public:
     int8_t get_rx_dBm() const;
     int8_t get_tx_dBm() const;
 
-    q::Clock::time_point get_last_rx_tp() const;
+    Clock::time_point get_last_rx_tp() const;
 
     Remote_Viewer_Server const& get_remote_viewer_server() const;
     Remote_Viewer_Server& get_remote_viewer_server();

@@ -18,8 +18,6 @@
 
 #include "_qmath.h"
 #include "QBase.h"
-#include "QData.h"
-#include "QInput.h"
 
 #include "def_lang/Result.h"
 

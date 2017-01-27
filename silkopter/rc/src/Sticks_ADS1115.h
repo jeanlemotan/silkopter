@@ -3,6 +3,7 @@
 #include "def_lang/Result.h"
 #include "ISticks.h"
 #include "utils/hw/I2C_Dev.h"
+#include "utils/Clock.h"
 
 namespace silk
 {
@@ -36,7 +37,7 @@ private:
     util::hw::I2C_Dev m_dev;
     uint8_t m_address = 0;
 
-    q::Clock::time_point m_last_tp = q::Clock::now();
+    Clock::time_point m_last_tp = Clock::now();
 
     bool set_config_register();
 

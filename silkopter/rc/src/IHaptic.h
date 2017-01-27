@@ -1,6 +1,7 @@
 #pragma once
 
 #include "IInput_Device.h"
+#include "utils/Clock.h"
 
 namespace silk
 {
@@ -13,7 +14,7 @@ public:
     struct Note
     {
         uint32_t frequency; //zero means no vibration
-        q::Clock::duration duration;
+        Clock::duration duration;
     };
 
     virtual void vibrate(std::vector<Note> const& notes) = 0;

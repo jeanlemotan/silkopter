@@ -18,14 +18,14 @@ extern void save_settings();
 Stick_Calibration_Menu_Page::Stick_Calibration_Menu_Page()
 {
     m_menu.push_submenu({"Next", "Cancel"}, 0, 34);
-    m_phase_start_tp = q::Clock::now();
+    m_phase_start_tp = Clock::now();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 void Stick_Calibration_Menu_Page::next_phase()
 {
-    m_phase_start_tp = q::Clock::now();
+    m_phase_start_tp = Clock::now();
     m_phase = static_cast<Phase>(static_cast<int>(m_phase) + 1);
 }
 

@@ -17,9 +17,7 @@ CONFIG += c++11
 INCLUDEPATH += ../../src
 INCLUDEPATH += ../../def
 INCLUDEPATH += ../../../../qbase/include
-INCLUDEPATH += ../../../../qdata/include
 INCLUDEPATH += ../../../../qmath/include
-INCLUDEPATH += ../../../../qinput/include
 INCLUDEPATH += ../../../../def_lang/include
 INCLUDEPATH += ../../../libs
 INCLUDEPATH += ../../../libs/common/comms/def
@@ -57,8 +55,6 @@ rpi {
 
 LIBS += -lboost_system -lboost_thread
 LIBS += -lfftw3 -lpcap -lz -lpthread
-LIBS += -L$${ROOT_LIBS_PATH}/qinput/lib/$${DEST_FOLDER} -lqinput
-LIBS += -L$${ROOT_LIBS_PATH}/qdata/lib/$${DEST_FOLDER} -lqdata
 LIBS += -L$${ROOT_LIBS_PATH}/qmath/lib/$${DEST_FOLDER} -lqmath
 LIBS += -L$${ROOT_LIBS_PATH}/qbase/lib/$${DEST_FOLDER} -lqbase
 LIBS += -L$${ROOT_LIBS_PATH}/def_lang/lib/$${DEST_FOLDER} -ldef_lang

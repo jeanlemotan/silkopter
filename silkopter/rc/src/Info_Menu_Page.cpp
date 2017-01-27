@@ -7,6 +7,8 @@
 
 #include "Menu_System.h"
 
+#include "utils/Clock.h"
+
 namespace silk
 {
 extern int s_version_major;
@@ -86,7 +88,7 @@ void Info_Menu_Page::render(Adafruit_GFX& display)
         display.printf("%d viewer(s)", static_cast<int>(m_comms.get_remote_viewer_server().get_remote_viewer_count()));
         display.printf("\n%ddBm RX", static_cast<int>(m_comms.get_rx_dBm()));
         display.printf("\n%ddBm TX", static_cast<int>(m_comms.get_rx_dBm()));
-        display.printf("\nRX Lag: %dms", static_cast<int>(std::chrono::duration_cast<std::chrono::milliseconds>(q::Clock::now() - m_comms.get_last_rx_tp()).count()));
+        display.printf("\nRX Lag: %dms", static_cast<int>(std::chrono::duration_cast<std::chrono::milliseconds>(Clock::now() - m_comms.get_last_rx_tp()).count()));
     }
     else if (m_section == Section::ABOUT)
     {

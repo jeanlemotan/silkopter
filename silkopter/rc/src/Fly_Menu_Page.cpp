@@ -64,8 +64,8 @@ bool Fly_Menu_Page::process(Input& input, Menu_System& menu_system)
         init(input);
     }
 
-    q::Clock::time_point now = q::Clock::now();
-    q::Clock::duration dt = now - m_last_tp;
+    Clock::time_point now = Clock::now();
+    Clock::duration dt = now - m_last_tp;
     m_last_tp = now;
 
     if (now - m_last_blink_tp >= std::chrono::milliseconds(100))
@@ -126,7 +126,7 @@ void Fly_Menu_Page::set_mode(Input& input, stream::IMultirotor_Commands::Mode mo
 {
     if (m_commands.mode != mode)
     {
-        m_last_mode_change_tp = q::Clock::now();
+        m_last_mode_change_tp = Clock::now();
 
         if (mode == stream::IMultirotor_State::Mode::IDLE)
         {
@@ -157,7 +157,7 @@ void Fly_Menu_Page::set_vertical_mode(Input& input, stream::IMultirotor_Commands
 {
     if (m_commands.vertical_mode != mode)
     {
-        m_last_vertical_mode_change_tp = q::Clock::now();
+        m_last_vertical_mode_change_tp = Clock::now();
 
         input.get_haptic().vibrate(k_mode_change_haptic);
     }
@@ -181,7 +181,7 @@ void Fly_Menu_Page::set_horizontal_mode(Input& input, stream::IMultirotor_Comman
 {
     if (m_commands.horizontal_mode != mode)
     {
-        m_last_horizontal_mode_change_tp = q::Clock::now();
+        m_last_horizontal_mode_change_tp = Clock::now();
 
         input.get_haptic().vibrate(k_mode_change_haptic);
     }
@@ -195,7 +195,7 @@ void Fly_Menu_Page::set_yaw_mode(Input& input, stream::IMultirotor_Commands::Yaw
 {
     if (m_commands.yaw_mode != mode)
     {
-        m_last_yaw_mode_change_tp = q::Clock::now();
+        m_last_yaw_mode_change_tp = Clock::now();
 
         input.get_haptic().vibrate(k_mode_change_haptic);
     }
@@ -207,7 +207,7 @@ void Fly_Menu_Page::set_yaw_mode(Input& input, stream::IMultirotor_Commands::Yaw
 
 void Fly_Menu_Page::process_mode_idle(Input& input)
 {
-    q::Clock::time_point now = q::Clock::now();
+    Clock::time_point now = Clock::now();
 
     set_horizontal_mode(input, silk::stream::IMultirotor_Commands::Horizontal_Mode::ANGLE);
 
@@ -277,7 +277,7 @@ void Fly_Menu_Page::process_mode_fly(Input& input)
         m_commands.sticks.roll = sticks.get_roll();
 
         //only apply the throttle some time after the mode chang, to let the actuator settle
-        if (q::Clock::now() - m_last_vertical_mode_change_tp > std::chrono::milliseconds(500))
+        if (Clock::now() - m_last_vertical_mode_change_tp > std::chrono::milliseconds(500))
         {
             if (m_commands.vertical_mode == stream::IMultirotor_Commands::Vertical_Mode::THRUST)
             {
@@ -379,9 +379,9 @@ void Fly_Menu_Page::process_mode_land(Input& input)
 
 void Fly_Menu_Page::render(Adafruit_GFX& display)
 {
-    q::Clock::time_point now = q::Clock::now();
+    Clock::time_point now = Clock::now();
 
-    const q::Clock::duration k_mode_change_blink_duration = std::chrono::milliseconds(300);
+    const Clock::duration k_mode_change_blink_duration = std::chrono::milliseconds(300);
 
     stream::IMultirotor_State::Value const& state = m_multirotor_state;
 
@@ -426,7 +426,7 @@ void Fly_Menu_Page::render(Adafruit_GFX& display)
 
     //signal strength
     {
-        const q::Clock::duration k_timeout_duration = std::chrono::seconds(2);
+        const Clock::duration k_timeout_duration = std::chrono::seconds(2);
         const float k_min_signal_strength = 0.15f;
 
         int16_t w = 60;

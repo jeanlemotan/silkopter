@@ -40,7 +40,14 @@ void Remote_Viewer::send_data(void const* video_data, size_t video_data_size, ma
                stream::IMultirotor_State::Value const& multirotor_state)
 {
     m_socket_adapter.write(video_data, video_data_size);
-//    m_channel.send(Message::RESOLUTION, &resolution, sizeof(resolution));
+    static int x = 100;
+    x--;
+    if (x <= 0)
+    {
+        x = 100;
+        QLOGI("pending to send: {}", m_socket_adapter.get_send_buffer_size());
+    }
+    //    m_channel.send(Message::RESOLUTION, &resolution, sizeof(resolution));
 //    m_channel.send(Message::VIDEO_DATA, video_data, video_data_size);
 
 //    size_t off = 0;

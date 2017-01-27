@@ -1,6 +1,7 @@
 #pragma once
 
 #include "IMenu_Page.h"
+#include "utils/Clock.h"
 
 namespace silk
 {
@@ -16,7 +17,7 @@ public:
 private:
     std::unique_ptr<IMenu_Page> m_mm;
 
-    q::Clock::time_point m_start_tp = q::Clock::now();
+    Clock::time_point m_start_tp = Clock::now();
 };
 
 }

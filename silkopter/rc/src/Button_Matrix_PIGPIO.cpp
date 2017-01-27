@@ -123,8 +123,8 @@ size_t Button_Matrix_PIGPIO::get_button_index(size_t row, size_t column) const
 
 static void microsleep(uint32_t us)
 {
-    auto start = q::Clock::now();
-    while (std::chrono::duration_cast<std::chrono::microseconds>(q::Clock::now() - start).count() < us);
+    auto start = Clock::now();
+    while (std::chrono::duration_cast<std::chrono::microseconds>(Clock::now() - start).count() < us);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////

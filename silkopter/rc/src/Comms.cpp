@@ -220,7 +220,7 @@ int8_t Comms::get_tx_dBm() const
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-q::Clock::time_point Comms::get_last_rx_tp() const
+Clock::time_point Comms::get_last_rx_tp() const
 {
     return m_rx_packet.rx_timepoint;
 }
@@ -263,7 +263,7 @@ void Comms::process()
     m_video_streamer.process();
     m_remote_viewer_server.process();
 
-//    if (q::Clock::now() - get_last_rx_tp() > std::chrono::seconds(5))
+//    if (Clock::now() - get_last_rx_tp() > std::chrono::seconds(5))
 //    {
 //        static FILE* fff = nullptr;
 //        if (!fff)
@@ -289,18 +289,18 @@ void Comms::process()
 //        m_remote_viewer_server.send_data(video_data.data(), video_data.size(), math::vec2u16(0, 0), m_multirotor_state);
 //    }
 
-    static q::Clock::time_point xxx = q::Clock::time_point(q::Clock::duration::zero());
+    static Clock::time_point xxx = Clock::time_point(Clock::duration::zero());
     if (m_multirotor_state.mode != m_multirotor_commands.mode)
     {
         if (xxx.time_since_epoch().count() == 0)
         {
-            xxx = q::Clock::now();
+            xxx = Clock::now();
         }
-        if (q::Clock::now() - xxx > std::chrono::seconds(1))
+        if (Clock::now() - xxx > std::chrono::seconds(1))
         {
             QLOGI("Simulated mode switch from {} to {}", m_multirotor_state.mode, m_multirotor_commands.mode);
             m_multirotor_state.mode = m_multirotor_commands.mode;
-            xxx = q::Clock::time_point(q::Clock::duration::zero());
+            xxx = Clock::time_point(Clock::duration::zero());
         }
     }
 }

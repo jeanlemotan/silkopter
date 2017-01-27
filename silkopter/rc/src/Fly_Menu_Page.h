@@ -3,7 +3,7 @@
 #include "IMenu_Page.h"
 #include "common/stream/IMultirotor_Commands.h"
 #include "common/stream/IMultirotor_State.h"
-
+#include "utils/Clock.h"
 
 namespace silk
 {
@@ -43,23 +43,23 @@ private:
     float m_tx_strength = 0.f;
     float m_slow_tx_strength = 0.f;
 
-    q::Clock::time_point m_last_tp = q::Clock::now();
+    Clock::time_point m_last_tp = Clock::now();
 
-    q::Clock::time_point m_last_blink_tp = q::Clock::now();
+    Clock::time_point m_last_blink_tp = Clock::now();
     uint16_t m_blink_color = 0;
-    q::Clock::time_point m_last_fast_blink_tp = q::Clock::now();
+    Clock::time_point m_last_fast_blink_tp = Clock::now();
     uint16_t m_fast_blink_color = 0;
 
-    q::Clock::time_point m_last_mode_change_tp = q::Clock::now();
-    q::Clock::time_point m_last_vertical_mode_change_tp = q::Clock::now();
-    q::Clock::time_point m_last_horizontal_mode_change_tp = q::Clock::now();
-    q::Clock::time_point m_last_yaw_mode_change_tp = q::Clock::now();
+    Clock::time_point m_last_mode_change_tp = Clock::now();
+    Clock::time_point m_last_vertical_mode_change_tp = Clock::now();
+    Clock::time_point m_last_horizontal_mode_change_tp = Clock::now();
+    Clock::time_point m_last_yaw_mode_change_tp = Clock::now();
 
 
     struct Idle_Mode_Data
     {
         bool is_pressed = false;
-        q::Clock::time_point pressed_tp = q::Clock::now();
+        Clock::time_point pressed_tp = Clock::now();
     } m_idle_mode_data;
 };
 

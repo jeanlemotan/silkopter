@@ -128,7 +128,7 @@ ts::Result<void> Sticks_ADS1115::init()
         return ts::Error("Cannot find ADS1115");
     }
 
-    m_last_tp = q::Clock::now();
+    m_last_tp = Clock::now();
 
     return ts::success;
 }
@@ -317,7 +317,7 @@ void Sticks_ADS1115::set_throttle_calibration(float center, float min, float max
 
 void Sticks_ADS1115::process()
 {
-    auto now = q::Clock::now();
+    auto now = Clock::now();
     if (now - m_last_tp < MIN_CONVERSION_DURATION)
     {
         return;

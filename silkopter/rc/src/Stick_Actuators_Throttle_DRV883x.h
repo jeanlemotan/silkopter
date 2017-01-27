@@ -4,6 +4,7 @@
 #include "IHaptic.h"
 #include "IStick_Actuators.h"
 #include "utils/PID.h"
+#include "utils/Clock.h"
 
 namespace silk
 {
@@ -42,9 +43,9 @@ private:
 
     uint8_t m_enabled_ref_count = 0;
     std::vector<Note> m_haptic_notes;
-    q::Clock::time_point m_last_note_tp = q::Clock::now();
+    Clock::time_point m_last_note_tp = Clock::now();
 
-    q::Clock::time_point m_last_tp = q::Clock::now();
+    Clock::time_point m_last_tp = Clock::now();
 };
 
 }

@@ -2,7 +2,7 @@
 
 #include "utils/hw/pigpio.h"
 
-constexpr q::Clock::duration PERIOD = std::chrono::milliseconds(10);
+constexpr Clock::duration PERIOD = std::chrono::milliseconds(10);
 
 namespace silk
 {
@@ -68,7 +68,7 @@ ts::Result<void> Stick_Actuators_Throttle_DRV883x::init()
     params.rate = std::chrono::duration<float>(1) / PERIOD;
     m_throttle_pid.set_params(params);
 
-    m_last_tp = q::Clock::now();
+    m_last_tp = Clock::now();
 
     return detect_direction();
 }
@@ -172,7 +172,7 @@ void Stick_Actuators_Throttle_DRV883x::vibrate(std::vector<Note> const& notes)
     }
 
     m_haptic_notes = notes;
-    m_last_note_tp = q::Clock::now();
+    m_last_note_tp = Clock::now();
 
     if (!m_haptic_notes.empty())
     {
@@ -194,7 +194,7 @@ void Stick_Actuators_Throttle_DRV883x::vibrate(std::vector<Note> const& notes)
 
 void Stick_Actuators_Throttle_DRV883x::process()
 {
-    auto now = q::Clock::now();
+    auto now = Clock::now();
     if (m_target_throttle)
     {
         auto dt = now - m_last_tp;

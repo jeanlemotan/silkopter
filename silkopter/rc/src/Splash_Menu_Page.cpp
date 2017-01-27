@@ -92,7 +92,7 @@ static const uint8_t s_splash_img[128*64] =
 Splash_Menu_Page::Splash_Menu_Page(std::unique_ptr<IMenu_Page> mm)
     : m_mm(std::move(mm))
 {
-    m_start_tp = q::Clock::now();
+    m_start_tp = Clock::now();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -107,7 +107,7 @@ bool Splash_Menu_Page::process(Input& input, Menu_System& menu_system)
 //    m_input_data.encoder1_clicks = input.get_param_encoder1().get_clicks();
 //    m_input_data.encoder2_clicks = input.get_param_encoder2().get_clicks();
 
-    if (q::Clock::now() - m_start_tp > std::chrono::seconds(1))
+    if (Clock::now() - m_start_tp > std::chrono::seconds(1))
     {
         menu_system.push_page(std::move(m_mm));
         return false; //to pop the splash
