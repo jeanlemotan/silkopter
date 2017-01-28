@@ -183,10 +183,10 @@ auto Comp_AHRS::get_descriptor() const -> std::shared_ptr<const hal::INode_Descr
     return m_descriptor;
 }
 
-//auto Comp_AHRS::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document
-//{
-//    return rapidjson::Document();
-//}
+ts::Result<std::shared_ptr<hal::INode_Message>> Comp_AHRS::send_message(hal::INode_Message const& message)
+{
+    return make_error("Unknown message");
+}
 
 }
 }

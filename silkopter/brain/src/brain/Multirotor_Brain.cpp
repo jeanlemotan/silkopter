@@ -606,11 +606,6 @@ void Multirotor_Brain::acquire_home_position()
 {
     QASSERT(m_mode == Mode::IDLE);
 
-    if (m_home.is_acquired && math::distance(m_home.position, m_inputs.position.sample.value) > 10.f)
-    {
-        m_home.is_acquired = false;
-    }
-
     bool is_stable = true;
 
     std::deque<util::coordinates::ECEF>& history = m_home.position_history;
@@ -618,7 +613,7 @@ void Multirotor_Brain::acquire_home_position()
     //check if the position is stable
     for (size_t i = 1; i < history.size(); i++)
     {
-        if (math::distance(history[0], history[1]) > m_config->get_max_allowed_position_variation())
+        if (math::distance(history[0], history[i]) > m_config->get_max_allowed_position_variation())
         {
             if (m_home.is_acquired)
             {
@@ -906,6 +901,11 @@ std::shared_ptr<const hal::INode_Config> Multirotor_Brain::get_config() const
 std::shared_ptr<const hal::INode_Descriptor> Multirotor_Brain::get_descriptor() const
 {
     return m_descriptor;
+}
+
+ts::Result<std::shared_ptr<hal::INode_Message>> Multirotor_Brain::send_message(hal::INode_Message const& message)
+{
+    return make_error("Unknown message");
 }
 
 }

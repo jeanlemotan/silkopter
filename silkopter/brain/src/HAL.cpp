@@ -471,12 +471,7 @@ auto HAL::init(RC_Comms& rc_comms, GS_Comms& gs_comms) -> bool
     m_bus_factory.add<bus::I2C_BCM>("I2C BCM");
     m_bus_factory.add<bus::SPI_BCM>("SPI BCM");
 
-#if !defined RASPBERRY_PI
     m_node_factory.add<Multirotor_Simulator>("Multirotor Simulator", *this);
-#endif
-
-    //m_node_factory.add<EHealth>("EHealth", *this);
-
     m_node_factory.add<MPU9250>("MPU9250", *this);
     m_node_factory.add<MS5611>("MS5611", *this);
     m_node_factory.add<SRF01>("SRF01", *this);

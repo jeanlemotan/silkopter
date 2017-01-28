@@ -105,10 +105,10 @@ auto ADC_Ammeter::get_descriptor() const -> std::shared_ptr<const hal::INode_Des
 {
     return m_descriptor;
 }
-//auto ADC_Ammeter::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document
-//{
-//    return rapidjson::Document();
-//}
+ts::Result<std::shared_ptr<hal::INode_Message>> ADC_Ammeter::send_message(hal::INode_Message const& message)
+{
+    return make_error("Unknown message");
+}
 
 
 }

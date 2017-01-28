@@ -450,10 +450,10 @@ auto Motor_Mixer::get_descriptor() const -> std::shared_ptr<const hal::INode_Des
 {
     return m_descriptor;
 }
-//auto Motor_Mixer::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document
-//{
-//    return rapidjson::Document();
-//}
+ts::Result<std::shared_ptr<hal::INode_Message>> Motor_Mixer::send_message(hal::INode_Message const& message)
+{
+    return make_error("Unknown message");
+}
 
 
 }

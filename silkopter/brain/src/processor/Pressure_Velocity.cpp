@@ -113,10 +113,10 @@ auto Pressure_Velocity::get_descriptor() const -> std::shared_ptr<const hal::INo
 {
     return m_descriptor;
 }
-//auto Pressure_Velocity::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document
-//{
-//    return rapidjson::Document();
-//}
+ts::Result<std::shared_ptr<hal::INode_Message>> Pressure_Velocity::send_message(hal::INode_Message const& message)
+{
+    return make_error("Unknown message");
+}
 
 
 }

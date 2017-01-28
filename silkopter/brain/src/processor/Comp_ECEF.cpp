@@ -146,9 +146,9 @@ auto Comp_ECEF::get_descriptor() const -> std::shared_ptr<const hal::INode_Descr
     return m_descriptor;
 }
 
-auto Comp_ECEF::send_message(rapidjson::Value const& json) -> rapidjson::Document
+ts::Result<std::shared_ptr<hal::INode_Message>> Comp_ECEF::send_message(hal::INode_Message const& message)
 {
-    return rapidjson::Document();
+    return make_error("Unknown message");
 }
 
 }

@@ -2,8 +2,6 @@
 #include "Multirotor_Simulator.h"
 #include "uav_properties/IMultirotor_Properties.h"
 
-#if !defined RASPBERRY_PI
-
 #include "hal.def.h"
 //#include "sz_Multirotor_Simulator.hpp"
 //#include "sz_Multirotor_Simulator_Structs.hpp"
@@ -289,18 +287,29 @@ void Multirotor_Simulator::process()
 
 ts::Result<void> Multirotor_Simulator::set_input_stream_path(size_t idx, std::string const& path)
 {
-    auto input_stream = m_hal.get_stream_registry().find_by_name<stream::IThrottle>(path);
-    auto rate = input_stream ? input_stream->get_rate() : 0u;
-    if (rate != m_descriptor->get_throttle_rate())
+    m_input_throttle_streams[idx].reset();
+    m_input_throttle_stream_paths[idx].clear();
+
+    if (!path.empty())
     {
-        m_input_throttle_streams[idx].reset();
-        m_input_throttle_stream_paths[idx].clear();
-        return make_error("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", path, m_descriptor->get_throttle_rate(), rate);
-    }
-    else
-    {
-        m_input_throttle_streams[idx] = input_stream;
-        m_input_throttle_stream_paths[idx] = path;
+        std::shared_ptr<stream::IThrottle> input_stream = m_hal.get_stream_registry().find_by_name<stream::IThrottle>(path);
+        if (input_stream)
+        {
+            uint32_t rate = input_stream->get_rate();
+            if (rate != m_descriptor->get_throttle_rate())
+            {
+                return make_error("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", path, m_descriptor->get_throttle_rate(), rate);
+            }
+            else
+            {
+                m_input_throttle_streams[idx] = input_stream;
+                m_input_throttle_stream_paths[idx] = path;
+            }
+        }
+        else
+        {
+            return make_error("Cannot find stream '{}'", path);
+        }
     }
     return ts::success;
 }
@@ -371,46 +380,30 @@ auto Multirotor_Simulator::get_descriptor() const -> std::shared_ptr<const hal::
 {
     return m_descriptor;
 }
-//auto Multirotor_Simulator::send_message(rapidjson::Value const& json) -> rapidjson::Document
-//{
-//    rapidjson::Document response;
 
-//    //todo - fix this
-////    auto* messagej = jsonutil::find_value(json, std::string("message"));
-////    if (!messagej)
-////    {
-////        jsonutil::add_value(response, std::string("error"), rapidjson::Value("Message not found"), response.GetAllocator());
-////    }
-////    else if (!messagej->IsString())
-////    {
-////        jsonutil::add_value(response, std::string("error"), rapidjson::Value("Message has to be a string"), response.GetAllocator());
-////    }
-////    else
-////    {
-////        std::string message = messagej->GetString();
-////        if (message == "reset")
-////        {
-////            m_simulation.reset();
-////        }
-////        else if (message == "stop motion")
-////        {
-////            m_simulation.stop_motion();
-////        }
-////        else if (message == "get state")
-////        {
-////            auto const& state = m_simulation.get_uav_state();
-////            autojsoncxx::to_document(state, response);
-////        }
-////        else
-////        {
-////            jsonutil::add_value(response, std::string("error"), rapidjson::Value("Unknown message"), response.GetAllocator());
-////        }
-////    }
-//    return std::move(response);
-//}
+ts::Result<std::shared_ptr<hal::INode_Message>> Multirotor_Simulator::send_message(hal::INode_Message const& _message)
+{
+    if (dynamic_cast<hal::Multirotor_Simulator_Reset_Message const*>(&_message))
+    {
+        m_simulation.reset();
+        return nullptr;
+    }
+    else if (dynamic_cast<hal::Multirotor_Simulator_Freeze_Message const*>(&_message))
+    {
+        m_simulation.stop_motion();
+        return nullptr;
+    }
+    else if (dynamic_cast<hal::Multirotor_Simulator_Get_State_Message const*>(&_message))
+    {
+        auto const& state = m_simulation.get_uav_state();
+        return nullptr;
+    }
+    else
+    {
+        return make_error("Unknown message");
+    }
+}
 
 
 }
 }
-
-#endif

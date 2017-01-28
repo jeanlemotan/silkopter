@@ -38,7 +38,7 @@ public:
     ts::Result<void> set_config(hal::INode_Config const& config) override;
     std::shared_ptr<const hal::INode_Config> get_config() const override;
 
-    //auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
+    ts::Result<std::shared_ptr<hal::INode_Message>> send_message(hal::INode_Message const& message) override;
 
     ts::Result<void> start(Clock::time_point tp) override;
 
@@ -194,11 +194,11 @@ auto Combiner<Stream_t>::get_descriptor() const -> std::shared_ptr<const hal::IN
     return m_descriptor;
 }
 
-//template<class Stream_t>
-//auto Combiner<Stream_t>::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document
-//{
-//    return rapidjson::Document();
-//}
+template<class Stream_t>
+ts::Result<std::shared_ptr<hal::INode_Message>> Combiner<Stream_t>::send_message(hal::INode_Message const& message)
+{
+    return make_error("Unknown message");
+}
 
 
 }

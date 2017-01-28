@@ -174,9 +174,9 @@ auto OpenCV_Capture::get_descriptor() const -> std::shared_ptr<const hal::INode_
     return m_descriptor;
 }
 
-auto OpenCV_Capture::send_message(rapidjson::Value const& json) -> rapidjson::Document
+ts::Result<std::shared_ptr<hal::INode_Message>> OpenCV_Capture::send_message(hal::INode_Message const& message)
 {
-    return rapidjson::Document();
+    return make_error("Unknown message");
 }
 
 void OpenCV_Capture::shutdown()

@@ -36,6 +36,8 @@ public:
     ts::Result<void> set_config(hal::INode_Config const& config) override;
     std::shared_ptr<const hal::INode_Config> get_config() const override;
 
+    ts::Result<std::shared_ptr<hal::INode_Message>> send_message(hal::INode_Message const& message) override;
+
     ts::Result<void> start(Clock::time_point tp) override;
 
     auto get_outputs() const -> std::vector<Output>;

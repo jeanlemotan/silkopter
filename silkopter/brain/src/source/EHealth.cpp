@@ -133,9 +133,9 @@ auto EHealth::get_descriptor() const -> std::shared_ptr<const hal::INode_Descrip
 {
     return m_desc;
 }
-auto EHealth::send_message(rapidjson::Value const& json) -> rapidjson::Document
+ts::Result<std::shared_ptr<hal::INode_Message>> EHealth::send_message(hal::INode_Message const& message)
 {
-    return rapidjson::Document();
+    return make_error("Unknown message");
 }
 
 

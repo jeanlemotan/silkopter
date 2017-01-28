@@ -45,7 +45,7 @@ RCC_DIR = ./.rcc/$${DEST_FOLDER}
 UI_DIR = ./.ui/$${DEST_FOLDER}
 DESTDIR = ../../bin/$${DEST_FOLDER}
 
-QMAKE_CXXFLAGS += -isystem =/opt/vc/include -isystem =/opt/vc/include/interface/vcos/pthreads -isystem =/opt/vc/include/interface/vmcs_host/linux
+QMAKE_CXXFLAGS += -isystem =/opt/vc/include -isystem =/opt/vc/include/interface/vcos/pthreads -isystem =/opt/vc/include/interface/vmcs_host/linux -isystem =/usr/include/bullet
 QMAKE_CXXFLAGS += -Wno-unused-variable -Wno-unused-parameter
 QMAKE_CFLAGS += -Wno-unused-variable -Wno-unused-parameter
 QMAKE_LFLAGS += -rdynamic -Wl,--whole-archive -lpthread -Wl,--no-whole-archive
@@ -76,6 +76,9 @@ LIBS += -lboost_thread
 LIBS += -lrt
 LIBS += -lz
 LIBS += -lpcap
+LIBS += -lBulletCollision
+LIBS += -lBulletDynamics
+LIBS += -lLinearMath
 rpi {
     LIBS += -lmmal_core
     LIBS += -lmmal_util
@@ -85,9 +88,6 @@ rpi {
 #    LIBS += -lGLESv2
 #    LIBS += -lEGL
 } else {
-    LIBS += -lBulletCollision
-    LIBS += -lBulletDynamics
-    LIBS += -lLinearMath
     LIBS += -lopencv_core
     LIBS += -lopencv_imgproc
     LIBS += -lopencv_highgui

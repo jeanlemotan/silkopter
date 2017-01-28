@@ -25,7 +25,7 @@ public:
     ts::Result<void> set_config(hal::INode_Config const& config) override;
     std::shared_ptr<const hal::INode_Config> get_config() const override;
 
-    //auto send_message(rapidjson::Value const& json) -> rapidjson::Document;
+    ts::Result<std::shared_ptr<hal::INode_Message>> send_message(hal::INode_Message const& message) override;
 
     ts::Result<void> start(Clock::time_point tp) override;
 
@@ -135,11 +135,12 @@ ts::Result<void> Vec3_Generator<Stream_t>::set_config(hal::INode_Config const& c
 
     return ts::success;
 }
-//template<class Stream_t>
-//auto Vec3_Generator<Stream_t>::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document
-//{
-//    return rapidjson::Document();
-//}
+template<class Stream_t>
+ts::Result<std::shared_ptr<hal::INode_Message>> Vec3_Generator<Stream_t>::send_message(hal::INode_Message const& message)
+{
+    return make_error("Unknown message");
+}
+
 template<class Stream_t>
 auto Vec3_Generator<Stream_t>::get_config() const -> std::shared_ptr<const hal::INode_Config>
 {

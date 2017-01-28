@@ -382,10 +382,10 @@ auto MS5611::get_descriptor() const -> std::shared_ptr<const hal::INode_Descript
     return m_descriptor;
 }
 
-//auto MS5611::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document
-//{
-//    return rapidjson::Document();
-//}
+ts::Result<std::shared_ptr<hal::INode_Message>> MS5611::send_message(hal::INode_Message const& message)
+{
+    return make_error("Unknown message");
+}
 
 }
 }

@@ -338,10 +338,10 @@ auto ADS1115::get_descriptor() const -> std::shared_ptr<const hal::INode_Descrip
     return m_descriptor;
 }
 
-//auto ADS1115::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document
-//{
-//    return rapidjson::Document();
-//}
+ts::Result<std::shared_ptr<hal::INode_Message>> ADS1115::send_message(hal::INode_Message const& message)
+{
+    return make_error("Unknown message");
+}
 
 }
 }

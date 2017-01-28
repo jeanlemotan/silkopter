@@ -9,6 +9,7 @@ namespace hal
 {
 struct INode_Descriptor;
 struct INode_Config;
+struct INode_Message;
 }
 }
 
@@ -73,7 +74,7 @@ public:
 
     virtual ts::Result<void> start(Clock::time_point tp) = 0;
 
-    //virtual auto send_message(rapidjson::Value const& json) -> rapidjson::Document = 0;
+    virtual ts::Result<std::shared_ptr<hal::INode_Message>> send_message(hal::INode_Message const& message) = 0;
 
     struct Input
     {

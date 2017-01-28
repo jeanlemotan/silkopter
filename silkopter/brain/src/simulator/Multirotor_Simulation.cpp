@@ -2,8 +2,6 @@
 #include "Multirotor_Simulation.h"
 #include "physics/constants.h"
 
-#if !defined RASPBERRY_PI
-
 #include "btBulletCollisionCommon.h"
 #include "btBulletDynamicsCommon.h"
 
@@ -29,7 +27,7 @@ namespace silk
 namespace node
 {
 
-constexpr size_t SUBSTEPS = 10;
+constexpr size_t SUBSTEPS = 1;
 
 //////////////////////////////////////////////////////////////////////////
 
@@ -94,10 +92,9 @@ auto Multirotor_Simulation::init_uav(std::shared_ptr<const IMultirotor_Propertie
     {
         m_uav.state.motors.clear();
         m_uav.state.motors.resize(m_uav.properties->get_motors().size());
-        q::util::Rand rnd;
         for (auto& m: m_uav.state.motors)
         {
-            m.drag_factor = rnd.get_positive_float() * 0.01f + 0.01f;
+            m.drag_factor = (std::rand() / float(RAND_MAX)) * 0.01f + 0.01f;
         }
     }
 
@@ -456,5 +453,3 @@ auto Multirotor_Simulation::get_uav_state() const -> IMultirotor_Simulator::UAV_
 
 }
 }
-
-#endif

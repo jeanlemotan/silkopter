@@ -333,10 +333,10 @@ auto CPPM_Receiver::get_descriptor() const -> std::shared_ptr<const hal::INode_D
     return m_descriptor;
 }
 
-//auto CPPM_Receiver::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document
-//{
-//    return rapidjson::Document();
-//}
+ts::Result<std::shared_ptr<hal::INode_Message>> CPPM_Receiver::send_message(hal::INode_Message const& message)
+{
+    return make_error("Unknown message");
+}
 
 }
 }

@@ -180,10 +180,10 @@ auto Rate_Controller::get_descriptor() const -> std::shared_ptr<const hal::INode
     return m_descriptor;
 }
 
-//auto Rate_Controller::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document
-//{
-//    return rapidjson::Document();
-//}
+ts::Result<std::shared_ptr<hal::INode_Message>> Rate_Controller::send_message(hal::INode_Message const& message)
+{
+    return make_error("Unknown message");
+}
 
 }
 }

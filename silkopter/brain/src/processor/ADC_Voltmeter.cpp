@@ -106,10 +106,10 @@ auto ADC_Voltmeter::get_descriptor() const -> std::shared_ptr<const hal::INode_D
     return m_descriptor;
 }
 
-//auto ADC_Voltmeter::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document
-//{
-//    return rapidjson::Document();
-//}
+ts::Result<std::shared_ptr<hal::INode_Message>> ADC_Voltmeter::send_message(hal::INode_Message const& message)
+{
+    return make_error("Unknown message");
+}
 
 
 }

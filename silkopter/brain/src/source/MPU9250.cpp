@@ -1393,10 +1393,10 @@ std::shared_ptr<const hal::INode_Descriptor> MPU9250::get_descriptor() const
     return m_descriptor;
 }
 
-//auto MPU9250::send_message(rapidjson::Value const& /*json*/) -> rapidjson::Document
-//{
-//    return rapidjson::Document();
-//}
+ts::Result<std::shared_ptr<hal::INode_Message>> MPU9250::send_message(hal::INode_Message const& message)
+{
+    return make_error("Unknown message");
+}
 
 }
 }

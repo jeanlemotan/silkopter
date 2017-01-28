@@ -1,5 +1,7 @@
 #pragma once
 
+#include <future>
+
 namespace silk
 {
     constexpr size_t MAX_MOTOR_COUNT = 12;
