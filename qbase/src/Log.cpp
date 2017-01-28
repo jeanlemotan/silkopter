@@ -27,7 +27,7 @@ namespace detail
     static std::mutex s_mutex;
     static __thread std::vector<char const*>* s_topic_stack = nullptr;
 
-    static std::chrono::high_resolution_clock::time_point s_start_tp = std::chrono::high_resolution_clock::now();
+    static std::chrono::steady_clock::time_point s_start_tp = std::chrono::steady_clock::now();
 }
 }
 }
@@ -182,7 +182,7 @@ void q::log(logging::Level level, const char* file, int line, const std::string&
     if (decorations.test(Decoration::TIMESTAMP))
     {
         char mbstr[100];
-        auto d = std::chrono::high_resolution_clock::now() - detail::s_start_tp;
+        auto d = std::chrono::steady_clock::now() - detail::s_start_tp;
         uint32_t us = static_cast<uint32_t>(std::chrono::duration_cast<std::chrono::microseconds>(d).count());
         uint32_t _us = us % 1000;
         uint32_t ms = us / 1000;
