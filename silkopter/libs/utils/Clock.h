@@ -2,4 +2,4 @@
 
 #include <chrono>
 
-typedef std::chrono::high_resolution_clock Clock;
+typedef std::chrono::steady_clock Clock;
