@@ -60,6 +60,7 @@ class Add_Node_Res;
 class Set_Node_Input_Stream_Path_Res;
 class Set_Stream_Telemetry_Enabled_Res;
 class Set_Node_Config_Res;
+class Send_Node_Message_Res;
 }
 }
 }
@@ -136,6 +137,8 @@ public:
 
     ts::Result<Node> set_node_config(std::string const& name, std::shared_ptr<ts::IStruct_Value> config, std::chrono::high_resolution_clock::duration timeout = std::chrono::milliseconds(1000));
 
+    ts::Result<void> send_node_message(std::string const& name, std::shared_ptr<messages::INode_Message> message);
+
     //----------------------------------------------------------------------
 
     boost::signals2::signal<void()> sig_reset;
@@ -146,6 +149,7 @@ public:
     boost::signals2::signal<void(uint32_t req_id, std::string const& message)> sig_error_received;
 
     boost::signals2::signal<void(std::shared_ptr<ts::IStruct_Value>)> sig_uav_descriptor_received;
+    boost::signals2::signal<void(std::string const&, messages::INode_Message const&)> sig_node_message_received;
 
     void request_all_data();
 
@@ -265,6 +269,7 @@ private:
     void handle_res(gs_comms::setup::Set_Node_Input_Stream_Path_Res const& res);
     void handle_res(gs_comms::setup::Set_Stream_Telemetry_Enabled_Res const& res);
     void handle_res(gs_comms::setup::Set_Node_Config_Res const& res);
+    void handle_res(gs_comms::setup::Send_Node_Message_Res const& res);
 };
 
 }

@@ -8,6 +8,8 @@
 #include "utils/comms/UDP_Socket.h"
 
 #include "gs_comms.def.h"
+#include "messages.def.h"
+
 #include "def_lang/JSON_Serializer.h"
 
 #include "def_lang/ast/Node.h"
@@ -1268,6 +1270,51 @@ void Comms::handle_res(gs_comms::setup::Set_Node_Config_Res const& res)
     sig_node_changed(result.extract_payload());
 }
 
+void Comms::handle_res(gs_comms::setup::Send_Node_Message_Res const& res)
+{
+    QLOGI("Set_Node_Config_Res {}", res.get_req_id());
+
+    std::shared_ptr<const ts::IPoly_Type> message_poly_type = m_ts.get_root_scope()->find_specialized_symbol_by_path<ts::IPoly_Type>("Poly_INode_Message");
+    if (!message_poly_type)
+    {
+        QLOGE("Cannot find 'Poly_INode_Message' type in the type system");
+        return;
+    }
+
+    std::shared_ptr<ts::IPoly_Value> message_poly_value = message_poly_type->create_specialized_value();
+    QASSERT(message_poly_value);
+    auto construction_result = message_poly_value->construct();
+    if (construction_result != ts::success)
+    {
+        QLOGE("Cannot construct a 'Poly_INode_Message' value: " + construction_result.error().what());
+        return;
+    }
+
+    std::string const& name = res.get_name();
+
+    {
+        std::string const& json = decode_json(res.get_message_data());
+        auto json_result = ts::sz::from_json(json);
+        if (json_result != ts::success)
+        {
+            QLOGE("Cannot deserialize ast json data: " + json_result.error().what());
+            return;
+        }
+
+        auto deserialize_result = message_poly_value->deserialize(json_result.payload());
+        if (deserialize_result != ts::success)
+        {
+            QLOGE("Cannot deserialize message: " + deserialize_result.error().what());
+            return;
+        }
+
+        std::shared_ptr<const messages::INode_Message> message = std::dynamic_pointer_cast<const messages::INode_Message>(message_poly_value->get_value());
+        if (message)
+        {
+            sig_node_message_received(name, *message);
+        }
+    }
+}
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -1706,6 +1753,21 @@ ts::Result<Comms::Node> Comms::set_node_config(std::string const& name,
     return result;
 }
 
+ts::Result<void> Comms::send_node_message(std::string const& name, std::shared_ptr<messages::INode_Message> message)
+{
+    messages::Poly_INode_Message container_value(message);
+
+    gs_comms::setup::Brain_Req request;
+    gs_comms::setup::Send_Node_Message_Req req;
+    req.set_req_id(++m_last_req_id);
+    req.set_name(name);
+
+    req.set_message_data(encode_json(ts::sz::to_json(messages::serialize(container_value), false)));
+    request = req;
+    serialize_and_send(SETUP_CHANNEL, request);
+
+    return ts::success;
+}
 
 
 void Comms::process_rcp()

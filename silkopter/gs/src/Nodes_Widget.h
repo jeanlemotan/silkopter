@@ -9,6 +9,8 @@
 #include "qnodeseditor.h"
 #include "qneport.h"
 
+#include "simulator/Simulator.h"
+
 #include <QGraphicsSceneMouseEvent>
 
 class Properties_Browser;
@@ -105,7 +107,7 @@ private:
 
     void upload_config(std::shared_ptr<Node> node);
 
-//    Sim_Window* m_sim_window = nullptr;
+    Simulator* m_sim_window = nullptr;
 
     void open_stream_viewer(std::string const& stream_path);
     std::string compute_unique_name(std::string const& name) const;

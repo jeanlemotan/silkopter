@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui opengl network widgets charts quick qml quickwidgets
+QT       += core gui opengl network widgets charts quick qml quickwidgets 3dcore 3drender 3dinput 3dextras
 
 TARGET = gs
 TEMPLATE = app
@@ -150,7 +150,10 @@ HEADERS += \
     ../../../libs/utils/comms/UDP_Socket.h \
     ../../src/QHexSpinBox.h \
     ../../src/Internal_Telemetry_Widget.h \
-    ../../../libs/utils/Coordinates.h
+    ../../../libs/utils/Coordinates.h \
+    ../../src/simulator/Simulator.h \
+    ../../src/simulator/OrbitCameraController.h \
+    ../../../libs/common/comms/def/messages.def.h
 
 SOURCES += \
     ../../src/GS.cpp \
@@ -220,7 +223,10 @@ SOURCES += \
     ../../../libs/utils/comms/RCP.cpp \
     ../../../libs/utils/comms/UDP_Socket.cpp \
     ../../src/Internal_Telemetry_Widget.cpp \
-    ../../../libs/utils/Coordinates.cpp
+    ../../../libs/utils/Coordinates.cpp \
+    ../../src/simulator/Simulator.cpp \
+    ../../src/simulator/OrbitCameraController.cpp \
+    ../../../libs/common/comms/def/messages.def.cpp
 
 FORMS += \
     ../../src/GS.ui \
@@ -240,7 +246,8 @@ FORMS += \
     ../../src/calibration/Magnetic_Field_Calibration_Wizard_Instructions.ui \
     ../../src/calibration/Magnetic_Field_Calibration_Wizard_Reset.ui \
     ../../src/Stream_Viewer_Window.ui \
-    ../../src/stream_viewers/Numeric_Viewer_Widget.ui
+    ../../src/stream_viewers/Numeric_Viewer_Widget.ui \
+    ../../src/simulator/Simulator.ui
 
 DISTFILES += \
 

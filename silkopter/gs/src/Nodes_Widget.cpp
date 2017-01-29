@@ -478,9 +478,10 @@ void Nodes_Widget::show_block_context_menu(QGraphicsSceneMouseEvent* event, QNEB
             auto action = menu.addAction(QIcon(":/icons/ui/simulator.png"), "View Simulatior");
             connect(action, &QAction::triggered, [=](bool)
             {
-//                delete m_sim_window;
-//                m_sim_window = new Sim_Window(m_hal, node, m_comms, m_context, this);
-//                m_sim_window->show();
+                delete m_sim_window;
+                //m_sim_window = new Simulator(m_hal, node, m_comms, m_context, this);
+                m_sim_window = new Simulator(this);
+                m_sim_window->show();
             });
         }
 
