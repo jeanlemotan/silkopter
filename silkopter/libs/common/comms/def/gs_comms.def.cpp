@@ -1118,16 +1118,90 @@ namespace setup
   }
 
 ////////////////////////////////////////////////////////////
-}
-ts::Result<void> deserialize(bool& value, ts::sz::Value const& sz_value)
-{
-  if (!sz_value.is_bool()) { return ts::Error("Expected bool value when deserializing"); }
-  value = sz_value.get_as_bool();
-  return ts::success;
-}
-ts::sz::Value serialize(bool const& value)
-{
-  return ts::sz::Value(value);
+  void Send_Node_Message_Req::set_req_id(uint32_t const& value)
+  {
+    m_req_id = value;
+  }
+  void Send_Node_Message_Req::set_req_id(uint32_t&& value)
+  {
+    m_req_id = std::move(value);
+  }
+  auto Send_Node_Message_Req::get_req_id() const -> uint32_t const& 
+  {
+    return m_req_id;
+  }
+
+////////////////////////////////////////////////////////////
+  void Send_Node_Message_Req::set_name(std::string const& value)
+  {
+    m_name = value;
+  }
+  void Send_Node_Message_Req::set_name(std::string&& value)
+  {
+    m_name = std::move(value);
+  }
+  auto Send_Node_Message_Req::get_name() const -> std::string const& 
+  {
+    return m_name;
+  }
+
+////////////////////////////////////////////////////////////
+  void Send_Node_Message_Req::set_message_data(setup::serialized_data_t const& value)
+  {
+    m_message_data = value;
+  }
+  void Send_Node_Message_Req::set_message_data(setup::serialized_data_t&& value)
+  {
+    m_message_data = std::move(value);
+  }
+  auto Send_Node_Message_Req::get_message_data() const -> setup::serialized_data_t const& 
+  {
+    return m_message_data;
+  }
+
+////////////////////////////////////////////////////////////
+  void Send_Node_Message_Res::set_req_id(uint32_t const& value)
+  {
+    m_req_id = value;
+  }
+  void Send_Node_Message_Res::set_req_id(uint32_t&& value)
+  {
+    m_req_id = std::move(value);
+  }
+  auto Send_Node_Message_Res::get_req_id() const -> uint32_t const& 
+  {
+    return m_req_id;
+  }
+
+////////////////////////////////////////////////////////////
+  void Send_Node_Message_Res::set_name(std::string const& value)
+  {
+    m_name = value;
+  }
+  void Send_Node_Message_Res::set_name(std::string&& value)
+  {
+    m_name = std::move(value);
+  }
+  auto Send_Node_Message_Res::get_name() const -> std::string const& 
+  {
+    return m_name;
+  }
+
+////////////////////////////////////////////////////////////
+  void Send_Node_Message_Res::set_message_data(setup::serialized_data_t const& value)
+  {
+    m_message_data = value;
+  }
+  void Send_Node_Message_Res::set_message_data(setup::serialized_data_t&& value)
+  {
+    m_message_data = std::move(value);
+  }
+  auto Send_Node_Message_Res::get_message_data() const -> setup::serialized_data_t const& 
+  {
+    return m_message_data;
+  }
+
+////////////////////////////////////////////////////////////
 }
 ts::Result<void> deserialize(std::string& value, ts::sz::Value const& sz_value)
 {
@@ -1136,6 +1210,16 @@ ts::Result<void> deserialize(std::string& value, ts::sz::Value const& sz_value)
   return ts::success;
 }
 ts::sz::Value serialize(std::string const& value)
+{
+  return ts::sz::Value(value);
+}
+ts::Result<void> deserialize(bool& value, ts::sz::Value const& sz_value)
+{
+  if (!sz_value.is_bool()) { return ts::Error("Expected bool value when deserializing"); }
+  value = sz_value.get_as_bool();
+  return ts::success;
+}
+ts::sz::Value serialize(bool const& value)
 {
   return ts::sz::Value(value);
 }
@@ -2533,6 +2617,82 @@ ts::sz::Value serialize(setup::Remove_Node_Res const& value)
   sz_value.add_object_member("req_id", serialize(value.get_req_id()));
   return sz_value;
 }
+ts::Result<void> deserialize(setup::Send_Node_Message_Req& value, ts::sz::Value const& sz_value)
+{
+  if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  {
+    auto const* member_sz_value = sz_value.find_object_member_by_name("req_id");
+    if (!member_sz_value) { return ts::Error("Cannot find member value 'req_id'"); }
+    std::remove_cv<std::remove_reference<decltype(value.get_req_id())>::type>::type v;
+    auto result = deserialize(v, *member_sz_value);
+    if (result != ts::success) { return result; }
+    value.set_req_id(std::move(v));
+  }
+  {
+    auto const* member_sz_value = sz_value.find_object_member_by_name("name");
+    if (!member_sz_value) { return ts::Error("Cannot find member value 'name'"); }
+    std::remove_cv<std::remove_reference<decltype(value.get_name())>::type>::type v;
+    auto result = deserialize(v, *member_sz_value);
+    if (result != ts::success) { return result; }
+    value.set_name(std::move(v));
+  }
+  {
+    auto const* member_sz_value = sz_value.find_object_member_by_name("message_data");
+    if (!member_sz_value) { return ts::Error("Cannot find member value 'message_data'"); }
+    std::remove_cv<std::remove_reference<decltype(value.get_message_data())>::type>::type v;
+    auto result = deserialize(v, *member_sz_value);
+    if (result != ts::success) { return result; }
+    value.set_message_data(std::move(v));
+  }
+  return ts::success;
+}
+ts::sz::Value serialize(setup::Send_Node_Message_Req const& value)
+{
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
+  sz_value.reserve_object_members(3);
+  sz_value.add_object_member("req_id", serialize(value.get_req_id()));
+  sz_value.add_object_member("name", serialize(value.get_name()));
+  sz_value.add_object_member("message_data", serialize(value.get_message_data()));
+  return sz_value;
+}
+ts::Result<void> deserialize(setup::Send_Node_Message_Res& value, ts::sz::Value const& sz_value)
+{
+  if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  {
+    auto const* member_sz_value = sz_value.find_object_member_by_name("req_id");
+    if (!member_sz_value) { return ts::Error("Cannot find member value 'req_id'"); }
+    std::remove_cv<std::remove_reference<decltype(value.get_req_id())>::type>::type v;
+    auto result = deserialize(v, *member_sz_value);
+    if (result != ts::success) { return result; }
+    value.set_req_id(std::move(v));
+  }
+  {
+    auto const* member_sz_value = sz_value.find_object_member_by_name("name");
+    if (!member_sz_value) { return ts::Error("Cannot find member value 'name'"); }
+    std::remove_cv<std::remove_reference<decltype(value.get_name())>::type>::type v;
+    auto result = deserialize(v, *member_sz_value);
+    if (result != ts::success) { return result; }
+    value.set_name(std::move(v));
+  }
+  {
+    auto const* member_sz_value = sz_value.find_object_member_by_name("message_data");
+    if (!member_sz_value) { return ts::Error("Cannot find member value 'message_data'"); }
+    std::remove_cv<std::remove_reference<decltype(value.get_message_data())>::type>::type v;
+    auto result = deserialize(v, *member_sz_value);
+    if (result != ts::success) { return result; }
+    value.set_message_data(std::move(v));
+  }
+  return ts::success;
+}
+ts::sz::Value serialize(setup::Send_Node_Message_Res const& value)
+{
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
+  sz_value.reserve_object_members(3);
+  sz_value.add_object_member("req_id", serialize(value.get_req_id()));
+  sz_value.add_object_member("name", serialize(value.get_name()));
+  sz_value.add_object_member("message_data", serialize(value.get_message_data()));
+  return sz_value;
+}
 ts::Result<void> deserialize(setup::Brain_Req& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
@@ -2606,6 +2766,12 @@ ts::Result<void> deserialize(setup::Brain_Req& value, ts::sz::Value const& sz_va
   {
     value = setup::Set_Node_Config_Req();
     auto result = deserialize(boost::get<setup::Set_Node_Config_Req>(value), *value_sz_value);
+    if (result != ts::success) { return result; }
+  }
+  else if (path == "::setup::Send_Node_Message_Req")
+  {
+    value = setup::Send_Node_Message_Req();
+    auto result = deserialize(boost::get<setup::Send_Node_Message_Req>(value), *value_sz_value);
     if (result != ts::success) { return result; }
   }
   else { return ts::Error("Cannot find type '" + path + "' when deserializing"); }
@@ -2692,6 +2858,13 @@ ts::sz::Value serialize(setup::Brain_Req const& value)
     sz_value.add_object_member("value", serialize(*v));
     return std::move(sz_value);
   }
+  else if (auto* v = boost::get<setup::Send_Node_Message_Req>(&value))
+  {
+    sz_value.reserve_object_members(2);
+    sz_value.add_object_member("type", "::setup::Send_Node_Message_Req");
+    sz_value.add_object_member("value", serialize(*v));
+    return std::move(sz_value);
+  }
   else { TS_ASSERT(false); return ts::sz::Value(); }
 }
 ts::Result<void> deserialize(setup::Brain_Res& value, ts::sz::Value const& sz_value)
@@ -2773,6 +2946,12 @@ ts::Result<void> deserialize(setup::Brain_Res& value, ts::sz::Value const& sz_va
   {
     value = setup::Error();
     auto result = deserialize(boost::get<setup::Error>(value), *value_sz_value);
+    if (result != ts::success) { return result; }
+  }
+  else if (path == "::setup::Send_Node_Message_Res")
+  {
+    value = setup::Send_Node_Message_Res();
+    auto result = deserialize(boost::get<setup::Send_Node_Message_Res>(value), *value_sz_value);
     if (result != ts::success) { return result; }
   }
   else { return ts::Error("Cannot find type '" + path + "' when deserializing"); }
@@ -2863,6 +3042,13 @@ ts::sz::Value serialize(setup::Brain_Res const& value)
   {
     sz_value.reserve_object_members(2);
     sz_value.add_object_member("type", "::setup::Error");
+    sz_value.add_object_member("value", serialize(*v));
+    return std::move(sz_value);
+  }
+  else if (auto* v = boost::get<setup::Send_Node_Message_Res>(&value))
+  {
+    sz_value.reserve_object_members(2);
+    sz_value.add_object_member("type", "::setup::Send_Node_Message_Res");
     sz_value.add_object_member("value", serialize(*v));
     return std::move(sz_value);
   }

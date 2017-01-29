@@ -9,6 +9,9 @@ namespace hal
 {
 struct INode_Descriptor;
 struct INode_Config;
+}
+namespace messages
+{
 struct INode_Message;
 }
 }
@@ -74,7 +77,7 @@ public:
 
     virtual ts::Result<void> start(Clock::time_point tp) = 0;
 
-    virtual ts::Result<std::shared_ptr<hal::INode_Message>> send_message(hal::INode_Message const& message) = 0;
+    virtual ts::Result<std::shared_ptr<messages::INode_Message>> send_message(messages::INode_Message const& message) = 0;
 
     struct Input
     {

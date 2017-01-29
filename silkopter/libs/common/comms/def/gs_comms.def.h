@@ -653,13 +653,57 @@ private:
   uint32_t m_req_id = {0};
 };
 
-typedef boost::variant<setup::Get_AST_Req,setup::Set_Clock_Req,setup::Set_UAV_Descriptor_Req,setup::Get_UAV_Descriptor_Req,setup::Get_Node_Defs_Req,setup::Remove_Node_Req,setup::Add_Node_Req,setup::Get_Nodes_Req,setup::Set_Node_Input_Stream_Path_Req,setup::Set_Stream_Telemetry_Enabled_Req,setup::Set_Node_Config_Req> Brain_Req;
-typedef boost::variant<setup::Get_AST_Res,setup::Set_Clock_Res,setup::Set_UAV_Descriptor_Res,setup::Get_UAV_Descriptor_Res,setup::Get_Node_Defs_Res,setup::Remove_Node_Res,setup::Add_Node_Res,setup::Get_Nodes_Res,setup::Set_Node_Input_Stream_Path_Res,setup::Set_Stream_Telemetry_Enabled_Res,setup::Set_Node_Config_Res,setup::Error> Brain_Res;
+struct Send_Node_Message_Req : public setup::IReq
+{
+public:
+  virtual ~Send_Node_Message_Req() = default;
+  void set_req_id(uint32_t const& value);
+  void set_req_id(uint32_t&& value);
+  auto get_req_id() const -> uint32_t const&;
+
+  void set_name(std::string const& value);
+  void set_name(std::string&& value);
+  auto get_name() const -> std::string const&;
+
+  void set_message_data(setup::serialized_data_t const& value);
+  void set_message_data(setup::serialized_data_t&& value);
+  auto get_message_data() const -> setup::serialized_data_t const&;
+
+private:
+  uint32_t m_req_id = {0};
+  std::string m_name;
+  setup::serialized_data_t m_message_data;
+};
+
+struct Send_Node_Message_Res : public setup::IRes
+{
+public:
+  virtual ~Send_Node_Message_Res() = default;
+  void set_req_id(uint32_t const& value);
+  void set_req_id(uint32_t&& value);
+  auto get_req_id() const -> uint32_t const&;
+
+  void set_name(std::string const& value);
+  void set_name(std::string&& value);
+  auto get_name() const -> std::string const&;
+
+  void set_message_data(setup::serialized_data_t const& value);
+  void set_message_data(setup::serialized_data_t&& value);
+  auto get_message_data() const -> setup::serialized_data_t const&;
+
+private:
+  uint32_t m_req_id = {0};
+  std::string m_name;
+  setup::serialized_data_t m_message_data;
+};
+
+typedef boost::variant<setup::Get_AST_Req,setup::Set_Clock_Req,setup::Set_UAV_Descriptor_Req,setup::Get_UAV_Descriptor_Req,setup::Get_Node_Defs_Req,setup::Remove_Node_Req,setup::Add_Node_Req,setup::Get_Nodes_Req,setup::Set_Node_Input_Stream_Path_Req,setup::Set_Stream_Telemetry_Enabled_Req,setup::Set_Node_Config_Req,setup::Send_Node_Message_Req> Brain_Req;
+typedef boost::variant<setup::Get_AST_Res,setup::Set_Clock_Res,setup::Set_UAV_Descriptor_Res,setup::Get_UAV_Descriptor_Res,setup::Get_Node_Defs_Res,setup::Remove_Node_Res,setup::Add_Node_Res,setup::Get_Nodes_Res,setup::Set_Node_Input_Stream_Path_Res,setup::Set_Stream_Telemetry_Enabled_Res,setup::Set_Node_Config_Res,setup::Error,setup::Send_Node_Message_Res> Brain_Res;
 }
-ts::Result<void> deserialize(bool& value, ts::sz::Value const& sz_value);
-ts::sz::Value serialize(bool const& value);
 ts::Result<void> deserialize(std::string& value, ts::sz::Value const& sz_value);
 ts::sz::Value serialize(std::string const& value);
+ts::Result<void> deserialize(bool& value, ts::sz::Value const& sz_value);
+ts::sz::Value serialize(bool const& value);
 ts::Result<void> deserialize(int64_t& value, ts::sz::Value const& sz_value);
 ts::sz::Value serialize(int64_t const& value);
 ts::Result<void> deserialize(float& value, ts::sz::Value const& sz_value);
@@ -758,6 +802,10 @@ ts::Result<void> deserialize(setup::Remove_Node_Req& value, ts::sz::Value const&
 ts::sz::Value serialize(setup::Remove_Node_Req const& value);
 ts::Result<void> deserialize(setup::Remove_Node_Res& value, ts::sz::Value const& sz_value);
 ts::sz::Value serialize(setup::Remove_Node_Res const& value);
+ts::Result<void> deserialize(setup::Send_Node_Message_Req& value, ts::sz::Value const& sz_value);
+ts::sz::Value serialize(setup::Send_Node_Message_Req const& value);
+ts::Result<void> deserialize(setup::Send_Node_Message_Res& value, ts::sz::Value const& sz_value);
+ts::sz::Value serialize(setup::Send_Node_Message_Res const& value);
 ts::Result<void> deserialize(setup::Brain_Req& value, ts::sz::Value const& sz_value);
 ts::sz::Value serialize(setup::Brain_Req const& value);
 ts::Result<void> deserialize(setup::Brain_Res& value, ts::sz::Value const& sz_value);

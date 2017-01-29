@@ -1,0 +1,77 @@
+alias int8_t = int : [ min = -128, max = 127, native_type = "int8_t" ];
+alias uint8_t = int : [ min = 0, max = 255, native_type = "uint8_t" ];
+alias int16_t = int : [ min = -32768, max = 32767, native_type = "int16_t" ];
+alias uint16_t = int : [ min = 0, max = 65535, native_type = "uint16_t" ];
+alias int32_t = int : [ min = -2147483648, max = 2147483647, native_type = "int32_t" ];
+alias uint32_t = int : [ min = 0, max = 4294967295, native_type = "uint32_t" ];
+alias int64_t = int ;
+alias ufloat = float : [ min = 0.f ];
+
+
+struct INode_Message : [ ui_name = "Node Message" ]
+{
+};
+alias Poly_INode_Message = poly<INode_Message>;
+
+struct Multirotor_Simulator_Reset_Message : public INode_Message
+{
+};
+
+struct Multirotor_Simulator_Stop_Motion_Message : public INode_Message
+{
+};
+
+struct Multirotor_Simulator_Set_Gravity_Enabled_Message : public INode_Message
+{
+    bool enabled = true;
+};
+
+struct Multirotor_Simulator_Set_Ground_Enabled_Message : public INode_Message
+{
+    bool enabled = true;
+};
+
+struct Multirotor_Simulator_Set_Simulation_Enabled_Message : public INode_Message
+{
+    bool enabled = true;
+};
+
+struct Multirotor_Simulator_Set_Drag_Enabled_Message : public INode_Message
+{
+    bool enabled = true;
+};
+
+struct Multirotor_Simulator_Get_State_Message : public INode_Message
+{
+};
+
+struct Multirotor_Simulation_State
+{
+    struct Motor_State
+    {
+        float drag_factor = 0.f;
+        float throttle = 0.f;
+        float thrust = 0.f;
+    };
+
+    vec3f enu_position;
+
+    alias quatf = vec4f;
+    quatf local_to_enu_rotation;
+
+    vec3f enu_velocity;
+    vec3f enu_linear_acceleration;
+    vec3f acceleration;
+    vec3f angular_velocity;
+    vec3f magnetic_field;
+    float pressure = 0.f;
+    float temperature = 0.f;
+    vec3f proximity_distance;
+
+    vector<Motor_State> motors;
+};
+
+struct Multirotor_Simulator_State_Message : public INode_Message
+{
+    Multirotor_Simulation_State state;
+};
