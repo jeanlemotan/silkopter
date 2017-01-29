@@ -102,14 +102,6 @@ private:
 };
 
 typedef Poly<INode_Config> Poly_INode_Config;
-struct INode_Message
-{
-public:
-  virtual ~INode_Message() = default;
-private:
-};
-
-typedef Poly<INode_Message> Poly_INode_Message;
 struct Settings
 {
 public:
@@ -1834,126 +1826,6 @@ private:
   Calibration m_calibration;
 };
 
-struct Multirotor_Simulator_Reset_Message : public INode_Message
-{
-public:
-  virtual ~Multirotor_Simulator_Reset_Message() = default;
-private:
-};
-
-struct Multirotor_Simulator_Freeze_Message : public INode_Message
-{
-public:
-  virtual ~Multirotor_Simulator_Freeze_Message() = default;
-private:
-};
-
-struct Multirotor_Simulator_Get_State_Message : public INode_Message
-{
-public:
-  virtual ~Multirotor_Simulator_Get_State_Message() = default;
-private:
-};
-
-struct Multirotor_Simulation_State
-{
-public:
-  struct Motor_State
-  {
-  public:
-    virtual ~Motor_State() = default;
-    void set_drag_factor(float const& value);
-    void set_drag_factor(float&& value);
-    auto get_drag_factor() const -> float const&;
-
-    void set_throttle(float const& value);
-    void set_throttle(float&& value);
-    auto get_throttle() const -> float const&;
-
-    void set_thrust(float const& value);
-    void set_thrust(float&& value);
-    auto get_thrust() const -> float const&;
-
-  private:
-    float m_drag_factor = {0};
-    float m_throttle = {0};
-    float m_thrust = {0};
-  };
-
-  typedef vec4f quatf;
-  virtual ~Multirotor_Simulation_State() = default;
-  void set_enu_position(vec3f const& value);
-  void set_enu_position(vec3f&& value);
-  auto get_enu_position() const -> vec3f const&;
-
-  void set_local_to_enu_rotation(quatf const& value);
-  void set_local_to_enu_rotation(quatf&& value);
-  auto get_local_to_enu_rotation() const -> quatf const&;
-
-  void set_enu_velocity(vec3f const& value);
-  void set_enu_velocity(vec3f&& value);
-  auto get_enu_velocity() const -> vec3f const&;
-
-  void set_enu_linear_acceleration(vec3f const& value);
-  void set_enu_linear_acceleration(vec3f&& value);
-  auto get_enu_linear_acceleration() const -> vec3f const&;
-
-  void set_acceleration(vec3f const& value);
-  void set_acceleration(vec3f&& value);
-  auto get_acceleration() const -> vec3f const&;
-
-  void set_angular_velocity(vec3f const& value);
-  void set_angular_velocity(vec3f&& value);
-  auto get_angular_velocity() const -> vec3f const&;
-
-  void set_magnetic_field(vec3f const& value);
-  void set_magnetic_field(vec3f&& value);
-  auto get_magnetic_field() const -> vec3f const&;
-
-  void set_pressure(float const& value);
-  void set_pressure(float&& value);
-  auto get_pressure() const -> float const&;
-
-  void set_temperature(float const& value);
-  void set_temperature(float&& value);
-  auto get_temperature() const -> float const&;
-
-  void set_proximity_distance(vec3f const& value);
-  void set_proximity_distance(vec3f&& value);
-  auto get_proximity_distance() const -> vec3f const&;
-
-  void set_motors(std::vector<Multirotor_Simulation_State::Motor_State> const& value);
-  void set_motors(std::vector<Multirotor_Simulation_State::Motor_State>&& value);
-  auto get_motors() const -> std::vector<Multirotor_Simulation_State::Motor_State> const&;
-  auto get_motors() -> std::vector<Multirotor_Simulation_State::Motor_State>&;
-
-private:
-  vec3f m_enu_position = {0, 0, 0};
-  quatf m_local_to_enu_rotation = {0, 0, 0, 0};
-  vec3f m_enu_velocity = {0, 0, 0};
-  vec3f m_enu_linear_acceleration = {0, 0, 0};
-  vec3f m_acceleration = {0, 0, 0};
-  vec3f m_angular_velocity = {0, 0, 0};
-  vec3f m_magnetic_field = {0, 0, 0};
-  float m_pressure = {0};
-  float m_temperature = {0};
-  vec3f m_proximity_distance = {0, 0, 0};
-  std::vector<Multirotor_Simulation_State::Motor_State> m_motors;
-};
-
-struct Multirotor_Simulator_State_Message : public INode_Message
-{
-public:
-  virtual ~Multirotor_Simulator_State_Message() = default;
-  void set_state(Multirotor_Simulation_State const& value);
-  void set_state(Multirotor_Simulation_State&& value);
-  auto get_state() const -> Multirotor_Simulation_State const&;
-  auto get_state() -> Multirotor_Simulation_State&;
-
-private:
-  Multirotor_Simulation_State m_state;
-};
-
 struct Oscillator_Descriptor : public INode_Descriptor
 {
 public:
@@ -3267,10 +3139,6 @@ ts::Result<void> deserialize(INode_Config& value, ts::sz::Value const& sz_value)
 ts::sz::Value serialize(INode_Config const& value);
 ts::Result<void> deserialize(Poly<INode_Config>& value, ts::sz::Value const& sz_value);
 ts::sz::Value serialize(Poly<INode_Config> const& value);
-ts::Result<void> deserialize(INode_Message& value, ts::sz::Value const& sz_value);
-ts::sz::Value serialize(INode_Message const& value);
-ts::Result<void> deserialize(Poly<INode_Message>& value, ts::sz::Value const& sz_value);
-ts::sz::Value serialize(Poly<INode_Message> const& value);
 ts::Result<void> deserialize(Settings::Bus_Data& value, ts::sz::Value const& sz_value);
 ts::sz::Value serialize(Settings::Bus_Data const& value);
 ts::Result<void> deserialize(Settings::Node_Data& value, ts::sz::Value const& sz_value);
@@ -3435,20 +3303,6 @@ ts::Result<void> deserialize(Multirotor_Simulator_Config::Calibration& value, ts
 ts::sz::Value serialize(Multirotor_Simulator_Config::Calibration const& value);
 ts::Result<void> deserialize(Multirotor_Simulator_Config& value, ts::sz::Value const& sz_value);
 ts::sz::Value serialize(Multirotor_Simulator_Config const& value);
-ts::Result<void> deserialize(Multirotor_Simulator_Reset_Message& value, ts::sz::Value const& sz_value);
-ts::sz::Value serialize(Multirotor_Simulator_Reset_Message const& value);
-ts::Result<void> deserialize(Multirotor_Simulator_Freeze_Message& value, ts::sz::Value const& sz_value);
-ts::sz::Value serialize(Multirotor_Simulator_Freeze_Message const& value);
-ts::Result<void> deserialize(Multirotor_Simulator_Get_State_Message& value, ts::sz::Value const& sz_value);
-ts::sz::Value serialize(Multirotor_Simulator_Get_State_Message const& value);
-ts::Result<void> deserialize(Multirotor_Simulation_State::Motor_State& value, ts::sz::Value const& sz_value);
-ts::sz::Value serialize(Multirotor_Simulation_State::Motor_State const& value);
-ts::Result<void> deserialize(Multirotor_Simulation_State& value, ts::sz::Value const& sz_value);
-ts::sz::Value serialize(Multirotor_Simulation_State const& value);
-ts::Result<void> deserialize(std::vector<Multirotor_Simulation_State::Motor_State>& value, ts::sz::Value const& sz_value);
-ts::sz::Value serialize(std::vector<Multirotor_Simulation_State::Motor_State> const& value);
-ts::Result<void> deserialize(Multirotor_Simulator_State_Message& value, ts::sz::Value const& sz_value);
-ts::sz::Value serialize(Multirotor_Simulator_State_Message const& value);
 ts::Result<void> deserialize(Oscillator_Descriptor& value, ts::sz::Value const& sz_value);
 ts::sz::Value serialize(Oscillator_Descriptor const& value);
 ts::Result<void> deserialize(Oscillator_Config::Component& value, ts::sz::Value const& sz_value);

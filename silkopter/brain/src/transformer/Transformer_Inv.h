@@ -26,7 +26,7 @@ public:
     ts::Result<void> set_config(hal::INode_Config const& config) override;
     std::shared_ptr<const hal::INode_Config> get_config() const override;
 
-    ts::Result<std::shared_ptr<hal::INode_Message>> send_message(hal::INode_Message const& message) override;
+    ts::Result<std::shared_ptr<messages::INode_Message>> send_message(messages::INode_Message const& message) override;
 
     ts::Result<void> start(Clock::time_point tp) override;
 
@@ -114,7 +114,7 @@ ts::Result<void> Transformer_Inv<In_Stream_t, Out_Stream_t, Frame_Stream_t>::set
 }
 
 template<class In_Stream_t, class Out_Stream_t, class Frame_Stream_t>
-ts::Result<std::shared_ptr<hal::INode_Message>> Transformer_Inv<In_Stream_t, Out_Stream_t, Frame_Stream_t>::send_message(hal::INode_Message const& message)
+ts::Result<std::shared_ptr<messages::INode_Message>> Transformer_Inv<In_Stream_t, Out_Stream_t, Frame_Stream_t>::send_message(messages::INode_Message const& message)
 {
     return make_error("Unknown message");
 }

@@ -25,7 +25,7 @@ public:
     ts::Result<void> set_config(hal::INode_Config const& config) override;
     std::shared_ptr<const hal::INode_Config> get_config() const override;
 
-    ts::Result<std::shared_ptr<hal::INode_Message>> send_message(hal::INode_Message const& message) override;
+    ts::Result<std::shared_ptr<messages::INode_Message>> send_message(messages::INode_Message const& message) override;
 
     ts::Result<void> start(Clock::time_point tp) override;
 
@@ -136,7 +136,7 @@ ts::Result<void> Vec3_Generator<Stream_t>::set_config(hal::INode_Config const& c
     return ts::success;
 }
 template<class Stream_t>
-ts::Result<std::shared_ptr<hal::INode_Message>> Vec3_Generator<Stream_t>::send_message(hal::INode_Message const& message)
+ts::Result<std::shared_ptr<messages::INode_Message>> Vec3_Generator<Stream_t>::send_message(messages::INode_Message const& message)
 {
     return make_error("Unknown message");
 }

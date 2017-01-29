@@ -111,7 +111,7 @@ auto Gravity_Filter::get_descriptor() const -> std::shared_ptr<const hal::INode_
     return m_descriptor;
 }
 
-ts::Result<std::shared_ptr<hal::INode_Message>> Gravity_Filter::send_message(hal::INode_Message const& message)
+ts::Result<std::shared_ptr<messages::INode_Message>> Gravity_Filter::send_message(messages::INode_Message const& message)
 {
     return make_error("Unknown message");
 }

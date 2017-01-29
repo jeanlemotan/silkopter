@@ -46,11 +46,6 @@ struct INode_Config : [ ui_name = "Node Config" ]
 alias Poly_INode_Config = poly<INode_Config>;
 
 
-struct INode_Message : [ ui_name = "Node Message" ]
-{
-};
-alias Poly_INode_Message = poly<INode_Message>;
-
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -631,49 +626,6 @@ struct Multirotor_Simulator_Config : public INode_Config
     };
 
     Calibration calibration : [ ui_name = "Calibration" ];
-};
-
-struct Multirotor_Simulator_Reset_Message : public INode_Message
-{
-};
-
-struct Multirotor_Simulator_Freeze_Message : public INode_Message
-{
-};
-
-struct Multirotor_Simulator_Get_State_Message : public INode_Message
-{
-};
-
-struct Multirotor_Simulation_State
-{
-	struct Motor_State
-	{
-        float drag_factor = 0.f;
-        float throttle = 0.f;
-        float thrust = 0.f;
-	};
-
-	vec3f enu_position;
-
-	alias quatf = vec4f;
-	quatf local_to_enu_rotation;
-
-	vec3f enu_velocity;
-	vec3f enu_linear_acceleration;
-	vec3f acceleration;
-	vec3f angular_velocity;
-	vec3f magnetic_field;
-	float pressure = 0.f;
-	float temperature = 0.f;
-	vec3f proximity_distance;
-
-	vector<Motor_State> motors;
-};
-
-struct Multirotor_Simulator_State_Message : public INode_Message
-{
-	Multirotor_Simulation_State state;
 };
 
 //////////////////////////////////////////////////////////////

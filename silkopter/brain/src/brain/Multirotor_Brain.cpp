@@ -903,7 +903,7 @@ std::shared_ptr<const hal::INode_Descriptor> Multirotor_Brain::get_descriptor() 
     return m_descriptor;
 }
 
-ts::Result<std::shared_ptr<hal::INode_Message>> Multirotor_Brain::send_message(hal::INode_Message const& message)
+ts::Result<std::shared_ptr<messages::INode_Message>> Multirotor_Brain::send_message(messages::INode_Message const& message)
 {
     return make_error("Unknown message");
 }

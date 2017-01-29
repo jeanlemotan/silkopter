@@ -176,7 +176,7 @@ auto Servo_Gimbal::get_descriptor() const -> std::shared_ptr<const hal::INode_De
     return m_descriptor;
 }
 
-ts::Result<std::shared_ptr<hal::INode_Message>> Servo_Gimbal::send_message(hal::INode_Message const& message)
+ts::Result<std::shared_ptr<messages::INode_Message>> Servo_Gimbal::send_message(messages::INode_Message const& message)
 {
     return make_error("Unknown message");
 }

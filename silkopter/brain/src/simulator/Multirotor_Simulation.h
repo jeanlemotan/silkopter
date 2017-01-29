@@ -3,6 +3,7 @@
 #include "common/node/IMultirotor_Simulator.h"
 #include "uav_properties/IMultirotor_Properties.h"
 #include "utils/Clock.h"
+#include "messages.def.h"
 
 class btCylinderShapeZ;
 class btMotionState;
@@ -41,7 +42,9 @@ public:
     void set_simulation_enabled(bool yes);
     void set_drag_enabled(bool yes);
 
-    auto get_uav_state() const -> IMultirotor_Simulator::UAV_State const&;
+    typedef messages::Multirotor_Simulation_State UAV_State;
+
+    UAV_State const& get_uav_state() const;
 
     void set_motor_throttle(size_t motor, float throttle);
 
@@ -62,7 +65,7 @@ private:
         std::shared_ptr<btCylinderShapeZ> shape;
         std::shared_ptr<btMotionState> motion_state;
         std::shared_ptr<btRigidBody> body;
-        IMultirotor_Simulator::UAV_State state;
+        UAV_State state;
     } m_uav;
 
 //    math::vec3f m_old_linear_velocity;

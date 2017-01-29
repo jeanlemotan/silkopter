@@ -36,6 +36,7 @@
 
 #include "hal.def.h"
 #include "gs_comms.def.h"
+#include "messages.def.h"
 #include "def_lang/JSON_Serializer.h"
 
 #include <boost/asio.hpp>
@@ -828,6 +829,60 @@ void GS_Comms::handle_req(gs_comms::setup::Set_Node_Config_Req const& req)
 
     //all good!!!
     res.set_node_data(std::move(boost::get<gs_comms::setup::Node_Data>(result)));
+    response = std::move(res);
+    serialize_and_send(SETUP_CHANNEL, response);
+}
+
+void GS_Comms::handle_req(gs_comms::setup::Send_Node_Message_Req const& req)
+{
+    TIMED_FUNCTION();
+    QLOGI("Send_Node_Message_Req {}", req.get_req_id());
+
+    gs_comms::setup::Brain_Res response;
+    gs_comms::setup::Send_Node_Message_Res res;
+    res.set_req_id(req.get_req_id());
+
+    std::string const& node_name = req.get_name();
+
+    std::string const& json = decode_json(req.get_message_data());
+    auto json_result = ts::sz::from_json(json);
+    if (json_result != ts::success)
+    {
+        response = make_error_response(req.get_req_id(), "Cannot deserialize node '{}'' config data: {}", node_name, json_result.error().what());
+        serialize_and_send(SETUP_CHANNEL, response);
+        return;
+    }
+    messages::Poly<messages::INode_Message> message;
+    auto deserialize_result = messages::deserialize(message, json_result.payload());
+    if (deserialize_result != ts::success)
+    {
+        response = make_error_response(req.get_req_id(), "Cannot deserialize node '{}'' message json: {}", node_name, deserialize_result.error().what());
+        serialize_and_send(SETUP_CHANNEL, response);
+        return;
+    }
+
+    std::shared_ptr<node::INode> node = m_hal.get_node_registry().find_by_name<node::INode>(node_name);
+    if (!node)
+    {
+        response = make_error_response(req.get_req_id(), "Cannot find node '{}'", node_name);
+        serialize_and_send(SETUP_CHANNEL, response);
+        return;
+    }
+
+    auto send_message_result = node->send_message(*message);
+    if (send_message_result != ts::success)
+    {
+        response = make_error_response(req.get_req_id(), "Cannot send message to node '{}': {}", node_name, send_message_result.error().what());
+        serialize_and_send(SETUP_CHANNEL, response);
+        return;
+    }
+
+    message = messages::Poly<messages::INode_Message>(send_message_result.payload());
+
+    ts::sz::Value sz_value = messages::serialize(message);
+    res.set_message_data(encode_json(ts::sz::to_json(m_json_buffer, sz_value, false)));
+
+    //all good!!!
     response = std::move(res);
     serialize_and_send(SETUP_CHANNEL, response);
 }

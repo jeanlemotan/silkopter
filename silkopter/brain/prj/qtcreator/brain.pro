@@ -168,7 +168,8 @@ SOURCES += \
     ../../../libs/utils/comms/fec.cpp \
     ../../../libs/utils/hw/RFM22B.cpp \
     ../../../libs/utils/comms/RC_Phy.cpp \
-    ../../../libs/utils/comms/RC_Protocol.cpp
+    ../../../libs/utils/comms/RC_Protocol.cpp \
+    ../../../libs/common/comms/def/messages.def.cpp
 
 HEADERS += \
     ../../src/BrainStdAfx.h \
@@ -327,7 +328,8 @@ HEADERS += \
     ../../../libs/utils/comms/fec.h \
     ../../../libs/utils/hw/RFM22B.h \
     ../../../libs/utils/comms/RC_Phy.h \
-    ../../../libs/utils/comms/RC_Protocol.h
+    ../../../libs/utils/comms/RC_Protocol.h \
+    ../../../libs/common/comms/def/messages.def.h
 
 DISTFILES +=
 

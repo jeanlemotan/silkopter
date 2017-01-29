@@ -40,6 +40,7 @@ class Add_Node_Req;
 class Set_Node_Input_Stream_Path_Req;
 class Set_Stream_Telemetry_Enabled_Req;
 class Set_Node_Config_Req;
+class Send_Node_Message_Req;
 }
 }
 }
@@ -115,6 +116,7 @@ private:
     void handle_req(gs_comms::setup::Set_Node_Input_Stream_Path_Req const& req);
     void handle_req(gs_comms::setup::Set_Stream_Telemetry_Enabled_Req const& req);
     void handle_req(gs_comms::setup::Set_Node_Config_Req const& req);
+    void handle_req(gs_comms::setup::Send_Node_Message_Req const& req);
 
     HAL& m_hal;
     Clock::time_point m_uav_sent_tp = Clock::now();

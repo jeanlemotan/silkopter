@@ -106,7 +106,7 @@ auto ADC_Voltmeter::get_descriptor() const -> std::shared_ptr<const hal::INode_D
     return m_descriptor;
 }
 
-ts::Result<std::shared_ptr<hal::INode_Message>> ADC_Voltmeter::send_message(hal::INode_Message const& message)
+ts::Result<std::shared_ptr<messages::INode_Message>> ADC_Voltmeter::send_message(messages::INode_Message const& message)
 {
     return make_error("Unknown message");
 }
