@@ -61,7 +61,7 @@ public:
   auto get_req_id() const -> uint32_t const&;
 
 private:
-  uint32_t m_req_id = {0};
+  uint32_t m_req_id = uint32_t{0};
 };
 
 struct IRes
@@ -73,7 +73,7 @@ public:
   auto get_req_id() const -> uint32_t const&;
 
 private:
-  uint32_t m_req_id = {0};
+  uint32_t m_req_id = uint32_t{0};
 };
 
 struct Error : public setup::IRes
@@ -89,7 +89,7 @@ public:
   auto get_message() const -> std::string const&;
 
 private:
-  uint32_t m_req_id = {0};
+  uint32_t m_req_id = uint32_t{0};
   std::string m_message;
 };
 
@@ -102,7 +102,7 @@ public:
   auto get_req_id() const -> uint32_t const&;
 
 private:
-  uint32_t m_req_id = {0};
+  uint32_t m_req_id = uint32_t{0};
 };
 
 struct Get_AST_Res : public setup::IRes
@@ -118,7 +118,7 @@ public:
   auto get_data() const -> setup::serialized_data_t const&;
 
 private:
-  uint32_t m_req_id = {0};
+  uint32_t m_req_id = uint32_t{0};
   setup::serialized_data_t m_data;
 };
 
@@ -135,8 +135,8 @@ public:
   auto get_time() const -> setup::time_ms_t const&;
 
 private:
-  uint32_t m_req_id = {0};
-  setup::time_ms_t m_time = {0};
+  uint32_t m_req_id = uint32_t{0};
+  setup::time_ms_t m_time = setup::time_ms_t{0};
 };
 
 struct Set_Clock_Res : public setup::IRes
@@ -152,8 +152,8 @@ public:
   auto get_time() const -> setup::time_ms_t const&;
 
 private:
-  uint32_t m_req_id = {0};
-  setup::time_ms_t m_time = {0};
+  uint32_t m_req_id = uint32_t{0};
+  setup::time_ms_t m_time = setup::time_ms_t{0};
 };
 
 struct Set_UAV_Descriptor_Req : public setup::IReq
@@ -169,7 +169,7 @@ public:
   auto get_data() const -> setup::serialized_data_t const&;
 
 private:
-  uint32_t m_req_id = {0};
+  uint32_t m_req_id = uint32_t{0};
   setup::serialized_data_t m_data;
 };
 
@@ -186,7 +186,7 @@ public:
   auto get_data() const -> setup::serialized_data_t const&;
 
 private:
-  uint32_t m_req_id = {0};
+  uint32_t m_req_id = uint32_t{0};
   setup::serialized_data_t m_data;
 };
 
@@ -199,7 +199,7 @@ public:
   auto get_req_id() const -> uint32_t const&;
 
 private:
-  uint32_t m_req_id = {0};
+  uint32_t m_req_id = uint32_t{0};
 };
 
 struct Get_UAV_Descriptor_Res : public setup::IRes
@@ -215,7 +215,7 @@ public:
   auto get_data() const -> setup::serialized_data_t const&;
 
 private:
-  uint32_t m_req_id = {0};
+  uint32_t m_req_id = uint32_t{0};
   setup::serialized_data_t m_data;
 };
 
@@ -240,8 +240,8 @@ public:
 
   private:
     std::string m_name;
-    uint8_t m_space = {0};
-    uint8_t m_semantic = {0};
+    uint8_t m_space = uint8_t{0};
+    uint8_t m_semantic = uint8_t{0};
   };
 
   struct Output
@@ -262,8 +262,8 @@ public:
 
   private:
     std::string m_name;
-    uint8_t m_space = {0};
-    uint8_t m_semantic = {0};
+    uint8_t m_space = uint8_t{0};
+    uint8_t m_semantic = uint8_t{0};
   };
 
   virtual ~Node_Def_Data() = default;
@@ -291,7 +291,7 @@ public:
 
 private:
   std::string m_name;
-  uint8_t m_type = {0};
+  uint8_t m_type = uint8_t{0};
   std::vector<setup::Node_Def_Data::Input> m_inputs;
   std::vector<setup::Node_Def_Data::Output> m_outputs;
   setup::serialized_data_t m_descriptor_data;
@@ -306,7 +306,7 @@ public:
   auto get_req_id() const -> uint32_t const&;
 
 private:
-  uint32_t m_req_id = {0};
+  uint32_t m_req_id = uint32_t{0};
 };
 
 struct Get_Node_Defs_Res : public setup::IRes
@@ -323,7 +323,7 @@ public:
   auto get_node_def_datas() -> std::vector<setup::Node_Def_Data>&;
 
 private:
-  uint32_t m_req_id = {0};
+  uint32_t m_req_id = uint32_t{0};
   std::vector<setup::Node_Def_Data> m_node_def_datas;
 };
 
@@ -356,9 +356,9 @@ public:
 
   private:
     std::string m_name;
-    uint8_t m_space = {0};
-    uint8_t m_semantic = {0};
-    uint32_t m_rate = {0};
+    uint8_t m_space = uint8_t{0};
+    uint8_t m_semantic = uint8_t{0};
+    uint32_t m_rate = uint32_t{0};
     std::string m_stream_path;
   };
 
@@ -384,9 +384,9 @@ public:
 
   private:
     std::string m_name;
-    uint8_t m_space = {0};
-    uint8_t m_semantic = {0};
-    uint32_t m_rate = {0};
+    uint8_t m_space = uint8_t{0};
+    uint8_t m_semantic = uint8_t{0};
+    uint32_t m_rate = uint32_t{0};
   };
 
   virtual ~Node_Data() = default;
@@ -418,7 +418,7 @@ public:
 
 private:
   std::string m_name;
-  uint8_t m_type = {0};
+  uint8_t m_type = uint8_t{0};
   std::vector<setup::Node_Data::Input> m_inputs;
   std::vector<setup::Node_Data::Output> m_outputs;
   setup::serialized_data_t m_descriptor_data;
@@ -438,7 +438,7 @@ public:
   auto get_name() const -> std::string const&;
 
 private:
-  uint32_t m_req_id = {0};
+  uint32_t m_req_id = uint32_t{0};
   std::string m_name;
 };
 
@@ -456,7 +456,7 @@ public:
   auto get_node_datas() -> std::vector<setup::Node_Data>&;
 
 private:
-  uint32_t m_req_id = {0};
+  uint32_t m_req_id = uint32_t{0};
   std::vector<setup::Node_Data> m_node_datas;
 };
 
@@ -481,7 +481,7 @@ public:
   auto get_stream_path() const -> std::string const&;
 
 private:
-  uint32_t m_req_id = {0};
+  uint32_t m_req_id = uint32_t{0};
   std::string m_node_name;
   std::string m_input_name;
   std::string m_stream_path;
@@ -501,7 +501,7 @@ public:
   auto get_node_data() -> setup::Node_Data&;
 
 private:
-  uint32_t m_req_id = {0};
+  uint32_t m_req_id = uint32_t{0};
   setup::Node_Data m_node_data;
 };
 
@@ -522,9 +522,9 @@ public:
   auto get_enabled() const -> bool const&;
 
 private:
-  uint32_t m_req_id = {0};
+  uint32_t m_req_id = uint32_t{0};
   std::string m_stream_path;
-  bool m_enabled = {false};
+  bool m_enabled = bool{false};
 };
 
 struct Set_Stream_Telemetry_Enabled_Res : public setup::IRes
@@ -536,7 +536,7 @@ public:
   auto get_req_id() const -> uint32_t const&;
 
 private:
-  uint32_t m_req_id = {0};
+  uint32_t m_req_id = uint32_t{0};
 };
 
 struct Add_Node_Req : public setup::IReq
@@ -560,7 +560,7 @@ public:
   auto get_descriptor_data() const -> setup::serialized_data_t const&;
 
 private:
-  uint32_t m_req_id = {0};
+  uint32_t m_req_id = uint32_t{0};
   std::string m_def_name;
   std::string m_name;
   setup::serialized_data_t m_descriptor_data;
@@ -580,7 +580,7 @@ public:
   auto get_node_data() -> setup::Node_Data&;
 
 private:
-  uint32_t m_req_id = {0};
+  uint32_t m_req_id = uint32_t{0};
   setup::Node_Data m_node_data;
 };
 
@@ -601,7 +601,7 @@ public:
   auto get_config_data() const -> setup::serialized_data_t const&;
 
 private:
-  uint32_t m_req_id = {0};
+  uint32_t m_req_id = uint32_t{0};
   std::string m_name;
   setup::serialized_data_t m_config_data;
 };
@@ -620,7 +620,7 @@ public:
   auto get_node_data() -> setup::Node_Data&;
 
 private:
-  uint32_t m_req_id = {0};
+  uint32_t m_req_id = uint32_t{0};
   setup::Node_Data m_node_data;
 };
 
@@ -637,7 +637,7 @@ public:
   auto get_name() const -> std::string const&;
 
 private:
-  uint32_t m_req_id = {0};
+  uint32_t m_req_id = uint32_t{0};
   std::string m_name;
 };
 
@@ -650,7 +650,7 @@ public:
   auto get_req_id() const -> uint32_t const&;
 
 private:
-  uint32_t m_req_id = {0};
+  uint32_t m_req_id = uint32_t{0};
 };
 
 struct Send_Node_Message_Req : public setup::IReq
@@ -670,7 +670,7 @@ public:
   auto get_message_data() const -> setup::serialized_data_t const&;
 
 private:
-  uint32_t m_req_id = {0};
+  uint32_t m_req_id = uint32_t{0};
   std::string m_name;
   setup::serialized_data_t m_message_data;
 };
@@ -692,7 +692,7 @@ public:
   auto get_message_data() const -> setup::serialized_data_t const&;
 
 private:
-  uint32_t m_req_id = {0};
+  uint32_t m_req_id = uint32_t{0};
   std::string m_name;
   setup::serialized_data_t m_message_data;
 };

@@ -78,7 +78,7 @@ public:
   auto get_enabled() const -> bool const&;
 
 private:
-  bool m_enabled = {true};
+  bool m_enabled = bool{true};
 };
 
 struct Multirotor_Simulator_Set_Ground_Enabled_Message : public INode_Message
@@ -90,7 +90,7 @@ public:
   auto get_enabled() const -> bool const&;
 
 private:
-  bool m_enabled = {true};
+  bool m_enabled = bool{true};
 };
 
 struct Multirotor_Simulator_Set_Simulation_Enabled_Message : public INode_Message
@@ -102,7 +102,7 @@ public:
   auto get_enabled() const -> bool const&;
 
 private:
-  bool m_enabled = {true};
+  bool m_enabled = bool{true};
 };
 
 struct Multirotor_Simulator_Set_Drag_Enabled_Message : public INode_Message
@@ -114,7 +114,7 @@ public:
   auto get_enabled() const -> bool const&;
 
 private:
-  bool m_enabled = {true};
+  bool m_enabled = bool{true};
 };
 
 struct Multirotor_Simulator_Get_State_Message : public INode_Message
@@ -144,9 +144,9 @@ public:
     auto get_thrust() const -> float const&;
 
   private:
-    float m_drag_factor = {0};
-    float m_throttle = {0};
-    float m_thrust = {0};
+    float m_drag_factor = float{0};
+    float m_throttle = float{0};
+    float m_thrust = float{0};
   };
 
   typedef vec4f quatf;
@@ -197,16 +197,16 @@ public:
   auto get_motors() -> std::vector<Multirotor_Simulation_State::Motor_State>&;
 
 private:
-  vec3f m_enu_position = {0, 0, 0};
-  quatf m_local_to_enu_rotation = {0, 0, 0, 0};
-  vec3f m_enu_velocity = {0, 0, 0};
-  vec3f m_enu_linear_acceleration = {0, 0, 0};
-  vec3f m_acceleration = {0, 0, 0};
-  vec3f m_angular_velocity = {0, 0, 0};
-  vec3f m_magnetic_field = {0, 0, 0};
-  float m_pressure = {0};
-  float m_temperature = {0};
-  vec3f m_proximity_distance = {0, 0, 0};
+  vec3f m_enu_position = vec3f{0, 0, 0};
+  quatf m_local_to_enu_rotation = quatf{0, 0, 0, 1.000000f};
+  vec3f m_enu_velocity = vec3f{0, 0, 0};
+  vec3f m_enu_linear_acceleration = vec3f{0, 0, 0};
+  vec3f m_acceleration = vec3f{0, 0, 0};
+  vec3f m_angular_velocity = vec3f{0, 0, 0};
+  vec3f m_magnetic_field = vec3f{0, 0, 0};
+  float m_pressure = float{0};
+  float m_temperature = float{0};
+  vec3f m_proximity_distance = vec3f{0, 0, 0};
   std::vector<Multirotor_Simulation_State::Motor_State> m_motors;
 };
 

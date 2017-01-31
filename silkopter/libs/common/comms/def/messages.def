@@ -57,7 +57,7 @@ struct Multirotor_Simulation_State
     vec3f enu_position;
 
     alias quatf = vec4f;
-    quatf local_to_enu_rotation;
+    quatf local_to_enu_rotation = { 0.f, 0.f, 0.f, 1.f };
 
     vec3f enu_velocity;
     vec3f enu_linear_acceleration;
