@@ -7,6 +7,7 @@ template<typename T> inline constexpr vec2<T>::vec2() : x(T(0)), y(T(0)) {}
 template<typename T> inline constexpr vec2<T>::vec2(math::ZUninitialized) {}
 template<typename T> inline constexpr vec2<T>::vec2(T _x, T _y) : x(_x), y(_y) {}
 template<typename T> inline constexpr vec2<T>::vec2(T v) : x(v), y(v) {}
+template<typename T> inline constexpr vec2<T>::vec2(std::array<T, 2> const& v) : x(v[0]), y(v[1]) {}
 
 template<typename T>
 template<typename U>

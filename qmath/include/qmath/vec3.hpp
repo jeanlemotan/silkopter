@@ -7,6 +7,7 @@ template<typename T> inline constexpr vec3<T>::vec3() : x(T(0)), y(T(0)), z(T(0)
 template<typename T> inline constexpr vec3<T>::vec3(math::ZUninitialized) {}
 template<typename T> inline constexpr vec3<T>::vec3(T _x, T _y, T _z) : x(_x), y(_y), z(_z) {}
 template<typename T> inline constexpr vec3<T>::vec3(T v) : x(v), y(v), z(v) {}
+template<typename T> inline constexpr vec3<T>::vec3(std::array<T, 3> const& v) : x(v[0]), y(v[1]), z(v[2]) {}
 template<typename T> inline constexpr vec3<T>::vec3(vec2<T> const& v) : x(v.x), y(v.y), z(0) {}
 template<typename T> inline constexpr vec3<T>::vec3(vec2<T> const& v, T z) : x(v.x), y(v.y), z(z) {}
 template<typename T> inline constexpr vec3<T>::vec3(vec4<T> const& v) : x(v.x), y(v.y), z(v.z) {}

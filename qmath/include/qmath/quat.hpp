@@ -11,13 +11,11 @@ template<typename T> quat<T> const quat<T>::identity;																		   \
 
 template <typename T> inline constexpr quat<T>::quat() : x(0), y(0), z(0), w(1) {}
 template <typename T> inline constexpr quat<T>::quat(math::ZUninitialized) {}
-template <typename T> inline constexpr quat<T>::quat(T _x, T _y, T _z, T _w) : x(_x), y(_y), z(_z), w(_w)
-{
-}
+template <typename T> inline constexpr quat<T>::quat(T _x, T _y, T _z, T _w) : x(_x), y(_y), z(_z), w(_w) {}
 template <typename T> template <typename U>
-inline constexpr quat<T>::quat(quat<U> const& q) : x(T(q.x)), y(T(q.y)), z(T(q.z)), w(T(q.w))
-{
-}
+inline constexpr quat<T>::quat(quat<U> const& q) : x(T(q.x)), y(T(q.y)), z(T(q.z)), w(T(q.w)) {}
+
+template<typename T> inline constexpr quat<T>::quat(std::array<T, 4> const& v) : x(v[0]), y(v[1]), z(v[2]), w(v[3]) {}
 
 template<typename T>
 template<class Policy>

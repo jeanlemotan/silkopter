@@ -1,5 +1,7 @@
 #pragma once
 
+#include <array>
+
 namespace math
 {
 	template<typename T> struct vec3;
@@ -31,6 +33,8 @@ struct vec2
 	//construct from a single value - x == y == s
 	//this has to be explicit to avoid undesirable casts
     explicit constexpr vec2(T s);
+
+    explicit constexpr vec2(std::array<T, 2> const& v);
 
 	//copy constructor
     constexpr vec2(vec2<T> const& v) = default;

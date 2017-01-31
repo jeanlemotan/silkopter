@@ -1,5 +1,7 @@
 #pragma once
 
+#include <array>
+
 namespace math
 {
 
@@ -24,6 +26,8 @@ struct quat
     constexpr quat(quat<T> const&) = default;
     constexpr quat(quat<T>&&) = default;
     template<typename U> explicit constexpr quat(quat<U> const&);
+
+    explicit constexpr quat(std::array<T, 4> const& v);
 
     template<class Policy = standard> static quat<T> look_at(vec3<T> const& front, vec3<T> const& up);
     template<class Policy = standard> static quat<T> from_axis_x(T const& a);
