@@ -481,6 +481,7 @@ void Nodes_Widget::show_block_context_menu(QGraphicsSceneMouseEvent* event, QNEB
                 delete m_sim_window;
                 //m_sim_window = new Simulator(m_hal, node, m_comms, m_context, this);
                 m_sim_window = new Simulator(this);
+                m_sim_window->init(*m_comms, node->name);
                 m_sim_window->show();
             });
         }

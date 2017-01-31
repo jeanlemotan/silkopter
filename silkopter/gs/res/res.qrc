@@ -72,6 +72,11 @@
         <file>icons/nodes/Sink.png</file>
         <file>icons/nodes/Source.png</file>
         <file>icons/nodes/Transformer.png</file>
+        <file>icons/ui/drag.png</file>
+        <file>icons/ui/multicopter-land.png</file>
+        <file>icons/ui/multicopter-signal.png</file>
+        <file>icons/ui/multicopter-take_off.png</file>
+        <file>icons/ui/uav-multicopter.png</file>
     </qresource>
     <qresource prefix="/qml">
         <file alias="map.qml">../src/stream_viewers/map/map.qml</file>

@@ -20,7 +20,7 @@
      <x>0</x>
      <y>0</y>
      <width>1034</width>
-     <height>23</height>
+     <height>25</height>
     </rect>
    </property>
   </widget>
@@ -35,33 +35,29 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
-   <addaction name="actionFreeze"/>
+   <addaction name="actionSimulation"/>
+   <addaction name="separator"/>
+   <addaction name="actionStopMotion"/>
    <addaction name="actionReset"/>
    <addaction name="actionGravity"/>
    <addaction name="actionDrag"/>
-   <addaction name="separator"/>
+   <addaction name="actionTerrain"/>
   </widget>
-  <action name="actionFreeze">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
+  <action name="actionStopMotion">
    <property name="icon">
-    <iconset resource="../res/res.qrc">
-     <normaloff>:/icons/ui/simulator.png</normaloff>:/icons/ui/simulator.png</iconset>
+    <iconset resource="../../res/res.qrc">
+     <normaloff>:/icons/ui/stop.png</normaloff>:/icons/ui/stop.png</iconset>
    </property>
    <property name="text">
-    <string>Freeze</string>
-   </property>
-   <property name="toolTip">
-    <string>Freeze Simulation</string>
+    <string>Stop Motion</string>
    </property>
    <property name="shortcut">
-    <string>Space</string>
+    <string>Ctrl+S</string>
    </property>
   </action>
   <action name="actionReset">
    <property name="icon">
-    <iconset resource="../res/res.qrc">
+    <iconset resource="../../res/res.qrc">
      <normaloff>:/icons/ui/reconnect.png</normaloff>:/icons/ui/reconnect.png</iconset>
    </property>
    <property name="text">
@@ -79,7 +75,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="../res/res.qrc">
+    <iconset resource="../../res/res.qrc">
      <normaloff>:/icons/ui/gravity.png</normaloff>:/icons/ui/gravity.png</iconset>
    </property>
    <property name="text">
@@ -94,8 +90,8 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="../res/res.qrc">
-     <normaloff>:/icons/ui/fft.png</normaloff>:/icons/ui/fft.png</iconset>
+    <iconset resource="../../res/res.qrc">
+     <normaloff>:/icons/ui/drag.png</normaloff>:/icons/ui/drag.png</iconset>
    </property>
    <property name="text">
     <string>Drag</string>
@@ -107,9 +103,39 @@
     <string>Ctrl+D</string>
    </property>
   </action>
+  <action name="actionSimulation">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../../res/res.qrc">
+     <normaloff>:/icons/ui/simulator.png</normaloff>:/icons/ui/simulator.png</iconset>
+   </property>
+   <property name="text">
+    <string>Simulation</string>
+   </property>
+   <property name="shortcut">
+    <string>Space</string>
+   </property>
+  </action>
+  <action name="actionTerrain">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../../res/res.qrc">
+     <normaloff>:/icons/ui/ground.png</normaloff>:/icons/ui/ground.png</iconset>
+   </property>
+   <property name="text">
+    <string>Terrain</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+T</string>
+   </property>
+  </action>
  </widget>
  <resources>
-  <include location="../res/res.qrc"/>
+  <include location="../../res/res.qrc"/>
  </resources>
  <connections/>
 </ui>
