@@ -438,7 +438,9 @@ static void generate_member_def_declaration_code(Context& context, ts::IMember_D
                 native_type_str +
                 " m_" +
                 member_def.get_name() +
-                " = {" +
+                " = " +
+                native_type_str +
+                "{" +
                 default_value_str +
                 "};\n";
     }

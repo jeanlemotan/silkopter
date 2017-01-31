@@ -114,7 +114,7 @@ void set_component(ts::vec4<T>& value, T const& component_value, size_t idx)
     if (idx == 0) value.x = component_value;
     else if (idx == 1) value.y = component_value;
     else if (idx == 2) value.z = component_value;
-    else if (idx == 4) value.w = component_value;
+    else if (idx == 3) value.w = component_value;
 }
 template<typename T>
 T get_component(ts::vec4<T> const& value, size_t idx)
