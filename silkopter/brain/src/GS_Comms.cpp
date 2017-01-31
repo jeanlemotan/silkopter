@@ -880,6 +880,7 @@ void GS_Comms::handle_req(gs_comms::setup::Send_Node_Message_Req const& req)
     message = messages::Poly<messages::INode_Message>(send_message_result.payload());
 
     ts::sz::Value sz_value = messages::serialize(message);
+    res.set_name(node_name);
     res.set_message_data(encode_json(ts::sz::to_json(m_json_buffer, sz_value, false)));
 
     //all good!!!
