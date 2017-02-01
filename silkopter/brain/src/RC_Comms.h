@@ -48,9 +48,12 @@ private:
     HAL& m_hal;
     Clock::time_point m_uav_sent_tp = Clock::now();
 
-    mutable std::mutex m_samples_mutex;
-
     boost::optional<stream::IMultirotor_Commands::Value> m_multirotor_commands;
+
+    mutable std::mutex m_new_multirotor_commands_mutex;
+    boost::optional<stream::IMultirotor_Commands::Value> m_new_multirotor_commands;
+
+    mutable std::mutex m_multirotor_state_mutex;
     stream::IMultirotor_State::Value m_multirotor_state;
 
     util::comms::RC_Phy m_rc_phy;

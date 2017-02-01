@@ -63,7 +63,10 @@ size_t RC_Comms::compute_multirotor_state_packet(uint8_t* data, uint8_t& packet_
     packet_type = static_cast<uint8_t>(rc_comms::Packet_Type::MULTIROTOR_STATE);
 
     size_t off = 0;
-    util::serialization::serialize(m_serialization_buffer, m_multirotor_state, off);
+    {
+        std::lock_guard<std::mutex> lg(m_multirotor_state_mutex);
+        util::serialization::serialize(m_serialization_buffer, m_multirotor_state, off);
+    }
 
     memcpy(data, m_serialization_buffer.data(), off);
 
@@ -84,8 +87,8 @@ void RC_Comms::process_rx_packet(util::comms::RC_Protocol::RX_Packet const& pack
         stream::IMultirotor_Commands::Value value;
         if (util::serialization::deserialize(packet.payload, value, off))
         {
-            std::lock_guard<std::mutex> lg(m_samples_mutex);
-            m_multirotor_commands = value;
+            std::lock_guard<std::mutex> lg(m_new_multirotor_commands_mutex);
+            m_new_multirotor_commands = value;
         }
         else
         {
@@ -102,7 +105,6 @@ void RC_Comms::process_rx_packet(util::comms::RC_Protocol::RX_Packet const& pack
 
 boost::optional<stream::IMultirotor_Commands::Value> const& RC_Comms::get_multirotor_commands() const
 {
-    std::lock_guard<std::mutex> lg(m_samples_mutex);
     return m_multirotor_commands;
 }
 
@@ -110,7 +112,7 @@ boost::optional<stream::IMultirotor_Commands::Value> const& RC_Comms::get_multir
 
 void RC_Comms::set_multirotor_state(stream::IMultirotor_State::Value const& value)
 {
-    std::lock_guard<std::mutex> lg(m_samples_mutex);
+    std::lock_guard<std::mutex> lg(m_multirotor_state_mutex);
     m_multirotor_state = value;
 }
 
@@ -130,7 +132,11 @@ void RC_Comms::process()
         return;
     }
 
-    m_multirotor_commands = boost::none;
+    {
+        std::lock_guard<std::mutex> lg(m_new_multirotor_commands_mutex);
+        m_multirotor_commands = m_new_multirotor_commands;
+        m_new_multirotor_commands = boost::none;
+    }
 }
 
 }
