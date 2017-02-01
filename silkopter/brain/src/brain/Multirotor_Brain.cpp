@@ -395,6 +395,12 @@ void Multirotor_Brain::process_return_home_mode()
     stream::IMultirotor_Commands::Value& commands = m_inputs.commands.sample.value;
     QASSERT(m_home.is_acquired);
 
+    if (m_inputs.commands.sample.value.mode != Mode::RETURN_HOME)
+    {
+        set_mode(m_inputs.commands.sample.value.mode);
+        return;
+    }
+
     set_vertical_mode(Vertical_Mode::ALTITUDE);
     float distance_2d = math::length(math::vec2f(m_enu_position));
     if (distance_2d < 10.f)
