@@ -631,7 +631,7 @@ void RCP::process()
         {
             tp = Clock::now();
             std::lock_guard<std::mutex> lg(m_tx.packet_queue_mutex);
-            QLOGI("{}: txd {} / tdf {} / rx {} / rxf {} / cf {}", m_tx.packet_queue.size(), m_global_stats.tx_datagrams, m_global_stats.tx_fragments, m_global_stats.rx_datagrams, m_global_stats.rx_fragments, m_global_stats.tx_confirmed_fragments);
+            //QLOGI("{}: txd {} / tdf {} / rx {} / rxf {} / cf {}", m_tx.packet_queue.size(), m_global_stats.tx_datagrams, m_global_stats.tx_fragments, m_global_stats.rx_datagrams, m_global_stats.rx_fragments, m_global_stats.tx_confirmed_fragments);
         }
     }
 
