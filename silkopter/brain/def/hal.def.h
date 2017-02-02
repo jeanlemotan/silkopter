@@ -73,8 +73,8 @@ public:
 
 private:
   std::string m_name;
-  mass_t m_mass = {0.010000f};
-  ufloat m_moment_of_inertia = {0};
+  mass_t m_mass = mass_t{0.010000f};
+  ufloat m_moment_of_inertia = ufloat{0};
 };
 
 typedef Poly<IUAV_Descriptor> Poly_IUAV_Descriptor;
@@ -232,14 +232,14 @@ public:
 
 private:
   std::string m_name;
-  IUAV_Descriptor::mass_t m_mass = {0.010000f};
-  ufloat m_moment_of_inertia = {0};
-  radius_t m_radius = {1.000000f};
-  height_t m_height = {1.000000f};
-  torque_t m_motor_z_torque = {1.000000f};
-  thrust_t m_motor_thrust = {1.000000f};
-  acceleration_t m_motor_acceleration = {10.000000f};
-  acceleration_t m_motor_deceleration = {10.000000f};
+  IUAV_Descriptor::mass_t m_mass = IUAV_Descriptor::mass_t{0.010000f};
+  ufloat m_moment_of_inertia = ufloat{0};
+  radius_t m_radius = radius_t{1.000000f};
+  height_t m_height = height_t{1.000000f};
+  torque_t m_motor_z_torque = torque_t{1.000000f};
+  thrust_t m_motor_thrust = thrust_t{1.000000f};
+  acceleration_t m_motor_acceleration = acceleration_t{10.000000f};
+  acceleration_t m_motor_deceleration = acceleration_t{10.000000f};
 };
 
 struct Tri_Multirotor_Descriptor : public Multirotor_Descriptor
@@ -284,14 +284,14 @@ public:
 
 private:
   std::string m_name;
-  IUAV_Descriptor::mass_t m_mass = {0.010000f};
-  ufloat m_moment_of_inertia = {0};
-  Multirotor_Descriptor::radius_t m_radius = {1.000000f};
-  Multirotor_Descriptor::height_t m_height = {1.000000f};
-  Multirotor_Descriptor::torque_t m_motor_z_torque = {1.000000f};
-  Multirotor_Descriptor::thrust_t m_motor_thrust = {1.000000f};
-  Multirotor_Descriptor::acceleration_t m_motor_acceleration = {10.000000f};
-  Multirotor_Descriptor::acceleration_t m_motor_deceleration = {10.000000f};
+  IUAV_Descriptor::mass_t m_mass = IUAV_Descriptor::mass_t{0.010000f};
+  ufloat m_moment_of_inertia = ufloat{0};
+  Multirotor_Descriptor::radius_t m_radius = Multirotor_Descriptor::radius_t{1.000000f};
+  Multirotor_Descriptor::height_t m_height = Multirotor_Descriptor::height_t{1.000000f};
+  Multirotor_Descriptor::torque_t m_motor_z_torque = Multirotor_Descriptor::torque_t{1.000000f};
+  Multirotor_Descriptor::thrust_t m_motor_thrust = Multirotor_Descriptor::thrust_t{1.000000f};
+  Multirotor_Descriptor::acceleration_t m_motor_acceleration = Multirotor_Descriptor::acceleration_t{10.000000f};
+  Multirotor_Descriptor::acceleration_t m_motor_deceleration = Multirotor_Descriptor::acceleration_t{10.000000f};
 };
 
 struct Quad_Multirotor_Descriptor : public Multirotor_Descriptor
@@ -340,15 +340,15 @@ public:
 
 private:
   std::string m_name;
-  IUAV_Descriptor::mass_t m_mass = {0.010000f};
-  ufloat m_moment_of_inertia = {0};
-  Multirotor_Descriptor::radius_t m_radius = {1.000000f};
-  Multirotor_Descriptor::height_t m_height = {1.000000f};
-  Multirotor_Descriptor::torque_t m_motor_z_torque = {1.000000f};
-  Multirotor_Descriptor::thrust_t m_motor_thrust = {1.000000f};
-  Multirotor_Descriptor::acceleration_t m_motor_acceleration = {10.000000f};
-  Multirotor_Descriptor::acceleration_t m_motor_deceleration = {10.000000f};
-  bool m_plus_configuration = {false};
+  IUAV_Descriptor::mass_t m_mass = IUAV_Descriptor::mass_t{0.010000f};
+  ufloat m_moment_of_inertia = ufloat{0};
+  Multirotor_Descriptor::radius_t m_radius = Multirotor_Descriptor::radius_t{1.000000f};
+  Multirotor_Descriptor::height_t m_height = Multirotor_Descriptor::height_t{1.000000f};
+  Multirotor_Descriptor::torque_t m_motor_z_torque = Multirotor_Descriptor::torque_t{1.000000f};
+  Multirotor_Descriptor::thrust_t m_motor_thrust = Multirotor_Descriptor::thrust_t{1.000000f};
+  Multirotor_Descriptor::acceleration_t m_motor_acceleration = Multirotor_Descriptor::acceleration_t{10.000000f};
+  Multirotor_Descriptor::acceleration_t m_motor_deceleration = Multirotor_Descriptor::acceleration_t{10.000000f};
+  bool m_plus_configuration = bool{false};
 };
 
 struct Hexa_Multirotor_Descriptor : public Multirotor_Descriptor
@@ -397,15 +397,15 @@ public:
 
 private:
   std::string m_name;
-  IUAV_Descriptor::mass_t m_mass = {0.010000f};
-  ufloat m_moment_of_inertia = {0};
-  Multirotor_Descriptor::radius_t m_radius = {1.000000f};
-  Multirotor_Descriptor::height_t m_height = {1.000000f};
-  Multirotor_Descriptor::torque_t m_motor_z_torque = {1.000000f};
-  Multirotor_Descriptor::thrust_t m_motor_thrust = {1.000000f};
-  Multirotor_Descriptor::acceleration_t m_motor_acceleration = {10.000000f};
-  Multirotor_Descriptor::acceleration_t m_motor_deceleration = {10.000000f};
-  bool m_plus_configuration = {false};
+  IUAV_Descriptor::mass_t m_mass = IUAV_Descriptor::mass_t{0.010000f};
+  ufloat m_moment_of_inertia = ufloat{0};
+  Multirotor_Descriptor::radius_t m_radius = Multirotor_Descriptor::radius_t{1.000000f};
+  Multirotor_Descriptor::height_t m_height = Multirotor_Descriptor::height_t{1.000000f};
+  Multirotor_Descriptor::torque_t m_motor_z_torque = Multirotor_Descriptor::torque_t{1.000000f};
+  Multirotor_Descriptor::thrust_t m_motor_thrust = Multirotor_Descriptor::thrust_t{1.000000f};
+  Multirotor_Descriptor::acceleration_t m_motor_acceleration = Multirotor_Descriptor::acceleration_t{10.000000f};
+  Multirotor_Descriptor::acceleration_t m_motor_deceleration = Multirotor_Descriptor::acceleration_t{10.000000f};
+  bool m_plus_configuration = bool{false};
 };
 
 struct Hexatri_Multirotor_Descriptor : public Multirotor_Descriptor
@@ -450,14 +450,14 @@ public:
 
 private:
   std::string m_name;
-  IUAV_Descriptor::mass_t m_mass = {0.010000f};
-  ufloat m_moment_of_inertia = {0};
-  Multirotor_Descriptor::radius_t m_radius = {1.000000f};
-  Multirotor_Descriptor::height_t m_height = {1.000000f};
-  Multirotor_Descriptor::torque_t m_motor_z_torque = {1.000000f};
-  Multirotor_Descriptor::thrust_t m_motor_thrust = {1.000000f};
-  Multirotor_Descriptor::acceleration_t m_motor_acceleration = {10.000000f};
-  Multirotor_Descriptor::acceleration_t m_motor_deceleration = {10.000000f};
+  IUAV_Descriptor::mass_t m_mass = IUAV_Descriptor::mass_t{0.010000f};
+  ufloat m_moment_of_inertia = ufloat{0};
+  Multirotor_Descriptor::radius_t m_radius = Multirotor_Descriptor::radius_t{1.000000f};
+  Multirotor_Descriptor::height_t m_height = Multirotor_Descriptor::height_t{1.000000f};
+  Multirotor_Descriptor::torque_t m_motor_z_torque = Multirotor_Descriptor::torque_t{1.000000f};
+  Multirotor_Descriptor::thrust_t m_motor_thrust = Multirotor_Descriptor::thrust_t{1.000000f};
+  Multirotor_Descriptor::acceleration_t m_motor_acceleration = Multirotor_Descriptor::acceleration_t{10.000000f};
+  Multirotor_Descriptor::acceleration_t m_motor_deceleration = Multirotor_Descriptor::acceleration_t{10.000000f};
 };
 
 struct Octo_Multirotor_Descriptor : public Multirotor_Descriptor
@@ -506,15 +506,15 @@ public:
 
 private:
   std::string m_name;
-  IUAV_Descriptor::mass_t m_mass = {0.010000f};
-  ufloat m_moment_of_inertia = {0};
-  Multirotor_Descriptor::radius_t m_radius = {1.000000f};
-  Multirotor_Descriptor::height_t m_height = {1.000000f};
-  Multirotor_Descriptor::torque_t m_motor_z_torque = {1.000000f};
-  Multirotor_Descriptor::thrust_t m_motor_thrust = {1.000000f};
-  Multirotor_Descriptor::acceleration_t m_motor_acceleration = {10.000000f};
-  Multirotor_Descriptor::acceleration_t m_motor_deceleration = {10.000000f};
-  bool m_plus_configuration = {false};
+  IUAV_Descriptor::mass_t m_mass = IUAV_Descriptor::mass_t{0.010000f};
+  ufloat m_moment_of_inertia = ufloat{0};
+  Multirotor_Descriptor::radius_t m_radius = Multirotor_Descriptor::radius_t{1.000000f};
+  Multirotor_Descriptor::height_t m_height = Multirotor_Descriptor::height_t{1.000000f};
+  Multirotor_Descriptor::torque_t m_motor_z_torque = Multirotor_Descriptor::torque_t{1.000000f};
+  Multirotor_Descriptor::thrust_t m_motor_thrust = Multirotor_Descriptor::thrust_t{1.000000f};
+  Multirotor_Descriptor::acceleration_t m_motor_acceleration = Multirotor_Descriptor::acceleration_t{10.000000f};
+  Multirotor_Descriptor::acceleration_t m_motor_deceleration = Multirotor_Descriptor::acceleration_t{10.000000f};
+  bool m_plus_configuration = bool{false};
 };
 
 struct Octaquad_Multirotor_Descriptor : public Multirotor_Descriptor
@@ -563,15 +563,15 @@ public:
 
 private:
   std::string m_name;
-  IUAV_Descriptor::mass_t m_mass = {0.010000f};
-  ufloat m_moment_of_inertia = {0};
-  Multirotor_Descriptor::radius_t m_radius = {1.000000f};
-  Multirotor_Descriptor::height_t m_height = {1.000000f};
-  Multirotor_Descriptor::torque_t m_motor_z_torque = {1.000000f};
-  Multirotor_Descriptor::thrust_t m_motor_thrust = {1.000000f};
-  Multirotor_Descriptor::acceleration_t m_motor_acceleration = {10.000000f};
-  Multirotor_Descriptor::acceleration_t m_motor_deceleration = {10.000000f};
-  bool m_plus_configuration = {false};
+  IUAV_Descriptor::mass_t m_mass = IUAV_Descriptor::mass_t{0.010000f};
+  ufloat m_moment_of_inertia = ufloat{0};
+  Multirotor_Descriptor::radius_t m_radius = Multirotor_Descriptor::radius_t{1.000000f};
+  Multirotor_Descriptor::height_t m_height = Multirotor_Descriptor::height_t{1.000000f};
+  Multirotor_Descriptor::torque_t m_motor_z_torque = Multirotor_Descriptor::torque_t{1.000000f};
+  Multirotor_Descriptor::thrust_t m_motor_thrust = Multirotor_Descriptor::thrust_t{1.000000f};
+  Multirotor_Descriptor::acceleration_t m_motor_acceleration = Multirotor_Descriptor::acceleration_t{10.000000f};
+  Multirotor_Descriptor::acceleration_t m_motor_deceleration = Multirotor_Descriptor::acceleration_t{10.000000f};
+  bool m_plus_configuration = bool{false};
 };
 
 struct Custom_Multirotor_Descriptor : public Multirotor_Descriptor
@@ -594,9 +594,9 @@ public:
     auto get_clockwise() const -> bool const&;
 
   private:
-    vec3f m_position = {0, 0, 0};
-    direction_t m_thrust_vector = {0, 0, 1.000000f};
-    bool m_clockwise = {false};
+    vec3f m_position = vec3f{0, 0, 0};
+    direction_t m_thrust_vector = direction_t{0, 0, 1.000000f};
+    bool m_clockwise = bool{false};
   };
 
   virtual ~Custom_Multirotor_Descriptor() = default;
@@ -643,14 +643,14 @@ public:
 
 private:
   std::string m_name;
-  IUAV_Descriptor::mass_t m_mass = {0.010000f};
-  ufloat m_moment_of_inertia = {0};
-  Multirotor_Descriptor::radius_t m_radius = {1.000000f};
-  Multirotor_Descriptor::height_t m_height = {1.000000f};
-  Multirotor_Descriptor::torque_t m_motor_z_torque = {1.000000f};
-  Multirotor_Descriptor::thrust_t m_motor_thrust = {1.000000f};
-  Multirotor_Descriptor::acceleration_t m_motor_acceleration = {10.000000f};
-  Multirotor_Descriptor::acceleration_t m_motor_deceleration = {10.000000f};
+  IUAV_Descriptor::mass_t m_mass = IUAV_Descriptor::mass_t{0.010000f};
+  ufloat m_moment_of_inertia = ufloat{0};
+  Multirotor_Descriptor::radius_t m_radius = Multirotor_Descriptor::radius_t{1.000000f};
+  Multirotor_Descriptor::height_t m_height = Multirotor_Descriptor::height_t{1.000000f};
+  Multirotor_Descriptor::torque_t m_motor_z_torque = Multirotor_Descriptor::torque_t{1.000000f};
+  Multirotor_Descriptor::thrust_t m_motor_thrust = Multirotor_Descriptor::thrust_t{1.000000f};
+  Multirotor_Descriptor::acceleration_t m_motor_acceleration = Multirotor_Descriptor::acceleration_t{10.000000f};
+  Multirotor_Descriptor::acceleration_t m_motor_deceleration = Multirotor_Descriptor::acceleration_t{10.000000f};
   std::vector<Custom_Multirotor_Descriptor::Motor> m_motors;
 };
 
@@ -677,8 +677,8 @@ public:
   auto get_baud() const -> baud_t const&;
 
 private:
-  std::string m_dev = {"/dev/ttyAMA0"};
-  baud_t m_baud = {UART_Linux_Descriptor::baud_t::_115200};
+  std::string m_dev = std::string{"/dev/ttyAMA0"};
+  baud_t m_baud = baud_t{UART_Linux_Descriptor::baud_t::_115200};
 };
 
 struct UART_BBang_Descriptor : public IBus_Descriptor
@@ -698,9 +698,9 @@ public:
   auto get_invert() const -> bool const&;
 
 private:
-  uint32_t m_rx_pin = {0};
-  uint32_t m_baud = {115200};
-  bool m_invert = {false};
+  uint32_t m_rx_pin = uint32_t{0};
+  uint32_t m_baud = uint32_t{115200};
+  bool m_invert = bool{false};
 };
 
 struct I2C_BCM_Descriptor : public IBus_Descriptor
@@ -718,8 +718,8 @@ public:
   auto get_baud() const -> baud_t const&;
 
 private:
-  dev_t m_dev = {0};
-  baud_t m_baud = {400000};
+  dev_t m_dev = dev_t{0};
+  baud_t m_baud = baud_t{400000};
 };
 
 struct I2C_Linux_Descriptor : public IBus_Descriptor
@@ -731,7 +731,7 @@ public:
   auto get_dev() const -> std::string const&;
 
 private:
-  std::string m_dev = {"/dev/i2c0"};
+  std::string m_dev = std::string{"/dev/i2c0"};
 };
 
 struct SPI_BCM_Descriptor : public IBus_Descriptor
@@ -758,10 +758,10 @@ public:
   auto get_speed() const -> speed_t const&;
 
 private:
-  dev_t m_dev = {0};
-  uint32_t m_baud = {1000000};
-  mode_t m_mode = {0};
-  speed_t m_speed = {1000000};
+  dev_t m_dev = dev_t{0};
+  uint32_t m_baud = uint32_t{1000000};
+  mode_t m_mode = mode_t{0};
+  speed_t m_speed = speed_t{1000000};
 };
 
 struct SPI_Linux_Descriptor : public IBus_Descriptor
@@ -778,8 +778,8 @@ public:
   auto get_speed() const -> speed_t const&;
 
 private:
-  std::string m_dev = {"/dev/ttyAMA0"};
-  speed_t m_speed = {1000000};
+  std::string m_dev = std::string{"/dev/ttyAMA0"};
+  speed_t m_speed = speed_t{1000000};
 };
 
 struct P_Controller_Descriptor
@@ -791,7 +791,7 @@ public:
   auto get_kp() const -> ufloat const&;
 
 private:
-  ufloat m_kp = {0};
+  ufloat m_kp = ufloat{0};
 };
 
 struct PI_Controller_Descriptor : public P_Controller_Descriptor
@@ -811,9 +811,9 @@ public:
   auto get_max_i() const -> ufloat const&;
 
 private:
-  ufloat m_kp = {0};
-  ufloat m_ki = {0};
-  ufloat m_max_i = {0};
+  ufloat m_kp = ufloat{0};
+  ufloat m_ki = ufloat{0};
+  ufloat m_max_i = ufloat{0};
 };
 
 struct PD_Controller_Descriptor : public P_Controller_Descriptor
@@ -833,9 +833,9 @@ public:
   auto get_d_filter() const -> muf_t const&;
 
 private:
-  ufloat m_kp = {0};
-  ufloat m_kd = {0};
-  muf_t m_d_filter = {0};
+  ufloat m_kp = ufloat{0};
+  ufloat m_kd = ufloat{0};
+  muf_t m_d_filter = muf_t{0};
 };
 
 struct PID_Controller_Descriptor : public PD_Controller_Descriptor
@@ -863,11 +863,11 @@ public:
   auto get_max_i() const -> ufloat const&;
 
 private:
-  ufloat m_kp = {0};
-  ufloat m_kd = {0};
-  muf_t m_d_filter = {0};
-  ufloat m_ki = {0};
-  ufloat m_max_i = {0};
+  ufloat m_kp = ufloat{0};
+  ufloat m_kd = ufloat{0};
+  muf_t m_d_filter = muf_t{0};
+  ufloat m_ki = ufloat{0};
+  ufloat m_max_i = ufloat{0};
 };
 
 struct ADC_Ammeter_Descriptor : public INode_Descriptor
@@ -880,7 +880,7 @@ public:
   auto get_rate() const -> uint32_t const&;
 
 private:
-  uint32_t m_rate = {100};
+  uint32_t m_rate = uint32_t{100};
 };
 
 struct ADC_Ammeter_Config : public INode_Config
@@ -896,8 +896,8 @@ public:
   auto get_bias() const -> float const&;
 
 private:
-  float m_scale = {1.000000f};
-  float m_bias = {0};
+  float m_scale = float{1.000000f};
+  float m_bias = float{0};
 };
 
 struct ADC_Voltmeter_Descriptor : public INode_Descriptor
@@ -910,7 +910,7 @@ public:
   auto get_rate() const -> uint32_t const&;
 
 private:
-  uint32_t m_rate = {100};
+  uint32_t m_rate = uint32_t{100};
 };
 
 struct ADC_Voltmeter_Config : public INode_Config
@@ -926,8 +926,8 @@ public:
   auto get_bias() const -> float const&;
 
 private:
-  float m_scale = {1.000000f};
-  float m_bias = {0};
+  float m_scale = float{1.000000f};
+  float m_bias = float{0};
 };
 
 struct ADS1115_Descriptor : public INode_Descriptor
@@ -962,11 +962,11 @@ public:
 
 private:
   std::string m_bus;
-  uint8_t m_i2c_address = {72};
-  uint32_t m_adc0_rate = {200};
-  uint32_t m_adc1_rate = {200};
-  uint32_t m_adc2_rate = {200};
-  uint32_t m_adc3_rate = {200};
+  uint8_t m_i2c_address = uint8_t{72};
+  uint32_t m_adc0_rate = uint32_t{200};
+  uint32_t m_adc1_rate = uint32_t{200};
+  uint32_t m_adc2_rate = uint32_t{200};
+  uint32_t m_adc3_rate = uint32_t{200};
 };
 
 struct ADS1115_Config : public INode_Config
@@ -996,8 +996,8 @@ public:
 
 private:
   std::string m_bus;
-  uint8_t m_i2c_address = {23};
-  uint32_t m_rate = {200};
+  uint8_t m_i2c_address = uint8_t{23};
+  uint32_t m_rate = uint32_t{200};
 };
 
 struct AVRADC_Config : public INode_Config
@@ -1017,7 +1017,7 @@ public:
   auto get_rate() const -> uint32_t const&;
 
 private:
-  uint32_t m_rate = {200};
+  uint32_t m_rate = uint32_t{200};
 };
 
 struct Comp_AHRS_Config : public INode_Config
@@ -1029,7 +1029,7 @@ public:
   auto get_drift_correction_factor() const -> muf_t const&;
 
 private:
-  muf_t m_drift_correction_factor = {0.300000f};
+  muf_t m_drift_correction_factor = muf_t{0.300000f};
 };
 
 struct Combiner_Descriptor : public INode_Descriptor
@@ -1042,7 +1042,7 @@ public:
   auto get_rate() const -> uint32_t const&;
 
 private:
-  uint32_t m_rate = {200};
+  uint32_t m_rate = uint32_t{200};
 };
 
 struct Combiner_Config : public INode_Config
@@ -1062,7 +1062,7 @@ public:
   auto get_rate() const -> uint32_t const&;
 
 private:
-  uint32_t m_rate = {1};
+  uint32_t m_rate = uint32_t{1};
 };
 
 struct Gravity_Filter_Config : public INode_Config
@@ -1082,7 +1082,7 @@ public:
   auto get_rate() const -> uint32_t const&;
 
 private:
-  uint32_t m_rate = {1};
+  uint32_t m_rate = uint32_t{1};
 };
 
 struct KF_ECEF_Config : public INode_Config
@@ -1114,12 +1114,12 @@ public:
   auto get_acceleration_accuracy() const -> ufloat const&;
 
 private:
-  ufloat m_gps_position_lag = {0};
-  ufloat m_gps_position_accuracy = {2.000000f};
-  ufloat m_gps_velocity_lag = {0};
-  ufloat m_gps_velocity_accuracy = {0.200000f};
-  ufloat m_acceleration_lag = {0};
-  ufloat m_acceleration_accuracy = {2.000000f};
+  ufloat m_gps_position_lag = ufloat{0};
+  ufloat m_gps_position_accuracy = ufloat{2.000000f};
+  ufloat m_gps_velocity_lag = ufloat{0};
+  ufloat m_gps_velocity_accuracy = ufloat{0.200000f};
+  ufloat m_acceleration_lag = ufloat{0};
+  ufloat m_acceleration_accuracy = ufloat{2.000000f};
 };
 
 struct ENU_Frame_System_Descriptor : public INode_Descriptor
@@ -1132,7 +1132,7 @@ public:
   auto get_rate() const -> uint32_t const&;
 
 private:
-  uint32_t m_rate = {1};
+  uint32_t m_rate = uint32_t{1};
 };
 
 struct ENU_Frame_System_Config : public INode_Config
@@ -1152,7 +1152,7 @@ public:
   auto get_rate() const -> uint32_t const&;
 
 private:
-  uint32_t m_rate = {1};
+  uint32_t m_rate = uint32_t{1};
 };
 
 struct LPF_Config : public INode_Config
@@ -1169,8 +1169,8 @@ public:
   auto get_cutoff_frequency() const -> ufloat const&;
 
 private:
-  poles_t m_poles = {1};
-  ufloat m_cutoff_frequency = {1.000000f};
+  poles_t m_poles = poles_t{1};
+  ufloat m_cutoff_frequency = ufloat{1.000000f};
 };
 
 struct MaxSonar_Descriptor : public INode_Descriptor
@@ -1188,7 +1188,7 @@ public:
 
 private:
   std::string m_bus;
-  uint32_t m_rate = {1};
+  uint32_t m_rate = uint32_t{1};
 };
 
 struct MaxSonar_Config : public INode_Config
@@ -1208,9 +1208,9 @@ public:
   auto get_min_distance() const -> ufloat const&;
 
 private:
-  direction_t m_direction = {0, 0, 0};
-  ufloat m_max_distance = {10.000000f};
-  ufloat m_min_distance = {0.200000f};
+  direction_t m_direction = direction_t{0, 0, 0};
+  ufloat m_max_distance = ufloat{10.000000f};
+  ufloat m_min_distance = ufloat{0.200000f};
 };
 
 struct Motor_Mixer_Descriptor : public INode_Descriptor
@@ -1223,7 +1223,7 @@ public:
   auto get_rate() const -> uint32_t const&;
 
 private:
-  uint32_t m_rate = {1};
+  uint32_t m_rate = uint32_t{1};
 };
 
 struct Motor_Mixer_Config : public INode_Config
@@ -1235,7 +1235,7 @@ public:
   auto get_armed_thrust() const -> ufloat const&;
 
 private:
-  ufloat m_armed_thrust = {0};
+  ufloat m_armed_thrust = ufloat{0};
 };
 
 struct Acceleration_Calibration_Point
@@ -1255,9 +1255,9 @@ public:
   auto get_scale() const -> vec3f const&;
 
 private:
-  float m_temperature = {0};
-  vec3f m_bias = {0, 0, 0};
-  vec3f m_scale = {1.000000f, 1.000000f, 1.000000f};
+  float m_temperature = float{0};
+  vec3f m_bias = vec3f{0, 0, 0};
+  vec3f m_scale = vec3f{1.000000f, 1.000000f, 1.000000f};
 };
 
 struct Angular_Velocity_Calibration_Point
@@ -1273,8 +1273,8 @@ public:
   auto get_bias() const -> vec3f const&;
 
 private:
-  float m_temperature = {0};
-  vec3f m_bias = {0, 0, 0};
+  float m_temperature = float{0};
+  vec3f m_bias = vec3f{0, 0, 0};
 };
 
 struct Magnetic_Field_Calibration_Point
@@ -1294,9 +1294,9 @@ public:
   auto get_scale() const -> vec3f const&;
 
 private:
-  float m_temperature = {0};
-  vec3f m_bias = {0, 0, 0};
-  vec3f m_scale = {1.000000f, 1.000000f, 1.000000f};
+  float m_temperature = float{0};
+  vec3f m_bias = vec3f{0, 0, 0};
+  vec3f m_scale = vec3f{1.000000f, 1.000000f, 1.000000f};
 };
 
 struct MPU9250_Descriptor : public INode_Descriptor
@@ -1358,12 +1358,12 @@ public:
 
 private:
   std::string m_bus;
-  uint8_t m_i2c_address = {105};
-  imu_rate_t m_imu_rate = {MPU9250_Descriptor::imu_rate_t::_1000};
-  uint32_t m_magnetometer_rate = {100};
-  uint32_t m_thermometer_rate = {10};
-  acceleration_range_t m_acceleration_range = {MPU9250_Descriptor::acceleration_range_t::_8};
-  angular_velocity_range_t m_angular_velocity_range = {MPU9250_Descriptor::angular_velocity_range_t::_500};
+  uint8_t m_i2c_address = uint8_t{105};
+  imu_rate_t m_imu_rate = imu_rate_t{MPU9250_Descriptor::imu_rate_t::_1000};
+  uint32_t m_magnetometer_rate = uint32_t{100};
+  uint32_t m_thermometer_rate = uint32_t{10};
+  acceleration_range_t m_acceleration_range = acceleration_range_t{MPU9250_Descriptor::acceleration_range_t::_8};
+  angular_velocity_range_t m_angular_velocity_range = angular_velocity_range_t{MPU9250_Descriptor::angular_velocity_range_t::_500};
 };
 
 struct MPU9250_Config : public INode_Config
@@ -1405,7 +1405,7 @@ public:
   auto get_calibration() -> Calibration&;
 
 private:
-  euler3_t m_rotation = {0, 0, 0};
+  euler3_t m_rotation = euler3_t{0, 0, 0};
   Calibration m_calibration;
 };
 
@@ -1433,9 +1433,9 @@ public:
 
 private:
   std::string m_bus;
-  uint8_t m_i2c_address = {119};
-  uint32_t m_pressure_rate = {100};
-  uint32_t m_temperature_rate = {10};
+  uint8_t m_i2c_address = uint8_t{119};
+  uint32_t m_pressure_rate = uint32_t{100};
+  uint32_t m_temperature_rate = uint32_t{10};
 };
 
 struct MS5611_Config : public INode_Config
@@ -1463,9 +1463,9 @@ public:
   auto get_state_rate() const -> uint32_t const&;
 
 private:
-  uint32_t m_rate = {100};
-  uint32_t m_commands_rate = {30};
-  uint32_t m_state_rate = {30};
+  uint32_t m_rate = uint32_t{100};
+  uint32_t m_commands_rate = uint32_t{30};
+  uint32_t m_state_rate = uint32_t{30};
 };
 
 struct Multirotor_Brain_Config : public INode_Config
@@ -1475,11 +1475,11 @@ public:
   {
   public:
     typedef float speed_deg_t;
-    typedef PID_Controller_Descriptor Combined_Rate_PIDs;
-    struct Separate_Rate_PIDs
+    typedef PID_Controller_Descriptor Combined_Angle_PIDs;
+    struct Separate_Angle_PIDs
     {
     public:
-      virtual ~Separate_Rate_PIDs() = default;
+      virtual ~Separate_Angle_PIDs() = default;
       void set_x_pid(PID_Controller_Descriptor const& value);
       void set_x_pid(PID_Controller_Descriptor&& value);
       auto get_x_pid() const -> PID_Controller_Descriptor const&;
@@ -1502,10 +1502,10 @@ public:
     void set_max_rate_deg(speed_deg_t&& value);
     auto get_max_rate_deg() const -> speed_deg_t const&;
 
-    void set_rate_pids(boost::variant<Combined_Rate_PIDs,Separate_Rate_PIDs> const& value);
-    void set_rate_pids(boost::variant<Combined_Rate_PIDs,Separate_Rate_PIDs>&& value);
-    auto get_rate_pids() const -> boost::variant<Combined_Rate_PIDs,Separate_Rate_PIDs> const&;
-    auto get_rate_pids() -> boost::variant<Combined_Rate_PIDs,Separate_Rate_PIDs>&;
+    void set_angle_pids(boost::variant<Combined_Angle_PIDs,Separate_Angle_PIDs> const& value);
+    void set_angle_pids(boost::variant<Combined_Angle_PIDs,Separate_Angle_PIDs>&& value);
+    auto get_angle_pids() const -> boost::variant<Combined_Angle_PIDs,Separate_Angle_PIDs> const&;
+    auto get_angle_pids() -> boost::variant<Combined_Angle_PIDs,Separate_Angle_PIDs>&;
 
     void set_max_angle_deg(max_angle_t const& value);
     void set_max_angle_deg(max_angle_t&& value);
@@ -1531,10 +1531,10 @@ public:
     auto get_position_pid() -> P_Controller_Descriptor&;
 
   private:
-    speed_deg_t m_max_rate_deg = {180.000000f};
-    boost::variant<Combined_Rate_PIDs,Separate_Rate_PIDs> m_rate_pids;
-    max_angle_t m_max_angle_deg = {60.000000f, 60.000000f};
-    speed_t m_max_speed = {2.000000f};
+    speed_deg_t m_max_rate_deg = speed_deg_t{180.000000f};
+    boost::variant<Combined_Angle_PIDs,Separate_Angle_PIDs> m_angle_pids;
+    max_angle_t m_max_angle_deg = max_angle_t{60.000000f, 60.000000f};
+    speed_t m_max_speed = speed_t{2.000000f};
     LPF_Config m_position_lpf;
     PI_Controller_Descriptor m_velocity_pid;
     P_Controller_Descriptor m_position_pid;
@@ -1549,14 +1549,14 @@ public:
     void set_max_rate_deg(speed_deg_t&& value);
     auto get_max_rate_deg() const -> speed_deg_t const&;
 
-    void set_rate_pid(PID_Controller_Descriptor const& value);
-    void set_rate_pid(PID_Controller_Descriptor&& value);
-    auto get_rate_pid() const -> PID_Controller_Descriptor const&;
-    auto get_rate_pid() -> PID_Controller_Descriptor&;
+    void set_angle_pid(PID_Controller_Descriptor const& value);
+    void set_angle_pid(PID_Controller_Descriptor&& value);
+    auto get_angle_pid() const -> PID_Controller_Descriptor const&;
+    auto get_angle_pid() -> PID_Controller_Descriptor&;
 
   private:
-    speed_deg_t m_max_rate_deg = {180.000000f};
-    PID_Controller_Descriptor m_rate_pid;
+    speed_deg_t m_max_rate_deg = speed_deg_t{180.000000f};
+    PID_Controller_Descriptor m_angle_pid;
   };
 
   struct Vertical
@@ -1584,7 +1584,7 @@ public:
     auto get_altitude_pid() -> P_Controller_Descriptor&;
 
   private:
-    speed_t m_max_speed = {2.000000f};
+    speed_t m_max_speed = speed_t{2.000000f};
     LPF_Config m_altitude_lpf;
     PI_Controller_Descriptor m_speed_pid;
     P_Controller_Descriptor m_altitude_pid;
@@ -1619,9 +1619,9 @@ public:
   auto get_yaw() -> Yaw&;
 
 private:
-  ufloat m_max_allowed_position_variation = {10.000000f};
-  ufloat m_max_thrust = {2.000000f};
-  ufloat m_min_thrust = {1.000000f};
+  ufloat m_max_allowed_position_variation = ufloat{10.000000f};
+  ufloat m_max_thrust = ufloat{2.000000f};
+  ufloat m_min_thrust = ufloat{1.000000f};
   Vertical m_vertical;
   Horizontal m_horizontal;
   Yaw m_yaw;
@@ -1645,9 +1645,9 @@ public:
   auto get_video_rate() const -> uint32_t const&;
 
 private:
-  uint32_t m_commands_rate = {30};
-  uint32_t m_state_rate = {30};
-  uint32_t m_video_rate = {30};
+  uint32_t m_commands_rate = uint32_t{30};
+  uint32_t m_state_rate = uint32_t{30};
+  uint32_t m_video_rate = uint32_t{30};
 };
 
 struct Multirotor_Pilot_Config : public INode_Config
@@ -1695,14 +1695,14 @@ public:
   auto get_gps_rate() const -> uint32_t const&;
 
 private:
-  uint32_t m_throttle_rate = {100};
-  uint32_t m_acceleration_rate = {1000};
-  uint32_t m_angular_velocity_rate = {1000};
-  uint32_t m_magnetic_field_rate = {100};
-  uint32_t m_pressure_rate = {100};
-  uint32_t m_temperature_rate = {10};
-  uint32_t m_distance_rate = {12};
-  uint32_t m_gps_rate = {5};
+  uint32_t m_throttle_rate = uint32_t{100};
+  uint32_t m_acceleration_rate = uint32_t{1000};
+  uint32_t m_angular_velocity_rate = uint32_t{1000};
+  uint32_t m_magnetic_field_rate = uint32_t{100};
+  uint32_t m_pressure_rate = uint32_t{100};
+  uint32_t m_temperature_rate = uint32_t{10};
+  uint32_t m_distance_rate = uint32_t{12};
+  uint32_t m_gps_rate = uint32_t{5};
 };
 
 struct Multirotor_Simulator_Config : public INode_Config
@@ -1753,16 +1753,16 @@ public:
     auto get_ground_distance() const -> ufloat const&;
 
   private:
-    ufloat m_gps_position = {2.000000f};
-    ufloat m_gps_velocity = {0.200000f};
-    ufloat m_gps_pacc = {0.500000f};
-    ufloat m_gps_vacc = {0.100000f};
-    ufloat m_acceleration = {0.010000f};
-    ufloat m_angular_velocity = {0.010000f};
-    ufloat m_magnetic_field = {0.100000f};
-    ufloat m_pressure = {0.100000f};
-    ufloat m_temperature = {0.100000f};
-    ufloat m_ground_distance = {0.010000f};
+    ufloat m_gps_position = ufloat{2.000000f};
+    ufloat m_gps_velocity = ufloat{0.200000f};
+    ufloat m_gps_pacc = ufloat{0.500000f};
+    ufloat m_gps_vacc = ufloat{0.100000f};
+    ufloat m_acceleration = ufloat{0.010000f};
+    ufloat m_angular_velocity = ufloat{0.010000f};
+    ufloat m_magnetic_field = ufloat{0.100000f};
+    ufloat m_pressure = ufloat{0.100000f};
+    ufloat m_temperature = ufloat{0.100000f};
+    ufloat m_ground_distance = ufloat{0.010000f};
   };
 
   struct Calibration
@@ -1818,10 +1818,10 @@ public:
   auto get_calibration() -> Calibration&;
 
 private:
-  bool m_simulation_enabled = {true};
-  bool m_drag_enabled = {true};
-  bool m_ground_enabled = {true};
-  bool m_gravity_enabled = {true};
+  bool m_simulation_enabled = bool{true};
+  bool m_drag_enabled = bool{true};
+  bool m_ground_enabled = bool{true};
+  bool m_gravity_enabled = bool{true};
   Noise m_noise;
   Calibration m_calibration;
 };
@@ -1841,8 +1841,8 @@ public:
   auto get_component_count() const -> component_count_t const&;
 
 private:
-  uint32_t m_rate = {30};
-  component_count_t m_component_count = {1};
+  uint32_t m_rate = uint32_t{30};
+  component_count_t m_component_count = component_count_t{1};
 };
 
 struct Oscillator_Config : public INode_Config
@@ -1865,9 +1865,9 @@ public:
     auto get_square() const -> bool const&;
 
   private:
-    ufloat m_frequency = {1.000000f};
-    ufloat m_amplitude = {1.000000f};
-    bool m_square = {false};
+    ufloat m_frequency = ufloat{1.000000f};
+    ufloat m_amplitude = ufloat{1.000000f};
+    bool m_square = bool{false};
   };
 
   virtual ~Oscillator_Config() = default;
@@ -1885,8 +1885,8 @@ public:
   auto get_components() -> std::vector<Oscillator_Config::Component>&;
 
 private:
-  ufloat m_amplitude = {1.000000f};
-  ufloat m_noise = {0};
+  ufloat m_amplitude = ufloat{1.000000f};
+  ufloat m_noise = ufloat{0};
   std::vector<Oscillator_Config::Component> m_components;
 };
 
@@ -1908,8 +1908,8 @@ public:
     auto get_servo_signal() const -> bool const&;
 
   private:
-    bool m_enabled = {false};
-    bool m_servo_signal = {false};
+    bool m_enabled = bool{false};
+    bool m_servo_signal = bool{false};
   };
 
   virtual ~PCA9685_Descriptor() = default;
@@ -1932,8 +1932,8 @@ public:
 
 private:
   std::string m_bus;
-  uint32_t m_rate = {30};
-  uint8_t m_address = {64};
+  uint32_t m_rate = uint32_t{30};
+  uint8_t m_address = uint8_t{64};
   std::vector<PCA9685_Descriptor::Channel> m_channels;
 };
 
@@ -1960,8 +1960,8 @@ public:
     auto get_max() const -> servo_signal_t const&;
 
   private:
-    servo_signal_t m_min = {1.000000f};
-    servo_signal_t m_max = {2.000000f};
+    servo_signal_t m_min = servo_signal_t{1.000000f};
+    servo_signal_t m_max = servo_signal_t{2.000000f};
   };
 
   struct PWM_Channel : public PCA9685_Config::IChannel
@@ -1977,8 +1977,8 @@ public:
     auto get_max() const -> pwm_signal_t const&;
 
   private:
-    pwm_signal_t m_min = {0};
-    pwm_signal_t m_max = {1.000000f};
+    pwm_signal_t m_min = pwm_signal_t{0};
+    pwm_signal_t m_max = pwm_signal_t{1.000000f};
   };
 
   virtual ~PCA9685_Config() = default;
@@ -2012,9 +2012,9 @@ public:
     auto get_rate() const -> uint32_t const&;
 
   private:
-    bool m_enabled = {false};
-    bool m_servo_signal = {false};
-    uint32_t m_rate = {400};
+    bool m_enabled = bool{false};
+    bool m_servo_signal = bool{false};
+    uint32_t m_rate = uint32_t{400};
   };
 
   virtual ~PIGPIO_Descriptor() = default;
@@ -2200,8 +2200,8 @@ public:
     auto get_max() const -> servo_signal_t const&;
 
   private:
-    servo_signal_t m_min = {1.000000f};
-    servo_signal_t m_max = {2.000000f};
+    servo_signal_t m_min = servo_signal_t{1.000000f};
+    servo_signal_t m_max = servo_signal_t{2.000000f};
   };
 
   struct PWM_Channel : public PIGPIO_Config::IChannel
@@ -2217,8 +2217,8 @@ public:
     auto get_max() const -> pwm_signal_t const&;
 
   private:
-    pwm_signal_t m_min = {0};
-    pwm_signal_t m_max = {1.000000f};
+    pwm_signal_t m_min = pwm_signal_t{0};
+    pwm_signal_t m_max = pwm_signal_t{1.000000f};
   };
 
   virtual ~PIGPIO_Config() = default;
@@ -2391,7 +2391,7 @@ public:
   auto get_rate() const -> uint32_t const&;
 
 private:
-  uint32_t m_rate = {1};
+  uint32_t m_rate = uint32_t{1};
 };
 
 struct Pressure_Velocity_Config : public INode_Config
@@ -2416,8 +2416,8 @@ public:
   auto get_channel_count() const -> channel_count_t const&;
 
 private:
-  uint32_t m_rate = {1};
-  channel_count_t m_channel_count = {1};
+  uint32_t m_rate = uint32_t{1};
+  channel_count_t m_channel_count = channel_count_t{1};
 };
 
 struct Proximity_Config : public INode_Config
@@ -2437,7 +2437,7 @@ public:
   auto get_rate() const -> uint32_t const&;
 
 private:
-  uint32_t m_rate = {1};
+  uint32_t m_rate = uint32_t{1};
 };
 
 struct Rate_Controller_Config : public INode_Config
@@ -2482,7 +2482,7 @@ public:
     auto get_z_pid() -> PID_Controller_Descriptor&;
 
   private:
-    muf_t m_weight = {1.000000f};
+    muf_t m_weight = muf_t{1.000000f};
     boost::variant<Combined_XY_PIDs,Separate_XY_PIDs> m_xy_pids;
     PID_Controller_Descriptor m_z_pid;
   };
@@ -2501,8 +2501,8 @@ public:
     auto get_max_torque() const -> torque_t const&;
 
   private:
-    muf_t m_weight = {0};
-    torque_t m_max_torque = {1.000000f};
+    muf_t m_weight = muf_t{0};
+    torque_t m_max_torque = torque_t{1.000000f};
   };
 
   virtual ~Rate_Controller_Config() = default;
@@ -2539,8 +2539,8 @@ public:
     auto get_bitrate() const -> bitrate_t const&;
 
   private:
-    resolution_t m_resolution = {8, 8};
-    bitrate_t m_bitrate = {10000};
+    resolution_t m_resolution = resolution_t{8, 8};
+    bitrate_t m_bitrate = bitrate_t{10000};
   };
 
   typedef int32_t fps_t;
@@ -2565,7 +2565,7 @@ public:
   auto get_recording() -> Quality&;
 
 private:
-  fps_t m_fps = {10};
+  fps_t m_fps = fps_t{10};
   Quality m_streaming_low;
   Quality m_streaming_high;
   Quality m_recording;
@@ -2651,18 +2651,18 @@ public:
   auto get_recording() const -> bool const&;
 
 private:
-  iso_t m_iso = {0};
-  shutter_speed_t m_shutter_speed = {0};
-  ev_t m_ev = {0};
-  sharpness_t m_sharpness = {50};
-  contrast_t m_contrast = {50};
-  brightness_t m_brightness = {50};
-  saturation_t m_saturation = {50};
-  awb_mode_t m_awb_mode = {Raspicam_Config::awb_mode_t::AUTO};
-  bool m_hflip = {false};
-  bool m_vflip = {false};
-  quality_t m_quality = {Raspicam_Config::quality_t::HIGH};
-  bool m_recording = {false};
+  iso_t m_iso = iso_t{0};
+  shutter_speed_t m_shutter_speed = shutter_speed_t{0};
+  ev_t m_ev = ev_t{0};
+  sharpness_t m_sharpness = sharpness_t{50};
+  contrast_t m_contrast = contrast_t{50};
+  brightness_t m_brightness = brightness_t{50};
+  saturation_t m_saturation = saturation_t{50};
+  awb_mode_t m_awb_mode = awb_mode_t{Raspicam_Config::awb_mode_t::AUTO};
+  bool m_hflip = bool{false};
+  bool m_vflip = bool{false};
+  quality_t m_quality = quality_t{Raspicam_Config::quality_t::HIGH};
+  bool m_recording = bool{false};
 };
 
 struct RC5T619_Descriptor : public INode_Descriptor
@@ -2684,8 +2684,8 @@ public:
 
 private:
   std::string m_bus;
-  uint32_t m_adc0_rate = {50};
-  uint32_t m_adc1_rate = {5};
+  uint32_t m_adc0_rate = uint32_t{50};
+  uint32_t m_adc1_rate = uint32_t{5};
 };
 
 struct RC5T619_Config : public INode_Config
@@ -2709,8 +2709,8 @@ public:
   auto get_output_rate() const -> uint32_t const&;
 
 private:
-  uint32_t m_input_rate = {1};
-  uint32_t m_output_rate = {1};
+  uint32_t m_input_rate = uint32_t{1};
+  uint32_t m_output_rate = uint32_t{1};
 };
 
 struct Resampler_Config : public INode_Config
@@ -2736,7 +2736,7 @@ public:
   auto get_rate() const -> uint32_t const&;
 
 private:
-  uint32_t m_rate = {1};
+  uint32_t m_rate = uint32_t{1};
 };
 
 struct Scalar_Generator_Config : public INode_Config
@@ -2748,7 +2748,7 @@ public:
   auto get_value() const -> float const&;
 
 private:
-  float m_value = {0};
+  float m_value = float{0};
 };
 
 struct Servo_Gimbal_Descriptor : public INode_Descriptor
@@ -2765,8 +2765,8 @@ public:
   auto get_commands_rate() const -> uint32_t const&;
 
 private:
-  uint32_t m_rate = {1};
-  uint32_t m_commands_rate = {1};
+  uint32_t m_rate = uint32_t{1};
+  uint32_t m_commands_rate = uint32_t{1};
 };
 
 struct Servo_Gimbal_Config : public INode_Config
@@ -2793,10 +2793,10 @@ public:
     auto get_max_pwm() const -> pwm_signal_t const&;
 
   private:
-    euler_t m_min_angle = {-180.000000f};
-    euler_t m_max_angle = {180.000000f};
-    pwm_signal_t m_min_pwm = {0};
-    pwm_signal_t m_max_pwm = {1.000000f};
+    euler_t m_min_angle = euler_t{-180.000000f};
+    euler_t m_max_angle = euler_t{180.000000f};
+    pwm_signal_t m_min_pwm = pwm_signal_t{0};
+    pwm_signal_t m_max_pwm = pwm_signal_t{1.000000f};
   };
 
   virtual ~Servo_Gimbal_Config() = default;
@@ -2836,7 +2836,7 @@ public:
 
 private:
   std::string m_bus;
-  uint32_t m_rate = {1};
+  uint32_t m_rate = uint32_t{1};
 };
 
 struct SRF01_Config : public INode_Config
@@ -2856,9 +2856,9 @@ public:
   auto get_min_distance() const -> ufloat const&;
 
 private:
-  direction_t m_direction = {0, 0, 0};
-  ufloat m_max_distance = {6.000000f};
-  ufloat m_min_distance = {0.200000f};
+  direction_t m_direction = direction_t{0, 0, 0};
+  ufloat m_max_distance = ufloat{6.000000f};
+  ufloat m_min_distance = ufloat{0.200000f};
 };
 
 struct SRF02_Descriptor : public INode_Descriptor
@@ -2876,7 +2876,7 @@ public:
 
 private:
   std::string m_bus;
-  uint32_t m_rate = {1};
+  uint32_t m_rate = uint32_t{1};
 };
 
 struct SRF02_Config : public INode_Config
@@ -2896,9 +2896,9 @@ public:
   auto get_min_distance() const -> ufloat const&;
 
 private:
-  direction_t m_direction = {0, 0, 0};
-  ufloat m_max_distance = {6.000000f};
-  ufloat m_min_distance = {0.200000f};
+  direction_t m_direction = direction_t{0, 0, 0};
+  ufloat m_max_distance = ufloat{6.000000f};
+  ufloat m_min_distance = ufloat{0.200000f};
 };
 
 struct Throttle_To_PWM_Descriptor : public INode_Descriptor
@@ -2916,8 +2916,8 @@ public:
   auto get_channel_count() const -> channel_count_t const&;
 
 private:
-  uint32_t m_rate = {1};
-  channel_count_t m_channel_count = {1};
+  uint32_t m_rate = uint32_t{1};
+  channel_count_t m_channel_count = channel_count_t{1};
 };
 
 struct Throttle_To_PWM_Config : public INode_Config
@@ -2937,7 +2937,7 @@ public:
   auto get_rate() const -> uint32_t const&;
 
 private:
-  uint32_t m_rate = {1};
+  uint32_t m_rate = uint32_t{1};
 };
 
 struct Transformer_Config : public INode_Config
@@ -2962,7 +2962,7 @@ public:
 
 private:
   std::string m_bus;
-  uint32_t m_rate = {1};
+  uint32_t m_rate = uint32_t{1};
 };
 
 struct UBLOX_Config : public INode_Config
@@ -2982,7 +2982,7 @@ public:
   auto get_rate() const -> uint32_t const&;
 
 private:
-  uint32_t m_rate = {1};
+  uint32_t m_rate = uint32_t{1};
 };
 
 struct Vec3_Generator_Config : public INode_Config
@@ -2994,7 +2994,7 @@ public:
   auto get_value() const -> vec3f const&;
 
 private:
-  vec3f m_value = {0, 0, 0};
+  vec3f m_value = vec3f{0, 0, 0};
 };
 
 struct CPPM_Receiver_Descriptor : public INode_Descriptor
@@ -3046,9 +3046,9 @@ public:
   auto get_rate() const -> uint32_t const&;
 
 private:
-  gpio_t m_gpio = {CPPM_Receiver_Descriptor::gpio_t::_26};
-  uint32_t m_channel_count = {8};
-  uint32_t m_rate = {50};
+  gpio_t m_gpio = gpio_t{CPPM_Receiver_Descriptor::gpio_t::_26};
+  uint32_t m_channel_count = uint32_t{8};
+  uint32_t m_rate = uint32_t{50};
 };
 
 struct CPPM_Receiver_Config : public INode_Config
@@ -3076,11 +3076,11 @@ public:
   auto get_max_pulse_length() const -> ufloat const&;
 
 private:
-  bool m_inverted = {false};
-  ufloat m_frame_length = {27.000000f};
-  ufloat m_gap_pulse_length = {0.400000f};
-  ufloat m_min_pulse_length = {0.600000f};
-  ufloat m_max_pulse_length = {1.600000f};
+  bool m_inverted = bool{false};
+  ufloat m_frame_length = ufloat{27.000000f};
+  ufloat m_gap_pulse_length = ufloat{0.400000f};
+  ufloat m_min_pulse_length = ufloat{0.600000f};
+  ufloat m_max_pulse_length = ufloat{1.600000f};
 };
 
 ts::Result<void> deserialize(std::string& value, ts::sz::Value const& sz_value);
@@ -3279,8 +3279,8 @@ ts::Result<void> deserialize(MS5611_Config& value, ts::sz::Value const& sz_value
 ts::sz::Value serialize(MS5611_Config const& value);
 ts::Result<void> deserialize(Multirotor_Brain_Descriptor& value, ts::sz::Value const& sz_value);
 ts::sz::Value serialize(Multirotor_Brain_Descriptor const& value);
-ts::Result<void> deserialize(Multirotor_Brain_Config::Horizontal::Separate_Rate_PIDs& value, ts::sz::Value const& sz_value);
-ts::sz::Value serialize(Multirotor_Brain_Config::Horizontal::Separate_Rate_PIDs const& value);
+ts::Result<void> deserialize(Multirotor_Brain_Config::Horizontal::Separate_Angle_PIDs& value, ts::sz::Value const& sz_value);
+ts::sz::Value serialize(Multirotor_Brain_Config::Horizontal::Separate_Angle_PIDs const& value);
 ts::Result<void> deserialize(Multirotor_Brain_Config::Horizontal& value, ts::sz::Value const& sz_value);
 ts::sz::Value serialize(Multirotor_Brain_Config::Horizontal const& value);
 ts::Result<void> deserialize(Multirotor_Brain_Config::Yaw& value, ts::sz::Value const& sz_value);
@@ -3289,8 +3289,8 @@ ts::Result<void> deserialize(Multirotor_Brain_Config::Vertical& value, ts::sz::V
 ts::sz::Value serialize(Multirotor_Brain_Config::Vertical const& value);
 ts::Result<void> deserialize(Multirotor_Brain_Config& value, ts::sz::Value const& sz_value);
 ts::sz::Value serialize(Multirotor_Brain_Config const& value);
-ts::Result<void> deserialize(boost::variant<Multirotor_Brain_Config::Horizontal::Combined_Rate_PIDs,Multirotor_Brain_Config::Horizontal::Separate_Rate_PIDs>& value, ts::sz::Value const& sz_value);
-ts::sz::Value serialize(boost::variant<Multirotor_Brain_Config::Horizontal::Combined_Rate_PIDs,Multirotor_Brain_Config::Horizontal::Separate_Rate_PIDs> const& value);
+ts::Result<void> deserialize(boost::variant<Multirotor_Brain_Config::Horizontal::Combined_Angle_PIDs,Multirotor_Brain_Config::Horizontal::Separate_Angle_PIDs>& value, ts::sz::Value const& sz_value);
+ts::sz::Value serialize(boost::variant<Multirotor_Brain_Config::Horizontal::Combined_Angle_PIDs,Multirotor_Brain_Config::Horizontal::Separate_Angle_PIDs> const& value);
 ts::Result<void> deserialize(Multirotor_Pilot_Descriptor& value, ts::sz::Value const& sz_value);
 ts::sz::Value serialize(Multirotor_Pilot_Descriptor const& value);
 ts::Result<void> deserialize(Multirotor_Pilot_Config& value, ts::sz::Value const& sz_value);

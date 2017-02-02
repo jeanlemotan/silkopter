@@ -518,13 +518,13 @@ struct Multirotor_Brain_Config : public INode_Config
         alias speed_deg_t = ufloat : [ min = 10.f, max = 3000.f ];
         speed_deg_t max_rate_deg = 180.f : [ ui_name = "Max Rate", ui_suffix = "°/s" ];
 
-        alias Combined_Rate_PIDs = PID_Controller_Descriptor : [ ui_name = "Combined" ];
-        struct Separate_Rate_PIDs : [ ui_name = "Separate" ]
+        alias Combined_Angle_PIDs = PID_Controller_Descriptor : [ ui_name = "Combined" ];
+        struct Separate_Angle_PIDs : [ ui_name = "Separate" ]
         {
             PID_Controller_Descriptor x_pid : [ ui_name = "X" ];
             PID_Controller_Descriptor y_pid : [ ui_name = "Y" ];
         };
-        variant<Combined_Rate_PIDs, Separate_Rate_PIDs> rate_pids : [ ui_name = "Rate PIDs" ];
+        variant<Combined_Angle_PIDs, Separate_Angle_PIDs> angle_pids : [ ui_name = "Angle PIDs" ];
 
 		alias max_angle_t = vec2f : [ min = {-90.f, -90.f}, max = {90.f, 90.f} ];
         max_angle_t max_angle_deg = { 60.f, 60.f } : [ ui_name = "Max Angle", ui_suffix = "°" ];
@@ -542,7 +542,7 @@ struct Multirotor_Brain_Config : public INode_Config
         alias speed_deg_t = ufloat : [ min = 10.f, max = 3000.f ];
         speed_deg_t max_rate_deg = 180.f : [ ui_name = "Max Rate", ui_suffix = "°/s" ];
 
-        PID_Controller_Descriptor rate_pid : [ ui_name = "Rate PID" ];
+        PID_Controller_Descriptor angle_pid : [ ui_name = "Angle PID" ];
     };
     struct Vertical
     {

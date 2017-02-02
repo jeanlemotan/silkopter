@@ -300,11 +300,12 @@ math::vec2f Multirotor_Brain::compute_horizontal_rate_for_angle(math::vec2f cons
     float diff_x, diff_y, _;
     diff.get_as_euler_zxy(diff_x, diff_y, _);
 
+    float rx = m_horizontal_mode_data.angle_x_pid.process(-diff_x, 0.f);
+    float ry = m_horizontal_mode_data.angle_y_pid.process(-diff_y, 0.f);
+
     float max_speed = math::radians(m_config->get_horizontal().get_max_rate_deg());
 
-    float rx = m_horizontal_mode_data.rate_x_pid.process(-diff_x, 0.f);
     rx = math::clamp(rx, -max_speed, max_speed);
-    float ry = m_horizontal_mode_data.rate_y_pid.process(-diff_y, 0.f);
     ry = math::clamp(ry, -max_speed, max_speed);
 
     return math::vec2f(rx, ry);
@@ -379,9 +380,9 @@ float Multirotor_Brain::compute_yaw_rate_for_angle(float target_angle)
     float _, diff_z;
     diff.get_as_euler_zxy(_, _, diff_z);
 
-    float max_speed = math::radians(m_config->get_yaw().get_max_rate_deg());
+    float z = m_yaw_mode_data.angle_pid.process(-diff_z, 0.f);
 
-    float z = m_yaw_mode_data.rate_pid.process(-diff_z, 0.f);
+    float max_speed = math::radians(m_config->get_yaw().get_max_rate_deg());
     z = math::clamp(z, -max_speed, max_speed);
 
     return z;
@@ -487,7 +488,7 @@ void Multirotor_Brain::process_fly_mode()
         }
 
         //apply command
-        float speed = m_config->get_vertical().get_max_speed() * commands.sticks.throttle * 2.f;
+        float speed = m_config->get_vertical().get_max_speed() * (commands.sticks.throttle * 2.f - 1.f);
         m_vertical_mode_data.target_altitude += speed * m_dts;
 
         thrust = compute_thrust_for_altitude(m_vertical_mode_data.target_altitude);
@@ -502,21 +503,22 @@ void Multirotor_Brain::process_fly_mode()
     if (m_horizontal_mode == stream::IMultirotor_Commands::Horizontal_Mode::ANGLE_RATE)
     {
         float max_speed = math::radians(m_config->get_horizontal().get_max_rate_deg());
-        rate.x = commands.sticks.pitch * max_speed * 2.f;
-        rate.y = commands.sticks.roll * max_speed * 2.f;
+        rate.x = (commands.sticks.pitch * 2.f - 1.f) * max_speed;
+        rate.y = (commands.sticks.roll * 2.f - 1.f) * max_speed;
     }
     else if (m_horizontal_mode == stream::IMultirotor_Commands::Horizontal_Mode::ANGLE)
     {
         math::vec2f const& max_angle = math::radians(m_config->get_horizontal().get_max_angle_deg());
-        math::vec2f hrate = compute_horizontal_rate_for_angle(math::vec2f(commands.sticks.pitch * max_angle.x * 2.f, commands.sticks.roll * max_angle.y * 2.f));
+        math::vec2f hrate = compute_horizontal_rate_for_angle(math::vec2f((commands.sticks.pitch * 2.f - 1.f) * max_angle.x,
+                                                                          (commands.sticks.roll * 2.f - 1.f) * max_angle.y));
         rate.x = hrate.x;
         rate.y = hrate.y;
     }
     else if (m_horizontal_mode == stream::IMultirotor_Commands::Horizontal_Mode::VELOCITY)
     {
         //apply command
-        math::vec2f velocity_local(commands.sticks.pitch * m_config->get_horizontal().get_max_speed() * 2.f,
-                                   commands.sticks.roll * m_config->get_horizontal().get_max_speed() * 2.f);
+        math::vec2f velocity_local((commands.sticks.pitch * 2.f - 1.f) * m_config->get_horizontal().get_max_speed(),
+                                   (commands.sticks.roll * 2.f - 1.f) * m_config->get_horizontal().get_max_speed());
 
         math::vec2f velocity_enu(math::rotate(m_inputs.frame.sample.value, math::vec3f(velocity_local)));
 
@@ -531,12 +533,12 @@ void Multirotor_Brain::process_fly_mode()
     if (m_yaw_mode == stream::IMultirotor_Commands::Yaw_Mode::ANGLE_RATE)
     {
         float max_speed = math::radians(m_config->get_yaw().get_max_rate_deg());
-        rate.z = commands.sticks.yaw * max_speed * 2.f;
+        rate.z = (commands.sticks.yaw * 2.f - 1.f) * max_speed;
     }
     else if (m_yaw_mode == stream::IMultirotor_Commands::Yaw_Mode::ANGLE)
     {
         float max_speed = math::radians(m_config->get_yaw().get_max_rate_deg());
-        float speed = commands.sticks.yaw * max_speed * 2.f;
+        float speed = (commands.sticks.yaw * 2.f - 1.f) * max_speed;
 
         m_yaw_mode_data.target_angle += speed * m_dts;
 
@@ -813,32 +815,32 @@ ts::Result<void> Multirotor_Brain::set_config(hal::INode_Config const& config)
 
     {
         hal::Multirotor_Brain_Config::Horizontal const& descriptor = m_config->get_horizontal();
-        PID::Params rate_x_params, rate_y_params;
-        if (auto combined_pids = boost::get<hal::Multirotor_Brain_Config::Horizontal::Combined_Rate_PIDs>(&descriptor.get_rate_pids()))
+        PID::Params angle_x_params, angle_y_params;
+        if (auto combined_pids = boost::get<hal::Multirotor_Brain_Config::Horizontal::Combined_Angle_PIDs>(&descriptor.get_angle_pids()))
         {
-            fill_pid_params(rate_x_params, *combined_pids, output_rate);
-            fill_pid_params(rate_y_params, *combined_pids, output_rate);
+            fill_pid_params(angle_x_params, *combined_pids, output_rate);
+            fill_pid_params(angle_y_params, *combined_pids, output_rate);
         }
         else
         {
-            auto separate_pids = boost::get<hal::Multirotor_Brain_Config::Horizontal::Separate_Rate_PIDs>(&descriptor.get_rate_pids());
-            fill_pid_params(rate_x_params, separate_pids->get_x_pid(), output_rate);
-            fill_pid_params(rate_y_params, separate_pids->get_y_pid(), output_rate);
+            auto separate_pids = boost::get<hal::Multirotor_Brain_Config::Horizontal::Separate_Angle_PIDs>(&descriptor.get_angle_pids());
+            fill_pid_params(angle_x_params, separate_pids->get_x_pid(), output_rate);
+            fill_pid_params(angle_y_params, separate_pids->get_y_pid(), output_rate);
         }
 
-        if (!m_horizontal_mode_data.rate_x_pid.set_params(rate_x_params) ||
-            !m_horizontal_mode_data.rate_y_pid.set_params(rate_y_params))
+        if (!m_horizontal_mode_data.angle_x_pid.set_params(angle_x_params) ||
+            !m_horizontal_mode_data.angle_y_pid.set_params(angle_y_params))
         {
-            return make_error("Bad horizontal rate PID params");
+            return make_error("Bad horizontal angle PID params");
         }
     }
 
     {
         PID::Params params;
-        fill_pid_params(params, m_config->get_yaw().get_rate_pid(), output_rate);
-        if (!m_yaw_mode_data.rate_pid.set_params(params))
+        fill_pid_params(params, m_config->get_yaw().get_angle_pid(), output_rate);
+        if (!m_yaw_mode_data.angle_pid.set_params(params))
         {
-            return make_error("Bad yaw rate PID params");
+            return make_error("Bad yaw angle PID params");
         }
     }
 
