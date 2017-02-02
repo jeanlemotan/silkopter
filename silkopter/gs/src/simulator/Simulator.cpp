@@ -78,13 +78,13 @@ void Simulator::init(silk::Comms& comms, std::string const& node_name)
         auto result = m_comms->send_node_message(m_node_name, message);
         QASSERT(result == ts::success);
     });
-    QObject::connect(m_ui.actionReset, &QAction::toggled, [this](bool yes)
+    QObject::connect(m_ui.actionReset, &QAction::triggered, [this](bool yes)
     {
         auto message = std::make_shared<silk::messages::Multirotor_Simulator_Reset_Message>();
         auto result = m_comms->send_node_message(m_node_name, message);
         QASSERT(result == ts::success);
     });
-    QObject::connect(m_ui.actionStopMotion, &QAction::toggled, [this](bool yes)
+    QObject::connect(m_ui.actionStopMotion, &QAction::triggered, [this](bool yes)
     {
         auto message = std::make_shared<silk::messages::Multirotor_Simulator_Stop_Motion_Message>();
         auto result = m_comms->send_node_message(m_node_name, message);
@@ -214,7 +214,7 @@ void Simulator::process_logic(float dt)
     auto now = Clock::now();
 
     if ((m_send_message == false && now - m_last_message_send_tp >= std::chrono::milliseconds(200)) ||
-         m_send_message == true && now - m_last_message_send_tp >= std::chrono::milliseconds(30))
+        (m_send_message == true && now - m_last_message_send_tp >= std::chrono::milliseconds(30)))
     {
         auto result = m_comms->send_node_message(m_node_name, m_get_state_message);
         QASSERT(result == ts::success);
