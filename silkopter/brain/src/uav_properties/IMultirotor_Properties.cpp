@@ -26,7 +26,7 @@ std::vector<IMultirotor_Properties::Motor> IMultirotor_Properties::create_motors
 
             Motor motor;
             motor.position = math::vec3f(x, y, 0.f);
-            motor.thrust_vector = math::vec3f(0, 0, r == 0 ? -1.f : 1.f);
+            motor.thrust_vector = math::vec3f(0, 0, 1.f);
             motor.clockwise = (c & 1) == 0;
             res.push_back(motor);
 
