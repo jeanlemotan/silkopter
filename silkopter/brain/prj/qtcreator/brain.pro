@@ -60,6 +60,7 @@ INCLUDEPATH += ../../../libs/common/comms/def
 INCLUDEPATH += ../../../../def_lang/include
 INCLUDEPATH += ../../../../qbase/include
 INCLUDEPATH += ../../../../qmath/include
+INCLUDEPATH += ../../../../ReactPhysics3D/src
 INCLUDEPATH += ../../../../eigen
 
 LIBS += -L=/opt/vc/lib/
