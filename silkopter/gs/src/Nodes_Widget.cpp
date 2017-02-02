@@ -494,7 +494,7 @@ void Nodes_Widget::show_block_context_menu(QGraphicsSceneMouseEvent* event, QNEB
 
         menu.addSeparator();
 
-        bool supports_any_calibration = false;
+        //bool supports_any_calibration = false;
         for (size_t i = 0; i < node->outputs.size(); i++)
         {
             Node::Output const& os = node->outputs[i];
@@ -507,7 +507,7 @@ void Nodes_Widget::show_block_context_menu(QGraphicsSceneMouseEvent* event, QNEB
                     do_acceleration_calibration(*node, i);
                 });
 
-                supports_any_calibration = true;
+                //supports_any_calibration = true;
                 continue;
             }
             if (supports_angular_velocity_calibration(*node, os))
@@ -518,7 +518,7 @@ void Nodes_Widget::show_block_context_menu(QGraphicsSceneMouseEvent* event, QNEB
                     do_angular_velocity_calibration(*node, i);
                 });
 
-                supports_any_calibration = true;
+                //supports_any_calibration = true;
                 continue;
             }
             if (supports_magnetic_field_calibration(*node, os))
@@ -529,7 +529,7 @@ void Nodes_Widget::show_block_context_menu(QGraphicsSceneMouseEvent* event, QNEB
                     do_magnetic_field_calibration(*node, i);
                 });
 
-                supports_any_calibration = true;
+                //supports_any_calibration = true;
                 continue;
             }
         }
