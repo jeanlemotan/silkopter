@@ -323,7 +323,15 @@ Result<void> Vector_Value::insert_value(size_t idx, std::shared_ptr<IValue> valu
         return Error("Cannot insert value of type '" + value->get_type()->get_name() + "'. Expected values of type '" + get_specialized_type()->get_inner_type()->get_name() + "'");
     }
 
+    boost::signals2::scoped_connection connection = value->sig_value_changed.connect([this]
+    {
+        sig_value_changed();
+    });
+
     m_values.insert(m_values.begin() + idx, std::move(value));
+    m_value_changed_connections.insert(m_value_changed_connections.begin() + idx, std::move(connection));
+
+    sig_value_changed();
 
     return success;
 }
@@ -340,6 +348,9 @@ Result<void> Vector_Value::erase_value(size_t idx)
     }
 
     m_values.erase(m_values.begin() + idx);
+    m_value_changed_connections.erase(m_value_changed_connections.begin() + idx);
+
+    sig_value_changed();
 
     return success;
 }
@@ -347,7 +358,12 @@ Result<void> Vector_Value::erase_value(size_t idx)
 void Vector_Value::clear()
 {
     TS_ASSERT(is_constructed());
-    m_values.clear();
+    if (!m_values.empty())
+    {
+        m_values.clear();
+        m_value_changed_connections.clear();
+        sig_value_changed();
+    }
 }
 
 size_t Vector_Value::get_value_count() const

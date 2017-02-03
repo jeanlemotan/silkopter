@@ -49,6 +49,7 @@ private:
     bool m_is_set = false;
     std::shared_ptr<IOptional_Type const> m_type;
     std::shared_ptr<IValue> m_value;
+    boost::signals2::scoped_connection m_value_changed_connection;
 };
 
 }

@@ -355,6 +355,11 @@ Result<void> Poly_Value::set_value(std::shared_ptr<IValue> value)
         //the actual assignment
         m_value = value;
 
+        m_value_changed_connection = m_value->sig_value_changed.connect([this]
+        {
+            sig_value_changed();
+        });
+
         //now that the type changed
         if (type_changes)
         {

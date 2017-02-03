@@ -48,7 +48,10 @@ public:
 private:
     bool m_is_constructed = false;
     std::shared_ptr<IVariant_Type const> m_type;
-    std::shared_ptr<IValue> m_value;
+    std::vector<std::shared_ptr<IValue>> m_values;
+    size_t m_crt_type_index = 0;
+
+    std::vector<boost::signals2::scoped_connection> m_value_changed_connections;
 };
 
 }

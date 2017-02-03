@@ -210,6 +210,12 @@ Result<void> Optional_Value::create_value()
     }
 
     m_value = value;
+
+    m_value_changed_connection = m_value->sig_value_changed.connect([this]
+    {
+        sig_value_changed();
+    });
+
     return success;
 }
 
@@ -244,6 +250,8 @@ Result<void> Optional_Value::mark_as_set(bool set)
     {
         sig_was_set();
     }
+
+    sig_value_changed();
 
     return ts::success;
 }

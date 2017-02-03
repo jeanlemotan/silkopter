@@ -13,8 +13,14 @@ Struct_Value::Struct_Value(std::shared_ptr<IStruct_Type const> type)
 {
     for (size_t i = 0; i < type->get_member_def_count(); i++)
     {
-        auto result = add_member(std::make_shared<Member>(type->get_member_def(i)));
+        std::shared_ptr<Member> member = std::make_shared<Member>(type->get_member_def(i));
+        auto result = add_member(member);
         TS_ASSERT(result == success);
+
+        m_value_changed_connections.push_back(member->get_value()->sig_value_changed.connect([this]
+        {
+            sig_value_changed();
+        }));
     }
 }
 

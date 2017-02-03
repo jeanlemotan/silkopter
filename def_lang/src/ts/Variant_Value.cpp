@@ -55,21 +55,25 @@ Result<void> Variant_Value::construct(IInitializer_List const& initializer_list)
         return Error("Not supported");
     }
 
-    std::shared_ptr<IValue> value = m_type->get_inner_qualified_type(0)->get_type()->create_value();
-    auto result = value->construct();
-    if (result != success)
+    //construct all inner values
+    for (size_t i = 0; i < m_type->get_inner_qualified_type_count(); i++)
     {
-        return result;
+        std::shared_ptr<IValue> value = m_type->get_inner_qualified_type(i)->get_type()->create_value();
+        auto result = value->construct();
+        if (result != success)
+        {
+            m_values.clear();
+            return result;
+        }
+
+        m_values.push_back(value);
+        m_value_changed_connections.push_back(value->sig_value_changed.connect([this]
+        {
+            sig_value_changed();
+        }));
     }
 
     m_is_constructed = true;
-
-    result = set_value(value);
-    if (result != success)
-    {
-        m_is_constructed = false;
-        return result;
-    }
 
     return success;
 }
@@ -232,14 +236,14 @@ Result<void> Variant_Value::deserialize(sz::Value const& sz_value)
 
 bool Variant_Value::is_set() const
 {
-    return m_value != nullptr;
+    return true;
 }
 
 
 std::shared_ptr<const IValue> Variant_Value::get_value() const
 {
     TS_ASSERT(is_constructed());
-    return m_value;
+    return m_values[m_crt_type_index];
 }
 std::shared_ptr<IValue> Variant_Value::get_value()
 {
@@ -249,7 +253,7 @@ std::shared_ptr<IValue> Variant_Value::get_value()
     }
 
     TS_ASSERT(is_constructed());
-    return m_value;
+    return m_values[m_crt_type_index];
 }
 
 Result<void> Variant_Value::set_value(std::shared_ptr<const IValue> value)
@@ -264,33 +268,13 @@ Result<void> Variant_Value::set_value(std::shared_ptr<const IValue> value)
         return Error("Unconstructed value");
     }
 
-    boost::optional<size_t> idx = m_type->find_inner_qualified_type_idx(value->get_type());
-    if (idx == boost::none)
-    {
-        return Error("Type '" + value->get_type()->get_symbol_path().to_string() + "' not allowed in variant '" + m_type->get_symbol_path().to_string() + "'");
-    }
-
-    bool index_change = m_value ? *idx != get_value_type_index() : true;
-    if (index_change)
-    {
-        sig_type_index_will_change();
-    }
-
-    std::shared_ptr<IValue> new_value = value->get_type()->create_value();
-    auto result = new_value->copy_construct(*value);
-    if (result != success)
+    auto result = set_value_type(value->get_type());
+    if (result != ts::success)
     {
         return result;
     }
 
-    m_value = new_value;
-
-    if (index_change)
-    {
-        sig_type_index_has_changed();
-    }
-
-    return success;
+    return get_value()->copy_assign(*value);
 }
 
 Result<void> Variant_Value::set_value_type(std::shared_ptr<const IType> type)
@@ -304,14 +288,14 @@ Result<void> Variant_Value::set_value_type(std::shared_ptr<const IType> type)
     {
         return Error("Cannot set null type in variant '" + m_type->get_symbol_path().to_string() + "'");
     }
-    std::shared_ptr<IValue> value = type->create_value();
-    auto result = value->construct();
-    if (result != ts::success)
+
+    boost::optional<size_t> idx = m_type->find_inner_qualified_type_idx(type);
+    if (idx == boost::none)
     {
-        return result;
+        return Error("Type '" + type->get_symbol_path().to_string() + "' not allowed in variant '" + m_type->get_symbol_path().to_string() + "'");
     }
 
-    return set_value(value);
+    return set_value_type_index(*idx);
 }
 
 Result<void> Variant_Value::set_value_type_index(size_t idx)
@@ -321,29 +305,25 @@ Result<void> Variant_Value::set_value_type_index(size_t idx)
         TS_ASSERT(false);
         return Error("Unconstructed value");
     }
-    if (idx != get_value_type_index())
+
+    if (m_crt_type_index != idx)
     {
-        std::shared_ptr<IValue> value = m_type->get_inner_qualified_type(idx)->get_type()->create_value();
-        auto result = value->construct();
-        if (result != ts::success)
-        {
-            return result;
-        }
-        return set_value(value);
+        sig_type_index_will_change();
+
+        TS_ASSERT(idx < m_values.size());
+        m_crt_type_index = idx;
+
+        sig_type_index_has_changed();
+        sig_value_changed();
     }
+
     return ts::success;
 }
 
 size_t Variant_Value::get_value_type_index() const
 {
     TS_ASSERT(is_constructed());
-    boost::optional<size_t> idx = m_type->find_inner_qualified_type_idx(m_value->get_type());
-    if (idx == boost::none)
-    {
-        TS_ASSERT(false);
-        return 0;
-    }
-    return *idx;
+    return m_crt_type_index;
 }
 
 
