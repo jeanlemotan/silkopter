@@ -11,8 +11,8 @@ namespace ts
 class Struct_Value final : public virtual IStruct_Value, public Member_Container_EP
 {
 public:
-
     Struct_Value(std::shared_ptr<IStruct_Type const> type);
+    ~Struct_Value();
 
     bool is_constructed() const override;
 
@@ -45,7 +45,7 @@ public:
 private:
     bool m_is_constructed = false;
     std::shared_ptr<IStruct_Type const> m_type;
-    std::vector<boost::signals2::scoped_connection> m_value_changed_connections;
+    std::vector<boost::signals2::connection> m_value_changed_connections;
 };
 
 }

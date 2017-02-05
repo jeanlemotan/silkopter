@@ -12,6 +12,14 @@ Variant_Value::Variant_Value(std::shared_ptr<IVariant_Type const> type)
 {
 }
 
+Variant_Value::~Variant_Value()
+{
+    for (boost::signals2::connection& c: m_value_changed_connections)
+    {
+        c.disconnect();
+    }
+}
+
 bool Variant_Value::is_constructed() const
 {
     return m_is_constructed;

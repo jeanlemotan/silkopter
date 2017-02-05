@@ -9,8 +9,8 @@ namespace ts
 class Variant_Value final : virtual public IVariant_Value
 {
 public:
-
     Variant_Value(std::shared_ptr<IVariant_Type const> type);
+    ~Variant_Value();
 
     bool is_constructed() const override;
 
@@ -51,7 +51,7 @@ private:
     std::vector<std::shared_ptr<IValue>> m_values;
     size_t m_crt_type_index = 0;
 
-    std::vector<boost::signals2::scoped_connection> m_value_changed_connections;
+    std::vector<boost::signals2::connection> m_value_changed_connections;
 };
 
 }

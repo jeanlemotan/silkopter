@@ -24,6 +24,14 @@ Struct_Value::Struct_Value(std::shared_ptr<IStruct_Type const> type)
     }
 }
 
+Struct_Value::~Struct_Value()
+{
+    for (boost::signals2::connection& c: m_value_changed_connections)
+    {
+        c.disconnect();
+    }
+}
+
 bool Struct_Value::is_constructed() const
 {
     return m_is_constructed;

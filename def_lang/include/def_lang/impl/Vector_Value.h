@@ -9,8 +9,8 @@ namespace ts
 class Vector_Value final : virtual public IVector_Value
 {
 public:
-
     Vector_Value(std::shared_ptr<IVector_Type const> type);
+    ~Vector_Value();
 
     Result<bool> is_equal(IValue const& other) const override;
 
@@ -49,7 +49,7 @@ private:
     bool m_is_constructed = false;
     std::shared_ptr<IVector_Type const> m_type;
     std::vector<std::shared_ptr<IValue>> m_values;
-    std::vector<boost::signals2::scoped_connection> m_value_changed_connections;
+    std::vector<boost::signals2::connection> m_value_changed_connections;
 };
 
 }

@@ -12,6 +12,11 @@ Vector_Value::Vector_Value(std::shared_ptr<IVector_Type const> type)
 {
 }
 
+Vector_Value::~Vector_Value()
+{
+    clear();
+}
+
 bool Vector_Value::is_constructed() const
 {
     return m_is_constructed;
@@ -323,13 +328,14 @@ Result<void> Vector_Value::insert_value(size_t idx, std::shared_ptr<IValue> valu
         return Error("Cannot insert value of type '" + value->get_type()->get_name() + "'. Expected values of type '" + get_specialized_type()->get_inner_type()->get_name() + "'");
     }
 
-    boost::signals2::scoped_connection connection = value->sig_value_changed.connect([this]
+
+    boost::signals2::connection connection = value->sig_value_changed.connect([this]
     {
         sig_value_changed();
     });
 
     m_values.insert(m_values.begin() + idx, std::move(value));
-    m_value_changed_connections.insert(m_value_changed_connections.begin() + idx, std::move(connection));
+    m_value_changed_connections.insert(m_value_changed_connections.begin() + idx, connection);
 
     sig_value_changed();
 
@@ -348,6 +354,8 @@ Result<void> Vector_Value::erase_value(size_t idx)
     }
 
     m_values.erase(m_values.begin() + idx);
+
+    m_value_changed_connections[idx].disconnect();
     m_value_changed_connections.erase(m_value_changed_connections.begin() + idx);
 
     sig_value_changed();
@@ -361,6 +369,10 @@ void Vector_Value::clear()
     if (!m_values.empty())
     {
         m_values.clear();
+        for (boost::signals2::connection& c: m_value_changed_connections)
+        {
+            c.disconnect();
+        }
         m_value_changed_connections.clear();
         sig_value_changed();
     }
