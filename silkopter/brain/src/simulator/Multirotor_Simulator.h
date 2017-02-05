@@ -14,6 +14,7 @@
 #include "common/node/IMultirotor_Simulator.h"
 
 #include "Multirotor_Simulation.h"
+#include "Basic_Output_Stream.h"
 
 
 namespace silk
@@ -169,6 +170,8 @@ private:
         std::vector<Sample> samples;
         Sample last_sample;
     };
+    typedef Basic_Output_Stream<stream::IMultirotor_Simulator_State> Simulator_State_Stream;
+    mutable std::shared_ptr<Simulator_State_Stream> m_simulator_state_stream;
 
     mutable std::shared_ptr<Angular_Velocity> m_angular_velocity_stream;
     mutable std::shared_ptr<Acceleration> m_acceleration_stream;

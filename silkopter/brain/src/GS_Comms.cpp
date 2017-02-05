@@ -25,6 +25,7 @@
 #include "common/stream/ITorque.h"
 #include "common/stream/IVoltage.h"
 #include "common/stream/IProximity.h"
+#include "common/stream/IMultirotor_Simulator_State.h"
 #include "common/stream/IMultirotor_State.h"
 #include "common/stream/IMultirotor_Commands.h"
 
@@ -212,6 +213,7 @@ void GS_Comms::gather_telemetry_data()
                 gather_telemetry_stream<stream::IThrottle>(ts, *stream) ||
                 gather_telemetry_stream<stream::IMultirotor_Commands>(ts, *stream) ||
                 gather_telemetry_stream<stream::IMultirotor_State>(ts, *stream) ||
+                gather_telemetry_stream<stream::IMultirotor_Simulator_State>(ts, *stream) ||
                 gather_telemetry_stream<stream::IProximity>(ts, *stream) ||
                 gather_telemetry_stream<stream::IVideo>(ts, *stream))
             {

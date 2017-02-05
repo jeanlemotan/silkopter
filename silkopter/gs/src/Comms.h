@@ -27,6 +27,7 @@
 #include "common/stream/IProximity.h"
 #include "common/stream/IMultirotor_Commands.h"
 #include "common/stream/IMultirotor_State.h"
+#include "common/stream/IMultirotor_Simulator_State.h"
 
 #include "utils/Clock.h"
 #include "utils/comms/RCP.h"
@@ -80,8 +81,8 @@ public:
     void disconnect();
     auto is_connected() const -> bool;
 
-    ts::Result<std::shared_ptr<ts::IStruct_Value>> request_uav_descriptor(std::chrono::high_resolution_clock::duration timeout = std::chrono::milliseconds(1000));
-    ts::Result<std::shared_ptr<ts::IStruct_Value>> send_uav_descriptor(std::shared_ptr<ts::IStruct_Value> descriptor, std::chrono::high_resolution_clock::duration timeout = std::chrono::milliseconds(1000));
+    ts::Result<std::shared_ptr<ts::IStruct_Value>> request_uav_descriptor(std::chrono::high_resolution_clock::duration timeout = std::chrono::milliseconds(3000));
+    ts::Result<std::shared_ptr<ts::IStruct_Value>> send_uav_descriptor(std::shared_ptr<ts::IStruct_Value> descriptor, std::chrono::high_resolution_clock::duration timeout = std::chrono::milliseconds(3000));
 
     struct Node_Def
     {
@@ -125,17 +126,17 @@ public:
         std::vector<Output> outputs;
     };
 
-    ts::Result<std::vector<Node_Def>> request_node_defs(std::chrono::high_resolution_clock::duration timeout = std::chrono::milliseconds(1000));
-    ts::Result<std::vector<Node>> request_nodes(std::chrono::high_resolution_clock::duration timeout = std::chrono::milliseconds(1000));
+    ts::Result<std::vector<Node_Def>> request_node_defs(std::chrono::high_resolution_clock::duration timeout = std::chrono::milliseconds(3000));
+    ts::Result<std::vector<Node>> request_nodes(std::chrono::high_resolution_clock::duration timeout = std::chrono::milliseconds(3000));
 
-    ts::Result<Node> add_node(std::string const& name, std::string const def_name, std::shared_ptr<ts::IStruct_Value> descriptor, std::chrono::high_resolution_clock::duration timeout = std::chrono::milliseconds(1000));
-    ts::Result<void> remove_node(std::string const& name, std::chrono::high_resolution_clock::duration timeout = std::chrono::milliseconds(1000));
+    ts::Result<Node> add_node(std::string const& name, std::string const def_name, std::shared_ptr<ts::IStruct_Value> descriptor, std::chrono::high_resolution_clock::duration timeout = std::chrono::milliseconds(3000));
+    ts::Result<void> remove_node(std::string const& name, std::chrono::high_resolution_clock::duration timeout = std::chrono::milliseconds(3000));
 
-    ts::Result<Comms::Node> set_node_input_stream_path(std::string const& node_name, std::string const& input_name, std::string const& stream_path, std::chrono::high_resolution_clock::duration timeout = std::chrono::milliseconds(1000));
+    ts::Result<Comms::Node> set_node_input_stream_path(std::string const& node_name, std::string const& input_name, std::string const& stream_path, std::chrono::high_resolution_clock::duration timeout = std::chrono::milliseconds(3000));
 
-    ts::Result<void> set_stream_telemetry_enabled(std::string const& stream_path, bool enabled, std::chrono::high_resolution_clock::duration timeout = std::chrono::milliseconds(1000));
+    ts::Result<void> set_stream_telemetry_enabled(std::string const& stream_path, bool enabled, std::chrono::high_resolution_clock::duration timeout = std::chrono::milliseconds(3000));
 
-    ts::Result<Node> set_node_config(std::string const& name, std::shared_ptr<ts::IStruct_Value> config, std::chrono::high_resolution_clock::duration timeout = std::chrono::milliseconds(1000));
+    ts::Result<Node> set_node_config(std::string const& name, std::shared_ptr<ts::IStruct_Value> config, std::chrono::high_resolution_clock::duration timeout = std::chrono::milliseconds(3000));
 
     ts::Result<void> send_node_message(std::string const& name, std::shared_ptr<messages::INode_Message> message);
 

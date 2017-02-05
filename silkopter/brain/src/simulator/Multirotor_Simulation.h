@@ -1,6 +1,7 @@
 #pragma once
 
 #include "common/node/IMultirotor_Simulator.h"
+#include "common/stream/IMultirotor_Simulator_State.h"
 #include "uav_properties/IMultirotor_Properties.h"
 #include "utils/Clock.h"
 #include "messages.def.h"
@@ -42,7 +43,7 @@ public:
     void set_simulation_enabled(bool yes);
     void set_drag_enabled(bool yes);
 
-    typedef messages::Multirotor_Simulation_State UAV_State;
+    typedef stream::IMultirotor_Simulator_State::Value UAV_State;
 
     UAV_State const& get_uav_state() const;
 
@@ -66,6 +67,7 @@ private:
         std::shared_ptr<btMotionState> motion_state;
         std::shared_ptr<btRigidBody> body;
         UAV_State state;
+        std::vector<float> motor_drag_factors;
     } m_uav;
 
 //    math::vec3f m_old_linear_velocity;
@@ -103,18 +105,20 @@ private:
     std::shared_ptr<btDiscreteDynamicsWorld> m_world;
 
 
-    Clock::time_point m_physics_timestamp;
-    Clock::duration m_physics_duration{0};
-//	Clock::duration m_uav_duration;
+    Clock::duration m_accumulated_duration{0};
+    Clock::duration m_accumulated_physics_duration{0};
+
+    uint32_t m_physics_rate = 0; //hz
+    Clock::duration m_physics_dt;
 
     void process_uav(Clock::duration dt);
     struct
     {
-        math::vec3f enu_velocity_sum;
+        math::vec3f enu_velocity;
         math::vec3f prev_enu_velocity;
-        math::vec3f enu_linear_acceleration_sum;
-        math::vec3f angular_velocity_sum;
-    } m_accumulated_data;
+        math::vec3f enu_linear_acceleration;
+        math::vec3f angular_velocity;
+    } m_sensor_data;
 
     void process_uav_sensors(Clock::duration dt);
     void process_air_drag(Clock::duration dt);

@@ -117,112 +117,6 @@ private:
   bool m_enabled = bool{true};
 };
 
-struct Multirotor_Simulator_Get_State_Message : public INode_Message
-{
-public:
-  virtual ~Multirotor_Simulator_Get_State_Message() = default;
-private:
-};
-
-struct Multirotor_Simulation_State
-{
-public:
-  struct Motor_State
-  {
-  public:
-    virtual ~Motor_State() = default;
-    void set_drag_factor(float const& value);
-    void set_drag_factor(float&& value);
-    auto get_drag_factor() const -> float const&;
-
-    void set_throttle(float const& value);
-    void set_throttle(float&& value);
-    auto get_throttle() const -> float const&;
-
-    void set_thrust(float const& value);
-    void set_thrust(float&& value);
-    auto get_thrust() const -> float const&;
-
-  private:
-    float m_drag_factor = float{0};
-    float m_throttle = float{0};
-    float m_thrust = float{0};
-  };
-
-  typedef vec4f quatf;
-  virtual ~Multirotor_Simulation_State() = default;
-  void set_enu_position(vec3f const& value);
-  void set_enu_position(vec3f&& value);
-  auto get_enu_position() const -> vec3f const&;
-
-  void set_local_to_enu_rotation(quatf const& value);
-  void set_local_to_enu_rotation(quatf&& value);
-  auto get_local_to_enu_rotation() const -> quatf const&;
-
-  void set_enu_velocity(vec3f const& value);
-  void set_enu_velocity(vec3f&& value);
-  auto get_enu_velocity() const -> vec3f const&;
-
-  void set_enu_linear_acceleration(vec3f const& value);
-  void set_enu_linear_acceleration(vec3f&& value);
-  auto get_enu_linear_acceleration() const -> vec3f const&;
-
-  void set_acceleration(vec3f const& value);
-  void set_acceleration(vec3f&& value);
-  auto get_acceleration() const -> vec3f const&;
-
-  void set_angular_velocity(vec3f const& value);
-  void set_angular_velocity(vec3f&& value);
-  auto get_angular_velocity() const -> vec3f const&;
-
-  void set_magnetic_field(vec3f const& value);
-  void set_magnetic_field(vec3f&& value);
-  auto get_magnetic_field() const -> vec3f const&;
-
-  void set_pressure(float const& value);
-  void set_pressure(float&& value);
-  auto get_pressure() const -> float const&;
-
-  void set_temperature(float const& value);
-  void set_temperature(float&& value);
-  auto get_temperature() const -> float const&;
-
-  void set_proximity_distance(vec3f const& value);
-  void set_proximity_distance(vec3f&& value);
-  auto get_proximity_distance() const -> vec3f const&;
-
-  void set_motors(std::vector<Multirotor_Simulation_State::Motor_State> const& value);
-  void set_motors(std::vector<Multirotor_Simulation_State::Motor_State>&& value);
-  auto get_motors() const -> std::vector<Multirotor_Simulation_State::Motor_State> const&;
-  auto get_motors() -> std::vector<Multirotor_Simulation_State::Motor_State>&;
-
-private:
-  vec3f m_enu_position = vec3f{0, 0, 0};
-  quatf m_local_to_enu_rotation = quatf{0, 0, 0, 1.000000f};
-  vec3f m_enu_velocity = vec3f{0, 0, 0};
-  vec3f m_enu_linear_acceleration = vec3f{0, 0, 0};
-  vec3f m_acceleration = vec3f{0, 0, 0};
-  vec3f m_angular_velocity = vec3f{0, 0, 0};
-  vec3f m_magnetic_field = vec3f{0, 0, 0};
-  float m_pressure = float{0};
-  float m_temperature = float{0};
-  vec3f m_proximity_distance = vec3f{0, 0, 0};
-  std::vector<Multirotor_Simulation_State::Motor_State> m_motors;
-};
-
-struct Multirotor_Simulator_State_Message : public INode_Message
-{
-public:
-  virtual ~Multirotor_Simulator_State_Message() = default;
-  void set_state(Multirotor_Simulation_State const& value);
-  void set_state(Multirotor_Simulation_State&& value);
-  auto get_state() const -> Multirotor_Simulation_State const&;
-  auto get_state() -> Multirotor_Simulation_State&;
-
-private:
-  Multirotor_Simulation_State m_state;
-};
-
 ts::Result<void> deserialize(std::string& value, ts::sz::Value const& sz_value);
 ts::sz::Value serialize(std::string const& value);
 ts::Result<void> deserialize(bool& value, ts::sz::Value const& sz_value);
@@ -279,15 +173,5 @@ ts::Result<void> deserialize(Multirotor_Simulator_Set_Simulation_Enabled_Message
 ts::sz::Value serialize(Multirotor_Simulator_Set_Simulation_Enabled_Message const& value);
 ts::Result<void> deserialize(Multirotor_Simulator_Set_Drag_Enabled_Message& value, ts::sz::Value const& sz_value);
 ts::sz::Value serialize(Multirotor_Simulator_Set_Drag_Enabled_Message const& value);
-ts::Result<void> deserialize(Multirotor_Simulator_Get_State_Message& value, ts::sz::Value const& sz_value);
-ts::sz::Value serialize(Multirotor_Simulator_Get_State_Message const& value);
-ts::Result<void> deserialize(Multirotor_Simulation_State::Motor_State& value, ts::sz::Value const& sz_value);
-ts::sz::Value serialize(Multirotor_Simulation_State::Motor_State const& value);
-ts::Result<void> deserialize(Multirotor_Simulation_State& value, ts::sz::Value const& sz_value);
-ts::sz::Value serialize(Multirotor_Simulation_State const& value);
-ts::Result<void> deserialize(std::vector<Multirotor_Simulation_State::Motor_State>& value, ts::sz::Value const& sz_value);
-ts::sz::Value serialize(std::vector<Multirotor_Simulation_State::Motor_State> const& value);
-ts::Result<void> deserialize(Multirotor_Simulator_State_Message& value, ts::sz::Value const& sz_value);
-ts::sz::Value serialize(Multirotor_Simulator_State_Message const& value);
 }
 }

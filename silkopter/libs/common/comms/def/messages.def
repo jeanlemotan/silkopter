@@ -40,38 +40,3 @@ struct Multirotor_Simulator_Set_Drag_Enabled_Message : public INode_Message
 {
     bool enabled = true;
 };
-
-struct Multirotor_Simulator_Get_State_Message : public INode_Message
-{
-};
-
-struct Multirotor_Simulation_State
-{
-    struct Motor_State
-    {
-        float drag_factor = 0.f;
-        float throttle = 0.f;
-        float thrust = 0.f;
-    };
-
-    vec3f enu_position;
-
-    alias quatf = vec4f;
-    quatf local_to_enu_rotation = { 0.f, 0.f, 0.f, 1.f };
-
-    vec3f enu_velocity;
-    vec3f enu_linear_acceleration;
-    vec3f acceleration;
-    vec3f angular_velocity;
-    vec3f magnetic_field;
-    float pressure = 0.f;
-    float temperature = 0.f;
-    vec3f proximity_distance;
-
-    vector<Motor_State> motors;
-};
-
-struct Multirotor_Simulator_State_Message : public INode_Message
-{
-    Multirotor_Simulation_State state;
-};

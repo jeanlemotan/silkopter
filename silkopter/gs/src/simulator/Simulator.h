@@ -10,6 +10,8 @@
 #include "Comms.h"
 #include "messages.def.h"
 
+#include "common/stream/IMultirotor_Simulator_State.h"
+
 class Simulator : public QMainWindow
 {
     Q_OBJECT
@@ -25,7 +27,9 @@ public Q_SLOTS:
 
 private:
     void init_world();
+    void create_axis(Qt3DCore::QEntity* parent);
     void message_received(std::string const& node_name, silk::messages::INode_Message const& message);
+    void telemetry_received(silk::Comms::ITelemetry_Stream const& stream);
 
     Ui::Simulator m_ui;
     Qt3DExtras::Qt3DWindow* m_view = nullptr;
@@ -38,10 +42,11 @@ private:
 
     silk::Comms* m_comms = nullptr;
     std::string m_node_name;
+    std::string m_stream_path;
 
-    bool m_send_message = true;
-    Clock::time_point m_last_message_send_tp = Clock::now();
+    boost::signals2::scoped_connection m_message_connection;
+    boost::signals2::scoped_connection m_telemetry_connection;
 
-    std::shared_ptr<silk::messages::Multirotor_Simulator_Get_State_Message> m_get_state_message;
-    silk::messages::Multirotor_Simulation_State m_state;
+    typedef silk::stream::IMultirotor_Simulator_State::Value UAV_State;
+    UAV_State m_state;
 };

@@ -26,6 +26,7 @@ Multirotor_Simulator::Multirotor_Simulator(HAL& hal)
     m_gps_info_stream = std::make_shared<GPS_Info>();
     m_ecef_position_stream = std::make_shared<ECEF_Position>();
     m_ecef_velocity_stream = std::make_shared<ECEF_Velocity>();
+    m_simulator_state_stream = std::make_shared<Simulator_State_Stream>();
 }
 
 ts::Result<void> Multirotor_Simulator::init(hal::INode_Descriptor const& descriptor)
@@ -89,12 +90,15 @@ ts::Result<void> Multirotor_Simulator::init()
     m_ecef_velocity_stream->rate = m_descriptor->get_gps_rate();
     m_ecef_velocity_stream->dt = std::chrono::microseconds(1000000 / m_ecef_velocity_stream->rate);
 
+    m_simulator_state_stream->set_rate(30);
+
     return ts::success;
 }
 
 ts::Result<void> Multirotor_Simulator::start(Clock::time_point tp)
 {
     m_last_tp = tp;
+    m_simulator_state_stream->set_tp(tp);
     return ts::success;
 }
 
@@ -123,6 +127,7 @@ auto Multirotor_Simulator::get_outputs() const -> std::vector<Output>
         {"gps_info", m_gps_info_stream},
         {"gps_position", m_ecef_position_stream},
         {"gps_velocity", m_ecef_velocity_stream},
+        {"simulator_state", m_simulator_state_stream},
     };
     return outputs;
 }
@@ -140,6 +145,7 @@ void Multirotor_Simulator::process()
     m_gps_info_stream->samples.clear();
     m_ecef_position_stream->samples.clear();
     m_ecef_velocity_stream->samples.clear();
+    m_simulator_state_stream->clear();
 
     for (size_t i = 0; i < m_input_throttle_streams.size(); i++)
     {
@@ -176,7 +182,7 @@ void Multirotor_Simulator::process()
             {
                 math::vec3f noise(m_noise.angular_velocity(m_noise.generator), m_noise.angular_velocity(m_noise.generator), m_noise.angular_velocity(m_noise.generator));
                 stream.accumulated_dt -= stream.dt;
-                stream.last_sample.value = uav_state.get_angular_velocity() + noise;
+                stream.last_sample.value = uav_state.angular_velocity + noise;
                 stream.last_sample.is_healthy = true;
                 stream.samples.push_back(stream.last_sample);
             }
@@ -188,7 +194,7 @@ void Multirotor_Simulator::process()
             {
                 math::vec3f noise(m_noise.acceleration(m_noise.generator), m_noise.acceleration(m_noise.generator), m_noise.acceleration(m_noise.generator));
                 stream.accumulated_dt -= stream.dt;
-                stream.last_sample.value = uav_state.get_acceleration() + noise;
+                stream.last_sample.value = uav_state.acceleration + noise;
                 stream.last_sample.is_healthy = true;
                 stream.samples.push_back(stream.last_sample);
             }
@@ -200,9 +206,9 @@ void Multirotor_Simulator::process()
             {
                 math::vec3f noise(m_noise.magnetic_field(m_noise.generator), m_noise.magnetic_field(m_noise.generator), m_noise.magnetic_field(m_noise.generator));
                 stream.accumulated_dt -= stream.dt;
-                QASSERT(math::is_finite(uav_state.get_magnetic_field()));
-                QASSERT(!math::is_zero(uav_state.get_magnetic_field(), math::epsilon<float>()));
-                stream.last_sample.value = uav_state.get_magnetic_field() + noise;
+                QASSERT(math::is_finite(uav_state.magnetic_field));
+                QASSERT(!math::is_zero(uav_state.magnetic_field, math::epsilon<float>()));
+                stream.last_sample.value = uav_state.magnetic_field + noise;
                 stream.last_sample.is_healthy = true;
                 stream.samples.push_back(stream.last_sample);
             }
@@ -214,7 +220,7 @@ void Multirotor_Simulator::process()
             {
                 double noise = m_noise.pressure(m_noise.generator);
                 stream.accumulated_dt -= stream.dt;
-                stream.last_sample.value = uav_state.get_pressure() + noise;
+                stream.last_sample.value = uav_state.pressure + noise;
                 stream.last_sample.is_healthy = true;
                 stream.samples.push_back(stream.last_sample);
             }
@@ -226,7 +232,7 @@ void Multirotor_Simulator::process()
             {
                 float noise = m_noise.temperature(m_noise.generator);
                 stream.accumulated_dt -= stream.dt;
-                stream.last_sample.value = uav_state.get_temperature() + noise;
+                stream.last_sample.value = uav_state.temperature + noise;
                 stream.last_sample.is_healthy = true;
                 stream.samples.push_back(stream.last_sample);
             }
@@ -238,8 +244,8 @@ void Multirotor_Simulator::process()
             {
                 float noise = m_noise.ground_distance(m_noise.generator);
                 stream.accumulated_dt -= stream.dt;
-                stream.last_sample.value = uav_state.get_proximity_distance() + noise;
-                stream.last_sample.is_healthy = !math::is_zero(uav_state.get_proximity_distance(), std::numeric_limits<float>::epsilon());
+                stream.last_sample.value = uav_state.proximity_distance + noise;
+                stream.last_sample.is_healthy = !math::is_zero(uav_state.proximity_distance, std::numeric_limits<float>::epsilon());
                 stream.samples.push_back(stream.last_sample);
             }
         }
@@ -266,7 +272,7 @@ void Multirotor_Simulator::process()
             {
                 math::vec3d noise(m_noise.gps_position(m_noise.generator), m_noise.gps_position(m_noise.generator), m_noise.gps_position(m_noise.generator));
                 stream.accumulated_dt -= stream.dt;
-                stream.last_sample.value = math::transform(enu_to_ecef_trans, math::vec3d(uav_state.get_enu_position())) + noise;
+                stream.last_sample.value = math::transform(enu_to_ecef_trans, math::vec3d(uav_state.enu_position)) + noise;
                 stream.last_sample.is_healthy = true;
                 stream.samples.push_back(stream.last_sample);
             }
@@ -278,12 +284,20 @@ void Multirotor_Simulator::process()
             {
                 math::vec3f noise(m_noise.gps_velocity(m_noise.generator), m_noise.gps_velocity(m_noise.generator), m_noise.gps_velocity(m_noise.generator));
                 stream.accumulated_dt -= stream.dt;
-                stream.last_sample.value = math::vec3f(math::transform(enu_to_ecef_rotation, math::vec3d(uav_state.get_enu_velocity()))) + noise;
+                stream.last_sample.value = math::vec3f(math::transform(enu_to_ecef_rotation, math::vec3d(uav_state.enu_velocity))) + noise;
                 stream.last_sample.is_healthy = true;
                 stream.samples.push_back(stream.last_sample);
             }
         }
     });
+
+    {
+        size_t samples_needed = m_simulator_state_stream->compute_samples_needed();
+        for (size_t i = 0; i < samples_needed; i++)
+        {
+            m_simulator_state_stream->push_sample(m_simulation.get_uav_state(), true);
+        }
+    }
 }
 
 ts::Result<void> Multirotor_Simulator::set_input_stream_path(size_t idx, std::string const& path)
@@ -413,13 +427,6 @@ ts::Result<std::shared_ptr<messages::INode_Message>> Multirotor_Simulator::send_
     {
         m_simulation.set_drag_enabled(message->get_enabled());
         return nullptr;
-    }
-    else if (dynamic_cast<messages::Multirotor_Simulator_Get_State_Message const*>(&_message))
-    {
-        auto const& state = m_simulation.get_uav_state();
-        std::shared_ptr<messages::Multirotor_Simulator_State_Message> response = std::make_shared<messages::Multirotor_Simulator_State_Message>();
-        response->set_state(state);
-        return response;
     }
     else
     {
