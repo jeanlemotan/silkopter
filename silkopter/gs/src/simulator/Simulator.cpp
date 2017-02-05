@@ -21,6 +21,7 @@
 
 #include <Qt3DRender/qrenderaspect.h>
 #include <Qt3DExtras/qforwardrenderer.h>
+#include <Qt3DExtras/QCylinderMesh>
 
 #include "OrbitCameraController.h"
 #include <Qt3DExtras/QPhongMaterial>
@@ -34,6 +35,13 @@ Simulator::Simulator(QWidget* parent)
     m_ui.setupUi(this);
 
     m_view = new Qt3DExtras::Qt3DWindow();
+
+    QSurfaceFormat format = m_view->format();
+    format.setSwapInterval(0);
+    m_view->setFormat(format);
+
+
+
     m_view->defaultFrameGraph()->setClearColor(QColor(QRgb(0x4d4d4f)));
     QWidget* container = QWidget::createWindowContainer(m_view);
     QSize screen_size = m_view->screen()->size();
@@ -60,11 +68,20 @@ void Simulator::init(silk::Comms& comms, std::string const& node_name)
     m_comms = &comms;
     m_node_name = node_name;
 
-    m_get_state_message = std::make_shared<silk::messages::Multirotor_Simulator_Get_State_Message>();
+    m_stream_path = node_name + "/simulator_state";
+    auto result = m_comms->set_stream_telemetry_enabled(m_stream_path, true);
+    if (result != ts::success)
+    {
+        QLOGE("Failed to enable simulator state stream '{}' telemetry: {}", m_stream_path, result.error().what());
+    }
 
-    m_comms->sig_node_message_received.connect(std::bind(&Simulator::message_received, this, std::placeholders::_1, std::placeholders::_2));
+    m_message_connection = m_comms->sig_node_message_received.connect(std::bind(&Simulator::message_received, this, std::placeholders::_1, std::placeholders::_2));
+    m_telemetry_connection = m_comms->sig_telemetry_samples_available.connect(std::bind(&Simulator::telemetry_received, this, std::placeholders::_1));
 
     init_world();
+
+    //m_view->show();
+
 
     Qt3DLogic::QFrameAction* frame_action = new Qt3DLogic::QFrameAction();
     m_root_entity->addComponent(frame_action);
@@ -150,6 +167,7 @@ void Simulator::init_world()
 
     //uavTransform->setScale(0.001f);
     m_uav_transform->setTranslation(QVector3D(-5.0f, 0.0f, 0.0f));
+    //m_uav_transform->setScale(m_comms->);
 
     Qt3DExtras::QPhongMaterial* uav_material = new Qt3DExtras::QPhongMaterial();
     uav_material->setDiffuse(QColor(QRgb(0xa69929)));
@@ -158,8 +176,8 @@ void Simulator::init_world()
     m_uav_entity = new Qt3DCore::QEntity(m_root_entity);
     m_uav_entity->addComponent(uav_mesh);
     m_uav_entity->addComponent(uav_material);
-    m_uav_entity->addComponent(m_uav_transform);
 
+    m_uav_entity->addComponent(m_uav_transform);
     {
         // plane shape data
         Qt3DRender::QMesh* plane_mesh = new Qt3DRender::QMesh();
@@ -193,6 +211,90 @@ void Simulator::init_world()
         m_ground_entity->addComponent(plane_material);
         m_ground_entity->addComponent(plane_transform);
     }
+
+    create_axis(m_uav_entity);
+}
+
+void Simulator::create_axis(Qt3DCore::QEntity* parent)
+{
+    float length = 1.f;
+
+    // Y - green
+    Qt3DExtras::QCylinderMesh *YAxis = new Qt3DExtras::QCylinderMesh();
+    YAxis->setRadius(0.01f);
+    YAxis->setLength(length);
+    YAxis->setRings(100);
+    YAxis->setSlices(20);
+
+    Qt3DCore::QTransform *transformY = new Qt3DCore::QTransform();
+    transformY->setTranslation(QVector3D(0, length / 2, 0));
+
+    Qt3DCore::QEntity* m_YAxisEntity = new Qt3DCore::QEntity(parent);
+    m_YAxisEntity->addComponent(YAxis); //will take ownership of YAxis if no parent was declared!
+    m_YAxisEntity->addComponent(transformY);
+
+    Qt3DExtras::QPhongMaterial *phongMaterialY = new Qt3DExtras::QPhongMaterial();
+    phongMaterialY->setDiffuse(QColor(0, 255, 0));
+    phongMaterialY->setAmbient(QColor(0, 255, 0));
+    phongMaterialY->setSpecular(Qt::white);
+    phongMaterialY->setShininess(50.0f);
+    m_YAxisEntity->addComponent(phongMaterialY);
+
+    // Z - blue
+    Qt3DExtras::QCylinderMesh *ZAxis = new Qt3DExtras::QCylinderMesh();
+    ZAxis->setRadius(0.01f);
+    ZAxis->setLength(length);
+    ZAxis->setRings(100);
+    ZAxis->setSlices(20);
+
+    Qt3DCore::QTransform *transformZ = new Qt3DCore::QTransform();
+    transformZ->setRotation(QQuaternion::fromAxisAndAngle(QVector3D(1,0,0), 90));
+    transformZ->setTranslation(QVector3D(0, 0, length / 2));
+
+    Qt3DCore::QEntity* m_ZAxisEntity = new Qt3DCore::QEntity(parent);
+    m_ZAxisEntity->addComponent(ZAxis);
+    m_ZAxisEntity->addComponent(transformZ);
+
+    Qt3DExtras::QPhongMaterial *phongMaterialZ = new Qt3DExtras::QPhongMaterial();
+    phongMaterialZ->setDiffuse(QColor(0, 0, 255));
+    phongMaterialZ->setAmbient(QColor(0, 0, 255));
+    phongMaterialZ->setSpecular(Qt::white);
+    phongMaterialZ->setShininess(50.0f);
+    m_ZAxisEntity->addComponent(phongMaterialZ);
+
+    // X - red
+    Qt3DExtras::QCylinderMesh *XAxis = new Qt3DExtras::QCylinderMesh();
+    XAxis->setRadius(0.01f);
+    XAxis->setLength(length);
+    XAxis->setRings(100);
+    XAxis->setSlices(20);
+
+    Qt3DCore::QTransform *transformX = new Qt3DCore::QTransform();
+    transformX->setRotation(QQuaternion::fromAxisAndAngle(QVector3D(0,0,1), -90));
+    transformX->setTranslation(QVector3D(length / 2, 0, 0));
+
+    Qt3DCore::QEntity* m_XAxisEntity = new Qt3DCore::QEntity(parent);
+    m_XAxisEntity->addComponent(XAxis);
+    m_XAxisEntity->addComponent(transformX);
+
+    Qt3DExtras::QPhongMaterial *phongMaterialX = new Qt3DExtras::QPhongMaterial();
+    phongMaterialX->setDiffuse(QColor(255, 0, 0));
+    phongMaterialX->setAmbient(QColor(255, 0, 0));
+    phongMaterialX->setSpecular(Qt::white);
+    phongMaterialX->setShininess(50.0f);
+    m_XAxisEntity->addComponent(phongMaterialX);
+}
+
+void Simulator::telemetry_received(silk::Comms::ITelemetry_Stream const& _stream)
+{
+    if (_stream.stream_path == m_stream_path)
+    {
+        auto const* stream = dynamic_cast<silk::Comms::Telemetry_Stream<silk::stream::IMultirotor_Simulator_State> const*>(&_stream);
+        if (stream && !stream->samples.empty())
+        {
+            m_state = stream->samples.back().value;
+        }
+    }
 }
 
 void Simulator::message_received(std::string const& node_name, silk::messages::INode_Message const& _message)
@@ -201,31 +303,19 @@ void Simulator::message_received(std::string const& node_name, silk::messages::I
     {
         return;
     }
-
-    if (silk::messages::Multirotor_Simulator_State_Message const* message = dynamic_cast<silk::messages::Multirotor_Simulator_State_Message const*>(&_message))
-    {
-        m_state = message->get_state();
-        m_send_message = true;
-    }
 }
 
 void Simulator::process_logic(float dt)
 {
-    auto now = Clock::now();
+    math::vec3f const& pos = m_state.enu_position;
+    m_uav_transform->setTranslation(QVector3D(pos.x, pos.y, pos.z));
 
-    if ((m_send_message == false && now - m_last_message_send_tp >= std::chrono::milliseconds(200)) ||
-        (m_send_message == true && now - m_last_message_send_tp >= std::chrono::milliseconds(30)))
     {
-        auto result = m_comms->send_node_message(m_node_name, m_get_state_message);
-        QASSERT(result == ts::success);
-        m_send_message = false;
-        m_last_message_send_tp = now;
+        QVector3D offset = QVector3D(pos.x, pos.y, pos.z) - m_camera_entity->viewCenter();
+        m_camera_entity->setViewCenter(m_camera_entity->viewCenter() + offset);
+        m_camera_entity->setPosition(m_camera_entity->position() + offset);
     }
 
-    math::vec3f pos = m_state.get_enu_position();
-    m_uav_transform->setTranslation(QVector3D(pos.x, pos.y, pos.z));
-    m_camera_entity->setViewCenter(QVector3D(pos.x, pos.y, pos.z));
-
-    math::vec4f rot = m_state.get_local_to_enu_rotation();
+    math::quatf const& rot = m_state.local_to_enu_rotation;
     m_uav_transform->setRotation(QQuaternion(rot.w, rot.x, rot.y, rot.z));
 }
