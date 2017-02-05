@@ -42,6 +42,14 @@ void execute_async_call(std::function<void()> f)
 }
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+/* This prints an "Assertion failed" message and aborts.  */
+void __assert_fail(const char *__assertion, const char *__file, unsigned int __line, const char *__function)
+{
+    QASSERT_MSG(false, "assert: {}:{}: {}: {}", __file, __line, __function, __assertion);
+}
+
 //static void* malloc_hook(size_t size, const void* caller)
 //{
 //    s_memory.allocation_count++;
