@@ -71,7 +71,7 @@ void Internal_Telemetry_Widget::init(silk::Comms& comms, std::vector<std::string
     for (std::string const& node_name: node_names)
     {
         RGB rgb = palette[index % palette.size()];
-        widget->add_graph(node_name, "s", QColor(rgb.r, rgb.g, rgb.b));
+        widget->add_graph(node_name, "%", QColor(rgb.r, rgb.g, rgb.b));
         max_widget->add_graph(node_name, "s", QColor(rgb.r, rgb.g, rgb.b));
         m_node_indices[node_name] = index;
         index++;
@@ -93,7 +93,8 @@ void Internal_Telemetry_Widget::init(silk::Comms& comms, std::vector<std::string
                 auto it = m_node_indices.find(sample.nodes[i].name);
                 if (it != m_node_indices.end())
                 {
-                    m_data[it->second] = std::chrono::duration_cast<std::chrono::microseconds>(sample.nodes[i].duration).count() / 1000000.f;
+                    //convet the duration per second to a percent
+                    m_data[it->second] = std::chrono::duration<float>(sample.nodes[i].duration).count() * 100.f;
                 }
             }
             widget->add_samples(m_data.data(), true);
