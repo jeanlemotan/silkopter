@@ -188,8 +188,8 @@ private:
     {
         math::vec2f target_enu_position;
 
-        PID rate_x_pid;
-        PID rate_y_pid;
+        PID angle_x_pid;
+        PID angle_y_pid;
 
         PID2 velocity_pi;
         PID2 position_p;
@@ -200,7 +200,7 @@ private:
     {
         float target_angle = 0.f;
 
-        PID rate_pid;
+        PID angle_pid;
     } m_yaw_mode_data;
 };
 
