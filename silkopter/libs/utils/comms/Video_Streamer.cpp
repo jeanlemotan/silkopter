@@ -58,8 +58,8 @@ struct Datagram_Header
     uint32_t datagram_index : 8;
     uint16_t is_fec : 1;
     uint16_t size : 15;
-    uint16_t width;
-    uint16_t height;
+//    uint16_t width;
+//    uint16_t height;
 };
 
 #pragma pack(pop)
@@ -86,19 +86,22 @@ struct Video_Streamer::TX
     {
         std::vector<uint8_t> data;
     };
-
     typedef Pool<Datagram>::Ptr Datagram_ptr;
-
     Pool<Datagram> datagram_pool;
 
     ////////
+    //These are accessed by both the TX thread and the main thread
     std::mutex datagram_queue_mutex;
     std::deque<Datagram_ptr> datagram_queue;
     std::condition_variable datagram_queue_cv;
     ////////
 
+    ////////
+    //these live in the TX thread only
+    std::deque<Datagram_ptr> ready_datagram_queue;
     std::vector<Datagram_ptr> block_datagrams;
     std::vector<Datagram_ptr> block_fec_datagrams;
+    ///////
 
     Datagram_ptr crt_datagram;
 
@@ -114,7 +117,7 @@ struct Video_Streamer::RX
     {
         bool is_processed = false;
         uint32_t index = 0;
-        math::vec2u16 resolution;
+        //math::vec2u16 resolution;
         std::vector<uint8_t> data;
     };
 
@@ -152,8 +155,8 @@ static void seal_datagram(Video_Streamer::TX::Datagram& datagram, size_t header_
     header.block_index = block_index;
     header.datagram_index = datagram_index;
     header.is_fec = is_fec ? 1 : 0;
-    header.width = resolution.x;
-    header.height = resolution.y;
+//    header.width = resolution.x;
+//    header.height = resolution.y;
 
 //    header.crc = q::util::murmur_hash(datagram.data.data() + header_offset, header.size, 0);
 }
@@ -494,7 +497,7 @@ bool Video_Streamer::process_rx_packet(PCap& pcap)
             RX::Datagram_ptr datagram = rx.datagram_pool.acquire();
             datagram->data.resize(bytes - sizeof(Datagram_Header));
             datagram->index = datagram_index;
-            datagram->resolution.set(header.width, header.height);
+            //datagram->resolution.set(header.width, header.height);
             memcpy(datagram->data.data(), payload + sizeof(Datagram_Header), bytes - sizeof(Datagram_Header));
 
             //store datagram
@@ -845,9 +848,10 @@ void Video_Streamer::tx_thread_proc()
 {
     TX& tx = m_impl->tx;
 
+    math::vec2u16 resolution = math::vec2u16::zero;
+
     while (!m_exit)
     {
-        TX::Datagram_ptr datagram;
         {
             //wait for data
             std::unique_lock<std::mutex> lg(tx.datagram_queue_mutex);
@@ -860,16 +864,67 @@ void Video_Streamer::tx_thread_proc()
                 break;
             }
 
-            //inject packets
+            TX::Datagram_ptr datagram;
             if (!tx.datagram_queue.empty())
             {
                 datagram = tx.datagram_queue.front();
                 tx.datagram_queue.pop_front();
             }
+
+            if (datagram)
+            {
+                seal_datagram(*datagram, m_datagram_header_offset, tx.last_block_index, tx.block_datagrams.size(), resolution, false);
+
+                tx.ready_datagram_queue.push_back(datagram); //ready to send
+                tx.block_datagrams.push_back(datagram);
+            }
         }
 
-        if (datagram)
+        //compute fec datagrams
+        if (tx.block_datagrams.size() >= m_coding_k)
         {
+            if (1)
+            {
+                auto start = Clock::now();
+
+                //init data for the fec_encode
+                for (size_t i = 0; i < m_coding_k; i++)
+                {
+                    m_fec_src_datagram_ptrs[i] = tx.block_datagrams[i]->data.data() + m_payload_offset;
+                }
+
+                size_t fec_count = m_coding_n - m_coding_k;
+                tx.block_fec_datagrams.resize(fec_count);
+                for (size_t i = 0; i < fec_count; i++)
+                {
+                    tx.block_fec_datagrams[i] = tx.datagram_pool.acquire();
+                    tx.block_fec_datagrams[i]->data.resize(m_transport_datagram_size);
+                    m_fec_dst_datagram_ptrs[i] = tx.block_fec_datagrams[i]->data.data() + m_payload_offset;
+                }
+
+                //encode
+                fec_encode(m_fec, m_fec_src_datagram_ptrs.data(), m_fec_dst_datagram_ptrs.data(), BLOCK_NUMS + m_coding_k, m_coding_n - m_coding_k, m_payload_size);
+
+                //seal the result
+                for (size_t i = 0; i < fec_count; i++)
+                {
+                    seal_datagram(*tx.block_fec_datagrams[i], m_datagram_header_offset, tx.last_block_index, m_coding_k + i, resolution, true);
+                    tx.ready_datagram_queue.push_back(tx.block_fec_datagrams[i]); //ready to send
+                }
+
+                //QLOGI("Encoded fec: {}", Clock::now() - start);
+            }
+
+            tx.block_datagrams.clear();
+            tx.block_fec_datagrams.clear();
+            tx.last_block_index++;
+        }
+
+        while (!tx.ready_datagram_queue.empty())
+        {
+            TX::Datagram_ptr datagram = tx.ready_datagram_queue.front();
+            tx.ready_datagram_queue.pop_front();
+
             std::lock_guard<std::mutex> lg(tx.pcap.mutex);
 
             int isize = static_cast<int>(datagram->data.size());
@@ -946,63 +1001,12 @@ void Video_Streamer::send(void const* _data, size_t size, math::vec2u16 const& r
 
         if (datagram->data.size() >= m_transport_datagram_size)
         {
-            seal_datagram(*datagram, m_datagram_header_offset, tx.last_block_index, tx.block_datagrams.size(), resolution, false);
-            tx.block_datagrams.push_back(datagram);
-
             //send the current datagram
             {
                 std::unique_lock<std::mutex> lg(tx.datagram_queue_mutex);
                 tx.datagram_queue.push_back(datagram);
             }
             datagram = tx.datagram_pool.acquire();
-
-
-            if (tx.block_datagrams.size() >= m_coding_k)
-            {
-                if (1)
-                {
-                    auto start = Clock::now();
-
-                    //init data for the fec_encode
-                    for (size_t i = 0; i < m_coding_k; i++)
-                    {
-                        m_fec_src_datagram_ptrs[i] = tx.block_datagrams[i]->data.data() + m_payload_offset;
-                    }
-
-                    size_t fec_count = m_coding_n - m_coding_k;
-                    tx.block_fec_datagrams.resize(fec_count);
-                    for (size_t i = 0; i < fec_count; i++)
-                    {
-                        tx.block_fec_datagrams[i] = tx.datagram_pool.acquire();
-                        tx.block_fec_datagrams[i]->data.resize(m_transport_datagram_size);
-                        m_fec_dst_datagram_ptrs[i] = tx.block_fec_datagrams[i]->data.data() + m_payload_offset;
-                    }
-
-                    //encode
-                    fec_encode(m_fec, m_fec_src_datagram_ptrs.data(), m_fec_dst_datagram_ptrs.data(), BLOCK_NUMS + m_coding_k, m_coding_n - m_coding_k, m_payload_size);
-
-                    //seal the result
-                    for (size_t i = 0; i < fec_count; i++)
-                    {
-                        seal_datagram(*tx.block_fec_datagrams[i], m_datagram_header_offset, tx.last_block_index, m_coding_k + i, resolution, true);
-                    }
-
-                    //send
-                    {
-                        std::unique_lock<std::mutex> lg(tx.datagram_queue_mutex);
-                        for (size_t i = 0; i < fec_count; i++)
-                        {
-                            tx.datagram_queue.push_back(tx.block_fec_datagrams[i]);
-                        }
-                    }
-
-                    //QLOGI("Encoded fec: {}", Clock::now() - start);
-                }
-
-                tx.block_datagrams.clear();
-                tx.block_fec_datagrams.clear();
-                tx.last_block_index++;
-            }
 
             tx.datagram_queue_cv.notify_all();
         }
@@ -1051,7 +1055,7 @@ void Video_Streamer::process()
                 //QLOGI("Datagram {}", seq_number);
                 if (on_data_received)
                 {
-                    on_data_received(d->data.data(), d->data.size(), d->resolution);
+                    on_data_received(d->data.data(), d->data.size(), /*d->resolution*/math::vec2u16::zero);
                 }
                 rx.last_datagram_tp = Clock::now();
                 d->is_processed = true;
@@ -1077,7 +1081,7 @@ void Video_Streamer::process()
                 //QLOGI("Datagram {}", seq_number);
                 if (on_data_received)
                 {
-                    on_data_received(d->data.data(), d->data.size(), d->resolution);
+                    on_data_received(d->data.data(), d->data.size(), /*d->resolution*/math::vec2u16::zero);
                 }
                 rx.last_datagram_tp = Clock::now();
                 d->is_processed = true;
@@ -1138,7 +1142,7 @@ void Video_Streamer::process()
                 //QLOGI("Datagram F {}", seq_number);
                 if (on_data_received)
                 {
-                    on_data_received(d->data.data(), d->data.size(), d->resolution);
+                    on_data_received(d->data.data(), d->data.size(), /*d->resolution*/math::vec2u16::zero);
                 }
                 rx.last_datagram_tp = Clock::now();
                 d->is_processed = true;
