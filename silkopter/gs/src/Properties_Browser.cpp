@@ -40,7 +40,7 @@ void Properties_Browser::init(std::shared_ptr<Value_Editor_Factory> editor_facto
 	setVerticalScrollMode(QAbstractItemView::ScrollMode::ScrollPerPixel);
 	setVerticalScrollBarPolicy(Qt::ScrollBarPolicy::ScrollBarAsNeeded);
 
-	setAlternatingRowColors(true);
+    setAlternatingRowColors(true);
 }
 
 //////////////////////////////////////////////////////////////////////////
