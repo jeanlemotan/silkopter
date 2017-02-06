@@ -116,6 +116,20 @@ void Multirotor_Brain::set_mode(Mode mode)
         m_home.is_acquired = false;
         m_home.position_history.clear();
     }
+    else if (mode == Mode::FLY)
+    {
+        m_fly_mode_data.state = Fly_Mode_Data::State::NORMAL;
+        m_vertical_mode_data.target_altitude = m_enu_position.z;
+        m_horizontal_mode_data.target_enu_position = math::vec2f(m_enu_position);
+    }
+    else if (mode == Mode::RETURN_HOME)
+    {
+        set_vertical_mode(Vertical_Mode::ALTITUDE);
+        set_horizontal_mode(Horizontal_Mode::VELOCITY);
+
+        m_vertical_mode_data.target_altitude = math::max(m_vertical_mode_data.target_altitude, 5.f);
+        m_horizontal_mode_data.target_enu_position = math::vec2f::zero;
+    }
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -392,24 +406,27 @@ float Multirotor_Brain::compute_yaw_rate_for_angle(float target_angle)
 
 void Multirotor_Brain::process_return_home_mode()
 {
-    const stream::IMultirotor_Commands::Value& prev_commands = m_inputs.commands.previous_sample.value;
-    stream::IMultirotor_Commands::Value& commands = m_inputs.commands.sample.value;
+    stream::IMultirotor_Commands::Value const& commands = m_inputs.commands.sample.value;
     QASSERT(m_home.is_acquired);
 
-    if (m_inputs.commands.sample.value.mode != Mode::RETURN_HOME)
+    auto now = Clock::now();
+
+    if (now - m_last_invalid_commands_tp > std::chrono::seconds(5))
     {
-        set_mode(m_inputs.commands.sample.value.mode);
-        return;
+        if (commands.mode == Mode::FLY ||
+            commands.mode == Mode::LAND)
+        {
+            set_mode(commands.mode);
+            return;
+        }
     }
 
-    set_vertical_mode(Vertical_Mode::ALTITUDE);
     float distance_2d = math::length(math::vec2f(m_enu_position));
     if (distance_2d < 10.f)
     {
         m_vertical_mode_data.target_altitude = 5.f;
     }
 
-    set_horizontal_mode(Horizontal_Mode::VELOCITY);
     m_horizontal_mode_data.target_enu_position = math::vec2f::zero;
 
     stream::IFloat::Value thrust = m_thrust_output_stream->get_last_sample().value;
@@ -436,19 +453,6 @@ void Multirotor_Brain::process_return_home_mode()
     }
 
     ///////////////////////////////////////////////////////////
-    // Yaw
-
-    if (m_yaw_mode == stream::IMultirotor_Commands::Yaw_Mode::ANGLE)
-    {
-        float max_speed = math::radians(m_config->get_yaw().get_max_rate_deg());
-        float speed = commands.sticks.yaw * max_speed * 2.f;
-
-        m_yaw_mode_data.target_angle += speed * m_dts;
-
-        rate.z = compute_yaw_rate_for_angle(m_yaw_mode_data.target_angle);
-    }
-
-    ///////////////////////////////////////////////////////////
 
     m_rate_output_stream->push_sample(rate, true);
     m_thrust_output_stream->push_sample(thrust, true);
@@ -458,16 +462,60 @@ void Multirotor_Brain::process_return_home_mode()
 
 void Multirotor_Brain::process_fly_mode()
 {
-    const stream::IMultirotor_Commands::Value& prev_commands = m_inputs.commands.previous_sample.value;
-    stream::IMultirotor_Commands::Value& commands = m_inputs.commands.sample.value;
+    stream::IMultirotor_Commands::Value commands = m_inputs.commands.sample.value;
     QASSERT(m_home.is_acquired);
 
     auto now = Clock::now();
-    if (now - m_inputs.commands.last_valid_tp > std::chrono::seconds(2))
+
+    if (m_fly_mode_data.state == Fly_Mode_Data::State::NORMAL)
     {
-        QLOGW("No input received for {}. Heading home", now - m_inputs.commands.last_valid_tp);
-        set_mode(Mode::RETURN_HOME);
-        return;
+        if (now - m_inputs.commands.last_valid_tp > std::chrono::seconds(2))
+        {
+            m_fly_mode_data.state = Fly_Mode_Data::State::ALERT_HOLD;
+            QLOGW("No input received for {}. Holding position", now - m_inputs.commands.last_valid_tp);
+            m_fly_mode_data.old_vertical_mode = m_vertical_mode;
+            m_fly_mode_data.old_horizontal_mode = m_horizontal_mode;
+            m_fly_mode_data.old_yaw_mode = m_yaw_mode;
+
+            set_vertical_mode(Vertical_Mode::ALTITUDE);
+            set_horizontal_mode(Horizontal_Mode::VELOCITY);
+            set_yaw_mode(Yaw_Mode::ANGLE);
+        }
+        else
+        {
+            if (commands.mode != Mode::FLY)
+            {
+                set_mode(commands.mode);
+                return;
+            }
+            set_vertical_mode(commands.vertical_mode);
+            set_horizontal_mode(commands.horizontal_mode);
+            set_yaw_mode(commands.yaw_mode);
+        }
+    }
+    if (m_fly_mode_data.state == Fly_Mode_Data::State::ALERT_HOLD)
+    {
+        if (now - m_inputs.commands.last_valid_tp > std::chrono::seconds(20))
+        {
+            QLOGW("No input received for {}. Returning home", now - m_inputs.commands.last_valid_tp);
+            set_mode(Mode::RETURN_HOME);
+            return;
+        }
+        else if (now - m_inputs.commands.last_valid_tp < std::chrono::milliseconds(500))
+        {
+            m_fly_mode_data.state = Fly_Mode_Data::State::NORMAL;
+            QLOGW("Input received. Returning to normal");
+            set_vertical_mode(m_fly_mode_data.old_vertical_mode);
+            set_horizontal_mode(m_fly_mode_data.old_horizontal_mode);
+            set_yaw_mode(m_fly_mode_data.old_yaw_mode);
+        }
+        else
+        {
+            commands.sticks.yaw = 0.5f;
+            commands.sticks.pitch = 0.5f;
+            commands.sticks.roll = 0.5f;
+            commands.sticks.throttle = 0.5f;
+        }
     }
 
     stream::IFloat::Value thrust = m_thrust_output_stream->get_last_sample().value;
@@ -502,23 +550,44 @@ void Multirotor_Brain::process_fly_mode()
 
     if (m_horizontal_mode == stream::IMultirotor_Commands::Horizontal_Mode::ANGLE_RATE)
     {
+        //positive X roations pitch up (X rotates Y over Z).
+        //The pitch stick is positive when pushed forward, so we have to invert it
+        float pitch_stick = -(commands.sticks.pitch * 2.f - 1.f);
+
+        //positive Y rotations roll clockwise (Y rotates Z over X)
+        //The roll stick is positive when pushed right, so no need for inversion
+        float roll_stick = (commands.sticks.roll * 2.f - 1.f);
+
         float max_speed = math::radians(m_config->get_horizontal().get_max_rate_deg());
-        rate.x = (commands.sticks.pitch * 2.f - 1.f) * max_speed;
-        rate.y = (commands.sticks.roll * 2.f - 1.f) * max_speed;
+
+        rate.x = pitch_stick * max_speed;
+        rate.y = roll_stick * max_speed;
     }
     else if (m_horizontal_mode == stream::IMultirotor_Commands::Horizontal_Mode::ANGLE)
     {
+        //positive X roations pitch up (X rotates Y over Z).
+        //The pitch stick is positive when pushed forward, so we have to invert it
+        float pitch_stick = -(commands.sticks.pitch * 2.f - 1.f);
+
+        //positive Y rotations roll clockwise (Y rotates Z over X)
+        //The roll stick is positive when pushed right, so no need for inversion
+        float roll_stick = (commands.sticks.roll * 2.f - 1.f);
+
         math::vec2f const& max_angle = math::radians(m_config->get_horizontal().get_max_angle_deg());
-        math::vec2f hrate = compute_horizontal_rate_for_angle(math::vec2f((commands.sticks.pitch * 2.f - 1.f) * max_angle.x,
-                                                                          (commands.sticks.roll * 2.f - 1.f) * max_angle.y));
+        math::vec2f hrate = compute_horizontal_rate_for_angle(math::vec2f(pitch_stick * max_angle.x,
+                                                                          roll_stick * max_angle.y));
         rate.x = hrate.x;
         rate.y = hrate.y;
     }
     else if (m_horizontal_mode == stream::IMultirotor_Commands::Horizontal_Mode::VELOCITY)
     {
         //apply command
-        math::vec2f velocity_local((commands.sticks.pitch * 2.f - 1.f) * m_config->get_horizontal().get_max_speed(),
-                                   (commands.sticks.roll * 2.f - 1.f) * m_config->get_horizontal().get_max_speed());
+
+        float pitch_stick = (commands.sticks.pitch * 2.f - 1.f);
+        float roll_stick = (commands.sticks.roll * 2.f - 1.f);
+
+        math::vec2f velocity_local(roll_stick * m_config->get_horizontal().get_max_speed(),
+                                   pitch_stick * m_config->get_horizontal().get_max_speed());
 
         math::vec2f velocity_enu(math::rotate(m_inputs.frame.sample.value, math::vec3f(velocity_local)));
 
@@ -532,14 +601,22 @@ void Multirotor_Brain::process_fly_mode()
 
     if (m_yaw_mode == stream::IMultirotor_Commands::Yaw_Mode::ANGLE_RATE)
     {
+        //positive Z rotations rotate the quad counter-clockwise as viewed from above (Z rotate X over Y)
+        //the yaw stick rotates clockwise for positive Z angles so we have to invert it
+        float stick = -(commands.sticks.yaw * 2.f - 1.f);
+
         float max_speed = math::radians(m_config->get_yaw().get_max_rate_deg());
-        rate.z = (commands.sticks.yaw * 2.f - 1.f) * max_speed;
+        rate.z = stick * max_speed;
     }
     else if (m_yaw_mode == stream::IMultirotor_Commands::Yaw_Mode::ANGLE)
     {
         float max_speed = math::radians(m_config->get_yaw().get_max_rate_deg());
-        float speed = (commands.sticks.yaw * 2.f - 1.f) * max_speed;
 
+        //positive Z rotations rotate the quad counter-clockwise as viewed from above (Z rotate X over Y)
+        //the yaw stick rotates clockwise for positive Z angles so we have to invert it
+        float stick = -(commands.sticks.yaw * 2.f - 1.f);
+
+        float speed = stick * max_speed;
         m_yaw_mode_data.target_angle += speed * m_dts;
 
         rate.z = compute_yaw_rate_for_angle(m_yaw_mode_data.target_angle);
@@ -555,8 +632,7 @@ void Multirotor_Brain::process_fly_mode()
 
 void Multirotor_Brain::process_flight_modes()
 {
-    const stream::IMultirotor_Commands::Value& prev_commands = m_inputs.commands.previous_sample.value;
-    stream::IMultirotor_Commands::Value& commands = m_inputs.commands.sample.value;
+    stream::IMultirotor_Commands::Value const& commands = m_inputs.commands.sample.value;
 
     m_enu_position = math::vec3f(math::transform(m_home.ecef_to_enu_transform, m_inputs.position.sample.value));
     m_enu_velocity = math::vec3f(math::rotate(m_home.ecef_to_enu_transform, math::vec3d(m_inputs.velocity.sample.value)));
@@ -709,11 +785,18 @@ void Multirotor_Brain::process()
     m_rate_output_stream->clear();
     m_thrust_output_stream->clear();
 
-    m_commands_accumulator.process([this](stream::IMultirotor_Commands::Sample const& i_commands)
+    auto now = Clock::now();
+
+    m_commands_accumulator.process([now, this](stream::IMultirotor_Commands::Sample const& i_commands)
     {
         m_inputs.commands.sample = i_commands;
-        m_inputs.commands.last_valid_tp = i_commands.is_healthy ? Clock::now() : m_inputs.commands.last_valid_tp;
+        m_inputs.commands.last_valid_tp = i_commands.is_healthy ? now : m_inputs.commands.last_valid_tp;
     });
+
+    if (now - m_inputs.commands.last_valid_tp >= std::chrono::milliseconds(500))
+    {
+        m_last_invalid_commands_tp = now;
+    }
 
 //    Merge_Commands func;
 //    stream::IMultirotor_Commands::apply(func, m_inputs.remote_commands.previous_sample.value, m_inputs.remote_commands.sample.value, m_inputs.local_commands.sample.value);
@@ -745,6 +828,7 @@ void Multirotor_Brain::process()
         state.battery_state.charge_used = m_battery_state_sample.value.charge_used;
         state.local_frame = m_inputs.frame.sample.value;
         state.mode = m_mode;
+        state.throttle = m_thrust_output_stream->get_last_sample().value / m_config->get_max_thrust();
 
         for (size_t i = 0; i < samples_needed; i++)
         {

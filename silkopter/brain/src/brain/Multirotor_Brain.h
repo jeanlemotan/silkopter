@@ -202,6 +202,28 @@ private:
 
         PID angle_pid;
     } m_yaw_mode_data;
+
+    struct Fly_Mode_Data
+    {
+        enum class State
+        {
+            NORMAL,
+            ALERT_HOLD,
+        };
+
+        State state = State::NORMAL;
+        Vertical_Mode old_vertical_mode;
+        Horizontal_Mode old_horizontal_mode;
+        Yaw_Mode old_yaw_mode;
+    };
+
+    Fly_Mode_Data m_fly_mode_data;
+
+    struct Return_Home_Mode_Data
+    {
+    };
+
+    Clock::time_point m_last_invalid_commands_tp = Clock::now();
 };
 
 
