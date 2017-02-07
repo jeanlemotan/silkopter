@@ -119,15 +119,22 @@ void Multirotor_Brain::set_mode(Mode mode)
     else if (mode == Mode::FLY)
     {
         m_fly_mode_data.state = Fly_Mode_Data::State::NORMAL;
+
+        //in case the uav was going somewhere, reset the targets to the current position
+        //this happens when switching form RETURN HOME to FLY
         m_vertical_mode_data.target_altitude = m_enu_position.z;
         m_horizontal_mode_data.target_enu_position = math::vec2f(m_enu_position);
     }
     else if (mode == Mode::RETURN_HOME)
     {
         set_vertical_mode(Vertical_Mode::ALTITUDE);
-        set_horizontal_mode(Horizontal_Mode::VELOCITY);
+        set_horizontal_mode(Horizontal_Mode::POSITION);
 
+        //make sure we're not too close to the ground
+        //TODO - add a config param for the RTH altitude
         m_vertical_mode_data.target_altitude = math::max(m_vertical_mode_data.target_altitude, 5.f);
+
+        //head straight home
         m_horizontal_mode_data.target_enu_position = math::vec2f::zero;
     }
 }
@@ -144,6 +151,7 @@ void Multirotor_Brain::set_vertical_mode(Vertical_Mode mode)
 
     if (mode == Vertical_Mode::ALTITUDE)
     {
+        //when switching to altitude hold, keep the current altitude
         m_vertical_mode_data.target_altitude = m_enu_position.z;
         QLOGI("Vertical mode changed to ALTITUDE. Initializing altitude to {}m", m_vertical_mode_data.target_altitude);
     }
@@ -159,10 +167,11 @@ void Multirotor_Brain::set_horizontal_mode(Horizontal_Mode mode)
     }
     m_horizontal_mode = mode;
 
-    if (mode == Horizontal_Mode::VELOCITY)
+    if (mode == Horizontal_Mode::POSITION)
     {
+        //when switching to position hold, keep the current position
         m_horizontal_mode_data.target_enu_position = math::vec2f(m_enu_position);
-        QLOGI("Horizontal mode changed to VELOCITY. Initializing position to {}", m_horizontal_mode_data.target_enu_position);
+        QLOGI("Horizontal mode changed to POSITION. Initializing position to {}", m_horizontal_mode_data.target_enu_position);
     }
 }
 
@@ -178,6 +187,7 @@ void Multirotor_Brain::set_yaw_mode(Yaw_Mode mode)
 
     if (mode == Yaw_Mode::ANGLE)
     {
+        //when switching to angle hold, keep the current angle as the reference
         float _, fz;
         m_inputs.frame.sample.value.get_as_euler_zxy(_, _, fz);
 
@@ -195,8 +205,13 @@ ts::Result<void> Multirotor_Brain::check_pre_flight_conditions() const
         return make_error("Home is not acquired!");
     }
 
+    //check that all sensors are functional
     auto now = Clock::now();
 
+    if (now - m_last_invalid_commands_tp < std::chrono::seconds(5))
+    {
+        return make_error("Command stream failed recently!");
+    }
     if (now - m_inputs.commands.last_valid_tp > std::chrono::milliseconds(100))
     {
         return make_error("Command stream is failing!");
@@ -236,9 +251,11 @@ void Multirotor_Brain::process_idle_mode()
 {
     acquire_home_position();
 
+    //we're home
     m_enu_position = math::vec3f::zero;
     m_enu_velocity = math::vec3f::zero;
 
+    //output nothing
     m_rate_output_stream->push_sample(stream::IAngular_Velocity::Value(), true);
     m_thrust_output_stream->push_sample(stream::IFloat::Value(), true);
 
@@ -305,20 +322,27 @@ float Multirotor_Brain::compute_ff_thrust(float target_altitude) const
 
 math::vec2f Multirotor_Brain::compute_horizontal_rate_for_angle(math::vec2f const& target_angle)
 {
-    float fx, fy, fz;
-    m_inputs.frame.sample.value.get_as_euler_zxy(fx, fy, fz);
+    //current yaw. We'll use it to compine with the new target_angles to get a new quaternion
+    float _, fz;
+    m_inputs.frame.sample.value.get_as_euler_zxy(_, _, fz);
 
+    //target attitude
     math::quatf target;
     target.set_from_euler_zxy(target_angle.x, target_angle.y, fz);
+
+    //compute the quat difference. This has no issues with singularities or gimbal locks
     math::quatf diff = math::inverse(m_inputs.frame.sample.value) * target;
-    float diff_x, diff_y, _;
+
+    //get the difference as angles. We ignore the yaw (Z rotation) here
+    float diff_x, diff_y;
     diff.get_as_euler_zxy(diff_x, diff_y, _);
 
+    //run it throught the PID to get rate. The target diff is 0, 0 - the UAV has to match the target angles
     float rx = m_horizontal_mode_data.angle_x_pid.process(-diff_x, 0.f);
     float ry = m_horizontal_mode_data.angle_y_pid.process(-diff_y, 0.f);
 
+    //clamp the rate to our maximums
     float max_speed = math::radians(m_config->get_horizontal().get_max_rate_deg());
-
     rx = math::clamp(rx, -max_speed, max_speed);
     ry = math::clamp(ry, -max_speed, max_speed);
 
@@ -330,16 +354,24 @@ math::vec2f Multirotor_Brain::compute_horizontal_rate_for_angle(math::vec2f cons
 math::vec2f Multirotor_Brain::compute_horizontal_rate_for_position(math::vec2f const& target_pos)
 {
     math::vec2f crt_pos(m_enu_position);
+    math::vec2f crt_vel(m_enu_velocity);
 
-    //cascaded PIDS: position P(ID) -> speed PI(D)
+    // cascaded PIDS: position P(ID) -> speed PI(D) !!!
+
+    //first run the crt & target pos through the PID to get the velocity
     math::vec2f velocity_output = m_horizontal_mode_data.position_p.process(crt_pos, target_pos);
+
+    //clamp the velocity to the max allowed
     if (math::length(velocity_output) > m_config->get_horizontal().get_max_speed())
     {
         velocity_output.set_length(m_config->get_horizontal().get_max_speed());
     }
 
-    math::vec2f output = m_horizontal_mode_data.velocity_pi.process(math::vec2f(m_enu_velocity.x, m_enu_velocity.y), velocity_output);
+    //now run the crt and target velocity through the PID to get the desired angles that will make them match
+    math::vec2f output = m_horizontal_mode_data.velocity_pi.process(crt_vel, velocity_output);
 
+    //clamp and filter the angles
+    //TODO - add a config param for this clamping
     output = math::clamp(output, -math::vec2f(math::radians(20.f)), math::vec2f(math::radians(20.f)));
     m_horizontal_mode_data.position_dsp.process(output);
 
@@ -435,10 +467,8 @@ void Multirotor_Brain::process_return_home_mode()
     //////////////////////////////////////////////////////////////
     // Verticals
 
-    {
-        //apply command
-        thrust = compute_thrust_for_altitude(m_vertical_mode_data.target_altitude);
-    }
+    //apply command
+    thrust = compute_thrust_for_altitude(m_vertical_mode_data.target_altitude);
 
     //clamp thrust
     thrust = math::clamp(thrust, m_config->get_min_thrust(), m_config->get_max_thrust());
@@ -446,11 +476,8 @@ void Multirotor_Brain::process_return_home_mode()
     ////////////////////////////////////////////////////////////
     // Horizontals
 
-    if (m_horizontal_mode == stream::IMultirotor_Commands::Horizontal_Mode::VELOCITY)
-    {
-        //apply command
-        rate = compute_horizontal_rate_for_position(m_horizontal_mode_data.target_enu_position);
-    }
+    //apply command
+    rate = compute_horizontal_rate_for_position(m_horizontal_mode_data.target_enu_position);
 
     ///////////////////////////////////////////////////////////
 
@@ -469,20 +496,26 @@ void Multirotor_Brain::process_fly_mode()
 
     if (m_fly_mode_data.state == Fly_Mode_Data::State::NORMAL)
     {
+        //check signal loss condition
+        //TODO - add a config param for this
         if (now - m_inputs.commands.last_valid_tp > std::chrono::seconds(2))
         {
             m_fly_mode_data.state = Fly_Mode_Data::State::ALERT_HOLD;
             QLOGW("No input received for {}. Holding position", now - m_inputs.commands.last_valid_tp);
+
+            //store the old modes in case we get the signal back and we have to revert back to normal
             m_fly_mode_data.old_vertical_mode = m_vertical_mode;
             m_fly_mode_data.old_horizontal_mode = m_horizontal_mode;
             m_fly_mode_data.old_yaw_mode = m_yaw_mode;
 
+            //set hold mode
             set_vertical_mode(Vertical_Mode::ALTITUDE);
-            set_horizontal_mode(Horizontal_Mode::VELOCITY);
+            set_horizontal_mode(Horizontal_Mode::POSITION);
             set_yaw_mode(Yaw_Mode::ANGLE);
         }
         else
         {
+            //we have solid signal, check mode transitions
             if (commands.mode != Mode::FLY)
             {
                 set_mode(commands.mode);
@@ -495,13 +528,17 @@ void Multirotor_Brain::process_fly_mode()
     }
     if (m_fly_mode_data.state == Fly_Mode_Data::State::ALERT_HOLD)
     {
+        //still no signal? switch to RETURN_HOME
+        //TODO - add a config param for this
         if (now - m_inputs.commands.last_valid_tp > std::chrono::seconds(20))
         {
             QLOGW("No input received for {}. Returning home", now - m_inputs.commands.last_valid_tp);
             set_mode(Mode::RETURN_HOME);
             return;
         }
-        else if (now - m_inputs.commands.last_valid_tp < std::chrono::milliseconds(500))
+        //no glitch lately? go back to normal
+        //TODO - add a config param for this
+        else if (now - m_last_invalid_commands_tp > std::chrono::milliseconds(500))
         {
             m_fly_mode_data.state = Fly_Mode_Data::State::NORMAL;
             QLOGW("Input received. Returning to normal");
@@ -509,6 +546,7 @@ void Multirotor_Brain::process_fly_mode()
             set_horizontal_mode(m_fly_mode_data.old_horizontal_mode);
             set_yaw_mode(m_fly_mode_data.old_yaw_mode);
         }
+        //make sure the commands are centered
         else
         {
             commands.sticks.yaw = 0.5f;
@@ -579,7 +617,7 @@ void Multirotor_Brain::process_fly_mode()
         rate.x = hrate.x;
         rate.y = hrate.y;
     }
-    else if (m_horizontal_mode == stream::IMultirotor_Commands::Horizontal_Mode::VELOCITY)
+    else if (m_horizontal_mode == stream::IMultirotor_Commands::Horizontal_Mode::POSITION)
     {
         //apply command
 
