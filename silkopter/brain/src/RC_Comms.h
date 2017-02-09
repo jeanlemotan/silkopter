@@ -55,12 +55,16 @@ private:
 
     mutable std::mutex m_multirotor_state_mutex;
     stream::IMultirotor_State::Value m_multirotor_state;
+    std::vector<uint8_t> m_multirotor_state_sz_buffer;
 
     util::comms::RC_Phy m_rc_phy;
     util::comms::RC_Protocol m_rc_protocol;
     util::comms::RC_Protocol::RX_Packet m_rx_packet;
     util::comms::Video_Streamer m_video_streamer;
-    std::vector<uint8_t> m_serialization_buffer;
+
+    silk::rc_comms::Packet_Type m_next_packet_type = silk::rc_comms::Packet_Type::MULTIROTOR_STATE_PART1;
+    bool m_send_home = false;
+    Clock::time_point m_last_home_sent_tp = Clock::now();
 
     bool m_is_connected = false;
 

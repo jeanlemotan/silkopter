@@ -136,37 +136,48 @@ void Comms::process_rx_packet(util::comms::RC_Protocol::RX_Packet const& packet)
     m_rx_packet.tx_dBm = packet.tx_dBm;
     m_rx_packet.rx_timepoint = packet.rx_timepoint;
 
-    if (packet.packet_type == static_cast<uint8_t>(rc_comms::Packet_Type::MULTIROTOR_STATE))
+    bool dsz_ok = false;
+    if (packet.packet_type == static_cast<uint8_t>(rc_comms::Packet_Type::MULTIROTOR_STATE_PART1))
     {
         size_t off = 0;
-        stream::IMultirotor_State::Value value;
-        if (util::serialization::deserialize(packet.payload, value, off))
+        std::lock_guard<std::mutex> lg(m_samples_mutex);
+        stream::IMultirotor_State::Value value = m_multirotor_state;
+        dsz_ok = util::serialization::deserialize_part1(packet.payload, value, off);
+        if (dsz_ok)
         {
-            std::lock_guard<std::mutex> lg(m_samples_mutex);
             m_multirotor_state = value;
         }
-        else
-        {
-            QLOGW("Cannot deserialize incoming multirotor state value");
-        }
     }
-    else if (packet.packet_type == static_cast<uint8_t>(rc_comms::Packet_Type::HOME))
+    else if (packet.packet_type == static_cast<uint8_t>(rc_comms::Packet_Type::MULTIROTOR_STATE_PART2))
     {
         size_t off = 0;
-        Home_Data data;
-        if (util::serialization::deserialize(packet.payload, data, off))
+        std::lock_guard<std::mutex> lg(m_samples_mutex);
+        stream::IMultirotor_State::Value value = m_multirotor_state;
+        dsz_ok = util::serialization::deserialize_part2(packet.payload, value, off);
+        if (dsz_ok)
         {
-            std::lock_guard<std::mutex> lg(m_samples_mutex);
-            m_home_data = data;
+            m_multirotor_state = value;
         }
-        else
+    }
+    else if (packet.packet_type == static_cast<uint8_t>(rc_comms::Packet_Type::MULTIROTOR_STATE_HOME))
+    {
+        size_t off = 0;
+        std::lock_guard<std::mutex> lg(m_samples_mutex);
+        stream::IMultirotor_State::Value value = m_multirotor_state;
+        dsz_ok = util::serialization::deserialize_home(packet.payload, value, off);
+        if (dsz_ok)
         {
-            QLOGW("Cannot deserialize incoming home data");
+            m_multirotor_state = value;
         }
     }
     else
     {
         QLOGW("Unknown incoming packet type: {}", static_cast<int>(packet.packet_type));
+    }
+
+    if (!dsz_ok)
+    {
+        QLOGW("Cannot deserialize incoming multirotor state value");
     }
 }
 

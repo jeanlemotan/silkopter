@@ -367,25 +367,39 @@ math::vec2f Multirotor_Brain::compute_horizontal_rate_for_position(math::vec2f c
         velocity_output.set_length(m_config->get_horizontal().get_max_speed());
     }
 
-    //now run the crt and target velocity through the PID to get the desired angles that will make them match
-    math::vec2f output = m_horizontal_mode_data.velocity_pi.process(crt_vel, velocity_output);
+    //now run the crt and target velocity through the PID to get the process variable
+    //output represents how much we want to 'push' to get to the desired speed, in enu coords
+    math::vec2f enu_output = m_horizontal_mode_data.velocity_pi.process(crt_vel, velocity_output);
 
-    //clamp and filter the angles
-    //TODO - add a config param for this clamping
-    output = math::clamp(output, -math::vec2f(math::radians(20.f)), math::vec2f(math::radians(20.f)));
-    m_horizontal_mode_data.position_dsp.process(output);
+    //let's filter a bit
+    m_horizontal_mode_data.position_dsp.process(enu_output);
 
     //compute the front/right in enu space
     math::vec3f front_vector = math::rotate(m_inputs.frame.sample.value, physics::constants::uav_front_vector);
     math::vec3f right_vector = math::rotate(m_inputs.frame.sample.value, physics::constants::uav_right_vector);
 
     //figure out how the delta displacement maps over the axis
-    float dx = math::dot(math::vec3f(output, 0.f), right_vector);
-    float dy = math::dot(math::vec3f(output, 0.f), front_vector);
+    math::vec2f output;
+    output.x = math::dot(math::vec3f(enu_output, 0.f), right_vector);
+    output.y = math::dot(math::vec3f(enu_output, 0.f), front_vector);
+
+    //Now dx/dy prepresent how much we want to 'push' to get to the desired velocity, in local space
+    //This is expected to have a linear effect so we cannot use it directly as angles, and thrust for various angles is not linear, but proportional to sin(angle)
+    //To have a linear quantity we have to asin the output.
+    //  This makes it non-linear which combined with the non-linear angle-thrust transformstion, results in linear action
+
+    //so first scale by an arbitrary factor to get more precision in the PID
+    output *= 0.1f;
+
+    //and clamp, as asin fails when x > 1 || x < -1
+    output = math::clamp(output, math::vec2f(-1), math::vec2f(1));
+
+    //now the asin
+    output = math::vec2f(math::asin(output.x), math::asin(output.y));
 
     //movement along X axis is obtained by rotation along the Y
     //movement along Y axis is obtained by rotation along the -X
-    math::vec2f angle = math::vec2f(-dy, dx);
+    math::vec2f angle = math::vec2f(-output.y, output.x);
 
     return compute_horizontal_rate_for_angle(angle);
 }
@@ -867,6 +881,7 @@ void Multirotor_Brain::process()
         state.local_frame = m_inputs.frame.sample.value;
         state.mode = m_mode;
         state.throttle = m_thrust_output_stream->get_last_sample().value / m_config->get_max_thrust();
+        state.home_ecef_position = m_home.is_acquired ? m_home.position : boost::optional<stream::IECEF_Position::Value>();
 
         for (size_t i = 0; i < samples_needed; i++)
         {

@@ -62,8 +62,9 @@ enum class Pilot_Message : uint8_t
 enum class Packet_Type : uint8_t
 {
     MULTIROTOR_COMMANDS,
-    MULTIROTOR_STATE,
-    HOME,
+    MULTIROTOR_STATE_PART1,
+    MULTIROTOR_STATE_PART2,
+    MULTIROTOR_STATE_HOME,
 };
 
 }

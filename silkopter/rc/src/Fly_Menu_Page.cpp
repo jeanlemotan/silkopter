@@ -291,7 +291,7 @@ void Fly_Menu_Page::process_mode_fly(Input& input)
 
     if (input.get_horizontal_mode_switch_up().was_released())
     {
-        if (m_commands.horizontal_mode < stream::IMultirotor_Commands::Horizontal_Mode::VELOCITY)
+        if (m_commands.horizontal_mode < stream::IMultirotor_Commands::Horizontal_Mode::POSITION)
         {
             set_horizontal_mode(input, static_cast<stream::IMultirotor_Commands::Horizontal_Mode>(static_cast<int>(m_commands.horizontal_mode) + 1));
         }
@@ -542,7 +542,7 @@ void Fly_Menu_Page::render(Adafruit_GFX& display)
         {
         case silk::stream::IMultirotor_Commands::Horizontal_Mode::ANGLE_RATE: mode_str = "RATE"; break;
         case silk::stream::IMultirotor_Commands::Horizontal_Mode::ANGLE: mode_str = "ANG"; break;
-        case silk::stream::IMultirotor_Commands::Horizontal_Mode::VELOCITY: mode_str = "VEL"; break;
+        case silk::stream::IMultirotor_Commands::Horizontal_Mode::POSITION: mode_str = "POS"; break;
         }
 
         bool blink = (now - m_last_horizontal_mode_change_tp) < k_mode_change_blink_duration;

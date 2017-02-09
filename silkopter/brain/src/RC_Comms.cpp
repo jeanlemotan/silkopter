@@ -60,15 +60,24 @@ auto RC_Comms::is_connected() const -> bool
 
 size_t RC_Comms::compute_multirotor_state_packet(uint8_t* data, uint8_t& packet_type)
 {
-    packet_type = static_cast<uint8_t>(rc_comms::Packet_Type::MULTIROTOR_STATE);
+    packet_type = static_cast<uint8_t>(m_next_packet_type);
 
     size_t off = 0;
     {
         std::lock_guard<std::mutex> lg(m_multirotor_state_mutex);
-        util::serialization::serialize(m_serialization_buffer, m_multirotor_state, off);
-    }
+        if (m_next_packet_type == silk::rc_comms::Packet_Type::MULTIROTOR_STATE_PART1)
+        {
+            util::serialization::serialize_part1(m_multirotor_state_sz_buffer, m_multirotor_state, off);
+            m_next_packet_type = silk::rc_comms::Packet_Type::MULTIROTOR_STATE_PART2;
+        }
+        else
+        {
+            util::serialization::serialize_part2(m_multirotor_state_sz_buffer, m_multirotor_state, off);
+            m_next_packet_type = silk::rc_comms::Packet_Type::MULTIROTOR_STATE_PART1;
+        }
 
-    memcpy(data, m_serialization_buffer.data(), off);
+        memcpy(data, m_multirotor_state_sz_buffer.data(), off);
+    }
 
     return off;
 }
@@ -113,6 +122,12 @@ boost::optional<stream::IMultirotor_Commands::Value> const& RC_Comms::get_multir
 void RC_Comms::set_multirotor_state(stream::IMultirotor_State::Value const& value)
 {
     std::lock_guard<std::mutex> lg(m_multirotor_state_mutex);
+
+    if (value.home_ecef_position != m_multirotor_state.home_ecef_position)
+    {
+        m_send_home = true;
+    }
+
     m_multirotor_state = value;
 }
 
@@ -136,6 +151,21 @@ void RC_Comms::process()
         std::lock_guard<std::mutex> lg(m_new_multirotor_commands_mutex);
         m_multirotor_commands = m_new_multirotor_commands;
         m_new_multirotor_commands = boost::none;
+    }
+
+    auto now = Clock::now();
+    if (m_send_home == true && now - m_last_home_sent_tp > std::chrono::seconds(1))
+    {
+        QLOGI("Home changed, sending it to the RC");
+        uint8_t packet_type = static_cast<uint8_t>(silk::rc_comms::Packet_Type::MULTIROTOR_STATE_HOME);
+        size_t off = 0;
+
+        std::lock_guard<std::mutex> lg(m_multirotor_state_mutex);
+        util::serialization::serialize_home(m_multirotor_state_sz_buffer, m_multirotor_state, off);
+        m_rc_protocol.send_packet(packet_type, m_multirotor_state_sz_buffer.data(), m_multirotor_state_sz_buffer.size());
+
+        m_send_home = false;
+        m_last_home_sent_tp = now;
     }
 }
 
