@@ -121,11 +121,17 @@ private:
                         stream::IECEF_Linear_Acceleration::Sample const& linear_acceleration,
                         stream::IProximity::Sample const& proximity);
 
+    typedef stream::IMultirotor_Commands::Mode Mode;
+    typedef stream::IMultirotor_Commands::Vertical_Mode Vertical_Mode;
+    typedef stream::IMultirotor_Commands::Horizontal_Mode Horizontal_Mode;
+    typedef stream::IMultirotor_Commands::Yaw_Mode Yaw_Mode;
+
     float compute_ff_thrust(float target_altitude) const;
     math::vec2f compute_horizontal_rate_for_angle(math::vec2f const& target_angle);
     math::vec2f compute_horizontal_rate_for_position(math::vec2f const& target_pos);
     float compute_thrust_for_altitude(float target_alt);
     float compute_yaw_rate_for_angle(float target_angle);
+    void process_vhy_modes(Vertical_Mode vertical_mode, Horizontal_Mode horizontal_mode, Yaw_Mode yaw_mode, stream::IMultirotor_Commands::Sticks const& sticks);
 
     void process_idle_mode();
 
@@ -134,11 +140,6 @@ private:
     void process_return_home_mode();
 
     void process_mode();
-
-    typedef stream::IMultirotor_Commands::Mode Mode;
-    typedef stream::IMultirotor_Commands::Vertical_Mode Vertical_Mode;
-    typedef stream::IMultirotor_Commands::Horizontal_Mode Horizontal_Mode;
-    typedef stream::IMultirotor_Commands::Yaw_Mode Yaw_Mode;
 
     Mode m_mode = Mode::IDLE;
     void set_mode(Mode mode);
@@ -166,6 +167,8 @@ private:
         math::mat3d enu_to_ecef_rotation;
         math::mat3d ecef_to_enu_rotation;
     } m_home;
+
+    std::deque<float> m_thrust_history;
 
     math::vec3f m_enu_position;
     math::vec3f m_enu_velocity;

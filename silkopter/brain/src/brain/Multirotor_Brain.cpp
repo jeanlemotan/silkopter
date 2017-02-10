@@ -450,6 +450,123 @@ float Multirotor_Brain::compute_yaw_rate_for_angle(float target_angle)
 
 //////////////////////////////////////////////////////////////////////////////////////////
 
+void Multirotor_Brain::process_vhy_modes(Vertical_Mode vertical_mode,
+                                         Horizontal_Mode horizontal_mode,
+                                         Yaw_Mode yaw_mode,
+                                         stream::IMultirotor_Commands::Sticks const& sticks)
+{
+    stream::IFloat::Value thrust = m_thrust_output_stream->get_last_sample().value;
+    stream::IAngular_Velocity::Value rate = m_rate_output_stream->get_last_sample().value;
+
+    //////////////////////////////////////////////////////////////
+    // Verticals
+
+    if (vertical_mode == Vertical_Mode::THRUST)
+    {
+        thrust = sticks.throttle * m_config->get_max_thrust();
+    }
+    else if (vertical_mode == Vertical_Mode::ALTITUDE)
+    {
+        {
+            //float output = compute_ff_thrust(sticks.throttle * m_config->get_vertical().get_max_speed() * 2.f);
+            //thrust = output;
+        }
+
+        //apply command
+        float speed = m_config->get_vertical().get_max_speed() * (sticks.throttle * 2.f - 1.f);
+        m_vertical_mode_data.target_altitude += speed * m_dts;
+
+        thrust = compute_thrust_for_altitude(m_vertical_mode_data.target_altitude);
+    }
+
+    //clamp thrust
+    thrust = math::clamp(thrust, m_config->get_min_thrust(), m_config->get_max_thrust());
+
+    ////////////////////////////////////////////////////////////
+    // Horizontals
+
+    if (horizontal_mode == Horizontal_Mode::ANGLE_RATE)
+    {
+        //positive X roations pitch up (X rotates Y over Z).
+        //The pitch stick is positive when pushed forward, so we have to invert it
+        float pitch_stick = -(sticks.pitch * 2.f - 1.f);
+
+        //positive Y rotations roll clockwise (Y rotates Z over X)
+        //The roll stick is positive when pushed right, so no need for inversion
+        float roll_stick = (sticks.roll * 2.f - 1.f);
+
+        float max_speed = math::radians(m_config->get_horizontal().get_max_rate_deg());
+
+        rate.x = pitch_stick * max_speed;
+        rate.y = roll_stick * max_speed;
+    }
+    else if (horizontal_mode == Horizontal_Mode::ANGLE)
+    {
+        //positive X roations pitch up (X rotates Y over Z).
+        //The pitch stick is positive when pushed forward, so we have to invert it
+        float pitch_stick = -(sticks.pitch * 2.f - 1.f);
+
+        //positive Y rotations roll clockwise (Y rotates Z over X)
+        //The roll stick is positive when pushed right, so no need for inversion
+        float roll_stick = (sticks.roll * 2.f - 1.f);
+
+        math::vec2f const& max_angle = math::radians(m_config->get_horizontal().get_max_angle_deg());
+        math::vec2f hrate = compute_horizontal_rate_for_angle(math::vec2f(pitch_stick * max_angle.x,
+                                                                          roll_stick * max_angle.y));
+        rate.x = hrate.x;
+        rate.y = hrate.y;
+    }
+    else if (horizontal_mode == Horizontal_Mode::POSITION)
+    {
+        //apply command
+
+        float pitch_stick = (sticks.pitch * 2.f - 1.f);
+        float roll_stick = (sticks.roll * 2.f - 1.f);
+
+        math::vec2f velocity_local(roll_stick * m_config->get_horizontal().get_max_speed(),
+                                   pitch_stick * m_config->get_horizontal().get_max_speed());
+
+        math::vec2f velocity_enu(math::rotate(m_inputs.frame.sample.value, math::vec3f(velocity_local)));
+
+        m_horizontal_mode_data.target_enu_position += velocity_enu * m_dts;
+
+        rate = compute_horizontal_rate_for_position(m_horizontal_mode_data.target_enu_position);
+    }
+
+    ///////////////////////////////////////////////////////////
+    // Yaw
+
+    if (yaw_mode == Yaw_Mode::ANGLE_RATE)
+    {
+        //positive Z rotations rotate the quad counter-clockwise as viewed from above (Z rotate X over Y)
+        //the yaw stick rotates clockwise for positive Z angles so we have to invert it
+        float stick = -(sticks.yaw * 2.f - 1.f);
+
+        float max_speed = math::radians(m_config->get_yaw().get_max_rate_deg());
+        rate.z = stick * max_speed;
+    }
+    else if (yaw_mode == Yaw_Mode::ANGLE)
+    {
+        float max_speed = math::radians(m_config->get_yaw().get_max_rate_deg());
+
+        //positive Z rotations rotate the quad counter-clockwise as viewed from above (Z rotate X over Y)
+        //the yaw stick rotates clockwise for positive Z angles so we have to invert it
+        float stick = -(sticks.yaw * 2.f - 1.f);
+
+        float speed = stick * max_speed;
+        m_yaw_mode_data.target_angle += speed * m_dts;
+
+        rate.z = compute_yaw_rate_for_angle(m_yaw_mode_data.target_angle);
+    }
+
+    ///////////////////////////////////////////////////////////
+
+    m_rate_output_stream->push_sample(rate, true);
+    m_thrust_output_stream->push_sample(thrust, true);
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////
+
 void Multirotor_Brain::process_return_home_mode()
 {
     stream::IMultirotor_Commands::Value const& commands = m_inputs.commands.sample.value;
@@ -475,28 +592,19 @@ void Multirotor_Brain::process_return_home_mode()
 
     m_horizontal_mode_data.target_enu_position = math::vec2f::zero;
 
-    stream::IFloat::Value thrust = m_thrust_output_stream->get_last_sample().value;
-    stream::IAngular_Velocity::Value rate = m_rate_output_stream->get_last_sample().value;
+    stream::IMultirotor_Commands::Sticks sticks;
+    sticks.pitch = 0.5f;
+    sticks.roll = 0.5f;
+    sticks.yaw = 0.5f;
 
-    //////////////////////////////////////////////////////////////
-    // Verticals
+    //no glitch lately? use the yaw
+    //TODO - add a config param for this
+    if (now - m_last_invalid_commands_tp > std::chrono::milliseconds(500))
+    {
+        sticks.yaw = commands.sticks.yaw;
+    }
 
-    //apply command
-    thrust = compute_thrust_for_altitude(m_vertical_mode_data.target_altitude);
-
-    //clamp thrust
-    thrust = math::clamp(thrust, m_config->get_min_thrust(), m_config->get_max_thrust());
-
-    ////////////////////////////////////////////////////////////
-    // Horizontals
-
-    //apply command
-    rate = compute_horizontal_rate_for_position(m_horizontal_mode_data.target_enu_position);
-
-    ///////////////////////////////////////////////////////////
-
-    m_rate_output_stream->push_sample(rate, true);
-    m_thrust_output_stream->push_sample(thrust, true);
+    process_vhy_modes(Vertical_Mode::ALTITUDE, Horizontal_Mode::POSITION, m_yaw_mode, sticks);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -570,114 +678,7 @@ void Multirotor_Brain::process_fly_mode()
         }
     }
 
-    stream::IFloat::Value thrust = m_thrust_output_stream->get_last_sample().value;
-    stream::IAngular_Velocity::Value rate = m_rate_output_stream->get_last_sample().value;
-
-    //////////////////////////////////////////////////////////////
-    // Verticals
-
-    if (m_vertical_mode == stream::IMultirotor_Commands::Vertical_Mode::THRUST)
-    {
-        thrust = commands.sticks.throttle * m_config->get_max_thrust();
-    }
-    else if (m_vertical_mode == stream::IMultirotor_Commands::Vertical_Mode::ALTITUDE)
-    {
-        {
-            //float output = compute_ff_thrust(commands.sticks.throttle * m_config->get_vertical().get_max_speed() * 2.f);
-            //thrust = output;
-        }
-
-        //apply command
-        float speed = m_config->get_vertical().get_max_speed() * (commands.sticks.throttle * 2.f - 1.f);
-        m_vertical_mode_data.target_altitude += speed * m_dts;
-
-        thrust = compute_thrust_for_altitude(m_vertical_mode_data.target_altitude);
-    }
-
-    //clamp thrust
-    thrust = math::clamp(thrust, m_config->get_min_thrust(), m_config->get_max_thrust());
-
-    ////////////////////////////////////////////////////////////
-    // Horizontals
-
-    if (m_horizontal_mode == stream::IMultirotor_Commands::Horizontal_Mode::ANGLE_RATE)
-    {
-        //positive X roations pitch up (X rotates Y over Z).
-        //The pitch stick is positive when pushed forward, so we have to invert it
-        float pitch_stick = -(commands.sticks.pitch * 2.f - 1.f);
-
-        //positive Y rotations roll clockwise (Y rotates Z over X)
-        //The roll stick is positive when pushed right, so no need for inversion
-        float roll_stick = (commands.sticks.roll * 2.f - 1.f);
-
-        float max_speed = math::radians(m_config->get_horizontal().get_max_rate_deg());
-
-        rate.x = pitch_stick * max_speed;
-        rate.y = roll_stick * max_speed;
-    }
-    else if (m_horizontal_mode == stream::IMultirotor_Commands::Horizontal_Mode::ANGLE)
-    {
-        //positive X roations pitch up (X rotates Y over Z).
-        //The pitch stick is positive when pushed forward, so we have to invert it
-        float pitch_stick = -(commands.sticks.pitch * 2.f - 1.f);
-
-        //positive Y rotations roll clockwise (Y rotates Z over X)
-        //The roll stick is positive when pushed right, so no need for inversion
-        float roll_stick = (commands.sticks.roll * 2.f - 1.f);
-
-        math::vec2f const& max_angle = math::radians(m_config->get_horizontal().get_max_angle_deg());
-        math::vec2f hrate = compute_horizontal_rate_for_angle(math::vec2f(pitch_stick * max_angle.x,
-                                                                          roll_stick * max_angle.y));
-        rate.x = hrate.x;
-        rate.y = hrate.y;
-    }
-    else if (m_horizontal_mode == stream::IMultirotor_Commands::Horizontal_Mode::POSITION)
-    {
-        //apply command
-
-        float pitch_stick = (commands.sticks.pitch * 2.f - 1.f);
-        float roll_stick = (commands.sticks.roll * 2.f - 1.f);
-
-        math::vec2f velocity_local(roll_stick * m_config->get_horizontal().get_max_speed(),
-                                   pitch_stick * m_config->get_horizontal().get_max_speed());
-
-        math::vec2f velocity_enu(math::rotate(m_inputs.frame.sample.value, math::vec3f(velocity_local)));
-
-        m_horizontal_mode_data.target_enu_position += velocity_enu * m_dts;
-
-        rate = compute_horizontal_rate_for_position(m_horizontal_mode_data.target_enu_position);
-    }
-
-    ///////////////////////////////////////////////////////////
-    // Yaw
-
-    if (m_yaw_mode == stream::IMultirotor_Commands::Yaw_Mode::ANGLE_RATE)
-    {
-        //positive Z rotations rotate the quad counter-clockwise as viewed from above (Z rotate X over Y)
-        //the yaw stick rotates clockwise for positive Z angles so we have to invert it
-        float stick = -(commands.sticks.yaw * 2.f - 1.f);
-
-        float max_speed = math::radians(m_config->get_yaw().get_max_rate_deg());
-        rate.z = stick * max_speed;
-    }
-    else if (m_yaw_mode == stream::IMultirotor_Commands::Yaw_Mode::ANGLE)
-    {
-        float max_speed = math::radians(m_config->get_yaw().get_max_rate_deg());
-
-        //positive Z rotations rotate the quad counter-clockwise as viewed from above (Z rotate X over Y)
-        //the yaw stick rotates clockwise for positive Z angles so we have to invert it
-        float stick = -(commands.sticks.yaw * 2.f - 1.f);
-
-        float speed = stick * max_speed;
-        m_yaw_mode_data.target_angle += speed * m_dts;
-
-        rate.z = compute_yaw_rate_for_angle(m_yaw_mode_data.target_angle);
-    }
-
-    ///////////////////////////////////////////////////////////
-
-    m_rate_output_stream->push_sample(rate, true);
-    m_thrust_output_stream->push_sample(thrust, true);
+    process_vhy_modes(m_vertical_mode, m_horizontal_mode, m_yaw_mode, commands.sticks);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -727,6 +728,14 @@ void Multirotor_Brain::process_mode()
     }
 
 
+    {
+        m_thrust_history.push_back(m_thrust_output_stream->get_last_sample().value);
+        size_t per_second = static_cast<size_t>(1.f / std::chrono::duration<float>(m_thrust_output_stream->get_dt()).count());
+        while (m_thrust_history.size() > 5 * per_second)
+        {
+            m_thrust_history.pop_front();
+        }
+    }
 
 //    //increment version of overriden commands
 //    //Increment_Version func;
@@ -880,7 +889,14 @@ void Multirotor_Brain::process()
         state.battery_state.charge_used = m_battery_state_sample.value.charge_used;
         state.local_frame = m_inputs.frame.sample.value;
         state.mode = m_mode;
-        state.throttle = m_thrust_output_stream->get_last_sample().value / m_config->get_max_thrust();
+
+        //compute the average thrust lately
+        {
+            float total_thrust = std::accumulate(m_thrust_history.begin(), m_thrust_history.end(), 0.f);
+            float average_thrust = m_thrust_history.empty() ? 0.f : total_thrust / static_cast<float>(m_thrust_history.size());
+            state.throttle = average_thrust / m_config->get_max_thrust();
+        }
+
         state.home_ecef_position = m_home.is_acquired ? m_home.position : boost::optional<stream::IECEF_Position::Value>();
 
         for (size_t i = 0; i < samples_needed; i++)
