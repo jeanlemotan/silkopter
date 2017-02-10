@@ -104,7 +104,9 @@ private:
         {
             T previous_sample;
             T sample;
-            Clock::time_point last_valid_tp;
+            Clock::time_point last_valid_tp; //when was the last valid sample
+            Clock::time_point last_invalid_tp; //when was the last invalid sample
+            bool is_stable = false; //is the data stable, without invalid samples lately?
         };
 
         Data<stream::IMultirotor_Commands::Sample> commands;
@@ -115,11 +117,7 @@ private:
         Data<stream::IProximity::Sample> proximity;
     } m_inputs;
 
-    void refresh_inputs(stream::IFrame::Sample const& frame,
-                        stream::IECEF_Position::Sample const& position,
-                        stream::IECEF_Velocity::Sample const& velocity,
-                        stream::IECEF_Linear_Acceleration::Sample const& linear_acceleration,
-                        stream::IProximity::Sample const& proximity);
+    template<typename T> void process_input_data(Inputs::Data<T>& data, T const& new_sample);
 
     typedef stream::IMultirotor_Commands::Mode Mode;
     typedef stream::IMultirotor_Commands::Vertical_Mode Vertical_Mode;
@@ -226,7 +224,7 @@ private:
     {
     };
 
-    Clock::time_point m_last_invalid_commands_tp = Clock::now();
+//    Clock::time_point m_last_invalid_commands_tp = Clock::now();
 };
 
 

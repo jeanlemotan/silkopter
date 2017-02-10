@@ -208,31 +208,27 @@ ts::Result<void> Multirotor_Brain::check_pre_flight_conditions() const
     //check that all sensors are functional
     auto now = Clock::now();
 
-    if (now - m_last_invalid_commands_tp < std::chrono::seconds(5))
-    {
-        return make_error("Command stream failed recently!");
-    }
-    if (now - m_inputs.commands.last_valid_tp > std::chrono::milliseconds(100))
+    if (now - m_inputs.commands.last_invalid_tp < std::chrono::seconds(5))
     {
         return make_error("Command stream is failing!");
     }
-    if (now - m_inputs.frame.last_valid_tp > std::chrono::milliseconds(100))
+    if (now - m_inputs.frame.last_invalid_tp < std::chrono::seconds(5))
     {
         return make_error("Frame stream is failing!");
     }
-    if (now - m_inputs.linear_acceleration.last_valid_tp > std::chrono::milliseconds(100))
+    if (now - m_inputs.linear_acceleration.last_invalid_tp < std::chrono::seconds(5))
     {
         return make_error("Linear acceleration stream is failing!");
     }
-    if (now - m_inputs.position.last_valid_tp > std::chrono::milliseconds(100))
+    if (now - m_inputs.position.last_invalid_tp < std::chrono::seconds(5))
     {
         return make_error("Proximity stream is failing!");
     }
-    if (now - m_inputs.velocity.last_valid_tp > std::chrono::milliseconds(100))
+    if (now - m_inputs.velocity.last_invalid_tp < std::chrono::seconds(5))
     {
         return make_error("Velocity stream is failing!");
     }
-    if (now - m_inputs.position.last_valid_tp > std::chrono::milliseconds(100))
+    if (now - m_inputs.position.last_invalid_tp < std::chrono::seconds(5))
     {
         return make_error("Position stream is failing!");
     }
@@ -572,9 +568,7 @@ void Multirotor_Brain::process_return_home_mode()
     stream::IMultirotor_Commands::Value const& commands = m_inputs.commands.sample.value;
     QASSERT(m_home.is_acquired);
 
-    auto now = Clock::now();
-
-    if (now - m_last_invalid_commands_tp > std::chrono::seconds(5))
+    if (m_inputs.commands.is_stable)
     {
         if (commands.mode == Mode::FLY ||
             commands.mode == Mode::LAND)
@@ -598,8 +592,7 @@ void Multirotor_Brain::process_return_home_mode()
     sticks.yaw = 0.5f;
 
     //no glitch lately? use the yaw
-    //TODO - add a config param for this
-    if (now - m_last_invalid_commands_tp > std::chrono::milliseconds(500))
+    if (m_inputs.commands.is_stable)
     {
         sticks.yaw = commands.sticks.yaw;
     }
@@ -620,7 +613,8 @@ void Multirotor_Brain::process_fly_mode()
     {
         //check signal loss condition
         //TODO - add a config param for this
-        if (now - m_inputs.commands.last_valid_tp > std::chrono::seconds(2))
+        //if (now - m_inputs.commands.last_valid_tp > std::chrono::seconds(2))
+        if (!m_inputs.commands.is_stable)
         {
             m_fly_mode_data.state = Fly_Mode_Data::State::ALERT_HOLD;
             QLOGW("No input received for {}. Holding position", now - m_inputs.commands.last_valid_tp);
@@ -660,7 +654,7 @@ void Multirotor_Brain::process_fly_mode()
         }
         //no glitch lately? go back to normal
         //TODO - add a config param for this
-        else if (now - m_last_invalid_commands_tp > std::chrono::milliseconds(500))
+        else if (m_inputs.commands.is_stable)
         {
             m_fly_mode_data.state = Fly_Mode_Data::State::NORMAL;
             QLOGW("Input received. Returning to normal");
@@ -755,6 +749,11 @@ void Multirotor_Brain::acquire_home_position()
 
     std::deque<util::coordinates::ECEF>& history = m_home.position_history;
 
+    if (m_inputs.position.is_stable)
+    {
+        history.push_back(m_inputs.position.sample.value);
+    }
+
     //check if the position is stable
     for (size_t i = 1; i < history.size(); i++)
     {
@@ -803,37 +802,26 @@ void Multirotor_Brain::acquire_home_position()
 
 //////////////////////////////////////////////////////////////////////////////////////////
 
-void Multirotor_Brain::refresh_inputs(stream::IFrame::Sample const& frame,
-                                stream::IECEF_Position::Sample const& position,
-                                stream::IECEF_Velocity::Sample const& velocity,
-                                stream::IECEF_Linear_Acceleration::Sample const& linear_acceleration,
-                                stream::IProximity::Sample const& proximity)
+template<typename T> void Multirotor_Brain::process_input_data(Inputs::Data<T>& data, T const& new_sample)
 {
     auto now = Clock::now();
 
-    m_inputs.frame.previous_sample = m_inputs.frame.sample;
-    m_inputs.frame.sample = frame;
-    m_inputs.frame.last_valid_tp = frame.is_healthy ? now : m_inputs.frame.last_valid_tp;
-
-    m_home.position_history.push_back(position.value);
-    if (position.is_healthy)
+    if (new_sample.is_healthy)
     {
-        m_inputs.position.previous_sample = m_inputs.position.sample;
-        m_inputs.position.sample = position;
-        m_inputs.position.last_valid_tp = now;
+        data.previous_sample = data.sample;
+        data.sample = new_sample;
+        data.last_valid_tp = now;
     }
 
-    m_inputs.velocity.previous_sample = m_inputs.velocity.sample;
-    m_inputs.velocity.sample = velocity;
-    m_inputs.velocity.last_valid_tp = velocity.is_healthy ? now : m_inputs.velocity.last_valid_tp;
-
-    m_inputs.linear_acceleration.previous_sample = m_inputs.linear_acceleration.sample;
-    m_inputs.linear_acceleration.sample = linear_acceleration;
-    m_inputs.linear_acceleration.last_valid_tp = linear_acceleration.is_healthy ? now : m_inputs.linear_acceleration.last_valid_tp;
-
-    m_inputs.proximity.previous_sample = m_inputs.proximity.sample;
-    m_inputs.proximity.sample = proximity;
-    m_inputs.proximity.last_valid_tp = proximity.is_healthy ? now : m_inputs.proximity.last_valid_tp;
+    if (now - data.last_valid_tp >= std::chrono::milliseconds(500))
+    {
+        data.last_invalid_tp = now;
+        data.is_stable = false;
+    }
+    if (now - data.last_invalid_tp >= std::chrono::milliseconds(500))
+    {
+        data.is_stable = true;
+    }
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -850,14 +838,8 @@ void Multirotor_Brain::process()
 
     m_commands_accumulator.process([now, this](stream::IMultirotor_Commands::Sample const& i_commands)
     {
-        m_inputs.commands.sample = i_commands;
-        m_inputs.commands.last_valid_tp = i_commands.is_healthy ? now : m_inputs.commands.last_valid_tp;
+        process_input_data(m_inputs.commands, i_commands);
     });
-
-    if (now - m_inputs.commands.last_valid_tp >= std::chrono::milliseconds(500))
-    {
-        m_last_invalid_commands_tp = now;
-    }
 
 //    Merge_Commands func;
 //    stream::IMultirotor_Commands::apply(func, m_inputs.remote_commands.previous_sample.value, m_inputs.remote_commands.sample.value, m_inputs.local_commands.sample.value);
@@ -873,7 +855,12 @@ void Multirotor_Brain::process()
     {
         m_battery_state_sample = m_battery.process(i_voltage, i_current);
 
-        refresh_inputs(i_frame, i_position, i_velocity, i_linear_acceleration, i_proximity);
+        process_input_data(m_inputs.frame, i_frame);
+        process_input_data(m_inputs.position, i_position);
+        process_input_data(m_inputs.velocity, i_velocity);
+        process_input_data(m_inputs.linear_acceleration, i_linear_acceleration);
+        process_input_data(m_inputs.proximity, i_proximity);
+
         process_mode();
     });
 
