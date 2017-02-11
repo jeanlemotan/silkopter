@@ -385,6 +385,15 @@ void Fly_Menu_Page::render(Adafruit_GFX& display)
 
     stream::IMultirotor_State::Value const& state = m_multirotor_state;
 
+    util::coordinates::LLA home_lla;
+    math::trans3dd home_ecef_to_enu_transform;
+    if (state.home_ecef_position)
+    {
+        home_lla = util::coordinates::ecef_to_lla(*state.home_ecef_position);
+        home_ecef_to_enu_transform = util::coordinates::ecef_to_enu_transform(home_lla);
+    }
+    math::vec3f enu_position = math::vec3f(math::transform(home_ecef_to_enu_transform, state.ecef_position));
+
 //    {
 //        math::vec3f euler;
 //        state.local_frame.get_as_euler_zxy(euler);
@@ -404,10 +413,11 @@ void Fly_Menu_Page::render(Adafruit_GFX& display)
 
     //mode
     {
+        bool inverted = false;
         const char* mode_str = "N/A";
         switch (state.mode)
         {
-        case stream::IMultirotor_State::Mode::IDLE: mode_str = "IDLE"; break;
+        case stream::IMultirotor_State::Mode::IDLE: mode_str = "IDLE"; inverted = state.home_ecef_position != boost::none; break;
         case stream::IMultirotor_State::Mode::TAKE_OFF: mode_str = "TAKE OFF"; break;
         case stream::IMultirotor_State::Mode::FLY: mode_str = "FLY"; break;
         case stream::IMultirotor_State::Mode::RETURN_HOME: mode_str = "RTH"; break;
@@ -416,12 +426,16 @@ void Fly_Menu_Page::render(Adafruit_GFX& display)
 
         bool blink = (now - m_last_mode_change_tp) < k_mode_change_blink_duration ||
                 state.mode != m_commands.mode;
-        uint16_t color = blink ? m_fast_blink_color : 1;
+        uint16_t color = inverted ? 0 : 1;
+        uint16_t bg_color = !color;
 
-        display.setTextColor(color);
-        display.setCursor(0, y);
-        display.print(mode_str);
-        display.setTextColor(1);
+        if (!blink || m_fast_blink_color == 0)
+        {
+            display.setTextColor(color, bg_color);
+            display.setCursor(0, y);
+            display.print(mode_str);
+            display.setTextColor(1 ,0);
+        }
     }
 
     //signal strength
@@ -468,7 +482,7 @@ void Fly_Menu_Page::render(Adafruit_GFX& display)
 //    display.setCursor(display.width() - 72, 0);
 //    display.printf("%d / %d", static_cast<int>(m_rx_strength * 100.f), static_cast<int>(m_tx_strength * 100.f));
 
-    y += 12;
+    y += 11;
     //battery
     {
         {
@@ -505,10 +519,10 @@ void Fly_Menu_Page::render(Adafruit_GFX& display)
         }
     }
 
-    y += 11;
+    y += 10;
     //display.drawFastHLine(0, y, display.width(), 1);
 
-    y += 6;
+    y += 5;
     //vertical mode
     {
         const char* mode_str = "N/A";
@@ -526,15 +540,22 @@ void Fly_Menu_Page::render(Adafruit_GFX& display)
         display.printf("V:%s", mode_str);
         display.setTextColor(1);
     }
-    //altitude
+    if (state.mode != silk::stream::IMultirotor_Commands::Mode::IDLE) //altitude
     {
-        //TODO - compute real altitude
-        float altitude = state.enu_velocity.z;
+        float altitude = enu_position.z;
         display.setCursor(display.width() - 80, y);
         display.printf("ALT:%.1fm", altitude);
     }
+    else
+    {
+        display.setCursor(display.width() - 80, y);
+        if (state.home_ecef_position.is_initialized() || m_blink_color == 0)
+        {
+            display.printf("ALT:%.1fm", home_lla.altitude);
+        }
+    }
 
-    y += 10;
+    y += 9;
     //horizontal mode
     {
         const char* mode_str = "N/A";
@@ -553,14 +574,22 @@ void Fly_Menu_Page::render(Adafruit_GFX& display)
         display.printf("H:%s", mode_str);
         display.setTextColor(1);
     }
-    //v speed
+    if (state.mode != silk::stream::IMultirotor_Commands::Mode::IDLE) //v speed
     {
         float speed = state.enu_velocity.z;
         display.setCursor(display.width() - 80, y);
         display.printf("VSP:%.1fm/s", speed);
     }
+    else
+    {
+        display.setCursor(display.width() - 80, y);
+        if (state.home_ecef_position.is_initialized() || m_blink_color == 0)
+        {
+            display.printf("LAT:%.5f", math::degrees(home_lla.latitude));
+        }
+    }
 
-    y += 10;
+    y += 9;
     //yaw mode
     {
         const char* mode_str = "N/A";
@@ -578,11 +607,29 @@ void Fly_Menu_Page::render(Adafruit_GFX& display)
         display.printf("Y:%s", mode_str);
         display.setTextColor(1);
     }
-    //h speed
+    if (state.mode != silk::stream::IMultirotor_Commands::Mode::IDLE) //h speed
     {
         float speed = math::length(math::vec2f(state.enu_velocity));
         display.setCursor(display.width() - 80, y);
         display.printf("HSP:%.1fm/s", speed);
+    }
+    else
+    {
+        display.setCursor(display.width() - 80, y);
+        if (state.home_ecef_position.is_initialized() || m_blink_color == 0)
+        {
+            display.printf("LON:%.5f", math::degrees(home_lla.longitude));
+        }
+    }
+
+    y+= 10;
+
+    //distance from home
+    if (state.mode != silk::stream::IMultirotor_Commands::Mode::IDLE) //h speed
+    {
+        float d = math::length(math::vec2f(enu_position));
+        display.setCursor(0, y);
+        display.printf("DIST:%.1fm", d);
     }
 }
 
