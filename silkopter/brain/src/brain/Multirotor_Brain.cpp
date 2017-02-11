@@ -198,6 +198,58 @@ void Multirotor_Brain::set_yaw_mode(Yaw_Mode mode)
 
 //////////////////////////////////////////////////////////////////////////////////////////
 
+float Multirotor_Brain::get_neutral_yaw_stick(Yaw_Mode mode) const
+{
+    return 0.5f;
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////
+
+float Multirotor_Brain::get_neutral_pitch_stick(Horizontal_Mode mode) const
+{
+    return 0.5f;
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////
+
+float Multirotor_Brain::get_neutral_roll_stick(Horizontal_Mode mode) const
+{
+    return 0.5f;
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////
+
+float Multirotor_Brain::get_neutral_throttle_stick(Vertical_Mode mode) const
+{
+    if (mode == Vertical_Mode::THRUST)
+    {
+        return 0.f;
+    }
+    else if (mode == Vertical_Mode::ALTITUDE)
+    {
+        return 0.5f;
+    }
+    else
+    {
+        QASSERT_MSG(false, "Unknown vertical mode");
+    }
+    return 0.f;
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////
+
+stream::IMultirotor_Commands::Sticks Multirotor_Brain::get_neutral_sticks(Vertical_Mode vmode, Horizontal_Mode hmode, Yaw_Mode ymode) const
+{
+    stream::IMultirotor_Commands::Sticks sticks;
+    sticks.yaw = get_neutral_yaw_stick(ymode);
+    sticks.pitch = get_neutral_pitch_stick(hmode);
+    sticks.roll = get_neutral_roll_stick(hmode);
+    sticks.throttle = get_neutral_throttle_stick(vmode);
+    return sticks;
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////
+
 ts::Result<void> Multirotor_Brain::check_pre_flight_conditions() const
 {
     if (!m_home.is_acquired)
@@ -586,10 +638,7 @@ void Multirotor_Brain::process_return_home_mode()
 
     m_horizontal_mode_data.target_enu_position = math::vec2f::zero;
 
-    stream::IMultirotor_Commands::Sticks sticks;
-    sticks.pitch = 0.5f;
-    sticks.roll = 0.5f;
-    sticks.yaw = 0.5f;
+    stream::IMultirotor_Commands::Sticks sticks = get_neutral_sticks(Vertical_Mode::ALTITUDE, Horizontal_Mode::POSITION, m_yaw_mode);
 
     //no glitch lately? use the yaw
     if (m_inputs.commands.is_stable)
@@ -612,8 +661,6 @@ void Multirotor_Brain::process_fly_mode()
     if (m_fly_mode_data.state == Fly_Mode_Data::State::NORMAL)
     {
         //check signal loss condition
-        //TODO - add a config param for this
-        //if (now - m_inputs.commands.last_valid_tp > std::chrono::seconds(2))
         if (!m_inputs.commands.is_stable)
         {
             m_fly_mode_data.state = Fly_Mode_Data::State::ALERT_HOLD;
@@ -653,7 +700,6 @@ void Multirotor_Brain::process_fly_mode()
             return;
         }
         //no glitch lately? go back to normal
-        //TODO - add a config param for this
         else if (m_inputs.commands.is_stable)
         {
             m_fly_mode_data.state = Fly_Mode_Data::State::NORMAL;
@@ -665,10 +711,7 @@ void Multirotor_Brain::process_fly_mode()
         //make sure the commands are centered
         else
         {
-            commands.sticks.yaw = 0.5f;
-            commands.sticks.pitch = 0.5f;
-            commands.sticks.roll = 0.5f;
-            commands.sticks.throttle = 0.5f;
+            commands.sticks = get_neutral_sticks(m_vertical_mode, m_horizontal_mode, m_yaw_mode);
         }
     }
 
@@ -761,7 +804,7 @@ void Multirotor_Brain::acquire_home_position()
         {
             if (m_home.is_acquired)
             {
-                QLOGI("Home un-acquired. Too instable!!!");
+                QLOGI("Home un-acquired. Too unstable!!!");
                 m_home.is_acquired = false;
             }
 

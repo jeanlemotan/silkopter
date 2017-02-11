@@ -139,6 +139,12 @@ private:
 
     void process_mode();
 
+    float get_neutral_yaw_stick(Yaw_Mode mode) const;
+    float get_neutral_pitch_stick(Horizontal_Mode mode) const;
+    float get_neutral_roll_stick(Horizontal_Mode mode) const;
+    float get_neutral_throttle_stick(Vertical_Mode mode) const;
+    stream::IMultirotor_Commands::Sticks get_neutral_sticks(Vertical_Mode vmode, Horizontal_Mode hmode, Yaw_Mode ymode) const;
+
     Mode m_mode = Mode::IDLE;
     void set_mode(Mode mode);
 
