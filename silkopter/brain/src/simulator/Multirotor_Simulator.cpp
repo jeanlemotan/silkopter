@@ -168,7 +168,7 @@ void Multirotor_Simulator::process()
     }
     m_last_tp = now;
 
-    static const util::coordinates::LLA origin_lla(math::radians(41.390205), math::radians(2.154007), 0.0);
+    static const util::coordinates::LLA origin_lla(math::radians(41.390205), math::radians(2.154007), 37.5);
     auto enu_to_ecef_trans = util::coordinates::enu_to_ecef_transform(origin_lla);
     auto enu_to_ecef_rotation = util::coordinates::enu_to_ecef_rotation(origin_lla);
 
