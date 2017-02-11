@@ -201,8 +201,6 @@ void SRF01::process()
     uint16_t d = 0;
     if (read_response_u16(*bus, REAL_RANGING_CM_TX, d))
     {
-        QLOGI("d = {}", d);
-
         float distance = static_cast<float>(d) / 100.f; //meters
 
         float min_distance = m_config->get_min_distance();//math::max(m_config->min_distance, static_cast<float>(min_d) / 100.f); //meters
