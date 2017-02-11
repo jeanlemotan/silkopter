@@ -46,15 +46,31 @@ void Acceleration_Stream_Viewer_Widget::init(silk::Comms& comms, std::string con
     {
         if (_stream.stream_path == m_stream_path)
         {
-            auto const* stream = dynamic_cast<silk::Comms::Telemetry_Stream<silk::stream::IAcceleration> const*>(&_stream);
-            if (stream)
+            if (auto const* stream = dynamic_cast<silk::Comms::Telemetry_Stream<silk::stream::IAcceleration> const*>(&_stream))
             {
                 for (auto const& sample: stream->samples)
                 {
                     float values[3] = { sample.value.x, sample.value.y, sample.value.z };
                     widget->add_samples(values, sample.is_healthy);
                 }
-
+                widget->process();
+            }
+            else if (auto const* stream = dynamic_cast<silk::Comms::Telemetry_Stream<silk::stream::IECEF_Acceleration> const*>(&_stream))
+            {
+                for (auto const& sample: stream->samples)
+                {
+                    float values[3] = { sample.value.x, sample.value.y, sample.value.z };
+                    widget->add_samples(values, sample.is_healthy);
+                }
+                widget->process();
+            }
+            else if (auto const* stream = dynamic_cast<silk::Comms::Telemetry_Stream<silk::stream::IENU_Acceleration> const*>(&_stream))
+            {
+                for (auto const& sample: stream->samples)
+                {
+                    float values[3] = { sample.value.x, sample.value.y, sample.value.z };
+                    widget->add_samples(values, sample.is_healthy);
+                }
                 widget->process();
             }
         }

@@ -46,15 +46,31 @@ void Velocity_Stream_Viewer_Widget::init(silk::Comms& comms, std::string const& 
     {
         if (_stream.stream_path == m_stream_path)
         {
-            auto const* stream = dynamic_cast<silk::Comms::Telemetry_Stream<silk::stream::IVelocity> const*>(&_stream);
-            if (stream)
+            if (auto const* stream = dynamic_cast<silk::Comms::Telemetry_Stream<silk::stream::IVelocity> const*>(&_stream))
             {
                 for (auto const& sample: stream->samples)
                 {
                     float values[3] = { sample.value.x, sample.value.y, sample.value.z };
                     widget->add_samples(values, sample.is_healthy);
                 }
-
+                widget->process();
+            }
+            else if (auto const* stream = dynamic_cast<silk::Comms::Telemetry_Stream<silk::stream::IECEF_Velocity> const*>(&_stream))
+            {
+                for (auto const& sample: stream->samples)
+                {
+                    float values[3] = { sample.value.x, sample.value.y, sample.value.z };
+                    widget->add_samples(values, sample.is_healthy);
+                }
+                widget->process();
+            }
+            else if (auto const* stream = dynamic_cast<silk::Comms::Telemetry_Stream<silk::stream::IENU_Velocity> const*>(&_stream))
+            {
+                for (auto const& sample: stream->samples)
+                {
+                    float values[3] = { sample.value.x, sample.value.y, sample.value.z };
+                    widget->add_samples(values, sample.is_healthy);
+                }
                 widget->process();
             }
         }
