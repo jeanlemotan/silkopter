@@ -72,20 +72,19 @@ public:
 
     struct Header
     {
-        uint16_t packet_type : 6;
+        uint16_t last_packet : 1;
+        uint16_t packet_type : 5;
         uint16_t packet_index : 5;
         uint16_t last_received_packet_index : 5;
 
-        static const size_t MAX_PACKET_TYPE = 59;
+        static const size_t MAX_PACKET_TYPE = 29;
         static const size_t MAX_PACKET_INDEX = 32;
         static const size_t MAX_PACKER_INDEX_MASK = MAX_PACKET_INDEX - 1;
 
         enum Internal_Packet_Type : uint8_t
         {
             EMPTY_PACKET = MAX_PACKET_TYPE + 1,
-            RESET_PACKET,
-            MID_PACKET,
-            LAST_PACKET,
+            RESET_PACKET
         };
     };
 

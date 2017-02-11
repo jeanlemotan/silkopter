@@ -73,6 +73,7 @@ size_t RC_Protocol::compute_tx_data(uint8_t* data)
 
                 header.packet_index = 0;
                 header.packet_type = packet_type;
+                header.last_packet = 1;
 
 #ifdef LOG
                 QLOGI("Send periodic packet type {}, size {}", packet_type, size);
@@ -88,13 +89,15 @@ size_t RC_Protocol::compute_tx_data(uint8_t* data)
         if (!m_tx_packet_queue.empty())
         {
             TX_Packet& packet = m_tx_packet_queue.front();
-            size_t size = std::min(packet.payload.size() - packet.offset, get_mtu());
+            size_t payload_size_left = packet.payload.size() - packet.offset;
+            size_t size = std::min(payload_size_left, get_mtu());
             QASSERT(size > 0);
 
             memcpy(data + sizeof(Header), packet.payload.data() + packet.offset, size);
 
             header.packet_type = packet.packet_type;
             header.packet_index = m_crt_sent_packet_index;
+            header.last_packet = (size == payload_size_left);
 
 #ifdef LOG
             QLOGI("Sent fragment {} - {} out of {}KB", packet.offset, packet.offset + size, packet.payload.size());
@@ -104,6 +107,7 @@ size_t RC_Protocol::compute_tx_data(uint8_t* data)
     }
 
     {
+        header.last_packet = 1;
         header.packet_type = Header::EMPTY_PACKET;
         header.packet_index = 0;
         return sizeof(Header);
@@ -164,43 +168,31 @@ void RC_Protocol::process_rx_data(util::comms::RC_Phy::RX_Data const& data)
             memcpy(m_incoming_packet.payload.data() + offset, data.payload.data() + sizeof(Header), size);
         }
 
-        bool done = false;
-
-        if (header.packet_type < Header::EMPTY_PACKET) //starting a new packet stream?
+        if (header.packet_type == Header::EMPTY_PACKET) //just a ping
+        {
+            m_incoming_packet.payload.clear();
+            m_incoming_packet.packet_type = static_cast<uint8_t>(-1);
+        }
+        else if (header.packet_type < Header::EMPTY_PACKET) //starting a new packet stream?
         {
             m_incoming_packet.packet_type = header.packet_type;
 
-            //packet index 0 is special - it indicates a periodic packet
-            if (header.packet_index == 0)
+            if (header.last_packet == 1)
             {
-                done = true;
+                m_incoming_packet.rx_dBm = data.rx_dBm;
+                m_incoming_packet.tx_dBm = data.tx_dBm;
+                m_incoming_packet.rx_timepoint = data.rx_timepoint;
+                if (m_incoming_packet.packet_type != static_cast<uint8_t>(-1))
+                {
+                    m_rx_callback(m_incoming_packet);
+                }
+                else
+                {
+                    QLOGW("Incomplete packet received!");
+                }
+                m_incoming_packet.payload.clear();
+                m_incoming_packet.packet_type = static_cast<uint8_t>(-1);
             }
-        }
-        else if (header.packet_type == Header::EMPTY_PACKET) //just a ping
-        {
-            m_incoming_packet.payload.clear();
-            m_incoming_packet.packet_type = static_cast<uint8_t>(-1);
-        }
-        else if (header.packet_type == Header::LAST_PACKET) //the last packet of a stream
-        {
-            done = true;
-        }
-
-        if (done)
-        {
-            m_incoming_packet.rx_dBm = data.rx_dBm;
-            m_incoming_packet.tx_dBm = data.tx_dBm;
-            m_incoming_packet.rx_timepoint = data.rx_timepoint;
-            if (m_incoming_packet.packet_type != static_cast<uint8_t>(-1))
-            {
-                m_rx_callback(m_incoming_packet);
-            }
-            else
-            {
-                QLOGW("Incomplete packet received!");
-            }
-            m_incoming_packet.payload.clear();
-            m_incoming_packet.packet_type = static_cast<uint8_t>(-1);
         }
     }
 }
