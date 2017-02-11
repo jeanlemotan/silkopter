@@ -2,8 +2,10 @@
 #include "Comms.h"
 
 #include <QQuickWidget>
-#include <QtCharts/QChartView>
-#include <QtCharts/QLineSeries>
+#include <QQuickItem>
+//#include <QtCharts/QChartView>
+//#include <QtCharts/QLineSeries>
+#include <QtPositioning/QGeoCoordinate>
 #include "Numeric_Viewer_Widget.h"
 
 using namespace QtCharts;
@@ -37,11 +39,14 @@ void Position_Stream_Viewer_Widget::init(silk::Comms& comms, std::string const& 
     quick_view->setResizeMode(QQuickWidget::SizeRootObjectToView);
     quick_view->show();
 
+    QQuickItem* root = quick_view->rootObject();
+    Q_ASSERT(root);
+
     setLayout(new QHBoxLayout());
     layout()->setMargin(0);
     layout()->addWidget(quick_view);
 
-    m_connection = m_comms->sig_telemetry_samples_available.connect([this](silk::Comms::ITelemetry_Stream const& _stream)
+    m_connection = m_comms->sig_telemetry_samples_available.connect([this, root](silk::Comms::ITelemetry_Stream const& _stream)
     {
         if (_stream.stream_path == m_stream_path)
         {
@@ -50,6 +55,14 @@ void Position_Stream_Viewer_Widget::init(silk::Comms& comms, std::string const& 
             {
                 for (auto const& sample: stream->samples)
                 {
+                    if (root)
+                    {
+                        util::coordinates::LLA lla = util::coordinates::ecef_to_lla(sample.value);
+                        root->setProperty("locationLatitude", math::degrees(lla.latitude));
+                        root->setProperty("locationLongitude", math::degrees(lla.longitude));
+                        root->setProperty("locationAltitude", lla.altitude);
+                    }
+
             //                    float values[3] = { sample.value.x, sample.value.y, sample.value.z };
             //                    widget->add_samples(values, sample.is_healthy);
                 }

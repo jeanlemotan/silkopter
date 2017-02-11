@@ -1,10 +1,14 @@
 import QtQuick 2.5
 import QtQuick.Controls 1.4
 import QtLocation 5.6
-//import QtPositioning 5.5
+import QtPositioning 5.5
 
 Rectangle
 {
+    property double locationLatitude
+    property double locationLongitude
+    property double locationAltitude
+
     Plugin {
         id: osmplugin
 
@@ -45,11 +49,23 @@ Rectangle
         anchors.right: parent.right
         anchors.bottom: parent.bottom
 
+        MapCircle {
+            center {
+                latitude: locationLatitude
+                longitude: locationLongitude
+                altitude: locationAltitude
+            }
+            radius: 1.0
+            color: 'green'
+            border.width: 3
+        }
+
         plugin: osmplugin
         //plugin: hereplugin
         center {
-            latitude: -27
-            longitude: 153
+            latitude: locationLatitude
+            longitude: locationLongitude
+            altitude: locationAltitude
         }
         zoomLevel: map.minimumZoomLevel //(map.minimumZoomLevel + map.maximumZoomLevel) / 2
         gesture.enabled: true

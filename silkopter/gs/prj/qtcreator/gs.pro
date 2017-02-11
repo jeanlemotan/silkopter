@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui opengl network widgets charts quick qml quickwidgets 3dcore 3drender 3dinput 3dextras
+QT       += core gui opengl network widgets charts quick qml quickwidgets 3dcore 3drender 3dinput 3dextras positioning
 
 TARGET = gs
 TEMPLATE = app
