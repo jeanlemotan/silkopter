@@ -167,7 +167,7 @@ inline bool deserialize_ecef_position(Buffer_t const& buffer, silk::stream::IECE
     }
 
     {
-        double v = s1 / 100.0;
+        double v = s1 / 10.0;
         lla_position.altitude = v;
     }
 
@@ -287,36 +287,10 @@ inline auto deserialize_part2(Buffer_t const& buffer, silk::stream::IMultirotor_
 
 inline void serialize_home(Buffer_t& buffer, silk::stream::IMultirotor_State::Value const& value, size_t& off)
 {
+    serialize(buffer, value.home_ecef_position.is_initialized(), off);
     if (value.home_ecef_position)
     {
-        util::coordinates::LLA lla_position = util::coordinates::ecef_to_lla(*value.home_ecef_position);
-
-        {
-            int64_t v = lla_position.latitude * 100000000.0; //8 decimal places
-            uint8_t const* data = reinterpret_cast<uint8_t const*>(&v);
-            serialize(buffer, data[0], off);
-            serialize(buffer, data[1], off);
-            serialize(buffer, data[2], off);
-            serialize(buffer, data[3], off);
-            serialize(buffer, data[4], off);
-        }
-        {
-            int64_t v = lla_position.longitude * 100000000.0; //8 decimal places
-            uint8_t const* data = reinterpret_cast<uint8_t const*>(&v);
-            serialize(buffer, data[0], off);
-            serialize(buffer, data[1], off);
-            serialize(buffer, data[2], off);
-            serialize(buffer, data[3], off);
-            serialize(buffer, data[4], off);
-        }
-        {
-            int16_t v = static_cast<int16_t>(math::clamp(lla_position.altitude, -327.0, 327.0) * 10.0);
-            serialize(buffer, v, off);
-        }
-    }
-    else
-    {
-        serialize(buffer, false, off);
+        serialize_ecef_position(buffer, *value.home_ecef_position, off);
     }
 }
 
