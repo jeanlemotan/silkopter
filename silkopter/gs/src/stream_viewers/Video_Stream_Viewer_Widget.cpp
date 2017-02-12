@@ -65,7 +65,6 @@ void Video_Stream_Viewer_Widget::init(silk::Comms& comms, std::string const& str
                         update();
                     }
                 }
-                stats_widget->process();
             }
         }
     });

@@ -6,6 +6,13 @@
 #include <QInputDialog>
 #include <QMessageBox>
 
+static GL_Widget* s_gl_widget = nullptr;
+
+void bind_context()
+{
+    s_gl_widget->makeCurrent();
+}
+
 
 GS::GS(QWidget *parent)
     : QMainWindow(parent)
@@ -21,6 +28,9 @@ GS::GS(QWidget *parent)
     m_editor_factory->register_standard_editors();
 
     m_ui.setupUi(this);
+
+    s_gl_widget = m_ui.gl_widget;
+    bind_context();
 
     QObject::connect(m_ui.tabWidget, &QTabWidget::currentChanged, [this](int index)
     {
@@ -150,6 +160,9 @@ void GS::process()
 //        m_comms.start_udp(boost::asio::ip::address::from_string(m_remote_address), 8001, 8000);
 //        //m_comms.start_rfmon("wlp0s20u1u4", 3);
 //    }
+
+
+    bind_context();
 
     m_comms.process_rcp();
 

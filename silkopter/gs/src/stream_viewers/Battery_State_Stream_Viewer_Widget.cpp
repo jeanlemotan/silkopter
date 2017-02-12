@@ -55,8 +55,6 @@ void Battery_State_Stream_Viewer_Widget::init(silk::Comms& comms, std::string co
                     float values[4] = { sample.value.charge_used, sample.value.average_current, sample.value.average_voltage, sample.value.capacity_left * 100.f };
                     widget->add_samples(values, sample.is_healthy);
                 }
-
-                widget->process();
             }
         }
     });

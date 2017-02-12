@@ -98,6 +98,9 @@
    <property name="checkable">
     <bool>true</bool>
    </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
    <property name="icon">
     <iconset resource="../../res/res.qrc">
      <normaloff>:/icons/ui/gravity.png</normaloff>:/icons/ui/gravity.png</iconset>
@@ -111,6 +114,9 @@
   </action>
   <action name="actionDrag">
    <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
     <bool>true</bool>
    </property>
    <property name="icon">
@@ -131,6 +137,9 @@
    <property name="checkable">
     <bool>true</bool>
    </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
    <property name="icon">
     <iconset resource="../../res/res.qrc">
      <normaloff>:/icons/ui/simulator.png</normaloff>:/icons/ui/simulator.png</iconset>
@@ -144,6 +153,9 @@
   </action>
   <action name="actionTerrain">
    <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
     <bool>true</bool>
    </property>
    <property name="icon">
@@ -161,6 +173,9 @@
    <property name="checkable">
     <bool>true</bool>
    </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
    <property name="icon">
     <iconset resource="../../res/res.qrc">
      <normaloff>:/icons/ui/axis.png</normaloff>:/icons/ui/axis.png</iconset>
@@ -171,6 +186,9 @@
   </action>
   <action name="actionShowAltitude">
    <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
     <bool>true</bool>
    </property>
    <property name="icon">

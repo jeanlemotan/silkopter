@@ -52,8 +52,6 @@ void Proximity_Stream_Viewer_Widget::init(silk::Comms& comms, std::string const&
                     float values[1] = { sample.value.distances.empty() ? 0.f : math::length(sample.value.distances[0]) };
                     widget->add_samples(values, sample.is_healthy);
                 }
-
-                widget->process();
             }
         }
     });

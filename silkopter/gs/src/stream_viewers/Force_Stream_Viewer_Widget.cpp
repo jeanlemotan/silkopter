@@ -54,8 +54,6 @@ void Force_Stream_Viewer_Widget::init(silk::Comms& comms, std::string const& str
                     float values[3] = { sample.value.x, sample.value.y, sample.value.z };
                     widget->add_samples(values, sample.is_healthy);
                 }
-
-                widget->process();
             }
         }
     });

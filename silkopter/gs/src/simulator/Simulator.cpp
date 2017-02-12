@@ -3,6 +3,9 @@
 #include <chrono>
 #include "simulator/Axis.h"
 
+extern void bind_context();
+
+
 Simulator::Simulator(QWidget* parent)
     : QMainWindow(parent)
     , m_camera_controller(m_context.camera)
@@ -76,6 +79,8 @@ void Simulator::init(silk::Comms& comms, std::string const& node_name)
 
 void Simulator::init_graphics()
 {
+    bind_context();
+
     m_context.camera.set_perspective_vertical_fov(math::anglef(math::radians(60.f)));
     m_context.camera.set_near_distance(0.05f);
     m_context.camera.set_far_distance(20000.f);
@@ -118,6 +123,8 @@ void Simulator::init_graphics()
     QASSERT(m_context.font);
 
     m_ui.render_widget->init();
+
+    m_context.camera.set_position(math::vec3f(1.f, -4.f, 2.f));
 }
 
 void Simulator::init_world()

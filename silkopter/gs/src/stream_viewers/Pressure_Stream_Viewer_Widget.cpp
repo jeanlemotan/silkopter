@@ -52,8 +52,6 @@ void Pressure_Stream_Viewer_Widget::init(silk::Comms& comms, std::string const& 
                     float values[1] = { static_cast<float>(sample.value) };
                     widget->add_samples(values, sample.is_healthy);
                 }
-
-                widget->process();
             }
         }
     });

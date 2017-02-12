@@ -52,8 +52,6 @@ void Multirotor_State_Stream_Viewer_Widget::init(silk::Comms& comms, std::string
                     float values[1] = { 0.f };
                     widget->add_samples(values, sample.is_healthy);
                 }
-
-                widget->process();
             }
         }
     });

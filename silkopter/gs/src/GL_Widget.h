@@ -1,6 +1,7 @@
 #pragma once
 
 //this is responsible for initializing opengl and providing  API to render to FBOs and converting these to QImages
+#include <QGLWidget>
 
 class GL_Widget : public QGLWidget
 {

@@ -54,8 +54,6 @@ void Magnetic_Field_Stream_Viewer_Widget::init(silk::Comms& comms, std::string c
                     float values[3] = { sample.value.x, sample.value.y, sample.value.z };
                     widget->add_samples(values, sample.is_healthy);
                 }
-
-                widget->process();
             }
         }
     });

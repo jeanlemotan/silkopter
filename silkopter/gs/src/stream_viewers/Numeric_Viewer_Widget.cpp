@@ -24,11 +24,11 @@ void Numeric_Viewer_Widget::init(std::string const& unit, uint32_t sample_rate, 
 
     m_ui.setupUi(this);
 
-    m_ui.plot->setCacheMode(QGraphicsView::CacheNone);
-    m_ui.plot->setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
+    m_ui.plot->setCacheMode(QGraphicsView::CacheBackground);
+    m_ui.plot->setViewportUpdateMode(QGraphicsView::SmartViewportUpdate);
 
-    m_ui.fft->setCacheMode(QGraphicsView::CacheNone);
-    m_ui.fft->setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
+    m_ui.fft->setCacheMode(QGraphicsView::CacheBackground);
+    m_ui.fft->setViewportUpdateMode(QGraphicsView::SmartViewportUpdate);
 
     m_plot_x_axis = new QtCharts::QValueAxis();
     setup_axis(m_plot_x_axis);
@@ -108,6 +108,11 @@ void Numeric_Viewer_Widget::init(std::string const& unit, uint32_t sample_rate, 
         delete m_ui.fft;
         m_ui.fft = nullptr;
     }
+
+    auto* timer = new QTimer(this);
+    timer->setSingleShot(false);
+    timer->start(30);
+    connect(timer, &QTimer::timeout, this, &Numeric_Viewer_Widget::process, Qt::QueuedConnection);
 
     //m_ui.window->setSingleStep(1.0 / float(m_sample_rate));
 }
@@ -214,7 +219,7 @@ void Numeric_Viewer_Widget::add_graph(std::string const& name, std::string const
     if (m_ui.fft)
     {
         QLineSeries* fft_series = new QLineSeries();
-        fft_series->setUseOpenGL(true);
+        fft_series->setUseOpenGL(false);
         fft_series->setPen(QPen(color, 2));
         fft_series->setName((name + " " + unit).c_str());
 
@@ -472,6 +477,18 @@ void Numeric_Viewer_Widget::finish_task()
     float max_value_range = std::numeric_limits<float>::lowest();
     bool has_range = false;
 
+    //first clear the graphs - this makes the setRange calls cheaper
+    for (size_t i = 0; i < m_graphs.size(); i++)
+    {
+        Graph& graph = *m_graphs[i];
+        m_graphs[i]->plot_series->clear();
+        if (m_ui.fft)
+        {
+            m_graphs[i]->fft_series->clear();
+        }
+    }
+
+    //calculate the limits
     for (size_t i = 0; i < m_graphs.size(); i++)
     {
         Graph& graph = *m_graphs[i];
@@ -495,7 +512,7 @@ void Numeric_Viewer_Widget::finish_task()
 
     m_ui.data_range->setValue(max_value_range);
     m_ui.average->setValue(max_average_value);
-    //m_ui.plot->xAxis->setRange(m_samples[m_view.start_idx].tp, m_samples[m_view.start_idx].tp + m_view.duration);
+
     m_plot_x_axis->setRange(m_samples[m_view.start_idx].tp, m_samples[m_view.start_idx].tp + m_view.duration);
 
     float display_range = m_ui.display_range->value();
@@ -517,6 +534,7 @@ void Numeric_Viewer_Widget::finish_task()
         }
     }
 
+    //set the new points
     for (size_t i = 0; i < m_graphs.size(); i++)
     {
         Graph& graph = *m_graphs[i];

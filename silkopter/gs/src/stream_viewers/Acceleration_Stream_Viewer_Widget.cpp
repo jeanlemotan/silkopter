@@ -53,7 +53,6 @@ void Acceleration_Stream_Viewer_Widget::init(silk::Comms& comms, std::string con
                     float values[3] = { sample.value.x, sample.value.y, sample.value.z };
                     widget->add_samples(values, sample.is_healthy);
                 }
-                widget->process();
             }
             else if (auto const* stream = dynamic_cast<silk::Comms::Telemetry_Stream<silk::stream::IECEF_Acceleration> const*>(&_stream))
             {
@@ -62,7 +61,6 @@ void Acceleration_Stream_Viewer_Widget::init(silk::Comms& comms, std::string con
                     float values[3] = { sample.value.x, sample.value.y, sample.value.z };
                     widget->add_samples(values, sample.is_healthy);
                 }
-                widget->process();
             }
             else if (auto const* stream = dynamic_cast<silk::Comms::Telemetry_Stream<silk::stream::IENU_Acceleration> const*>(&_stream))
             {
@@ -71,7 +69,6 @@ void Acceleration_Stream_Viewer_Widget::init(silk::Comms& comms, std::string con
                     float values[3] = { sample.value.x, sample.value.y, sample.value.z };
                     widget->add_samples(values, sample.is_healthy);
                 }
-                widget->process();
             }
         }
     });

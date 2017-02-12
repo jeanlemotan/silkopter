@@ -2,6 +2,8 @@
 
 #include <QtOpenGL/QGLFunctions>
 
+extern void bind_context();
+
 //////////////////////////////////////////////////////////////////////////
 
 Render_Widget::Render_Widget(QWidget* parent)
@@ -22,6 +24,8 @@ Render_Widget::Render_Widget(Flags flags, QWidget* parent)
 void Render_Widget::init()
 {
 	setMouseTracking(true);
+
+    bind_context();
 
 	m_buffers_full = false;
 	q::video::gles::Interface interf;
@@ -52,6 +56,8 @@ void Render_Widget::init()
 
 Render_Widget::~Render_Widget()
 {
+    bind_context();
+
 	for (size_t i = 0; i < m_buffers.size(); i++)
 	{
 		auto& buffer = m_buffers[i];
@@ -103,6 +109,8 @@ void Render_Widget::finish_buffer_transfer(Buffer& buffer)
 
 void Render_Widget::begin_rendering()
 {
+    bind_context();
+
 	auto& buffer = m_buffers[m_write_buffer_idx];
     std::lock_guard<std::mutex> lg(buffer.mutex);
 
@@ -128,6 +136,8 @@ void Render_Widget::begin_rendering()
 
 void Render_Widget::end_rendering()
 {
+    bind_context();
+
 	q::System::inst().get_renderer()->flush();
 
 	q::video::gles::Interface interf;
@@ -201,6 +211,8 @@ void Render_Widget::paintEvent(QPaintEvent* event)
 
 	if (m_buffers_full)
 	{
+        bind_context();
+
  		auto& buffer = m_buffers[m_read_buffer_idx];
         std::lock_guard<std::mutex> lg(buffer.mutex);
 
@@ -275,6 +287,8 @@ float Render_Widget::get_depth_at(const math::vec2u32& coords)
 
 	if (m_buffers_full)
 	{
+        bind_context();
+
 		auto& buffer = m_buffers[m_read_buffer_idx];
         std::lock_guard<std::mutex> lg(buffer.mutex);
 

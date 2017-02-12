@@ -55,8 +55,6 @@ void GPS_Info_Stream_Viewer_Widget::init(silk::Comms& comms, std::string const& 
                     float values[4] = { static_cast<float>(sample.value.fix_satellites), sample.value.pdop, sample.value.pacc, sample.value.vacc };
                     widget->add_samples(values, sample.is_healthy);
                 }
-
-                widget->process();
             }
         }
     });

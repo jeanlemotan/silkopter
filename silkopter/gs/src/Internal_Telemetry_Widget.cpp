@@ -111,8 +111,5 @@ void Internal_Telemetry_Widget::init(silk::Comms& comms, std::vector<std::string
             }
             max_widget->add_samples(m_data.data(), true);
         }
-
-        widget->process();
-        max_widget->process();
     });
 }

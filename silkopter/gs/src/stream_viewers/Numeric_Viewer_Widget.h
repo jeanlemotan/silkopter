@@ -5,6 +5,7 @@
 #include "ui_Numeric_Viewer_Widget.h"
 
 #include <QtCharts/QLineSeries>
+#include <QtCharts/QValueAxis>
 
 class Numeric_Viewer_Widget : public QWidget
 {
@@ -16,9 +17,9 @@ public:
 
     void add_graph(std::string const& name, std::string const& unit, QColor color);
     void add_samples(float const* src, bool is_healthy);
-    void process();
 
 private:
+    void process();
     void show_context_menu(QPoint const& point);
 
     void setup_axis(QtCharts::QAbstractAxis* axis);
@@ -81,12 +82,12 @@ private:
         QtCharts::QLineSeries* fft_series = nullptr;
     };
 
-    QtCharts::QAbstractAxis* m_plot_x_axis = nullptr;
-    QtCharts::QAbstractAxis* m_plot_y_axis = nullptr;
+    QtCharts::QValueAxis* m_plot_x_axis = nullptr;
+    QtCharts::QValueAxis* m_plot_y_axis = nullptr;
     QtCharts::QChart* m_plot_chart = nullptr;
 
     QtCharts::QAbstractAxis* m_fft_x_axis = nullptr;
-    QtCharts::QAbstractAxis* m_fft_y_axis = nullptr;
+    QtCharts::QValueAxis* m_fft_y_axis = nullptr;
     QtCharts::QChart* m_fft_chart = nullptr;
 
     std::vector<std::unique_ptr<Graph>> m_graphs;

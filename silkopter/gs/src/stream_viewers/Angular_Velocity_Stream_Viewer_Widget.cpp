@@ -54,8 +54,6 @@ void Angular_Velocity_Stream_Viewer_Widget::init(silk::Comms& comms, std::string
                     float values[3] = { math::degrees(sample.value.x), math::degrees(sample.value.y), math::degrees(sample.value.z) };
                     widget->add_samples(values, sample.is_healthy);
                 }
-
-                widget->process();
             }
         }
     });

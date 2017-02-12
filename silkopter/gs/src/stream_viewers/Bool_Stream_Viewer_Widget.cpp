@@ -52,8 +52,6 @@ void Bool_Stream_Viewer_Widget::init(silk::Comms& comms, std::string const& stre
                     float values[1] = { sample.value ? 1.f : 0.f };
                     widget->add_samples(values, sample.is_healthy);
                 }
-
-                widget->process();
             }
         }
     });
