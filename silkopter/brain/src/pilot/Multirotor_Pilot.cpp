@@ -72,14 +72,14 @@ void Multirotor_Pilot::process()
 
     //process commandss
     {
-        auto const& commandsOpt = m_rc_comms.get_multirotor_commands();
+        auto const& commands_opt = m_rc_comms.get_multirotor_commands();
 
         auto now = Clock::now();
 
         stream::IMultirotor_Commands::Value& commands_value = m_last_commands_value;
-        if (commandsOpt)
+        if (commands_opt)
         {
-            commands_value = commandsOpt.get();
+            commands_value = commands_opt.get();
             m_last_received_commands_value_tp = now;
         }
 

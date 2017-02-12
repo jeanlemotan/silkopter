@@ -85,9 +85,9 @@ void Comp_AHRS::process()
             float theta_magnitude = math::length(theta);
             if (theta_magnitude > std::numeric_limits<float>::epsilon())
             {
-                auto av = theta*0.5f;
+                math::vec3f av = theta*0.5f;
                 av_length = theta_magnitude;
-                auto& a = rotation;
+                math::quatf& a = rotation;
                 float w = /*(av.w * a.w)*/ - (av.x * a.x) - (av.y * a.y) - (av.z * a.z);
                 float x = (av.x * a.w) /*+ (av.w * a.x)*/ + (av.z * a.y) - (av.y * a.z);
                 float y = (av.y * a.w) /*+ (av.w * a.y)*/ + (av.x * a.z) - (av.z * a.x);

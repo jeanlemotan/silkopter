@@ -72,8 +72,8 @@ void Gravity_Filter::process()
     {
         if (f_sample.is_healthy & a_sample.is_healthy)
         {
-            auto p2l = math::inverse<float, math::safe>(f_sample.value);
-            auto gravity_local = math::rotate(p2l, physics::constants::enu_gravity);
+            math::quatf p2l = math::inverse<float, math::safe>(f_sample.value);
+            math::vec3f gravity_local = math::rotate(p2l, physics::constants::enu_gravity);
             m_output_stream->push_sample(a_sample.value - gravity_local, true);
         }
         else

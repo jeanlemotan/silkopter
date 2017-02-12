@@ -30,6 +30,7 @@ ts::Result<void> ADC_Voltmeter::init(hal::INode_Descriptor const& descriptor)
 
     return init();
 }
+
 ts::Result<void> ADC_Voltmeter::init()
 {
     m_output_stream->set_rate(m_descriptor->get_rate());
@@ -57,7 +58,6 @@ auto ADC_Voltmeter::get_outputs() const -> std::vector<Output>
     outputs[0].stream = m_output_stream;
     return outputs;
 }
-
 
 void ADC_Voltmeter::process()
 {
