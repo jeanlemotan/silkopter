@@ -39,7 +39,7 @@ static std::vector<std::pair<Path, bool>> enumerate_files(Path const& path)
 
     while ((dit = readdir(dip)) != nullptr)
 	{
-        if (util::strcmp(dit->d_name, "..") != 0 && util::strcmp(dit->d_name, ".") != 0)
+        if (strcmp(dit->d_name, "..") != 0 && strcmp(dit->d_name, ".") != 0)
 		{
 			data.emplace_back(Path(dit->d_name), dit->d_type == DT_DIR);
             QLOGD("***    file: {}", dit->d_name);
@@ -85,7 +85,7 @@ static std::vector<std::pair<Path, bool>> enumerate_files(Path const& path)
 	{ 
 		do 
 		{ 
-			if (util::strcmp(wfd.cFileName, "..") && util::strcmp(wfd.cFileName, "."))
+            if (strcmp(wfd.cFileName, "..") && strcmp(wfd.cFileName, "."))
 			{
 				bool isDir = (wfd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0;
 				data.emplace_back(Path(wfd.cFileName), isDir);

@@ -174,7 +174,7 @@ Path const& Zip_Data_Pack::get_path(size_t idx) const
 	auto const& f = m_files[idx];
 	return f.path;
 }
-Path const& Zip_Data_Pack::find_path_by_name(String const& name) const
+Path const& Zip_Data_Pack::find_path_by_name(std::string const& name) const
 {
 	int xxx = 0;
 	auto it = std::find_if(m_files.begin(), m_files.end(), [&] (File_Descriptor const& fi)
@@ -189,7 +189,7 @@ Path const& Zip_Data_Pack::find_path_by_name(String const& name) const
 	}
 	return Path::null;
 }
-std::vector<Path> Zip_Data_Pack::find_all_paths_by_name(String const& name) const
+std::vector<Path> Zip_Data_Pack::find_all_paths_by_name(std::string const& name) const
 {
 	std::vector<Path> paths;
 	paths.reserve(5);
@@ -213,7 +213,7 @@ int Zip_Data_Pack::find_idx_by_path(Path const& path) const
 	}
 	return -1;
 }
-// String ZipDataPack::getFilename(size_t idx) const
+// std::string ZipDataPack::getFilename(size_t idx) const
 // {
 // 	auto const& f = mFileWalker.getFiles()[idx];
 // 	std::string str;

@@ -8,18 +8,18 @@
 using namespace q;
 using namespace data;
 
-void File_System::mount(String const& mp, data::Data_Pack_uptr pack)
+void File_System::mount(std::string const& mp, data::Data_Pack_uptr pack)
 {
 	std::lock_guard<std::mutex> sm(m_mutex);
 	m_mount_points[mp] = std::move(pack);
 }
-void File_System::unmount(String const& mp)
+void File_System::unmount(std::string const& mp)
 {
 	std::lock_guard<std::mutex> sm(m_mutex);
 	m_mount_points.erase(mp);
 }
 
-Path File_System::find_path_by_name(String const& name)	const
+Path File_System::find_path_by_name(std::string const& name)	const
 {
 	std::lock_guard<std::mutex> sm(m_mutex);
 	for (auto const& it: m_mount_points)
@@ -33,7 +33,7 @@ Path File_System::find_path_by_name(String const& name)	const
 	return Path();
 }
 
-std::vector<Path> File_System::find_all_paths_by_name(String const& name) const
+std::vector<Path> File_System::find_all_paths_by_name(std::string const& name) const
 {
 	std::lock_guard<std::mutex> sm(m_mutex);
 	std::vector<Path> results;

@@ -128,7 +128,7 @@ std::string Preprocessor::resolve_includes(Path const& path, std::string const& 
 			filename = filename.substr(qsoff + 1, qeoff - qsoff - 1);
 		}
 
-		Path new_path(path.get_sub_path(0, -1) + String(filename));
+        Path new_path(path.get_sub_path(0, -1) + std::string(filename));
 		auto link = m_file_system.open(new_path);
 		if (!link)
 		{
@@ -153,7 +153,7 @@ std::string Preprocessor::resolve_includes(Path const& path, std::string const& 
 	return res;
 }
 
-String Preprocessor::preprocess(String const& source)
+std::string Preprocessor::preprocess(std::string const& source)
 {
 	if (source.empty())
 	{
@@ -173,6 +173,6 @@ String Preprocessor::preprocess(String const& source)
 		src = resolve_includes(m_root, src);
 	}
 
-	return String(src.c_str());
+    return src;
 }
 

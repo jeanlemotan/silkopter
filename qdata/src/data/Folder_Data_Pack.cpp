@@ -27,7 +27,7 @@ Path const& Folder_Data_Pack::get_path(size_t idx) const
 	auto const& f = m_files[idx];
 	return f.path;
 }
-Path const& Folder_Data_Pack::find_path_by_name(String const& name) const
+Path const& Folder_Data_Pack::find_path_by_name(std::string const& name) const
 {
 	auto it = std::find_if(m_files.begin(), m_files.end(), [&] (util::fs::Folder_Walker::File_Info const& fi) 
 	{ 
@@ -40,7 +40,7 @@ Path const& Folder_Data_Pack::find_path_by_name(String const& name) const
 	}
 	return Path::null;
 }
-std::vector<Path> Folder_Data_Pack::find_all_paths_by_name(String const& name) const
+std::vector<Path> Folder_Data_Pack::find_all_paths_by_name(std::string const& name) const
 {
 	std::vector<Path> paths;
 	paths.reserve(5);
