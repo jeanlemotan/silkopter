@@ -21,9 +21,14 @@ public:
 private:
     void init(Input& input);
     void set_mode(Input& input, stream::IMultirotor_Commands::Mode mode);
-    void set_vertical_mode(Input& input, stream::IMultirotor_Commands::Vertical_Mode mode);
-    void set_horizontal_mode(Input& input, stream::IMultirotor_Commands::Horizontal_Mode mode);
-    void set_yaw_mode(Input& input, stream::IMultirotor_Commands::Yaw_Mode mode);
+
+    typedef stream::IMultirotor_Commands::Vertical_Mode Vertical_Mode;
+    typedef stream::IMultirotor_Commands::Horizontal_Mode Horizontal_Mode;
+    typedef stream::IMultirotor_Commands::Yaw_Mode Yaw_Mode;
+
+    void set_vertical_mode(Input& input, Vertical_Mode mode);
+    void set_horizontal_mode(Input& input, Horizontal_Mode mode);
+    void set_yaw_mode(Input& input, Yaw_Mode mode);
 
     void process_mode_idle(Input& input);
     void process_mode_take_off(Input& input);
