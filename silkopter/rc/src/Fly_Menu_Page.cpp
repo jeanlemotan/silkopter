@@ -362,6 +362,13 @@ void Fly_Menu_Page::process_mode_return_home(Input& input)
 
     ISticks const& sticks = input.get_sticks();
     m_commands.sticks.yaw = sticks.get_yaw();
+
+    if (input.get_yaw_mode_switch().was_released())
+    {
+        set_yaw_mode(input, m_commands.yaw_mode == stream::IMultirotor_Commands::Yaw_Mode::ANGLE_RATE
+                     ? stream::IMultirotor_Commands::Yaw_Mode::ANGLE
+                     : stream::IMultirotor_Commands::Yaw_Mode::ANGLE_RATE);
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -533,11 +540,14 @@ void Fly_Menu_Page::render(Adafruit_GFX& display)
     y += 5;
     //vertical mode
     {
-        const char* mode_str = "N/A";
-        switch (m_commands.vertical_mode)
+        const char* mode_str = "---";
+        if (m_multirotor_state.mode == silk::stream::IMultirotor_State::Mode::FLY)
         {
-        case silk::stream::IMultirotor_Commands::Vertical_Mode::ALTITUDE: mode_str = "ALT"; break;
-        case silk::stream::IMultirotor_Commands::Vertical_Mode::THRUST: mode_str = "THR"; break;
+            switch (m_commands.vertical_mode)
+            {
+            case silk::stream::IMultirotor_Commands::Vertical_Mode::ALTITUDE: mode_str = "ALT"; break;
+            case silk::stream::IMultirotor_Commands::Vertical_Mode::THRUST: mode_str = "THR"; break;
+            }
         }
 
         bool blink = (now - m_last_vertical_mode_change_tp) < k_mode_change_blink_duration;
@@ -566,12 +576,15 @@ void Fly_Menu_Page::render(Adafruit_GFX& display)
     y += 9;
     //horizontal mode
     {
-        const char* mode_str = "N/A";
-        switch (m_commands.horizontal_mode)
+        const char* mode_str = "---";
+        if (m_multirotor_state.mode == silk::stream::IMultirotor_State::Mode::FLY)
         {
-        case silk::stream::IMultirotor_Commands::Horizontal_Mode::ANGLE_RATE: mode_str = "RATE"; break;
-        case silk::stream::IMultirotor_Commands::Horizontal_Mode::ANGLE: mode_str = "ANG"; break;
-        case silk::stream::IMultirotor_Commands::Horizontal_Mode::POSITION: mode_str = "POS"; break;
+            switch (m_commands.horizontal_mode)
+            {
+            case silk::stream::IMultirotor_Commands::Horizontal_Mode::ANGLE_RATE: mode_str = "RATE"; break;
+            case silk::stream::IMultirotor_Commands::Horizontal_Mode::ANGLE: mode_str = "ANG"; break;
+            case silk::stream::IMultirotor_Commands::Horizontal_Mode::POSITION: mode_str = "POS"; break;
+            }
         }
 
         bool blink = (now - m_last_horizontal_mode_change_tp) < k_mode_change_blink_duration;
@@ -600,11 +613,15 @@ void Fly_Menu_Page::render(Adafruit_GFX& display)
     y += 9;
     //yaw mode
     {
-        const char* mode_str = "N/A";
-        switch (m_commands.yaw_mode)
+        const char* mode_str = "---";
+        if (m_multirotor_state.mode == silk::stream::IMultirotor_State::Mode::FLY ||
+            m_multirotor_state.mode == silk::stream::IMultirotor_State::Mode::RETURN_HOME)
         {
-        case silk::stream::IMultirotor_Commands::Yaw_Mode::ANGLE_RATE: mode_str = "RATE"; break;
-        case silk::stream::IMultirotor_Commands::Yaw_Mode::ANGLE: mode_str = "ANG"; break;
+            switch (m_commands.yaw_mode)
+            {
+            case silk::stream::IMultirotor_Commands::Yaw_Mode::ANGLE_RATE: mode_str = "RATE"; break;
+            case silk::stream::IMultirotor_Commands::Yaw_Mode::ANGLE: mode_str = "ANG"; break;
+            }
         }
 
         bool blink = (now - m_last_yaw_mode_change_tp) < k_mode_change_blink_duration;
