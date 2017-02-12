@@ -63,10 +63,10 @@ void Input::init()
     m_input_devices.push_back(button_matrix);
 
     silk::settings::Settings::Input::Sticks_Calibration const& sc = s_settings.get_input().get_sticks_calibration();
-    m_sticks->set_yaw_calibration(sc.get_yaw_center(), sc.get_yaw_min(), sc.get_yaw_max());
-    m_sticks->set_pitch_calibration(sc.get_pitch_center(), sc.get_pitch_min(), sc.get_pitch_max());
-    m_sticks->set_roll_calibration(sc.get_roll_center(), sc.get_roll_min(), sc.get_roll_max());
-    m_sticks->set_throttle_calibration(sc.get_throttle_center(), sc.get_throttle_min(), sc.get_throttle_max());
+    m_sticks->set_yaw_calibration(sc.get_yaw_min(), sc.get_yaw_center(), sc.get_yaw_max(), sc.get_yaw_deadband());
+    m_sticks->set_pitch_calibration(sc.get_pitch_min(), sc.get_pitch_center(), sc.get_pitch_max(), sc.get_pitch_deadband());
+    m_sticks->set_roll_calibration(sc.get_roll_min(), sc.get_roll_center(), sc.get_roll_max(), sc.get_roll_deadband());
+    m_sticks->set_throttle_calibration(sc.get_throttle_min(), sc.get_throttle_center(), sc.get_throttle_max(), sc.get_throttle_deadband());
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////

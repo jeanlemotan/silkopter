@@ -2,6 +2,8 @@
 #include "Adafruit_GFX.h"
 #include "Input.h"
 #include "ISticks.h"
+#include "IStick_Actuators.h"
+#include "IButton.h"
 #include "Comms.h"
 #include "Remote_Viewer_Server.h"
 
@@ -39,10 +41,44 @@ bool Info_Menu_Page::process(Input& input, Menu_System& menu_system)
         }
     }
 
-    m_yaw.value = input.get_sticks().get_yaw();
-    m_pitch.value = input.get_sticks().get_pitch();
-    m_roll.value = input.get_sticks().get_roll();
-    m_throttle.value = input.get_sticks().get_throttle();
+    if (m_section == Section::STICKS)
+    {
+        ISticks& sticks = input.get_sticks();
+        m_yaw.value = sticks.get_yaw();
+        m_pitch.value = sticks.get_pitch();
+        m_roll.value = sticks.get_roll();
+        m_throttle.value = sticks.get_throttle();
+
+        if (!m_throttle_initialized)
+        {
+            m_throttle_initialized = true;
+            m_throttle_mode_change_tp = Clock::now();
+            sticks.set_throttle_deadband_position(ISticks::Deadband_Position::MIDDLE);
+            input.get_stick_actuators().set_target_throttle(0.5f);
+        }
+
+        if (input.get_vertical_mode_switch().was_released())
+        {
+            m_throttle_mode_change_tp = Clock::now();
+
+            if (sticks.get_throttle_deadband_position() == ISticks::Deadband_Position::MIDDLE)
+            {
+                sticks.set_throttle_deadband_position(ISticks::Deadband_Position::LOW);
+                input.get_stick_actuators().set_target_throttle(0.f);
+            }
+            else if (sticks.get_throttle_deadband_position() == ISticks::Deadband_Position::LOW)
+            {
+                sticks.set_throttle_deadband_position(ISticks::Deadband_Position::MIDDLE);
+                input.get_stick_actuators().set_target_throttle(0.5f);
+            }
+        }
+
+        //deactivate the actuator
+        if (Clock::now() - m_throttle_mode_change_tp > std::chrono::milliseconds(200))
+        {
+            input.get_stick_actuators().set_target_throttle(boost::none);
+        }
+    }
 
     return true;
 }

@@ -140,6 +140,7 @@ void Fly_Menu_Page::set_mode(Input& input, stream::IMultirotor_Commands::Mode mo
 
     if (mode == stream::IMultirotor_State::Mode::IDLE)
     {
+        input.get_sticks().set_throttle_deadband_position(ISticks::Deadband_Position::LOW);
         input.get_stick_actuators().set_target_throttle(0.f);
         m_idle_mode_data.is_pressed = false;
     }
@@ -164,10 +165,12 @@ void Fly_Menu_Page::set_vertical_mode(Input& input, stream::IMultirotor_Commands
 
     if (mode == stream::IMultirotor_Commands::Vertical_Mode::ALTITUDE)
     {
+        input.get_sticks().set_throttle_deadband_position(ISticks::Deadband_Position::MIDDLE);
         m_commands.sticks.throttle = 0.5f;
     }
     else
     {
+        input.get_sticks().set_throttle_deadband_position(ISticks::Deadband_Position::LOW);
         m_commands.sticks.throttle = m_multirotor_state.throttle;
     }
     input.get_stick_actuators().set_target_throttle(m_commands.sticks.throttle);
@@ -277,7 +280,7 @@ void Fly_Menu_Page::process_mode_fly(Input& input)
         m_commands.sticks.roll = sticks.get_roll();
 
         //only apply the throttle some time after the mode chang, to let the actuator settle
-        if (Clock::now() - m_last_vertical_mode_change_tp > std::chrono::milliseconds(500))
+        if (Clock::now() - m_last_vertical_mode_change_tp > std::chrono::milliseconds(200))
         {
             if (m_commands.vertical_mode == stream::IMultirotor_Commands::Vertical_Mode::THRUST)
             {
@@ -334,6 +337,7 @@ void Fly_Menu_Page::process_mode_take_off(Input& input)
     stream::IMultirotor_State::Value const& state = m_multirotor_state;
     QASSERT(state.mode == stream::IMultirotor_State::Mode::TAKE_OFF);
 
+    input.get_sticks().set_throttle_deadband_position(ISticks::Deadband_Position::LOW);
     input.get_stick_actuators().set_target_throttle(state.throttle);
 
     ISticks const& sticks = input.get_sticks();
@@ -364,6 +368,7 @@ void Fly_Menu_Page::process_mode_land(Input& input)
     stream::IMultirotor_State::Value const& state = m_multirotor_state;
     QASSERT(state.mode == stream::IMultirotor_State::Mode::LAND);
 
+    input.get_sticks().set_throttle_deadband_position(ISticks::Deadband_Position::LOW);
     input.get_stick_actuators().set_target_throttle(state.throttle);
 
     ISticks const& sticks = input.get_sticks();

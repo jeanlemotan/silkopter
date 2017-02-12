@@ -2,6 +2,7 @@
 
 #include "IMenu_Page.h"
 #include "Menu.h"
+#include "utils/Clock.h"
 
 namespace silk
 {
@@ -38,6 +39,9 @@ private:
     } m_section = Section::STICKS;
 
     void draw_axis(Adafruit_GFX& display, int16_t y, const char* name, Axis_Data const& axis);
+
+    Clock::time_point m_throttle_mode_change_tp = Clock::now();
+    bool m_throttle_initialized = false;
 };
 
 }

@@ -25,17 +25,21 @@ struct Settings
     {
         struct Sticks_Calibration
         {
-            float yaw_center = 0.5f;
             float yaw_min = 0.f;
+            float yaw_center = 0.5f;
+            float yaw_deadband = 0.f;
             float yaw_max = 1.f;
-            float pitch_center = 0.5f;
             float pitch_min = 0.f;
+            float pitch_center = 0.5f;
+            float pitch_deadband = 0.f;
             float pitch_max = 1.f;
-            float roll_center = 0.5f;
             float roll_min = 0.f;
+            float roll_center = 0.5f;
+            float roll_deadband = 0.f;
             float roll_max = 1.f;
-            float throttle_center = 0.5f;
             float throttle_min = 0.f;
+            float throttle_center = 0.5f;
+            float throttle_deadband = 0.f;
             float throttle_max = 1.f;
         };
 

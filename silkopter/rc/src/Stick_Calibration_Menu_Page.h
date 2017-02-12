@@ -25,6 +25,7 @@ private:
         float max = 0.f;
 
         float center = 0.f;
+        float deadband = 0.f; //this one is after min/max transformation - it's relative to the 0.5 center
     };
 
     Axis_Data m_yaw;
@@ -34,18 +35,26 @@ private:
 
     enum class Phase
     {
-        CENTER_QUESTIION,
+        CENTER_QUESTION,
         CENTER_MEASUREMENT,
-        RANGE_QUESTIION,
+        RANGE_QUESTION,
         RANGE_MEASUREMENT,
+        DEADBAND_QUESTION,
+        YAW_DEADBAND,
+        PITCH_DEADBAND,
+        ROLL_DEADBAND,
+        THROTTLE_DEADBAND,
         DONE,
-    } m_phase = Phase::CENTER_QUESTIION;
+    } m_phase = Phase::CENTER_QUESTION;
 
     Clock::time_point m_phase_start_tp;
     size_t m_sample_count = 0;
 
+    void process_deadband(Input& input, Axis_Data& axis);
+
     void next_phase();
     void draw_axis(Adafruit_GFX& display, int16_t y, const char* name, Axis_Data const& axis);
+    void draw_axis_deadband(Adafruit_GFX& display, int16_t y, const char* name, Axis_Data const& axis);
 };
 
 }

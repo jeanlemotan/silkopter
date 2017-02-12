@@ -203,7 +203,7 @@ void Stick_Actuators_Throttle_DRV883x::process()
             return;
         }
 
-        float crt_throttle = m_sticks.get_throttle();
+        float crt_throttle = m_sticks.get_raw_throttle(ISticks::Raw_Type::WITHOUT_DEADBAND);
         float target_throttle = *m_target_throttle;
 
     //    if (math::abs(target_throttle - crt_throttle) < 0.01f)

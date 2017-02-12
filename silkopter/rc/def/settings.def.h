@@ -61,67 +61,87 @@ public:
     {
     public:
       virtual ~Sticks_Calibration() = default;
+      void set_yaw_min(float const& value);
+      void set_yaw_min(float&& value);
+      auto get_yaw_min() const -> float const&;
+
       void set_yaw_center(float const& value);
       void set_yaw_center(float&& value);
       auto get_yaw_center() const -> float const&;
 
-      void set_yaw_min(float const& value);
-      void set_yaw_min(float&& value);
-      auto get_yaw_min() const -> float const&;
+      void set_yaw_deadband(float const& value);
+      void set_yaw_deadband(float&& value);
+      auto get_yaw_deadband() const -> float const&;
 
       void set_yaw_max(float const& value);
       void set_yaw_max(float&& value);
       auto get_yaw_max() const -> float const&;
 
+      void set_pitch_min(float const& value);
+      void set_pitch_min(float&& value);
+      auto get_pitch_min() const -> float const&;
+
       void set_pitch_center(float const& value);
       void set_pitch_center(float&& value);
       auto get_pitch_center() const -> float const&;
 
-      void set_pitch_min(float const& value);
-      void set_pitch_min(float&& value);
-      auto get_pitch_min() const -> float const&;
+      void set_pitch_deadband(float const& value);
+      void set_pitch_deadband(float&& value);
+      auto get_pitch_deadband() const -> float const&;
 
       void set_pitch_max(float const& value);
       void set_pitch_max(float&& value);
       auto get_pitch_max() const -> float const&;
 
+      void set_roll_min(float const& value);
+      void set_roll_min(float&& value);
+      auto get_roll_min() const -> float const&;
+
       void set_roll_center(float const& value);
       void set_roll_center(float&& value);
       auto get_roll_center() const -> float const&;
 
-      void set_roll_min(float const& value);
-      void set_roll_min(float&& value);
-      auto get_roll_min() const -> float const&;
+      void set_roll_deadband(float const& value);
+      void set_roll_deadband(float&& value);
+      auto get_roll_deadband() const -> float const&;
 
       void set_roll_max(float const& value);
       void set_roll_max(float&& value);
       auto get_roll_max() const -> float const&;
 
+      void set_throttle_min(float const& value);
+      void set_throttle_min(float&& value);
+      auto get_throttle_min() const -> float const&;
+
       void set_throttle_center(float const& value);
       void set_throttle_center(float&& value);
       auto get_throttle_center() const -> float const&;
 
-      void set_throttle_min(float const& value);
-      void set_throttle_min(float&& value);
-      auto get_throttle_min() const -> float const&;
+      void set_throttle_deadband(float const& value);
+      void set_throttle_deadband(float&& value);
+      auto get_throttle_deadband() const -> float const&;
 
       void set_throttle_max(float const& value);
       void set_throttle_max(float&& value);
       auto get_throttle_max() const -> float const&;
 
     private:
-      float m_yaw_center = {0.500000f};
-      float m_yaw_min = {0};
-      float m_yaw_max = {1.000000f};
-      float m_pitch_center = {0.500000f};
-      float m_pitch_min = {0};
-      float m_pitch_max = {1.000000f};
-      float m_roll_center = {0.500000f};
-      float m_roll_min = {0};
-      float m_roll_max = {1.000000f};
-      float m_throttle_center = {0.500000f};
-      float m_throttle_min = {0};
-      float m_throttle_max = {1.000000f};
+      float m_yaw_min = float{0};
+      float m_yaw_center = float{0.500000f};
+      float m_yaw_deadband = float{0};
+      float m_yaw_max = float{1.000000f};
+      float m_pitch_min = float{0};
+      float m_pitch_center = float{0.500000f};
+      float m_pitch_deadband = float{0};
+      float m_pitch_max = float{1.000000f};
+      float m_roll_min = float{0};
+      float m_roll_center = float{0.500000f};
+      float m_roll_deadband = float{0};
+      float m_roll_max = float{1.000000f};
+      float m_throttle_min = float{0};
+      float m_throttle_center = float{0.500000f};
+      float m_throttle_deadband = float{0};
+      float m_throttle_max = float{1.000000f};
     };
 
     virtual ~Input() = default;
@@ -148,8 +168,8 @@ public:
     auto get_display_incremental_step_us() const -> uint32_t const&;
 
   private:
-    pigpio_period_us_t m_pigpio_period_us = {1};
-    uint32_t m_display_incremental_step_us = {1000};
+    pigpio_period_us_t m_pigpio_period_us = pigpio_period_us_t{1};
+    uint32_t m_display_incremental_step_us = uint32_t{1000};
   };
 
   struct Comms
@@ -195,14 +215,14 @@ public:
 
   private:
     std::vector<std::string> m_video_interfaces;
-    uint32_t m_video_coding_k = {12};
-    uint32_t m_video_coding_n = {20};
-    uint32_t m_video_max_latency_ms = {500};
-    uint32_t m_video_reset_duration_ms = {1000};
-    gpio_t m_rc_sdn_gpio = {6};
-    gpio_t m_rc_nirq_gpio = {26};
-    std::string m_rc_spi_device = {"/dev/spidev0.0"};
-    uint32_t m_rc_spi_speed = {16000000};
+    uint32_t m_video_coding_k = uint32_t{12};
+    uint32_t m_video_coding_n = uint32_t{20};
+    uint32_t m_video_max_latency_ms = uint32_t{500};
+    uint32_t m_video_reset_duration_ms = uint32_t{1000};
+    gpio_t m_rc_sdn_gpio = gpio_t{6};
+    gpio_t m_rc_nirq_gpio = gpio_t{26};
+    std::string m_rc_spi_device = std::string{"/dev/spidev0.0"};
+    uint32_t m_rc_spi_speed = uint32_t{16000000};
   };
 
   virtual ~Settings() = default;

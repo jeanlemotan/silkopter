@@ -20,6 +20,20 @@ T max(T v, T max)
 {
   return std::max(v, max);
 }
+      void Settings::Input::Sticks_Calibration::set_yaw_min(float const& value)
+      {
+        m_yaw_min = value;
+      }
+      void Settings::Input::Sticks_Calibration::set_yaw_min(float&& value)
+      {
+        m_yaw_min = std::move(value);
+      }
+      auto Settings::Input::Sticks_Calibration::get_yaw_min() const -> float const& 
+      {
+        return m_yaw_min;
+      }
+
+////////////////////////////////////////////////////////////
       void Settings::Input::Sticks_Calibration::set_yaw_center(float const& value)
       {
         m_yaw_center = value;
@@ -34,17 +48,17 @@ T max(T v, T max)
       }
 
 ////////////////////////////////////////////////////////////
-      void Settings::Input::Sticks_Calibration::set_yaw_min(float const& value)
+      void Settings::Input::Sticks_Calibration::set_yaw_deadband(float const& value)
       {
-        m_yaw_min = value;
+        m_yaw_deadband = value;
       }
-      void Settings::Input::Sticks_Calibration::set_yaw_min(float&& value)
+      void Settings::Input::Sticks_Calibration::set_yaw_deadband(float&& value)
       {
-        m_yaw_min = std::move(value);
+        m_yaw_deadband = std::move(value);
       }
-      auto Settings::Input::Sticks_Calibration::get_yaw_min() const -> float const& 
+      auto Settings::Input::Sticks_Calibration::get_yaw_deadband() const -> float const& 
       {
-        return m_yaw_min;
+        return m_yaw_deadband;
       }
 
 ////////////////////////////////////////////////////////////
@@ -62,6 +76,20 @@ T max(T v, T max)
       }
 
 ////////////////////////////////////////////////////////////
+      void Settings::Input::Sticks_Calibration::set_pitch_min(float const& value)
+      {
+        m_pitch_min = value;
+      }
+      void Settings::Input::Sticks_Calibration::set_pitch_min(float&& value)
+      {
+        m_pitch_min = std::move(value);
+      }
+      auto Settings::Input::Sticks_Calibration::get_pitch_min() const -> float const& 
+      {
+        return m_pitch_min;
+      }
+
+////////////////////////////////////////////////////////////
       void Settings::Input::Sticks_Calibration::set_pitch_center(float const& value)
       {
         m_pitch_center = value;
@@ -76,17 +104,17 @@ T max(T v, T max)
       }
 
 ////////////////////////////////////////////////////////////
-      void Settings::Input::Sticks_Calibration::set_pitch_min(float const& value)
+      void Settings::Input::Sticks_Calibration::set_pitch_deadband(float const& value)
       {
-        m_pitch_min = value;
+        m_pitch_deadband = value;
       }
-      void Settings::Input::Sticks_Calibration::set_pitch_min(float&& value)
+      void Settings::Input::Sticks_Calibration::set_pitch_deadband(float&& value)
       {
-        m_pitch_min = std::move(value);
+        m_pitch_deadband = std::move(value);
       }
-      auto Settings::Input::Sticks_Calibration::get_pitch_min() const -> float const& 
+      auto Settings::Input::Sticks_Calibration::get_pitch_deadband() const -> float const& 
       {
-        return m_pitch_min;
+        return m_pitch_deadband;
       }
 
 ////////////////////////////////////////////////////////////
@@ -104,6 +132,20 @@ T max(T v, T max)
       }
 
 ////////////////////////////////////////////////////////////
+      void Settings::Input::Sticks_Calibration::set_roll_min(float const& value)
+      {
+        m_roll_min = value;
+      }
+      void Settings::Input::Sticks_Calibration::set_roll_min(float&& value)
+      {
+        m_roll_min = std::move(value);
+      }
+      auto Settings::Input::Sticks_Calibration::get_roll_min() const -> float const& 
+      {
+        return m_roll_min;
+      }
+
+////////////////////////////////////////////////////////////
       void Settings::Input::Sticks_Calibration::set_roll_center(float const& value)
       {
         m_roll_center = value;
@@ -118,17 +160,17 @@ T max(T v, T max)
       }
 
 ////////////////////////////////////////////////////////////
-      void Settings::Input::Sticks_Calibration::set_roll_min(float const& value)
+      void Settings::Input::Sticks_Calibration::set_roll_deadband(float const& value)
       {
-        m_roll_min = value;
+        m_roll_deadband = value;
       }
-      void Settings::Input::Sticks_Calibration::set_roll_min(float&& value)
+      void Settings::Input::Sticks_Calibration::set_roll_deadband(float&& value)
       {
-        m_roll_min = std::move(value);
+        m_roll_deadband = std::move(value);
       }
-      auto Settings::Input::Sticks_Calibration::get_roll_min() const -> float const& 
+      auto Settings::Input::Sticks_Calibration::get_roll_deadband() const -> float const& 
       {
-        return m_roll_min;
+        return m_roll_deadband;
       }
 
 ////////////////////////////////////////////////////////////
@@ -146,6 +188,20 @@ T max(T v, T max)
       }
 
 ////////////////////////////////////////////////////////////
+      void Settings::Input::Sticks_Calibration::set_throttle_min(float const& value)
+      {
+        m_throttle_min = value;
+      }
+      void Settings::Input::Sticks_Calibration::set_throttle_min(float&& value)
+      {
+        m_throttle_min = std::move(value);
+      }
+      auto Settings::Input::Sticks_Calibration::get_throttle_min() const -> float const& 
+      {
+        return m_throttle_min;
+      }
+
+////////////////////////////////////////////////////////////
       void Settings::Input::Sticks_Calibration::set_throttle_center(float const& value)
       {
         m_throttle_center = value;
@@ -160,17 +216,17 @@ T max(T v, T max)
       }
 
 ////////////////////////////////////////////////////////////
-      void Settings::Input::Sticks_Calibration::set_throttle_min(float const& value)
+      void Settings::Input::Sticks_Calibration::set_throttle_deadband(float const& value)
       {
-        m_throttle_min = value;
+        m_throttle_deadband = value;
       }
-      void Settings::Input::Sticks_Calibration::set_throttle_min(float&& value)
+      void Settings::Input::Sticks_Calibration::set_throttle_deadband(float&& value)
       {
-        m_throttle_min = std::move(value);
+        m_throttle_deadband = std::move(value);
       }
-      auto Settings::Input::Sticks_Calibration::get_throttle_min() const -> float const& 
+      auto Settings::Input::Sticks_Calibration::get_throttle_deadband() const -> float const& 
       {
-        return m_throttle_min;
+        return m_throttle_deadband;
       }
 
 ////////////////////////////////////////////////////////////
@@ -825,6 +881,14 @@ ts::Result<void> deserialize(Settings::Input::Sticks_Calibration& value, ts::sz:
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
+    auto const* member_sz_value = sz_value.find_object_member_by_name("yaw_min");
+    if (!member_sz_value) { return ts::Error("Cannot find member value 'yaw_min'"); }
+    std::remove_cv<std::remove_reference<decltype(value.get_yaw_min())>::type>::type v;
+    auto result = deserialize(v, *member_sz_value);
+    if (result != ts::success) { return result; }
+    value.set_yaw_min(std::move(v));
+  }
+  {
     auto const* member_sz_value = sz_value.find_object_member_by_name("yaw_center");
     if (!member_sz_value) { return ts::Error("Cannot find member value 'yaw_center'"); }
     std::remove_cv<std::remove_reference<decltype(value.get_yaw_center())>::type>::type v;
@@ -833,12 +897,12 @@ ts::Result<void> deserialize(Settings::Input::Sticks_Calibration& value, ts::sz:
     value.set_yaw_center(std::move(v));
   }
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("yaw_min");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'yaw_min'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_yaw_min())>::type>::type v;
+    auto const* member_sz_value = sz_value.find_object_member_by_name("yaw_deadband");
+    if (!member_sz_value) { return ts::Error("Cannot find member value 'yaw_deadband'"); }
+    std::remove_cv<std::remove_reference<decltype(value.get_yaw_deadband())>::type>::type v;
     auto result = deserialize(v, *member_sz_value);
     if (result != ts::success) { return result; }
-    value.set_yaw_min(std::move(v));
+    value.set_yaw_deadband(std::move(v));
   }
   {
     auto const* member_sz_value = sz_value.find_object_member_by_name("yaw_max");
@@ -849,6 +913,14 @@ ts::Result<void> deserialize(Settings::Input::Sticks_Calibration& value, ts::sz:
     value.set_yaw_max(std::move(v));
   }
   {
+    auto const* member_sz_value = sz_value.find_object_member_by_name("pitch_min");
+    if (!member_sz_value) { return ts::Error("Cannot find member value 'pitch_min'"); }
+    std::remove_cv<std::remove_reference<decltype(value.get_pitch_min())>::type>::type v;
+    auto result = deserialize(v, *member_sz_value);
+    if (result != ts::success) { return result; }
+    value.set_pitch_min(std::move(v));
+  }
+  {
     auto const* member_sz_value = sz_value.find_object_member_by_name("pitch_center");
     if (!member_sz_value) { return ts::Error("Cannot find member value 'pitch_center'"); }
     std::remove_cv<std::remove_reference<decltype(value.get_pitch_center())>::type>::type v;
@@ -857,12 +929,12 @@ ts::Result<void> deserialize(Settings::Input::Sticks_Calibration& value, ts::sz:
     value.set_pitch_center(std::move(v));
   }
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("pitch_min");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'pitch_min'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_pitch_min())>::type>::type v;
+    auto const* member_sz_value = sz_value.find_object_member_by_name("pitch_deadband");
+    if (!member_sz_value) { return ts::Error("Cannot find member value 'pitch_deadband'"); }
+    std::remove_cv<std::remove_reference<decltype(value.get_pitch_deadband())>::type>::type v;
     auto result = deserialize(v, *member_sz_value);
     if (result != ts::success) { return result; }
-    value.set_pitch_min(std::move(v));
+    value.set_pitch_deadband(std::move(v));
   }
   {
     auto const* member_sz_value = sz_value.find_object_member_by_name("pitch_max");
@@ -873,6 +945,14 @@ ts::Result<void> deserialize(Settings::Input::Sticks_Calibration& value, ts::sz:
     value.set_pitch_max(std::move(v));
   }
   {
+    auto const* member_sz_value = sz_value.find_object_member_by_name("roll_min");
+    if (!member_sz_value) { return ts::Error("Cannot find member value 'roll_min'"); }
+    std::remove_cv<std::remove_reference<decltype(value.get_roll_min())>::type>::type v;
+    auto result = deserialize(v, *member_sz_value);
+    if (result != ts::success) { return result; }
+    value.set_roll_min(std::move(v));
+  }
+  {
     auto const* member_sz_value = sz_value.find_object_member_by_name("roll_center");
     if (!member_sz_value) { return ts::Error("Cannot find member value 'roll_center'"); }
     std::remove_cv<std::remove_reference<decltype(value.get_roll_center())>::type>::type v;
@@ -881,12 +961,12 @@ ts::Result<void> deserialize(Settings::Input::Sticks_Calibration& value, ts::sz:
     value.set_roll_center(std::move(v));
   }
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("roll_min");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'roll_min'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_roll_min())>::type>::type v;
+    auto const* member_sz_value = sz_value.find_object_member_by_name("roll_deadband");
+    if (!member_sz_value) { return ts::Error("Cannot find member value 'roll_deadband'"); }
+    std::remove_cv<std::remove_reference<decltype(value.get_roll_deadband())>::type>::type v;
     auto result = deserialize(v, *member_sz_value);
     if (result != ts::success) { return result; }
-    value.set_roll_min(std::move(v));
+    value.set_roll_deadband(std::move(v));
   }
   {
     auto const* member_sz_value = sz_value.find_object_member_by_name("roll_max");
@@ -897,6 +977,14 @@ ts::Result<void> deserialize(Settings::Input::Sticks_Calibration& value, ts::sz:
     value.set_roll_max(std::move(v));
   }
   {
+    auto const* member_sz_value = sz_value.find_object_member_by_name("throttle_min");
+    if (!member_sz_value) { return ts::Error("Cannot find member value 'throttle_min'"); }
+    std::remove_cv<std::remove_reference<decltype(value.get_throttle_min())>::type>::type v;
+    auto result = deserialize(v, *member_sz_value);
+    if (result != ts::success) { return result; }
+    value.set_throttle_min(std::move(v));
+  }
+  {
     auto const* member_sz_value = sz_value.find_object_member_by_name("throttle_center");
     if (!member_sz_value) { return ts::Error("Cannot find member value 'throttle_center'"); }
     std::remove_cv<std::remove_reference<decltype(value.get_throttle_center())>::type>::type v;
@@ -905,12 +993,12 @@ ts::Result<void> deserialize(Settings::Input::Sticks_Calibration& value, ts::sz:
     value.set_throttle_center(std::move(v));
   }
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("throttle_min");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'throttle_min'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_throttle_min())>::type>::type v;
+    auto const* member_sz_value = sz_value.find_object_member_by_name("throttle_deadband");
+    if (!member_sz_value) { return ts::Error("Cannot find member value 'throttle_deadband'"); }
+    std::remove_cv<std::remove_reference<decltype(value.get_throttle_deadband())>::type>::type v;
     auto result = deserialize(v, *member_sz_value);
     if (result != ts::success) { return result; }
-    value.set_throttle_min(std::move(v));
+    value.set_throttle_deadband(std::move(v));
   }
   {
     auto const* member_sz_value = sz_value.find_object_member_by_name("throttle_max");
@@ -925,18 +1013,22 @@ ts::Result<void> deserialize(Settings::Input::Sticks_Calibration& value, ts::sz:
 ts::sz::Value serialize(Settings::Input::Sticks_Calibration const& value)
 {
   ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
-  sz_value.reserve_object_members(12);
-  sz_value.add_object_member("yaw_center", serialize(value.get_yaw_center()));
+  sz_value.reserve_object_members(16);
   sz_value.add_object_member("yaw_min", serialize(value.get_yaw_min()));
+  sz_value.add_object_member("yaw_center", serialize(value.get_yaw_center()));
+  sz_value.add_object_member("yaw_deadband", serialize(value.get_yaw_deadband()));
   sz_value.add_object_member("yaw_max", serialize(value.get_yaw_max()));
-  sz_value.add_object_member("pitch_center", serialize(value.get_pitch_center()));
   sz_value.add_object_member("pitch_min", serialize(value.get_pitch_min()));
+  sz_value.add_object_member("pitch_center", serialize(value.get_pitch_center()));
+  sz_value.add_object_member("pitch_deadband", serialize(value.get_pitch_deadband()));
   sz_value.add_object_member("pitch_max", serialize(value.get_pitch_max()));
-  sz_value.add_object_member("roll_center", serialize(value.get_roll_center()));
   sz_value.add_object_member("roll_min", serialize(value.get_roll_min()));
+  sz_value.add_object_member("roll_center", serialize(value.get_roll_center()));
+  sz_value.add_object_member("roll_deadband", serialize(value.get_roll_deadband()));
   sz_value.add_object_member("roll_max", serialize(value.get_roll_max()));
-  sz_value.add_object_member("throttle_center", serialize(value.get_throttle_center()));
   sz_value.add_object_member("throttle_min", serialize(value.get_throttle_min()));
+  sz_value.add_object_member("throttle_center", serialize(value.get_throttle_center()));
+  sz_value.add_object_member("throttle_deadband", serialize(value.get_throttle_deadband()));
   sz_value.add_object_member("throttle_max", serialize(value.get_throttle_max()));
   return sz_value;
 }
