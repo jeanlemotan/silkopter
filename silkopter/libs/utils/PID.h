@@ -8,13 +8,32 @@ namespace util
 
 namespace pid
 {
-template<class Value, class Factor> Factor sub(Value const& a, Value const& b)
+template<typename Value, typename Factor>
+Factor sub(Value const& a, Value const& b)
 {
     return Factor(a - b);
 }
+template<typename Factor>
+Factor compute_integrator_mask(Factor const& output, Factor const& min, Factor const& max)
+{
+    return (output < min || output > max) ? Factor(0) : Factor(1);
+}
+template<typename T>
+math::vec2<T> compute_integrator_mask(math::vec2<T> const& output, math::vec2<T> const& min, math::vec2<T> const& max)
+{
+    return math::vec2<T>(compute_integrator_mask(output.x, min.x, max.x),
+                         compute_integrator_mask(output.y, min.y, max.y));
+}
+template<typename T>
+math::vec3<T> compute_integrator_mask(math::vec3<T> const& output, math::vec3<T> const& min, math::vec3<T> const& max)
+{
+    return math::vec3<T>(compute_integrator_mask(output.x, min.x, max.x),
+                         compute_integrator_mask(output.y, min.y, max.y),
+                         compute_integrator_mask(output.z, min.z, max.z));
+}
 }
 
-template<class Scalar, class Value, class Factor>
+template<typename Scalar, typename Value, typename Factor>
 class PID
 {
 public:
@@ -34,9 +53,10 @@ public:
 
     explicit PID(Params const& params = Params());
 
-    auto set_params(Params const& params) -> bool;
-    auto process(Value_t const& input, Value_t const& target) -> Factor_t;
-    auto process_ex(Value_t const& input, Value_t const& target, Value_t const& derivative) -> Factor_t;
+    bool set_params(Params const& params);
+    void set_output_limits(Factor_t const& min, Factor_t const& max);
+    Factor_t process(Value_t const& input, Value_t const& target);
+    Factor_t process_ex(Value_t const& input, Value_t const& target, Value_t const& derivative);
     void reset();
 
 private:
@@ -48,11 +68,13 @@ private:
     Value_t m_integrator;
     Value_t m_last_input;
     Factor_t m_last_derivative = Factor_t();
+    Factor_t m_min_output = Factor_t(std::numeric_limits<float>::lowest());
+    Factor_t m_max_output = Factor_t(std::numeric_limits<float>::max());
     bool m_is_last_input_valid = false;
 };
 
 
-template<class Scalar, class Value, class Factor>
+template<typename Scalar, typename Value, typename Factor>
 PID<Scalar, Value, Factor>::PID(Params const& params)
  : m_integrator()
  , m_last_input()
@@ -60,17 +82,30 @@ PID<Scalar, Value, Factor>::PID(Params const& params)
     set_params(params);
 }
 
-template<class Scalar, class Value, class Factor>
+template<typename Scalar, typename Value, typename Factor>
+void PID<Scalar, Value, Factor>::set_output_limits(Factor_t const& min, Factor_t const& max)
+{
+    QASSERT(min < max);
+    m_min_output = min;
+    m_max_output = max;
+}
+
+template<typename Scalar, typename Value, typename Factor>
 auto PID<Scalar, Value, Factor>::process_ex(Value_t const& input, Value_t const& target, Value_t const& derivative) -> Factor_t
 {
     // Compute proportional component
-    auto error = pid::sub<Value_t, Factor_t>(target, input);
-    auto output = error * m_params.kp;
+    Factor_t error = pid::sub<Value_t, Factor_t>(target, input);
+    Factor_t output = error * m_params.kp;
 
     // Compute integral component if time has elapsed
     if (m_has_ki)
     {
         m_integrator = math::clamp(m_integrator + Factor_t(error * m_params.ki * m_dts), -m_params.max_i, m_params.max_i);
+
+        //mask (zero) out the integrator is the output is outside of limits
+        Factor_t integrator_mask = pid::compute_integrator_mask(output, m_min_output, m_max_output);
+        m_integrator *= integrator_mask;
+
         output += m_integrator;
     }
 
@@ -87,10 +122,10 @@ auto PID<Scalar, Value, Factor>::process_ex(Value_t const& input, Value_t const&
         output -= m_params.kd * d;
     }
 
-    return output;
+    return math::clamp(output, m_min_output, m_max_output);
 }
 
-template<class Scalar, class Value, class Factor>
+template<typename Scalar, typename Value, typename Factor>
 auto PID<Scalar, Value, Factor>::process(Value_t const& input, Value_t const& target) -> Factor_t
 {
     // Compute derivative component if time has elapsed
@@ -113,7 +148,7 @@ auto PID<Scalar, Value, Factor>::process(Value_t const& input, Value_t const& ta
     return process_ex(input, target, derivative);
 }
 
-template<class Scalar, class Value, class Factor>
+template<typename Scalar, typename Value, typename Factor>
 void PID<Scalar, Value, Factor>::reset()
 {
     m_integrator = Value_t();
@@ -122,7 +157,7 @@ void PID<Scalar, Value, Factor>::reset()
     m_last_derivative = Factor_t();
 }
 
-template<class Scalar, class Value, class Factor>
+template<typename Scalar, typename Value, typename Factor>
 auto PID<Scalar, Value, Factor>::set_params(Params const& params) -> bool
 {
     if (params.rate <= 0)
