@@ -56,4 +56,9 @@ std::unique_ptr<T> make_unique()
 	return std::unique_ptr<T>(new T());
 }
 
+
+typedef std::chrono::high_resolution_clock Clock;
+typedef Clock::duration Duration;
+typedef std::chrono::duration<float> Secondsf;
+
 }
