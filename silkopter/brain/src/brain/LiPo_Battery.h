@@ -34,8 +34,9 @@ public:
 private:
     Config m_config;
     size_t m_rate = 0;
+    size_t m_samples_received = 0;
 
-    auto compute_cell_count() -> boost::optional<uint8_t>;
+    boost::optional<uint8_t> compute_cell_count();
     boost::optional<uint8_t> m_cell_count;
 
     stream::IBattery_State::Sample m_battery_state;

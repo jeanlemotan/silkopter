@@ -57,14 +57,18 @@ auto LiPo_Battery::process(stream::IVoltage::Sample const& v_sample, stream::ICu
         m_battery_state.value.average_voltage = voltage;
 
         m_battery_state.value.capacity_left = 1.f - math::clamp(m_battery_state.value.charge_used / m_config.full_charge, 0.f, 1.f);
+        m_samples_received++;
     }
     else
     {
         m_battery_state.is_healthy = false;
     }
 
+    //TODO - add a config param for this
+    size_t samples_needed = m_rate * 10; //10 seconds worth of data
+
     //compute cell count
-    if (!m_cell_count)
+    if (!m_cell_count && m_samples_received >= samples_needed)
     {
         m_cell_count = compute_cell_count();
         if (m_cell_count)
