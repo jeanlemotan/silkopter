@@ -101,15 +101,18 @@ bool Multirotor_Simulation::init(uint32_t rate)
 bool Multirotor_Simulation::init_uav(std::shared_ptr<const IMultirotor_Properties> multirotor_properties)
 {
     m_uav.properties = multirotor_properties;
+    m_uav.state.radius = multirotor_properties->get_radius();
 
     if (m_uav.state.motors.size() != m_uav.properties->get_motors().size())
     {
         m_uav.state.motors.clear();
         m_uav.state.motors.resize(m_uav.properties->get_motors().size());
         m_uav.motor_drag_factors.resize(m_uav.properties->get_motors().size());
-        for (float& df: m_uav.motor_drag_factors)
+        for (size_t i = 0; i < m_uav.state.motors.size(); i++)
         {
-            df = (std::rand() / float(RAND_MAX)) * 0.001f + 0.001f;
+            m_uav.motor_drag_factors[i] = (std::rand() / float(RAND_MAX)) * 0.001f + 0.001f;
+            m_uav.state.motors[i].max_thrust = multirotor_properties->get_motor_thrust();
+            m_uav.state.motors[i].position = multirotor_properties->get_motors()[i].position;
         }
     }
 
@@ -170,7 +173,7 @@ void Multirotor_Simulation::reset()
     m_uav.state.enu_position = math::vec3f::zero;
     m_uav.state.enu_velocity = math::vec3f::zero;
     m_uav.state.local_to_enu_rotation = math::quatf::identity;
-    for (UAV_State::Motor_State& m: m_uav.state.motors)
+    for (State::Motor_State& m: m_uav.state.motors)
     {
         m.throttle = 0;
         m.thrust = 0;
@@ -337,7 +340,7 @@ void Multirotor_Simulation::process_uav(Clock::duration dt)
     {
         for (size_t i = 0; i < m_uav.state.motors.size(); i++)
         {
-            UAV_State::Motor_State& m = m_uav.state.motors[i];
+            State::Motor_State& m = m_uav.state.motors[i];
             IMultirotor_Properties::Motor const& mc = m_uav.properties->get_motors()[i];
 
             float thrust = m.thrust;
@@ -396,7 +399,7 @@ void Multirotor_Simulation::process_uav(Clock::duration dt)
             {
                 for (size_t i = 0; i < m_uav.state.motors.size(); i++)
                 {
-                    UAV_State::Motor_State& m = m_uav.state.motors[i];
+                    State::Motor_State& m = m_uav.state.motors[i];
                     IMultirotor_Properties::Motor const& mc = m_uav.properties->get_motors()[i];
 
                     float intensity = -math::dot(local_to_enu_trans.get_axis_z(), velocity_normalized);
@@ -470,7 +473,7 @@ void Multirotor_Simulation::process_uav_sensors(Clock::duration dt)
 }
 
 
-Multirotor_Simulation::UAV_State const& Multirotor_Simulation::get_uav_state() const
+Multirotor_Simulation::State const& Multirotor_Simulation::get_state() const
 {
     return m_uav.state;
 }

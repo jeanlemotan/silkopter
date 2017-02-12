@@ -186,6 +186,10 @@ private:
     std::vector<std::weak_ptr<stream::IThrottle>> m_input_throttle_streams;
     std::vector<std::string> m_input_throttle_stream_paths;
 
+    std::weak_ptr<stream::IMultirotor_State> m_input_state_stream;
+    std::string m_input_state_stream_path;
+    stream::IMultirotor_State::Value m_multirotor_state;
+
     Multirotor_Simulation m_simulation;
 };
 

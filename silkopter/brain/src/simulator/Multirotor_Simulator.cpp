@@ -104,7 +104,7 @@ ts::Result<void> Multirotor_Simulator::start(Clock::time_point tp)
 
 auto Multirotor_Simulator::get_inputs() const -> std::vector<Input>
 {
-    std::vector<Input> inputs(m_input_throttle_streams.size());
+    std::vector<Input> inputs(m_input_throttle_streams.size() + 1);
     for (size_t i = 0; i < m_input_throttle_streams.size(); i++)
     {
         inputs[i].type = stream::IThrottle::TYPE;
@@ -112,6 +112,11 @@ auto Multirotor_Simulator::get_inputs() const -> std::vector<Input>
         inputs[i].name = q::util::format<std::string>("throttle_{}", i);
         inputs[i].stream_path = m_input_throttle_stream_paths[i];
     }
+    inputs.back().type = stream::IMultirotor_State::TYPE;
+    inputs.back().rate = m_descriptor->get_state_rate();
+    inputs.back().name = "state";
+    inputs.back().stream_path = m_input_state_stream_path;
+
     return inputs;
 }
 auto Multirotor_Simulator::get_outputs() const -> std::vector<Output>
@@ -149,13 +154,25 @@ void Multirotor_Simulator::process()
 
     for (size_t i = 0; i < m_input_throttle_streams.size(); i++)
     {
-        auto throttle = m_input_throttle_streams[i].lock();
-        if (throttle)
+        auto stream = m_input_throttle_streams[i].lock();
+        if (stream)
         {
-            auto const& samples = throttle->get_samples();
+            auto const& samples = stream->get_samples();
             if (!samples.empty())
             {
                 m_simulation.set_motor_throttle(i, samples.back().value);
+            }
+        }
+    }
+
+    {
+        auto stream = m_input_state_stream.lock();
+        if (stream)
+        {
+            auto const& samples = stream->get_samples();
+            if (!samples.empty())
+            {
+                m_multirotor_state = samples.back().value;
             }
         }
     }
@@ -174,7 +191,7 @@ void Multirotor_Simulator::process()
 
     m_simulation.process(dt, [this, &enu_to_ecef_trans, &enu_to_ecef_rotation](Multirotor_Simulation& simulation, Clock::duration simulation_dt)
     {
-        auto const& uav_state = simulation.get_uav_state();
+        auto const& uav_state = simulation.get_state();
         {
             Angular_Velocity& stream = *m_angular_velocity_stream;
             stream.accumulated_dt += simulation_dt;
@@ -293,37 +310,67 @@ void Multirotor_Simulator::process()
 
     {
         size_t samples_needed = m_simulator_state_stream->compute_samples_needed();
+        Multirotor_Simulation::State simulation_state = m_simulation.get_state();
+        simulation_state.multirotor_state = m_multirotor_state;
         for (size_t i = 0; i < samples_needed; i++)
         {
-            m_simulator_state_stream->push_sample(m_simulation.get_uav_state(), true);
+            m_simulator_state_stream->push_sample(simulation_state, true);
         }
     }
 }
 
 ts::Result<void> Multirotor_Simulator::set_input_stream_path(size_t idx, std::string const& path)
 {
-    m_input_throttle_streams[idx].reset();
-    m_input_throttle_stream_paths[idx].clear();
-
-    if (!path.empty())
+    if (idx < m_input_throttle_streams.size())
     {
-        std::shared_ptr<stream::IThrottle> input_stream = m_hal.get_stream_registry().find_by_name<stream::IThrottle>(path);
-        if (input_stream)
+        m_input_throttle_streams[idx].reset();
+        m_input_throttle_stream_paths[idx].clear();
+        if (!path.empty())
         {
-            uint32_t rate = input_stream->get_rate();
-            if (rate != m_descriptor->get_throttle_rate())
+            std::shared_ptr<stream::IThrottle> input_stream = m_hal.get_stream_registry().find_by_name<stream::IThrottle>(path);
+            if (input_stream)
             {
-                return make_error("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", path, m_descriptor->get_throttle_rate(), rate);
+                uint32_t rate = input_stream->get_rate();
+                if (rate != m_descriptor->get_throttle_rate())
+                {
+                    return make_error("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", path, m_descriptor->get_throttle_rate(), rate);
+                }
+                else
+                {
+                    m_input_throttle_streams[idx] = input_stream;
+                    m_input_throttle_stream_paths[idx] = path;
+                }
             }
             else
             {
-                m_input_throttle_streams[idx] = input_stream;
-                m_input_throttle_stream_paths[idx] = path;
+                return make_error("Cannot find stream '{}'", path);
             }
         }
-        else
+    }
+    else
+    {
+        m_input_state_stream.reset();
+        m_input_state_stream_path.clear();
+        if (!path.empty())
         {
-            return make_error("Cannot find stream '{}'", path);
+            std::shared_ptr<stream::IMultirotor_State> input_stream = m_hal.get_stream_registry().find_by_name<stream::IMultirotor_State>(path);
+            if (input_stream)
+            {
+                uint32_t rate = input_stream->get_rate();
+                if (rate != m_descriptor->get_state_rate())
+                {
+                    return make_error("Bad input stream '{}'. Expected rate {}Hz, got {}Hz", path, m_descriptor->get_state_rate(), rate);
+                }
+                else
+                {
+                    m_input_state_stream = input_stream;
+                    m_input_state_stream_path = path;
+                }
+            }
+            else
+            {
+                return make_error("Cannot find stream '{}'", path);
+            }
         }
     }
     return ts::success;

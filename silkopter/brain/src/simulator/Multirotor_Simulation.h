@@ -43,9 +43,9 @@ public:
     void set_simulation_enabled(bool yes);
     void set_drag_enabled(bool yes);
 
-    typedef stream::IMultirotor_Simulator_State::Value UAV_State;
+    typedef stream::IMultirotor_Simulator_State::Value State;
 
-    UAV_State const& get_uav_state() const;
+    State const& get_state() const;
 
     void set_motor_throttle(size_t motor, float throttle);
 
@@ -66,7 +66,7 @@ private:
         std::shared_ptr<btCylinderShapeZ> shape;
         std::shared_ptr<btMotionState> motion_state;
         std::shared_ptr<btRigidBody> body;
-        UAV_State state;
+        State state;
         std::vector<float> motor_drag_factors;
     } m_uav;
 
