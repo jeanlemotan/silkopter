@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Stream_Base.h"
+#include "IMultirotor_State.h"
 
 namespace silk
 {
@@ -19,7 +20,13 @@ public:
             float drag_factor = 0;
             float throttle = 0;
             float thrust = 0;
+
+            //the following come from the config
+            float max_thrust = 0;
+            math::vec3f position;
         };
+
+        float radius = 0.f; //comes from the config directly
 
         math::vec3f enu_position;
         math::quatf local_to_enu_rotation;
@@ -34,6 +41,8 @@ public:
         math::vec3f proximity_distance;
 
         std::vector<Motor_State> motors;
+
+        IMultirotor_State::Value multirotor_state; //comes from the brain, it's what the brain thinks
     };
 
     typedef stream::Sample<Value>     Sample;
@@ -58,12 +67,16 @@ template<> inline void serialize(Buffer_t& buffer, silk::stream::IMultirotor_Sim
 {
     serialize(buffer, value.throttle, off);
     serialize(buffer, value.thrust, off);
+    serialize(buffer, value.max_thrust, off);
+    serialize(buffer, value.position, off);
 }
 
 template<> inline auto deserialize(Buffer_t const& buffer, silk::stream::IMultirotor_Simulator_State::Value::Motor_State& value, size_t& off) -> bool
 {
     return deserialize(buffer, value.throttle, off) &&
-        deserialize(buffer, value.thrust, off);
+            deserialize(buffer, value.thrust, off) &&
+            deserialize(buffer, value.max_thrust, off) &&
+            deserialize(buffer, value.position, off);
 }
 
 template<> inline void serialize(Buffer_t& buffer, silk::stream::IMultirotor_Simulator_State::Value const& value, size_t& off)
@@ -79,6 +92,7 @@ template<> inline void serialize(Buffer_t& buffer, silk::stream::IMultirotor_Sim
     serialize(buffer, value.temperature, off);
     serialize(buffer, value.proximity_distance, off);
     serialize(buffer, value.motors, off);
+    serialize(buffer, value.multirotor_state, off);
 }
 
 template<> inline auto deserialize(Buffer_t const& buffer, silk::stream::IMultirotor_Simulator_State::Value& value, size_t& off) -> bool
@@ -93,7 +107,8 @@ template<> inline auto deserialize(Buffer_t const& buffer, silk::stream::IMultir
         deserialize(buffer, value.pressure, off) &&
         deserialize(buffer, value.temperature, off) &&
         deserialize(buffer, value.proximity_distance, off) &&
-        deserialize(buffer, value.motors, off);
+        deserialize(buffer, value.motors, off) &&
+        deserialize(buffer, value.multirotor_state, off);
 }
 
 
