@@ -106,6 +106,15 @@ std::vector<Multirotor_Brain::Output> Multirotor_Brain::get_outputs() const
 
 //////////////////////////////////////////////////////////////////////////////////////////
 
+static float get_yaw(math::quatf const& frame)
+{
+    float _, fz;
+    frame.get_as_euler_zxy(_, _, fz);
+    return fz;
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////
+
 void Multirotor_Brain::set_mode(Mode mode)
 {
     m_mode = mode;
@@ -188,10 +197,7 @@ void Multirotor_Brain::set_yaw_mode(Yaw_Mode mode)
     if (mode == Yaw_Mode::ANGLE)
     {
         //when switching to angle hold, keep the current angle as the reference
-        float _, fz;
-        m_inputs.frame.sample.value.get_as_euler_zxy(_, _, fz);
-
-        m_yaw_mode_data.target_angle = fz;
+        m_yaw_mode_data.target_angle = get_yaw(m_inputs.frame.sample.value);
         QLOGI("Yaw mode changed to ANGLE. Initializing angle to {}", m_yaw_mode_data.target_angle);
     }
 }
@@ -303,6 +309,10 @@ void Multirotor_Brain::process_idle_mode()
     m_enu_position = math::vec3f::zero;
     m_enu_velocity = math::vec3f::zero;
 
+    //this is the current/target yaw angle
+    //this is so that when taking off the uav doesn't rotate quickly/violently towards the target
+    m_yaw_mode_data.target_angle = get_yaw(m_inputs.frame.sample.value);
+
     //output nothing
     m_rate_output_stream->push_sample(stream::IAngular_Velocity::Value(), true);
     m_thrust_output_stream->push_sample(stream::IFloat::Value(), true);
@@ -371,8 +381,7 @@ float Multirotor_Brain::compute_ff_thrust(float target_altitude) const
 math::vec2f Multirotor_Brain::compute_horizontal_rate_for_angle(math::vec2f const& target_angle)
 {
     //current yaw. We'll use it to compine with the new target_angles to get a new quaternion
-    float _, fz;
-    m_inputs.frame.sample.value.get_as_euler_zxy(_, _, fz);
+    float fz = get_yaw(m_inputs.frame.sample.value);
 
     //target attitude
     math::quatf target;
@@ -382,7 +391,7 @@ math::vec2f Multirotor_Brain::compute_horizontal_rate_for_angle(math::vec2f cons
     math::quatf diff = math::inverse(m_inputs.frame.sample.value) * target;
 
     //get the difference as angles. We ignore the yaw (Z rotation) here
-    float diff_x, diff_y;
+    float diff_x, diff_y, _;
     diff.get_as_euler_zxy(diff_x, diff_y, _);
 
     //run it throught the PID to get rate. The target diff is 0, 0 - the UAV has to match the target angles
@@ -479,13 +488,13 @@ float Multirotor_Brain::compute_thrust_for_altitude(float target_alt)
 
 float Multirotor_Brain::compute_yaw_rate_for_angle(float target_angle)
 {
-    float fx, fy, fz;
-    m_inputs.frame.sample.value.get_as_euler_zxy(fx, fy, fz);
+    float fx, fy, _;
+    m_inputs.frame.sample.value.get_as_euler_zxy(fx, fy, _);
 
     math::quatf target;
     target.set_from_euler_zxy(fx, fy, target_angle);
     math::quatf diff = math::inverse(m_inputs.frame.sample.value) * target;
-    float _, diff_z;
+    float diff_z;
     diff.get_as_euler_zxy(_, _, diff_z);
 
     float z = m_yaw_mode_data.angle_pid.process(-diff_z, 0.f);
