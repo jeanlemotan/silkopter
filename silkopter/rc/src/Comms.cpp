@@ -118,14 +118,22 @@ Remote_Viewer_Server& Comms::get_remote_viewer_server()
 
 size_t Comms::compute_multirotor_commands_packet(uint8_t* data, uint8_t& packet_type)
 {
-    packet_type = static_cast<uint8_t>(rc_comms::Packet_Type::MULTIROTOR_COMMANDS);
+    if (Clock::now() - m_multirotor_commands_tp < std::chrono::milliseconds(500))
+    {
+        packet_type = static_cast<uint8_t>(rc_comms::Packet_Type::MULTIROTOR_COMMANDS);
 
-    size_t off = 0;
-    util::serialization::serialize(m_serialization_buffer, m_multirotor_commands, off);
+        size_t off = 0;
+        util::serialization::serialize(m_serialization_buffer, m_multirotor_commands, off);
 
-    memcpy(data, m_serialization_buffer.data(), off);
+        memcpy(data, m_serialization_buffer.data(), off);
 
-    return off;
+        return off;
+    }
+    else
+    {
+        //commands are out of date - don't send them
+        return 0;
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -265,6 +273,7 @@ stream::IMultirotor_State::Value Comms::get_multirotor_state() const
 void Comms::send_multirotor_commands_value(stream::IMultirotor_Commands::Value const& value)
 {
     m_multirotor_commands = value;
+    m_multirotor_commands_tp = Clock::now();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -300,20 +309,20 @@ void Comms::process()
 //        m_remote_viewer_server.send_data(video_data.data(), video_data.size(), math::vec2u16(0, 0), m_multirotor_state);
 //    }
 
-    static Clock::time_point xxx = Clock::time_point(Clock::duration::zero());
-    if (m_multirotor_state.mode != m_multirotor_commands.mode)
-    {
-        if (xxx.time_since_epoch().count() == 0)
-        {
-            xxx = Clock::now();
-        }
-        if (Clock::now() - xxx > std::chrono::seconds(1))
-        {
-            QLOGI("Simulated mode switch from {} to {}", m_multirotor_state.mode, m_multirotor_commands.mode);
-            m_multirotor_state.mode = m_multirotor_commands.mode;
-            xxx = Clock::time_point(Clock::duration::zero());
-        }
-    }
+//    static Clock::time_point xxx = Clock::time_point(Clock::duration::zero());
+//    if (m_multirotor_state.mode != m_multirotor_commands.mode)
+//    {
+//        if (xxx.time_since_epoch().count() == 0)
+//        {
+//            xxx = Clock::now();
+//        }
+//        if (Clock::now() - xxx > std::chrono::seconds(1))
+//        {
+//            QLOGI("Simulated mode switch from {} to {}", m_multirotor_state.mode, m_multirotor_commands.mode);
+//            m_multirotor_state.mode = m_multirotor_commands.mode;
+//            xxx = Clock::time_point(Clock::duration::zero());
+//        }
+//    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////

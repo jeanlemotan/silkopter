@@ -359,6 +359,9 @@ void Fly_Menu_Page::process_mode_return_home(Input& input)
         set_mode(input, stream::IMultirotor_Commands::Mode::FLY);
         return;
     }
+
+    ISticks const& sticks = input.get_sticks();
+    m_commands.sticks.yaw = sticks.get_yaw();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////

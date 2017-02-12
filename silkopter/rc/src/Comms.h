@@ -97,6 +97,9 @@ private:
     stream::IMultirotor_State::Value m_multirotor_state;
     stream::IMultirotor_Commands::Value m_multirotor_commands;
 
+    //mark the commands as infinitely old
+    Clock::time_point m_multirotor_commands_tp = Clock::time_point(Clock::duration::zero());
+
     void handle_video(void const* data, size_t size, math::vec2u16 const& resolution);
 };
 
