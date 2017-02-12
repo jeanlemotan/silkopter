@@ -935,6 +935,23 @@ struct ADS1115_Descriptor : public INode_Descriptor
 public:
   typedef uint32_t rate_t;
   typedef uint8_t i2c_address_t;
+  struct ADC
+  {
+  public:
+    virtual ~ADC() = default;
+    void set_is_enabled(bool const& value);
+    void set_is_enabled(bool&& value);
+    auto get_is_enabled() const -> bool const&;
+
+    void set_rate(uint32_t const& value);
+    void set_rate(uint32_t&& value);
+    auto get_rate() const -> uint32_t const&;
+
+  private:
+    bool m_is_enabled = bool{false};
+    uint32_t m_rate = uint32_t{200};
+  };
+
   virtual ~ADS1115_Descriptor() = default;
   void set_bus(std::string const& value);
   void set_bus(std::string&& value);
@@ -944,29 +961,33 @@ public:
   void set_i2c_address(uint8_t&& value);
   auto get_i2c_address() const -> uint8_t const&;
 
-  void set_adc0_rate(uint32_t const& value);
-  void set_adc0_rate(uint32_t&& value);
-  auto get_adc0_rate() const -> uint32_t const&;
+  void set_adc0(ADC const& value);
+  void set_adc0(ADC&& value);
+  auto get_adc0() const -> ADC const&;
+  auto get_adc0() -> ADC&;
 
-  void set_adc1_rate(uint32_t const& value);
-  void set_adc1_rate(uint32_t&& value);
-  auto get_adc1_rate() const -> uint32_t const&;
+  void set_adc1(ADC const& value);
+  void set_adc1(ADC&& value);
+  auto get_adc1() const -> ADC const&;
+  auto get_adc1() -> ADC&;
 
-  void set_adc2_rate(uint32_t const& value);
-  void set_adc2_rate(uint32_t&& value);
-  auto get_adc2_rate() const -> uint32_t const&;
+  void set_adc2(ADC const& value);
+  void set_adc2(ADC&& value);
+  auto get_adc2() const -> ADC const&;
+  auto get_adc2() -> ADC&;
 
-  void set_adc3_rate(uint32_t const& value);
-  void set_adc3_rate(uint32_t&& value);
-  auto get_adc3_rate() const -> uint32_t const&;
+  void set_adc3(ADC const& value);
+  void set_adc3(ADC&& value);
+  auto get_adc3() const -> ADC const&;
+  auto get_adc3() -> ADC&;
 
 private:
   std::string m_bus;
   uint8_t m_i2c_address = uint8_t{72};
-  uint32_t m_adc0_rate = uint32_t{200};
-  uint32_t m_adc1_rate = uint32_t{200};
-  uint32_t m_adc2_rate = uint32_t{200};
-  uint32_t m_adc3_rate = uint32_t{200};
+  ADC m_adc0;
+  ADC m_adc1;
+  ADC m_adc2;
+  ADC m_adc3;
 };
 
 struct ADS1115_Config : public INode_Config
@@ -1666,6 +1687,10 @@ public:
   void set_throttle_rate(uint32_t&& value);
   auto get_throttle_rate() const -> uint32_t const&;
 
+  void set_state_rate(uint32_t const& value);
+  void set_state_rate(uint32_t&& value);
+  auto get_state_rate() const -> uint32_t const&;
+
   void set_acceleration_rate(uint32_t const& value);
   void set_acceleration_rate(uint32_t&& value);
   auto get_acceleration_rate() const -> uint32_t const&;
@@ -1696,6 +1721,7 @@ public:
 
 private:
   uint32_t m_throttle_rate = uint32_t{100};
+  uint32_t m_state_rate = uint32_t{30};
   uint32_t m_acceleration_rate = uint32_t{1000};
   uint32_t m_angular_velocity_rate = uint32_t{1000};
   uint32_t m_magnetic_field_rate = uint32_t{100};
@@ -2490,22 +2516,21 @@ public:
   struct Feedforward
   {
   public:
-    typedef float torque_t;
     virtual ~Feedforward() = default;
     void set_weight(muf_t const& value);
     void set_weight(muf_t&& value);
     auto get_weight() const -> muf_t const&;
 
-    void set_max_torque(torque_t const& value);
-    void set_max_torque(torque_t&& value);
-    auto get_max_torque() const -> torque_t const&;
-
   private:
     muf_t m_weight = muf_t{0};
-    torque_t m_max_torque = torque_t{1.000000f};
   };
 
+  typedef float torque_t;
   virtual ~Rate_Controller_Config() = default;
+  void set_max_torque(torque_t const& value);
+  void set_max_torque(torque_t&& value);
+  auto get_max_torque() const -> torque_t const&;
+
   void set_feedback(Feedback const& value);
   void set_feedback(Feedback&& value);
   auto get_feedback() const -> Feedback const&;
@@ -2517,6 +2542,7 @@ public:
   auto get_feedforward() -> Feedforward&;
 
 private:
+  torque_t m_max_torque = torque_t{1.000000f};
   Feedback m_feedback;
   Feedforward m_feedforward;
 };
@@ -3209,6 +3235,8 @@ ts::Result<void> deserialize(ADC_Voltmeter_Descriptor& value, ts::sz::Value cons
 ts::sz::Value serialize(ADC_Voltmeter_Descriptor const& value);
 ts::Result<void> deserialize(ADC_Voltmeter_Config& value, ts::sz::Value const& sz_value);
 ts::sz::Value serialize(ADC_Voltmeter_Config const& value);
+ts::Result<void> deserialize(ADS1115_Descriptor::ADC& value, ts::sz::Value const& sz_value);
+ts::sz::Value serialize(ADS1115_Descriptor::ADC const& value);
 ts::Result<void> deserialize(ADS1115_Descriptor& value, ts::sz::Value const& sz_value);
 ts::sz::Value serialize(ADS1115_Descriptor const& value);
 ts::Result<void> deserialize(ADS1115_Config& value, ts::sz::Value const& sz_value);

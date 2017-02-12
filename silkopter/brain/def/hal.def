@@ -262,15 +262,21 @@ struct ADC_Voltmeter_Config : public INode_Config
 
 struct ADS1115_Descriptor : public INode_Descriptor
 {
-    alias rate_t = uint32_t : [ min = 1, max = 200, native_type = "uint32_t" ];
+    alias rate_t = uint32_t : [ min = 1, max = 400, native_type = "uint32_t" ];
     alias i2c_address_t = uint8_t : [ min = 0, max = 127, native_type = "uint8_t", hex ];
 
     string bus : [ ui_name = "Bus" ];
     i2c_address_t i2c_address = 0x48 : [ ui_name = "I2C Address" ];
-    rate_t adc0_rate = 200 : [ ui_name = "ADC0 Rate", ui_suffix = "Hz" ];
-    rate_t adc1_rate = 200 : [ ui_name = "ADC1 Rate", ui_suffix = "Hz" ];
-    rate_t adc2_rate = 200 : [ ui_name = "ADC2 Rate", ui_suffix = "Hz" ];
-    rate_t adc3_rate = 200 : [ ui_name = "ADC3 Rate", ui_suffix = "Hz" ];
+    struct ADC
+    {
+    	bool is_enabled = false : [ ui_name = "Enabled" ];
+    	rate_t rate = 200 : [ ui_name = "Rate", ui_suffix = "Hz" ];
+    };
+
+    ADC adc0 : [ ui_name = "ADC0" ];
+    ADC adc1 : [ ui_name = "ADC1" ];
+    ADC adc2 : [ ui_name = "ADC2" ];
+    ADC adc3 : [ ui_name = "ADC3" ];
 };
 
 struct ADS1115_Config : public INode_Config
@@ -587,6 +593,7 @@ struct Multirotor_Simulator_Descriptor : public INode_Descriptor
     alias rate_t = uint32_t : [ min = 1, max = 10000, native_type = "uint32_t" ];
 
     rate_t throttle_rate = 100 : [ ui_name = "Throttle Rate", ui_suffix = "Hz" ];
+    rate_t state_rate = 30 : [ ui_name = "State Rate", ui_suffix = "Hz" ];
     rate_t acceleration_rate = 1000 : [ ui_name = "Acceleration Rate", ui_suffix = "Hz" ];
     rate_t angular_velocity_rate = 1000 : [ ui_name = "Angular Velocity Rate", ui_suffix = "Hz" ];
     rate_t magnetic_field_rate = 100 : [ ui_name = "Magnetic Field Rate", ui_suffix = "Hz" ];
@@ -834,12 +841,11 @@ struct Rate_Controller_Config : public INode_Config
     };
     struct Feedforward
     {
-        alias torque_t = float : [ min = 0.01f ];
-
         muf_t weight = 0.f : [ ui_name = "Weight" ];
-        torque_t max_torque = 1.f : [ ui_name = "Max Torque", ui_suffix = "N" ];
     };
 
+    alias torque_t = float : [ min = 0.01f ];
+    torque_t max_torque = 1.f : [ ui_name = "Max Torque", ui_suffix = "N" ];
     Feedback feedback : [ ui_name = "Feedback" ];
     Feedforward feedforward : [ ui_name = "Feedforward" ];
 };
