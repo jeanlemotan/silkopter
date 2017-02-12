@@ -1125,10 +1125,10 @@ void MPU9250::process()
 
     //handle and report the slow clock
     {
-        constexpr size_t k_max_sample_difference = 8;
+        constexpr size_t MAX_SKIPPED_SAMPLES = 8;
         {
             Clock::duration dt = m_acceleration->get_dt();
-            if (m_acceleration->get_tp() <= now - dt * k_max_sample_difference)
+            if (m_acceleration->get_tp() <= now - dt * MAX_SKIPPED_SAMPLES)
             {
                 while (m_acceleration->get_tp() <= now - dt)
                 {
@@ -1139,7 +1139,7 @@ void MPU9250::process()
         }
         {
             Clock::duration dt = m_angular_velocity->get_dt();
-            if (m_angular_velocity->get_tp() <= now - dt * k_max_sample_difference)
+            if (m_angular_velocity->get_tp() <= now - dt * MAX_SKIPPED_SAMPLES)
             {
                 while (m_angular_velocity->get_tp() <= now - dt)
                 {
@@ -1211,8 +1211,8 @@ void MPU9250::process_thermometer(Buses& buses)
         m_stats.bus_failures++;
     }
 
-    constexpr size_t k_max_sample_difference = 5;
-    bool is_healthy = Clock::now() - m_last_temperature_tp <= m_temperature->get_dt() * k_max_sample_difference;
+    constexpr size_t MAX_SKIPPED_SAMPLES = 5;
+    bool is_healthy = Clock::now() - m_last_temperature_tp <= m_temperature->get_dt() * MAX_SKIPPED_SAMPLES;
 
     if (!is_healthy)
     {
@@ -1308,8 +1308,8 @@ void MPU9250::process_magnetometer(Buses& buses)
         }
     }
 
-    constexpr size_t k_max_sample_difference = 5;
-    bool is_healthy = Clock::now() - m_last_magnetic_field_tp <= m_magnetic_field->get_dt() * k_max_sample_difference;
+    constexpr size_t MAX_LATE_SAMPLES = 5;
+    bool is_healthy = Clock::now() - m_last_magnetic_field_tp <= m_magnetic_field->get_dt() * MAX_LATE_SAMPLES;
 
     size_t samples_needed = m_magnetic_field->compute_samples_needed();
 

@@ -46,16 +46,26 @@ public:
 private:
     ts::Result<void> init();
 
+    bool read_sensor(bus::II2C& i2c, float& o_value);
+
     HAL& m_hal;
     std::weak_ptr<bus::II2C> m_i2c;
 
     std::shared_ptr<hal::ADS1115_Descriptor> m_descriptor;
     std::shared_ptr<hal::ADS1115_Config> m_config;
 
-    Clock::time_point m_last_tp = Clock::now();
+    Clock::time_point m_schedule_tp = Clock::now();
 
     typedef Basic_Output_Stream<stream::IADC> Output_Stream;
-    mutable std::array<std::shared_ptr<Output_Stream>, 4> m_adcs;
+
+    struct ADC
+    {
+        std::shared_ptr<Output_Stream> stream;
+        size_t pin_index = 0;
+        Clock::time_point last_tp = Clock::now();
+    };
+
+    mutable std::vector<ADC> m_adcs;
 
     auto set_config_register(bus::II2C& i2c) -> bool;
 
@@ -72,7 +82,7 @@ private:
         uint16_t queue = 0;
     } m_config_register;
 
-    uint8_t m_crt_adc = 0;
+    uint8_t m_crt_adc_idx = 0;
 };
 
 

@@ -315,11 +315,11 @@ void MS5611::process()
         double p = (m_pressure->reading*SENS*0.000000476837158203125 - OFF)*0.000030517578125;
         p = p * 0.001; //pascals to kilopascals
 
-        constexpr size_t k_max_sample_difference = 5;
+        constexpr size_t MAX_LATE_SAMPLES = 5;
 
         {
             size_t samples_needed = m_pressure->compute_samples_needed();
-            bool is_healthy = Clock::now() - m_last_pressure_reading_tp <= m_pressure->get_dt() * k_max_sample_difference;
+            bool is_healthy = Clock::now() - m_last_pressure_reading_tp <= m_pressure->get_dt() * MAX_LATE_SAMPLES;
             if (!is_healthy)
             {
                 m_stats.pres.added += samples_needed;
@@ -332,7 +332,7 @@ void MS5611::process()
         }
         {
             size_t samples_needed = m_temperature->compute_samples_needed();
-            bool is_healthy = Clock::now() - m_last_temperature_reading_tp <= m_temperature->get_dt() * k_max_sample_difference;
+            bool is_healthy = Clock::now() - m_last_temperature_reading_tp <= m_temperature->get_dt() * MAX_LATE_SAMPLES;
             if (!is_healthy)
             {
                 m_stats.temp.added += samples_needed;

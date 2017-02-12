@@ -117,7 +117,7 @@ void MaxSonar::process()
 
     //use the latest data only
     {
-        constexpr size_t k_max_sample_difference = 5;
+        constexpr size_t MAX_SKIPPED_SAMPLES = 5;
 
         auto samples_needed = m_output_stream->compute_samples_needed();
 
@@ -125,7 +125,7 @@ void MaxSonar::process()
         float max_distance = m_config->get_max_distance();
 
         bool is_healthy = m_last_distance >= min_distance && m_last_distance <= max_distance &&
-                        Clock::now() - m_last_reading_tp <= m_output_stream->get_dt() * k_max_sample_difference;
+                        Clock::now() - m_last_reading_tp <= m_output_stream->get_dt() * MAX_SKIPPED_SAMPLES;
         if (!is_healthy)
         {
             m_stats.added += samples_needed;

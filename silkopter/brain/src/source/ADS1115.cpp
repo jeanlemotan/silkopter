@@ -95,8 +95,7 @@ constexpr uint16_t ADS1115_COMP_QUE_DISABLE    = 0x03 << ADS1115_COMP_QUE_SHIFT;
 
 
 
-constexpr std::chrono::milliseconds MIN_CONVERSION_DURATION(5);
-
+constexpr std::chrono::microseconds MIN_CONVERSION_DURATION(1200);
 
 
 ADS1115::ADS1115(HAL& hal)
@@ -104,21 +103,16 @@ ADS1115::ADS1115(HAL& hal)
     , m_descriptor(new hal::ADS1115_Descriptor())
     , m_config(new hal::ADS1115_Config())
 {
-    for (auto& adc: m_adcs)
-    {
-        adc = std::make_shared<Output_Stream>();
-    }
 }
 
 auto ADS1115::get_outputs() const -> std::vector<Output>
 {
-    std::vector<Output> outputs =
-    {{
-        { "adc_0", m_adcs[0] },
-        { "adc_1", m_adcs[1] },
-        { "adc_2", m_adcs[2] },
-        { "adc_3", m_adcs[3] }
-     }};
+    std::vector<Output> outputs(m_adcs.size());
+    for (size_t i = 0; i < m_adcs.size(); i++)
+    {
+        outputs[i].name = q::util::format<std::string>("adc {}", m_adcs[i].pin_index);
+        outputs[i].stream = m_adcs[i].stream;
+    }
     return outputs;
 }
 ts::Result<void> ADS1115::init(hal::INode_Descriptor const& descriptor)
@@ -152,16 +146,42 @@ ts::Result<void> ADS1115::init()
     });
 
 
-//    m_descriptor->adc0_rate = math::clamp<size_t>(m_descriptor->adc0_rate, 1, 500);
-//    m_descriptor->adc1_rate = math::clamp<size_t>(m_descriptor->adc1_rate, 1, 500);
-//    m_descriptor->adc2_rate = math::clamp<size_t>(m_descriptor->adc2_rate, 1, 500);
-//    m_descriptor->adc3_rate = math::clamp<size_t>(m_descriptor->adc3_rate, 1, 500);
-
-
-    m_adcs[0]->set_rate(m_descriptor->get_adc0_rate());
-    m_adcs[1]->set_rate(m_descriptor->get_adc1_rate());
-    m_adcs[2]->set_rate(m_descriptor->get_adc2_rate());
-    m_adcs[3]->set_rate(m_descriptor->get_adc3_rate());
+    if (m_descriptor->get_adc0().get_is_enabled())
+    {
+        ADC adc;
+        adc.stream = std::make_shared<Output_Stream>();
+        adc.stream->set_rate(m_descriptor->get_adc0().get_rate());
+        adc.pin_index = 0;
+        adc.last_tp = Clock::now();
+        m_adcs.push_back(adc);
+    }
+    if (m_descriptor->get_adc1().get_is_enabled())
+    {
+        ADC adc;
+        adc.stream = std::make_shared<Output_Stream>();
+        adc.stream->set_rate(m_descriptor->get_adc1().get_rate());
+        adc.pin_index = 1;
+        adc.last_tp = Clock::now();
+        m_adcs.push_back(adc);
+    }
+    if (m_descriptor->get_adc2().get_is_enabled())
+    {
+        ADC adc;
+        adc.stream = std::make_shared<Output_Stream>();
+        adc.stream->set_rate(m_descriptor->get_adc2().get_rate());
+        adc.pin_index = 2;
+        adc.last_tp = Clock::now();
+        m_adcs.push_back(adc);
+    }
+    if (m_descriptor->get_adc3().get_is_enabled())
+    {
+        ADC adc;
+        adc.stream = std::make_shared<Output_Stream>();
+        adc.stream->set_rate(m_descriptor->get_adc3().get_rate());
+        adc.pin_index = 3;
+        adc.last_tp = Clock::now();
+        m_adcs.push_back(adc);
+    }
 
     m_config_register.gain = ADS1115_PGA_4096;
     m_config_register.mux = ADS1115_MUX_P0_NG;
@@ -175,7 +195,7 @@ ts::Result<void> ADS1115::init()
     res &= i2c->read_register_u8(m_descriptor->get_i2c_address(), ADS1115_RA_CONFIG, data);
 
     //start first measurement
-    m_crt_adc = 0;
+    m_crt_adc_idx = 0;
     m_config_register.status = ADS1115_OS_ACTIVE;
     res &= set_config_register(*i2c);
     if (!res)
@@ -201,10 +221,11 @@ auto ADS1115::set_config_register(bus::II2C& i2c) -> bool
 
 ts::Result<void> ADS1115::start(Clock::time_point tp)
 {
-    m_last_tp = tp;
-    for (auto& adc: m_adcs)
+    m_schedule_tp = tp;
+
+    for (ADC& adc: m_adcs)
     {
-        adc->set_tp(tp);
+        adc.stream->set_tp(tp);
     }
     return ts::success;
 }
@@ -214,9 +235,9 @@ void ADS1115::process()
 {
     QLOG_TOPIC("ADS1115::process");
 
-    for (auto& adc: m_adcs)
+    for (ADC& adc: m_adcs)
     {
-        adc->clear();
+        adc.stream->clear();
     }
 
     auto i2c = m_i2c.lock();
@@ -231,88 +252,112 @@ void ADS1115::process()
         i2c->unlock();
     });
 
-    auto& adc = *m_adcs[m_crt_adc];
-    auto samples_needed = adc.compute_samples_needed();
-    auto now = Clock::now();
-    if (samples_needed == 0 || now - m_last_tp < MIN_CONVERSION_DURATION)
+    uint8_t next_adc_idx = m_crt_adc_idx;
+    bool schedule_reading = false;
+
+    const size_t MAX_SKIPPED_SAMPLES = 5;
+
+    for (ADC& adc: m_adcs)
     {
-        return;
+        size_t samples_needed = adc.stream->compute_samples_needed();
+        auto now = Clock::now();
+        if (samples_needed == 0)
+        {
+            continue;
+        }
+
+        float value = adc.stream->get_last_sample().value;
+
+        //refresh the current adc pin
+        if (&adc == &m_adcs[m_crt_adc_idx] && now - m_schedule_tp >= MIN_CONVERSION_DURATION)
+        {
+            bool good = read_sensor(*i2c, value);
+            if (good)
+            {
+                adc.last_tp = now;
+
+                //move to the next one
+                next_adc_idx = (m_crt_adc_idx + 1) % m_adcs.size();
+                schedule_reading = true;
+            }
+        }
+
+        //add samples up to the sample rate
+        while (samples_needed > 0)
+        {
+            bool is_healthy = now - adc.last_tp < adc.stream->get_dt() * MAX_SKIPPED_SAMPLES;
+            adc.stream->push_sample(value, is_healthy);
+            samples_needed--;
+        }
     }
 
-    //TODO - add healthy indication
+    //start the next reading
+    if (schedule_reading)
+    {
+        //start measurement again
+        uint16_t muxes[] = { ADS1115_MUX_P0_NG, ADS1115_MUX_P1_NG, ADS1115_MUX_P2_NG, ADS1115_MUX_P3_NG };
+        m_config_register.mux = muxes[m_adcs[next_adc_idx].pin_index];
+        if (set_config_register(*i2c))
+        {
+            m_crt_adc_idx = next_adc_idx;
+            m_schedule_tp = Clock::now();
+        }
+    }
+}
 
+bool ADS1115::read_sensor(bus::II2C& i2c, float& o_value)
+{
     if (m_config_register.mode == ADS1115_MODE_SINGLESHOT)
     {
         uint16_t cr = 0;
-        if (!i2c->read_register_u16(m_descriptor->get_i2c_address(), ADS1115_RA_CONFIG, cr))
+        if (!i2c.read_register_u16(m_descriptor->get_i2c_address(), ADS1115_RA_CONFIG, cr))
         {
-            return;
+            return false;
         }
         //not ready
         if ((cr & ADS1115_OS_ACTIVE) == 0)
         {
-            return;
+            return false;
         }
     }
 
     uint16_t ufvalue = 0;
-    if (!i2c->read_register_u16(m_descriptor->get_i2c_address(), ADS1115_RA_CONVERSION, ufvalue))
+    if (!i2c.read_register_u16(m_descriptor->get_i2c_address(), ADS1115_RA_CONVERSION, ufvalue))
     {
-        return;
+        return false;
     }
     int16_t fvalue = reinterpret_cast<int16_t&>(ufvalue);
 
-    float value = 0;
     switch (m_config_register.gain)
     {
     case ADS1115_PGA_6144:
-        value = fvalue * ADS1115_MV_6144;
+        o_value = fvalue * ADS1115_MV_6144;
         break;
     case ADS1115_PGA_4096:
-        value = fvalue * ADS1115_MV_4096;
+        o_value = fvalue * ADS1115_MV_4096;
         break;
     case ADS1115_PGA_2048:
-        value = fvalue * ADS1115_MV_2048;
+        o_value = fvalue * ADS1115_MV_2048;
         break;
     case ADS1115_PGA_1024:
-        value = fvalue * ADS1115_MV_1024;
+        o_value = fvalue * ADS1115_MV_1024;
         break;
     case ADS1115_PGA_512:
-        value = fvalue * ADS1115_MV_512;
+        o_value = fvalue * ADS1115_MV_512;
         break;
     case ADS1115_PGA_256:
     case ADS1115_PGA_256B:
     case ADS1115_PGA_256C:
-        value = fvalue * ADS1115_MV_256;
+        o_value = fvalue * ADS1115_MV_256;
         break;
     default:
-        return;
+        return false;
     }
 
     //scale 0..3.3v to 0..1
-    value = math::clamp(value / 3.3f, 0.f, 1.f);
+    o_value = math::clamp(o_value / 3.3f, 0.f, 1.f);
 
-    //add samples up to the sample rate
-    while (samples_needed > 0)
-    {
-        adc.push_sample(value, true);
-        samples_needed--;
-    }
-
-
-    ///////////////////////////////////////////////////////
-    //advance to next ADC
-    uint8_t next_adc = (m_crt_adc + 1) % m_adcs.size();
-
-    //start measurement again
-    uint16_t muxes[] = { ADS1115_MUX_P0_NG, ADS1115_MUX_P1_NG, ADS1115_MUX_P2_NG, ADS1115_MUX_P3_NG };
-    m_config_register.mux = muxes[next_adc];
-    if (set_config_register(*i2c))
-    {
-        m_crt_adc = next_adc;
-    }
-
-    m_last_tp = now;
+    return true;
 }
 
 ts::Result<void> ADS1115::set_config(hal::INode_Config const& config)

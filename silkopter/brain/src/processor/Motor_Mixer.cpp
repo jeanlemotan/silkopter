@@ -119,21 +119,21 @@ void Motor_Mixer::process()
         return;
     }
 
-//    for (auto& os: m_outputs)
-//    {
-//        os->samples.resize(count);
-//    }
-
     m_accumulator.process([this, &multirotor_properties](stream::ITorque::Sample const& t_sample,
                                                 stream::IFloat::Sample const& f_sample)
     {
-        compute_throttles(*multirotor_properties, f_sample.value, t_sample.value);
+        bool is_healthy = false;
+        if (t_sample.is_healthy & f_sample.is_healthy)
+        {
+            compute_throttles(*multirotor_properties, f_sample.value, t_sample.value);
+            is_healthy = true;
+        }
 
         for (size_t mi = 0; mi < m_outputs.size(); mi++)
         {
             auto& sample = m_outputs[mi]->last_sample;
             sample.value = m_outputs[mi]->throttle;
-            sample.is_healthy = true;
+            sample.is_healthy = is_healthy;
             m_outputs[mi]->samples.push_back(sample);
         }
     });

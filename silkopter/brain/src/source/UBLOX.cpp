@@ -567,12 +567,12 @@ void UBLOX::process()
         poll_for_data(buses);
     }
 
-    constexpr size_t k_max_sample_difference = 5;
+    constexpr size_t MAX_LATE_SAMPLES = 5;
 
     bool is_gps_info_healthy = true;
     {
         size_t samples_needed = m_gps_info_stream->compute_samples_needed();
-        is_gps_info_healthy = Clock::now() - m_last_gps_info_tp <= m_gps_info_stream->get_dt() * k_max_sample_difference;
+        is_gps_info_healthy = Clock::now() - m_last_gps_info_tp <= m_gps_info_stream->get_dt() * MAX_LATE_SAMPLES;
         if (!is_gps_info_healthy)
         {
             m_stats.info.added += samples_needed;
@@ -586,7 +586,7 @@ void UBLOX::process()
 
     {
         size_t samples_needed = m_position_stream->compute_samples_needed();
-        bool is_healthy = Clock::now() - m_last_position_tp <= m_position_stream->get_dt() * k_max_sample_difference;
+        bool is_healthy = Clock::now() - m_last_position_tp <= m_position_stream->get_dt() * MAX_LATE_SAMPLES;
         if (!is_healthy)
         {
             m_stats.pos.added += samples_needed;
@@ -602,7 +602,7 @@ void UBLOX::process()
 
     {
         size_t samples_needed = m_velocity_stream->compute_samples_needed();
-        bool is_healthy = Clock::now() - m_last_velocity_tp <= m_velocity_stream->get_dt() * k_max_sample_difference;
+        bool is_healthy = Clock::now() - m_last_velocity_tp <= m_velocity_stream->get_dt() * MAX_LATE_SAMPLES;
         if (!is_healthy)
         {
             m_stats.vel.added += samples_needed;
