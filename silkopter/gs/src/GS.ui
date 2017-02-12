@@ -61,6 +61,28 @@
       </widget>
      </widget>
     </item>
+    <item>
+     <widget class="GL_Widget" name="gl_widget" native="true">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>1</width>
+        <height>1</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>1</width>
+        <height>1</height>
+       </size>
+      </property>
+     </widget>
+    </item>
    </layout>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
@@ -70,7 +92,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>19</height>
+     <height>25</height>
     </rect>
    </property>
    <property name="nativeMenuBar">
@@ -128,6 +150,12 @@
    <class>UAV_Descriptor_Widget</class>
    <extends>QWidget</extends>
    <header>UAV_Descriptor_Widget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>GL_Widget</class>
+   <extends>QWidget</extends>
+   <header>GL_Widget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

@@ -13,6 +13,10 @@ GS::GS(QWidget *parent)
     , m_ts()
     , m_comms(m_ts)
 {
+    QGLFormat format(QGL::DepthBuffer | QGL::Rgba | QGL::NoStencilBuffer | QGL::SingleBuffer);
+    format.setSwapInterval(0);
+    QGLFormat::setDefaultFormat(format);
+
     m_editor_factory = std::make_shared<Value_Editor_Factory>();
     m_editor_factory->register_standard_editors();
 
@@ -154,7 +158,13 @@ void GS::process()
     if (dt >= std::chrono::milliseconds(33))
     {
         m_process_last_tp = now;
+
+        q::System::inst().get_renderer()->begin_frame();
+
         m_comms.process();
+        m_ui.nodes_widget->process();
+
+        q::System::inst().get_renderer()->end_frame();
     }
 }
 

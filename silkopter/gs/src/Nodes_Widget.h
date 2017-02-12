@@ -23,7 +23,10 @@ public:
 
     void init(QToolBar* toolbar, silk::Comms& comms, Properties_Browser& browser);
 
+    void process();
+
     void refresh();
+
 private:
     void refresh_node_defs();
     void refresh_nodes();

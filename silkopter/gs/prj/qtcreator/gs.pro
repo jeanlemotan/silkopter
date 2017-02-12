@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui opengl network widgets charts quick qml quickwidgets 3dcore 3drender 3dinput 3dextras positioning
+QT       += core gui opengl network widgets charts quick qml quickwidgets positioning
 
 TARGET = gs
 TEMPLATE = app
@@ -20,6 +20,8 @@ INCLUDEPATH += ../../src/qnodeseditor
 INCLUDEPATH += ../../src/calibration
 INCLUDEPATH += ../../src/stream_viewers
 INCLUDEPATH += ../../../../qbase/include
+INCLUDEPATH += ../../../../qdata/include
+INCLUDEPATH += ../../../../q/include
 INCLUDEPATH += ../../../../qmath/include
 INCLUDEPATH += ../../../../def_lang/include
 INCLUDEPATH += ../../../libs
@@ -59,10 +61,12 @@ rpi {
 }
 
 LIBS += -L$${ROOT_LIBS_PATH}/def_lang/lib/$${DEST_FOLDER} -ldef_lang
+LIBS += -L$${ROOT_LIBS_PATH}/q/lib/$${DEST_FOLDER} -lq
 LIBS += -L$${ROOT_LIBS_PATH}/qmath/lib/$${DEST_FOLDER} -lqmath
+LIBS += -L$${ROOT_LIBS_PATH}/qdata/lib/$${DEST_FOLDER} -lqdata
 LIBS += -L$${ROOT_LIBS_PATH}/qbase/lib/$${DEST_FOLDER} -lqbase
 
-LIBS += -lboost_system -lavutil -lavcodec -lavformat -lswscale -lfftw3f -lz
+LIBS += -lboost_system -lavutil -lavcodec -lavformat -lswscale -lfftw3f -lz -lfreetype
 LIBS += -lboost_thread
 #LIBS += -lpcap
 
@@ -152,8 +156,11 @@ HEADERS += \
     ../../src/Internal_Telemetry_Widget.h \
     ../../../libs/utils/Coordinates.h \
     ../../src/simulator/Simulator.h \
-    ../../src/simulator/OrbitCameraController.h \
-    ../../../libs/common/comms/def/messages.def.h
+    ../../../libs/common/comms/def/messages.def.h \
+    ../../src/simulator/Camera_Controller_3D.h \
+    ../../src/simulator/Render_Widget.h \
+    ../../src/GL_Widget.h \
+    ../../src/simulator/Axis.h
 
 SOURCES += \
     ../../src/GS.cpp \
@@ -225,8 +232,11 @@ SOURCES += \
     ../../src/Internal_Telemetry_Widget.cpp \
     ../../../libs/utils/Coordinates.cpp \
     ../../src/simulator/Simulator.cpp \
-    ../../src/simulator/OrbitCameraController.cpp \
-    ../../../libs/common/comms/def/messages.def.cpp
+    ../../../libs/common/comms/def/messages.def.cpp \
+    ../../src/simulator/Camera_Controller_3D.cpp \
+    ../../src/simulator/Render_Widget.cpp \
+    ../../src/GL_Widget.cpp \
+    ../../src/simulator/Axis.cpp
 
 FORMS += \
     ../../src/GS.ui \

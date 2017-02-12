@@ -1,66 +1,14 @@
 #include "Simulator.h"
 
 #include <chrono>
-#include <Qt3DLogic/QFrameAction>
-#include <QtGui/QScreen>
-#include <Qt3DRender/qcamera.h>
-#include <Qt3DCore/qentity.h>
-#include <Qt3DRender/qcameralens.h>
-#include <Qt3DRender/qmesh.h>
-#include <Qt3DRender/qtechnique.h>
-#include <Qt3DRender/qmaterial.h>
-#include <Qt3DRender/qeffect.h>
-#include <Qt3DRender/qtexture.h>
-#include <Qt3DRender/qrenderpass.h>
-#include <Qt3DRender/qsceneloader.h>
-#include <Qt3DRender/qpointlight.h>
-
-#include <Qt3DInput/QInputAspect>
-#include <Qt3DCore/qtransform.h>
-#include <Qt3DCore/qaspectengine.h>
-
-#include <Qt3DRender/qrenderaspect.h>
-#include <Qt3DExtras/qforwardrenderer.h>
-#include <Qt3DExtras/QCylinderMesh>
-
-#include "OrbitCameraController.h"
-#include <Qt3DExtras/QPhongMaterial>
-#include <Qt3DExtras/QDiffuseMapMaterial>
-#include <Qt3DRender/QTexture>
-
+#include "simulator/Axis.h"
 
 Simulator::Simulator(QWidget* parent)
     : QMainWindow(parent)
+    , m_camera_controller(m_context.camera)
 {
     m_ui.setupUi(this);
-
-    m_view = new Qt3DExtras::Qt3DWindow();
-
-    QSurfaceFormat format = m_view->format();
-    format.setSwapInterval(0);
-    m_view->setFormat(format);
-
-
-
-    m_view->defaultFrameGraph()->setClearColor(QColor(QRgb(0x4d4d4f)));
-    QWidget* container = QWidget::createWindowContainer(m_view);
-    QSize screen_size = m_view->screen()->size();
-    container->setMinimumSize(QSize(200, 100));
-    container->setMaximumSize(screen_size);
-
-    QWidget* widget = new QWidget(this);
-    QHBoxLayout* hl = new QHBoxLayout(widget);
-    QVBoxLayout* vl = new QVBoxLayout();
-    vl->setAlignment(Qt::AlignTop);
-    vl->setMargin(0);
-    hl->addWidget(container, 1);
-    hl->addLayout(vl);
-    hl->setMargin(0);
-
-    setCentralWidget(widget);
-
-    Qt3DInput::QInputAspect* input = new Qt3DInput::QInputAspect;
-    m_view->registerAspect(input);
+    show();
 }
 
 void Simulator::init(silk::Comms& comms, std::string const& node_name)
@@ -78,15 +26,11 @@ void Simulator::init(silk::Comms& comms, std::string const& node_name)
     m_message_connection = m_comms->sig_node_message_received.connect(std::bind(&Simulator::message_received, this, std::placeholders::_1, std::placeholders::_2));
     m_telemetry_connection = m_comms->sig_telemetry_samples_available.connect(std::bind(&Simulator::telemetry_received, this, std::placeholders::_1));
 
+    init_graphics();
     init_world();
 
     //m_view->show();
 
-
-    Qt3DLogic::QFrameAction* frame_action = new Qt3DLogic::QFrameAction();
-    m_root_entity->addComponent(frame_action);
-
-    QObject::connect(frame_action, SIGNAL(triggered(float)), this, SLOT(process_logic(float)));
 
     QObject::connect(m_ui.actionSimulation, &QAction::toggled, [this](bool yes)
     {
@@ -130,159 +74,54 @@ void Simulator::init(silk::Comms& comms, std::string const& node_name)
     });
 }
 
-void Simulator::init_world()
+void Simulator::init_graphics()
 {
-    m_root_entity = new Qt3DCore::QEntity();
-    m_view->setRootEntity(m_root_entity);
+    m_context.camera.set_perspective_vertical_fov(math::anglef(math::radians(60.f)));
+    m_context.camera.set_near_distance(0.05f);
+    m_context.camera.set_far_distance(20000.f);
+    m_context.scene.set_camera(m_context.camera);
+    m_context.painter.set_camera(m_context.camera);
 
-    m_camera_entity = m_view->camera();
+    //////////////////////////////////////////////////////////////////////////
+    // load resources
+    auto technique = q::System::inst().get_factory().load<q::video::Technique>(q::Path("techniques/primitive_3d.technique"));
+    QASSERT(technique);
+    m_context.materials.primitive.set_technique(technique);
+    m_context.materials.primitive.get_render_state(0).set_depth_test(true);
+    m_context.materials.primitive.get_render_state(0).set_depth_write(true);
+    m_context.materials.primitive.get_render_state(0).set_culling(false);
 
-    m_camera_entity->lens()->setPerspectiveProjection(45.0f, 16.0f/9.0f, 0.1f, 1000.0f);
-    m_camera_entity->setPosition(QVector3D(0, -20.f, 0.0f));
-    m_camera_entity->setUpVector(QVector3D(0, 0, 1));
-    m_camera_entity->setViewCenter(QVector3D(0, 0, 0));
-    m_camera_entity->tilt(math::anglef::pi);
+    technique = q::System::inst().get_factory().load<q::video::Technique>(q::Path("techniques/primitive_2d.technique"));
+    QASSERT(technique);
+    m_context.materials.primitive_2d.set_technique(technique);
+    m_context.materials.primitive_2d.get_render_state(0).set_depth_test(true);
+    m_context.materials.primitive_2d.get_render_state(0).set_depth_write(true);
+    m_context.materials.primitive_2d.get_render_state(0).set_culling(false);
 
-    OrbitCameraController* cam_controller = new OrbitCameraController(m_root_entity);
-    cam_controller->setCamera(m_camera_entity);
+    technique = q::System::inst().get_factory().load<q::video::Technique>(q::Path("techniques/textured_2d.technique"));
+    QASSERT(technique);
+    m_context.materials.textured_2d.set_technique(technique);
+    m_context.materials.textured_2d.get_render_state(0).set_depth_test(true);
+    m_context.materials.textured_2d.get_render_state(0).set_depth_write(true);
+    m_context.materials.textured_2d.get_render_state(0).set_culling(false);
 
-    Qt3DCore::QEntity* light_entity = new Qt3DCore::QEntity(m_root_entity);
-    Qt3DRender::QPointLight* light = new Qt3DRender::QPointLight(light_entity);
-    light->setColor("white");
-    light->setIntensity(1);
-    light_entity->addComponent(light);
-    Qt3DCore::QTransform* light_transform = new Qt3DCore::QTransform(light_entity);
-    light_transform->setTranslation(QVector3D(0, 0, 20.f));
-    light_entity->addComponent(light_transform);
-    //m_cameraEntity->addComponent(lightEntity);
+    technique = q::System::inst().get_factory().load<q::video::Technique>(q::Path("techniques/font.technique"));
+    QASSERT(technique);
+    m_context.materials.font.set_technique(technique);
+    m_context.materials.font.get_render_state(0).set_depth_test(false);
+    m_context.materials.font.get_render_state(0).set_depth_write(false);
+    m_context.materials.font.get_render_state(0).set_culling(false);
+    m_context.materials.font.get_render_state(0).set_blend_formula(q::video::Render_State::Blend_Formula::Preset::ALPHA);
 
-    // uav shape data
-    Qt3DRender::QMesh* uav_mesh = new Qt3DRender::QMesh();
-    //uavMesh->setSource(QUrl("meshes/xxx.obj"));
-    uav_mesh->setSource(QUrl::fromLocalFile("meshes/quad.obj"));
+//    m_context.font = q::System::inst().get_factory().load<q::text::Font>(q::Path("fonts/DroidSans.ttf"));
+    m_context.font = q::System::inst().get_factory().load<q::text::Font>(q::Path("fonts/ConsolaMono.ttf"));
+    QASSERT(m_context.font);
 
-
-    // Sphere mesh transform
-    m_uav_transform = new Qt3DCore::QTransform();
-
-    //uavTransform->setScale(0.001f);
-    m_uav_transform->setTranslation(QVector3D(-5.0f, 0.0f, 0.0f));
-    //m_uav_transform->setScale(m_comms->);
-
-    Qt3DExtras::QPhongMaterial* uav_material = new Qt3DExtras::QPhongMaterial();
-    uav_material->setDiffuse(QColor(QRgb(0xa69929)));
-
-    // uav
-    m_uav_entity = new Qt3DCore::QEntity(m_root_entity);
-    m_uav_entity->addComponent(uav_mesh);
-    m_uav_entity->addComponent(uav_material);
-
-    m_uav_entity->addComponent(m_uav_transform);
-    {
-        // plane shape data
-        Qt3DRender::QMesh* plane_mesh = new Qt3DRender::QMesh();
-        plane_mesh->setSource(QUrl::fromLocalFile("meshes/plane.obj"));
-
-        // Sphere mesh transform
-        Qt3DCore::QTransform* plane_transform = new Qt3DCore::QTransform();
-
-        //planeTransform->setScale(0.001f);
-        plane_transform->setTranslation(QVector3D(0.0f, 0.0f, 0.0f));
-
-        Qt3DExtras::QDiffuseMapMaterial* plane_material = new Qt3DExtras::QDiffuseMapMaterial();
-        plane_material->setAmbient(QColor(QRgb(0xFFFFFF)));
-
-        Qt3DRender::QTextureImage* texture_image = new Qt3DRender::QTextureImage();
-        texture_image->setSource(QUrl::fromLocalFile("textures/checkerboard.png"));
-
-        Qt3DRender::QTexture2D* texture = new Qt3DRender::QTexture2D();
-        texture->setGenerateMipMaps(true);
-        texture->addTextureImage(texture_image);
-        texture->setWrapMode(Qt3DRender::QTextureWrapMode(Qt3DRender::QTextureWrapMode::Repeat));
-        texture->setMinificationFilter(Qt3DRender::QTexture2D::LinearMipMapLinear);
-        texture->setMagnificationFilter(Qt3DRender::QTexture2D::Nearest);
-        texture->setMaximumAnisotropy(16.f);
-
-        plane_material->setDiffuse(texture);
-
-        // plane
-        m_ground_entity = new Qt3DCore::QEntity(m_root_entity);
-        m_ground_entity->addComponent(plane_mesh);
-        m_ground_entity->addComponent(plane_material);
-        m_ground_entity->addComponent(plane_transform);
-    }
-
-    create_axis(m_uav_entity);
+    m_ui.render_widget->init();
 }
 
-void Simulator::create_axis(Qt3DCore::QEntity* parent)
+void Simulator::init_world()
 {
-    float length = 1.f;
-
-    // Y - green
-    Qt3DExtras::QCylinderMesh *YAxis = new Qt3DExtras::QCylinderMesh();
-    YAxis->setRadius(0.01f);
-    YAxis->setLength(length);
-    YAxis->setRings(100);
-    YAxis->setSlices(20);
-
-    Qt3DCore::QTransform *transformY = new Qt3DCore::QTransform();
-    transformY->setTranslation(QVector3D(0, length / 2, 0));
-
-    Qt3DCore::QEntity* m_YAxisEntity = new Qt3DCore::QEntity(parent);
-    m_YAxisEntity->addComponent(YAxis); //will take ownership of YAxis if no parent was declared!
-    m_YAxisEntity->addComponent(transformY);
-
-    Qt3DExtras::QPhongMaterial *phongMaterialY = new Qt3DExtras::QPhongMaterial();
-    phongMaterialY->setDiffuse(QColor(0, 255, 0));
-    phongMaterialY->setAmbient(QColor(0, 255, 0));
-    phongMaterialY->setSpecular(Qt::white);
-    phongMaterialY->setShininess(50.0f);
-    m_YAxisEntity->addComponent(phongMaterialY);
-
-    // Z - blue
-    Qt3DExtras::QCylinderMesh *ZAxis = new Qt3DExtras::QCylinderMesh();
-    ZAxis->setRadius(0.01f);
-    ZAxis->setLength(length);
-    ZAxis->setRings(100);
-    ZAxis->setSlices(20);
-
-    Qt3DCore::QTransform *transformZ = new Qt3DCore::QTransform();
-    transformZ->setRotation(QQuaternion::fromAxisAndAngle(QVector3D(1,0,0), 90));
-    transformZ->setTranslation(QVector3D(0, 0, length / 2));
-
-    Qt3DCore::QEntity* m_ZAxisEntity = new Qt3DCore::QEntity(parent);
-    m_ZAxisEntity->addComponent(ZAxis);
-    m_ZAxisEntity->addComponent(transformZ);
-
-    Qt3DExtras::QPhongMaterial *phongMaterialZ = new Qt3DExtras::QPhongMaterial();
-    phongMaterialZ->setDiffuse(QColor(0, 0, 255));
-    phongMaterialZ->setAmbient(QColor(0, 0, 255));
-    phongMaterialZ->setSpecular(Qt::white);
-    phongMaterialZ->setShininess(50.0f);
-    m_ZAxisEntity->addComponent(phongMaterialZ);
-
-    // X - red
-    Qt3DExtras::QCylinderMesh *XAxis = new Qt3DExtras::QCylinderMesh();
-    XAxis->setRadius(0.01f);
-    XAxis->setLength(length);
-    XAxis->setRings(100);
-    XAxis->setSlices(20);
-
-    Qt3DCore::QTransform *transformX = new Qt3DCore::QTransform();
-    transformX->setRotation(QQuaternion::fromAxisAndAngle(QVector3D(0,0,1), -90));
-    transformX->setTranslation(QVector3D(length / 2, 0, 0));
-
-    Qt3DCore::QEntity* m_XAxisEntity = new Qt3DCore::QEntity(parent);
-    m_XAxisEntity->addComponent(XAxis);
-    m_XAxisEntity->addComponent(transformX);
-
-    Qt3DExtras::QPhongMaterial *phongMaterialX = new Qt3DExtras::QPhongMaterial();
-    phongMaterialX->setDiffuse(QColor(255, 0, 0));
-    phongMaterialX->setAmbient(QColor(255, 0, 0));
-    phongMaterialX->setSpecular(Qt::white);
-    phongMaterialX->setShininess(50.0f);
-    m_XAxisEntity->addComponent(phongMaterialX);
 }
 
 void Simulator::telemetry_received(silk::Comms::ITelemetry_Stream const& _stream)
@@ -292,7 +131,7 @@ void Simulator::telemetry_received(silk::Comms::ITelemetry_Stream const& _stream
         auto const* stream = dynamic_cast<silk::Comms::Telemetry_Stream<silk::stream::IMultirotor_Simulator_State> const*>(&_stream);
         if (stream && !stream->samples.empty())
         {
-            m_state = stream->samples.back().value;
+            m_sim_state = stream->samples.back().value;
         }
     }
 }
@@ -305,17 +144,296 @@ void Simulator::message_received(std::string const& node_name, silk::messages::I
     }
 }
 
-void Simulator::process_logic(float dt)
-{
-    math::vec3f const& pos = m_state.enu_position;
-    m_uav_transform->setTranslation(QVector3D(pos.x, pos.y, pos.z));
+/////////////////////////////////////////////////////////////////////////
 
+void Simulator::mousePressEvent(QMouseEvent* event)
+{
+    QWidget::mousePressEvent(event);
+    m_camera_controller.mouse_press_event(event);
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+void Simulator::mouseReleaseEvent(QMouseEvent* event)
+{
+    QWidget::mouseReleaseEvent(event);
+    m_camera_controller.mouse_release_event(event);
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+void Simulator::mouseMoveEvent(QMouseEvent* event)
+{
+    QWidget::mouseMoveEvent(event);
+    m_camera_controller.mouse_move_event(event);
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+void Simulator::wheelEvent(QWheelEvent* event)
+{
+    QWidget::wheelEvent(event);
+    m_camera_controller.wheel_event(event);
+}
+
+void Simulator::render_ground()
+{
+    math::vec3s32 offset(m_sim_state.enu_position);
+    offset.z = 0;
+
+    math::trans3df trans;
+    trans.set_translation(math::vec3f(offset));
+    m_context.painter.push_post_clip_transform(trans);
+
+    auto mat = m_context.materials.primitive;
+    mat.get_render_state(0).set_depth_test(true);
+    mat.get_render_state(0).set_depth_write(false);
+    mat.get_render_state(0).set_culling(false);
+    mat.get_render_state(0).set_blend_formula(q::video::Render_State::Blend_Formula::Preset::ALPHA);
+    m_context.painter.set_material(mat);
+
+    const float k_size = 10000;
+    const int k_line_count = 300;
+    const int k_half_line_size = k_line_count / 2;
+
+    //m_context.painter.fill_rectangle(q::draw::Vertex(math::vec3f(-k_size, -k_size, 0), 0x20FFFFFF), q::draw::Vertex(math::vec3f(k_size, k_size, 0), 0x20FFFFFF));
+
+    float max_alpha = 20.f;
+    float color_inc = 2.f / float(k_line_count);
+    for (int i = 0; i < k_line_count; i++)
     {
-        QVector3D offset = QVector3D(pos.x, pos.y, pos.z) - m_camera_entity->viewCenter();
-        m_camera_entity->setViewCenter(m_camera_entity->viewCenter() + offset);
-        m_camera_entity->setPosition(m_camera_entity->position() + offset);
+        float x = float(i) - k_half_line_size;
+        uint32_t color = 0x00FFFFFF;
+        uint32_t color2 = color | static_cast<int>((1.f - math::abs(x) * color_inc) * max_alpha) << 24;
+
+        m_context.painter.draw_line(q::draw::Vertex(math::vec3f(-k_half_line_size, x, 0), color), q::draw::Vertex(math::vec3f(0, x, 0), color2));
+        m_context.painter.draw_line(q::draw::Vertex(math::vec3f(0, x, 0), color2), q::draw::Vertex(math::vec3f(k_half_line_size, x, 0), color));
+
+        m_context.painter.draw_line(q::draw::Vertex(math::vec3f(x, -k_half_line_size, 0), color), q::draw::Vertex(math::vec3f(x, 0, 0), color2));
+        m_context.painter.draw_line(q::draw::Vertex(math::vec3f(x, 0, 0), color2), q::draw::Vertex(math::vec3f(x, k_half_line_size, 0), color));
     }
 
-    math::quatf const& rot = m_state.local_to_enu_rotation;
-    m_uav_transform->setRotation(QQuaternion(rot.w, rot.x, rot.y, rot.z));
+    m_context.painter.pop_post_clip_transform();
+}
+
+void Simulator::render_uav(math::trans3df const& trans)
+{
+    m_context.painter.push_post_clip_transform(trans);
+
+    auto mat = m_context.materials.primitive;
+    mat.get_render_state(0).set_depth_test(true);
+    mat.get_render_state(0).set_depth_write(false);
+    mat.get_render_state(0).set_culling(false);
+    mat.get_render_state(0).set_blend_formula(q::video::Render_State::Blend_Formula::Preset::ALPHA);
+
+    m_context.painter.set_material(mat);
+
+    //render motors
+    {
+        //float pitch = math::dot(m_local_to_world_mat.get_axis_y(), math::vec3f(0, 0, 1));
+        //float roll = math::dot(m_local_to_world_mat.get_axis_x(), math::vec3f(0, 0, 1));
+        //m_uav.get_motor_mixer().set_data(0.5f, 0, -pitch, -roll);
+
+        //UAV radius
+        m_context.painter.draw_circle(q::draw::Vertex(math::vec3f::zero, 0xFFFFFFFF), m_sim_state.radius, 32); //motor
+
+        const float propeller_radius = 0.12f;
+        const float motor_radius = 0.02f;
+        for (size_t i = 0; i < m_sim_state.motors.size(); i++)
+        {
+            auto const& m = m_sim_state.motors[i];
+
+            m_context.painter.draw_line(q::draw::Vertex(math::vec3f::zero, 0xFFFFFFFF), q::draw::Vertex(m.position, 0xFFFFFFFF));
+            m_context.painter.fill_circle(q::draw::Vertex(m.position, 0xFFFFFFFF), motor_radius, 16); //motor
+
+            m_context.painter.fill_circle(q::draw::Vertex(m.position, 0x40FFFFFF), propeller_radius, 32); //motor + prop
+            if (!math::is_zero(m.max_thrust, math::epsilon<float>()))
+            {
+                float ratio = m.thrust / m.max_thrust;
+                m_context.painter.fill_circle(q::draw::Vertex(m.position, 0xAA00FF00), math::lerp(0.f, propeller_radius, ratio), 32);
+            }
+        }
+    }
+
+    //render axis
+    if (m_ui.actionShowAxis->isChecked())
+    {
+        render_axis(m_context.painter, 1.f, 0.2f);
+    }
+
+    m_context.painter.pop_post_clip_transform();
+
+    //render altitude meter
+    if (m_ui.actionShowAltitude->isChecked())
+    {
+        math::vec3f p0 = m_sim_state.enu_position;
+        math::vec3f p1 = p0;
+        p0.z = 0;
+        math::vec3f p2 = p1 + math::vec3f(0, 0, math::sgn(p0.z)) * 2.f;
+        m_context.painter.draw_line(q::draw::Vertex(p0, 0x50FFFFFF), q::draw::Vertex(p1, 0x50FFFFFF));
+        m_context.painter.draw_line(q::draw::Vertex(p1, 0x50FFFFFF), q::draw::Vertex(p2, 0x00FFFFFF));
+        m_context.painter.fill_circle(q::draw::Vertex(p0, 0x50FFFFFF), 0.05, 16);
+        m_context.painter.fill_sphere(q::draw::Vertex(p1, 0x50FFFFFF), 0.05, 4);
+    }
+}
+
+void Simulator::render_brain_state()
+{
+    auto mat = m_context.materials.primitive;
+    mat.get_render_state(0).set_depth_test(true);
+    mat.get_render_state(0).set_depth_write(false);
+    mat.get_render_state(0).set_culling(false);
+    mat.get_render_state(0).set_blend_formula(q::video::Render_State::Blend_Formula::Preset::ALPHA);
+
+    m_context.painter.set_material(mat);
+
+    silk::stream::IMultirotor_State::Value& multirotor_state = m_sim_state.multirotor_state;
+    if (!multirotor_state.home_ecef_position.is_initialized())
+    {
+        return;
+    }
+
+    util::coordinates::LLA home_lla_position = util::coordinates::ecef_to_lla(*multirotor_state.home_ecef_position);
+    math::trans3dd enu_to_ecef_trans = util::coordinates::enu_to_ecef_transform(home_lla_position);
+    math::trans3dd ecef_to_enu_trans = math::inverse(enu_to_ecef_trans);
+
+    //auto lla_position = util::coordinates::ecef_to_lla(m_uav.brain_state.value.ecef_position.value);
+    //QLOGI("LAT: {}, LON: {}, ALT: {}", lla_position.latitude, lla_position.longitude, lla_position.altitude);
+
+    //render what the brain _thinks_ the orientation is
+    {
+        math::trans3df trans;
+        trans.set_rotation(multirotor_state.local_frame);
+        trans.set_translation(m_sim_state.enu_position);
+        m_context.painter.push_post_clip_transform(trans);
+
+        //render axis
+        if (m_ui.actionShowAxis->isChecked())
+        {
+            render_axis(m_context.painter, 1.f, 0.15f);
+        }
+
+        m_context.painter.pop_post_clip_transform();
+    }
+
+    //render where the brain _thinks_ it is
+    {
+        auto enu_position = math::vec3f(math::transform(ecef_to_enu_trans, multirotor_state.ecef_position));
+
+        math::trans3df trans;
+        trans.set_rotation(multirotor_state.local_frame);
+        trans.set_translation(enu_position);
+        m_context.painter.push_post_clip_transform(trans);
+
+        //render axis
+        if (m_ui.actionShowAxis->isChecked())
+        {
+            render_axis(m_context.painter, 1.f, 0.15f);
+        }
+
+        m_context.painter.pop_post_clip_transform();
+
+        m_context.painter.fill_sphere(q::draw::Vertex(enu_position, 0x50FFFFFF), 0.05, 4);
+    }
+}
+
+void Simulator::render_world_axis()
+{
+    auto mat = m_context.materials.primitive;
+    mat.get_render_state(0).set_depth_test(true);
+    mat.get_render_state(0).set_depth_write(false);
+    mat.get_render_state(0).set_culling(false);
+    mat.get_render_state(0).set_blend_formula(q::video::Render_State::Blend_Formula::Preset::ALPHA);
+
+    m_context.painter.set_material(mat);
+
+    math::trans3df trans;
+    m_context.painter.push_post_clip_transform(trans);
+
+    q::scene::Camera camera;
+    camera.set_parallel_zoom(4.f);
+    camera.set_viewport(q::video::Viewport(math::vec2u32(0, 0), math::vec2u32(150, 150)));
+    camera.set_near_distance(-100.0f);
+    camera.set_far_distance( 100.0f);
+
+    //ENU
+    {
+        math::quatf rot(m_context.camera.get_rotation());
+
+        camera.set_transform(math::rotate(rot, math::vec3f(0, 5, 0)), rot);
+        m_context.painter.set_camera(camera);
+        render_axis(m_context.painter, 1.f, 1.5f);
+    }
+
+    //ECEF
+//    {
+//        auto home_lla_position = util::coordinates::ecef_to_lla(m_uav.brain_state.value.home_position.value);
+//        auto enu_to_ecef_rotation = util::coordinates::enu_to_ecef_rotation(home_lla_position);
+//        math::quatd rotd;
+//        rotd.set_from_mat3(enu_to_ecef_rotation);
+//        math::quatf rot(rotd);
+//        rot = rot * m_context.camera.get_rotation();
+
+//        camera.set_viewport(q::video::Viewport(math::vec2u32(0, 150), math::vec2u32(150, 150)));
+//        camera.set_transform(math::rotate(rot, math::vec3f(0, 5, 0)), rot);
+//        m_context.painter.set_camera(camera);
+//        render_axis(m_context.painter, 1.f, 1.5f);
+//    }
+
+    m_context.painter.pop_post_clip_transform();
+    m_context.painter.set_camera(m_context.camera);
+}
+
+void Simulator::process()
+{
+    m_ui.render_widget->begin_rendering();
+
+//    math::vec3f const& pos = m_state.enu_position;
+//    m_uav_transform->setTranslation(QVector3D(pos.x, pos.y, pos.z));
+
+//    {
+//        QVector3D offset = QVector3D(pos.x, pos.y, pos.z) - m_camera_entity->viewCenter();
+//        m_camera_entity->setViewCenter(m_camera_entity->viewCenter() + offset);
+//        m_camera_entity->setPosition(m_camera_entity->position() + offset);
+//    }
+
+//    math::quatf const& rot = m_state.local_to_enu_rotation;
+//    m_uav_transform->setRotation(QQuaternion(rot.w, rot.x, rot.y, rot.z));
+
+    m_context.camera.set_viewport_and_aspect_ratio(q::video::Viewport(math::vec2u32::zero, math::vec2u32(m_ui.render_widget->width(), m_ui.render_widget->height())));
+
+    auto color = math::color::u32_to_rgba<float>(0x2c3e50);
+    q::System::inst().get_renderer()->get_render_target()->set_color_clear_value(color);
+    q::System::inst().get_renderer()->get_render_target()->clear_all();
+
+    m_camera_controller.process();
+
+    {
+        auto delta = m_sim_state.enu_position - m_camera_position_target;
+        //delta *= 0.9f;
+        m_camera_position_target += delta;
+        m_context.camera.set_position(m_context.camera.get_position() + delta);
+        m_camera_controller.set_focus_point(m_camera_position_target);
+    }
+
+    m_context.painter.set_camera(m_context.camera);
+
+    render_ground();
+
+    {
+        math::trans3df trans;
+        trans.set_rotation(m_sim_state.local_to_enu_rotation);
+        trans.set_translation(m_sim_state.enu_position);
+        render_uav(trans);
+    }
+    {
+        render_brain_state();
+    }
+
+    render_world_axis();
+
+    m_context.painter.flush();
+
+    m_ui.render_widget->end_rendering();
+    m_ui.render_widget->update();
 }

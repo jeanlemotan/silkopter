@@ -1047,3 +1047,11 @@ void Nodes_Widget::show_internal_telementry()
     widget->init(*m_comms, node_names);
     widget->show();
 }
+
+void Nodes_Widget::process()
+{
+    if (m_sim_window)
+    {
+        m_sim_window->process();
+    }
+}

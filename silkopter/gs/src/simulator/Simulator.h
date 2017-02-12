@@ -2,10 +2,8 @@
 
 #include <QMainWindow>
 #include "ui_Simulator.h"
-
-#include <Qt3DExtras/qt3dwindow.h>
-#include <Qt3DCore/qentity.h>
-#include <Qt3DRender/qcamera.h>
+#include "simulator/Render_Widget.h"
+#include "simulator/Camera_Controller_3D.h"
 
 #include "Comms.h"
 #include "messages.def.h"
@@ -20,25 +18,27 @@ public:
 
     void init(silk::Comms& comms, std::string const& node_name);
 
-Q_SIGNALS:
-
-public Q_SLOTS:
-    void process_logic(float);
+    void process();
 
 private:
+    void mousePressEvent(QMouseEvent* event);
+    void mouseReleaseEvent(QMouseEvent* event);
+    void mouseMoveEvent(QMouseEvent* event);
+    void wheelEvent(QWheelEvent* event);
+
+    Render_Context m_context;
+    void init_graphics();
+
     void init_world();
-    void create_axis(Qt3DCore::QEntity* parent);
     void message_received(std::string const& node_name, silk::messages::INode_Message const& message);
     void telemetry_received(silk::Comms::ITelemetry_Stream const& stream);
 
-    Ui::Simulator m_ui;
-    Qt3DExtras::Qt3DWindow* m_view = nullptr;
-    Qt3DCore::QEntity* m_root_entity = nullptr;
-    Qt3DRender::QCamera* m_camera_entity = nullptr;
+    void render_ground();
+    void render_uav(math::trans3df const& trans);
+    void render_brain_state();
+    void render_world_axis();
 
-    Qt3DCore::QEntity* m_uav_entity = nullptr;
-    Qt3DCore::QTransform* m_uav_transform = nullptr;
-    Qt3DCore::QEntity* m_ground_entity = nullptr;
+    Ui::Simulator m_ui;
 
     silk::Comms* m_comms = nullptr;
     std::string m_node_name;
@@ -48,5 +48,8 @@ private:
     boost::signals2::scoped_connection m_telemetry_connection;
 
     typedef silk::stream::IMultirotor_Simulator_State::Value UAV_State;
-    UAV_State m_state;
+    UAV_State m_sim_state;
+
+    Camera_Controller_3D m_camera_controller;
+    math::vec3f m_camera_position_target;
 };

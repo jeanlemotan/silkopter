@@ -1,0 +1,32 @@
+<technique name="primitive3d">
+	<pass name="0">
+		<uniform desc="MVP" name="uMVP" link="transform/world_view_projection" />
+		<attribute desc="Positions" name="aPos" link="positions" count="3"/>
+		<attribute desc="Colors" name="aCol" link="colors" count="4"/>
+
+		<shader>
+			<vshader><![CDATA[
+				varying lowp vec4 vColor;
+
+				void main()
+				{
+					highp vec4 pos = $(uMVP$) * vec4($(aPos).xyz, 1.0);
+					
+					vColor = $(aCol);
+					
+					gl_Position = pos;
+				}
+			]]></vshader>
+			<fshader><![CDATA[
+				varying lowp vec4 vColor;
+				void main()
+				{
+					gl_FragColor = vColor;
+				}
+			]]></fshader>
+		</shader>
+		
+	
+	</pass>
+	
+</technique>

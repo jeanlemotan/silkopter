@@ -77,6 +77,8 @@
         <file>icons/ui/multicopter-signal.png</file>
         <file>icons/ui/multicopter-take_off.png</file>
         <file>icons/ui/uav-multicopter.png</file>
+        <file>icons/ui/altitude.png</file>
+        <file>icons/ui/axis.png</file>
     </qresource>
     <qresource prefix="/qml">
         <file alias="map.qml">../src/stream_viewers/map/map.qml</file>

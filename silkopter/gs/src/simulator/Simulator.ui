@@ -13,7 +13,28 @@
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
-  <widget class="QWidget" name="centralwidget"/>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <property name="spacing">
+     <number>0</number>
+    </property>
+    <property name="leftMargin">
+     <number>0</number>
+    </property>
+    <property name="topMargin">
+     <number>0</number>
+    </property>
+    <property name="rightMargin">
+     <number>0</number>
+    </property>
+    <property name="bottomMargin">
+     <number>0</number>
+    </property>
+    <item>
+     <widget class="Render_Widget" name="render_widget" native="true"/>
+    </item>
+   </layout>
+  </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
@@ -42,6 +63,9 @@
    <addaction name="actionGravity"/>
    <addaction name="actionDrag"/>
    <addaction name="actionTerrain"/>
+   <addaction name="separator"/>
+   <addaction name="actionShowAxis"/>
+   <addaction name="actionShowAltitude"/>
   </widget>
   <action name="actionStopMotion">
    <property name="icon">
@@ -133,7 +157,39 @@
     <string>Ctrl+T</string>
    </property>
   </action>
+  <action name="actionShowAxis">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../../res/res.qrc">
+     <normaloff>:/icons/ui/axis.png</normaloff>:/icons/ui/axis.png</iconset>
+   </property>
+   <property name="text">
+    <string>Show Axis</string>
+   </property>
+  </action>
+  <action name="actionShowAltitude">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../../res/res.qrc">
+     <normaloff>:/icons/ui/altitude.png</normaloff>:/icons/ui/altitude.png</iconset>
+   </property>
+   <property name="text">
+    <string>Show Altitude</string>
+   </property>
+  </action>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>Render_Widget</class>
+   <extends>QWidget</extends>
+   <header>simulator/Render_Widget.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="../../res/res.qrc"/>
  </resources>
