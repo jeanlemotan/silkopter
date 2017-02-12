@@ -98,7 +98,8 @@ inline void serialize_ecef_position(Buffer_t& buffer, silk::stream::IECEF_Positi
         serialize(buffer, data[4], off);
     }
     {
-        int16_t v = static_cast<int16_t>(math::clamp(lla_position.altitude, -327.0, 327.0) * 10.0);
+        int64_t v64 = static_cast<int64_t>(lla_position.altitude * 10.0);
+        int16_t v = static_cast<int16_t>(math::clamp(v64, int64_t(-32767), int64_t(32767)));
         serialize(buffer, v, off);
     }
 }
