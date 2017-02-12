@@ -64,7 +64,7 @@ inline void Fps::tick()
 	}
 
 	m_frame_time = time - m_last_time;
-	m_fps = 1.f / std::chrono::duration_cast<Seconds>(m_frame_time).count();
+    m_fps = 1.f / std::chrono::duration_cast<Secondsf>(m_frame_time).count();
 
 	m_last_time = time;
 }

@@ -58,7 +58,7 @@ void QModel_Base_Loader::load(Path const& /*path*/, data::Source& source, Model_
 
 	for (uint32_t i = 0; i < material_count; i++)
 	{
-		String name;
+        std::string name;
 		source >> name;
 
 		video::Material material;
@@ -67,7 +67,7 @@ void QModel_Base_Loader::load(Path const& /*path*/, data::Source& source, Model_
 		if (!technique || !technique->is_valid())
 		{
             QLOGW("Cannot load technique '{}'. Trying the default one.", name);
-			static String def("default.technique");
+            static std::string def("default.technique");
 			technique = System::inst().get_factory().load_by_name<video::Technique>(def);
 			if (!technique)
 			{
@@ -83,13 +83,13 @@ void QModel_Base_Loader::load(Path const& /*path*/, data::Source& source, Model_
 
 		material.get_render_state(0).set_culling(!twoSided);
 
-		static String shininessStr("shininess");
-		static String reflectionStr("reflection");
-		static String refractionStr("refraction");
-		static String ambientColorStr("ambientColor");
-		static String diffuseColorStr("diffuseColor");
-		static String specularColorStr("specularColor");
-		static String emissiveColorStr("emissiveColor");
+        static std::string shininessStr("shininess");
+        static std::string reflectionStr("reflection");
+        static std::string refractionStr("refraction");
+        static std::string ambientColorStr("ambientColor");
+        static std::string diffuseColorStr("diffuseColor");
+        static std::string specularColorStr("specularColor");
+        static std::string emissiveColorStr("emissiveColor");
 
 		int uidx = material.find_uniform_idx_by_name(0, shininessStr);
 		if (uidx >= 0)
@@ -187,7 +187,7 @@ void QModel_Base_Loader::load(Path const& /*path*/, data::Source& source, Model_
 		source >> tex_channel_count;
 		for (uint32_t tc = 0; tc < tex_channel_count; tc++)
 		{
-			String channelName, textureName;
+            std::string channelName, textureName;
 			char wrapu, wrapv;
 			source >> channelName >> textureName >> wrapu >> wrapv;
 
@@ -212,7 +212,7 @@ void QModel_Base_Loader::load(Path const& /*path*/, data::Source& source, Model_
 	source >> node_count;
 	for (uint32_t i = 0; i < node_count; i++)
 	{
-		String name;
+        std::string name;
 		int parentIdx;
 		source >> name >> parentIdx;
 
@@ -236,7 +236,7 @@ void QModel_Base_Loader::load(Path const& /*path*/, data::Source& source, Model_
 	source >> mesh_count;
 	for (uint32_t i = 0; i < mesh_count; i++)
 	{
-		String name;
+        std::string name;
 		source >> name;
 
 		uint32_t node_idx;

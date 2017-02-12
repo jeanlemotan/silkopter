@@ -134,8 +134,8 @@ namespace video
 
 		static Sampler const& get_sampler_screen_color_buffer(void* data);
 		static Sampler const& get_sampler_screen_depth_buffer(void* data);
-		static Sampler const& get_sampler_render_target_color_buffer(void* data, String const& name);
-		static Sampler const& get_sampler_render_target_depth_buffer(void* data, String const& name);
+        static Sampler const& get_sampler_render_target_color_buffer(void* data, std::string const& name);
+        static Sampler const& get_sampler_render_target_depth_buffer(void* data, std::string const& name);
 
 		//////////////////////////////////////////////////////////////////////////
 
@@ -161,7 +161,7 @@ namespace video
 		static Uniform const& get_uniform_fract_time(void* data);
 
 		static Uniform const& get_uniform_screen_size(void* data);
-		static Uniform const& get_uniform_render_target_size(void* data, String const& name);
+        static Uniform const& get_uniform_render_target_size(void* data, std::string const& name);
 
 		//////////////////////////////////////////////////////////////////////////
 

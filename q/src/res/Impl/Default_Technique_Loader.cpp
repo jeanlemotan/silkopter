@@ -19,7 +19,7 @@ bool DefaultTechniqueLoader::can_load_from_source(data::Source& source) const
 {
 	source.seek(0);
 
-	auto str = data::read_whole_source_as_string<std::string>(source);
+    auto str = data::read_whole_source_as_string<std::string>(source);
 
 	xml_document doc;
 	xml_parse_result res = doc.load(str.c_str());
@@ -104,7 +104,7 @@ bool DefaultTechniqueLoader::load_pass(Path const& path, const pugi::xml_node& r
 	a = root.attribute("render_target");
 	if (a)
 	{
-		String rtname(a.value());
+        std::string rtname(a.value());
 		Render_Target_ptr rt = System::inst().get_renderer()->find_render_target_by_name(rtname);
 		QASSERT(rt);
 		if (!rt)
@@ -173,13 +173,13 @@ bool DefaultTechniqueLoader::load_pass(Path const& path, const pugi::xml_node& r
 
 bool DefaultTechniqueLoader::load_uniform(Path const& /*path*/, const pugi::xml_node& root, Uniform_Def& u) const
 {
-	String nameStr(root.attribute("name").value());
-	String hnameStr(root.attribute("desc").value());
-	String typeStr(root.attribute("type").value());
-	String countStr(root.attribute("count").value());
-	String precisionStr(root.attribute("precision").value());
-	String linkStr(root.attribute("link").value());
-	String semanticStr(root.attribute("semantic").value());
+    std::string nameStr(root.attribute("name").value());
+    std::string hnameStr(root.attribute("desc").value());
+    std::string typeStr(root.attribute("type").value());
+    std::string countStr(root.attribute("count").value());
+    std::string precisionStr(root.attribute("precision").value());
+    std::string linkStr(root.attribute("link").value());
+    std::string semanticStr(root.attribute("semantic").value());
 
 	hnameStr = hnameStr.empty() ? nameStr : hnameStr;
 
@@ -236,7 +236,7 @@ bool DefaultTechniqueLoader::load_uniform(Path const& /*path*/, const pugi::xml_
 	}
 	return true;
 }
-bool DefaultTechniqueLoader::parse_uniform_value(Uniform& u, String const& typeStr, String const& countStr, String const& val) const
+bool DefaultTechniqueLoader::parse_uniform_value(Uniform& u, std::string const& typeStr, std::string const& countStr, std::string const& val) const
 {
 	size_t count = 1;
 	if (!countStr.empty())
@@ -332,7 +332,7 @@ bool DefaultTechniqueLoader::parse_uniform_value(Uniform& u, String const& typeS
 
 	return true;
 }
-bool DefaultTechniqueLoader::parse_bool(String const& val, bool def) const
+bool DefaultTechniqueLoader::parse_bool(std::string const& val, bool def) const
 {
 	if (val == "1" || val == "yes" || val == "true")
 	{
@@ -345,7 +345,7 @@ bool DefaultTechniqueLoader::parse_bool(String const& val, bool def) const
 	return def;
 }
 
-bool DefaultTechniqueLoader::parse_uniform_min_value(Uniform& u, String const& type, String const& val) const
+bool DefaultTechniqueLoader::parse_uniform_min_value(Uniform& u, std::string const& type, std::string const& val) const
 {
 	if (type == "bool")
 	{
@@ -358,7 +358,7 @@ bool DefaultTechniqueLoader::parse_uniform_min_value(Uniform& u, String const& t
 			u = Uniform(-2147483647);
 			return true;
 		}
-		return parse_uniform_value(u, type, String::null, val);
+        return parse_uniform_value(u, type, std::string(), val);
 	}
 	else if (type == "float")
 	{
@@ -367,7 +367,7 @@ bool DefaultTechniqueLoader::parse_uniform_min_value(Uniform& u, String const& t
 			u = Uniform(-999999999.f);
 			return true;
 		}
-		return parse_uniform_value(u, type, String::null, val);
+        return parse_uniform_value(u, type, std::string(), val);
 	}
 	else if (type == "vec2")
 	{
@@ -376,7 +376,7 @@ bool DefaultTechniqueLoader::parse_uniform_min_value(Uniform& u, String const& t
 			u = Uniform(math::vec2f(-999999999.f));
 			return true;
 		}
-		return parse_uniform_value(u, type, String::null, val);
+        return parse_uniform_value(u, type, std::string(), val);
 	}
 	else if (type == "vec3")
 	{
@@ -385,7 +385,7 @@ bool DefaultTechniqueLoader::parse_uniform_min_value(Uniform& u, String const& t
 			u = Uniform(math::vec3f(-999999999.f));
 			return true;
 		}
-		return parse_uniform_value(u, type, String::null, val);
+        return parse_uniform_value(u, type, std::string(), val);
 	}
 	else if (type == "vec4")
 	{
@@ -394,12 +394,12 @@ bool DefaultTechniqueLoader::parse_uniform_min_value(Uniform& u, String const& t
 			u = Uniform(math::vec4f(-999999999.f));
 			return true;
 		}
-		return parse_uniform_value(u, type, String::null, val);
+        return parse_uniform_value(u, type, std::string(), val);
 	}
 
 	return val.empty(); //valid only if the value was not specified
 }
-bool DefaultTechniqueLoader::parse_uniform_max_value(Uniform& u, String const& type, String const& val) const
+bool DefaultTechniqueLoader::parse_uniform_max_value(Uniform& u, std::string const& type, std::string const& val) const
 {
 	if (type == "bool")
 	{
@@ -412,7 +412,7 @@ bool DefaultTechniqueLoader::parse_uniform_max_value(Uniform& u, String const& t
 			u = Uniform(2147483647);
 			return true;
 		}
-		return parse_uniform_value(u, type, String::null, val);
+        return parse_uniform_value(u, type, std::string(), val);
 	}
 	else if (type == "float")
 	{
@@ -421,7 +421,7 @@ bool DefaultTechniqueLoader::parse_uniform_max_value(Uniform& u, String const& t
 			u = Uniform(999999999.f);
 			return true;
 		}
-		return parse_uniform_value(u, type, String::null, val);
+        return parse_uniform_value(u, type, std::string(), val);
 	}
 	else if (type == "vec2")
 	{
@@ -430,7 +430,7 @@ bool DefaultTechniqueLoader::parse_uniform_max_value(Uniform& u, String const& t
 			u = Uniform(math::vec2f(999999999.f));
 			return true;
 		}
-		return parse_uniform_value(u, type, String::null, val);
+        return parse_uniform_value(u, type, std::string(), val);
 	}
 	else if (type == "vec3")
 	{
@@ -439,7 +439,7 @@ bool DefaultTechniqueLoader::parse_uniform_max_value(Uniform& u, String const& t
 			u = Uniform(math::vec3f(999999999.f));
 			return true;
 		}
-		return parse_uniform_value(u, type, String::null, val);
+        return parse_uniform_value(u, type, std::string(), val);
 	}
 	else if (type == "vec4")
 	{
@@ -448,13 +448,13 @@ bool DefaultTechniqueLoader::parse_uniform_max_value(Uniform& u, String const& t
 			u = Uniform(math::vec4f(999999999.f));
 			return true;
 		}
-		return parse_uniform_value(u, type, String::null, val);
+        return parse_uniform_value(u, type, std::string(), val);
 	}
 
 	return val.empty(); //valid only if the value was not specified
 }
 
-Sampler_Def::Semantic DefaultTechniqueLoader::parse_semantic(String const& value, Sampler_Def::Semantic def) const
+Sampler_Def::Semantic DefaultTechniqueLoader::parse_semantic(std::string const& value, Sampler_Def::Semantic def) const
 {
 	if (value.empty())
 	{
@@ -483,14 +483,14 @@ Sampler_Def::Semantic DefaultTechniqueLoader::parse_semantic(String const& value
 
 bool DefaultTechniqueLoader::load_sampler(Path const& /*path*/, const pugi::xml_node& root, Sampler_Def& s) const
 {
-	String name(root.attribute("name").value());
-	String hname(root.attribute("desc").value());
-	String filter(root.attribute("filter").value());
-	String wrapu(root.attribute("wrapu").value());
-	String wrapv(root.attribute("wrapv").value());
-	String mipmap(root.attribute("mipmap").value());
-	String link(root.attribute("link").value());
-	String type(root.attribute("type").value());
+    std::string name(root.attribute("name").value());
+    std::string hname(root.attribute("desc").value());
+    std::string filter(root.attribute("filter").value());
+    std::string wrapu(root.attribute("wrapu").value());
+    std::string wrapv(root.attribute("wrapv").value());
+    std::string mipmap(root.attribute("mipmap").value());
+    std::string link(root.attribute("link").value());
+    std::string type(root.attribute("type").value());
 
 	//TODO activate
 //	if (name.empty() || link.empty())
@@ -519,10 +519,10 @@ bool DefaultTechniqueLoader::load_sampler(Path const& /*path*/, const pugi::xml_
 
 bool DefaultTechniqueLoader::load_attribute(Path const& path, const pugi::xml_node& root, Attribute_Def& a) const
 {
-	String name(root.attribute("name").value());
-	String hname(root.attribute("desc").value());
-	String link(root.attribute("link").value());
-	String count(root.attribute("count").value());
+    std::string name(root.attribute("name").value());
+    std::string hname(root.attribute("desc").value());
+    std::string link(root.attribute("link").value());
+    std::string count(root.attribute("count").value());
 
 	if (name.empty() || link.empty())
 	{
@@ -562,11 +562,11 @@ bool DefaultTechniqueLoader::load_render_state(Path const& /*path*/, const pugi:
 	{
 		Render_State::Blend_Formula formula;
 		xml_node srcFactor = blend.child("src");
-		String val = String(srcFactor.attribute("val").value());
+        std::string val = std::string(srcFactor.attribute("val").value());
 		formula.src_color = formula.src_alpha = parse_blend_factor(val, Render_State::Blend_Formula::Factor::ONE);
 
 		xml_node dstFactor = blend.child("dst");
-		val = String(dstFactor.attribute("val").value());
+        val = std::string(dstFactor.attribute("val").value());
 		formula.dst_color = formula.dst_alpha = parse_blend_factor(val, Render_State::Blend_Formula::Factor::ZERO);
 		rs.set_blend_formula(formula);
 	}
@@ -574,16 +574,16 @@ bool DefaultTechniqueLoader::load_render_state(Path const& /*path*/, const pugi:
 	xml_node cull = root.child("cull");
 	if (cull)
 	{
-		String val(cull.attribute("val").value());
+        std::string val(cull.attribute("val").value());
 		rs.set_culling(parse_bool(val, true));
 		if (rs.get_culling())
 		{
 			xml_node face = cull.child("face");
-			val = String(face.attribute("val").value());
+            val = std::string(face.attribute("val").value());
 			rs.set_cull_face(val == "front" ? Render_State::Cull_Face::FRONT : Render_State::Cull_Face::BACK);
 
 			xml_node wind = cull.child("wind");
-			val = String(wind.attribute("val").value());
+            val = std::string(wind.attribute("val").value());
 			rs.set_winding(val == "ccw" ? Render_State::Winding::WINDING_CCW : Render_State::Winding::WINDING_CW);
 		}
 	}
@@ -592,11 +592,11 @@ bool DefaultTechniqueLoader::load_render_state(Path const& /*path*/, const pugi:
 	if (depth)
 	{
 		xml_node test = depth.child("test");
-		String val(test.attribute("val").value());
+        std::string val(test.attribute("val").value());
 		rs.set_depth_test(parse_bool(val, true));
 
 		xml_node write = depth.child("write");
-		val = String(write.attribute("val").value());
+        val = std::string(write.attribute("val").value());
 		rs.set_depth_write(parse_bool(val, true));
 	}
 
@@ -604,7 +604,7 @@ bool DefaultTechniqueLoader::load_render_state(Path const& /*path*/, const pugi:
 
 	return true;
 }
-Render_State::Blend_Formula::Factor DefaultTechniqueLoader::parse_blend_factor(String const& val, Render_State::Blend_Formula::Factor def) const
+Render_State::Blend_Formula::Factor DefaultTechniqueLoader::parse_blend_factor(std::string const& val, Render_State::Blend_Formula::Factor def) const
 {
 	if (val.empty())
 	{
@@ -670,7 +670,7 @@ bool DefaultTechniqueLoader::load_shader(Path const& path, const pugi::xml_node&
 	}
 	Uber_Shader shader;
 
-	String vs, fs;
+    std::string vs, fs;
 	xml_node pn = root.child("vshader");
 	{
 		pugi::xml_node cdata = pn.first_child();
@@ -706,7 +706,7 @@ bool DefaultTechniqueLoader::load_render_target(Path const& /*path*/, const pugi
 	math::vec2u32 size;
 
 	pugi::xml_attribute att = root.attribute("color");
-	String cf(att.value());
+    std::string cf(att.value());
 
 #define COLOR_FORMAT(format) else if (cf == #format) color_format = Render_Target::Color_Format::format
 
@@ -736,7 +736,7 @@ bool DefaultTechniqueLoader::load_render_target(Path const& /*path*/, const pugi
 	}
 
 	att = root.attribute("depth");
-	String df(att.value());
+    std::string df(att.value());
 	if (df == "HALF")
 	{
 		depth_format = Render_Target::Depth_Format::HALF;
@@ -752,7 +752,7 @@ bool DefaultTechniqueLoader::load_render_target(Path const& /*path*/, const pugi
 	}
 
 	att = root.attribute("stencil");
-	String sf(att.value());
+    std::string sf(att.value());
 	if (sf == "FULL")
 	{
 		stencil_format = Render_Target::Stencil_Format::FULL;
@@ -764,7 +764,7 @@ bool DefaultTechniqueLoader::load_render_target(Path const& /*path*/, const pugi
 	}
 
 	att = root.attribute("aa");
-	String af(att.value());
+    std::string af(att.value());
 	if (af == "2x")
 	{
 		aa_format = Render_Target::AA_Format::A2X;
@@ -818,7 +818,7 @@ bool DefaultTechniqueLoader::load_render_target(Path const& /*path*/, const pugi
 	}
 
 	att = root.attribute("name");
-	String name(att.value());
+    std::string name(att.value());
 	if (name.empty())
 	{
         QLOGE("Missing name tag in render target definition");

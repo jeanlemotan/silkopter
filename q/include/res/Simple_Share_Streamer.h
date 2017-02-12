@@ -124,14 +124,14 @@ namespace res
 		auto source = factory.get_file_system().open(path);
 		if (!source)
 		{
-            QLOGW("Failed to load {}, path '{}' not found", rtti::get_class_name<T>(), path);
+            QLOGW("Failed to load {}, path '{}' not found", typeid(T).name(), path);
 			return T_ptr();
 		}
 
 		auto* loader = factory.find_loader_for_source<T>(*source);
 		if (!loader)
 		{
-            QLOGW("Failed to load {}, no loaders for '{}'", rtti::get_class_name<T>(), path);
+            QLOGW("Failed to load {}, no loaders for '{}'", typeid(T).name(), path);
 			return T_ptr();
 		}
 
@@ -144,7 +144,7 @@ namespace res
 		loader->load(path, *source, *r);
 		if (!r->is_valid())
 		{
-            QLOGW("Failed to load {}, source '{}' is invalid", rtti::get_class_name<T>(), path);
+            QLOGW("Failed to load {}, source '{}' is invalid", typeid(T).name(), path);
 		}
 
 		//finished loading, lock again and add

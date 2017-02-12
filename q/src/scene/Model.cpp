@@ -209,9 +209,9 @@ anim::Animation_Node_ptr const& Model::get_animation_node()
 	return m_animation_node;
 }
 
-static String k_position("position");
-static String k_rotation("rotation");
-static String k_scale("scale");
+static std::string k_position("position");
+static std::string k_rotation("rotation");
+static std::string k_scale("scale");
 
 void Model::link_animation_node()
 {
@@ -443,7 +443,7 @@ void Model::set_material(size_t idx, video::Material const& material)
 	}
 }
 
-int Model::find_material_idx_by_name(String const& name) const
+int Model::find_material_idx_by_name(std::string const& name) const
 {
 	return m_base->find_material_idx_by_name(name);
 }
@@ -455,7 +455,7 @@ video::Material const& Model::get_material(size_t idx) const
 {
 	return m_meshes[m_material_idx_to_mesh_idx[idx][0]].render_job.get_material();
 }
-String Model::get_material_name(size_t idx) const
+std::string Model::get_material_name(size_t idx) const
 {
 	return m_base->get_material(idx).name;
 }

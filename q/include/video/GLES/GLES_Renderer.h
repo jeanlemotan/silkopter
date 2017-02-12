@@ -43,11 +43,11 @@ namespace video
 		void			add_flush_callback(Flush_Callback const* callback);
 		void			remove_flush_callback(Flush_Callback const* callback);
 
-		void			set_user_uniform_getter(String const& name, Uniform_Def::Getter const& getter);
-		void			set_user_sampler_getter(String const& name, Sampler_Def::Getter const& getter);
+        void			set_user_uniform_getter(std::string const& name, Uniform_Def::Getter const& getter);
+        void			set_user_sampler_getter(std::string const& name, Sampler_Def::Getter const& getter);
 
-		void			add_render_target(String const& name, Render_Target_ptr rt);
-		Render_Target_ptr	find_render_target_by_name(String const& name);
+        void			add_render_target(std::string const& name, Render_Target_ptr rt);
+        Render_Target_ptr	find_render_target_by_name(std::string const& name);
 
 		Dynamic_Image_uptr	read_color_pixels(math::vec2u32 const& position, math::vec2u32 const& size);
 		Dynamic_Image_uptr	read_depth_pixels(math::vec2u32 const& position, math::vec2u32 const& size);
@@ -85,7 +85,7 @@ namespace video
 		bool			link_uniform(Uniform_Def& def) const;
 		bool			link_sampler(Sampler_Def& def, Path const& link) const;
 
-		int				find_render_target_idx_by_name(String const& name) const;
+        int				find_render_target_idx_by_name(std::string const& name) const;
 
 		class Render_Context
 		{
@@ -111,10 +111,10 @@ namespace video
 
 
 		Render_Target_ptr m_default_render_target;
-		std::vector<std::pair<String, Render_Target_ptr>> m_render_targets;
+        std::vector<std::pair<std::string, Render_Target_ptr>> m_render_targets;
 
-		std::map<String, Uniform_Def::Getter>	m_user_uniform_getters;
-		std::map<String, Sampler_Def::Getter>	m_user_sampler_getters;
+        std::map<std::string, Uniform_Def::Getter>	m_user_uniform_getters;
+        std::map<std::string, Sampler_Def::Getter>	m_user_sampler_getters;
 
 		struct Post_FX_Data
 		{

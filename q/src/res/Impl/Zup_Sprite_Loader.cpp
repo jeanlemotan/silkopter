@@ -56,7 +56,7 @@ void ZupSpriteLoader::load(Path const& /*path*/, data::Source& source, SpriteBas
 	for (uint32_t i = 0; i < textureCount; i++)
 	{
 		uint32_t id;
-		String name, texName;
+        std::string name, texName;
 		source >> name >> id >> texName;
 		auto tex = System::inst().get_factory().load_by_name<video::Texture>(texName);
 		if (!tex)
@@ -72,7 +72,7 @@ void ZupSpriteLoader::load(Path const& /*path*/, data::Source& source, SpriteBas
 	source >> moduleCount;
 	for (uint32_t i = 0; i < moduleCount; i++)
 	{
-		String name;
+        std::string name;
 		uint32_t id, textureId, x, y, w, h;
 		source >> name >> id >> textureId >> x >> y >> w >> h;
 
@@ -87,7 +87,7 @@ void ZupSpriteLoader::load(Path const& /*path*/, data::Source& source, SpriteBas
 	source >> frameCount;
 	for (uint32_t i = 0; i < frameCount; i++)
 	{
-		String name;
+        std::string name;
 		uint32_t id, fmCount;
 		source >> name >> id >> fmCount;
 
@@ -113,7 +113,7 @@ void ZupSpriteLoader::load(Path const& /*path*/, data::Source& source, SpriteBas
 	source >> animCount;
 	for (uint32_t i = 0; i < animCount; i++)
 	{
-		String name;
+        std::string name;
 		uint32_t id, afCount;
 		source >> name >> id >> afCount;
 

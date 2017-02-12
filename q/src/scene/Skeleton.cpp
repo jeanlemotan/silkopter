@@ -23,12 +23,12 @@ bool Skeleton::operator!=(Skeleton const& other)
 }
 
 
-int Skeleton::find_node_idx_by_name(String const& name) const
+int Skeleton::find_node_idx_by_name(std::string const& name) const
 {
 	auto it = std::find(m_names.begin(), m_names.end(), name);
 	return (it != m_names.end()) ? std::distance(m_names.begin(), it) : -1;
 }
-int Skeleton::add_node(String const& name, size_t parent_idx)
+int Skeleton::add_node(std::string const& name, size_t parent_idx)
 {
 	int idx = find_node_idx_by_name(name);
 	if (idx >= 0)

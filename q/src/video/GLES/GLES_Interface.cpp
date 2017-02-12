@@ -1,6 +1,8 @@
 #include "QStdAfx.h"
 #include "video/GLES/GLES_Interface.h"
 
+#include <cstring>
+
 #if defined Q_WINDOWS
 #	define NOMINMAX
 #	define NOWINRES
@@ -1947,7 +1949,7 @@ bool Interface::ihasExtension(const char* extension)
 	for (const char* p = all; ; p++)
 	{
 		// Advance p Up To The Next Possible Match
-		p = q::util::stristr(p, extension);
+        p = strcasestr(p, extension);
 		if (!p)
 		{
 			return false;  // No Match
@@ -1986,7 +1988,7 @@ bool Interface::ihasExtensionPart(const char* extensionPart)
 		return false;
 	}
 
-	return q::util::stristr(all, extensionPart) != 0;
+    return strcasestr(all, extensionPart) != 0;
 }
 
 void Interface::iflush()
@@ -2366,7 +2368,7 @@ void TL_Interface::sync()
 	assertNoError();
 
 	//if (interf.ihasExtensionPart("vertex_array_object"))//don't do it because it calls flush
-	if (m_extensions.find("_vertex_array_object ") != String::npos)
+    if (m_extensions.find("_vertex_array_object ") != std::string::npos)
 	{
 		glGetIntegerv(iGL_VERTEX_ARRAY_BINDING, reinterpret_cast<GLint*>(&m_crt_state.bindVertexArray));
 		assertNoError();

@@ -6,6 +6,7 @@
 #include "mem/Memory.h"
 
 #include "util/Util.h"
+#include "util/Singleton.h"
 
 #include "res/Loader.h"
 #include "res/Streamer.h"

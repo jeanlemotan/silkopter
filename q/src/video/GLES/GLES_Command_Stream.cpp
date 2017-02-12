@@ -335,7 +335,7 @@ Uniform const& Command_Stream::get_uniform_screen_size(void* data)
 	ctx->_this->m_uniform = math::vec2f(ctx->renderer->get_viewport_size());
 	return ctx->_this->m_uniform;
 }
-Uniform const& Command_Stream::get_uniform_render_target_size(void* data, String const& name)
+Uniform const& Command_Stream::get_uniform_render_target_size(void* data, std::string const& name)
 {
 	if (!data)
 	{
@@ -390,7 +390,7 @@ Sampler const& Command_Stream::get_sampler_screen_depth_buffer(void* data)
 	return ctx->_this->m_sampler;
 }
 
-Sampler const& Command_Stream::get_sampler_render_target_color_buffer(void* data, String const& name)
+Sampler const& Command_Stream::get_sampler_render_target_color_buffer(void* data, std::string const& name)
 {
 	if (!data)
 	{
@@ -406,7 +406,7 @@ Sampler const& Command_Stream::get_sampler_render_target_color_buffer(void* data
 	return ctx->_this->m_sampler;
 }
 
-Sampler const& Command_Stream::get_sampler_render_target_depth_buffer(void* data, String const& name)
+Sampler const& Command_Stream::get_sampler_render_target_depth_buffer(void* data, std::string const& name)
 {
 	if (!data)
 	{
@@ -834,7 +834,7 @@ bool Command_Stream::bind_attributes(gles::Interface& interf, Command_Stream::Re
 		int attIdx = -1;
 		if (semantic == Vertex_Declaration::Semantic::USER)
 		{
-			String attName = def.get_attribute_name();
+            std::string attName = def.get_attribute_name();
 			attIdx = declaration.find_attribute_idx_by_name(attName);
 		}
 		else

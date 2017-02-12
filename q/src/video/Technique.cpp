@@ -30,7 +30,7 @@ Pass const& Technique::get_pass(size_t idx) const
 	QASSERT(idx < get_pass_count());
 	return m_passes[idx];
 }
-int Technique::find_pass_idx_by_name(String const& name) const
+int Technique::find_pass_idx_by_name(std::string const& name) const
 {
 	auto it = m_pass_map.find(name);
 	return it != m_pass_map.end() ? it->second : -1;

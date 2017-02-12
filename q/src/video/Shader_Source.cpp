@@ -7,7 +7,7 @@
 using namespace q;
 using namespace video;
 
-Shader_Source::Shader_Source(String const& src)
+Shader_Source::Shader_Source(std::string const& src)
 	: m_source(src.begin(), src.end())
 {
 	process();
@@ -43,9 +43,9 @@ bool Shader_Source::operator!=(Shader_Source const& other) const
 	return !operator==(other);
 }
 
-String Shader_Source::get_source() const
+std::string Shader_Source::get_source() const
 {
-	return String(m_source);
+    return std::string(m_source);
 }
 
 void Shader_Source::process()
@@ -82,7 +82,7 @@ void Shader_Source::process()
 	{
 		auto const& tag_match = *it;
 
-		std::string const& tag = tag_match[0];
+        std::string const& tag = tag_match[0];
 		std::string name, index;
 		size_t name_start_idx = 0, name_length = 0;
 		size_t index_start_idx = 0, index_length = 0;
@@ -134,9 +134,9 @@ void Shader_Source::process()
 
 		auto* t = new Expression;
 		t->type = Token::Type::EXPRESSION;
-		t->value = Literal(String(tag), tag_match.position(), tag_match.length());
-		t->name = Literal(String(name), name_start_idx, name_length);
-		t->index = Literal(String(index), index_start_idx, index_length);
+        t->value = Literal(std::string(tag), tag_match.position(), tag_match.length());
+        t->name = Literal(std::string(name), name_start_idx, name_length);
+        t->index = Literal(std::string(index), index_start_idx, index_length);
 		m_tokens.emplace_back(t);
 	}
 

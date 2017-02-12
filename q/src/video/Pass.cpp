@@ -44,21 +44,21 @@ auto Pass::operator=(Pass&& other) -> Pass&
 	return *this;
 }
 
-void Pass::set_name(String const& name)
+void Pass::set_name(std::string const& name)
 {
 	m_name = name;
 }
-auto Pass::get_name() const -> String
+auto Pass::get_name() const -> std::string const&
 {
 	return m_name;
 }
 
-void Pass::set_scope_name(String const& scopeName)
+void Pass::set_scope_name(std::string const& scopeName)
 {
 	m_scope_name = scopeName;
 	QASSERT(0); //TODO
 }
-auto Pass::get_scope_name() const -> String
+auto Pass::get_scope_name() const -> std::string const&
 {
 	return m_scope_name;
 }
@@ -116,12 +116,12 @@ auto Pass::get_material_uniform_def_data_size(size_t idx) const -> size_t
 {
 	return m_material_uniform_data[idx].second;
 }
-auto Pass::find_material_uniform_def_idx_by_name(String const& name) const -> int
+auto Pass::find_material_uniform_def_idx_by_name(std::string const& name) const -> int
 {
 	auto it = m_material_uniform_map.find(name);
 	return it != m_material_uniform_map.end() ? it->second : -1;
 }
-auto Pass::find_uniform_def_idx_by_name(String const& name) const -> int
+auto Pass::find_uniform_def_idx_by_name(std::string const& name) const -> int
 {
 	auto it = std::find_if(m_uniforms.begin(), m_uniforms.end(), [&](Uniform_Def const& def) { return def.get_name() == name; });
 	return it != m_uniforms.end() ? std::distance(m_uniforms.begin(), it) : -1;
@@ -148,7 +148,7 @@ auto Pass::get_sampler_def(size_t idx) const -> Sampler_Def const&
 {
 	return m_samplers[idx];
 }
-auto Pass::find_sampler_def_idx_by_name(String const& name) const -> int
+auto Pass::find_sampler_def_idx_by_name(std::string const& name) const -> int
 {
 	auto it = std::find_if(m_samplers.begin(), m_samplers.end(), [&](Sampler_Def const& def) { return def.get_name() == name; });
 	return it != m_samplers.end() ? std::distance(m_samplers.begin(), it) : -1;
@@ -161,7 +161,7 @@ auto Pass::get_material_sampler_def(size_t idx) const -> Sampler_Def const&
 {
 	return m_samplers[m_material_samplers_idx[idx]];
 }
-auto Pass::find_material_sampler_def_idx_by_name(String const& name) const -> int 
+auto Pass::find_material_sampler_def_idx_by_name(std::string const& name) const -> int
 {
 	auto it = m_material_sampler_map.find(name);
 	return it != m_material_sampler_map.end() ? it->second : -1;
@@ -185,7 +185,7 @@ auto Pass::get_attribute_def(size_t idx) const -> Attribute_Def const&
 	QASSERT(idx < get_attribute_def_count());
 	return m_attributes[idx];
 }
-auto Pass::find_attribute_def_idx_by_name(String const& name) const -> int
+auto Pass::find_attribute_def_idx_by_name(std::string const& name) const -> int
 {
 	auto it = m_attribute_map.find(name);
 	return it != m_attribute_map.end() ? it->second : -1;

@@ -169,10 +169,10 @@ auto Vertex_Declaration::add_attribute(Vertex_Buffer_ptr buffer, Semantic semant
         QLOGE("Attribute semantic {} already exists. Ignoring.", (int)semantic);
 		return -1;
 	}
-	return add_attribute(buffer, String::null, semantic, type, count, offset, stride);
+    return add_attribute(buffer, std::string(), semantic, type, count, offset, stride);
 }
 
-auto Vertex_Declaration::add_attribute(Vertex_Buffer_ptr buffer, String const& name, Type type, uint8_t count, uint16_t offset, uint16_t stride) -> int
+auto Vertex_Declaration::add_attribute(Vertex_Buffer_ptr buffer, std::string const& name, Type type, uint8_t count, uint16_t offset, uint16_t stride) -> int
 {
 	int idx = find_attribute_idx_by_name(name);
 	if (idx >= 0)
@@ -183,7 +183,7 @@ auto Vertex_Declaration::add_attribute(Vertex_Buffer_ptr buffer, String const& n
 	return add_attribute(buffer, name, Semantic::USER, type, count, offset, stride);
 }
 
-auto Vertex_Declaration::add_attribute(Vertex_Buffer_ptr buffer, String const& name, Semantic semantic, Type type, uint8_t count, uint16_t offset, uint16_t stride) -> int
+auto Vertex_Declaration::add_attribute(Vertex_Buffer_ptr buffer, std::string const& name, Semantic semantic, Type type, uint8_t count, uint16_t offset, uint16_t stride) -> int
 {
 	if (!buffer)
 	{
@@ -271,7 +271,7 @@ auto Vertex_Declaration::add_attribute(Vertex_Buffer_ptr buffer, String const& n
 
 	return idx;
 }
-auto Vertex_Declaration::find_attribute_idx_by_name(String const& name) const -> int
+auto Vertex_Declaration::find_attribute_idx_by_name(std::string const& name) const -> int
 {
 	auto it = std::find_if(m_attributes.begin(), m_attributes.end(), [&](Attribute_Data const& a) { return a.attribute.name == name; });
 	if (it != m_attributes.end())

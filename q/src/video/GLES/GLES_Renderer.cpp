@@ -210,15 +210,15 @@ void GLES_Renderer::init_capabilities()
 	}
 
 	{
-		String vendor(reinterpret_cast<const char*>(interf.iglGetString(gles::iGL_VENDOR)));
-		String renderer(reinterpret_cast<const char*>(interf.iglGetString(gles::iGL_RENDERER)));
-		String version(reinterpret_cast<const char*>(interf.iglGetString(gles::iGL_VERSION)));
+        std::string vendor(reinterpret_cast<const char*>(interf.iglGetString(gles::iGL_VENDOR)));
+        std::string renderer(reinterpret_cast<const char*>(interf.iglGetString(gles::iGL_RENDERER)));
+        std::string version(reinterpret_cast<const char*>(interf.iglGetString(gles::iGL_VERSION)));
         QLOGI("Rendering info:");
         QLOGI("\t Vendor: {}", vendor);
         QLOGI("\t Renderer: {}", renderer);
         QLOGI("\t Version: {}", version);
 
-		if (renderer.find("powervr") != String::npos)
+        if (renderer.find("powervr") != std::string::npos)
 		{
 			//powervr needs this to avoid buffer resolves
 			m_needs_full_clear_every_frame = true;
@@ -253,7 +253,7 @@ void GLES_Renderer::remove_flush_callback(Flush_Callback const* callback)
 	m_flush_callbacks.erase(std::remove(m_flush_callbacks.begin(), m_flush_callbacks.end(), callback), m_flush_callbacks.end());
 }
 
-void GLES_Renderer::add_render_target(String const& name, Render_Target_ptr rt)
+void GLES_Renderer::add_render_target(std::string const& name, Render_Target_ptr rt)
 {
 	QASSERT(!m_frame_begun);
 
@@ -270,18 +270,18 @@ void GLES_Renderer::add_render_target(String const& name, Render_Target_ptr rt)
 
 	m_render_targets.emplace_back(name, rt);
 }
-Render_Target_ptr GLES_Renderer::find_render_target_by_name(String const& name)
+Render_Target_ptr GLES_Renderer::find_render_target_by_name(std::string const& name)
 {
-	auto it = std::find_if(m_render_targets.begin(), m_render_targets.end(), [&](std::pair<String, Render_Target_ptr> const& rtd) { return rtd.first == name; });
+    auto it = std::find_if(m_render_targets.begin(), m_render_targets.end(), [&](std::pair<std::string, Render_Target_ptr> const& rtd) { return rtd.first == name; });
 	if (it != m_render_targets.end())
 	{
 		return it->second;
 	}
 	return Render_Target_ptr();
 }
-int GLES_Renderer::find_render_target_idx_by_name(String const& name) const
+int GLES_Renderer::find_render_target_idx_by_name(std::string const& name) const
 {
-	auto it = std::find_if(m_render_targets.begin(), m_render_targets.end(), [&] (std::pair<String, Render_Target_ptr> p) { return p.first == name; });
+    auto it = std::find_if(m_render_targets.begin(), m_render_targets.end(), [&] (std::pair<std::string, Render_Target_ptr> p) { return p.first == name; });
 	return it != m_render_targets.end() ? std::distance(m_render_targets.begin(), it) : -1;
 }
 
@@ -366,11 +366,11 @@ Dynamic_Image_uptr	GLES_Renderer::read_depth_pixels(math::vec2u32 const& positio
 	return image;
 }
 
-void GLES_Renderer::set_user_uniform_getter(String const& name, Uniform_Def::Getter const& getter)
+void GLES_Renderer::set_user_uniform_getter(std::string const& name, Uniform_Def::Getter const& getter)
 {
 	m_user_uniform_getters[name] = getter;
 }
-void GLES_Renderer::set_user_sampler_getter(String const& name, Sampler_Def::Getter const& getter)
+void GLES_Renderer::set_user_sampler_getter(std::string const& name, Sampler_Def::Getter const& getter)
 {
 	m_user_sampler_getters[name] = getter;
 }
@@ -800,7 +800,7 @@ bool GLES_Renderer::link_uniform(Uniform_Def& def) const
 
 	if (link[0] == "user" && link.get_count() == 2)
 	{
-		String name = link[1];
+        std::string name = link[1];
 		auto it = m_user_uniform_getters.find(name);
 		if (it == m_user_uniform_getters.end())
 		{
@@ -943,10 +943,10 @@ bool GLES_Renderer::link_uniform(Uniform_Def& def) const
 			return true;
 		}
 
-		String rtName = link.get(1);
+        std::string rtName = link.get(1);
 		if (rtName == "screen")
 		{
-			String var = link.get(2);
+            std::string var = link.get(2);
 			if (var == "size")
 			{
 				def.set_getter(std::bind(&Command_Stream::get_uniform_screen_size, std::placeholders::_1));
@@ -958,7 +958,7 @@ bool GLES_Renderer::link_uniform(Uniform_Def& def) const
 		int idx = find_render_target_idx_by_name(rtName);
 		if (idx >= 0 && idx < 50)
 		{
-			String var = link.get(2);
+            std::string var = link.get(2);
 			if (var == "size")
 			{
 				def.set_getter(std::bind(&Command_Stream::get_uniform_render_target_size, std::placeholders::_1, rtName));
@@ -979,7 +979,7 @@ bool GLES_Renderer::link_sampler(Sampler_Def& def, Path const& link) const
 	}
 
 	def.set_enabled(true);
-	String name = link.get(0);
+    std::string name = link.get(0);
 
 	if (link[0] == "user" && link.get_count() == 2)
 	{
@@ -995,10 +995,10 @@ bool GLES_Renderer::link_sampler(Sampler_Def& def, Path const& link) const
 
 	if (name == "render_target")
 	{
-		String sampler = link.get(1);
+        std::string sampler = link.get(1);
 		if (sampler == "screen")
 		{
-			String buffer = link.get_count() > 2 ? link.get(2) : "color";
+            std::string buffer = link.get_count() > 2 ? link.get(2) : "color";
 			if (buffer == "color")
 			{
 				def.set_getter(std::bind(&Command_Stream::get_sampler_screen_color_buffer, std::placeholders::_1));
@@ -1015,7 +1015,7 @@ bool GLES_Renderer::link_sampler(Sampler_Def& def, Path const& link) const
 			int idx = find_render_target_idx_by_name(sampler);
 			if (idx >= 0 && idx < 50)
 			{
-				String buffer = link.get_count() > 2 ? link.get(2) : "color";
+                std::string buffer = link.get_count() > 2 ? link.get(2) : "color";
 				if (buffer == "color")
 				{
 					def.set_getter(std::bind(&Command_Stream::get_sampler_render_target_color_buffer, std::placeholders::_1, sampler));

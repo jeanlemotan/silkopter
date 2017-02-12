@@ -37,8 +37,8 @@ static bool test_pvr(data::Source& source)
 
 static void load_pvr(Path const& path, data::Source& source, Resource& r)
 {
-	auto* texture = rtti::cast_to<Texture>(&r);
-	auto* image = rtti::cast_to<Dynamic_Image>(&r);
+    auto* texture = dynamic_cast<Texture*>(&r);
+    auto* image = dynamic_cast<Dynamic_Image*>(&r);
 	if (!texture && !image)
 	{
 		QASSERT(0);

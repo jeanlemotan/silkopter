@@ -88,27 +88,27 @@ template<class T>
 class Match_Def_By_Name
 {
 public:
-	Match_Def_By_Name(String const& name) : m_name(name) {}
+    Match_Def_By_Name(std::string const& name) : m_name(name) {}
 	bool operator()(T const& def)
 	{
 		return def.get_name() == m_name;
 	}
-	String m_name;
+    std::string m_name;
 };
 
 
-String GLES_Shader::patch_shader(
+std::string GLES_Shader::patch_shader(
 	std::vector<Uniform_Def>& uniforms,
 	std::vector<Sampler_Def>& samplers,
 	std::vector<Attribute_Def>& attributes,
 	Shader_Source const& source)
 {
-	String src = source.get_source();
+    std::string src = source.get_source();
 	size_t tok_count = source.get_token_count();
 
-	std::map<String, std::vector<Shader_Source::Expression>> uniform_expressions; //uniforms
-	std::map<String, std::vector<Shader_Source::Expression>> attribute_expressions; //attributes
-	std::map<String, std::vector<Shader_Source::Expression>> sampler_expressions; //samplers
+    std::map<std::string, std::vector<Shader_Source::Expression>> uniform_expressions; //uniforms
+    std::map<std::string, std::vector<Shader_Source::Expression>> attribute_expressions; //attributes
+    std::map<std::string, std::vector<Shader_Source::Expression>> sampler_expressions; //samplers
 
 	//first collect them
 	for (size_t i = 0; i < tok_count; i++)
@@ -120,7 +120,7 @@ String GLES_Shader::patch_shader(
 			{
 				auto pos = util::find_line_char_by_offset(src, t.value.start);
                 QLOGE("Shader contains unfiltered conditionals at {0}", pos);
-				return String::null;
+                return std::string();
 				break;
 			}
 		case Shader_Source::Token::Type::EXPRESSION:
@@ -148,7 +148,7 @@ String GLES_Shader::patch_shader(
 				{
 					auto pos = util::find_line_char_by_offset(src, t.value.start);
                     QLOGE("Expression '{}' cannot be found at {}", a.name.value, pos);
-					return String::null;
+                    return std::string();
 				}
 				break;
 			}
@@ -156,14 +156,14 @@ String GLES_Shader::patch_shader(
 			{
 				auto pos = util::find_line_char_by_offset(src, t.value.start);
                 QLOGE("Shader contains unrecognized token at {}", pos);
-				return String::null;
+                return std::string();
 			}
 		}
 	}
 
 	//Renderer& renderer = *System::inst().get_renderer();
 
-	String patched;
+    std::string patched;
 	//size_t lastPos = 0;
 
 	std::string declaration;
@@ -181,7 +181,7 @@ String GLES_Shader::patch_shader(
 	size_t uniform_floats = 0;
 	for (auto const& it: uniform_expressions)
 	{
-		String name = it.first;
+        std::string name = it.first;
 
 		auto uit = std::find_if(uniforms.begin(), uniforms.end(), Match_Def_By_Name<Uniform_Def>(name));
 		QASSERT(uit != uniforms.end());
@@ -240,7 +240,7 @@ String GLES_Shader::patch_shader(
 				const char* x[] = {"array", "scalar"};
 				auto pos = util::find_line_char_by_offset(src, exp.value.start);
                 QLOGE("Uniform {} used as a {} but it's actually a {} at {}", exp.name.value, x[is_array ? 0 : 1], x[expencting_array ? 0 : 1], pos);
-				return String::null;
+                return std::string();
 			}
 
 			if (is_array)
@@ -257,7 +257,7 @@ String GLES_Shader::patch_shader(
 	}
 	for (auto const& it: sampler_expressions)
 	{
-		String name = it.first;
+        std::string name = it.first;
 
 		auto sit = std::find_if(samplers.begin(), samplers.end(), Match_Def_By_Name<Sampler_Def>(name));
 		QASSERT(sit != samplers.end());
@@ -287,7 +287,7 @@ String GLES_Shader::patch_shader(
 	}
 	for (auto const& it : attribute_expressions)
 	{
-		String name = it.first;
+        std::string name = it.first;
 
 		auto ait = std::find_if(attributes.begin(), attributes.end(), Match_Def_By_Name<Attribute_Def>(name));
 		QASSERT(ait != attributes.end());
@@ -430,7 +430,7 @@ String GLES_Shader::patch_shader(
 		}
 
 		{
-			Uniform_Def udef("skin_transforms", String::null);
+            Uniform_Def udef("skin_transforms", std::string());
 			udef.set_link(Path("skinning/transforms"));
 			udef.set_getter(std::bind(&GLES_Shader::get_uniform_skin_matrix, this, std::placeholders::_1));
 			uniforms.push_back(udef);
@@ -458,7 +458,7 @@ String GLES_Shader::patch_shader(
 		patched_source = patched_source.substr(0, start) + str + patched_source.substr(start + length);
 	}
 
-	return String(declaration + functions + patched_source);
+    return std::string(declaration + functions + patched_source);
 }
 
 void GLES_Shader::compile(
@@ -619,7 +619,7 @@ void GLES_Shader::upload_uniform(uint32_t id, Uniform const& u, uint8_t const* d
 }
 
 
-uint32_t GLES_Shader::compile_shader(uint32_t shaderType, String const& source)
+uint32_t GLES_Shader::compile_shader(uint32_t shaderType, std::string const& source)
 {
 	gles::Interface interf;
 	gles::iGLuint shader_id = interf.iglCreateShader(shaderType);

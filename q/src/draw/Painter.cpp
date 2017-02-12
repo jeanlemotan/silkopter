@@ -18,8 +18,8 @@ static const int32_t MAX_SIN_COS_TABLE_SIZE = 2048;
 
 std::vector<math::vec2f> Painter::ms_cos_sin_table;
 
-String k_painter_lines_str("Painter Lines");
-String k_painter_tri_quad_str("Painter TriQuad");
+std::string k_painter_lines_str("Painter Lines");
+std::string k_painter_tri_quad_str("Painter TriQuad");
 
 //////////////////////////////////////////////////////////////////////////
 

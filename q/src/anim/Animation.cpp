@@ -196,8 +196,8 @@ bool Animation::update_pose(Pose& pose, Duration time) const
 		return false;
 	}
 
-	float duration_s = Seconds(m_duration).count();
-	float time_s = Seconds(time).count();
+    float duration_s = Secondsf(m_duration).count();
+    float time_s = Secondsf(time).count();
 
 	time_s = math::clamp(time_s, 0.f, duration_s);
 	uint32_t time_ms = (uint32_t)(time_s * 1000.f);

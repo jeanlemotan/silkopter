@@ -31,7 +31,7 @@ Path const& Uber_Shader::get_root_path() const
 	return m_root_path;
 }
 
-void Uber_Shader::set_source(String const& vs, String const& fs)
+void Uber_Shader::set_source(std::string const& vs, std::string const& fs)
 {
 	util::Preprocessor pp(System::inst().get_file_system(), get_root_path());
 	m_vertex_src = Shader_Source(pp.preprocess(vs));

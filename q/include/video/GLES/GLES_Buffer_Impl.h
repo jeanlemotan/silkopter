@@ -2,6 +2,7 @@
 
 #include "video/Buffer.h"
 #include "video/GLES/GLES_Interface.h"
+#include <atomic>
 
 namespace q
 {

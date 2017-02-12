@@ -1031,7 +1031,7 @@ namespace gles
 
 		void* m_context;
 
-		String m_extensions;
+        std::string m_extensions;
 	};
 
 

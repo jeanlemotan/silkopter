@@ -35,7 +35,7 @@ void Model_Base::set_skeleton(Skeleton const& skeleton)
 {
 	m_skeleton = skeleton;
 }
-size_t Model_Base::add_mesh(String const& name, size_t node_idx, size_t material_idx, video::Vertex_Declaration const& declaration, math::aabb3f const& aabb)
+size_t Model_Base::add_mesh(std::string const& name, size_t node_idx, size_t material_idx, video::Vertex_Declaration const& declaration, math::aabb3f const& aabb)
 {
 	QASSERT(node_idx < m_skeleton.get_node_count());
 	QASSERT(material_idx < m_materials.size());
@@ -66,7 +66,7 @@ Model_Base::Mesh_Data const& Model_Base::get_mesh(size_t idx) const
 {
 	return m_meshes[idx];
 }
-size_t Model_Base::add_material(String const& name, video::Material const& material)
+size_t Model_Base::add_material(std::string const& name, video::Material const& material)
 {
 	QASSERT(find_material_idx_by_name(name) < 0);
 	Material_Data data;
@@ -83,7 +83,7 @@ Model_Base::Material_Data const& Model_Base::get_material(size_t idx)
 {
 	return m_materials[idx];
 }
-int Model_Base::find_material_idx_by_name(String const& name)
+int Model_Base::find_material_idx_by_name(std::string const& name)
 {
 	auto it = std::find_if(m_materials.begin(), m_materials.end(), [&](Material_Data const& m) { return m.name == name; });
 	if (it != m_materials.end())
@@ -93,7 +93,7 @@ int Model_Base::find_material_idx_by_name(String const& name)
 	return -1;
 }
 
-size_t Model_Base::add_texture_channel(String const& name, String const& textureName, video::Sampler::Wrap wrapu, video::Sampler::Wrap wrapv)
+size_t Model_Base::add_texture_channel(std::string const& name, std::string const& textureName, video::Sampler::Wrap wrapu, video::Sampler::Wrap wrapv)
 {
 	Texture_Channel_Data data;
 	data.name = name;

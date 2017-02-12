@@ -59,7 +59,7 @@ void QAnimation_Loader::load(Path const& /*path*/, data::Source& source, anim::A
 
 	for (uint32_t i = 0; i < channel_count; i++)
 	{
-		String chPath;
+        std::string chPath;
 		source >> chPath;
 
 		uint8_t type;
