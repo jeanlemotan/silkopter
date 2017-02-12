@@ -98,7 +98,7 @@ math::vec3f Rate_Controller::compute_feedforward(IMultirotor_Properties const& m
     math::vec3f v = target - input;
     float vm = math::length(v) * multirotor_properties.get_moment_of_inertia();
 
-    float max_T = m_config->get_feedforward().get_max_torque();
+    float max_T = m_config->get_max_torque();
 
     float A = multirotor_properties.get_motor_acceleration();
     float C = multirotor_properties.get_motor_deceleration();
@@ -160,6 +160,13 @@ ts::Result<void> Rate_Controller::set_config(hal::INode_Config const& config)
     }
 
     fill_pid_params(z_params, descriptor.get_z_pid(), output_rate);
+
+    //this should prevent integral windup when the PID is stressed a lot.
+    //for example in sharpp changes of target
+    float limit = m_config->get_max_torque();
+    m_x_pid.set_output_limits(-limit, limit);
+    m_y_pid.set_output_limits(-limit, limit);
+    m_z_pid.set_output_limits(-limit, limit);
 
     if (!m_x_pid.set_params(x_params) ||
         !m_y_pid.set_params(y_params) ||
