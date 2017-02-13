@@ -44,7 +44,9 @@ auto RC_Comms::start(std::string const& interface, uint8_t id) -> bool
     }
 
     //m_rc_phy.set_rate(100);
-    m_rc_protocol.add_periodic_packet(std::chrono::milliseconds(30), std::bind(&RC_Comms::compute_multirotor_state_packet, this, std::placeholders::_1, std::placeholders::_2));
+    m_rc_protocol.add_periodic_packet(std::chrono::milliseconds(30), std::bind(&RC_Comms::compute_multirotor_state_packet, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+    m_rc_protocol.reset_session();
+
     m_send_home = true;
 
     QLOGI("Started sending on interface {}", interface);
@@ -59,7 +61,7 @@ auto RC_Comms::is_connected() const -> bool
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-size_t RC_Comms::compute_multirotor_state_packet(uint8_t* data, uint8_t& packet_type)
+bool RC_Comms::compute_multirotor_state_packet(uint8_t* data, size_t& size, uint8_t& packet_type)
 {
     packet_type = static_cast<uint8_t>(m_next_packet_type);
 
@@ -80,7 +82,9 @@ size_t RC_Comms::compute_multirotor_state_packet(uint8_t* data, uint8_t& packet_
         memcpy(data, m_multirotor_state_sz_buffer.data(), off);
     }
 
-    return off;
+    size = off;
+
+    return true;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -104,6 +108,11 @@ void RC_Comms::process_rx_packet(util::comms::RC_Protocol::RX_Packet const& pack
         {
             QLOGW("Cannot deserialize incoming multirotor state value");
         }
+    }
+    else if (packet.packet_type == static_cast<uint8_t>(rc_comms::Packet_Type::RC_CONNECTED))
+    {
+        QLOGI("RC connected, sending vital data");
+        m_send_home = true;
     }
     else
     {

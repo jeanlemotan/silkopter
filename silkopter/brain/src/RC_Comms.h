@@ -42,7 +42,7 @@ public:
 
     struct Impl; //this needs to be public...
 private:
-    size_t compute_multirotor_state_packet(uint8_t* data, uint8_t& packet_type);
+    bool compute_multirotor_state_packet(uint8_t* data, size_t& size, uint8_t& packet_type);
     void process_rx_packet(util::comms::RC_Protocol::RX_Packet const& packet);
 
     HAL& m_hal;

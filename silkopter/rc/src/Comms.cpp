@@ -69,7 +69,11 @@ bool Comms::start()
     }
 
     //m_rc_phy.set_rate(100);
-    m_rc_protocol.add_periodic_packet(std::chrono::milliseconds(30), std::bind(&Comms::compute_multirotor_commands_packet, this, std::placeholders::_1, std::placeholders::_2));
+    m_rc_protocol.add_periodic_packet(std::chrono::milliseconds(30), std::bind(&Comms::compute_multirotor_commands_packet, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+
+    //send connected message so the UAV can send vital data back
+    m_rc_protocol.reset_session();
+    m_rc_protocol.send_packet(static_cast<uint8_t>(rc_comms::Packet_Type::RC_CONNECTED), nullptr, 0);
 
     m_video_streamer.on_data_received = std::bind(&Comms::handle_video, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
 
@@ -116,7 +120,7 @@ Remote_Viewer_Server& Comms::get_remote_viewer_server()
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-size_t Comms::compute_multirotor_commands_packet(uint8_t* data, uint8_t& packet_type)
+bool Comms::compute_multirotor_commands_packet(uint8_t* data, size_t& size, uint8_t& packet_type)
 {
     if (Clock::now() - m_multirotor_commands_tp < std::chrono::milliseconds(500))
     {
@@ -124,15 +128,15 @@ size_t Comms::compute_multirotor_commands_packet(uint8_t* data, uint8_t& packet_
 
         size_t off = 0;
         util::serialization::serialize(m_serialization_buffer, m_multirotor_commands, off);
-
         memcpy(data, m_serialization_buffer.data(), off);
 
-        return off;
+        size = off;
+        return true;
     }
     else
     {
         //commands are out of date - don't send them
-        return 0;
+        return false;
     }
 }
 

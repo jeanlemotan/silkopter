@@ -33,14 +33,18 @@ public:
 
     size_t get_mtu() const;
 
-    typedef std::function<size_t(uint8_t* data, uint8_t& packet_type)> TX_Callback;
+    typedef std::function<bool(uint8_t* data, size_t& size, uint8_t& packet_type)> TX_Callback;
     void add_periodic_packet(Clock::duration period, TX_Callback tx_callback);
 
     void send_packet(uint8_t packet_type, uint8_t const* data, size_t size);
 
+    void reset_session();
+
     void process();
 
 public:
+    void reset_session_data();
+
     size_t compute_tx_data(uint8_t* data);
     void process_rx_data(util::comms::RC_Phy::RX_Data const& data);
 
@@ -62,6 +66,10 @@ public:
         std::vector<uint8_t> payload;
     };
 
+    bool m_send_reset_request = false;
+    bool m_send_reset_reply = false;
+    uint32_t m_session_id = 0;
+
     std::mutex m_tx_packet_queue_mutex;
     std::deque<TX_Packet> m_tx_packet_queue;
 
@@ -78,8 +86,7 @@ public:
         uint16_t last_received_packet_index : 5;
 
         static const size_t MAX_PACKET_TYPE = 29;
-        static const size_t MAX_PACKET_INDEX = 32;
-        static const size_t MAX_PACKER_INDEX_MASK = MAX_PACKET_INDEX - 1;
+        static const size_t MAX_PACKET_INDEX = 31;
 
         enum Internal_Packet_Type : uint8_t
         {
