@@ -31,8 +31,7 @@ qmath - math lib
 q - 3d rendering engine used by the simulator and ground station
 silkopter/brain - raspberry pi software. The actual UAV FC
 silkopter/gs - ground station
-silkopter/io_board - the old Crius board firmware
-silkopter/sim - io_board simulator
+silkopter/rc - remote control
 silkopter/libs - common code used by the brain, gs and sim projects
 
 The q* libraries started initially as a mobile 3d game engine so most of the code is very game-oriented.
