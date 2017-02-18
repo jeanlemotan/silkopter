@@ -925,8 +925,6 @@ void GS_Comms::process()
         m_setup_buffer.clear();
     }
 
-    gather_telemetry_data();
-
     auto result = m_socket->process();
     if (result != util::comms::ISocket::Result::OK)
     {
@@ -935,13 +933,18 @@ void GS_Comms::process()
 
     m_rcp->process();
 
-    auto now = Clock::now();
-    if (now - m_last_rcp_tp >= RCP_PERIOD)
+    if (m_rcp->is_connected())
     {
-        m_last_rcp_tp = now;
+        gather_telemetry_data();
 
-        pack_telemetry_data();
-        m_telemetry_channel.send(*m_rcp);
+        auto now = Clock::now();
+        if (now - m_last_rcp_tp >= RCP_PERIOD)
+        {
+            m_last_rcp_tp = now;
+
+            pack_telemetry_data();
+            m_telemetry_channel.send(*m_rcp);
+        }
     }
 }
 
