@@ -94,8 +94,8 @@ private:
         enum class Result
         {
             FOUND_PACKET,
-            NEEDS_DATA,
-            DONE
+            INCOMPLETE_PACKET,
+            NEEDS_DATA
         };
 
         size_t data_idx = 0;

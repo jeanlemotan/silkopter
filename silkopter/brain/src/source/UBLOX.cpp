@@ -408,9 +408,9 @@ ts::Result<void> UBLOX::setup()
         std::vector<std::pair<Message, size_t>> msgs = {{
                                                               {MESSAGE_NAV_POSECEF, 0},
                                                               {MESSAGE_NAV_VELECEF, 0},
-                                                              {MESSAGE_NAV_SOL, 0},
+                                                              {MESSAGE_NAV_SOL, m_descriptor->get_rate()},
                                                               {MESSAGE_NAV_STATUS, 0},
-                                                              {MESSAGE_MON_HW, 0},
+                                                              {MESSAGE_MON_HW, m_descriptor->get_rate()},
                                                           }};
         for (auto const& m: msgs)
         {
@@ -473,7 +473,7 @@ ts::Result<void> UBLOX::start(Clock::time_point tp)
 void UBLOX::poll_for_data(Buses& buses)
 {
     auto now = Clock::now();
-    //if (now - m_last_poll_tp > std::chrono::milliseconds(200))
+    if (now - m_last_poll_tp >= m_position_stream->get_dt())
     {
         m_last_poll_tp = now;
         //send_packet(buses, MESSAGE_NAV_POSECEF, nullptr, 0);
@@ -516,23 +516,6 @@ void UBLOX::process()
 
     m_last_process_tp = now;
 
-
-//    if (m_setup_state != Setup_State::DONE)
-//    {
-//        if (m_setup_state == Setup_State::UNKNOWN || m_setup_state == Setup_State::FAILED)
-//        {
-//            m_setup_state = Setup_State::RUNNING;
-
-//            //start the async setup
-//            silk::async(std::function<void()>([this]()
-//            {
-//                bool res = setup();
-//                m_setup_state = res ? Setup_State::DONE : Setup_State::FAILED;
-//            }));
-//        }
-//        return;
-//    }
-
     Buses buses = { m_i2c.lock(), m_spi.lock(), m_uart.lock() };
     if (!buses.i2c && !buses.spi && !buses.uart)
     {
@@ -547,24 +530,24 @@ void UBLOX::process()
 
     read_data(buses);
 
-    //poll for data so the reeiver doesn't disable the SPI interface.
-    //see section: 8.2 Extended TX timeout
-    poll_for_data(buses);
+    //Also for SPI: poll for data so the receiver doesn't disable the SPI interface.
+    //  see section: 8.2 Extended TX timeout
+    if (buses.spi)
+    {
+        poll_for_data(buses);
+    }
 
     if (now - m_last_gps_info_tp > REINIT_WATCHDOG_TIMEOUT)
     {
         QLOGW("No GPS Info packets for {}", now - m_last_gps_info_tp);
-        poll_for_data(buses);
     }
     if (now - m_last_position_tp > REINIT_WATCHDOG_TIMEOUT)
     {
         QLOGW("No GPS Position packets for {}", now - m_last_position_tp);
-        poll_for_data(buses);
     }
     if (now - m_last_velocity_tp > REINIT_WATCHDOG_TIMEOUT)
     {
         QLOGW("No GPS Velocity packets for {}", now - m_last_velocity_tp);
-        poll_for_data(buses);
     }
 
     constexpr size_t MAX_LATE_SAMPLES = 5;
@@ -633,9 +616,9 @@ void UBLOX::process()
 void UBLOX::read_data(Buses& buses)
 {
     auto start = Clock::now();
-    constexpr std::chrono::milliseconds MAX_DURATION(1);
+    constexpr std::chrono::milliseconds MAX_DURATION(2);
 
-    while (Clock::now() - start < MAX_DURATION)
+    do
     {
         auto result = decode_packet(m_packet, m_buffer);
         if (result == Decoder_State::Result::FOUND_PACKET)
@@ -651,14 +634,16 @@ void UBLOX::read_data(Buses& buses)
             }
         }
 
-        //remove SPI no-data markers
-        if (result == Decoder_State::Result::NEEDS_DATA || result == Decoder_State::Result::DONE)
+        //if (result == Decoder_State::Result::INCOMPLETE_PACKET || result == Decoder_State::Result::NEEDS_DATA)
         {
             auto res = read(buses, m_temp_buffer.data(), m_temp_buffer.size());
             if (res > 0)
             {
-                std::copy(m_temp_buffer.begin(), m_temp_buffer.begin() + res, std::back_inserter(m_buffer));
-                if (result == Decoder_State::Result::DONE)
+                //QLOGI("XXXXX GPS reading {}, buffered {}, result {}", res, m_buffer.size(), result);
+                size_t offset = m_buffer.size();
+                m_buffer.resize(offset + res);
+                std::copy(m_temp_buffer.begin(), m_temp_buffer.begin() + res, m_buffer.begin() + offset);
+                if (result == Decoder_State::Result::NEEDS_DATA)
                 {
                     //remove SPI no-data markers
                     auto it = std::find_if(m_buffer.begin(), m_buffer.end(), [](uint8_t x) { return x != 0xFF; });
@@ -673,8 +658,17 @@ void UBLOX::read_data(Buses& buses)
                 break;
             }
         }
-    }
+
+        //no data at all? break and try laterz
+        if (m_buffer.empty())
+        {
+            break;
+        }
+    } while (Clock::now() - start < MAX_DURATION);
 }
+
+//#define DECODE_LOG(...) QLOGI(__VA_ARGS__)
+#define DECODE_LOG(...)
 
 auto UBLOX::decode_packet(Packet& packet, std::deque<uint8_t>& buffer) -> Decoder_State::Result
 {
@@ -687,29 +681,29 @@ auto UBLOX::decode_packet(Packet& packet, std::deque<uint8_t>& buffer) -> Decode
             auto const d = buffer[m_state.data_idx];
             if (d != 0)
             {
-               // QLOGI("step: {}, d: {}", step, d);
+               // DECODE_LOG("step: {}, d: {}", step, d);
             }
             switch (m_state.step)
             {
             case 0:
                 if (d != PREAMBLE1)
                 {
-                    //QLOGI("step: {}, d: {}, invalid", step, d);
+                    DECODE_LOG("step: {}, d: {}, invalid", m_state.step, d);
                     is_invalid = true;
                     break;
                 }
                 packet.payload.clear();
-                //QLOGI("step: {}, d: {}", step, d);
+                DECODE_LOG("step: {}, idx: {}, d: {}", m_state.step, m_state.data_idx, d);
                 m_state.step++;
                 break;
             case 1:
                 if (d != PREAMBLE2)
                 {
-                    //QLOGI("step: {}, d: {}, invalid", step, d);
+                    DECODE_LOG("step: {}, idx: {}, d: {}, invalid", m_state.step, m_state.data_idx, d);
                     is_invalid = true;
                     break;
                 }
-                //QLOGI("step: {}, d: {}", step, d);
+                DECODE_LOG("step: {}, idx: {}, d: {}", m_state.step, m_state.data_idx, d);
                 m_state.step++;
                 break;
             case 2:
@@ -718,7 +712,7 @@ auto UBLOX::decode_packet(Packet& packet, std::deque<uint8_t>& buffer) -> Decode
                 m_state.ck_b = m_state.ck_a = d;
                 break;
             case 3:
-                //QLOGI("step: {}, d: {}, cls {}, msg {}", step, d, packet.cls, d);
+                DECODE_LOG("step: {}, idx: {}, d: {}, cls {}, msg {}", m_state.step, m_state.data_idx, d, packet.cls, d);
                 packet.message = static_cast<Message>((d << 8) | packet.cls);
                 m_state.step++;
                 m_state.ck_b += (m_state.ck_a += d);
@@ -730,13 +724,14 @@ auto UBLOX::decode_packet(Packet& packet, std::deque<uint8_t>& buffer) -> Decode
                 break;
             case 5:
                 m_state.payload_size = (d << 8) | m_state.payload_size;
-                //QLOGI("step: {}, d: {}, size", step, d, payload_size);
+                DECODE_LOG("step: {}, idx: {}, d: {}, size: {}", m_state.step, m_state.data_idx, d, m_state.payload_size);
                 if (m_state.payload_size > MAX_PAYLOAD_SIZE)
                 {
-                    //QLOGI("step: {}, d: {}, invalid", step, d);
+                    DECODE_LOG("step: {}, idx: {}, d: {}, invalid", m_state.step, m_state.data_idx, d);
                     is_invalid = true;
                     break;
                 }
+                packet.payload.clear();
                 if (m_state.payload_size > 0)
                 {
                     packet.payload.reserve(m_state.payload_size);
@@ -751,27 +746,32 @@ auto UBLOX::decode_packet(Packet& packet, std::deque<uint8_t>& buffer) -> Decode
             case 6:
                 m_state.ck_b += (m_state.ck_a += d);
                 packet.payload.push_back(d);
-                m_state.step = (packet.payload.size() == m_state.payload_size) ? m_state.step + 1 : m_state.step;
+                DECODE_LOG("step: {}, idx: {}, sz: {}, ck:{}/{}, d: {}", m_state.step, m_state.data_idx, packet.payload.size(), m_state.ck_a, m_state.ck_b, d);
+                //done?
+                if (packet.payload.size() == m_state.payload_size)
+                {
+                    m_state.step++;
+                }
                 break;
             case 7:
                 if (m_state.ck_a != d)
                 {
-                    //QLOGI("step: {}, d: {}, invalid", step, d);
+                    DECODE_LOG("step: {}, idx: {}, ck:{}/{}, d: {}, invalid", m_state.step, m_state.data_idx, m_state.ck_a, m_state.ck_b, d);
                     is_invalid = true;
                     break;
                 }
-                //QLOGI("step: {}, d: {}", step, d);
+                DECODE_LOG("step: {}, idx: {}, d: {}", m_state.step, m_state.data_idx, d);
                 m_state.step++;
                 break;
             case 8:
                 if (m_state.ck_b != d)
                 {
-                    //QLOGI("step: {}, d: {}, invalid", step, d);
+                    DECODE_LOG("step: {}, idx: {}, ck:{}/{}, d: {}, invalid", m_state.step, m_state.data_idx, m_state.ck_a, m_state.ck_b, d);
                     is_invalid = true;
                     break;
                 }
 
-                //QLOGI("step MSG: {}, d: {} - {}", m_state.step, d, m_packet.message);
+                DECODE_LOG("step MSG: {}, idx: {}, d: {} - {}", m_state.step, m_state.data_idx, d, m_packet.message);
                 //consume all the data from the buffer
                 buffer.erase(buffer.begin(), buffer.begin() + m_state.data_idx + 1);
 
@@ -790,12 +790,12 @@ auto UBLOX::decode_packet(Packet& packet, std::deque<uint8_t>& buffer) -> Decode
         else
         {
             //so far so good but we need more data
-            return Decoder_State::Result::NEEDS_DATA;
+            return Decoder_State::Result::INCOMPLETE_PACKET;
         }
     }
 
     m_state = Decoder_State();
-    return Decoder_State::Result::DONE;
+    return Decoder_State::Result::NEEDS_DATA;
 }
 
 
