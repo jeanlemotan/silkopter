@@ -2693,7 +2693,7 @@ ts::sz::Value serialize(setup::Send_Node_Message_Res const& value)
   sz_value.add_object_member("message_data", serialize(value.get_message_data()));
   return sz_value;
 }
-ts::Result<void> deserialize(setup::Brain_Req& value, ts::sz::Value const& sz_value)
+ts::Result<void> deserialize(setup::FC_Req& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   auto const* type_sz_value = sz_value.find_object_member_by_name("type");
@@ -2777,7 +2777,7 @@ ts::Result<void> deserialize(setup::Brain_Req& value, ts::sz::Value const& sz_va
   else { return ts::Error("Cannot find type '" + path + "' when deserializing"); }
   return ts::success;
 }
-ts::sz::Value serialize(setup::Brain_Req const& value)
+ts::sz::Value serialize(setup::FC_Req const& value)
 {
   ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   if (false) { return ts::sz::Value(); } //this is here just to have the next items with 'else if'
@@ -2867,7 +2867,7 @@ ts::sz::Value serialize(setup::Brain_Req const& value)
   }
   else { TS_ASSERT(false); return ts::sz::Value(); }
 }
-ts::Result<void> deserialize(setup::Brain_Res& value, ts::sz::Value const& sz_value)
+ts::Result<void> deserialize(setup::FC_Res& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   auto const* type_sz_value = sz_value.find_object_member_by_name("type");
@@ -2957,7 +2957,7 @@ ts::Result<void> deserialize(setup::Brain_Res& value, ts::sz::Value const& sz_va
   else { return ts::Error("Cannot find type '" + path + "' when deserializing"); }
   return ts::success;
 }
-ts::sz::Value serialize(setup::Brain_Res const& value)
+ts::sz::Value serialize(setup::FC_Res const& value)
 {
   ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
   if (false) { return ts::sz::Value(); } //this is here just to have the next items with 'else if'

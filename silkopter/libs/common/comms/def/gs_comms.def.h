@@ -697,8 +697,8 @@ private:
   setup::serialized_data_t m_message_data;
 };
 
-typedef boost::variant<setup::Get_AST_Req,setup::Set_Clock_Req,setup::Set_UAV_Descriptor_Req,setup::Get_UAV_Descriptor_Req,setup::Get_Node_Defs_Req,setup::Remove_Node_Req,setup::Add_Node_Req,setup::Get_Nodes_Req,setup::Set_Node_Input_Stream_Path_Req,setup::Set_Stream_Telemetry_Enabled_Req,setup::Set_Node_Config_Req,setup::Send_Node_Message_Req> Brain_Req;
-typedef boost::variant<setup::Get_AST_Res,setup::Set_Clock_Res,setup::Set_UAV_Descriptor_Res,setup::Get_UAV_Descriptor_Res,setup::Get_Node_Defs_Res,setup::Remove_Node_Res,setup::Add_Node_Res,setup::Get_Nodes_Res,setup::Set_Node_Input_Stream_Path_Res,setup::Set_Stream_Telemetry_Enabled_Res,setup::Set_Node_Config_Res,setup::Error,setup::Send_Node_Message_Res> Brain_Res;
+typedef boost::variant<setup::Get_AST_Req,setup::Set_Clock_Req,setup::Set_UAV_Descriptor_Req,setup::Get_UAV_Descriptor_Req,setup::Get_Node_Defs_Req,setup::Remove_Node_Req,setup::Add_Node_Req,setup::Get_Nodes_Req,setup::Set_Node_Input_Stream_Path_Req,setup::Set_Stream_Telemetry_Enabled_Req,setup::Set_Node_Config_Req,setup::Send_Node_Message_Req> FC_Req;
+typedef boost::variant<setup::Get_AST_Res,setup::Set_Clock_Res,setup::Set_UAV_Descriptor_Res,setup::Get_UAV_Descriptor_Res,setup::Get_Node_Defs_Res,setup::Remove_Node_Res,setup::Add_Node_Res,setup::Get_Nodes_Res,setup::Set_Node_Input_Stream_Path_Res,setup::Set_Stream_Telemetry_Enabled_Res,setup::Set_Node_Config_Res,setup::Error,setup::Send_Node_Message_Res> FC_Res;
 }
 ts::Result<void> deserialize(std::string& value, ts::sz::Value const& sz_value);
 ts::sz::Value serialize(std::string const& value);
@@ -806,10 +806,10 @@ ts::Result<void> deserialize(setup::Send_Node_Message_Req& value, ts::sz::Value 
 ts::sz::Value serialize(setup::Send_Node_Message_Req const& value);
 ts::Result<void> deserialize(setup::Send_Node_Message_Res& value, ts::sz::Value const& sz_value);
 ts::sz::Value serialize(setup::Send_Node_Message_Res const& value);
-ts::Result<void> deserialize(setup::Brain_Req& value, ts::sz::Value const& sz_value);
-ts::sz::Value serialize(setup::Brain_Req const& value);
-ts::Result<void> deserialize(setup::Brain_Res& value, ts::sz::Value const& sz_value);
-ts::sz::Value serialize(setup::Brain_Res const& value);
+ts::Result<void> deserialize(setup::FC_Req& value, ts::sz::Value const& sz_value);
+ts::sz::Value serialize(setup::FC_Req const& value);
+ts::Result<void> deserialize(setup::FC_Res& value, ts::sz::Value const& sz_value);
+ts::sz::Value serialize(setup::FC_Res const& value);
 ts::Result<void> deserialize(std::vector<setup::Node_Def_Data::Input>& value, ts::sz::Value const& sz_value);
 ts::sz::Value serialize(std::vector<setup::Node_Def_Data::Input> const& value);
 ts::Result<void> deserialize(std::vector<setup::Node_Def_Data::Output>& value, ts::sz::Value const& sz_value);
