@@ -195,7 +195,7 @@ void Comms::serialize_and_send(size_t channel_idx, T const& message)
 void Comms::request_all_data()
 {
     //todo - ask for these in sequence, not all at once as the response is not guaranteed to arrive in order
-    gs_comms::setup::Brain_Req request;
+    gs_comms::setup::FC_Req request;
     {
         uint64_t t = time(nullptr);
         gs_comms::setup::Set_Clock_Req req;
@@ -1309,7 +1309,7 @@ ts::Result<std::shared_ptr<ts::IStruct_Value>> Comms::request_uav_descriptor(std
     ts::Result<std::shared_ptr<ts::IStruct_Value>> result = ts::Error("Timeout");
     bool done = false;
 
-    gs_comms::setup::Brain_Req request;
+    gs_comms::setup::FC_Req request;
     gs_comms::setup::Get_UAV_Descriptor_Req req;
     req.set_req_id(++m_last_req_id);
     request = req;
@@ -1367,7 +1367,7 @@ ts::Result<std::shared_ptr<ts::IStruct_Value>> Comms::send_uav_descriptor(std::s
     ts::Result<std::shared_ptr<ts::IStruct_Value>> result = ts::Error("Timeout");
     bool done = false;
 
-    gs_comms::setup::Brain_Req request;
+    gs_comms::setup::FC_Req request;
     gs_comms::setup::Set_UAV_Descriptor_Req req;
     req.set_req_id(++m_last_req_id);
 
@@ -1404,7 +1404,7 @@ ts::Result<std::vector<Comms::Node_Def>> Comms::request_node_defs(std::chrono::h
     ts::Result<std::vector<Comms::Node_Def>> result = ts::Error("Timeout");
     bool done = false;
 
-    gs_comms::setup::Brain_Req request;
+    gs_comms::setup::FC_Req request;
     gs_comms::setup::Get_Node_Defs_Req req;
     req.set_req_id(++m_last_req_id);
     request = req;
@@ -1439,7 +1439,7 @@ ts::Result<std::vector<Comms::Node>> Comms::request_nodes(std::chrono::high_reso
     ts::Result<std::vector<Comms::Node>> result = ts::Error("Timeout");
     bool done = false;
 
-    gs_comms::setup::Brain_Req request;
+    gs_comms::setup::FC_Req request;
     gs_comms::setup::Get_Nodes_Req req;
     req.set_req_id(++m_last_req_id);
     request = req;
@@ -1500,7 +1500,7 @@ ts::Result<Comms::Node> Comms::add_node(std::string const& name,
     ts::Result<Node> result = ts::Error("Timeout");
     bool done = false;
 
-    gs_comms::setup::Brain_Req request;
+    gs_comms::setup::FC_Req request;
     gs_comms::setup::Add_Node_Req req;
     req.set_req_id(++m_last_req_id);
     req.set_def_name(def_name);
@@ -1539,7 +1539,7 @@ ts::Result<void> Comms::remove_node(std::string const& name, std::chrono::high_r
     ts::Result<void> result = ts::Error("Timeout");
     bool done = false;
 
-    gs_comms::setup::Brain_Req request;
+    gs_comms::setup::FC_Req request;
     gs_comms::setup::Remove_Node_Req req;
     req.set_req_id(++m_last_req_id);
     req.set_name(name);
@@ -1576,7 +1576,7 @@ ts::Result<Comms::Node> Comms::set_node_input_stream_path(std::string const& nod
     ts::Result<Comms::Node> result = ts::Error("Timeout");
     bool done = false;
 
-    gs_comms::setup::Brain_Req request;
+    gs_comms::setup::FC_Req request;
     gs_comms::setup::Set_Node_Input_Stream_Path_Req req;
     req.set_req_id(++m_last_req_id);
     req.set_node_name(node_name);
@@ -1631,7 +1631,7 @@ ts::Result<void> Comms::set_stream_telemetry_enabled(std::string const& stream_p
     ts::Result<void> result = ts::Error("Timeout");
     bool done = false;
 
-    gs_comms::setup::Brain_Req request;
+    gs_comms::setup::FC_Req request;
     gs_comms::setup::Set_Stream_Telemetry_Enabled_Req req;
     req.set_req_id(++m_last_req_id);
     req.set_stream_path(stream_path);
@@ -1706,7 +1706,7 @@ ts::Result<Comms::Node> Comms::set_node_config(std::string const& name,
     ts::Result<Node> result = ts::Error("Timeout");
     bool done = false;
 
-    gs_comms::setup::Brain_Req request;
+    gs_comms::setup::FC_Req request;
     gs_comms::setup::Set_Node_Config_Req req;
     req.set_req_id(++m_last_req_id);
     req.set_name(name);
@@ -1743,7 +1743,7 @@ ts::Result<void> Comms::send_node_message(std::string const& name, std::shared_p
 {
     messages::Poly_INode_Message container_value(message);
 
-    gs_comms::setup::Brain_Req request;
+    gs_comms::setup::FC_Req request;
     gs_comms::setup::Send_Node_Message_Req req;
     req.set_req_id(++m_last_req_id);
     req.set_name(name);
@@ -1805,7 +1805,7 @@ void Comms::process()
         }
         else
         {
-            silk::gs_comms::setup::Brain_Res res;
+            silk::gs_comms::setup::FC_Res res;
             auto result = silk::gs_comms::deserialize(res, parse_result.payload());
             if (result != ts::success)
             {
