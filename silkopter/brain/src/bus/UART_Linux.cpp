@@ -62,7 +62,7 @@ ts::Result<void> UART_Linux::init(std::string const& dev, int baud_id)
 
     std::lock_guard<UART_Linux> lg(*this);
 
-    m_fd = ::open(dev.c_str(), O_RDWR | O_NOCTTY | O_NDELAY | O_NONBLOCK);
+    m_fd = ::open(dev.c_str(), O_RDWR | O_NOCTTY);
     if (m_fd < 0)
     {
         return make_error("Can't open " + dev + ": " + strerror(errno));
@@ -76,6 +76,12 @@ ts::Result<void> UART_Linux::init(std::string const& dev, int baud_id)
     cfsetospeed(&options, baud_id);
 
     cfmakeraw(&options);
+
+//    options.c_iflag &= ~IGNBRK;         // disable break processing
+//    options.c_lflag = 0;                // no signaling chars, no echo, no canonical processing
+//    options.c_oflag = 0;                // no remapping, no delays
+    options.c_cc[VMIN]  = 0;            // read doesn't block
+    options.c_cc[VTIME] = 0;            // 0 seconds read timeout
 
     tcflush(m_fd, TCIFLUSH);
     tcsetattr(m_fd, TCSANOW, &options);
