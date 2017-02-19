@@ -1,4 +1,4 @@
-#include "BrainStdAfx.h"
+#include "FCStdAfx.h"
 #include "GS_Comms.h"
 #include "utils/Timed_Scope.h"
 
@@ -384,7 +384,7 @@ void GS_Comms::handle_req(gs_comms::setup::Get_AST_Req const& req)
     TIMED_FUNCTION();
     QLOGI("Get_AST_Req {}", req.get_req_id());
 
-    gs_comms::setup::Brain_Res response = gs_comms::setup::Get_AST_Res();
+    gs_comms::setup::FC_Res response = gs_comms::setup::Get_AST_Res();
     gs_comms::setup::Get_AST_Res& res = boost::get<gs_comms::setup::Get_AST_Res>(response);
 
     res.set_req_id(req.get_req_id());
@@ -398,7 +398,7 @@ void GS_Comms::handle_req(gs_comms::setup::Set_Clock_Req const& req)
     TIMED_FUNCTION();
     QLOGI("Set_Clock_Req {}", req.get_req_id());
 
-    gs_comms::setup::Brain_Res response;
+    gs_comms::setup::FC_Res response;
 
     int64_t time_t_data = req.get_time();
 #ifdef RASPBERRY_PI
@@ -432,7 +432,7 @@ void GS_Comms::handle_req(gs_comms::setup::Set_UAV_Descriptor_Req const& req)
     TIMED_FUNCTION();
     QLOGI("Set_UAV_Descriptor_Req {}", req.get_req_id());
 
-    gs_comms::setup::Brain_Res response;
+    gs_comms::setup::FC_Res response;
 
     std::string const& json = decode_json(req.get_data());
     auto json_result = ts::sz::from_json(json);
@@ -478,7 +478,7 @@ void GS_Comms::handle_req(gs_comms::setup::Get_UAV_Descriptor_Req const& req)
     TIMED_FUNCTION();
     QLOGI("Get_UAV_Descriptor_Req {}", req.get_req_id());
 
-    gs_comms::setup::Brain_Res response = gs_comms::setup::Get_UAV_Descriptor_Res();
+    gs_comms::setup::FC_Res response = gs_comms::setup::Get_UAV_Descriptor_Res();
     gs_comms::setup::Get_UAV_Descriptor_Res& res = boost::get<gs_comms::setup::Get_UAV_Descriptor_Res>(response);
 
     ts::sz::Value sz_value = hal::serialize(hal::Poly<const hal::IUAV_Descriptor>(m_hal.get_uav_descriptor()));
@@ -493,7 +493,7 @@ void GS_Comms::handle_req(gs_comms::setup::Get_Node_Defs_Req const& req)
     TIMED_FUNCTION();
     QLOGI("Get_Node_Defs_Req {}", req.get_req_id());
 
-    gs_comms::setup::Brain_Res response = gs_comms::setup::Get_Node_Defs_Res();
+    gs_comms::setup::FC_Res response = gs_comms::setup::Get_Node_Defs_Res();
     gs_comms::setup::Get_Node_Defs_Res& res = boost::get<gs_comms::setup::Get_Node_Defs_Res>(response);
 
 //    //first disable all telemetry because the GS doesn't yet have all the streams
@@ -552,7 +552,7 @@ void GS_Comms::handle_req(gs_comms::setup::Remove_Node_Req const& req)
     TIMED_FUNCTION();
     QLOGI("Remove_Node_Req {}", req.get_req_id());
 
-    gs_comms::setup::Brain_Res response;
+    gs_comms::setup::FC_Res response;
 
     std::shared_ptr<node::INode> node = m_hal.get_node_registry().find_by_name<node::INode>(req.get_name());
     if (!node)
@@ -576,7 +576,7 @@ void GS_Comms::handle_req(gs_comms::setup::Add_Node_Req const& req)
     TIMED_FUNCTION();
     QLOGI("Add_Node_Req {}", req.get_req_id());
 
-    gs_comms::setup::Brain_Res response;
+    gs_comms::setup::FC_Res response;
 
     std::string const& json = decode_json(req.get_descriptor_data());
     auto json_result = ts::sz::from_json(json);
@@ -625,7 +625,7 @@ void GS_Comms::handle_req(gs_comms::setup::Get_Nodes_Req const& req)
     TIMED_FUNCTION();
     QLOGI("Get_Nodes_Req {}", req.get_req_id());
 
-    gs_comms::setup::Brain_Res response;
+    gs_comms::setup::FC_Res response;
 
     gs_comms::setup::Get_Nodes_Res res;
     res.set_req_id(req.get_req_id());
@@ -676,7 +676,7 @@ void GS_Comms::handle_req(gs_comms::setup::Set_Node_Input_Stream_Path_Req const&
     TIMED_FUNCTION();
     QLOGI("Set_Node_Input_Stream_Path_Req {}", req.get_req_id());
 
-    gs_comms::setup::Brain_Res response;
+    gs_comms::setup::FC_Res response;
     gs_comms::setup::Set_Node_Input_Stream_Path_Res res;
     res.set_req_id(req.get_req_id());
 
@@ -731,7 +731,7 @@ void GS_Comms::handle_req(gs_comms::setup::Set_Stream_Telemetry_Enabled_Req cons
     TIMED_FUNCTION();
     QLOGI("Set_Stream_Telemetry_Enabled_Req {}", req.get_req_id());
 
-    gs_comms::setup::Brain_Res response;
+    gs_comms::setup::FC_Res response;
     gs_comms::setup::Set_Stream_Telemetry_Enabled_Res res;
     res.set_req_id(req.get_req_id());
 
@@ -781,7 +781,7 @@ void GS_Comms::handle_req(gs_comms::setup::Set_Node_Config_Req const& req)
     TIMED_FUNCTION();
     QLOGI("Set_Node_Config_Req {}", req.get_req_id());
 
-    gs_comms::setup::Brain_Res response;
+    gs_comms::setup::FC_Res response;
     gs_comms::setup::Set_Node_Config_Res res;
     res.set_req_id(req.get_req_id());
 
@@ -840,7 +840,7 @@ void GS_Comms::handle_req(gs_comms::setup::Send_Node_Message_Req const& req)
     TIMED_FUNCTION();
     QLOGI("Send_Node_Message_Req {}", req.get_req_id());
 
-    gs_comms::setup::Brain_Res response;
+    gs_comms::setup::FC_Res response;
     gs_comms::setup::Send_Node_Message_Res res;
     res.set_req_id(req.get_req_id());
 
@@ -914,7 +914,7 @@ void GS_Comms::process()
         }
         else
         {
-            silk::gs_comms::setup::Brain_Req req;
+            silk::gs_comms::setup::FC_Req req;
             auto result = silk::gs_comms::deserialize(req, parse_result.payload());
             if (result != ts::success)
             {

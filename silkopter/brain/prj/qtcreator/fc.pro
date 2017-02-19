@@ -4,11 +4,11 @@ CONFIG += console
 CONFIG -= qt
 CONFIG += c++11
 
-TARGET = brain
+TARGET = fc
 target.path = /root
 INSTALLS = target
 
-PRECOMPILED_HEADER = ../../src/BrainStdAfx.h
+PRECOMPILED_HEADER = ../../src/FCStdAfx.h
 CONFIG *= precompile_header
 
 
@@ -97,7 +97,6 @@ rpi {
 }
 
 SOURCES += \
-    ../../src/BrainStdAfx.cpp \
     ../../src/main.cpp \
     ../../src/bus/UART_Linux.cpp \
     ../../src/bus/SPI_Linux.cpp \
@@ -171,9 +170,9 @@ SOURCES += \
     ../../../libs/utils/comms/RC_Phy.cpp \
     ../../../libs/utils/comms/RC_Protocol.cpp \
     ../../../libs/common/comms/def/messages.def.cpp \
+    ../../src/FCStdAfx.cpp
 
 HEADERS += \
-    ../../src/BrainStdAfx.h \
     ../../../libs/utils/chrono.h \
     ../../../libs/utils/PID.h \
     ../../../libs/utils/Timed_Scope.h \
@@ -331,7 +330,8 @@ HEADERS += \
     ../../../libs/utils/comms/RC_Phy.h \
     ../../../libs/utils/comms/RC_Protocol.h \
     ../../../libs/common/comms/def/messages.def.h \
-    ../../../libs/common/stream/IMultirotor_Simulator_State.h
+    ../../../libs/common/stream/IMultirotor_Simulator_State.h \
+    ../../src/FCStdAfx.h
 
 DISTFILES +=
 

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "qmath.h"
 #include "uav_properties/IUAV_Properties.h"
 
 #include <stdint.h>

@@ -1,4 +1,4 @@
-#include "BrainStdAfx.h"
+#include "FCStdAfx.h"
 #include "Multirotor_Simulation.h"
 #include "physics/constants.h"
 
@@ -12,14 +12,6 @@ static math::vec3f bt_to_vec3f(btVector3 const& v)
 static math::quatf bt_to_quatf(btQuaternion const& v)
 {
     return math::quatf(v.x(), v.y(), v.z(), v.w());
-}
-static math::quatf vec4f_to_quatf(math::vec4f const& v)
-{
-    return math::quatf(v.x, v.y, v.z, v.w);
-}
-static math::vec4f quatf_to_vec4f(math::quatf const& q)
-{
-    return math::vec4f(q.x, q.y, q.z, q.w);
 }
 static btVector3 vec3f_to_bt(math::vec3f const& v)
 {

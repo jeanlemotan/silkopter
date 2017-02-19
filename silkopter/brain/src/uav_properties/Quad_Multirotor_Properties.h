@@ -1,5 +1,6 @@
 #pragma once
 
+#include "def_lang/Result.h"
 #include "uav_properties/IMultirotor_Properties.h"
 
 #include <stdint.h>
