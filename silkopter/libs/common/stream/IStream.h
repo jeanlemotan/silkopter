@@ -139,21 +139,13 @@ public:
 
 
 //A stream sample
-template<class T> struct Sample
+template<typename Value_T> struct Sample
 {
-    typedef T Value;
+    typedef Value_T Value;
 
-    Sample() : value() {}
-    Sample(Sample const& other) = default;
-    Sample(Sample&& other) = default;
-    Sample& operator=(Sample const& other) = default;
-    Sample& operator=(Sample&& other) = default;
-
-    T value;
+    Value value = Value();
     bool is_healthy = false;
 };
-
-
 
 }
 }
@@ -175,7 +167,7 @@ struct Serialized_Sample_Data
 }
 
 
-template<class T> inline void serialize(Buffer_t& buffer, silk::stream::Sample<T> const& sample, size_t& off)
+template<typename V> inline void serialize(Buffer_t& buffer, silk::stream::Sample<V> const& sample, size_t& off)
 {
     detail::Serialized_Sample_Data data;
     data.is_healthy = sample.is_healthy;
@@ -183,10 +175,11 @@ template<class T> inline void serialize(Buffer_t& buffer, silk::stream::Sample<T
     serialize(buffer, sample.value, off);
 }
 
-template<class T> inline auto deserialize(Buffer_t const& buffer, silk::stream::Sample<T>& sample, size_t& off) -> bool
+template<typename V> inline auto deserialize(Buffer_t const& buffer, silk::stream::Sample<V>& sample, size_t& off) -> bool
 {
     detail::Serialized_Sample_Data data;
-    if (!deserialize(buffer, data, off) || !deserialize(buffer, sample.value, off))
+    if (!deserialize(buffer, data, off) ||
+        !deserialize(buffer, sample.value, off))
     {
         return false;
     }
