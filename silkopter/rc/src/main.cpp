@@ -223,11 +223,6 @@ int main(int argc, char *argv[])
     silk::Input input;
     input.init();
 
-    size_t render_frames = 0;
-
-    Clock::time_point last_tp = Clock::now();
-    size_t process_frames = 0;
-
     // init done
     display.clearDisplay();   // clears the screen  buffer
     display.display();   		// display it (clear display)
@@ -242,20 +237,9 @@ int main(int argc, char *argv[])
         comms.process();
         menu_system.process(input);
 
-        process_frames++;
-        if (Clock::now() - last_tp >= std::chrono::seconds(1))
-        {
-            last_tp = Clock::now();
-            QLOGI("P FPS: {}, R FPS: {}", process_frames, render_frames);
-            process_frames = 0;
-            render_frames = 0;
-        }
-
         if (display.displayIncremental(silk::s_settings.get_hw().get_display_incremental_step_us()))
         {
-            render_frames++;
             display.clearDisplay();
-
             menu_system.render(display);
         }
 

@@ -177,7 +177,15 @@ HEADERS += \
     ../../src/Remote_Viewer.h \
     ../../src/Remote_Viewer_Server.h \
     ../../../libs/utils/comms/ASIO_Socket_Adapter.h \
-    ../../../libs/utils/comms/RCP_Channel.h
+    ../../../libs/utils/comms/RCP_Channel.h \
+    ../../../libs/utils/hw/ADS1115.h \
+    ../../../libs/utils/hw/II2C.h \
+    ../../../libs/utils/hw/ISPI.h \
+    ../../../libs/utils/hw/I2C_BCM.h \
+    ../../../libs/utils/hw/IUART.h \
+    ../../../libs/utils/hw/SPI_BCM.h \
+    ../../../libs/utils/hw/UART_BB.h \
+    ../../../libs/utils/hw/UART_Dev.h
 
 SOURCES += \
     ../../src/main.cpp \
@@ -221,7 +229,11 @@ SOURCES += \
     ../../../libs/utils/comms/RC_Phy.cpp \
     ../../../libs/utils/comms/RC_Protocol.cpp \
     ../../src/Remote_Viewer.cpp \
-    ../../src/Remote_Viewer_Server.cpp
+    ../../src/Remote_Viewer_Server.cpp \
+    ../../../libs/utils/hw/ADS1115.cpp \
+    ../../../libs/utils/hw/I2C_BCM.cpp \
+    ../../../libs/utils/hw/SPI_BCM.cpp \
+    ../../../libs/utils/hw/UART_Dev.cpp
 
 DISTFILES += \
     ../../src/node.png \

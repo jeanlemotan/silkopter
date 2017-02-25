@@ -391,7 +391,7 @@ private:
     uint8_t m_sdn_gpio = 0;
     uint8_t m_nirq_gpio = 0;
 
-    SPI_Dev m_spi_dev;
+    mutable SPI_Dev m_spi_dev;
     bool m_is_initialized = false;
 };
 

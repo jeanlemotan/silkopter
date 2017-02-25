@@ -29,6 +29,8 @@ namespace util
 namespace hw
 {
 
+std::recursive_mutex I2C_Dev::s_mutex;
+
 I2C_Dev::I2C_Dev()
 {
 }
@@ -66,10 +68,26 @@ void I2C_Dev::close()
     }
 }
 
+void I2C_Dev::lock()
+{
+    s_mutex.lock();
+}
+
+bool I2C_Dev::try_lock()
+{
+    return s_mutex.try_lock();
+}
+void I2C_Dev::unlock()
+{
+    s_mutex.unlock();
+}
+
 bool I2C_Dev::read(uint8_t address, uint8_t* data, size_t size)
 {
     QLOG_TOPIC("I2C_Dev::read");
     QASSERT(m_fd >= 0);
+
+    std::lock_guard<I2C_Dev> lg(*this);
 
     struct i2c_rdwr_ioctl_data io;
     memset(&io, 0, sizeof(i2c_rdwr_ioctl_data));
@@ -96,6 +114,8 @@ bool I2C_Dev::write(uint8_t address, uint8_t const* data, size_t size)
     QLOG_TOPIC("I2C_Dev::write");
     QASSERT(m_fd >= 0);
 
+    std::lock_guard<I2C_Dev> lg(*this);
+
     struct i2c_rdwr_ioctl_data io;
     memset(&io, 0, sizeof(i2c_rdwr_ioctl_data));
 
@@ -120,6 +140,8 @@ bool I2C_Dev::read_register(uint8_t address, uint8_t reg, uint8_t* data, size_t 
 {
     QLOG_TOPIC("I2C_Dev::read_register");
     QASSERT(m_fd >= 0);
+
+    std::lock_guard<I2C_Dev> lg(*this);
 
     struct i2c_rdwr_ioctl_data io;
     memset(&io, 0, sizeof(i2c_rdwr_ioctl_data));
@@ -151,6 +173,8 @@ bool I2C_Dev::write_register(uint8_t address, uint8_t reg, uint8_t const* data, 
     QLOG_TOPIC("I2C_Dev::write_register");
     QASSERT(m_fd >= 0);
 
+    std::lock_guard<I2C_Dev> lg(*this);
+
     struct i2c_rdwr_ioctl_data io;
     memset(&io, 0, sizeof(i2c_rdwr_ioctl_data));
 
@@ -177,33 +201,6 @@ bool I2C_Dev::write_register(uint8_t address, uint8_t reg, uint8_t const* data, 
         return false;
     }
     return true;
-}
-
-bool I2C_Dev::read_register_u16(uint8_t address, uint8_t reg, uint16_t& dst)
-{
-    uint8_t val[2];
-    if (read_register(address, reg, val, 2))
-    {
-        reinterpret_cast<uint8_t*>(&dst)[1] = val[0];
-        reinterpret_cast<uint8_t*>(&dst)[0] = val[1];
-        return true;
-    }
-    return false;
-}
-bool I2C_Dev::read_register_u8(uint8_t address, uint8_t reg, uint8_t& dst)
-{
-    return read_register(address, reg, &dst, 1);
-}
-bool I2C_Dev::write_register_u8(uint8_t address, uint8_t reg, uint8_t t)
-{
-    return write_register(address, reg, &t, 1);
-}
-bool I2C_Dev::write_register_u16(uint8_t address, uint8_t reg, uint16_t t)
-{
-    uint8_t val[2];
-    val[0] = reinterpret_cast<uint8_t const*>(&t)[1];
-    val[1] = reinterpret_cast<uint8_t const*>(&t)[0];
-    return write_register(address, reg, val, 2);
 }
 
 }

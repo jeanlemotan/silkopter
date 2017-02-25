@@ -30,9 +30,12 @@ private:
     Axis_Data m_roll;
     Axis_Data m_throttle;
 
+    std::vector<std::vector<uint8_t>> m_button_state;
+
     enum class Section
     {
         STICKS,
+        BUTTONS,
         COMMS,
         BATTERY,
         ABOUT,

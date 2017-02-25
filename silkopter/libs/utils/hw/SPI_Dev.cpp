@@ -12,6 +12,8 @@ namespace util
 namespace hw
 {
 
+std::recursive_mutex SPI_Dev::s_mutex;
+
 SPI_Dev::SPI_Dev()
 {
 }
@@ -46,13 +48,29 @@ ts::Result<void> SPI_Dev::init(std::string const& device, uint32_t speed)
     return ts::success;
 }
 
-bool SPI_Dev::do_transfer(void const* tx_data, void* rx_data, size_t size, uint32_t speed) const
+void SPI_Dev::lock()
+{
+    s_mutex.lock();
+}
+
+bool SPI_Dev::try_lock()
+{
+    return s_mutex.try_lock();
+}
+void SPI_Dev::unlock()
+{
+    s_mutex.unlock();
+}
+
+bool SPI_Dev::do_transfer(void const* tx_data, void* rx_data, size_t size, uint32_t speed)
 {
     QASSERT(m_fd >= 0 && size > 0);
     if (m_fd < 0 || size == 0)
     {
         return false;
     }
+
+    std::lock_guard<SPI_Dev> lg(*this);
 
     spi_ioc_transfer spi_transfer;
     memset(&spi_transfer, 0, sizeof(spi_ioc_transfer));
@@ -74,15 +92,17 @@ bool SPI_Dev::do_transfer(void const* tx_data, void* rx_data, size_t size, uint3
     return true;
 }
 
-bool SPI_Dev::transfer(void const* tx_data, void* rx_data, size_t size, uint32_t speed) const
+bool SPI_Dev::transfer(void const* tx_data, void* rx_data, size_t size, uint32_t speed)
 {
     QLOG_TOPIC("SPI_Dev::transfer");
     return do_transfer(tx_data, rx_data, size, speed);
 }
 
-bool SPI_Dev::transfer_register(uint8_t reg, void const* tx_data, void* rx_data, size_t size, uint32_t speed) const
+bool SPI_Dev::transfer_register(uint8_t reg, void const* tx_data, void* rx_data, size_t size, uint32_t speed)
 {
     QLOG_TOPIC("SPI_Dev::transfer_register");
+
+    std::lock_guard<SPI_Dev> lg(*this);
 
     m_tx_buffer.resize(size + 1);
     m_tx_buffer[0] = reg;

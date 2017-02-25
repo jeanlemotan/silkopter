@@ -3,6 +3,7 @@
 #include "def_lang/Result.h"
 #include "ISticks.h"
 #include "utils/hw/I2C_Dev.h"
+#include "utils/hw/ADS1115.h"
 #include "utils/Clock.h"
 
 namespace silk
@@ -37,24 +38,7 @@ public:
 
 private:
     util::hw::I2C_Dev m_dev;
-    uint8_t m_address = 0;
-
-    Clock::time_point m_last_tp = Clock::now();
-
-    bool set_config_register();
-
-    struct Config_Register
-    {
-        uint16_t gain = 0;
-        uint16_t mux = 0;
-        uint16_t status = 0;
-        uint16_t mode = 0;
-        uint16_t rate = 0;
-        uint16_t comparator = 0;
-        uint16_t polarity = 0;
-        uint16_t latch = 0;
-        uint16_t queue = 0;
-    } m_config_register;
+    util::hw::ADS1115 m_ads1115;
 
     struct ADC
     {
@@ -70,8 +54,6 @@ private:
     Deadband_Position m_throttle_deadband_position = Deadband_Position::LOW;
 
     static float get_stick_value(ADC const& adc, bool apply_deadband, bool center_deadband);
-
-    uint8_t m_crt_adc = 0;
 };
 
 }

@@ -3,20 +3,19 @@
 #include "II2C.h"
 #include <mutex>
 #include <vector>
-#include <string>
 
 namespace util
 {
 namespace hw
 {
 
-class I2C_Dev : public II2C
+class I2C_BCM : public II2C
 {
 public:
-    I2C_Dev();
-    ~I2C_Dev();
+    I2C_BCM();
+    ~I2C_BCM();
 
-    ts::Result<void> init(std::string const& device);
+    ts::Result<void> init(uint32_t device, uint32_t baud);
 
     void lock() override;
     bool try_lock() override;
@@ -31,9 +30,10 @@ public:
 private:
     void close();
 
-    std::string m_device;
-    int m_fd = -1;
+    uint32_t m_device = 0;
+    uint32_t m_baud = 0;
     std::vector<uint8_t> m_buffer;
+
     static std::recursive_mutex s_mutex;
 };
 

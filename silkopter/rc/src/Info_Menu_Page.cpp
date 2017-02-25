@@ -4,6 +4,7 @@
 #include "ISticks.h"
 #include "IStick_Actuators.h"
 #include "IButton.h"
+#include "IButton_Matrix.h"
 #include "Comms.h"
 #include "Remote_Viewer_Server.h"
 
@@ -21,7 +22,7 @@ extern int s_version_minor;
 Info_Menu_Page::Info_Menu_Page(Comms& comms)
     : m_comms(comms)
 {
-    m_menu.push_submenu({"<-", "Sticks", "Comms", "Battery", "About"}, 0, 34);
+    m_menu.push_submenu({"<-", "Sticks", "Buttons", "Comms", "Battery", "About"}, 0, 34);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -35,9 +36,10 @@ bool Info_Menu_Page::process(Input& input, Menu_System& menu_system)
         {
         case 0: return false;
         case 1: m_section = Section::STICKS; break;
-        case 2: m_section = Section::COMMS; break;
-        case 3: m_section = Section::BATTERY; break;
-        case 4: m_section = Section::ABOUT; break;
+        case 2: m_section = Section::BUTTONS; break;
+        case 3: m_section = Section::COMMS; break;
+        case 4: m_section = Section::BATTERY; break;
+        case 5: m_section = Section::ABOUT; break;
         }
     }
 
@@ -79,6 +81,18 @@ bool Info_Menu_Page::process(Input& input, Menu_System& menu_system)
             input.get_stick_actuators().set_target_throttle(boost::none);
         }
     }
+    else if (m_section == Section::BUTTONS)
+    {
+        m_button_state.resize(input.get_button_matrix().get_row_count());
+        for (size_t r = 0; r < m_button_state.size(); r++)
+        {
+            m_button_state[r].resize(input.get_button_matrix().get_column_count());
+            for (size_t c = 0; c < m_button_state[r].size(); c++)
+            {
+                m_button_state[r][c] = input.get_button_matrix().get_button(r, c).is_pressed() ? 1 : 0;
+            }
+        }
+    }
 
     return true;
 }
@@ -116,6 +130,32 @@ void Info_Menu_Page::render(Adafruit_GFX& display)
         draw_axis(display, 8, "P", m_pitch);
         draw_axis(display, 16, "R", m_roll);
         draw_axis(display, 24, "T", m_throttle);
+    }
+    else if (m_section == Section::BUTTONS)
+    {
+        int16_t btn_list_x = 106;
+        int16_t btn_list_y = 2;
+
+        int16_t btn_size = 8;
+        for (size_t r = 0; r < m_button_state.size(); r++)
+        {
+            for (size_t c = 0; c < m_button_state[r].size(); c++)
+            {
+                int16_t btn_x = 10 + c*(btn_size - 1);
+                int16_t btn_y = 2 + r*(btn_size - 1);
+                if (m_button_state[r][c] == 1)
+                {
+                    display.fillRect(btn_x, btn_y, btn_size, btn_size, 1);
+                    display.setCursor(btn_list_x, btn_list_y);
+                    display.printf("%d%d", r, c);
+                    btn_list_y += 8;
+                }
+                else
+                {
+                    display.drawRect(btn_x, btn_y, btn_size, btn_size, 1);
+                }
+            }
+        }
     }
     else if (m_section == Section::COMMS)
     {
