@@ -29,10 +29,12 @@ qdata - filesystem and stream library
 qinput - gamepad, mouse, touch and keyboard abstraction
 qmath - math lib
 q - 3d rendering engine used by the simulator and ground station
-silkopter/brain - raspberry pi software. The actual UAV FC
+silkopter/fc - flight controller
 silkopter/gs - ground station
 silkopter/rc - remote control
 silkopter/libs - common code used by the brain, gs and sim projects
+printing/gimbal - a raspberry pi camera 2 axis gimbal
+electrical/fc - eagle schematic and board layout for the silkopter fc
 
 The q* libraries started initially as a mobile 3d game engine so most of the code is very game-oriented.
 
