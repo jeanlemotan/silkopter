@@ -5,18 +5,17 @@
 #include "IRotary_Encoder.h"
 
 #include "Menu_System.h"
+#include "HAL.h"
 
 #include "settings.def.h"
 
 namespace silk
 {
 
-extern settings::Settings s_settings;
-extern void save_settings();
-
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-Stick_Calibration_Menu_Page::Stick_Calibration_Menu_Page()
+Stick_Calibration_Menu_Page::Stick_Calibration_Menu_Page(HAL& hal)
+    : m_hal(hal)
 {
     m_menu.push_submenu({"Next", "Cancel"}, 0, 34);
     m_phase_start_tp = Clock::now();
@@ -78,7 +77,7 @@ bool Stick_Calibration_Menu_Page::process(Input& input, Menu_System& menu_system
                 input.get_sticks().set_roll_calibration(m_roll.min, m_roll.center, m_roll.max, m_roll.deadband);
                 input.get_sticks().set_throttle_calibration(m_throttle.min, m_throttle.center, m_throttle.max, m_throttle.deadband);
 
-                settings::Settings::Input::Sticks_Calibration& sc = s_settings.get_input().get_sticks_calibration();
+                settings::Settings::Input::Sticks_Calibration& sc = m_hal.get_settings().get_input().get_sticks_calibration();
                 sc.set_yaw_min(m_yaw.min);
                 sc.set_yaw_center(m_yaw.center);
                 sc.set_yaw_max(m_yaw.max);
@@ -96,7 +95,7 @@ bool Stick_Calibration_Menu_Page::process(Input& input, Menu_System& menu_system
                 sc.set_throttle_max(m_throttle.max);
                 sc.set_throttle_deadband(m_throttle.deadband);
 
-                save_settings();
+                m_hal.save_settings();
 
                 return false;
             }

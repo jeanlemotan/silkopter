@@ -1,25 +1,19 @@
 #pragma once
 
 #include "IBus.h"
+#include "utils/hw/IUART.h"
 
 namespace silk
 {
 namespace bus
 {
 
-class IUART: public IBus
+class IUART_Bus: public IBus
 {
 public:
-    virtual ~IUART() = default;
+    virtual ~IUART_Bus() = default;
 
-    virtual void lock() = 0;
-    virtual auto try_lock() -> bool = 0;
-    virtual void unlock() = 0;
-
-    virtual auto read(uint8_t* data, size_t max_size) -> size_t = 0;
-    virtual auto write(uint8_t const* data, size_t size) -> bool = 0;
-
-    virtual void send_break() = 0;
+    virtual util::hw::IUART& get_uart() = 0;
 };
 
 

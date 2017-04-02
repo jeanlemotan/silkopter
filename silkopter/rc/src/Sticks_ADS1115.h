@@ -12,7 +12,7 @@ namespace silk
 class Sticks_ADS1115 : public ISticks
 {
 public:
-    Sticks_ADS1115();
+    Sticks_ADS1115(util::hw::II2C& i2c);
     ~Sticks_ADS1115();
 
     ts::Result<void> init();
@@ -37,7 +37,7 @@ public:
     void process() override;
 
 private:
-    util::hw::I2C_Dev m_dev;
+    util::hw::II2C& m_i2c;
     util::hw::ADS1115 m_ads1115;
 
     struct ADC

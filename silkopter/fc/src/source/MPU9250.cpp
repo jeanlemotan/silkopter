@@ -326,12 +326,12 @@ bool MPU9250::lock(Buses& buses)
 {
     if (buses.i2c)
     {
-        buses.i2c->lock(); //lock the bus
+        buses.i2c->get_i2c().lock(); //lock the bus
         return true;
     }
     if (buses.spi)
     {
-        buses.spi->lock(); //lock the bus
+        buses.spi->get_spi().lock(); //lock the bus
         return true;
     }
     return false;
@@ -340,12 +340,12 @@ void MPU9250::unlock(Buses& buses)
 {
     if (buses.i2c)
     {
-        buses.i2c->unlock(); //unlock the bus
+        buses.i2c->get_i2c().unlock(); //unlock the busbuses.i2c->unlock(); //unlock the bus
         return;
     }
     if (buses.spi)
     {
-        buses.spi->unlock(); //unlock the bus
+        buses.spi->get_spi().unlock(); //unlock the bus
         return;
     }
 }
@@ -353,43 +353,43 @@ void MPU9250::unlock(Buses& buses)
 bool MPU9250::mpu_read(Buses& buses, uint8_t reg, uint8_t* rx_data, uint32_t size, size_t speed)
 {
     m_dummy_tx_data.resize(size);
-    return buses.i2c ? buses.i2c->read_register(m_descriptor->get_i2c_address(), reg, rx_data, size)
-         : buses.spi ? buses.spi->transfer_register(reg | READ_FLAG, m_dummy_tx_data.data(), rx_data, size, speed)
+    return buses.i2c ? buses.i2c->get_i2c().read_register(m_descriptor->get_i2c_address(), reg, rx_data, size)
+         : buses.spi ? buses.spi->get_spi().transfer_register(reg | READ_FLAG, m_dummy_tx_data.data(), rx_data, size, speed)
          : false;
 }
 bool MPU9250::mpu_read_u8(Buses& buses, uint8_t reg, uint8_t& rx_data, size_t speed)
 {
     uint8_t dummy_data = 0;
-    return buses.i2c ? buses.i2c->read_register_u8(m_descriptor->get_i2c_address(), reg, rx_data)
-         : buses.spi ? buses.spi->transfer_register_u8(reg | READ_FLAG, dummy_data, rx_data, speed)
+    return buses.i2c ? buses.i2c->get_i2c().read_register_u8(m_descriptor->get_i2c_address(), reg, rx_data)
+         : buses.spi ? buses.spi->get_spi().transfer_register_u8(reg | READ_FLAG, dummy_data, rx_data, speed)
          : false;
 }
 bool MPU9250::mpu_read_u16(Buses& buses, uint8_t reg, uint16_t& rx_data, size_t speed)
 {
     uint16_t dummy_data = 0;
-    return buses.i2c ? buses.i2c->read_register_u16(m_descriptor->get_i2c_address(), reg, rx_data)
-         : buses.spi ? buses.spi->transfer_register_u16(reg | READ_FLAG, dummy_data, rx_data, speed)
+    return buses.i2c ? buses.i2c->get_i2c().read_register_u16(m_descriptor->get_i2c_address(), reg, rx_data)
+         : buses.spi ? buses.spi->get_spi().transfer_register_u16(reg | READ_FLAG, dummy_data, rx_data, speed)
          : false;
 }
 bool MPU9250::mpu_write_u8(Buses& buses, uint8_t reg, uint8_t tx_data, size_t speed)
 {
     uint8_t dummy_data = 0;
-    return buses.i2c ? buses.i2c->write_register_u8(m_descriptor->get_i2c_address(), reg, tx_data)
-         : buses.spi ? buses.spi->transfer_register_u8(reg, tx_data, dummy_data, speed)
+    return buses.i2c ? buses.i2c->get_i2c().write_register_u8(m_descriptor->get_i2c_address(), reg, tx_data)
+         : buses.spi ? buses.spi->get_spi().transfer_register_u8(reg, tx_data, dummy_data, speed)
          : false;
 }
 bool MPU9250::mpu_write_u16(Buses& buses, uint8_t reg, uint16_t tx_data, size_t speed)
 {
     uint16_t dummy_data = 0;
-    return buses.i2c ? buses.i2c->write_register_u16(m_descriptor->get_i2c_address(), reg, tx_data)
-         : buses.spi ? buses.spi->transfer_register_u16(reg, tx_data, dummy_data, speed)
+    return buses.i2c ? buses.i2c->get_i2c().write_register_u16(m_descriptor->get_i2c_address(), reg, tx_data)
+         : buses.spi ? buses.spi->get_spi().transfer_register_u16(reg, tx_data, dummy_data, speed)
          : false;
 }
 bool MPU9250::akm_read(Buses& buses, uint8_t reg, uint8_t* rx_data, uint32_t size, size_t speed)
 {
     if (buses.i2c)
     {
-        return buses.i2c->read_register(m_akm_address, reg, rx_data, size);
+        return buses.i2c->get_i2c().read_register(m_akm_address, reg, rx_data, size);
     }
 
     //spi read
@@ -417,7 +417,7 @@ bool MPU9250::akm_read_u16(Buses& buses, uint8_t reg, uint16_t& dst, size_t spee
 {
     if (buses.i2c)
     {
-        return buses.i2c->read_register_u16(m_akm_address, reg, dst);
+        return buses.i2c->get_i2c().read_register_u16(m_akm_address, reg, dst);
     }
 
     //spi read
@@ -440,7 +440,7 @@ bool MPU9250::akm_write_u8(Buses& buses, uint8_t reg, uint8_t t, size_t speed)
 {
     if (buses.i2c)
     {
-        return buses.i2c->write_register_u8(m_akm_address, reg, t);
+        return buses.i2c->get_i2c().write_register_u8(m_akm_address, reg, t);
     }
 
     //spi write
@@ -490,10 +490,10 @@ ts::Result<void> MPU9250::init(hal::INode_Descriptor const& descriptor)
 
 ts::Result<void> MPU9250::init()
 {
-    m_i2c = m_hal.get_bus_registry().find_by_name<bus::II2C>(m_descriptor->get_bus());
-    m_spi = m_hal.get_bus_registry().find_by_name<bus::ISPI>(m_descriptor->get_bus());
+    m_i2c_bus = m_hal.get_bus_registry().find_by_name<bus::II2C_Bus>(m_descriptor->get_bus());
+    m_spi_bus = m_hal.get_bus_registry().find_by_name<bus::ISPI_Bus>(m_descriptor->get_bus());
 
-    Buses buses = { m_i2c.lock(), m_spi.lock() };
+    Buses buses = { m_i2c_bus.lock(), m_spi_bus.lock() };
     if (!buses.i2c && !buses.spi)
     {
         return make_error("No bus configured");
@@ -991,7 +991,7 @@ void MPU9250::process()
     m_magnetic_field->clear();
     m_temperature->clear();
 
-    Buses buses = { m_i2c.lock(), m_spi.lock() };
+    Buses buses = { m_i2c_bus.lock(), m_spi_bus.lock() };
     if (!buses.i2c && !buses.spi)
     {
         return;

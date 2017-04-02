@@ -1,160 +1,279 @@
-//#include "HAL.h"
-//#include "Comms.h"
-//#include "utils/Json_Util.h"
-//#include "utils/Timed_Scope.h"
+#include "HAL.h"
+#include "IBattery_Info.h"
+#include "Input.h"
+#include "ArduiPi_OLED.h"
+#include "utils/hw/I2C_Dev.h"
+#include "utils/hw/ADS1115.h"
+#include "Battery_Info_ADS1115.h"
 
-//#include "sz_math.hpp"
-//#include "sz_Multi_Config.hpp"
+#include "def_lang/Serialization.h"
+#include "def_lang/JSON_Serializer.h"
 
-//#include "rapidjson/document.h"     // rapidjson's DOM-style API
-//#include "rapidjson/prettywriter.h" // for stringify JSON
-//#include "rapidjson/stringbuffer.h"
+#include "settings.def.h"
+#include <fstream>
 
+extern "C"
+{
+#include "utils/hw/pigpio.h"
+#include "utils/hw/bcm2835.h"
+}
 
-///////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////
 
-//namespace silk
-//{
+namespace silk
+{
 
-/////////////////////////////////////////////////////////////////
-
-//HAL::HAL()
-//{
-//    QLOG_TOPIC("hal");
-//}
-
-//HAL::~HAL()
-//{
-//}
-
-//void HAL::init(Comms& comms)
-//{
-//    m_comms = &comms;
-//}
-
-//auto HAL::get_remote_clock() const -> Manual_Clock const&
-//{
-//    return m_remote_clock;
-//}
-
-//auto HAL::get_node_defs() const  -> Registry<node::gs::Node_Def> const&
-//{
-//    return m_node_defs;
-//}
-//auto HAL::get_nodes() const  -> Registry<node::gs::Node> const&
-//{
-//    return m_nodes;
-//}
-//auto HAL::get_streams() const  -> Registry<stream::gs::Stream> const&
-//{
-//    return m_streams;
-//}
-
-//auto HAL::get_multi_config() const -> boost::optional<config::Multi>
-//{
-//    return m_configs.multi;
-//}
-//void HAL::set_multi_config(config::Multi const& config)
-//{
-//    rapidjson::Document configj;
-//    configj.SetObject();
-//    autojsoncxx::to_document(config, configj);
-
-//    auto& channel = m_comms->get_setup_channel();
-//    channel.begin_pack(comms::Setup_Message::MULTI_CONFIG);
-//    channel.pack_param(configj);
-//    channel.end_pack();
-//}
-
-//void HAL::add_node(std::string const& def_name,
-//                     std::string const& name,
-//                     rapidjson::Document const& init_params)
-//{
-//    auto& channel = m_comms->get_setup_channel();
-//    channel.begin_pack(comms::Setup_Message::ADD_NODE);
-//    channel.pack_param(def_name);
-//    channel.pack_param(name);
-//    channel.pack_param(init_params);
-//    channel.end_pack();
-//}
-
-//void HAL::remove_node(node::gs::Node_ptr node)
-//{
-//    auto& channel = m_comms->get_setup_channel();
-//    channel.begin_pack(comms::Setup_Message::REMOVE_NODE);
-//    channel.pack_param(node->name);
-//    channel.end_pack();
-//}
-
-//void HAL::set_node_input_stream_path(node::gs::Node_ptr node, std::string const& input_name, q::Path const& stream_path)
-//{
-//    auto it = std::find_if(node->inputs.begin(), node->inputs.end(), [input_name](node::gs::Node::Input const& is) { return is.name == input_name; });
-//    if (it == node->inputs.end())
-//    {
-//        QLOGE("Cannot find input stream '{}' for node '{}'", input_name, node->name);
-//        return;
-//    }
-
-//    uint32_t input_idx = static_cast<uint32_t>(std::distance(node->inputs.begin(), it));
-
-//    auto& channel = m_comms->get_setup_channel();
-//    channel.begin_pack(comms::Setup_Message::NODE_INPUT_STREAM_PATH);
-//    channel.pack_param(node->name);
-//    channel.pack_param(input_idx);
-//    channel.pack_param(stream_path.get_as<std::string>());
-//    channel.end_pack();
-//}
-
-//void HAL::set_node_config(node::gs::Node_ptr node, rapidjson::Document const& config)
-//{
-//    auto& channel = m_comms->get_setup_channel();
-//    channel.begin_pack(comms::Setup_Message::NODE_CONFIG);
-//    channel.pack_param(node->name);
-//    channel.pack_param(config);
-//    channel.end_pack();
-//}
-
-//void HAL::send_node_message(node::gs::Node_ptr node, rapidjson::Document const& json)
-//{
-//    auto& channel = m_comms->get_setup_channel();
-//    channel.begin_pack(comms::Setup_Message::NODE_MESSAGE);
-//    channel.pack_param(node->name);
-//    channel.pack_param(json);
-//    channel.end_pack();
-//}
-
-//void HAL::set_stream_telemetry_active(std::string const& stream_name, bool active)
-//{
-//    auto stream = m_streams.find_by_name(stream_name);
-//    if (!stream)
-//    {
-//        QLOGW("Cannot find stream '{}'", stream_name);
-//        return;
-//    }
-//    if (stream->telemetry_active_req == 0 && !active)
-//    {
-//        QLOGW("Trying to disable stream '{}' but it's already disabled", stream_name);
-//        return;
-//    }
-
-//    stream->telemetry_active_req += active ? 1 : -1;
-
-//    //if the status will not change, it's ok. No need to do the request
-//    bool new_active = stream->telemetry_active_req > 0;
-//    if (new_active == stream->is_telemetry_active)
-//    {
-//        return;
-//    }
-
-//    auto& channel = m_comms->get_setup_channel();
-//    channel.begin_pack(comms::Setup_Message::STREAM_TELEMETRY_ACTIVE);
-//    channel.pack_param(stream_name);
-//    channel.pack_param(new_active);
-//    channel.end_pack();
-//}
+static const std::string k_settings_path("settings.json");
 
 
+struct HAL::Impl
+{
+    Impl(HAL& hal)
+        : display()
+        , comms(hal)
+        , i2c()
+        , battery_gimbal_adc()
+        , battery_info(hal, battery_gimbal_adc, 1) //battery is connected to channel 1
+        , input(hal, i2c)
+        , settings()
+    {}
 
+    ArduiPi_OLED display;
+    Comms comms;
+    util::hw::I2C_Dev i2c;
+    util::hw::ADS1115 battery_gimbal_adc;
+    silk::Battery_Info_ADS1115 battery_info;
+    silk::Input input;
 
-//}
+    settings::Settings settings;
+};
 
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+static bool pigpio_is_isitialized = false;
+
+static bool initialize_pigpio(HAL& hal)
+{
+    if (pigpio_is_isitialized)
+    {
+        return true;
+    }
+
+    QLOGI("Initializing pigpio");
+    if (gpioCfgClock(hal.get_settings().get_hw().get_pigpio_period_us(), PI_CLOCK_PCM, 0) < 0 ||
+            gpioCfgPermissions(static_cast<uint64_t>(-1)))
+    {
+        QLOGE("Cannot configure pigpio");
+        return false;
+    }
+    if (gpioInitialise() < 0)
+    {
+        QLOGE("Cannot initialize pigpio");
+        return false;
+    }
+
+    pigpio_is_isitialized = true;
+    return true;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+static void shutdown_pigpio()
+{
+    if (pigpio_is_isitialized)
+    {
+        gpioTerminate();
+    }
+    pigpio_is_isitialized = false;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+static void generate_settings_file(HAL& hal)
+{
+    hal.get_settings() = settings::Settings();
+    hal.get_settings().get_comms().set_video_interfaces({"wlan2", "wlan3"});
+    hal.save_settings();
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+static ts::Result<void> load_settings(HAL& hal)
+{
+    std::string data;
+
+    {
+        //read the data
+        std::ifstream fs(k_settings_path, std::ifstream::in | std::ifstream::binary);
+        if (!fs.is_open())
+        {
+            QLOGW("Failed to load '{}'", k_settings_path);
+            generate_settings_file(hal);
+            return false;
+        }
+
+        fs.seekg (0, fs.end);
+        size_t size = fs.tellg();
+        fs.seekg (0, fs.beg);
+
+        data.resize(size + 1);
+        fs.read(&data[0], size);
+    }
+
+    ts::Result<ts::sz::Value> json_result = ts::sz::from_json(data);
+    if (json_result != ts::success)
+    {
+        return ts::Error("Failed to load '" + k_settings_path + "': " + json_result.error().what());
+    }
+
+    settings::Settings settings;
+    auto reserialize_result = settings::deserialize(settings, json_result.payload());
+    if (reserialize_result != ts::success)
+    {
+        return ts::Error("Failed to deserialize settings: " + reserialize_result.error().what());
+    }
+
+    hal.get_settings() = settings;
+
+    return ts::success;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+void HAL::save_settings()
+{
+    ts::sz::Value sz_value = settings::serialize(m_impl->settings);
+
+    std::string json = ts::sz::to_json(sz_value, true);
+
+    std::ofstream fs(k_settings_path);
+    if (fs.is_open())
+    {
+        fs.write(json.data(), json.size());
+        fs.flush();
+    }
+    else
+    {
+        QLOGE("Cannot open '{}' to save settings.", k_settings_path);
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+HAL::HAL()
+{
+    m_impl.reset(new Impl(*this));
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+HAL::~HAL()
+{
+
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+ts::Result<void> HAL::init()
+{
+    m_impl->display.init(OLED_ADAFRUIT_I2C_128x64);
+    m_impl->display.begin();
+
+    // init done
+    m_impl->display.clearDisplay();   // clears the screen  buffer
+    m_impl->display.display();   		// display it (clear display)
+
+    ts::Result<void> result = load_settings(*this);
+    if (result != ts::success)
+    {
+        return result.error();
+    }
+
+    if (!initialize_pigpio(*this))
+    {
+        return ts::Error("Cannot initialize pigpio");
+    }
+
+    if (!m_impl->comms.start())
+    {
+        return ts::Error("Cannot start comms.");
+    }
+
+    result = m_impl->i2c.init("/dev/i2c-1");
+    if (result != ts::success)
+    {
+        return result.error();
+    }
+
+    {
+        util::hw::ADS1115::Descriptor descriptor;
+        descriptor.i2c_address = 0x49;
+        descriptor.adcs[0].is_enabled = true;
+        descriptor.adcs[0].rate = 200;
+        descriptor.adcs[1].is_enabled = true;
+        descriptor.adcs[1].rate = 200;
+
+        result = m_impl->battery_gimbal_adc.init(m_impl->i2c, descriptor);
+        if (result != ts::success)
+        {
+            return result.error();
+        }
+    }
+
+    m_impl->battery_info.init();
+
+    m_impl->input.init();
+
+    return ts::success;
+}
+
+void HAL::shutdown()
+{
+    shutdown_pigpio();
+}
+
+Comms& HAL::get_comms()
+{
+    return m_impl->comms;
+}
+
+IBattery_Info& HAL::get_battery_info()
+{
+    return m_impl->battery_info;
+}
+
+Input& HAL::get_input()
+{
+    return m_impl->input;
+}
+
+ArduiPi_OLED& HAL::get_display()
+{
+    return m_impl->display;
+}
+
+settings::Settings& HAL::get_settings()
+{
+    return m_impl->settings;
+}
+
+void HAL::process()
+{
+    m_impl->battery_gimbal_adc.process(m_impl->i2c);
+    m_impl->battery_info.process();
+
+    m_impl->input.process();
+    m_impl->comms.process();
+}
+
+bool HAL::render()
+{
+    if (m_impl->display.displayIncremental(m_impl->settings.get_hw().get_display_incremental_step_us()))
+    {
+        m_impl->display.clearDisplay();
+        return true;
+    }
+    return false;
+}
+
+}

@@ -68,17 +68,19 @@ ts::Result<void> SRF02::init(hal::INode_Descriptor const& descriptor)
 
 ts::Result<void> SRF02::init()
 {
-    m_bus = m_hal.get_bus_registry().find_by_name<bus::II2C>(m_descriptor->get_bus());
-    auto bus = m_bus.lock();
-    if (!bus)
+    m_i2c_bus = m_hal.get_bus_registry().find_by_name<bus::II2C_Bus>(m_descriptor->get_bus());
+    auto i2c_bus = m_i2c_bus.lock();
+    if (!i2c_bus)
     {
         return make_error("No bus configured");
     }
 
-    bus->lock();
-    At_Exit at_exit([this, &bus]()
+    util::hw::II2C& i2c = i2c_bus->get_i2c();
+
+    i2c.lock();
+    At_Exit at_exit([this, &i2c]()
     {
-        bus->unlock();
+        i2c.unlock();
     });
 
     m_descriptor->set_rate(math::clamp<size_t>(m_descriptor->get_rate(), 1, 10));
@@ -90,9 +92,9 @@ ts::Result<void> SRF02::init()
     while (++tries <= max_tries)
     {
         uint8_t rev = 0, test = 0;
-        auto ret = bus->read_register_u8(ADDR, SW_REV_CMD, rev);
+        auto ret = i2c.read_register_u8(ADDR, SW_REV_CMD, rev);
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
-        ret &= bus->read_register_u8(ADDR, UNUSED, test);
+        ret &= i2c.read_register_u8(ADDR, UNUSED, test);
         if (ret && rev != 0 && rev != 255 && test != 0 && test != 255)
         {
             QLOGI("Found SRF02 rev {} after {} tries", rev, tries);//rev is 6 so far
@@ -107,17 +109,17 @@ ts::Result<void> SRF02::init()
         return make_error("Failed to initialize SRF02");
     }
 
-    trigger(*bus);
+    trigger(i2c);
 
     m_output_stream->set_rate(m_descriptor->get_rate());
 
     return ts::success;
 }
 
-void SRF02::trigger(bus::II2C& bus)
+void SRF02::trigger(util::hw::II2C& i2c)
 {
     m_last_trigger_tp = Clock::now();
-    bus.write_register_u8(ADDR, SW_REV_CMD, REAL_RAGING_MODE_CM);
+    i2c.write_register_u8(ADDR, SW_REV_CMD, REAL_RAGING_MODE_CM);
 }
 
 ts::Result<void> SRF02::start(Clock::time_point tp)
@@ -141,23 +143,25 @@ void SRF02::process()
         return;
     }
 
-    auto bus = m_bus.lock();
-    if (!bus)
+    auto i2c_bus = m_i2c_bus.lock();
+    if (!i2c_bus)
     {
         return;
     }
 
-    bus->lock();
-    At_Exit at_exit([this, &bus]()
+    util::hw::II2C& i2c = i2c_bus->get_i2c();
+
+    i2c.lock();
+    At_Exit at_exit([this, &i2c]()
     {
-        bus->unlock();
+        i2c.unlock();
     });
 
     std::array<uint8_t, 4> buf;
-    bool res = bus->read_register(ADDR, RANGE_H, buf.data(), buf.size());
+    bool res = i2c.read_register(ADDR, RANGE_H, buf.data(), buf.size());
 
     //trigger immediately
-    trigger(*bus);
+    trigger(i2c);
 
     //TODO - add health indication
 

@@ -885,7 +885,7 @@ void Video_Streamer::tx_thread_proc()
         {
             if (1)
             {
-                auto start = Clock::now();
+                //auto start = Clock::now();
 
                 //init data for the fec_encode
                 for (size_t i = 0; i < m_coding_k; i++)
@@ -1096,7 +1096,7 @@ void Video_Streamer::process()
     //can we fec decode?
     if (block->datagrams.size() + block->fec_datagrams.size() >= m_coding_k)
     {
-        auto start = Clock::now();
+        //auto start = Clock::now();
 
         std::array<unsigned int, 32> indices;
         size_t primary_index = 0;

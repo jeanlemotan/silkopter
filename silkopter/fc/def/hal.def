@@ -156,7 +156,7 @@ struct UART_Linux_Descriptor : public IBus_Descriptor
     string dev = "/dev/ttyAMA0";
     baud_t baud = baud_t::_115200;
 };
-struct UART_BBang_Descriptor : public IBus_Descriptor
+struct UART_BB_Descriptor : public IBus_Descriptor
 {
     uint32_t rx_pin = 0;
     uint32_t baud = 115200;

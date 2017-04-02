@@ -45,11 +45,11 @@ public:
 private:
     ts::Result<void> init();
 
-    void trigger(bus::II2C& bus);
+    void trigger(util::hw::II2C& i2c);
 
     HAL& m_hal;
 
-    std::weak_ptr<bus::II2C> m_bus;
+    std::weak_ptr<bus::II2C_Bus> m_i2c_bus;
 
     std::shared_ptr<hal::SRF02_Descriptor> m_descriptor;
     std::shared_ptr<hal::SRF02_Config> m_config;

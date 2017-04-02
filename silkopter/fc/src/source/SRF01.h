@@ -45,16 +45,16 @@ public:
 private:
     ts::Result<void> init();
 
-    auto send_command(bus::IUART& bus, uint8_t command) -> bool;
-    auto read_response(bus::IUART& bus, uint8_t sent_command, uint8_t* response, size_t size) -> bool;
-    auto read_response_u8(bus::IUART& bus, uint8_t sent_command, uint8_t& response) -> bool;
-    auto read_response_u16(bus::IUART& bus, uint8_t sent_command, uint16_t& response) -> bool;
+    auto send_command(util::hw::IUART& uart, uint8_t command) -> bool;
+    auto read_response(util::hw::IUART& uart, uint8_t sent_command, uint8_t* response, size_t size) -> bool;
+    auto read_response_u8(util::hw::IUART& uart, uint8_t sent_command, uint8_t& response) -> bool;
+    auto read_response_u16(util::hw::IUART& uart, uint8_t sent_command, uint16_t& response) -> bool;
 
-    void trigger(bus::IUART& bus);
+    void trigger(util::hw::IUART& uart);
 
     HAL& m_hal;
 
-    std::weak_ptr<bus::IUART> m_bus;
+    std::weak_ptr<bus::IUART_Bus> m_uart_bus;
 
     std::shared_ptr<hal::SRF01_Descriptor> m_descriptor;
     std::shared_ptr<hal::SRF01_Config> m_config;

@@ -51,12 +51,12 @@ auto MS5611::lock(Buses& buses) -> bool
 {
     if (buses.i2c)
     {
-        buses.i2c->lock(); //lock the bus
+        buses.i2c->get_i2c().lock(); //lock the bus
         return true;
     }
     if (buses.spi)
     {
-        buses.spi->lock(); //lock the bus
+        buses.spi->get_spi().lock(); //lock the bus
         return true;
     }
     return false;
@@ -65,12 +65,12 @@ void MS5611::unlock(Buses& buses)
 {
     if (buses.i2c)
     {
-        buses.i2c->unlock(); //unlock the bus
+        buses.i2c->get_i2c().unlock(); //unlock the bus
         return;
     }
     if (buses.spi)
     {
-        buses.spi->unlock(); //unlock the bus
+        buses.spi->get_spi().unlock(); //unlock the bus
         return;
     }
 }
@@ -79,8 +79,8 @@ auto MS5611::bus_read_u24(Buses& buses, uint8_t reg, uint32_t& dst) -> bool
 {
     uint8_t tx_data[3] = {0};
     uint8_t rx_data[3];
-    bool res = buses.i2c ? buses.i2c->read_register(m_descriptor->get_i2c_address(), reg, rx_data, 3)
-                : buses.spi ? buses.spi->transfer_register(reg, tx_data, rx_data, 3)
+    bool res = buses.i2c ? buses.i2c->get_i2c().read_register(m_descriptor->get_i2c_address(), reg, rx_data, 3)
+                : buses.spi ? buses.spi->get_spi().transfer_register(reg, tx_data, rx_data, 3)
                 : false;
     if (res)
     {
@@ -91,22 +91,22 @@ auto MS5611::bus_read_u24(Buses& buses, uint8_t reg, uint32_t& dst) -> bool
 auto MS5611::bus_read_u8(Buses& buses, uint8_t reg, uint8_t& rx_data) -> bool
 {
     uint8_t dummy_data = 0;
-    return buses.i2c ? buses.i2c->read_register_u8(m_descriptor->get_i2c_address(), reg, rx_data)
-         : buses.spi ? buses.spi->transfer_register_u8(reg, dummy_data, rx_data)
+    return buses.i2c ? buses.i2c->get_i2c().read_register_u8(m_descriptor->get_i2c_address(), reg, rx_data)
+         : buses.spi ? buses.spi->get_spi().transfer_register_u8(reg, dummy_data, rx_data)
          : false;
 }
 auto MS5611::bus_read_u16(Buses& buses, uint8_t reg, uint16_t& rx_data) -> bool
 {
     uint16_t dummy_data = 0;
-    return buses.i2c ? buses.i2c->read_register_u16(m_descriptor->get_i2c_address(), reg, rx_data)
-         : buses.spi ? buses.spi->transfer_register_u16(reg, dummy_data, rx_data)
+    return buses.i2c ? buses.i2c->get_i2c().read_register_u16(m_descriptor->get_i2c_address(), reg, rx_data)
+         : buses.spi ? buses.spi->get_spi().transfer_register_u16(reg, dummy_data, rx_data)
          : false;
 }
 auto MS5611::bus_write(Buses& buses, uint8_t data) -> bool
 {
     uint8_t dummy_data;
-    return buses.i2c ? buses.i2c->write(m_descriptor->get_i2c_address(), &data, 1)
-         : buses.spi ? buses.spi->transfer(&data, &dummy_data, 1)
+    return buses.i2c ? buses.i2c->get_i2c().write(m_descriptor->get_i2c_address(), &data, 1)
+         : buses.spi ? buses.spi->get_spi().transfer(&data, &dummy_data, 1)
          : false;
 }
 
@@ -134,10 +134,10 @@ ts::Result<void> MS5611::init(hal::INode_Descriptor const& descriptor)
 }
 ts::Result<void> MS5611::init()
 {
-    m_i2c = m_hal.get_bus_registry().find_by_name<bus::II2C>(m_descriptor->get_bus());
-    m_spi = m_hal.get_bus_registry().find_by_name<bus::ISPI>(m_descriptor->get_bus());
+    m_i2c_bus = m_hal.get_bus_registry().find_by_name<bus::II2C_Bus>(m_descriptor->get_bus());
+    m_spi_bus = m_hal.get_bus_registry().find_by_name<bus::ISPI_Bus>(m_descriptor->get_bus());
 
-    Buses buses = { m_i2c.lock(), m_spi.lock() };
+    Buses buses = { m_i2c_bus.lock(), m_spi_bus.lock() };
     if (!buses.i2c && !buses.spi)
     {
         return make_error("No bus configured");
@@ -213,7 +213,7 @@ void MS5611::process()
     m_pressure->clear();
     m_temperature->clear();
 
-    Buses buses = { m_i2c.lock(), m_spi.lock() };
+    Buses buses = { m_i2c_bus.lock(), m_spi_bus.lock() };
     if (!buses.i2c && !buses.spi)
     {
         return;

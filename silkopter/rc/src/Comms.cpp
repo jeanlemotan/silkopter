@@ -9,6 +9,7 @@
 #include "utils/comms/RFMON_Socket.h"
 #include "utils/comms/RF4463F30_Socket.h"
 
+#include "HAL.h"
 #include "settings.def.h"
 
 namespace silk
@@ -22,12 +23,11 @@ namespace silk
 //constexpr char const* RC_SPI_DEVICE = "/dev/spidev0.0";
 //constexpr size_t RC_SPEED = 16000000;
 
-extern settings::Settings s_settings;
-
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-Comms::Comms()
-    : m_rc_phy(true)
+Comms::Comms(HAL& hal)
+    : m_hal(hal)
+    , m_rc_phy(true)
     , m_rc_protocol(m_rc_phy, std::bind(&Comms::process_rx_packet, this, std::placeholders::_1))
     , m_video_streamer()
 {
@@ -39,7 +39,7 @@ bool Comms::start()
 {
     disconnect();
 
-    settings::Settings::Comms const& comms = s_settings.get_comms();
+    settings::Settings::Comms const& comms = m_hal.get_settings().get_comms();
 
     util::comms::Video_Streamer::RX_Descriptor rx_descriptor;
     rx_descriptor.interfaces = comms.get_video_interfaces();

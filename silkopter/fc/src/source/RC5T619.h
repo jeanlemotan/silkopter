@@ -46,7 +46,7 @@ private:
 
     HAL& m_hal;
 
-    std::weak_ptr<bus::II2C> m_i2c;
+    std::weak_ptr<bus::II2C_Bus> m_i2c_bus;
 
     std::shared_ptr<hal::RC5T619_Descriptor> m_descriptor;
     std::shared_ptr<hal::RC5T619_Config> m_config;

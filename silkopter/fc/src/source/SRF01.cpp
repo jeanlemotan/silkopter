@@ -56,17 +56,18 @@ ts::Result<void> SRF01::init(hal::INode_Descriptor const& descriptor)
 
 ts::Result<void> SRF01::init()
 {
-    m_bus = m_hal.get_bus_registry().find_by_name<bus::IUART>(m_descriptor->get_bus());
-    auto bus = m_bus.lock();
+    m_uart_bus = m_hal.get_bus_registry().find_by_name<bus::IUART_Bus>(m_descriptor->get_bus());
+    auto bus = m_uart_bus.lock();
     if (!bus)
     {
         return make_error("No bus configured");
     }
 
-    bus->lock();
-    At_Exit at_exit([this, &bus]()
+    util::hw::IUART& uart = bus->get_uart();
+    uart.lock();
+    At_Exit at_exit([this, &uart]()
     {
-        bus->unlock();
+        uart.unlock();
     });
 
     QLOGI("Probing SRF01 on {}...", m_descriptor->get_bus());
@@ -75,10 +76,10 @@ ts::Result<void> SRF01::init()
     constexpr uint32_t max_tries = 10;
     while (++tries <= max_tries)
     {
-        bool ok = send_command(*bus, SW_REV);
+        bool ok = send_command(uart, SW_REV);
 
         uint8_t rev = 0;
-        ok &= read_response_u8(*bus, SW_REV, rev);
+        ok &= read_response_u8(uart, SW_REV, rev);
         if (ok && rev != 0 && rev != 255)
         {
             QLOGI("Found SRF01 rev {} after {} tries", rev, tries);
@@ -95,9 +96,9 @@ ts::Result<void> SRF01::init()
 
     //clear advanced mode
     //send_command(*bus, CLEAR_ADVANCED_MODE);
-    send_command(*bus, SET_ADVANCED_MODE);
+    send_command(uart, SET_ADVANCED_MODE);
 
-    trigger(*bus);
+    trigger(uart);
 
     m_output_stream->set_rate(m_descriptor->get_rate());
 
@@ -111,21 +112,21 @@ ts::Result<void> SRF01::start(Clock::time_point tp)
     return ts::success;
 }
 
-auto SRF01::send_command(bus::IUART& bus, uint8_t command) -> bool
+auto SRF01::send_command(util::hw::IUART& uart, uint8_t command) -> bool
 {
     std::array<uint8_t, 2> buf;
     buf[0] = ADDR;											//SRF01 address
     buf[1] = command;
 
-    bus.send_break();
-    return bus.write(buf.data(), buf.size());
+    uart.send_break();
+    return uart.write(buf.data(), buf.size());
 }
 
-auto SRF01::read_response(bus::IUART& bus, uint8_t sent_command, uint8_t* response, size_t size) -> bool
+auto SRF01::read_response(util::hw::IUART& uart, uint8_t sent_command, uint8_t* response, size_t size) -> bool
 {
     QASSERT(response && size > 0);
     std::array<uint8_t, 32> buf;
-    size_t count = bus.read(buf.data(), buf.size());
+    size_t count = uart.read(buf.data(), buf.size());
     if (count > 0)
     {
         std::copy(buf.begin(), buf.begin() + count, std::back_inserter(m_read_data));
@@ -146,14 +147,14 @@ auto SRF01::read_response(bus::IUART& bus, uint8_t sent_command, uint8_t* respon
 
     return false;
 }
-auto SRF01::read_response_u8(bus::IUART& bus, uint8_t sent_command, uint8_t& response) -> bool
+auto SRF01::read_response_u8(util::hw::IUART& uart, uint8_t sent_command, uint8_t& response) -> bool
 {
-    return read_response(bus, sent_command, &response, 1);
+    return read_response(uart, sent_command, &response, 1);
 }
-auto SRF01::read_response_u16(bus::IUART& bus, uint8_t sent_command, uint16_t& response) -> bool
+auto SRF01::read_response_u16(util::hw::IUART& uart, uint8_t sent_command, uint16_t& response) -> bool
 {
     uint8_t res[2];
-    if (read_response(bus, sent_command, res, 2))
+    if (read_response(uart, sent_command, res, 2))
     {
         response = (uint16_t)(res[0] << 8) | res[1];
         return true;
@@ -162,10 +163,10 @@ auto SRF01::read_response_u16(bus::IUART& bus, uint8_t sent_command, uint16_t& r
 }
 
 
-void SRF01::trigger(bus::IUART& bus)
+void SRF01::trigger(util::hw::IUART& uart)
 {
     m_last_trigger_tp = Clock::now();
-    send_command(bus, REAL_RANGING_CM_TX);
+    send_command(uart, REAL_RANGING_CM_TX);
 }
 
 void SRF01::process()
@@ -182,16 +183,17 @@ void SRF01::process()
         return;
     }
 
-    auto bus = m_bus.lock();
+    auto bus = m_uart_bus.lock();
     if (!bus)
     {
         return;
     }
+    util::hw::IUART& uart = bus->get_uart();
 
-    bus->lock();
-    At_Exit at_exit([this, &bus]()
+    uart.lock();
+    At_Exit at_exit([this, &uart]()
     {
-        bus->unlock();
+        uart.unlock();
     });
 
     //TODO - add health indication
@@ -199,7 +201,7 @@ void SRF01::process()
 
     //the trigger data acts as a header. Following this header there is the actual measurement
     uint16_t d = 0;
-    if (read_response_u16(*bus, REAL_RANGING_CM_TX, d))
+    if (read_response_u16(uart, REAL_RANGING_CM_TX, d))
     {
         float distance = static_cast<float>(d) / 100.f; //meters
 
@@ -216,14 +218,14 @@ void SRF01::process()
             samples_needed--;
         }
 
-        trigger(*bus);
+        trigger(uart);
     }
     else
     {
         if (now - m_last_trigger_tp >= std::chrono::milliseconds(500))
         {
             QLOGI("Timeout. triggering again");
-            trigger(*bus);
+            trigger(uart);
         }
     }
 }

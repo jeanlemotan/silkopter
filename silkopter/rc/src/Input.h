@@ -2,11 +2,13 @@
 
 #include <vector>
 #include <memory>
+#include "utils/hw/II2C.h"
 
 
 namespace silk
 {
 
+class HAL;
 class IInput_Device;
 class ISticks;
 class IStick_Actuators;
@@ -18,7 +20,7 @@ class IHaptic;
 class Input
 {
 public:
-    Input();
+    Input(HAL& hal, util::hw::II2C& i2c);
     ~Input();
 
     void init();
@@ -61,6 +63,9 @@ public:
     void process();
 
 private:
+    HAL& m_hal;
+    util::hw::II2C& m_i2c;
+
     std::vector<IInput_Device*> m_input_devices;
 
     std::unique_ptr<ISticks> m_sticks;

@@ -104,8 +104,8 @@ ts::Result<void> PCA9685::init(hal::INode_Descriptor const& descriptor)
 
 ts::Result<void> PCA9685::init()
 {
-    m_i2c = m_hal.get_bus_registry().find_by_name<bus::II2C>(m_descriptor->get_bus());
-    auto i2c = m_i2c.lock();
+    m_i2c_bus = m_hal.get_bus_registry().find_by_name<bus::II2C_Bus>(m_descriptor->get_bus());
+    auto i2c = m_i2c_bus.lock();
     if (!i2c)
     {
         return make_error("No bus configured");
@@ -210,7 +210,7 @@ auto PCA9685::set_all_pwm_enabled(bool val) -> bool
     return true;
 }
 
-auto PCA9685::restart(bus::II2C& i2c) -> bool
+auto PCA9685::restart(util::hw::II2C& i2c) -> bool
 {
     bool res = i2c.write_register_u8(m_descriptor->get_address(), PCA9685_RA_MODE1, PCA9685_MODE1_SLEEP_BIT);
     std::this_thread::sleep_for(std::chrono::milliseconds(2));
@@ -222,7 +222,7 @@ auto PCA9685::restart(bus::II2C& i2c) -> bool
 }
 
 
-void PCA9685::set_pwm_value(bus::II2C& i2c, size_t idx, boost::optional<float> _value)
+void PCA9685::set_pwm_value(util::hw::II2C& i2c, size_t idx, boost::optional<float> _value)
 {
     QLOG_TOPIC("PCA9685::set_pwm_value");
 
@@ -283,11 +283,12 @@ void PCA9685::process()
 {
     QLOG_TOPIC("PCA9685::process");
 
-    auto i2c = m_i2c.lock();
-    if (!i2c)
+    auto i2c_bus = m_i2c_bus.lock();
+    if (!i2c_bus)
     {
         return;
     }
+    util::hw::II2C& i2c = i2c_bus->get_i2c();
 
     for (size_t i = 0; i < m_pwm_channels.size(); i++)
     {
@@ -298,7 +299,7 @@ void PCA9685::process()
             auto const& samples = stream->get_samples();
             if (!samples.empty())
             {
-                set_pwm_value(*i2c, i, samples.back().value);
+                set_pwm_value(i2c, i, samples.back().value);
             }
         }
     }
@@ -324,18 +325,20 @@ if (idx == CH)\
         m_pwm_channels[CH].stream = input_stream;\
         m_pwm_channels[CH].stream_path = path;\
     }\
-    set_pwm_value(*i2c, idx, boost::none);\
+    set_pwm_value(i2c, idx, boost::none);\
 }
 
 ts::Result<void> PCA9685::set_input_stream_path(size_t idx, std::string const& path)
 {
     QLOG_TOPIC("PCA9685::set_input_stream_path");
 
-    auto i2c = m_i2c.lock();
-    if (!i2c)
+    auto i2c_bus = m_i2c_bus.lock();
+    if (!i2c_bus)
     {
         return make_error("Bus error");
     }
+
+    util::hw::II2C& i2c = i2c_bus->get_i2c();
 
     FIND_STREAM(0);
     FIND_STREAM(1);

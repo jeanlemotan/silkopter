@@ -1,5 +1,5 @@
 #include "FCStdAfx.h"
-#include "ADS1115.h"
+#include "ADS1115_Source.h"
 #include "physics/constants.h"
 #include "utils/Timed_Scope.h"
 
@@ -98,14 +98,14 @@ constexpr uint16_t ADS1115_COMP_QUE_DISABLE    = 0x03 << ADS1115_COMP_QUE_SHIFT;
 constexpr std::chrono::microseconds MIN_CONVERSION_DURATION(1200);
 
 
-ADS1115::ADS1115(HAL& hal)
+ADS1115_Source::ADS1115_Source(HAL& hal)
     : m_hal(hal)
     , m_descriptor(new hal::ADS1115_Descriptor())
     , m_config(new hal::ADS1115_Config())
 {
 }
 
-auto ADS1115::get_outputs() const -> std::vector<Output>
+auto ADS1115_Source::get_outputs() const -> std::vector<Output>
 {
     std::vector<Output> outputs(m_adcs.size());
     for (size_t i = 0; i < m_adcs.size(); i++)
@@ -115,7 +115,7 @@ auto ADS1115::get_outputs() const -> std::vector<Output>
     }
     return outputs;
 }
-ts::Result<void> ADS1115::init(hal::INode_Descriptor const& descriptor)
+ts::Result<void> ADS1115_Source::init(hal::INode_Descriptor const& descriptor)
 {
     QLOG_TOPIC("ADS1115::init");
 
@@ -129,20 +129,22 @@ ts::Result<void> ADS1115::init(hal::INode_Descriptor const& descriptor)
     return init();
 }
 
-ts::Result<void> ADS1115::init()
+ts::Result<void> ADS1115_Source::init()
 {
-    m_i2c = m_hal.get_bus_registry().find_by_name<bus::II2C>(m_descriptor->get_bus());
+    m_i2c_bus = m_hal.get_bus_registry().find_by_name<bus::II2C_Bus>(m_descriptor->get_bus());
 
-    auto i2c = m_i2c.lock();
-    if (!i2c)
+    auto i2c_bus = m_i2c_bus.lock();
+    if (!i2c_bus)
     {
         return make_error("No bus configured");
     }
 
-    i2c->lock();
+    util::hw::II2C& i2c = i2c_bus->get_i2c();
+
+    i2c.lock();
     At_Exit at_exit([this, &i2c]()
     {
-        i2c->unlock();
+        i2c.unlock();
     });
 
 
@@ -189,15 +191,15 @@ ts::Result<void> ADS1115::init()
     m_config_register.queue = ADS1115_COMP_QUE_DISABLE;
     m_config_register.rate = ADS1115_RATE_860;
 
-    bool res = set_config_register(*i2c);
+    bool res = set_config_register(i2c);
 
     uint8_t data;
-    res &= i2c->read_register_u8(m_descriptor->get_i2c_address(), ADS1115_RA_CONFIG, data);
+    res &= i2c.read_register_u8(m_descriptor->get_i2c_address(), ADS1115_RA_CONFIG, data);
 
     //start first measurement
     m_crt_adc_idx = 0;
     m_config_register.status = ADS1115_OS_ACTIVE;
-    res &= set_config_register(*i2c);
+    res &= set_config_register(i2c);
     if (!res)
     {
         return make_error("Cannot find ADS1115");
@@ -205,7 +207,7 @@ ts::Result<void> ADS1115::init()
     return ts::success;
 }
 
-auto ADS1115::set_config_register(bus::II2C& i2c) -> bool
+auto ADS1115_Source::set_config_register(util::hw::II2C& i2c) -> bool
 {
     uint16_t config =   m_config_register.gain |
                         m_config_register.mux |
@@ -219,7 +221,7 @@ auto ADS1115::set_config_register(bus::II2C& i2c) -> bool
     return i2c.write_register_u16(m_descriptor->get_i2c_address(), ADS1115_RA_CONFIG, config);
 }
 
-ts::Result<void> ADS1115::start(Clock::time_point tp)
+ts::Result<void> ADS1115_Source::start(Clock::time_point tp)
 {
     m_schedule_tp = tp;
 
@@ -231,7 +233,7 @@ ts::Result<void> ADS1115::start(Clock::time_point tp)
 }
 
 
-void ADS1115::process()
+void ADS1115_Source::process()
 {
     QLOG_TOPIC("ADS1115::process");
 
@@ -240,16 +242,18 @@ void ADS1115::process()
         adc.stream->clear();
     }
 
-    auto i2c = m_i2c.lock();
-    if (!i2c)
+    auto i2c_bus = m_i2c_bus.lock();
+    if (!i2c_bus)
     {
         return;
     }
 
-    i2c->lock();
+    util::hw::II2C& i2c = i2c_bus->get_i2c();
+
+    i2c.lock();
     At_Exit at_exit([this, &i2c]()
     {
-        i2c->unlock();
+        i2c.unlock();
     });
 
     uint8_t next_adc_idx = m_crt_adc_idx;
@@ -271,7 +275,7 @@ void ADS1115::process()
         //refresh the current adc pin
         if (&adc == &m_adcs[m_crt_adc_idx] && now - m_schedule_tp >= MIN_CONVERSION_DURATION)
         {
-            bool good = read_sensor(*i2c, value);
+            bool good = read_sensor(i2c, value);
             if (good)
             {
                 adc.last_tp = now;
@@ -297,7 +301,7 @@ void ADS1115::process()
         //start measurement again
         uint16_t muxes[] = { ADS1115_MUX_P0_NG, ADS1115_MUX_P1_NG, ADS1115_MUX_P2_NG, ADS1115_MUX_P3_NG };
         m_config_register.mux = muxes[m_adcs[next_adc_idx].pin_index];
-        if (set_config_register(*i2c))
+        if (set_config_register(i2c))
         {
             m_crt_adc_idx = next_adc_idx;
             m_schedule_tp = Clock::now();
@@ -305,7 +309,7 @@ void ADS1115::process()
     }
 }
 
-bool ADS1115::read_sensor(bus::II2C& i2c, float& o_value)
+bool ADS1115_Source::read_sensor(util::hw::II2C& i2c, float& o_value)
 {
     if (m_config_register.mode == ADS1115_MODE_SINGLESHOT)
     {
@@ -360,7 +364,7 @@ bool ADS1115::read_sensor(bus::II2C& i2c, float& o_value)
     return true;
 }
 
-ts::Result<void> ADS1115::set_config(hal::INode_Config const& config)
+ts::Result<void> ADS1115_Source::set_config(hal::INode_Config const& config)
 {
     QLOG_TOPIC("ADS1115::set_config");
 
@@ -373,17 +377,17 @@ ts::Result<void> ADS1115::set_config(hal::INode_Config const& config)
 
     return ts::success;
 }
-auto ADS1115::get_config() const -> std::shared_ptr<const hal::INode_Config>
+auto ADS1115_Source::get_config() const -> std::shared_ptr<const hal::INode_Config>
 {
     return m_config;
 }
 
-auto ADS1115::get_descriptor() const -> std::shared_ptr<const hal::INode_Descriptor>
+auto ADS1115_Source::get_descriptor() const -> std::shared_ptr<const hal::INode_Descriptor>
 {
     return m_descriptor;
 }
 
-ts::Result<std::shared_ptr<messages::INode_Message>> ADS1115::send_message(messages::INode_Message const& message)
+ts::Result<std::shared_ptr<messages::INode_Message>> ADS1115_Source::send_message(messages::INode_Message const& message)
 {
     return make_error("Unknown message");
 }

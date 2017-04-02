@@ -6,18 +6,18 @@
 namespace silk
 {
 
-class Comms;
+class HAL;
 
 class Main_Menu_Page : public IMenu_Page
 {
 public:
-    Main_Menu_Page(Comms& comms);
+    Main_Menu_Page(HAL& hal);
 
     bool process(Input& input, Menu_System& menu_system) override;
     void render(Adafruit_GFX& display) override;
 
 private:
-    Comms& m_comms;
+    HAL& m_hal;
     Menu m_menu;
 
     enum class Submenu

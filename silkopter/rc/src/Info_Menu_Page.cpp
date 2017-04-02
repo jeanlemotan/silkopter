@@ -5,7 +5,7 @@
 #include "IStick_Actuators.h"
 #include "IButton.h"
 #include "IButton_Matrix.h"
-#include "Comms.h"
+#include "HAL.h"
 #include "Remote_Viewer_Server.h"
 
 #include "Menu_System.h"
@@ -19,8 +19,8 @@ extern int s_version_minor;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-Info_Menu_Page::Info_Menu_Page(Comms& comms)
-    : m_comms(comms)
+Info_Menu_Page::Info_Menu_Page(HAL& hal)
+    : m_hal(hal)
 {
     m_menu.push_submenu({"<-", "Sticks", "Buttons", "Comms", "Battery", "About"}, 0, 34);
 }
@@ -42,6 +42,8 @@ bool Info_Menu_Page::process(Input& input, Menu_System& menu_system)
         case 5: m_section = Section::ABOUT; break;
         }
     }
+
+    Comms& comms = m_hal.get_comms();
 
     if (m_section == Section::STICKS)
     {
@@ -76,7 +78,7 @@ bool Info_Menu_Page::process(Input& input, Menu_System& menu_system)
         }
 
         //deactivate the actuator
-        if (Clock::now() - m_throttle_mode_change_tp > std::chrono::milliseconds(200))
+        if (Clock::now() - m_throttle_mode_change_tp > std::chrono::milliseconds(1000))
         {
             input.get_stick_actuators().set_target_throttle(boost::none);
         }
@@ -92,6 +94,18 @@ bool Info_Menu_Page::process(Input& input, Menu_System& menu_system)
                 m_button_state[r][c] = input.get_button_matrix().get_button(r, c).is_pressed() ? 1 : 0;
             }
         }
+    }
+    else if (m_section == Section::COMMS)
+    {
+        Clock::time_point now = Clock::now();
+        if (now - m_last_dbm_tp >= std::chrono::seconds(1))
+        {
+            m_last_dbm_tp = now;
+            m_min_rx_dBm = comms.get_rx_dBm();
+            m_min_tx_dBm = comms.get_tx_dBm();
+        }
+        m_min_rx_dBm = std::min<int>(m_min_rx_dBm, comms.get_rx_dBm());
+        m_min_tx_dBm = std::min<int>(m_min_tx_dBm, comms.get_tx_dBm());
     }
 
     return true;
@@ -161,10 +175,10 @@ void Info_Menu_Page::render(Adafruit_GFX& display)
     {
         display.setCursor(0, 0);
         display.setTextWrap(true);
-        display.printf("%d viewer(s)", static_cast<int>(m_comms.get_remote_viewer_server().get_remote_viewer_count()));
-        display.printf("\n%ddBm RX", static_cast<int>(m_comms.get_rx_dBm()));
-        display.printf("\n%ddBm TX", static_cast<int>(m_comms.get_rx_dBm()));
-        display.printf("\nRX Lag: %dms", static_cast<int>(std::chrono::duration_cast<std::chrono::milliseconds>(Clock::now() - m_comms.get_last_rx_tp()).count()));
+        display.printf("%d viewer(s)", static_cast<int>(m_hal.get_comms().get_remote_viewer_server().get_remote_viewer_count()));
+        display.printf("\nRX: %ddBm", m_min_rx_dBm);
+        display.printf("\nTX: %ddBm", m_min_tx_dBm);
+        display.printf("\nRX Lag: %dms", static_cast<int>(std::chrono::duration_cast<std::chrono::milliseconds>(Clock::now() - m_hal.get_comms().get_last_rx_tp()).count()));
     }
     else if (m_section == Section::ABOUT)
     {

@@ -98,9 +98,6 @@ rpi {
 
 SOURCES += \
     ../../src/main.cpp \
-    ../../src/bus/UART_Linux.cpp \
-    ../../src/bus/SPI_Linux.cpp \
-    ../../src/bus/I2C_Linux.cpp \ 
     ../../src/sink/PIGPIO.cpp \
     ../../src/source/MPU9250.cpp \
     ../../src/source/MS5611.cpp \
@@ -118,7 +115,6 @@ SOURCES += \
     ../../src/simulator/Multirotor_Simulator.cpp \
     ../../src/processor/Servo_Gimbal.cpp \
     ../../src/processor/Motor_Mixer.cpp \
-    ../../src/source/ADS1115.cpp \
     ../../src/sink/PCA9685.cpp \
     ../../src/generator/Oscillator.cpp \
     ../../../libs/lz4/lz4.c \
@@ -131,9 +127,6 @@ SOURCES += \
     ../../src/processor/Comp_ECEF.cpp \
     ../../src/processor/KF_ECEF.cpp \
     ../../src/processor/Proximity.cpp \
-    ../../src/bus/I2C_BCM.cpp \
-    ../../src/bus/SPI_BCM.cpp \
-    ../../src/bus/UART_BBang.cpp \
     ../../src/source/AVRADC.cpp \
     ../../src/processor/Pressure_Velocity.cpp \
     ../../src/processor/ENU_Frame_System.cpp \
@@ -170,7 +163,20 @@ SOURCES += \
     ../../../libs/utils/comms/RC_Phy.cpp \
     ../../../libs/utils/comms/RC_Protocol.cpp \
     ../../../libs/common/comms/def/messages.def.cpp \
-    ../../src/FCStdAfx.cpp
+    ../../src/FCStdAfx.cpp \
+    ../../../libs/utils/hw/ADS1115.cpp \
+    ../../../libs/utils/hw/I2C_BCM.cpp \
+    ../../../libs/utils/hw/I2C_Dev.cpp \
+    ../../../libs/utils/hw/SPI_BCM.cpp \
+    ../../../libs/utils/hw/UART_BB.cpp \
+    ../../../libs/utils/hw/UART_Dev.cpp \
+    ../../src/source/ADS1115_Source.cpp \
+    ../../src/bus/I2C_BCM_Bus.cpp \
+    ../../src/bus/I2C_Linux_Bus.cpp \
+    ../../src/bus/SPI_BCM_Bus.cpp \
+    ../../src/bus/SPI_Linux_Bus.cpp \
+    ../../src/bus/UART_Linux_Bus.cpp \
+    ../../src/bus/UART_BB_Bus.cpp
 
 HEADERS += \
     ../../../libs/utils/chrono.h \
@@ -179,9 +185,6 @@ HEADERS += \
     ../../../libs/physics/constants.h \
     ../../../libs/common/Comm_Data.h \
     ../../../libs/common/Manual_Clock.h \
-    ../../src/bus/I2C_Linux.h \
-    ../../src/bus/SPI_Linux.h \
-    ../../src/bus/UART_Linux.h \ 
     ../../../libs/common/node/source/IInertial.h \
     ../../src/sink/PIGPIO.h \
     ../../src/source/MPU9250.h \
@@ -220,7 +223,6 @@ HEADERS += \
     ../../../libs/common/node/IConfig.h \
     ../../src/processor/Servo_Gimbal.h \
     ../../src/processor/Motor_Mixer.h \
-    ../../src/source/ADS1115.h \
     ../../src/sink/PCA9685.h \
     ../../src/generator/Oscillator.h \
     ../../src/Sample_Accumulator.h \
@@ -279,9 +281,6 @@ HEADERS += \
     ../../src/processor/KF_ECEF.h \
     ../../src/processor/Proximity.h \
     ../../../libs/common/stream/IMultirotor_Commands.h \
-    ../../src/bus/I2C_BCM.h \
-    ../../src/bus/SPI_BCM.h \
-    ../../src/bus/UART_BBang.h \
     ../../src/source/AVRADC.h \
     ../../../libs/common/node/ICombiner.h \
     ../../src/combiner/Combiner.h \
@@ -331,7 +330,23 @@ HEADERS += \
     ../../../libs/utils/comms/RC_Protocol.h \
     ../../../libs/common/comms/def/messages.def.h \
     ../../../libs/common/stream/IMultirotor_Simulator_State.h \
-    ../../src/FCStdAfx.h
+    ../../src/FCStdAfx.h \
+    ../../../libs/utils/hw/ADS1115.h \
+    ../../../libs/utils/hw/I2C_BCM.h \
+    ../../../libs/utils/hw/I2C_Dev.h \
+    ../../../libs/utils/hw/II2C.h \
+    ../../../libs/utils/hw/ISPI.h \
+    ../../../libs/utils/hw/IUART.h \
+    ../../../libs/utils/hw/SPI_BCM.h \
+    ../../../libs/utils/hw/UART_BB.h \
+    ../../../libs/utils/hw/UART_Dev.h \
+    ../../src/source/ADS1115_Source.h \
+    ../../src/bus/I2C_BCM_Bus.h \
+    ../../src/bus/I2C_Linux_Bus.h \
+    ../../src/bus/SPI_BCM_Bus.h \
+    ../../src/bus/SPI_Linux_Bus.h \
+    ../../src/bus/UART_Linux_Bus.h \
+    ../../src/bus/UART_BB_Bus.h
 
 DISTFILES +=
 

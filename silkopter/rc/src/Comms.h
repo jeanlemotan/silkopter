@@ -45,10 +45,12 @@
 namespace silk
 {
 
+class HAL;
+
 class Comms : q::util::Noncopyable
 {
 public:
-    Comms();
+    Comms(HAL& hal);
 
     bool start();
 
@@ -73,6 +75,8 @@ public:
     void process();
 
 private:
+    HAL& m_hal;
+
     void reset();
 
     bool compute_multirotor_commands_packet(uint8_t* data, size_t& size, uint8_t& packet_type);

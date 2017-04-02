@@ -681,10 +681,10 @@ private:
   baud_t m_baud = baud_t{UART_Linux_Descriptor::baud_t::_115200};
 };
 
-struct UART_BBang_Descriptor : public IBus_Descriptor
+struct UART_BB_Descriptor : public IBus_Descriptor
 {
 public:
-  virtual ~UART_BBang_Descriptor() = default;
+  virtual ~UART_BB_Descriptor() = default;
   void set_rx_pin(uint32_t const& value);
   void set_rx_pin(uint32_t&& value);
   auto get_rx_pin() const -> uint32_t const&;
@@ -3209,8 +3209,8 @@ ts::Result<void> deserialize(UART_Linux_Descriptor::baud_t& value, ts::sz::Value
 ts::sz::Value serialize(UART_Linux_Descriptor::baud_t const& value);
 ts::Result<void> deserialize(UART_Linux_Descriptor& value, ts::sz::Value const& sz_value);
 ts::sz::Value serialize(UART_Linux_Descriptor const& value);
-ts::Result<void> deserialize(UART_BBang_Descriptor& value, ts::sz::Value const& sz_value);
-ts::sz::Value serialize(UART_BBang_Descriptor const& value);
+ts::Result<void> deserialize(UART_BB_Descriptor& value, ts::sz::Value const& sz_value);
+ts::sz::Value serialize(UART_BB_Descriptor const& value);
 ts::Result<void> deserialize(I2C_BCM_Descriptor& value, ts::sz::Value const& sz_value);
 ts::sz::Value serialize(I2C_BCM_Descriptor const& value);
 ts::Result<void> deserialize(I2C_Linux_Descriptor& value, ts::sz::Value const& sz_value);

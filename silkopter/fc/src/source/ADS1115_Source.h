@@ -24,10 +24,10 @@ namespace silk
 namespace node
 {
 
-class ADS1115 : public ISource
+class ADS1115_Source : public ISource
 {
 public:
-    ADS1115(HAL& hal);
+    ADS1115_Source(HAL& hal);
 
     ts::Result<void> init(hal::INode_Descriptor const& descriptor) override;
     std::shared_ptr<const hal::INode_Descriptor> get_descriptor() const override;
@@ -46,10 +46,10 @@ public:
 private:
     ts::Result<void> init();
 
-    bool read_sensor(bus::II2C& i2c, float& o_value);
+    bool read_sensor(util::hw::II2C& i2c, float& o_value);
 
     HAL& m_hal;
-    std::weak_ptr<bus::II2C> m_i2c;
+    std::weak_ptr<bus::II2C_Bus> m_i2c_bus;
 
     std::shared_ptr<hal::ADS1115_Descriptor> m_descriptor;
     std::shared_ptr<hal::ADS1115_Config> m_config;
@@ -67,7 +67,7 @@ private:
 
     mutable std::vector<ADC> m_adcs;
 
-    auto set_config_register(bus::II2C& i2c) -> bool;
+    auto set_config_register(util::hw::II2C& i2c) -> bool;
 
     struct Config_Register
     {

@@ -54,19 +54,11 @@ ts::Result<void> AVRADC::init(hal::INode_Descriptor const& descriptor)
 
 ts::Result<void> AVRADC::init()
 {
-    m_i2c = m_hal.get_bus_registry().find_by_name<bus::II2C>(m_descriptor->get_bus());
-
-    auto i2c = m_i2c.lock();
-    if (!i2c)
+    m_i2c_bus = m_hal.get_bus_registry().find_by_name<bus::II2C_Bus>(m_descriptor->get_bus());
+    if (!m_i2c_bus.lock())
     {
         return make_error("No bus configured");
     }
-
-    i2c->lock();
-    At_Exit at_exit([this, &i2c]()
-    {
-        i2c->unlock();
-    });
 
     m_adcs[0]->set_rate(m_descriptor->get_rate());
     m_adcs[1]->set_rate(m_descriptor->get_rate());
@@ -94,16 +86,18 @@ void AVRADC::process()
         adc->clear();
     }
 
-    auto i2c = m_i2c.lock();
-    if (!i2c)
+    auto i2c_bus = m_i2c_bus.lock();
+    if (!i2c_bus)
     {
         return;
     }
 
-    i2c->lock();
+    util::hw::II2C& i2c = i2c_bus->get_i2c();
+
+    i2c.lock();
     At_Exit at_exit([this, &i2c]()
     {
-        i2c->unlock();
+        i2c.unlock();
     });
 
     auto now = Clock::now();
@@ -115,7 +109,7 @@ void AVRADC::process()
 
     //TODO - add healthy indication
     uint8_t data[4] = {0};
-    if (i2c->read(m_descriptor->get_i2c_address(), data, sizeof(data)))
+    if (i2c.read(m_descriptor->get_i2c_address(), data, sizeof(data)))
     {
         for (size_t i = 0; i < m_adcs.size(); i++)
         {

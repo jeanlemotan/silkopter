@@ -9,18 +9,18 @@
 
 /////////////////////////////////////////////////////////////////////////////////////
 
-#include "bus/I2C_Linux.h"
-#include "bus/SPI_Linux.h"
-#include "bus/I2C_BCM.h"
-#include "bus/SPI_BCM.h"
-#include "bus/UART_Linux.h"
-#include "bus/UART_BBang.h"
+#include "bus/I2C_Linux_Bus.h"
+#include "bus/SPI_Linux_Bus.h"
+#include "bus/I2C_BCM_Bus.h"
+#include "bus/SPI_BCM_Bus.h"
+#include "bus/UART_Linux_Bus.h"
+#include "bus/UART_BB_Bus.h"
 
 #include "source/Raspicam.h"
 #include "source/MPU9250.h"
 #include "source/MS5611.h"
 #include "source/RC5T619.h"
-#include "source/ADS1115.h"
+#include "source/ADS1115_Source.h"
 #include "source/AVRADC.h"
 #include "source/SRF01.h"
 #include "source/SRF02.h"
@@ -464,12 +464,12 @@ auto HAL::init(RC_Comms& rc_comms, GS_Comms& gs_comms) -> bool
     }
 #endif
 
-    m_bus_factory.add<bus::UART_Linux>("UART Linux");
-    m_bus_factory.add<bus::UART_BBang>("UART BBang");
-    m_bus_factory.add<bus::I2C_Linux>("I2C Linux");
-    m_bus_factory.add<bus::SPI_Linux>("SPI Linux");
-    m_bus_factory.add<bus::I2C_BCM>("I2C BCM");
-    m_bus_factory.add<bus::SPI_BCM>("SPI BCM");
+    m_bus_factory.add<bus::UART_Linux_Bus>("UART Linux");
+    m_bus_factory.add<bus::UART_BB_Bus>("UART BB");
+    m_bus_factory.add<bus::I2C_Linux_Bus>("I2C Linux");
+    m_bus_factory.add<bus::SPI_Linux_Bus>("SPI Linux");
+    m_bus_factory.add<bus::I2C_BCM_Bus>("I2C BCM");
+    m_bus_factory.add<bus::SPI_BCM_Bus>("SPI BCM");
 
     m_node_factory.add<Multirotor_Simulator>("Multirotor Simulator", *this);
     m_node_factory.add<MPU9250>("MPU9250", *this);
@@ -479,7 +479,7 @@ auto HAL::init(RC_Comms& rc_comms, GS_Comms& gs_comms) -> bool
     m_node_factory.add<MaxSonar>("MaxSonar", *this);
     m_node_factory.add<Raspicam>("Raspicam", *this);
     m_node_factory.add<RC5T619>("RC5T619", *this);
-    m_node_factory.add<ADS1115>("ADS1115", *this);
+    m_node_factory.add<ADS1115_Source>("ADS1115", *this);
     m_node_factory.add<AVRADC>("AVRADC", *this);
     m_node_factory.add<UBLOX>("UBLOX", *this);
     m_node_factory.add<CPPM_Receiver>("CPPM Receiver", *this);

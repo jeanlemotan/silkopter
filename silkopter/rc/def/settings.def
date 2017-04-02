@@ -73,5 +73,15 @@ struct Settings
     };
 
     Comms comms;
+
+    struct Battery_Info
+    {
+    	float low_voltage = 7.f;
+    	float critical_voltage = 6.f;
+    	float calibration_bias = 0.f;
+    	float calibration_scale = 1.f;
+    };
+
+    Battery_Info battery_info;
 };
 

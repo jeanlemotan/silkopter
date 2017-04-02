@@ -53,6 +53,7 @@ RC_Phy::~RC_Phy()
 
 bool RC_Phy::init(std::string const& device, uint32_t speed, uint8_t sdn_gpio, uint8_t nirq_gpio)
 {
+    QLOG_TOPIC("RC_Phy::init");
     if (!m_hw->chip.init(device, speed, sdn_gpio, nirq_gpio))
     {
         return false;
@@ -164,6 +165,7 @@ void RC_Phy::set_rate(size_t rate)
 
 void RC_Phy::master_thread_proc()
 {
+    QLOG_TOPIC("RC_Phy::master");
     while (!m_exit)
     {
         Clock::duration tx_duration;
@@ -230,6 +232,7 @@ void RC_Phy::master_thread_proc()
 
 void RC_Phy::slave_thread_proc()
 {
+    QLOG_TOPIC("RC_Phy::slave");
     while (!m_exit)
     {
         //wait for a packet indefinitely
@@ -292,6 +295,7 @@ void RC_Phy::slave_thread_proc()
 
 bool RC_Phy::read_fifo(size_t rx_size)
 {
+    QLOG_TOPIC("RC_Phy::read_fifo");
     if (rx_size == 0)
     {
         return true;

@@ -157,13 +157,15 @@ ts::Result<void> RC5T619::init(hal::INode_Descriptor const& descriptor)
 
 ts::Result<void> RC5T619::init()
 {
-    m_i2c = m_hal.get_bus_registry().find_by_name<bus::II2C>(m_descriptor->get_bus());
+    m_i2c_bus = m_hal.get_bus_registry().find_by_name<bus::II2C_Bus>(m_descriptor->get_bus());
 
-    auto i2c = m_i2c.lock();
-    if (!i2c)
+    auto i2c_bus = m_i2c_bus.lock();
+    if (!i2c_bus)
     {
         return make_error("No bus configured");
     }
+
+    util::hw::II2C& i2c = i2c_bus->get_i2c();
 
     //m_descriptor->adc0_rate = math::clamp<size_t>(m_descriptor->adc0_rate, 1, 50);
     //m_descriptor->adc1_rate_ratio = math::clamp<size_t>(m_descriptor->adc1_rate_ratio, 1, 100);
@@ -176,7 +178,7 @@ ts::Result<void> RC5T619::init()
     Mode_Guard mg;
 
     uint8_t control;
-    auto res = i2c->read_register_u8(ADDR, 0x36, control);
+    auto res = i2c.read_register_u8(ADDR, 0x36, control);
     if (!res || control == 0xff)
     {
         return make_error("rc5t619 not found");
@@ -184,19 +186,19 @@ ts::Result<void> RC5T619::init()
     QLOGI("rc5t619 found: {}", control);
 
     // Set ADRQ=00 to stop ADC
-    res &= i2c->write_register_u8(ADDR, RC5T619_ADC_CNT3, 0x0);
+    res &= i2c.write_register_u8(ADDR, RC5T619_ADC_CNT3, 0x0);
 
     // Set ADC auto conversion interval 250ms
-    res &= i2c->write_register_u8(ADDR, RC5T619_ADC_CNT2, 0x0);
+    res &= i2c.write_register_u8(ADDR, RC5T619_ADC_CNT2, 0x0);
 
     // Enable AIN0, AIN1 pin conversion in auto-ADC
-    res &= i2c->write_register_u8(ADDR, RC5T619_ADC_CNT1, 0xC0);
+    res &= i2c.write_register_u8(ADDR, RC5T619_ADC_CNT1, 0xC0);
 
     // Start auto-mode & average 4-time conversion mode for ADC
-    res &= i2c->write_register_u8(ADDR, RC5T619_ADC_CNT3, 0x17);
+    res &= i2c.write_register_u8(ADDR, RC5T619_ADC_CNT3, 0x17);
 
     //start by converting voltage first
-    res &= i2c->write_register_u8(ADDR, RC5T619_ADC_CNT3, CONVERT_ADC1);
+    res &= i2c.write_register_u8(ADDR, RC5T619_ADC_CNT3, CONVERT_ADC1);
     if (!res)
     {
         return make_error("Failed to init rc5t619");
@@ -218,11 +220,13 @@ void RC5T619::process()
     m_adc[0]->samples.clear();
     m_adc[1]->samples.clear();
 
-    auto i2c = m_i2c.lock();
-    if (!i2c)
+    auto i2c_bus = m_i2c_bus.lock();
+    if (!i2c_bus)
     {
         return;
     }
+
+    util::hw::II2C& i2c = i2c_bus->get_i2c();
 
     auto now = Clock::now();
     if (now - m_last_tp < m_dt)
@@ -244,7 +248,7 @@ void RC5T619::process()
     {
         //read coltage
 
-        if (i2c->read_register(ADDR, RC5T619_AIN1_DATAH, buf.data(), buf.size()))
+        if (i2c.read_register(ADDR, RC5T619_AIN1_DATAH, buf.data(), buf.size()))
         {
             int r = (unsigned int)(buf[0] << 4) | (buf[1]&0xf);
             auto result =  math::clamp(static_cast<float>(r) / 4095.f, 0.f, 1.f);
@@ -257,7 +261,7 @@ void RC5T619::process()
         }
 
         //next
-        if (i2c->write_register_u8(ADDR, RC5T619_ADC_CNT3, CONVERT_ADC0)) //read current next
+        if (i2c.write_register_u8(ADDR, RC5T619_ADC_CNT3, CONVERT_ADC0)) //read current next
         {
             m_stage++;
         }
@@ -266,7 +270,7 @@ void RC5T619::process()
     {
         //read current
 
-        if (i2c->read_register(ADDR, RC5T619_AIN0_DATAH, buf.data(), buf.size()))
+        if (i2c.read_register(ADDR, RC5T619_AIN0_DATAH, buf.data(), buf.size()))
         {
             int r = (unsigned int)(buf[0] << 4) | (buf[1]&0xf);
             auto result =  math::clamp(static_cast<float>(r) / 4095.f, 0.f, 1.f);

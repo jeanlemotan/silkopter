@@ -422,6 +422,62 @@ T max(T v, T max)
     }
 
 ////////////////////////////////////////////////////////////
+    void Settings::Battery_Info::set_low_voltage(float const& value)
+    {
+      m_low_voltage = value;
+    }
+    void Settings::Battery_Info::set_low_voltage(float&& value)
+    {
+      m_low_voltage = std::move(value);
+    }
+    auto Settings::Battery_Info::get_low_voltage() const -> float const& 
+    {
+      return m_low_voltage;
+    }
+
+////////////////////////////////////////////////////////////
+    void Settings::Battery_Info::set_critical_voltage(float const& value)
+    {
+      m_critical_voltage = value;
+    }
+    void Settings::Battery_Info::set_critical_voltage(float&& value)
+    {
+      m_critical_voltage = std::move(value);
+    }
+    auto Settings::Battery_Info::get_critical_voltage() const -> float const& 
+    {
+      return m_critical_voltage;
+    }
+
+////////////////////////////////////////////////////////////
+    void Settings::Battery_Info::set_calibration_bias(float const& value)
+    {
+      m_calibration_bias = value;
+    }
+    void Settings::Battery_Info::set_calibration_bias(float&& value)
+    {
+      m_calibration_bias = std::move(value);
+    }
+    auto Settings::Battery_Info::get_calibration_bias() const -> float const& 
+    {
+      return m_calibration_bias;
+    }
+
+////////////////////////////////////////////////////////////
+    void Settings::Battery_Info::set_calibration_scale(float const& value)
+    {
+      m_calibration_scale = value;
+    }
+    void Settings::Battery_Info::set_calibration_scale(float&& value)
+    {
+      m_calibration_scale = std::move(value);
+    }
+    auto Settings::Battery_Info::get_calibration_scale() const -> float const& 
+    {
+      return m_calibration_scale;
+    }
+
+////////////////////////////////////////////////////////////
   void Settings::set_input(Input const& value)
   {
     m_input = value;
@@ -476,6 +532,25 @@ T max(T v, T max)
   auto Settings::get_comms() -> Comms& 
   {
     return m_comms;
+  }
+
+////////////////////////////////////////////////////////////
+  void Settings::set_battery_info(Battery_Info const& value)
+  {
+    m_battery_info = value;
+  }
+  void Settings::set_battery_info(Battery_Info&& value)
+  {
+    m_battery_info = std::move(value);
+  }
+  auto Settings::get_battery_info() const -> Battery_Info const& 
+  {
+    return m_battery_info;
+  }
+
+  auto Settings::get_battery_info() -> Battery_Info& 
+  {
+    return m_battery_info;
   }
 
 ////////////////////////////////////////////////////////////
@@ -1173,6 +1248,53 @@ ts::sz::Value serialize(Settings::Comms const& value)
   sz_value.add_object_member("rc_spi_speed", serialize(value.get_rc_spi_speed()));
   return sz_value;
 }
+ts::Result<void> deserialize(Settings::Battery_Info& value, ts::sz::Value const& sz_value)
+{
+  if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  {
+    auto const* member_sz_value = sz_value.find_object_member_by_name("low_voltage");
+    if (!member_sz_value) { return ts::Error("Cannot find member value 'low_voltage'"); }
+    std::remove_cv<std::remove_reference<decltype(value.get_low_voltage())>::type>::type v;
+    auto result = deserialize(v, *member_sz_value);
+    if (result != ts::success) { return result; }
+    value.set_low_voltage(std::move(v));
+  }
+  {
+    auto const* member_sz_value = sz_value.find_object_member_by_name("critical_voltage");
+    if (!member_sz_value) { return ts::Error("Cannot find member value 'critical_voltage'"); }
+    std::remove_cv<std::remove_reference<decltype(value.get_critical_voltage())>::type>::type v;
+    auto result = deserialize(v, *member_sz_value);
+    if (result != ts::success) { return result; }
+    value.set_critical_voltage(std::move(v));
+  }
+  {
+    auto const* member_sz_value = sz_value.find_object_member_by_name("calibration_bias");
+    if (!member_sz_value) { return ts::Error("Cannot find member value 'calibration_bias'"); }
+    std::remove_cv<std::remove_reference<decltype(value.get_calibration_bias())>::type>::type v;
+    auto result = deserialize(v, *member_sz_value);
+    if (result != ts::success) { return result; }
+    value.set_calibration_bias(std::move(v));
+  }
+  {
+    auto const* member_sz_value = sz_value.find_object_member_by_name("calibration_scale");
+    if (!member_sz_value) { return ts::Error("Cannot find member value 'calibration_scale'"); }
+    std::remove_cv<std::remove_reference<decltype(value.get_calibration_scale())>::type>::type v;
+    auto result = deserialize(v, *member_sz_value);
+    if (result != ts::success) { return result; }
+    value.set_calibration_scale(std::move(v));
+  }
+  return ts::success;
+}
+ts::sz::Value serialize(Settings::Battery_Info const& value)
+{
+  ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
+  sz_value.reserve_object_members(4);
+  sz_value.add_object_member("low_voltage", serialize(value.get_low_voltage()));
+  sz_value.add_object_member("critical_voltage", serialize(value.get_critical_voltage()));
+  sz_value.add_object_member("calibration_bias", serialize(value.get_calibration_bias()));
+  sz_value.add_object_member("calibration_scale", serialize(value.get_calibration_scale()));
+  return sz_value;
+}
 ts::Result<void> deserialize(Settings& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
@@ -1200,15 +1322,24 @@ ts::Result<void> deserialize(Settings& value, ts::sz::Value const& sz_value)
     if (result != ts::success) { return result; }
     value.set_comms(std::move(v));
   }
+  {
+    auto const* member_sz_value = sz_value.find_object_member_by_name("battery_info");
+    if (!member_sz_value) { return ts::Error("Cannot find member value 'battery_info'"); }
+    std::remove_cv<std::remove_reference<decltype(value.get_battery_info())>::type>::type v;
+    auto result = deserialize(v, *member_sz_value);
+    if (result != ts::success) { return result; }
+    value.set_battery_info(std::move(v));
+  }
   return ts::success;
 }
 ts::sz::Value serialize(Settings const& value)
 {
   ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
-  sz_value.reserve_object_members(3);
+  sz_value.reserve_object_members(4);
   sz_value.add_object_member("input", serialize(value.get_input()));
   sz_value.add_object_member("hw", serialize(value.get_hw()));
   sz_value.add_object_member("comms", serialize(value.get_comms()));
+  sz_value.add_object_member("battery_info", serialize(value.get_battery_info()));
   return sz_value;
 }
 ts::Result<void> deserialize(std::vector<std::string>& value, ts::sz::Value const& sz_value)

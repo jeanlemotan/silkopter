@@ -6,7 +6,7 @@
 #include "ISticks.h"
 #include "IHaptic.h"
 
-#include "Comms.h"
+#include "HAL.h"
 
 namespace silk
 {
@@ -42,8 +42,8 @@ static float dBm_to_strength(int8_t dBm)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-Fly_Menu_Page::Fly_Menu_Page(Comms& comms)
-    : m_comms(comms)
+Fly_Menu_Page::Fly_Menu_Page(HAL& hal)
+    : m_hal(hal)
 {
 }
 
@@ -51,7 +51,7 @@ Fly_Menu_Page::Fly_Menu_Page(Comms& comms)
 
 void Fly_Menu_Page::init(Input& input)
 {
-    m_multirotor_state = m_comms.get_multirotor_state();
+    m_multirotor_state = m_hal.get_comms().get_multirotor_state();
 
     set_mode(input, m_multirotor_state.mode);
 
@@ -103,12 +103,14 @@ bool Fly_Menu_Page::process(Input& input, Menu_System& menu_system)
         return false;
     }
 
-    m_multirotor_state = m_comms.get_multirotor_state();
+    Comms& comms = m_hal.get_comms();
 
-    m_rx_strength = math::lerp<math::safe>(m_rx_strength, dBm_to_strength(m_comms.get_rx_dBm()), std::chrono::duration<float>(dt).count());
+    m_multirotor_state = comms.get_multirotor_state();
+
+    m_rx_strength = math::lerp<math::safe>(m_rx_strength, dBm_to_strength(comms.get_rx_dBm()), std::chrono::duration<float>(dt).count());
     m_slow_rx_strength = math::lerp<math::safe>(m_slow_rx_strength, m_rx_strength, std::chrono::duration<float>(dt).count() / 5.f);
 
-    m_tx_strength = math::lerp<math::safe>(m_tx_strength, dBm_to_strength(m_comms.get_tx_dBm()), std::chrono::duration<float>(dt).count());
+    m_tx_strength = math::lerp<math::safe>(m_tx_strength, dBm_to_strength(comms.get_tx_dBm()), std::chrono::duration<float>(dt).count());
     m_slow_tx_strength = math::lerp<math::safe>(m_slow_tx_strength, m_tx_strength, std::chrono::duration<float>(dt).count() / 5.f);
 
     stream::IMultirotor_State::Value const& state = m_multirotor_state;
@@ -134,7 +136,7 @@ bool Fly_Menu_Page::process(Input& input, Menu_System& menu_system)
         }
     }
 
-    m_comms.send_multirotor_commands_value(m_commands);
+    comms.send_multirotor_commands_value(m_commands);
 
     return true;
 }
@@ -422,6 +424,8 @@ void Fly_Menu_Page::render(Adafruit_GFX& display)
 
     const Clock::duration k_mode_change_blink_duration = std::chrono::milliseconds(300);
 
+    Comms& comms = m_hal.get_comms();
+
     stream::IMultirotor_State::Value const& state = m_multirotor_state;
 
     util::coordinates::LLA home_lla;
@@ -493,7 +497,7 @@ void Fly_Menu_Page::render(Adafruit_GFX& display)
             display.drawFastHLine(arrow_x,     line_y + 2, 1, 1);
 
             bool error = m_rx_strength < k_min_signal_strength ||
-                    (now - m_comms.get_last_rx_tp()) >= k_timeout_duration;
+                    (now - comms.get_last_rx_tp()) >= k_timeout_duration;
             uint16_t color = error ? m_blink_color : 1;
 
             display.fillRect(x, line_y, static_cast<int16_t>(m_rx_strength * w), h, color);

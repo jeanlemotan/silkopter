@@ -47,7 +47,7 @@ private:
 
     HAL& m_hal;
 
-    std::weak_ptr<bus::IUART> m_bus;
+    std::weak_ptr<bus::IUART_Bus> m_uart_bus;
 
     std::shared_ptr<hal::MaxSonar_Descriptor> m_descriptor;
     std::shared_ptr<hal::MaxSonar_Config> m_config;

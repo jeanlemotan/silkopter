@@ -185,7 +185,11 @@ HEADERS += \
     ../../../libs/utils/hw/IUART.h \
     ../../../libs/utils/hw/SPI_BCM.h \
     ../../../libs/utils/hw/UART_BB.h \
-    ../../../libs/utils/hw/UART_Dev.h
+    ../../../libs/utils/hw/UART_Dev.h \
+    ../../src/Battery_Info_ADS1115.h \
+    ../../src/Gimbal_Control_ADS1115.h \
+    ../../src/IBattery_Info.h \
+    ../../src/IGimbal_Control.h
 
 SOURCES += \
     ../../src/main.cpp \
@@ -233,7 +237,10 @@ SOURCES += \
     ../../../libs/utils/hw/ADS1115.cpp \
     ../../../libs/utils/hw/I2C_BCM.cpp \
     ../../../libs/utils/hw/SPI_BCM.cpp \
-    ../../../libs/utils/hw/UART_Dev.cpp
+    ../../../libs/utils/hw/UART_Dev.cpp \
+    ../../../libs/utils/hw/UART_BB.cpp \
+    ../../src/Battery_Info_ADS1115.cpp \
+    ../../src/Gimbal_Control_ADS1115.cpp
 
 DISTFILES += \
     ../../src/node.png \

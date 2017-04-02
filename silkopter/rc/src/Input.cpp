@@ -6,16 +6,17 @@
 #include "Rotary_Encoder_PIGPIO.h"
 #include "Button_Matrix_PIGPIO.h"
 
+#include "HAL.h"
 #include "settings.def.h"
 
 namespace silk
 {
 
-extern settings::Settings s_settings;
-
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-Input::Input()
+Input::Input(HAL& hal, util::hw::II2C& i2c)
+    : m_hal(hal)
+    , m_i2c(i2c)
 {
 
 }
@@ -31,7 +32,7 @@ Input::~Input()
 
 void Input::init()
 {
-    Sticks_ADS1115* sticks = new Sticks_ADS1115();
+    Sticks_ADS1115* sticks = new Sticks_ADS1115(m_i2c);
     auto result = sticks->init();
     QASSERT(result == ts::success);
     m_sticks.reset(sticks);
@@ -62,7 +63,7 @@ void Input::init()
     m_button_matrix.reset(button_matrix);
     m_input_devices.push_back(button_matrix);
 
-    silk::settings::Settings::Input::Sticks_Calibration const& sc = s_settings.get_input().get_sticks_calibration();
+    silk::settings::Settings::Input::Sticks_Calibration const& sc = m_hal.get_settings().get_input().get_sticks_calibration();
     m_sticks->set_yaw_calibration(sc.get_yaw_min(), sc.get_yaw_center(), sc.get_yaw_max(), sc.get_yaw_deadband());
     m_sticks->set_pitch_calibration(sc.get_pitch_min(), sc.get_pitch_center(), sc.get_pitch_max(), sc.get_pitch_deadband());
     m_sticks->set_roll_calibration(sc.get_roll_min(), sc.get_roll_center(), sc.get_roll_max(), sc.get_roll_deadband());

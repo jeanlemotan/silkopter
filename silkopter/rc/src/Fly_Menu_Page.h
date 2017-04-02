@@ -8,12 +8,12 @@
 namespace silk
 {
 
-class Comms;
+class HAL;
 
 class Fly_Menu_Page : public IMenu_Page
 {
 public:
-    Fly_Menu_Page(Comms& comms);
+    Fly_Menu_Page(HAL& hal);
 
     bool process(Input& input, Menu_System& menu_system);
     void render(Adafruit_GFX& display);
@@ -37,7 +37,7 @@ private:
     void process_mode_land(Input& input);
 
     silk::stream::IMultirotor_Commands::Value m_commands;
-    Comms& m_comms;
+    HAL& m_hal;
     stream::IMultirotor_State::Value m_multirotor_state;
 
     bool m_is_initialized = false;

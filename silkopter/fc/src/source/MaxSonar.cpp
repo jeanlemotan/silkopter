@@ -45,18 +45,11 @@ ts::Result<void> MaxSonar::init(hal::INode_Descriptor const& descriptor)
 
 ts::Result<void> MaxSonar::init()
 {
-    m_bus = m_hal.get_bus_registry().find_by_name<bus::IUART>(m_descriptor->get_bus());
-    auto bus = m_bus.lock();
-    if (!bus)
+    m_uart_bus = m_hal.get_bus_registry().find_by_name<bus::IUART_Bus>(m_descriptor->get_bus());
+    if (!m_uart_bus.lock())
     {
         return make_error("No bus configured");
     }
-
-    bus->lock();
-    At_Exit at_exit([this, &bus]()
-    {
-        bus->unlock();
-    });
 
     m_output_stream->set_rate(m_descriptor->get_rate());
 
@@ -75,21 +68,23 @@ void MaxSonar::process()
 
     m_output_stream->clear();
 
-    auto bus = m_bus.lock();
-    if (!bus)
+    auto uart_bus = m_uart_bus.lock();
+    if (!uart_bus)
     {
         return;
     }
 
-    bus->lock();
-    At_Exit at_exit([this, &bus]()
+    util::hw::IUART& uart = uart_bus->get_uart();
+
+    uart.lock();
+    At_Exit at_exit([this, &uart]()
     {
-        bus->unlock();
+        uart.unlock();
     });
 
     //accumulate data from the serial port
     std::array<uint8_t, 32> buf;
-    size_t count = bus->read(buf.data(), buf.size());
+    size_t count = uart.read(buf.data(), buf.size());
     if (count > 0)
     {
         std::copy(buf.begin(), buf.begin() + count, std::back_inserter(m_read_data));

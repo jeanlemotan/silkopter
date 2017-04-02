@@ -6,19 +6,19 @@
 
 namespace silk
 {
-class Comms;
+class HAL;
 
 class Info_Menu_Page : public IMenu_Page
 {
 public:
-    Info_Menu_Page(Comms& comms);
+    Info_Menu_Page(HAL& hal);
 
     bool process(Input& input, Menu_System& menu_system) override;
     void render(Adafruit_GFX& display);
 
 private:
     Menu m_menu;
-    Comms& m_comms;
+    HAL& m_hal;
 
     struct Axis_Data
     {
@@ -45,6 +45,10 @@ private:
 
     Clock::time_point m_throttle_mode_change_tp = Clock::now();
     bool m_throttle_initialized = false;
+
+    Clock::time_point m_last_dbm_tp = Clock::now();
+    int m_min_rx_dBm = 999;
+    int m_min_tx_dBm = 999;
 };
 
 }

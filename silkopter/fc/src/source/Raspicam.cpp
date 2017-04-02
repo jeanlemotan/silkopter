@@ -550,30 +550,30 @@ void Raspicam::stop_recording()
 
 #if defined RASPBERRY_PI
 
-static void dump_format_info(size_t tabs, MMAL_ES_FORMAT_T* format)
-{
-//    SCOPED_PINS_GUARD;
+//static void dump_format_info(size_t tabs, MMAL_ES_FORMAT_T* format)
+//{
+////    SCOPED_PINS_GUARD;
 
-    QASSERT(format);
-    std::string prefix(tabs, '\t');
-    char encoding[5] = {0};
-    char encoding_variant[5] = {0};
-    char color_space[5] = {0};
-    memcpy(encoding, &format->encoding, 4);
-    memcpy(encoding_variant, &format->encoding_variant, 4);
-    memcpy(color_space, &format->es->video.color_space, 4);
+//    QASSERT(format);
+//    std::string prefix(tabs, '\t');
+//    char encoding[5] = {0};
+//    char encoding_variant[5] = {0};
+//    char color_space[5] = {0};
+//    memcpy(encoding, &format->encoding, 4);
+//    memcpy(encoding_variant, &format->encoding_variant, 4);
+//    memcpy(color_space, &format->es->video.color_space, 4);
 
-    QLOGI("{}type: {}", prefix, format->type);
-    QLOGI("{}encoding: {} / variant: {}", prefix, encoding, encoding_variant);
-    QLOGI("{}bitrate: {}", prefix, format->bitrate);
-    QLOGI("{}flags: {}", prefix, format->flags);
-    QLOGI("{}extradata_size: {}", prefix, format->extradata_size);
-    QLOGI("{}width: {} / height: {}", prefix, format->es->video.width, format->es->video.height);
-    QLOGI("{}crop (x: {}, y: {}, w: {}, h: {})", prefix, format->es->video.crop.x, format->es->video.crop.y, format->es->video.crop.width, format->es->video.crop.height);
-    QLOGI("{}frame_rate: num: {} / den: {}", prefix, format->es->video.frame_rate.num, format->es->video.frame_rate.den);
-    QLOGI("{}par: num: {} / den: {}", prefix, format->es->video.par.num, format->es->video.par.den);
-    QLOGI("{}color_space: {}", prefix, color_space);
-}
+//    QLOGI("{}type: {}", prefix, format->type);
+//    QLOGI("{}encoding: {} / variant: {}", prefix, encoding, encoding_variant);
+//    QLOGI("{}bitrate: {}", prefix, format->bitrate);
+//    QLOGI("{}flags: {}", prefix, format->flags);
+//    QLOGI("{}extradata_size: {}", prefix, format->extradata_size);
+//    QLOGI("{}width: {} / height: {}", prefix, format->es->video.width, format->es->video.height);
+//    QLOGI("{}crop (x: {}, y: {}, w: {}, h: {})", prefix, format->es->video.crop.x, format->es->video.crop.y, format->es->video.crop.width, format->es->video.crop.height);
+//    QLOGI("{}frame_rate: num: {} / den: {}", prefix, format->es->video.frame_rate.num, format->es->video.frame_rate.den);
+//    QLOGI("{}par: num: {} / den: {}", prefix, format->es->video.par.num, format->es->video.par.den);
+//    QLOGI("{}color_space: {}", prefix, color_space);
+//}
 
 //static void dump_port_info(size_t tabs, MMAL_PORT_T* port)
 //{

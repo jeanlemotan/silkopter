@@ -49,13 +49,13 @@ private:
 
     HAL& m_hal;
 
-    std::weak_ptr<bus::II2C> m_i2c;
-    std::weak_ptr<bus::ISPI> m_spi;
+    std::weak_ptr<bus::II2C_Bus> m_i2c_bus;
+    std::weak_ptr<bus::ISPI_Bus> m_spi_bus;
 
     struct Buses
     {
-        std::shared_ptr<bus::II2C> i2c;
-        std::shared_ptr<bus::ISPI> spi;
+        std::shared_ptr<bus::II2C_Bus> i2c;
+        std::shared_ptr<bus::ISPI_Bus> spi;
     };
 
     auto lock(Buses& buses) -> bool;

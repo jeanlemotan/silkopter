@@ -6,7 +6,8 @@ namespace silk
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-Sticks_ADS1115::Sticks_ADS1115()
+Sticks_ADS1115::Sticks_ADS1115(util::hw::II2C& i2c)
+    : m_i2c(i2c)
 {
 }
 
@@ -20,12 +21,6 @@ Sticks_ADS1115::~Sticks_ADS1115()
 
 ts::Result<void> Sticks_ADS1115::init()
 {
-    ts::Result<void> result = m_dev.init("/dev/i2c-1");
-    if (result != ts::success)
-    {
-        return result;
-    }
-
     util::hw::ADS1115::Descriptor descriptor;
     descriptor.i2c_address = 0x48;
     descriptor.adcs[0].is_enabled = true;
@@ -37,7 +32,7 @@ ts::Result<void> Sticks_ADS1115::init()
     descriptor.adcs[3].is_enabled = true;
     descriptor.adcs[3].rate = 200;
 
-    result = m_ads1115.init(m_dev, descriptor);
+    ts::Result<void> result = m_ads1115.init(m_i2c, descriptor);
     if (result != ts::success)
     {
         return result.error();
@@ -252,7 +247,7 @@ void Sticks_ADS1115::set_throttle_calibration(float min, float center, float max
 
 void Sticks_ADS1115::process()
 {
-    m_ads1115.process(m_dev);
+    m_ads1115.process(m_i2c);
 
     for (size_t i = 0; i < 4; i++)
     {

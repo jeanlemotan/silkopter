@@ -17,8 +17,8 @@ extern int s_version_minor;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-Main_Menu_Page::Main_Menu_Page(Comms& comms)
-    : m_comms(comms)
+Main_Menu_Page::Main_Menu_Page(HAL& hal)
+    : m_hal(hal)
 {
     set_submenu(Submenu::MAIN_MENU);
 }
@@ -59,8 +59,8 @@ bool Main_Menu_Page::process(Input& input, Menu_System& menu_system)
         {
             switch (*selected_entry)
             {
-            case 0: menu_system.push_page(std::unique_ptr<IMenu_Page>(new Fly_Menu_Page(m_comms))); break;
-            case 1: menu_system.push_page(std::unique_ptr<IMenu_Page>(new Info_Menu_Page(m_comms))); break;
+            case 0: menu_system.push_page(std::unique_ptr<IMenu_Page>(new Fly_Menu_Page(m_hal))); break;
+            case 1: menu_system.push_page(std::unique_ptr<IMenu_Page>(new Info_Menu_Page(m_hal))); break;
             case 2: set_submenu(Submenu::CONFIG);
             }
         }
@@ -69,7 +69,7 @@ bool Main_Menu_Page::process(Input& input, Menu_System& menu_system)
             switch (*selected_entry)
             {
             case 0: m_menu.pop_submenu(); m_submenu = Submenu::MAIN_MENU; break;
-            case 1: menu_system.push_page(std::unique_ptr<IMenu_Page>(new Stick_Calibration_Menu_Page)); break;
+            case 1: menu_system.push_page(std::unique_ptr<IMenu_Page>(new Stick_Calibration_Menu_Page(m_hal))); break;
 //            case 2: menu_system.push_page(std::unique_ptr<IMenu_Page>(new Encoder_Calibration_Menu_Page)); break;
 //            case 3: menu_system.push_page(std::unique_ptr<IMenu_Page>(new Feedback_Calibration_Menu_Page)); break;
 //            case 4: menu_system.push_page(std::unique_ptr<IMenu_Page>(new Vibration_Calibration_Menu_Page)); break;

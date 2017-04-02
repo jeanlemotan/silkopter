@@ -7,15 +7,18 @@
 namespace silk
 {
 
+class HAL;
+
 class Stick_Calibration_Menu_Page : public IMenu_Page
 {
 public:
-    Stick_Calibration_Menu_Page();
+    Stick_Calibration_Menu_Page(HAL& hal);
 
     bool process(Input& input, Menu_System& menu_system) override;
     void render(Adafruit_GFX& display);
 
 private:
+    HAL& m_hal;
     Menu m_menu;
 
     struct Axis_Data

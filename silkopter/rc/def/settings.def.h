@@ -225,6 +225,33 @@ public:
     uint32_t m_rc_spi_speed = uint32_t{16000000};
   };
 
+  struct Battery_Info
+  {
+  public:
+    virtual ~Battery_Info() = default;
+    void set_low_voltage(float const& value);
+    void set_low_voltage(float&& value);
+    auto get_low_voltage() const -> float const&;
+
+    void set_critical_voltage(float const& value);
+    void set_critical_voltage(float&& value);
+    auto get_critical_voltage() const -> float const&;
+
+    void set_calibration_bias(float const& value);
+    void set_calibration_bias(float&& value);
+    auto get_calibration_bias() const -> float const&;
+
+    void set_calibration_scale(float const& value);
+    void set_calibration_scale(float&& value);
+    auto get_calibration_scale() const -> float const&;
+
+  private:
+    float m_low_voltage = float{7.000000f};
+    float m_critical_voltage = float{6.000000f};
+    float m_calibration_bias = float{0};
+    float m_calibration_scale = float{1.000000f};
+  };
+
   virtual ~Settings() = default;
   void set_input(Input const& value);
   void set_input(Input&& value);
@@ -241,10 +268,16 @@ public:
   auto get_comms() const -> Comms const&;
   auto get_comms() -> Comms&;
 
+  void set_battery_info(Battery_Info const& value);
+  void set_battery_info(Battery_Info&& value);
+  auto get_battery_info() const -> Battery_Info const&;
+  auto get_battery_info() -> Battery_Info&;
+
 private:
   Input m_input;
   HW m_hw;
   Comms m_comms;
+  Battery_Info m_battery_info;
 };
 
 ts::Result<void> deserialize(std::string& value, ts::sz::Value const& sz_value);
@@ -295,6 +328,8 @@ ts::Result<void> deserialize(Settings::HW& value, ts::sz::Value const& sz_value)
 ts::sz::Value serialize(Settings::HW const& value);
 ts::Result<void> deserialize(Settings::Comms& value, ts::sz::Value const& sz_value);
 ts::sz::Value serialize(Settings::Comms const& value);
+ts::Result<void> deserialize(Settings::Battery_Info& value, ts::sz::Value const& sz_value);
+ts::sz::Value serialize(Settings::Battery_Info const& value);
 ts::Result<void> deserialize(Settings& value, ts::sz::Value const& sz_value);
 ts::sz::Value serialize(Settings const& value);
 ts::Result<void> deserialize(std::vector<std::string>& value, ts::sz::Value const& sz_value);

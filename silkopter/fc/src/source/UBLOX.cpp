@@ -261,17 +261,17 @@ auto UBLOX::lock(Buses& buses) -> bool
 {
     if (buses.i2c)
     {
-        buses.i2c->lock(); //lock the bus
+        buses.i2c->get_i2c().lock(); //lock the bus
         return true;
     }
     if (buses.spi)
     {
-        buses.spi->lock(); //lock the bus
+        buses.spi->get_spi().lock(); //lock the bus
         return true;
     }
     if (buses.uart)
     {
-        buses.uart->lock(); //lock the bus
+        buses.uart->get_uart().lock(); //lock the bus
         return true;
     }
     return false;
@@ -280,17 +280,17 @@ void UBLOX::unlock(Buses& buses)
 {
     if (buses.i2c)
     {
-        buses.i2c->unlock(); //unlock the bus
+        buses.i2c->get_i2c().unlock(); //unlock the bus
         return;
     }
     if (buses.spi)
     {
-        buses.spi->unlock(); //unlock the bus
+        buses.spi->get_spi().unlock(); //unlock the bus
         return;
     }
     if (buses.uart)
     {
-        buses.uart->unlock(); //lock the bus
+        buses.uart->get_uart().unlock(); //lock the bus
         return;
     }
 }
@@ -321,9 +321,9 @@ ts::Result<void> UBLOX::init(hal::INode_Descriptor const& descriptor)
 }
 ts::Result<void> UBLOX::init()
 {
-    m_i2c = m_hal.get_bus_registry().find_by_name<bus::II2C>(m_descriptor->get_bus());
-    m_spi = m_hal.get_bus_registry().find_by_name<bus::ISPI>(m_descriptor->get_bus());
-    m_uart = m_hal.get_bus_registry().find_by_name<bus::IUART>(m_descriptor->get_bus());
+    m_i2c_bus = m_hal.get_bus_registry().find_by_name<bus::II2C_Bus>(m_descriptor->get_bus());
+    m_spi_bus = m_hal.get_bus_registry().find_by_name<bus::ISPI_Bus>(m_descriptor->get_bus());
+    m_uart_bus = m_hal.get_bus_registry().find_by_name<bus::IUART_Bus>(m_descriptor->get_bus());
 
     m_position_stream->set_rate(m_descriptor->get_rate());
     m_velocity_stream->set_rate(m_descriptor->get_rate());
@@ -336,13 +336,13 @@ auto UBLOX::read(Buses& buses, uint8_t* rx_data, size_t max_size) -> size_t
 {
     if (buses.uart)
     {
-        return buses.uart->read(rx_data, max_size);
+        return buses.uart->get_uart().read(rx_data, max_size);
     }
     else if (buses.spi)
     {
         max_size = math::min<size_t>(max_size, 32u);
         m_dummy_tx_data.resize(max_size, 0);
-        return buses.spi->transfer(m_dummy_tx_data.data(), rx_data, max_size) ? max_size : 0;
+        return buses.spi->get_spi().transfer(m_dummy_tx_data.data(), rx_data, max_size) ? max_size : 0;
     }
     else if (buses.i2c)
     {
@@ -356,12 +356,12 @@ auto UBLOX::write(Buses& buses, uint8_t const* tx_data, size_t size) -> bool
 {
     if (buses.uart)
     {
-        return buses.uart->write(tx_data, size);
+        return buses.uart->get_uart().write(tx_data, size);
     }
     else if (buses.spi)
     {
         m_dummy_rx_data.resize(size);
-        return buses.spi->transfer(tx_data, m_dummy_rx_data.data(), size);
+        return buses.spi->get_spi().transfer(tx_data, m_dummy_rx_data.data(), size);
     }
     else if (buses.i2c)
     {
@@ -380,7 +380,7 @@ ts::Result<void> UBLOX::setup()
 
 //    tcflush(m_fd, TCIOFLUSH);
 
-    Buses buses = { m_i2c.lock(), m_spi.lock(), m_uart.lock() };
+    Buses buses = { m_i2c_bus.lock(), m_spi_bus.lock(), m_uart_bus.lock() };
     if (!buses.i2c && !buses.spi && !buses.uart)
     {
         return make_error("No bus configured");
@@ -516,7 +516,7 @@ void UBLOX::process()
 
     m_last_process_tp = now;
 
-    Buses buses = { m_i2c.lock(), m_spi.lock(), m_uart.lock() };
+    Buses buses = { m_i2c_bus.lock(), m_spi_bus.lock(), m_uart_bus.lock() };
     if (!buses.i2c && !buses.spi && !buses.uart)
     {
         return;
