@@ -9,7 +9,7 @@ std::vector<IMultirotor_Properties::Motor> IMultirotor_Properties::create_motors
     std::vector<IMultirotor_Properties::Motor> res;
 
     float angle_between_motors = math::anglef::_2pi / (float)arm_count;
-    float starting_angle = plus_config ? math::anglef::pi : (math::anglef::pi + angle_between_motors / 2.f);
+    float starting_angle = plus_config ? 0 : (angle_between_motors / 2.f);
 
     size_t rows = double_config ? 2 : 1;
     for (size_t r = 0; r < rows; r++)
