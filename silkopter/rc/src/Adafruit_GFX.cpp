@@ -42,6 +42,8 @@ void Adafruit_GFX::constructor(int16_t w, int16_t h)
 // the printf function
 void Adafruit_GFX::printf( const char * format, ...) 
 {
+    uint16_t tc = textcolor;
+    uint16_t tbg = textbgcolor;
 
     char buffer[64];
     char * p = buffer;
@@ -57,11 +59,16 @@ void Adafruit_GFX::printf( const char * format, ...)
     }
 
     va_end (args);
+
+    textcolor = tc;
+    textbgcolor = tbg;
 }
 
 // the print function
 void Adafruit_GFX::print( const char * string) 
 {
+    uint16_t tc = textcolor;
+    uint16_t tbg = textbgcolor;
 
     const char * p = string;
     int n = strlen(string);
@@ -71,6 +78,8 @@ void Adafruit_GFX::print( const char * string)
         write ( (uint8_t) *p++);
     }
 
+    textcolor = tc;
+    textbgcolor = tbg;
 }
 
 
@@ -518,7 +527,11 @@ void Adafruit_GFX::drawBitmap(int16_t x, int16_t y, const uint8_t *bitmap, int16
 
 size_t Adafruit_GFX::write(uint8_t c) 
 {
-    if (c == '\n')
+    if (c == '\1')
+    {
+        setTextColor(textbgcolor, textcolor);
+    }
+    else if (c == '\n')
     {
         cursor_y += textsize*8;
         cursor_x = 0;
