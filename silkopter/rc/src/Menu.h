@@ -19,6 +19,8 @@ public:
     void push_submenu(std::vector<std::string> const& entries, size_t selected, int16_t y);
     void pop_submenu();
 
+    void set_submenu_entry(size_t idx, std::string const& entry);
+
     boost::optional<size_t> process(Input& input);
 
     void render(Adafruit_GFX& display, size_t max_entries);

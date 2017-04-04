@@ -68,6 +68,25 @@ void Menu::pop_submenu()
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
+void Menu::set_submenu_entry(size_t idx, std::string const& entry)
+{
+    if (m_submenus.empty() || m_crt_submenu_idx >= m_submenus.size())
+    {
+        return;
+    }
+
+    Submenu& crt_submenu = m_submenus[m_crt_submenu_idx];
+
+    if (idx >= crt_submenu.entries.size())
+    {
+        return;
+    }
+
+    crt_submenu.entries[idx] = entry;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
 boost::optional<size_t> Menu::process(Input& input)
 {
     if (m_submenus.empty() || m_crt_submenu_idx >= m_submenus.size())
