@@ -8,6 +8,7 @@
 #include "Fly_Menu_Page.h"
 #include "Info_Menu_Page.h"
 #include "Stick_Calibration_Menu_Page.h"
+#include "Battery_Calibration_Menu_Page.h"
 
 namespace silk
 {
@@ -73,7 +74,7 @@ bool Main_Menu_Page::process(Input& input, Menu_System& menu_system)
 //            case 2: menu_system.push_page(std::unique_ptr<IMenu_Page>(new Encoder_Calibration_Menu_Page)); break;
 //            case 3: menu_system.push_page(std::unique_ptr<IMenu_Page>(new Feedback_Calibration_Menu_Page)); break;
 //            case 4: menu_system.push_page(std::unique_ptr<IMenu_Page>(new Vibration_Calibration_Menu_Page)); break;
-//            case 5: menu_system.push_page(std::unique_ptr<IMenu_Page>(new Battery_Calibration_Menu_Page)); break;
+            case 5: menu_system.push_page(std::unique_ptr<IMenu_Page>(new Battery_Calibration_Menu_Page(m_hal))); break;
             }
         }
     }

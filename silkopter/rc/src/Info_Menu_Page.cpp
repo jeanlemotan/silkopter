@@ -5,6 +5,7 @@
 #include "IStick_Actuators.h"
 #include "IButton.h"
 #include "IButton_Matrix.h"
+#include "IBattery_Info.h"
 #include "HAL.h"
 #include "Remote_Viewer_Server.h"
 
@@ -175,10 +176,19 @@ void Info_Menu_Page::render(Adafruit_GFX& display)
     {
         display.setCursor(0, 0);
         display.setTextWrap(true);
-        display.printf("%d viewer(s)", static_cast<int>(m_hal.get_comms().get_remote_viewer_server().get_remote_viewer_count()));
-        display.printf("\nRX: %ddBm", m_min_rx_dBm);
-        display.printf("\nTX: %ddBm", m_min_tx_dBm);
-        display.printf("\nRX Lag: %dms", static_cast<int>(std::chrono::duration_cast<std::chrono::milliseconds>(Clock::now() - m_hal.get_comms().get_last_rx_tp()).count()));
+        display.printf("%d viewer(s)\n", static_cast<int>(m_hal.get_comms().get_remote_viewer_server().get_remote_viewer_count()));
+        display.printf("RX: %ddBm\n", m_min_rx_dBm);
+        display.printf("TX: %ddBm\n", m_min_tx_dBm);
+        display.printf("RX Lag: %dms\n", static_cast<int>(std::chrono::duration_cast<std::chrono::milliseconds>(Clock::now() - m_hal.get_comms().get_last_rx_tp()).count()));
+    }
+    else if (m_section == Section::BATTERY)
+    {
+        display.setCursor(0, 0);
+        display.setTextWrap(true);
+        IBattery_Info const& bi = m_hal.get_battery_info();
+        display.printf("Current: %.1fV\n", bi.get_voltage());
+        display.printf("Low: %.1fV\n", bi.get_low_voltage());
+        display.printf("Critical: %.1fV\n", bi.get_critical_voltage());
     }
     else if (m_section == Section::ABOUT)
     {
