@@ -10,8 +10,6 @@ namespace util
 namespace hw
 {
 
-std::recursive_mutex UART_Dev::s_mutex;
-
 UART_Dev::UART_Dev()
 {
 }
@@ -80,16 +78,16 @@ void UART_Dev::close()
 
 void UART_Dev::lock()
 {
-    s_mutex.lock();
+    m_mutex.lock();
 }
 
 bool UART_Dev::try_lock()
 {
-    return s_mutex.try_lock();
+    return m_mutex.try_lock();
 }
 void UART_Dev::unlock()
 {
-    s_mutex.unlock();
+    m_mutex.unlock();
 }
 
 size_t UART_Dev::read(uint8_t* data, size_t max_size)

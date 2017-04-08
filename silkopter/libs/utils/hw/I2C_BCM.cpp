@@ -14,8 +14,6 @@ namespace util
 namespace hw
 {
 
-std::recursive_mutex I2C_BCM::s_mutex;
-
 I2C_BCM::I2C_BCM()
 {
 }
@@ -41,16 +39,16 @@ ts::Result<void> I2C_BCM::init(uint32_t device, uint32_t baud)
 
 void I2C_BCM::lock()
 {
-    s_mutex.lock();
+    m_mutex.lock();
 }
 
 bool I2C_BCM::try_lock()
 {
-    return s_mutex.try_lock();
+    return m_mutex.try_lock();
 }
 void I2C_BCM::unlock()
 {
-    s_mutex.unlock();
+    m_mutex.unlock();
 }
 
 bool I2C_BCM::read(uint8_t address, uint8_t* data, size_t size)

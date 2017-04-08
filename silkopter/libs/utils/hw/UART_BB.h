@@ -32,7 +32,7 @@ private:
 
     uint32_t m_rx_gpio = 0;
 
-    static std::recursive_mutex s_mutex;
+    mutable std::recursive_mutex m_mutex;
 
     bool m_is_initialized = true;
 };

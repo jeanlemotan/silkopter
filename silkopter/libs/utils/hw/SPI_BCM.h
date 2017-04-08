@@ -38,7 +38,7 @@ private:
     mutable std::vector<uint8_t> m_tx_buffer;
     mutable std::vector<uint8_t> m_rx_buffer;
 
-    static std::recursive_mutex s_mutex;
+    mutable std::recursive_mutex m_mutex;
 };
 
 }

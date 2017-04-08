@@ -34,7 +34,7 @@ private:
     uint32_t m_baud = 0;
     std::vector<uint8_t> m_buffer;
 
-    static std::recursive_mutex s_mutex;
+    mutable std::recursive_mutex m_mutex;
 };
 
 }

@@ -12,8 +12,6 @@ namespace util
 namespace hw
 {
 
-std::recursive_mutex SPI_Dev::s_mutex;
-
 SPI_Dev::SPI_Dev()
 {
 }
@@ -50,16 +48,16 @@ ts::Result<void> SPI_Dev::init(std::string const& device, uint32_t speed)
 
 void SPI_Dev::lock()
 {
-    s_mutex.lock();
+    m_mutex.lock();
 }
 
 bool SPI_Dev::try_lock()
 {
-    return s_mutex.try_lock();
+    return m_mutex.try_lock();
 }
 void SPI_Dev::unlock()
 {
-    s_mutex.unlock();
+    m_mutex.unlock();
 }
 
 bool SPI_Dev::do_transfer(void const* tx_data, void* rx_data, size_t size, uint32_t speed)

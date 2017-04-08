@@ -43,8 +43,9 @@ private:
     std::string m_device;
     int m_fd = -1;
 
-    static std::recursive_mutex s_mutex;
     std::vector<uint8_t> m_buffer;
+
+    mutable std::recursive_mutex m_mutex;
 };
 
 }

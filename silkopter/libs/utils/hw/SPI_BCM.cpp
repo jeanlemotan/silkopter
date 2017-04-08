@@ -12,8 +12,6 @@ namespace util
 namespace hw
 {
 
-std::recursive_mutex SPI_BCM::s_mutex;
-
 SPI_BCM::SPI_BCM()
 {
 }
@@ -48,16 +46,16 @@ ts::Result<void> SPI_BCM::init(uint32_t device, uint32_t speed, uint32_t mode)
 
 void SPI_BCM::lock()
 {
-    s_mutex.lock();
+    m_mutex.lock();
 }
 
 bool SPI_BCM::try_lock()
 {
-    return s_mutex.try_lock();
+    return m_mutex.try_lock();
 }
 void SPI_BCM::unlock()
 {
-    s_mutex.unlock();
+    m_mutex.unlock();
 }
 
 uint32_t SPI_BCM::get_divider(uint32_t speed) const

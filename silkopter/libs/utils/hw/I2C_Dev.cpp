@@ -29,7 +29,6 @@ namespace util
 namespace hw
 {
 
-std::recursive_mutex I2C_Dev::s_mutex;
 
 I2C_Dev::I2C_Dev()
 {
@@ -70,16 +69,16 @@ void I2C_Dev::close()
 
 void I2C_Dev::lock()
 {
-    s_mutex.lock();
+    m_mutex.lock();
 }
 
 bool I2C_Dev::try_lock()
 {
-    return s_mutex.try_lock();
+    return m_mutex.try_lock();
 }
 void I2C_Dev::unlock()
 {
-    s_mutex.unlock();
+    m_mutex.unlock();
 }
 
 bool I2C_Dev::read(uint8_t address, uint8_t* data, size_t size)
