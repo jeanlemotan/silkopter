@@ -39,6 +39,7 @@
 //#include "processor/Comp_ECEF.h"
 #include "processor/KF_ECEF.h"
 #include "processor/Motor_Mixer.h"
+#include "processor/Quad_Multirotor_Motor_Mixer.h"
 #include "processor/Servo_Gimbal.h"
 #include "processor/Throttle_To_PWM.h"
 #include "processor/Proximity.h"
@@ -685,6 +686,7 @@ auto HAL::init(RC_Comms& rc_comms, GS_Comms& gs_comms) -> bool
     m_node_factory.add<Transformer_Inv<stream::IVelocity, stream::IENU_Velocity, stream::IFrame>>("Velocity (Local->ENU)", *this);
 
     m_node_factory.add<Motor_Mixer>("Motor Mixer", *this);
+    m_node_factory.add<Quad_Multirotor_Motor_Mixer>("Quad Multirotor Motor Mixer", *this);
     m_node_factory.add<Servo_Gimbal>("Servo Gimbal", *this);
 
     m_node_factory.add<Rate_Controller>("Rate Controller", *this);

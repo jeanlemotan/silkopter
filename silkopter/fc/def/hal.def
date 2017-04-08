@@ -421,6 +421,20 @@ struct Motor_Mixer_Config : public INode_Config
 
 //////////////////////////////////////////////////////////////
 
+struct Quad_Multirotor_Motor_Mixer_Descriptor : public INode_Descriptor
+{
+    alias rate_t = uint32_t : [ min = 1, max = 10000, native_type = "uint32_t" ];
+
+    rate_t rate = 1 : [ ui_name = "Rate", ui_suffix = "Hz" ];
+};
+
+struct Quad_Multirotor_Motor_Mixer_Config : public INode_Config
+{
+    muf_t armed_min_throttle = 0.1f : [ui_name = "Armed Min Throttle" ];
+};
+
+//////////////////////////////////////////////////////////////
+
 struct Acceleration_Calibration_Point
 {
     float temperature : [ ui_name = "Temperature", ui_suffix = "°C" ];

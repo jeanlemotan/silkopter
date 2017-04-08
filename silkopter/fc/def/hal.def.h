@@ -1259,6 +1259,31 @@ private:
   ufloat m_armed_thrust = ufloat{0};
 };
 
+struct Quad_Multirotor_Motor_Mixer_Descriptor : public INode_Descriptor
+{
+public:
+  typedef uint32_t rate_t;
+  virtual ~Quad_Multirotor_Motor_Mixer_Descriptor() = default;
+  void set_rate(uint32_t const& value);
+  void set_rate(uint32_t&& value);
+  auto get_rate() const -> uint32_t const&;
+
+private:
+  uint32_t m_rate = uint32_t{1};
+};
+
+struct Quad_Multirotor_Motor_Mixer_Config : public INode_Config
+{
+public:
+  virtual ~Quad_Multirotor_Motor_Mixer_Config() = default;
+  void set_armed_min_throttle(muf_t const& value);
+  void set_armed_min_throttle(muf_t&& value);
+  auto get_armed_min_throttle() const -> muf_t const&;
+
+private:
+  muf_t m_armed_min_throttle = muf_t{0.100000f};
+};
+
 struct Acceleration_Calibration_Point
 {
 public:
@@ -3277,6 +3302,10 @@ ts::Result<void> deserialize(Motor_Mixer_Descriptor& value, ts::sz::Value const&
 ts::sz::Value serialize(Motor_Mixer_Descriptor const& value);
 ts::Result<void> deserialize(Motor_Mixer_Config& value, ts::sz::Value const& sz_value);
 ts::sz::Value serialize(Motor_Mixer_Config const& value);
+ts::Result<void> deserialize(Quad_Multirotor_Motor_Mixer_Descriptor& value, ts::sz::Value const& sz_value);
+ts::sz::Value serialize(Quad_Multirotor_Motor_Mixer_Descriptor const& value);
+ts::Result<void> deserialize(Quad_Multirotor_Motor_Mixer_Config& value, ts::sz::Value const& sz_value);
+ts::sz::Value serialize(Quad_Multirotor_Motor_Mixer_Config const& value);
 ts::Result<void> deserialize(Acceleration_Calibration_Point& value, ts::sz::Value const& sz_value);
 ts::sz::Value serialize(Acceleration_Calibration_Point const& value);
 ts::Result<void> deserialize(Angular_Velocity_Calibration_Point& value, ts::sz::Value const& sz_value);
