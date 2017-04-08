@@ -242,10 +242,10 @@ void PIGPIO::process()
     for (size_t i = 0; i < m_channels.size(); i++)
     {
         std::unique_ptr<Channel> const& ch = m_channels[i];
-        auto stream = ch->stream.lock();
+        std::shared_ptr<stream::IPWM> stream = ch->stream.lock();
         if (stream)
         {
-            auto const& samples = stream->get_samples();
+            std::vector<stream::IPWM::Sample> const& samples = stream->get_samples();
             if (!samples.empty())
             {
 //                if (samples.size() > 20)
@@ -253,7 +253,15 @@ void PIGPIO::process()
 //                    QLOGW("channel {} on GPIO {} is too slow. {} samples are queued", i, ch.gpio, samples.size());
 //                }
 
-                set_pwm_value(i, samples.back().value);
+                stream::IPWM::Sample const& sample = samples.back();
+                if (sample.is_healthy)
+                {
+                    set_pwm_value(i, sample.value);
+                }
+                else
+                {
+                    set_pwm_value(i, 0);
+                }
             }
         }
     }
