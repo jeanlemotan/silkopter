@@ -4,6 +4,7 @@
 #include "IButton.h"
 #include "IStick_Actuators.h"
 #include "ISticks.h"
+#include "IGimbal_Control.h"
 #include "IHaptic.h"
 
 #include "HAL.h"
@@ -135,6 +136,8 @@ bool Fly_Menu_Page::process(Input& input, Menu_System& menu_system)
         case stream::IMultirotor_State::Mode::LAND: process_mode_land(input); break;
         }
     }
+
+    m_commands.gimbal_pitch = m_hal.get_gimbal_control().get_pitch();
 
     comms.send_multirotor_commands_value(m_commands);
 

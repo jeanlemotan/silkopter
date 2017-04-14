@@ -21,6 +21,7 @@ Multirotor_Brain::Multirotor_Brain(HAL& hal)
     m_state_output_stream = std::make_shared<State_Output_Stream>();
     m_rate_output_stream = std::make_shared<Rate_Output_Stream>();
     m_thrust_output_stream = std::make_shared<Thrust_Output_Stream>();
+    m_gimbal_pitch_output_stream = std::make_shared<Gimbal_Pitch_Output_Stream>();
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -57,6 +58,7 @@ ts::Result<void> Multirotor_Brain::init()
     m_state_output_stream->set_rate(m_descriptor->get_state_rate());
     m_rate_output_stream->set_rate(m_descriptor->get_rate());
     m_thrust_output_stream->set_rate(m_descriptor->get_rate());
+    m_gimbal_pitch_output_stream->set_rate(m_descriptor->get_commands_rate()); //the gimbal is a pass-through from the commands stream
 
     m_dts = std::chrono::duration<float>(m_thrust_output_stream->get_dt()).count();
 
@@ -70,6 +72,7 @@ ts::Result<void> Multirotor_Brain::start(Clock::time_point tp)
     m_state_output_stream->set_tp(tp);
     m_rate_output_stream->set_tp(tp);
     m_thrust_output_stream->set_tp(tp);
+    m_gimbal_pitch_output_stream->set_tp(tp);
     return ts::success;
 }
 
@@ -100,6 +103,7 @@ std::vector<Multirotor_Brain::Output> Multirotor_Brain::get_outputs() const
          { "state",        m_state_output_stream },
          { "rate",         m_rate_output_stream },
          { "thrust",       m_thrust_output_stream },
+         { "gimbal_pitch", m_gimbal_pitch_output_stream },
      }};
     return outputs;
 }
@@ -885,12 +889,15 @@ void Multirotor_Brain::process()
     m_state_output_stream->clear();
     m_rate_output_stream->clear();
     m_thrust_output_stream->clear();
+    m_gimbal_pitch_output_stream->clear();
 
     auto now = Clock::now();
 
     m_commands_accumulator.process([now, this](stream::IMultirotor_Commands::Sample const& i_commands)
     {
         process_input_data(m_inputs.commands, i_commands);
+
+        m_gimbal_pitch_output_stream->push_sample(i_commands.value.gimbal_pitch, i_commands.is_healthy);
     });
 
 //    Merge_Commands func;

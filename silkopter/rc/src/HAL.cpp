@@ -5,6 +5,7 @@
 #include "utils/hw/I2C_Dev.h"
 #include "utils/hw/ADS1115.h"
 #include "Battery_Info_ADS1115.h"
+#include "Gimbal_Control_ADS1115.h"
 
 #include "def_lang/Serialization.h"
 #include "def_lang/JSON_Serializer.h"
@@ -34,6 +35,7 @@ struct HAL::Impl
         , i2c()
         , battery_gimbal_adc()
         , battery_info(hal, battery_gimbal_adc, 1) //battery is connected to channel 1
+        , gimbal_control(battery_gimbal_adc, 0u, boost::none)
         , input(hal, i2c)
         , settings()
     {}
@@ -43,6 +45,7 @@ struct HAL::Impl
     util::hw::I2C_Dev i2c;
     util::hw::ADS1115 battery_gimbal_adc;
     silk::Battery_Info_ADS1115 battery_info;
+    silk::Gimbal_Control_ADS1115 gimbal_control;
     silk::Input input;
 
     settings::Settings settings;
@@ -221,6 +224,7 @@ ts::Result<void> HAL::init()
     }
 
     m_impl->battery_info.init();
+    m_impl->gimbal_control.init();
 
     m_impl->input.init();
 
@@ -242,6 +246,11 @@ IBattery_Info& HAL::get_battery_info()
     return m_impl->battery_info;
 }
 
+IGimbal_Control& HAL::get_gimbal_control()
+{
+    return m_impl->gimbal_control;
+}
+
 Input& HAL::get_input()
 {
     return m_impl->input;
@@ -261,6 +270,7 @@ void HAL::process()
 {
     m_impl->battery_gimbal_adc.process(m_impl->i2c);
     m_impl->battery_info.process();
+    m_impl->gimbal_control.process();
 
     m_impl->input.process();
     m_impl->comms.process();

@@ -3,6 +3,7 @@
 #include "Comms.h"
 #include "IBattery_Info.h"
 #include "Input.h"
+#include "IGimbal_Control.h"
 #include "ArduiPi_OLED.h"
 
 #include "def_lang/Result.h"
@@ -26,6 +27,7 @@ public:
 
     Comms& get_comms();
     IBattery_Info& get_battery_info();
+    IGimbal_Control& get_gimbal_control();
     Input& get_input();
 
     ArduiPi_OLED& get_display();

@@ -12,6 +12,7 @@
 #include "common/stream/IVelocity.h"
 #include "common/stream/IAcceleration.h"
 #include "common/stream/IProximity.h"
+#include "common/stream/IPWM.h"
 
 #include "common/stream/IMultirotor_Commands.h"
 #include "common/stream/IMultirotor_State.h"
@@ -95,6 +96,9 @@ private:
 
     typedef Basic_Output_Stream<stream::IFloat> Thrust_Output_Stream;
     mutable std::shared_ptr<Thrust_Output_Stream> m_thrust_output_stream;
+
+    typedef Basic_Output_Stream<stream::IPWM> Gimbal_Pitch_Output_Stream;
+    mutable std::shared_ptr<Gimbal_Pitch_Output_Stream> m_gimbal_pitch_output_stream;
 
     float m_dts = 0;
 
