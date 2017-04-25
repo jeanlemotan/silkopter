@@ -1,10 +1,11 @@
 TEMPLATE = app
 
 QT += qml quick opengl androidextras network
-CONFIG += c++11
+CONFIG += c++14
 
 INCLUDEPATH += ../libs
-INCLUDEPATH += ../../../../qmath/include
+INCLUDEPATH += ../../qmath/include
+INCLUDEPATH += boost
 
 SOURCES += main.cpp \
     VideoSurface.cpp \
