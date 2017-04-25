@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include "common/Comm_Data.h"
 #include <boost/asio.hpp>
 #include "common/stream/IMultirotor_State.h"
 #include "utils/comms/Channel.h"
@@ -32,16 +33,9 @@ private:
     boost::asio::ip::tcp::socket m_socket;
     bool m_is_master;
 
-    enum class Message
-    {
-        RESOLUTION,
-        VIDEO_DATA,
-        MULTIROTOR_STATE
-    };
-
     typedef util::comms::ASIO_Socket_Adapter<boost::asio::ip::tcp::socket> Socket_Adapter;
     Socket_Adapter m_socket_adapter;
-    util::comms::Channel<Message, Socket_Adapter> m_channel;
+    util::comms::Channel<viewer::Packet_Type, Socket_Adapter> m_channel;
 
     std::vector<uint8_t> m_serialization_buffer;
 };

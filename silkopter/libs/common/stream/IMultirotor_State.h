@@ -14,6 +14,7 @@
 
 #include "IMultirotor_Commands.h"
 #include <boost/optional.hpp>
+//#include <experimental/optional>
 
 namespace silk
 {
@@ -61,7 +62,7 @@ public:
 
     virtual ~IMultirotor_State() {}
 
-    virtual auto get_samples() const -> std::vector<Sample> const& = 0;
+    virtual std::vector<Sample> const& get_samples() const = 0;
 };
 
 
