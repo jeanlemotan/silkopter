@@ -242,7 +242,7 @@ private:
         set_value_fixed(m_tx_buffer, data_crc, DATA_CRC_OFFSET);
 
         //send
-        m_socket.write(m_tx_buffer, total_size);
+        m_socket.write(m_tx_buffer.data(), total_size);
     }
 
     //sends a message with confirmation
