@@ -145,7 +145,12 @@ Q_DECL_EXPORT jint JNICALL JNI_OnLoad(JavaVM* vm, void* /*reserved*/)
 
         int flag = flagFullscreen | flagHideNavigation | flagImmersiveSticky;
 
+        //hiding the status bar
         decorView.callMethod<void>("setSystemUiVisibility", "(I)V", flag);
+
+        //keeping the screen on
+        const int FLAG_KEEP_SCREEN_ON = 128;
+        window.callMethod<void>("addFlags", "(I)V", FLAG_KEEP_SCREEN_ON);
     }
 
     return JNI_VERSION_1_4;
@@ -571,7 +576,7 @@ QSGNode* VideoSurface::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *)
     {
         constexpr size_t naluSeparatorSize = sizeof(naluSeparator);
         std::lock_guard<std::mutex> lg(s_videoDataMutex);
-        if (s_videoData.size() > naluSeparatorSize)
+        while (s_videoData.size() > naluSeparatorSize)
         {
             uint8_t const* src = s_videoData.data();
             uint8_t const* p = reinterpret_cast<uint8_t const*>(memmem(src + naluSeparatorSize, s_videoData.size() - naluSeparatorSize, naluSeparator, naluSeparatorSize));
@@ -579,7 +584,7 @@ QSGNode* VideoSurface::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *)
             {
                 //nalupacket found
                 const size_t naluSize = p - src;
-                __android_log_print(ANDROID_LOG_INFO, "Skptr", "NALU @ %d, %d left", (int)naluSize, (int)s_videoData.size());
+                //__android_log_print(ANDROID_LOG_INFO, "Skptr", "NALU @ %d, %d left", (int)naluSize, (int)(s_videoData.size() - naluSize));
 
                 jbyteArray frameData = m_env->NewByteArray(naluSize);
 
@@ -593,6 +598,7 @@ QSGNode* VideoSurface::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *)
             else
             {
                 //__android_log_print(ANDROID_LOG_INFO, "Skptr", "NALU not found");
+                break;
             }
         }
     }
