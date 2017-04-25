@@ -64,6 +64,17 @@ int main(int argc, char *argv[])
     format.setSwapInterval(0);
     view.setFormat(format);
 
+    //https://github.com/jeanleflambeur/silkopter/issues/40
+    //to prevent the app reverting to 60 FPS after focus lost
+    QObject::connect(&app, &QGuiApplication::applicationStateChanged, [](Qt::ApplicationState state)
+    {
+        if (state == Qt::ApplicationInactive)
+        {
+            __android_log_print(ANDROID_LOG_INFO, "Skptr", "Viewer is inactive");
+            exit(0); //abort, because QT will default to 60 FPS when coming back and I found no way to fix this
+        }
+    });
+
     view.setResizeMode(QQuickView::SizeRootObjectToView);
     //view.setSource(QUrl(QStringLiteral("qrc:/main.qml")));
     view.show();
