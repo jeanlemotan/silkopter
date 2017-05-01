@@ -75,8 +75,7 @@ namespace viewer
 {
 enum class Packet_Type : uint8_t
 {
-    MULTIROTOR_COMMANDS,
-    MULTIROTOR_STATE,
+    TELEMETRY,
     VIDEO_DATA,
 };
 }

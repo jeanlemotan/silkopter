@@ -36,29 +36,31 @@ bool Remote_Viewer::is_alive() const
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-void Remote_Viewer::send_data(void const* video_data, size_t video_data_size, math::vec2u16 const& resolution,
-               stream::IMultirotor_State::Value const& multirotor_state)
+void Remote_Viewer::send_video_data(void const* video_data, size_t video_data_size, math::vec2u16 const& resolution)
 {
-    {
-        size_t offset = 0;
-        util::serialization::serialize(m_serialization_buffer, resolution, offset);
-        m_serialization_buffer.resize(offset + video_data_size);
-        memcpy(m_serialization_buffer.data() + offset, video_data, video_data_size);
-        m_channel.send(viewer::Packet_Type::VIDEO_DATA, m_serialization_buffer.data(), m_serialization_buffer.size());
-    }
+    m_serialization_buffer.clear();
+    size_t offset = 0;
+    util::serialization::serialize(m_serialization_buffer, resolution, offset);
+    m_serialization_buffer.resize(offset + video_data_size);
+    memcpy(m_serialization_buffer.data() + offset, video_data, video_data_size);
+    m_channel.send(viewer::Packet_Type::VIDEO_DATA, m_serialization_buffer.data(), m_serialization_buffer.size());
+}
 
-    {
-        size_t offset = 0;
-        util::serialization::serialize(m_serialization_buffer, multirotor_state, offset);
-        m_channel.send(viewer::Packet_Type::MULTIROTOR_STATE, m_serialization_buffer.data(), m_serialization_buffer.size());
-    }
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+void Remote_Viewer::send_telemetry(stream::IMultirotor_Commands::Value const& multirotor_commands, stream::IMultirotor_State::Value const& multirotor_state)
+{
+    m_serialization_buffer.clear();
+    size_t offset = 0;
+    util::serialization::serialize(m_serialization_buffer, multirotor_state, offset);
+    m_channel.send(viewer::Packet_Type::TELEMETRY, m_serialization_buffer.data(), m_serialization_buffer.size());
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 void Remote_Viewer::process()
 {
-    m_channel.process();
+    //m_channel.process();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////

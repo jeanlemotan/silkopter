@@ -9,6 +9,8 @@
 #include <vector>
 #include <functional>
 
+#include "qmath.h"
+
 class VideoTexture : public QSGDynamicTexture
 {
     Q_OBJECT
@@ -82,7 +84,7 @@ public:
     QSGNode *updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *paintNodeData) override;
     void geometryChanged(const QRectF &newGeometry, const QRectF &oldGeometry) override;
 
-    static void addVideoData(void const* data, size_t size);
+    static void addVideoData(void const* data, size_t size, math::vec2u16 const& resolution);
 
 private:
     bool m_isGeomertyDirty = true;

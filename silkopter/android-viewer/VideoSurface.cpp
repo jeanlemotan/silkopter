@@ -63,8 +63,11 @@ static jclass s_classSurfaceTexture = nullptr;
 
 static VideoTexture* s_videoTexture = nullptr;
 static jobject s_surfaceTexture = nullptr;
-static std::vector<uint8_t> s_videoData;
+
 static std::mutex s_videoDataMutex;
+static std::vector<uint8_t> s_videoData;
+static math::vec2u16 s_videoResolution;
+static bool s_videoResolutionDirty = false;
 
 static const uint8_t naluSeparator[4] = { 0, 0, 0, 1 };
 
@@ -541,24 +544,6 @@ QSGNode* VideoSurface::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *)
         m_isGeomertyDirty = true;
     }
 
-    if (m_isGeomertyDirty)
-    {
-        const QRectF br = boundingRect();
-        QRectF rect = br;//(QPointF(0, 0), QSizeF(m_nativeSize).scaled(br.size(), Qt::KeepAspectRatio));
-        rect.moveCenter(br.center());
-        int orientation = 0;//(m_orientation - m_textureOrientation) % 360;
-        if (orientation < 0)
-            orientation += 360;
-        node->setBoundingRect(
-                    rect,
-                    orientation,
-                    false,
-                    false);
-        node->markDirty(QSGNode::DirtyGeometry);
-
-        m_isGeomertyDirty = false;
-    }
-
     {
         static int frames = 0;
         frames++;
@@ -572,10 +557,30 @@ QSGNode* VideoSurface::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *)
         }
     }
 
+    std::lock_guard<std::mutex> lg(s_videoDataMutex);
+
+    if (m_isGeomertyDirty || s_videoResolutionDirty)
+    {
+        const QRectF br = boundingRect();
+        QRectF rect = QRectF(QPointF(0, 0), QSizeF(s_videoResolution.x, s_videoResolution.y).scaled(br.size(), Qt::KeepAspectRatio));
+        rect.moveCenter(br.center());
+        int orientation = 0;//(m_orientation - m_textureOrientation) % 360;
+        if (orientation < 0)
+            orientation += 360;
+        node->setBoundingRect(
+                    rect,
+                    orientation,
+                    false,
+                    false);
+        node->markDirty(QSGNode::DirtyGeometry);
+
+        m_isGeomertyDirty = false;
+        s_videoResolutionDirty = false;
+    }
+
     //parse NALU packets
     {
         constexpr size_t naluSeparatorSize = sizeof(naluSeparator);
-        std::lock_guard<std::mutex> lg(s_videoDataMutex);
         while (s_videoData.size() > naluSeparatorSize)
         {
             uint8_t const* src = s_videoData.data();
@@ -614,7 +619,7 @@ QSGNode* VideoSurface::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *)
     return node;
 }
 
-void VideoSurface::addVideoData(void const* data, size_t size)
+void VideoSurface::addVideoData(void const* data, size_t size, math::vec2u16 const& resolution)
 {
     Q_ASSERT(data && size > 0);
     if (!data || size == 0)
@@ -627,6 +632,12 @@ void VideoSurface::addVideoData(void const* data, size_t size)
     size_t offset = s_videoData.size();
     s_videoData.resize(offset + size);
     memcpy(s_videoData.data() + offset, data, size);
+
+    if (s_videoResolution != resolution)
+    {
+        s_videoResolution = math::vec2u16(1280, 720);//resolution;
+        s_videoResolutionDirty = true;
+    }
 }
 
 

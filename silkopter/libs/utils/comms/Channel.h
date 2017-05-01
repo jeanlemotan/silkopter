@@ -22,8 +22,6 @@ public:
 
     Channel(Socket_t& socket) : m_socket(socket) {}
 
-    void process()  { Message_t message; get_next_message(message); }
-
     //////////////////////////////////////////////////////////////////////////
 
     void send(Message_t message, void const* data, size_t size)
@@ -50,7 +48,7 @@ public:
 
 private:
     typedef uint8_t Magic_t;
-    typedef uint8_t Message_Size_t;
+    typedef uint16_t Message_Size_t;
     typedef uint8_t Header_Crc_t;
     typedef uint16_t Data_Crc_t;
 
@@ -222,7 +220,6 @@ private:
 
     void _send(Message_t message, size_t total_size)
     {
-        assert(total_size < 255);
         assert(total_size >= HEADER_SIZE);
         size_t data_size = total_size - HEADER_SIZE;
         //header

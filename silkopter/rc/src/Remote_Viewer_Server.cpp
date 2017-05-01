@@ -41,11 +41,21 @@ size_t Remote_Viewer_Server::get_remote_viewer_count() const
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-void Remote_Viewer_Server::send_data(void const* video_data, size_t video_data_size, math::vec2u16 const& resolution, stream::IMultirotor_State::Value const& multirotor_state)
+void Remote_Viewer_Server::send_video_data(void const* video_data, size_t video_data_size, math::vec2u16 const& resolution)
 {
     for (std::unique_ptr<Remote_Viewer>& viewer: m_viewers)
     {
-        viewer->send_data(video_data, video_data_size, resolution, multirotor_state);
+        viewer->send_video_data(video_data, video_data_size, resolution);
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+void Remote_Viewer_Server::send_telemetry(stream::IMultirotor_Commands::Value const& multirotor_commands, stream::IMultirotor_State::Value const& multirotor_state)
+{
+    for (std::unique_ptr<Remote_Viewer>& viewer: m_viewers)
+    {
+        viewer->send_telemetry(multirotor_commands, multirotor_state);
     }
 }
 

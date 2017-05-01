@@ -5,6 +5,7 @@
 
 #include "VideoSurface.h"
 #include "Comms.h"
+#include "Telemetry.h"
 #include "OS.h"
 #include "Menus.h"
 
@@ -48,6 +49,7 @@ int main(int argc, char *argv[])
     Comms comms;
     comms.init("192.168.42.1", 3333);
 
+    qmlRegisterType<Telemetry>("com.silk.Telemetry", 1, 0, "Telemetry");
     qmlRegisterType<Comms>("com.silk.Comms", 1, 0, "Comms");
     view.engine()->rootContext()->setContextProperty("s_comms", &comms);
     view.engine()->rootContext()->setContextProperty("s_os", &os);
@@ -113,10 +115,10 @@ int main(int argc, char *argv[])
 //        }
 
         comms.process();
-        std::pair<void const*, size_t> videoData = comms.getVideoData();
-        if (videoData.second > 0)
+        Comms::VideoData const& videoData = comms.getVideoData();
+        if (!videoData.data.empty())
         {
-            VideoSurface::addVideoData(videoData.first, videoData.second);
+            VideoSurface::addVideoData(videoData.data.data(), videoData.data.size(), videoData.resolution);
         }
 
         std::this_thread::sleep_for(std::chrono::microseconds(1));

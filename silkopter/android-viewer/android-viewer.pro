@@ -1,6 +1,6 @@
 TEMPLATE = app
 
-QT += qml quick opengl androidextras network
+QT += qml quick opengl androidextras network positioning
 CONFIG += c++14
 
 INCLUDEPATH += ../libs
@@ -11,7 +11,9 @@ SOURCES += main.cpp \
     VideoSurface.cpp \
     Comms.cpp \
     Menus.cpp \
-    OS.cpp
+    OS.cpp \
+    ../libs/utils/Coordinates.cpp \
+    Telemetry.cpp
 
 OTHER_FILES += \
     main.qml
@@ -47,7 +49,9 @@ HEADERS += \
     Comms.h \
     QTcpSocketAdapter.h \
     Menus.h \
-    OS.h
+    OS.h \
+    ../libs/utils/Coordinates.h \
+    Telemetry.h
 
 DISTFILES += \
     android/AndroidManifest.xml \

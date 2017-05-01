@@ -19,8 +19,8 @@ public:
 
     size_t get_remote_viewer_count() const;
 
-    void send_data(void const* video_data, size_t video_data_size, math::vec2u16 const& resolution,
-                   stream::IMultirotor_State::Value const& multirotor_state);
+    void send_video_data(void const* video_data, size_t video_data_size, math::vec2u16 const& resolution);
+    void send_telemetry(stream::IMultirotor_Commands::Value const& multirotor_commands, stream::IMultirotor_State::Value const& multirotor_state);
 
     void process();
 

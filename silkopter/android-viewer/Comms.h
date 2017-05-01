@@ -5,7 +5,7 @@
 #include <memory>
 #include <string>
 
-#include "common/stream/IMultirotor_State.h"
+#include "Telemetry.h"
 #include "common/Comm_Data.h"
 #include "utils/comms/Channel.h"
 #include "QTcpSocketAdapter.h"
@@ -21,7 +21,13 @@ public:
 
     bool init(std::string const& address, uint16_t port);
 
-    std::pair<void const*, size_t> getVideoData() const;
+    struct VideoData
+    {
+        std::vector<uint8_t> data;
+        math::vec2u16 resolution;
+    };
+
+    VideoData const& getVideoData() const;
 
     Q_INVOKABLE void connect();
     Q_INVOKABLE void disconnect();
@@ -39,6 +45,9 @@ public:
 
     void process();
 
+public slots:
+    Telemetry const& getTelemetry() const;
+
 signals:
     void connectionStatusChanged(ConnectionStatus);
 
@@ -46,13 +55,20 @@ private:
     void reset();
     void stateChanged(QTcpSocket::SocketState socketState);
 
+    void processVideoData();
+    void processTelemetry();
+
     std::string m_address;
     uint16_t m_port = 0;
 
-    std::vector<uint8_t> m_videoData;
+    std::vector<uint8_t> m_channelData;
+
+    VideoData m_videoData;
+    Telemetry m_telemetry;
 
     QTcpSocketAdapter m_socketAdapter;
-    util::comms::Channel<silk::viewer::Packet_Type, QTcpSocketAdapter> m_channel;
+    typedef util::comms::Channel<silk::viewer::Packet_Type, QTcpSocketAdapter> Channel;
+    Channel m_channel;
 
     mutable std::mutex m_samplesMutex;
 };
