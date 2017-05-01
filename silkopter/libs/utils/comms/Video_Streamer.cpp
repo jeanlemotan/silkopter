@@ -58,8 +58,8 @@ struct Datagram_Header
     uint32_t datagram_index : 8;
     uint16_t is_fec : 1;
     uint16_t size : 15;
-//    uint16_t width;
-//    uint16_t height;
+    //uint16_t width;
+    //uint16_t height;
 };
 
 #pragma pack(pop)
@@ -85,6 +85,7 @@ struct Video_Streamer::TX
     struct Datagram : public Pool_Item_Base
     {
         std::vector<uint8_t> data;
+        math::vec2u16 resolution;
     };
     typedef Pool<Datagram>::Ptr Datagram_ptr;
     Pool<Datagram> datagram_pool;
@@ -117,7 +118,7 @@ struct Video_Streamer::RX
     {
         bool is_processed = false;
         uint32_t index = 0;
-        //math::vec2u16 resolution;
+        math::vec2u16 resolution;
         std::vector<uint8_t> data;
     };
 
@@ -145,7 +146,7 @@ struct Video_Streamer::RX
 };
 
 
-static void seal_datagram(Video_Streamer::TX::Datagram& datagram, size_t header_offset, uint32_t block_index, uint8_t datagram_index, math::vec2u16 const& resolution, bool is_fec)
+static void seal_datagram(Video_Streamer::TX::Datagram& datagram, size_t header_offset, uint32_t block_index, uint8_t datagram_index, bool is_fec)
 {
     QASSERT(datagram.data.size() >= header_offset + sizeof(Video_Streamer::TX::Datagram));
 
@@ -155,8 +156,8 @@ static void seal_datagram(Video_Streamer::TX::Datagram& datagram, size_t header_
     header.block_index = block_index;
     header.datagram_index = datagram_index;
     header.is_fec = is_fec ? 1 : 0;
-//    header.width = resolution.x;
-//    header.height = resolution.y;
+    //header.width = datagram.resolution.x;
+    //header.height = datagram.resolution.y;
 
 //    header.crc = q::util::murmur_hash(datagram.data.data() + header_offset, header.size, 0);
 }
@@ -305,9 +306,9 @@ void Video_Streamer::prepare_radiotap_header(size_t rate_hz)
     ieee80211_radiotap_header& hdr = reinterpret_cast<ieee80211_radiotap_header&>(*RADIOTAP_HEADER.data());
     hdr.it_version = 0;
     hdr.it_present = 0
-                    | (1 << IEEE80211_RADIOTAP_RATE)
+//                    | (1 << IEEE80211_RADIOTAP_RATE)
                     | (1 << IEEE80211_RADIOTAP_TX_FLAGS)
-                    | (1 << IEEE80211_RADIOTAP_RTS_RETRIES)
+//                    | (1 << IEEE80211_RADIOTAP_RTS_RETRIES)
                     | (1 << IEEE80211_RADIOTAP_DATA_RETRIES)
                     | (1 << IEEE80211_RADIOTAP_CHANNEL)
 //                    | (1 << IEEE80211_RADIOTAP_MCS)
@@ -336,7 +337,7 @@ void Video_Streamer::prepare_radiotap_header(size_t rate_hz)
     {
         radiotap_add_u8(dst, idx, IEEE80211_RADIOTAP_MCS_HAVE_MCS);
         radiotap_add_u8(dst, idx, 0);
-        radiotap_add_u8(dst, idx, 18);
+        radiotap_add_u8(dst, idx, 1);
     }
     if (hdr.it_present & (1 << IEEE80211_RADIOTAP_CHANNEL))
     {
@@ -848,7 +849,57 @@ void Video_Streamer::tx_thread_proc()
 {
     TX& tx = m_impl->tx;
 
-    math::vec2u16 resolution = math::vec2u16::zero;
+    //math::vec2u16 resolution = math::vec2u16::zero;
+
+#if 0 //TEST THROUGHPUT
+    TX::Datagram_ptr datagram = tx.datagram_pool.acquire();
+
+    size_t s = std::min(8192u, m_transport_datagram_size - datagram->data.size());
+    size_t offset = datagram->data.size();
+    datagram->data.resize(offset + s);
+
+    auto start = Clock::now();
+
+    size_t packets = 0;
+    size_t total_size = 0;
+
+    while (!m_exit)
+    {
+        int isize = static_cast<int>(datagram->data.size());
+
+        std::lock_guard<std::mutex> lg(tx.pcap.mutex);
+        int r = pcap_inject(tx.pcap.pcap, datagram->data.data(), isize);
+        if (r <= 0)
+        {
+            QLOGW("Trouble injecting packet: {} / {}: {}", r, isize, pcap_geterr(tx.pcap.pcap));
+            //result = Result::ERROR;
+        }
+        if (r > 0)
+        {
+            if (r != isize)
+            {
+                QLOGW("Incomplete packet sent: {} / {}", r, isize);
+            }
+            else
+            {
+                packets++;
+                total_size += isize;
+            }
+        }
+
+        auto now = Clock::now();
+        if (now - start > std::chrono::seconds(1))
+        {
+            float f = std::chrono::duration<float>(now - start).count();
+            start = now;
+
+            QLOGI("Packets: {}, Size: {}MB", packets / f, (total_size / (1024.f * 1024.f)) / f);
+            packets = 0;
+            total_size = 0;
+        }
+    }
+#endif
+
 
     while (!m_exit)
     {
@@ -873,7 +924,7 @@ void Video_Streamer::tx_thread_proc()
 
             if (datagram)
             {
-                seal_datagram(*datagram, m_datagram_header_offset, tx.last_block_index, tx.block_datagrams.size(), resolution, false);
+                seal_datagram(*datagram, m_datagram_header_offset, tx.last_block_index, tx.block_datagrams.size(), false);
 
                 tx.ready_datagram_queue.push_back(datagram); //ready to send
                 tx.block_datagrams.push_back(datagram);
@@ -908,7 +959,7 @@ void Video_Streamer::tx_thread_proc()
                 //seal the result
                 for (size_t i = 0; i < fec_count; i++)
                 {
-                    seal_datagram(*tx.block_fec_datagrams[i], m_datagram_header_offset, tx.last_block_index, m_coding_k + i, resolution, true);
+                    seal_datagram(*tx.block_fec_datagrams[i], m_datagram_header_offset, tx.last_block_index, m_coding_k + i, true);
                     tx.ready_datagram_queue.push_back(tx.block_fec_datagrams[i]); //ready to send
                 }
 
@@ -990,6 +1041,7 @@ void Video_Streamer::send(void const* _data, size_t size, math::vec2u16 const& r
         if (!datagram)
         {
             datagram = tx.datagram_pool.acquire();
+            datagram->resolution = resolution;
         }
 
         size_t s = std::min(size, m_transport_datagram_size - datagram->data.size());
@@ -1022,9 +1074,16 @@ size_t Video_Streamer::get_mtu() const
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-void Video_Streamer::process()
+size_t Video_Streamer::get_video_rate() const
 {
-    if (!m_impl || m_is_tx)
+    return m_video_stats_rate;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////
+
+void Video_Streamer::process_rx_packets()
+{
+    if (m_is_tx)
     {
         return;
     }
@@ -1053,6 +1112,7 @@ void Video_Streamer::process()
             if (!d->is_processed)
             {
                 //QLOGI("Datagram {}", seq_number);
+                m_video_stats_data_accumulated += d->data.size();
                 if (on_data_received)
                 {
                     on_data_received(d->data.data(), d->data.size(), /*d->resolution*/math::vec2u16::zero);
@@ -1079,9 +1139,10 @@ void Video_Streamer::process()
             if (!d->is_processed)
             {
                 //QLOGI("Datagram {}", seq_number);
+                m_video_stats_data_accumulated += d->data.size();
                 if (on_data_received)
                 {
-                    on_data_received(d->data.data(), d->data.size(), /*d->resolution*/math::vec2u16::zero);
+                    on_data_received(d->data.data(), d->data.size(), d->resolution);
                 }
                 rx.last_datagram_tp = Clock::now();
                 d->is_processed = true;
@@ -1140,6 +1201,7 @@ void Video_Streamer::process()
             if (!d->is_processed)
             {
                 //QLOGI("Datagram F {}", seq_number);
+                m_video_stats_data_accumulated += d->data.size();
                 if (on_data_received)
                 {
                     on_data_received(d->data.data(), d->data.size(), /*d->resolution*/math::vec2u16::zero);
@@ -1172,7 +1234,25 @@ void Video_Streamer::process()
         rx.next_block_index = block->index + 1;
         rx.block_queue.pop_front();
     }
+}
 
+void Video_Streamer::process()
+{
+    if (!m_impl || m_is_tx)
+    {
+        return;
+    }
+
+    process_rx_packets();
+
+    Clock::time_point now = Clock::now();
+    if (now - m_video_stats_last_tp >= std::chrono::seconds(1))
+    {
+        float d = std::chrono::duration<float>(now - m_video_stats_last_tp).count();
+        m_video_stats_rate = static_cast<size_t>(static_cast<float>(m_video_stats_data_accumulated) / d);
+        m_video_stats_data_accumulated = 0;
+        m_video_stats_last_tp = now;
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////

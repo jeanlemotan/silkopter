@@ -45,6 +45,7 @@ public:
     std::function<void(void const* data, size_t size, math::vec2u16 const& resolution)> on_data_received;
 
     size_t get_mtu() const;
+    size_t get_video_rate() const;
 
     static std::vector<std::string> enumerate_interfaces();
 
@@ -62,6 +63,7 @@ private:
     void prepare_radiotap_header(size_t rate_hz);
     void prepare_tx_packet_header(uint8_t* buffer);
     bool process_rx_packet(PCap& pcap);
+    void process_rx_packets();
 
     void tx_thread_proc();
     void rx_thread_proc();
@@ -89,6 +91,10 @@ private:
 
     size_t m_datagram_header_offset = 0;
     size_t m_payload_offset = 0;
+
+    size_t m_video_stats_rate = 0;
+    size_t m_video_stats_data_accumulated = 0;
+    Clock::time_point m_video_stats_last_tp = Clock::now();
 };
 
 

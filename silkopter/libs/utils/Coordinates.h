@@ -1,5 +1,7 @@
 #pragma once
 
+#include "qmath.h"
+
 namespace util
 {
 namespace coordinates

@@ -67,6 +67,9 @@ public:
     Remote_Viewer_Server const& get_remote_viewer_server() const;
     Remote_Viewer_Server& get_remote_viewer_server();
 
+    util::comms::Video_Streamer const& get_video_streamer() const;
+    util::comms::Video_Streamer& get_video_streamer();
+
 //    void get_video_data(std::vector<uint8_t>& dst, math::vec2u16& resolution);
     stream::IMultirotor_State::Value get_multirotor_state() const;
 
@@ -104,7 +107,10 @@ private:
     //mark the commands as infinitely old
     Clock::time_point m_multirotor_commands_tp = Clock::time_point(Clock::duration::zero());
 
-    void handle_video(void const* data, size_t size, math::vec2u16 const& resolution);
+    void send_video_to_viewers(void const* data, size_t size, math::vec2u16 const& resolution);
+
+    Clock::time_point m_telemetry_tp = Clock::time_point(Clock::duration::zero());
+    void send_telemetry_to_viewers();
 };
 
 }

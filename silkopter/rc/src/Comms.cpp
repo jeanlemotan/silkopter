@@ -75,7 +75,7 @@ bool Comms::start()
     m_rc_protocol.reset_session();
     m_rc_protocol.send_packet(static_cast<uint8_t>(rc_comms::Packet_Type::RC_CONNECTED), nullptr, 0);
 
-    m_video_streamer.on_data_received = std::bind(&Comms::handle_video, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
+    m_video_streamer.on_data_received = std::bind(&Comms::send_video_to_viewers, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
 
     QLOGI("Started receiving video");
 
@@ -116,6 +116,20 @@ Remote_Viewer_Server const& Comms::get_remote_viewer_server() const
 Remote_Viewer_Server& Comms::get_remote_viewer_server()
 {
     return m_remote_viewer_server;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+util::comms::Video_Streamer const& Comms::get_video_streamer() const
+{
+    return m_video_streamer;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+util::comms::Video_Streamer& Comms::get_video_streamer()
+{
+    return m_video_streamer;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -195,7 +209,7 @@ void Comms::process_rx_packet(util::comms::RC_Protocol::RX_Packet const& packet)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-void Comms::handle_video(void const* data, size_t size, math::vec2u16 const& resolution)
+void Comms::send_video_to_viewers(void const* data, size_t size, math::vec2u16 const& resolution)
 {
     std::lock_guard<std::mutex> lg(m_samples_mutex);
 
@@ -207,7 +221,7 @@ void Comms::handle_video(void const* data, size_t size, math::vec2u16 const& res
 
     if (size > 0)
     {
-        m_remote_viewer_server.send_data(data, size, resolution, m_multirotor_state);
+        m_remote_viewer_server.send_video_data(data, size, resolution);
 //        uint8_t const* data = reinterpret_cast<uint8_t const*>(_data);
 //        size_t offset = m_video_data.size();
 //        m_video_data.resize(offset + size);
@@ -225,6 +239,13 @@ void Comms::handle_video(void const* data, size_t size, math::vec2u16 const& res
 //    FILE* f = fopen("a.h264", "a+");
 //    fwrite(_data, size, 1, f);
 //    fclose(f);
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+void Comms::send_telemetry_to_viewers()
+{
+    m_remote_viewer_server.send_telemetry(m_multirotor_commands, m_multirotor_state);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -285,6 +306,14 @@ void Comms::send_multirotor_commands_value(stream::IMultirotor_Commands::Value c
 void Comms::process()
 {
     m_video_streamer.process();
+
+    Clock::time_point now = Clock::now();
+    if (now - m_telemetry_tp >= std::chrono::milliseconds(30))
+    {
+        m_telemetry_tp = now;
+        send_telemetry_to_viewers();
+    }
+
     m_remote_viewer_server.process();
 
 //    if (Clock::now() - get_last_rx_tp() > std::chrono::seconds(5))
