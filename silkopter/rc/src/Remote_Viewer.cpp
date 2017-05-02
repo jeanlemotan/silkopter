@@ -53,7 +53,8 @@ void Remote_Viewer::send_telemetry(stream::IMultirotor_Commands::Value const& mu
     m_serialization_buffer.clear();
     size_t offset = 0;
     util::serialization::serialize(m_serialization_buffer, multirotor_state, offset);
-    m_channel.send(viewer::Packet_Type::TELEMETRY, m_serialization_buffer.data(), m_serialization_buffer.size());
+    util::serialization::serialize(m_serialization_buffer, multirotor_commands, offset);
+    m_channel.send(viewer::Packet_Type::TELEMETRY, m_serialization_buffer.data(), offset);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
