@@ -20,8 +20,7 @@ ToolButton
 
     style: ButtonStyle {
         background: Rectangle {
-            color: root.color
-            opacity: root.enabled ? 1 : 0.5
+            opacity: 0.2
             radius: 4
         }
     }
