@@ -18,6 +18,7 @@ public:
     ~Comms();
 
     Q_PROPERTY(ConnectionStatus connectionStatus READ getConnectionStatus NOTIFY connectionStatusChanged)
+    Q_PROPERTY(Telemetry* telemetry READ getTelemetry)
 
     bool init(std::string const& address, uint16_t port);
 
@@ -42,11 +43,9 @@ public:
     Q_ENUMS(ConnectionStatus);
 
     ConnectionStatus getConnectionStatus() const;
+    Telemetry* getTelemetry();
 
     void process();
-
-public slots:
-    Telemetry const& getTelemetry() const;
 
 signals:
     void connectionStatusChanged(ConnectionStatus);

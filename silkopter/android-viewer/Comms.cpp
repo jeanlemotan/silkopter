@@ -1,7 +1,6 @@
 #include "Comms.h"
 
 #include <QObject>
-#include <android/log.h>
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -9,6 +8,7 @@ Comms::Comms()
     : m_socketAdapter()
     , m_channel(m_socketAdapter)
 {
+    QObject::connect(&m_socketAdapter.getSocket(), &QTcpSocket::stateChanged, this, &Comms::stateChanged);
 }
 
 Comms::~Comms()
@@ -22,6 +22,8 @@ bool Comms::init(std::string const& address, uint16_t port)
 
     m_socketAdapter.start();
 
+    connect();
+
     return true;
 }
 
@@ -29,8 +31,6 @@ void Comms::connect()
 {
     disconnect();
     m_socketAdapter.getSocket().connectToHost(m_address.c_str(), m_port, QTcpSocket::ReadWrite);
-
-    QObject::connect(&m_socketAdapter.getSocket(), &QTcpSocket::stateChanged, this, &Comms::stateChanged);
 }
 
 void Comms::disconnect()
@@ -38,7 +38,7 @@ void Comms::disconnect()
     reset();
 }
 
-void Comms::stateChanged(QTcpSocket::SocketState socketState)
+void Comms::stateChanged(QTcpSocket::SocketState /*socketState*/)
 {
     Q_EMIT connectionStatusChanged(getConnectionStatus());
 }
@@ -65,9 +65,9 @@ Comms::VideoData const& Comms::getVideoData() const
     return m_videoData;
 }
 
-Telemetry const& Comms::getTelemetry() const
+Telemetry* Comms::getTelemetry()
 {
-    return m_telemetry;
+    return &m_telemetry;
 }
 
 void Comms::processVideoData()
