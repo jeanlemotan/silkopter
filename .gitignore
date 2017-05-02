@@ -30,4 +30,5 @@ silkopter/io_board/*.map
 silkopter/io_board/.projectile
 
 silkopter/android-viewer/build-*
+silkopter/build-*
 
