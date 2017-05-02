@@ -13,6 +13,5 @@
 #include <thread>
 #include <mutex>
 #include <condition_variable>
-#include <boost/signals2.hpp>
 
 

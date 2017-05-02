@@ -27,6 +27,17 @@ rpi {
         DEST_FOLDER = rpi/release
         DEFINES += NDEBUG
     }
+} android {
+    DEFINES+=ANDROID
+    QMAKE_MAKEFILE = "Makefile.android"
+    MAKEFILE = "Makefile.android"
+    CONFIG(debug, debug|release) {
+        DEST_FOLDER = android/debug
+    }
+    CONFIG(release, debug|release) {
+        DEST_FOLDER = android/release
+        DEFINES += NDEBUG
+    }
 } else {
     QMAKE_MAKEFILE = "Makefile"
     CONFIG(debug, debug|release) {

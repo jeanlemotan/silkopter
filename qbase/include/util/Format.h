@@ -1,9 +1,13 @@
 #pragma once
 
-#include "boost/optional.hpp"
+#ifndef Q_ANDROID
+#   include "boost/optional.hpp"
+#endif
+
 #include <set>
 #include <vector>
 #include <FString.h>
+#include <cassert>
 
 namespace q
 {
@@ -624,6 +628,7 @@ namespace formatting
         format_string(dst, ph, tp.time_since_epoch());
 	}
 
+#ifndef Q_ANDROID
 	template<class Dst_String, class Placeholder, class T>
 	void format_string(Dst_String& dst, Placeholder const& ph, boost::optional<T> const& opt)
 	{
@@ -636,6 +641,7 @@ namespace formatting
 			format_string(dst, ph, "<none>");
 		}
 	}
+#endif
 
     template<class Dst_String, class Placeholder, class T>
     void format_string(Dst_String& dst, Placeholder const& ph, std::vector<T> const& container)

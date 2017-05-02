@@ -101,13 +101,13 @@ void q::debug::detail::set_assert_enabled(const char* file, int line, bool enabl
 	}
 }
 
-#if defined Q_POSIX_API
+#if defined Q_POSIX_API && !defined Q_ANDROID
 #   include <execinfo.h>
 #endif
 
 void q::debug::dump_stacktrace()
 {
-#if defined Q_POSIX_API
+#if defined Q_POSIX_API  && !defined Q_ANDROID
     void* trace_ptrs[256] = { nullptr };
     int count = backtrace(trace_ptrs, 256);
     char** func_names = backtrace_symbols(trace_ptrs, count);
@@ -131,6 +131,5 @@ bool q::volatile_false()
 {
     return false;
 }
-
 
 
