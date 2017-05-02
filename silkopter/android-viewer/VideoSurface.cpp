@@ -10,19 +10,15 @@
 //#include <QQuickWindow>
 #include <QTimer>
 
-#include <jni.h>
-#include <android/log.h>
-
-//#include <qpa/qplatformnativeinterface.h>
-//#include <private/qgstreamerelementcontrol_p.h>
-
-#include <EGL/egl.h>
-#include <EGL/eglext.h>
-//#include <gst/interfaces/nemovideotexture.h>
-//#include <gst/video/gstvideometa.h>
+#ifdef Q_ANDROID
+#   include <jni.h>
+#   include <android/log.h>
+#   include <QAndroidJniObject>
+#   include <EGL/egl.h>
+#   include <EGL/eglext.h>
+#endif
 
 #include <QThread>
-#include <QAndroidJniObject>
 //#include <qpa/qplatformnativeinterface.h>
 
 #include <chrono>
@@ -38,6 +34,9 @@ static const size_t NALU_MAXLEN = 1024 * 1024;
 /*----------------------------------------------------------------------
 |    definitions
 +---------------------------------------------------------------------*/
+
+#ifdef Q_ANDROID
+
 #define ATTACH_TO_CURRENT_THREAD_THEN_RET(ret_statement)    \
     JNIEnv* env;                                            \
     if (s_javaVM->AttachCurrentThread(&env, NULL) < 0)      \
@@ -60,16 +59,7 @@ static jmethodID s_midFeedDecoder = nullptr;
 static jmethodID s_midUpdateTexture = nullptr;
 static jclass s_classVideoDecoder = nullptr;
 static jclass s_classSurfaceTexture = nullptr;
-
-static VideoTexture* s_videoTexture = nullptr;
 static jobject s_surfaceTexture = nullptr;
-
-static std::mutex s_videoDataMutex;
-static std::vector<uint8_t> s_videoData;
-static math::vec2u16 s_videoResolution;
-static bool s_videoResolutionDirty = false;
-
-static const uint8_t naluSeparator[4] = { 0, 0, 0, 1 };
 
 /*----------------------------------------------------------------------
 |    load_custom_java_classes
@@ -159,7 +149,16 @@ Q_DECL_EXPORT jint JNICALL JNI_OnLoad(JavaVM* vm, void* /*reserved*/)
     return JNI_VERSION_1_4;
 }
 
+#endif //Q_ANDROID
 
+
+static VideoTexture* s_videoTexture = nullptr;
+static std::mutex s_videoDataMutex;
+static std::vector<uint8_t> s_videoData;
+static math::vec2u16 s_videoResolution;
+static bool s_videoResolutionDirty = false;
+
+static const uint8_t naluSeparator[4] = { 0, 0, 0, 1 };
 
 
 VideoTexture::VideoTexture()
@@ -168,12 +167,14 @@ VideoTexture::VideoTexture()
     , m_textureId(0)
     , m_updated(false)
 {
+#ifdef Q_ANDROID
     glGenTextures(1, &m_textureId);
     glBindTexture(GL_TEXTURE_EXTERNAL_OES, m_textureId);
     glTexParameterf(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameterf(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+#endif
 }
 
 VideoTexture::~VideoTexture()
@@ -181,7 +182,9 @@ VideoTexture::~VideoTexture()
     releaseTexture();
     if (m_textureId)
     {
+#ifdef Q_ANDROID
         glDeleteTextures(1, &m_textureId);
+#endif
     }
 }
 
@@ -219,7 +222,9 @@ void VideoTexture::bind()
 {
     if (m_textureId != 0)
     {
+#ifdef Q_ANDROID
         glBindTexture(GL_TEXTURE_EXTERNAL_OES, m_textureId);
+#endif
     }
 }
 
@@ -306,7 +311,9 @@ void VideoTexture::invalidateTexture()
 {
     if (m_textureId != 0)
     {
+#ifdef Q_ANDROID
         glDeleteTextures(1, &m_textureId);
+#endif
         m_textureId = 0;
     }
 }
@@ -318,7 +325,9 @@ void VideoTexture::releaseTexture()
         m_updated = false;
         if (m_textureId != 0)
         {
+#ifdef Q_ANDROID
             glDeleteTextures(1, &m_textureId);
+#endif
             m_textureId = 0;
         }
     }
@@ -367,7 +376,9 @@ void VideoMaterialShader::updateState(const RenderState &state, QSGMaterial *new
     const QRectF subRect = material->m_texture->normalizedTextureSubRect();
     program()->setUniformValue(m_id_subrect, QVector4D(subRect.x(), subRect.y(), subRect.width(), subRect.height()));
 
+#ifdef Q_ANDROID
     glActiveTexture(GL_TEXTURE0);
+#endif
     material->m_texture->bind();
 }
 
@@ -517,6 +528,7 @@ QSGNode* VideoSurface::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *)
 //    tp = std::chrono::high_resolution_clock::now();
 //    __android_log_print(ANDROID_LOG_INFO, "Qt", "dt %dms", dt);
 
+#ifdef Q_ANDROID
     if (!m_env)
     {
         if (s_javaVM->AttachCurrentThread(&m_env, NULL) < 0)
@@ -525,19 +537,22 @@ QSGNode* VideoSurface::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *)
             return nullptr;
         }
     }
+#endif
 
     if (!node)
     {
-        if (!s_surfaceTexture)
+        if (!s_videoTexture)
         {
             s_videoTexture = new VideoTexture();
 
+#ifdef Q_ANDROID
             jobject surfTexture = m_env->CallStaticObjectMethod(s_classVideoDecoder, s_midSetupDecoder, s_videoTexture->textureId());
             if (!surfTexture)
             {
                 qWarning("Failed to instantiate SurfaceTexture.");
             }
             s_surfaceTexture = m_env->NewGlobalRef(surfTexture);
+#endif
         }
 
         node = new VideoNode(s_videoTexture);
@@ -551,7 +566,7 @@ QSGNode* VideoSurface::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *)
         int dt = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - tp).count();
         if (dt > 1000)
         {
-            __android_log_print(ANDROID_LOG_INFO, "Skptr", "%d frames, %d FPS", frames, frames * 1000 / dt);
+            QLOGI("{} frames, {} FPS", frames, frames * 1000 / dt);
             tp = std::chrono::high_resolution_clock::now();
             frames = 0;
         }
@@ -591,12 +606,14 @@ QSGNode* VideoSurface::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *)
                 const size_t naluSize = p - src;
                 //__android_log_print(ANDROID_LOG_INFO, "Skptr", "NALU @ %d, %d left", (int)naluSize, (int)(s_videoData.size() - naluSize));
 
+#ifdef Q_ANDROID
                 jbyteArray frameData = m_env->NewByteArray(naluSize);
 
                 m_env->SetByteArrayRegion(frameData, 0, static_cast<int>(naluSize), reinterpret_cast<jbyte const*>(src));
                 m_env->CallStaticVoidMethod(s_classVideoDecoder, s_midFeedDecoder, frameData, (int)naluSize);
 
                 m_env->DeleteLocalRef(frameData);
+#endif
 
                 s_videoData.erase(s_videoData.begin(), s_videoData.begin() + naluSize);
             }
@@ -608,10 +625,12 @@ QSGNode* VideoSurface::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *)
         }
     }
 
+#ifdef Q_ANDROID
     if (s_surfaceTexture)
     {
         m_env->CallVoidMethod(s_surfaceTexture, s_midUpdateTexture);
     }
+#endif
 
     node->markDirty(QSGNode::DirtyMaterial);
     update();

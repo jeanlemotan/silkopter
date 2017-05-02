@@ -5,11 +5,15 @@
 #include <QSGTexture>
 #include <QSGGeometryNode>
 #include <QSGGeometry>
-#include <jni.h>
 #include <vector>
 #include <functional>
 
+#include "QBase.h"
 #include "qmath.h"
+
+#ifdef Q_ANDROID
+#   include <jni.h>
+#endif
 
 class VideoTexture : public QSGDynamicTexture
 {
@@ -89,6 +93,8 @@ public:
 private:
     bool m_isGeomertyDirty = true;
 
+#ifdef Q_ANDROID
     JNIEnv* m_env = nullptr;
+#endif
 };
 

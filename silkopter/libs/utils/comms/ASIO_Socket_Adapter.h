@@ -3,6 +3,7 @@
 #include <vector>
 #include <deque>
 #include <mutex>
+#include <boost/bind.hpp>
 
 namespace util
 {

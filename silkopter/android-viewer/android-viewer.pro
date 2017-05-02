@@ -1,11 +1,50 @@
 TEMPLATE = app
 
-QT += qml quick opengl androidextras network positioning
+QT += qml quick opengl network positioning
+
 CONFIG += c++14
 
+android {
+    QT += androidextras
+    DEFINES += ANDROID
+    QMAKE_MAKEFILE = "Makefile.android"
+    MAKEFILE = "Makefile.android"
+    CONFIG(debug, debug|release) {
+        DEST_FOLDER = android/debug
+    }
+    CONFIG(release, debug|release) {
+        DEST_FOLDER = android/release
+        DEFINES += NDEBUG
+    }
+} else {
+    QMAKE_MAKEFILE = "Makefile"
+    CONFIG(debug, debug|release) {
+        DEST_FOLDER = pc/debug
+    }
+    CONFIG(release, debug|release) {
+        DEST_FOLDER = pc/release
+        DEFINES += NDEBUG
+    }
+}
+
+OBJECTS_DIR = ./.obj/$${DEST_FOLDER}
+MOC_DIR = ./.moc/$${DEST_FOLDER}
+RCC_DIR = ./.rcc/$${DEST_FOLDER}
+UI_DIR = ./.ui/$${DEST_FOLDER}
+DESTDIR = ../../bin/$${DEST_FOLDER}
+
+
+
 INCLUDEPATH += ../libs
+INCLUDEPATH += ../../qbase/include
 INCLUDEPATH += ../../qmath/include
 INCLUDEPATH += boost
+
+
+ROOT_LIBS_PATH = ../..
+
+LIBS += -L$${ROOT_LIBS_PATH}/qmath/lib/$${DEST_FOLDER} -lqmath
+LIBS += -L$${ROOT_LIBS_PATH}/qbase/lib/$${DEST_FOLDER} -lqbase
 
 SOURCES += main.cpp \
     VideoSurface.cpp \

@@ -3,18 +3,27 @@
 #include <QtQuick>
 #include <QQmlApplicationEngine>
 
+#include "QBase.h"
 #include "VideoSurface.h"
 #include "Comms.h"
 #include "Telemetry.h"
 #include "OS.h"
 #include "Menus.h"
 
-#include <android/log.h>
+#ifdef PLATFORM_ANDROID
+#   include <android/log.h>
+#endif
+
 #include <thread>
 
 int main(int argc, char *argv[])
 {
     QGuiApplication app(argc, argv);
+
+    q::logging::add_logger(q::logging::Logger_uptr(new q::logging::Console_Logger()));
+    q::logging::set_decorations(q::logging::Decorations(q::logging::Decoration::TIMESTAMP, q::logging::Decoration::LEVEL, q::logging::Decoration::TOPIC));
+
+    QLOG_TOPIC("silk");
 
     Q_INIT_RESOURCE(res);
 
@@ -72,8 +81,10 @@ int main(int argc, char *argv[])
     {
         if (state == Qt::ApplicationInactive)
         {
-            __android_log_print(ANDROID_LOG_INFO, "Skptr", "Viewer is inactive");
+            QLOGI("Viewer is inactive");
+#ifdef Q_ANDROID
             exit(0); //abort, because QT will default to 60 FPS when coming back and I found no way to fix this
+#endif
         }
     });
 
