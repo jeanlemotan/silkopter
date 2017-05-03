@@ -18,7 +18,7 @@ public:
     ~Comms();
 
     Q_PROPERTY(ConnectionStatus connectionStatus READ getConnectionStatus NOTIFY connectionStatusChanged)
-    Q_PROPERTY(Telemetry* telemetry READ getTelemetry)
+    Q_PROPERTY(Telemetry* telemetry READ getTelemetry NOTIFY telemetryChanged)
 
     bool init(std::string const& address, uint16_t port);
 
@@ -49,6 +49,7 @@ public:
 
 signals:
     void connectionStatusChanged(ConnectionStatus);
+    void telemetryChanged(); //dummy signal, never triggered. Here because otherwise QML complains that telemetry is not notified!
 
 private:
     void reset();
