@@ -1,6 +1,10 @@
-import QtQuick 2.0
+import QtQuick 2.7
 import QtQuick.Controls 1.4
+import QtQuick.Layouts 1.3
 import QtQuick.Controls.Styles 1.4
+import QtLocation 5.6
+import QtPositioning 5.6
+
 import com.silk.Comms 1.0
 import com.silk.VideoSurface 0.1
 import com.silk.Telemetry 1.0
@@ -46,26 +50,122 @@ Item {
         anchors.left: root.left
         anchors.right: root.right
         anchors.bottom: root.bottom
+    }
+
+    RowLayout {
+        id: topBar
+        anchors.top: parent.top
+        anchors.right: parent.right
+        spacing: 2
 
         Label {
-            id: telemetryVoltage
-            text: "Voltage: " + s_comms.telemetry.batteryAverageVoltage + "V"
+            TextMetrics {
+                id: ampsMetrics
+                text: "999.9A "
+            }
+
+            Layout.preferredWidth: ampsMetrics.width
+            style: Text.Outline; styleColor: "black"
+            text: s_comms.telemetry.batteryAverageCurrent.toFixed(1) + "A"
         }
         Label {
-            id: telemetryCurrent
-            anchors.top: telemetryVoltage.bottom
-            text: "Current: " + s_comms.telemetry.batteryAverageCurrent + "A"
+            TextMetrics {
+                id: voltsMetrics
+                text: "99.9V "
+            }
+
+            Layout.preferredWidth: voltsMetrics.width
+            style: Text.Outline; styleColor: "black"
+            text: s_comms.telemetry.batteryAverageVoltage.toFixed(1) + "V"
+        }
+        ProgressBar {
+            Layout.preferredWidth: 200
+            value: s_comms.telemetry.batteryCapacityLeft
+            style: ProgressBarStyle {
+                progress: Rectangle {
+                    color: s_comms.telemetry.batteryCapacityLeft < 0.3 ? (s_comms.telemetry.batteryCapacityLeft < 0.2 ? "red" : "yellow") : "green"
+                }
+            }
         }
         Label {
-            id: telemetryCapacity
-            anchors.top: telemetryCurrent.bottom
-            text: "Capacity: " + s_comms.telemetry.batteryCapacityLeft * 100  + "%"
+            TextMetrics {
+                id: percentMetrics
+                text: "100% "
+            }
+
+            Layout.preferredWidth: percentMetrics.width
+            style: Text.Outline; styleColor: "black"
+            text: (s_comms.telemetry.batteryCapacityLeft * 100.0).toFixed(0)  + "%"
+            color: s_comms.telemetry.batteryCapacityLeft < 0.3 ? (s_comms.telemetry.batteryCapacityLeft < 0.2 ? "red" : "yellow") : "green"
         }
     }
 
-//    UAVInfo {
-//        id: uavInfo
-//        anchors.margins: 20
+
+//    Plugin {
+//        id: osmPlugin
+//        name: "osm"
 //    }
 
+//    Map {
+//        anchors.top: topBar.bottom
+//        anchors.bottom: parent.bottom
+//        anchors.left: parent.left
+//        width: 500
+//        plugin: osmPlugin
+//        center: s_comms.telemetry.location
+//        zoomLevel: 10
+//    }
+    Plugin {
+        id: osmplugin
+
+        name: "osm"
+        PluginParameter { name: "osm.useragent"; value: "silkopter_gs" }
+        PluginParameter { name: "osm.mapping.host"; value: "http://osm.tile.server.address/" }
+        PluginParameter { name: "osm.mapping.copyright"; value: "All mine" }
+        PluginParameter { name: "osm.routing.host"; value: "http://osrm.server.address/viaroute" }
+        PluginParameter { name: "osm.geocoding.host"; value: "http://geocoding.server.address" }
+    }
+    Plugin {
+        id: hereplugin
+
+        name: "here"
+        PluginParameter { name: "here.app_id"; value: "Z5ZvL9i1ZOjQhZsGxVR6" }
+        PluginParameter { name: "here.token"; value: "owBddrRguz4pZxOyTlc37g" }
+        PluginParameter { name: "here.mapping.cache.disk.size"; value: "300" }
+        PluginParameter { name: "here.mapping.cache.memory.size"; value: "100" }
+        PluginParameter { name: "here.mapping.cache.texture.size"; value: "100" }
+    }
+
+    GroupBox{
+        id: mapTypeGroup
+        anchors.top: parent.top
+        title:"Map Types"
+        ComboBox {
+            width: 150
+            model:map.supportedMapTypes
+            textRole: "description"
+            onCurrentIndexChanged: map.activeMapType = map.supportedMapTypes[currentIndex]
+        }
+    }
+
+    Map {
+        id: map
+        anchors.top: mapTypeGroup.bottom
+        anchors.bottom: parent.bottom
+        anchors.left: parent.left
+        width: 1000
+
+        MapCircle {
+            center: s_comms.telemetry.location
+            radius: 1.0
+            color: 'green'
+            border.width: 3
+        }
+
+        plugin: osmplugin
+        //plugin: hereplugin
+        center: s_comms.telemetry.location
+        zoomLevel: 10//map.minimumZoomLevel //(map.minimumZoomLevel + map.maximumZoomLevel) / 2
+        gesture.enabled: true
+    }
 }
