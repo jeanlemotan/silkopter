@@ -10,6 +10,8 @@
 #include "utils/comms/Channel.h"
 #include "QTcpSocketAdapter.h"
 
+#include <QUdpSocket>
+
 class Comms : public QObject
 {
     Q_OBJECT
@@ -18,9 +20,8 @@ public:
     ~Comms();
 
     Q_PROPERTY(ConnectionStatus connectionStatus READ getConnectionStatus NOTIFY connectionStatusChanged)
-    Q_PROPERTY(Telemetry* telemetry READ getTelemetry NOTIFY telemetryChanged)
 
-    bool init(std::string const& address, uint16_t port);
+    bool init();
 
     struct VideoData
     {
@@ -29,9 +30,6 @@ public:
     };
 
     VideoData const& getVideoData() const;
-
-    Q_INVOKABLE void connect();
-    Q_INVOKABLE void disconnect();
 
     enum class ConnectionStatus
     {
@@ -43,23 +41,25 @@ public:
     Q_ENUMS(ConnectionStatus);
 
     ConnectionStatus getConnectionStatus() const;
-    Telemetry* getTelemetry();
+    Telemetry& getTelemetry();
 
     void process();
 
 signals:
     void connectionStatusChanged(ConnectionStatus);
-    void telemetryChanged(); //dummy signal, never triggered. Here because otherwise QML complains that telemetry is not notified!
 
 private:
-    void reset();
-    void stateChanged(QTcpSocket::SocketState socketState);
+    void connect(std::string const& address, uint16_t port);
+    void disconnect();
+
+private slots:
+    void onSocketError(QAbstractSocket::SocketError error);
+    void onSocketStateChanged(QTcpSocket::SocketState socketState);
+
+private:
 
     void processVideoData();
     void processTelemetry();
-
-    std::string m_address;
-    uint16_t m_port = 0;
 
     std::vector<uint8_t> m_channelData;
 

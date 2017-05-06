@@ -1,6 +1,10 @@
 #include "Comms.h"
+#include "QBase.h"
 
 #include <QObject>
+
+const uint16_t k_port = 3333;
+
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -8,39 +12,46 @@ Comms::Comms()
     : m_socketAdapter()
     , m_channel(m_socketAdapter)
 {
-    QObject::connect(&m_socketAdapter.getSocket(), &QTcpSocket::stateChanged, this, &Comms::stateChanged);
+    QObject::connect(&m_socketAdapter.getSocket(), &QTcpSocket::stateChanged, this, &Comms::onSocketStateChanged);
+    QObject::connect(&m_socketAdapter.getSocket(), SIGNAL(error), this, SLOT(onSocketError()));
 }
 
 Comms::~Comms()
 {
 }
 
-bool Comms::init(std::string const& address, uint16_t port)
+bool Comms::init()
 {
-    m_address = address;
-    m_port = port;
-
     m_socketAdapter.start();
 
-    connect();
+    connect("192.168.42.1", k_port);
 
     return true;
 }
 
-void Comms::connect()
+void Comms::connect(std::string const& address, uint16_t port)
 {
+    QLOGI("Trying to connect to {}:{}", address, port);
+
     disconnect();
-    m_socketAdapter.getSocket().connectToHost(m_address.c_str(), m_port, QTcpSocket::ReadWrite);
+    //m_socketAdapter.getSocket().bind(QHostAddress("192.168.42.2"), k_port);
+    m_socketAdapter.getSocket().connectToHost(address.c_str(), port, QTcpSocket::ReadWrite);
 }
 
 void Comms::disconnect()
 {
-    reset();
+    m_socketAdapter.getSocket().disconnectFromHost();
 }
 
-void Comms::stateChanged(QTcpSocket::SocketState /*socketState*/)
+void Comms::onSocketError(QAbstractSocket::SocketError error)
+{
+    QLOGI("Connection error: {}", error);
+}
+
+void Comms::onSocketStateChanged(QTcpSocket::SocketState /*socketState*/)
 {
     Q_EMIT connectionStatusChanged(getConnectionStatus());
+    QLOGI("Connection status changed to {}", m_socketAdapter.getSocket().state());
 }
 
 Comms::ConnectionStatus Comms::getConnectionStatus() const
@@ -55,19 +66,14 @@ Comms::ConnectionStatus Comms::getConnectionStatus() const
     }
 }
 
-void Comms::reset()
-{
-    m_socketAdapter.getSocket().disconnectFromHost();
-}
-
 Comms::VideoData const& Comms::getVideoData() const
 {
     return m_videoData;
 }
 
-Telemetry* Comms::getTelemetry()
+Telemetry& Comms::getTelemetry()
 {
-    return &m_telemetry;
+    return m_telemetry;
 }
 
 void Comms::processVideoData()
@@ -123,6 +129,11 @@ void Comms::processTelemetry()
 
 void Comms::process()
 {
+    if (getConnectionStatus() == ConnectionStatus::DISCONNECTED)
+    {
+        connect("192.168.42.1", k_port);
+    }
+
     m_videoData.data.clear();
 
     silk::viewer::Packet_Type message;
