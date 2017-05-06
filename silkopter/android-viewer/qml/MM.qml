@@ -66,7 +66,7 @@ Item {
 
             Layout.preferredWidth: ampsMetrics.width
             style: Text.Outline; styleColor: "black"
-            text: s_comms.telemetry.batteryAverageCurrent.toFixed(1) + "A"
+            text: s_telemetry.batteryAverageCurrent.toFixed(1) + "A"
         }
         Label {
             TextMetrics {
@@ -76,14 +76,14 @@ Item {
 
             Layout.preferredWidth: voltsMetrics.width
             style: Text.Outline; styleColor: "black"
-            text: s_comms.telemetry.batteryAverageVoltage.toFixed(1) + "V"
+            text: s_telemetry.batteryAverageVoltage.toFixed(1) + "V"
         }
         ProgressBar {
             Layout.preferredWidth: 200
-            value: s_comms.telemetry.batteryCapacityLeft
+            value: s_telemetry.batteryCapacityLeft
             style: ProgressBarStyle {
                 progress: Rectangle {
-                    color: s_comms.telemetry.batteryCapacityLeft < 0.3 ? (s_comms.telemetry.batteryCapacityLeft < 0.2 ? "red" : "yellow") : "green"
+                    color: s_telemetry.batteryCapacityLeft < 0.3 ? (s_telemetry.batteryCapacityLeft < 0.2 ? "red" : "yellow") : "green"
                 }
             }
         }
@@ -95,8 +95,8 @@ Item {
 
             Layout.preferredWidth: percentMetrics.width
             style: Text.Outline; styleColor: "black"
-            text: (s_comms.telemetry.batteryCapacityLeft * 100.0).toFixed(0)  + "%"
-            color: s_comms.telemetry.batteryCapacityLeft < 0.3 ? (s_comms.telemetry.batteryCapacityLeft < 0.2 ? "red" : "yellow") : "green"
+            text: (s_telemetry.batteryCapacityLeft * 100.0).toFixed(0)  + "%"
+            color: s_telemetry.batteryCapacityLeft < 0.3 ? (s_telemetry.batteryCapacityLeft < 0.2 ? "red" : "yellow") : "green"
         }
     }
 
@@ -112,7 +112,7 @@ Item {
 //        anchors.left: parent.left
 //        width: 500
 //        plugin: osmPlugin
-//        center: s_comms.telemetry.location
+//        center: s_telemetry.position
 //        zoomLevel: 10
 //    }
     Plugin {
@@ -139,10 +139,10 @@ Item {
     GroupBox{
         id: mapTypeGroup
         anchors.top: parent.top
-        title:"Map Types"
+        title: "Map Types"
         ComboBox {
-            width: 150
-            model:map.supportedMapTypes
+            //width: 150
+            model: map.supportedMapTypes
             textRole: "description"
             onCurrentIndexChanged: map.activeMapType = map.supportedMapTypes[currentIndex]
         }
@@ -150,21 +150,49 @@ Item {
 
     Map {
         id: map
-        anchors.top: mapTypeGroup.bottom
         anchors.bottom: parent.bottom
         anchors.left: parent.left
         width: 1000
+        height: 1000
+        opacity: 0.7
+
+        copyrightsVisible: false
+
+        MapPolyline {
+            id: history
+            line.width: 4
+            line.color: "#60FF00FF"
+        }
+
+        Connections {
+            target: s_telemetry
+            onPathPointAdded: {
+                history.addCoordinate(point);
+            }
+            onPathCleared: {
+                history = [];
+            }
+        }
 
         MapCircle {
-            center: s_comms.telemetry.location
-            radius: 1.0
+            id: homePosition
+            center: s_telemetry.homePosition
+            radius: 3.0
+            color: 'blue'
+            border.width: 2
+            visible: s_telemetry.homePosition.isValid
+        }
+        MapCircle {
+            id: position
+            center: s_telemetry.position
+            radius: 2.0
             color: 'green'
-            border.width: 3
+            border.width: 2
         }
 
         plugin: osmplugin
         //plugin: hereplugin
-        center: s_comms.telemetry.location
+        center: s_telemetry.position
         zoomLevel: 10//map.minimumZoomLevel //(map.minimumZoomLevel + map.maximumZoomLevel) / 2
         gesture.enabled: true
     }
