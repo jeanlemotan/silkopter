@@ -12,7 +12,6 @@
 
 #ifdef Q_ANDROID
 #   include <jni.h>
-#   include <android/log.h>
 #   include <QAndroidJniObject>
 #   include <EGL/egl.h>
 #   include <EGL/eglext.h>
@@ -73,7 +72,7 @@ int load_custom_java_classes(JNIEnv* env)
     jclass cls = env->FindClass(classNameDecoder);
     if (!cls)
     {
-        __android_log_print(ANDROID_LOG_FATAL, "Qt", "Unable to find class %s.", classNameDecoder);
+        QLOGE("Unable to find class {}.", classNameDecoder);
         return JNI_FALSE;
     }
     s_classVideoDecoder  = (jclass)env->NewGlobalRef(cls);
@@ -82,7 +81,7 @@ int load_custom_java_classes(JNIEnv* env)
     cls = env->FindClass(classNameSurfTexture);
     if (!cls)
     {
-        __android_log_print(ANDROID_LOG_FATAL, "Qt", "Unable to find class %s.", classNameSurfTexture);
+        QLOGE("Unable to find class {}.", classNameSurfTexture);
         return JNI_FALSE;
     }
 
@@ -116,14 +115,14 @@ Q_DECL_EXPORT jint JNICALL JNI_OnLoad(JavaVM* vm, void* /*reserved*/)
 
     if (s_javaVM->GetEnv((void**)&s_env, JNI_VERSION_1_4) != JNI_OK)
     {
-        __android_log_print(ANDROID_LOG_FATAL, "Qt", "GetEnv failed.");
+        QLOGE("GetEnv failed.");
         return JNI_ERR;
     }
 
     // lcarlon: load the classes for the Qt application here.
     if (!load_custom_java_classes(s_env))
     {
-        __android_log_print(ANDROID_LOG_FATAL, "Qt", "Couldn't register user defined classes.");
+        QLOGE("Couldn't register user defined classes.");
         return JNI_ERR;
     }
 
