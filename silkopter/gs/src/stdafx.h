@@ -58,6 +58,7 @@ extern "C"
 
 #include "_qmath.h"
 #include "QBase.h"
+#include "util/Signals.h"
 #include "q.h"
 
 #include "def_lang/Type_System.h"
