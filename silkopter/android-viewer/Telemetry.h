@@ -30,8 +30,8 @@ public:
 
     Q_PROPERTY(QVector3D localFrameEuler READ localFrameEuler NOTIFY telemetryChanged)
     Q_PROPERTY(QQuaternion localFrame READ localFrame NOTIFY telemetryChanged)
-    Q_PROPERTY(QGeoCoordinate homeLocation READ homeLocation NOTIFY telemetryChanged)
-    Q_PROPERTY(QGeoCoordinate location READ location NOTIFY telemetryChanged)
+    Q_PROPERTY(QGeoCoordinate homePosition READ homePosition NOTIFY telemetryChanged)
+    Q_PROPERTY(QGeoCoordinate position READ position NOTIFY telemetryChanged)
     Q_PROPERTY(QVector3D localVelocity READ localVelocity NOTIFY telemetryChanged)
     Q_PROPERTY(QVector3D enuVelocity READ enuVelocity NOTIFY telemetryChanged)
 
@@ -42,17 +42,22 @@ public:
     Mode uavMode() const;
     QVector3D localFrameEuler() const;
     QQuaternion localFrame() const;
-    QGeoCoordinate homeLocation() const;
-    QGeoCoordinate location() const;
+    QGeoCoordinate homePosition() const;
+    QGeoCoordinate position() const;
     QVector3D localVelocity() const;
     QVector3D enuVelocity() const;
 
 signals:
     void telemetryChanged();
+    void pathPointAdded(QGeoCoordinate const& point);
+    void pathCleared();
 
 public slots:
 
 private:
     silk::stream::IMultirotor_State::Value m_multirotor_state;
     silk::stream::IMultirotor_Commands::Value m_multirotor_commands;
+
+    void processPath();
+    QGeoCoordinate m_lastPathPoint;
 };

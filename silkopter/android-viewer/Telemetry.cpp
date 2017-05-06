@@ -1,5 +1,37 @@
 #include "Telemetry.h"
 
+static QGeoCoordinate llaToQGeoCoordinate(util::coordinates::LLA const& lla)
+{
+    double latitude = math::degrees(lla.latitude);
+    if (latitude > 90.0)
+    {
+        latitude -= 360.0;
+    }
+    if (latitude < -90.0)
+    {
+        latitude += 360.0;
+    }
+    double longitude = math::degrees(lla.longitude);
+    if (longitude > 180.0)
+    {
+        longitude -= 360.0;
+    }
+    if (longitude < -180.0)
+    {
+        longitude += 360.0;
+    }
+
+    return QGeoCoordinate(latitude, longitude, lla.altitude);
+}
+
+static QGeoCoordinate ecefToQGeoCoordinate(util::coordinates::ECEF const& ecef)
+{
+    util::coordinates::LLA lla = util::coordinates::ecef_to_lla(ecef);
+    return llaToQGeoCoordinate(lla);
+}
+
+///////////////////////////////////////////////////////////////////////
+
 Telemetry::Telemetry(QObject *parent) : QObject(parent)
 {
 
@@ -12,6 +44,34 @@ void Telemetry::setData(silk::stream::IMultirotor_State::Value const& multirotor
     m_multirotor_commands = multirotor_commands;
 
     emit telemetryChanged();
+
+    processPath();
+}
+
+void Telemetry::processPath()
+{
+    if (!m_multirotor_state.home_ecef_position.is_initialized())
+    {
+        m_lastPathPoint = QGeoCoordinate();
+        emit pathCleared();
+    }
+    else
+    {
+        if (!m_lastPathPoint.isValid())
+        {
+            m_lastPathPoint = ecefToQGeoCoordinate(*m_multirotor_state.home_ecef_position);
+            emit pathPointAdded(m_lastPathPoint);
+        }
+        else
+        {
+            QGeoCoordinate coordinate = ecefToQGeoCoordinate(m_multirotor_state.ecef_position);
+            if (!m_lastPathPoint.isValid() || m_lastPathPoint.distanceTo(coordinate) > 5.f)
+            {
+                m_lastPathPoint = coordinate;
+                emit pathPointAdded(coordinate);
+            }
+        }
+    }
 }
 
 float Telemetry::batteryChargeUsed() const
@@ -52,20 +112,18 @@ QQuaternion Telemetry::localFrame() const
     return QQuaternion(q.w, q.x, q.y, q.z);
 }
 
-QGeoCoordinate Telemetry::homeLocation() const
+QGeoCoordinate Telemetry::homePosition() const
 {
     if (!m_multirotor_state.home_ecef_position.is_initialized())
     {
         return QGeoCoordinate();
     }
-    util::coordinates::LLA lla = util::coordinates::ecef_to_lla(*m_multirotor_state.home_ecef_position);
-    return QGeoCoordinate(lla.latitude, lla.longitude, lla.altitude);
+    return ecefToQGeoCoordinate(*m_multirotor_state.home_ecef_position);
 }
 
-QGeoCoordinate Telemetry::location() const
+QGeoCoordinate Telemetry::position() const
 {
-    util::coordinates::LLA lla = util::coordinates::ecef_to_lla(m_multirotor_state.ecef_position);
-    return QGeoCoordinate(lla.latitude, lla.longitude, lla.altitude);
+    return ecefToQGeoCoordinate(m_multirotor_state.ecef_position);
 }
 
 QVector3D Telemetry::localVelocity() const
