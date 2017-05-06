@@ -10,10 +10,6 @@
 #include "OS.h"
 #include "Menus.h"
 
-#ifdef PLATFORM_ANDROID
-#   include <android/log.h>
-#endif
-
 #include <thread>
 
 int main(int argc, char *argv[])
@@ -56,11 +52,12 @@ int main(int argc, char *argv[])
     menus.init(view);
 
     Comms comms;
-    comms.init("192.168.42.1", 3333);
+    comms.init();
 
     qmlRegisterType<Telemetry>("com.silk.Telemetry", 1, 0, "Telemetry");
     qmlRegisterType<Comms>("com.silk.Comms", 1, 0, "Comms");
     view.engine()->rootContext()->setContextProperty("s_comms", &comms);
+    view.engine()->rootContext()->setContextProperty("s_telemetry", &comms.getTelemetry());
     view.engine()->rootContext()->setContextProperty("s_os", &os);
     view.engine()->rootContext()->setContextProperty("s_menus", &menus);
     qmlRegisterType<VideoSurface>("com.silk.VideoSurface", 0, 1, "VideoSurface");
@@ -83,7 +80,7 @@ int main(int argc, char *argv[])
         {
             QLOGI("Viewer is inactive");
 #ifdef Q_ANDROID
-            exit(0); //abort, because QT will default to 60 FPS when coming back and I found no way to fix this
+            //exit(0); //abort, because QT will default to 60 FPS when coming back and I found no way to fix this
 #endif
         }
     });
