@@ -1,5 +1,7 @@
 #pragma once
 
+#include "mem/auto_buffer.h"
+
 namespace q
 {
 namespace data
