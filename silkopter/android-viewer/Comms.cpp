@@ -36,6 +36,8 @@ void Comms::connect(std::string const& address, uint16_t port)
     disconnect();
     //m_socketAdapter.getSocket().bind(QHostAddress("192.168.42.2"), k_port);
     m_socketAdapter.getSocket().connectToHost(address.c_str(), port, QTcpSocket::ReadWrite);
+
+    m_lastConnectAttemptTP = Clock::now();
 }
 
 void Comms::disconnect()
@@ -129,7 +131,8 @@ void Comms::processTelemetry()
 
 void Comms::process()
 {
-    if (getConnectionStatus() == ConnectionStatus::DISCONNECTED)
+    if (getConnectionStatus() == ConnectionStatus::DISCONNECTED &&
+        Clock::now() - m_lastConnectAttemptTP >= std::chrono::seconds(1))
     {
         connect("192.168.42.1", k_port);
     }

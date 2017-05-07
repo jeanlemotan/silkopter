@@ -69,6 +69,7 @@ private:
     QTcpSocketAdapter m_socketAdapter;
     typedef util::comms::Channel<silk::viewer::Packet_Type, QTcpSocketAdapter> Channel;
     Channel m_channel;
+    Clock::time_point m_lastConnectAttemptTP = Clock::now();
 
     mutable std::mutex m_samplesMutex;
 };
