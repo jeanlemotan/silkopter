@@ -575,9 +575,16 @@ QSGNode* VideoSurface::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *)
 
     if (m_isGeomertyDirty || s_videoResolutionDirty)
     {
+        QLOGI("Resolution changed to: {}", s_videoResolution);
         const QRectF br = boundingRect();
         QRectF rect = QRectF(QPointF(0, 0), QSizeF(s_videoResolution.x, s_videoResolution.y).scaled(br.size(), Qt::KeepAspectRatio));
         rect.moveCenter(br.center());
+
+        //align left, top
+        float dx = (br.width() - rect.width()) / 2.f;
+        float dy = (br.height() - rect.height()) / 2.f;
+        rect.translate(-dx, -dy);
+
         int orientation = 0;//(m_orientation - m_textureOrientation) % 360;
         if (orientation < 0)
             orientation += 360;
@@ -587,6 +594,8 @@ QSGNode* VideoSurface::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *)
                     false,
                     false);
         node->markDirty(QSGNode::DirtyGeometry);
+
+        QLOGI("Node rect size: {}x{}", rect.width(), rect.height());
 
         m_isGeomertyDirty = false;
         s_videoResolutionDirty = false;
@@ -653,7 +662,8 @@ void VideoSurface::addVideoData(void const* data, size_t size, math::vec2u16 con
 
     if (s_videoResolution != resolution)
     {
-        s_videoResolution = math::vec2u16(1280, 720);//resolution;
+        //s_videoResolution = math::vec2u16(1280, 720);
+        s_videoResolution = resolution;
         s_videoResolutionDirty = true;
     }
 }
