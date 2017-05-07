@@ -878,8 +878,11 @@ struct Raspicam_Descriptor : public INode_Descriptor
     };
 
     alias fps_t = int32_t : [ min = 10, max = 120 ];
-
     fps_t fps : [ ui_name = "FPS", ui_suffix = "Hz" ];
+
+    alias commands_rate_t = uint32_t : [ min = 1, max = 30, native_type = "uint32_t" ];
+    commands_rate_t commands_rate = 1 : [ ui_name = "Commands Rate", ui_suffix = "Hz" ];
+
     Quality streaming_low : [ ui_name = "Streaming Low" ];
     Quality streaming_high : [ ui_name = "Streaming High" ];
     Quality recording : [ ui_name = "Recording" ];
@@ -894,11 +897,6 @@ struct Raspicam_Config : public INode_Config
     alias contrast_t = int32_t : [ min = 0, max = 100 ];
     alias brightness_t = int32_t : [ min = 0, max = 100 ];
     alias saturation_t = int32_t : [ min = 0, max = 100 ];
-    enum quality_t
-    {
-        LOW = 0 : [ ui_name = "Low" ],
-        HIGH : [ ui_name = "High" ],
-    };
 
     enum awb_mode_t
     {
@@ -924,8 +922,6 @@ struct Raspicam_Config : public INode_Config
     awb_mode_t awb_mode = awb_mode_t::AUTO : [ ui_name = "AWB Mode" ];
     bool hflip = false : [ ui_name = "Horizontal Flip" ];
     bool vflip = false : [ ui_name = "Vertical Flip" ];
-    quality_t quality = quality_t::HIGH : [ ui_name = "Quality" ];
-    bool recording : [ ui_name = "Recording" ];
 };
 
 //////////////////////////////////////////////////////////////

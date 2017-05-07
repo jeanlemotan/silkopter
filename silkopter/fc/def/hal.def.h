@@ -2595,10 +2595,15 @@ public:
   };
 
   typedef int32_t fps_t;
+  typedef uint32_t commands_rate_t;
   virtual ~Raspicam_Descriptor() = default;
   void set_fps(fps_t const& value);
   void set_fps(fps_t&& value);
   auto get_fps() const -> fps_t const&;
+
+  void set_commands_rate(uint32_t const& value);
+  void set_commands_rate(uint32_t&& value);
+  auto get_commands_rate() const -> uint32_t const&;
 
   void set_streaming_low(Quality const& value);
   void set_streaming_low(Quality&& value);
@@ -2617,6 +2622,7 @@ public:
 
 private:
   fps_t m_fps = fps_t{10};
+  uint32_t m_commands_rate = uint32_t{1};
   Quality m_streaming_low;
   Quality m_streaming_high;
   Quality m_recording;
@@ -2632,12 +2638,6 @@ public:
   typedef int32_t contrast_t;
   typedef int32_t brightness_t;
   typedef int32_t saturation_t;
-  enum class quality_t
-  {
-    LOW = 0,
-    HIGH = 1,
-  };
-
   enum class awb_mode_t
   {
     OFF = 0,
@@ -2693,14 +2693,6 @@ public:
   void set_vflip(bool&& value);
   auto get_vflip() const -> bool const&;
 
-  void set_quality(quality_t const& value);
-  void set_quality(quality_t&& value);
-  auto get_quality() const -> quality_t const&;
-
-  void set_recording(bool const& value);
-  void set_recording(bool&& value);
-  auto get_recording() const -> bool const&;
-
 private:
   iso_t m_iso = iso_t{0};
   shutter_speed_t m_shutter_speed = shutter_speed_t{0};
@@ -2712,8 +2704,6 @@ private:
   awb_mode_t m_awb_mode = awb_mode_t{Raspicam_Config::awb_mode_t::AUTO};
   bool m_hflip = bool{false};
   bool m_vflip = bool{false};
-  quality_t m_quality = quality_t{Raspicam_Config::quality_t::HIGH};
-  bool m_recording = bool{false};
 };
 
 struct RC5T619_Descriptor : public INode_Descriptor
@@ -3424,8 +3414,6 @@ ts::Result<void> deserialize(Raspicam_Descriptor::Quality& value, ts::sz::Value 
 ts::sz::Value serialize(Raspicam_Descriptor::Quality const& value);
 ts::Result<void> deserialize(Raspicam_Descriptor& value, ts::sz::Value const& sz_value);
 ts::sz::Value serialize(Raspicam_Descriptor const& value);
-ts::Result<void> deserialize(Raspicam_Config::quality_t& value, ts::sz::Value const& sz_value);
-ts::sz::Value serialize(Raspicam_Config::quality_t const& value);
 ts::Result<void> deserialize(Raspicam_Config::awb_mode_t& value, ts::sz::Value const& sz_value);
 ts::sz::Value serialize(Raspicam_Config::awb_mode_t const& value);
 ts::Result<void> deserialize(Raspicam_Config& value, ts::sz::Value const& sz_value);
