@@ -219,30 +219,30 @@ int main(int argc, char const* argv[])
                 std::this_thread::sleep_for(std::chrono::milliseconds(1));
 #endif
 
-                {
-                    static Clock::time_point last_timestamp = Clock::now();
-                    auto now = Clock::now();
-                    auto dt = now - last_timestamp;
-                    last_timestamp = now;
-                    static Clock::duration min_dt, max_dt, avg_dt;
-                    static int xxx = 0;
-                    min_dt = std::min(min_dt, dt);
-                    max_dt = std::max(max_dt, dt);
-                    avg_dt += dt;
-                    xxx++;
-                    static Clock::time_point xxx_timestamp = Clock::now();
-                    if (now - xxx_timestamp >= std::chrono::milliseconds(1000))
-                    {
-                        xxx_timestamp = now;
+//                {
+//                    static Clock::time_point last_timestamp = Clock::now();
+//                    auto now = Clock::now();
+//                    auto dt = now - last_timestamp;
+//                    last_timestamp = now;
+//                    static Clock::duration min_dt, max_dt, avg_dt;
+//                    static int xxx = 0;
+//                    min_dt = std::min(min_dt, dt);
+//                    max_dt = std::max(max_dt, dt);
+//                    avg_dt += dt;
+//                    xxx++;
+//                    static Clock::time_point xxx_timestamp = Clock::now();
+//                    if (now - xxx_timestamp >= std::chrono::milliseconds(1000))
+//                    {
+//                        xxx_timestamp = now;
 
-                        QLOGI("min {}, max {}, avg {}", min_dt, max_dt, avg_dt/ xxx);
-                        min_dt = dt;
-                        max_dt = dt;
-                        avg_dt = std::chrono::milliseconds(0);
+//                        QLOGI("min {}, max {}, avg {}", min_dt, max_dt, avg_dt/ xxx);
+//                        min_dt = dt;
+//                        max_dt = dt;
+//                        avg_dt = std::chrono::milliseconds(0);
 
-                        xxx = 0;
-                    }
-                }
+//                        xxx = 0;
+//                    }
+//                }
             }
         }
 
