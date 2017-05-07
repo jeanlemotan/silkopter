@@ -25,6 +25,7 @@
 #include "common/stream/IVideo.h"
 #include "common/stream/IVoltage.h"
 #include "common/stream/IProximity.h"
+#include "common/stream/ICamera_Commands.h"
 #include "common/stream/IMultirotor_Commands.h"
 #include "common/stream/IMultirotor_State.h"
 
@@ -74,6 +75,7 @@ public:
     stream::IMultirotor_State::Value get_multirotor_state() const;
 
     void send_multirotor_commands_value(stream::IMultirotor_Commands::Value const& value);
+    void send_camera_commands_value(stream::ICamera_Commands::Value const& value);
 
     void process();
 
@@ -83,6 +85,7 @@ private:
     void reset();
 
     bool compute_multirotor_commands_packet(uint8_t* data, size_t& size, uint8_t& packet_type);
+    bool compute_camera_commands_packet(uint8_t* data, size_t& size, uint8_t& packet_type);
     void process_rx_packet(util::comms::RC_Protocol::RX_Packet const& packet);
 
     Remote_Viewer_Server m_remote_viewer_server;
@@ -103,9 +106,11 @@ private:
     std::vector<uint8_t> m_serialization_buffer;
     stream::IMultirotor_State::Value m_multirotor_state;
     stream::IMultirotor_Commands::Value m_multirotor_commands;
+    stream::ICamera_Commands::Value m_camera_commands;
 
     //mark the commands as infinitely old
     Clock::time_point m_multirotor_commands_tp = Clock::time_point(Clock::duration::zero());
+    Clock::time_point m_camera_commands_tp = Clock::time_point(Clock::duration::zero());
 
     void send_video_to_viewers(void const* data, size_t size, math::vec2u16 const& resolution);
 

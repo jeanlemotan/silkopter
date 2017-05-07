@@ -25,6 +25,7 @@
 #include "common/stream/IVideo.h"
 #include "common/stream/IVoltage.h"
 #include "common/stream/IProximity.h"
+#include "common/stream/ICamera_Commands.h"
 #include "common/stream/IMultirotor_Commands.h"
 #include "common/stream/IMultirotor_State.h"
 #include "common/stream/IMultirotor_Simulator_State.h"

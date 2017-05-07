@@ -78,6 +78,7 @@ Comms::Comms(ts::Type_System& ts)
     m_streams[stream::IThrottle::TYPE] =                std::unique_ptr<Comms::ITelemetry_Stream>(new Comms::Telemetry_Stream<stream::IThrottle>());
     m_streams[stream::IVoltage::TYPE] =                 std::unique_ptr<Comms::ITelemetry_Stream>(new Comms::Telemetry_Stream<stream::IVoltage>());
     m_streams[stream::IVideo::TYPE] =                   std::unique_ptr<Comms::ITelemetry_Stream>(new Comms::Telemetry_Stream<stream::IVideo>());
+    m_streams[stream::ICamera_Commands::TYPE] =     std::unique_ptr<Comms::ITelemetry_Stream>(new Comms::Telemetry_Stream<stream::ICamera_Commands>());
     m_streams[stream::IMultirotor_Commands::TYPE] =     std::unique_ptr<Comms::ITelemetry_Stream>(new Comms::Telemetry_Stream<stream::IMultirotor_Commands>());
     m_streams[stream::IMultirotor_State::TYPE] =        std::unique_ptr<Comms::ITelemetry_Stream>(new Comms::Telemetry_Stream<stream::IMultirotor_State>());
     m_streams[stream::IMultirotor_Simulator_State::TYPE] = std::unique_ptr<Comms::ITelemetry_Stream>(new Comms::Telemetry_Stream<stream::IMultirotor_Simulator_State>());

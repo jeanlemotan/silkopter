@@ -74,7 +74,7 @@ struct Raspicam::Impl
         Component_ptr resizer;
         Connection_ptr resizer_connection;
 
-        std::atomic<bool> is_active{false};
+        std::atomic_bool is_active{false};
 
         Clock::time_point start;
 
@@ -200,6 +200,15 @@ auto Raspicam::get_outputs() const -> std::vector<Output>
     return outputs;
 }
 
+std::vector<Raspicam::Input> Raspicam::get_inputs() const
+{
+    std::vector<Input> inputs =
+    {{
+         { stream::ICamera_Commands::TYPE,      m_descriptor->get_commands_rate(), "commands", m_commands_accumulator.get_stream_path(0) }
+    }};
+    return inputs;
+}
+
 ts::Result<void> Raspicam::init(hal::INode_Descriptor const& descriptor)
 {
     QLOG_TOPIC("raspicam::init");
@@ -227,22 +236,37 @@ ts::Result<void> Raspicam::init()
         while (!m_recording_data.should_stop)
         {
             {
-                std::lock_guard<std::mutex> lg(m_recording_data.mutex);
+                std::lock_guard<std::mutex> lg(m_recording_data.data_in_mutex);
                 if (!m_recording_data.data_in.empty())
                 {
                     m_recording_data.data_out = std::move(m_recording_data.data_in);
                 }
             }
 
-            if (!m_recording_data.data_out.empty())
+            std::ofstream& stream = m_recording_data.file_sink;
+            if (m_impl->recording.is_active)
             {
-                std::ofstream& stream = m_recording_data.file_sink;
+                if (!stream.is_open())
+                {
+                    create_file_sink();
+                }
+
+                if (!m_recording_data.data_out.empty())
+                {
+                    if (stream.is_open())
+                    {
+                        stream.write(reinterpret_cast<const char*>(m_recording_data.data_out.data()), m_recording_data.data_out.size());
+                        stream.flush();
+                    }
+                    m_recording_data.data_out.clear();
+                }
+            }
+            else
+            {
                 if (stream.is_open())
                 {
-                    stream.write(reinterpret_cast<const char*>(m_recording_data.data_out.data()), m_recording_data.data_out.size());
-                    stream.flush();
+                    stream.close();
                 }
-                m_recording_data.data_out.clear();
             }
 
             std::this_thread::sleep_for(std::chrono::milliseconds(50));
@@ -284,6 +308,13 @@ ts::Result<void> Raspicam::init()
 #endif
 }
 
+//////////////////////////////////////////////////////////////////////////////////////////
+
+ts::Result<void> Raspicam::set_input_stream_path(size_t idx, std::string const& path)
+{
+    return m_commands_accumulator.set_stream_path(idx, path, m_descriptor->get_commands_rate(), m_hal);
+}
+
 ts::Result<void> Raspicam::set_config(hal::INode_Config const& config)
 {
     QLOG_TOPIC("raspicam::set_config");
@@ -294,17 +325,6 @@ ts::Result<void> Raspicam::set_config(hal::INode_Config const& config)
         return make_error("Wrong config type");
     }
     *m_config = *specialized;
-
-    activate_streams();
-
-    if (m_config->get_recording())
-    {
-        start_recording();
-    }
-    else
-    {
-        stop_recording();
-    }
 
 #if defined RASPBERRY_PI
     m_config->set_shutter_speed(math::clamp(m_config->get_shutter_speed(), 0.f, 1000.f / m_descriptor->get_fps()));
@@ -352,6 +372,14 @@ void Raspicam::process()
 {
     QLOG_TOPIC("raspicam::process");
 
+    m_commands_accumulator.process([this](stream::ICamera_Commands::Sample const& i_commands)
+    {
+        if (i_commands.is_healthy)
+        {
+            process_commands(i_commands.value);
+        }
+    });
+
     std::lock_guard<std::mutex> lg(m_sample_queue.mutex);
 
     //put the samples back
@@ -372,6 +400,12 @@ void Raspicam::process()
     }
 }
 
+void Raspicam::process_commands(stream::ICamera_Commands::Value const& i_commands)
+{
+    m_last_commands = i_commands;
+    activate_streams();
+}
+
 
 void Raspicam::recording_callback(uint8_t const* data, size_t size, math::vec2u16 const& resolution, bool is_keyframe)
 {
@@ -380,7 +414,7 @@ void Raspicam::recording_callback(uint8_t const* data, size_t size, math::vec2u1
         return;
     }
 
-    std::lock_guard<std::mutex> lg(m_recording_data.mutex);
+    std::lock_guard<std::mutex> lg(m_recording_data.data_in_mutex);
     size_t offset = m_recording_data.data_in.size();
     if (offset < 10 * 1024 * 1024)
     {
@@ -422,9 +456,9 @@ void Raspicam::activate_streams()
 #if defined RASPBERRY_PI
     std::lock_guard<std::mutex> lg(m_impl->mutex);
 
-    bool recording = m_recording_data.file_sink.is_open();
-    bool high = m_config->get_quality() == hal::Raspicam_Config::quality_t::HIGH;
-    bool low = m_config->get_quality() == hal::Raspicam_Config::quality_t::LOW;
+    bool recording = m_last_commands.recording;
+    bool high = m_last_commands.quality == stream::ICamera_Commands::Quality::HIGH;
+    bool low = m_last_commands.quality == stream::ICamera_Commands::Quality::LOW;
 
     if (m_impl->recording.is_active == recording &&
         m_impl->high.is_active == high &&
@@ -433,7 +467,7 @@ void Raspicam::activate_streams()
         return;
     }
 
-    QLOGI("activating streams recording {}, quality {}", recording, m_config->get_quality());
+    QLOGI("activating streams recording {}, quality {}", recording, m_last_commands.quality);
 
     if (set_connection_enabled(m_impl->recording.encoder_connection, recording))
     {
@@ -466,9 +500,14 @@ void Raspicam::activate_streams()
 
 void Raspicam::create_file_sink()
 {
+    if (!q::util::fs::is_folder(q::Path("capture")) && !q::util::fs::create_folder(q::Path("capture")))
+    {
+        return;
+    }
+
     char mbstr[256] = {0};
     std::time_t t = std::time(nullptr);
-    if (!std::strftime(mbstr, 100, "%e-%m-%Y-%H-%M-%S", std::localtime(&t)))
+    if (!std::strftime(mbstr, 100, "capture-%e-%m-%Y-%H-%M-%S", std::localtime(&t)))
     {
         strcpy(mbstr, "no-date");
     }
@@ -495,33 +534,6 @@ void Raspicam::create_file_sink()
     m_recording_data.file_sink.close();
 }
 
-
-bool Raspicam::start_recording()
-{
-#if defined RASPBERRY_PI
-    if (!q::util::fs::is_folder(q::Path("capture")) && !q::util::fs::create_folder(q::Path("capture")))
-    {
-        QLOGW("Cannot create capture folder");
-        return false;
-    }
-
-    if (!m_recording_data.file_sink.is_open())
-    {
-        create_file_sink();
-    }
-
-    activate_streams();
-#endif
-    return true;
-}
-void Raspicam::stop_recording()
-{
-#if defined RASPBERRY_PI
-    m_recording_data.file_sink.close();
-
-    activate_streams();
-#endif
-}
 
 //void Raspicam::set_stream_quality(comms::Camera_Params::Stream_Quality sq)
 //{

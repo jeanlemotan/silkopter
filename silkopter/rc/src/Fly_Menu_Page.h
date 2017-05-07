@@ -1,6 +1,7 @@
 #pragma once
 
 #include "IMenu_Page.h"
+#include "common/stream/ICamera_Commands.h"
 #include "common/stream/IMultirotor_Commands.h"
 #include "common/stream/IMultirotor_State.h"
 #include "utils/Clock.h"
@@ -26,6 +27,8 @@ private:
     typedef stream::IMultirotor_Commands::Horizontal_Mode Horizontal_Mode;
     typedef stream::IMultirotor_Commands::Yaw_Mode Yaw_Mode;
 
+    void process_camera_commands(Input& input);
+
     void set_vertical_mode(Input& input, Vertical_Mode mode);
     void set_horizontal_mode(Input& input, Horizontal_Mode mode);
     void set_yaw_mode(Input& input, Yaw_Mode mode);
@@ -36,7 +39,9 @@ private:
     void process_mode_return_home(Input& input);
     void process_mode_land(Input& input);
 
-    silk::stream::IMultirotor_Commands::Value m_commands;
+    silk::stream::IMultirotor_Commands::Value m_multirotor_commands;
+    silk::stream::ICamera_Commands::Value m_camera_commands;
+
     HAL& m_hal;
     stream::IMultirotor_State::Value m_multirotor_state;
 

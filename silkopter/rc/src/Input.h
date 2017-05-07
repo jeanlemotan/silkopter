@@ -46,8 +46,8 @@ public:
 
     IButton_Matrix const& get_button_matrix() const;
 
-    IButton const& get_switch1_up() const;
-    IButton const& get_switch1_down() const;
+    IButton const& get_camera_quality_switch() const;
+    IButton const& get_camera_recording_switch() const;
 
     IButton const& get_switch2_up() const;
     IButton const& get_switch2_down() const;

@@ -70,6 +70,7 @@ bool Comms::start()
 
     //m_rc_phy.set_rate(100);
     m_rc_protocol.add_periodic_packet(std::chrono::milliseconds(30), std::bind(&Comms::compute_multirotor_commands_packet, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+    m_rc_protocol.add_periodic_packet(std::chrono::milliseconds(200), std::bind(&Comms::compute_camera_commands_packet, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 
     //send connected message so the UAV can send vital data back
     m_rc_protocol.reset_session();
@@ -142,6 +143,28 @@ bool Comms::compute_multirotor_commands_packet(uint8_t* data, size_t& size, uint
 
         size_t off = 0;
         util::serialization::serialize(m_serialization_buffer, m_multirotor_commands, off);
+        memcpy(data, m_serialization_buffer.data(), off);
+
+        size = off;
+        return true;
+    }
+    else
+    {
+        //commands are out of date - don't send them
+        return false;
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+bool Comms::compute_camera_commands_packet(uint8_t* data, size_t& size, uint8_t& packet_type)
+{
+    if (Clock::now() - m_camera_commands_tp < std::chrono::milliseconds(500))
+    {
+        packet_type = static_cast<uint8_t>(rc_comms::Packet_Type::CAMERA_COMMANDS);
+
+        size_t off = 0;
+        util::serialization::serialize(m_serialization_buffer, m_camera_commands, off);
         memcpy(data, m_serialization_buffer.data(), off);
 
         size = off;
@@ -299,6 +322,14 @@ void Comms::send_multirotor_commands_value(stream::IMultirotor_Commands::Value c
 {
     m_multirotor_commands = value;
     m_multirotor_commands_tp = Clock::now();
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+void Comms::send_camera_commands_value(stream::ICamera_Commands::Value const& value)
+{
+    m_camera_commands = value;
+    m_camera_commands_tp = Clock::now();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////

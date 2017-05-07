@@ -7,6 +7,11 @@
 #include <boost/thread.hpp>
 #include <fstream>
 
+#include "common/stream/IPWM.h"
+
+#include "common/stream/ICamera_Commands.h"
+#include "Sample_Accumulator.h"
+
 namespace silk
 {
 namespace hal
@@ -41,14 +46,11 @@ public:
 
     void shutdown();
 
-    auto get_outputs() const -> std::vector<Output>;
+    std::vector<Output> get_outputs() const override;
 
-    //----------------------------------------------------------------------
+    ts::Result<void> set_input_stream_path(size_t, std::string const&) override;
+    std::vector<Input> get_inputs() const override;
 
-    auto start_recording() -> bool;
-    void stop_recording();
-
-    //----------------------------------------------------------------------
     struct Impl;
     void process();
 
@@ -61,6 +63,10 @@ private:
 
     std::shared_ptr<hal::Raspicam_Descriptor> m_descriptor;
     std::shared_ptr<hal::Raspicam_Config> m_config;
+
+    Sample_Accumulator<stream::ICamera_Commands> m_commands_accumulator;
+    void process_commands(stream::ICamera_Commands::Value const& i_commands);
+    stream::ICamera_Commands::Value m_last_commands;
 
     void activate_streams();
 
@@ -92,10 +98,11 @@ private:
 
     struct Recording_Data
     {
-        std::mutex mutex;
+        std::mutex data_in_mutex;
+        std::vector<uint8_t> data_in;
+
         boost::thread thread;
         std::atomic_bool should_stop = {false};
-        std::vector<uint8_t> data_in;
         std::vector<uint8_t> data_out;
         std::ofstream file_sink;
     } m_recording_data;

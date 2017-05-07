@@ -163,14 +163,14 @@ IButton_Matrix const& Input::get_button_matrix() const
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-IButton const& Input::get_switch1_up() const
+IButton const& Input::get_camera_quality_switch() const
 {
     return m_button_matrix->get_button(2, 0);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-IButton const& Input::get_switch1_down() const
+IButton const& Input::get_camera_recording_switch() const
 {
     return m_button_matrix->get_button(3, 0);
 }

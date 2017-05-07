@@ -115,7 +115,7 @@ bool Fly_Menu_Page::process(Input& input, Menu_System& menu_system)
     m_slow_tx_strength = math::lerp<math::safe>(m_slow_tx_strength, m_tx_strength, std::chrono::duration<float>(dt).count() / 5.f);
 
     stream::IMultirotor_State::Value const& state = m_multirotor_state;
-    if (state.mode != m_commands.mode)
+    if (state.mode != m_multirotor_commands.mode)
     {
         if (now - m_last_mode_change_tp >= std::chrono::seconds(2))
         {
@@ -127,7 +127,7 @@ bool Fly_Menu_Page::process(Input& input, Menu_System& menu_system)
     }
     else
     {
-        switch (m_commands.mode)
+        switch (m_multirotor_commands.mode)
         {
         case stream::IMultirotor_State::Mode::IDLE: process_mode_idle(input); break;
         case stream::IMultirotor_State::Mode::TAKE_OFF: process_mode_take_off(input); break;
@@ -137,18 +137,45 @@ bool Fly_Menu_Page::process(Input& input, Menu_System& menu_system)
         }
     }
 
-    m_commands.gimbal_pitch = m_hal.get_gimbal_control().get_pitch();
+    m_multirotor_commands.gimbal_pitch = m_hal.get_gimbal_control().get_pitch();
 
-    comms.send_multirotor_commands_value(m_commands);
+    process_camera_commands(input);
+
+    comms.send_multirotor_commands_value(m_multirotor_commands);
+    comms.send_camera_commands_value(m_camera_commands);
 
     return true;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
+void Fly_Menu_Page::process_camera_commands(Input& input)
+{
+    if (input.get_camera_quality_switch().was_released())
+    {
+        if (m_camera_commands.quality == silk::stream::ICamera_Commands::Quality::HIGH)
+        {
+            m_camera_commands.quality = silk::stream::ICamera_Commands::Quality::LOW;
+        }
+        else
+        {
+            m_camera_commands.quality = silk::stream::ICamera_Commands::Quality::HIGH;
+        }
+        QLOGI("Switching camera quality to {}", m_camera_commands.quality);
+    }
+
+    if (input.get_camera_recording_switch().was_released())
+    {
+        m_camera_commands.recording = !m_camera_commands.recording;
+        QLOGI("Camera recording {}", m_camera_commands.recording ? "ON" : "OFF");
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
 void Fly_Menu_Page::set_mode(Input& input, stream::IMultirotor_Commands::Mode new_mode)
 {
-    stream::IMultirotor_Commands::Mode old_mode = m_commands.mode;
+    stream::IMultirotor_Commands::Mode old_mode = m_multirotor_commands.mode;
     if (old_mode == new_mode && m_is_initialized)
     {
         return;
@@ -183,14 +210,14 @@ void Fly_Menu_Page::set_mode(Input& input, stream::IMultirotor_Commands::Mode ne
 //        m_idle_mode_data.is_pressed = false;
 //    }
 
-    m_commands.mode = new_mode;
+    m_multirotor_commands.mode = new_mode;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 void Fly_Menu_Page::set_vertical_mode(Input& input, Vertical_Mode new_mode)
 {
-    if (m_commands.vertical_mode == new_mode && m_is_initialized)
+    if (m_multirotor_commands.vertical_mode == new_mode && m_is_initialized)
     {
         return;
     }
@@ -201,23 +228,23 @@ void Fly_Menu_Page::set_vertical_mode(Input& input, Vertical_Mode new_mode)
     if (new_mode == Vertical_Mode::ALTITUDE)
     {
         input.get_sticks().set_throttle_deadband_position(ISticks::Deadband_Position::MIDDLE);
-        m_commands.sticks.throttle = 0.5f;
+        m_multirotor_commands.sticks.throttle = 0.5f;
     }
     else
     {
         input.get_sticks().set_throttle_deadband_position(ISticks::Deadband_Position::LOW);
-        m_commands.sticks.throttle = m_multirotor_state.throttle;
+        m_multirotor_commands.sticks.throttle = m_multirotor_state.throttle;
     }
-    input.get_stick_actuators().set_target_throttle(m_commands.sticks.throttle);
+    input.get_stick_actuators().set_target_throttle(m_multirotor_commands.sticks.throttle);
 
-    m_commands.vertical_mode = new_mode;
+    m_multirotor_commands.vertical_mode = new_mode;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 void Fly_Menu_Page::set_horizontal_mode(Input& input, Horizontal_Mode new_mode)
 {
-    if (m_commands.horizontal_mode == new_mode && m_is_initialized)
+    if (m_multirotor_commands.horizontal_mode == new_mode && m_is_initialized)
     {
         return;
     }
@@ -225,14 +252,14 @@ void Fly_Menu_Page::set_horizontal_mode(Input& input, Horizontal_Mode new_mode)
     m_last_horizontal_mode_change_tp = Clock::now();
     input.get_haptic().vibrate(k_mode_change_haptic);
 
-    m_commands.horizontal_mode = new_mode;
+    m_multirotor_commands.horizontal_mode = new_mode;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 void Fly_Menu_Page::set_yaw_mode(Input& input, Yaw_Mode new_mode)
 {
-    if (m_commands.yaw_mode == new_mode && m_is_initialized)
+    if (m_multirotor_commands.yaw_mode == new_mode && m_is_initialized)
     {
         return;
     }
@@ -240,7 +267,7 @@ void Fly_Menu_Page::set_yaw_mode(Input& input, Yaw_Mode new_mode)
     m_last_yaw_mode_change_tp = Clock::now();
     input.get_haptic().vibrate(k_mode_change_haptic);
 
-    m_commands.yaw_mode = new_mode;
+    m_multirotor_commands.yaw_mode = new_mode;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -277,10 +304,10 @@ void Fly_Menu_Page::process_mode_fly(Input& input)
     ISticks const& sticks = input.get_sticks();
     if (input.get_mode_switch().is_pressed())
     {
-        m_commands.sticks.yaw = 0.5f;
-        m_commands.sticks.pitch = 0.5f;
-        m_commands.sticks.roll = 0.5f;
-        m_commands.sticks.throttle = sticks.get_throttle();
+        m_multirotor_commands.sticks.yaw = 0.5f;
+        m_multirotor_commands.sticks.pitch = 0.5f;
+        m_multirotor_commands.sticks.roll = 0.5f;
+        m_multirotor_commands.sticks.throttle = sticks.get_throttle();
     }
     else
     {
@@ -310,47 +337,47 @@ void Fly_Menu_Page::process_mode_fly(Input& input)
             }
         }
 
-        m_commands.sticks.yaw = sticks.get_yaw();
-        m_commands.sticks.pitch = sticks.get_pitch();
-        m_commands.sticks.roll = sticks.get_roll();
+        m_multirotor_commands.sticks.yaw = sticks.get_yaw();
+        m_multirotor_commands.sticks.pitch = sticks.get_pitch();
+        m_multirotor_commands.sticks.roll = sticks.get_roll();
 
         //only apply the throttle some time after the mode chang, to let the actuator settle
         if (Clock::now() - m_last_vertical_mode_change_tp > std::chrono::milliseconds(200))
         {
-            if (m_commands.vertical_mode == Vertical_Mode::THRUST)
+            if (m_multirotor_commands.vertical_mode == Vertical_Mode::THRUST)
             {
                 input.get_stick_actuators().set_target_throttle(boost::none);
             }
 
-            m_commands.sticks.throttle = sticks.get_throttle();
+            m_multirotor_commands.sticks.throttle = sticks.get_throttle();
         }
     }
 
 
     if (input.get_horizontal_mode_switch_up().was_released())
     {
-        if (m_commands.horizontal_mode < Horizontal_Mode::POSITION)
+        if (m_multirotor_commands.horizontal_mode < Horizontal_Mode::POSITION)
         {
-            set_horizontal_mode(input, static_cast<Horizontal_Mode>(static_cast<int>(m_commands.horizontal_mode) + 1));
+            set_horizontal_mode(input, static_cast<Horizontal_Mode>(static_cast<int>(m_multirotor_commands.horizontal_mode) + 1));
         }
     }
 
     if (input.get_horizontal_mode_switch_down().was_released())
     {
-        if (m_commands.horizontal_mode > Horizontal_Mode::ANGLE_RATE)
+        if (m_multirotor_commands.horizontal_mode > Horizontal_Mode::ANGLE_RATE)
         {
-            set_horizontal_mode(input, static_cast<Horizontal_Mode>(static_cast<int>(m_commands.horizontal_mode) - 1));
+            set_horizontal_mode(input, static_cast<Horizontal_Mode>(static_cast<int>(m_multirotor_commands.horizontal_mode) - 1));
         }
     }
 
     if (input.get_vertical_mode_switch().was_released())
     {
-        set_vertical_mode(input, m_commands.vertical_mode == Vertical_Mode::THRUST ? Vertical_Mode::ALTITUDE : Vertical_Mode::THRUST);
+        set_vertical_mode(input, m_multirotor_commands.vertical_mode == Vertical_Mode::THRUST ? Vertical_Mode::ALTITUDE : Vertical_Mode::THRUST);
     }
 
     if (input.get_yaw_mode_switch().was_released())
     {
-        set_yaw_mode(input, m_commands.yaw_mode == Yaw_Mode::ANGLE_RATE ? Yaw_Mode::ANGLE : Yaw_Mode::ANGLE_RATE);
+        set_yaw_mode(input, m_multirotor_commands.yaw_mode == Yaw_Mode::ANGLE_RATE ? Yaw_Mode::ANGLE : Yaw_Mode::ANGLE_RATE);
     }
 
     if (input.get_return_home_switch().was_released())
@@ -392,11 +419,11 @@ void Fly_Menu_Page::process_mode_return_home(Input& input)
     }
 
     ISticks const& sticks = input.get_sticks();
-    m_commands.sticks.yaw = sticks.get_yaw();
+    m_multirotor_commands.sticks.yaw = sticks.get_yaw();
 
     if (input.get_yaw_mode_switch().was_released())
     {
-        set_yaw_mode(input, m_commands.yaw_mode == Yaw_Mode::ANGLE_RATE ? Yaw_Mode::ANGLE : Yaw_Mode::ANGLE_RATE);
+        set_yaw_mode(input, m_multirotor_commands.yaw_mode == Yaw_Mode::ANGLE_RATE ? Yaw_Mode::ANGLE : Yaw_Mode::ANGLE_RATE);
     }
 }
 
@@ -471,7 +498,7 @@ void Fly_Menu_Page::render(Adafruit_GFX& display)
         }
 
         bool blink = (now - m_last_mode_change_tp) < k_mode_change_blink_duration ||
-                state.mode != m_commands.mode;
+                state.mode != m_multirotor_commands.mode;
         uint16_t color = inverted ? 0 : 1;
         uint16_t bg_color = !color;
 
@@ -574,7 +601,7 @@ void Fly_Menu_Page::render(Adafruit_GFX& display)
         const char* mode_str = "---";
         if (m_multirotor_state.mode == silk::stream::IMultirotor_State::Mode::FLY)
         {
-            switch (m_commands.vertical_mode)
+            switch (m_multirotor_commands.vertical_mode)
             {
             case Vertical_Mode::ALTITUDE: mode_str = "ALT"; break;
             case Vertical_Mode::THRUST: mode_str = "THR"; break;
@@ -610,7 +637,7 @@ void Fly_Menu_Page::render(Adafruit_GFX& display)
         const char* mode_str = "---";
         if (m_multirotor_state.mode == silk::stream::IMultirotor_State::Mode::FLY)
         {
-            switch (m_commands.horizontal_mode)
+            switch (m_multirotor_commands.horizontal_mode)
             {
             case Horizontal_Mode::ANGLE_RATE: mode_str = "RATE"; break;
             case Horizontal_Mode::ANGLE: mode_str = "ANG"; break;
@@ -648,7 +675,7 @@ void Fly_Menu_Page::render(Adafruit_GFX& display)
         if (m_multirotor_state.mode == silk::stream::IMultirotor_State::Mode::FLY ||
             m_multirotor_state.mode == silk::stream::IMultirotor_State::Mode::RETURN_HOME)
         {
-            switch (m_commands.yaw_mode)
+            switch (m_multirotor_commands.yaw_mode)
             {
             case Yaw_Mode::ANGLE_RATE: mode_str = "RATE"; break;
             case Yaw_Mode::ANGLE: mode_str = "ANG"; break;
@@ -686,6 +713,19 @@ void Fly_Menu_Page::render(Adafruit_GFX& display)
         float d = math::length(math::vec2f(enu_position));
         display.setCursor(0, y);
         display.printf("DIST:%.1fm", d);
+    }
+
+    //camera stuff
+    {
+        const char* quality_str = m_camera_commands.quality == silk::stream::ICamera_Commands::Quality::HIGH ? "H" : "L";
+        display.setCursor(display.width() - 16, y);
+        display.printf("%s", quality_str);
+
+        const char* recording_str = m_camera_commands.recording ? "R" : " ";
+        display.setTextColor(m_blink_color);
+        display.setCursor(display.width() - 8, y);
+        display.printf("%s", recording_str);
+        display.setTextColor(1);
     }
 }
 

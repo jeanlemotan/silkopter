@@ -15,7 +15,8 @@ Multirotor_Pilot::Multirotor_Pilot(HAL& hal, RC_Comms& rc_comms)
     , m_descriptor(new hal::Multirotor_Pilot_Descriptor())
     , m_config(new hal::Multirotor_Pilot_Config())
 {
-    m_output_stream = std::make_shared<Output_Stream>();
+    m_multirotor_commands_output_stream = std::make_shared<Multirotor_Commands_Output_Stream>();
+    m_camera_commands_output_stream = std::make_shared<Camera_Commands_Output_Stream>();
 }
 
 ts::Result<void> Multirotor_Pilot::init(hal::INode_Descriptor const& descriptor)
@@ -34,13 +35,15 @@ ts::Result<void> Multirotor_Pilot::init(hal::INode_Descriptor const& descriptor)
 
 ts::Result<void> Multirotor_Pilot::init()
 {
-    m_output_stream->set_rate(m_descriptor->get_commands_rate());
+    m_multirotor_commands_output_stream->set_rate(m_descriptor->get_commands_rate());
+    m_camera_commands_output_stream->set_rate(m_descriptor->get_commands_rate());
     return ts::success;
 }
 
 ts::Result<void> Multirotor_Pilot::start(Clock::time_point tp)
 {
-    m_output_stream->set_tp(tp);
+    m_multirotor_commands_output_stream->set_tp(tp);
+    m_camera_commands_output_stream->set_tp(tp);
     return ts::success;
 }
 
@@ -57,38 +60,58 @@ auto Multirotor_Pilot::get_outputs() const -> std::vector<Output>
 {
     std::vector<Output> outputs =
     {{
-         { "commands", m_output_stream },
+         { "multirotor commands", m_multirotor_commands_output_stream },
+         { "camera commands", m_camera_commands_output_stream },
     }};
     return outputs;
 }
 
-static constexpr std::chrono::milliseconds COMMANDS_HEALTHY_TIMEOUT(200);
+static constexpr std::chrono::milliseconds MULTIROTOR_COMMANDS_HEALTHY_TIMEOUT(200);
+static constexpr std::chrono::milliseconds CAMERA_COMMANDS_HEALTHY_TIMEOUT(2000);
 
 void Multirotor_Pilot::process()
 {
     QLOG_TOPIC("Multirotor_Pilot::process");
 
-    m_output_stream->clear();
+    m_camera_commands_output_stream->clear();
+    m_multirotor_commands_output_stream->clear();
 
-    //process commandss
+    //process commands
     {
-        auto const& commands_opt = m_rc_comms.get_multirotor_commands();
-
         auto now = Clock::now();
 
-        stream::IMultirotor_Commands::Value& commands_value = m_last_commands_value;
+        auto const& commands_opt = m_rc_comms.get_multirotor_commands();
         if (commands_opt)
         {
-            commands_value = commands_opt.get();
-            m_last_received_commands_value_tp = now;
+            m_last_multirotor_commands_value = commands_opt.get();
+            m_last_received_multirotor_commands_value_tp = now;
         }
 
-        bool is_healthy = now - m_last_received_commands_value_tp < COMMANDS_HEALTHY_TIMEOUT;
+        bool is_healthy = now - m_last_received_multirotor_commands_value_tp < MULTIROTOR_COMMANDS_HEALTHY_TIMEOUT;
 
-        size_t samples_needed = m_output_stream->compute_samples_needed();
+        size_t samples_needed = m_multirotor_commands_output_stream->compute_samples_needed();
         for (size_t i = 0; i < samples_needed; i++)
         {
-            m_output_stream->push_sample(commands_value, is_healthy);
+            m_multirotor_commands_output_stream->push_sample(m_last_multirotor_commands_value, is_healthy);
+        }
+    }
+    //process commandss
+    {
+        auto now = Clock::now();
+
+        auto const& commands_opt = m_rc_comms.get_camera_commands();
+        if (commands_opt)
+        {
+            m_last_camera_commands_value = commands_opt.get();
+            m_last_received_camera_commands_value_tp = now;
+        }
+
+        bool is_healthy = now - m_last_received_camera_commands_value_tp < CAMERA_COMMANDS_HEALTHY_TIMEOUT;
+
+        size_t samples_needed = m_camera_commands_output_stream->compute_samples_needed();
+        for (size_t i = 0; i < samples_needed; i++)
+        {
+            m_camera_commands_output_stream->push_sample(m_last_camera_commands_value, is_healthy);
         }
     }
 

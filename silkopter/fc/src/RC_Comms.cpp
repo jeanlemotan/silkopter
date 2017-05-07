@@ -109,6 +109,20 @@ void RC_Comms::process_rx_packet(util::comms::RC_Protocol::RX_Packet const& pack
             QLOGW("Cannot deserialize incoming multirotor state value");
         }
     }
+    else if (packet.packet_type == static_cast<uint8_t>(rc_comms::Packet_Type::CAMERA_COMMANDS))
+    {
+        size_t off = 0;
+        stream::ICamera_Commands::Value value;
+        if (util::serialization::deserialize(packet.payload, value, off))
+        {
+            std::lock_guard<std::mutex> lg(m_new_camera_commands_mutex);
+            m_new_camera_commands = value;
+        }
+        else
+        {
+            QLOGW("Cannot deserialize incoming camera state value");
+        }
+    }
     else if (packet.packet_type == static_cast<uint8_t>(rc_comms::Packet_Type::RC_CONNECTED))
     {
         QLOGI("RC connected, sending vital data");
@@ -125,6 +139,13 @@ void RC_Comms::process_rx_packet(util::comms::RC_Protocol::RX_Packet const& pack
 boost::optional<stream::IMultirotor_Commands::Value> const& RC_Comms::get_multirotor_commands() const
 {
     return m_multirotor_commands;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+boost::optional<stream::ICamera_Commands::Value> const& RC_Comms::get_camera_commands() const
+{
+    return m_camera_commands;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -157,6 +178,11 @@ void RC_Comms::process()
         return;
     }
 
+    {
+        std::lock_guard<std::mutex> lg(m_new_camera_commands_mutex);
+        m_camera_commands = m_new_camera_commands;
+        m_new_camera_commands = boost::none;
+    }
     {
         std::lock_guard<std::mutex> lg(m_new_multirotor_commands_mutex);
         m_multirotor_commands = m_new_multirotor_commands;

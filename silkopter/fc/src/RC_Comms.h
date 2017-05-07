@@ -5,6 +5,7 @@
 
 #include "common/Manual_Clock.h"
 #include "common/node/ISource.h"
+#include "common/stream/ICamera_Commands.h"
 #include "common/stream/IMultirotor_Commands.h"
 #include "common/stream/IMultirotor_State.h"
 #include "common/stream/IVideo.h"
@@ -37,6 +38,8 @@ public:
     void process();
 
     boost::optional<stream::IMultirotor_Commands::Value> const& get_multirotor_commands() const;
+    boost::optional<stream::ICamera_Commands::Value> const& get_camera_commands() const;
+
     void set_multirotor_state(stream::IMultirotor_State::Value const& value);
     void add_video_data(stream::IVideo::Value const& value);
 
@@ -48,7 +51,11 @@ private:
     HAL& m_hal;
     Clock::time_point m_uav_sent_tp = Clock::now();
 
+    boost::optional<stream::ICamera_Commands::Value> m_camera_commands;
     boost::optional<stream::IMultirotor_Commands::Value> m_multirotor_commands;
+
+    mutable std::mutex m_new_camera_commands_mutex;
+    boost::optional<stream::ICamera_Commands::Value> m_new_camera_commands;
 
     mutable std::mutex m_new_multirotor_commands_mutex;
     boost::optional<stream::IMultirotor_Commands::Value> m_new_multirotor_commands;
