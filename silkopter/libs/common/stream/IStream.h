@@ -40,6 +40,7 @@ enum class Semantic : uint8_t
     ANGULAR_VELOCITY,
     BATTERY_STATE,
     MULTIROTOR_COMMANDS,
+    CAMERA_COMMANDS,
     MULTIROTOR_STATE,
     MULTIROTOR_SIMULATOR_STATE,
     CURRENT,
@@ -71,6 +72,7 @@ inline auto get_as_string(Semantic type, bool details) -> std::string
     case Semantic::ADC: return GET_AS_STRING("ADC", "(float, 0..1)");
     case Semantic::ANGULAR_VELOCITY: return GET_AS_STRING("Angular Velocity", "(vec3, Rad/s)");
     case Semantic::BATTERY_STATE: return GET_AS_STRING("Battery State", "(struct)");
+    case Semantic::CAMERA_COMMANDS: return GET_AS_STRING("Camera Commands", "(struct)");
     case Semantic::MULTIROTOR_COMMANDS: return GET_AS_STRING("Multirotor Commands", "(struct)");
     case Semantic::MULTIROTOR_STATE: return GET_AS_STRING("Multirotor State", "(struct)");
     case Semantic::MULTIROTOR_SIMULATOR_STATE: return GET_AS_STRING("Multirotor Simulator State", "(struct)");
