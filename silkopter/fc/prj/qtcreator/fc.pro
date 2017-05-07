@@ -348,7 +348,8 @@ HEADERS += \
     ../../src/bus/SPI_Linux_Bus.h \
     ../../src/bus/UART_Linux_Bus.h \
     ../../src/bus/UART_BB_Bus.h \
-    ../../src/processor/Quad_Multirotor_Motor_Mixer.h
+    ../../src/processor/Quad_Multirotor_Motor_Mixer.h \
+    ../../../libs/common/stream/ICamera_Commands.h
 
 DISTFILES +=
 

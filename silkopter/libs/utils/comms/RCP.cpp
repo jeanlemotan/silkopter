@@ -619,7 +619,7 @@ void RCP::process_connection()
     }
     m_connection.last_sent_tp = now;
 
-    QLOGI("Sending reconnect request");
+    //QLOGI("Sending reconnect request");
     send_packet_connect_req();
 }
 

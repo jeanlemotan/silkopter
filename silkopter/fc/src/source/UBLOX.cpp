@@ -1060,7 +1060,7 @@ void UBLOX::process_mon_hw_packet(Buses& buses, Packet& packet)
         QLOGE("unknown HW_MON packet size: {}", packet.payload.size());
     }
 
-    QLOGI("GPS HW: jamming:{}, noise:{}, agc:{}", jamInd, noisePerMS, agcCnt);
+    //QLOGI("GPS HW: jamming:{}, noise:{}, agc:{}", jamInd, noisePerMS, agcCnt);
     send_packet(buses, MESSAGE_MON_HW, nullptr, 0);
 }
 
