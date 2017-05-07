@@ -108,6 +108,8 @@ bool RC_Phy::init(std::string const& device, uint32_t speed, uint8_t sdn_gpio, u
 
     m_hw->chip.set_modem_configuration(modem_config);
     m_hw->chip.set_tx_power_dBm(20);
+
+    QLOGI("TX power: {}dBm", m_hw->chip.get_tx_power_dBm());
 #endif
 
     if (m_is_master)
