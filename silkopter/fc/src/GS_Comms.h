@@ -11,6 +11,7 @@
 #include "utils/comms/RCP.h"
 #include "utils/comms/RCP_Channel.h"
 #include "utils/Clock.h"
+#include <boost/variant.hpp>
 
 namespace util
 {
