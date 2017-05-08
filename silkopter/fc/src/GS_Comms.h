@@ -56,7 +56,7 @@ class GS_Comms
     GS_Comms operator=(GS_Comms const&) = delete;
 
 public:
-    GS_Comms(HAL& hal);
+    GS_Comms(HAL& hal, RC_Comms& rc_comms);
 
     auto start_udp(uint16_t send_port, uint16_t receive_port) -> bool;
 
@@ -120,6 +120,7 @@ private:
     void handle_req(gs_comms::setup::Send_Node_Message_Req const& req);
 
     HAL& m_hal;
+    RC_Comms& m_rc_comms;
     Clock::time_point m_uav_sent_tp = Clock::now();
 
     std::vector<stream::IMultirotor_Commands::Value> m_multirotor_commands_values;

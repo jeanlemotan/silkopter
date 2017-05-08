@@ -112,6 +112,8 @@ bool RC_Phy::init(std::string const& device, uint32_t speed, uint8_t sdn_gpio, u
     QLOGI("TX power: {}dBm", m_hw->chip.get_tx_power_dBm());
 #endif
 
+//    m_thread = boost::thread([this]() { master_thread_proc(); });
+
     if (m_is_master)
     {
         m_thread = boost::thread([this]() { master_thread_proc(); });
@@ -122,6 +124,24 @@ bool RC_Phy::init(std::string const& device, uint32_t speed, uint8_t sdn_gpio, u
     }
 
     return true;
+}
+
+bool RC_Phy::set_center_frequency(float center_frequency)
+{
+    QLOGI("Setting center frequency of {}MHz", center_frequency);
+#if USE_CHIP == CHIP_RFM22B
+    return m_hw->chip.set_center_frequency(center_frequency);
+#endif
+
+    return false;
+}
+
+void RC_Phy::set_xtal_adjustment(float adjustment)
+{
+    QLOGI("Setting xtal adjustment of {}", adjustment);
+#if USE_CHIP == CHIP_RFM22B
+    m_hw->chip.set_xtal_adjustment(static_cast<uint8_t>(128.f + (adjustment / 100.f * 128.f)));
+#endif
 }
 
 void RC_Phy::set_callbacks(TX_Callback txcb, RX_Callback rxcb)

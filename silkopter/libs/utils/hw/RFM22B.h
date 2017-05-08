@@ -311,6 +311,9 @@ public:
     void set_channel(uint8_t channel);
     uint8_t get_channel() const;
 
+    bool set_center_frequency(float center_frequency); //MHz
+    void set_xtal_adjustment(uint8_t adjustment); //0 - 256. At value 128 and above there is a discontinuity - a bigger jump;
+
     //sets the whole modem block with settings obtained from
     //  http://www.hoperf.com/upload/rf/RF22B%2023B%2031B%2042B%2043B%20Register%20Settings_RevB1-v5.xls
 /*

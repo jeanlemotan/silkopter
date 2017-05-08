@@ -1,5 +1,6 @@
 #include "FCStdAfx.h"
 #include "GS_Comms.h"
+#include "RC_Comms.h"
 #include "utils/Timed_Scope.h"
 
 #include "common/stream/IAcceleration.h"
@@ -50,8 +51,9 @@ constexpr uint8_t TELEMETRY_CHANNEL = 11;
 
 constexpr Clock::duration RCP_PERIOD = std::chrono::milliseconds(30);
 
-GS_Comms::GS_Comms(HAL& hal)
+GS_Comms::GS_Comms(HAL& hal, RC_Comms& rc_comms)
     : m_hal(hal)
+    , m_rc_comms(rc_comms)
     , m_telemetry_channel(TELEMETRY_CHANNEL)
 {
 }
@@ -459,6 +461,17 @@ void GS_Comms::handle_req(gs_comms::setup::Set_UAV_Descriptor_Req const& req)
             serialize_and_send(SETUP_CHANNEL, response);
             return;
         }
+    }
+
+    {
+        silk::hal::IUAV_Descriptor::Comms const& comms_settings = m_hal.get_uav_descriptor()->get_comms();
+        if (!m_rc_comms.get_rc_phy().set_center_frequency(comms_settings.get_rc_frequency()))
+        {
+            response = make_error_response(req.get_req_id(), "Cannot set RC center frequency");
+            serialize_and_send(SETUP_CHANNEL, response);
+            return;
+        }
+        m_rc_comms.get_rc_phy().set_xtal_adjustment(comms_settings.get_rc_xtal_ajdustment());
     }
 
     m_hal.save_settings();

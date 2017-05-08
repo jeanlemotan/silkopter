@@ -1,6 +1,7 @@
 #include "FCStdAfx.h"
 #include "RC_Comms.h"
 #include "utils/Timed_Scope.h"
+#include "hal.def.h"
 
 
 namespace silk
@@ -22,15 +23,16 @@ RC_Comms::RC_Comms(HAL& hal)
 
 auto RC_Comms::start(std::string const& interface, uint8_t id) -> bool
 {
+    silk::hal::IUAV_Descriptor::Comms const& comms_settings = m_hal.get_uav_descriptor()->get_comms();
+
     try
     {
         util::comms::Video_Streamer::TX_Descriptor descriptor;
-        descriptor.interface = "wlan1";
-        descriptor.coding_k = 12;
-        descriptor.coding_n = 20;
+        descriptor.interface = comms_settings.get_video_wlan_interface();
+        descriptor.coding_k = comms_settings.get_fec_coding_k();
+        descriptor.coding_n = comms_settings.get_fec_coding_n();
 
-        m_is_connected = m_rc_phy.init(SPI_DEVICE, SPEED, SDN_GPIO, NIRQ_GPIO)
-                        && m_video_streamer.init_tx(descriptor);
+        m_is_connected = m_rc_phy.init(SPI_DEVICE, SPEED, SDN_GPIO, NIRQ_GPIO) && m_video_streamer.init_tx(descriptor);
     }
     catch(std::exception e)
     {
@@ -42,6 +44,9 @@ auto RC_Comms::start(std::string const& interface, uint8_t id) -> bool
         QLOGW("Cannot start comms on interface {}", interface);
         return false;
     }
+
+    m_rc_phy.set_center_frequency(comms_settings.get_rc_frequency());
+    m_rc_phy.set_xtal_adjustment(comms_settings.get_rc_xtal_ajdustment());
 
     //m_rc_phy.set_rate(100);
     m_rc_protocol.add_periodic_packet(std::chrono::milliseconds(30), std::bind(&RC_Comms::compute_multirotor_state_packet, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
@@ -57,6 +62,20 @@ auto RC_Comms::start(std::string const& interface, uint8_t id) -> bool
 auto RC_Comms::is_connected() const -> bool
 {
     return m_is_connected;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+util::comms::RC_Phy const& RC_Comms::get_rc_phy() const
+{
+    return m_rc_phy;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+util::comms::RC_Phy& RC_Comms::get_rc_phy()
+{
+    return m_rc_phy;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////

@@ -37,6 +37,9 @@ public:
 
     void process();
 
+    util::comms::RC_Phy const& get_rc_phy() const;
+    util::comms::RC_Phy& get_rc_phy();
+
     boost::optional<stream::IMultirotor_Commands::Value> const& get_multirotor_commands() const;
     boost::optional<stream::ICamera_Commands::Value> const& get_camera_commands() const;
 
