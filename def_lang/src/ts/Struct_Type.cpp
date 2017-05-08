@@ -17,6 +17,7 @@ Struct_Type::Struct_Type(std::string const& name, std::shared_ptr<const IStruct_
     , m_ui_name(name)
 {
     replicate_base_struct();
+    m_first_noninherited_member_def_index = get_member_def_count();
 }
 
 Struct_Type::Struct_Type(Struct_Type const& other, std::string const& name)
