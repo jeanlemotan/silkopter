@@ -57,11 +57,52 @@ typedef float pwm_signal_t;
 struct IUAV_Descriptor
 {
 public:
+  struct Comms
+  {
+  public:
+    typedef float rc_frequency_433_t;
+    typedef float rc_xtal_adjustment_t;
+    typedef int64_t fec_coding_k_t;
+    typedef int64_t fec_coding_n_t;
+    virtual ~Comms() = default;
+    void set_rc_frequency(rc_frequency_433_t const& value);
+    void set_rc_frequency(rc_frequency_433_t&& value);
+    auto get_rc_frequency() const -> rc_frequency_433_t const&;
+
+    void set_rc_xtal_ajdustment(rc_xtal_adjustment_t const& value);
+    void set_rc_xtal_ajdustment(rc_xtal_adjustment_t&& value);
+    auto get_rc_xtal_ajdustment() const -> rc_xtal_adjustment_t const&;
+
+    void set_fec_coding_k(fec_coding_k_t const& value);
+    void set_fec_coding_k(fec_coding_k_t&& value);
+    auto get_fec_coding_k() const -> fec_coding_k_t const&;
+
+    void set_fec_coding_n(fec_coding_n_t const& value);
+    void set_fec_coding_n(fec_coding_n_t&& value);
+    auto get_fec_coding_n() const -> fec_coding_n_t const&;
+
+    void set_video_wlan_interface(std::string const& value);
+    void set_video_wlan_interface(std::string&& value);
+    auto get_video_wlan_interface() const -> std::string const&;
+
+  private:
+    rc_frequency_433_t m_rc_frequency = rc_frequency_433_t{433.500000f};
+    rc_xtal_adjustment_t m_rc_xtal_ajdustment = rc_xtal_adjustment_t{0};
+    fec_coding_k_t m_fec_coding_k = fec_coding_k_t{12};
+    fec_coding_n_t m_fec_coding_n = fec_coding_n_t{20};
+    std::string m_video_wlan_interface = std::string{"wlan1"};
+  };
+
   typedef float mass_t;
   virtual ~IUAV_Descriptor() = default;
   void set_name(std::string const& value);
   void set_name(std::string&& value);
   auto get_name() const -> std::string const&;
+
+  void set_comms(Comms const& value);
+  void set_comms(Comms&& value);
+  auto get_comms() const -> Comms const&;
+  auto get_comms() -> Comms&;
 
   void set_mass(mass_t const& value);
   void set_mass(mass_t&& value);
@@ -73,6 +114,7 @@ public:
 
 private:
   std::string m_name;
+  Comms m_comms;
   mass_t m_mass = mass_t{0.010000f};
   ufloat m_moment_of_inertia = ufloat{0};
 };
@@ -194,18 +236,6 @@ public:
   typedef float thrust_t;
   typedef float acceleration_t;
   virtual ~Multirotor_Descriptor() = default;
-  void set_name(std::string const& value);
-  void set_name(std::string&& value);
-  auto get_name() const -> std::string const&;
-
-  void set_mass(IUAV_Descriptor::mass_t const& value);
-  void set_mass(IUAV_Descriptor::mass_t&& value);
-  auto get_mass() const -> IUAV_Descriptor::mass_t const&;
-
-  void set_moment_of_inertia(ufloat const& value);
-  void set_moment_of_inertia(ufloat&& value);
-  auto get_moment_of_inertia() const -> ufloat const&;
-
   void set_radius(radius_t const& value);
   void set_radius(radius_t&& value);
   auto get_radius() const -> radius_t const&;
@@ -231,9 +261,6 @@ public:
   auto get_motor_deceleration() const -> acceleration_t const&;
 
 private:
-  std::string m_name;
-  IUAV_Descriptor::mass_t m_mass = IUAV_Descriptor::mass_t{0.010000f};
-  ufloat m_moment_of_inertia = ufloat{0};
   radius_t m_radius = radius_t{1.000000f};
   height_t m_height = height_t{1.000000f};
   torque_t m_motor_z_torque = torque_t{1.000000f};
@@ -246,108 +273,18 @@ struct Tri_Multirotor_Descriptor : public Multirotor_Descriptor
 {
 public:
   virtual ~Tri_Multirotor_Descriptor() = default;
-  void set_name(std::string const& value);
-  void set_name(std::string&& value);
-  auto get_name() const -> std::string const&;
-
-  void set_mass(IUAV_Descriptor::mass_t const& value);
-  void set_mass(IUAV_Descriptor::mass_t&& value);
-  auto get_mass() const -> IUAV_Descriptor::mass_t const&;
-
-  void set_moment_of_inertia(ufloat const& value);
-  void set_moment_of_inertia(ufloat&& value);
-  auto get_moment_of_inertia() const -> ufloat const&;
-
-  void set_radius(Multirotor_Descriptor::radius_t const& value);
-  void set_radius(Multirotor_Descriptor::radius_t&& value);
-  auto get_radius() const -> Multirotor_Descriptor::radius_t const&;
-
-  void set_height(Multirotor_Descriptor::height_t const& value);
-  void set_height(Multirotor_Descriptor::height_t&& value);
-  auto get_height() const -> Multirotor_Descriptor::height_t const&;
-
-  void set_motor_z_torque(Multirotor_Descriptor::torque_t const& value);
-  void set_motor_z_torque(Multirotor_Descriptor::torque_t&& value);
-  auto get_motor_z_torque() const -> Multirotor_Descriptor::torque_t const&;
-
-  void set_motor_thrust(Multirotor_Descriptor::thrust_t const& value);
-  void set_motor_thrust(Multirotor_Descriptor::thrust_t&& value);
-  auto get_motor_thrust() const -> Multirotor_Descriptor::thrust_t const&;
-
-  void set_motor_acceleration(Multirotor_Descriptor::acceleration_t const& value);
-  void set_motor_acceleration(Multirotor_Descriptor::acceleration_t&& value);
-  auto get_motor_acceleration() const -> Multirotor_Descriptor::acceleration_t const&;
-
-  void set_motor_deceleration(Multirotor_Descriptor::acceleration_t const& value);
-  void set_motor_deceleration(Multirotor_Descriptor::acceleration_t&& value);
-  auto get_motor_deceleration() const -> Multirotor_Descriptor::acceleration_t const&;
-
 private:
-  std::string m_name;
-  IUAV_Descriptor::mass_t m_mass = IUAV_Descriptor::mass_t{0.010000f};
-  ufloat m_moment_of_inertia = ufloat{0};
-  Multirotor_Descriptor::radius_t m_radius = Multirotor_Descriptor::radius_t{1.000000f};
-  Multirotor_Descriptor::height_t m_height = Multirotor_Descriptor::height_t{1.000000f};
-  Multirotor_Descriptor::torque_t m_motor_z_torque = Multirotor_Descriptor::torque_t{1.000000f};
-  Multirotor_Descriptor::thrust_t m_motor_thrust = Multirotor_Descriptor::thrust_t{1.000000f};
-  Multirotor_Descriptor::acceleration_t m_motor_acceleration = Multirotor_Descriptor::acceleration_t{10.000000f};
-  Multirotor_Descriptor::acceleration_t m_motor_deceleration = Multirotor_Descriptor::acceleration_t{10.000000f};
 };
 
 struct Quad_Multirotor_Descriptor : public Multirotor_Descriptor
 {
 public:
   virtual ~Quad_Multirotor_Descriptor() = default;
-  void set_name(std::string const& value);
-  void set_name(std::string&& value);
-  auto get_name() const -> std::string const&;
-
-  void set_mass(IUAV_Descriptor::mass_t const& value);
-  void set_mass(IUAV_Descriptor::mass_t&& value);
-  auto get_mass() const -> IUAV_Descriptor::mass_t const&;
-
-  void set_moment_of_inertia(ufloat const& value);
-  void set_moment_of_inertia(ufloat&& value);
-  auto get_moment_of_inertia() const -> ufloat const&;
-
-  void set_radius(Multirotor_Descriptor::radius_t const& value);
-  void set_radius(Multirotor_Descriptor::radius_t&& value);
-  auto get_radius() const -> Multirotor_Descriptor::radius_t const&;
-
-  void set_height(Multirotor_Descriptor::height_t const& value);
-  void set_height(Multirotor_Descriptor::height_t&& value);
-  auto get_height() const -> Multirotor_Descriptor::height_t const&;
-
-  void set_motor_z_torque(Multirotor_Descriptor::torque_t const& value);
-  void set_motor_z_torque(Multirotor_Descriptor::torque_t&& value);
-  auto get_motor_z_torque() const -> Multirotor_Descriptor::torque_t const&;
-
-  void set_motor_thrust(Multirotor_Descriptor::thrust_t const& value);
-  void set_motor_thrust(Multirotor_Descriptor::thrust_t&& value);
-  auto get_motor_thrust() const -> Multirotor_Descriptor::thrust_t const&;
-
-  void set_motor_acceleration(Multirotor_Descriptor::acceleration_t const& value);
-  void set_motor_acceleration(Multirotor_Descriptor::acceleration_t&& value);
-  auto get_motor_acceleration() const -> Multirotor_Descriptor::acceleration_t const&;
-
-  void set_motor_deceleration(Multirotor_Descriptor::acceleration_t const& value);
-  void set_motor_deceleration(Multirotor_Descriptor::acceleration_t&& value);
-  auto get_motor_deceleration() const -> Multirotor_Descriptor::acceleration_t const&;
-
   void set_plus_configuration(bool const& value);
   void set_plus_configuration(bool&& value);
   auto get_plus_configuration() const -> bool const&;
 
 private:
-  std::string m_name;
-  IUAV_Descriptor::mass_t m_mass = IUAV_Descriptor::mass_t{0.010000f};
-  ufloat m_moment_of_inertia = ufloat{0};
-  Multirotor_Descriptor::radius_t m_radius = Multirotor_Descriptor::radius_t{1.000000f};
-  Multirotor_Descriptor::height_t m_height = Multirotor_Descriptor::height_t{1.000000f};
-  Multirotor_Descriptor::torque_t m_motor_z_torque = Multirotor_Descriptor::torque_t{1.000000f};
-  Multirotor_Descriptor::thrust_t m_motor_thrust = Multirotor_Descriptor::thrust_t{1.000000f};
-  Multirotor_Descriptor::acceleration_t m_motor_acceleration = Multirotor_Descriptor::acceleration_t{10.000000f};
-  Multirotor_Descriptor::acceleration_t m_motor_deceleration = Multirotor_Descriptor::acceleration_t{10.000000f};
   bool m_plus_configuration = bool{false};
 };
 
@@ -355,56 +292,11 @@ struct Hexa_Multirotor_Descriptor : public Multirotor_Descriptor
 {
 public:
   virtual ~Hexa_Multirotor_Descriptor() = default;
-  void set_name(std::string const& value);
-  void set_name(std::string&& value);
-  auto get_name() const -> std::string const&;
-
-  void set_mass(IUAV_Descriptor::mass_t const& value);
-  void set_mass(IUAV_Descriptor::mass_t&& value);
-  auto get_mass() const -> IUAV_Descriptor::mass_t const&;
-
-  void set_moment_of_inertia(ufloat const& value);
-  void set_moment_of_inertia(ufloat&& value);
-  auto get_moment_of_inertia() const -> ufloat const&;
-
-  void set_radius(Multirotor_Descriptor::radius_t const& value);
-  void set_radius(Multirotor_Descriptor::radius_t&& value);
-  auto get_radius() const -> Multirotor_Descriptor::radius_t const&;
-
-  void set_height(Multirotor_Descriptor::height_t const& value);
-  void set_height(Multirotor_Descriptor::height_t&& value);
-  auto get_height() const -> Multirotor_Descriptor::height_t const&;
-
-  void set_motor_z_torque(Multirotor_Descriptor::torque_t const& value);
-  void set_motor_z_torque(Multirotor_Descriptor::torque_t&& value);
-  auto get_motor_z_torque() const -> Multirotor_Descriptor::torque_t const&;
-
-  void set_motor_thrust(Multirotor_Descriptor::thrust_t const& value);
-  void set_motor_thrust(Multirotor_Descriptor::thrust_t&& value);
-  auto get_motor_thrust() const -> Multirotor_Descriptor::thrust_t const&;
-
-  void set_motor_acceleration(Multirotor_Descriptor::acceleration_t const& value);
-  void set_motor_acceleration(Multirotor_Descriptor::acceleration_t&& value);
-  auto get_motor_acceleration() const -> Multirotor_Descriptor::acceleration_t const&;
-
-  void set_motor_deceleration(Multirotor_Descriptor::acceleration_t const& value);
-  void set_motor_deceleration(Multirotor_Descriptor::acceleration_t&& value);
-  auto get_motor_deceleration() const -> Multirotor_Descriptor::acceleration_t const&;
-
   void set_plus_configuration(bool const& value);
   void set_plus_configuration(bool&& value);
   auto get_plus_configuration() const -> bool const&;
 
 private:
-  std::string m_name;
-  IUAV_Descriptor::mass_t m_mass = IUAV_Descriptor::mass_t{0.010000f};
-  ufloat m_moment_of_inertia = ufloat{0};
-  Multirotor_Descriptor::radius_t m_radius = Multirotor_Descriptor::radius_t{1.000000f};
-  Multirotor_Descriptor::height_t m_height = Multirotor_Descriptor::height_t{1.000000f};
-  Multirotor_Descriptor::torque_t m_motor_z_torque = Multirotor_Descriptor::torque_t{1.000000f};
-  Multirotor_Descriptor::thrust_t m_motor_thrust = Multirotor_Descriptor::thrust_t{1.000000f};
-  Multirotor_Descriptor::acceleration_t m_motor_acceleration = Multirotor_Descriptor::acceleration_t{10.000000f};
-  Multirotor_Descriptor::acceleration_t m_motor_deceleration = Multirotor_Descriptor::acceleration_t{10.000000f};
   bool m_plus_configuration = bool{false};
 };
 
@@ -412,108 +304,18 @@ struct Hexatri_Multirotor_Descriptor : public Multirotor_Descriptor
 {
 public:
   virtual ~Hexatri_Multirotor_Descriptor() = default;
-  void set_name(std::string const& value);
-  void set_name(std::string&& value);
-  auto get_name() const -> std::string const&;
-
-  void set_mass(IUAV_Descriptor::mass_t const& value);
-  void set_mass(IUAV_Descriptor::mass_t&& value);
-  auto get_mass() const -> IUAV_Descriptor::mass_t const&;
-
-  void set_moment_of_inertia(ufloat const& value);
-  void set_moment_of_inertia(ufloat&& value);
-  auto get_moment_of_inertia() const -> ufloat const&;
-
-  void set_radius(Multirotor_Descriptor::radius_t const& value);
-  void set_radius(Multirotor_Descriptor::radius_t&& value);
-  auto get_radius() const -> Multirotor_Descriptor::radius_t const&;
-
-  void set_height(Multirotor_Descriptor::height_t const& value);
-  void set_height(Multirotor_Descriptor::height_t&& value);
-  auto get_height() const -> Multirotor_Descriptor::height_t const&;
-
-  void set_motor_z_torque(Multirotor_Descriptor::torque_t const& value);
-  void set_motor_z_torque(Multirotor_Descriptor::torque_t&& value);
-  auto get_motor_z_torque() const -> Multirotor_Descriptor::torque_t const&;
-
-  void set_motor_thrust(Multirotor_Descriptor::thrust_t const& value);
-  void set_motor_thrust(Multirotor_Descriptor::thrust_t&& value);
-  auto get_motor_thrust() const -> Multirotor_Descriptor::thrust_t const&;
-
-  void set_motor_acceleration(Multirotor_Descriptor::acceleration_t const& value);
-  void set_motor_acceleration(Multirotor_Descriptor::acceleration_t&& value);
-  auto get_motor_acceleration() const -> Multirotor_Descriptor::acceleration_t const&;
-
-  void set_motor_deceleration(Multirotor_Descriptor::acceleration_t const& value);
-  void set_motor_deceleration(Multirotor_Descriptor::acceleration_t&& value);
-  auto get_motor_deceleration() const -> Multirotor_Descriptor::acceleration_t const&;
-
 private:
-  std::string m_name;
-  IUAV_Descriptor::mass_t m_mass = IUAV_Descriptor::mass_t{0.010000f};
-  ufloat m_moment_of_inertia = ufloat{0};
-  Multirotor_Descriptor::radius_t m_radius = Multirotor_Descriptor::radius_t{1.000000f};
-  Multirotor_Descriptor::height_t m_height = Multirotor_Descriptor::height_t{1.000000f};
-  Multirotor_Descriptor::torque_t m_motor_z_torque = Multirotor_Descriptor::torque_t{1.000000f};
-  Multirotor_Descriptor::thrust_t m_motor_thrust = Multirotor_Descriptor::thrust_t{1.000000f};
-  Multirotor_Descriptor::acceleration_t m_motor_acceleration = Multirotor_Descriptor::acceleration_t{10.000000f};
-  Multirotor_Descriptor::acceleration_t m_motor_deceleration = Multirotor_Descriptor::acceleration_t{10.000000f};
 };
 
 struct Octo_Multirotor_Descriptor : public Multirotor_Descriptor
 {
 public:
   virtual ~Octo_Multirotor_Descriptor() = default;
-  void set_name(std::string const& value);
-  void set_name(std::string&& value);
-  auto get_name() const -> std::string const&;
-
-  void set_mass(IUAV_Descriptor::mass_t const& value);
-  void set_mass(IUAV_Descriptor::mass_t&& value);
-  auto get_mass() const -> IUAV_Descriptor::mass_t const&;
-
-  void set_moment_of_inertia(ufloat const& value);
-  void set_moment_of_inertia(ufloat&& value);
-  auto get_moment_of_inertia() const -> ufloat const&;
-
-  void set_radius(Multirotor_Descriptor::radius_t const& value);
-  void set_radius(Multirotor_Descriptor::radius_t&& value);
-  auto get_radius() const -> Multirotor_Descriptor::radius_t const&;
-
-  void set_height(Multirotor_Descriptor::height_t const& value);
-  void set_height(Multirotor_Descriptor::height_t&& value);
-  auto get_height() const -> Multirotor_Descriptor::height_t const&;
-
-  void set_motor_z_torque(Multirotor_Descriptor::torque_t const& value);
-  void set_motor_z_torque(Multirotor_Descriptor::torque_t&& value);
-  auto get_motor_z_torque() const -> Multirotor_Descriptor::torque_t const&;
-
-  void set_motor_thrust(Multirotor_Descriptor::thrust_t const& value);
-  void set_motor_thrust(Multirotor_Descriptor::thrust_t&& value);
-  auto get_motor_thrust() const -> Multirotor_Descriptor::thrust_t const&;
-
-  void set_motor_acceleration(Multirotor_Descriptor::acceleration_t const& value);
-  void set_motor_acceleration(Multirotor_Descriptor::acceleration_t&& value);
-  auto get_motor_acceleration() const -> Multirotor_Descriptor::acceleration_t const&;
-
-  void set_motor_deceleration(Multirotor_Descriptor::acceleration_t const& value);
-  void set_motor_deceleration(Multirotor_Descriptor::acceleration_t&& value);
-  auto get_motor_deceleration() const -> Multirotor_Descriptor::acceleration_t const&;
-
   void set_plus_configuration(bool const& value);
   void set_plus_configuration(bool&& value);
   auto get_plus_configuration() const -> bool const&;
 
 private:
-  std::string m_name;
-  IUAV_Descriptor::mass_t m_mass = IUAV_Descriptor::mass_t{0.010000f};
-  ufloat m_moment_of_inertia = ufloat{0};
-  Multirotor_Descriptor::radius_t m_radius = Multirotor_Descriptor::radius_t{1.000000f};
-  Multirotor_Descriptor::height_t m_height = Multirotor_Descriptor::height_t{1.000000f};
-  Multirotor_Descriptor::torque_t m_motor_z_torque = Multirotor_Descriptor::torque_t{1.000000f};
-  Multirotor_Descriptor::thrust_t m_motor_thrust = Multirotor_Descriptor::thrust_t{1.000000f};
-  Multirotor_Descriptor::acceleration_t m_motor_acceleration = Multirotor_Descriptor::acceleration_t{10.000000f};
-  Multirotor_Descriptor::acceleration_t m_motor_deceleration = Multirotor_Descriptor::acceleration_t{10.000000f};
   bool m_plus_configuration = bool{false};
 };
 
@@ -521,56 +323,11 @@ struct Octaquad_Multirotor_Descriptor : public Multirotor_Descriptor
 {
 public:
   virtual ~Octaquad_Multirotor_Descriptor() = default;
-  void set_name(std::string const& value);
-  void set_name(std::string&& value);
-  auto get_name() const -> std::string const&;
-
-  void set_mass(IUAV_Descriptor::mass_t const& value);
-  void set_mass(IUAV_Descriptor::mass_t&& value);
-  auto get_mass() const -> IUAV_Descriptor::mass_t const&;
-
-  void set_moment_of_inertia(ufloat const& value);
-  void set_moment_of_inertia(ufloat&& value);
-  auto get_moment_of_inertia() const -> ufloat const&;
-
-  void set_radius(Multirotor_Descriptor::radius_t const& value);
-  void set_radius(Multirotor_Descriptor::radius_t&& value);
-  auto get_radius() const -> Multirotor_Descriptor::radius_t const&;
-
-  void set_height(Multirotor_Descriptor::height_t const& value);
-  void set_height(Multirotor_Descriptor::height_t&& value);
-  auto get_height() const -> Multirotor_Descriptor::height_t const&;
-
-  void set_motor_z_torque(Multirotor_Descriptor::torque_t const& value);
-  void set_motor_z_torque(Multirotor_Descriptor::torque_t&& value);
-  auto get_motor_z_torque() const -> Multirotor_Descriptor::torque_t const&;
-
-  void set_motor_thrust(Multirotor_Descriptor::thrust_t const& value);
-  void set_motor_thrust(Multirotor_Descriptor::thrust_t&& value);
-  auto get_motor_thrust() const -> Multirotor_Descriptor::thrust_t const&;
-
-  void set_motor_acceleration(Multirotor_Descriptor::acceleration_t const& value);
-  void set_motor_acceleration(Multirotor_Descriptor::acceleration_t&& value);
-  auto get_motor_acceleration() const -> Multirotor_Descriptor::acceleration_t const&;
-
-  void set_motor_deceleration(Multirotor_Descriptor::acceleration_t const& value);
-  void set_motor_deceleration(Multirotor_Descriptor::acceleration_t&& value);
-  auto get_motor_deceleration() const -> Multirotor_Descriptor::acceleration_t const&;
-
   void set_plus_configuration(bool const& value);
   void set_plus_configuration(bool&& value);
   auto get_plus_configuration() const -> bool const&;
 
 private:
-  std::string m_name;
-  IUAV_Descriptor::mass_t m_mass = IUAV_Descriptor::mass_t{0.010000f};
-  ufloat m_moment_of_inertia = ufloat{0};
-  Multirotor_Descriptor::radius_t m_radius = Multirotor_Descriptor::radius_t{1.000000f};
-  Multirotor_Descriptor::height_t m_height = Multirotor_Descriptor::height_t{1.000000f};
-  Multirotor_Descriptor::torque_t m_motor_z_torque = Multirotor_Descriptor::torque_t{1.000000f};
-  Multirotor_Descriptor::thrust_t m_motor_thrust = Multirotor_Descriptor::thrust_t{1.000000f};
-  Multirotor_Descriptor::acceleration_t m_motor_acceleration = Multirotor_Descriptor::acceleration_t{10.000000f};
-  Multirotor_Descriptor::acceleration_t m_motor_deceleration = Multirotor_Descriptor::acceleration_t{10.000000f};
   bool m_plus_configuration = bool{false};
 };
 
@@ -600,57 +357,12 @@ public:
   };
 
   virtual ~Custom_Multirotor_Descriptor() = default;
-  void set_name(std::string const& value);
-  void set_name(std::string&& value);
-  auto get_name() const -> std::string const&;
-
-  void set_mass(IUAV_Descriptor::mass_t const& value);
-  void set_mass(IUAV_Descriptor::mass_t&& value);
-  auto get_mass() const -> IUAV_Descriptor::mass_t const&;
-
-  void set_moment_of_inertia(ufloat const& value);
-  void set_moment_of_inertia(ufloat&& value);
-  auto get_moment_of_inertia() const -> ufloat const&;
-
-  void set_radius(Multirotor_Descriptor::radius_t const& value);
-  void set_radius(Multirotor_Descriptor::radius_t&& value);
-  auto get_radius() const -> Multirotor_Descriptor::radius_t const&;
-
-  void set_height(Multirotor_Descriptor::height_t const& value);
-  void set_height(Multirotor_Descriptor::height_t&& value);
-  auto get_height() const -> Multirotor_Descriptor::height_t const&;
-
-  void set_motor_z_torque(Multirotor_Descriptor::torque_t const& value);
-  void set_motor_z_torque(Multirotor_Descriptor::torque_t&& value);
-  auto get_motor_z_torque() const -> Multirotor_Descriptor::torque_t const&;
-
-  void set_motor_thrust(Multirotor_Descriptor::thrust_t const& value);
-  void set_motor_thrust(Multirotor_Descriptor::thrust_t&& value);
-  auto get_motor_thrust() const -> Multirotor_Descriptor::thrust_t const&;
-
-  void set_motor_acceleration(Multirotor_Descriptor::acceleration_t const& value);
-  void set_motor_acceleration(Multirotor_Descriptor::acceleration_t&& value);
-  auto get_motor_acceleration() const -> Multirotor_Descriptor::acceleration_t const&;
-
-  void set_motor_deceleration(Multirotor_Descriptor::acceleration_t const& value);
-  void set_motor_deceleration(Multirotor_Descriptor::acceleration_t&& value);
-  auto get_motor_deceleration() const -> Multirotor_Descriptor::acceleration_t const&;
-
   void set_motors(std::vector<Custom_Multirotor_Descriptor::Motor> const& value);
   void set_motors(std::vector<Custom_Multirotor_Descriptor::Motor>&& value);
   auto get_motors() const -> std::vector<Custom_Multirotor_Descriptor::Motor> const&;
   auto get_motors() -> std::vector<Custom_Multirotor_Descriptor::Motor>&;
 
 private:
-  std::string m_name;
-  IUAV_Descriptor::mass_t m_mass = IUAV_Descriptor::mass_t{0.010000f};
-  ufloat m_moment_of_inertia = ufloat{0};
-  Multirotor_Descriptor::radius_t m_radius = Multirotor_Descriptor::radius_t{1.000000f};
-  Multirotor_Descriptor::height_t m_height = Multirotor_Descriptor::height_t{1.000000f};
-  Multirotor_Descriptor::torque_t m_motor_z_torque = Multirotor_Descriptor::torque_t{1.000000f};
-  Multirotor_Descriptor::thrust_t m_motor_thrust = Multirotor_Descriptor::thrust_t{1.000000f};
-  Multirotor_Descriptor::acceleration_t m_motor_acceleration = Multirotor_Descriptor::acceleration_t{10.000000f};
-  Multirotor_Descriptor::acceleration_t m_motor_deceleration = Multirotor_Descriptor::acceleration_t{10.000000f};
   std::vector<Custom_Multirotor_Descriptor::Motor> m_motors;
 };
 
@@ -798,10 +510,6 @@ struct PI_Controller_Descriptor : public P_Controller_Descriptor
 {
 public:
   virtual ~PI_Controller_Descriptor() = default;
-  void set_kp(ufloat const& value);
-  void set_kp(ufloat&& value);
-  auto get_kp() const -> ufloat const&;
-
   void set_ki(ufloat const& value);
   void set_ki(ufloat&& value);
   auto get_ki() const -> ufloat const&;
@@ -811,7 +519,6 @@ public:
   auto get_max_i() const -> ufloat const&;
 
 private:
-  ufloat m_kp = ufloat{0};
   ufloat m_ki = ufloat{0};
   ufloat m_max_i = ufloat{0};
 };
@@ -820,10 +527,6 @@ struct PD_Controller_Descriptor : public P_Controller_Descriptor
 {
 public:
   virtual ~PD_Controller_Descriptor() = default;
-  void set_kp(ufloat const& value);
-  void set_kp(ufloat&& value);
-  auto get_kp() const -> ufloat const&;
-
   void set_kd(ufloat const& value);
   void set_kd(ufloat&& value);
   auto get_kd() const -> ufloat const&;
@@ -833,7 +536,6 @@ public:
   auto get_d_filter() const -> muf_t const&;
 
 private:
-  ufloat m_kp = ufloat{0};
   ufloat m_kd = ufloat{0};
   muf_t m_d_filter = muf_t{0};
 };
@@ -842,18 +544,6 @@ struct PID_Controller_Descriptor : public PD_Controller_Descriptor
 {
 public:
   virtual ~PID_Controller_Descriptor() = default;
-  void set_kp(ufloat const& value);
-  void set_kp(ufloat&& value);
-  auto get_kp() const -> ufloat const&;
-
-  void set_kd(ufloat const& value);
-  void set_kd(ufloat&& value);
-  auto get_kd() const -> ufloat const&;
-
-  void set_d_filter(muf_t const& value);
-  void set_d_filter(muf_t&& value);
-  auto get_d_filter() const -> muf_t const&;
-
   void set_ki(ufloat const& value);
   void set_ki(ufloat&& value);
   auto get_ki() const -> ufloat const&;
@@ -863,9 +553,6 @@ public:
   auto get_max_i() const -> ufloat const&;
 
 private:
-  ufloat m_kp = ufloat{0};
-  ufloat m_kd = ufloat{0};
-  muf_t m_d_filter = muf_t{0};
   ufloat m_ki = ufloat{0};
   ufloat m_max_i = ufloat{0};
 };
@@ -3164,6 +2851,8 @@ ts::Result<void> deserialize(int32_t& value, ts::sz::Value const& sz_value);
 ts::sz::Value serialize(int32_t const& value);
 ts::Result<void> deserialize(uint32_t& value, ts::sz::Value const& sz_value);
 ts::sz::Value serialize(uint32_t const& value);
+ts::Result<void> deserialize(IUAV_Descriptor::Comms& value, ts::sz::Value const& sz_value);
+ts::sz::Value serialize(IUAV_Descriptor::Comms const& value);
 ts::Result<void> deserialize(IUAV_Descriptor& value, ts::sz::Value const& sz_value);
 ts::sz::Value serialize(IUAV_Descriptor const& value);
 ts::Result<void> deserialize(Poly<IUAV_Descriptor>& value, ts::sz::Value const& sz_value);

@@ -19,9 +19,27 @@ alias pwm_signal_t = float : [ min = 0.f, max = 1.f ];
 
 struct IUAV_Descriptor : [ ui_name = "UAV Descriptor" ]
 {
-    alias mass_t = float : [ min = 0.01f, max = 100.f ];
-
     string name : [ui_name = "Name"];
+
+    struct Comms
+    {
+        alias rc_frequency_433_t = float : [ min = 433.05f, max = 434.79f ];
+        rc_frequency_433_t rc_frequency = 433.5f: [ ui_name = "RC Frequency", ui_suffix = "MHz" ];
+
+        alias rc_xtal_adjustment_t = float : [ min = -100.f, max = 100.f ];
+        rc_xtal_adjustment_t rc_xtal_ajdustment = 0.f : [ ui_name = "RC Crystal Adjustment" ];
+
+        alias fec_coding_k_t = int : [ min = 1, max = 32 ];
+        alias fec_coding_n_t = int : [ min = 1, max = 32 ];
+        fec_coding_k_t fec_coding_k = 12 : [ ui_name = "FEC Coding K" ];
+        fec_coding_n_t fec_coding_n = 20 : [ ui_name = "FEC Coding N" ];
+
+        string video_wlan_interface = "wlan1" : [ ui_name = "Video WLAN Interface" ];
+    };
+
+    Comms comms : [ ui_name = "Comms" ];
+
+    alias mass_t = float : [ min = 0.01f, max = 100.f ];
     mass_t mass : [ui_name = "Mass", ui_suffix = "Kg"];
     ufloat moment_of_inertia : [ui_name = "Moment Of Inertia"];
 };
