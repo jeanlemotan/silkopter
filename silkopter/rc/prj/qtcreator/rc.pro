@@ -190,7 +190,8 @@ HEADERS += \
     ../../src/Gimbal_Control_ADS1115.h \
     ../../src/IBattery_Info.h \
     ../../src/IGimbal_Control.h \
-    ../../src/Battery_Calibration_Menu_Page.h
+    ../../src/Battery_Calibration_Menu_Page.h \
+    ../../src/RF_Config_Menu_Page.h
 
 SOURCES += \
     ../../src/main.cpp \
@@ -242,7 +243,8 @@ SOURCES += \
     ../../../libs/utils/hw/UART_BB.cpp \
     ../../src/Battery_Info_ADS1115.cpp \
     ../../src/Gimbal_Control_ADS1115.cpp \
-    ../../src/Battery_Calibration_Menu_Page.cpp
+    ../../src/Battery_Calibration_Menu_Page.cpp \
+    ../../src/RF_Config_Menu_Page.cpp
 
 DISTFILES += \
     ../../src/node.png \

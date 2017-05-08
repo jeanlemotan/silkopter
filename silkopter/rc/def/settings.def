@@ -60,9 +60,9 @@ struct Settings
 
     struct Comms
     {
-    	vector<string> video_interfaces;
-    	uint32_t video_coding_k = 12;
-    	uint32_t video_coding_n = 20;
+    	vector<string> video_wlan_interfaces;
+    	uint32_t video_fec_coding_k = 12;
+    	uint32_t video_fec_coding_n = 20;
     	uint32_t video_max_latency_ms = 500;
     	uint32_t video_reset_duration_ms = 1000;
 
@@ -70,6 +70,9 @@ struct Settings
     	gpio_t rc_nirq_gpio = 26;
     	string rc_spi_device = "/dev/spidev0.0";
     	uint32_t rc_spi_speed = 16000000;
+
+        float rc_center_frequency = 433.5f;
+        float rc_xtal_adjustment = 0.f;
     };
 
     Comms comms;

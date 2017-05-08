@@ -95,7 +95,7 @@ static void shutdown_pigpio()
 static void generate_settings_file(HAL& hal)
 {
     hal.get_settings() = settings::Settings();
-    hal.get_settings().get_comms().set_video_interfaces({"wlan2", "wlan3"});
+    hal.get_settings().get_comms().set_video_wlan_interfaces({"wlan2", "wlan3"});
     hal.save_settings();
 }
 

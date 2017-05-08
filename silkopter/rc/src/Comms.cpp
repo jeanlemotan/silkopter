@@ -42,9 +42,9 @@ bool Comms::start()
     settings::Settings::Comms const& comms = m_hal.get_settings().get_comms();
 
     util::comms::Video_Streamer::RX_Descriptor rx_descriptor;
-    rx_descriptor.interfaces = comms.get_video_interfaces();
-    rx_descriptor.coding_k = comms.get_video_coding_k();
-    rx_descriptor.coding_n = comms.get_video_coding_n();
+    rx_descriptor.interfaces = comms.get_video_wlan_interfaces();
+    rx_descriptor.coding_k = comms.get_video_fec_coding_k();
+    rx_descriptor.coding_n = comms.get_video_fec_coding_n();
     rx_descriptor.max_latency = std::chrono::milliseconds(comms.get_video_max_latency_ms());
     rx_descriptor.reset_duration = std::chrono::milliseconds(comms.get_video_reset_duration_ms());
 
@@ -67,6 +67,13 @@ bool Comms::start()
         QLOGW("Cannot start comms");
         return false;
     }
+
+    if (!m_rc_phy.set_center_frequency(m_hal.get_settings().get_comms().get_rc_center_frequency()))
+    {
+        QLOGW("Cannot set center frequency of {}MHz", m_hal.get_settings().get_comms().get_rc_center_frequency());
+        return false;
+    }
+    m_rc_phy.set_xtal_adjustment(m_hal.get_settings().get_comms().get_rc_xtal_adjustment());
 
     //m_rc_phy.set_rate(100);
     m_rc_protocol.add_periodic_packet(std::chrono::milliseconds(30), std::bind(&Comms::compute_multirotor_commands_packet, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
@@ -103,6 +110,20 @@ bool Comms::is_connected() const
 void Comms::reset()
 {
     m_last_req_id = 0;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+util::comms::RC_Phy const& Comms::get_rc_phy() const
+{
+    return m_rc_phy;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+util::comms::RC_Phy& Comms::get_rc_phy()
+{
+    return m_rc_phy;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////

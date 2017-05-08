@@ -161,7 +161,7 @@ int main(int argc, char const* argv[])
     {
         silk::HAL hal;
         silk::RC_Comms rc_comms(hal);
-        silk::GS_Comms gs_comms(hal);
+        silk::GS_Comms gs_comms(hal, rc_comms);
 
         if (!hal.init(rc_comms, gs_comms))
         {

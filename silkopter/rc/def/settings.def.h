@@ -176,18 +176,18 @@ public:
   {
   public:
     virtual ~Comms() = default;
-    void set_video_interfaces(std::vector<std::string> const& value);
-    void set_video_interfaces(std::vector<std::string>&& value);
-    auto get_video_interfaces() const -> std::vector<std::string> const&;
-    auto get_video_interfaces() -> std::vector<std::string>&;
+    void set_video_wlan_interfaces(std::vector<std::string> const& value);
+    void set_video_wlan_interfaces(std::vector<std::string>&& value);
+    auto get_video_wlan_interfaces() const -> std::vector<std::string> const&;
+    auto get_video_wlan_interfaces() -> std::vector<std::string>&;
 
-    void set_video_coding_k(uint32_t const& value);
-    void set_video_coding_k(uint32_t&& value);
-    auto get_video_coding_k() const -> uint32_t const&;
+    void set_video_fec_coding_k(uint32_t const& value);
+    void set_video_fec_coding_k(uint32_t&& value);
+    auto get_video_fec_coding_k() const -> uint32_t const&;
 
-    void set_video_coding_n(uint32_t const& value);
-    void set_video_coding_n(uint32_t&& value);
-    auto get_video_coding_n() const -> uint32_t const&;
+    void set_video_fec_coding_n(uint32_t const& value);
+    void set_video_fec_coding_n(uint32_t&& value);
+    auto get_video_fec_coding_n() const -> uint32_t const&;
 
     void set_video_max_latency_ms(uint32_t const& value);
     void set_video_max_latency_ms(uint32_t&& value);
@@ -213,16 +213,26 @@ public:
     void set_rc_spi_speed(uint32_t&& value);
     auto get_rc_spi_speed() const -> uint32_t const&;
 
+    void set_rc_center_frequency(float const& value);
+    void set_rc_center_frequency(float&& value);
+    auto get_rc_center_frequency() const -> float const&;
+
+    void set_rc_xtal_adjustment(float const& value);
+    void set_rc_xtal_adjustment(float&& value);
+    auto get_rc_xtal_adjustment() const -> float const&;
+
   private:
-    std::vector<std::string> m_video_interfaces;
-    uint32_t m_video_coding_k = uint32_t{12};
-    uint32_t m_video_coding_n = uint32_t{20};
+    std::vector<std::string> m_video_wlan_interfaces;
+    uint32_t m_video_fec_coding_k = uint32_t{12};
+    uint32_t m_video_fec_coding_n = uint32_t{20};
     uint32_t m_video_max_latency_ms = uint32_t{500};
     uint32_t m_video_reset_duration_ms = uint32_t{1000};
     gpio_t m_rc_sdn_gpio = gpio_t{6};
     gpio_t m_rc_nirq_gpio = gpio_t{26};
     std::string m_rc_spi_device = std::string{"/dev/spidev0.0"};
     uint32_t m_rc_spi_speed = uint32_t{16000000};
+    float m_rc_center_frequency = float{433.500000f};
+    float m_rc_xtal_adjustment = float{0};
   };
 
   struct Battery_Info

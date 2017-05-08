@@ -9,6 +9,7 @@
 #include "Info_Menu_Page.h"
 #include "Stick_Calibration_Menu_Page.h"
 #include "Battery_Calibration_Menu_Page.h"
+#include "RF_Config_Menu_Page.h"
 
 namespace silk
 {
@@ -39,10 +40,8 @@ void Main_Menu_Page::set_submenu(Submenu submenu)
         m_menu.push_submenu(
                     {"<-",
                      "Stick Calibration",
-                     "Encoder Calibration",
-                     "Feedback Calibration",
-                     "Vibration Calibration",
-                     "Battery Calibration"},
+                     "Battery Calibration",
+                     "RF"},
                     0, 12);
     }
 
@@ -71,10 +70,8 @@ bool Main_Menu_Page::process(Input& input, Menu_System& menu_system)
             {
             case 0: m_menu.pop_submenu(); m_submenu = Submenu::MAIN_MENU; break;
             case 1: menu_system.push_page(std::unique_ptr<IMenu_Page>(new Stick_Calibration_Menu_Page(m_hal))); break;
-//            case 2: menu_system.push_page(std::unique_ptr<IMenu_Page>(new Encoder_Calibration_Menu_Page)); break;
-//            case 3: menu_system.push_page(std::unique_ptr<IMenu_Page>(new Feedback_Calibration_Menu_Page)); break;
-//            case 4: menu_system.push_page(std::unique_ptr<IMenu_Page>(new Vibration_Calibration_Menu_Page)); break;
-            case 5: menu_system.push_page(std::unique_ptr<IMenu_Page>(new Battery_Calibration_Menu_Page(m_hal))); break;
+            case 2: menu_system.push_page(std::unique_ptr<IMenu_Page>(new Battery_Calibration_Menu_Page(m_hal))); break;
+            case 3: menu_system.push_page(std::unique_ptr<IMenu_Page>(new RF_Config_Menu_Page(m_hal))); break;
             }
         }
     }

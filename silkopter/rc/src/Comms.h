@@ -63,6 +63,9 @@ public:
     int8_t get_rx_dBm() const;
     int8_t get_tx_dBm() const;
 
+    util::comms::RC_Phy const& get_rc_phy() const;
+    util::comms::RC_Phy& get_rc_phy();
+
     Clock::time_point get_last_rx_tp() const;
 
     Remote_Viewer_Server const& get_remote_viewer_server() const;

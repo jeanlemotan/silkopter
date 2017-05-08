@@ -291,50 +291,50 @@ T max(T v, T max)
     }
 
 ////////////////////////////////////////////////////////////
-    void Settings::Comms::set_video_interfaces(std::vector<std::string> const& value)
+    void Settings::Comms::set_video_wlan_interfaces(std::vector<std::string> const& value)
     {
-      m_video_interfaces = value;
+      m_video_wlan_interfaces = value;
     }
-    void Settings::Comms::set_video_interfaces(std::vector<std::string>&& value)
+    void Settings::Comms::set_video_wlan_interfaces(std::vector<std::string>&& value)
     {
-      m_video_interfaces = std::move(value);
+      m_video_wlan_interfaces = std::move(value);
     }
-    auto Settings::Comms::get_video_interfaces() const -> std::vector<std::string> const& 
+    auto Settings::Comms::get_video_wlan_interfaces() const -> std::vector<std::string> const& 
     {
-      return m_video_interfaces;
-    }
-
-    auto Settings::Comms::get_video_interfaces() -> std::vector<std::string>& 
-    {
-      return m_video_interfaces;
+      return m_video_wlan_interfaces;
     }
 
-////////////////////////////////////////////////////////////
-    void Settings::Comms::set_video_coding_k(uint32_t const& value)
+    auto Settings::Comms::get_video_wlan_interfaces() -> std::vector<std::string>& 
     {
-      m_video_coding_k = value;
-    }
-    void Settings::Comms::set_video_coding_k(uint32_t&& value)
-    {
-      m_video_coding_k = std::move(value);
-    }
-    auto Settings::Comms::get_video_coding_k() const -> uint32_t const& 
-    {
-      return m_video_coding_k;
+      return m_video_wlan_interfaces;
     }
 
 ////////////////////////////////////////////////////////////
-    void Settings::Comms::set_video_coding_n(uint32_t const& value)
+    void Settings::Comms::set_video_fec_coding_k(uint32_t const& value)
     {
-      m_video_coding_n = value;
+      m_video_fec_coding_k = value;
     }
-    void Settings::Comms::set_video_coding_n(uint32_t&& value)
+    void Settings::Comms::set_video_fec_coding_k(uint32_t&& value)
     {
-      m_video_coding_n = std::move(value);
+      m_video_fec_coding_k = std::move(value);
     }
-    auto Settings::Comms::get_video_coding_n() const -> uint32_t const& 
+    auto Settings::Comms::get_video_fec_coding_k() const -> uint32_t const& 
     {
-      return m_video_coding_n;
+      return m_video_fec_coding_k;
+    }
+
+////////////////////////////////////////////////////////////
+    void Settings::Comms::set_video_fec_coding_n(uint32_t const& value)
+    {
+      m_video_fec_coding_n = value;
+    }
+    void Settings::Comms::set_video_fec_coding_n(uint32_t&& value)
+    {
+      m_video_fec_coding_n = std::move(value);
+    }
+    auto Settings::Comms::get_video_fec_coding_n() const -> uint32_t const& 
+    {
+      return m_video_fec_coding_n;
     }
 
 ////////////////////////////////////////////////////////////
@@ -419,6 +419,34 @@ T max(T v, T max)
     auto Settings::Comms::get_rc_spi_speed() const -> uint32_t const& 
     {
       return m_rc_spi_speed;
+    }
+
+////////////////////////////////////////////////////////////
+    void Settings::Comms::set_rc_center_frequency(float const& value)
+    {
+      m_rc_center_frequency = value;
+    }
+    void Settings::Comms::set_rc_center_frequency(float&& value)
+    {
+      m_rc_center_frequency = std::move(value);
+    }
+    auto Settings::Comms::get_rc_center_frequency() const -> float const& 
+    {
+      return m_rc_center_frequency;
+    }
+
+////////////////////////////////////////////////////////////
+    void Settings::Comms::set_rc_xtal_adjustment(float const& value)
+    {
+      m_rc_xtal_adjustment = value;
+    }
+    void Settings::Comms::set_rc_xtal_adjustment(float&& value)
+    {
+      m_rc_xtal_adjustment = std::move(value);
+    }
+    auto Settings::Comms::get_rc_xtal_adjustment() const -> float const& 
+    {
+      return m_rc_xtal_adjustment;
     }
 
 ////////////////////////////////////////////////////////////
@@ -1160,28 +1188,28 @@ ts::Result<void> deserialize(Settings::Comms& value, ts::sz::Value const& sz_val
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("video_interfaces");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'video_interfaces'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_video_interfaces())>::type>::type v;
+    auto const* member_sz_value = sz_value.find_object_member_by_name("video_wlan_interfaces");
+    if (!member_sz_value) { return ts::Error("Cannot find member value 'video_wlan_interfaces'"); }
+    std::remove_cv<std::remove_reference<decltype(value.get_video_wlan_interfaces())>::type>::type v;
     auto result = deserialize(v, *member_sz_value);
     if (result != ts::success) { return result; }
-    value.set_video_interfaces(std::move(v));
+    value.set_video_wlan_interfaces(std::move(v));
   }
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("video_coding_k");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'video_coding_k'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_video_coding_k())>::type>::type v;
+    auto const* member_sz_value = sz_value.find_object_member_by_name("video_fec_coding_k");
+    if (!member_sz_value) { return ts::Error("Cannot find member value 'video_fec_coding_k'"); }
+    std::remove_cv<std::remove_reference<decltype(value.get_video_fec_coding_k())>::type>::type v;
     auto result = deserialize(v, *member_sz_value);
     if (result != ts::success) { return result; }
-    value.set_video_coding_k(std::move(v));
+    value.set_video_fec_coding_k(std::move(v));
   }
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("video_coding_n");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'video_coding_n'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_video_coding_n())>::type>::type v;
+    auto const* member_sz_value = sz_value.find_object_member_by_name("video_fec_coding_n");
+    if (!member_sz_value) { return ts::Error("Cannot find member value 'video_fec_coding_n'"); }
+    std::remove_cv<std::remove_reference<decltype(value.get_video_fec_coding_n())>::type>::type v;
     auto result = deserialize(v, *member_sz_value);
     if (result != ts::success) { return result; }
-    value.set_video_coding_n(std::move(v));
+    value.set_video_fec_coding_n(std::move(v));
   }
   {
     auto const* member_sz_value = sz_value.find_object_member_by_name("video_max_latency_ms");
@@ -1231,21 +1259,39 @@ ts::Result<void> deserialize(Settings::Comms& value, ts::sz::Value const& sz_val
     if (result != ts::success) { return result; }
     value.set_rc_spi_speed(std::move(v));
   }
+  {
+    auto const* member_sz_value = sz_value.find_object_member_by_name("rc_center_frequency");
+    if (!member_sz_value) { return ts::Error("Cannot find member value 'rc_center_frequency'"); }
+    std::remove_cv<std::remove_reference<decltype(value.get_rc_center_frequency())>::type>::type v;
+    auto result = deserialize(v, *member_sz_value);
+    if (result != ts::success) { return result; }
+    value.set_rc_center_frequency(std::move(v));
+  }
+  {
+    auto const* member_sz_value = sz_value.find_object_member_by_name("rc_xtal_adjustment");
+    if (!member_sz_value) { return ts::Error("Cannot find member value 'rc_xtal_adjustment'"); }
+    std::remove_cv<std::remove_reference<decltype(value.get_rc_xtal_adjustment())>::type>::type v;
+    auto result = deserialize(v, *member_sz_value);
+    if (result != ts::success) { return result; }
+    value.set_rc_xtal_adjustment(std::move(v));
+  }
   return ts::success;
 }
 ts::sz::Value serialize(Settings::Comms const& value)
 {
   ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
-  sz_value.reserve_object_members(9);
-  sz_value.add_object_member("video_interfaces", serialize(value.get_video_interfaces()));
-  sz_value.add_object_member("video_coding_k", serialize(value.get_video_coding_k()));
-  sz_value.add_object_member("video_coding_n", serialize(value.get_video_coding_n()));
+  sz_value.reserve_object_members(11);
+  sz_value.add_object_member("video_wlan_interfaces", serialize(value.get_video_wlan_interfaces()));
+  sz_value.add_object_member("video_fec_coding_k", serialize(value.get_video_fec_coding_k()));
+  sz_value.add_object_member("video_fec_coding_n", serialize(value.get_video_fec_coding_n()));
   sz_value.add_object_member("video_max_latency_ms", serialize(value.get_video_max_latency_ms()));
   sz_value.add_object_member("video_reset_duration_ms", serialize(value.get_video_reset_duration_ms()));
   sz_value.add_object_member("rc_sdn_gpio", serialize(value.get_rc_sdn_gpio()));
   sz_value.add_object_member("rc_nirq_gpio", serialize(value.get_rc_nirq_gpio()));
   sz_value.add_object_member("rc_spi_device", serialize(value.get_rc_spi_device()));
   sz_value.add_object_member("rc_spi_speed", serialize(value.get_rc_spi_speed()));
+  sz_value.add_object_member("rc_center_frequency", serialize(value.get_rc_center_frequency()));
+  sz_value.add_object_member("rc_xtal_adjustment", serialize(value.get_rc_xtal_adjustment()));
   return sz_value;
 }
 ts::Result<void> deserialize(Settings::Battery_Info& value, ts::sz::Value const& sz_value)
