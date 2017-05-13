@@ -23,16 +23,16 @@ Video_Stream_Viewer_Widget::~Video_Stream_Viewer_Widget()
 
 void Video_Stream_Viewer_Widget::init(silk::Comms& comms, std::string const& stream_path, uint32_t stream_rate, silk::stream::Type stream_type)
 {
+    m_comms = &comms;
+    m_stream_path = stream_path;
+    m_stream_rate = stream_rate;
+    m_stream_type = stream_type;
+
     Numeric_Viewer_Widget* stats_widget = new Numeric_Viewer_Widget(nullptr);
     stats_widget->show();
     stats_widget->init("x", m_stream_rate);
 
     stats_widget->add_graph("Frame Size", "KB", QColor(0xe74c3c));
-
-    m_comms = &comms;
-    m_stream_path = stream_path;
-    m_stream_rate = stream_rate;
-    m_stream_type = stream_type;
 
     auto result = m_comms->set_stream_telemetry_enabled(m_stream_path, true);
     QASSERT(result == ts::success);
