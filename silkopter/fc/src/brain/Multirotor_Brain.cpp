@@ -319,7 +319,7 @@ void Multirotor_Brain::process_idle_mode()
 
     //output nothing
     m_rate_output_stream->push_sample(stream::IAngular_Velocity::Value(), true);
-    m_thrust_output_stream->push_sample(stream::IFloat::Value(), true);
+    m_thrust_output_stream->push_sample(stream::IFloat::Value(0.f), true);
 
     if (m_inputs.commands.sample.value.mode == Mode::FLY)
     {
@@ -676,6 +676,12 @@ void Multirotor_Brain::process_fly_mode()
         //check signal loss condition
         if (!m_inputs.commands.is_stable)
         {
+            //XXXXXXXXXXXXXXXXXXXXX
+            //Safety code to avoid flyaways!!!!
+
+            set_mode(Mode::IDLE);
+            return;
+
             m_fly_mode_data.state = Fly_Mode_Data::State::ALERT_HOLD;
             QLOGW("No input received for {}. Holding position", now - m_inputs.commands.last_valid_tp);
 
@@ -869,12 +875,12 @@ template<typename T> void Multirotor_Brain::process_input_data(Inputs::Data<T>& 
         data.last_valid_tp = now;
     }
 
-    if (now - data.last_valid_tp >= std::chrono::milliseconds(500))
+    if (now - data.last_valid_tp >= std::chrono::milliseconds(3000))
     {
         data.last_invalid_tp = now;
         data.is_stable = false;
     }
-    if (now - data.last_invalid_tp >= std::chrono::milliseconds(500))
+    if (now - data.last_invalid_tp >= std::chrono::milliseconds(3000))
     {
         data.is_stable = true;
     }

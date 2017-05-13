@@ -161,6 +161,24 @@ ts::Result<void> Rate_Controller::set_config(hal::INode_Config const& config)
 
     fill_pid_params(z_params, descriptor.get_z_pid(), output_rate);
 
+    //scale factor to avoid using very small values in the UI
+    const float pid_scale = 100.f;
+
+    x_params.kp /= pid_scale;
+    x_params.ki /= pid_scale;
+    x_params.kd /= pid_scale;
+    x_params.max_i /= pid_scale;
+
+    y_params.kp /= pid_scale;
+    y_params.ki /= pid_scale;
+    y_params.kd /= pid_scale;
+    y_params.max_i /= pid_scale;
+
+    z_params.kp /= pid_scale;
+    z_params.ki /= pid_scale;
+    z_params.kd /= pid_scale;
+    z_params.max_i /= pid_scale;
+
     //this should prevent integral windup when the PID is stressed a lot.
     //for example in sharpp changes of target
     float limit = m_config->get_max_torque();
