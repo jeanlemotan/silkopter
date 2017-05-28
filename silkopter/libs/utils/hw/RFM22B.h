@@ -307,12 +307,10 @@ public:
 
     void reset();
 
-    // Set or get the frequency hopping channel
-    void set_channel(uint8_t channel);
+    bool set_channel(uint8_t channel);
     uint8_t get_channel() const;
 
-    bool set_center_frequency(float center_frequency); //MHz
-    void set_xtal_adjustment(uint8_t adjustment); //0 - 256. At value 128 and above there is a discontinuity - a bigger jump;
+    void set_xtal_adjustment(float adjustment); //-1 - 1
 
     //sets the whole modem block with settings obtained from
     //  http://www.hoperf.com/upload/rf/RF22B%2023B%2031B%2042B%2043B%20Register%20Settings_RevB1-v5.xls
@@ -384,8 +382,8 @@ public:
     bool write_tx_fifo(void const* data, size_t size);
     bool read_rx_fifo(void* data, size_t size);
 
-    bool tx(size_t size, uint8_t channel);
-    bool rx(size_t& size, uint8_t channel, Clock::duration timeout);
+    bool tx(size_t size);
+    bool rx(size_t& size, Clock::duration timeout);
 
     bool get_nirq_level();
 

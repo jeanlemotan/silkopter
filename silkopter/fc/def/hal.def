@@ -23,10 +23,10 @@ struct IUAV_Descriptor : [ ui_name = "UAV Descriptor" ]
 
     struct Comms
     {
-        alias rc_frequency_433_t = float : [ min = 433.05f, max = 434.79f ];
-        rc_frequency_433_t rc_frequency = 433.5f: [ ui_name = "RC Frequency", ui_suffix = "MHz" ];
+        alias rc_channel_t = int : [ min = 0, max = 32 ];
+        rc_channel_t rc_channel = 0: [ ui_name = "RC Channel" ];
 
-        alias rc_xtal_adjustment_t = float : [ min = -100.f, max = 100.f ];
+        alias rc_xtal_adjustment_t = float : [ min = -1.f, max = 1.f ];
         rc_xtal_adjustment_t rc_xtal_ajdustment = 0.f : [ ui_name = "RC Crystal Adjustment" ];
 
         alias fec_coding_k_t = int : [ min = 1, max = 32 ];

@@ -24,10 +24,10 @@ private:
     Menu m_menu;
     boost::optional<size_t> m_selected_entry;
 
-    float m_initial_center_frequency = 0.f;
+    uint8_t m_initial_channel = 0;
     float m_initial_xtal_adjustment = 0.f;
 
-    float m_center_frequency = 0.f;
+    uint8_t m_channel = 0;
     float m_xtal_adjustment = 0.f;
 
     Clock::time_point m_last_dbm_tp = Clock::now();

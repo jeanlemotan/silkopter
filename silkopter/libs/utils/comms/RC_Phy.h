@@ -20,8 +20,8 @@ public:
     RC_Phy(bool master);
     ~RC_Phy();
 
-    bool set_center_frequency(float center_frequency); //MHz
-    void set_xtal_adjustment(float adjustment); //-100.f, 100.f
+    bool set_channel(uint8_t channel);
+    void set_xtal_adjustment(float adjustment); //-1.f, 1.f
 
     struct RX_Data
     {

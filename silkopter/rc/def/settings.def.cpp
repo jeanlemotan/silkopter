@@ -422,17 +422,17 @@ T max(T v, T max)
     }
 
 ////////////////////////////////////////////////////////////
-    void Settings::Comms::set_rc_center_frequency(float const& value)
+    void Settings::Comms::set_rc_channel(uint8_t const& value)
     {
-      m_rc_center_frequency = value;
+      m_rc_channel = value;
     }
-    void Settings::Comms::set_rc_center_frequency(float&& value)
+    void Settings::Comms::set_rc_channel(uint8_t&& value)
     {
-      m_rc_center_frequency = std::move(value);
+      m_rc_channel = std::move(value);
     }
-    auto Settings::Comms::get_rc_center_frequency() const -> float const& 
+    auto Settings::Comms::get_rc_channel() const -> uint8_t const& 
     {
-      return m_rc_center_frequency;
+      return m_rc_channel;
     }
 
 ////////////////////////////////////////////////////////////
@@ -1260,12 +1260,12 @@ ts::Result<void> deserialize(Settings::Comms& value, ts::sz::Value const& sz_val
     value.set_rc_spi_speed(std::move(v));
   }
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("rc_center_frequency");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'rc_center_frequency'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_rc_center_frequency())>::type>::type v;
+    auto const* member_sz_value = sz_value.find_object_member_by_name("rc_channel");
+    if (!member_sz_value) { return ts::Error("Cannot find member value 'rc_channel'"); }
+    std::remove_cv<std::remove_reference<decltype(value.get_rc_channel())>::type>::type v;
     auto result = deserialize(v, *member_sz_value);
     if (result != ts::success) { return result; }
-    value.set_rc_center_frequency(std::move(v));
+    value.set_rc_channel(std::move(v));
   }
   {
     auto const* member_sz_value = sz_value.find_object_member_by_name("rc_xtal_adjustment");
@@ -1290,7 +1290,7 @@ ts::sz::Value serialize(Settings::Comms const& value)
   sz_value.add_object_member("rc_nirq_gpio", serialize(value.get_rc_nirq_gpio()));
   sz_value.add_object_member("rc_spi_device", serialize(value.get_rc_spi_device()));
   sz_value.add_object_member("rc_spi_speed", serialize(value.get_rc_spi_speed()));
-  sz_value.add_object_member("rc_center_frequency", serialize(value.get_rc_center_frequency()));
+  sz_value.add_object_member("rc_channel", serialize(value.get_rc_channel()));
   sz_value.add_object_member("rc_xtal_adjustment", serialize(value.get_rc_xtal_adjustment()));
   return sz_value;
 }

@@ -71,7 +71,7 @@ struct Settings
     	string rc_spi_device = "/dev/spidev0.0";
     	uint32_t rc_spi_speed = 16000000;
 
-        float rc_center_frequency = 433.5f;
+        uint8_t rc_channel = 0;
         float rc_xtal_adjustment = 0.f;
     };
 

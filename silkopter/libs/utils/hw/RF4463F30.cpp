@@ -256,6 +256,32 @@ void RF4463F30::reset()
     }
 }
 
+uint8_t RF4463F30::get_channel() const
+{
+    return m_channel;
+}
+
+bool RF4463F30::set_channel(uint8_t channel)
+{
+    m_channel = channel;
+    return true;
+}
+
+void RF4463F30::set_xtal_adjustment(float adjustment)
+{
+    if (!m_is_initialized)
+    {
+        return;
+    }
+
+    uint8_t adj = static_cast<uint8_t>(math::clamp(64.f + (adjustment * 64.f), 0.f, 127.f));
+    uint8_t args[2] = { adj };
+    if (!m_chip.set_properties(Si4463::Property::GLOBAL_XO_TUNE, 1, args, sizeof(args)))
+    {
+        QLOGE("Failed to set xtal adjustment of {}", adjustment);
+        return;
+    }
+}
 
 bool RF4463F30::write_tx_fifo(void const* data, uint8_t size)
 {
@@ -272,7 +298,7 @@ bool RF4463F30::write_tx_fifo(void const* data, uint8_t size)
 
     return m_chip.write_tx_fifo(data, size);
 }
-bool RF4463F30::begin_tx(size_t size, uint8_t channel)
+bool RF4463F30::begin_tx(size_t size)
 {
     if (!m_is_initialized)
     {
@@ -280,11 +306,6 @@ bool RF4463F30::begin_tx(size_t size, uint8_t channel)
     }
 
     //set the packet size
-    uint8_t args[2] = { (uint8_t)(size >> 8), (uint8_t)(size & 0xFF) };
-    if (!m_chip.set_properties(Si4463::Property::PKT_FIELD_2_LENGTH_12_8, 2, args, sizeof(args)))
-    {
-        return false;
-    }
 
     //enter tx state
     uint8_t condition =
@@ -294,7 +315,7 @@ bool RF4463F30::begin_tx(size_t size, uint8_t channel)
     if (!m_chip.call_api_raw(
             {
                 (uint8_t)Si4463::Command::START_TX,
-                channel,
+                m_channel,
                 condition,
                 0, 0 //(uint8_t)(size >> 8), (uint8_t)(size & 0xFF)//0x00, 0x00 //use the field1 length
             }))
@@ -361,16 +382,16 @@ bool RF4463F30::end_tx()
     return true;
 }
 
-bool RF4463F30::tx(size_t size, uint8_t channel)
+bool RF4463F30::tx(size_t size)
 {
-    if (!begin_tx(size, channel))
+    if (!begin_tx(size))
     {
         return false;
     }
     return end_tx();
 }
 
-bool RF4463F30::begin_rx(uint8_t channel)
+bool RF4463F30::begin_rx()
 {
     if (!m_is_initialized)
     {
@@ -406,7 +427,7 @@ bool RF4463F30::begin_rx(uint8_t channel)
     return m_chip.call_api_raw(
     {
         (uint8_t)Si4463::Command::START_RX,
-        channel,
+        m_channel,
         0x00, //start immediately
         0x00, 0x00, //size = 0
         0, //preamble timeout -> rx state
@@ -460,14 +481,14 @@ bool RF4463F30::end_rx(size_t& size, Clock::duration timeout)
     return true;
 }
 
-bool RF4463F30::rx(size_t& size, uint8_t channel, Clock::duration timeout)
+bool RF4463F30::rx(size_t& size, Clock::duration timeout)
 {
     if (!m_is_initialized)
     {
         return false;
     }
 
-    if (!begin_rx(channel))
+    if (!begin_rx())
     {
         return false;
     }

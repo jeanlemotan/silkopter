@@ -1,14 +1,20 @@
 #include "RC_Phy.h"
-#include "utils/hw/RF4463F30.h"
-#include "utils/hw/RFM22B.h"
 #include <string>
 #include "util/murmurhash.h"
 
 #define CHIP_RF4463F30  1
 #define CHIP_RFM22B     2
 
-#define USE_CHIP CHIP_RFM22B
+//#define USE_CHIP CHIP_RFM22B
+#define USE_CHIP CHIP_RF4463F30
 
+
+
+#if USE_CHIP == CHIP_RFM22B
+#   include "utils/hw/RFM22B.h"
+#elif USE_CHIP == CHIP_RF4463F30
+#   include "utils/hw/RF4463F30.h"
+#endif
 
 namespace util
 {
@@ -16,7 +22,6 @@ namespace comms
 {
 
 constexpr size_t MTU = 64;
-constexpr uint8_t CHANNEL = 0;
 constexpr Clock::duration MIN_TX_DURATION = std::chrono::microseconds(1);
 
 
@@ -126,22 +131,17 @@ bool RC_Phy::init(std::string const& device, uint32_t speed, uint8_t sdn_gpio, u
     return true;
 }
 
-bool RC_Phy::set_center_frequency(float center_frequency)
+bool RC_Phy::set_channel(uint8_t channel)
 {
-    QLOGI("Setting center frequency of {}MHz", center_frequency);
-#if USE_CHIP == CHIP_RFM22B
-    return m_hw->chip.set_center_frequency(center_frequency);
-#endif
-
-    return false;
+    QLOGI("Setting channel {}", channel);
+    return m_hw->chip.set_channel(channel);
 }
 
 void RC_Phy::set_xtal_adjustment(float adjustment)
 {
+    adjustment = math::clamp(adjustment, -1.f, 1.f);
     QLOGI("Setting xtal adjustment of {}", adjustment);
-#if USE_CHIP == CHIP_RFM22B
-    m_hw->chip.set_xtal_adjustment(static_cast<uint8_t>(128.f + (adjustment / 100.f * 128.f)));
-#endif
+    m_hw->chip.set_xtal_adjustment(adjustment);
 }
 
 void RC_Phy::set_callbacks(TX_Callback txcb, RX_Callback rxcb)
@@ -221,7 +221,7 @@ void RC_Phy::master_thread_proc()
             if (m_hw->chip.write_tx_fifo(m_tx_buffer.data(), m_tx_buffer.size()))
             {
                 //The first byte is the length. The actual payload is size - 1
-                if (m_hw->chip.tx(m_tx_buffer.size(), CHANNEL))
+                if (m_hw->chip.tx(m_tx_buffer.size()))
                 {
 
                 }
@@ -240,7 +240,7 @@ void RC_Phy::master_thread_proc()
             }
 
             size_t rx_size = 0;
-            if (m_hw->chip.rx(rx_size, CHANNEL, rx_duration))
+            if (m_hw->chip.rx(rx_size, rx_duration))
             {
                 read_fifo(rx_size);
             }
@@ -262,7 +262,7 @@ void RC_Phy::slave_thread_proc()
             size_t rx_size = 0;
             while (!m_exit)
             {
-                if (m_hw->chip.rx(rx_size, CHANNEL, std::chrono::seconds(500)))
+                if (m_hw->chip.rx(rx_size, std::chrono::seconds(500)))
                 {
                     read_fifo(rx_size);
                     break;
@@ -304,7 +304,7 @@ void RC_Phy::slave_thread_proc()
             if (m_hw->chip.write_tx_fifo(m_tx_buffer.data(), m_tx_buffer.size()))
             {
                 //The first byte is the length. The actual payload is size - 1
-                if (m_hw->chip.tx(m_tx_buffer.size(), CHANNEL))
+                if (m_hw->chip.tx(m_tx_buffer.size()))
                 {
 
                 }

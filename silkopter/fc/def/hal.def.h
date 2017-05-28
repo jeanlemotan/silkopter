@@ -60,14 +60,14 @@ public:
   struct Comms
   {
   public:
-    typedef float rc_frequency_433_t;
+    typedef int64_t rc_channel_t;
     typedef float rc_xtal_adjustment_t;
     typedef int64_t fec_coding_k_t;
     typedef int64_t fec_coding_n_t;
     virtual ~Comms() = default;
-    void set_rc_frequency(rc_frequency_433_t const& value);
-    void set_rc_frequency(rc_frequency_433_t&& value);
-    auto get_rc_frequency() const -> rc_frequency_433_t const&;
+    void set_rc_channel(rc_channel_t const& value);
+    void set_rc_channel(rc_channel_t&& value);
+    auto get_rc_channel() const -> rc_channel_t const&;
 
     void set_rc_xtal_ajdustment(rc_xtal_adjustment_t const& value);
     void set_rc_xtal_ajdustment(rc_xtal_adjustment_t&& value);
@@ -86,7 +86,7 @@ public:
     auto get_video_wlan_interface() const -> std::string const&;
 
   private:
-    rc_frequency_433_t m_rc_frequency = rc_frequency_433_t{433.500000f};
+    rc_channel_t m_rc_channel = rc_channel_t{0};
     rc_xtal_adjustment_t m_rc_xtal_ajdustment = rc_xtal_adjustment_t{0};
     fec_coding_k_t m_fec_coding_k = fec_coding_k_t{12};
     fec_coding_n_t m_fec_coding_n = fec_coding_n_t{20};

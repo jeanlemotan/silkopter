@@ -45,7 +45,7 @@ auto RC_Comms::start(std::string const& interface, uint8_t id) -> bool
         return false;
     }
 
-    m_rc_phy.set_center_frequency(comms_settings.get_rc_frequency());
+    m_rc_phy.set_channel(comms_settings.get_rc_channel());
     m_rc_phy.set_xtal_adjustment(comms_settings.get_rc_xtal_ajdustment());
 
     //m_rc_phy.set_rate(100);

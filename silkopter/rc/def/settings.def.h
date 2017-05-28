@@ -213,9 +213,9 @@ public:
     void set_rc_spi_speed(uint32_t&& value);
     auto get_rc_spi_speed() const -> uint32_t const&;
 
-    void set_rc_center_frequency(float const& value);
-    void set_rc_center_frequency(float&& value);
-    auto get_rc_center_frequency() const -> float const&;
+    void set_rc_channel(uint8_t const& value);
+    void set_rc_channel(uint8_t&& value);
+    auto get_rc_channel() const -> uint8_t const&;
 
     void set_rc_xtal_adjustment(float const& value);
     void set_rc_xtal_adjustment(float&& value);
@@ -231,7 +231,7 @@ public:
     gpio_t m_rc_nirq_gpio = gpio_t{26};
     std::string m_rc_spi_device = std::string{"/dev/spidev0.0"};
     uint32_t m_rc_spi_speed = uint32_t{16000000};
-    float m_rc_center_frequency = float{433.500000f};
+    uint8_t m_rc_channel = uint8_t{0};
     float m_rc_xtal_adjustment = float{0};
   };
 

@@ -309,68 +309,25 @@ uint8_t RFM22B::get_tx_power_dBm()
     }
 }
 
-// Get and set the frequency hopping channel
-void RFM22B::set_channel(uint8_t channel)
-{
-    set_register(Register::FREQUENCY_HOPPING_CHANNEL_SELECT_79, channel);
-}
-
 uint8_t RFM22B::get_channel() const
 {
     return get_register(Register::FREQUENCY_HOPPING_CHANNEL_SELECT_79);
 }
 
-bool RFM22B::set_center_frequency(float center_frequency)
+bool RFM22B::set_channel(uint8_t channel)
 {
-    uint8_t fbsel = (uint8_t)Frequency_Band_Select::SBSEL;
-    uint8_t afclimiter = 0;
-    if (center_frequency < 240.0 || center_frequency > 960.0) // 930.0 for early silicon
-    {
-        return false;
-    }
-
-    float afc_pull_in_range = 0.05f;
-
-    if (center_frequency >= 480.0)
-    {
-        if (afc_pull_in_range < 0.0 || afc_pull_in_range > 0.318750)
-        {
-            return false;
-        }
-        center_frequency /= 2;
-        fbsel |= (uint8_t)Frequency_Band_Select::HBSEL;
-        afclimiter = afc_pull_in_range * 1000000.0 / 1250.0;
-    }
-    else
-    {
-        if (afc_pull_in_range < 0.0 || afc_pull_in_range > 0.159375)
-        {
-            return false;
-        }
-        afclimiter = afc_pull_in_range * 1000000.0 / 625.0;
-    }
-    center_frequency /= 10.0;
-    float integer_part = floor(center_frequency);
-    float fractional_part = center_frequency - integer_part;
-
-    uint8_t fb = (uint8_t)integer_part - 24; // Range 0 to 23
-    fbsel |= fb;
-    uint16_t fc = fractional_part * 64000;
-    set_register(Register::FREQUENCY_OFFSET_1_73, 0);  // REVISIT
-    set_register(Register::FREQUENCY_OFFSET_2_74, 0);
-    set_register(Register::FREQUENCY_BAND_SELECT_75, fbsel);
-    set_register(Register::NOMINAL_CARRIER_FREQUENCY_1_76, fc >> 8);
-    set_register(Register::NOMINAL_CARRIER_FREQUENCY_0_77, fc & 0xff);
-    set_register(Register::AFC_LIMITER_2A, afclimiter);
-    return !(get_register(Register::DEVICE_STATUS_02) & (uint8_t)Device_Status::FREQERR);
+    set_register(Register::FREQUENCY_HOPPING_CHANNEL_SELECT_79, channel);
+    return true;
 }
 
-void RFM22B::set_xtal_adjustment(uint8_t adjustment)
+void RFM22B::set_xtal_adjustment(float adjustment)
 {
+    uint8_t adj = static_cast<uint8_t>(math::clamp(128.f + (adjustment * 128.f), 0.f, 255.f));
+
     //uint8_t reg = get_register(Register::CRYSTAL_OSCILLATOR_LOAD_CAPACITANCE_09);
     //reg &= ~(0x7F);
     //reg |= adjustment & 0x7F;
-    set_register(Register::CRYSTAL_OSCILLATOR_LOAD_CAPACITANCE_09, adjustment);
+    set_register(Register::CRYSTAL_OSCILLATOR_LOAD_CAPACITANCE_09, adj);
 }
 
 
@@ -489,7 +446,7 @@ void RFM22B::set_register16(Register reg, uint16_t value)
     }
 }
 
-bool RFM22B::tx(size_t size, uint8_t channel)
+bool RFM22B::tx(size_t size)
 {
     set_register(Register::TRANSMIT_PACKET_LENGTH_3E, size);
 
@@ -520,7 +477,7 @@ bool RFM22B::tx(size_t size, uint8_t channel)
 
     return true;
 }
-bool RFM22B::rx(size_t& size, uint8_t channel, Clock::duration timeout)
+bool RFM22B::rx(size_t& size, Clock::duration timeout)
 {
     //Toggle ffclrrx bit high and low to clear RX FIFO
     set_register(Register::OPERATING_MODE_AND_FUNCTION_CONTROL_2_08, 2);

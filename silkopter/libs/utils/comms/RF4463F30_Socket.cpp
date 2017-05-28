@@ -6,8 +6,6 @@ namespace util
 namespace comms
 {
 
-constexpr uint8_t CHANNEL = 0;
-
 constexpr Clock::duration TX_DURATION = std::chrono::milliseconds(5);
 constexpr Clock::duration RX_DURATION = std::chrono::milliseconds(5);
 
@@ -84,14 +82,14 @@ bool RF4463F30_Socket::start()
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
             }
             //QLOGI("Send {}", i);
-            if (!m_impl->rf_chip.tx(data.size() - 1, 0))
+            if (!m_impl->rf_chip.tx(data.size() - 1))
             {
                 QLOGE("Failed to send");
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
             }
 
 //            size_t rx_size = 0;
-//            if (!m_impl->rf_chip.rx(rx_size, CHANNEL, std::chrono::milliseconds(1)))
+//            if (!m_impl->rf_chip.rx(rx_size, std::chrono::milliseconds(1)))
 //            {
 //                QLOGE("Cannot enter RX state");
 //            }
@@ -119,7 +117,7 @@ bool RF4463F30_Socket::start()
         size_t rx_size = 0;
         while (!m_exit)
         {
-            if (m_impl->rf_chip.rx(rx_size, CHANNEL, std::chrono::milliseconds(1000)))
+            if (m_impl->rf_chip.rx(rx_size, std::chrono::milliseconds(1000)))
             {
                 if (rx_size > 0 && rx_size <= get_mtu())
                 {
@@ -223,7 +221,7 @@ void RF4463F30_Socket::master_thread_proc()
                 if (m_impl->rf_chip.write_tx_fifo(m_impl->tx_buffer.data(), m_impl->tx_buffer.size()))
                 {
                     //The first byte is the length. The actual payload is size - 1
-                    if (m_impl->rf_chip.tx(m_impl->tx_buffer.size() - 1, CHANNEL))
+                    if (m_impl->rf_chip.tx(m_impl->tx_buffer.size() - 1))
                     {
                         result = Result::OK;
                     }
@@ -243,7 +241,7 @@ void RF4463F30_Socket::master_thread_proc()
 
         {
             size_t rx_size = 0;
-            if (m_impl->rf_chip.rx(rx_size, CHANNEL, RX_DURATION))
+            if (m_impl->rf_chip.rx(rx_size, RX_DURATION))
             {
                 if (rx_size > 0 && rx_size <= get_mtu())
                 {
@@ -274,7 +272,7 @@ void RF4463F30_Socket::slave_thread_proc()
             size_t rx_size = 0;
             while (!m_exit)
             {
-                if (m_impl->rf_chip.rx(rx_size, CHANNEL, std::chrono::seconds(500)))
+                if (m_impl->rf_chip.rx(rx_size, std::chrono::seconds(500)))
                 {
                     if (rx_size > 0 && rx_size <= get_mtu())
                     {
@@ -322,7 +320,7 @@ void RF4463F30_Socket::slave_thread_proc()
                 if (m_impl->rf_chip.write_tx_fifo(m_impl->tx_buffer.data(), m_impl->tx_buffer.size()))
                 {
                     //The first byte is the length. The actual payload is size - 1
-                    if (m_impl->rf_chip.tx(m_impl->tx_buffer.size() - 1, CHANNEL))
+                    if (m_impl->rf_chip.tx(m_impl->tx_buffer.size() - 1))
                     {
                         result = Result::OK;
                     }

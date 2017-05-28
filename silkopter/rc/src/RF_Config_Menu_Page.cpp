@@ -15,10 +15,10 @@ namespace silk
 
 constexpr float MIN_FREQUENCY = 433.05f;
 constexpr float MAX_FREQUENCY = 434.79f;
-constexpr float MIN_XTAL_ADJUSTMENT = -100.f;
-constexpr float MAX_XTAL_ADJUSTMENT = 100.f;
+constexpr float MIN_XTAL_ADJUSTMENT = -1.f;
+constexpr float MAX_XTAL_ADJUSTMENT = 1.f;
 
-constexpr size_t CENTER_FREQUENCY_SUBMENU = 2;
+constexpr size_t CHANNEL_SUBMENU = 2;
 constexpr size_t XTAL_ADJUSTMENT_SUBMENU = 3;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -33,9 +33,9 @@ RF_Config_Menu_Page::RF_Config_Menu_Page(HAL& hal)
                          "XTal Adj",
                         }, 0, 12);
 
-    m_initial_center_frequency = m_hal.get_settings().get_comms().get_rc_center_frequency();
+    m_initial_channel = m_hal.get_settings().get_comms().get_rc_channel();
     m_initial_xtal_adjustment = m_hal.get_settings().get_comms().get_rc_xtal_adjustment();
-    m_center_frequency = m_initial_center_frequency;
+    m_channel = m_initial_channel;
     m_xtal_adjustment = m_initial_xtal_adjustment;
 
     refresh_menu();
@@ -51,8 +51,8 @@ void RF_Config_Menu_Page::refresh_menu()
 
     char buffer[128];
 
-    sprintf(buffer, "Freq: %s%.2f MHz", se == CENTER_FREQUENCY_SUBMENU ? ">" : " ", m_center_frequency);
-    m_menu.set_submenu_entry(CENTER_FREQUENCY_SUBMENU, buffer);
+    sprintf(buffer, "Chan: %s%d", se == CHANNEL_SUBMENU ? ">" : " ", (int)m_channel);
+    m_menu.set_submenu_entry(CHANNEL_SUBMENU, buffer);
 
     sprintf(buffer, "XTal: %s%d", se == XTAL_ADJUSTMENT_SUBMENU ? ">" : " ", static_cast<int>(m_xtal_adjustment));
     m_menu.set_submenu_entry(XTAL_ADJUSTMENT_SUBMENU, buffer);
@@ -71,17 +71,17 @@ bool RF_Config_Menu_Page::process(Input& input, Menu_System& menu_system)
         {
             if (*m_selected_entry == 0)
             {
-                m_hal.get_settings().get_comms().set_rc_center_frequency(m_initial_center_frequency);
+                m_hal.get_settings().get_comms().set_rc_channel(m_initial_channel);
                 m_hal.get_settings().get_comms().set_rc_xtal_adjustment(m_initial_xtal_adjustment);
                 return false;
             }
             else if (*m_selected_entry == 1)
             {
-                m_hal.get_settings().get_comms().set_rc_center_frequency(m_center_frequency);
+                m_hal.get_settings().get_comms().set_rc_channel(m_channel);
                 m_hal.get_settings().get_comms().set_rc_xtal_adjustment(m_xtal_adjustment);
                 m_hal.save_settings();
 
-                m_initial_center_frequency = m_center_frequency;
+                m_initial_channel = m_channel;
                 m_initial_xtal_adjustment = m_xtal_adjustment;
 
                 m_selected_entry = boost::none;
@@ -97,19 +97,19 @@ bool RF_Config_Menu_Page::process(Input& input, Menu_System& menu_system)
         }
         else
         {
-            if (*m_selected_entry == CENTER_FREQUENCY_SUBMENU)
+            if (*m_selected_entry == CHANNEL_SUBMENU)
             {
-                float f = math::clamp(m_center_frequency + input.get_menu_encoder().get_delta() / 100.f, MIN_FREQUENCY, MAX_FREQUENCY);
-                if (!math::equals(f, m_center_frequency, math::epsilon<float>()))
+                uint8_t ch = math::clamp(m_channel + input.get_menu_encoder().get_delta(), MIN_CHANNEL, MAX_CHANNEL);
+                if (ch != m_channel)
                 {
-                    m_center_frequency = f;
-                    comms.get_rc_phy().set_center_frequency(m_center_frequency);
+                    m_channel = ch;
+                    comms.get_rc_phy().set_channel(m_channel);
                     refresh_menu();
                 }
             }
             else if (*m_selected_entry == XTAL_ADJUSTMENT_SUBMENU)
             {
-                float f = math::clamp(m_xtal_adjustment + input.get_menu_encoder().get_delta(), MIN_XTAL_ADJUSTMENT, MAX_XTAL_ADJUSTMENT);
+                float f = math::clamp(m_xtal_adjustment + input.get_menu_encoder().get_delta() / 100.f, MIN_XTAL_ADJUSTMENT, MAX_XTAL_ADJUSTMENT);
                 if (!math::equals(f, m_xtal_adjustment, math::epsilon<float>()))
                 {
                     m_xtal_adjustment = f;
