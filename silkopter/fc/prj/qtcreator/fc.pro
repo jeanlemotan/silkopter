@@ -177,7 +177,8 @@ SOURCES += \
     ../../src/bus/SPI_Linux_Bus.cpp \
     ../../src/bus/UART_Linux_Bus.cpp \
     ../../src/bus/UART_BB_Bus.cpp \
-    ../../src/processor/Quad_Multirotor_Motor_Mixer.cpp
+    ../../src/processor/Quad_Multirotor_Motor_Mixer.cpp \
+    ../../../libs/utils/hw/SPI_PIGPIO.cpp
 
 HEADERS += \
     ../../../libs/utils/chrono.h \
@@ -349,7 +350,8 @@ HEADERS += \
     ../../src/bus/UART_Linux_Bus.h \
     ../../src/bus/UART_BB_Bus.h \
     ../../src/processor/Quad_Multirotor_Motor_Mixer.h \
-    ../../../libs/common/stream/ICamera_Commands.h
+    ../../../libs/common/stream/ICamera_Commands.h \
+    ../../../libs/utils/hw/SPI_PIGPIO.h
 
 DISTFILES +=
 
