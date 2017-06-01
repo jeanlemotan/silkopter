@@ -589,22 +589,29 @@ static ts::Result<void> generate_struct_type_sz_code(Context& context, ts::IStru
 
     context.sz_section_h += "ts::Result<void> deserialize(" + native_type_str + "& value, ts::sz::Value const& sz_value);\n";
     context.sz_section_cpp += "ts::Result<void> deserialize(" + native_type_str + "& value, ts::sz::Value const& sz_value)\n"
-                                           "{\n"
-                                           "  if (!sz_value.is_object()) { return ts::Error(\"Expected object value when deserializing\"); }\n";
+                                "{\n"
+                                "  if (!sz_value.is_object()) { return ts::Error(\"Expected object value when deserializing\"); }\n"
+                                "  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)\n"
+                                "  {\n"
+                                "    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);\n";
 
     for (size_t i = 0; i < type.get_member_def_count(); i++)
     {
         ts::IMember_Def const& member_def = *type.get_member_def(i);
 
-        context.sz_section_cpp += "  {\n"
-                                             "    auto const* member_sz_value = sz_value.find_object_member_by_name(\"" + member_def.get_name() + "\");\n"
-                                             "    if (!member_sz_value) { return ts::Error(\"Cannot find member value '" + member_def.get_name() + "'\"); }\n"
-                                             "    std::remove_cv<std::remove_reference<decltype(value.get_" + member_def.get_name() + "())>::type>::type v;\n"
-                                             "    auto result = deserialize(v, *member_sz_value);\n"
-                                             "    if (result != ts::success) { return result; }\n"
-                                             "    value.set_" + member_def.get_name() + "(std::move(v));\n"
-                                             "  }\n";
+        if (i > 0)
+        {
+            context.sz_section_cpp += "    else ";
+        }
+        context.sz_section_cpp += "    if (sz_value.get_object_member_name(i) == \"" + member_def.get_name() + "\")\n"
+                                  "    {\n"
+                                  "      std::remove_cv<std::remove_reference<decltype(value.get_" + member_def.get_name() + "())>::type>::type v;\n"
+                                  "      auto result = deserialize(v, member_sz_value);\n"
+                                  "      if (result != ts::success) { return result; }\n"
+                                  "      value.set_" + member_def.get_name() + "(std::move(v));\n"
+                                  "    }\n";
     }
+    context.sz_section_cpp += "  }\n";
     context.sz_section_cpp += "  return ts::success;\n"
                                          "}\n";
 
