@@ -13,8 +13,8 @@
 namespace silk
 {
 
-constexpr float MIN_FREQUENCY = 433.05f;
-constexpr float MAX_FREQUENCY = 434.79f;
+constexpr uint8_t MIN_CHANNEL = 0;
+constexpr uint8_t MAX_CHANNEL = 128;
 constexpr float MIN_XTAL_ADJUSTMENT = -1.f;
 constexpr float MAX_XTAL_ADJUSTMENT = 1.f;
 
@@ -54,7 +54,7 @@ void RF_Config_Menu_Page::refresh_menu()
     sprintf(buffer, "Chan: %s%d", se == CHANNEL_SUBMENU ? ">" : " ", (int)m_channel);
     m_menu.set_submenu_entry(CHANNEL_SUBMENU, buffer);
 
-    sprintf(buffer, "XTal: %s%d", se == XTAL_ADJUSTMENT_SUBMENU ? ">" : " ", static_cast<int>(m_xtal_adjustment));
+    sprintf(buffer, "XTal: %s%d", se == XTAL_ADJUSTMENT_SUBMENU ? ">" : " ", static_cast<int>(m_xtal_adjustment * 100.f));
     m_menu.set_submenu_entry(XTAL_ADJUSTMENT_SUBMENU, buffer);
 }
 
@@ -99,7 +99,7 @@ bool RF_Config_Menu_Page::process(Input& input, Menu_System& menu_system)
         {
             if (*m_selected_entry == CHANNEL_SUBMENU)
             {
-                uint8_t ch = math::clamp(m_channel + input.get_menu_encoder().get_delta(), MIN_CHANNEL, MAX_CHANNEL);
+                uint8_t ch = math::clamp<uint8_t>(m_channel + input.get_menu_encoder().get_delta(), MIN_CHANNEL, MAX_CHANNEL);
                 if (ch != m_channel)
                 {
                     m_channel = ch;

@@ -8,6 +8,8 @@
 #include "utils/comms/UDP_Socket.h"
 #include "utils/comms/RFMON_Socket.h"
 #include "utils/comms/RF4463F30_Socket.h"
+#include "utils/hw/SPI_PIGPIO.h"
+#include "utils/hw/SPI_Dev.h"
 
 #include "HAL.h"
 #include "settings.def.h"
@@ -18,10 +20,17 @@ namespace silk
 //constexpr char const* VIDEO_INTERFACE1 = "wlan2";
 //constexpr char const* VIDEO_INTERFACE2 = "wlan3";
 
-//constexpr uint8_t RC_SDN_GPIO = 6;
-//constexpr uint8_t RC_NIRQ_GPIO = 26;
-//constexpr char const* RC_SPI_DEVICE = "/dev/spidev0.0";
-//constexpr size_t RC_SPEED = 16000000;
+//#define USE_SPI_PIGPIO
+
+#ifdef USE_SPI_PIGPIO
+constexpr size_t SPI_PORT = 0;
+constexpr size_t SPI_CHANNEL = 0;
+constexpr size_t SPI_SPEED = 4000000;
+#else
+const char* SPI_DEVICE = "/dev/spidev0.0";
+constexpr size_t SPI_SPEED = 4400000;
+#endif
+
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -48,10 +57,26 @@ bool Comms::start()
     rx_descriptor.max_latency = std::chrono::milliseconds(comms.get_video_max_latency_ms());
     rx_descriptor.reset_duration = std::chrono::milliseconds(comms.get_video_reset_duration_ms());
 
+#ifdef USE_SPI_PIGPIO
+    util::hw::SPI_PIGPIO* spi = new util::hw::SPI_PIGPIO();
+    m_spi.reset(spi);
+
+    ts::Result<void> result = spi->init(SPI_PORT, SPI_CHANNEL, SPI_SPEED, 0);
+#else
+    util::hw::SPI_Dev* spi = new util::hw::SPI_Dev();
+    m_spi.reset(spi);
+
+    ts::Result<void> result = spi->init(SPI_DEVICE, SPI_SPEED);
+#endif
+    if (result != ts::success)
+    {
+        QLOGW("Cannot start spi: {}", result.error().what());
+        return false;
+    }
+
     try
     {
-        m_is_connected = m_rc_phy.init(comms.get_rc_spi_device(),
-                                       comms.get_rc_spi_speed(),
+        m_is_connected = m_rc_phy.init(*m_spi,
                                        comms.get_rc_sdn_gpio(),
                                        comms.get_rc_nirq_gpio())
                 && m_rc_protocol.init()
@@ -68,9 +93,10 @@ bool Comms::start()
         return false;
     }
 
-    if (!m_rc_phy.set_center_frequency(m_hal.get_settings().get_comms().get_rc_center_frequency()))
+    uint8_t channel = m_hal.get_settings().get_comms().get_rc_channel();
+    if (!m_rc_phy.set_channel(channel))
     {
-        QLOGW("Cannot set center frequency of {}MHz", m_hal.get_settings().get_comms().get_rc_center_frequency());
+        QLOGW("Cannot set channel {}", channel);
         return false;
     }
     m_rc_phy.set_xtal_adjustment(m_hal.get_settings().get_comms().get_rc_xtal_adjustment());

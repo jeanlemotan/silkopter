@@ -39,6 +39,7 @@
 #include "utils/comms/RC_Phy.h"
 #include "utils/comms/RC_Protocol.h"
 #include "utils/comms/Video_Streamer.h"
+#include "utils/hw/ISPI.h"
 #include "Remote_Viewer_Server.h"
 
 #include <boost/asio.hpp>
@@ -102,6 +103,8 @@ private:
     bool m_is_connected = false;
 
     uint32_t m_last_req_id = 0;
+
+    std::unique_ptr<util::hw::ISPI> m_spi;
 
     mutable std::mutex m_samples_mutex;
     math::vec2u16 m_video_resolution;

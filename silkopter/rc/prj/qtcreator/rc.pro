@@ -191,7 +191,8 @@ HEADERS += \
     ../../src/IBattery_Info.h \
     ../../src/IGimbal_Control.h \
     ../../src/Battery_Calibration_Menu_Page.h \
-    ../../src/RF_Config_Menu_Page.h
+    ../../src/RF_Config_Menu_Page.h \
+    ../../../libs/utils/hw/SPI_PIGPIO.h
 
 SOURCES += \
     ../../src/main.cpp \
@@ -244,7 +245,8 @@ SOURCES += \
     ../../src/Battery_Info_ADS1115.cpp \
     ../../src/Gimbal_Control_ADS1115.cpp \
     ../../src/Battery_Calibration_Menu_Page.cpp \
-    ../../src/RF_Config_Menu_Page.cpp
+    ../../src/RF_Config_Menu_Page.cpp \
+    ../../../libs/utils/hw/SPI_PIGPIO.cpp
 
 DISTFILES += \
     ../../src/node.png \
