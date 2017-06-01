@@ -20,25 +20,25 @@ SPI_BCM::~SPI_BCM()
 {
 }
 
-ts::Result<void> SPI_BCM::init(uint32_t device, uint32_t speed, uint32_t mode)
+ts::Result<void> SPI_BCM::init(uint32_t channel, uint32_t speed, uint32_t mode)
 {
-    if (device > 1)
+    if (channel > 1)
     {
-        return ts::Error("Only SPI devices 0 & 1 are allowed");
+        return ts::Error("Only SPI channels 0 & 1 are allowed");
     }
     if (mode > 3)
     {
         return ts::Error("Only SPI modes 0 to 3 are allowed");
     }
 
-    m_device = device;
+    m_channel = channel;
     m_speed = speed;
     m_mode = mode;
 
 #ifdef RASPBERRY_PI
     bcm2835_spi_begin();
     bcm2835_spi_setBitOrder(BCM2835_SPI_BIT_ORDER_MSBFIRST);      // The default
-    bcm2835_spi_setChipSelectPolarity(m_device, LEVEL_LOW);      // the default
+    bcm2835_spi_setChipSelectPolarity(m_channel, LEVEL_LOW);      // the default
 #endif
 
     return ts::success;
@@ -95,7 +95,7 @@ bool SPI_BCM::do_transfer(void const* tx_data, void* rx_data, size_t size, uint3
 #ifdef RASPBERRY_PI
     uint32_t divider = get_divider(speed ? speed : m_speed);
 
-    bcm2835_spi_chipSelect(m_device);
+    bcm2835_spi_chipSelect(m_channel);
     bcm2835_spi_setDataMode(m_mode);
     bcm2835_spi_setClockDivider(divider);
 
@@ -118,6 +118,18 @@ bool SPI_BCM::transfer(void const* tx_data, void* rx_data, size_t size, uint32_t
 {
     QLOG_TOPIC("spi_bcm::transfer");
     return do_transfer(tx_data, rx_data, size, speed);
+}
+
+bool SPI_BCM::transfers(Transfer const* transfers, size_t transfer_count, uint32_t speed)
+{
+    for (size_t i = 0; i < transfer_count; i++)
+    {
+        if (!transfer(transfers[i].tx_data, transfers[i].rx_data, transfers[i].size, speed))
+        {
+            return false;
+        }
+    }
+    return true;
 }
 
 bool SPI_BCM::transfer_register(uint8_t reg, void const* tx_data, void* rx_data, size_t size, uint32_t speed)

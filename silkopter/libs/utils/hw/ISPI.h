@@ -1,5 +1,7 @@
 #pragma once
 
+#include "utils/Clock.h"
+
 namespace util
 {
 namespace hw
@@ -16,6 +18,16 @@ public:
 
     virtual bool transfer(void const* tx_data, void* rx_data, size_t size, uint32_t speed = 0) = 0;
     virtual bool transfer_register(uint8_t reg, void const* tx_data, void* rx_data, size_t size, uint32_t speed = 0) = 0;
+
+    struct Transfer
+    {
+        void const* tx_data = nullptr;
+        void* rx_data = nullptr;
+        size_t size = 0;
+        Clock::duration delay = Clock::duration::zero();
+    };
+
+    virtual bool transfers(Transfer const* transfers, size_t transfer_count, uint32_t speed = 0) = 0;
 
     //-----------------------------------
     //convenience method
