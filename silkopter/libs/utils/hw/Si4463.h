@@ -1,7 +1,7 @@
 #pragma once
 
 #include <string>
-#include "SPI_Dev.h"
+#include "ISPI.h"
 #include "utils/Clock.h"
 
 namespace util
@@ -15,7 +15,7 @@ public:
     Si4463();
     ~Si4463();
 
-    bool init(std::string const& device, uint32_t speed, uint8_t sdn_gpio, uint8_t nirq_gpio);
+    bool init(hw::ISPI& spi, uint8_t sdn_gpio, uint8_t nirq_gpio);
 
     enum class Command : uint8_t
     {
@@ -241,9 +241,11 @@ public:
     bool boot();
     bool shutdown();
     bool reset();
+    bool check_part();
 
-    bool call_api(Command cmd, void const* tx_data, size_t tx_size, void* rx_data, size_t rx_size);
     bool call_api_raw(void const* tx_data, size_t tx_size, void* rx_data, size_t rx_size);
+
+    bool get_properties(Property start_prop, size_t prop_count, void* rx_data, size_t rx_size);
 
     bool set_property(Property prop, void const* tx_data, size_t tx_size);
     bool set_properties(Property start_prop, size_t prop_count, void const* tx_data, size_t tx_size);
@@ -253,12 +255,12 @@ public:
     bool write_tx_fifo(void const* data, size_t size);
     bool read_rx_fifo(void* data, size_t size);
 
-    bool wait_for_ph_interrupt(bool& got_it, uint8_t& status, Clock::duration timeout);
+    bool wait_for_ph_interrupt(bool& got_it, uint8_t clear_interrupts, uint8_t& pending, uint8_t& status, Clock::duration timeout);
 
-    bool read_frr_a(uint8_t& value);
-    bool read_frr_b(uint8_t& value);
-    bool read_frr_c(uint8_t& value);
-    bool read_frr_d(uint8_t& value);
+    bool read_frr_a(uint8_t* values, size_t value_count);
+    bool read_frr_b(uint8_t* values, size_t value_count);
+    bool read_frr_c(uint8_t* values, size_t value_count);
+    bool read_frr_d(uint8_t* values, size_t value_count);
 
     bool wait_for_cts();
     bool get_nirq_level();
@@ -271,8 +273,9 @@ private:
     std::vector<uint8_t> m_tx_data;
     std::vector<uint8_t> m_rx_data;
 
-    SPI_Dev m_spi_dev;
+    hw::ISPI* m_spi = nullptr;
     bool m_is_initialized = false;
+    bool m_needs_to_wait_for_cts = false;
 };
 
 inline bool Si4463::call_api_raw(std::initializer_list<uint8_t> const& tx_data)
