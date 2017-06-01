@@ -2,6 +2,8 @@
 
 #include <chrono>
 #include <string>
+#include <vector>
+#include <mutex>
 #include "Si4463.h"
 #include "utils/Clock.h"
 
@@ -16,25 +18,38 @@ public:
     RF4463F30();
     ~RF4463F30();
 
-    bool init(std::string const& device, uint32_t speed, uint8_t sdn_gpio, uint8_t nirq_gpio);
+    bool init(hw::ISPI& spi, uint8_t sdn_gpio, uint8_t nirq_gpio);
 
     bool set_channel(uint8_t channel);
     uint8_t get_channel() const;
     void set_xtal_adjustment(float adjustment); //-1 - 1. Default is 0;
 
-    bool write_tx_fifo(void const* data, uint8_t size);
+    enum class FIFO_Mode
+    {
+        SPLIT,
+        HALF_DUPLEX
+    };
 
-    bool begin_tx(size_t size);
-    bool end_tx();
+    bool set_fifo_mode(FIFO_Mode mode);
 
-    bool tx(size_t size);
+    uint8_t* get_tx_fifo_payload_ptr(size_t fifo_size);
 
-    bool begin_rx();
-    bool end_rx(size_t& size, Clock::duration timeout);
+    size_t get_rx_fifo_payload_size() const;
+    uint8_t* get_rx_fifo_payload_ptr();
 
-    bool rx(size_t& size, Clock::duration timeout);
+    bool tx();
 
-    bool read_rx_fifo(void* data, size_t& size);
+    enum class RX_Result
+    {
+        OK,
+        TIMEOUT,
+        CRC_FAILED,
+        RX_FAILED,
+        FIFO_FAILED
+    };
+
+    RX_Result rx(size_t max_expected_size, Clock::duration timeout);
+    RX_Result resume_rx(Clock::duration timeout);
 
     int8_t get_input_dBm();
 
@@ -43,10 +58,21 @@ private:
     void shutdown();
     void reset();
 
+    size_t get_fifo_capacity() const;
+
     bool m_is_initialized = false;
     bool m_tx_started = false;
     uint8_t m_channel = 0;
     Si4463 m_chip;
+
+    FIFO_Mode m_fifo_mode = FIFO_Mode::SPLIT;
+    std::vector<uint8_t> m_tx_fifo;
+    uint8_t m_tx_fifo_threshold = 0;
+
+    std::vector<uint8_t> m_rx_fifo;
+    uint8_t m_rx_fifo_threshold = 0;
+
+    mutable std::recursive_mutex m_mutex;
 };
 
 }

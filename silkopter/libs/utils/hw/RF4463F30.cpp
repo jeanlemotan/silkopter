@@ -7,10 +7,11 @@ namespace util
 namespace hw
 {
 
+volatile bool s_force_compiler_to_keep_loop = true;
+
 
 RF4463F30::RF4463F30()
 {
-
 }
 
 RF4463F30::~RF4463F30()
@@ -18,14 +19,16 @@ RF4463F30::~RF4463F30()
     shutdown();
 }
 
-bool RF4463F30::init(const std::string& device, uint32_t speed, uint8_t sdn_gpio, uint8_t nirq_gpio)
+bool RF4463F30::init(hw::ISPI& spi, uint8_t sdn_gpio, uint8_t nirq_gpio)
 {
+    std::lock_guard<std::recursive_mutex> lg(m_mutex);
+
     if (m_is_initialized)
     {
         return true;
     }
 
-    if (!m_chip.init(device, speed, sdn_gpio, nirq_gpio))
+    if (!m_chip.init(spi, sdn_gpio, nirq_gpio))
     {
         return false;
     }
@@ -37,6 +40,8 @@ bool RF4463F30::init(const std::string& device, uint32_t speed, uint8_t sdn_gpio
 
 bool RF4463F30::init()
 {
+    std::lock_guard<std::recursive_mutex> lg(m_mutex);
+
 #if 1
     uint8_t config[] = RADIO_CONFIGURATION_DATA_ARRAY;
 
@@ -233,6 +238,14 @@ bool RF4463F30::init()
     }
 #endif
 
+    if (!m_chip.check_part())
+    {
+        goto error;
+    }
+
+
+    set_fifo_mode(FIFO_Mode::HALF_DUPLEX);
+
     return true;
 
 error:
@@ -242,6 +255,8 @@ error:
 
 void RF4463F30::shutdown()
 {
+    std::lock_guard<std::recursive_mutex> lg(m_mutex);
+
     if (m_is_initialized)
     {
         m_chip.shutdown();
@@ -250,25 +265,106 @@ void RF4463F30::shutdown()
 
 void RF4463F30::reset()
 {
+    std::lock_guard<std::recursive_mutex> lg(m_mutex);
+
     if (m_is_initialized)
     {
         m_chip.reset();
     }
 }
 
+bool RF4463F30::set_fifo_mode(FIFO_Mode mode)
+{
+    std::lock_guard<std::recursive_mutex> lg(m_mutex);
+
+    uint8_t args[1] = { 0 };
+    if (!m_chip.get_properties(Si4463::Property::GLOBAL_CONFIG, 1, args, sizeof(args)))
+    {
+        QLOGE("Failed to get global config, to set the fifo mode to {}", mode);
+        return false;
+    }
+
+    if (mode == FIFO_Mode::SPLIT)
+    {
+        args[0] &= ~(1 << 4);
+    }
+    else
+    {
+        args[0] |= (1 << 4);
+    }
+
+    if (!m_chip.set_properties(Si4463::Property::GLOBAL_CONFIG, 1, args, sizeof(args)))
+    {
+        QLOGE("Failed to set global config, to set the fifo mode to {}", mode);
+        return false;
+    }
+
+    //reset the FIFOs to make the change active
+    if (!m_chip.call_api_raw({ static_cast<uint8_t>(Si4463::Command::FIFO_INFO), 0x03 }))
+    {
+        return false;
+    }
+
+    m_fifo_mode = mode;
+
+    m_tx_fifo_threshold = 16;
+    m_chip.set_properties(Si4463::Property::PKT_TX_THRESHOLD, 1, &m_tx_fifo_threshold, 1);
+    m_chip.get_properties(Si4463::Property::PKT_TX_THRESHOLD, 1, &m_tx_fifo_threshold, 1);
+
+    m_rx_fifo_threshold = 16;
+    m_chip.set_properties(Si4463::Property::PKT_RX_THRESHOLD, 1, &m_rx_fifo_threshold, 1);
+    m_chip.get_properties(Si4463::Property::PKT_RX_THRESHOLD, 1, &m_rx_fifo_threshold, 1);
+    QLOGI("FIFO thresholds: rx {}, tx {}", m_rx_fifo_threshold, m_tx_fifo_threshold);
+
+    return true;
+}
+
+uint8_t* RF4463F30::get_tx_fifo_payload_ptr(size_t fifo_size)
+{
+    std::lock_guard<std::recursive_mutex> lg(m_mutex);
+
+    if (fifo_size > 255)
+    {
+        return nullptr;
+    }
+
+    m_tx_fifo.resize(fifo_size + 1);
+    return m_tx_fifo.data() + 1;
+}
+
+size_t RF4463F30::get_rx_fifo_payload_size() const
+{
+    std::lock_guard<std::recursive_mutex> lg(m_mutex);
+
+    return m_rx_fifo.size();
+}
+
+uint8_t* RF4463F30::get_rx_fifo_payload_ptr()
+{
+    std::lock_guard<std::recursive_mutex> lg(m_mutex);
+
+    return m_rx_fifo.data();
+}
+
 uint8_t RF4463F30::get_channel() const
 {
+    std::lock_guard<std::recursive_mutex> lg(m_mutex);
+
     return m_channel;
 }
 
 bool RF4463F30::set_channel(uint8_t channel)
 {
+    std::lock_guard<std::recursive_mutex> lg(m_mutex);
+
     m_channel = channel;
     return true;
 }
 
 void RF4463F30::set_xtal_adjustment(float adjustment)
 {
+    std::lock_guard<std::recursive_mutex> lg(m_mutex);
+
     if (!m_is_initialized)
     {
         return;
@@ -283,234 +379,337 @@ void RF4463F30::set_xtal_adjustment(float adjustment)
     }
 }
 
-bool RF4463F30::write_tx_fifo(void const* data, uint8_t size)
+size_t RF4463F30::get_fifo_capacity() const
 {
-    if (!m_is_initialized)
+    if (m_fifo_mode == FIFO_Mode::SPLIT)
     {
-        return false;
+        return 64;
     }
-
-    //reset TX fifo
-    if (!m_chip.call_api_raw({ static_cast<uint8_t>(Si4463::Command::FIFO_INFO), 0x01 }))
-    {
-        return false;
-    }
-
-    return m_chip.write_tx_fifo(data, size);
+    return 129;
 }
-bool RF4463F30::begin_tx(size_t size)
+
+bool RF4463F30::tx()
 {
+    std::lock_guard<std::recursive_mutex> lg(m_mutex);
+
     if (!m_is_initialized)
     {
         return false;
+    }
+
+    //TODO - set idle mode here, to avoid RX mode interfering with the fifo
+
+    //reset TX & RX fifos
+    if (!m_chip.call_api_raw({ static_cast<uint8_t>(Si4463::Command::FIFO_INFO), 0x03 }))
+    {
+        return false;
+    }
+
+    uint8_t payload_size = m_tx_fifo.size() - 1;
+    m_tx_fifo[0] = (uint8_t)payload_size;
+
+    size_t pending_fifo_size = m_tx_fifo.size();
+    uint8_t const* fifo_ptr = m_tx_fifo.data();
+
+    constexpr size_t initial_upload = 32u;
+    QASSERT(initial_upload <= get_fifo_capacity());
+
+    //QLOGI("Start");
+
+    //do the initial upload in the fifo.
+    //I don't do it all here to be able to start TX faster
+    {
+        size_t written = std::min(pending_fifo_size, initial_upload);
+        if (!m_chip.write_tx_fifo(fifo_ptr, written))
+        {
+            QLOGW("Write FIFO failed 1.");
+            return false;
+        }
+        pending_fifo_size -= written;
+        fifo_ptr += written;
     }
 
     //set the packet size
+    {
+        uint8_t args[2] = { (uint8_t)(payload_size >> 8), (uint8_t)(payload_size & 0xFF) };
+        if (!m_chip.set_properties(Si4463::Property::PKT_FIELD_2_LENGTH_12_8, 2, args, sizeof(args)))
+        {
+            return false;
+        }
+    }
 
     //enter tx state
-    uint8_t condition =
-            8 << 4 | //rx state
-            0 << 0; //start immediately
+    {
+        uint8_t args[] =
+        {
+            (uint8_t)Si4463::Command::START_TX,
+            m_channel,
 
-    if (!m_chip.call_api_raw(
-            {
-                (uint8_t)Si4463::Command::START_TX,
-                m_channel,
-                condition,
-                0, 0 //(uint8_t)(size >> 8), (uint8_t)(size & 0xFF)//0x00, 0x00 //use the field1 length
-            }))
-    {
-        return false;
-    }
-    if (!m_chip.wait_for_cts())
-    {
-        return false;
+            3 << 4 | //ready
+            0 << 0, //start immediately
+
+            0, 0 //(uint8_t)(payload_size >> 8), (uint8_t)(payload_size & 0xFF)//0x00, 0x00 //use the field1 length
+        };
+        if (!m_chip.call_api_raw(args, sizeof(args), nullptr, 0))
+        {
+            return false;
+        }
     }
 
-    m_tx_started = true;
-
-    return true;
-}
-
-bool RF4463F30::end_tx()
-{
-    if (!m_is_initialized)
+    //do the rest of the upload up to fifo capacity
+    //this cannot overflow, by definition
+    if (pending_fifo_size > 0)
     {
-        return false;
-    }
-    if (!m_tx_started)
-    {
-        QASSERT(false);
-        return false;
+        size_t written = std::min(pending_fifo_size, get_fifo_capacity() - initial_upload);
+        if (!m_chip.write_tx_fifo(fifo_ptr, written))
+        {
+            QLOGW("Write FIFO failed 2.");
+            return false;
+        }
+        pending_fifo_size -= written;
+        fifo_ptr += written;
     }
 
-    m_tx_started = false;
+    //calculate the time it would take to transmit the bytes in the fifo
+    float bitrate = 1000000.f / 8.f;
+    Clock::duration duration_per_byte = std::chrono::duration_cast<Clock::duration>(std::chrono::duration<float>(1.0f / bitrate));
+    Clock::time_point start_tp = Clock::now();
+    Clock::duration max_duration = duration_per_byte * m_tx_fifo.size() * 4;
 
-    auto start = Clock::now();
-
+    size_t spin = 0;
+    size_t uploads = 0;
     do
     {
-        bool got_it = false;
-        uint8_t status = 0;
-        if (!m_chip.wait_for_ph_interrupt(got_it, status, std::chrono::milliseconds(100)))
+        spin++;
+
         {
-            return false;
+            uint8_t response[8] = { 0 };
+            uint8_t request[] = { static_cast<uint8_t>(Si4463::Command::GET_INT_STATUS) };
+            m_chip.call_api_raw(request, sizeof(request), response, sizeof(response));
+            {
+                uint8_t ph_flags = response[3];
+                uint8_t chip_flags = response[7];
+
+                if (chip_flags & (1 << 5))
+                {
+                    if (!m_chip.call_api_raw({ static_cast<uint8_t>(Si4463::Command::FIFO_INFO), 0x03 }))
+                    {
+                        return false;
+                    }
+                    QLOGI("Overflow: spin {}, uploads {}, data left {}", spin, uploads, pending_fifo_size);
+                    return false;
+                }
+
+                if ((ph_flags & (1 << 5)) != 0)
+                {
+                    if (pending_fifo_size > 0)
+                    {
+                        QLOGW("TX finished with {} bytes left in the fifo !!!", pending_fifo_size);
+                    }
+                    break;
+                }
+
+                if (((ph_flags & 0x2) != 0) && pending_fifo_size > 0)
+                {
+                    size_t written = std::min<size_t>(pending_fifo_size, m_tx_fifo_threshold);
+
+                    if (!m_chip.write_tx_fifo(fifo_ptr, written))
+                    {
+                        QLOGW("Write FIFO failed 3.");
+                        return false;
+                    }
+                    pending_fifo_size -= written;
+                    fifo_ptr += written;
+                    uploads++;
+                }
+            }
+
+            //std::this_thread::sleep_for(std::chrono::microseconds(100));
         }
-        if (got_it && (status & (1 << 5)) != 0)
+
+        if (Clock::now() - start_tp > max_duration)
         {
+            QLOGW("Timeout");
             break;
         }
-
-        if (Clock::now() - start > std::chrono::milliseconds(100))
-        {
-//            uint8_t response[2];
-//            if (!m_chip.call_api(Si4463::Command::REQUEST_DEVICE_STATE, nullptr, 0, response, sizeof(response)))
-//            {
-//                return false;
-//            }
-
-            reset();
-            init();
-
-            QLOGW("Timeout");
-            return false;
-        }
-
-        //std::this_thread::sleep_for(std::chrono::microseconds(10));
     } while (true);
 
     return true;
 }
 
-bool RF4463F30::tx(size_t size)
+RF4463F30::RX_Result RF4463F30::rx(size_t max_expected_size, Clock::duration timeout)
 {
-    if (!begin_tx(size))
-    {
-        return false;
-    }
-    return end_tx();
-}
+    std::lock_guard<std::recursive_mutex> lg(m_mutex);
 
-bool RF4463F30::begin_rx()
-{
     if (!m_is_initialized)
     {
-        return false;
+        return RX_Result::RX_FAILED;
     }
 
-    uint8_t frr_d = 0;
-    if (!m_chip.read_frr_d(frr_d))
-    {
-        return false;
-    }
+    m_rx_fifo.clear();
 
-    if ((frr_d & 0xF) == 8)
-    {
-        return true;
-    }
-
-    //reset RX fifo
-    if (!m_chip.call_api_raw({ static_cast<uint8_t>(Si4463::Command::FIFO_INFO), 0x02 }))
-    {
-        return false;
-    }
 
     //set the packet size
     //this needs to be maximum otherwise the rx fifo will not get data.
     //The actual data that is in the rx fifo will be the max(this value, actual data size received)
-    uint8_t args[2] = { (uint8_t)(0), (uint8_t)(64) };
+    uint8_t args[2] = { (uint8_t)(max_expected_size >> 8), (uint8_t)(max_expected_size & 0xFF) };
     if (!m_chip.set_properties(Si4463::Property::PKT_FIELD_2_LENGTH_12_8, 2, args, sizeof(args)))
     {
-        return false;
+        return RX_Result::RX_FAILED;
     }
 
-    return m_chip.call_api_raw(
+    if (!m_chip.call_api_raw({ static_cast<uint8_t>(Si4463::Command::FIFO_INFO), 0x03 }))
+    {
+        return RX_Result::RX_FAILED;
+    }
+
+    return resume_rx(timeout);
+}
+
+RF4463F30::RX_Result RF4463F30::resume_rx(Clock::duration timeout)
+{
+    std::lock_guard<std::recursive_mutex> lg(m_mutex);
+
+    if (!m_is_initialized)
+    {
+        return RX_Result::RX_FAILED;
+    }
+
+    m_rx_fifo.clear();
+
+    //reset RX fifo
+//    if (!m_chip.call_api_raw({ static_cast<uint8_t>(Si4463::Command::FIFO_INFO), 0x03 }))
+//    {
+//        return RX_Result::RX_FAILED;
+//    }
+
+    if (!m_chip.call_api_raw(
     {
         (uint8_t)Si4463::Command::START_RX,
         m_channel,
         0x00, //start immediately
         0x00, 0x00, //size = 0
-        0, //preamble timeout -> rx state
-        3, //valid packet -> ready state
-        0  //invalid packet -> rx state
-    });
-}
-bool RF4463F30::end_rx(size_t& size, Clock::duration timeout)
-{
-    if (!m_is_initialized)
+        0, //preamble timeout -> no change
+        3, //valid packet -> ready
+        3  //invalid packet -> ready
+    }))
     {
-        return false;
+        return RX_Result::RX_FAILED;
     }
 
-    size = 0;
+    //-------------------------------------------------
+
+    size_t spin = 0;
+    size_t downloads = 0;
+    bool overflow = false;
 
     auto start = Clock::now();
-
-    bool received = false;
     do
     {
-        bool got_it = false;
-        uint8_t status = 0;
-        if (!m_chip.wait_for_ph_interrupt(got_it, status, timeout))
+        spin++;
+
         {
-            return false;
+            uint8_t response[8] = { 0 };
+            uint8_t request[] = { static_cast<uint8_t>(Si4463::Command::GET_INT_STATUS) };
+            if (m_chip.call_api_raw(request, sizeof(request), response, sizeof(response)))
+            {
+                uint8_t ph_flags = response[3];
+                uint8_t chip_flags = response[7];
+
+                if (chip_flags & (1 << 5))
+                {
+                    QLOGI("Overflow: spin {}, downloads {}", spin, downloads);
+
+                    if (!m_chip.call_api_raw({ static_cast<uint8_t>(Si4463::Command::FIFO_INFO), 0x03 }))
+                    {
+                        return RX_Result::RX_FAILED;
+                    }
+                    return RX_Result::FIFO_FAILED;
+                }
+
+                //crc error?
+                if ((ph_flags & (1 << 2)) != 0 || (ph_flags & (1 << 3)) != 0)
+                {
+                    if (!m_chip.call_api_raw({ static_cast<uint8_t>(Si4463::Command::FIFO_INFO), 0x03 }))
+                    {
+                        return RX_Result::RX_FAILED;
+                    }
+                    return RX_Result::CRC_FAILED;
+                }
+
+                //data in the fifo is ready?
+                if (ph_flags & 0x1)
+                {
+//                    {
+//                        uint8_t response[1] = { 0 };
+//                        uint8_t request[2] = { static_cast<uint8_t>(Si4463::Command::FIFO_INFO), 0x0 };
+//                        if (m_chip.call_api_raw(request, sizeof(request), response, sizeof(response)))
+//                        {
+//                            size_t available = response[0];
+//                            if (available < m_rx_fifo_threshold)
+//                            {
+//                                QLOGI("available {} - xxx {}", available, m_rx_fifo_threshold);
+//                            }
+//                        }
+//                    }
+
+                    size_t available = m_rx_fifo_threshold;
+                    size_t offset = m_rx_fifo.size();
+                    m_rx_fifo.resize(offset + available);
+                    if (!m_chip.read_rx_fifo(m_rx_fifo.data() + offset, available))
+                    {
+                        QLOGW("Read FIFO failed.");
+                        return RX_Result::FIFO_FAILED;
+                    }
+                    downloads++;
+                }
+
+                //are we done?
+                if ((ph_flags & (1 << 4)) != 0)
+                {
+                    break;
+                }
+            }
         }
-        if (got_it && (status & (1 << 4)) != 0) //got a packet
+
+        if (Clock::now() - start > timeout)
         {
-            received = true;
-            break;
+            return RX_Result::TIMEOUT;
+        }
+    } while (true);
+
+    //read the rest of the fifo
+    {
+        uint8_t response[2] = { 0 };
+        uint8_t request[] = { static_cast<uint8_t>(Si4463::Command::PACKET_INFO) };
+        if (m_chip.call_api_raw(request, sizeof(request), response, sizeof(response)))
+        {
+            size_t total_size = (response[0] << 8) | response[1];
+            if (total_size != 250)
+            {
+                QLOGI("total size {} - crt {} / downloads: {}", total_size, m_rx_fifo.size(), downloads);
+            }
+            if (total_size > m_rx_fifo.size())
+            {
+                size_t available = total_size - m_rx_fifo.size();
+                size_t offset = m_rx_fifo.size();
+                m_rx_fifo.resize(offset + available);
+                if (!m_chip.read_rx_fifo(m_rx_fifo.data() + offset, available))
+                {
+                    QLOGW("Read FIFO failed.");
+                    return RX_Result::FIFO_FAILED;
+                }
+            }
         }
     }
-    while (Clock::now() - start < timeout);
 
-    if (!received)
-    {
-        size = 0;
-        return true; //no error, but no packet either
-    }
-
-    uint8_t response[2];
-    if (!m_chip.call_api(Si4463::Command::PACKET_INFO, nullptr, 0, response, sizeof(response)))
-    {
-        return false;
-    }
-
-    size = ((uint16_t)response[0] << 8) & 0xFF00;
-    size |= (uint16_t)response[1] & 0x00FF;
-
-    return true;
-}
-
-bool RF4463F30::rx(size_t& size, Clock::duration timeout)
-{
-    if (!m_is_initialized)
-    {
-        return false;
-    }
-
-    if (!begin_rx())
-    {
-        return false;
-    }
-    if (!end_rx(size, timeout))
-    {
-        return false;
-    }
-
-    return true;
-}
-bool RF4463F30::read_rx_fifo(void* data, size_t& size)
-{
-    if (!m_is_initialized)
-    {
-        return false;
-    }
-
-    return m_chip.read_rx_fifo(data, size);
+    return RX_Result::OK;
 }
 
 int8_t RF4463F30::get_input_dBm()
 {
+    std::lock_guard<std::recursive_mutex> lg(m_mutex);
+
     if (!m_is_initialized)
     {
         return false;
@@ -518,7 +717,7 @@ int8_t RF4463F30::get_input_dBm()
 
     int8_t dBm = 0;
 
-    if (!m_chip.read_frr_a(reinterpret_cast<uint8_t&>(dBm)))
+    if (!m_chip.read_frr_a(reinterpret_cast<uint8_t*>(&dBm), 1))
     {
         return 0;
     }
