@@ -5492,45 +5492,44 @@ ts::sz::Value serialize(uint32_t const& value)
 ts::Result<void> deserialize(IUAV_Descriptor::Comms& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("rc_channel");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'rc_channel'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_rc_channel())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_rc_channel(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("rc_xtal_ajdustment");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'rc_xtal_ajdustment'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_rc_xtal_ajdustment())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_rc_xtal_ajdustment(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("fec_coding_k");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'fec_coding_k'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_fec_coding_k())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_fec_coding_k(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("fec_coding_n");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'fec_coding_n'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_fec_coding_n())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_fec_coding_n(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("video_wlan_interface");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'video_wlan_interface'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_video_wlan_interface())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_video_wlan_interface(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "rc_channel")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_rc_channel())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_rc_channel(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "rc_xtal_ajdustment")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_rc_xtal_ajdustment())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_rc_xtal_ajdustment(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "fec_coding_k")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_fec_coding_k())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_fec_coding_k(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "fec_coding_n")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_fec_coding_n())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_fec_coding_n(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "video_wlan_interface")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_video_wlan_interface())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_video_wlan_interface(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -5548,37 +5547,37 @@ ts::sz::Value serialize(IUAV_Descriptor::Comms const& value)
 ts::Result<void> deserialize(IUAV_Descriptor& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("name");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'name'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_name())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_name(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("comms");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'comms'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_comms())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_comms(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("mass");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'mass'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_mass())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_mass(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("moment_of_inertia");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'moment_of_inertia'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_moment_of_inertia())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_moment_of_inertia(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "name")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_name())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_name(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "comms")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_comms())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_comms(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "mass")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_mass())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_mass(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "moment_of_inertia")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_moment_of_inertia())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_moment_of_inertia(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -5711,6 +5710,10 @@ ts::sz::Value serialize(Poly<IUAV_Descriptor> const& value)
 ts::Result<void> deserialize(IBus_Descriptor& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
+  {
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+  }
   return ts::success;
 }
 ts::sz::Value serialize(IBus_Descriptor const& value)
@@ -5814,6 +5817,10 @@ ts::sz::Value serialize(Poly<IBus_Descriptor> const& value)
 ts::Result<void> deserialize(INode_Descriptor& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
+  {
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+  }
   return ts::success;
 }
 ts::sz::Value serialize(INode_Descriptor const& value)
@@ -6277,6 +6284,10 @@ ts::sz::Value serialize(Poly<INode_Descriptor> const& value)
 ts::Result<void> deserialize(INode_Config& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
+  {
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+  }
   return ts::success;
 }
 ts::sz::Value serialize(INode_Config const& value)
@@ -6740,29 +6751,30 @@ ts::sz::Value serialize(Poly<INode_Config> const& value)
 ts::Result<void> deserialize(Settings::Bus_Data& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("name");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'name'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_name())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_name(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("type");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'type'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_type())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_type(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("descriptor");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'descriptor'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_descriptor())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_descriptor(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "name")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_name())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_name(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "type")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_type())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_type(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "descriptor")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_descriptor())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_descriptor(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -6778,45 +6790,44 @@ ts::sz::Value serialize(Settings::Bus_Data const& value)
 ts::Result<void> deserialize(Settings::Node_Data& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("name");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'name'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_name())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_name(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("type");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'type'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_type())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_type(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("descriptor");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'descriptor'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_descriptor())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_descriptor(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("config");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'config'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_config())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_config(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("input_paths");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'input_paths'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_input_paths())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_input_paths(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "name")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_name())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_name(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "type")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_type())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_type(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "descriptor")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_descriptor())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_descriptor(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "config")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_config())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_config(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "input_paths")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_input_paths())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_input_paths(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -6834,29 +6845,30 @@ ts::sz::Value serialize(Settings::Node_Data const& value)
 ts::Result<void> deserialize(Settings& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("uav_descriptor");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'uav_descriptor'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_uav_descriptor())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_uav_descriptor(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("buses");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'buses'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_buses())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_buses(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("nodes");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'nodes'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_nodes())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_nodes(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "uav_descriptor")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_uav_descriptor())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_uav_descriptor(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "buses")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_buses())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_buses(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "nodes")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_nodes())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_nodes(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -8050,85 +8062,79 @@ ts::sz::Value serialize(std::vector<Settings::Node_Data> const& value)
 ts::Result<void> deserialize(Multirotor_Descriptor& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("name");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'name'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_name())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_name(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("comms");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'comms'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_comms())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_comms(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("mass");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'mass'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_mass())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_mass(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("moment_of_inertia");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'moment_of_inertia'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_moment_of_inertia())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_moment_of_inertia(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("radius");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'radius'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_radius())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_radius(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("height");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'height'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_height())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_height(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("motor_z_torque");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'motor_z_torque'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_motor_z_torque())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_motor_z_torque(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("motor_thrust");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'motor_thrust'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_motor_thrust())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_motor_thrust(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("motor_acceleration");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'motor_acceleration'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_motor_acceleration())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_motor_acceleration(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("motor_deceleration");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'motor_deceleration'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_motor_deceleration())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_motor_deceleration(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "name")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_name())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_name(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "comms")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_comms())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_comms(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "mass")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_mass())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_mass(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "moment_of_inertia")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_moment_of_inertia())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_moment_of_inertia(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "radius")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_radius())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_radius(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "height")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_height())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_height(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "motor_z_torque")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_motor_z_torque())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_motor_z_torque(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "motor_thrust")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_motor_thrust())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_motor_thrust(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "motor_acceleration")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_motor_acceleration())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_motor_acceleration(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "motor_deceleration")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_motor_deceleration())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_motor_deceleration(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -8151,85 +8157,79 @@ ts::sz::Value serialize(Multirotor_Descriptor const& value)
 ts::Result<void> deserialize(Tri_Multirotor_Descriptor& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("name");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'name'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_name())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_name(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("comms");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'comms'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_comms())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_comms(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("mass");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'mass'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_mass())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_mass(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("moment_of_inertia");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'moment_of_inertia'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_moment_of_inertia())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_moment_of_inertia(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("radius");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'radius'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_radius())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_radius(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("height");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'height'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_height())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_height(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("motor_z_torque");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'motor_z_torque'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_motor_z_torque())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_motor_z_torque(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("motor_thrust");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'motor_thrust'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_motor_thrust())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_motor_thrust(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("motor_acceleration");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'motor_acceleration'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_motor_acceleration())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_motor_acceleration(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("motor_deceleration");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'motor_deceleration'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_motor_deceleration())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_motor_deceleration(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "name")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_name())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_name(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "comms")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_comms())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_comms(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "mass")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_mass())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_mass(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "moment_of_inertia")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_moment_of_inertia())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_moment_of_inertia(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "radius")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_radius())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_radius(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "height")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_height())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_height(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "motor_z_torque")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_motor_z_torque())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_motor_z_torque(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "motor_thrust")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_motor_thrust())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_motor_thrust(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "motor_acceleration")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_motor_acceleration())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_motor_acceleration(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "motor_deceleration")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_motor_deceleration())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_motor_deceleration(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -8252,93 +8252,86 @@ ts::sz::Value serialize(Tri_Multirotor_Descriptor const& value)
 ts::Result<void> deserialize(Quad_Multirotor_Descriptor& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("name");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'name'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_name())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_name(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("comms");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'comms'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_comms())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_comms(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("mass");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'mass'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_mass())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_mass(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("moment_of_inertia");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'moment_of_inertia'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_moment_of_inertia())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_moment_of_inertia(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("radius");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'radius'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_radius())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_radius(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("height");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'height'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_height())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_height(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("motor_z_torque");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'motor_z_torque'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_motor_z_torque())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_motor_z_torque(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("motor_thrust");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'motor_thrust'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_motor_thrust())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_motor_thrust(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("motor_acceleration");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'motor_acceleration'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_motor_acceleration())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_motor_acceleration(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("motor_deceleration");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'motor_deceleration'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_motor_deceleration())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_motor_deceleration(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("plus_configuration");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'plus_configuration'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_plus_configuration())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_plus_configuration(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "name")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_name())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_name(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "comms")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_comms())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_comms(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "mass")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_mass())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_mass(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "moment_of_inertia")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_moment_of_inertia())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_moment_of_inertia(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "radius")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_radius())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_radius(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "height")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_height())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_height(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "motor_z_torque")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_motor_z_torque())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_motor_z_torque(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "motor_thrust")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_motor_thrust())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_motor_thrust(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "motor_acceleration")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_motor_acceleration())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_motor_acceleration(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "motor_deceleration")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_motor_deceleration())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_motor_deceleration(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "plus_configuration")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_plus_configuration())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_plus_configuration(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -8362,93 +8355,86 @@ ts::sz::Value serialize(Quad_Multirotor_Descriptor const& value)
 ts::Result<void> deserialize(Hexa_Multirotor_Descriptor& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("name");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'name'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_name())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_name(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("comms");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'comms'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_comms())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_comms(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("mass");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'mass'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_mass())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_mass(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("moment_of_inertia");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'moment_of_inertia'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_moment_of_inertia())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_moment_of_inertia(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("radius");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'radius'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_radius())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_radius(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("height");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'height'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_height())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_height(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("motor_z_torque");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'motor_z_torque'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_motor_z_torque())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_motor_z_torque(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("motor_thrust");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'motor_thrust'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_motor_thrust())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_motor_thrust(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("motor_acceleration");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'motor_acceleration'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_motor_acceleration())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_motor_acceleration(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("motor_deceleration");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'motor_deceleration'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_motor_deceleration())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_motor_deceleration(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("plus_configuration");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'plus_configuration'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_plus_configuration())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_plus_configuration(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "name")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_name())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_name(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "comms")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_comms())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_comms(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "mass")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_mass())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_mass(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "moment_of_inertia")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_moment_of_inertia())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_moment_of_inertia(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "radius")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_radius())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_radius(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "height")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_height())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_height(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "motor_z_torque")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_motor_z_torque())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_motor_z_torque(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "motor_thrust")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_motor_thrust())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_motor_thrust(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "motor_acceleration")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_motor_acceleration())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_motor_acceleration(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "motor_deceleration")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_motor_deceleration())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_motor_deceleration(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "plus_configuration")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_plus_configuration())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_plus_configuration(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -8472,85 +8458,79 @@ ts::sz::Value serialize(Hexa_Multirotor_Descriptor const& value)
 ts::Result<void> deserialize(Hexatri_Multirotor_Descriptor& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("name");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'name'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_name())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_name(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("comms");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'comms'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_comms())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_comms(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("mass");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'mass'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_mass())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_mass(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("moment_of_inertia");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'moment_of_inertia'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_moment_of_inertia())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_moment_of_inertia(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("radius");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'radius'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_radius())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_radius(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("height");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'height'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_height())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_height(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("motor_z_torque");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'motor_z_torque'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_motor_z_torque())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_motor_z_torque(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("motor_thrust");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'motor_thrust'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_motor_thrust())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_motor_thrust(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("motor_acceleration");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'motor_acceleration'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_motor_acceleration())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_motor_acceleration(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("motor_deceleration");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'motor_deceleration'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_motor_deceleration())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_motor_deceleration(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "name")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_name())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_name(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "comms")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_comms())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_comms(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "mass")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_mass())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_mass(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "moment_of_inertia")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_moment_of_inertia())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_moment_of_inertia(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "radius")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_radius())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_radius(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "height")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_height())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_height(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "motor_z_torque")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_motor_z_torque())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_motor_z_torque(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "motor_thrust")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_motor_thrust())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_motor_thrust(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "motor_acceleration")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_motor_acceleration())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_motor_acceleration(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "motor_deceleration")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_motor_deceleration())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_motor_deceleration(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -8573,93 +8553,86 @@ ts::sz::Value serialize(Hexatri_Multirotor_Descriptor const& value)
 ts::Result<void> deserialize(Octo_Multirotor_Descriptor& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("name");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'name'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_name())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_name(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("comms");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'comms'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_comms())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_comms(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("mass");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'mass'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_mass())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_mass(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("moment_of_inertia");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'moment_of_inertia'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_moment_of_inertia())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_moment_of_inertia(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("radius");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'radius'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_radius())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_radius(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("height");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'height'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_height())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_height(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("motor_z_torque");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'motor_z_torque'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_motor_z_torque())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_motor_z_torque(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("motor_thrust");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'motor_thrust'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_motor_thrust())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_motor_thrust(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("motor_acceleration");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'motor_acceleration'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_motor_acceleration())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_motor_acceleration(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("motor_deceleration");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'motor_deceleration'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_motor_deceleration())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_motor_deceleration(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("plus_configuration");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'plus_configuration'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_plus_configuration())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_plus_configuration(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "name")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_name())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_name(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "comms")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_comms())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_comms(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "mass")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_mass())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_mass(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "moment_of_inertia")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_moment_of_inertia())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_moment_of_inertia(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "radius")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_radius())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_radius(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "height")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_height())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_height(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "motor_z_torque")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_motor_z_torque())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_motor_z_torque(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "motor_thrust")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_motor_thrust())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_motor_thrust(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "motor_acceleration")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_motor_acceleration())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_motor_acceleration(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "motor_deceleration")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_motor_deceleration())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_motor_deceleration(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "plus_configuration")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_plus_configuration())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_plus_configuration(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -8683,93 +8656,86 @@ ts::sz::Value serialize(Octo_Multirotor_Descriptor const& value)
 ts::Result<void> deserialize(Octaquad_Multirotor_Descriptor& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("name");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'name'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_name())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_name(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("comms");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'comms'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_comms())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_comms(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("mass");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'mass'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_mass())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_mass(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("moment_of_inertia");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'moment_of_inertia'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_moment_of_inertia())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_moment_of_inertia(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("radius");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'radius'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_radius())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_radius(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("height");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'height'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_height())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_height(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("motor_z_torque");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'motor_z_torque'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_motor_z_torque())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_motor_z_torque(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("motor_thrust");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'motor_thrust'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_motor_thrust())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_motor_thrust(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("motor_acceleration");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'motor_acceleration'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_motor_acceleration())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_motor_acceleration(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("motor_deceleration");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'motor_deceleration'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_motor_deceleration())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_motor_deceleration(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("plus_configuration");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'plus_configuration'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_plus_configuration())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_plus_configuration(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "name")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_name())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_name(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "comms")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_comms())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_comms(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "mass")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_mass())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_mass(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "moment_of_inertia")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_moment_of_inertia())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_moment_of_inertia(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "radius")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_radius())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_radius(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "height")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_height())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_height(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "motor_z_torque")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_motor_z_torque())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_motor_z_torque(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "motor_thrust")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_motor_thrust())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_motor_thrust(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "motor_acceleration")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_motor_acceleration())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_motor_acceleration(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "motor_deceleration")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_motor_deceleration())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_motor_deceleration(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "plus_configuration")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_plus_configuration())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_plus_configuration(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -8793,29 +8759,30 @@ ts::sz::Value serialize(Octaquad_Multirotor_Descriptor const& value)
 ts::Result<void> deserialize(Custom_Multirotor_Descriptor::Motor& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("position");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'position'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_position())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_position(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("thrust_vector");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'thrust_vector'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_thrust_vector())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_thrust_vector(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("clockwise");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'clockwise'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_clockwise())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_clockwise(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "position")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_position())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_position(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "thrust_vector")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_thrust_vector())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_thrust_vector(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "clockwise")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_clockwise())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_clockwise(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -8831,93 +8798,86 @@ ts::sz::Value serialize(Custom_Multirotor_Descriptor::Motor const& value)
 ts::Result<void> deserialize(Custom_Multirotor_Descriptor& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("name");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'name'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_name())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_name(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("comms");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'comms'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_comms())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_comms(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("mass");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'mass'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_mass())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_mass(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("moment_of_inertia");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'moment_of_inertia'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_moment_of_inertia())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_moment_of_inertia(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("radius");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'radius'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_radius())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_radius(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("height");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'height'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_height())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_height(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("motor_z_torque");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'motor_z_torque'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_motor_z_torque())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_motor_z_torque(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("motor_thrust");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'motor_thrust'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_motor_thrust())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_motor_thrust(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("motor_acceleration");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'motor_acceleration'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_motor_acceleration())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_motor_acceleration(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("motor_deceleration");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'motor_deceleration'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_motor_deceleration())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_motor_deceleration(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("motors");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'motors'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_motors())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_motors(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "name")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_name())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_name(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "comms")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_comms())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_comms(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "mass")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_mass())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_mass(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "moment_of_inertia")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_moment_of_inertia())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_moment_of_inertia(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "radius")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_radius())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_radius(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "height")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_height())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_height(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "motor_z_torque")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_motor_z_torque())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_motor_z_torque(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "motor_thrust")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_motor_thrust())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_motor_thrust(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "motor_acceleration")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_motor_acceleration())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_motor_acceleration(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "motor_deceleration")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_motor_deceleration())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_motor_deceleration(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "motors")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_motors())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_motors(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -8996,21 +8956,23 @@ ts::sz::Value serialize(UART_Linux_Descriptor::baud_t const& value)
 ts::Result<void> deserialize(UART_Linux_Descriptor& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("dev");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'dev'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_dev())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_dev(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("baud");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'baud'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_baud())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_baud(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "dev")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_dev())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_dev(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "baud")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_baud())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_baud(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -9025,29 +8987,30 @@ ts::sz::Value serialize(UART_Linux_Descriptor const& value)
 ts::Result<void> deserialize(UART_BB_Descriptor& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("rx_pin");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'rx_pin'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_rx_pin())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_rx_pin(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("baud");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'baud'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_baud())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_baud(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("invert");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'invert'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_invert())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_invert(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "rx_pin")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_rx_pin())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_rx_pin(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "baud")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_baud())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_baud(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "invert")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_invert())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_invert(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -9063,21 +9026,23 @@ ts::sz::Value serialize(UART_BB_Descriptor const& value)
 ts::Result<void> deserialize(I2C_BCM_Descriptor& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("dev");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'dev'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_dev())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_dev(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("baud");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'baud'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_baud())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_baud(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "dev")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_dev())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_dev(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "baud")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_baud())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_baud(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -9092,13 +9057,16 @@ ts::sz::Value serialize(I2C_BCM_Descriptor const& value)
 ts::Result<void> deserialize(I2C_Linux_Descriptor& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("dev");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'dev'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_dev())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_dev(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "dev")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_dev())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_dev(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -9112,37 +9080,37 @@ ts::sz::Value serialize(I2C_Linux_Descriptor const& value)
 ts::Result<void> deserialize(SPI_BCM_Descriptor& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("dev");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'dev'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_dev())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_dev(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("baud");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'baud'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_baud())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_baud(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("mode");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'mode'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_mode())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_mode(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("speed");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'speed'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_speed())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_speed(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "dev")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_dev())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_dev(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "baud")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_baud())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_baud(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "mode")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_mode())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_mode(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "speed")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_speed())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_speed(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -9159,21 +9127,23 @@ ts::sz::Value serialize(SPI_BCM_Descriptor const& value)
 ts::Result<void> deserialize(SPI_Linux_Descriptor& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("dev");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'dev'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_dev())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_dev(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("speed");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'speed'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_speed())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_speed(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "dev")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_dev())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_dev(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "speed")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_speed())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_speed(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -9188,13 +9158,16 @@ ts::sz::Value serialize(SPI_Linux_Descriptor const& value)
 ts::Result<void> deserialize(P_Controller_Descriptor& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("kp");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'kp'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_kp())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_kp(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "kp")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_kp())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_kp(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -9208,29 +9181,30 @@ ts::sz::Value serialize(P_Controller_Descriptor const& value)
 ts::Result<void> deserialize(PI_Controller_Descriptor& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("kp");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'kp'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_kp())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_kp(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("ki");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'ki'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_ki())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_ki(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("max_i");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'max_i'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_max_i())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_max_i(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "kp")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_kp())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_kp(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "ki")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_ki())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_ki(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "max_i")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_max_i())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_max_i(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -9246,29 +9220,30 @@ ts::sz::Value serialize(PI_Controller_Descriptor const& value)
 ts::Result<void> deserialize(PD_Controller_Descriptor& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("kp");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'kp'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_kp())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_kp(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("kd");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'kd'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_kd())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_kd(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("d_filter");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'd_filter'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_d_filter())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_d_filter(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "kp")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_kp())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_kp(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "kd")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_kd())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_kd(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "d_filter")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_d_filter())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_d_filter(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -9284,45 +9259,44 @@ ts::sz::Value serialize(PD_Controller_Descriptor const& value)
 ts::Result<void> deserialize(PID_Controller_Descriptor& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("kp");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'kp'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_kp())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_kp(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("kd");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'kd'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_kd())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_kd(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("d_filter");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'd_filter'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_d_filter())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_d_filter(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("ki");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'ki'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_ki())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_ki(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("max_i");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'max_i'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_max_i())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_max_i(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "kp")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_kp())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_kp(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "kd")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_kd())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_kd(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "d_filter")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_d_filter())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_d_filter(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "ki")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_ki())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_ki(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "max_i")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_max_i())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_max_i(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -9340,13 +9314,16 @@ ts::sz::Value serialize(PID_Controller_Descriptor const& value)
 ts::Result<void> deserialize(ADC_Ammeter_Descriptor& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("rate");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'rate'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_rate())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_rate(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "rate")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_rate())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_rate(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -9360,21 +9337,23 @@ ts::sz::Value serialize(ADC_Ammeter_Descriptor const& value)
 ts::Result<void> deserialize(ADC_Ammeter_Config& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("scale");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'scale'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_scale())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_scale(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("bias");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'bias'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_bias())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_bias(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "scale")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_scale())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_scale(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "bias")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_bias())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_bias(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -9389,13 +9368,16 @@ ts::sz::Value serialize(ADC_Ammeter_Config const& value)
 ts::Result<void> deserialize(ADC_Voltmeter_Descriptor& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("rate");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'rate'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_rate())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_rate(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "rate")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_rate())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_rate(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -9409,21 +9391,23 @@ ts::sz::Value serialize(ADC_Voltmeter_Descriptor const& value)
 ts::Result<void> deserialize(ADC_Voltmeter_Config& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("scale");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'scale'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_scale())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_scale(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("bias");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'bias'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_bias())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_bias(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "scale")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_scale())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_scale(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "bias")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_bias())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_bias(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -9438,21 +9422,23 @@ ts::sz::Value serialize(ADC_Voltmeter_Config const& value)
 ts::Result<void> deserialize(ADS1115_Descriptor::ADC& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("is_enabled");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'is_enabled'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_is_enabled())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_is_enabled(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("rate");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'rate'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_rate())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_rate(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "is_enabled")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_is_enabled())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_is_enabled(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "rate")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_rate())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_rate(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -9467,53 +9453,51 @@ ts::sz::Value serialize(ADS1115_Descriptor::ADC const& value)
 ts::Result<void> deserialize(ADS1115_Descriptor& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("bus");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'bus'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_bus())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_bus(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("i2c_address");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'i2c_address'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_i2c_address())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_i2c_address(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("adc0");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'adc0'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_adc0())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_adc0(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("adc1");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'adc1'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_adc1())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_adc1(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("adc2");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'adc2'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_adc2())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_adc2(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("adc3");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'adc3'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_adc3())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_adc3(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "bus")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_bus())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_bus(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "i2c_address")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_i2c_address())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_i2c_address(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "adc0")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_adc0())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_adc0(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "adc1")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_adc1())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_adc1(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "adc2")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_adc2())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_adc2(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "adc3")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_adc3())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_adc3(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -9532,6 +9516,10 @@ ts::sz::Value serialize(ADS1115_Descriptor const& value)
 ts::Result<void> deserialize(ADS1115_Config& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
+  {
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+  }
   return ts::success;
 }
 ts::sz::Value serialize(ADS1115_Config const& value)
@@ -9543,29 +9531,30 @@ ts::sz::Value serialize(ADS1115_Config const& value)
 ts::Result<void> deserialize(AVRADC_Descriptor& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("bus");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'bus'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_bus())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_bus(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("i2c_address");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'i2c_address'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_i2c_address())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_i2c_address(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("rate");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'rate'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_rate())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_rate(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "bus")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_bus())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_bus(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "i2c_address")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_i2c_address())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_i2c_address(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "rate")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_rate())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_rate(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -9581,6 +9570,10 @@ ts::sz::Value serialize(AVRADC_Descriptor const& value)
 ts::Result<void> deserialize(AVRADC_Config& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
+  {
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+  }
   return ts::success;
 }
 ts::sz::Value serialize(AVRADC_Config const& value)
@@ -9592,13 +9585,16 @@ ts::sz::Value serialize(AVRADC_Config const& value)
 ts::Result<void> deserialize(Comp_AHRS_Descriptor& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("rate");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'rate'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_rate())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_rate(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "rate")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_rate())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_rate(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -9612,13 +9608,16 @@ ts::sz::Value serialize(Comp_AHRS_Descriptor const& value)
 ts::Result<void> deserialize(Comp_AHRS_Config& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("drift_correction_factor");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'drift_correction_factor'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_drift_correction_factor())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_drift_correction_factor(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "drift_correction_factor")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_drift_correction_factor())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_drift_correction_factor(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -9632,13 +9631,16 @@ ts::sz::Value serialize(Comp_AHRS_Config const& value)
 ts::Result<void> deserialize(Combiner_Descriptor& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("rate");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'rate'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_rate())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_rate(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "rate")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_rate())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_rate(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -9652,6 +9654,10 @@ ts::sz::Value serialize(Combiner_Descriptor const& value)
 ts::Result<void> deserialize(Combiner_Config& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
+  {
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+  }
   return ts::success;
 }
 ts::sz::Value serialize(Combiner_Config const& value)
@@ -9663,13 +9669,16 @@ ts::sz::Value serialize(Combiner_Config const& value)
 ts::Result<void> deserialize(Gravity_Filter_Descriptor& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("rate");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'rate'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_rate())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_rate(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "rate")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_rate())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_rate(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -9683,6 +9692,10 @@ ts::sz::Value serialize(Gravity_Filter_Descriptor const& value)
 ts::Result<void> deserialize(Gravity_Filter_Config& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
+  {
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+  }
   return ts::success;
 }
 ts::sz::Value serialize(Gravity_Filter_Config const& value)
@@ -9694,13 +9707,16 @@ ts::sz::Value serialize(Gravity_Filter_Config const& value)
 ts::Result<void> deserialize(KF_ECEF_Descriptor& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("rate");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'rate'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_rate())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_rate(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "rate")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_rate())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_rate(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -9714,53 +9730,51 @@ ts::sz::Value serialize(KF_ECEF_Descriptor const& value)
 ts::Result<void> deserialize(KF_ECEF_Config& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("gps_position_lag");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'gps_position_lag'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_gps_position_lag())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_gps_position_lag(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("gps_position_accuracy");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'gps_position_accuracy'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_gps_position_accuracy())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_gps_position_accuracy(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("gps_velocity_lag");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'gps_velocity_lag'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_gps_velocity_lag())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_gps_velocity_lag(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("gps_velocity_accuracy");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'gps_velocity_accuracy'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_gps_velocity_accuracy())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_gps_velocity_accuracy(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("acceleration_lag");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'acceleration_lag'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_acceleration_lag())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_acceleration_lag(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("acceleration_accuracy");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'acceleration_accuracy'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_acceleration_accuracy())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_acceleration_accuracy(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "gps_position_lag")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_gps_position_lag())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_gps_position_lag(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "gps_position_accuracy")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_gps_position_accuracy())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_gps_position_accuracy(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "gps_velocity_lag")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_gps_velocity_lag())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_gps_velocity_lag(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "gps_velocity_accuracy")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_gps_velocity_accuracy())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_gps_velocity_accuracy(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "acceleration_lag")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_acceleration_lag())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_acceleration_lag(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "acceleration_accuracy")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_acceleration_accuracy())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_acceleration_accuracy(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -9779,13 +9793,16 @@ ts::sz::Value serialize(KF_ECEF_Config const& value)
 ts::Result<void> deserialize(ENU_Frame_System_Descriptor& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("rate");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'rate'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_rate())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_rate(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "rate")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_rate())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_rate(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -9799,6 +9816,10 @@ ts::sz::Value serialize(ENU_Frame_System_Descriptor const& value)
 ts::Result<void> deserialize(ENU_Frame_System_Config& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
+  {
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+  }
   return ts::success;
 }
 ts::sz::Value serialize(ENU_Frame_System_Config const& value)
@@ -9810,13 +9831,16 @@ ts::sz::Value serialize(ENU_Frame_System_Config const& value)
 ts::Result<void> deserialize(LPF_Descriptor& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("rate");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'rate'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_rate())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_rate(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "rate")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_rate())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_rate(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -9830,21 +9854,23 @@ ts::sz::Value serialize(LPF_Descriptor const& value)
 ts::Result<void> deserialize(LPF_Config& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("poles");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'poles'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_poles())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_poles(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("cutoff_frequency");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'cutoff_frequency'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_cutoff_frequency())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_cutoff_frequency(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "poles")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_poles())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_poles(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "cutoff_frequency")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_cutoff_frequency())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_cutoff_frequency(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -9859,21 +9885,23 @@ ts::sz::Value serialize(LPF_Config const& value)
 ts::Result<void> deserialize(MaxSonar_Descriptor& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("bus");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'bus'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_bus())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_bus(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("rate");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'rate'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_rate())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_rate(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "bus")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_bus())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_bus(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "rate")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_rate())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_rate(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -9888,29 +9916,30 @@ ts::sz::Value serialize(MaxSonar_Descriptor const& value)
 ts::Result<void> deserialize(MaxSonar_Config& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("direction");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'direction'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_direction())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_direction(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("max_distance");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'max_distance'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_max_distance())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_max_distance(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("min_distance");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'min_distance'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_min_distance())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_min_distance(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "direction")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_direction())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_direction(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "max_distance")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_max_distance())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_max_distance(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "min_distance")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_min_distance())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_min_distance(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -9926,13 +9955,16 @@ ts::sz::Value serialize(MaxSonar_Config const& value)
 ts::Result<void> deserialize(Motor_Mixer_Descriptor& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("rate");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'rate'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_rate())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_rate(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "rate")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_rate())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_rate(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -9946,13 +9978,16 @@ ts::sz::Value serialize(Motor_Mixer_Descriptor const& value)
 ts::Result<void> deserialize(Motor_Mixer_Config& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("armed_thrust");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'armed_thrust'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_armed_thrust())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_armed_thrust(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "armed_thrust")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_armed_thrust())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_armed_thrust(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -9966,13 +10001,16 @@ ts::sz::Value serialize(Motor_Mixer_Config const& value)
 ts::Result<void> deserialize(Quad_Multirotor_Motor_Mixer_Descriptor& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("rate");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'rate'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_rate())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_rate(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "rate")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_rate())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_rate(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -9986,13 +10024,16 @@ ts::sz::Value serialize(Quad_Multirotor_Motor_Mixer_Descriptor const& value)
 ts::Result<void> deserialize(Quad_Multirotor_Motor_Mixer_Config& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("armed_min_throttle");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'armed_min_throttle'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_armed_min_throttle())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_armed_min_throttle(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "armed_min_throttle")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_armed_min_throttle())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_armed_min_throttle(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -10006,29 +10047,30 @@ ts::sz::Value serialize(Quad_Multirotor_Motor_Mixer_Config const& value)
 ts::Result<void> deserialize(Acceleration_Calibration_Point& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("temperature");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'temperature'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_temperature())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_temperature(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("bias");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'bias'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_bias())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_bias(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("scale");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'scale'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_scale())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_scale(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "temperature")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_temperature())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_temperature(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "bias")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_bias())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_bias(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "scale")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_scale())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_scale(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -10044,21 +10086,23 @@ ts::sz::Value serialize(Acceleration_Calibration_Point const& value)
 ts::Result<void> deserialize(Angular_Velocity_Calibration_Point& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("temperature");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'temperature'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_temperature())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_temperature(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("bias");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'bias'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_bias())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_bias(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "temperature")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_temperature())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_temperature(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "bias")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_bias())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_bias(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -10073,29 +10117,30 @@ ts::sz::Value serialize(Angular_Velocity_Calibration_Point const& value)
 ts::Result<void> deserialize(Magnetic_Field_Calibration_Point& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("temperature");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'temperature'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_temperature())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_temperature(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("bias");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'bias'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_bias())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_bias(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("scale");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'scale'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_scale())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_scale(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "temperature")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_temperature())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_temperature(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "bias")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_bias())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_bias(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "scale")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_scale())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_scale(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -10196,61 +10241,58 @@ ts::sz::Value serialize(MPU9250_Descriptor::angular_velocity_range_t const& valu
 ts::Result<void> deserialize(MPU9250_Descriptor& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("bus");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'bus'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_bus())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_bus(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("i2c_address");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'i2c_address'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_i2c_address())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_i2c_address(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("imu_rate");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'imu_rate'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_imu_rate())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_imu_rate(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("magnetometer_rate");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'magnetometer_rate'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_magnetometer_rate())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_magnetometer_rate(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("thermometer_rate");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'thermometer_rate'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_thermometer_rate())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_thermometer_rate(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("acceleration_range");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'acceleration_range'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_acceleration_range())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_acceleration_range(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("angular_velocity_range");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'angular_velocity_range'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_angular_velocity_range())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_angular_velocity_range(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "bus")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_bus())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_bus(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "i2c_address")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_i2c_address())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_i2c_address(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "imu_rate")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_imu_rate())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_imu_rate(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "magnetometer_rate")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_magnetometer_rate())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_magnetometer_rate(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "thermometer_rate")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_thermometer_rate())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_thermometer_rate(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "acceleration_range")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_acceleration_range())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_acceleration_range(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "angular_velocity_range")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_angular_velocity_range())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_angular_velocity_range(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -10270,29 +10312,30 @@ ts::sz::Value serialize(MPU9250_Descriptor const& value)
 ts::Result<void> deserialize(MPU9250_Config::Calibration& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("acceleration");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'acceleration'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_acceleration())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_acceleration(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("angular_velocity");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'angular_velocity'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_angular_velocity())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_angular_velocity(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("magnetic_field");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'magnetic_field'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_magnetic_field())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_magnetic_field(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "acceleration")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_acceleration())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_acceleration(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "angular_velocity")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_angular_velocity())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_angular_velocity(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "magnetic_field")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_magnetic_field())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_magnetic_field(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -10308,21 +10351,23 @@ ts::sz::Value serialize(MPU9250_Config::Calibration const& value)
 ts::Result<void> deserialize(MPU9250_Config& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("rotation");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'rotation'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_rotation())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_rotation(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("calibration");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'calibration'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_calibration())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_calibration(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "rotation")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_rotation())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_rotation(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "calibration")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_calibration())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_calibration(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -10403,37 +10448,37 @@ ts::sz::Value serialize(std::vector<Magnetic_Field_Calibration_Point> const& val
 ts::Result<void> deserialize(MS5611_Descriptor& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("bus");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'bus'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_bus())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_bus(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("i2c_address");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'i2c_address'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_i2c_address())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_i2c_address(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("pressure_rate");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'pressure_rate'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_pressure_rate())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_pressure_rate(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("temperature_rate");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'temperature_rate'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_temperature_rate())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_temperature_rate(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "bus")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_bus())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_bus(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "i2c_address")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_i2c_address())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_i2c_address(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "pressure_rate")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_pressure_rate())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_pressure_rate(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "temperature_rate")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_temperature_rate())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_temperature_rate(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -10450,6 +10495,10 @@ ts::sz::Value serialize(MS5611_Descriptor const& value)
 ts::Result<void> deserialize(MS5611_Config& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
+  {
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+  }
   return ts::success;
 }
 ts::sz::Value serialize(MS5611_Config const& value)
@@ -10461,29 +10510,30 @@ ts::sz::Value serialize(MS5611_Config const& value)
 ts::Result<void> deserialize(Multirotor_Brain_Descriptor& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("rate");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'rate'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_rate())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_rate(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("commands_rate");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'commands_rate'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_commands_rate())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_commands_rate(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("state_rate");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'state_rate'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_state_rate())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_state_rate(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "rate")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_rate())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_rate(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "commands_rate")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_commands_rate())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_commands_rate(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "state_rate")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_state_rate())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_state_rate(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -10499,21 +10549,23 @@ ts::sz::Value serialize(Multirotor_Brain_Descriptor const& value)
 ts::Result<void> deserialize(Multirotor_Brain_Config::Horizontal::Separate_Angle_PIDs& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("x_pid");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'x_pid'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_x_pid())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_x_pid(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("y_pid");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'y_pid'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_y_pid())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_y_pid(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "x_pid")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_x_pid())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_x_pid(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "y_pid")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_y_pid())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_y_pid(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -10528,61 +10580,58 @@ ts::sz::Value serialize(Multirotor_Brain_Config::Horizontal::Separate_Angle_PIDs
 ts::Result<void> deserialize(Multirotor_Brain_Config::Horizontal& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("max_rate_deg");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'max_rate_deg'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_max_rate_deg())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_max_rate_deg(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("angle_pids");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'angle_pids'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_angle_pids())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_angle_pids(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("max_angle_deg");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'max_angle_deg'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_max_angle_deg())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_max_angle_deg(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("max_speed");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'max_speed'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_max_speed())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_max_speed(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("position_lpf");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'position_lpf'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_position_lpf())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_position_lpf(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("velocity_pid");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'velocity_pid'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_velocity_pid())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_velocity_pid(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("position_pid");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'position_pid'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_position_pid())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_position_pid(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "max_rate_deg")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_max_rate_deg())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_max_rate_deg(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "angle_pids")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_angle_pids())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_angle_pids(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "max_angle_deg")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_max_angle_deg())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_max_angle_deg(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "max_speed")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_max_speed())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_max_speed(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "position_lpf")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_position_lpf())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_position_lpf(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "velocity_pid")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_velocity_pid())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_velocity_pid(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "position_pid")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_position_pid())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_position_pid(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -10602,21 +10651,23 @@ ts::sz::Value serialize(Multirotor_Brain_Config::Horizontal const& value)
 ts::Result<void> deserialize(Multirotor_Brain_Config::Yaw& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("max_rate_deg");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'max_rate_deg'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_max_rate_deg())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_max_rate_deg(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("angle_pid");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'angle_pid'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_angle_pid())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_angle_pid(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "max_rate_deg")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_max_rate_deg())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_max_rate_deg(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "angle_pid")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_angle_pid())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_angle_pid(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -10631,37 +10682,37 @@ ts::sz::Value serialize(Multirotor_Brain_Config::Yaw const& value)
 ts::Result<void> deserialize(Multirotor_Brain_Config::Vertical& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("max_speed");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'max_speed'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_max_speed())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_max_speed(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("altitude_lpf");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'altitude_lpf'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_altitude_lpf())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_altitude_lpf(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("speed_pid");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'speed_pid'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_speed_pid())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_speed_pid(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("altitude_pid");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'altitude_pid'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_altitude_pid())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_altitude_pid(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "max_speed")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_max_speed())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_max_speed(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "altitude_lpf")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_altitude_lpf())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_altitude_lpf(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "speed_pid")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_speed_pid())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_speed_pid(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "altitude_pid")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_altitude_pid())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_altitude_pid(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -10678,53 +10729,51 @@ ts::sz::Value serialize(Multirotor_Brain_Config::Vertical const& value)
 ts::Result<void> deserialize(Multirotor_Brain_Config& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("max_allowed_position_variation");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'max_allowed_position_variation'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_max_allowed_position_variation())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_max_allowed_position_variation(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("max_thrust");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'max_thrust'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_max_thrust())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_max_thrust(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("min_thrust");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'min_thrust'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_min_thrust())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_min_thrust(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("vertical");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'vertical'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_vertical())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_vertical(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("horizontal");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'horizontal'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_horizontal())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_horizontal(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("yaw");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'yaw'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_yaw())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_yaw(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "max_allowed_position_variation")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_max_allowed_position_variation())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_max_allowed_position_variation(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "max_thrust")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_max_thrust())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_max_thrust(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "min_thrust")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_min_thrust())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_min_thrust(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "vertical")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_vertical())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_vertical(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "horizontal")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_horizontal())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_horizontal(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "yaw")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_yaw())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_yaw(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -10787,29 +10836,30 @@ ts::sz::Value serialize(boost::variant<Multirotor_Brain_Config::Horizontal::Comb
 ts::Result<void> deserialize(Multirotor_Pilot_Descriptor& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("commands_rate");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'commands_rate'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_commands_rate())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_commands_rate(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("state_rate");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'state_rate'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_state_rate())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_state_rate(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("video_rate");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'video_rate'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_video_rate())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_video_rate(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "commands_rate")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_commands_rate())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_commands_rate(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "state_rate")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_state_rate())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_state_rate(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "video_rate")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_video_rate())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_video_rate(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -10825,6 +10875,10 @@ ts::sz::Value serialize(Multirotor_Pilot_Descriptor const& value)
 ts::Result<void> deserialize(Multirotor_Pilot_Config& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
+  {
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+  }
   return ts::success;
 }
 ts::sz::Value serialize(Multirotor_Pilot_Config const& value)
@@ -10836,77 +10890,72 @@ ts::sz::Value serialize(Multirotor_Pilot_Config const& value)
 ts::Result<void> deserialize(Multirotor_Simulator_Descriptor& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("throttle_rate");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'throttle_rate'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_throttle_rate())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_throttle_rate(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("state_rate");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'state_rate'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_state_rate())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_state_rate(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("acceleration_rate");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'acceleration_rate'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_acceleration_rate())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_acceleration_rate(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("angular_velocity_rate");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'angular_velocity_rate'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_angular_velocity_rate())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_angular_velocity_rate(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("magnetic_field_rate");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'magnetic_field_rate'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_magnetic_field_rate())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_magnetic_field_rate(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("pressure_rate");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'pressure_rate'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_pressure_rate())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_pressure_rate(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("temperature_rate");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'temperature_rate'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_temperature_rate())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_temperature_rate(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("distance_rate");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'distance_rate'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_distance_rate())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_distance_rate(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("gps_rate");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'gps_rate'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_gps_rate())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_gps_rate(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "throttle_rate")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_throttle_rate())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_throttle_rate(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "state_rate")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_state_rate())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_state_rate(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "acceleration_rate")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_acceleration_rate())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_acceleration_rate(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "angular_velocity_rate")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_angular_velocity_rate())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_angular_velocity_rate(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "magnetic_field_rate")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_magnetic_field_rate())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_magnetic_field_rate(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "pressure_rate")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_pressure_rate())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_pressure_rate(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "temperature_rate")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_temperature_rate())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_temperature_rate(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "distance_rate")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_distance_rate())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_distance_rate(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "gps_rate")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_gps_rate())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_gps_rate(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -10928,85 +10977,79 @@ ts::sz::Value serialize(Multirotor_Simulator_Descriptor const& value)
 ts::Result<void> deserialize(Multirotor_Simulator_Config::Noise& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("gps_position");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'gps_position'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_gps_position())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_gps_position(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("gps_velocity");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'gps_velocity'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_gps_velocity())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_gps_velocity(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("gps_pacc");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'gps_pacc'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_gps_pacc())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_gps_pacc(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("gps_vacc");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'gps_vacc'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_gps_vacc())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_gps_vacc(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("acceleration");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'acceleration'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_acceleration())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_acceleration(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("angular_velocity");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'angular_velocity'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_angular_velocity())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_angular_velocity(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("magnetic_field");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'magnetic_field'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_magnetic_field())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_magnetic_field(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("pressure");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'pressure'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_pressure())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_pressure(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("temperature");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'temperature'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_temperature())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_temperature(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("ground_distance");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'ground_distance'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_ground_distance())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_ground_distance(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "gps_position")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_gps_position())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_gps_position(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "gps_velocity")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_gps_velocity())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_gps_velocity(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "gps_pacc")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_gps_pacc())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_gps_pacc(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "gps_vacc")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_gps_vacc())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_gps_vacc(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "acceleration")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_acceleration())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_acceleration(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "angular_velocity")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_angular_velocity())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_angular_velocity(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "magnetic_field")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_magnetic_field())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_magnetic_field(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "pressure")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_pressure())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_pressure(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "temperature")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_temperature())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_temperature(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "ground_distance")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_ground_distance())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_ground_distance(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -11029,29 +11072,30 @@ ts::sz::Value serialize(Multirotor_Simulator_Config::Noise const& value)
 ts::Result<void> deserialize(Multirotor_Simulator_Config::Calibration& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("acceleration");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'acceleration'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_acceleration())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_acceleration(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("angular_velocity");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'angular_velocity'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_angular_velocity())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_angular_velocity(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("magnetic_field");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'magnetic_field'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_magnetic_field())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_magnetic_field(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "acceleration")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_acceleration())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_acceleration(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "angular_velocity")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_angular_velocity())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_angular_velocity(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "magnetic_field")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_magnetic_field())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_magnetic_field(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -11067,53 +11111,51 @@ ts::sz::Value serialize(Multirotor_Simulator_Config::Calibration const& value)
 ts::Result<void> deserialize(Multirotor_Simulator_Config& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("simulation_enabled");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'simulation_enabled'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_simulation_enabled())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_simulation_enabled(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("drag_enabled");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'drag_enabled'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_drag_enabled())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_drag_enabled(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("ground_enabled");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'ground_enabled'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_ground_enabled())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_ground_enabled(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("gravity_enabled");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'gravity_enabled'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_gravity_enabled())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_gravity_enabled(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("noise");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'noise'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_noise())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_noise(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("calibration");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'calibration'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_calibration())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_calibration(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "simulation_enabled")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_simulation_enabled())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_simulation_enabled(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "drag_enabled")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_drag_enabled())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_drag_enabled(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "ground_enabled")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_ground_enabled())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_ground_enabled(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "gravity_enabled")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_gravity_enabled())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_gravity_enabled(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "noise")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_noise())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_noise(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "calibration")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_calibration())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_calibration(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -11132,21 +11174,23 @@ ts::sz::Value serialize(Multirotor_Simulator_Config const& value)
 ts::Result<void> deserialize(Oscillator_Descriptor& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("rate");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'rate'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_rate())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_rate(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("component_count");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'component_count'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_component_count())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_component_count(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "rate")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_rate())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_rate(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "component_count")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_component_count())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_component_count(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -11161,29 +11205,30 @@ ts::sz::Value serialize(Oscillator_Descriptor const& value)
 ts::Result<void> deserialize(Oscillator_Config::Component& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("frequency");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'frequency'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_frequency())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_frequency(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("amplitude");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'amplitude'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_amplitude())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_amplitude(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("square");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'square'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_square())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_square(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "frequency")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_frequency())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_frequency(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "amplitude")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_amplitude())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_amplitude(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "square")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_square())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_square(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -11199,29 +11244,30 @@ ts::sz::Value serialize(Oscillator_Config::Component const& value)
 ts::Result<void> deserialize(Oscillator_Config& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("amplitude");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'amplitude'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_amplitude())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_amplitude(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("noise");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'noise'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_noise())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_noise(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("components");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'components'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_components())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_components(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "amplitude")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_amplitude())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_amplitude(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "noise")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_noise())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_noise(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "components")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_components())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_components(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -11259,21 +11305,23 @@ ts::sz::Value serialize(std::vector<Oscillator_Config::Component> const& value)
 ts::Result<void> deserialize(PCA9685_Descriptor::Channel& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("enabled");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'enabled'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_enabled())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_enabled(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("servo_signal");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'servo_signal'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_servo_signal())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_servo_signal(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "enabled")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_enabled())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_enabled(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "servo_signal")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_servo_signal())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_servo_signal(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -11288,37 +11336,37 @@ ts::sz::Value serialize(PCA9685_Descriptor::Channel const& value)
 ts::Result<void> deserialize(PCA9685_Descriptor& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("bus");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'bus'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_bus())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_bus(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("rate");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'rate'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_rate())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_rate(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("address");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'address'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_address())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_address(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("channels");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'channels'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_channels())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_channels(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "bus")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_bus())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_bus(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "rate")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_rate())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_rate(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "address")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_address())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_address(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "channels")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_channels())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_channels(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -11357,6 +11405,10 @@ ts::sz::Value serialize(std::vector<PCA9685_Descriptor::Channel> const& value)
 ts::Result<void> deserialize(PCA9685_Config::IChannel& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
+  {
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+  }
   return ts::success;
 }
 ts::sz::Value serialize(PCA9685_Config::IChannel const& value)
@@ -11368,21 +11420,23 @@ ts::sz::Value serialize(PCA9685_Config::IChannel const& value)
 ts::Result<void> deserialize(PCA9685_Config::Servo_Channel& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("min");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'min'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_min())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_min(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("max");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'max'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_max())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_max(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "min")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_min())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_min(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "max")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_max())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_max(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -11397,21 +11451,23 @@ ts::sz::Value serialize(PCA9685_Config::Servo_Channel const& value)
 ts::Result<void> deserialize(PCA9685_Config::PWM_Channel& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("min");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'min'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_min())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_min(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("max");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'max'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_max())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_max(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "min")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_min())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_min(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "max")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_max())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_max(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -11426,13 +11482,16 @@ ts::sz::Value serialize(PCA9685_Config::PWM_Channel const& value)
 ts::Result<void> deserialize(PCA9685_Config& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("channels");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'channels'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_channels())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_channels(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "channels")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_channels())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_channels(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -11512,29 +11571,30 @@ ts::sz::Value serialize(std::vector<Poly<PCA9685_Config::IChannel>> const& value
 ts::Result<void> deserialize(PIGPIO_Descriptor::Channel& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("enabled");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'enabled'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_enabled())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_enabled(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("servo_signal");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'servo_signal'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_servo_signal())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_servo_signal(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("rate");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'rate'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_rate())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_rate(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "enabled")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_enabled())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_enabled(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "servo_signal")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_servo_signal())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_servo_signal(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "rate")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_rate())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_rate(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -11550,213 +11610,191 @@ ts::sz::Value serialize(PIGPIO_Descriptor::Channel const& value)
 ts::Result<void> deserialize(PIGPIO_Descriptor& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("gpio_2");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'gpio_2'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_gpio_2())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_gpio_2(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("gpio_3");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'gpio_3'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_gpio_3())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_gpio_3(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("gpio_4");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'gpio_4'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_gpio_4())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_gpio_4(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("gpio_5");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'gpio_5'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_gpio_5())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_gpio_5(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("gpio_6");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'gpio_6'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_gpio_6())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_gpio_6(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("gpio_7");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'gpio_7'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_gpio_7())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_gpio_7(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("gpio_8");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'gpio_8'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_gpio_8())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_gpio_8(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("gpio_9");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'gpio_9'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_gpio_9())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_gpio_9(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("gpio_10");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'gpio_10'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_gpio_10())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_gpio_10(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("gpio_11");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'gpio_11'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_gpio_11())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_gpio_11(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("gpio_12");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'gpio_12'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_gpio_12())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_gpio_12(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("gpio_13");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'gpio_13'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_gpio_13())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_gpio_13(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("gpio_14");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'gpio_14'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_gpio_14())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_gpio_14(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("gpio_15");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'gpio_15'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_gpio_15())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_gpio_15(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("gpio_16");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'gpio_16'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_gpio_16())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_gpio_16(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("gpio_17");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'gpio_17'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_gpio_17())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_gpio_17(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("gpio_18");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'gpio_18'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_gpio_18())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_gpio_18(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("gpio_19");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'gpio_19'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_gpio_19())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_gpio_19(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("gpio_20");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'gpio_20'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_gpio_20())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_gpio_20(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("gpio_21");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'gpio_21'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_gpio_21())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_gpio_21(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("gpio_22");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'gpio_22'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_gpio_22())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_gpio_22(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("gpio_23");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'gpio_23'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_gpio_23())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_gpio_23(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("gpio_24");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'gpio_24'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_gpio_24())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_gpio_24(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("gpio_25");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'gpio_25'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_gpio_25())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_gpio_25(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("gpio_26");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'gpio_26'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_gpio_26())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_gpio_26(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("gpio_27");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'gpio_27'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_gpio_27())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_gpio_27(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "gpio_2")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_gpio_2())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_gpio_2(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "gpio_3")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_gpio_3())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_gpio_3(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "gpio_4")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_gpio_4())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_gpio_4(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "gpio_5")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_gpio_5())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_gpio_5(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "gpio_6")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_gpio_6())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_gpio_6(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "gpio_7")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_gpio_7())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_gpio_7(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "gpio_8")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_gpio_8())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_gpio_8(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "gpio_9")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_gpio_9())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_gpio_9(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "gpio_10")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_gpio_10())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_gpio_10(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "gpio_11")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_gpio_11())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_gpio_11(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "gpio_12")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_gpio_12())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_gpio_12(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "gpio_13")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_gpio_13())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_gpio_13(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "gpio_14")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_gpio_14())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_gpio_14(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "gpio_15")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_gpio_15())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_gpio_15(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "gpio_16")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_gpio_16())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_gpio_16(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "gpio_17")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_gpio_17())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_gpio_17(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "gpio_18")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_gpio_18())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_gpio_18(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "gpio_19")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_gpio_19())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_gpio_19(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "gpio_20")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_gpio_20())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_gpio_20(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "gpio_21")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_gpio_21())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_gpio_21(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "gpio_22")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_gpio_22())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_gpio_22(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "gpio_23")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_gpio_23())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_gpio_23(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "gpio_24")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_gpio_24())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_gpio_24(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "gpio_25")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_gpio_25())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_gpio_25(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "gpio_26")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_gpio_26())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_gpio_26(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "gpio_27")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_gpio_27())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_gpio_27(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -11795,6 +11833,10 @@ ts::sz::Value serialize(PIGPIO_Descriptor const& value)
 ts::Result<void> deserialize(PIGPIO_Config::IChannel& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
+  {
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+  }
   return ts::success;
 }
 ts::sz::Value serialize(PIGPIO_Config::IChannel const& value)
@@ -11806,21 +11848,23 @@ ts::sz::Value serialize(PIGPIO_Config::IChannel const& value)
 ts::Result<void> deserialize(PIGPIO_Config::Servo_Channel& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("min");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'min'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_min())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_min(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("max");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'max'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_max())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_max(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "min")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_min())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_min(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "max")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_max())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_max(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -11835,21 +11879,23 @@ ts::sz::Value serialize(PIGPIO_Config::Servo_Channel const& value)
 ts::Result<void> deserialize(PIGPIO_Config::PWM_Channel& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("min");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'min'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_min())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_min(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("max");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'max'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_max())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_max(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "min")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_min())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_min(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "max")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_max())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_max(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -11864,213 +11910,191 @@ ts::sz::Value serialize(PIGPIO_Config::PWM_Channel const& value)
 ts::Result<void> deserialize(PIGPIO_Config& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("gpio_2");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'gpio_2'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_gpio_2())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_gpio_2(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("gpio_3");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'gpio_3'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_gpio_3())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_gpio_3(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("gpio_4");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'gpio_4'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_gpio_4())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_gpio_4(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("gpio_5");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'gpio_5'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_gpio_5())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_gpio_5(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("gpio_6");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'gpio_6'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_gpio_6())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_gpio_6(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("gpio_7");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'gpio_7'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_gpio_7())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_gpio_7(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("gpio_8");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'gpio_8'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_gpio_8())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_gpio_8(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("gpio_9");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'gpio_9'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_gpio_9())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_gpio_9(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("gpio_10");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'gpio_10'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_gpio_10())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_gpio_10(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("gpio_11");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'gpio_11'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_gpio_11())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_gpio_11(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("gpio_12");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'gpio_12'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_gpio_12())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_gpio_12(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("gpio_13");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'gpio_13'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_gpio_13())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_gpio_13(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("gpio_14");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'gpio_14'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_gpio_14())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_gpio_14(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("gpio_15");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'gpio_15'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_gpio_15())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_gpio_15(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("gpio_16");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'gpio_16'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_gpio_16())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_gpio_16(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("gpio_17");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'gpio_17'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_gpio_17())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_gpio_17(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("gpio_18");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'gpio_18'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_gpio_18())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_gpio_18(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("gpio_19");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'gpio_19'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_gpio_19())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_gpio_19(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("gpio_20");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'gpio_20'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_gpio_20())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_gpio_20(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("gpio_21");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'gpio_21'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_gpio_21())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_gpio_21(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("gpio_22");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'gpio_22'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_gpio_22())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_gpio_22(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("gpio_23");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'gpio_23'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_gpio_23())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_gpio_23(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("gpio_24");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'gpio_24'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_gpio_24())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_gpio_24(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("gpio_25");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'gpio_25'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_gpio_25())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_gpio_25(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("gpio_26");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'gpio_26'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_gpio_26())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_gpio_26(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("gpio_27");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'gpio_27'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_gpio_27())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_gpio_27(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "gpio_2")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_gpio_2())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_gpio_2(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "gpio_3")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_gpio_3())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_gpio_3(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "gpio_4")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_gpio_4())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_gpio_4(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "gpio_5")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_gpio_5())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_gpio_5(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "gpio_6")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_gpio_6())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_gpio_6(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "gpio_7")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_gpio_7())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_gpio_7(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "gpio_8")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_gpio_8())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_gpio_8(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "gpio_9")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_gpio_9())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_gpio_9(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "gpio_10")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_gpio_10())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_gpio_10(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "gpio_11")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_gpio_11())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_gpio_11(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "gpio_12")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_gpio_12())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_gpio_12(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "gpio_13")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_gpio_13())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_gpio_13(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "gpio_14")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_gpio_14())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_gpio_14(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "gpio_15")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_gpio_15())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_gpio_15(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "gpio_16")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_gpio_16())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_gpio_16(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "gpio_17")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_gpio_17())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_gpio_17(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "gpio_18")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_gpio_18())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_gpio_18(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "gpio_19")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_gpio_19())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_gpio_19(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "gpio_20")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_gpio_20())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_gpio_20(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "gpio_21")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_gpio_21())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_gpio_21(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "gpio_22")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_gpio_22())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_gpio_22(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "gpio_23")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_gpio_23())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_gpio_23(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "gpio_24")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_gpio_24())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_gpio_24(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "gpio_25")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_gpio_25())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_gpio_25(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "gpio_26")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_gpio_26())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_gpio_26(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "gpio_27")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_gpio_27())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_gpio_27(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -12153,13 +12177,16 @@ ts::sz::Value serialize(Poly<PIGPIO_Config::IChannel> const& value)
 ts::Result<void> deserialize(Pressure_Velocity_Descriptor& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("rate");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'rate'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_rate())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_rate(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "rate")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_rate())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_rate(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -12173,6 +12200,10 @@ ts::sz::Value serialize(Pressure_Velocity_Descriptor const& value)
 ts::Result<void> deserialize(Pressure_Velocity_Config& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
+  {
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+  }
   return ts::success;
 }
 ts::sz::Value serialize(Pressure_Velocity_Config const& value)
@@ -12184,21 +12215,23 @@ ts::sz::Value serialize(Pressure_Velocity_Config const& value)
 ts::Result<void> deserialize(Proximity_Descriptor& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("rate");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'rate'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_rate())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_rate(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("channel_count");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'channel_count'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_channel_count())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_channel_count(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "rate")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_rate())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_rate(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "channel_count")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_channel_count())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_channel_count(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -12213,6 +12246,10 @@ ts::sz::Value serialize(Proximity_Descriptor const& value)
 ts::Result<void> deserialize(Proximity_Config& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
+  {
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+  }
   return ts::success;
 }
 ts::sz::Value serialize(Proximity_Config const& value)
@@ -12224,13 +12261,16 @@ ts::sz::Value serialize(Proximity_Config const& value)
 ts::Result<void> deserialize(Rate_Controller_Descriptor& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("rate");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'rate'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_rate())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_rate(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "rate")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_rate())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_rate(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -12244,21 +12284,23 @@ ts::sz::Value serialize(Rate_Controller_Descriptor const& value)
 ts::Result<void> deserialize(Rate_Controller_Config::Feedback::Separate_XY_PIDs& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("x_pid");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'x_pid'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_x_pid())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_x_pid(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("y_pid");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'y_pid'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_y_pid())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_y_pid(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "x_pid")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_x_pid())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_x_pid(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "y_pid")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_y_pid())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_y_pid(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -12273,29 +12315,30 @@ ts::sz::Value serialize(Rate_Controller_Config::Feedback::Separate_XY_PIDs const
 ts::Result<void> deserialize(Rate_Controller_Config::Feedback& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("weight");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'weight'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_weight())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_weight(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("xy_pids");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'xy_pids'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_xy_pids())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_xy_pids(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("z_pid");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'z_pid'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_z_pid())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_z_pid(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "weight")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_weight())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_weight(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "xy_pids")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_xy_pids())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_xy_pids(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "z_pid")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_z_pid())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_z_pid(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -12311,13 +12354,16 @@ ts::sz::Value serialize(Rate_Controller_Config::Feedback const& value)
 ts::Result<void> deserialize(Rate_Controller_Config::Feedforward& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("weight");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'weight'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_weight())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_weight(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "weight")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_weight())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_weight(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -12331,29 +12377,30 @@ ts::sz::Value serialize(Rate_Controller_Config::Feedforward const& value)
 ts::Result<void> deserialize(Rate_Controller_Config& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("max_torque");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'max_torque'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_max_torque())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_max_torque(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("feedback");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'feedback'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_feedback())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_feedback(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("feedforward");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'feedforward'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_feedforward())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_feedforward(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "max_torque")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_max_torque())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_max_torque(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "feedback")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_feedback())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_feedback(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "feedforward")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_feedforward())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_feedforward(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -12413,21 +12460,23 @@ ts::sz::Value serialize(boost::variant<Rate_Controller_Config::Feedback::Combine
 ts::Result<void> deserialize(Raspicam_Descriptor::Quality& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("resolution");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'resolution'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_resolution())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_resolution(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("bitrate");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'bitrate'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_bitrate())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_bitrate(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "resolution")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_resolution())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_resolution(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "bitrate")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_bitrate())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_bitrate(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -12442,45 +12491,44 @@ ts::sz::Value serialize(Raspicam_Descriptor::Quality const& value)
 ts::Result<void> deserialize(Raspicam_Descriptor& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("fps");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'fps'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_fps())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_fps(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("commands_rate");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'commands_rate'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_commands_rate())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_commands_rate(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("streaming_low");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'streaming_low'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_streaming_low())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_streaming_low(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("streaming_high");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'streaming_high'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_streaming_high())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_streaming_high(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("recording");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'recording'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_recording())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_recording(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "fps")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_fps())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_fps(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "commands_rate")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_commands_rate())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_commands_rate(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "streaming_low")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_streaming_low())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_streaming_low(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "streaming_high")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_streaming_high())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_streaming_high(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "recording")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_recording())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_recording(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -12539,85 +12587,79 @@ ts::sz::Value serialize(Raspicam_Config::awb_mode_t const& value)
 ts::Result<void> deserialize(Raspicam_Config& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("iso");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'iso'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_iso())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_iso(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("shutter_speed");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'shutter_speed'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_shutter_speed())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_shutter_speed(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("ev");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'ev'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_ev())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_ev(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("sharpness");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'sharpness'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_sharpness())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_sharpness(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("contrast");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'contrast'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_contrast())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_contrast(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("brightness");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'brightness'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_brightness())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_brightness(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("saturation");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'saturation'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_saturation())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_saturation(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("awb_mode");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'awb_mode'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_awb_mode())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_awb_mode(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("hflip");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'hflip'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_hflip())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_hflip(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("vflip");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'vflip'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_vflip())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_vflip(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "iso")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_iso())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_iso(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "shutter_speed")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_shutter_speed())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_shutter_speed(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "ev")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_ev())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_ev(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "sharpness")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_sharpness())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_sharpness(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "contrast")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_contrast())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_contrast(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "brightness")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_brightness())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_brightness(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "saturation")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_saturation())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_saturation(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "awb_mode")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_awb_mode())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_awb_mode(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "hflip")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_hflip())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_hflip(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "vflip")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_vflip())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_vflip(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -12640,29 +12682,30 @@ ts::sz::Value serialize(Raspicam_Config const& value)
 ts::Result<void> deserialize(RC5T619_Descriptor& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("bus");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'bus'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_bus())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_bus(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("adc0_rate");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'adc0_rate'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_adc0_rate())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_adc0_rate(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("adc1_rate");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'adc1_rate'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_adc1_rate())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_adc1_rate(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "bus")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_bus())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_bus(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "adc0_rate")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_adc0_rate())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_adc0_rate(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "adc1_rate")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_adc1_rate())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_adc1_rate(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -12678,6 +12721,10 @@ ts::sz::Value serialize(RC5T619_Descriptor const& value)
 ts::Result<void> deserialize(RC5T619_Config& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
+  {
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+  }
   return ts::success;
 }
 ts::sz::Value serialize(RC5T619_Config const& value)
@@ -12689,21 +12736,23 @@ ts::sz::Value serialize(RC5T619_Config const& value)
 ts::Result<void> deserialize(Resampler_Descriptor& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("input_rate");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'input_rate'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_input_rate())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_input_rate(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("output_rate");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'output_rate'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_output_rate())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_output_rate(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "input_rate")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_input_rate())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_input_rate(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "output_rate")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_output_rate())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_output_rate(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -12718,13 +12767,16 @@ ts::sz::Value serialize(Resampler_Descriptor const& value)
 ts::Result<void> deserialize(Resampler_Config& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("lpf");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'lpf'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_lpf())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_lpf(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "lpf")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_lpf())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_lpf(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -12738,13 +12790,16 @@ ts::sz::Value serialize(Resampler_Config const& value)
 ts::Result<void> deserialize(Scalar_Generator_Descriptor& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("rate");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'rate'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_rate())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_rate(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "rate")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_rate())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_rate(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -12758,13 +12813,16 @@ ts::sz::Value serialize(Scalar_Generator_Descriptor const& value)
 ts::Result<void> deserialize(Scalar_Generator_Config& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("value");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'value'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_value())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_value(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "value")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_value())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_value(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -12778,21 +12836,23 @@ ts::sz::Value serialize(Scalar_Generator_Config const& value)
 ts::Result<void> deserialize(Servo_Gimbal_Descriptor& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("rate");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'rate'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_rate())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_rate(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("commands_rate");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'commands_rate'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_commands_rate())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_commands_rate(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "rate")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_rate())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_rate(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "commands_rate")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_commands_rate())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_commands_rate(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -12807,37 +12867,37 @@ ts::sz::Value serialize(Servo_Gimbal_Descriptor const& value)
 ts::Result<void> deserialize(Servo_Gimbal_Config::Channel& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("min_angle");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'min_angle'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_min_angle())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_min_angle(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("max_angle");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'max_angle'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_max_angle())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_max_angle(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("min_pwm");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'min_pwm'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_min_pwm())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_min_pwm(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("max_pwm");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'max_pwm'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_max_pwm())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_max_pwm(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "min_angle")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_min_angle())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_min_angle(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "max_angle")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_max_angle())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_max_angle(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "min_pwm")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_min_pwm())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_min_pwm(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "max_pwm")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_max_pwm())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_max_pwm(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -12854,29 +12914,30 @@ ts::sz::Value serialize(Servo_Gimbal_Config::Channel const& value)
 ts::Result<void> deserialize(Servo_Gimbal_Config& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("x_channel");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'x_channel'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_x_channel())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_x_channel(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("y_channel");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'y_channel'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_y_channel())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_y_channel(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("z_channel");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'z_channel'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_z_channel())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_z_channel(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "x_channel")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_x_channel())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_x_channel(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "y_channel")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_y_channel())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_y_channel(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "z_channel")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_z_channel())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_z_channel(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -12892,21 +12953,23 @@ ts::sz::Value serialize(Servo_Gimbal_Config const& value)
 ts::Result<void> deserialize(SRF01_Descriptor& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("bus");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'bus'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_bus())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_bus(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("rate");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'rate'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_rate())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_rate(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "bus")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_bus())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_bus(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "rate")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_rate())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_rate(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -12921,29 +12984,30 @@ ts::sz::Value serialize(SRF01_Descriptor const& value)
 ts::Result<void> deserialize(SRF01_Config& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("direction");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'direction'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_direction())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_direction(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("max_distance");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'max_distance'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_max_distance())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_max_distance(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("min_distance");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'min_distance'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_min_distance())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_min_distance(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "direction")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_direction())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_direction(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "max_distance")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_max_distance())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_max_distance(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "min_distance")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_min_distance())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_min_distance(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -12959,21 +13023,23 @@ ts::sz::Value serialize(SRF01_Config const& value)
 ts::Result<void> deserialize(SRF02_Descriptor& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("bus");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'bus'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_bus())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_bus(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("rate");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'rate'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_rate())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_rate(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "bus")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_bus())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_bus(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "rate")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_rate())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_rate(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -12988,29 +13054,30 @@ ts::sz::Value serialize(SRF02_Descriptor const& value)
 ts::Result<void> deserialize(SRF02_Config& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("direction");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'direction'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_direction())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_direction(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("max_distance");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'max_distance'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_max_distance())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_max_distance(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("min_distance");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'min_distance'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_min_distance())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_min_distance(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "direction")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_direction())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_direction(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "max_distance")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_max_distance())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_max_distance(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "min_distance")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_min_distance())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_min_distance(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -13026,21 +13093,23 @@ ts::sz::Value serialize(SRF02_Config const& value)
 ts::Result<void> deserialize(Throttle_To_PWM_Descriptor& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("rate");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'rate'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_rate())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_rate(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("channel_count");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'channel_count'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_channel_count())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_channel_count(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "rate")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_rate())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_rate(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "channel_count")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_channel_count())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_channel_count(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -13055,6 +13124,10 @@ ts::sz::Value serialize(Throttle_To_PWM_Descriptor const& value)
 ts::Result<void> deserialize(Throttle_To_PWM_Config& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
+  {
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+  }
   return ts::success;
 }
 ts::sz::Value serialize(Throttle_To_PWM_Config const& value)
@@ -13066,13 +13139,16 @@ ts::sz::Value serialize(Throttle_To_PWM_Config const& value)
 ts::Result<void> deserialize(Transformer_Descriptor& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("rate");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'rate'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_rate())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_rate(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "rate")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_rate())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_rate(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -13086,6 +13162,10 @@ ts::sz::Value serialize(Transformer_Descriptor const& value)
 ts::Result<void> deserialize(Transformer_Config& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
+  {
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+  }
   return ts::success;
 }
 ts::sz::Value serialize(Transformer_Config const& value)
@@ -13097,21 +13177,23 @@ ts::sz::Value serialize(Transformer_Config const& value)
 ts::Result<void> deserialize(UBLOX_Descriptor& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("bus");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'bus'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_bus())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_bus(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("rate");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'rate'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_rate())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_rate(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "bus")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_bus())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_bus(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "rate")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_rate())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_rate(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -13126,6 +13208,10 @@ ts::sz::Value serialize(UBLOX_Descriptor const& value)
 ts::Result<void> deserialize(UBLOX_Config& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
+  {
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+  }
   return ts::success;
 }
 ts::sz::Value serialize(UBLOX_Config const& value)
@@ -13137,13 +13223,16 @@ ts::sz::Value serialize(UBLOX_Config const& value)
 ts::Result<void> deserialize(Vec3_Generator_Descriptor& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("rate");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'rate'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_rate())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_rate(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "rate")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_rate())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_rate(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -13157,13 +13246,16 @@ ts::sz::Value serialize(Vec3_Generator_Descriptor const& value)
 ts::Result<void> deserialize(Vec3_Generator_Config& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("value");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'value'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_value())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_value(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "value")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_value())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_value(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -13250,29 +13342,30 @@ ts::sz::Value serialize(CPPM_Receiver_Descriptor::gpio_t const& value)
 ts::Result<void> deserialize(CPPM_Receiver_Descriptor& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("gpio");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'gpio'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_gpio())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_gpio(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("channel_count");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'channel_count'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_channel_count())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_channel_count(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("rate");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'rate'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_rate())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_rate(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "gpio")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_gpio())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_gpio(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "channel_count")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_channel_count())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_channel_count(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "rate")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_rate())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_rate(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -13288,45 +13381,44 @@ ts::sz::Value serialize(CPPM_Receiver_Descriptor const& value)
 ts::Result<void> deserialize(CPPM_Receiver_Config& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("inverted");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'inverted'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_inverted())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_inverted(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("frame_length");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'frame_length'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_frame_length())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_frame_length(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("gap_pulse_length");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'gap_pulse_length'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_gap_pulse_length())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_gap_pulse_length(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("min_pulse_length");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'min_pulse_length'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_min_pulse_length())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_min_pulse_length(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("max_pulse_length");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'max_pulse_length'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_max_pulse_length())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_max_pulse_length(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "inverted")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_inverted())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_inverted(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "frame_length")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_frame_length())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_frame_length(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "gap_pulse_length")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_gap_pulse_length())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_gap_pulse_length(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "min_pulse_length")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_min_pulse_length())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_min_pulse_length(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "max_pulse_length")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_max_pulse_length())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_max_pulse_length(std::move(v));
+    }
   }
   return ts::success;
 }
