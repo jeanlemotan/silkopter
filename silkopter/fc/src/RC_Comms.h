@@ -13,6 +13,7 @@
 #include "utils/comms/RC_Protocol.h"
 #include "utils/comms/Video_Streamer.h"
 #include "utils/Clock.h"
+#include "utils/hw/ISPI.h"
 
 namespace util
 {
@@ -31,9 +32,9 @@ class RC_Comms : q::util::Noncopyable
 public:
     RC_Comms(HAL& hal);
 
-    auto start(std::string const& interface, uint8_t id) -> bool;
+    bool start();
 
-    auto is_connected() const -> bool;
+    bool is_connected() const;
 
     void process();
 
@@ -53,6 +54,8 @@ private:
 
     HAL& m_hal;
     Clock::time_point m_uav_sent_tp = Clock::now();
+
+    std::unique_ptr<util::hw::ISPI> m_spi;
 
     boost::optional<stream::ICamera_Commands::Value> m_camera_commands;
     boost::optional<stream::IMultirotor_Commands::Value> m_multirotor_commands;

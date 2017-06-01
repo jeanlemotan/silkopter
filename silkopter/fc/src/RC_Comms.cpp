@@ -1,6 +1,9 @@
 #include "FCStdAfx.h"
 #include "RC_Comms.h"
 #include "utils/Timed_Scope.h"
+#include "utils/hw/SPI_PIGPIO.h"
+#include "utils/hw/SPI_Dev.h"
+
 #include "hal.def.h"
 
 
@@ -9,9 +12,17 @@ namespace silk
 
 constexpr uint8_t SDN_GPIO = 6;
 constexpr uint8_t NIRQ_GPIO = 5;
-constexpr char const* SPI_DEVICE = "/dev/spidev1.0";
-constexpr size_t SPEED = 2000000;
 
+//#define USE_SPI_PIGPIO
+
+#ifdef USE_SPI_PIGPIO
+constexpr size_t SPI_PORT = 1;
+constexpr size_t SPI_CHANNEL = 2;
+constexpr size_t SPI_SPEED = 4000000;
+#else
+const char* SPI_DEVICE = "/dev/spidev1.0";
+constexpr size_t SPI_SPEED = 10000000;
+#endif
 
 RC_Comms::RC_Comms(HAL& hal)
     : m_hal(hal)
@@ -21,9 +32,26 @@ RC_Comms::RC_Comms(HAL& hal)
 {
 }
 
-auto RC_Comms::start(std::string const& interface, uint8_t id) -> bool
+auto RC_Comms::start() -> bool
 {
     silk::hal::IUAV_Descriptor::Comms const& comms_settings = m_hal.get_uav_descriptor()->get_comms();
+
+#ifdef USE_SPI_PIGPIO
+    util::hw::SPI_PIGPIO* spi = new util::hw::SPI_PIGPIO();
+    m_spi.reset(spi);
+
+    ts::Result<void> result = spi->init(SPI_PORT, SPI_CHANNEL, SPI_SPEED, 0);
+#else
+    util::hw::SPI_Dev* spi = new util::hw::SPI_Dev();
+    m_spi.reset(spi);
+
+    ts::Result<void> result = spi->init("/dev/spidev1.0", SPI_SPEED);
+#endif
+    if (result != ts::success)
+    {
+        QLOGW("Cannot start spi: {}", result.error().what());
+        return false;
+    }
 
     try
     {
@@ -32,7 +60,7 @@ auto RC_Comms::start(std::string const& interface, uint8_t id) -> bool
         descriptor.coding_k = comms_settings.get_fec_coding_k();
         descriptor.coding_n = comms_settings.get_fec_coding_n();
 
-        m_is_connected = m_rc_phy.init(SPI_DEVICE, SPEED, SDN_GPIO, NIRQ_GPIO) && m_video_streamer.init_tx(descriptor);
+        m_is_connected = m_rc_phy.init(*m_spi, SDN_GPIO, NIRQ_GPIO) && m_video_streamer.init_tx(descriptor);
     }
     catch(std::exception e)
     {
@@ -41,7 +69,7 @@ auto RC_Comms::start(std::string const& interface, uint8_t id) -> bool
 
     if (!m_is_connected)
     {
-        QLOGW("Cannot start comms on interface {}", interface);
+        QLOGW("Cannot start comms");
         return false;
     }
 
@@ -54,7 +82,7 @@ auto RC_Comms::start(std::string const& interface, uint8_t id) -> bool
 
     m_send_home = true;
 
-    QLOGI("Started sending on interface {}", interface);
+    QLOGI("Started comms");
 
     return true;
 }
