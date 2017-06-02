@@ -323,13 +323,13 @@ uint8_t* RF4463F30::get_tx_fifo_payload_ptr(size_t fifo_size)
 {
     std::lock_guard<std::recursive_mutex> lg(m_mutex);
 
-    if (fifo_size > 255)
+    if (fifo_size > 30000)
     {
         return nullptr;
     }
 
-    m_tx_fifo.resize(fifo_size + 1);
-    return m_tx_fifo.data() + 1;
+    m_tx_fifo.resize(fifo_size + 2);
+    return m_tx_fifo.data() + 2;
 }
 
 size_t RF4463F30::get_rx_fifo_payload_size() const
@@ -405,10 +405,11 @@ bool RF4463F30::tx()
         return false;
     }
 
-    uint8_t payload_size = m_tx_fifo.size() - 1;
-    m_tx_fifo[0] = (uint8_t)payload_size;
+    size_t payload_size = m_tx_fifo.size() - 2;
+    m_tx_fifo[0] = (uint8_t)(payload_size >> 8);
+    m_tx_fifo[1] = (uint8_t)(payload_size & 0xFF);
 
-    size_t pending_fifo_size = m_tx_fifo.size();
+    size_t pending_to_upload = m_tx_fifo.size();
     uint8_t const* fifo_ptr = m_tx_fifo.data();
 
     constexpr size_t initial_upload = 32u;
@@ -419,13 +420,13 @@ bool RF4463F30::tx()
     //do the initial upload in the fifo.
     //I don't do it all here to be able to start TX faster
     {
-        size_t written = std::min(pending_fifo_size, initial_upload);
+        size_t written = std::min(pending_to_upload, initial_upload);
         if (!m_chip.write_tx_fifo(fifo_ptr, written))
         {
             QLOGW("Write FIFO failed 1.");
             return false;
         }
-        pending_fifo_size -= written;
+        pending_to_upload -= written;
         fifo_ptr += written;
     }
 
@@ -458,15 +459,15 @@ bool RF4463F30::tx()
 
     //do the rest of the upload up to fifo capacity
     //this cannot overflow, by definition
-    if (pending_fifo_size > 0)
+    if (pending_to_upload > 0)
     {
-        size_t written = std::min(pending_fifo_size, get_fifo_capacity() - initial_upload);
+        size_t written = std::min(pending_to_upload, get_fifo_capacity() - initial_upload);
         if (!m_chip.write_tx_fifo(fifo_ptr, written))
         {
             QLOGW("Write FIFO failed 2.");
             return false;
         }
-        pending_fifo_size -= written;
+        pending_to_upload -= written;
         fifo_ptr += written;
     }
 
@@ -496,32 +497,55 @@ bool RF4463F30::tx()
                     {
                         return false;
                     }
-                    QLOGI("Overflow: spin {}, uploads {}, data left {}", spin, uploads, pending_fifo_size);
+                    QLOGI("Overflow: spin {}, uploads {}, data left {}", spin, uploads, pending_to_upload);
                     return false;
                 }
 
                 if ((ph_flags & (1 << 5)) != 0)
                 {
-                    if (pending_fifo_size > 0)
+                    if (pending_to_upload > 0)
                     {
-                        QLOGW("TX finished with {} bytes left in the fifo !!!", pending_fifo_size);
+                        QLOGW("TX finished with {} bytes left in the fifo !!!", pending_to_upload);
                     }
                     break;
                 }
 
-                if (((ph_flags & 0x2) != 0) && pending_fifo_size > 0)
-                {
-                    size_t written = std::min<size_t>(pending_fifo_size, m_tx_fifo_threshold);
 
-                    if (!m_chip.write_tx_fifo(fifo_ptr, written))
+                if (pending_to_upload > 0)
+                {
+                    uint8_t response[2] = { 0 };
+                    uint8_t request[2] = { static_cast<uint8_t>(Si4463::Command::FIFO_INFO), 0x0 };
+                    if (m_chip.call_api_raw(request, sizeof(request), response, sizeof(response)))
                     {
-                        QLOGW("Write FIFO failed 3.");
-                        return false;
+                        size_t available = response[1];
+                        if (available > 0)
+                        {
+                            size_t written = std::min<size_t>(pending_to_upload, available);
+                            if (!m_chip.write_tx_fifo(fifo_ptr, written))
+                            {
+                                QLOGW("Write FIFO failed 3.");
+                                return false;
+                            }
+                            pending_to_upload -= written;
+                            fifo_ptr += written;
+                            uploads++;
+                        }
                     }
-                    pending_fifo_size -= written;
-                    fifo_ptr += written;
-                    uploads++;
                 }
+
+//                if (((ph_flags & 0x2) != 0) && pending_to_upload > 0)
+//                {
+//                    size_t written = std::min<size_t>(pending_to_upload, m_tx_fifo_threshold);
+
+//                    if (!m_chip.write_tx_fifo(fifo_ptr, written))
+//                    {
+//                        QLOGW("Write FIFO failed 3.");
+//                        return false;
+//                    }
+//                    pending_to_upload -= written;
+//                    fifo_ptr += written;
+//                    uploads++;
+//                }
             }
 
             //std::this_thread::sleep_for(std::chrono::microseconds(100));
@@ -583,6 +607,8 @@ RF4463F30::RX_Result RF4463F30::resume_rx(Clock::duration timeout)
 //        return RX_Result::RX_FAILED;
 //    }
 
+    Clock::time_point start = Clock::now();
+
     if (!m_chip.call_api_raw(
     {
         (uint8_t)Si4463::Command::START_RX,
@@ -601,9 +627,7 @@ RF4463F30::RX_Result RF4463F30::resume_rx(Clock::duration timeout)
 
     size_t spin = 0;
     size_t downloads = 0;
-    bool overflow = false;
 
-    auto start = Clock::now();
     do
     {
         spin++;
@@ -618,7 +642,7 @@ RF4463F30::RX_Result RF4463F30::resume_rx(Clock::duration timeout)
 
                 if (chip_flags & (1 << 5))
                 {
-                    QLOGI("Overflow: spin {}, downloads {}", spin, downloads);
+                    QLOGI("Overflow: spin {}, downloads {}, after {}us", spin, downloads, std::chrono::duration_cast<std::chrono::microseconds>(Clock::now() - start).count());
 
                     if (!m_chip.call_api_raw({ static_cast<uint8_t>(Si4463::Command::FIFO_INFO), 0x03 }))
                     {
@@ -637,32 +661,39 @@ RF4463F30::RX_Result RF4463F30::resume_rx(Clock::duration timeout)
                     return RX_Result::CRC_FAILED;
                 }
 
-                //data in the fifo is ready?
-                if (ph_flags & 0x1)
                 {
-//                    {
-//                        uint8_t response[1] = { 0 };
-//                        uint8_t request[2] = { static_cast<uint8_t>(Si4463::Command::FIFO_INFO), 0x0 };
-//                        if (m_chip.call_api_raw(request, sizeof(request), response, sizeof(response)))
-//                        {
-//                            size_t available = response[0];
-//                            if (available < m_rx_fifo_threshold)
-//                            {
-//                                QLOGI("available {} - xxx {}", available, m_rx_fifo_threshold);
-//                            }
-//                        }
-//                    }
-
-                    size_t available = m_rx_fifo_threshold;
-                    size_t offset = m_rx_fifo.size();
-                    m_rx_fifo.resize(offset + available);
-                    if (!m_chip.read_rx_fifo(m_rx_fifo.data() + offset, available))
+                    uint8_t response[1] = { 0 };
+                    uint8_t request[2] = { static_cast<uint8_t>(Si4463::Command::FIFO_INFO), 0x0 };
+                    if (m_chip.call_api_raw(request, sizeof(request), response, sizeof(response)))
                     {
-                        QLOGW("Read FIFO failed.");
-                        return RX_Result::FIFO_FAILED;
+                        size_t available = response[0];
+                        if (available > 0)
+                        {
+                            size_t offset = m_rx_fifo.size();
+                            m_rx_fifo.resize(offset + available);
+                            if (!m_chip.read_rx_fifo(m_rx_fifo.data() + offset, available))
+                            {
+                                QLOGW("Read FIFO failed.");
+                                return RX_Result::FIFO_FAILED;
+                            }
+                        }
+                        downloads++;
                     }
-                    downloads++;
                 }
+
+                //data in the fifo is ready?
+//                if (ph_flags & 0x1)
+//                {
+//                    size_t available = m_rx_fifo_threshold;
+//                    size_t offset = m_rx_fifo.size();
+//                    m_rx_fifo.resize(offset + available);
+//                    if (!m_chip.read_rx_fifo(m_rx_fifo.data() + offset, available))
+//                    {
+//                        QLOGW("Read FIFO failed.");
+//                        return RX_Result::FIFO_FAILED;
+//                    }
+//                    downloads++;
+//                }
 
                 //are we done?
                 if ((ph_flags & (1 << 4)) != 0)
@@ -679,29 +710,31 @@ RF4463F30::RX_Result RF4463F30::resume_rx(Clock::duration timeout)
     } while (true);
 
     //read the rest of the fifo
-    {
-        uint8_t response[2] = { 0 };
-        uint8_t request[] = { static_cast<uint8_t>(Si4463::Command::PACKET_INFO) };
-        if (m_chip.call_api_raw(request, sizeof(request), response, sizeof(response)))
-        {
-            size_t total_size = (response[0] << 8) | response[1];
-            if (total_size != 250)
-            {
-                QLOGI("total size {} - crt {} / downloads: {}", total_size, m_rx_fifo.size(), downloads);
-            }
-            if (total_size > m_rx_fifo.size())
-            {
-                size_t available = total_size - m_rx_fifo.size();
-                size_t offset = m_rx_fifo.size();
-                m_rx_fifo.resize(offset + available);
-                if (!m_chip.read_rx_fifo(m_rx_fifo.data() + offset, available))
-                {
-                    QLOGW("Read FIFO failed.");
-                    return RX_Result::FIFO_FAILED;
-                }
-            }
-        }
-    }
+//    {
+//        uint8_t response[2] = { 0 };
+//        uint8_t request[] = { static_cast<uint8_t>(Si4463::Command::PACKET_INFO) };
+//        if (m_chip.call_api_raw(request, sizeof(request), response, sizeof(response)))
+//        {
+//            size_t total_size = (response[0] << 8) | response[1];
+//            if (total_size != 255)
+//            {
+//                QLOGI("total size {} - crt {} / downloads: {}", total_size, m_rx_fifo.size(), downloads);
+//            }
+//            QLOGI("Done: spin {}, downloads {}, reported {}, downloaded {}, after {}us", spin, downloads, total_size, m_rx_fifo.size(), std::chrono::duration_cast<std::chrono::microseconds>(Clock::now() - start).count());
+
+//            if (total_size > m_rx_fifo.size())
+//            {
+//                size_t available = total_size - m_rx_fifo.size();
+//                size_t offset = m_rx_fifo.size();
+//                m_rx_fifo.resize(offset + available);
+//                if (!m_chip.read_rx_fifo(m_rx_fifo.data() + offset, available))
+//                {
+//                    QLOGW("Read FIFO failed.");
+//                    return RX_Result::FIFO_FAILED;
+//                }
+//            }
+//        }
+//    }
 
     return RX_Result::OK;
 }
