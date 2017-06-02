@@ -16,7 +16,7 @@ public:
 	}
 	static bool has_inst()
 	{
-		return s_instance != false;
+                return s_instance != nullptr;
 	}
 	static T& create()
 	{
