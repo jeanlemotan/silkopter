@@ -28,7 +28,7 @@ constexpr size_t SPI_CHANNEL = 0;
 constexpr size_t SPI_SPEED = 4000000;
 #else
 const char* SPI_DEVICE = "/dev/spidev0.0";
-constexpr size_t SPI_SPEED = 4400000;
+constexpr size_t SPI_SPEED = 10000000;
 #endif
 
 
