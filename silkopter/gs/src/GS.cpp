@@ -172,12 +172,18 @@ void GS::process()
     {
         m_process_last_tp = now;
 
-        q::System::inst().get_renderer()->begin_frame();
+        if (q::System::has_inst())
+        {
+            q::System::inst().get_renderer()->begin_frame();
+        }
 
         m_comms.process();
         m_ui.nodes_widget->process();
 
-        q::System::inst().get_renderer()->end_frame();
+        if (q::System::has_inst())
+        {
+            q::System::inst().get_renderer()->end_frame();
+        }
     }
 }
 
