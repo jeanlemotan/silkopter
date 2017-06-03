@@ -91,24 +91,64 @@ std::string s_rx_reliable_payload = { "MASTER: This is a test string that is lon
                                       "This is the tenth and last line, after nine other attepmts at filling the packet.\n"
                                       "The end." };
 
-void rx_callback(util::comms::RC_Protocol::RX_Packet const& packet)
+std::string s_tx_fec_payload = { "SLAVE: This is a test string that is long enough to cause multiple packets.\n"
+                                      "The second line is here in increase the size.\n"
+                                      "There is a third line as well to make the size even longer.\n"
+                                      "Four lines are not enough for a decent size.\n"
+                                      "Maybe the fifth line will cause the packet to exceed 500 chars?\n"
+                                      "Not really, a sixth line is needed, and probably a seventh as well.\n"
+                                      "Yes, a seventh line is definitely, positively needed.\n"
+                                      "What about an eith line? Could be.\n"
+                                      "Well, just 440 chars with eight lines, so a ninth and a tenth will definitely be sufficient.\n"
+                                      "This is the tenth and last line, after nine other attepmts at filling the packet.\n"
+                                      "The end." };
+std::string s_rx_fec_payload = { "MASTER: This is a test string that is long enough to cause multiple packets.\n"
+                                      "The second line is here in increase the size.\n"
+                                      "There is a third line as well to make the size even longer.\n"
+                                      "Four lines are not enough for a decent size.\n"
+                                      "Maybe the fifth line will cause the packet to exceed 500 chars?\n"
+                                      "Not really, a sixth line is needed, and probably a seventh as well.\n"
+                                      "Yes, a seventh line is definitely, positively needed.\n"
+                                      "What about an eith line? Could be.\n"
+                                      "Well, just 440 chars with eight lines, so a ninth and a tenth will definitely be sufficient.\n"
+                                      "This is the tenth and last line, after nine other attepmts at filling the packet.\n"
+                                      "The end." };
+
+void rx_callback(util::comms::RC_Protocol::RX_Packet const& packet, uint8_t* data, size_t size)
 {
-    if (packet.payload.size() == 0)
+    if (size == 0)
     {
-        QLOGW("Payload too small: {}", packet.payload.size());
+        QLOGW("Payload too small: {}", size);
         return;
     }
 
-    if (packet.packet_type == 10)
+    if (packet.packet_type == 0xFF)
     {
-        std::string payload((char*)(packet.payload.data()), (char*)packet.payload.data() + packet.payload.size());
+        //std::string payload((char*)data, (char*)data + size);
+        //QLOGI("FEC: \n{}", payload);
+        static Clock::time_point last_tp = Clock::now();
+        static size_t accumulated_size = 0;
+        static size_t average_size = 0;
+        accumulated_size += size;
+
+        if (Clock::now() - last_tp >= std::chrono::seconds(1))
+        {
+            average_size = (average_size * 9 + accumulated_size) / 10;
+            QLOGI("FEC bandwidth: {}bps", average_size);
+            accumulated_size = 0;
+            last_tp = Clock::now();
+        }
+    }
+    else if (packet.packet_type == 10)
+    {
+        std::string payload((char*)data, (char*)data + size);
         if (s_rx_reliable_payload != payload)
         {
             QLOGW("Incorrect reliable payload. xpected {}, got {}", s_rx_reliable_payload, payload);
         }
         else
         {
-            QLOGW("Correct reliable payload");
+            //QLOGW("Correct reliable payload");
         }
     }
     else
@@ -119,14 +159,14 @@ void rx_callback(util::comms::RC_Protocol::RX_Packet const& packet)
             QLOGW("Corrupted state {}. Max is {}", state, s_tx_periodic_payloads.size());
             return;
         }
-        std::string payload((char*)(packet.payload.data()), (char*)packet.payload.data() + packet.payload.size());
+        std::string payload((char*)data, (char*)data + size);
         if (s_rx_periodic_payloads[state] != payload)
         {
             QLOGW("Incorrect periodic payload, state {}. xpected {}, got {}", state, s_rx_periodic_payloads[state], payload);
         }
         else
         {
-            QLOGI("Correct periodic payload");
+            //QLOGI("Correct periodic payload");
         }
     }
 }
@@ -178,7 +218,7 @@ int main(int argc, char *argv[])
         exit(1);
     }
 
-    util::comms::RC_Protocol rc_protocol(rc_phy, std::bind(&rx_callback, std::placeholders::_1));
+    util::comms::RC_Protocol rc_protocol(rc_phy, std::bind(&rx_callback, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
     if (!rc_protocol.init(5, 7))
     {
         QLOGW("Cannot init protocol");
@@ -196,8 +236,8 @@ int main(int argc, char *argv[])
         if (Clock::now() - last_reliable_tp >= std::chrono::seconds(3))
         {
             last_reliable_tp = Clock::now();
-            //rc_protocol.send_reliable_packet(10, s_tx_reliable_payload.data(), s_tx_reliable_payload.size());
-            rc_protocol.send_fec_packet(s_tx_reliable_payload.data(), s_tx_reliable_payload.size());
+            rc_protocol.send_reliable_packet(10, s_tx_reliable_payload.data(), s_tx_reliable_payload.size());
+            //rc_protocol.send_fec_packet(s_tx_fec_payload.data(), s_tx_fec_payload.size());
         }
     }
 

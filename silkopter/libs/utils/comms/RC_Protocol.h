@@ -6,6 +6,7 @@
 #include "RC_Phy.h"
 #include "utils/Clock.h"
 #include "utils/Queue.h"
+#include "utils/Pool.h"
 
 struct fec_t;
 
@@ -24,10 +25,9 @@ public:
         Clock::time_point rx_timepoint;
         int8_t tx_dBm = 0;
         int8_t rx_dBm = 0;
-        std::vector<uint8_t> payload;
     };
 
-    typedef std::function<void(RX_Packet const&)> RX_Callback;
+    typedef std::function<void(RX_Packet const& packet, uint8_t* data, size_t size)> RX_Callback;
 
     RC_Protocol(RC_Phy& phy, RX_Callback rx_callback);
     ~RC_Protocol();
@@ -83,27 +83,74 @@ public:
 
     std::atomic_bool m_empty_packet_needed = { false };
 
+    RX_Callback m_rx_callback;
+
+    struct RX_Reliable
+    {
+        std::vector<uint8_t> payload;
+    } m_rx_reliable;
+
+    struct RX_Periodic
+    {
+        std::vector<uint8_t> payload;
+    } m_rx_periodic;
+
 
     //fec packets are dumped into this queue
     fec_t* m_fec = nullptr;
-    std::array<uint8_t const*, 15> m_fec_source_ptrs;
-    std::array<uint8_t*, 32> m_fec_extra_ptrs;
     uint8_t m_fec_coding_k = 5;
     uint8_t m_fec_coding_n = 7;
     size_t m_fec_buffer_size = 400u;
-    size_t m_fec_last_block_index = 0;
-    Queue<std::vector<uint8_t>> m_tx_fec_source_queue;
-    std::unique_ptr<std::vector<uint8_t>> m_fec_crt_source_buffer;
 
-    struct FEC_Extra_Buffer
+
+    struct TX_FEC
     {
-        uint8_t fec_index = 0;
-        std::vector<uint8_t> data;
-    };
-    Queue<FEC_Extra_Buffer> m_tx_fec_extra_queue;
+        TX_FEC() : source_queue(32), extra_queue(32) {}
 
-    std::vector<std::unique_ptr<std::vector<uint8_t>>> m_fec_block_source_buffers;
-    std::vector<std::unique_ptr<FEC_Extra_Buffer>> m_fec_block_extra_buffers;
+        std::array<uint8_t const*, 15> source_ptrs;
+        std::array<uint8_t*, 15> extra_ptrs;
+
+        struct Buffer
+        {
+            uint16_t block_index = 0;
+            uint8_t fec_index = 0;
+            std::vector<uint8_t> data;
+        };
+        Queue<Buffer> source_queue;
+        Queue<Buffer> extra_queue;
+
+        std::unique_ptr<Buffer> crt_source_buffer;
+
+        uint16_t last_block_index = { 0 };
+
+        std::vector<std::unique_ptr<Buffer>> block_source_buffers;
+        std::vector<std::unique_ptr<Buffer>> block_extra_buffers;
+    } m_tx_fec;
+
+    struct RX_FEC
+    {
+        struct Buffer : public Pool_Item_Base
+        {
+            bool is_processed = false;
+            uint8_t index;
+            std::vector<uint8_t> data;
+        };
+        typedef Pool<Buffer> Buffer_Pool;
+        typedef Buffer_Pool::Ptr Buffer_ptr;
+
+        Buffer_Pool buffer_pool;
+
+        struct Block
+        {
+            uint32_t index = 0;
+            std::vector<Buffer_ptr> source_buffers;
+            std::vector<Buffer_ptr> extra_buffers;
+        };
+        Block block;
+
+        std::array<uint8_t const*, 15> source_ptrs;
+        std::array<uint8_t*, 15> extra_ptrs;
+    } m_rx_fec;
 
 
 #pragma pack(push, 1)
@@ -162,12 +209,6 @@ public:
     };
 
 #pragma pack(pop)
-
-    RX_Callback m_rx_callback;
-
-    std::mutex m_incoming_packet_mutex;
-    RX_Packet m_incoming_reliable_packet;
-    RX_Packet m_incoming_periodic_packet;
 };
 
 }
