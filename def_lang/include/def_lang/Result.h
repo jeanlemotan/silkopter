@@ -26,8 +26,7 @@ public:
 	{}
 
     Error(const std::string& what)
-        : m_source_location(Source_Location::from_cpp_source(__FILE__, __LINE__))
-        , m_what(what)
+        : m_what(what)
 	{}
 
     Source_Location const& source_location() const{ return m_source_location; }
