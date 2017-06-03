@@ -48,8 +48,8 @@ public:
         FIFO_FAILED
     };
 
-    RX_Result rx(size_t max_expected_size, Clock::duration timeout);
-    RX_Result resume_rx(Clock::duration timeout);
+    RX_Result rx(size_t max_expected_size, Clock::duration packet_timeout, Clock::duration payload_timeout);
+    RX_Result resume_rx(Clock::duration packet_timeout, Clock::duration payload_timeout);
 
     int8_t get_input_dBm();
 

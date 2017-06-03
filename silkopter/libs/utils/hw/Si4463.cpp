@@ -571,13 +571,13 @@ bool Si4463::read_rx_fifo(void* data, size_t size)
     return true;
 }
 
-bool Si4463::read_frr_a(uint8_t* values, size_t value_count)
+bool Si4463::read_frr(FRR frr, uint8_t* values, size_t value_count)
 {
     if (!m_is_initialized || !values || value_count == 0 || value_count > 4)
     {
         return false;
     }
-    uint8_t request[] = { (uint8_t)Si4463::Command::FRR_A_READ, 0, 0, 0, 0 };
+    uint8_t request[] = { (uint8_t)Si4463::Command::FRR_A_READ + (uint8_t)frr, 0, 0, 0, 0 };
     uint8_t response[5] = { 0 };
     if (!m_spi->transfer(request, response, value_count + 1))
     {
@@ -586,53 +586,6 @@ bool Si4463::read_frr_a(uint8_t* values, size_t value_count)
     memcpy(values, response + 1, value_count);
     return true;
 }
-
-bool Si4463::read_frr_b(uint8_t* values, size_t value_count)
-{
-    if (!m_is_initialized || !values || value_count == 0 || value_count > 4)
-    {
-        return false;
-    }
-    uint8_t request[] = { (uint8_t)Si4463::Command::FRR_B_READ, 0, 0, 0, 0 };
-    uint8_t response[5] = { 0 };
-    if (!m_spi->transfer(request, response, value_count + 1))
-    {
-        return false;
-    }
-    memcpy(values, response + 1, value_count);
-    return true;
-}
-bool Si4463::read_frr_c(uint8_t* values, size_t value_count)
-{
-    if (!m_is_initialized || !values || value_count == 0 || value_count > 4)
-    {
-        return false;
-    }
-    uint8_t request[] = { (uint8_t)Si4463::Command::FRR_C_READ, 0, 0, 0, 0 };
-    uint8_t response[5] = { 0 };
-    if (!m_spi->transfer(request, response, value_count + 1))
-    {
-        return false;
-    }
-    memcpy(values, response + 1, value_count);
-    return true;
-}
-bool Si4463::read_frr_d(uint8_t* values, size_t value_count)
-{
-    if (!m_is_initialized || !values || value_count == 0 || value_count > 4)
-    {
-        return false;
-    }
-    uint8_t request[] = { (uint8_t)Si4463::Command::FRR_D_READ, 0, 0, 0, 0 };
-    uint8_t response[5] = { 0 };
-    if (!m_spi->transfer(request, response, value_count + 1))
-    {
-        return false;
-    }
-    memcpy(values, response + 1, value_count);
-    return true;
-}
-
 
 }
 }

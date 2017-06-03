@@ -475,7 +475,7 @@ bool RF4463F30::tx()
     float bitrate = 1000000.f / 8.f;
     Clock::duration duration_per_byte = std::chrono::duration_cast<Clock::duration>(std::chrono::duration<float>(1.0f / bitrate));
     Clock::time_point start_tp = Clock::now();
-    Clock::duration max_duration = duration_per_byte * m_tx_fifo.size() * 4;
+    Clock::duration max_duration = duration_per_byte * std::max(20u, m_tx_fifo.size()) * 2 + std::chrono::milliseconds(1);
 
     size_t spin = 0;
     size_t uploads = 0;
@@ -561,7 +561,7 @@ bool RF4463F30::tx()
     return true;
 }
 
-RF4463F30::RX_Result RF4463F30::rx(size_t max_expected_size, Clock::duration timeout)
+RF4463F30::RX_Result RF4463F30::rx(size_t max_expected_size, Clock::duration packet_timeout, Clock::duration payload_timeout)
 {
     std::lock_guard<std::recursive_mutex> lg(m_mutex);
 
@@ -587,10 +587,10 @@ RF4463F30::RX_Result RF4463F30::rx(size_t max_expected_size, Clock::duration tim
         return RX_Result::RX_FAILED;
     }
 
-    return resume_rx(timeout);
+    return resume_rx(packet_timeout, payload_timeout);
 }
 
-RF4463F30::RX_Result RF4463F30::resume_rx(Clock::duration timeout)
+RF4463F30::RX_Result RF4463F30::resume_rx(Clock::duration packet_timeout, Clock::duration payload_timeout)
 {
     std::lock_guard<std::recursive_mutex> lg(m_mutex);
 
@@ -632,12 +632,15 @@ RF4463F30::RX_Result RF4463F30::resume_rx(Clock::duration timeout)
     {
         spin++;
 
+        uint8_t modem_flags = 0;
+
         {
             uint8_t response[8] = { 0 };
             uint8_t request[] = { static_cast<uint8_t>(Si4463::Command::GET_INT_STATUS) };
             if (m_chip.call_api_raw(request, sizeof(request), response, sizeof(response)))
             {
                 uint8_t ph_flags = response[3];
+                modem_flags = response[5];
                 uint8_t chip_flags = response[7];
 
                 if (chip_flags & (1 << 5))
@@ -703,9 +706,19 @@ RF4463F30::RX_Result RF4463F30::resume_rx(Clock::duration timeout)
             }
         }
 
-        if (Clock::now() - start > timeout)
+        if (modem_flags & (0x1) == 0)
         {
-            return RX_Result::TIMEOUT;
+            if (Clock::now() - start >= payload_timeout)
+            {
+                return RX_Result::TIMEOUT;
+            }
+        }
+        else
+        {
+            if (Clock::now() - start > packet_timeout)
+            {
+                return RX_Result::TIMEOUT;
+            }
         }
     } while (true);
 
@@ -749,9 +762,9 @@ int8_t RF4463F30::get_input_dBm()
     }
 
     int8_t dBm = 0;
-
-    if (!m_chip.read_frr_a(reinterpret_cast<uint8_t*>(&dBm), 1))
+    if (!m_chip.read_frr(Si4463::FRR::A, reinterpret_cast<uint8_t*>(&dBm), 1))
     {
+        QLOGW("FRR read failed");
         return 0;
     }
     return dBm;

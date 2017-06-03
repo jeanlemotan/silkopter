@@ -257,10 +257,15 @@ public:
 
     bool wait_for_ph_interrupt(bool& got_it, uint8_t clear_interrupts, uint8_t& pending, uint8_t& status, Clock::duration timeout);
 
-    bool read_frr_a(uint8_t* values, size_t value_count);
-    bool read_frr_b(uint8_t* values, size_t value_count);
-    bool read_frr_c(uint8_t* values, size_t value_count);
-    bool read_frr_d(uint8_t* values, size_t value_count);
+    enum class FRR
+    {
+        A,
+        B,
+        C,
+        D
+    };
+
+    bool read_frr(FRR frr, uint8_t* values, size_t value_count);
 
     bool wait_for_cts();
     bool get_nirq_level();
