@@ -28,6 +28,8 @@ public:
     void end_producing(std::unique_ptr<Buffer> buffer, bool block);
     void cancel_producing(std::unique_ptr<Buffer> buffer);
 
+    void clear();
+
 private:
 
     size_t m_max_length = 0;
@@ -56,6 +58,17 @@ void Queue<T>::finish()
 {
     m_is_finished = true;
     m_queue_cv.notify_all();
+}
+
+template<typename T>
+void Queue<T>::clear()
+{
+    std::unique_lock<std::mutex> lg(m_queue_mutex);
+    for (std::unique_ptr<T>& buffer: m_queue)
+    {
+        std::lock_guard<std::mutex> lg(m_pool_mutex);
+        m_pool.push_back(std::move(buffer));
+    }
 }
 
 template<typename T>
