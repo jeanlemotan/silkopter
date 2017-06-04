@@ -79,6 +79,7 @@ private:
 
     std::atomic_bool m_exit = { false };
     std::atomic_int_fast8_t m_last_dBm = { 0 };
+    Clock::time_point m_last_dBm_tp = Clock::now();
 
     std::mutex m_rx_data_mutex;
     RX_Data m_rx_data;

@@ -183,19 +183,19 @@ void RC_Phy::master_thread_proc()
 {
     QLOG_TOPIC("RC_Phy::master");
 
-    {
-        const struct sched_param priority = {1};
-        sched_setscheduler(0, SCHED_FIFO, &priority);
+//    {
+//        const struct sched_param priority = {1};
+//        sched_setscheduler(0, SCHED_FIFO, &priority);
 
-        cpu_set_t cpuset;
-        CPU_ZERO(&cpuset);
-        CPU_SET(3, &cpuset);
-        int s = pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpuset);
-        if (s != 0)
-        {
-            QLOGW("pthread_setaffinity_np failed: {}", s);
-        }
-    }
+//        cpu_set_t cpuset;
+//        CPU_ZERO(&cpuset);
+//        CPU_SET(3, &cpuset);
+//        int s = pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpuset);
+//        if (s != 0)
+//        {
+//            QLOGW("pthread_setaffinity_np failed: {}", s);
+//        }
+//    }
 
     Clock::duration tx_average_duration = Clock::duration::zero();
     Clock::time_point last_tp = Clock::now();
@@ -224,6 +224,8 @@ void RC_Phy::master_thread_proc()
 
                 bool keep_tx = Clock::now() - start_session_tp < m_master_listen_period;
 
+                std::this_thread::sleep_for(std::chrono::microseconds(250));
+
                 std::unique_ptr<std::vector<uint8_t>> buffer = m_tx_queue.begin_consuming(false);
                 if (!buffer)
                 {
@@ -234,8 +236,7 @@ void RC_Phy::master_thread_proc()
                         Master_Header& header = *reinterpret_cast<Master_Header*>(tx_fifo);
                         header.dBm = last_encoded_dBm;
                         header.more_data = 0;
-                        std::this_thread::sleep_for(std::chrono::microseconds(50));
-                        if (m_hw->chip.tx())
+                        if (m_hw->chip.tx(std::chrono::milliseconds(10)))
                         {
                             tx_packet_count++;
                         }
@@ -253,10 +254,6 @@ void RC_Phy::master_thread_proc()
 
                 uint8_t* tx_fifo = m_hw->chip.get_tx_fifo_payload_ptr(buffer->size());
                 QASSERT(buffer->size() >= sizeof(Master_Header));
-                if (buffer->size() < 3)
-                {
-                    QLOGI("YYYYY size: {}", buffer->size());
-                }
                 memcpy(tx_fifo, buffer->data(), buffer->size());
                 buffer->clear();
                 m_tx_queue.end_consuming(std::move(buffer));
@@ -268,8 +265,7 @@ void RC_Phy::master_thread_proc()
                     header.more_data = 0;
                 }
 
-                std::this_thread::sleep_for(std::chrono::microseconds(50));
-                if (m_hw->chip.tx())
+                if (m_hw->chip.tx(std::chrono::milliseconds(10)))
                 {
                     tx_packet_count++;
                 }
@@ -290,7 +286,9 @@ void RC_Phy::master_thread_proc()
 
         //RX session --------------------------------------------------------
         {
-            hw::RF4463F30::RX_Result result = m_hw->chip.rx(get_mtu() + sizeof(Slave_Header), std::chrono::milliseconds(5), std::chrono::milliseconds(100));
+            hw::RF4463F30::RX_Result result = m_hw->chip.rx(get_mtu() + sizeof(Slave_Header),
+                                                            std::chrono::milliseconds(10),
+                                                            std::chrono::milliseconds(100));
             if (result == hw::RF4463F30::RX_Result::OK)
             {
                 uint8_t* rx_data = m_hw->chip.get_rx_fifo_payload_ptr();
@@ -325,7 +323,9 @@ void RC_Phy::master_thread_proc()
         }
 
         //refresh dBm --------------------------------------------------
+        if (Clock::now() - m_last_dBm_tp >= std::chrono::milliseconds(500))
         {
+            m_last_dBm_tp = Clock::now();
             m_last_dBm = m_hw->chip.get_input_dBm();
             last_encoded_dBm = -std::min<int8_t>(m_last_dBm, 0);
         }
@@ -351,19 +351,19 @@ void RC_Phy::slave_thread_proc()
 {
     QLOG_TOPIC("RC_Phy::slave");
 
-    {
-        const struct sched_param priority = {1};
-        sched_setscheduler(0, SCHED_FIFO, &priority);
+//    {
+//        const struct sched_param priority = {1};
+//        sched_setscheduler(0, SCHED_FIFO, &priority);
 
-        cpu_set_t cpuset;
-        CPU_ZERO(&cpuset);
-        CPU_SET(3, &cpuset);
-        int s = pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpuset);
-        if (s != 0)
-        {
-            QLOGW("pthread_setaffinity_np failed: {}", s);
-        }
-    }
+//        cpu_set_t cpuset;
+//        CPU_ZERO(&cpuset);
+//        CPU_SET(3, &cpuset);
+//        int s = pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpuset);
+//        if (s != 0)
+//        {
+//            QLOGW("pthread_setaffinity_np failed: {}", s);
+//        }
+//    }
 
     m_hw->chip.set_fifo_mode(hw::RF4463F30::FIFO_Mode::HALF_DUPLEX);
 
@@ -388,8 +388,8 @@ void RC_Phy::slave_thread_proc()
             {
                 spin++;
                 hw::RF4463F30::RX_Result result = (first) ?
-                            m_hw->chip.rx(get_mtu() + sizeof(Master_Header), std::chrono::seconds(1), std::chrono::milliseconds(10)) :
-                            m_hw->chip.resume_rx(std::chrono::seconds(1), std::chrono::milliseconds(10));
+                            m_hw->chip.rx(get_mtu() + sizeof(Master_Header), std::chrono::seconds(1), std::chrono::milliseconds(20)) :
+                            m_hw->chip.resume_rx(std::chrono::seconds(1), std::chrono::milliseconds(20));
                 if (result == hw::RF4463F30::RX_Result::OK)
                 {
                     uint8_t* rx_data = m_hw->chip.get_rx_fifo_payload_ptr();
@@ -430,7 +430,9 @@ void RC_Phy::slave_thread_proc()
         }
 
         //refresh dBm
+        if (Clock::now() - m_last_dBm_tp >= std::chrono::milliseconds(500))
         {
+            m_last_dBm_tp = Clock::now();
             m_last_dBm = m_hw->chip.get_input_dBm();
             last_encoded_dBm = -std::min<int8_t>(m_last_dBm, 0);
         }
@@ -438,6 +440,8 @@ void RC_Phy::slave_thread_proc()
         //TX session
         {
             auto start_tx_tp = Clock::now();
+
+            std::this_thread::sleep_for(std::chrono::microseconds(100));
 
             std::unique_ptr<std::vector<uint8_t>> buffer = m_tx_queue.begin_consuming(false);
             if (buffer)
@@ -451,8 +455,7 @@ void RC_Phy::slave_thread_proc()
                 Slave_Header& header = *reinterpret_cast<Slave_Header*>(tx_fifo);
                 header.dBm = last_encoded_dBm;
 
-                std::this_thread::sleep_for(std::chrono::microseconds(50));
-                if (m_hw->chip.tx())
+                if (m_hw->chip.tx(std::chrono::milliseconds(10)))
                 {
                     tx_packet_count++;
                 }
