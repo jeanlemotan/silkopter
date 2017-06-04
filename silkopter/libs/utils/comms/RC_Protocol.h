@@ -105,7 +105,7 @@ public:
 
     struct TX_FEC
     {
-        TX_FEC() : source_queue(32), extra_queue(32) {}
+        TX_FEC() : source_queue(64), extra_queue(64) {}
 
         std::array<uint8_t const*, 15> source_ptrs;
         std::array<uint8_t*, 15> extra_ptrs;

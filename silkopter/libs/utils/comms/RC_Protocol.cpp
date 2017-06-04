@@ -49,7 +49,7 @@ bool RC_Protocol::init(uint8_t fec_coding_k, uint8_t fec_coding_n)
     }
     m_fec = fec_new(m_fec_coding_k, m_fec_coding_n);
 
-    m_fec_buffer_size = std::min(400u, m_phy.get_mtu() - sizeof(FEC_Header));
+    m_fec_buffer_size = std::min(300u, m_phy.get_mtu() - sizeof(FEC_Header));
 
     reset_session();
     reset_session_data();
@@ -88,12 +88,12 @@ void RC_Protocol::send_fec_packet(void const* _data, size_t size)
         if (!m_tx_fec.crt_source_buffer)
         {
             m_tx_fec.crt_source_buffer = m_tx_fec.source_queue.begin_producing();
+            if (!m_tx_fec.crt_source_buffer)
+            {
+                QLOGW("No FEC buffers available, packet not sent");
+                return;
+            }
             m_tx_fec.crt_source_buffer->data.clear();
-        }
-        if (!m_tx_fec.crt_source_buffer)
-        {
-            QLOGW("No FEC buffers available, packet not sent");
-            return;
         }
 
         size_t s = std::min(size, m_fec_buffer_size - m_tx_fec.crt_source_buffer->data.size());
@@ -105,7 +105,7 @@ void RC_Protocol::send_fec_packet(void const* _data, size_t size)
 
         if (m_tx_fec.crt_source_buffer->data.size() >= m_fec_buffer_size)
         {
-            m_tx_fec.source_queue.end_producing(std::move(m_tx_fec.crt_source_buffer), true);
+            m_tx_fec.source_queue.end_producing(std::move(m_tx_fec.crt_source_buffer), false);
         }
     }
 }
@@ -175,30 +175,41 @@ bool RC_Protocol::compute_tx_data(RC_Phy::Buffer& buffer, bool& more_data)
     //PERIODIC -------------------------------------------------------
     if (!packet_ready)
     {
-        buffer.resize(sizeof(Periodic_Header) + offset);
+        //compute the best packet to send (the one that has been waiting the longest)
+        Periodic_Packet* best_packet = nullptr;
+        Clock::duration best_duration = Clock::duration::zero();
 
         std::lock_guard<std::mutex> lg(m_periodic_packets_mutex);
         for (Periodic_Packet& p: m_periodic_packets)
         {
-            if (now - p.last_tp >= p.period)
+            Clock::duration duration = now - p.last_tp;
+            if (duration >= p.period && duration > best_duration)
             {
-                p.last_tp = now;
+                best_duration = duration;
+                best_packet = &p;
+            }
+        }
 
-                uint8_t packet_type = 0;
-                if (p.tx_callback(buffer, packet_type))
-                {
-                    QASSERT(packet_type <= Header::MAX_PACKET_TYPE);
-                    Periodic_Header& header = *reinterpret_cast<Periodic_Header*>(buffer.data() + offset);
-                    header.header_type = Header::PERIODIC;
-                    header.packet_type = packet_type;
+        //found it, send it
+        if (best_packet)
+        {
+            buffer.resize(sizeof(Periodic_Header) + offset);
+
+            best_packet->last_tp = now;
+
+            uint8_t packet_type = 0;
+            if (best_packet->tx_callback(buffer, packet_type))
+            {
+                QASSERT(packet_type <= Header::MAX_PACKET_TYPE);
+                Periodic_Header& header = *reinterpret_cast<Periodic_Header*>(buffer.data() + offset);
+                header.header_type = Header::PERIODIC;
+                header.packet_type = packet_type;
 
 #ifdef LOG
-                    QLOGI("Send periodic packet type {}, size {}", packet_type, size);
-                    QLOGI("TX periodic packet type {}, size {}", packet_type, buffer.size());
+                QLOGI("Send periodic packet type {}, size {}", packet_type, size);
+                QLOGI("TX periodic packet type {}, size {}", packet_type, buffer.size());
 #endif
-                    packet_ready = true;
-                    break;
-                }
+                packet_ready = true;
             }
         }
         if (!packet_ready)
