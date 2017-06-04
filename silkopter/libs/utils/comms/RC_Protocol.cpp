@@ -35,7 +35,7 @@ RC_Protocol::~RC_Protocol()
 
 bool RC_Protocol::init(uint8_t fec_coding_k, uint8_t fec_coding_n)
 {
-    if (fec_coding_k == 0 || fec_coding_n < fec_coding_k || fec_coding_k > m_tx_fec.source_ptrs.size() || fec_coding_n > m_tx_fec.extra_ptrs.size())
+    if (fec_coding_k == 0 || fec_coding_n <= fec_coding_k || fec_coding_k > m_tx_fec.source_ptrs.size() || fec_coding_n > m_tx_fec.extra_ptrs.size())
     {
         QLOGE("Invalid coding params: {} / {}" , fec_coding_k, fec_coding_n);
         return false;
@@ -134,6 +134,14 @@ void RC_Protocol::reset_session()
 void RC_Protocol::reset_session_data()
 {
     m_received_reliable_packet_index = Reliable_Header::INVALID_PACKET_INDEX;
+
+    {
+        std::lock_guard<std::mutex> lg (m_reliable_packet_queue_mutex);
+        m_reliable_packet_queue.clear();
+    }
+
+    m_tx_fec.source_queue.clear();
+    m_tx_fec.extra_queue.clear();
 }
 
 bool RC_Protocol::compute_tx_data(RC_Phy::Buffer& buffer, bool& more_data)
@@ -263,13 +271,23 @@ bool RC_Protocol::compute_tx_data(RC_Phy::Buffer& buffer, bool& more_data)
                 header.fec_index = m_tx_fec.block_source_buffers.size();
                 memcpy(buffer.data() + offset + sizeof(FEC_Header), fec_buffer->data.data(), fec_buffer->data.size());
 
-                m_tx_fec.block_source_buffers.push_back(std::move(fec_buffer));
+                if (m_fec_coding_n > m_fec_coding_k)
+                {
+                    //we do fec encoding, so build up the block
+                    m_tx_fec.block_source_buffers.push_back(std::move(fec_buffer));
+                }
+                else
+                {
+                    //no fec encoding, consume immediadely
+                    m_tx_fec.source_queue.end_consuming(std::move(fec_buffer));
+                    m_tx_fec.last_block_index++;
+                }
                 packet_ready = true;
             }
         }
 
         //compute fec datagrams
-        if (m_tx_fec.block_source_buffers.size() >= m_fec_coding_k)
+        if (m_tx_fec.block_source_buffers.size() >= m_fec_coding_k && m_fec_coding_n > m_fec_coding_k)
         {
             //init data for the fec_encode
             for (size_t i = 0; i < m_fec_coding_k; i++)
@@ -515,7 +533,9 @@ void RC_Protocol::process_rx_data(util::comms::RC_Phy::RX_Data const& rx_data, R
         FEC_Header const& header = *reinterpret_cast<FEC_Header const*>(buffer.data());
         RX_FEC::Block& block = m_rx_fec.block;
 
-        if (header.block_index < block.index)
+        //If the new buffer is to old (retransmit, or extra fec buffer that came after fec decoding), ignore
+        //We have to handle wrapping of the block_index, so the 'old' window is 5 indices.
+        if (header.block_index < block.index && static_cast<uint32_t>(header.block_index) + 5u >= block.index)
         {
             //QLOGW("Old packet. Block index: {}", (int)header.block_index);
         }
