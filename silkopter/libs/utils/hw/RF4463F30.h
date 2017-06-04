@@ -37,7 +37,7 @@ public:
     size_t get_rx_fifo_payload_size() const;
     uint8_t* get_rx_fifo_payload_ptr();
 
-    bool tx();
+    bool tx(Clock::duration timeout);
 
     enum class RX_Result
     {

@@ -388,7 +388,7 @@ size_t RF4463F30::get_fifo_capacity() const
     return 129;
 }
 
-bool RF4463F30::tx()
+bool RF4463F30::tx(Clock::duration timeout)
 {
     std::lock_guard<std::recursive_mutex> lg(m_mutex);
 
@@ -471,11 +471,7 @@ bool RF4463F30::tx()
         fifo_ptr += written;
     }
 
-    //calculate the time it would take to transmit the bytes in the fifo
-    float bitrate = 1000000.f / 8.f;
-    Clock::duration duration_per_byte = std::chrono::duration_cast<Clock::duration>(std::chrono::duration<float>(1.0f / bitrate));
     Clock::time_point start_tp = Clock::now();
-    Clock::duration max_duration = duration_per_byte * std::max(20u, m_tx_fifo.size()) * 2 + std::chrono::milliseconds(1);
 
     size_t spin = 0;
     size_t uploads = 0;
@@ -551,7 +547,7 @@ bool RF4463F30::tx()
             //std::this_thread::sleep_for(std::chrono::microseconds(100));
         }
 
-        if (Clock::now() - start_tp > max_duration)
+        if (Clock::now() - start_tp > timeout)
         {
             QLOGW("Timeout");
             break;
@@ -706,7 +702,7 @@ RF4463F30::RX_Result RF4463F30::resume_rx(Clock::duration packet_timeout, Clock:
             }
         }
 
-        if (modem_flags & (0x1) == 0)
+        if ((modem_flags & (0x1)) == 0)
         {
             if (Clock::now() - start >= payload_timeout)
             {
