@@ -91,29 +91,6 @@ std::string s_rx_reliable_payload = { "MASTER: This is a test string that is lon
                                       "This is the tenth and last line, after nine other attepmts at filling the packet.\n"
                                       "The end." };
 
-std::string s_tx_fec_payload = { "SLAVE: This is a test string that is long enough to cause multiple packets.\n"
-                                      "The second line is here in increase the size.\n"
-                                      "There is a third line as well to make the size even longer.\n"
-                                      "Four lines are not enough for a decent size.\n"
-                                      "Maybe the fifth line will cause the packet to exceed 500 chars?\n"
-                                      "Not really, a sixth line is needed, and probably a seventh as well.\n"
-                                      "Yes, a seventh line is definitely, positively needed.\n"
-                                      "What about an eith line? Could be.\n"
-                                      "Well, just 440 chars with eight lines, so a ninth and a tenth will definitely be sufficient.\n"
-                                      "This is the tenth and last line, after nine other attepmts at filling the packet.\n"
-                                      "The end." };
-std::string s_rx_fec_payload = { "MASTER: This is a test string that is long enough to cause multiple packets.\n"
-                                      "The second line is here in increase the size.\n"
-                                      "There is a third line as well to make the size even longer.\n"
-                                      "Four lines are not enough for a decent size.\n"
-                                      "Maybe the fifth line will cause the packet to exceed 500 chars?\n"
-                                      "Not really, a sixth line is needed, and probably a seventh as well.\n"
-                                      "Yes, a seventh line is definitely, positively needed.\n"
-                                      "What about an eith line? Could be.\n"
-                                      "Well, just 440 chars with eight lines, so a ninth and a tenth will definitely be sufficient.\n"
-                                      "This is the tenth and last line, after nine other attepmts at filling the packet.\n"
-                                      "The end." };
-
 void rx_callback(util::comms::RC_Protocol::RX_Packet const& packet, uint8_t* data, size_t size)
 {
     if (size == 0)
@@ -124,6 +101,23 @@ void rx_callback(util::comms::RC_Protocol::RX_Packet const& packet, uint8_t* dat
 
     if (packet.packet_type == 0xFF)
     {
+        static size_t fec_errors = 0;
+        static uint16_t counter = 0;
+
+        uint16_t* data16 = (uint16_t*)data;
+        for (size_t i = 0; i < size/2; i++)
+        {
+            counter++;
+            if (data16[i] != counter)
+            {
+                while (data16[i] != counter)
+                {
+                    counter++;
+                    fec_errors++;
+                }
+            }
+        }
+
         //std::string payload((char*)data, (char*)data + size);
         //QLOGI("FEC: \n{}", payload);
         static Clock::time_point last_tp = Clock::now();
@@ -134,8 +128,9 @@ void rx_callback(util::comms::RC_Protocol::RX_Packet const& packet, uint8_t* dat
         if (Clock::now() - last_tp >= std::chrono::seconds(1))
         {
             average_size = (average_size * 9 + accumulated_size) / 10;
-            QLOGI("FEC bandwidth: {}bps", average_size);
+            QLOGI("FEC bandwidth: {} / {}, errors: {}", accumulated_size, average_size, fec_errors);
             accumulated_size = 0;
+            fec_errors = 0;
             last_tp = Clock::now();
         }
     }
