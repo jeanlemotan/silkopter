@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <string>
+#include <atomic>
 #include <boost/thread.hpp>
 #include "utils/Clock.h"
 
@@ -46,6 +47,7 @@ public:
 
     size_t get_mtu() const;
     size_t get_video_rate() const;
+    int get_input_dBm() const;
 
     static std::vector<std::string> enumerate_interfaces();
 
@@ -91,6 +93,9 @@ private:
 
     size_t m_datagram_header_offset = 0;
     size_t m_payload_offset = 0;
+
+    std::atomic_int m_best_input_dBm = { 0 };
+    std::atomic_int m_latched_input_dBm = { 0 };
 
     size_t m_video_stats_rate = 0;
     size_t m_video_stats_data_accumulated = 0;

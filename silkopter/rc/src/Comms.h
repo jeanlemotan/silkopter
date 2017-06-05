@@ -117,7 +117,7 @@ private:
     Clock::time_point m_multirotor_commands_tp = Clock::time_point(Clock::duration::zero());
     Clock::time_point m_camera_commands_tp = Clock::time_point(Clock::duration::zero());
 
-    void send_video_to_viewers(void const* data, size_t size, math::vec2u16 const& resolution);
+    void video_data_received(void const* data, size_t size, math::vec2u16 const& resolution);
 
     Clock::time_point m_telemetry_tp = Clock::time_point(Clock::duration::zero());
     void send_telemetry_to_viewers();

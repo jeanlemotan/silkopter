@@ -47,7 +47,7 @@ struct Penumbra_Radiotap_Header
     int32_t channel = 0;
     int32_t channel_flags = 0;
     int32_t rate = 0;
-    int32_t antenna = 0;
+    int32_t input_dBm = 0;
     int32_t radiotap_flags = 0;
 };
 
@@ -427,10 +427,9 @@ bool Video_Streamer::process_rx_packet(PCap& pcap)
                 prh.channel_flags = (*((uint16_t *)(rti.this_arg + 2)));
                 break;
 
-            case IEEE80211_RADIOTAP_ANTENNA:
-                prh.antenna = (*rti.this_arg) + 1;
+            case IEEE80211_RADIOTAP_DBM_ANTSIGNAL:
+                prh.input_dBm = *(int8_t*)rti.this_arg;
                 break;
-
             case IEEE80211_RADIOTAP_FLAGS:
                 prh.radiotap_flags = *rti.this_arg;
                 break;
@@ -458,6 +457,11 @@ bool Video_Streamer::process_rx_packet(PCap& pcap)
         {
             QLOGW("invalid checksum.");
             return true;
+        }
+
+        {
+            int best_input_dBm = m_best_input_dBm;
+            m_best_input_dBm = std::max(best_input_dBm, prh.input_dBm);
         }
 
         {
@@ -1093,6 +1097,13 @@ size_t Video_Streamer::get_video_rate() const
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 
+int Video_Streamer::get_input_dBm() const
+{
+    return m_latched_input_dBm;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////
+
 void Video_Streamer::process_rx_packets()
 {
     if (m_is_tx)
@@ -1256,6 +1267,12 @@ void Video_Streamer::process()
     }
 
     process_rx_packets();
+
+    if (m_best_input_dBm != std::numeric_limits<int>::lowest())
+    {
+        m_latched_input_dBm = m_best_input_dBm.load();
+    }
+    m_best_input_dBm = std::numeric_limits<int>::lowest();
 
     Clock::time_point now = Clock::now();
     if (now - m_video_stats_last_tp >= std::chrono::seconds(1))

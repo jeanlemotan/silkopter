@@ -108,7 +108,7 @@ bool Comms::start()
     m_rc_protocol.reset_session();
     m_rc_protocol.send_reliable_packet(static_cast<uint8_t>(rc_comms::Packet_Type::RC_CONNECTED), nullptr, 0);
 
-    m_video_streamer.on_data_received = std::bind(&Comms::send_video_to_viewers, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
+    m_video_streamer.on_data_received = std::bind(&Comms::video_data_received, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
 
     QLOGI("Started receiving video");
 
@@ -229,7 +229,7 @@ void Comms::process_rx_packet(util::comms::RC_Protocol::RX_Packet const& packet,
 
     if (packet.packet_type == 0xFF)
     {
-        //send_video_to_viewers(data, size, math::vec2u16(640, 480));
+        //video_data_received(data, size, math::vec2u16(640, 480));
         return;
     }
 
@@ -287,7 +287,7 @@ void Comms::process_rx_packet(util::comms::RC_Protocol::RX_Packet const& packet,
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-void Comms::send_video_to_viewers(void const* data, size_t size, math::vec2u16 const& resolution)
+void Comms::video_data_received(void const* data, size_t size, math::vec2u16 const& resolution)
 {
     std::lock_guard<std::mutex> lg(m_samples_mutex);
 
