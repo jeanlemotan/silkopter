@@ -71,10 +71,10 @@ RC_Phy::~RC_Phy()
     }
 }
 
-bool RC_Phy::init(hw::ISPI& spi, uint8_t sdn_gpio, uint8_t nirq_gpio)
+bool RC_Phy::init(hw::ISPI& spi, uint8_t sdn_gpio)
 {
     QLOG_TOPIC("RC_Phy::init");
-    if (!m_hw->chip.init(spi, sdn_gpio, nirq_gpio))
+    if (!m_hw->chip.init(spi, sdn_gpio))
     {
         return false;
     }
@@ -224,7 +224,7 @@ void RC_Phy::master_thread_proc()
 
                 bool keep_tx = Clock::now() - start_session_tp < m_master_listen_period;
 
-                std::this_thread::sleep_for(std::chrono::microseconds(250));
+                std::this_thread::sleep_for(std::chrono::microseconds(300));
 
                 std::unique_ptr<std::vector<uint8_t>> buffer = m_tx_queue.begin_consuming(false);
                 if (!buffer)
@@ -441,7 +441,7 @@ void RC_Phy::slave_thread_proc()
         {
             auto start_tx_tp = Clock::now();
 
-            std::this_thread::sleep_for(std::chrono::microseconds(100));
+            std::this_thread::sleep_for(std::chrono::microseconds(300));
 
             std::unique_ptr<std::vector<uint8_t>> buffer = m_tx_queue.begin_consuming(false);
             if (buffer)

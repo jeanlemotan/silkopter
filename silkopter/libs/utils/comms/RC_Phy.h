@@ -42,7 +42,7 @@ public:
     typedef std::function<bool(Buffer& buffer, bool& more_data)> TX_Callback;
     typedef std::function<void(RX_Data const& data, Buffer& buffer)> RX_Callback;
 
-    bool init(hw::ISPI& spi, uint8_t sdn_gpio, uint8_t nirq_gpio);
+    bool init(hw::ISPI& spi, uint8_t sdn_gpio);
     void set_callbacks(TX_Callback txcb, RX_Callback rxcb);
 
     size_t get_mtu() const;
