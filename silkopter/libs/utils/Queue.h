@@ -66,9 +66,14 @@ void Queue<T>::clear()
     std::unique_lock<std::mutex> lg(m_queue_mutex);
     for (std::unique_ptr<T>& buffer: m_queue)
     {
-        std::lock_guard<std::mutex> lg(m_pool_mutex);
-        m_pool.push_back(std::move(buffer));
+        if (buffer)
+        {
+            std::lock_guard<std::mutex> lg(m_pool_mutex);
+            m_pool.push_back(std::move(buffer));
+        }
     }
+    m_consumer_index = 0;
+    m_producer_index = 0;
 }
 
 template<typename T>
