@@ -19,7 +19,7 @@ RF4463F30::~RF4463F30()
     shutdown();
 }
 
-bool RF4463F30::init(hw::ISPI& spi, uint8_t sdn_gpio, uint8_t nirq_gpio)
+bool RF4463F30::init(hw::ISPI& spi, uint8_t sdn_gpio)
 {
     std::lock_guard<std::recursive_mutex> lg(m_mutex);
 
@@ -28,7 +28,7 @@ bool RF4463F30::init(hw::ISPI& spi, uint8_t sdn_gpio, uint8_t nirq_gpio)
         return true;
     }
 
-    if (!m_chip.init(spi, sdn_gpio, nirq_gpio))
+    if (!m_chip.init(spi, sdn_gpio))
     {
         return false;
     }
@@ -283,6 +283,10 @@ bool RF4463F30::set_fifo_mode(FIFO_Mode mode)
         QLOGE("Failed to get global config, to set the fifo mode to {}", mode);
         return false;
     }
+
+    //this is the reserved bit that needs to be set to 1, according to the documentation
+    //WDS fails to set it accordingly, so I set it here as a backup
+    args[0] |= 0x40;
 
     if (mode == FIFO_Mode::SPLIT)
     {
@@ -549,8 +553,32 @@ bool RF4463F30::tx(Clock::duration timeout)
 
         if (Clock::now() - start_tp > timeout)
         {
-            QLOGW("Timeout");
-            break;
+            uint8_t response[1] = { 0 };
+            uint8_t request[] = { static_cast<uint8_t>(Si4463::Command::REQUEST_DEVICE_STATE) };
+            if (m_chip.call_api_raw(request, sizeof(request), response, sizeof(response)))
+            {
+                if (response[0] == 0)
+                {
+                    uint8_t request[] = { static_cast<uint8_t>(Si4463::Command::CHANGE_STATE), 0x3 };
+                    if (m_chip.call_api_raw(request, sizeof(request), nullptr, 0))
+                    {
+                        QLOGW("Timeout, but recovered to ready state");
+                    }
+                    else
+                    {
+                        QLOGW("Timeout and cannot recover to ready state");
+                    }
+                }
+                else
+                {
+                    QLOGW("Timeout, stuck in state: {}", response[0]);
+                }
+            }
+            else
+            {
+                QLOGW("Timeout");
+            }
+            return false;
         }
     } while (true);
 

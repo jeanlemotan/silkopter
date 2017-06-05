@@ -29,7 +29,7 @@ Si4463::~Si4463()
 
 }
 
-bool Si4463::init(hw::ISPI& spi, uint8_t sdn_gpio, uint8_t nirq_gpio)
+bool Si4463::init(hw::ISPI& spi, uint8_t sdn_gpio)
 {
     if (m_is_initialized)
     {
@@ -39,7 +39,6 @@ bool Si4463::init(hw::ISPI& spi, uint8_t sdn_gpio, uint8_t nirq_gpio)
     m_spi = &spi;
 
     m_sdn_gpio = sdn_gpio;
-    m_nirq_gpio = nirq_gpio;
 
     //configure the GPIOs
 
@@ -49,23 +48,11 @@ bool Si4463::init(hw::ISPI& spi, uint8_t sdn_gpio, uint8_t nirq_gpio)
         QLOGE("The SDN GPIO {} is bad", m_sdn_gpio);
         return false;
     }
-    int nirq_gpio_mode = gpioGetMode(m_nirq_gpio);
-    if (nirq_gpio_mode == PI_BAD_GPIO)
-    {
-        QLOGE("The nIRQ GPIO {} is bad", m_nirq_gpio);
-        return false;
-    }
 
     int res = gpioSetMode(m_sdn_gpio, PI_OUTPUT);
     if (res != 0)
     {
         QLOGE("The SDN GPIO {} is bad", m_sdn_gpio);
-        goto error;
-    }
-    res = gpioSetMode(m_nirq_gpio, PI_INPUT);
-    if (res != 0)
-    {
-        QLOGE("The nIRQ GPIO {} is bad", m_nirq_gpio);
         goto error;
     }
 
@@ -76,14 +63,14 @@ bool Si4463::init(hw::ISPI& spi, uint8_t sdn_gpio, uint8_t nirq_gpio)
         QLOGE("Failed to set SDN");
         goto error;
     }
-    std::this_thread::sleep_for(std::chrono::milliseconds(7));
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
     res = gpioWrite(m_sdn_gpio, 0);
     if (res != 0)
     {
         QLOGE("Failed to set SDN");
         goto error;
     }
-    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    std::this_thread::sleep_for(std::chrono::milliseconds(20));
 
     m_is_initialized = true; //set to true so we can call call_api
     m_needs_to_wait_for_cts = true;
@@ -96,7 +83,6 @@ error:
     m_is_initialized = false;
 
     gpioSetMode(m_sdn_gpio, sdn_gpio_mode);
-    gpioSetMode(m_nirq_gpio, nirq_gpio_mode);
     return false;
 }
 
@@ -139,24 +125,21 @@ bool Si4463::upload_config(void const* _data)
         data += count;
         items++;
 
-        if (get_nirq_level() == false)
+        uint8_t request[] = { (uint8_t)Si4463::Command::GET_INT_STATUS };
+        uint8_t response[8] = { 0 };
+        // Get and clear all interrupts.  An error has occured...
+        if (!call_api_raw( request, sizeof(request), response, sizeof(response)))
         {
-            uint8_t request[] = { (uint8_t)Si4463::Command::GET_INT_STATUS };
-            uint8_t response[8] = { 0 };
-            // Get and clear all interrupts.  An error has occured...
-            if (!call_api_raw( request, sizeof(request), response, sizeof(response)))
-            {
-                QLOGE("Failed to clear interrupts");
-                return false;
-            }
-            if (response[7] & 8) //cmd error
-            {
-                //QLOGE("CMD error");
-                //return false;
-            }
+            QLOGE("Failed to clear interrupts");
+            return false;
+        }
+        if (response[7] & 8) //cmd error
+        {
+            QLOGE("CMD error");
+            return false;
         }
 
-        //std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
 
     return true;
@@ -255,12 +238,6 @@ bool Si4463::reset()
     return true;
 }
 
-bool Si4463::get_nirq_level()
-{
-    QASSERT(m_is_initialized);
-    return gpioRead(m_nirq_gpio) != 0;
-}
-
 bool Si4463::wait_for_ph_interrupt(bool& got_it, uint8_t clear_interrupts, uint8_t& pending, uint8_t& status, Clock::duration timeout)
 {
     QASSERT(m_is_initialized);
@@ -290,27 +267,6 @@ bool Si4463::wait_for_ph_interrupt(bool& got_it, uint8_t clear_interrupts, uint8
 
     do
     {
-        int spin = 0;
-        do
-        {
-            spin++;
-            if (gpioRead(m_nirq_gpio) == 0) //active is LOW
-            {
-                break;
-            }
-            if (Clock::now() - start > timeout)
-            {
-                return true; //not error, but no interrupt either
-            }
-            //std::this_thread::sleep_for(std::chrono::microseconds(1));
-        } while (true);
-
-        if (spin > 1)
-        {
-            int a = 0;
-        }
-        //QLOGI("xspin = {}", spin);
-
         uint8_t request[] = { (uint8_t)Si4463::Command::GET_PH_STATUS, (uint8_t)~clear_interrupts };
         if (!call_api_raw(request, sizeof(request), response, sizeof(response)))
         {

@@ -15,7 +15,7 @@ public:
     Si4463();
     ~Si4463();
 
-    bool init(hw::ISPI& spi, uint8_t sdn_gpio, uint8_t nirq_gpio);
+    bool init(hw::ISPI& spi, uint8_t sdn_gpio);
 
     enum class Command : uint8_t
     {
@@ -268,12 +268,10 @@ public:
     bool read_frr(FRR frr, uint8_t* values, size_t value_count);
 
     bool wait_for_cts();
-    bool get_nirq_level();
 
 private:
 
     uint8_t m_sdn_gpio = 0;
-    uint8_t m_nirq_gpio = 0;
 
     std::vector<uint8_t> m_tx_data;
     std::vector<uint8_t> m_rx_data;

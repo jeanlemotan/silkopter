@@ -18,7 +18,7 @@ public:
     RF4463F30();
     ~RF4463F30();
 
-    bool init(hw::ISPI& spi, uint8_t sdn_gpio, uint8_t nirq_gpio);
+    bool init(hw::ISPI& spi, uint8_t sdn_gpio);
 
     bool set_channel(uint8_t channel);
     uint8_t get_channel() const;
