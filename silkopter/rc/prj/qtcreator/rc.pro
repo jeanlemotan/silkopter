@@ -143,7 +143,6 @@ HEADERS += \
     ../../../libs/utils/hw/si446x_patch.h \
     ../../../libs/utils/hw/radiotap/ieee80211_radiotap.h \
     ../../../libs/utils/hw/radiotap/radiotap.h \
-    ../../../libs/utils/comms/Video_Streamer.h \
     ../../../libs/utils/comms/fec.h \
     ../../src/ISticks.h \
     ../../../libs/utils/hw/I2C_Dev.h \
@@ -192,7 +191,9 @@ HEADERS += \
     ../../src/IGimbal_Control.h \
     ../../src/Battery_Calibration_Menu_Page.h \
     ../../src/RF_Config_Menu_Page.h \
-    ../../../libs/utils/hw/SPI_PIGPIO.h
+    ../../../libs/utils/hw/SPI_PIGPIO.h \
+    ../../../libs/utils/Queue.h \
+    ../../../libs/utils/comms/Video_Streamer.h
 
 SOURCES += \
     ../../src/main.cpp \
@@ -213,7 +214,6 @@ SOURCES += \
     ../../../libs/utils/hw/Si4463.cpp \
     ../../../libs/utils/hw/SPI_Dev.cpp \
     ../../../libs/utils/hw/radiotap/radiotap.cpp \
-    ../../../libs/utils/comms/Video_Streamer.cpp \
     ../../../libs/utils/comms/fec.cpp \
     ../../src/Sticks_ADS1115.cpp \
     ../../../libs/utils/hw/I2C_Dev.cpp \
@@ -246,7 +246,9 @@ SOURCES += \
     ../../src/Gimbal_Control_ADS1115.cpp \
     ../../src/Battery_Calibration_Menu_Page.cpp \
     ../../src/RF_Config_Menu_Page.cpp \
-    ../../../libs/utils/hw/SPI_PIGPIO.cpp
+    ../../../libs/utils/hw/SPI_PIGPIO.cpp \
+    ../../../libs/utils/Queue.cpp \
+    ../../../libs/utils/comms/Video_Streamer.cpp
 
 DISTFILES += \
     ../../src/node.png \

@@ -157,7 +157,6 @@ SOURCES += \
     ../../../libs/utils/hw/RF4463F30.cpp \
     ../../../libs/utils/hw/Si4463.cpp \
     ../../../libs/utils/hw/SPI_Dev.cpp \
-    ../../../libs/utils/comms/Video_Streamer.cpp \
     ../../../libs/utils/comms/fec.cpp \
     ../../../libs/utils/hw/RFM22B.cpp \
     ../../../libs/utils/comms/RC_Phy.cpp \
@@ -178,7 +177,9 @@ SOURCES += \
     ../../src/bus/UART_Linux_Bus.cpp \
     ../../src/bus/UART_BB_Bus.cpp \
     ../../src/processor/Quad_Multirotor_Motor_Mixer.cpp \
-    ../../../libs/utils/hw/SPI_PIGPIO.cpp
+    ../../../libs/utils/hw/SPI_PIGPIO.cpp \
+    ../../../libs/utils/Queue.cpp \
+    ../../../libs/utils/comms/Video_Streamer.cpp
 
 HEADERS += \
     ../../../libs/utils/chrono.h \
@@ -324,7 +325,6 @@ HEADERS += \
     ../../../libs/utils/hw/si446x_patch.h \
     ../../../libs/utils/hw/Si4463.h \
     ../../../libs/utils/hw/SPI_Dev.h \
-    ../../../libs/utils/comms/Video_Streamer.h \
     ../../../libs/utils/Pool.h \
     ../../../libs/utils/comms/fec.h \
     ../../../libs/utils/hw/RFM22B.h \
@@ -351,7 +351,9 @@ HEADERS += \
     ../../src/bus/UART_BB_Bus.h \
     ../../src/processor/Quad_Multirotor_Motor_Mixer.h \
     ../../../libs/common/stream/ICamera_Commands.h \
-    ../../../libs/utils/hw/SPI_PIGPIO.h
+    ../../../libs/utils/hw/SPI_PIGPIO.h \
+    ../../../libs/utils/Queue.h \
+    ../../../libs/utils/comms/Video_Streamer.h
 
 DISTFILES +=
 

@@ -380,20 +380,6 @@ T max(T v, T max)
     }
 
 ////////////////////////////////////////////////////////////
-    void Settings::Comms::set_rc_nirq_gpio(gpio_t const& value)
-    {
-      m_rc_nirq_gpio = clamp(value, gpio_t(0), gpio_t(40));
-    }
-    void Settings::Comms::set_rc_nirq_gpio(gpio_t&& value)
-    {
-      m_rc_nirq_gpio = clamp(std::move(value), gpio_t(0), gpio_t(40));
-    }
-    auto Settings::Comms::get_rc_nirq_gpio() const -> gpio_t const& 
-    {
-      return m_rc_nirq_gpio;
-    }
-
-////////////////////////////////////////////////////////////
     void Settings::Comms::set_rc_spi_device(std::string const& value)
     {
       m_rc_spi_device = value;
@@ -983,133 +969,121 @@ ts::sz::Value serialize(uint32_t const& value)
 ts::Result<void> deserialize(Settings::Input::Sticks_Calibration& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("yaw_min");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'yaw_min'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_yaw_min())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_yaw_min(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("yaw_center");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'yaw_center'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_yaw_center())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_yaw_center(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("yaw_deadband");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'yaw_deadband'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_yaw_deadband())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_yaw_deadband(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("yaw_max");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'yaw_max'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_yaw_max())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_yaw_max(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("pitch_min");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'pitch_min'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_pitch_min())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_pitch_min(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("pitch_center");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'pitch_center'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_pitch_center())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_pitch_center(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("pitch_deadband");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'pitch_deadband'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_pitch_deadband())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_pitch_deadband(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("pitch_max");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'pitch_max'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_pitch_max())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_pitch_max(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("roll_min");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'roll_min'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_roll_min())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_roll_min(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("roll_center");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'roll_center'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_roll_center())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_roll_center(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("roll_deadband");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'roll_deadband'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_roll_deadband())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_roll_deadband(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("roll_max");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'roll_max'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_roll_max())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_roll_max(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("throttle_min");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'throttle_min'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_throttle_min())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_throttle_min(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("throttle_center");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'throttle_center'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_throttle_center())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_throttle_center(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("throttle_deadband");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'throttle_deadband'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_throttle_deadband())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_throttle_deadband(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("throttle_max");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'throttle_max'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_throttle_max())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_throttle_max(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "yaw_min")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_yaw_min())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_yaw_min(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "yaw_center")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_yaw_center())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_yaw_center(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "yaw_deadband")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_yaw_deadband())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_yaw_deadband(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "yaw_max")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_yaw_max())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_yaw_max(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "pitch_min")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_pitch_min())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_pitch_min(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "pitch_center")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_pitch_center())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_pitch_center(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "pitch_deadband")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_pitch_deadband())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_pitch_deadband(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "pitch_max")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_pitch_max())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_pitch_max(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "roll_min")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_roll_min())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_roll_min(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "roll_center")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_roll_center())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_roll_center(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "roll_deadband")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_roll_deadband())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_roll_deadband(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "roll_max")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_roll_max())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_roll_max(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "throttle_min")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_throttle_min())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_throttle_min(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "throttle_center")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_throttle_center())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_throttle_center(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "throttle_deadband")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_throttle_deadband())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_throttle_deadband(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "throttle_max")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_throttle_max())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_throttle_max(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -1138,13 +1112,16 @@ ts::sz::Value serialize(Settings::Input::Sticks_Calibration const& value)
 ts::Result<void> deserialize(Settings::Input& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("sticks_calibration");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'sticks_calibration'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_sticks_calibration())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_sticks_calibration(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "sticks_calibration")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_sticks_calibration())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_sticks_calibration(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -1158,21 +1135,23 @@ ts::sz::Value serialize(Settings::Input const& value)
 ts::Result<void> deserialize(Settings::HW& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("pigpio_period_us");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'pigpio_period_us'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_pigpio_period_us())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_pigpio_period_us(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("display_incremental_step_us");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'display_incremental_step_us'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_display_incremental_step_us())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_display_incremental_step_us(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "pigpio_period_us")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_pigpio_period_us())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_pigpio_period_us(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "display_incremental_step_us")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_display_incremental_step_us())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_display_incremental_step_us(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -1187,107 +1166,92 @@ ts::sz::Value serialize(Settings::HW const& value)
 ts::Result<void> deserialize(Settings::Comms& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("video_wlan_interfaces");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'video_wlan_interfaces'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_video_wlan_interfaces())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_video_wlan_interfaces(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("video_fec_coding_k");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'video_fec_coding_k'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_video_fec_coding_k())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_video_fec_coding_k(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("video_fec_coding_n");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'video_fec_coding_n'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_video_fec_coding_n())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_video_fec_coding_n(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("video_max_latency_ms");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'video_max_latency_ms'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_video_max_latency_ms())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_video_max_latency_ms(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("video_reset_duration_ms");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'video_reset_duration_ms'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_video_reset_duration_ms())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_video_reset_duration_ms(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("rc_sdn_gpio");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'rc_sdn_gpio'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_rc_sdn_gpio())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_rc_sdn_gpio(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("rc_nirq_gpio");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'rc_nirq_gpio'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_rc_nirq_gpio())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_rc_nirq_gpio(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("rc_spi_device");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'rc_spi_device'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_rc_spi_device())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_rc_spi_device(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("rc_spi_speed");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'rc_spi_speed'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_rc_spi_speed())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_rc_spi_speed(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("rc_channel");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'rc_channel'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_rc_channel())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_rc_channel(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("rc_xtal_adjustment");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'rc_xtal_adjustment'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_rc_xtal_adjustment())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_rc_xtal_adjustment(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "video_wlan_interfaces")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_video_wlan_interfaces())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_video_wlan_interfaces(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "video_fec_coding_k")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_video_fec_coding_k())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_video_fec_coding_k(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "video_fec_coding_n")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_video_fec_coding_n())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_video_fec_coding_n(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "video_max_latency_ms")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_video_max_latency_ms())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_video_max_latency_ms(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "video_reset_duration_ms")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_video_reset_duration_ms())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_video_reset_duration_ms(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "rc_sdn_gpio")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_rc_sdn_gpio())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_rc_sdn_gpio(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "rc_spi_device")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_rc_spi_device())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_rc_spi_device(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "rc_spi_speed")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_rc_spi_speed())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_rc_spi_speed(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "rc_channel")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_rc_channel())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_rc_channel(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "rc_xtal_adjustment")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_rc_xtal_adjustment())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_rc_xtal_adjustment(std::move(v));
+    }
   }
   return ts::success;
 }
 ts::sz::Value serialize(Settings::Comms const& value)
 {
   ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
-  sz_value.reserve_object_members(11);
+  sz_value.reserve_object_members(10);
   sz_value.add_object_member("video_wlan_interfaces", serialize(value.get_video_wlan_interfaces()));
   sz_value.add_object_member("video_fec_coding_k", serialize(value.get_video_fec_coding_k()));
   sz_value.add_object_member("video_fec_coding_n", serialize(value.get_video_fec_coding_n()));
   sz_value.add_object_member("video_max_latency_ms", serialize(value.get_video_max_latency_ms()));
   sz_value.add_object_member("video_reset_duration_ms", serialize(value.get_video_reset_duration_ms()));
   sz_value.add_object_member("rc_sdn_gpio", serialize(value.get_rc_sdn_gpio()));
-  sz_value.add_object_member("rc_nirq_gpio", serialize(value.get_rc_nirq_gpio()));
   sz_value.add_object_member("rc_spi_device", serialize(value.get_rc_spi_device()));
   sz_value.add_object_member("rc_spi_speed", serialize(value.get_rc_spi_speed()));
   sz_value.add_object_member("rc_channel", serialize(value.get_rc_channel()));
@@ -1297,37 +1261,37 @@ ts::sz::Value serialize(Settings::Comms const& value)
 ts::Result<void> deserialize(Settings::Battery_Info& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("low_voltage");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'low_voltage'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_low_voltage())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_low_voltage(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("critical_voltage");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'critical_voltage'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_critical_voltage())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_critical_voltage(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("calibration_bias");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'calibration_bias'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_calibration_bias())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_calibration_bias(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("calibration_scale");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'calibration_scale'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_calibration_scale())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_calibration_scale(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "low_voltage")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_low_voltage())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_low_voltage(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "critical_voltage")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_critical_voltage())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_critical_voltage(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "calibration_bias")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_calibration_bias())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_calibration_bias(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "calibration_scale")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_calibration_scale())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_calibration_scale(std::move(v));
+    }
   }
   return ts::success;
 }
@@ -1344,37 +1308,37 @@ ts::sz::Value serialize(Settings::Battery_Info const& value)
 ts::Result<void> deserialize(Settings& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
+  for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("input");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'input'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_input())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_input(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("hw");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'hw'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_hw())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_hw(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("comms");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'comms'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_comms())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_comms(std::move(v));
-  }
-  {
-    auto const* member_sz_value = sz_value.find_object_member_by_name("battery_info");
-    if (!member_sz_value) { return ts::Error("Cannot find member value 'battery_info'"); }
-    std::remove_cv<std::remove_reference<decltype(value.get_battery_info())>::type>::type v;
-    auto result = deserialize(v, *member_sz_value);
-    if (result != ts::success) { return result; }
-    value.set_battery_info(std::move(v));
+    ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
+    if (sz_value.get_object_member_name(i) == "input")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_input())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_input(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "hw")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_hw())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_hw(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "comms")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_comms())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_comms(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "battery_info")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_battery_info())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_battery_info(std::move(v));
+    }
   }
   return ts::success;
 }

@@ -67,7 +67,6 @@ struct Settings
     	uint32_t video_reset_duration_ms = 1000;
 
     	gpio_t rc_sdn_gpio = 6;
-    	gpio_t rc_nirq_gpio = 26;
     	string rc_spi_device = "/dev/spidev0.0";
     	uint32_t rc_spi_speed = 16000000;
 

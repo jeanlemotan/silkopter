@@ -201,10 +201,6 @@ public:
     void set_rc_sdn_gpio(gpio_t&& value);
     auto get_rc_sdn_gpio() const -> gpio_t const&;
 
-    void set_rc_nirq_gpio(gpio_t const& value);
-    void set_rc_nirq_gpio(gpio_t&& value);
-    auto get_rc_nirq_gpio() const -> gpio_t const&;
-
     void set_rc_spi_device(std::string const& value);
     void set_rc_spi_device(std::string&& value);
     auto get_rc_spi_device() const -> std::string const&;
@@ -228,7 +224,6 @@ public:
     uint32_t m_video_max_latency_ms = uint32_t{500};
     uint32_t m_video_reset_duration_ms = uint32_t{1000};
     gpio_t m_rc_sdn_gpio = gpio_t{6};
-    gpio_t m_rc_nirq_gpio = gpio_t{26};
     std::string m_rc_spi_device = std::string{"/dev/spidev0.0"};
     uint32_t m_rc_spi_speed = uint32_t{16000000};
     uint8_t m_rc_channel = uint8_t{0};
