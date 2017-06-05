@@ -38,12 +38,15 @@ bool Remote_Viewer::is_alive() const
 
 void Remote_Viewer::send_video_data(void const* video_data, size_t video_data_size, math::vec2u16 const& resolution)
 {
-    m_serialization_buffer.clear();
-    size_t offset = 0;
-    util::serialization::serialize(m_serialization_buffer, resolution, offset);
-    m_serialization_buffer.resize(offset + video_data_size);
-    memcpy(m_serialization_buffer.data() + offset, video_data, video_data_size);
-    m_channel.send(viewer::Packet_Type::VIDEO_DATA, m_serialization_buffer.data(), m_serialization_buffer.size());
+    if (video_data && video_data_size)
+    {
+        m_serialization_buffer.clear();
+        size_t offset = 0;
+        util::serialization::serialize(m_serialization_buffer, resolution, offset);
+        m_serialization_buffer.resize(offset + video_data_size);
+        memcpy(m_serialization_buffer.data() + offset, video_data, video_data_size);
+        m_channel.send(viewer::Packet_Type::VIDEO_DATA, m_serialization_buffer.data(), m_serialization_buffer.size());
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
