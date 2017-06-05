@@ -1234,11 +1234,11 @@ void MPU9250::process_magnetometer(Buses& buses)
     Clock::time_point now = Clock::now();
 
     Clock::duration dt = now - m_last_magnetic_field_tp;
-    if (dt >= std::chrono::seconds(5))
-    {
-        m_stats.mf.reset++;
-        setup_magnetometer(buses);
-    }
+//    if (dt >= std::chrono::seconds(5))
+//    {
+//        m_stats.mf.reset++;
+//        setup_magnetometer(buses);
+//    }
 
     bool data_available = false;
     std::array<uint8_t, 8> data;
