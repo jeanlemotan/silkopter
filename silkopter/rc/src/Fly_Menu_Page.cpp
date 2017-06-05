@@ -34,8 +34,8 @@ std::vector<IHaptic::Note> k_alert_haptic =
 static float dBm_to_strength(int8_t dBm)
 {
     //return math::pow(10.f, static_cast<float>(dBm) / 10.f);
-    const int max_dBm = -50;
-    const int min_dBm = -100;
+    const int max_dBm = -70;
+    const int min_dBm = -120;
 
     float factor = 1.f - static_cast<float>(max_dBm - dBm) / static_cast<float>(max_dBm - min_dBm);
     return math::clamp(factor, 0.f, 1.f);
