@@ -49,8 +49,8 @@ public:
 
     struct Impl; //this needs to be public...
 private:
-    bool compute_multirotor_state_packet(uint8_t* data, size_t& size, uint8_t& packet_type);
-    void process_rx_packet(util::comms::RC_Protocol::RX_Packet const& packet);
+    bool compute_multirotor_state_packet(util::comms::RC_Protocol::Buffer& buffer, uint8_t& packet_type);
+    void process_rx_packet(util::comms::RC_Protocol::RX_Packet const& packet, uint8_t* data, size_t size);
 
     HAL& m_hal;
     Clock::time_point m_uav_sent_tp = Clock::now();
@@ -69,6 +69,7 @@ private:
     mutable std::mutex m_multirotor_state_mutex;
     stream::IMultirotor_State::Value m_multirotor_state;
     std::vector<uint8_t> m_multirotor_state_sz_buffer;
+    std::vector<uint8_t> m_rx_packet_sz_buffer;
 
     util::comms::RC_Phy m_rc_phy;
     util::comms::RC_Protocol m_rc_protocol;

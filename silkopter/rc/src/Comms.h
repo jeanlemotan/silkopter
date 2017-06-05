@@ -88,9 +88,9 @@ private:
 
     void reset();
 
-    bool compute_multirotor_commands_packet(uint8_t* data, size_t& size, uint8_t& packet_type);
-    bool compute_camera_commands_packet(uint8_t* data, size_t& size, uint8_t& packet_type);
-    void process_rx_packet(util::comms::RC_Protocol::RX_Packet const& packet);
+    bool compute_multirotor_commands_packet(util::comms::RC_Protocol::Buffer& buffer, uint8_t& packet_type);
+    bool compute_camera_commands_packet(util::comms::RC_Protocol::Buffer& buffer, uint8_t& packet_type);
+    void process_rx_packet(util::comms::RC_Protocol::RX_Packet const& packet, uint8_t* data, size_t size);
 
     Remote_Viewer_Server m_remote_viewer_server;
 
@@ -108,8 +108,7 @@ private:
 
     mutable std::mutex m_samples_mutex;
     math::vec2u16 m_video_resolution;
-    std::vector<uint8_t> m_video_data;
-    std::vector<uint8_t> m_serialization_buffer;
+    std::vector<uint8_t> m_rx_packet_sz_buffer;
     stream::IMultirotor_State::Value m_multirotor_state;
     stream::IMultirotor_Commands::Value m_multirotor_commands;
     stream::ICamera_Commands::Value m_camera_commands;

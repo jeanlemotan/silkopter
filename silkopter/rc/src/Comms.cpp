@@ -37,8 +37,8 @@ constexpr size_t SPI_SPEED = 10000000;
 Comms::Comms(HAL& hal)
     : m_hal(hal)
     , m_rc_phy(true)
-    , m_rc_protocol(m_rc_phy, std::bind(&Comms::process_rx_packet, this, std::placeholders::_1))
-    , m_video_streamer()
+    , m_rc_protocol(m_rc_phy, std::bind(&Comms::process_rx_packet, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3))
+    //, m_video_streamer()
 {
 }
 
@@ -77,10 +77,9 @@ bool Comms::start()
     try
     {
         m_is_connected = m_rc_phy.init(*m_spi,
-                                       comms.get_rc_sdn_gpio(),
-                                       comms.get_rc_nirq_gpio())
-                && m_rc_protocol.init()
-                && m_video_streamer.init_rx(rx_descriptor);
+                                       comms.get_rc_sdn_gpio())
+                      && m_rc_protocol.init(2, 3)
+                      && m_video_streamer.init_rx(rx_descriptor);
     }
     catch(std::exception e)
     {
@@ -102,12 +101,12 @@ bool Comms::start()
     m_rc_phy.set_xtal_adjustment(m_hal.get_settings().get_comms().get_rc_xtal_adjustment());
 
     //m_rc_phy.set_rate(100);
-    m_rc_protocol.add_periodic_packet(std::chrono::milliseconds(30), std::bind(&Comms::compute_multirotor_commands_packet, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
-    m_rc_protocol.add_periodic_packet(std::chrono::milliseconds(200), std::bind(&Comms::compute_camera_commands_packet, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+    m_rc_protocol.add_periodic_packet(std::chrono::milliseconds(30), std::bind(&Comms::compute_multirotor_commands_packet, this, std::placeholders::_1, std::placeholders::_2));
+    m_rc_protocol.add_periodic_packet(std::chrono::milliseconds(200), std::bind(&Comms::compute_camera_commands_packet, this, std::placeholders::_1, std::placeholders::_2));
 
     //send connected message so the UAV can send vital data back
     m_rc_protocol.reset_session();
-    m_rc_protocol.send_packet(static_cast<uint8_t>(rc_comms::Packet_Type::RC_CONNECTED), nullptr, 0);
+    m_rc_protocol.send_reliable_packet(static_cast<uint8_t>(rc_comms::Packet_Type::RC_CONNECTED), nullptr, 0);
 
     m_video_streamer.on_data_received = std::bind(&Comms::send_video_to_viewers, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
 
@@ -182,17 +181,15 @@ util::comms::Video_Streamer& Comms::get_video_streamer()
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool Comms::compute_multirotor_commands_packet(uint8_t* data, size_t& size, uint8_t& packet_type)
+bool Comms::compute_multirotor_commands_packet(util::comms::RC_Protocol::Buffer& buffer, uint8_t& packet_type)
 {
     if (Clock::now() - m_multirotor_commands_tp < std::chrono::milliseconds(500))
     {
         packet_type = static_cast<uint8_t>(rc_comms::Packet_Type::MULTIROTOR_COMMANDS);
 
-        size_t off = 0;
-        util::serialization::serialize(m_serialization_buffer, m_multirotor_commands, off);
-        memcpy(data, m_serialization_buffer.data(), off);
+        size_t off = buffer.size();
+        util::serialization::serialize(buffer, m_multirotor_commands, off);
 
-        size = off;
         return true;
     }
     else
@@ -204,17 +201,15 @@ bool Comms::compute_multirotor_commands_packet(uint8_t* data, size_t& size, uint
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool Comms::compute_camera_commands_packet(uint8_t* data, size_t& size, uint8_t& packet_type)
+bool Comms::compute_camera_commands_packet(util::comms::RC_Protocol::Buffer& buffer, uint8_t& packet_type)
 {
     if (Clock::now() - m_camera_commands_tp < std::chrono::milliseconds(500))
     {
         packet_type = static_cast<uint8_t>(rc_comms::Packet_Type::CAMERA_COMMANDS);
 
-        size_t off = 0;
-        util::serialization::serialize(m_serialization_buffer, m_camera_commands, off);
-        memcpy(data, m_serialization_buffer.data(), off);
+        size_t off = buffer.size();
+        util::serialization::serialize(buffer, m_camera_commands, off);
 
-        size = off;
         return true;
     }
     else
@@ -226,11 +221,24 @@ bool Comms::compute_camera_commands_packet(uint8_t* data, size_t& size, uint8_t&
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-void Comms::process_rx_packet(util::comms::RC_Protocol::RX_Packet const& packet)
+void Comms::process_rx_packet(util::comms::RC_Protocol::RX_Packet const& packet, uint8_t* data, size_t size)
 {
     m_rx_packet.rx_dBm = packet.rx_dBm;
     m_rx_packet.tx_dBm = packet.tx_dBm;
     m_rx_packet.rx_timepoint = packet.rx_timepoint;
+
+    if (packet.packet_type == 0xFF)
+    {
+        //send_video_to_viewers(data, size, math::vec2u16(640, 480));
+        return;
+    }
+
+    m_rx_packet_sz_buffer.resize(size);
+    if (size > 0)
+    {
+        memcpy(m_rx_packet_sz_buffer.data(), data, size);
+    }
+
 
     bool dsz_ok = false;
     if (packet.packet_type == static_cast<uint8_t>(rc_comms::Packet_Type::MULTIROTOR_STATE_PART1))
@@ -238,7 +246,7 @@ void Comms::process_rx_packet(util::comms::RC_Protocol::RX_Packet const& packet)
         size_t off = 0;
         std::lock_guard<std::mutex> lg(m_samples_mutex);
         stream::IMultirotor_State::Value value = m_multirotor_state;
-        dsz_ok = util::serialization::deserialize_part1(packet.payload, value, off);
+        dsz_ok = util::serialization::deserialize_part1(m_rx_packet_sz_buffer, value, off);
         if (dsz_ok)
         {
             m_multirotor_state = value;
@@ -249,7 +257,7 @@ void Comms::process_rx_packet(util::comms::RC_Protocol::RX_Packet const& packet)
         size_t off = 0;
         std::lock_guard<std::mutex> lg(m_samples_mutex);
         stream::IMultirotor_State::Value value = m_multirotor_state;
-        dsz_ok = util::serialization::deserialize_part2(packet.payload, value, off);
+        dsz_ok = util::serialization::deserialize_part2(m_rx_packet_sz_buffer, value, off);
         if (dsz_ok)
         {
             m_multirotor_state = value;
@@ -260,7 +268,7 @@ void Comms::process_rx_packet(util::comms::RC_Protocol::RX_Packet const& packet)
         size_t off = 0;
         std::lock_guard<std::mutex> lg(m_samples_mutex);
         stream::IMultirotor_State::Value value = m_multirotor_state;
-        dsz_ok = util::serialization::deserialize_home(packet.payload, value, off);
+        dsz_ok = util::serialization::deserialize_home(m_rx_packet_sz_buffer, value, off);
         if (dsz_ok)
         {
             m_multirotor_state = value;
@@ -286,7 +294,6 @@ void Comms::send_video_to_viewers(void const* data, size_t size, math::vec2u16 c
     if (resolution != m_video_resolution)
     {
         m_video_resolution = resolution;
-        m_video_data.clear();
     }
 
     if (size > 0)

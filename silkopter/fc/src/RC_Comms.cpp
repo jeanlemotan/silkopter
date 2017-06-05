@@ -11,7 +11,6 @@ namespace silk
 {
 
 constexpr uint8_t SDN_GPIO = 6;
-constexpr uint8_t NIRQ_GPIO = 5;
 
 //#define USE_SPI_PIGPIO
 
@@ -27,8 +26,8 @@ constexpr size_t SPI_SPEED = 10000000;
 RC_Comms::RC_Comms(HAL& hal)
     : m_hal(hal)
     , m_rc_phy(false)
-    , m_rc_protocol(m_rc_phy, std::bind(&RC_Comms::process_rx_packet, this, std::placeholders::_1))
-    , m_video_streamer()
+    , m_rc_protocol(m_rc_phy, std::bind(&RC_Comms::process_rx_packet, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3))
+    //, m_video_streamer()
 {
 }
 
@@ -55,12 +54,14 @@ auto RC_Comms::start() -> bool
 
     try
     {
-        util::comms::Video_Streamer::TX_Descriptor descriptor;
-        descriptor.interface = comms_settings.get_video_wlan_interface();
-        descriptor.coding_k = comms_settings.get_fec_coding_k();
-        descriptor.coding_n = comms_settings.get_fec_coding_n();
+        util::comms::Video_Streamer::TX_Descriptor tx_descriptor;
+        tx_descriptor.interface = comms_settings.get_video_wlan_interface();
+        tx_descriptor.coding_k = comms_settings.get_fec_coding_k();
+        tx_descriptor.coding_n = comms_settings.get_fec_coding_n();
 
-        m_is_connected = m_rc_phy.init(*m_spi, SDN_GPIO, NIRQ_GPIO) && m_video_streamer.init_tx(descriptor);
+        m_is_connected = m_rc_phy.init(*m_spi, SDN_GPIO) &&
+                         m_rc_protocol.init(2, 3) &&
+                         m_video_streamer.init_tx(tx_descriptor);
     }
     catch(std::exception e)
     {
@@ -77,7 +78,7 @@ auto RC_Comms::start() -> bool
     m_rc_phy.set_xtal_adjustment(comms_settings.get_rc_xtal_ajdustment());
 
     //m_rc_phy.set_rate(100);
-    m_rc_protocol.add_periodic_packet(std::chrono::milliseconds(30), std::bind(&RC_Comms::compute_multirotor_state_packet, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+    m_rc_protocol.add_periodic_packet(std::chrono::milliseconds(30), std::bind(&RC_Comms::compute_multirotor_state_packet, this, std::placeholders::_1, std::placeholders::_2));
     m_rc_protocol.reset_session();
 
     m_send_home = true;
@@ -86,6 +87,8 @@ auto RC_Comms::start() -> bool
 
     return true;
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
 
 auto RC_Comms::is_connected() const -> bool
 {
@@ -108,45 +111,51 @@ util::comms::RC_Phy& RC_Comms::get_rc_phy()
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool RC_Comms::compute_multirotor_state_packet(uint8_t* data, size_t& size, uint8_t& packet_type)
+bool RC_Comms::compute_multirotor_state_packet(util::comms::RC_Protocol::Buffer& buffer, uint8_t& packet_type)
 {
     packet_type = static_cast<uint8_t>(m_next_packet_type);
 
-    size_t off = 0;
+    size_t off = buffer.size();
     {
         std::lock_guard<std::mutex> lg(m_multirotor_state_mutex);
         if (m_next_packet_type == silk::rc_comms::Packet_Type::MULTIROTOR_STATE_PART1)
         {
-            util::serialization::serialize_part1(m_multirotor_state_sz_buffer, m_multirotor_state, off);
+            util::serialization::serialize_part1(buffer, m_multirotor_state, off);
             m_next_packet_type = silk::rc_comms::Packet_Type::MULTIROTOR_STATE_PART2;
         }
         else
         {
-            util::serialization::serialize_part2(m_multirotor_state_sz_buffer, m_multirotor_state, off);
+            util::serialization::serialize_part2(buffer, m_multirotor_state, off);
             m_next_packet_type = silk::rc_comms::Packet_Type::MULTIROTOR_STATE_PART1;
         }
 
-        memcpy(data, m_multirotor_state_sz_buffer.data(), off);
+        //memcpy(data, m_multirotor_state_sz_buffer.data(), off);
     }
 
-    size = off;
+    //size = off;
 
     return true;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-void RC_Comms::process_rx_packet(util::comms::RC_Protocol::RX_Packet const& packet)
+void RC_Comms::process_rx_packet(util::comms::RC_Protocol::RX_Packet const& packet, uint8_t* data, size_t size)
 {
     m_rx_packet.rx_dBm = packet.rx_dBm;
     m_rx_packet.tx_dBm = packet.tx_dBm;
     m_rx_packet.rx_timepoint = packet.rx_timepoint;
 
+    m_rx_packet_sz_buffer.resize(size);
+    if (size > 0)
+    {
+        memcpy(m_rx_packet_sz_buffer.data(), data, size);
+    }
+
     if (packet.packet_type == static_cast<uint8_t>(rc_comms::Packet_Type::MULTIROTOR_COMMANDS))
     {
         size_t off = 0;
         stream::IMultirotor_Commands::Value value;
-        if (util::serialization::deserialize(packet.payload, value, off))
+        if (util::serialization::deserialize(m_rx_packet_sz_buffer, value, off))
         {
             std::lock_guard<std::mutex> lg(m_new_multirotor_commands_mutex);
             m_new_multirotor_commands = value;
@@ -160,7 +169,7 @@ void RC_Comms::process_rx_packet(util::comms::RC_Protocol::RX_Packet const& pack
     {
         size_t off = 0;
         stream::ICamera_Commands::Value value;
-        if (util::serialization::deserialize(packet.payload, value, off))
+        if (util::serialization::deserialize(m_rx_packet_sz_buffer, value, off))
         {
             std::lock_guard<std::mutex> lg(m_new_camera_commands_mutex);
             m_new_camera_commands = value;
@@ -245,7 +254,7 @@ void RC_Comms::process()
 
         std::lock_guard<std::mutex> lg(m_multirotor_state_mutex);
         util::serialization::serialize_home(m_multirotor_state_sz_buffer, m_multirotor_state, off);
-        m_rc_protocol.send_packet(packet_type, m_multirotor_state_sz_buffer.data(), m_multirotor_state_sz_buffer.size());
+        m_rc_protocol.send_reliable_packet(packet_type, m_multirotor_state_sz_buffer.data(), m_multirotor_state_sz_buffer.size());
 
         m_send_home = false;
         m_last_home_sent_tp = now;
