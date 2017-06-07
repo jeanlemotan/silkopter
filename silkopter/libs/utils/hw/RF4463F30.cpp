@@ -553,31 +553,38 @@ bool RF4463F30::tx(Clock::duration timeout)
 
         if (Clock::now() - start_tp > timeout)
         {
-            uint8_t response[1] = { 0 };
-            uint8_t request[] = { static_cast<uint8_t>(Si4463::Command::REQUEST_DEVICE_STATE) };
-            if (m_chip.call_api_raw(request, sizeof(request), response, sizeof(response)))
+            QLOGW("Timeout, resetting");
+            reset();
+            if (!init())
             {
-                if (response[0] == 0)
-                {
-                    uint8_t request[] = { static_cast<uint8_t>(Si4463::Command::CHANGE_STATE), 0x3 };
-                    if (m_chip.call_api_raw(request, sizeof(request), nullptr, 0))
-                    {
-                        QLOGW("Timeout, but recovered to ready state");
-                    }
-                    else
-                    {
-                        QLOGW("Timeout and cannot recover to ready state");
-                    }
-                }
-                else
-                {
-                    QLOGW("Timeout, stuck in state: {}", response[0]);
-                }
+                QLOGW("Reset failed");
             }
-            else
-            {
-                QLOGW("Timeout");
-            }
+
+//            uint8_t response[1] = { 0 };
+//            uint8_t request[] = { static_cast<uint8_t>(Si4463::Command::REQUEST_DEVICE_STATE) };
+//            if (m_chip.call_api_raw(request, sizeof(request), response, sizeof(response)))
+//            {
+//                if (response[0] == 0)
+//                {
+//                    uint8_t request[] = { static_cast<uint8_t>(Si4463::Command::CHANGE_STATE), 0x3 };
+//                    if (m_chip.call_api_raw(request, sizeof(request), nullptr, 0))
+//                    {
+//                        QLOGW("Timeout, but recovered to ready state");
+//                    }
+//                    else
+//                    {
+//                        QLOGW("Timeout and cannot recover to ready state");
+//                    }
+//                }
+//                else
+//                {
+//                    QLOGW("Timeout, stuck in state: {}", response[0]);
+//                }
+//            }
+//            else
+//            {
+//                QLOGW("Timeout");
+//            }
             return false;
         }
     } while (true);

@@ -120,10 +120,10 @@ bool Si4463::upload_config(void const* _data)
 
         if (!call_api_raw(data, count, nullptr, 0))
         {
+            QLOGE("Failed to upload config {}", items);
             return false;
         }
         data += count;
-        items++;
 
         uint8_t request[] = { (uint8_t)Si4463::Command::GET_INT_STATUS };
         uint8_t response[8] = { 0 };
@@ -139,7 +139,12 @@ bool Si4463::upload_config(void const* _data)
             return false;
         }
 
-        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        if (items == 0)
+        {
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        }
+
+        items++;
     }
 
     return true;
