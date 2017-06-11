@@ -31,6 +31,8 @@ std::vector<IMultirotor_Properties::Motor> IMultirotor_Properties::create_motors
             res.push_back(motor);
 
             angle += angle_between_motors;
+
+            QLOGI("{}: {} motor at {}", res.size() - 1, motor.clockwise ? "CW" : "CCW", math::vec2f(motor.position));
         }
     }
 
