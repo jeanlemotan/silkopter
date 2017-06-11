@@ -538,7 +538,7 @@ bool Si4463::read_frr(FRR frr, uint8_t* values, size_t value_count)
     {
         return false;
     }
-    uint8_t request[] = { (uint8_t)Si4463::Command::FRR_A_READ + (uint8_t)frr, 0, 0, 0, 0 };
+    uint8_t request[] = { (uint8_t)((uint8_t)Si4463::Command::FRR_A_READ + (uint8_t)frr), 0, 0, 0, 0 };
     uint8_t response[5] = { 0 };
     if (!m_spi->transfer(request, response, value_count + 1))
     {
