@@ -123,8 +123,7 @@ void Quad_Multirotor_Motor_Mixer::process()
         return;
     }
 
-    m_accumulator.process([this, &multirotor_properties](stream::ITorque::Sample const& t_sample,
-                                                stream::IFloat::Sample const& f_sample)
+    m_accumulator.process([this, &multirotor_properties](stream::ITorque::Sample const& t_sample, stream::IFloat::Sample const& f_sample)
     {
         bool is_healthy = false;
         if (t_sample.is_healthy & f_sample.is_healthy)
@@ -269,7 +268,7 @@ void Quad_Multirotor_Motor_Mixer::compute_throttles(Quad_Multirotor_Properties c
     }
 
     //convert thrust to throttle and clip
-    for (auto& out: m_outputs)
+    for (std::shared_ptr<Stream>& out: m_outputs)
     {
         out->throttle = compute_throttle_from_thrust(max_thrust_per_motor, out->thrust);
     }
