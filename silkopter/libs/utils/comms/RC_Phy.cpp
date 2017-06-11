@@ -6,8 +6,8 @@
 #define CHIP_RF4463F30  1
 #define CHIP_RFM22B     2
 
-//#define USE_CHIP CHIP_RFM22B
-#define USE_CHIP CHIP_RF4463F30
+#define USE_CHIP CHIP_RFM22B
+//#define USE_CHIP CHIP_RF4463F30
 
 
 
@@ -26,18 +26,18 @@ namespace comms
 constexpr Clock::duration MIN_TX_DURATION = std::chrono::microseconds(1);
 
 
+#if USE_CHIP == CHIP_RF4463F30
+    typedef hw::RF4463F30 Chip;
+#elif USE_CHIP == CHIP_RFM22B
+    typedef hw::RFM22B Chip;
+#else
+#   error "Choose a RF chip"
+#endif
 
 
 struct RC_Phy::HW
 {
-
-#if USE_CHIP == CHIP_RF4463F30
-    hw::RF4463F30 chip;
-#elif USE_CHIP == CHIP_RFM22B
-    hw::RFM22B chip;
-#else
-#   error "Choose a RF chip"
-#endif
+    Chip chip;
 };
 
 
@@ -176,7 +176,11 @@ void RC_Phy::set_master_listen_rate(size_t rate)
 
 size_t RC_Phy::get_mtu() const
 {
+#if USE_CHIP == CHIP_RF4463F30
     return 510;
+#else
+    return 63;
+#endif
 }
 
 void RC_Phy::master_thread_proc()
@@ -207,7 +211,9 @@ void RC_Phy::master_thread_proc()
     size_t crc_failed_count = 0;
 
 
+#if USE_CHIP == CHIP_RF4463F30
     m_hw->chip.set_fifo_mode(hw::RF4463F30::FIFO_Mode::HALF_DUPLEX);
+#endif
 
     uint8_t last_encoded_dBm = 0;
 
@@ -286,10 +292,10 @@ void RC_Phy::master_thread_proc()
 
         //RX session --------------------------------------------------------
         {
-            hw::RF4463F30::RX_Result result = m_hw->chip.rx(get_mtu() + sizeof(Slave_Header),
+            Chip::RX_Result result = m_hw->chip.rx(get_mtu() + sizeof(Slave_Header),
                                                             std::chrono::milliseconds(10),
                                                             std::chrono::milliseconds(100));
-            if (result == hw::RF4463F30::RX_Result::OK)
+            if (result == Chip::RX_Result::OK)
             {
                 uint8_t* rx_data = m_hw->chip.get_rx_fifo_payload_ptr();
                 size_t rx_size = m_hw->chip.get_rx_fifo_payload_size();
@@ -312,11 +318,11 @@ void RC_Phy::master_thread_proc()
                     }
                 }
             }
-            else if (result == hw::RF4463F30::RX_Result::CRC_FAILED)
+            else if (result == Chip::RX_Result::CRC_FAILED)
             {
                 crc_failed_count++;
             }
-            else if (result != hw::RF4463F30::RX_Result::TIMEOUT)
+            else if (result != Chip::RX_Result::TIMEOUT)
             {
                 QLOGW("RX error: {}", result);
             }
@@ -330,20 +336,20 @@ void RC_Phy::master_thread_proc()
             last_encoded_dBm = -std::min<int8_t>(m_last_dBm, 0);
         }
 
-        if (Clock::now() - last_tp >= std::chrono::seconds(1))
-        {
-            last_tp = Clock::now();
-            QLOGI("TX packets: {}, average per packet: {}", tx_packet_count, tx_packet_count > 0 ? tx_average_duration / tx_packet_count : Clock::duration::zero());
-            tx_packet_count = 0;
-            tx_average_duration = Clock::duration::zero();
+//        if (Clock::now() - last_tp >= std::chrono::seconds(1))
+//        {
+//            last_tp = Clock::now();
+//            QLOGI("TX packets: {}, average per packet: {}", tx_packet_count, tx_packet_count > 0 ? tx_average_duration / tx_packet_count : Clock::duration::zero());
+//            tx_packet_count = 0;
+//            tx_average_duration = Clock::duration::zero();
 
-            QLOGI("RX packets: {}, crc failed {}, {}-{}-{}", rx_packet_count, crc_failed_count, min_size, max_size, rx_packet_count > 0 ? average_size / rx_packet_count : 0);
-            rx_packet_count = 0;
-            crc_failed_count = 0;
-            min_size = 999999;
-            max_size = 0;
-            average_size = 0;
-        }
+//            QLOGI("RX packets: {}, crc failed {}, {}-{}-{}", rx_packet_count, crc_failed_count, min_size, max_size, rx_packet_count > 0 ? average_size / rx_packet_count : 0);
+//            rx_packet_count = 0;
+//            crc_failed_count = 0;
+//            min_size = 999999;
+//            max_size = 0;
+//            average_size = 0;
+//        }
     }
 }
 
@@ -365,7 +371,9 @@ void RC_Phy::slave_thread_proc()
 //        }
 //    }
 
+#if USE_CHIP == CHIP_RF4463F30
     m_hw->chip.set_fifo_mode(hw::RF4463F30::FIFO_Mode::HALF_DUPLEX);
+#endif
 
     Clock::duration tx_average_duration = Clock::duration::zero();
     Clock::time_point last_tp = Clock::now();
@@ -383,14 +391,11 @@ void RC_Phy::slave_thread_proc()
         //RX session, until the master says to send -----------------------------------
         {
             size_t spin = 0;
-            bool first = true;
             while (!m_exit)
             {
                 spin++;
-                hw::RF4463F30::RX_Result result = (first) ?
-                            m_hw->chip.rx(get_mtu() + sizeof(Master_Header), std::chrono::seconds(1), std::chrono::milliseconds(20)) :
-                            m_hw->chip.resume_rx(std::chrono::seconds(1), std::chrono::milliseconds(20));
-                if (result == hw::RF4463F30::RX_Result::OK)
+                Chip::RX_Result result = m_hw->chip.rx(get_mtu() + sizeof(Master_Header), std::chrono::seconds(1), std::chrono::milliseconds(20));
+                if (result == Chip::RX_Result::OK)
                 {
                     uint8_t* rx_data = m_hw->chip.get_rx_fifo_payload_ptr();
                     size_t rx_size = m_hw->chip.get_rx_fifo_payload_size();
@@ -416,16 +421,14 @@ void RC_Phy::slave_thread_proc()
                         }
                     }
                 }
-                else if (result == hw::RF4463F30::RX_Result::CRC_FAILED)
+                else if (result == Chip::RX_Result::CRC_FAILED)
                 {
                     crc_failed_count++;
                 }
-                else if (result != hw::RF4463F30::RX_Result::TIMEOUT)
+                else if (result != Chip::RX_Result::TIMEOUT)
                 {
                     QLOGW("RX error: {}", result);
                 }
-
-                first = false;
             }
         }
 
@@ -469,20 +472,20 @@ void RC_Phy::slave_thread_proc()
             }
         }
 
-        if (Clock::now() - last_tp >= std::chrono::seconds(1))
-        {
-            last_tp = Clock::now();
-            QLOGI("TX packets: {}, average per packet: {}", tx_packet_count, tx_packet_count > 0 ? tx_average_duration / tx_packet_count : Clock::duration::zero());
-            tx_packet_count = 0;
-            tx_average_duration = Clock::duration::zero();
+//        if (Clock::now() - last_tp >= std::chrono::seconds(1))
+//        {
+//            last_tp = Clock::now();
+//            QLOGI("TX packets: {}, average per packet: {}", tx_packet_count, tx_packet_count > 0 ? tx_average_duration / tx_packet_count : Clock::duration::zero());
+//            tx_packet_count = 0;
+//            tx_average_duration = Clock::duration::zero();
 
-            QLOGI("RX packets: {}, crc failed {}, {}-{}-{}", rx_packet_count, crc_failed_count, min_size, max_size, rx_packet_count > 0 ? average_size / rx_packet_count : 0);
-            rx_packet_count = 0;
-            crc_failed_count = 0;
-            min_size = 999999;
-            max_size = 0;
-            average_size = 0;
-        }
+//            QLOGI("RX packets: {}, crc failed {}, {}-{}-{}", rx_packet_count, crc_failed_count, min_size, max_size, rx_packet_count > 0 ? average_size / rx_packet_count : 0);
+//            rx_packet_count = 0;
+//            crc_failed_count = 0;
+//            min_size = 999999;
+//            max_size = 0;
+//            average_size = 0;
+//        }
 
         if (m_exit)
         {

@@ -31,22 +31,15 @@ RFM22B::~RFM22B()
 
 }
 
-bool RFM22B::init(std::string const& device, uint32_t speed, uint8_t sdn_gpio, uint8_t nirq_gpio)
+bool RFM22B::init(ISPI& spi, uint8_t sdn_gpio)
 {
-    if (m_is_initialized)
+    if (m_spi)
     {
         return true;
     }
-
-    auto result = m_spi_dev.init(device, speed);
-    if (result != ts::success)
-    {
-        QLOGE("SPI initialization failed: {}", result.error().what());
-        return false;
-    }
+    m_spi = &spi;
 
     m_sdn_gpio = sdn_gpio;
-    m_nirq_gpio = nirq_gpio;
 
     //configure the GPIOs
 
@@ -56,23 +49,11 @@ bool RFM22B::init(std::string const& device, uint32_t speed, uint8_t sdn_gpio, u
         QLOGE("The SDN GPIO {} is bad", m_sdn_gpio);
         return false;
     }
-    int nirq_gpio_mode = gpioGetMode(m_nirq_gpio);
-    if (nirq_gpio_mode == PI_BAD_GPIO)
-    {
-        QLOGE("The nIRQ GPIO {} is bad", m_nirq_gpio);
-        return false;
-    }
 
     int res = gpioSetMode(m_sdn_gpio, PI_OUTPUT);
     if (res != 0)
     {
         QLOGE("The SDN GPIO {} is bad", m_sdn_gpio);
-        goto error;
-    }
-    res = gpioSetMode(m_nirq_gpio, PI_INPUT);
-    if (res != 0)
-    {
-        QLOGE("The nIRQ GPIO {} is bad", m_nirq_gpio);
         goto error;
     }
 
@@ -103,23 +84,19 @@ bool RFM22B::init(std::string const& device, uint32_t speed, uint8_t sdn_gpio, u
     set_gpio_function(RFM22B::GPIO::GPIO0, RFM22B::GPIO_Function::TX_STATE);
     set_gpio_function(RFM22B::GPIO::GPIO1, RFM22B::GPIO_Function::RX_STATE);
 
-    m_is_initialized = true; //set to true so we can call call_api
-
     return true;
 
 error:
     shutdown();
-
-    m_is_initialized = false;
+    m_spi = nullptr;
 
     gpioSetMode(m_sdn_gpio, sdn_gpio_mode);
-    gpioSetMode(m_nirq_gpio, nirq_gpio_mode);
     return false;
 }
 
 bool RFM22B::shutdown()
 {
-    if (!m_is_initialized)
+    if (!m_spi)
     {
         return false;
     }
@@ -134,7 +111,7 @@ bool RFM22B::shutdown()
 
 bool RFM22B::powerup()
 {
-    if (!m_is_initialized)
+    if (!m_spi)
     {
         return false;
     }
@@ -150,12 +127,16 @@ bool RFM22B::powerup()
 
 void RFM22B::reset()
 {
+    std::lock_guard<std::recursive_mutex> lg(m_mutex);
+
     set_operating_mode((uint16_t)Operating_Mode::READY_MODE | (uint16_t)Operating_Mode::RESET);
 }
 
 
 void RFM22B::set_modem_configuration(uint8_t data[42])
 {
+    std::lock_guard<std::recursive_mutex> lg(m_mutex);
+
     uint8_t const* ptr = data;
     set_register(Register::IF_FILTER_BANDWIDTH_1C, *ptr++);
     set_register(Register::AFC_LOOP_GEARSHIFT_OVERRIDE_1D, *ptr++);
@@ -211,16 +192,22 @@ void RFM22B::set_modem_configuration(uint8_t data[42])
 
 void RFM22B::idle_mode()
 {
+    std::lock_guard<std::recursive_mutex> lg(m_mutex);
+
     set_operating_mode((uint16_t)Operating_Mode::READY_MODE);
 }
 
 void RFM22B::sleep_mode()
 {
+    std::lock_guard<std::recursive_mutex> lg(m_mutex);
+
     set_operating_mode((uint16_t)Operating_Mode::ENABLE_WAKE_UP_TIMER);
 }
 
 void RFM22B::stand_by_mode()
 {
+    std::lock_guard<std::recursive_mutex> lg(m_mutex);
+
     get_register(Register::INTERRUPT_STATUS_1_03);
     get_register(Register::INTERRUPT_STATUS_2_04);
     set_operating_mode(0);
@@ -231,28 +218,38 @@ void RFM22B::stand_by_mode()
 //	It expects a bitwise-ORed combination of the modes you want set
 void RFM22B::set_operating_mode(uint16_t mode)
 {
+    std::lock_guard<std::recursive_mutex> lg(m_mutex);
+
     set_register16(Register::OPERATING_MODE_AND_FUNCTION_CONTROL_1_07, mode);
 }
 
 // Get operating mode (bitwise-ORed)
 uint16_t RFM22B::get_operating_mode() const
 {
+    std::lock_guard<std::recursive_mutex> lg(m_mutex);
+
     return get_register16(Register::OPERATING_MODE_AND_FUNCTION_CONTROL_1_07);
 }
 
 // Manuall enter RX or TX mode
 void RFM22B::rx_mode()
 {
+    std::lock_guard<std::recursive_mutex> lg(m_mutex);
+
     set_operating_mode((uint16_t)Operating_Mode::READY_MODE | (uint16_t)Operating_Mode::RX_MODE);
 }
 void RFM22B::tx_mode()
 {
+    std::lock_guard<std::recursive_mutex> lg(m_mutex);
+
     set_operating_mode((uint16_t)Operating_Mode::READY_MODE | (uint16_t)Operating_Mode::TX_MODE);
 }
 
 // Set or get the GPIO configuration
 void RFM22B::set_gpio_function(GPIO gpio, GPIO_Function func)
 {
+    std::lock_guard<std::recursive_mutex> lg(m_mutex);
+
     // Get the GPIO register
     uint8_t gpioX = get_register((Register)gpio);
 
@@ -269,6 +266,8 @@ void RFM22B::set_gpio_function(GPIO gpio, GPIO_Function func)
 // Set or get the transmission power
 void RFM22B::set_tx_power_dBm(uint8_t power)
 {
+    std::lock_guard<std::recursive_mutex> lg(m_mutex);
+
     // Saturate to maximum power
     if (power > 20)
     {
@@ -292,6 +291,8 @@ void RFM22B::set_tx_power_dBm(uint8_t power)
 }
 uint8_t RFM22B::get_tx_power_dBm()
 {
+    std::lock_guard<std::recursive_mutex> lg(m_mutex);
+
     // Get the TX power register
     uint8_t txp = get_register(Register::TX_POWER_6D);
 
@@ -311,17 +312,23 @@ uint8_t RFM22B::get_tx_power_dBm()
 
 uint8_t RFM22B::get_channel() const
 {
+    std::lock_guard<std::recursive_mutex> lg(m_mutex);
+
     return get_register(Register::FREQUENCY_HOPPING_CHANNEL_SELECT_79);
 }
 
 bool RFM22B::set_channel(uint8_t channel)
 {
+    std::lock_guard<std::recursive_mutex> lg(m_mutex);
+
     set_register(Register::FREQUENCY_HOPPING_CHANNEL_SELECT_79, channel);
     return true;
 }
 
 void RFM22B::set_xtal_adjustment(float adjustment)
 {
+    std::lock_guard<std::recursive_mutex> lg(m_mutex);
+
     uint8_t adj = static_cast<uint8_t>(math::clamp(128.f + (adjustment * 128.f), 0.f, 255.f));
 
     //uint8_t reg = get_register(Register::CRYSTAL_OSCILLATOR_LOAD_CAPACITANCE_09);
@@ -335,18 +342,41 @@ void RFM22B::set_xtal_adjustment(float adjustment)
 //	Coefficients approximated from the graph in Section 8.10 of the datasheet
 int8_t RFM22B::get_input_dBm() const
 {
+    std::lock_guard<std::recursive_mutex> lg(m_mutex);
+
     return 0.56*get_register(Register::RECEIVED_SIGNAL_STRENGTH_INDICATOR_26)-128.8;
 }
 
-bool RFM22B::get_nirq_level()
+uint8_t* RFM22B::get_tx_fifo_payload_ptr(size_t fifo_size)
 {
-    QASSERT(m_is_initialized);
-    return gpioRead(m_nirq_gpio) != 0;
+    std::lock_guard<std::recursive_mutex> lg(m_mutex);
+
+    if (fifo_size > 64)
+    {
+        return nullptr;
+    }
+
+    m_tx_fifo.resize(fifo_size);
+    return m_tx_fifo.data();
+}
+
+size_t RFM22B::get_rx_fifo_payload_size() const
+{
+    std::lock_guard<std::recursive_mutex> lg(m_mutex);
+
+    return m_rx_fifo.size();
+}
+
+uint8_t* RFM22B::get_rx_fifo_payload_ptr()
+{
+    std::lock_guard<std::recursive_mutex> lg(m_mutex);
+
+    return m_rx_fifo.data();
 }
 
 bool RFM22B::write_tx_fifo(void const* data, size_t size)
 {
-    if (!m_is_initialized)
+    if (!m_spi)
     {
         return false;
     }
@@ -366,12 +396,12 @@ bool RFM22B::write_tx_fifo(void const* data, size_t size)
 
     memcpy(buffer + 1, data, size);
 
-    return m_spi_dev.transfer(buffer, nullptr, size + 1);
+    return m_spi->transfer(buffer, nullptr, size + 1);
 }
 
 bool RFM22B::read_rx_fifo(void* data, size_t size)
 {
-    if (!m_is_initialized)
+    if (!m_spi)
     {
         return false;
     }
@@ -385,7 +415,7 @@ bool RFM22B::read_rx_fifo(void* data, size_t size)
     uint8_t buffer[MAX_PACHET_SIZE + 1] = { 0xFF };
     buffer[0] = (uint8_t)Register::FIFO_ACCESS_7F;
 
-    if (!m_spi_dev.transfer(buffer, buffer, size + 1))
+    if (!m_spi->transfer(buffer, buffer, size + 1))
     {
         return false;
     }
@@ -405,7 +435,7 @@ uint8_t RFM22B::get_register(Register reg) const
     // the requested register was being sent), and rx[1] will contain the value
     uint8_t tx_data[2] = {uint8_t(reg), 0x00};
     uint8_t rx_data[2] = { 0 };
-    if (!m_spi_dev.transfer(tx_data, rx_data, 2))
+    if (!m_spi->transfer(tx_data, rx_data, 2))
     {
         QLOGE("Failed to transfer SPI data");
         return 0;
@@ -418,7 +448,7 @@ uint16_t RFM22B::get_register16(Register reg) const
 {
     uint8_t tx_data[3] = {uint8_t(reg), 0x00, 0x00};
     uint8_t rx_data[3] = { 0 };
-    if (!m_spi_dev.transfer(tx_data, rx_data, 3))
+    if (!m_spi->transfer(tx_data, rx_data, 3))
     {
         QLOGE("Failed to transfer SPI data");
         return 0;
@@ -430,7 +460,7 @@ uint16_t RFM22B::get_register16(Register reg) const
 void RFM22B::set_register(Register reg, uint8_t value)
 {
     uint8_t buffer[] = {uint8_t(uint8_t(reg) | (1 << 7)), value};
-    if (!m_spi_dev.transfer(buffer, nullptr, 2))
+    if (!m_spi->transfer(buffer, nullptr, 2))
     {
         QLOGE("Failed to transfer SPI data");
     }
@@ -440,14 +470,22 @@ void RFM22B::set_register(Register reg, uint8_t value)
 void RFM22B::set_register16(Register reg, uint16_t value)
 {
     uint8_t buffer[] = {uint8_t(uint8_t(reg) | (1 << 7)), uint8_t(value >> 8), uint8_t(value & 0xFF)};
-    if (!m_spi_dev.transfer(buffer, nullptr, 3))
+    if (!m_spi->transfer(buffer, nullptr, 3))
     {
         QLOGE("Failed to transfer SPI data");
     }
 }
 
-bool RFM22B::tx(size_t size)
+bool RFM22B::tx(Clock::duration timeout)
 {
+    size_t size = m_tx_fifo.size();
+    if (size > 0)
+    {
+        if (!write_tx_fifo(m_tx_fifo.data(), size))
+        {
+            return false;
+        }
+    }
     set_register(Register::TRANSMIT_PACKET_LENGTH_3E, size);
 
     tx_mode();
@@ -455,7 +493,6 @@ bool RFM22B::tx(size_t size)
     // Timing for the interrupt loop timeout
     auto start = Clock::now();
     auto elapsed = Clock::now() - start;
-    std::chrono::milliseconds timeout(100);
 
     uint32_t count = 0;
 
@@ -477,7 +514,7 @@ bool RFM22B::tx(size_t size)
 
     return true;
 }
-bool RFM22B::rx(size_t& size, Clock::duration timeout)
+RFM22B::RX_Result RFM22B::rx(size_t max_expected_size, Clock::duration packet_timeout, Clock::duration payload_timeout)
 {
     //Toggle ffclrrx bit high and low to clear RX FIFO
     set_register(Register::OPERATING_MODE_AND_FUNCTION_CONTROL_2_08, 2);
@@ -494,33 +531,40 @@ bool RFM22B::rx(size_t& size, Clock::duration timeout)
     //	Don't use interrupt registers here as these don't seem to behave consistently
     //	Watch the operating mode register for the device leaving RX mode. This is indicitive
     //	of a valid packet being received
-    while (((get_register(Register::OPERATING_MODE_AND_FUNCTION_CONTROL_1_07)>>2) & 1) && elapsed < timeout)
+    while (((get_register(Register::OPERATING_MODE_AND_FUNCTION_CONTROL_1_07)>>2) & 1) && elapsed < (packet_timeout + payload_timeout))
     {
         count++;
         elapsed = Clock::now() - start;
     }
 
     // If timeout occured, return -1
-    if (elapsed >= timeout)
+    if (elapsed >= (packet_timeout + payload_timeout))
     {
-        size = 0;
-        return true; //no error
+        return RX_Result::TIMEOUT;
     }
 
     uint8_t is = get_register(Register::INTERRUPT_STATUS_1_03);
     if ((is & 0x2) == 0)
     {
-        size = 0;
-        return true;
+        return RX_Result::TIMEOUT;
     }
 
-    size = get_register(Register::RECEIVED_PACKET_LENGTH_4B);
+    size_t size = get_register(Register::RECEIVED_PACKET_LENGTH_4B);
     if (size > 64)
     {
-        size = 0;
+        return RX_Result::FIFO_FAILED;
     }
 
-    return true;
+    m_rx_fifo.resize(size);
+    if (size > 0)
+    {
+        if (!read_rx_fifo(m_rx_fifo.data(), size))
+        {
+            return RX_Result::FIFO_FAILED;
+        }
+    }
+
+    return RX_Result::OK;
 }
 
 

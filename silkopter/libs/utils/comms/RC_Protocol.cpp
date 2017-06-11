@@ -23,6 +23,7 @@ RC_Protocol::RC_Protocol(RC_Phy& phy, RX_Callback rx_callback)
     //std::atomic_init(&m_crt_sent_packet_index, 0);
     //std::atomic_init(&m_received_packet_index, 0);
 
+    m_phy.set_master_listen_rate(100);
 }
 
 RC_Protocol::~RC_Protocol()
@@ -508,7 +509,6 @@ void RC_Protocol::process_rx_data(util::comms::RC_Phy::RX_Data const& rx_data, R
                 m_rx_reliable.payload.clear();
             }
 
-            QLOGI("old RIDX {}, new RIDX {}", m_received_reliable_packet_index, (int)header.packet_index);
             m_received_reliable_packet_index = header.packet_index;
         }
     }

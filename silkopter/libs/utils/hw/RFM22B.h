@@ -300,7 +300,7 @@ public:
     };
 
 
-    bool init(std::string const& device, uint32_t speed, uint8_t sdn_gpio, uint8_t nirq_gpio);
+    bool init(hw::ISPI& spi, uint8_t sdn_gpio);
 
     bool shutdown();
     bool powerup();
@@ -379,21 +379,38 @@ public:
     void set_register16(Register register, uint16_t value);
     uint16_t get_register16(Register register) const;
 
+//    bool write_tx_fifo(void const* data, size_t size);
+//    bool read_rx_fifo(void* data, size_t size);
+
+    uint8_t* get_tx_fifo_payload_ptr(size_t fifo_size);
+
+    size_t get_rx_fifo_payload_size() const;
+    uint8_t* get_rx_fifo_payload_ptr();
+
+    bool tx(Clock::duration timeout);
+
+    enum class RX_Result
+    {
+        OK,
+        TIMEOUT,
+        CRC_FAILED,
+        RX_FAILED,
+        FIFO_FAILED
+    };
+
+    RX_Result rx(size_t max_expected_size, Clock::duration packet_timeout, Clock::duration payload_timeout);
+
+private:
     bool write_tx_fifo(void const* data, size_t size);
     bool read_rx_fifo(void* data, size_t size);
 
-    bool tx(size_t size);
-    bool rx(size_t& size, Clock::duration timeout);
-
-    bool get_nirq_level();
-
-private:
-
     uint8_t m_sdn_gpio = 0;
-    uint8_t m_nirq_gpio = 0;
 
-    mutable SPI_Dev m_spi_dev;
-    bool m_is_initialized = false;
+    ISPI* m_spi = nullptr;
+    std::vector<uint8_t> m_tx_fifo;
+    std::vector<uint8_t> m_rx_fifo;
+
+    mutable std::recursive_mutex m_mutex;
 };
 
 
