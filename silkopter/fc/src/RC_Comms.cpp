@@ -20,7 +20,7 @@ constexpr size_t SPI_CHANNEL = 2;
 constexpr size_t SPI_SPEED = 4000000;
 #else
 const char* SPI_DEVICE = "/dev/spidev1.0";
-constexpr size_t SPI_SPEED = 10000000;
+constexpr size_t SPI_SPEED = 5000000;
 #endif
 
 RC_Comms::RC_Comms(HAL& hal)
