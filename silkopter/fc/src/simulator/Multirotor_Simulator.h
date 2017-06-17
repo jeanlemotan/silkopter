@@ -47,8 +47,8 @@ public:
     ts::Result<void> start(Clock::time_point tp) override;
 
     ts::Result<void> set_input_stream_path(size_t idx, std::string const& path);
-    auto get_inputs() const -> std::vector<Input>;
-    auto get_outputs() const -> std::vector<Output>;
+    std::vector<Input> get_inputs() const;
+    std::vector<Output> get_outputs() const;
 
     void process();
 
@@ -82,8 +82,8 @@ private:
 
     struct Angular_Velocity : public stream::IAngular_Velocity
     {
-        auto get_samples() const -> std::vector<Sample> const& { return samples; }
-        auto get_rate() const -> uint32_t { return rate; }
+        std::vector<Sample> const& get_samples() const { return samples; }
+        uint32_t get_rate() const { return rate; }
         uint32_t rate = 0;
         Clock::duration accumulated_dt = Clock::duration{0};
         Clock::duration dt = Clock::duration{0};
@@ -92,8 +92,8 @@ private:
     };
     struct Acceleration : public stream::IAcceleration
     {
-        auto get_samples() const -> std::vector<Sample> const& { return samples; }
-        auto get_rate() const -> uint32_t { return rate; }
+        std::vector<Sample> const& get_samples() const { return samples; }
+        uint32_t get_rate() const { return rate; }
         uint32_t rate = 0;
         Clock::duration accumulated_dt = Clock::duration{0};
         Clock::duration dt = Clock::duration{0};
@@ -102,8 +102,8 @@ private:
     };
     struct Magnetic_Field : public stream::IMagnetic_Field
     {
-        auto get_samples() const -> std::vector<Sample> const& { return samples; }
-        auto get_rate() const -> uint32_t { return rate; }
+        std::vector<Sample> const& get_samples() const { return samples; }
+        uint32_t get_rate() const { return rate; }
         uint32_t rate = 0;
         Clock::duration accumulated_dt = Clock::duration{0};
         Clock::duration dt = Clock::duration{0};
@@ -112,8 +112,8 @@ private:
     };
     struct Pressure : public stream::IPressure
     {
-        auto get_samples() const -> std::vector<Sample> const& { return samples; }
-        auto get_rate() const -> uint32_t { return rate; }
+        std::vector<Sample> const& get_samples() const { return samples; }
+        uint32_t get_rate() const { return rate; }
         uint32_t rate = 0;
         Clock::duration accumulated_dt = Clock::duration{0};
         Clock::duration dt = Clock::duration{0};
@@ -122,8 +122,8 @@ private:
     };
     struct Temperature : public stream::ITemperature
     {
-        auto get_samples() const -> std::vector<Sample> const& { return samples; }
-        auto get_rate() const -> uint32_t { return rate; }
+        std::vector<Sample> const& get_samples() const { return samples; }
+        uint32_t get_rate() const { return rate; }
         uint32_t rate = 0;
         Clock::duration accumulated_dt = Clock::duration{0};
         Clock::duration dt = Clock::duration{0};
@@ -132,8 +132,8 @@ private:
     };
     struct Distance : public stream::IDistance
     {
-        auto get_samples() const -> std::vector<Sample> const& { return samples; }
-        auto get_rate() const -> uint32_t { return rate; }
+        std::vector<Sample> const& get_samples() const { return samples; }
+        uint32_t get_rate() const { return rate; }
         uint32_t rate = 0;
         Clock::duration accumulated_dt = Clock::duration{0};
         Clock::duration dt = Clock::duration{0};
@@ -142,8 +142,8 @@ private:
     };
     struct GPS_Info : public stream::IGPS_Info
     {
-        auto get_samples() const -> std::vector<Sample> const& { return samples; }
-        auto get_rate() const -> uint32_t { return rate; }
+        std::vector<Sample> const& get_samples() const { return samples; }
+        uint32_t get_rate() const { return rate; }
         uint32_t rate = 0;
         Clock::duration accumulated_dt = Clock::duration{0};
         Clock::duration dt = Clock::duration{0};
@@ -152,8 +152,8 @@ private:
     };
     struct ECEF_Position : public stream::IECEF_Position
     {
-        auto get_samples() const -> std::vector<Sample> const& { return samples; }
-        auto get_rate() const -> uint32_t { return rate; }
+        std::vector<Sample> const& get_samples() const { return samples; }
+        uint32_t get_rate() const { return rate; }
         uint32_t rate = 0;
         Clock::duration accumulated_dt = Clock::duration{0};
         Clock::duration dt = Clock::duration{0};
@@ -162,8 +162,8 @@ private:
     };
     struct ECEF_Velocity : public stream::IECEF_Velocity
     {
-        auto get_samples() const -> std::vector<Sample> const& { return samples; }
-        auto get_rate() const -> uint32_t { return rate; }
+        std::vector<Sample> const& get_samples() const { return samples; }
+        uint32_t get_rate() const { return rate; }
         uint32_t rate = 0;
         Clock::duration accumulated_dt = Clock::duration{0};
         Clock::duration dt = Clock::duration{0};

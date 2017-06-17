@@ -31,7 +31,7 @@ ts::Result<void> LiPo_Battery::init(size_t rate)
     if (!m_current_filter.setup(2, rate, 10.f) ||
         !m_voltage_filter.setup(2, rate, 2.f))
     {
-        return make_error("Cannot setup dsp filters");
+        return make_error("Cannot setup lpf filters");
     }
 
     return ts::success;

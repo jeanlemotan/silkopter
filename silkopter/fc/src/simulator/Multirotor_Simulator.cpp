@@ -102,7 +102,7 @@ ts::Result<void> Multirotor_Simulator::start(Clock::time_point tp)
     return ts::success;
 }
 
-auto Multirotor_Simulator::get_inputs() const -> std::vector<Input>
+std::vector<INode::Input> Multirotor_Simulator::get_inputs() const
 {
     std::vector<Input> inputs(m_input_throttle_streams.size() + 1);
     for (size_t i = 0; i < m_input_throttle_streams.size(); i++)
@@ -119,7 +119,7 @@ auto Multirotor_Simulator::get_inputs() const -> std::vector<Input>
 
     return inputs;
 }
-auto Multirotor_Simulator::get_outputs() const -> std::vector<Output>
+std::vector<INode::Output> Multirotor_Simulator::get_outputs() const
 {
     std::vector<Output> outputs =
     {
@@ -154,10 +154,10 @@ void Multirotor_Simulator::process()
 
     for (size_t i = 0; i < m_input_throttle_streams.size(); i++)
     {
-        auto stream = m_input_throttle_streams[i].lock();
+        std::shared_ptr<stream::IThrottle> stream = m_input_throttle_streams[i].lock();
         if (stream)
         {
-            auto const& samples = stream->get_samples();
+            std::vector<stream::IThrottle::Sample> const& samples = stream->get_samples();
             if (!samples.empty())
             {
                 m_simulation.set_motor_throttle(i, samples.back().value);
@@ -166,10 +166,10 @@ void Multirotor_Simulator::process()
     }
 
     {
-        auto stream = m_input_state_stream.lock();
+        std::shared_ptr<stream::IMultirotor_State> stream = m_input_state_stream.lock();
         if (stream)
         {
-            auto const& samples = stream->get_samples();
+            std::vector<stream::IMultirotor_State::Sample> const& samples = stream->get_samples();
             if (!samples.empty())
             {
                 m_multirotor_state = samples.back().value;
@@ -177,8 +177,8 @@ void Multirotor_Simulator::process()
         }
     }
 
-    auto now = Clock::now();
-    auto dt = now - m_last_tp;
+    Clock::time_point now = Clock::now();
+    Clock::duration dt = now - m_last_tp;
     if (dt < std::chrono::milliseconds(1))
     {
         return;
@@ -186,12 +186,12 @@ void Multirotor_Simulator::process()
     m_last_tp = now;
 
     static const util::coordinates::LLA origin_lla(math::radians(41.390205), math::radians(2.154007), 37.5);
-    auto enu_to_ecef_trans = util::coordinates::enu_to_ecef_transform(origin_lla);
-    auto enu_to_ecef_rotation = util::coordinates::enu_to_ecef_rotation(origin_lla);
+    math::trans3dd enu_to_ecef_trans = util::coordinates::enu_to_ecef_transform(origin_lla);
+    math::mat3d enu_to_ecef_rotation = util::coordinates::enu_to_ecef_rotation(origin_lla);
 
     m_simulation.process(dt, [this, &enu_to_ecef_trans, &enu_to_ecef_rotation](Multirotor_Simulation& simulation, Clock::duration simulation_dt)
     {
-        auto const& uav_state = simulation.get_state();
+        Multirotor_Simulation::State const& uav_state = simulation.get_state();
         {
             Angular_Velocity& stream = *m_angular_velocity_stream;
             stream.accumulated_dt += simulation_dt;
@@ -433,12 +433,12 @@ ts::Result<void> Multirotor_Simulator::set_config(hal::INode_Config const& confi
 
     return ts::success;
 }
-auto Multirotor_Simulator::get_config() const -> std::shared_ptr<const hal::INode_Config>
+std::shared_ptr<const hal::INode_Config> Multirotor_Simulator::get_config() const
 {
     return m_config;
 }
 
-auto Multirotor_Simulator::get_descriptor() const -> std::shared_ptr<const hal::INode_Descriptor>
+std::shared_ptr<const hal::INode_Descriptor> Multirotor_Simulator::get_descriptor() const
 {
     return m_descriptor;
 }

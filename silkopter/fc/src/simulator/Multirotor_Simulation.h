@@ -68,6 +68,7 @@ private:
         std::shared_ptr<btRigidBody> body;
         State state;
         std::vector<float> motor_drag_factors;
+        std::vector<float> motor_thrust_factors;
     } m_uav;
 
 //    math::vec3f m_old_linear_velocity;

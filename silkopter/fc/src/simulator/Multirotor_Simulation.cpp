@@ -95,14 +95,22 @@ bool Multirotor_Simulation::init_uav(std::shared_ptr<const IMultirotor_Propertie
     m_uav.properties = multirotor_properties;
     m_uav.state.radius = multirotor_properties->get_radius();
 
+    std::random_device rd;  //Will be used to obtain a seed for the random number engine
+    std::mt19937 gen(rd()); //Standard mersenne_twister_engine seeded with rd()
+    gen.seed(1);
+    std::uniform_real_distribution<float> motor_thrust_factor_distribution(0.8f, 1.2f);
+    std::uniform_real_distribution<float> motor_drag_factor_distribution(0.001f, 0.002f);
+
     if (m_uav.state.motors.size() != m_uav.properties->get_motors().size())
     {
         m_uav.state.motors.clear();
         m_uav.state.motors.resize(m_uav.properties->get_motors().size());
         m_uav.motor_drag_factors.resize(m_uav.properties->get_motors().size());
+        m_uav.motor_thrust_factors.resize(m_uav.properties->get_motors().size());
         for (size_t i = 0; i < m_uav.state.motors.size(); i++)
         {
-            m_uav.motor_drag_factors[i] = (std::rand() / float(RAND_MAX)) * 0.001f + 0.001f;
+            m_uav.motor_drag_factors[i] = motor_drag_factor_distribution(gen);
+            m_uav.motor_thrust_factors[i] = motor_thrust_factor_distribution(gen);
             m_uav.state.motors[i].max_thrust = multirotor_properties->get_motor_thrust();
             m_uav.state.motors[i].position = multirotor_properties->get_motors()[i].position;
         }
@@ -299,7 +307,7 @@ void Multirotor_Simulation::process_uav(Clock::duration dt)
         m_uav.state.local_to_enu_rotation = rotation;
 
         math::vec3f euler;
-        delta.get_as_euler_xyz(euler);
+        delta.get_as_euler_zxy(euler);
         QASSERT(math::is_finite(euler));
         m_sensor_data.angular_velocity = euler / dts;
         QASSERT(math::is_finite(m_sensor_data.angular_velocity));
@@ -335,20 +343,21 @@ void Multirotor_Simulation::process_uav(Clock::duration dt)
             State::Motor_State& m = m_uav.state.motors[i];
             IMultirotor_Properties::Motor const& mc = m_uav.properties->get_motors()[i];
 
+            const float motor_thrust = m_uav.properties->get_motor_thrust() * m_uav.motor_thrust_factors[i];
             float thrust = m.thrust;
             {
-                float target_thrust = math::square(m.throttle) * m_uav.properties->get_motor_thrust();
+                float target_thrust = math::square(m.throttle) * motor_thrust;
                 if (!math::equals(thrust, target_thrust))
                 {
                     float delta = target_thrust - thrust;
                     float acc = delta > 0 ? m_uav.properties->get_motor_acceleration() : m_uav.properties->get_motor_deceleration();
                     float d = math::min(math::abs(delta), acc / std::chrono::duration<float>(dt).count());
                     thrust += math::sgn(delta) * d;
-                    thrust = math::clamp(thrust, 0.f, m_uav.properties->get_motor_thrust());
+                    thrust = math::clamp(thrust, 0.f, motor_thrust);
                     m.thrust = thrust;
                 }
             }
-            z_torque += mc.thrust_vector * m_uav.properties->get_motor_z_torque() * (mc.clockwise ? 1 : -1) * (thrust / m_uav.properties->get_motor_thrust());
+            z_torque += mc.thrust_vector * m_uav.properties->get_motor_z_torque() * (mc.clockwise ? 1 : -1) * (thrust / motor_thrust);
 
 //            total_rpm += m.rpm * (mc.clockwise ? 1.f : -1.f);
 

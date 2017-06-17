@@ -46,7 +46,7 @@ private:
 
     Sample_Accumulator<Stream_t> m_accumulator;
 
-    util::Butterworth<typename Stream_t::Value> m_dsp;
+    util::Butterworth<typename Stream_t::Value> m_lpf;
 
     typedef Basic_Output_Stream<Stream_t> Output_Stream;
     mutable std::shared_ptr<Output_Stream> m_output_stream;
@@ -121,11 +121,11 @@ ts::Result<void> LPF<Stream_t>::set_config(hal::INode_Config const& config)
         m_config->set_cutoff_frequency(max_cutoff);
     }
     m_config->set_cutoff_frequency(math::clamp(m_config->get_cutoff_frequency(), 0.1f, max_cutoff));
-    if (!m_dsp.setup(m_config->get_poles(), output_rate, m_config->get_cutoff_frequency()))
+    if (!m_lpf.setup(m_config->get_poles(), output_rate, m_config->get_cutoff_frequency()))
     {
-        return make_error("Cannot setup dsp filter.");
+        return make_error("Cannot setup lpf filter.");
     }
-    m_dsp.reset();
+    m_lpf.reset();
 
     return ts::success;
 }
@@ -184,7 +184,7 @@ void LPF<Stream_t>::process()
         {
             auto value = i_sample.value;
             QASSERT(math::is_finite(value));
-            m_dsp.process(value);
+            m_lpf.process(value);
             QASSERT(math::is_finite(value));
             m_output_stream->push_sample(value, true);
         }

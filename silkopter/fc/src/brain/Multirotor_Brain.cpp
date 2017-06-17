@@ -433,7 +433,7 @@ math::vec2f Multirotor_Brain::compute_horizontal_rate_for_position(math::vec2f c
     math::vec2f enu_output = m_horizontal_mode_data.velocity_pi.process(crt_vel, velocity_output);
 
     //let's filter a bit
-    m_horizontal_mode_data.position_dsp.process(enu_output);
+    m_horizontal_mode_data.position_lpf.process(enu_output);
 
     //compute the front/right in enu space
     math::vec3f front_vector = math::rotate(m_inputs.frame.sample.value, physics::constants::uav_front_vector);
@@ -480,7 +480,7 @@ float Multirotor_Brain::compute_thrust_for_altitude(float target_alt)
 
 //            float output = m_vertical_altitude_data.pid.process_ex(crt_alt, target_alt, m_enu_velocity.z);
     output = math::clamp(output, -1.f, 1.f);
-    m_vertical_mode_data.altitude_dsp.process(output);
+    m_vertical_mode_data.altitude_lpf.process(output);
 
     float hover_thrust = m_multirotor_properties->get_mass() * physics::constants::g;
     float max_thrust_range = math::max(hover_thrust, m_config->get_max_thrust() - hover_thrust);
@@ -571,9 +571,8 @@ void Multirotor_Brain::process_vhy_modes(Vertical_Mode vertical_mode,
         //The roll stick is positive when pushed right, so no need for inversion
         float roll_stick = (sticks.roll * 2.f - 1.f);
 
-        math::vec2f const& max_angle = math::radians(m_config->get_horizontal().get_max_angle_deg());
-        math::vec2f hrate = compute_horizontal_rate_for_angle(math::vec2f(pitch_stick * max_angle.x,
-                                                                          roll_stick * max_angle.y));
+        math::vec2f max_angle = math::radians(m_config->get_horizontal().get_max_angle_deg());
+        math::vec2f hrate = compute_horizontal_rate_for_angle(math::vec2f(pitch_stick * max_angle.x, roll_stick * max_angle.y));
         rate.x = hrate.x;
         rate.y = hrate.y;
     }
@@ -1067,11 +1066,11 @@ ts::Result<void> Multirotor_Brain::set_config(hal::INode_Config const& config)
     {
         hal::LPF_Config& lpf_config = m_config->get_vertical().get_altitude_lpf();
         lpf_config.set_cutoff_frequency(math::clamp(lpf_config.get_cutoff_frequency(), 0.1f, output_rate / 2.f));
-        if (!m_vertical_mode_data.altitude_dsp.setup(lpf_config.get_poles(), output_rate, lpf_config.get_cutoff_frequency()))
+        if (!m_vertical_mode_data.altitude_lpf.setup(lpf_config.get_poles(), output_rate, lpf_config.get_cutoff_frequency()))
         {
-            return make_error("Cannot setup vertical altitude dsp filter.");
+            return make_error("Cannot setup vertical altitude lpf filter.");
         }
-        m_vertical_mode_data.altitude_dsp.reset();
+        m_vertical_mode_data.altitude_lpf.reset();
     }
 
     //horizontal
@@ -1092,11 +1091,11 @@ ts::Result<void> Multirotor_Brain::set_config(hal::INode_Config const& config)
     {
         hal::LPF_Config& lpf_config = m_config->get_horizontal().get_position_lpf();
         lpf_config.set_cutoff_frequency(math::clamp(lpf_config.get_cutoff_frequency(), 0.1f, output_rate / 2.f));
-        if (!m_horizontal_mode_data.position_dsp.setup(lpf_config.get_poles(), output_rate, lpf_config.get_cutoff_frequency()))
+        if (!m_horizontal_mode_data.position_lpf.setup(lpf_config.get_poles(), output_rate, lpf_config.get_cutoff_frequency()))
         {
-            return make_error("Cannot setup position dsp filter.");
+            return make_error("Cannot setup position lpf filter.");
         }
-        m_horizontal_mode_data.position_dsp.reset();
+        m_horizontal_mode_data.position_lpf.reset();
     }
 
     return ts::success;

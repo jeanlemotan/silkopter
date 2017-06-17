@@ -192,7 +192,7 @@ private:
 
         PID speed_pi;
         PID altitude_p;
-        util::Butterworth<float> altitude_dsp;
+        util::Butterworth<float> altitude_lpf;
     } m_vertical_mode_data;
 
     struct Horizontal_Mode_Data
@@ -204,7 +204,7 @@ private:
 
         PID2 velocity_pi;
         PID2 position_p;
-        util::Butterworth<math::vec2f> position_dsp;
+        util::Butterworth<math::vec2f> position_lpf;
     } m_horizontal_mode_data;
 
     struct Yaw_Mode_Data

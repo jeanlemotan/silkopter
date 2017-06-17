@@ -72,27 +72,27 @@ private:
     template<class T>
     struct Butterworth<T, true>
     {
-        util::Butterworth<typename T::Value> dsp;
+        util::Butterworth<typename T::Value> lpf;
 
         auto setup(size_t order, float rate, float cutoff_frequency) -> bool
         {
-            return dsp.setup(order, rate, cutoff_frequency);
+            return lpf.setup(order, rate, cutoff_frequency);
         }
         void reset(typename T::Value const& t)
         {
-            dsp.reset(t);
+            lpf.reset(t);
         }
         void reset()
         {
-            dsp.reset();
+            lpf.reset();
         }
         void process(typename T::Value& t)
         {
-            dsp.process(t);
+            lpf.process(t);
         }
     };
 
-    Butterworth<Stream_t, Stream_t::can_be_filtered_t::value> m_dsp;
+    Butterworth<Stream_t, Stream_t::can_be_filtered_t::value> m_lpf;
 
     typedef Basic_Output_Stream<Stream_t> Output_Stream;
 //    struct Stream : public Stream_t
@@ -184,11 +184,11 @@ ts::Result<void> Resampler<Stream_t>::set_config(hal::INode_Config const& config
         lpf_config.set_cutoff_frequency(max_cutoff);
     }
     lpf_config.set_cutoff_frequency(math::clamp(lpf_config.get_cutoff_frequency(), 0.1f, max_cutoff));
-    if (!m_dsp.setup(lpf_config.get_poles(), max_rate, lpf_config.get_cutoff_frequency()))
+    if (!m_lpf.setup(lpf_config.get_poles(), max_rate, lpf_config.get_cutoff_frequency()))
     {
-        return make_error("Cannot setup dsp filter.");
+        return make_error("Cannot setup lpf filter.");
     }
-    m_dsp.reset();
+    m_lpf.reset();
 
     return ts::success;
 }
@@ -293,7 +293,7 @@ void Resampler<Stream_t>::resample()
             if (is_downsampling && m_last_input_sample.is_healthy)
             {
                 //upsampling, filter at the input stream sample rate
-                m_dsp.process(m_input_samples.back().value);
+                m_lpf.process(m_input_samples.back().value);
             }
             m_input_samples.pop_front();
         }
@@ -304,7 +304,7 @@ void Resampler<Stream_t>::resample()
             if (!is_downsampling)
             {
                 //upsampling, filter at the output stream sample rate
-                m_dsp.process(value);
+                m_lpf.process(value);
             }
 
             m_output_stream->push_sample(value, true);
