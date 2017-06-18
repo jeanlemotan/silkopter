@@ -137,26 +137,6 @@ int main(int argc, char const* argv[])
     boost::shared_ptr<boost::asio::io_service::work> async_work(new boost::asio::io_service::work(s_async_io_service));
     auto async_thread = boost::thread([]() { s_async_io_service.run(); });
 
-#if defined RASPBERRY_PI
-    {
-        int policy = SCHED_FIFO;
-        struct sched_param param;
-        param.sched_priority = sched_get_priority_max(policy);
-        if (pthread_setschedparam(pthread_self(), policy, &param) != 0)
-        {
-            perror("Failed to set priority for main thread");
-            //exit(EXIT_FAILURE);
-        }
-        policy = SCHED_IDLE;
-        param.sched_priority = sched_get_priority_min(policy);
-        if (pthread_setschedparam(async_thread.native_handle(), policy, &param) != 0)
-        {
-            perror("Failed to set priority for async thread");
-            //exit(EXIT_FAILURE);
-        }
-    }
-#endif
-
     try
     {
         silk::HAL hal;
@@ -190,6 +170,35 @@ int main(int argc, char const* argv[])
 //                break;
 //            }
 //        }
+
+#if defined RASPBERRY_PI
+    {
+        int policy = SCHED_FIFO;
+        struct sched_param param;
+        param.sched_priority = sched_get_priority_max(policy);
+        if (pthread_setschedparam(pthread_self(), policy, &param) != 0)
+        {
+            perror("Failed to set priority for main thread");
+            //exit(EXIT_FAILURE);
+        }
+        policy = SCHED_IDLE;
+        param.sched_priority = sched_get_priority_min(policy);
+        if (pthread_setschedparam(async_thread.native_handle(), policy, &param) != 0)
+        {
+            perror("Failed to set priority for async thread");
+            //exit(EXIT_FAILURE);
+        }
+
+        cpu_set_t cpuset;
+        CPU_ZERO(&cpuset);
+        CPU_SET(3, &cpuset);
+        int s = pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpuset);
+        if (s != 0)
+        {
+            QLOGW("pthread_setaffinity_np failed: {}", s);
+        }
+    }
+#endif
 
         QLOGI("All systems up. Ready to fly...");
 
