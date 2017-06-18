@@ -1,7 +1,7 @@
 #pragma once
 
 #include "II2C.h"
-#include <mutex>
+#include <atomic>
 #include <vector>
 
 namespace util
@@ -17,10 +17,6 @@ public:
 
     ts::Result<void> init(uint32_t device, uint32_t baud);
 
-    void lock() override;
-    bool try_lock() override;
-    void unlock() override;
-
     bool read(uint8_t address, uint8_t* data, size_t size) override;
     bool write(uint8_t address, uint8_t const* data, size_t size) override;
 
@@ -34,7 +30,7 @@ private:
     uint32_t m_baud = 0;
     std::vector<uint8_t> m_buffer;
 
-    mutable std::recursive_mutex m_mutex;
+    mutable std::atomic_bool m_is_used = { false };
 };
 
 }

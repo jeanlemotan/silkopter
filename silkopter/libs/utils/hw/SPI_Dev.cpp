@@ -74,20 +74,6 @@ ts::Result<void> SPI_Dev::init(std::string const& device, uint32_t speed)
     return ts::success;
 }
 
-void SPI_Dev::lock()
-{
-    m_mutex.lock();
-}
-
-bool SPI_Dev::try_lock()
-{
-    return m_mutex.try_lock();
-}
-void SPI_Dev::unlock()
-{
-    m_mutex.unlock();
-}
-
 bool SPI_Dev::do_transfer(void const* tx_data, void* rx_data, size_t size, uint32_t speed)
 {
     QASSERT(m_fd >= 0 && size > 0);
@@ -95,8 +81,6 @@ bool SPI_Dev::do_transfer(void const* tx_data, void* rx_data, size_t size, uint3
     {
         return false;
     }
-
-    std::lock_guard<SPI_Dev> lg(*this);
 
     m_spi_transfers[0].tx_buf = (unsigned long)tx_data;
     m_spi_transfers[0].rx_buf = (unsigned long)rx_data;
@@ -119,17 +103,35 @@ bool SPI_Dev::do_transfer(void const* tx_data, void* rx_data, size_t size, uint3
 bool SPI_Dev::transfer(void const* tx_data, void* rx_data, size_t size, uint32_t speed)
 {
     QLOG_TOPIC("SPI_Dev::transfer");
-    return do_transfer(tx_data, rx_data, size, speed);
+
+    if (m_is_used.exchange(true) == true)
+    {
+        QLOGE("SPI bus in use");
+        return false;
+    }
+
+    bool res = do_transfer(tx_data, rx_data, size, speed);
+
+    m_is_used = false;
+
+    return res;
 }
 
 bool SPI_Dev::transfers(Transfer const* transfers, size_t transfer_count, uint32_t speed)
 {
+    if (m_is_used.exchange(true) == true)
+    {
+        QLOGE("SPI bus in use");
+        return false;
+    }
+
     if (transfer_count > 256)
     {
         for (size_t i = 0; i < transfer_count; i++)
         {
             if (!do_transfer(transfers[i].tx_data, transfers[i].rx_data, transfers[i].size, speed))
             {
+                m_is_used = false;
                 return false;
             }
         }
@@ -139,10 +141,9 @@ bool SPI_Dev::transfers(Transfer const* transfers, size_t transfer_count, uint32
         QASSERT(m_fd >= 0);
         if (m_fd < 0)
         {
+            m_is_used = false;
             return false;
         }
-
-        std::lock_guard<SPI_Dev> lg(*this);
 
         for (size_t i = 0; i < transfer_count; i++)
         {
@@ -159,9 +160,12 @@ bool SPI_Dev::transfers(Transfer const* transfers, size_t transfer_count, uint32
         if (status < 0)
         {
             QLOGW("transfer failed: {}", strerror(errno));
+            m_is_used = false;
             return false;
         }
     }
+
+    m_is_used = false;
     return true;
 }
 
@@ -169,7 +173,11 @@ bool SPI_Dev::transfer_register(uint8_t reg, void const* tx_data, void* rx_data,
 {
     QLOG_TOPIC("SPI_Dev::transfer_register");
 
-    std::lock_guard<SPI_Dev> lg(*this);
+    if (m_is_used.exchange(true) == true)
+    {
+        QLOGE("SPI bus in use");
+        return false;
+    }
 
     m_tx_buffer.resize(size + 1);
     m_tx_buffer[0] = reg;
@@ -178,10 +186,13 @@ bool SPI_Dev::transfer_register(uint8_t reg, void const* tx_data, void* rx_data,
     m_rx_buffer.resize(size + 1);
     if (!do_transfer(m_tx_buffer.data(), m_rx_buffer.data(), size + 1, speed))
     {
+        m_is_used = false;
         return false;
     }
 
     std::copy(m_rx_buffer.begin() + 1, m_rx_buffer.end(), reinterpret_cast<uint8_t*>(rx_data));
+
+    m_is_used = false;
     return true;
 }
 

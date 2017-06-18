@@ -257,44 +257,6 @@ UBLOX::~UBLOX()
 {
 }
 
-auto UBLOX::lock(Buses& buses) -> bool
-{
-    if (buses.i2c)
-    {
-        buses.i2c->get_i2c().lock(); //lock the bus
-        return true;
-    }
-    if (buses.spi)
-    {
-        buses.spi->get_spi().lock(); //lock the bus
-        return true;
-    }
-    if (buses.uart)
-    {
-        buses.uart->get_uart().lock(); //lock the bus
-        return true;
-    }
-    return false;
-}
-void UBLOX::unlock(Buses& buses)
-{
-    if (buses.i2c)
-    {
-        buses.i2c->get_i2c().unlock(); //unlock the bus
-        return;
-    }
-    if (buses.spi)
-    {
-        buses.spi->get_spi().unlock(); //unlock the bus
-        return;
-    }
-    if (buses.uart)
-    {
-        buses.uart->get_uart().unlock(); //lock the bus
-        return;
-    }
-}
-
 auto UBLOX::get_outputs() const -> std::vector<Output>
 {
     std::vector<Output> outputs =
@@ -385,12 +347,6 @@ ts::Result<void> UBLOX::setup()
     {
         return make_error("No bus configured");
     }
-
-    lock(buses);
-    At_Exit at_exit([this, &buses]()
-    {
-        unlock(buses);
-    });
 
     //read some data from the port to make sure the GPS doesn't have pending data
 //    {
@@ -521,12 +477,6 @@ void UBLOX::process()
     {
         return;
     }
-
-    lock(buses);
-    At_Exit at_exit([this, &buses]()
-    {
-        unlock(buses);
-    });
 
     read_data(buses);
 

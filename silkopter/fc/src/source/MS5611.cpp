@@ -47,34 +47,6 @@ MS5611::MS5611(HAL& hal)
     m_temperature = std::make_shared<Temperature_Stream>();
 }
 
-auto MS5611::lock(Buses& buses) -> bool
-{
-    if (buses.i2c)
-    {
-        buses.i2c->get_i2c().lock(); //lock the bus
-        return true;
-    }
-    if (buses.spi)
-    {
-        buses.spi->get_spi().lock(); //lock the bus
-        return true;
-    }
-    return false;
-}
-void MS5611::unlock(Buses& buses)
-{
-    if (buses.i2c)
-    {
-        buses.i2c->get_i2c().unlock(); //unlock the bus
-        return;
-    }
-    if (buses.spi)
-    {
-        buses.spi->get_spi().unlock(); //unlock the bus
-        return;
-    }
-}
-
 auto MS5611::bus_read_u24(Buses& buses, uint8_t reg, uint32_t& dst) -> bool
 {
     uint8_t tx_data[3] = {0};
@@ -142,12 +114,6 @@ ts::Result<void> MS5611::init()
     {
         return make_error("No bus configured");
     }
-
-    lock(buses);
-    At_Exit at_exit([this, &buses]()
-    {
-        unlock(buses);
-    });
 
 //    m_descriptor->pressure_rate = math::clamp<size_t>(m_descriptor->pressure_rate, 10, 100);
 //    m_descriptor->temperature_rate_ratio = math::clamp<size_t>(m_descriptor->temperature_rate_ratio, 1, 10);
@@ -218,12 +184,6 @@ void MS5611::process()
     {
         return;
     }
-
-    lock(buses);
-    At_Exit at_exit([this, &buses]()
-    {
-        unlock(buses);
-    });
 
     QLOG_TOPIC("ms5611::process");
     auto now = Clock::now();

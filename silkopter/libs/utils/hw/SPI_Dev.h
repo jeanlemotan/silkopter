@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ISPI.h"
-#include <mutex>
+#include <atomic>
 #include <vector>
 #include <string>
 #include <linux/spi/spidev.h>
@@ -18,10 +18,6 @@ public:
     ~SPI_Dev();
 
     ts::Result<void> init(std::string const& device, uint32_t speed);
-
-    void lock() override;
-    bool try_lock() override;
-    void unlock() override;
 
     bool transfer(void const* tx_data, void* rx_data, size_t size, uint32_t speed = 0) override;
     bool transfer_register(uint8_t reg, void const* tx_data, void* rx_data, size_t size, uint32_t speed = 0) override;
@@ -41,7 +37,7 @@ private:
     mutable std::vector<uint8_t> m_tx_buffer;
     mutable std::vector<uint8_t> m_rx_buffer;
 
-    mutable std::recursive_mutex m_mutex;
+    mutable std::atomic_bool m_is_used = { false };
 };
 
 }

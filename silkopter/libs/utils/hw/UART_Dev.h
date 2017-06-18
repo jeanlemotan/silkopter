@@ -3,7 +3,7 @@
 #include "IUART.h"
 #include <string>
 #include <vector>
-#include <mutex>
+#include <atomic>
 
 namespace util
 {
@@ -28,10 +28,6 @@ public:
 
     ts::Result<void> init(std::string const& device, Baud baud);
 
-    void lock() override;
-    bool try_lock() override;
-    void unlock() override;
-
     size_t read(uint8_t* data, size_t max_size) override;
     bool write(uint8_t const* data, size_t size) override;
 
@@ -45,7 +41,7 @@ private:
 
     std::vector<uint8_t> m_buffer;
 
-    mutable std::recursive_mutex m_mutex;
+    mutable std::atomic_bool m_is_used = { false };
 };
 
 }

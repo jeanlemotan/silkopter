@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ISPI.h"
-#include <mutex>
+#include <atomic>
 #include <vector>
 
 namespace util
@@ -16,10 +16,6 @@ public:
     ~SPI_BCM();
 
     ts::Result<void> init(uint32_t channel, uint32_t speed, uint32_t mode);
-
-    void lock() override;
-    bool try_lock() override;
-    void unlock() override;
 
     bool transfer(void const* tx_data, void* rx_data, size_t size, uint32_t speed = 0) override;
     bool transfer_register(uint8_t reg, void const* tx_data, void* rx_data, size_t size, uint32_t speed = 0) override;
@@ -40,7 +36,7 @@ private:
     mutable std::vector<uint8_t> m_tx_buffer;
     mutable std::vector<uint8_t> m_rx_buffer;
 
-    mutable std::recursive_mutex m_mutex;
+    mutable std::atomic_bool m_is_used = { false };
 };
 
 }

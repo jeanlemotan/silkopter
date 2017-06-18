@@ -37,23 +37,15 @@ ts::Result<void> I2C_BCM::init(uint32_t device, uint32_t baud)
     return ts::success;
 }
 
-void I2C_BCM::lock()
-{
-    m_mutex.lock();
-}
-
-bool I2C_BCM::try_lock()
-{
-    return m_mutex.try_lock();
-}
-void I2C_BCM::unlock()
-{
-    m_mutex.unlock();
-}
-
 bool I2C_BCM::read(uint8_t address, uint8_t* data, size_t size)
 {
     QLOG_TOPIC("i2c_bcm::read");
+
+    if (m_is_used.exchange(true) == true)
+    {
+        QLOGE("SPI bus in use");
+        return false;
+    }
 
 #ifdef RASPBERRY_PI
     bcm2835_i2c_setSlaveAddress(address);
@@ -61,15 +53,23 @@ bool I2C_BCM::read(uint8_t address, uint8_t* data, size_t size)
     if (res != BCM2835_I2C_REASON_OK)
     {
         QLOGW("read failed: {}", res);
+        m_is_used = false;
         return false;
     }
 #endif
 
+    m_is_used = false;
     return true;
 }
 bool I2C_BCM::write(uint8_t address, uint8_t const* data, size_t size)
 {
     QLOG_TOPIC("i2c_bcm::write");
+
+    if (m_is_used.exchange(true) == true)
+    {
+        QLOGE("SPI bus in use");
+        return false;
+    }
 
 #ifdef RASPBERRY_PI
     bcm2835_i2c_setSlaveAddress(address);
@@ -77,10 +77,12 @@ bool I2C_BCM::write(uint8_t address, uint8_t const* data, size_t size)
     if (res != BCM2835_I2C_REASON_OK)
     {
         QLOGW("write failed: {}", res);
+        m_is_used = false;
         return false;
     }
 #endif
 
+    m_is_used = false;
     return true;
 }
 
@@ -88,21 +90,35 @@ bool I2C_BCM::read_register(uint8_t address, uint8_t reg, uint8_t* data, size_t 
 {
     QLOG_TOPIC("i2c_bcm::read_register");
 
+    if (m_is_used.exchange(true) == true)
+    {
+        QLOGE("SPI bus in use");
+        return false;
+    }
+
 #ifdef RASPBERRY_PI
     bcm2835_i2c_setSlaveAddress(address);
     int res = bcm2835_i2c_read_register_rs(reinterpret_cast<char*>(&reg), reinterpret_cast<char*>(data), size);
     if (res != BCM2835_I2C_REASON_OK)
     {
         QLOGW("read register {} failed: {}", reg, res);
+        m_is_used = false;
         return false;
     }
 #endif
 
+    m_is_used = false;
     return true;
 }
 bool I2C_BCM::write_register(uint8_t address, uint8_t reg, uint8_t const* data, size_t size)
 {
     QLOG_TOPIC("i2c_bcm::write_register");
+
+    if (m_is_used.exchange(true) == true)
+    {
+        QLOGE("SPI bus in use");
+        return false;
+    }
 
     m_buffer.resize(size + 1);
 
@@ -118,10 +134,12 @@ bool I2C_BCM::write_register(uint8_t address, uint8_t reg, uint8_t const* data, 
     if (res != BCM2835_I2C_REASON_OK)
     {
         QLOGW("write register {} failed: {}", reg, res);
+        m_is_used = false;
         return false;
     }
 #endif
 
+    m_is_used = false;
     return true;
 }
 

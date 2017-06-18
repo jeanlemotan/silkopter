@@ -25,8 +25,6 @@ ts::Result<void> UART_BB::init(uint32_t rx_gpio, uint32_t baud, bool inverted_si
 {
     close();
 
-    std::lock_guard<UART_BB> lg(*this);
-
 #if defined (RASPBERRY_PI)
     int res = gpioSetMode(rx_gpio, PI_INPUT);
     if (res != 0)
@@ -68,35 +66,28 @@ void UART_BB::close()
     m_is_initialized = false;
 }
 
-void UART_BB::lock()
-{
-    m_mutex.lock();
-}
-
-bool UART_BB::try_lock()
-{
-    return m_mutex.try_lock();
-}
-void UART_BB::unlock()
-{
-    m_mutex.unlock();
-}
-
 size_t UART_BB::read(uint8_t* data, size_t max_size)
 {
     QLOG_TOPIC("UART_BB::read");
 
-    std::lock_guard<UART_BB> lg(*this);
+    if (m_is_used.exchange(true) == true)
+    {
+        QLOGE("SPI bus in use");
+        return false;
+    }
 
 #if defined (RASPBERRY_PI)
     int res = gpioSerialRead(m_rx_gpio, data, max_size);
     if (res < 0)
     {
         QLOGE("error reading from bit-banged rx gpio {}: {}", m_rx_gpio, res);
+        m_is_used = false;
         return 0;
     }
+    m_is_used = false;
     return res;
 #else
+    m_is_used = false;
     return 0;
 #endif
 }

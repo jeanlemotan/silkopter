@@ -67,26 +67,16 @@ void I2C_Dev::close()
     }
 }
 
-void I2C_Dev::lock()
-{
-    m_mutex.lock();
-}
-
-bool I2C_Dev::try_lock()
-{
-    return m_mutex.try_lock();
-}
-void I2C_Dev::unlock()
-{
-    m_mutex.unlock();
-}
-
 bool I2C_Dev::read(uint8_t address, uint8_t* data, size_t size)
 {
     QLOG_TOPIC("I2C_Dev::read");
     QASSERT(m_fd >= 0);
 
-    std::lock_guard<I2C_Dev> lg(*this);
+    if (m_is_used.exchange(true) == true)
+    {
+        QLOGE("SPI bus in use");
+        return false;
+    }
 
     struct i2c_rdwr_ioctl_data io;
     memset(&io, 0, sizeof(i2c_rdwr_ioctl_data));
@@ -104,8 +94,10 @@ bool I2C_Dev::read(uint8_t address, uint8_t* data, size_t size)
     if (ioctl(m_fd, I2C_RDWR, &io) < 0)
     {
         QLOGW("read failed: {}", strerror(errno));
+        m_is_used = false;
         return false;
     }
+    m_is_used = false;
     return true;
 }
 bool I2C_Dev::write(uint8_t address, uint8_t const* data, size_t size)
@@ -113,7 +105,11 @@ bool I2C_Dev::write(uint8_t address, uint8_t const* data, size_t size)
     QLOG_TOPIC("I2C_Dev::write");
     QASSERT(m_fd >= 0);
 
-    std::lock_guard<I2C_Dev> lg(*this);
+    if (m_is_used.exchange(true) == true)
+    {
+        QLOGE("SPI bus in use");
+        return false;
+    }
 
     struct i2c_rdwr_ioctl_data io;
     memset(&io, 0, sizeof(i2c_rdwr_ioctl_data));
@@ -130,8 +126,10 @@ bool I2C_Dev::write(uint8_t address, uint8_t const* data, size_t size)
     if (ioctl(m_fd, I2C_RDWR, &io) < 0)
     {
         QLOGW("write failed: {}", strerror(errno));
+        m_is_used = false;
         return false;
     }
+    m_is_used = false;
     return true;
 }
 
@@ -140,7 +138,11 @@ bool I2C_Dev::read_register(uint8_t address, uint8_t reg, uint8_t* data, size_t 
     QLOG_TOPIC("I2C_Dev::read_register");
     QASSERT(m_fd >= 0);
 
-    std::lock_guard<I2C_Dev> lg(*this);
+    if (m_is_used.exchange(true) == true)
+    {
+        QLOGE("SPI bus in use");
+        return false;
+    }
 
     struct i2c_rdwr_ioctl_data io;
     memset(&io, 0, sizeof(i2c_rdwr_ioctl_data));
@@ -163,8 +165,10 @@ bool I2C_Dev::read_register(uint8_t address, uint8_t reg, uint8_t* data, size_t 
     if (ioctl(m_fd, I2C_RDWR, &io) < 0)
     {
         QLOGW("read register {} failed: {}", reg, strerror(errno));
+        m_is_used = false;
         return false;
     }
+    m_is_used = false;
     return true;
 }
 bool I2C_Dev::write_register(uint8_t address, uint8_t reg, uint8_t const* data, size_t size)
@@ -172,7 +176,11 @@ bool I2C_Dev::write_register(uint8_t address, uint8_t reg, uint8_t const* data, 
     QLOG_TOPIC("I2C_Dev::write_register");
     QASSERT(m_fd >= 0);
 
-    std::lock_guard<I2C_Dev> lg(*this);
+    if (m_is_used.exchange(true) == true)
+    {
+        QLOGE("SPI bus in use");
+        return false;
+    }
 
     struct i2c_rdwr_ioctl_data io;
     memset(&io, 0, sizeof(i2c_rdwr_ioctl_data));
@@ -197,8 +205,10 @@ bool I2C_Dev::write_register(uint8_t address, uint8_t reg, uint8_t const* data, 
     if (ioctl(m_fd, I2C_RDWR, &io) < 0)
     {
         QLOGW("write register {} failed: {}", reg, strerror(errno));
+        m_is_used = false;
         return false;
     }
+    m_is_used = false;
     return true;
 }
 

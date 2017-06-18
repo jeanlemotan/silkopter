@@ -3,7 +3,7 @@
 #include "IUART.h"
 #include <string>
 #include <vector>
-#include <mutex>
+#include <atomic>
 
 namespace util
 {
@@ -18,10 +18,6 @@ public:
 
     ts::Result<void> init(uint32_t rx_gpio, uint32_t baud, bool inverted_signalling);
 
-    void lock() override;
-    bool try_lock() override;
-    void unlock() override;
-
     size_t read(uint8_t* data, size_t max_size) override;
     bool write(uint8_t const* data, size_t size) override;
 
@@ -32,7 +28,7 @@ private:
 
     uint32_t m_rx_gpio = 0;
 
-    mutable std::recursive_mutex m_mutex;
+    mutable std::atomic_bool m_is_used = { false };
 
     bool m_is_initialized = true;
 };

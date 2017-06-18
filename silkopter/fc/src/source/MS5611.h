@@ -58,12 +58,10 @@ private:
         std::shared_ptr<bus::ISPI_Bus> spi;
     };
 
-    auto lock(Buses& buses) -> bool;
-    void unlock(Buses& buses);
-    auto bus_read_u24(Buses& buses, uint8_t reg, uint32_t& dst) -> bool;
-    auto bus_read_u8(Buses& buses, uint8_t reg, uint8_t& dst) -> bool;
-    auto bus_read_u16(Buses& buses, uint8_t reg, uint16_t& dst) -> bool;
-    auto bus_write(Buses& buses, uint8_t data) -> bool;
+    bool bus_read_u24(Buses& buses, uint8_t reg, uint32_t& dst);
+    bool bus_read_u8(Buses& buses, uint8_t reg, uint8_t& dst);
+    bool bus_read_u16(Buses& buses, uint8_t reg, uint16_t& dst);
+    bool bus_write(Buses& buses, uint8_t data);
 
     std::shared_ptr<hal::MS5611_Descriptor> m_descriptor;
     std::shared_ptr<hal::MS5611_Config> m_config;

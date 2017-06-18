@@ -67,9 +67,6 @@ private:
     std::vector<uint8_t> m_dummy_tx_data;
     std::vector<uint8_t> m_dummy_rx_data;
 
-    auto lock(Buses& buses) -> bool;
-    void unlock(Buses& buses);
-
     auto read(Buses& buses, uint8_t* data, size_t max_size) -> size_t;
     auto write(Buses& buses, uint8_t const* data, size_t size) -> bool;
 

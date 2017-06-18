@@ -202,7 +202,7 @@ void RC_Phy::master_thread_proc()
 //    }
 
     Clock::duration tx_average_duration = Clock::duration::zero();
-    Clock::time_point last_tp = Clock::now();
+    //Clock::time_point last_tp = Clock::now();
     size_t tx_packet_count = 0;
     size_t rx_packet_count = 0;
     size_t min_size = 999999;
@@ -376,7 +376,7 @@ void RC_Phy::slave_thread_proc()
 #endif
 
     Clock::duration tx_average_duration = Clock::duration::zero();
-    Clock::time_point last_tp = Clock::now();
+    //Clock::time_point last_tp = Clock::now();
     size_t tx_packet_count = 0;
     size_t rx_packet_count = 0;
     size_t min_size = 999999;

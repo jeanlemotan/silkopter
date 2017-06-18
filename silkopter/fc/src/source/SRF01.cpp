@@ -64,11 +64,6 @@ ts::Result<void> SRF01::init()
     }
 
     util::hw::IUART& uart = bus->get_uart();
-    uart.lock();
-    At_Exit at_exit([this, &uart]()
-    {
-        uart.unlock();
-    });
 
     QLOGI("Probing SRF01 on {}...", m_descriptor->get_bus());
 
@@ -189,12 +184,6 @@ void SRF01::process()
         return;
     }
     util::hw::IUART& uart = bus->get_uart();
-
-    uart.lock();
-    At_Exit at_exit([this, &uart]()
-    {
-        uart.unlock();
-    });
 
     //TODO - add health indication
 

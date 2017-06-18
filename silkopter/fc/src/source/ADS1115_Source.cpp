@@ -141,13 +141,6 @@ ts::Result<void> ADS1115_Source::init()
 
     util::hw::II2C& i2c = i2c_bus->get_i2c();
 
-    i2c.lock();
-    At_Exit at_exit([this, &i2c]()
-    {
-        i2c.unlock();
-    });
-
-
     if (m_descriptor->get_adc0().get_is_enabled())
     {
         ADC adc;
@@ -249,12 +242,6 @@ void ADS1115_Source::process()
     }
 
     util::hw::II2C& i2c = i2c_bus->get_i2c();
-
-    i2c.lock();
-    At_Exit at_exit([this, &i2c]()
-    {
-        i2c.unlock();
-    });
 
     uint8_t next_adc_idx = m_crt_adc_idx;
     bool schedule_reading = false;

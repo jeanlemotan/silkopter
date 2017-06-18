@@ -94,12 +94,6 @@ void AVRADC::process()
 
     util::hw::II2C& i2c = i2c_bus->get_i2c();
 
-    i2c.lock();
-    At_Exit at_exit([this, &i2c]()
-    {
-        i2c.unlock();
-    });
-
     auto now = Clock::now();
     if (now - m_last_process_tp < MIN_CONVERSION_DURATION)
     {

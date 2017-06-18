@@ -77,20 +77,6 @@ ts::Result<void> SPI_PIGPIO::init(uint32_t port, uint32_t channel, uint32_t spee
     return ts::success;
 }
 
-void SPI_PIGPIO::lock()
-{
-    m_mutex.lock();
-}
-
-bool SPI_PIGPIO::try_lock()
-{
-    return m_mutex.try_lock();
-}
-void SPI_PIGPIO::unlock()
-{
-    m_mutex.unlock();
-}
-
 bool SPI_PIGPIO::do_transfer(void const* tx_data, void* rx_data, size_t size, uint32_t speed)
 {
     QASSERT(size > 0);
@@ -98,8 +84,6 @@ bool SPI_PIGPIO::do_transfer(void const* tx_data, void* rx_data, size_t size, ui
     {
         return false;
     }
-
-    //std::lock_guard<SPI_PIGPIO> lg(*this);
 
 #ifdef RASPBERRY_PI
     int result = 0;
@@ -129,18 +113,37 @@ bool SPI_PIGPIO::do_transfer(void const* tx_data, void* rx_data, size_t size, ui
 bool SPI_PIGPIO::transfer(void const* tx_data, void* rx_data, size_t size, uint32_t speed)
 {
     QLOG_TOPIC("spi_PIGPIO::transfer");
-    return do_transfer(tx_data, rx_data, size, speed);
+
+    if (m_is_used.exchange(true) == true)
+    {
+        QLOGE("SPI bus in use");
+        return false;
+    }
+
+    bool res = do_transfer(tx_data, rx_data, size, speed);
+
+    m_is_used = false;
+
+    return res;
 }
 
 bool SPI_PIGPIO::transfers(Transfer const* transfers, size_t transfer_count, uint32_t speed)
 {
+    if (m_is_used.exchange(true) == true)
+    {
+        QLOGE("SPI bus in use");
+        return false;
+    }
+
     for (size_t i = 0; i < transfer_count; i++)
     {
-        if (!transfer(transfers[i].tx_data, transfers[i].rx_data, transfers[i].size, speed))
+        if (!do_transfer(transfers[i].tx_data, transfers[i].rx_data, transfers[i].size, speed))
         {
+            m_is_used = false;
             return false;
         }
     }
+    m_is_used = false;
     return true;
 }
 
@@ -148,7 +151,11 @@ bool SPI_PIGPIO::transfer_register(uint8_t reg, void const* tx_data, void* rx_da
 {
     QLOG_TOPIC("spi_PIGPIO::transfer_register");
 
-    //std::lock_guard<SPI_PIGPIO> lg(*this);
+    if (m_is_used.exchange(true) == true)
+    {
+        QLOGE("SPI bus in use");
+        return false;
+    }
 
     m_tx_buffer.resize(size + 1);
     m_tx_buffer[0] = reg;
@@ -157,10 +164,13 @@ bool SPI_PIGPIO::transfer_register(uint8_t reg, void const* tx_data, void* rx_da
     m_rx_buffer.resize(size + 1);
     if (!do_transfer(m_tx_buffer.data(), m_rx_buffer.data(), size + 1, speed))
     {
+        m_is_used = false;
         return false;
     }
 
     std::copy(m_rx_buffer.begin() + 1, m_rx_buffer.end(), reinterpret_cast<uint8_t*>(rx_data));
+
+    m_is_used = false;
     return true;
 }
 

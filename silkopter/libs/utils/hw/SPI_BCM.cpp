@@ -44,20 +44,6 @@ ts::Result<void> SPI_BCM::init(uint32_t channel, uint32_t speed, uint32_t mode)
     return ts::success;
 }
 
-void SPI_BCM::lock()
-{
-    m_mutex.lock();
-}
-
-bool SPI_BCM::try_lock()
-{
-    return m_mutex.try_lock();
-}
-void SPI_BCM::unlock()
-{
-    m_mutex.unlock();
-}
-
 uint32_t SPI_BCM::get_divider(uint32_t speed) const
 {
 #ifdef RASPBERRY_PI
@@ -90,8 +76,6 @@ bool SPI_BCM::do_transfer(void const* tx_data, void* rx_data, size_t size, uint3
         return false;
     }
 
-    std::lock_guard<SPI_BCM> lg(*this);
-
 #ifdef RASPBERRY_PI
     uint32_t divider = get_divider(speed ? speed : m_speed);
 
@@ -117,18 +101,31 @@ bool SPI_BCM::do_transfer(void const* tx_data, void* rx_data, size_t size, uint3
 bool SPI_BCM::transfer(void const* tx_data, void* rx_data, size_t size, uint32_t speed)
 {
     QLOG_TOPIC("spi_bcm::transfer");
-    return do_transfer(tx_data, rx_data, size, speed);
+
+    if (m_is_used.exchange(true) == true)
+    {
+        QLOGE("SPI bus in use");
+        return false;
+    }
+
+    bool res = do_transfer(tx_data, rx_data, size, speed);
+
+    m_is_used = false;
+
+    return res;
 }
 
 bool SPI_BCM::transfers(Transfer const* transfers, size_t transfer_count, uint32_t speed)
 {
     for (size_t i = 0; i < transfer_count; i++)
     {
-        if (!transfer(transfers[i].tx_data, transfers[i].rx_data, transfers[i].size, speed))
+        if (!do_transfer(transfers[i].tx_data, transfers[i].rx_data, transfers[i].size, speed))
         {
+            m_is_used = false;
             return false;
         }
     }
+    m_is_used = false;
     return true;
 }
 
@@ -136,7 +133,11 @@ bool SPI_BCM::transfer_register(uint8_t reg, void const* tx_data, void* rx_data,
 {
     QLOG_TOPIC("spi_bcm::transfer_register");
 
-    std::lock_guard<SPI_BCM> lg(*this);
+    if (m_is_used.exchange(true) == true)
+    {
+        QLOGE("SPI bus in use");
+        return false;
+    }
 
     m_tx_buffer.resize(size + 1);
     m_tx_buffer[0] = reg;
@@ -145,10 +146,12 @@ bool SPI_BCM::transfer_register(uint8_t reg, void const* tx_data, void* rx_data,
     m_rx_buffer.resize(size + 1);
     if (!do_transfer(m_tx_buffer.data(), m_rx_buffer.data(), size + 1, speed))
     {
+        m_is_used = false;
         return false;
     }
 
     std::copy(m_rx_buffer.begin() + 1, m_rx_buffer.end(), reinterpret_cast<uint8_t*>(rx_data));
+    m_is_used = false;
     return true;
 }
 

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "II2C.h"
-#include <mutex>
+#include <atomic>
 #include <vector>
 #include <string>
 
@@ -18,10 +18,6 @@ public:
 
     ts::Result<void> init(std::string const& device);
 
-    void lock() override;
-    bool try_lock() override;
-    void unlock() override;
-
     bool read(uint8_t address, uint8_t* data, size_t size) override;
     bool write(uint8_t address, uint8_t const* data, size_t size) override;
 
@@ -34,7 +30,7 @@ private:
     std::string m_device;
     int m_fd = -1;
     std::vector<uint8_t> m_buffer;
-    mutable std::recursive_mutex m_mutex;
+    mutable std::atomic_bool m_is_used = { false };
 };
 
 }

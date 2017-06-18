@@ -76,12 +76,6 @@ void MaxSonar::process()
 
     util::hw::IUART& uart = uart_bus->get_uart();
 
-    uart.lock();
-    At_Exit at_exit([this, &uart]()
-    {
-        uart.unlock();
-    });
-
     //accumulate data from the serial port
     std::array<uint8_t, 32> buf;
     size_t count = uart.read(buf.data(), buf.size());

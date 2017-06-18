@@ -64,27 +64,24 @@ private:
     };
     std::vector<uint8_t> m_dummy_tx_data;
 
-    auto mpu_read(Buses& buses, uint8_t reg, uint8_t* data, uint32_t size, size_t speed) -> bool;
-    auto mpu_read_u8(Buses& buses, uint8_t reg, uint8_t& dst, size_t speed) -> bool;
-    auto mpu_read_u16(Buses& buses, uint8_t reg, uint16_t& dst, size_t speed) -> bool;
-    auto mpu_write_u8(Buses& buses, uint8_t reg, uint8_t t, size_t speed) -> bool;
-    auto mpu_write_u16(Buses& buses, uint8_t reg, uint16_t t, size_t speed) -> bool;
+    bool mpu_read(Buses& buses, uint8_t reg, uint8_t* data, uint32_t size, size_t speed);
+    bool mpu_read_u8(Buses& buses, uint8_t reg, uint8_t& dst, size_t speed);
+    bool mpu_read_u16(Buses& buses, uint8_t reg, uint16_t& dst, size_t speed);
+    bool mpu_write_u8(Buses& buses, uint8_t reg, uint8_t t, size_t speed);
+    bool mpu_write_u16(Buses& buses, uint8_t reg, uint16_t t, size_t speed);
 
-    auto akm_read(Buses& buses, uint8_t reg, uint8_t* data, uint32_t size, size_t speed) -> bool;
-    auto akm_read_u8(Buses& buses, uint8_t reg, uint8_t& dst, size_t speed) -> bool;
-    auto akm_read_u16(Buses& buses, uint8_t reg, uint16_t& dst, size_t speed) -> bool;
-    auto akm_write_u8(Buses& buses, uint8_t reg, uint8_t t, size_t speed) -> bool;
-
-    auto lock(Buses& buses) -> bool;
-    void unlock(Buses& buses);
+    bool akm_read(Buses& buses, uint8_t reg, uint8_t* data, uint32_t size, size_t speed);
+    bool akm_read_u8(Buses& buses, uint8_t reg, uint8_t& dst, size_t speed);
+    bool akm_read_u16(Buses& buses, uint8_t reg, uint16_t& dst, size_t speed);
+    bool akm_write_u8(Buses& buses, uint8_t reg, uint8_t t, size_t speed);
 
     void reset_fifo(Buses& buses);
 
     void process_thermometer(Buses& buses);
 
-    auto setup_magnetometer(Buses& buses) -> bool;
-    auto setup_magnetometer_i2c(Buses& buses) -> bool;
-    auto setup_magnetometer_spi(Buses& buses) -> bool;
+    bool setup_magnetometer(Buses& buses);
+    bool setup_magnetometer_i2c(Buses& buses);
+    bool setup_magnetometer_spi(Buses& buses);
 
 //    void set_bypass(Buses& buses, bool on);
     void process_magnetometer(Buses& buses);

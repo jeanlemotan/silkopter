@@ -36,8 +36,6 @@ ts::Result<void> UART_Dev::init(std::string const& device, Baud baud)
         return ts::Error("Invalid baud requested");
     }
 
-    std::lock_guard<UART_Dev> lg(*this);
-
     m_device = device;
     m_fd = ::open(device.c_str(), O_RDWR | O_NOCTTY);
     if (m_fd < 0)
@@ -70,24 +68,9 @@ void UART_Dev::close()
 
     if (m_fd)
     {
-        std::lock_guard<UART_Dev> lg(*this);
         ::close(m_fd);
         m_fd = -1;
     }
-}
-
-void UART_Dev::lock()
-{
-    m_mutex.lock();
-}
-
-bool UART_Dev::try_lock()
-{
-    return m_mutex.try_lock();
-}
-void UART_Dev::unlock()
-{
-    m_mutex.unlock();
 }
 
 size_t UART_Dev::read(uint8_t* data, size_t max_size)
@@ -95,7 +78,11 @@ size_t UART_Dev::read(uint8_t* data, size_t max_size)
     QLOG_TOPIC("UART_Dev::read");
     QASSERT(m_fd >= 0);
 
-    std::lock_guard<UART_Dev> lg(*this);
+    if (m_is_used.exchange(true) == true)
+    {
+        QLOGE("SPI bus in use");
+        return false;
+    }
 
     int res = ::read(m_fd, data, max_size);
     if (res < 0)
@@ -104,8 +91,10 @@ size_t UART_Dev::read(uint8_t* data, size_t max_size)
         {
             QLOGE("error reading from {}: {}", m_device, strerror(errno));
         }
+        m_is_used = false;
         return 0;
     }
+    m_is_used = false;
     return res;
 }
 bool UART_Dev::write(uint8_t const* data, size_t size)
@@ -113,20 +102,34 @@ bool UART_Dev::write(uint8_t const* data, size_t size)
     QLOG_TOPIC("UART_Dev::write");
     QASSERT(m_fd >= 0);
 
-    std::lock_guard<UART_Dev> lg(*this);
+    if (m_is_used.exchange(true) == true)
+    {
+        QLOGE("SPI bus in use");
+        return false;
+    }
 
     int res = ::write(m_fd, data, size);
     if (res < 0)
     {
         QLOGE("error writing to {}: {}", m_device, strerror(errno));
+        m_is_used = false;
         return false;
     }
+    m_is_used = false;
     return static_cast<size_t>(res) == size;
 }
 
 void UART_Dev::send_break()
 {
+    if (m_is_used.exchange(true) == true)
+    {
+        QLOGE("SPI bus in use");
+        return;
+    }
+
     tcsendbreak(m_fd, 1);
+
+    m_is_used = false;
 }
 
 }

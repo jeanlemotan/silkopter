@@ -10,10 +10,6 @@ class II2C
 public:
     virtual ~II2C() = default;
 
-    virtual void lock() = 0;
-    virtual bool try_lock() = 0;
-    virtual void unlock() = 0;
-
     virtual bool read(uint8_t address, uint8_t* data, size_t size) = 0;
     virtual bool write(uint8_t address, uint8_t const* data, size_t size) = 0;
 

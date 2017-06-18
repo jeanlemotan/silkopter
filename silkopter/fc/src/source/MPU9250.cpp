@@ -322,34 +322,6 @@ MPU9250::~MPU9250()
 {
 }
 
-bool MPU9250::lock(Buses& buses)
-{
-    if (buses.i2c)
-    {
-        buses.i2c->get_i2c().lock(); //lock the bus
-        return true;
-    }
-    if (buses.spi)
-    {
-        buses.spi->get_spi().lock(); //lock the bus
-        return true;
-    }
-    return false;
-}
-void MPU9250::unlock(Buses& buses)
-{
-    if (buses.i2c)
-    {
-        buses.i2c->get_i2c().unlock(); //unlock the busbuses.i2c->unlock(); //unlock the bus
-        return;
-    }
-    if (buses.spi)
-    {
-        buses.spi->get_spi().unlock(); //unlock the bus
-        return;
-    }
-}
-
 bool MPU9250::mpu_read(Buses& buses, uint8_t reg, uint8_t* rx_data, uint32_t size, size_t speed)
 {
     m_dummy_tx_data.resize(size);
@@ -498,13 +470,6 @@ ts::Result<void> MPU9250::init()
     {
         return make_error("No bus configured");
     }
-
-    lock(buses);
-    At_Exit at_exit([this, &buses]()
-    {
-        unlock(buses);
-    });
-
 
 //    std::vector<size_t> g_ranges = { 250, 500, 1000, 2000 };
 //    std::vector<size_t> a_ranges = { 2, 4, 8, 16 };
@@ -997,12 +962,6 @@ void MPU9250::process()
         return;
     }
 
-    lock(buses);
-    At_Exit at_exit([this, &buses]()
-    {
-        unlock(buses);
-    });
-
     //TODO - add health indication
 
     //auto now = Clock::now();
@@ -1096,8 +1055,8 @@ void MPU9250::process()
                         else
                         {
                             math::vec3f value(x, y, z);
-                            value = value * m_angular_velocity_sensor_scale;
                             value = math::transform(m_imu_rotation, value);
+                            value = value * m_angular_velocity_sensor_scale;
                             value = value - m_angular_velocity_bias;
                             m_angular_velocity->push_sample(value, true);
                         }

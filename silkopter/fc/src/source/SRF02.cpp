@@ -77,12 +77,6 @@ ts::Result<void> SRF02::init()
 
     util::hw::II2C& i2c = i2c_bus->get_i2c();
 
-    i2c.lock();
-    At_Exit at_exit([this, &i2c]()
-    {
-        i2c.unlock();
-    });
-
     m_descriptor->set_rate(math::clamp<size_t>(m_descriptor->get_rate(), 1, 10));
 
     QLOGI("Probing SRF02 on {}...", m_descriptor->get_bus());
@@ -150,12 +144,6 @@ void SRF02::process()
     }
 
     util::hw::II2C& i2c = i2c_bus->get_i2c();
-
-    i2c.lock();
-    At_Exit at_exit([this, &i2c]()
-    {
-        i2c.unlock();
-    });
 
     std::array<uint8_t, 4> buf;
     bool res = i2c.read_register(ADDR, RANGE_H, buf.data(), buf.size());
