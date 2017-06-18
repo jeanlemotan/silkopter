@@ -373,15 +373,6 @@ public:
 
     void set_gpio_function(GPIO gpio, GPIO_Function func);
 
-    void set_register(Register register, uint8_t value);
-    uint8_t get_register(Register register) const;
-
-    void set_register16(Register register, uint16_t value);
-    uint16_t get_register16(Register register) const;
-
-//    bool write_tx_fifo(void const* data, size_t size);
-//    bool read_rx_fifo(void* data, size_t size);
-
     uint8_t* get_tx_fifo_payload_ptr(size_t fifo_size);
 
     size_t get_rx_fifo_payload_size() const;
@@ -401,6 +392,12 @@ public:
     RX_Result rx(size_t max_expected_size, Clock::duration packet_timeout, Clock::duration payload_timeout);
 
 private:
+    void set_register(Register register, uint8_t value);
+    uint8_t get_register(Register register) const;
+
+    void set_register16(Register register, uint16_t value);
+    uint16_t get_register16(Register register) const;
+
     bool write_tx_fifo(void const* data, size_t size);
     bool read_rx_fifo(void* data, size_t size);
 

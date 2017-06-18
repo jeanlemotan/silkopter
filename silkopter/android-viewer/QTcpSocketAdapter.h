@@ -20,6 +20,11 @@ public:
     {
     }
 
+    void setSocket(QTcpSocket* socket)
+    {
+        m_socket.reset(socket);
+    }
+
     QTcpSocket& getSocket()
     {
         return *m_socket;

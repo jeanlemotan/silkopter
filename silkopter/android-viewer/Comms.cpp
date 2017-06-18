@@ -9,40 +9,45 @@ const uint16_t k_port = 3333;
 /////////////////////////////////////////////////////////////////////////////////////////////
 
 Comms::Comms()
-    : m_socketAdapter()
+    : m_tcpServer(new QTcpServer)
+    , m_socketAdapter()
     , m_channel(m_socketAdapter)
 {
-    QObject::connect(&m_socketAdapter.getSocket(), &QTcpSocket::stateChanged, this, &Comms::onSocketStateChanged);
-    QObject::connect(&m_socketAdapter.getSocket(), SIGNAL(error), this, SLOT(onSocketError()));
 }
 
 Comms::~Comms()
 {
+    m_socketAdapter.setSocket(nullptr);
+    delete m_tcpServer;
 }
 
 bool Comms::init()
 {
-    m_socketAdapter.start();
+//    m_socketAdapter.start();
 
-    connect("192.168.42.1", k_port);
+//    connect("192.168.42.1", k_port);
+
+    QObject::connect(m_tcpServer, SIGNAL(newConnection()), this, SLOT(newConnection()));
+    m_tcpServer->listen(QHostAddress::Any, k_port);
 
     return true;
 }
 
-void Comms::connect(std::string const& address, uint16_t port)
+void Comms::newConnection()
 {
-    QLOGI("Trying to connect to {}:{}", address, port);
+    // need to grab the socket
+    QTcpSocket* socket = m_tcpServer->nextPendingConnection();
+    if (socket)
+    {
+        m_socketAdapter.setSocket(socket);
+        m_socketAdapter.start();
 
-    disconnect();
-    //m_socketAdapter.getSocket().bind(QHostAddress("192.168.42.2"), k_port);
-    m_socketAdapter.getSocket().connectToHost(address.c_str(), port, QTcpSocket::ReadWrite);
+        QObject::connect(socket, &QTcpSocket::stateChanged, this, &Comms::onSocketStateChanged);
+        QObject::connect(socket, SIGNAL(error()), this, SLOT(onSocketError()));
 
-    m_lastConnectAttemptTP = Clock::now();
-}
-
-void Comms::disconnect()
-{
-    m_socketAdapter.getSocket().disconnectFromHost();
+        QLOGI("Incomming connection");
+        onSocketStateChanged(socket->state());
+    }
 }
 
 void Comms::onSocketError(QAbstractSocket::SocketError error)
@@ -131,12 +136,6 @@ void Comms::processTelemetry()
 
 void Comms::process()
 {
-    if (getConnectionStatus() == ConnectionStatus::DISCONNECTED &&
-        Clock::now() - m_lastConnectAttemptTP >= std::chrono::seconds(1))
-    {
-        connect("192.168.42.1", k_port);
-    }
-
     m_videoData.data.clear();
 
     silk::viewer::Packet_Type message;

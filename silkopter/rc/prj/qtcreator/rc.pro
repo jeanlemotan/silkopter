@@ -193,7 +193,8 @@ HEADERS += \
     ../../src/RF_Config_Menu_Page.h \
     ../../../libs/utils/hw/SPI_PIGPIO.h \
     ../../../libs/utils/Queue.h \
-    ../../../libs/utils/comms/Video_Streamer.h
+    ../../../libs/utils/comms/Video_Streamer.h \
+    ../../src/Remote_Viewer_Client.h
 
 SOURCES += \
     ../../src/main.cpp \
@@ -248,7 +249,8 @@ SOURCES += \
     ../../src/RF_Config_Menu_Page.cpp \
     ../../../libs/utils/hw/SPI_PIGPIO.cpp \
     ../../../libs/utils/Queue.cpp \
-    ../../../libs/utils/comms/Video_Streamer.cpp
+    ../../../libs/utils/comms/Video_Streamer.cpp \
+    ../../src/Remote_Viewer_Client.cpp
 
 DISTFILES += \
     ../../src/node.png \

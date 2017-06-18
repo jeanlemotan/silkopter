@@ -178,7 +178,8 @@ void Info_Menu_Page::render(Adafruit_GFX& display)
         display.setTextWrap(true);
         display.printf("i%d o%d v%d dBm\n", m_min_rx_dBm, m_min_tx_dBm, static_cast<int>(m_hal.get_comms().get_video_streamer().get_input_dBm()));
         display.printf("RC Lag: %dms\n", static_cast<int>(std::chrono::duration_cast<std::chrono::milliseconds>(Clock::now() - m_hal.get_comms().get_last_rx_tp()).count()));
-        display.printf("%d viewer(s)\n", static_cast<int>(m_hal.get_comms().get_remote_viewer_server().get_remote_viewer_count()));
+        //display.printf("%d viewer(s)\n", static_cast<int>(m_hal.get_comms().get_remote_viewer_server().get_remote_viewer_count()));
+        display.printf("Viewer %s\n", m_hal.get_comms().get_remote_viewer_client().is_connected() ? "ON" : "OFF");
         display.printf("%.2fMbps video\n", static_cast<float>(m_hal.get_comms().get_video_streamer().get_video_rate() * 8) / (1024.f * 1024.f));
     }
     else if (m_section == Section::BATTERY)

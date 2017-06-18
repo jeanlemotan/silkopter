@@ -153,16 +153,30 @@ util::comms::RC_Phy& Comms::get_rc_phy()
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-Remote_Viewer_Server const& Comms::get_remote_viewer_server() const
+//Remote_Viewer_Server const& Comms::get_remote_viewer_server() const
+//{
+//    return m_remote_viewer_server;
+//}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+
+//Remote_Viewer_Server& Comms::get_remote_viewer_server()
+//{
+//    return m_remote_viewer_server;
+//}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+Remote_Viewer_Client const& Comms::get_remote_viewer_client() const
 {
-    return m_remote_viewer_server;
+    return m_remote_viewer_client;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-Remote_Viewer_Server& Comms::get_remote_viewer_server()
+Remote_Viewer_Client& Comms::get_remote_viewer_client()
 {
-    return m_remote_viewer_server;
+    return m_remote_viewer_client;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -298,7 +312,8 @@ void Comms::video_data_received(void const* data, size_t size, math::vec2u16 con
 
     if (size > 0)
     {
-        m_remote_viewer_server.send_video_data(data, size, resolution);
+        //m_remote_viewer_server.send_video_data(data, size, resolution);
+        m_remote_viewer_client.send_video_data(data, size, resolution);
 //        uint8_t const* data = reinterpret_cast<uint8_t const*>(_data);
 //        size_t offset = m_video_data.size();
 //        m_video_data.resize(offset + size);
@@ -322,7 +337,8 @@ void Comms::video_data_received(void const* data, size_t size, math::vec2u16 con
 
 void Comms::send_telemetry_to_viewers()
 {
-    m_remote_viewer_server.send_telemetry(m_multirotor_commands, m_multirotor_state);
+    //m_remote_viewer_server.send_telemetry(m_multirotor_commands, m_multirotor_state);
+    m_remote_viewer_client.send_telemetry(m_multirotor_commands, m_multirotor_state);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -399,7 +415,8 @@ void Comms::process()
         send_telemetry_to_viewers();
     }
 
-    m_remote_viewer_server.process();
+    //m_remote_viewer_server.process();
+    m_remote_viewer_client.process();
 
 //    if (Clock::now() - get_last_rx_tp() > std::chrono::seconds(5))
 //    {

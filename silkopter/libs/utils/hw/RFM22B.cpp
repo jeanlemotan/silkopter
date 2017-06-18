@@ -33,6 +33,8 @@ RFM22B::~RFM22B()
 
 bool RFM22B::init(ISPI& spi, uint8_t sdn_gpio)
 {
+    std::lock_guard<std::recursive_mutex> lg(m_mutex);
+
     if (m_spi)
     {
         return true;
@@ -96,6 +98,8 @@ error:
 
 bool RFM22B::shutdown()
 {
+    std::lock_guard<std::recursive_mutex> lg(m_mutex);
+
     if (!m_spi)
     {
         return false;
@@ -111,6 +115,8 @@ bool RFM22B::shutdown()
 
 bool RFM22B::powerup()
 {
+    std::lock_guard<std::recursive_mutex> lg(m_mutex);
+
     if (!m_spi)
     {
         return false;
@@ -478,6 +484,8 @@ void RFM22B::set_register16(Register reg, uint16_t value)
 
 bool RFM22B::tx(Clock::duration timeout)
 {
+    std::lock_guard<std::recursive_mutex> lg(m_mutex);
+
     size_t size = m_tx_fifo.size();
     if (size > 0)
     {
@@ -516,6 +524,8 @@ bool RFM22B::tx(Clock::duration timeout)
 }
 RFM22B::RX_Result RFM22B::rx(size_t max_expected_size, Clock::duration packet_timeout, Clock::duration payload_timeout)
 {
+    std::lock_guard<std::recursive_mutex> lg(m_mutex);
+
     //Toggle ffclrrx bit high and low to clear RX FIFO
     set_register(Register::OPERATING_MODE_AND_FUNCTION_CONTROL_2_08, 2);
     set_register(Register::OPERATING_MODE_AND_FUNCTION_CONTROL_2_08, 0);

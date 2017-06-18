@@ -11,6 +11,7 @@
 #include "QTcpSocketAdapter.h"
 
 #include <QUdpSocket>
+#include <QTcpServer>
 
 class Comms : public QObject
 {
@@ -48,13 +49,10 @@ public:
 signals:
     void connectionStatusChanged(ConnectionStatus);
 
-private:
-    void connect(std::string const& address, uint16_t port);
-    void disconnect();
-
 private slots:
     void onSocketError(QAbstractSocket::SocketError error);
     void onSocketStateChanged(QTcpSocket::SocketState socketState);
+    void newConnection();
 
 private:
 
@@ -66,10 +64,10 @@ private:
     VideoData m_videoData;
     Telemetry m_telemetry;
 
+    QTcpServer* m_tcpServer = nullptr;
     QTcpSocketAdapter m_socketAdapter;
     typedef util::comms::Channel<silk::viewer::Packet_Type, QTcpSocketAdapter> Channel;
     Channel m_channel;
-    Clock::time_point m_lastConnectAttemptTP = Clock::now();
 
     mutable std::mutex m_samplesMutex;
 };

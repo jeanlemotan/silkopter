@@ -40,7 +40,7 @@
 #include "utils/comms/RC_Protocol.h"
 #include "utils/comms/Video_Streamer.h"
 #include "utils/hw/ISPI.h"
-#include "Remote_Viewer_Server.h"
+#include "Remote_Viewer_Client.h"
 
 #include <boost/asio.hpp>
 
@@ -69,8 +69,10 @@ public:
 
     Clock::time_point get_last_rx_tp() const;
 
-    Remote_Viewer_Server const& get_remote_viewer_server() const;
-    Remote_Viewer_Server& get_remote_viewer_server();
+//    Remote_Viewer_Server const& get_remote_viewer_server() const;
+//    Remote_Viewer_Server& get_remote_viewer_server();
+    Remote_Viewer_Client const& get_remote_viewer_client() const;
+    Remote_Viewer_Client& get_remote_viewer_client();
 
     util::comms::Video_Streamer const& get_video_streamer() const;
     util::comms::Video_Streamer& get_video_streamer();
@@ -92,7 +94,8 @@ private:
     bool compute_camera_commands_packet(util::comms::RC_Protocol::Buffer& buffer, uint8_t& packet_type);
     void process_rx_packet(util::comms::RC_Protocol::RX_Packet const& packet, uint8_t* data, size_t size);
 
-    Remote_Viewer_Server m_remote_viewer_server;
+    //Remote_Viewer_Server m_remote_viewer_server;
+    Remote_Viewer_Client m_remote_viewer_client;
 
     util::comms::RC_Phy m_rc_phy;
     util::comms::RC_Protocol m_rc_protocol;

@@ -61,6 +61,25 @@ Rectangle {
         spacing: 4
 
         Label {
+            function getConnectionStatus() {
+                if (s_comms.connectionStatus === Comms.CONNECTED) return "ON";
+                if (s_comms.connectionStatus === Comms.DISCONNECTED) return "OFF";
+                if (s_comms.connectionStatus === Comms.CONNECTING) return "...";
+                return "?"
+            }
+
+            TextMetrics {
+                id: connMetrics
+                text: "OFF"
+            }
+
+            Layout.preferredWidth: connMetrics.width
+            style: Text.Outline; styleColor: "black"
+            font.pointSize: 12;
+            text: getConnectionStatus()
+        }
+
+        Label {
             TextMetrics {
                 id: ampsMetrics
                 text: "999.9A "
