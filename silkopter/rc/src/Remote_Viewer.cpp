@@ -8,7 +8,7 @@ namespace silk
 Remote_Viewer::Remote_Viewer(boost::asio::ip::tcp::socket socket, bool master)
     : m_socket(std::move(socket))
     , m_is_master(master)
-    , m_socket_adapter(m_socket)
+//    , m_socket_adapter(m_socket)
     , m_channel(m_socket_adapter)
 {
 }
@@ -24,7 +24,7 @@ Remote_Viewer::~Remote_Viewer()
 
 void Remote_Viewer::start()
 {
-    m_socket_adapter.start();
+    m_socket_adapter.start(m_socket);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////

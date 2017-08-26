@@ -19,22 +19,19 @@ class ASIO_Socket_Adapter : q::util::Noncopyable
 public:
     typedef S Socket_t;
 
-    ASIO_Socket_Adapter(Socket_t& s)
-        : m_socket(s)
+    ASIO_Socket_Adapter()
     {
     }
 
-    void start()
+    void start(Socket_t& s)
     {
-        m_socket.async_read_some(boost::asio::buffer(m_rx_temp_buffer.data(), m_rx_temp_buffer.size()),
-                                 boost::bind(&ASIO_Socket_Adapter<Socket_t>::handle_receive, this,
-                                             boost::asio::placeholders::error,
-                                             boost::asio::placeholders::bytes_transferred));
-        //            m_socket.async_receive(
-        //                boost::asio::buffer(m_rx_temp_buffer.data(), m_rx_temp_buffer.size()),
-        //                boost::bind(&Asio_Socket_Adapter<Socket_t>::handle_receive, this,
-        //				boost::asio::placeholders::error,
-        //				boost::asio::placeholders::bytes_transferred));
+        m_socket = &s;
+        start();
+    }
+
+    void stop()
+    {
+        m_socket = nullptr;
     }
 
     template<class Container>
@@ -48,7 +45,8 @@ public:
     }
     void write(void const* data, size_t size)
     {
-        if (size)
+        assert(m_socket);
+        if (size && m_socket)
         {
             m_pending_to_send_size += size;
 
@@ -65,7 +63,7 @@ public:
                 std::copy(m_tx_pending_buffer.begin(), m_tx_pending_buffer.begin() + mtu_size, m_tx_crt_buffer.begin());
 
                 m_is_sending = true;
-                m_socket.async_write_some(boost::asio::buffer(m_tx_crt_buffer),
+                m_socket->async_write_some(boost::asio::buffer(m_tx_crt_buffer),
                                           boost::bind(&ASIO_Socket_Adapter<Socket_t>::handle_send, this,
                                                       boost::asio::placeholders::error,
                                                       boost::asio::placeholders::bytes_transferred));
@@ -79,11 +77,22 @@ public:
     }
 
 private:
+    void start()
+    {
+        m_socket->async_read_some(boost::asio::buffer(m_rx_temp_buffer.data(), m_rx_temp_buffer.size()),
+                                 boost::bind(&ASIO_Socket_Adapter<Socket_t>::handle_receive, this,
+                                             boost::asio::placeholders::error,
+                                             boost::asio::placeholders::bytes_transferred));
+    }
+
     void handle_send(const boost::system::error_code& error, std::size_t bytes_transferred)
     {
         if (error)
         {
-            m_socket.close();
+            if (m_socket)
+            {
+                m_socket->close();
+            }
         }
         else
         {
@@ -102,11 +111,14 @@ private:
 
                 std::copy(m_tx_pending_buffer.begin(), m_tx_pending_buffer.begin() + mtu_size, m_tx_crt_buffer.begin());
 
-                m_is_sending = true;
-                m_socket.async_write_some(boost::asio::buffer(m_tx_crt_buffer),
-                                          boost::bind(&ASIO_Socket_Adapter<Socket_t>::handle_send, this,
-                                                      boost::asio::placeholders::error,
-                                                      boost::asio::placeholders::bytes_transferred));
+                if (m_socket)
+                {
+                    m_is_sending = true;
+                    m_socket->async_write_some(boost::asio::buffer(m_tx_crt_buffer),
+                                               boost::bind(&ASIO_Socket_Adapter<Socket_t>::handle_send, this,
+                                                           boost::asio::placeholders::error,
+                                                           boost::asio::placeholders::bytes_transferred));
+                }
             }
             else
             {
@@ -119,7 +131,10 @@ private:
     {
         if (error)
         {
-            m_socket.close();
+            if (m_socket)
+            {
+                m_socket->close();
+            }
         }
         else
         {
@@ -151,7 +166,7 @@ private:
         return buffer_ptr;
     }
 
-    Socket_t& m_socket;
+    Socket_t* m_socket = nullptr;
     RX_Buffer_t m_rx_buffer;
     std::array<uint8_t, 512> m_rx_temp_buffer;
     std::mutex m_rx_mutex;

@@ -11,8 +11,6 @@ const uint16_t k_port = 3333;
 Remote_Viewer_Client::Remote_Viewer_Client()
     : m_io_service()
     , m_io_service_work(new boost::asio::io_service::work(m_io_service))
-    , m_socket(m_io_service)
-    , m_socket_adapter(m_socket)
     , m_channel(m_socket_adapter)
 {
     m_io_service_thread = boost::thread([this]()
@@ -36,7 +34,7 @@ Remote_Viewer_Client::~Remote_Viewer_Client()
 
 bool Remote_Viewer_Client::is_connected() const
 {
-    return m_socket.is_open() && m_is_connected;
+    return m_socket && m_socket->is_open() && m_is_connected;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -81,21 +79,31 @@ void Remote_Viewer_Client::start_connect()
     {
         boost::asio::ip::tcp::endpoint endpoint(boost::asio::ip::address::from_string("192.168.42.129"), k_port);
 
-        m_socket.close();
-        m_socket.async_connect(endpoint, [this](boost::system::error_code ec)
+        if (m_socket)
+        {
+            m_socket_adapter.stop();
+            m_socket->close();
+        }
+
+        m_socket.reset(new boost::asio::ip::tcp::socket(m_io_service));
+        m_socket->async_connect(endpoint, [this](boost::system::error_code ec)
         {
             try
             {
                 if (!ec)
                 {
                     QLOGI("Remote Viewer connected");
-                    m_socket_adapter.start();
+                    m_socket_adapter.start(*m_socket);
                     m_is_connected = true;
                 }
                 else
                 {
                     QLOGI("Remote Viewer failed to connect. Retrying");
-                    m_socket.close();
+                    if (m_socket)
+                    {
+                        m_socket_adapter.stop();
+                        m_socket->close();
+                    }
                 }
             }
             catch (std::exception const& e)
@@ -114,7 +122,7 @@ void Remote_Viewer_Client::start_connect()
 
 void Remote_Viewer_Client::process()
 {
-    if (!is_connected() && Clock::now() - m_last_connection_attempt_tp >= std::chrono::seconds(1))
+    if (!is_connected() && Clock::now() - m_last_connection_attempt_tp >= std::chrono::milliseconds(100))
     {
         start_connect();
     }

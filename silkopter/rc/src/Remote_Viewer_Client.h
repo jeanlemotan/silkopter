@@ -30,7 +30,7 @@ private:
 
     boost::asio::io_service m_io_service;
     std::unique_ptr<boost::asio::io_service::work> m_io_service_work;
-    boost::asio::ip::tcp::socket m_socket;
+    std::unique_ptr<boost::asio::ip::tcp::socket> m_socket;
     boost::thread m_io_service_thread;
 
     typedef util::comms::ASIO_Socket_Adapter<boost::asio::ip::tcp::socket> Socket_Adapter;
