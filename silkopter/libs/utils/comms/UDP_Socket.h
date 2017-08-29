@@ -1,8 +1,10 @@
 #pragma once
 
 #include "ISocket.h"
-#include <boost/thread.hpp>
+#include <thread>
 #include "utils/Clock.h"
+#include <functional>
+#include <asio.hpp>
 
 namespace boost
 {
@@ -35,7 +37,7 @@ public:
 
     void open(uint16_t send_port, uint16_t receive_port);
     void start_listening();
-    void set_send_endpoint(boost::asio::ip::address const& address, uint16_t port);
+    void set_send_endpoint(asio::ip::address const& address, uint16_t port);
 
     auto get_mtu() const -> size_t override;
 
@@ -45,16 +47,16 @@ public:
 private:
     void async_send(void const* data, size_t size) override;
 
-    void handle_receive(const boost::system::error_code& error, std::size_t bytes_transferred);
-    void handle_send(const boost::system::error_code& error, std::size_t bytes_transferred);
+    void handle_receive(const asio::error_code& error, std::size_t bytes_transferred);
+    void handle_send(const asio::error_code& error, std::size_t bytes_transferred);
 
-    boost::function<void(const boost::system::error_code& error, std::size_t bytes_transferred)> m_asio_send_callback;
-    boost::function<void(const boost::system::error_code& error, std::size_t bytes_transferred)> m_asio_receive_callback;
+    std::function<void(const asio::error_code& error, std::size_t bytes_transferred)> m_asio_send_callback;
+    std::function<void(const asio::error_code& error, std::size_t bytes_transferred)> m_asio_receive_callback;
 
     struct ASIO_Impl;
     std::unique_ptr<ASIO_Impl> m_asio_impl;
 
-    boost::thread m_io_thread;
+    std::thread m_io_thread;
 
     std::atomic_bool m_send_in_progress = {false};
 

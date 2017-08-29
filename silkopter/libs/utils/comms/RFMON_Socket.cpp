@@ -449,7 +449,7 @@ auto RFMON_Socket::start() -> bool
     m_impl->tx_buffer.resize(MAX_PACKET_SIZE);
     prepare_tx_packet_header(m_impl->tx_buffer.data());
 
-    m_rx_thread = boost::thread([this]()
+    m_rx_thread = std::thread([this]()
     {
         while (!m_exit)
         {
@@ -474,7 +474,7 @@ auto RFMON_Socket::start() -> bool
         }
     });
 
-    m_tx_thread = boost::thread([this]()
+    m_tx_thread = std::thread([this]()
     {
         while (!m_exit)
         {

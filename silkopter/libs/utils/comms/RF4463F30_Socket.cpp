@@ -162,11 +162,11 @@ bool RF4463F30_Socket::start()
 
     if (m_is_master)
     {
-        m_thread = boost::thread([this]() { master_thread_proc(); });
+        m_thread = std::thread([this]() { master_thread_proc(); });
     }
     else
     {
-        m_thread = boost::thread([this]() { slave_thread_proc(); });
+        m_thread = std::thread([this]() { slave_thread_proc(); });
     }
 
 

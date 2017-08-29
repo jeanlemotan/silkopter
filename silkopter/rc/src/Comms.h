@@ -42,7 +42,7 @@
 #include "utils/hw/ISPI.h"
 #include "Remote_Viewer_Client.h"
 
-#include <boost/asio.hpp>
+#include <asio.hpp>
 
 namespace silk
 {

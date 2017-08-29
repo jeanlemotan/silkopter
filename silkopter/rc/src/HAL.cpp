@@ -24,7 +24,8 @@ extern "C"
 namespace silk
 {
 
-static const std::string k_settings_path("settings.json");
+static const std::string k_settings_filename("settings.json");
+extern std::string s_program_path;
 
 
 struct HAL::Impl
@@ -95,7 +96,7 @@ static void shutdown_pigpio()
 static void generate_settings_file(HAL& hal)
 {
     hal.get_settings() = settings::Settings();
-    hal.get_settings().get_comms().set_video_wlan_interfaces({"wlan2", "wlan3"});
+    hal.get_settings().get_comms().set_video_wlan_interfaces({"wlan1", "wlan2"});
     hal.save_settings();
 }
 
@@ -103,14 +104,17 @@ static void generate_settings_file(HAL& hal)
 
 static ts::Result<void> load_settings(HAL& hal)
 {
+    std::string filename = s_program_path + "/" + k_settings_filename;
+    QLOGI("Loading settings from '{}'", filename);
+
     std::string data;
 
     {
         //read the data
-        std::ifstream fs(k_settings_path, std::ifstream::in | std::ifstream::binary);
+        std::ifstream fs(filename, std::ifstream::in | std::ifstream::binary);
         if (!fs.is_open())
         {
-            QLOGW("Failed to load '{}'", k_settings_path);
+            QLOGW("Failed to load '{}'", filename);
             generate_settings_file(hal);
             return false;
         }
@@ -126,7 +130,7 @@ static ts::Result<void> load_settings(HAL& hal)
     ts::Result<ts::sz::Value> json_result = ts::sz::from_json(data);
     if (json_result != ts::success)
     {
-        return ts::Error("Failed to load '" + k_settings_path + "': " + json_result.error().what());
+        return ts::Error("Failed to load '" + filename + "': " + json_result.error().what());
     }
 
     settings::Settings settings;
@@ -145,11 +149,14 @@ static ts::Result<void> load_settings(HAL& hal)
 
 void HAL::save_settings()
 {
+    std::string filename = s_program_path + "/" + k_settings_filename;
+    QLOGI("Saving settings to '{}'", filename);
+
     ts::sz::Value sz_value = settings::serialize(m_impl->settings);
 
     std::string json = ts::sz::to_json(sz_value, true);
 
-    std::ofstream fs(k_settings_path);
+    std::ofstream fs(filename);
     if (fs.is_open())
     {
         fs.write(json.data(), json.size());
@@ -157,7 +164,7 @@ void HAL::save_settings()
     }
     else
     {
-        QLOGE("Cannot open '{}' to save settings.", k_settings_path);
+        QLOGE("Cannot open '{}' to save settings.", filename);
     }
 }
 

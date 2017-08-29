@@ -28,18 +28,6 @@
 #include <cmath>
 #include <cfloat>
 
-//#include <boost/thread.hpp>
-//#include <boost/optional.hpp>
-//#include <boost/variant.hpp>
-//#include <boost/signals2.hpp>
-//#include <boost/iterator/reverse_iterator.hpp>
-//#include <boost/iterator/iterator_traits.hpp>
-//#include <boost/swap.hpp>
-//#include <boost/type_traits/aligned_storage.hpp>
-//#include <boost/type_traits/has_trivial_assign.hpp>
-//#include <boost/type_traits/has_trivial_constructor.hpp>
-//#include <boost/type_traits/has_trivial_destructor.hpp>
-
 #include "QBase.h"
 #include "qmath.h"
 

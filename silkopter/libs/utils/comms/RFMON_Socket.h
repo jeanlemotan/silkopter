@@ -3,7 +3,7 @@
 #include "ISocket.h"
 #include <vector>
 #include <string>
-#include <boost/thread.hpp>
+#include <thread>
 
 namespace util
 {
@@ -42,8 +42,8 @@ private:
     std::unique_ptr<Impl> m_impl;
     std::string m_interface;
     bool m_exit = false;
-    boost::thread m_rx_thread;
-    boost::thread m_tx_thread;
+    std::thread m_rx_thread;
+    std::thread m_tx_thread;
     uint8_t m_id = 0;
 };
 

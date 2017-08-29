@@ -10,10 +10,10 @@ const uint16_t k_port = 3333;
 
 Remote_Viewer_Client::Remote_Viewer_Client()
     : m_io_service()
-    , m_io_service_work(new boost::asio::io_service::work(m_io_service))
+    , m_io_service_work(new asio::io_service::work(m_io_service))
     , m_channel(m_socket_adapter)
 {
-    m_io_service_thread = boost::thread([this]()
+    m_io_service_thread = std::thread([this]()
     {
        m_io_service.run();
     });
@@ -77,16 +77,16 @@ void Remote_Viewer_Client::start_connect()
 
     try
     {
-        boost::asio::ip::tcp::endpoint endpoint(boost::asio::ip::address::from_string("192.168.42.129"), k_port);
+        asio::ip::tcp::endpoint endpoint(asio::ip::address::from_string("192.168.42.129"), k_port);
 
         if (m_socket)
         {
             m_socket_adapter.stop();
-            m_socket->close();
+            m_socket.reset();
         }
 
-        m_socket.reset(new boost::asio::ip::tcp::socket(m_io_service));
-        m_socket->async_connect(endpoint, [this](boost::system::error_code ec)
+        m_socket.reset(new asio::ip::tcp::socket(m_io_service));
+        m_socket->async_connect(endpoint, [this](asio::error_code ec)
         {
             try
             {
@@ -102,7 +102,7 @@ void Remote_Viewer_Client::start_connect()
                     if (m_socket)
                     {
                         m_socket_adapter.stop();
-                        m_socket->close();
+                        m_socket.reset();
                     }
                 }
             }
@@ -122,7 +122,7 @@ void Remote_Viewer_Client::start_connect()
 
 void Remote_Viewer_Client::process()
 {
-    if (!is_connected() && Clock::now() - m_last_connection_attempt_tp >= std::chrono::milliseconds(100))
+    if (!is_connected() && Clock::now() - m_last_connection_attempt_tp >= std::chrono::milliseconds(1000))
     {
         start_connect();
     }

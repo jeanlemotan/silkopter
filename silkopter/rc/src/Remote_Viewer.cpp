@@ -5,7 +5,7 @@ namespace silk
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-Remote_Viewer::Remote_Viewer(boost::asio::ip::tcp::socket socket, bool master)
+Remote_Viewer::Remote_Viewer(asio::ip::tcp::socket socket, bool master)
     : m_socket(std::move(socket))
     , m_is_master(master)
 //    , m_socket_adapter(m_socket)

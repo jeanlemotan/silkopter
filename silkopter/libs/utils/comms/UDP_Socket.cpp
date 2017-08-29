@@ -1,6 +1,7 @@
 #include "UDP_Socket.h"
-#include <boost/asio.hpp>
-#include <boost/thread.hpp>
+#include <asio.hpp>
+#include <functional>
+#include <thread>
 
 namespace util
 {
@@ -24,11 +25,11 @@ struct UDP_Socket::ASIO_Impl
         io_service.stop();
     }
 
-    boost::asio::io_service io_service;
-    boost::asio::io_service::work io_work;
-    boost::asio::ip::udp::endpoint tx_endpoint;
-    boost::asio::ip::udp::endpoint rx_endpoint;
-    boost::asio::ip::udp::socket socket;
+    asio::io_service io_service;
+    asio::io_service::work io_work;
+    asio::ip::udp::endpoint tx_endpoint;
+    asio::ip::udp::endpoint rx_endpoint;
+    asio::ip::udp::socket socket;
 };
 
 
@@ -37,10 +38,10 @@ UDP_Socket::UDP_Socket()
     m_asio_impl.reset(new ASIO_Impl);
 
     m_rx_buffer.resize(100 * 1024);
-    m_asio_send_callback = boost::bind(&UDP_Socket::handle_send, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred);
-    m_asio_receive_callback = boost::bind(&UDP_Socket::handle_receive, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred);
+    m_asio_send_callback = std::bind(&UDP_Socket::handle_send, this, std::placeholders::_1, std::placeholders::_2);
+    m_asio_receive_callback = std::bind(&UDP_Socket::handle_receive, this, std::placeholders::_1, std::placeholders::_2);
 
-    m_io_thread = boost::thread([this]() { m_asio_impl->io_service.run(); });
+    m_io_thread = std::thread([this]() { m_asio_impl->io_service.run(); });
 }
 
 UDP_Socket::~UDP_Socket()
@@ -58,9 +59,9 @@ UDP_Socket::~UDP_Socket()
 
 void UDP_Socket::open(uint16_t send_port, uint16_t receive_port)
 {
-    m_asio_impl->socket.open(boost::asio::ip::udp::v4());
-    m_asio_impl->socket.set_option(boost::asio::ip::udp::socket::reuse_address(true));
-    m_asio_impl->socket.bind(boost::asio::ip::udp::endpoint(boost::asio::ip::udp::v4(), receive_port));
+    m_asio_impl->socket.open(asio::ip::udp::v4());
+    m_asio_impl->socket.set_option(asio::ip::udp::socket::reuse_address(true));
+    m_asio_impl->socket.bind(asio::ip::udp::endpoint(asio::ip::udp::v4(), receive_port));
 
     m_send_port = send_port;
     m_receive_port = receive_port;
@@ -68,12 +69,12 @@ void UDP_Socket::open(uint16_t send_port, uint16_t receive_port)
 
 void UDP_Socket::start_listening()
 {
-    m_asio_impl->socket.async_receive_from(boost::asio::buffer(m_rx_buffer), m_asio_impl->rx_endpoint, m_asio_receive_callback);
+    m_asio_impl->socket.async_receive_from(asio::buffer(m_rx_buffer), m_asio_impl->rx_endpoint, m_asio_receive_callback);
 }
 
-void UDP_Socket::set_send_endpoint(boost::asio::ip::address const& address, uint16_t port)
+void UDP_Socket::set_send_endpoint(asio::ip::address const& address, uint16_t port)
 {
-    m_asio_impl->tx_endpoint = boost::asio::ip::udp::endpoint(address, port);
+    m_asio_impl->tx_endpoint = asio::ip::udp::endpoint(address, port);
 }
 
 auto UDP_Socket::acquire_tx_buffer_locked(size_t size) -> Buffer
@@ -140,15 +141,15 @@ void UDP_Socket::send_next_packet_locked()
             m_tx_data_sent_tp = Clock::now();
         }
 
-        m_asio_impl->socket.async_send_to(boost::asio::buffer(*m_tx_buffer_in_transit), m_asio_impl->tx_endpoint, m_asio_send_callback);
+        m_asio_impl->socket.async_send_to(asio::buffer(*m_tx_buffer_in_transit), m_asio_impl->tx_endpoint, m_asio_send_callback);
     }
 }
 
-void UDP_Socket::handle_receive(const boost::system::error_code& error, std::size_t bytes_transferred)
+void UDP_Socket::handle_receive(const asio::error_code& error, std::size_t bytes_transferred)
 {
     if (error)
     {
-        if (error != boost::asio::error::eof)
+        if (error != asio::error::eof)
         {
             QLOGE("Error on socket receive: {}", error.message());
             //m_socket.close();
@@ -189,7 +190,7 @@ void UDP_Socket::handle_receive(const boost::system::error_code& error, std::siz
         start_listening();
     }
 }
-void UDP_Socket::handle_send(const boost::system::error_code& error, std::size_t bytes_transferred)
+void UDP_Socket::handle_send(const asio::error_code& error, std::size_t bytes_transferred)
 {
     std::lock_guard<std::mutex> lg(m_tx_buffer_mutex);
 

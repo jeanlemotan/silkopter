@@ -3,7 +3,7 @@
 #include <vector>
 #include <string>
 #include <atomic>
-#include <boost/thread.hpp>
+#include <thread>
 #include "utils/Clock.h"
 
 struct fec_t;
@@ -81,7 +81,7 @@ private:
     struct Impl;
     std::unique_ptr<Impl> m_impl;
     bool m_exit = false;
-    boost::thread m_thread;
+    std::thread m_thread;
 
     fec_t* m_fec = nullptr;
     std::array<uint8_t const*, 16> m_fec_src_datagram_ptrs;

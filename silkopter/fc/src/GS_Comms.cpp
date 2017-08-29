@@ -41,7 +41,7 @@
 #include "messages.def.h"
 #include "def_lang/JSON_Serializer.h"
 
-#include <boost/asio.hpp>
+#include <asio.hpp>
 
 namespace silk
 {
@@ -75,7 +75,7 @@ auto GS_Comms::start_udp(uint16_t send_port, uint16_t receive_port) -> bool
 
             s->open(send_port, receive_port);
             s->start_listening();
-//            s->set_send_endpoint(boost::asio::ip::address::from_string("127.0.0.1"), send_port);
+//            s->set_send_endpoint(asio::ip::address::from_string("127.0.0.1"), send_port);
             m_is_connected = true;
         }
     }

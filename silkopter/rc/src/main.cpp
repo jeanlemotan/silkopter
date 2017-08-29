@@ -13,6 +13,8 @@ namespace silk
 int s_version_major = 1;
 int s_version_minor = 0;
 
+std::string s_program_path;
+
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -32,12 +34,21 @@ int main(int argc, char *argv[])
     q::logging::set_decorations(q::logging::Decorations(q::logging::Decoration::TIMESTAMP, q::logging::Decoration::LEVEL, q::logging::Decoration::TOPIC));
 
 
-    //    boost::shared_ptr<boost::asio::io_service::work> work(new boost::asio::io_service::work(s_async_io_service));
-    //    boost::thread_group worker_threads;
+    //    boost::shared_ptr<asio::io_service::work> work(new asio::io_service::work(s_async_io_service));
+    //    std::thread_group worker_threads;
     //    for(int x = 0; x < 4; ++x)
     //    {
-    //        worker_threads.create_thread(boost::bind(&boost::asio::io_service::run, &s_async_io_service));
+    //        worker_threads.create_thread(boost::bind(&asio::io_service::run, &s_async_io_service));
     //    }
+
+    silk::s_program_path = argv[0];
+    size_t off = silk::s_program_path.find_last_of('/');
+    if (off != std::string::npos)
+    {
+        silk::s_program_path = silk::s_program_path.substr(0, off);
+    }
+    QLOGI("Program path: {}.", silk::s_program_path);
+
 
     silk::HAL hal;
     ts::Result<void> result = hal.init();

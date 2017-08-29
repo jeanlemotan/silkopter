@@ -4,6 +4,8 @@ CONFIG -= app_bundle
 CONFIG -= qt
 CONFIG += c++11
 INCLUDEPATH += ../../include
+INCLUDEPATH += =/usr/local/include
+INCLUDEPATH += ../../../asio/include
 
 PRECOMPILED_HEADER = ../../include/QBaseStdAfx.h
 CONFIG *= precompile_header
@@ -15,6 +17,8 @@ CONFIG *= precompile_header
 QMAKE_CXXFLAGS += -Wno-unused-variable
 QMAKE_CFLAGS += -Wno-unused-variable
 
+DEFINES += BOOST_ERROR_CODE_HEADER_ONLY
+DEFINES += ASIO_STANDALONE
 rpi {
     DEFINES+=RASPBERRY_PI
     QMAKE_MAKEFILE = "Makefile.rpi"

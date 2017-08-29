@@ -8,6 +8,8 @@ CONFIG += c++11
 PRECOMPILED_HEADER = ../../src/stdafx.h
 CONFIG *= precompile_header
 
+DEFINES += BOOST_ERROR_CODE_HEADER_ONLY
+DEFINES += ASIO_STANDALONE
 rpi {
     DEFINES+=RASPBERRY_PI
     QMAKE_MAKEFILE = "Makefile.rpi"
@@ -41,6 +43,7 @@ QMAKE_CFLAGS += -Wno-unused-variable -Wno-unused-parameter
 QMAKE_LFLAGS += -rdynamic
 
 
+INCLUDEPATH += =/usr/local/include
 INCLUDEPATH += ../../include
 INCLUDEPATH += ../../src
 

@@ -12,10 +12,6 @@
 #include <unordered_map>
 #include <future>
 
-//#include <boost/asio.hpp>
-#include <boost/noncopyable.hpp>
-//#include <boost/thread.hpp>
-
 #include "_qmath.h"
 #include "QBase.h"
 
@@ -31,7 +27,7 @@ namespace std
     }
 }
 
-//extern boost::asio::io_service s_async_io_service;
+//extern asio::io_service s_async_io_service;
 
 namespace silk
 {

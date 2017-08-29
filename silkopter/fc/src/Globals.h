@@ -17,7 +17,7 @@ namespace std
 }
 
 
-//extern boost::asio::io_service s_async_io_service;
+//extern asio::io_service s_async_io_service;
 
 namespace silk
 {

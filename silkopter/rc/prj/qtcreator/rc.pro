@@ -14,11 +14,13 @@ INSTALLS = target
 CONFIG -= qt
 CONFIG += c++11
 
+INCLUDEPATH += =/usr/local/include
 INCLUDEPATH += ../../src
 INCLUDEPATH += ../../def
 INCLUDEPATH += ../../../../qbase/include
 INCLUDEPATH += ../../../../qmath/include
 INCLUDEPATH += ../../../../def_lang/include
+INCLUDEPATH += ../../../../asio/include
 INCLUDEPATH += ../../../libs
 INCLUDEPATH += ../../../libs/common/comms/def
 
@@ -31,6 +33,8 @@ CONFIG *= precompile_header
 
 ROOT_LIBS_PATH = ../../../..
 
+DEFINES += BOOST_ERROR_CODE_HEADER_ONLY
+DEFINES += ASIO_STANDALONE
 rpi {
     DEFINES+=RASPBERRY_PI
     QMAKE_MAKEFILE = "Makefile.rpi"
@@ -53,8 +57,8 @@ rpi {
     }
 }
 
-LIBS += -lboost_system -lboost_thread
-LIBS += -lfftw3 -lpcap -lz -lpthread
+#LIBS += -lboost_system -lboost_thread
+LIBS += -lpcap -lz -lpthread
 LIBS += -L$${ROOT_LIBS_PATH}/qmath/lib/$${DEST_FOLDER} -lqmath
 LIBS += -L$${ROOT_LIBS_PATH}/qbase/lib/$${DEST_FOLDER} -lqbase
 LIBS += -L$${ROOT_LIBS_PATH}/def_lang/lib/$${DEST_FOLDER} -ldef_lang

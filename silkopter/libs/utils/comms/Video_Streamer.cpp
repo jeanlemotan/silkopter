@@ -781,7 +781,7 @@ bool Video_Streamer::init()
         {
             return false;
         }
-        m_thread = boost::thread([this]() { tx_thread_proc(); });
+        m_thread = std::thread([this]() { tx_thread_proc(); });
     }
     else
     {
@@ -794,7 +794,7 @@ bool Video_Streamer::init()
             }
         }
 
-        m_thread = boost::thread([this]() { rx_thread_proc(); });
+        m_thread = std::thread([this]() { rx_thread_proc(); });
     }
 
 #if defined RASPBERRY_PI

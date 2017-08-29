@@ -231,7 +231,7 @@ ts::Result<void> Raspicam::init()
         return ts::success;
     }
 
-    m_recording_data.thread = boost::thread([this]()
+    m_recording_data.thread = std::thread([this]()
     {
         while (!m_recording_data.should_stop)
         {

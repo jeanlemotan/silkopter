@@ -4,8 +4,10 @@
 #include "common/node/ISource.h"
 #include "common/Comm_Data.h"
 #include "common/stream/IVideo.h"
-#include <boost/thread.hpp>
+#include <thread>
 #include <fstream>
+#include <thread>
+#include <atomic>
 
 #include "common/stream/IPWM.h"
 
@@ -101,7 +103,7 @@ private:
         std::mutex data_in_mutex;
         std::vector<uint8_t> data_in;
 
-        boost::thread thread;
+        std::thread thread;
         std::atomic_bool should_stop = {false};
         std::vector<uint8_t> data_out;
         std::ofstream file_sink;

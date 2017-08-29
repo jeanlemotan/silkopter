@@ -4,8 +4,8 @@
 #include "GS_Comms.h"
 #include "utils/Clock.h"
 
-#include <boost/asio.hpp>
-#include <boost/thread.hpp>
+#include <asio.hpp>
+#include <thread>
 
 #include <sys/time.h>
 #include <sys/resource.h>
@@ -17,7 +17,7 @@
 
 size_t s_test = 0;
 bool s_exit = false;
-boost::asio::io_service s_async_io_service;
+asio::io_service s_async_io_service;
 
 struct Memory
 {
@@ -25,14 +25,14 @@ struct Memory
     size_t free_count = 0;
 } s_memory;
 
-namespace boost
-{
-	void throw_exception(std::exception const & e)
-	{
-        QLOGE("boost::exception {}", e.what());
-		throw e;
-    }
-}
+//namespace boost
+//{
+//	void throw_exception(std::exception const & e)
+//	{
+//        QLOGE("boost::exception {}", e.what());
+//		throw e;
+//    }
+//}
 
 namespace silk
 {
@@ -134,8 +134,8 @@ int main(int argc, char const* argv[])
 
     QLOGI("Creating io_service thread");
 
-    boost::shared_ptr<boost::asio::io_service::work> async_work(new boost::asio::io_service::work(s_async_io_service));
-    auto async_thread = boost::thread([]() { s_async_io_service.run(); });
+    std::unique_ptr<asio::io_service::work> async_work(new asio::io_service::work(s_async_io_service));
+    auto async_thread = std::thread([]() { s_async_io_service.run(); });
 
     try
     {

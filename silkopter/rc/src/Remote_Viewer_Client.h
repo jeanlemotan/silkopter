@@ -1,8 +1,8 @@
 #pragma once
 
 #include <memory>
-#include <boost/asio.hpp>
-#include <boost/thread.hpp>
+#include <asio.hpp>
+#include <thread>
 #include "common/Comm_Data.h"
 #include "common/stream/IMultirotor_State.h"
 #include "utils/comms/Channel.h"
@@ -28,12 +28,12 @@ public:
 private:
     void start_connect();
 
-    boost::asio::io_service m_io_service;
-    std::unique_ptr<boost::asio::io_service::work> m_io_service_work;
-    std::unique_ptr<boost::asio::ip::tcp::socket> m_socket;
-    boost::thread m_io_service_thread;
+    asio::io_service m_io_service;
+    std::unique_ptr<asio::io_service::work> m_io_service_work;
+    std::unique_ptr<asio::ip::tcp::socket> m_socket;
+    std::thread m_io_service_thread;
 
-    typedef util::comms::ASIO_Socket_Adapter<boost::asio::ip::tcp::socket> Socket_Adapter;
+    typedef util::comms::ASIO_Socket_Adapter<asio::ip::tcp::socket> Socket_Adapter;
     Socket_Adapter m_socket_adapter;
     util::comms::Channel<viewer::Packet_Type, Socket_Adapter> m_channel;
 

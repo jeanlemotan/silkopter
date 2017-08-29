@@ -1,8 +1,8 @@
 #pragma once
 
 #include <memory>
-#include <boost/asio.hpp>
-#include <boost/thread.hpp>
+#include <asio.hpp>
+#include <thread>
 #include "common/stream/IMultirotor_State.h"
 
 
@@ -27,12 +27,12 @@ public:
 private:
     void start_accept();
 
-    boost::asio::io_service m_io_service;
-    std::unique_ptr<boost::asio::io_service::work> m_io_service_work;
-    boost::asio::ip::tcp::endpoint m_endpoint;
-    boost::asio::ip::tcp::socket m_socket;
-    boost::asio::ip::tcp::acceptor m_acceptor;
-    boost::thread m_io_service_thread;
+    asio::io_service m_io_service;
+    std::unique_ptr<asio::io_service::work> m_io_service_work;
+    asio::ip::tcp::endpoint m_endpoint;
+    asio::ip::tcp::socket m_socket;
+    asio::ip::tcp::acceptor m_acceptor;
+    std::thread m_io_service_thread;
 
     std::vector<std::unique_ptr<Remote_Viewer>> m_viewers;
 };

@@ -2,7 +2,7 @@
 
 #include <memory>
 #include "common/Comm_Data.h"
-#include <boost/asio.hpp>
+#include <asio.hpp>
 #include "common/stream/IMultirotor_State.h"
 #include "utils/comms/Channel.h"
 #include "utils/comms/ASIO_Socket_Adapter.h"
@@ -19,7 +19,7 @@ public:
     ~Remote_Viewer();
 
 protected:
-    Remote_Viewer(boost::asio::ip::tcp::socket socket, bool master);
+    Remote_Viewer(asio::ip::tcp::socket socket, bool master);
 
     void start();
     bool is_alive() const;
@@ -30,10 +30,10 @@ protected:
     void process();
 
 private:
-    boost::asio::ip::tcp::socket m_socket;
+    asio::ip::tcp::socket m_socket;
     bool m_is_master;
 
-    typedef util::comms::ASIO_Socket_Adapter<boost::asio::ip::tcp::socket> Socket_Adapter;
+    typedef util::comms::ASIO_Socket_Adapter<asio::ip::tcp::socket> Socket_Adapter;
     Socket_Adapter m_socket_adapter;
     util::comms::Channel<viewer::Packet_Type, Socket_Adapter> m_channel;
 

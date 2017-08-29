@@ -5,7 +5,7 @@
 #include <memory>
 #include <mutex>
 #include <atomic>
-#include <boost/thread.hpp>
+#include <thread>
 #include "utils/Clock.h"
 #include "utils/hw/ISPI.h"
 #include "utils/Queue.h"
@@ -73,9 +73,9 @@ private:
     //size_t m_desired_rate = 0;
     //Clock::duration m_desired_duration;
 
-    boost::thread m_hw_thread;
-    boost::thread m_pk_tx_thread;
-    boost::thread m_pk_rx_thread;
+    std::thread m_hw_thread;
+    std::thread m_pk_tx_thread;
+    std::thread m_pk_rx_thread;
 
     std::atomic_bool m_exit = { false };
     std::atomic_int_fast8_t m_last_dBm = { 0 };

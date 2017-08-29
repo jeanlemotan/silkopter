@@ -5,7 +5,9 @@ CONFIG -= qt
 CONFIG += c++11
 INCLUDEPATH += ../../include
 INCLUDEPATH += ../../../qbase/include
+INCLUDEPATH += ../../../asio/include
 INCLUDEPATH += /usr/include/lua5.1
+INCLUDEPATH += =/usr/local/include
 
 
 #QMAKE_CXXFLAGS_RELEASE += -g
@@ -15,7 +17,8 @@ INCLUDEPATH += /usr/include/lua5.1
 QMAKE_CXXFLAGS += -Wno-unused-variable
 QMAKE_CFLAGS += -Wno-unused-variable
 
-
+DEFINES += BOOST_ERROR_CODE_HEADER_ONLY
+DEFINES += ASIO_STANDALONE
 rpi {
     DEFINES+=RASPBERRY_PI
     QMAKE_MAKEFILE = "Makefile.rpi"

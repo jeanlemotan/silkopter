@@ -132,19 +132,19 @@ bool RC_Phy::init(hw::ISPI& spi, uint8_t sdn_gpio)
     QLOGI("TX power: {}dBm", m_hw->chip.get_tx_power_dBm());
 #endif
 
-//    m_hw_thread = boost::thread([this]() { master_thread_proc(); });
+//    m_hw_thread = std::thread([this]() { master_thread_proc(); });
 
     if (m_is_master)
     {
-        m_hw_thread = boost::thread([this]() { master_thread_proc(); });
+        m_hw_thread = std::thread([this]() { master_thread_proc(); });
     }
     else
     {
-        m_hw_thread = boost::thread([this]() { slave_thread_proc(); });
+        m_hw_thread = std::thread([this]() { slave_thread_proc(); });
     }
 
-    m_pk_tx_thread = boost::thread([this]() { packet_tx_thread_proc(); });
-    m_pk_rx_thread = boost::thread([this]() { packet_rx_thread_proc(); });
+    m_pk_tx_thread = std::thread([this]() { packet_tx_thread_proc(); });
+    m_pk_rx_thread = std::thread([this]() { packet_rx_thread_proc(); });
 
     return true;
 }

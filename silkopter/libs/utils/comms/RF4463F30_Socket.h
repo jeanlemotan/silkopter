@@ -4,7 +4,7 @@
 #include <vector>
 #include <string>
 #include <chrono>
-#include <boost/thread.hpp>
+#include <thread>
 #include "utils/Clock.h"
 
 namespace util
@@ -41,7 +41,7 @@ private:
     uint32_t m_speed = 0;
     bool m_exit = false;
     bool m_is_master = false;
-    boost::thread m_thread;
+    std::thread m_thread;
     Clock::time_point m_last_tx_tp = Clock::now();
     Clock::time_point m_last_rx_tp = Clock::now();
     uint8_t m_id = 0;

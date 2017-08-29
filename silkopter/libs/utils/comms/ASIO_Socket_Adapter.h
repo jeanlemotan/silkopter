@@ -3,7 +3,8 @@
 #include <vector>
 #include <deque>
 #include <mutex>
-#include <boost/bind.hpp>
+#include <functional>
+#include <asio.hpp>
 
 namespace util
 {
@@ -63,10 +64,10 @@ public:
                 std::copy(m_tx_pending_buffer.begin(), m_tx_pending_buffer.begin() + mtu_size, m_tx_crt_buffer.begin());
 
                 m_is_sending = true;
-                m_socket->async_write_some(boost::asio::buffer(m_tx_crt_buffer),
-                                          boost::bind(&ASIO_Socket_Adapter<Socket_t>::handle_send, this,
-                                                      boost::asio::placeholders::error,
-                                                      boost::asio::placeholders::bytes_transferred));
+                m_socket->async_write_some(asio::buffer(m_tx_crt_buffer),
+                                          std::bind(&ASIO_Socket_Adapter<Socket_t>::handle_send, this,
+                                                      std::placeholders::_1,
+                                                      std::placeholders::_2));
             }
         }
     }
@@ -79,13 +80,13 @@ public:
 private:
     void start()
     {
-        m_socket->async_read_some(boost::asio::buffer(m_rx_temp_buffer.data(), m_rx_temp_buffer.size()),
-                                 boost::bind(&ASIO_Socket_Adapter<Socket_t>::handle_receive, this,
-                                             boost::asio::placeholders::error,
-                                             boost::asio::placeholders::bytes_transferred));
+        m_socket->async_read_some(asio::buffer(m_rx_temp_buffer.data(), m_rx_temp_buffer.size()),
+                                 std::bind(&ASIO_Socket_Adapter<Socket_t>::handle_receive, this,
+                                             std::placeholders::_1,
+                                             std::placeholders::_2));
     }
 
-    void handle_send(const boost::system::error_code& error, std::size_t bytes_transferred)
+    void handle_send(const asio::error_code& error, std::size_t bytes_transferred)
     {
         if (error)
         {
@@ -114,10 +115,10 @@ private:
                 if (m_socket)
                 {
                     m_is_sending = true;
-                    m_socket->async_write_some(boost::asio::buffer(m_tx_crt_buffer),
-                                               boost::bind(&ASIO_Socket_Adapter<Socket_t>::handle_send, this,
-                                                           boost::asio::placeholders::error,
-                                                           boost::asio::placeholders::bytes_transferred));
+                    m_socket->async_write_some(asio::buffer(m_tx_crt_buffer),
+                                               std::bind(&ASIO_Socket_Adapter<Socket_t>::handle_send, this,
+                                                           std::placeholders::_1,
+                                                           std::placeholders::_2));
                 }
             }
             else
@@ -127,7 +128,7 @@ private:
         }
     }
 
-    void handle_receive(const boost::system::error_code& error, std::size_t bytes_transferred)
+    void handle_receive(const asio::error_code& error, std::size_t bytes_transferred)
     {
         if (error)
         {

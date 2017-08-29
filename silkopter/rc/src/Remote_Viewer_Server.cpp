@@ -10,12 +10,12 @@ const uint16_t k_port = 3333;
 
 Remote_Viewer_Server::Remote_Viewer_Server()
     : m_io_service()
-    , m_io_service_work(new boost::asio::io_service::work(m_io_service))
-    , m_endpoint(boost::asio::ip::tcp::v4(), k_port)
+    , m_io_service_work(new asio::io_service::work(m_io_service))
+    , m_endpoint(asio::ip::tcp::v4(), k_port)
     , m_socket(m_io_service)
     , m_acceptor(m_io_service, m_endpoint)
 {
-    m_io_service_thread = boost::thread([this]()
+    m_io_service_thread = std::thread([this]()
     {
        m_io_service.run();
     });
@@ -63,7 +63,7 @@ void Remote_Viewer_Server::send_telemetry(stream::IMultirotor_Commands::Value co
 
 void Remote_Viewer_Server::start_accept()
 {
-    m_acceptor.async_accept(m_socket, [this](boost::system::error_code ec)
+    m_acceptor.async_accept(m_socket, [this](asio::error_code ec)
     {
         if (!ec)
         {
