@@ -394,7 +394,7 @@ void RC_Phy::slave_thread_proc()
             while (!m_exit)
             {
                 spin++;
-                Chip::RX_Result result = m_hw->chip.rx(get_mtu() + sizeof(Master_Header), std::chrono::seconds(1), std::chrono::milliseconds(20));
+                Chip::RX_Result result = m_hw->chip.rx(get_mtu() + sizeof(Master_Header), std::chrono::seconds(1), std::chrono::milliseconds(1));
                 if (result == Chip::RX_Result::OK)
                 {
                     uint8_t* rx_data = m_hw->chip.get_rx_fifo_payload_ptr();
