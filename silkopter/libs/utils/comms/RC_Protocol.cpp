@@ -373,9 +373,12 @@ bool RC_Protocol::compute_tx_data(RC_Phy::Buffer& buffer, bool& more_data)
 
 void RC_Protocol::process_rx_data(util::comms::RC_Phy::RX_Data const& rx_data, RC_Phy::Buffer& buffer)
 {
-    QASSERT(buffer.size() >= sizeof(Header));
+    if (buffer.size() < sizeof(Header))
+    {
+        QLOGE("Invalid packet size (< header size)");
+        return;
+    }
     Header& header = *reinterpret_cast<Header*>(buffer.data());
-    //uint8_t const* payload_ptr = buffer.data() + sizeof(Header);
 
     uint16_t crc = header.crc;
     header.crc = 0;
