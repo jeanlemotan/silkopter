@@ -312,7 +312,7 @@ void Video_Streamer::prepare_radiotap_header(size_t rate_hz)
                     | (1 << IEEE80211_RADIOTAP_TX_FLAGS)
 //                    | (1 << IEEE80211_RADIOTAP_RTS_RETRIES)
                     | (1 << IEEE80211_RADIOTAP_DATA_RETRIES)
-                    | (1 << IEEE80211_RADIOTAP_CHANNEL)
+//                    | (1 << IEEE80211_RADIOTAP_CHANNEL)
 //                    | (1 << IEEE80211_RADIOTAP_MCS)
                     ;
 
@@ -566,6 +566,8 @@ bool Video_Streamer::process_rx_packet(PCap& pcap)
 
 bool Video_Streamer::prepare_pcap(std::string const& interface, PCap& pcap)
 {
+    QLOGI("Opening interface {} in monitor mode", interface);
+
     pcap.pcap = pcap_create(interface.c_str(), pcap.error_buffer);
     if (pcap.pcap == nullptr)
     {
