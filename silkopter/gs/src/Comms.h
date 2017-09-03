@@ -41,7 +41,7 @@
 
 #include "def_lang/IStruct_Value.h"
 
-#include <boost/asio.hpp>
+#include <asio.hpp>
 
 namespace silk
 {
@@ -77,7 +77,7 @@ public:
 
     ts::Type_System& get_type_system();
 
-    auto start_udp(boost::asio::ip::address const& address, uint16_t send_port, uint16_t receive_port) -> bool;
+    auto start_udp(asio::ip::address const& address, uint16_t send_port, uint16_t receive_port) -> bool;
 
     void disconnect();
     auto is_connected() const -> bool;

@@ -131,7 +131,7 @@ void GS::set_remote_address(std::string const& address)
     {
         try
         {
-            boost::asio::ip::address ip_address = boost::asio::ip::address::from_string(address);
+            asio::ip::address ip_address = asio::ip::address::from_string(address);
             m_comms.start_udp(ip_address, 8006, 8005);
 
             m_remote_address = address;
@@ -157,7 +157,7 @@ void GS::process()
     }
 //    if (!m_comms.is_connected() && !m_remote_address.empty())
 //    {
-//        m_comms.start_udp(boost::asio::ip::address::from_string(m_remote_address), 8001, 8000);
+//        m_comms.start_udp(asio::ip::address::from_string(m_remote_address), 8001, 8000);
 //        //m_comms.start_rfmon("wlp0s20u1u4", 3);
 //    }
 

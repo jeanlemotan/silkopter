@@ -32,6 +32,8 @@ INCLUDEPATH += ../../../../autojsoncxx/rapidjson/include
 INCLUDEPATH += ../../../../eigen
 INCLUDEPATH += ../../../brain/autogen
 INCLUDEPATH += ../../../libs/common/comms/def
+INCLUDEPATH += ../../../../asio/include
+
 
 QMAKE_CXXFLAGS += -Wno-unused-variable -Wno-unused-parameter -B$HOME/dev/bin/gold
 QMAKE_CFLAGS += -Wno-unused-variable -Wno-unused-parameter -B$HOME/dev/bin/gold
@@ -40,6 +42,9 @@ PRECOMPILED_HEADER = ../../src/stdafx.h
 CONFIG *= precompile_header
 
 ROOT_LIBS_PATH = ../../../..
+
+#DEFINES += BOOST_ERROR_CODE_HEADER_ONLY
+DEFINES += ASIO_STANDALONE
 
 rpi {
     DEFINES+=RASPBERRY_PI

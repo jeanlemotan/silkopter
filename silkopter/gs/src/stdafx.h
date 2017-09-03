@@ -11,9 +11,7 @@
 #include <deque>
 #include <unordered_map>
 
-#include <boost/asio.hpp>
-#include <boost/noncopyable.hpp>
-#include <boost/thread.hpp>
+#include <asio.hpp>
 
 #include <QtCore>
 #include <QtWidgets/QMessageBox>
@@ -61,6 +59,9 @@ extern "C"
 #include "util/Signals.h"
 #include "q.h"
 
+#include <asio.hpp>
+#include <boost/thread.hpp>
+
 #include "def_lang/Type_System.h"
 #include "def_lang/IVector_Value.h"
 #include "def_lang/IVector_Type.h"
@@ -94,7 +95,7 @@ namespace std
     }
 }
 
-extern boost::asio::io_service s_async_io_service;
+extern asio::io_service s_async_io_service;
 
 namespace silk
 {

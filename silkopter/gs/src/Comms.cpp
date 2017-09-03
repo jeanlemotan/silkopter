@@ -20,7 +20,6 @@
 
 
 using namespace silk;
-//using namespace boost::asio;
 
 constexpr uint8_t SETUP_CHANNEL = 10;
 constexpr uint8_t TELEMETRY_CHANNEL = 11;
@@ -92,7 +91,7 @@ ts::Type_System& Comms::get_type_system()
 }
 
 
-auto Comms::start_udp(boost::asio::ip::address const& address, uint16_t send_port, uint16_t receive_port) -> bool
+auto Comms::start_udp(asio::ip::address const& address, uint16_t send_port, uint16_t receive_port) -> bool
 {
     try
     {
