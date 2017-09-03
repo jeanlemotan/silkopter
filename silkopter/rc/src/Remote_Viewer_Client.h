@@ -33,12 +33,13 @@ private:
     std::unique_ptr<asio::ip::tcp::socket> m_socket;
     std::thread m_io_service_thread;
 
+    mutable std::recursive_mutex m_socket_mutex;
     typedef util::comms::ASIO_Socket_Adapter<asio::ip::tcp::socket> Socket_Adapter;
     Socket_Adapter m_socket_adapter;
     util::comms::Channel<viewer::Packet_Type, Socket_Adapter> m_channel;
 
     Clock::time_point m_last_connection_attempt_tp = Clock::now();
-    bool m_is_connected = false;
+    std::atomic_bool m_is_connected = { false };
 
 
     std::vector<uint8_t> m_serialization_buffer;
