@@ -36,6 +36,9 @@ struct Memory
 
 namespace silk
 {
+
+std::string s_program_path;
+
 void execute_async_call(std::function<void()> f)
 {
     s_async_io_service.post(f);
@@ -105,6 +108,15 @@ int main(int argc, char const* argv[])
     std::set_new_handler(out_of_memory_handler);
 
     std::srand(std::time(0));
+
+    silk::s_program_path = argv[0];
+    size_t off = silk::s_program_path.find_last_of('/');
+    if (off != std::string::npos)
+    {
+        silk::s_program_path = silk::s_program_path.substr(0, off);
+    }
+    QLOGI("Program path: {}.", silk::s_program_path);
+
 
     q::logging::add_logger(q::logging::Logger_uptr(new q::logging::Console_Logger()));
     q::logging::set_decorations(q::logging::Decorations(q::logging::Decoration::TIMESTAMP, q::logging::Decoration::LEVEL, q::logging::Decoration::TOPIC));

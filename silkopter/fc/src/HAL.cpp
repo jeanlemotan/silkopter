@@ -151,7 +151,9 @@ static auto shutdown_bcm() -> bool
 namespace silk
 {
 
-static const std::string k_settings_path("settings.json");
+static const std::string k_settings_filename("settings.json");
+extern std::string s_program_path;
+
 
 //wrapper to keep all nodes in the same container
 class INode_Wrapper
@@ -225,7 +227,8 @@ void HAL::save_settings()
 
         std::string json = ts::sz::to_json(sz_value, true);
 
-        std::ofstream fs(k_settings_path);
+        std::string settings_path = s_program_path + "/" + k_settings_filename;
+        std::ofstream fs(settings_path);
         if (fs.is_open())
         {
             fs.write(json.data(), json.size());
@@ -233,7 +236,7 @@ void HAL::save_settings()
         }
         else
         {
-            QLOGE("Cannot open '{}' to save settings.", k_settings_path);
+            QLOGE("Cannot open '{}' to save settings.", settings_path);
         }
     }));
 }
@@ -698,12 +701,13 @@ auto HAL::init(RC_Comms& rc_comms, GS_Comms& gs_comms) -> bool
 
     std::string data;
 
+    std::string settings_path = s_program_path + "/" + k_settings_filename;
     {
         //read the data
-        std::ifstream fs(k_settings_path, std::ifstream::in | std::ifstream::binary);
+        std::ifstream fs(settings_path, std::ifstream::in | std::ifstream::binary);
         if (!fs.is_open())
         {
-            QLOGW("Failed to load '{}'", k_settings_path);
+            QLOGW("Failed to load '{}'", settings_path);
             generate_settings_file();
             return false;
         }
@@ -719,7 +723,7 @@ auto HAL::init(RC_Comms& rc_comms, GS_Comms& gs_comms) -> bool
     ts::Result<ts::sz::Value> json_result = ts::sz::from_json(data);
     if (json_result != ts::success)
     {
-        QLOGE("Failed to load '{}': {}", k_settings_path, json_result.error().what());
+        QLOGE("Failed to load '{}': {}", settings_path, json_result.error().what());
         return false;
     }
 
