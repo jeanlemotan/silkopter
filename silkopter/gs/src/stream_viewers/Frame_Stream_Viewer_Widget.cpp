@@ -34,9 +34,9 @@ void Frame_Stream_Viewer_Widget::init(silk::Comms& comms, std::string const& str
     Numeric_Viewer_Widget* widget = new Numeric_Viewer_Widget(this);
     widget->init("x", m_stream_rate);
 
-    widget->add_graph("x", "Vector", Qt::red);
-    widget->add_graph("y", "Vector", Qt::green);
-    widget->add_graph("z", "Vector", Qt::blue);
+    widget->add_graph("x", "°/s", Qt::red);
+    widget->add_graph("y", "°/s", Qt::green);
+    widget->add_graph("z", "°/s", Qt::blue);
 
     setLayout(new QVBoxLayout());
     layout()->setMargin(0);
@@ -48,25 +48,34 @@ void Frame_Stream_Viewer_Widget::init(silk::Comms& comms, std::string const& str
         {
             if (auto const* stream = dynamic_cast<silk::Comms::Telemetry_Stream<silk::stream::IFrame> const*>(&_stream))
             {
+                math::vec3f euler;
                 for (auto const& sample: stream->samples)
                 {
-                    float values[3] = { sample.value.x, sample.value.y, sample.value.z };
+                    sample.value.get_as_euler_zxy(euler);
+                    euler = math::degrees(euler);
+                    float values[3] = { euler.x, euler.y, euler.z };
                     widget->add_samples(values, sample.is_healthy);
                 }
             }
             else if (auto const* stream = dynamic_cast<silk::Comms::Telemetry_Stream<silk::stream::IGimbal_Frame> const*>(&_stream))
             {
+                math::vec3f euler;
                 for (auto const& sample: stream->samples)
                 {
-                    float values[3] = { sample.value.x, sample.value.y, sample.value.z };
+                    sample.value.get_as_euler_zxy(euler);
+                    euler = math::degrees(euler);
+                    float values[3] = { euler.x, euler.y, euler.z };
                     widget->add_samples(values, sample.is_healthy);
                 }
             }
             if (auto const* stream = dynamic_cast<silk::Comms::Telemetry_Stream<silk::stream::IENU_Frame> const*>(&_stream))
             {
+                math::vec3f euler;
                 for (auto const& sample: stream->samples)
                 {
-                    float values[3] = { sample.value.x, sample.value.y, sample.value.z };
+                    sample.value.get_as_euler_zxy(euler);
+                    euler = math::degrees(euler);
+                    float values[3] = { euler.x, euler.y, euler.z };
                     widget->add_samples(values, sample.is_healthy);
                 }
             }
