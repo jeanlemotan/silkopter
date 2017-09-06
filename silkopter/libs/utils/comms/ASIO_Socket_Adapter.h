@@ -35,6 +35,11 @@ public:
         m_socket = nullptr;
     }
 
+    bool is_connected() const
+    {
+        return m_socket && m_socket->is_open();
+    }
+
     template<class Container>
     void read(Container& dst)
     {

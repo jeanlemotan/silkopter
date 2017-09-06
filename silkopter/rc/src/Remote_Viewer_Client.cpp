@@ -35,7 +35,7 @@ Remote_Viewer_Client::~Remote_Viewer_Client()
 bool Remote_Viewer_Client::is_connected() const
 {
     std::lock_guard<std::recursive_mutex> lg(m_socket_mutex);
-    return m_socket && m_socket->is_open() && m_is_connected;
+    return m_socket_adapter.is_connected();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -105,14 +105,12 @@ void Remote_Viewer_Client::start_connect()
                 {
                     QLOGI("Remote Viewer connected");
                     m_socket_adapter.start(*m_socket);
-                    m_is_connected = true;
                 }
                 else
                 {
                     QLOGI("Remote Viewer failed to connect. Retrying");
                     if (m_socket)
                     {
-                        m_is_connected = true;
                         m_socket_adapter.stop();
                         m_socket.reset();
                     }
