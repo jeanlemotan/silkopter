@@ -172,10 +172,12 @@ template<> inline auto deserialize(Buffer_t const& buffer, silk::stream::IMultir
         return false;
     }
 
-    value.sticks.yaw = v1 / 255.f;
-    value.sticks.pitch = v2 / 255.f;
-    value.sticks.roll = v3 / 255.f;
-    value.sticks.throttle = v4 / 255.f;
+    //after rounding, 0.5 is preserved.
+    //without rounding, 0.5 * 255 = 127.5 which is stored as 127. When deserializing, 127/255 = 0.498, which rounded to 2 decimals == 0.5
+    value.sticks.yaw = math::round(v1 / 255.f, 2);
+    value.sticks.pitch = math::round(v2 / 255.f, 2);
+    value.sticks.roll = math::round(v3 / 255.f, 2);
+    value.sticks.throttle = math::round(v4 / 255.f, 2);
 
     //vertical mode
     if (!deserialize(buffer, value.vertical_mode, off))
