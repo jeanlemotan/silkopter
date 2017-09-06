@@ -337,6 +337,13 @@ void Fly_Menu_Page::process_mode_fly(Input& input)
             }
         }
 
+        if (input.get_panic_disarm_switch().was_released())
+        {
+            QLOGI("PANIC DISARM!!!");
+            set_mode(input, stream::IMultirotor_Commands::Mode::IDLE);
+            return;
+        }
+
         m_multirotor_commands.sticks.yaw = sticks.get_yaw();
         m_multirotor_commands.sticks.pitch = sticks.get_pitch();
         m_multirotor_commands.sticks.roll = sticks.get_roll();

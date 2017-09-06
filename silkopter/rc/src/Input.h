@@ -57,8 +57,9 @@ public:
     IButton const& get_horizontal_mode_switch_up() const;
     IButton const& get_horizontal_mode_switch_down() const;
 
-    IButton const& get_return_home_switch() const;
     IButton const& get_mode_switch() const;
+    IButton const& get_return_home_switch() const;
+    IButton const& get_panic_disarm_switch() const;
 
     void process();
 
