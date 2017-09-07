@@ -237,7 +237,7 @@ void Quad_Multirotor_Motor_Mixer::compute_throttles(Quad_Multirotor_Properties c
 
         //distribute the z torque
         {
-            float mu = math::clamp(z_target_per_motor / (multirotor_properties.get_motor_z_torque() * (mc.clockwise ? 1 : -1)), 0.f, 1.f);
+            float mu = math::clamp(z_target_per_motor / (multirotor_properties.get_motor_z_torque() * (mc.clockwise ? 1 : -1)), -1.f, 1.f);
             thrust += mu * max_thrust_per_motor;
         }
 
@@ -272,6 +272,7 @@ void Quad_Multirotor_Motor_Mixer::compute_throttles(Quad_Multirotor_Properties c
     {
         out->throttle = compute_throttle_from_thrust(max_thrust_per_motor, out->thrust);
     }
+    //QLOGI("THROTTLE: {}%, {}%, {}%, {}%", (int)(m_outputs[0]->throttle * 100.f), (int)(m_outputs[1]->throttle * 100.f), (int)(m_outputs[2]->throttle * 100.f), (int)(m_outputs[3]->throttle * 100.f));
 }
 
 ts::Result<void> Quad_Multirotor_Motor_Mixer::set_input_stream_path(size_t idx, std::string const& path)
