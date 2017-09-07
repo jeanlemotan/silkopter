@@ -141,10 +141,10 @@ template<> inline void serialize(Buffer_t& buffer, silk::stream::IMultirotor_Com
 {
     serialize(buffer, value.mode, off);
 
-    serialize(buffer, static_cast<uint8_t>((math::clamp(value.sticks.yaw, 0.f, 1.f) * 255.f)), off);
-    serialize(buffer, static_cast<uint8_t>((math::clamp(value.sticks.pitch, 0.f, 1.f) * 255.f)), off);
-    serialize(buffer, static_cast<uint8_t>((math::clamp(value.sticks.roll, 0.f, 1.f) * 255.f)), off);
-    serialize(buffer, static_cast<uint8_t>((math::clamp(value.sticks.throttle, 0.f, 1.f) * 255.f)), off);
+    serialize(buffer, static_cast<uint16_t>((math::clamp(value.sticks.yaw, 0.f, 1.f) * 65535.f)), off);
+    serialize(buffer, static_cast<uint16_t>((math::clamp(value.sticks.pitch, 0.f, 1.f) * 65535.f)), off);
+    serialize(buffer, static_cast<uint16_t>((math::clamp(value.sticks.roll, 0.f, 1.f) * 65535.f)), off);
+    serialize(buffer, static_cast<uint16_t>((math::clamp(value.sticks.throttle, 0.f, 1.f) * 65535.f)), off);
 
     serialize(buffer, value.vertical_mode, off);
     serialize(buffer, value.horizontal_mode, off);
@@ -163,21 +163,23 @@ template<> inline auto deserialize(Buffer_t const& buffer, silk::stream::IMultir
     }
 
     //sticks
-    uint8_t v1, v2, v3, v4;
-    if (!deserialize(buffer, v1, off) ||
-            !deserialize(buffer, v2, off) ||
-            !deserialize(buffer, v3, off) ||
-            !deserialize(buffer, v4, off))
     {
-        return false;
-    }
+        uint16_t v1, v2, v3, v4;
+        if (!deserialize(buffer, v1, off) ||
+                !deserialize(buffer, v2, off) ||
+                !deserialize(buffer, v3, off) ||
+                !deserialize(buffer, v4, off))
+        {
+            return false;
+        }
 
-    //after rounding, 0.5 is preserved.
-    //without rounding, 0.5 * 255 = 127.5 which is stored as 127. When deserializing, 127/255 = 0.498, which rounded to 2 decimals == 0.5
-    value.sticks.yaw = math::round(v1 / 255.f, 2);
-    value.sticks.pitch = math::round(v2 / 255.f, 2);
-    value.sticks.roll = math::round(v3 / 255.f, 2);
-    value.sticks.throttle = math::round(v4 / 255.f, 2);
+        //after rounding, 0.5 is preserved.
+        //without rounding, 0.5 * 65535 = 32767.5 which is stored as 32767. When deserializing, 32767/65535 = 0.4999.., which rounded to 4 decimals == 0.5
+        value.sticks.yaw = math::round(v1 / 65535.f, 4);
+        value.sticks.pitch = math::round(v2 / 65535.f, 4);
+        value.sticks.roll = math::round(v3 / 65535.f, 4);
+        value.sticks.throttle = math::round(v4 / 65535.f, 4);
+    }
 
     //vertical mode
     if (!deserialize(buffer, value.vertical_mode, off))
@@ -198,6 +200,7 @@ template<> inline auto deserialize(Buffer_t const& buffer, silk::stream::IMultir
     }
 
     //gimbal pitch
+    uint8_t v1;
     if (!deserialize(buffer, v1, off))
     {
         return false;
