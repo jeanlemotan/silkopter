@@ -85,7 +85,7 @@ extern "C"
 
 ///////////////////////////////////////////////////////////////////
 
-std::chrono::microseconds PIGPIO_PERIOD(5);
+std::chrono::microseconds PIGPIO_PERIOD(2);
 
 static auto initialize_pigpio() -> bool
 {
