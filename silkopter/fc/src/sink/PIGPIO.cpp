@@ -155,7 +155,9 @@ ts::Result<void> PIGPIO::init()
 //            QLOGE("channel {}: max ({}) is bigger than the range ({})", channel.gpio, config.max, config.range);
 //            return false;
 //        }
-        if (std::find(rates.begin(), rates.end(), channel.rate) == rates.end())
+
+        //the available rated differ with the PIGPIO period
+        if (std::find(rates.begin(), rates.end(), channel.rate * period) == rates.end())
         {
             return make_error("channel {}: invalid rate {}. Supported are: {}", channel.gpio, channel.rate, rates);
         }
