@@ -69,28 +69,45 @@ static float scale_value_center(float value, float min, float min_center, float 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-float Sticks_ADS1115::get_stick_value(ADC const& adc, bool apply_deadband, bool center_deadband)
+float Sticks_ADS1115::get_remapped_stick_value(ADC const& adc)
 {
     float value = scale_value_center(adc.value, adc.min, adc.center, adc.center, adc.max);
+    return value;
+}
 
-    if (apply_deadband)
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+float Sticks_ADS1115::get_stick_value(ADC const& adc, bool center_deadband)
+{
+    float value = get_remapped_stick_value(adc);
+
+    float curve = math::max(adc.curve, 0.001f);
+    float deadband = adc.deadband * 0.5f;
+    if (center_deadband)
     {
-        float deadband = adc.deadband * 0.5f;
-        if (center_deadband)
+        value = scale_value_center(value, 0.f, 0.5f - deadband, 0.5f + deadband, 1.f);
+        if (value < 0.5f)
         {
-            value = scale_value_center(value, 0.f, 0.5f - deadband, 0.5f + deadband, 1.f);
+            value = math::pow(1.f - value * 2.f, curve); //apply curve
+            value = 0.5f - value * 0.5f;
+        }
+        if (value > 0.5f)
+        {
+            value = math::pow(value * 2.f - 1.f, curve); //apply curve
+            value = value * 0.5f + 0.5f;
+        }
+    }
+    else
+    {
+        if (value < deadband)
+        {
+            value = 0.f;
         }
         else
         {
-            if (value < deadband)
-            {
-                value = 0.f;
-            }
-            else
-            {
-                value = (value - deadband) / (1.f - deadband); //0 - 1 range
-                value = math::clamp(value, 0.f, 1.f); //just to make sure
-            }
+            value = (value - deadband) / (1.f - deadband); //0 - 1 range
+            value = math::clamp(value, 0.f, 1.f); //just to make sure
+            value = math::pow(value, curve); //apply curve
         }
     }
 
@@ -108,7 +125,7 @@ float Sticks_ADS1115::get_raw_yaw(Raw_Type raw_type) const
     }
     else
     {
-        return get_stick_value(adc, false, false);
+        return get_remapped_stick_value(adc);
     }
 }
 
@@ -116,18 +133,19 @@ float Sticks_ADS1115::get_raw_yaw(Raw_Type raw_type) const
 
 float Sticks_ADS1115::get_yaw() const
 {
-    return get_stick_value(m_adcs[0], true, true);
+    return get_stick_value(m_adcs[0], true);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-void Sticks_ADS1115::set_yaw_calibration(float min, float center, float max, float deadband)
+void Sticks_ADS1115::set_yaw_calibration(float min, float center, float max, float deadband, float curve)
 {
     ADC& adc = m_adcs[0];
     adc.min = min;
     adc.center = center;
     adc.max = max;
     adc.deadband = deadband;
+    adc.curve = curve;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -141,7 +159,7 @@ float Sticks_ADS1115::get_raw_pitch(Raw_Type raw_type) const
     }
     else
     {
-        return get_stick_value(adc, false, false);
+        return get_remapped_stick_value(adc);
     }
 }
 
@@ -149,18 +167,19 @@ float Sticks_ADS1115::get_raw_pitch(Raw_Type raw_type) const
 
 float Sticks_ADS1115::get_pitch() const
 {
-    return get_stick_value(m_adcs[1], true, true);
+    return get_stick_value(m_adcs[1], true);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-void Sticks_ADS1115::set_pitch_calibration(float min, float center, float max, float deadband)
+void Sticks_ADS1115::set_pitch_calibration(float min, float center, float max, float deadband, float curve)
 {
     ADC& adc = m_adcs[1];
     adc.min = min;
     adc.center = center;
     adc.max = max;
     adc.deadband = deadband;
+    adc.curve = curve;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -174,7 +193,7 @@ float Sticks_ADS1115::get_raw_roll(Raw_Type raw_type) const
     }
     else
     {
-        return get_stick_value(adc, false, false);
+        return get_remapped_stick_value(adc);
     }
 }
 
@@ -182,18 +201,19 @@ float Sticks_ADS1115::get_raw_roll(Raw_Type raw_type) const
 
 float Sticks_ADS1115::get_roll() const
 {
-    return get_stick_value(m_adcs[2], true, true);
+    return get_stick_value(m_adcs[2], true);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-void Sticks_ADS1115::set_roll_calibration(float min, float center, float max, float deadband)
+void Sticks_ADS1115::set_roll_calibration(float min, float center, float max, float deadband, float curve)
 {
     ADC& adc = m_adcs[2];
     adc.min = min;
     adc.center = center;
     adc.max = max;
     adc.deadband = deadband;
+    adc.curve = curve;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -221,7 +241,7 @@ float Sticks_ADS1115::get_raw_throttle(Raw_Type raw_type) const
     }
     else
     {
-        return get_stick_value(adc, false, false);
+        return get_remapped_stick_value(adc);
     }
 }
 
@@ -229,18 +249,19 @@ float Sticks_ADS1115::get_raw_throttle(Raw_Type raw_type) const
 
 float Sticks_ADS1115::get_throttle() const
 {
-    return get_stick_value(m_adcs[3], true, m_throttle_deadband_position == Deadband_Position::MIDDLE);
+    return get_stick_value(m_adcs[3], m_throttle_deadband_position == Deadband_Position::MIDDLE);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-void Sticks_ADS1115::set_throttle_calibration(float min, float center, float max, float deadband)
+void Sticks_ADS1115::set_throttle_calibration(float min, float center, float max, float deadband, float curve)
 {
     ADC& adc = m_adcs[3];
     adc.min = min;
     adc.center = center;
     adc.max = max;
     adc.deadband = deadband;
+    adc.curve = curve;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////

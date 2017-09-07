@@ -23,12 +23,14 @@ private:
 
     struct Axis_Data
     {
+        float value = 0.f;
         float raw = 0.f;
         float min = 1.f;
         float max = 0.f;
 
         float center = 0.f;
         float deadband = 0.f; //this one is after min/max transformation - it's relative to the 0.5 center
+        float curve = 1.f;//this one is after deadband
     };
 
     Axis_Data m_yaw;
@@ -47,6 +49,10 @@ private:
         PITCH_DEADBAND,
         ROLL_DEADBAND,
         THROTTLE_DEADBAND,
+        YAW_CURVE,
+        PITCH_CURVE,
+        ROLL_CURVE,
+        THROTTLE_CURVE,
         DONE,
     } m_phase = Phase::CENTER_QUESTION;
 
@@ -54,10 +60,12 @@ private:
     size_t m_sample_count = 0;
 
     void process_deadband(Input& input, Axis_Data& axis);
+    void process_curve(Input& input, Axis_Data& axis);
 
     void next_phase();
     void draw_axis(Adafruit_GFX& display, int16_t y, const char* name, Axis_Data const& axis);
     void draw_axis_deadband(Adafruit_GFX& display, int16_t y, const char* name, Axis_Data const& axis);
+    void draw_axis_curve(Adafruit_GFX& display, int16_t y, const char* name, Axis_Data const& axis);
 };
 
 }

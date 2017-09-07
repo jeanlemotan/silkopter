@@ -48,6 +48,20 @@ T max(T v, T max)
       }
 
 ////////////////////////////////////////////////////////////
+      void Settings::Input::Sticks_Calibration::set_yaw_max(float const& value)
+      {
+        m_yaw_max = value;
+      }
+      void Settings::Input::Sticks_Calibration::set_yaw_max(float&& value)
+      {
+        m_yaw_max = std::move(value);
+      }
+      auto Settings::Input::Sticks_Calibration::get_yaw_max() const -> float const& 
+      {
+        return m_yaw_max;
+      }
+
+////////////////////////////////////////////////////////////
       void Settings::Input::Sticks_Calibration::set_yaw_deadband(float const& value)
       {
         m_yaw_deadband = value;
@@ -62,17 +76,17 @@ T max(T v, T max)
       }
 
 ////////////////////////////////////////////////////////////
-      void Settings::Input::Sticks_Calibration::set_yaw_max(float const& value)
+      void Settings::Input::Sticks_Calibration::set_yaw_curve(float const& value)
       {
-        m_yaw_max = value;
+        m_yaw_curve = value;
       }
-      void Settings::Input::Sticks_Calibration::set_yaw_max(float&& value)
+      void Settings::Input::Sticks_Calibration::set_yaw_curve(float&& value)
       {
-        m_yaw_max = std::move(value);
+        m_yaw_curve = std::move(value);
       }
-      auto Settings::Input::Sticks_Calibration::get_yaw_max() const -> float const& 
+      auto Settings::Input::Sticks_Calibration::get_yaw_curve() const -> float const& 
       {
-        return m_yaw_max;
+        return m_yaw_curve;
       }
 
 ////////////////////////////////////////////////////////////
@@ -104,6 +118,20 @@ T max(T v, T max)
       }
 
 ////////////////////////////////////////////////////////////
+      void Settings::Input::Sticks_Calibration::set_pitch_max(float const& value)
+      {
+        m_pitch_max = value;
+      }
+      void Settings::Input::Sticks_Calibration::set_pitch_max(float&& value)
+      {
+        m_pitch_max = std::move(value);
+      }
+      auto Settings::Input::Sticks_Calibration::get_pitch_max() const -> float const& 
+      {
+        return m_pitch_max;
+      }
+
+////////////////////////////////////////////////////////////
       void Settings::Input::Sticks_Calibration::set_pitch_deadband(float const& value)
       {
         m_pitch_deadband = value;
@@ -118,17 +146,17 @@ T max(T v, T max)
       }
 
 ////////////////////////////////////////////////////////////
-      void Settings::Input::Sticks_Calibration::set_pitch_max(float const& value)
+      void Settings::Input::Sticks_Calibration::set_pitch_curve(float const& value)
       {
-        m_pitch_max = value;
+        m_pitch_curve = value;
       }
-      void Settings::Input::Sticks_Calibration::set_pitch_max(float&& value)
+      void Settings::Input::Sticks_Calibration::set_pitch_curve(float&& value)
       {
-        m_pitch_max = std::move(value);
+        m_pitch_curve = std::move(value);
       }
-      auto Settings::Input::Sticks_Calibration::get_pitch_max() const -> float const& 
+      auto Settings::Input::Sticks_Calibration::get_pitch_curve() const -> float const& 
       {
-        return m_pitch_max;
+        return m_pitch_curve;
       }
 
 ////////////////////////////////////////////////////////////
@@ -160,6 +188,20 @@ T max(T v, T max)
       }
 
 ////////////////////////////////////////////////////////////
+      void Settings::Input::Sticks_Calibration::set_roll_max(float const& value)
+      {
+        m_roll_max = value;
+      }
+      void Settings::Input::Sticks_Calibration::set_roll_max(float&& value)
+      {
+        m_roll_max = std::move(value);
+      }
+      auto Settings::Input::Sticks_Calibration::get_roll_max() const -> float const& 
+      {
+        return m_roll_max;
+      }
+
+////////////////////////////////////////////////////////////
       void Settings::Input::Sticks_Calibration::set_roll_deadband(float const& value)
       {
         m_roll_deadband = value;
@@ -174,17 +216,17 @@ T max(T v, T max)
       }
 
 ////////////////////////////////////////////////////////////
-      void Settings::Input::Sticks_Calibration::set_roll_max(float const& value)
+      void Settings::Input::Sticks_Calibration::set_roll_curve(float const& value)
       {
-        m_roll_max = value;
+        m_roll_curve = value;
       }
-      void Settings::Input::Sticks_Calibration::set_roll_max(float&& value)
+      void Settings::Input::Sticks_Calibration::set_roll_curve(float&& value)
       {
-        m_roll_max = std::move(value);
+        m_roll_curve = std::move(value);
       }
-      auto Settings::Input::Sticks_Calibration::get_roll_max() const -> float const& 
+      auto Settings::Input::Sticks_Calibration::get_roll_curve() const -> float const& 
       {
-        return m_roll_max;
+        return m_roll_curve;
       }
 
 ////////////////////////////////////////////////////////////
@@ -216,6 +258,20 @@ T max(T v, T max)
       }
 
 ////////////////////////////////////////////////////////////
+      void Settings::Input::Sticks_Calibration::set_throttle_max(float const& value)
+      {
+        m_throttle_max = value;
+      }
+      void Settings::Input::Sticks_Calibration::set_throttle_max(float&& value)
+      {
+        m_throttle_max = std::move(value);
+      }
+      auto Settings::Input::Sticks_Calibration::get_throttle_max() const -> float const& 
+      {
+        return m_throttle_max;
+      }
+
+////////////////////////////////////////////////////////////
       void Settings::Input::Sticks_Calibration::set_throttle_deadband(float const& value)
       {
         m_throttle_deadband = value;
@@ -230,17 +286,17 @@ T max(T v, T max)
       }
 
 ////////////////////////////////////////////////////////////
-      void Settings::Input::Sticks_Calibration::set_throttle_max(float const& value)
+      void Settings::Input::Sticks_Calibration::set_throttle_curve(float const& value)
       {
-        m_throttle_max = value;
+        m_throttle_curve = value;
       }
-      void Settings::Input::Sticks_Calibration::set_throttle_max(float&& value)
+      void Settings::Input::Sticks_Calibration::set_throttle_curve(float&& value)
       {
-        m_throttle_max = std::move(value);
+        m_throttle_curve = std::move(value);
       }
-      auto Settings::Input::Sticks_Calibration::get_throttle_max() const -> float const& 
+      auto Settings::Input::Sticks_Calibration::get_throttle_curve() const -> float const& 
       {
-        return m_throttle_max;
+        return m_throttle_curve;
       }
 
 ////////////////////////////////////////////////////////////
@@ -986,6 +1042,13 @@ ts::Result<void> deserialize(Settings::Input::Sticks_Calibration& value, ts::sz:
       if (result != ts::success) { return result; }
       value.set_yaw_center(std::move(v));
     }
+    else     if (sz_value.get_object_member_name(i) == "yaw_max")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_yaw_max())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_yaw_max(std::move(v));
+    }
     else     if (sz_value.get_object_member_name(i) == "yaw_deadband")
     {
       std::remove_cv<std::remove_reference<decltype(value.get_yaw_deadband())>::type>::type v;
@@ -993,12 +1056,12 @@ ts::Result<void> deserialize(Settings::Input::Sticks_Calibration& value, ts::sz:
       if (result != ts::success) { return result; }
       value.set_yaw_deadband(std::move(v));
     }
-    else     if (sz_value.get_object_member_name(i) == "yaw_max")
+    else     if (sz_value.get_object_member_name(i) == "yaw_curve")
     {
-      std::remove_cv<std::remove_reference<decltype(value.get_yaw_max())>::type>::type v;
+      std::remove_cv<std::remove_reference<decltype(value.get_yaw_curve())>::type>::type v;
       auto result = deserialize(v, member_sz_value);
       if (result != ts::success) { return result; }
-      value.set_yaw_max(std::move(v));
+      value.set_yaw_curve(std::move(v));
     }
     else     if (sz_value.get_object_member_name(i) == "pitch_min")
     {
@@ -1014,6 +1077,13 @@ ts::Result<void> deserialize(Settings::Input::Sticks_Calibration& value, ts::sz:
       if (result != ts::success) { return result; }
       value.set_pitch_center(std::move(v));
     }
+    else     if (sz_value.get_object_member_name(i) == "pitch_max")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_pitch_max())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_pitch_max(std::move(v));
+    }
     else     if (sz_value.get_object_member_name(i) == "pitch_deadband")
     {
       std::remove_cv<std::remove_reference<decltype(value.get_pitch_deadband())>::type>::type v;
@@ -1021,12 +1091,12 @@ ts::Result<void> deserialize(Settings::Input::Sticks_Calibration& value, ts::sz:
       if (result != ts::success) { return result; }
       value.set_pitch_deadband(std::move(v));
     }
-    else     if (sz_value.get_object_member_name(i) == "pitch_max")
+    else     if (sz_value.get_object_member_name(i) == "pitch_curve")
     {
-      std::remove_cv<std::remove_reference<decltype(value.get_pitch_max())>::type>::type v;
+      std::remove_cv<std::remove_reference<decltype(value.get_pitch_curve())>::type>::type v;
       auto result = deserialize(v, member_sz_value);
       if (result != ts::success) { return result; }
-      value.set_pitch_max(std::move(v));
+      value.set_pitch_curve(std::move(v));
     }
     else     if (sz_value.get_object_member_name(i) == "roll_min")
     {
@@ -1042,6 +1112,13 @@ ts::Result<void> deserialize(Settings::Input::Sticks_Calibration& value, ts::sz:
       if (result != ts::success) { return result; }
       value.set_roll_center(std::move(v));
     }
+    else     if (sz_value.get_object_member_name(i) == "roll_max")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_roll_max())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_roll_max(std::move(v));
+    }
     else     if (sz_value.get_object_member_name(i) == "roll_deadband")
     {
       std::remove_cv<std::remove_reference<decltype(value.get_roll_deadband())>::type>::type v;
@@ -1049,12 +1126,12 @@ ts::Result<void> deserialize(Settings::Input::Sticks_Calibration& value, ts::sz:
       if (result != ts::success) { return result; }
       value.set_roll_deadband(std::move(v));
     }
-    else     if (sz_value.get_object_member_name(i) == "roll_max")
+    else     if (sz_value.get_object_member_name(i) == "roll_curve")
     {
-      std::remove_cv<std::remove_reference<decltype(value.get_roll_max())>::type>::type v;
+      std::remove_cv<std::remove_reference<decltype(value.get_roll_curve())>::type>::type v;
       auto result = deserialize(v, member_sz_value);
       if (result != ts::success) { return result; }
-      value.set_roll_max(std::move(v));
+      value.set_roll_curve(std::move(v));
     }
     else     if (sz_value.get_object_member_name(i) == "throttle_min")
     {
@@ -1070,13 +1147,6 @@ ts::Result<void> deserialize(Settings::Input::Sticks_Calibration& value, ts::sz:
       if (result != ts::success) { return result; }
       value.set_throttle_center(std::move(v));
     }
-    else     if (sz_value.get_object_member_name(i) == "throttle_deadband")
-    {
-      std::remove_cv<std::remove_reference<decltype(value.get_throttle_deadband())>::type>::type v;
-      auto result = deserialize(v, member_sz_value);
-      if (result != ts::success) { return result; }
-      value.set_throttle_deadband(std::move(v));
-    }
     else     if (sz_value.get_object_member_name(i) == "throttle_max")
     {
       std::remove_cv<std::remove_reference<decltype(value.get_throttle_max())>::type>::type v;
@@ -1084,29 +1154,47 @@ ts::Result<void> deserialize(Settings::Input::Sticks_Calibration& value, ts::sz:
       if (result != ts::success) { return result; }
       value.set_throttle_max(std::move(v));
     }
+    else     if (sz_value.get_object_member_name(i) == "throttle_deadband")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_throttle_deadband())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_throttle_deadband(std::move(v));
+    }
+    else     if (sz_value.get_object_member_name(i) == "throttle_curve")
+    {
+      std::remove_cv<std::remove_reference<decltype(value.get_throttle_curve())>::type>::type v;
+      auto result = deserialize(v, member_sz_value);
+      if (result != ts::success) { return result; }
+      value.set_throttle_curve(std::move(v));
+    }
   }
   return ts::success;
 }
 ts::sz::Value serialize(Settings::Input::Sticks_Calibration const& value)
 {
   ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
-  sz_value.reserve_object_members(16);
+  sz_value.reserve_object_members(20);
   sz_value.add_object_member("yaw_min", serialize(value.get_yaw_min()));
   sz_value.add_object_member("yaw_center", serialize(value.get_yaw_center()));
-  sz_value.add_object_member("yaw_deadband", serialize(value.get_yaw_deadband()));
   sz_value.add_object_member("yaw_max", serialize(value.get_yaw_max()));
+  sz_value.add_object_member("yaw_deadband", serialize(value.get_yaw_deadband()));
+  sz_value.add_object_member("yaw_curve", serialize(value.get_yaw_curve()));
   sz_value.add_object_member("pitch_min", serialize(value.get_pitch_min()));
   sz_value.add_object_member("pitch_center", serialize(value.get_pitch_center()));
-  sz_value.add_object_member("pitch_deadband", serialize(value.get_pitch_deadband()));
   sz_value.add_object_member("pitch_max", serialize(value.get_pitch_max()));
+  sz_value.add_object_member("pitch_deadband", serialize(value.get_pitch_deadband()));
+  sz_value.add_object_member("pitch_curve", serialize(value.get_pitch_curve()));
   sz_value.add_object_member("roll_min", serialize(value.get_roll_min()));
   sz_value.add_object_member("roll_center", serialize(value.get_roll_center()));
-  sz_value.add_object_member("roll_deadband", serialize(value.get_roll_deadband()));
   sz_value.add_object_member("roll_max", serialize(value.get_roll_max()));
+  sz_value.add_object_member("roll_deadband", serialize(value.get_roll_deadband()));
+  sz_value.add_object_member("roll_curve", serialize(value.get_roll_curve()));
   sz_value.add_object_member("throttle_min", serialize(value.get_throttle_min()));
   sz_value.add_object_member("throttle_center", serialize(value.get_throttle_center()));
-  sz_value.add_object_member("throttle_deadband", serialize(value.get_throttle_deadband()));
   sz_value.add_object_member("throttle_max", serialize(value.get_throttle_max()));
+  sz_value.add_object_member("throttle_deadband", serialize(value.get_throttle_deadband()));
+  sz_value.add_object_member("throttle_curve", serialize(value.get_throttle_curve()));
   return sz_value;
 }
 ts::Result<void> deserialize(Settings::Input& value, ts::sz::Value const& sz_value)

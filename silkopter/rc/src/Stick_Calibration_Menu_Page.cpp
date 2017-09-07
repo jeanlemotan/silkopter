@@ -34,11 +34,24 @@ void Stick_Calibration_Menu_Page::next_phase()
 void Stick_Calibration_Menu_Page::process_deadband(Input& input, Axis_Data& axis)
 {
     //increments of 1%
-    float delta = (input.get_param_encoder().get_delta() / 100.f) * 1.f;
+    float delta = input.get_param_encoder().get_delta() / 100.f;
 
     if (!math::is_zero(delta, math::epsilon<float>()))
     {
         axis.deadband = math::clamp(axis.deadband + delta, 0.01f, 0.9f);
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+void Stick_Calibration_Menu_Page::process_curve(Input& input, Axis_Data& axis)
+{
+    //increments of 5%
+    float delta = input.get_param_encoder().get_delta() / 20.f;
+
+    if (!math::is_zero(delta, math::epsilon<float>()))
+    {
+        axis.curve = math::clamp(axis.curve + delta, 0.1f, 10.f);
     }
 }
 
@@ -72,28 +85,32 @@ bool Stick_Calibration_Menu_Page::process(Input& input, Menu_System& menu_system
             }
             else
             {
-                input.get_sticks().set_yaw_calibration(m_yaw.min, m_yaw.center, m_yaw.max, m_yaw.deadband);
-                input.get_sticks().set_pitch_calibration(m_pitch.min, m_pitch.center, m_pitch.max, m_pitch.deadband);
-                input.get_sticks().set_roll_calibration(m_roll.min, m_roll.center, m_roll.max, m_roll.deadband);
-                input.get_sticks().set_throttle_calibration(m_throttle.min, m_throttle.center, m_throttle.max, m_throttle.deadband);
+                input.get_sticks().set_yaw_calibration(m_yaw.min, m_yaw.center, m_yaw.max, m_yaw.deadband, m_yaw.curve);
+                input.get_sticks().set_pitch_calibration(m_pitch.min, m_pitch.center, m_pitch.max, m_pitch.deadband, m_pitch.curve);
+                input.get_sticks().set_roll_calibration(m_roll.min, m_roll.center, m_roll.max, m_roll.deadband, m_roll.curve);
+                input.get_sticks().set_throttle_calibration(m_throttle.min, m_throttle.center, m_throttle.max, m_throttle.deadband, m_throttle.curve);
 
                 settings::Settings::Input::Sticks_Calibration& sc = m_hal.get_settings().get_input().get_sticks_calibration();
                 sc.set_yaw_min(m_yaw.min);
                 sc.set_yaw_center(m_yaw.center);
                 sc.set_yaw_max(m_yaw.max);
                 sc.set_yaw_deadband(m_yaw.deadband);
+                sc.set_yaw_curve(m_yaw.curve);
                 sc.set_pitch_min(m_pitch.min);
                 sc.set_pitch_center(m_pitch.center);
                 sc.set_pitch_max(m_pitch.max);
                 sc.set_pitch_deadband(m_pitch.deadband);
+                sc.set_pitch_curve(m_pitch.curve);
                 sc.set_roll_min(m_roll.min);
                 sc.set_roll_center(m_roll.center);
                 sc.set_roll_max(m_roll.max);
                 sc.set_roll_deadband(m_roll.deadband);
+                sc.set_roll_curve(m_roll.curve);
                 sc.set_throttle_min(m_throttle.min);
                 sc.set_throttle_center(m_throttle.center);
                 sc.set_throttle_max(m_throttle.max);
                 sc.set_throttle_deadband(m_throttle.deadband);
+                sc.set_throttle_curve(m_throttle.curve);
 
                 m_hal.save_settings();
 
@@ -109,6 +126,11 @@ bool Stick_Calibration_Menu_Page::process(Input& input, Menu_System& menu_system
     m_pitch.raw = input.get_sticks().get_raw_pitch(ISticks::Raw_Type::WITHOUT_REMAPPING);
     m_roll.raw = input.get_sticks().get_raw_roll(ISticks::Raw_Type::WITHOUT_REMAPPING);
     m_throttle.raw = input.get_sticks().get_raw_throttle(ISticks::Raw_Type::WITHOUT_REMAPPING);
+
+    m_yaw.value = input.get_sticks().get_yaw();
+    m_pitch.value = input.get_sticks().get_pitch();
+    m_roll.value = input.get_sticks().get_roll();
+    m_throttle.value = input.get_sticks().get_throttle();
 
     if (m_phase == Phase::CENTER_MEASUREMENT)
     {
@@ -147,6 +169,22 @@ bool Stick_Calibration_Menu_Page::process(Input& input, Menu_System& menu_system
     else if (m_phase == Phase::THROTTLE_DEADBAND)
     {
         process_deadband(input, m_throttle);
+    }
+    else if (m_phase == Phase::YAW_CURVE)
+    {
+        process_curve(input, m_yaw);
+    }
+    else if (m_phase == Phase::PITCH_CURVE)
+    {
+        process_curve(input, m_pitch);
+    }
+    else if (m_phase == Phase::ROLL_CURVE)
+    {
+        process_curve(input, m_roll);
+    }
+    else if (m_phase == Phase::THROTTLE_CURVE)
+    {
+        process_curve(input, m_throttle);
     }
 
     return true;
@@ -236,6 +274,36 @@ void Stick_Calibration_Menu_Page::draw_axis_deadband(Adafruit_GFX& display, int1
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
+void Stick_Calibration_Menu_Page::draw_axis_curve(Adafruit_GFX& display, int16_t y, const char* name, Axis_Data const& axis)
+{
+    int16_t w = display.width();
+
+    display.setCursor(0, y);
+    display.printf("%s: %.2f", name, axis.curve);
+
+    int16_t start_x = 2;
+    int16_t end_x = 90;
+    int16_t start_y = y + 2;
+    int16_t end_y = 34;
+    int16_t prev_x = 0;
+    int16_t prev_y = 0;
+    for (int16_t i = 0; i < end_x - start_x; i++)
+    {
+        float value = float(i) / (end_x - start_x);
+        float curved_value = math::pow(value, axis.curve);
+        int16_t y = end_y - curved_value * (end_y - start_y);
+        if (i != 0)
+        {
+            display.drawLine(prev_x, prev_y, start_x + i, y, 1);
+        }
+        prev_x = start_x + i;
+        prev_y = y;
+    }
+    display.drawLine(prev_x, prev_y, end_x, start_y, 1);
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
 void Stick_Calibration_Menu_Page::render(Adafruit_GFX& display)
 {
     if (m_phase == Phase::CENTER_QUESTION)
@@ -290,6 +358,22 @@ void Stick_Calibration_Menu_Page::render(Adafruit_GFX& display)
     else if (m_phase == Phase::THROTTLE_DEADBAND)
     {
         draw_axis_deadband(display, 24, "T", m_throttle);
+    }
+    else if (m_phase == Phase::YAW_CURVE)
+    {
+        draw_axis_curve(display, 0, "Y", m_yaw);
+    }
+    else if (m_phase == Phase::PITCH_CURVE)
+    {
+        draw_axis_curve(display, 0, "P", m_pitch);
+    }
+    else if (m_phase == Phase::ROLL_CURVE)
+    {
+        draw_axis_curve(display, 0, "R", m_roll);
+    }
+    else if (m_phase == Phase::THROTTLE_CURVE)
+    {
+        draw_axis_curve(display, 0, "T", m_throttle);
     }
     else if (m_phase == Phase::DONE)
     {

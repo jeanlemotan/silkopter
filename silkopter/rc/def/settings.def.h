@@ -69,13 +69,17 @@ public:
       void set_yaw_center(float&& value);
       auto get_yaw_center() const -> float const&;
 
+      void set_yaw_max(float const& value);
+      void set_yaw_max(float&& value);
+      auto get_yaw_max() const -> float const&;
+
       void set_yaw_deadband(float const& value);
       void set_yaw_deadband(float&& value);
       auto get_yaw_deadband() const -> float const&;
 
-      void set_yaw_max(float const& value);
-      void set_yaw_max(float&& value);
-      auto get_yaw_max() const -> float const&;
+      void set_yaw_curve(float const& value);
+      void set_yaw_curve(float&& value);
+      auto get_yaw_curve() const -> float const&;
 
       void set_pitch_min(float const& value);
       void set_pitch_min(float&& value);
@@ -85,13 +89,17 @@ public:
       void set_pitch_center(float&& value);
       auto get_pitch_center() const -> float const&;
 
+      void set_pitch_max(float const& value);
+      void set_pitch_max(float&& value);
+      auto get_pitch_max() const -> float const&;
+
       void set_pitch_deadband(float const& value);
       void set_pitch_deadband(float&& value);
       auto get_pitch_deadband() const -> float const&;
 
-      void set_pitch_max(float const& value);
-      void set_pitch_max(float&& value);
-      auto get_pitch_max() const -> float const&;
+      void set_pitch_curve(float const& value);
+      void set_pitch_curve(float&& value);
+      auto get_pitch_curve() const -> float const&;
 
       void set_roll_min(float const& value);
       void set_roll_min(float&& value);
@@ -101,13 +109,17 @@ public:
       void set_roll_center(float&& value);
       auto get_roll_center() const -> float const&;
 
+      void set_roll_max(float const& value);
+      void set_roll_max(float&& value);
+      auto get_roll_max() const -> float const&;
+
       void set_roll_deadband(float const& value);
       void set_roll_deadband(float&& value);
       auto get_roll_deadband() const -> float const&;
 
-      void set_roll_max(float const& value);
-      void set_roll_max(float&& value);
-      auto get_roll_max() const -> float const&;
+      void set_roll_curve(float const& value);
+      void set_roll_curve(float&& value);
+      auto get_roll_curve() const -> float const&;
 
       void set_throttle_min(float const& value);
       void set_throttle_min(float&& value);
@@ -117,31 +129,39 @@ public:
       void set_throttle_center(float&& value);
       auto get_throttle_center() const -> float const&;
 
-      void set_throttle_deadband(float const& value);
-      void set_throttle_deadband(float&& value);
-      auto get_throttle_deadband() const -> float const&;
-
       void set_throttle_max(float const& value);
       void set_throttle_max(float&& value);
       auto get_throttle_max() const -> float const&;
 
+      void set_throttle_deadband(float const& value);
+      void set_throttle_deadband(float&& value);
+      auto get_throttle_deadband() const -> float const&;
+
+      void set_throttle_curve(float const& value);
+      void set_throttle_curve(float&& value);
+      auto get_throttle_curve() const -> float const&;
+
     private:
       float m_yaw_min = float{0};
       float m_yaw_center = float{0.500000f};
-      float m_yaw_deadband = float{0};
       float m_yaw_max = float{1.000000f};
+      float m_yaw_deadband = float{0};
+      float m_yaw_curve = float{0};
       float m_pitch_min = float{0};
       float m_pitch_center = float{0.500000f};
-      float m_pitch_deadband = float{0};
       float m_pitch_max = float{1.000000f};
+      float m_pitch_deadband = float{0};
+      float m_pitch_curve = float{0};
       float m_roll_min = float{0};
       float m_roll_center = float{0.500000f};
-      float m_roll_deadband = float{0};
       float m_roll_max = float{1.000000f};
+      float m_roll_deadband = float{0};
+      float m_roll_curve = float{0};
       float m_throttle_min = float{0};
       float m_throttle_center = float{0.500000f};
-      float m_throttle_deadband = float{0};
       float m_throttle_max = float{1.000000f};
+      float m_throttle_deadband = float{0};
+      float m_throttle_curve = float{0};
     };
 
     virtual ~Input() = default;
