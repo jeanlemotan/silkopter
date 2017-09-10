@@ -425,7 +425,11 @@ void RC_Phy::slave_thread_proc()
                 {
                     crc_failed_count++;
                 }
-                else if (result != Chip::RX_Result::TIMEOUT)
+                else if (result == Chip::RX_Result::TIMEOUT)
+                {
+                    std::this_thread::sleep_for(std::chrono::milliseconds(1));
+                }
+                else
                 {
                     QLOGW("RX error: {}", result);
                 }
