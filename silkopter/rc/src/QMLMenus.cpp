@@ -1,20 +1,21 @@
-#include "Menus_QML_Proxy.h"
+#include "QMLMenus.h"
 
+#include <QTimer>
 #include <QQmlEngine>
 #include <QQmlContext>
 
 
-Menus_QML_Proxy::Menus_QML_Proxy(QObject *parent)
+QMLMenus::QMLMenus(QObject *parent)
     : QObject(parent)
 {
 }
 
-void Menus_QML_Proxy::init(QQuickView& view)
+void QMLMenus::init(QQuickView& view)
 {
     m_view = &view;
 }
 
-void Menus_QML_Proxy::pop()
+void QMLMenus::pop()
 {
     QASSERT(m_stack.size() >= 1);
     QASSERT(!m_isLocked);
@@ -27,13 +28,14 @@ void Menus_QML_Proxy::pop()
         }
         else
         {
+            QLOGI("Menu pop: {}", m_stack.back().toString().toUtf8().data());
             m_stack.pop_back();
             QTimer::singleShot(0, this, SLOT(setView()));
         }
     }
 }
 
-void Menus_QML_Proxy::push(const QString& qml)
+void QMLMenus::push(const QString& qml)
 {
     QASSERT(!m_isLocked);
     if (!m_isLocked)
@@ -42,6 +44,7 @@ void Menus_QML_Proxy::push(const QString& qml)
 
 //#ifdef RASPBERRY_PI
         m_stack.push_back(QUrl("qrc:/qml/" + qml));
+        QLOGI("Menu push: {}", m_stack.back().toString().toUtf8().data());
 //#else
         //m_stack.push_back(QUrl("qml/" + qml));
 //#endif
@@ -49,9 +52,10 @@ void Menus_QML_Proxy::push(const QString& qml)
     }
 }
 
-void Menus_QML_Proxy::setView()
+void QMLMenus::setView()
 {
     QASSERT(m_isLocked);
+    QLOGI("Menu set: {}", m_stack.back().toString().toUtf8().data());
     m_view->setSource(m_stack.back());
     m_isLocked = false;
 

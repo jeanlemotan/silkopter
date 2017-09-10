@@ -81,5 +81,7 @@
         <file>icons/nodes/Sink.png</file>
         <file>icons/nodes/Source.png</file>
         <file>icons/nodes/Transformer.png</file>
+        <file>fonts/Play-Regular.ttf</file>
+        <file>fonts/Play-Bold.ttf</file>
     </qresource>
 </RCC>

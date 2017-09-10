@@ -4,6 +4,8 @@
 #
 #-------------------------------------------------
 
+QT       += core quick qml quickcontrols2 positioning
+
 TARGET = rc
 TEMPLATE = app
 
@@ -11,7 +13,7 @@ TARGET = rc
 target.path = rc
 INSTALLS = target
 
-CONFIG -= qt
+#CONFIG -= qt
 CONFIG += c++11
 
 INCLUDEPATH += =/usr/local/include
@@ -46,6 +48,13 @@ rpi {
         DEST_FOLDER = rpi/release
         DEFINES += NDEBUG
     }
+    LIBS += -lmmal_core
+    LIBS += -lmmal_util
+    LIBS += -lmmal_vc_client
+    LIBS += -lvcos
+    LIBS += -lbcm_host
+    LIBS += -lGLESv2
+    LIBS += -lEGL
 } else {
     QMAKE_MAKEFILE = "Makefile"
     CONFIG(debug, debug|release) {
@@ -58,6 +67,7 @@ rpi {
 }
 
 #LIBS += -lboost_system -lboost_thread
+#LIBS += -lfreetype
 LIBS += -lpcap -lz -lpthread
 LIBS += -L$${ROOT_LIBS_PATH}/qmath/lib/$${DEST_FOLDER} -lqmath
 LIBS += -L$${ROOT_LIBS_PATH}/qbase/lib/$${DEST_FOLDER} -lqbase
@@ -69,7 +79,8 @@ RCC_DIR = ./.rcc/$${DEST_FOLDER}
 UI_DIR = ./.ui/$${DEST_FOLDER}
 DESTDIR = ../../bin
 
-RESOURCES +=
+RESOURCES += \
+    ../../src/res.qrc
 
 HEADERS += \
     ../../src/Comms.h \
@@ -177,8 +188,6 @@ HEADERS += \
     ../../../libs/utils/comms/RC_Phy.h \
     ../../../libs/utils/comms/RC_Protocol.h \
     ../../src/IHaptic.h \
-    ../../src/Remote_Viewer.h \
-    ../../src/Remote_Viewer_Server.h \
     ../../../libs/utils/comms/ASIO_Socket_Adapter.h \
     ../../../libs/utils/comms/RCP_Channel.h \
     ../../../libs/utils/hw/ADS1115.h \
@@ -198,7 +207,9 @@ HEADERS += \
     ../../../libs/utils/hw/SPI_PIGPIO.h \
     ../../../libs/utils/Queue.h \
     ../../../libs/utils/comms/Video_Streamer.h \
-    ../../src/Remote_Viewer_Client.h
+    ../../src/QMLMenus.h \
+    ../../src/QMLVideoSurface.h \
+    ../../src/QMLTelemetry.h
 
 SOURCES += \
     ../../src/main.cpp \
@@ -240,8 +251,6 @@ SOURCES += \
     ../../../libs/utils/hw/RFM22B.cpp \
     ../../../libs/utils/comms/RC_Phy.cpp \
     ../../../libs/utils/comms/RC_Protocol.cpp \
-    ../../src/Remote_Viewer.cpp \
-    ../../src/Remote_Viewer_Server.cpp \
     ../../../libs/utils/hw/ADS1115.cpp \
     ../../../libs/utils/hw/I2C_BCM.cpp \
     ../../../libs/utils/hw/SPI_BCM.cpp \
@@ -254,7 +263,9 @@ SOURCES += \
     ../../../libs/utils/hw/SPI_PIGPIO.cpp \
     ../../../libs/utils/Queue.cpp \
     ../../../libs/utils/comms/Video_Streamer.cpp \
-    ../../src/Remote_Viewer_Client.cpp
+    ../../src/QMLMenus.cpp \
+    ../../src/QMLVideoSurface.cpp \
+    ../../src/QMLTelemetry.cpp
 
 DISTFILES += \
     ../../src/node.png \

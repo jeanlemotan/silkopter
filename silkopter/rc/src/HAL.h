@@ -4,7 +4,6 @@
 #include "IBattery_Info.h"
 #include "Input.h"
 #include "IGimbal_Control.h"
-#include "ArduiPi_OLED.h"
 
 #include "def_lang/Result.h"
 
@@ -30,13 +29,10 @@ public:
     IGimbal_Control& get_gimbal_control();
     Input& get_input();
 
-    ArduiPi_OLED& get_display();
-
     settings::Settings& get_settings();
     void save_settings();
 
     void process();
-    bool render();
 
 private:
     struct Impl;

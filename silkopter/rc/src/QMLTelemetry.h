@@ -9,11 +9,11 @@
 #include "common/stream/IMultirotor_Commands.h"
 
 
-class Telemetry : public QObject
+class QMLTelemetry : public QObject
 {
     Q_OBJECT
 public:
-    explicit Telemetry(QObject *parent = 0);
+    explicit QMLTelemetry(QObject *parent = 0);
 
     void setData(silk::stream::IMultirotor_State::Value const& multirotor_state,
                   silk::stream::IMultirotor_Commands::Value const& multirotor_commands);

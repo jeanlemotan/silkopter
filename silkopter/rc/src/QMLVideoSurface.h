@@ -11,24 +11,22 @@
 #include "QBase.h"
 #include "qmath.h"
 
-#ifdef Q_ANDROID
-#   include <jni.h>
-#endif
+class Video_Decoder;
 
-class VideoTexture : public QSGDynamicTexture
+class QMLVideoTexture : public QSGDynamicTexture
 {
     Q_OBJECT
 public:
-    VideoTexture();
-    ~VideoTexture();
+    QMLVideoTexture(uint32_t videoTextureId);
+    ~QMLVideoTexture();
 
     bool isActive() const;
 
-    int textureId() const;
-    QSize textureSize() const;
+    int textureId() const override;
+    QSize textureSize() const override;
     void setTextureSize(const QSize &size);
-    bool hasAlphaChannel() const;
-    bool hasMipmaps() const;
+    bool hasAlphaChannel() const override;
+    bool hasMipmaps() const override;
 
     QRectF normalizedTextureSubRect() const;
 
@@ -47,54 +45,51 @@ private:
     bool m_updated;
 };
 
-class VideoMaterial : public QSGMaterial
+class QMLVideoMaterial : public QSGMaterial
 {
 public:
-    VideoMaterial(VideoTexture *texture);
+    QMLVideoMaterial(QMLVideoTexture* texture);
 
-    QSGMaterialShader *createShader() const;
-    QSGMaterialType *type() const;
-    int compare(const QSGMaterial *other) const;
+    QSGMaterialShader* createShader() const;
+    QSGMaterialType* type() const;
+    int compare(const QSGMaterial* other) const;
 
-    void setTexture(VideoTexture *texture);
+    void setTexture(QMLVideoTexture* texture);
 
 private:
     friend class VideoMaterialShader;
-    friend class VideoNode;
+    friend class QMLVideoNode;
 
-    VideoTexture *m_texture;
+    QMLVideoTexture* m_texture;
 };
 
-class VideoNode : public QSGGeometryNode
+class QMLVideoNode : public QSGGeometryNode
 {
 public:
-    VideoNode(VideoTexture *texture);
-    ~VideoNode();
+    QMLVideoNode(QMLVideoTexture* texture);
+    ~QMLVideoNode();
 
     void setBoundingRect(const QRectF &rect, int orientation, bool horizontalMirror, bool verticalMirror);
     void preprocess();
 
 private:
-    VideoMaterial m_material;
+    QMLVideoMaterial m_material;
     QSGGeometry m_geometry;
 };
 
-class VideoSurface : public QQuickItem
+class QMLVideoSurface : public QQuickItem
 {
     Q_OBJECT
 public:
-    explicit VideoSurface(QQuickItem *parent = 0);
+    explicit QMLVideoSurface(QQuickItem* parent = 0);
 
-    QSGNode *updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *paintNodeData) override;
+    QSGNode* updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData* paintNodeData) override;
     void geometryChanged(const QRectF &newGeometry, const QRectF &oldGeometry) override;
 
-    static void addVideoData(void const* data, size_t size, math::vec2u16 const& resolution);
+    static void init(Video_Decoder& decoder);
+    static void setResolution(math::vec2u16 const& resolution);
 
 private:
     bool m_isGeomertyDirty = true;
-
-#ifdef Q_ANDROID
-    JNIEnv* m_env = nullptr;
-#endif
 };
 

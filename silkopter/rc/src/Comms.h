@@ -40,7 +40,6 @@
 #include "utils/comms/RC_Protocol.h"
 #include "utils/comms/Video_Streamer.h"
 #include "utils/hw/ISPI.h"
-#include "Remote_Viewer_Client.h"
 
 #include <asio.hpp>
 
@@ -69,11 +68,6 @@ public:
 
     Clock::time_point get_last_rx_tp() const;
 
-//    Remote_Viewer_Server const& get_remote_viewer_server() const;
-//    Remote_Viewer_Server& get_remote_viewer_server();
-    Remote_Viewer_Client const& get_remote_viewer_client() const;
-    Remote_Viewer_Client& get_remote_viewer_client();
-
     util::comms::Video_Streamer const& get_video_streamer() const;
     util::comms::Video_Streamer& get_video_streamer();
 
@@ -94,9 +88,6 @@ private:
     bool compute_camera_commands_packet(util::comms::RC_Protocol::Buffer& buffer, uint8_t& packet_type);
     void process_rx_packet(util::comms::RC_Protocol::RX_Packet const& packet, uint8_t* data, size_t size);
 
-    //Remote_Viewer_Server m_remote_viewer_server;
-    Remote_Viewer_Client m_remote_viewer_client;
-
     util::comms::RC_Phy m_rc_phy;
     util::comms::RC_Protocol m_rc_protocol;
     util::comms::RC_Protocol::RX_Packet m_rx_packet;
@@ -110,7 +101,6 @@ private:
     std::unique_ptr<util::hw::ISPI> m_spi;
 
     mutable std::mutex m_samples_mutex;
-    math::vec2u16 m_video_resolution;
     std::vector<uint8_t> m_rx_packet_sz_buffer;
     stream::IMultirotor_State::Value m_multirotor_state;
     stream::IMultirotor_Commands::Value m_multirotor_commands;
@@ -120,10 +110,7 @@ private:
     Clock::time_point m_multirotor_commands_tp = Clock::time_point(Clock::duration::zero());
     Clock::time_point m_camera_commands_tp = Clock::time_point(Clock::duration::zero());
 
-    void video_data_received(void const* data, size_t size, math::vec2u16 const& resolution);
-
     Clock::time_point m_telemetry_tp = Clock::time_point(Clock::duration::zero());
-    void send_telemetry_to_viewers();
 };
 
 }

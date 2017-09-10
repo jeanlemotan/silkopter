@@ -31,8 +31,7 @@ extern std::string s_program_path;
 struct HAL::Impl
 {
     Impl(HAL& hal)
-        : display()
-        , comms(hal)
+        : comms(hal)
         , i2c()
         , battery_gimbal_adc()
         , battery_info(hal, battery_gimbal_adc, 1) //battery is connected to channel 1
@@ -41,7 +40,6 @@ struct HAL::Impl
         , settings()
     {}
 
-    ArduiPi_OLED display;
     Comms comms;
     util::hw::I2C_Dev i2c;
     util::hw::ADS1115 battery_gimbal_adc;
@@ -186,13 +184,6 @@ HAL::~HAL()
 
 ts::Result<void> HAL::init()
 {
-    m_impl->display.init(OLED_ADAFRUIT_I2C_128x64);
-    m_impl->display.begin();
-
-    // init done
-    m_impl->display.clearDisplay();   // clears the screen  buffer
-    m_impl->display.display();   		// display it (clear display)
-
     ts::Result<void> result = load_settings(*this);
     if (result != ts::success)
     {
@@ -263,11 +254,6 @@ Input& HAL::get_input()
     return m_impl->input;
 }
 
-ArduiPi_OLED& HAL::get_display()
-{
-    return m_impl->display;
-}
-
 settings::Settings& HAL::get_settings()
 {
     return m_impl->settings;
@@ -283,14 +269,5 @@ void HAL::process()
     m_impl->comms.process();
 }
 
-bool HAL::render()
-{
-    if (m_impl->display.displayIncremental(m_impl->settings.get_hw().get_display_incremental_step_us()))
-    {
-        m_impl->display.clearDisplay();
-        return true;
-    }
-    return false;
-}
 
 }

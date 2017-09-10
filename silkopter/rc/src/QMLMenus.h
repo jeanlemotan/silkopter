@@ -4,11 +4,11 @@
 #include <QUrl>
 #include <QQuickView>
 
-class Menus_QML_Proxy : public QObject
+class QMLMenus : public QObject
 {
     Q_OBJECT
 public:
-    explicit Menus_QML_Proxy(QObject *parent = 0);
+    explicit QMLMenus(QObject *parent = 0);
 
     void init(QQuickView& view);
 

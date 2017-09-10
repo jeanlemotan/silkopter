@@ -1,4 +1,4 @@
-#include "Telemetry.h"
+#include "QMLTelemetry.h"
 
 static QGeoCoordinate llaToQGeoCoordinate(util::coordinates::LLA const& lla)
 {
@@ -32,12 +32,12 @@ static QGeoCoordinate ecefToQGeoCoordinate(util::coordinates::ECEF const& ecef)
 
 ///////////////////////////////////////////////////////////////////////
 
-Telemetry::Telemetry(QObject *parent) : QObject(parent)
+QMLTelemetry::QMLTelemetry(QObject *parent) : QObject(parent)
 {
 
 }
 
-void Telemetry::setData(silk::stream::IMultirotor_State::Value const& multirotor_state,
+void QMLTelemetry::setData(silk::stream::IMultirotor_State::Value const& multirotor_state,
               silk::stream::IMultirotor_Commands::Value const& multirotor_commands)
 {
     m_multirotor_state = multirotor_state;
@@ -48,7 +48,7 @@ void Telemetry::setData(silk::stream::IMultirotor_State::Value const& multirotor
     processPath();
 }
 
-void Telemetry::processPath()
+void QMLTelemetry::processPath()
 {
     if (!m_multirotor_state.home_ecef_position.is_initialized())
     {
@@ -74,45 +74,45 @@ void Telemetry::processPath()
     }
 }
 
-float Telemetry::batteryChargeUsed() const
+float QMLTelemetry::batteryChargeUsed() const
 {
     return m_multirotor_state.battery_state.charge_used;
 }
 
-float Telemetry::batteryAverageVoltage() const
+float QMLTelemetry::batteryAverageVoltage() const
 {
     return m_multirotor_state.battery_state.average_voltage;
 }
 
-float Telemetry::batteryAverageCurrent() const
+float QMLTelemetry::batteryAverageCurrent() const
 {
     return m_multirotor_state.battery_state.average_current;
 }
 
-float Telemetry::batteryCapacityLeft() const
+float QMLTelemetry::batteryCapacityLeft() const
 {
     return m_multirotor_state.battery_state.capacity_left;
 }
 
-Telemetry::Mode Telemetry::uavMode() const
+QMLTelemetry::Mode QMLTelemetry::uavMode() const
 {
     return m_multirotor_state.mode;
 }
 
-QVector3D Telemetry::localFrameEuler() const
+QVector3D QMLTelemetry::localFrameEuler() const
 {
     math::vec3f euler;
     m_multirotor_state.local_frame.get_as_euler_zxy(euler);
     return QVector3D(euler.x, euler.y, euler.z);
 }
 
-QQuaternion Telemetry::localFrame() const
+QQuaternion QMLTelemetry::localFrame() const
 {
     math::quatf const& q = m_multirotor_state.local_frame;
     return QQuaternion(q.w, q.x, q.y, q.z);
 }
 
-QGeoCoordinate Telemetry::homePosition() const
+QGeoCoordinate QMLTelemetry::homePosition() const
 {
     if (!m_multirotor_state.home_ecef_position.is_initialized())
     {
@@ -121,19 +121,19 @@ QGeoCoordinate Telemetry::homePosition() const
     return ecefToQGeoCoordinate(*m_multirotor_state.home_ecef_position);
 }
 
-QGeoCoordinate Telemetry::position() const
+QGeoCoordinate QMLTelemetry::position() const
 {
     return ecefToQGeoCoordinate(m_multirotor_state.ecef_position);
 }
 
-QVector3D Telemetry::localVelocity() const
+QVector3D QMLTelemetry::localVelocity() const
 {
     math::quatf enuToLocal = math::inverse(m_multirotor_state.local_frame);
     math::vec3f v = math::rotate(enuToLocal, m_multirotor_state.enu_velocity);
     return QVector3D(v.x, v.y, v.z);
 }
 
-QVector3D Telemetry::enuVelocity() const
+QVector3D QMLTelemetry::enuVelocity() const
 {
     math::vec3f const& v = m_multirotor_state.enu_velocity;
     return QVector3D(v.x, v.y, v.z);

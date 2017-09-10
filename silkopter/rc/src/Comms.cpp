@@ -108,8 +108,6 @@ bool Comms::start()
     m_rc_protocol.reset_session();
     m_rc_protocol.send_reliable_packet(static_cast<uint8_t>(rc_comms::Packet_Type::RC_CONNECTED), nullptr, 0);
 
-    m_video_streamer.on_data_received = std::bind(&Comms::video_data_received, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
-
     QLOGI("Started receiving video");
 
     return true;
@@ -149,34 +147,6 @@ util::comms::RC_Phy const& Comms::get_rc_phy() const
 util::comms::RC_Phy& Comms::get_rc_phy()
 {
     return m_rc_phy;
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////
-
-//Remote_Viewer_Server const& Comms::get_remote_viewer_server() const
-//{
-//    return m_remote_viewer_server;
-//}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////
-
-//Remote_Viewer_Server& Comms::get_remote_viewer_server()
-//{
-//    return m_remote_viewer_server;
-//}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////
-
-Remote_Viewer_Client const& Comms::get_remote_viewer_client() const
-{
-    return m_remote_viewer_client;
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////
-
-Remote_Viewer_Client& Comms::get_remote_viewer_client()
-{
-    return m_remote_viewer_client;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -301,48 +271,6 @@ void Comms::process_rx_packet(util::comms::RC_Protocol::RX_Packet const& packet,
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-void Comms::video_data_received(void const* data, size_t size, math::vec2u16 const& resolution)
-{
-    std::lock_guard<std::mutex> lg(m_samples_mutex);
-
-    if (resolution != m_video_resolution)
-    {
-        m_video_resolution = resolution;
-    }
-
-    if (size > 0)
-    {
-        //m_remote_viewer_server.send_video_data(data, size, resolution);
-        m_remote_viewer_client.send_video_data(data, size, resolution);
-//        uint8_t const* data = reinterpret_cast<uint8_t const*>(_data);
-//        size_t offset = m_video_data.size();
-//        m_video_data.resize(offset + size);
-//        memcpy(m_video_data.data() + offset, data, size);
-
-//        //keep the buffer from growing too much
-//        constexpr size_t MAX_VIDEO_DATA_SIZE = 1024*1024;
-//        if (m_video_data.size() > MAX_VIDEO_DATA_SIZE)
-//        {
-//            size_t del = m_video_data.size() - MAX_VIDEO_DATA_SIZE;
-//            m_video_data.erase(m_video_data.begin(), m_video_data.begin() + del);
-//        }
-    }
-
-//    FILE* f = fopen("a.h264", "a+");
-//    fwrite(_data, size, 1, f);
-//    fclose(f);
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////
-
-void Comms::send_telemetry_to_viewers()
-{
-    //m_remote_viewer_server.send_telemetry(m_multirotor_commands, m_multirotor_state);
-    m_remote_viewer_client.send_telemetry(m_multirotor_commands, m_multirotor_state);
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////
-
 int8_t Comms::get_rx_dBm() const
 {
     return m_rx_packet.rx_dBm;
@@ -412,11 +340,7 @@ void Comms::process()
     if (now - m_telemetry_tp >= std::chrono::milliseconds(30))
     {
         m_telemetry_tp = now;
-        send_telemetry_to_viewers();
     }
-
-    //m_remote_viewer_server.process();
-    m_remote_viewer_client.process();
 
 //    if (Clock::now() - get_last_rx_tp() > std::chrono::seconds(5))
 //    {
@@ -440,8 +364,6 @@ void Comms::process()
 //            fseek(fff, 0, SEEK_SET);
 //        }
 //        video_data.resize(r);
-
-//        m_remote_viewer_server.send_data(video_data.data(), video_data.size(), math::vec2u16(0, 0), m_multirotor_state);
 //    }
 
 //    static Clock::time_point xxx = Clock::time_point(Clock::duration::zero());
