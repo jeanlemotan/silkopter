@@ -63,7 +63,10 @@ void RC_Protocol::add_periodic_packet(Clock::duration period, TX_Callback tx_cal
     Periodic_Packet pp;
     pp.period = period;
     pp.tx_callback = tx_callback;
-    m_periodic_packets.push_back(pp);
+    {
+        std::lock_guard<std::mutex> lg(m_periodic_packets_mutex);
+        m_periodic_packets.push_back(pp);
+    }
 }
 
 void RC_Protocol::send_reliable_packet(uint8_t packet_type, void const* data, size_t size)
