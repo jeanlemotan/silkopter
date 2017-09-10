@@ -24,7 +24,7 @@ INCLUDEPATH += ../../../../qmath/include
 INCLUDEPATH += ../../../../def_lang/include
 INCLUDEPATH += ../../../../asio/include
 INCLUDEPATH += ../../../libs
-INCLUDEPATH += ../../../libs/common/comms/def
+INCLUDEPATH += ../../../libs/comSn/comms/def
 
 
 QMAKE_CXXFLAGS += -Wno-unused-variable -Wno-unused-parameter
@@ -88,7 +88,6 @@ HEADERS += \
     ../../src/stdafx.h \
     ../../../libs/common/Comm_Data.h \
     ../../../libs/utils/Butterworth.h \
-    ../../../libs/utils/Channel.h \
     ../../../libs/utils/PID.h \
     ../../../libs/utils/Timed_Scope.h \
     ../../../libs/common/bus/IBus.h \
@@ -136,10 +135,8 @@ HEADERS += \
     ../../../libs/common/stream/Stream_Base.h \
     ../../../libs/utils/Coordinates.h \
     ../../../libs/common/node/ICombiner.h \
-    ../../src/Nodes.h \
     ../../../libs/common/stream/IMultirotor_Commands.h \
     ../../../libs/common/stream/IMultirotor_State.h \
-    ../../src/Comms_Slots.h \
     ../../src/Video_Decoder.h \
     ../../../libs/utils/hw/bcm2835.h \
     ../../../libs/utils/hw/command.h \
@@ -167,21 +164,10 @@ HEADERS += \
     ../../src/IRotary_Encoder.h \
     ../../src/Rotary_Encoder_PIGPIO.h \
     ../../src/IInput_Device.h \
-    ../../src/Input.h \
-    ../../src/Adafruit_GFX.h \
-    ../../src/ArduiPi_OLED.h \
     ../../src/IButton_Matrix.h \
     ../../src/Button_Matrix_PIGPIO.h \
     ../../src/IButton.h \
     ../../src/Button_PIGPIO.h \
-    ../../src/IMenu_Page.h \
-    ../../src/Splash_Menu_Page.h \
-    ../../src/Fly_Menu_Page.h \
-    ../../src/Menu_System.h \
-    ../../src/Main_Menu_Page.h \
-    ../../src/Menu.h \
-    ../../src/Stick_Calibration_Menu_Page.h \
-    ../../src/Info_Menu_Page.h \
     ../../def/settings.def.h \
     ../../def/gen_support.h \
     ../../../libs/utils/hw/RFM22B.h \
@@ -202,14 +188,13 @@ HEADERS += \
     ../../src/Gimbal_Control_ADS1115.h \
     ../../src/IBattery_Info.h \
     ../../src/IGimbal_Control.h \
-    ../../src/Battery_Calibration_Menu_Page.h \
-    ../../src/RF_Config_Menu_Page.h \
     ../../../libs/utils/hw/SPI_PIGPIO.h \
     ../../../libs/utils/Queue.h \
     ../../../libs/utils/comms/Video_Streamer.h \
     ../../src/QMLMenus.h \
     ../../src/QMLVideoSurface.h \
-    ../../src/QMLTelemetry.h
+    ../../src/QMLTelemetry.h \
+    ../../src/QMLHUD.h
 
 SOURCES += \
     ../../src/main.cpp \
@@ -217,7 +202,6 @@ SOURCES += \
     ../../src/HAL.cpp \
     ../../../libs/lz4/lz4.c \
     ../../../libs/utils/Coordinates.cpp \
-    ../../src/Comms_Slots.cpp \
     ../../src/Video_Decoder.cpp \
     ../../../libs/utils/hw/bcm2835.c \
     ../../../libs/utils/hw/command.c \
@@ -235,18 +219,8 @@ SOURCES += \
     ../../../libs/utils/hw/I2C_Dev.cpp \
     ../../src/Stick_Actuators_Throttle_DRV883x.cpp \
     ../../src/Rotary_Encoder_PIGPIO.cpp \
-    ../../src/Input.cpp \
-    ../../src/Adafruit_GFX.cpp \
-    ../../src/ArduiPi_OLED.cpp \
     ../../src/Button_Matrix_PIGPIO.cpp \
     ../../src/Button_PIGPIO.cpp \
-    ../../src/Splash_Menu_Page.cpp \
-    ../../src/Fly_Menu_Page.cpp \
-    ../../src/Menu_System.cpp \
-    ../../src/Main_Menu_Page.cpp \
-    ../../src/Menu.cpp \
-    ../../src/Stick_Calibration_Menu_Page.cpp \
-    ../../src/Info_Menu_Page.cpp \
     ../../def/settings.def.cpp \
     ../../../libs/utils/hw/RFM22B.cpp \
     ../../../libs/utils/comms/RC_Phy.cpp \
@@ -258,14 +232,13 @@ SOURCES += \
     ../../../libs/utils/hw/UART_BB.cpp \
     ../../src/Battery_Info_ADS1115.cpp \
     ../../src/Gimbal_Control_ADS1115.cpp \
-    ../../src/Battery_Calibration_Menu_Page.cpp \
-    ../../src/RF_Config_Menu_Page.cpp \
     ../../../libs/utils/hw/SPI_PIGPIO.cpp \
     ../../../libs/utils/Queue.cpp \
     ../../../libs/utils/comms/Video_Streamer.cpp \
     ../../src/QMLMenus.cpp \
     ../../src/QMLVideoSurface.cpp \
-    ../../src/QMLTelemetry.cpp
+    ../../src/QMLTelemetry.cpp \
+    ../../src/QMLHUD.cpp
 
 DISTFILES += \
     ../../src/node.png \

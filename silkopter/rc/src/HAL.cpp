@@ -1,11 +1,12 @@
 #include "HAL.h"
 #include "IBattery_Info.h"
 #include "Input.h"
-#include "ArduiPi_OLED.h"
 #include "utils/hw/I2C_Dev.h"
 #include "utils/hw/ADS1115.h"
 #include "Battery_Info_ADS1115.h"
 #include "Gimbal_Control_ADS1115.h"
+#include "Sticks_ADS1115.h"
+#include "Stick_Actuators_Throttle_DRV883x.h"
 
 #include "def_lang/Serialization.h"
 #include "def_lang/JSON_Serializer.h"
@@ -36,7 +37,8 @@ struct HAL::Impl
         , battery_gimbal_adc()
         , battery_info(hal, battery_gimbal_adc, 1) //battery is connected to channel 1
         , gimbal_control(battery_gimbal_adc, 0u, boost::none)
-        , input(hal, i2c)
+        , sticks(i2c)
+        , stick_actuators(sticks)
         , settings()
     {}
 
@@ -45,7 +47,8 @@ struct HAL::Impl
     util::hw::ADS1115 battery_gimbal_adc;
     silk::Battery_Info_ADS1115 battery_info;
     silk::Gimbal_Control_ADS1115 gimbal_control;
-    silk::Input input;
+    silk::Sticks_ADS1115 sticks;
+    silk::Stick_Actuators_Throttle_DRV883x stick_actuators;
 
     settings::Settings settings;
 };
@@ -224,7 +227,26 @@ ts::Result<void> HAL::init()
     m_impl->battery_info.init();
     m_impl->gimbal_control.init();
 
-    m_impl->input.init();
+    {
+        auto result = m_impl->sticks.init();
+        if (result != ts::success)
+        {
+            return result.error();
+        }
+        silk::settings::Settings::Input::Sticks_Calibration const& sc = get_settings().get_input().get_sticks_calibration();
+        m_impl->sticks.set_yaw_calibration(sc.get_yaw_min(), sc.get_yaw_center(), sc.get_yaw_max(), sc.get_yaw_deadband(), sc.get_yaw_curve());
+        m_impl->sticks.set_pitch_calibration(sc.get_pitch_min(), sc.get_pitch_center(), sc.get_pitch_max(), sc.get_pitch_deadband(), sc.get_pitch_curve());
+        m_impl->sticks.set_roll_calibration(sc.get_roll_min(), sc.get_roll_center(), sc.get_roll_max(), sc.get_roll_deadband(), sc.get_roll_curve());
+        m_impl->sticks.set_throttle_calibration(sc.get_throttle_min(), sc.get_throttle_center(), sc.get_throttle_max(), sc.get_throttle_deadband(), sc.get_throttle_curve());
+    }
+
+    {
+        auto result = m_impl->stick_actuators.init();
+        if (result != ts::success)
+        {
+            return result.error();
+        }
+    }
 
     return ts::success;
 }
@@ -248,10 +270,19 @@ IGimbal_Control& HAL::get_gimbal_control()
 {
     return m_impl->gimbal_control;
 }
-
-Input& HAL::get_input()
+ISticks& HAL::get_sticks()
 {
-    return m_impl->input;
+    return m_impl->sticks;
+}
+
+IStick_Actuators& HAL::get_stick_actuators()
+{
+    return m_impl->stick_actuators;
+}
+
+IHaptic& HAL::get_haptic()
+{
+    return m_impl->stick_actuators;
 }
 
 settings::Settings& HAL::get_settings()
@@ -264,9 +295,9 @@ void HAL::process()
     m_impl->battery_gimbal_adc.process(m_impl->i2c);
     m_impl->battery_info.process();
     m_impl->gimbal_control.process();
-
-    m_impl->input.process();
     m_impl->comms.process();
+    m_impl->sticks.process();
+    m_impl->stick_actuators.process();
 }
 
 
