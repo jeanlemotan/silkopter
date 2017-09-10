@@ -933,7 +933,7 @@ static Component_ptr create_encoder_component_for_recording(MMAL_PORT_T* src, ma
     return encoder;
 }
 
-static Component_ptr create_encoder_component_for_streaming(MMAL_PORT_T* src, math::vec2u16 const& resolution, size_t bitrate)
+static Component_ptr create_encoder_component_for_streaming(MMAL_PORT_T* src, math::vec2u16 const& resolution, uint32_t iframe_interval, size_t bitrate)
 {
     //    SCOPED_PINS_GUARD;;
 
@@ -1019,7 +1019,7 @@ static Component_ptr create_encoder_component_for_streaming(MMAL_PORT_T* src, ma
     }
 
     {
-        MMAL_PARAMETER_UINT32_T param = {{ MMAL_PARAMETER_INTRAPERIOD, sizeof(param)}, 30};
+        MMAL_PARAMETER_UINT32_T param = {{ MMAL_PARAMETER_INTRAPERIOD, sizeof(param)}, iframe_interval};
         if (mmal_port_parameter_set(output, &param.hdr) != MMAL_SUCCESS)
         {
             QLOGW("failed to set MMAL_PARAMETER_INTRAPERIOD");
@@ -1447,7 +1447,7 @@ auto Raspicam::create_components() -> bool
         QLOGE("Cannot create high bitrate resizer");
         return false;
     }
-    high.encoder = create_encoder_component_for_streaming(high.resizer->output[0], high_resolution, m_descriptor->get_streaming_high().get_bitrate());
+    high.encoder = create_encoder_component_for_streaming(high.resizer->output[0], high_resolution, m_descriptor->get_iframe_interval(), m_descriptor->get_streaming_high().get_bitrate());
     if (!high.encoder)
     {
         QLOGE("Cannot create high bitrate encoder");
@@ -1480,7 +1480,7 @@ auto Raspicam::create_components() -> bool
         QLOGE("Cannot create low bitrate resizer");
         return false;
     }
-    low.encoder = create_encoder_component_for_streaming(low.resizer->output[0], low_resolution, m_descriptor->get_streaming_low().get_bitrate());
+    low.encoder = create_encoder_component_for_streaming(low.resizer->output[0], low_resolution, m_descriptor->get_iframe_interval(), m_descriptor->get_streaming_low().get_bitrate());
     if (!low.encoder)
     {
         QLOGE("Cannot create low bitrate encoder");

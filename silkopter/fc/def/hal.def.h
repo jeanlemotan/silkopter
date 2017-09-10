@@ -2282,11 +2282,16 @@ public:
   };
 
   typedef int32_t fps_t;
+  typedef uint32_t iframe_interval_t;
   typedef uint32_t commands_rate_t;
   virtual ~Raspicam_Descriptor() = default;
   void set_fps(fps_t const& value);
   void set_fps(fps_t&& value);
   auto get_fps() const -> fps_t const&;
+
+  void set_iframe_interval(iframe_interval_t const& value);
+  void set_iframe_interval(iframe_interval_t&& value);
+  auto get_iframe_interval() const -> iframe_interval_t const&;
 
   void set_commands_rate(uint32_t const& value);
   void set_commands_rate(uint32_t&& value);
@@ -2309,6 +2314,7 @@ public:
 
 private:
   fps_t m_fps = fps_t{10};
+  iframe_interval_t m_iframe_interval = iframe_interval_t{30};
   uint32_t m_commands_rate = uint32_t{1};
   Quality m_streaming_low;
   Quality m_streaming_high;
