@@ -9,7 +9,7 @@
 #include "Video_Decoder.h"
 #include "QMLMenus.h"
 #include "QMLVideoSurface.h"
-#include "QMLTelemetry.h"
+#include "QMLHUD.h"
 
 //#include "Menu_System.h"
 //#include "Splash_Menu_Page.h"
@@ -124,10 +124,11 @@ int main(int argc, char *argv[])
     QMLMenus menus;
     menus.init(view);
 
-    QMLTelemetry telemetry;
+    QMLHUD hud;
+    hud.init(hal);
 
-    qmlRegisterType<QMLTelemetry>("com.silk.Telemetry", 1, 0, "Telemetry");
-    view.engine()->rootContext()->setContextProperty("s_telemetry", &telemetry);
+    qmlRegisterType<QMLHUD>("com.silk.HUD", 1, 0, "HUD");
+    view.engine()->rootContext()->setContextProperty("s_hud", &hud);
     view.engine()->rootContext()->setContextProperty("s_menus", &menus);
     qmlRegisterType<QMLVideoSurface>("com.silk.VideoSurface", 0, 1, "VideoSurface");
 
@@ -135,8 +136,13 @@ int main(int argc, char *argv[])
 
     size_t render_frames = 0;
 
-    QObject::connect(&view, &QQuickView::frameSwapped, [&render_frames, &decoder]()
+    q::Clock::time_point last_swapped_tp = q::Clock::now();
+    QObject::connect(&view, &QQuickView::frameSwapped, [&render_frames, &decoder, &last_swapped_tp]()
     {
+//        std::chrono::duration<float> dt = q::Clock::now() - last_swapped_tp;
+//        last_swapped_tp = q::Clock::now();
+//        QLOGI("Frame DT: {}", dt.count());
+
         decoder.release_buffers();
         render_frames++;
     });
@@ -163,7 +169,7 @@ int main(int argc, char *argv[])
     format.setBlueBufferSize(8);
     format.setSamples(1);
     format.setSwapBehavior(QSurfaceFormat::TripleBuffer);
-    format.setSwapInterval(0);
+    //format.setSwapInterval(0);
     view.setFormat(format);
 
     view.setClearBeforeRendering(false);
@@ -173,7 +179,7 @@ int main(int argc, char *argv[])
     view.create();
     view.show();
 
-    menus.push("Splash.qml");
+    menus.push("HUD.qml");
 
     hal.get_comms().get_video_streamer().on_data_received = [&video_data, &resolution](void const* data, size_t size, math::vec2u16 const& res)
     {
@@ -189,9 +195,8 @@ int main(int argc, char *argv[])
     while (true)
     {
         hal.process();
+        hud.process();
         app.processEvents();
-
-        telemetry.setData(hal.get_comms().get_multirotor_state(), silk::stream::IMultirotor_Commands::Value());
 
         process_frames++;
         if (q::Clock::now() - last_tp >= std::chrono::seconds(1))
