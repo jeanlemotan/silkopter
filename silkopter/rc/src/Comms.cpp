@@ -341,6 +341,11 @@ void Comms::process()
     {
         m_telemetry_tp = now;
     }
+    if (now - m_rx_packet.rx_timepoint >= std::chrono::seconds(2))
+    {
+        m_rx_packet.rx_dBm = 0;
+        m_rx_packet.tx_dBm = 0;
+    }
 
 //    if (Clock::now() - get_last_rx_tp() > std::chrono::seconds(5))
 //    {

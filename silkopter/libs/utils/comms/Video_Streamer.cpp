@@ -1277,6 +1277,13 @@ void Video_Streamer::process()
     m_best_input_dBm = std::numeric_limits<int>::lowest();
 
     Clock::time_point now = Clock::now();
+
+    RX& rx = m_impl->rx;
+    if (now - rx.last_block_tp > std::chrono::seconds(2))
+    {
+        m_latched_input_dBm = 0;
+    }
+
     if (now - m_video_stats_last_tp >= std::chrono::seconds(1))
     {
         float d = std::chrono::duration<float>(now - m_video_stats_last_tp).count();
