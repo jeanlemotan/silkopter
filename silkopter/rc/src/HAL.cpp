@@ -1,6 +1,5 @@
 #include "HAL.h"
 #include "IBattery_Info.h"
-#include "Input.h"
 #include "utils/hw/I2C_Dev.h"
 #include "utils/hw/ADS1115.h"
 #include "Battery_Info_ADS1115.h"
