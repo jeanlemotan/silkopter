@@ -367,9 +367,9 @@ QSGNode* QMLVideoSurface::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData 
         rect.moveCenter(br.center());
 
         //align left, top
-        float dx = (br.width() - rect.width()) / 2.f;
-        float dy = (br.height() - rect.height()) / 2.f;
-        rect.translate(-dx, -dy);
+//        float dx = (br.width() - rect.width()) / 2.f;
+//        float dy = (br.height() - rect.height()) / 2.f;
+//        rect.translate(-dx, -dy);
 
         int orientation = 0;//(m_orientation - m_textureOrientation) % 360;
         if (orientation < 0)
