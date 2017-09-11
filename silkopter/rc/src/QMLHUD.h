@@ -19,40 +19,64 @@ public:
 
     void process();
 
-    typedef silk::stream::IMultirotor_State::Mode Mode;
-    Q_ENUMS(Mode);
+    enum class Mode
+    {
+        MODE_IDLE = (int)silk::stream::IMultirotor_Commands::Mode::IDLE,
+        MODE_TAKE_OFF = (int)silk::stream::IMultirotor_Commands::Mode::TAKE_OFF,
+        MODE_FLY = (int)silk::stream::IMultirotor_Commands::Mode::FLY,
+        MODE_RETURN_HOME = (int)silk::stream::IMultirotor_Commands::Mode::RETURN_HOME,
+        MODE_LAND = (int)silk::stream::IMultirotor_Commands::Mode::LAND
+    };
+    Q_ENUM(Mode)
     Q_PROPERTY(Mode mode READ mode WRITE setMode NOTIFY modeChanged)
     Mode mode() const;
     void setMode(Mode mode);
     Q_PROPERTY(bool isModeConfirmed READ isModeConfirmed NOTIFY modeConfirmedChanged)
     bool isModeConfirmed() const;
 
-    typedef silk::stream::IMultirotor_Commands::Vertical_Mode VerticalMode;
-    Q_ENUMS(VerticalMode);
+    enum class VerticalMode
+    {
+        VERTICAL_MODE_THRUST = (int)silk::stream::IMultirotor_Commands::Vertical_Mode::THRUST,
+        VERTICAL_MODE_ALTITUDE = (int)silk::stream::IMultirotor_Commands::Vertical_Mode::ALTITUDE,
+    };
+    Q_ENUM(VerticalMode)
     Q_PROPERTY(VerticalMode verticalMode READ verticalMode WRITE setVerticalMode NOTIFY verticalModeChanged)
     VerticalMode verticalMode() const;
     void setVerticalMode(VerticalMode mode);
     Q_PROPERTY(bool isVerticalModeConfirmed READ isVerticalModeConfirmed NOTIFY verticalModeConfirmedChanged)
     bool isVerticalModeConfirmed() const;
 
-    typedef silk::stream::IMultirotor_Commands::Horizontal_Mode HorizontalMode;
-    Q_ENUMS(HorizontalMode);
+    enum class HorizontalMode
+    {
+        HORIZONTAL_MODE_ANGLE_RATE = (int)silk::stream::IMultirotor_Commands::Horizontal_Mode::ANGLE_RATE,
+        HORIZONTAL_MODE_ANGLE = (int)silk::stream::IMultirotor_Commands::Horizontal_Mode::ANGLE,
+        HORIZONTAL_MODE_POSITION = (int)silk::stream::IMultirotor_Commands::Horizontal_Mode::POSITION,
+    };
+    Q_ENUM(HorizontalMode)
     Q_PROPERTY(HorizontalMode horizontalMode READ horizontalMode WRITE setHorizontalMode NOTIFY horizontalModeChanged)
     HorizontalMode horizontalMode() const;
     void setHorizontalMode(HorizontalMode mode);
     Q_PROPERTY(bool isHorizontalModeConfirmed READ isHorizontalModeConfirmed NOTIFY horizontalModeConfirmedChanged)
     bool isHorizontalModeConfirmed() const;
 
-    typedef silk::stream::IMultirotor_Commands::Yaw_Mode YawMode;
-    Q_ENUMS(YawMode);
+    enum class YawMode
+    {
+        YAW_MODE_ANGLE_RATE = (int)silk::stream::IMultirotor_Commands::Yaw_Mode::ANGLE_RATE,
+        YAW_MODE_ANGLE = (int)silk::stream::IMultirotor_Commands::Yaw_Mode::ANGLE
+    };
+    Q_ENUM(YawMode)
     Q_PROPERTY(YawMode yawMode READ yawMode WRITE setYawMode NOTIFY yawModeChanged)
     YawMode yawMode() const;
     void setYawMode(YawMode mode);
     Q_PROPERTY(bool isYawModeConfirmed READ isYawModeConfirmed NOTIFY yawModeConfirmedChanged)
     bool isYawModeConfirmed() const;
 
-    typedef silk::stream::ICamera_Commands::Quality StreamQuality;
-    Q_ENUMS(StreamQuality);
+    enum class StreamQuality
+    {
+        STREAM_QUALITY_LOW = (int)silk::stream::ICamera_Commands::Quality::LOW,
+        STREAM_QUALITY_HIGH = (int)silk::stream::ICamera_Commands::Quality::HIGH,
+    };
+    Q_ENUM(StreamQuality)
     Q_PROPERTY(StreamQuality streamQuality READ streamQuality WRITE setStreamQuality NOTIFY streamQualityChanged)
     StreamQuality streamQuality() const;
     void setStreamQuality(StreamQuality quality);
@@ -120,6 +144,12 @@ signals:
     void recordingChanged();
     void recordingConfirmedChanged();
 
+    void pathPointAdded(QGeoCoordinate const& point);
+    void pathCleared();
+
+public slots:
+    void clearPath();
+
 private:
     mutable std::recursive_mutex m_mutex;
 
@@ -137,4 +167,6 @@ private:
     void processModeReturnHome();
     void processModeLand();
 
+    void processPath();
+    QGeoCoordinate m_lastPathPoint;
 };

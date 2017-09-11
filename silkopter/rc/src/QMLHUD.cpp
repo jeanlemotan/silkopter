@@ -30,8 +30,6 @@ static QGeoCoordinate ecefToQGeoCoordinate(util::coordinates::ECEF const& ecef)
     return llaToQGeoCoordinate(lla);
 }
 
-
-
 QMLHUD::QMLHUD(QObject *parent)
     : QObject(parent)
 {
@@ -44,14 +42,14 @@ void QMLHUD::init(silk::HAL& hal)
 
     m_multirotorState = m_hal->get_comms().get_multirotor_state();
 
-    setMode(m_multirotorState.mode);
+    setMode((Mode)m_multirotorState.mode);
 
     //start up in a safe state if flying
-    if (m_multirotorState.mode == Mode::FLY)
+    if (m_multirotorState.mode == silk::stream::IMultirotor_Commands::Mode::FLY)
     {
-        setVerticalMode(VerticalMode::ALTITUDE);
-        setHorizontalMode(HorizontalMode::POSITION);
-        setYawMode(YawMode::ANGLE);
+        setVerticalMode(VerticalMode::VERTICAL_MODE_ALTITUDE);
+        setHorizontalMode(HorizontalMode::HORIZONTAL_MODE_POSITION);
+        setYawMode(YawMode::YAW_MODE_ANGLE);
     }
 
     m_isInitialized = true;
@@ -61,43 +59,45 @@ void QMLHUD::init(silk::HAL& hal)
 QMLHUD::Mode QMLHUD::mode() const
 {
     std::lock_guard<std::recursive_mutex> lg(m_mutex);
-    return m_multirotorCommands.mode;
+    return (Mode)m_multirotorCommands.mode;
 }
 void QMLHUD::setMode(Mode newMode)
 {
     std::lock_guard<std::recursive_mutex> lg(m_mutex);
 
-    silk::stream::IMultirotor_Commands::Mode oldMode = m_multirotorCommands.mode;
+    Mode oldMode = (Mode)m_multirotorCommands.mode;
     if (oldMode == newMode && m_isInitialized)
     {
         return;
     }
 
+    QLOGI("Mode: {}", newMode);
+
     //m_last_mode_change_tp = Clock::now();
 
-    if (newMode == Mode::IDLE)
+    if (newMode == Mode::MODE_IDLE)
     {
         //input.get_haptic().vibrate(k_alert_haptic);
         //m_idle_mode_data.is_pressed = false;
-        setVerticalMode(VerticalMode::THRUST);
-        setHorizontalMode(HorizontalMode::ANGLE);
+        setVerticalMode(VerticalMode::VERTICAL_MODE_THRUST);
+        setHorizontalMode(HorizontalMode::HORIZONTAL_MODE_ANGLE);
     }
 
-    if (oldMode == Mode::IDLE)
+    if (oldMode == Mode::MODE_IDLE)
     {
         //input.get_haptic().vibrate(k_alert_haptic);
     }
-    else if (oldMode == Mode::RETURN_HOME)
+    else if (oldMode == Mode::MODE_RETURN_HOME)
     {
         //when leaving RTH, these are the best modes
-        setVerticalMode(VerticalMode::ALTITUDE);
-        setHorizontalMode(HorizontalMode::POSITION);
+        setVerticalMode(VerticalMode::VERTICAL_MODE_ALTITUDE);
+        setHorizontalMode(HorizontalMode::HORIZONTAL_MODE_POSITION);
         //no need to change the yaw as it's user controllable in RTH
     }
 
     bool oldConfirmed = isModeConfirmed();
 
-    m_multirotorCommands.mode = newMode;
+    m_multirotorCommands.mode = (silk::stream::IMultirotor_Commands::Mode)newMode;
     emit modeChanged();
 
     if (isModeConfirmed() != oldConfirmed)
@@ -115,20 +115,22 @@ bool QMLHUD::isModeConfirmed() const
 QMLHUD::VerticalMode QMLHUD::verticalMode() const
 {
     std::lock_guard<std::recursive_mutex> lg(m_mutex);
-    return m_multirotorCommands.vertical_mode;
+    return (VerticalMode)m_multirotorCommands.vertical_mode;
 }
 void QMLHUD::setVerticalMode(VerticalMode newMode)
 {
     std::lock_guard<std::recursive_mutex> lg(m_mutex);
-    if (m_multirotorCommands.vertical_mode == newMode && m_isInitialized)
+    if ((VerticalMode)m_multirotorCommands.vertical_mode == newMode && m_isInitialized)
     {
         return;
     }
 
+    QLOGI("Vertical Mode: {}", newMode);
+
     //m_last_vertical_mode_change_tp = Clock::now();
     //input.get_haptic().vibrate(k_mode_change_haptic);
 
-    if (newMode == VerticalMode::ALTITUDE)
+    if (newMode == VerticalMode::VERTICAL_MODE_ALTITUDE)
     {
         //input.get_sticks().set_throttle_deadband_position(ISticks::Deadband_Position::MIDDLE);
         m_multirotorCommands.sticks.throttle = 0.5f;
@@ -142,7 +144,7 @@ void QMLHUD::setVerticalMode(VerticalMode newMode)
 
     bool oldConfirmed = isVerticalModeConfirmed();
 
-    m_multirotorCommands.vertical_mode = newMode;
+    m_multirotorCommands.vertical_mode = (silk::stream::IMultirotor_Commands::Vertical_Mode)newMode;
     emit verticalModeChanged();
 
     if (isVerticalModeConfirmed() != oldConfirmed)
@@ -159,22 +161,24 @@ bool QMLHUD::isVerticalModeConfirmed() const
 QMLHUD::HorizontalMode QMLHUD::horizontalMode() const
 {
     std::lock_guard<std::recursive_mutex> lg(m_mutex);
-    return m_multirotorCommands.horizontal_mode;
+    return (HorizontalMode)m_multirotorCommands.horizontal_mode;
 }
 void QMLHUD::setHorizontalMode(HorizontalMode newMode)
 {
     std::lock_guard<std::recursive_mutex> lg(m_mutex);
-    if (m_multirotorCommands.horizontal_mode == newMode && m_isInitialized)
+    if ((HorizontalMode)m_multirotorCommands.horizontal_mode == newMode && m_isInitialized)
     {
         return;
     }
+
+    QLOGI("Horizontal Mode: {}", newMode);
 
     //m_last_horizontal_mode_change_tp = Clock::now();
     //input.get_haptic().vibrate(k_mode_change_haptic);
 
     bool oldConfirmed = isHorizontalModeConfirmed();
 
-    m_multirotorCommands.horizontal_mode = newMode;
+    m_multirotorCommands.horizontal_mode = (silk::stream::IMultirotor_Commands::Horizontal_Mode)newMode;
     emit horizontalModeChanged();
 
     if (isHorizontalModeConfirmed() != oldConfirmed)
@@ -191,21 +195,23 @@ bool QMLHUD::isHorizontalModeConfirmed() const
 QMLHUD::YawMode QMLHUD::yawMode() const
 {
     std::lock_guard<std::recursive_mutex> lg(m_mutex);
-    return m_multirotorCommands.yaw_mode;
+    return (YawMode)m_multirotorCommands.yaw_mode;
 }
 void QMLHUD::setYawMode(YawMode newMode)
 {
     std::lock_guard<std::recursive_mutex> lg(m_mutex);
-    if (m_multirotorCommands.yaw_mode == newMode && m_isInitialized)
+    if ((YawMode)m_multirotorCommands.yaw_mode == newMode && m_isInitialized)
     {
         return;
     }
+
+    QLOGI("Yaw Mode: {}", newMode);
 
     //m_last_yaw_mode_change_tp = Clock::now();
     //input.get_haptic().vibrate(k_mode_change_haptic);
     bool oldConfirmed = isYawModeConfirmed();
 
-    m_multirotorCommands.yaw_mode = newMode;
+    m_multirotorCommands.yaw_mode = (silk::stream::IMultirotor_Commands::Yaw_Mode)newMode;
     emit yawModeChanged();
 
     if (isYawModeConfirmed() != oldConfirmed)
@@ -222,16 +228,17 @@ bool QMLHUD::isYawModeConfirmed() const
 QMLHUD::StreamQuality QMLHUD::streamQuality() const
 {
     std::lock_guard<std::recursive_mutex> lg(m_mutex);
-    return m_cameraCommands.quality;
+    return (StreamQuality)m_cameraCommands.quality;
 }
 void QMLHUD::setStreamQuality(StreamQuality quality)
 {
     std::lock_guard<std::recursive_mutex> lg(m_mutex);
-    if (m_cameraCommands.quality != quality)
+    if ((StreamQuality)m_cameraCommands.quality != quality)
     {
+        QLOGI("Stream quality: {}", quality);
         bool oldConfirmed = isStreamQualityConfirmed();
 
-        m_cameraCommands.quality = quality;
+        m_cameraCommands.quality = (silk::stream::ICamera_Commands::Quality)quality;
         emit streamQualityChanged();
 
         if (isStreamQualityConfirmed() != oldConfirmed)
@@ -256,6 +263,7 @@ void QMLHUD::setRecording(bool recording)
     std::lock_guard<std::recursive_mutex> lg(m_mutex);
     if (m_cameraCommands.recording != recording)
     {
+        QLOGI("Recording: {}", recording);
         bool oldConfirmed = isRecordingConfirmed();
 
         m_cameraCommands.recording = recording;
@@ -360,6 +368,8 @@ void QMLHUD::setGimbalPitch(float pitch)
     std::lock_guard<std::recursive_mutex> lg(m_mutex);
     if (m_multirotorCommands.gimbal_pitch != pitch)
     {
+        QLOGI("Gimbal Pitch: {}", pitch);
+
         m_multirotorCommands.gimbal_pitch = pitch;
         emit gimbalPitchChanged();
     }
@@ -397,6 +407,7 @@ void QMLHUD::process()
     m_multirotorState = comms.get_multirotor_state();
 
     emit telemetryChanged();
+    processPath();
 
 //    m_rx_strength = math::lerp<math::safe>(m_rx_strength, dBm_to_strength(comms.get_rx_dBm()), std::chrono::duration<float>(dt).count());
 //    m_slow_rx_strength = math::lerp<math::safe>(m_slow_rx_strength, m_rx_strength, std::chrono::duration<float>(dt).count() / 5.f);
@@ -417,13 +428,13 @@ void QMLHUD::process()
     }
     else
     {
-        switch (m_multirotorCommands.mode)
+        switch ((Mode)m_multirotorCommands.mode)
         {
-        case Mode::IDLE: processModeIdle(); break;
-        case Mode::TAKE_OFF: processModeTakeOff(); break;
-        case Mode::FLY: processModeFly(); break;
-        case Mode::RETURN_HOME: processModeReturnHome(); break;
-        case Mode::LAND: processModeLand(); break;
+        case Mode::MODE_IDLE: processModeIdle(); break;
+        case Mode::MODE_TAKE_OFF: processModeTakeOff(); break;
+        case Mode::MODE_FLY: processModeFly(); break;
+        case Mode::MODE_RETURN_HOME: processModeReturnHome(); break;
+        case Mode::MODE_LAND: processModeLand(); break;
         }
     }
 
@@ -449,7 +460,7 @@ void QMLHUD::processModeFly()
     std::lock_guard<std::recursive_mutex> lg(m_mutex);
 
     silk::stream::IMultirotor_State::Value const& state = m_multirotorState;
-    QASSERT(state.mode == Mode::FLY);
+    QASSERT((Mode)state.mode == Mode::MODE_FLY);
 
 //    m_multirotor_commands.sticks.yaw = sticks.get_yaw();
 //    m_multirotor_commands.sticks.pitch = sticks.get_pitch();
@@ -477,4 +488,35 @@ void QMLHUD::processModeLand()
 {
     std::lock_guard<std::recursive_mutex> lg(m_mutex);
 
+}
+
+void QMLHUD::processPath()
+{
+    if (!m_multirotorState.home_ecef_position.is_initialized())
+    {
+        clearPath();
+    }
+    else
+    {
+        if (!m_lastPathPoint.isValid())
+        {
+            m_lastPathPoint = ecefToQGeoCoordinate(*m_multirotorState.home_ecef_position);
+            emit pathPointAdded(m_lastPathPoint);
+        }
+        else
+        {
+            QGeoCoordinate coordinate = ecefToQGeoCoordinate(m_multirotorState.ecef_position);
+            if (!m_lastPathPoint.isValid() || m_lastPathPoint.distanceTo(coordinate) > 5.f)
+            {
+                m_lastPathPoint = coordinate;
+                emit pathPointAdded(coordinate);
+            }
+        }
+    }
+}
+
+void QMLHUD::clearPath()
+{
+    m_lastPathPoint = QGeoCoordinate();
+    emit pathCleared();
 }
