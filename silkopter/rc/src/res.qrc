@@ -20,8 +20,10 @@
         <file>icons/streams/Torque.png</file>
         <file>icons/streams/Velocity.png</file>
         <file>images/logo.png</file>
+        <file>images/horizon.png</file>
+        <file>images/vertical_tick.png</file>
         <file>qml/Splash.qml</file>
-        <file>qml/MM.qml</file>
+        <file>qml/HUD.qml</file>
         <file>qml/TopBar.qml</file>
         <file>qml/Setup.qml</file>
         <file>qml/MenuButton.qml</file>
@@ -69,6 +71,8 @@
         <file>icons/ui/waypoints.png</file>
         <file>icons/ui/waypoints-destination.png</file>
         <file>icons/ui/wifi.png</file>
+        <file>icons/ui/hq.png</file>
+        <file>icons/ui/recording.png</file>
         <file>icons/nodes/Brain.png</file>
         <file>icons/nodes/Combiner.png</file>
         <file>icons/nodes/Controller.png</file>
