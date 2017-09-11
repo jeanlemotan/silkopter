@@ -43,7 +43,7 @@ Rectangle {
                 }
             }
         }
-        onClicked: s_menus.push("MM.qml")
+        onClicked: s_menus.push("HUD.qml")
     }
 
     Dialog {
