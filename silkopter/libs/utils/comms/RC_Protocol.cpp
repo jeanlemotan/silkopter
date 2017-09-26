@@ -1,15 +1,10 @@
 #include "RC_Protocol.h"
 #include "util/murmurhash.h"
-#include "fec.h"
 
 namespace util
 {
 namespace comms
 {
-
-static constexpr unsigned BLOCK_NUMS[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
-                                           10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
-                                           21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31 };
 
 //#define LOG
 
@@ -17,8 +12,8 @@ RC_Protocol::RC_Protocol(RC_Phy& phy, RX_Callback rx_callback)
     : m_phy(phy)
     , m_rx_callback(rx_callback)
 {
-    m_phy.set_callbacks(std::bind(&RC_Protocol::compute_tx_data, this, std::placeholders::_1, std::placeholders::_2),
-                        std::bind(&RC_Protocol::process_rx_data, this, std::placeholders::_1, std::placeholders::_2));
+//    m_phy.set_callbacks(std::bind(&RC_Protocol::compute_tx_data, this, std::placeholders::_1, std::placeholders::_2),
+//                        std::bind(&RC_Protocol::process_rx_data, this, std::placeholders::_1, std::placeholders::_2));
 
     //std::atomic_init(&m_crt_sent_packet_index, 0);
     //std::atomic_init(&m_received_packet_index, 0);
@@ -28,30 +23,10 @@ RC_Protocol::RC_Protocol(RC_Phy& phy, RX_Callback rx_callback)
 
 RC_Protocol::~RC_Protocol()
 {
-    if (m_fec)
-    {
-        fec_free(m_fec);
-    }
 }
 
-bool RC_Protocol::init(uint8_t fec_coding_k, uint8_t fec_coding_n)
+bool RC_Protocol::init()
 {
-    if (fec_coding_k == 0 || fec_coding_n <= fec_coding_k || fec_coding_k > m_tx_fec.source_ptrs.size() || fec_coding_n > m_tx_fec.extra_ptrs.size())
-    {
-        QLOGE("Invalid coding params: {} / {}" , fec_coding_k, fec_coding_n);
-        return false;
-    }
-    m_fec_coding_k = fec_coding_k;
-    m_fec_coding_n = fec_coding_n;
-
-    if (m_fec)
-    {
-        fec_free(m_fec);
-    }
-    m_fec = fec_new(m_fec_coding_k, m_fec_coding_n);
-
-    m_fec_buffer_size = std::min(300u, m_phy.get_mtu() - sizeof(FEC_Header));
-
     reset_session();
     reset_session_data();
 
@@ -84,36 +59,6 @@ void RC_Protocol::send_reliable_packet(uint8_t packet_type, void const* data, si
     m_reliable_packet_queue.push_back(std::move(packet));
 }
 
-void RC_Protocol::send_fec_packet(void const* _data, size_t size)
-{
-    uint8_t const* data = reinterpret_cast<uint8_t const*>(_data);
-    while (size > 0)
-    {
-        if (!m_tx_fec.crt_source_buffer)
-        {
-            m_tx_fec.crt_source_buffer = m_tx_fec.source_queue.begin_producing();
-            if (!m_tx_fec.crt_source_buffer)
-            {
-                QLOGW("No FEC buffers available, packet not sent");
-                return;
-            }
-            m_tx_fec.crt_source_buffer->data.clear();
-        }
-
-        size_t s = std::min(size, m_fec_buffer_size - m_tx_fec.crt_source_buffer->data.size());
-        size_t offset = m_tx_fec.crt_source_buffer->data.size();
-        m_tx_fec.crt_source_buffer->data.resize(offset + s);
-        memcpy(m_tx_fec.crt_source_buffer->data.data() + offset, data, s);
-        data += s;
-        size -= s;
-
-        if (m_tx_fec.crt_source_buffer->data.size() >= m_fec_buffer_size)
-        {
-            m_tx_fec.source_queue.end_producing(std::move(m_tx_fec.crt_source_buffer), false);
-        }
-    }
-}
-
 void RC_Protocol::reset_session()
 {
     //A party will always reply to the reset signal with a signal of it's own.
@@ -143,12 +88,9 @@ void RC_Protocol::reset_session_data()
         std::lock_guard<std::mutex> lg (m_reliable_packet_queue_mutex);
         m_reliable_packet_queue.clear();
     }
-
-    m_tx_fec.source_queue.clear();
-    m_tx_fec.extra_queue.clear();
 }
 
-bool RC_Protocol::compute_tx_data(RC_Phy::Buffer& buffer, bool& more_data)
+bool RC_Protocol::compute_tx_data()
 {
     Clock::time_point now = Clock::now();
 
@@ -252,95 +194,6 @@ bool RC_Protocol::compute_tx_data(RC_Phy::Buffer& buffer, bool& more_data)
             QLOGI("TX reliable packet type {}, index {}{}, size {}", packet.packet_type, m_crt_sent_reliable_packet_index, header.last_packet ? " last" : "", buffer.size());
 #endif
             packet_ready = true;
-        }
-    }
-
-    //FEC -------------------------------------------------------
-    if (!packet_ready)
-    {
-        std::unique_ptr<TX_FEC::Buffer> fec_buffer = m_tx_fec.extra_queue.begin_consuming(false);
-        if (fec_buffer)
-        {
-            buffer.resize(sizeof(FEC_Header) + offset + fec_buffer->data.size());
-            FEC_Header& header = *reinterpret_cast<FEC_Header*>(buffer.data() + offset);
-            header.header_type = Header::FEC;
-            header.packet_type = FEC_Header::FEC_EXTRA;
-            header.block_index = fec_buffer->block_index;
-            header.fec_index = fec_buffer->fec_index;
-            memcpy(buffer.data() + offset + sizeof(FEC_Header), fec_buffer->data.data(), fec_buffer->data.size());
-
-            fec_buffer->data.clear();
-            m_tx_fec.extra_queue.end_consuming(std::move(fec_buffer));
-            packet_ready = true;
-        }
-        else
-        {
-            std::unique_ptr<TX_FEC::Buffer> fec_buffer = m_tx_fec.source_queue.begin_consuming(false);
-            if (fec_buffer)
-            {
-                buffer.resize(sizeof(FEC_Header) + offset + fec_buffer->data.size());
-                FEC_Header& header = *reinterpret_cast<FEC_Header*>(buffer.data() + offset);
-                header.header_type = Header::FEC;
-                header.packet_type = FEC_Header::FEC_SOURCE;
-                header.block_index = m_tx_fec.last_block_index;
-                header.fec_index = m_tx_fec.block_source_buffers.size();
-                memcpy(buffer.data() + offset + sizeof(FEC_Header), fec_buffer->data.data(), fec_buffer->data.size());
-
-                if (m_fec_coding_n > m_fec_coding_k)
-                {
-                    //we do fec encoding, so build up the block
-                    m_tx_fec.block_source_buffers.push_back(std::move(fec_buffer));
-                }
-                else
-                {
-                    //no fec encoding, consume immediadely
-                    m_tx_fec.source_queue.end_consuming(std::move(fec_buffer));
-                    m_tx_fec.last_block_index++;
-                }
-                packet_ready = true;
-            }
-        }
-
-        //compute fec datagrams
-        if (m_tx_fec.block_source_buffers.size() >= m_fec_coding_k && m_fec_coding_n > m_fec_coding_k)
-        {
-            //init data for the fec_encode
-            for (size_t i = 0; i < m_fec_coding_k; i++)
-            {
-                m_tx_fec.source_ptrs[i] = m_tx_fec.block_source_buffers[i]->data.data();
-            }
-
-            //prepare the exta buffers and store the pointers
-            size_t fec_extra_count = m_fec_coding_n - m_fec_coding_k;
-            m_tx_fec.block_extra_buffers.resize(fec_extra_count);
-            for (size_t i = 0; i < fec_extra_count; i++)
-            {
-                m_tx_fec.block_extra_buffers[i] = m_tx_fec.extra_queue.begin_producing();
-                m_tx_fec.block_extra_buffers[i]->data.resize(m_fec_buffer_size);
-                m_tx_fec.extra_ptrs[i] = m_tx_fec.block_extra_buffers[i]->data.data();
-            }
-
-            //encode
-            fec_encode(m_fec, m_tx_fec.source_ptrs.data(), m_tx_fec.extra_ptrs.data(), BLOCK_NUMS + m_fec_coding_k, m_fec_coding_n - m_fec_coding_k, m_fec_buffer_size);
-
-            //enqueue the extra buffers
-            for (size_t i = 0; i < fec_extra_count; i++)
-            {
-                std::unique_ptr<TX_FEC::Buffer>& fec_buffer = m_tx_fec.block_extra_buffers[i];
-                fec_buffer->block_index = m_tx_fec.last_block_index;
-                fec_buffer->fec_index = m_fec_coding_k + i;
-                m_tx_fec.extra_queue.end_producing(std::move(fec_buffer), false);
-            }
-            m_tx_fec.block_extra_buffers.clear();
-
-            //release the source buffers
-            for (size_t i = 0; i < m_tx_fec.block_source_buffers.size(); i++)
-            {
-                m_tx_fec.source_queue.end_consuming(std::move(m_tx_fec.block_source_buffers[i]));
-            }
-            m_tx_fec.block_source_buffers.clear();
-
-            m_tx_fec.last_block_index++;
         }
     }
 
@@ -543,154 +396,6 @@ void RC_Protocol::process_rx_data(util::comms::RC_Phy::RX_Data const& rx_data, R
 #ifdef LOG
             QLOGI("RX empty, size {}", (int)header.packet_type, buffer.size());
 #endif
-        }
-    }
-    else if (header.header_type == Header::FEC)
-    {
-        FEC_Header const& header = *reinterpret_cast<FEC_Header const*>(buffer.data());
-        RX_FEC::Block& block = m_rx_fec.block;
-
-        //If the new buffer is to old (retransmit, or extra fec buffer that came after fec decoding), ignore
-        //We have to handle wrapping of the block_index, so the 'old' window is 5 indices.
-        if (header.block_index < block.index && static_cast<uint32_t>(header.block_index) + 5u >= block.index)
-        {
-            //QLOGW("Old packet. Block index: {}", (int)header.block_index);
-        }
-        else
-        {
-            if (block.index != header.block_index)
-            {
-                block.source_buffers.clear();
-                block.extra_buffers.clear();
-            }
-            block.index = header.block_index;
-
-            RX_FEC::Buffer_ptr fec_buffer = m_rx_fec.buffer_pool.acquire();
-            fec_buffer->is_processed = false;
-            fec_buffer->index = header.fec_index;
-            fec_buffer->data.resize(buffer.size() - sizeof(FEC_Header));
-            memcpy(fec_buffer->data.data(), buffer.data() + sizeof(FEC_Header), fec_buffer->data.size());
-
-            std::vector<RX_FEC::Buffer_ptr>& buffers = header.packet_type == FEC_Header::FEC_EXTRA ? block.extra_buffers : block.source_buffers;
-
-            //store datagram
-            auto iter = std::lower_bound(buffers.begin(), buffers.end(), header.fec_index, [](RX_FEC::Buffer_ptr const& l, uint32_t index) { return l->index < index; });
-            if (iter != buffers.end() && (*iter)->index == header.fec_index)
-            {
-                //QLOGW("Duplicated datagram {} from block {} (index {})", datagram_index, block_index, block_index * m_fec_coding_k + datagram_index);
-            }
-            else
-            {
-                buffers.insert(iter, fec_buffer);
-            }
-        }
-
-        rx_packet.packet_type = 0xFF;
-
-        //entire block received
-        if (block.source_buffers.size() >= m_fec_coding_k)
-        {
-            for (RX_FEC::Buffer_ptr const& b: block.source_buffers)
-            {
-                uint32_t seq_number = block.index * m_fec_coding_k + b->index;
-                if (!b->is_processed)
-                {
-                    b->is_processed = true;
-                    //QLOGI("Datagram {}", seq_number);
-                    //m_video_stats_data_accumulated += b->data.size();
-                    m_rx_callback(rx_packet, b->data.data(), b->data.size());
-                }
-            }
-            //rx.next_block_index = block.index + 1;
-            //rx.block_queue.pop_front();
-            block.index++;
-            block.source_buffers.clear();
-            block.extra_buffers.clear();
-        }
-        else
-        {
-            //try to process consecutive buffers before the block is finished to minimize latency
-            for (size_t i = 0; i < block.source_buffers.size(); i++)
-            {
-                RX_FEC::Buffer_ptr const& b = block.source_buffers[i];
-                if (b->index == i)
-                {
-                    uint32_t seq_number = block.index * m_fec_coding_k + b->index;
-                    if (!b->is_processed)
-                    {
-                        b->is_processed = true;
-                        //QLOGI("Datagram {}", seq_number);
-                        //m_video_stats_data_accumulated += b->data.size();
-                        m_rx_callback(rx_packet, b->data.data(), b->data.size());
-                    }
-                }
-                else
-                {
-                    break;
-                }
-            }
-
-            //can we fec decode?
-            if (block.source_buffers.size() + block.extra_buffers.size() >= m_fec_coding_k)
-            {
-                //auto start = Clock::now();
-
-                std::array<unsigned int, 32> indices;
-                size_t source_index = 0;
-                size_t used_fec_index = 0;
-                for (size_t i = 0; i < m_fec_coding_k; i++)
-                {
-                    if (source_index < block.source_buffers.size() && i == block.source_buffers[source_index]->index)
-                    {
-                        m_rx_fec.source_ptrs[i] = block.source_buffers[source_index]->data.data();
-                        indices[i] = block.source_buffers[source_index]->index;
-                        source_index++;
-                    }
-                    else
-                    {
-                        m_rx_fec.source_ptrs[i] = block.extra_buffers[used_fec_index]->data.data();
-                        indices[i] = block.extra_buffers[used_fec_index]->index;
-                        used_fec_index++;
-                    }
-                }
-
-                //insert the missing datagrams, they will be filled with data by the fec_decode below
-                size_t fec_index = 0;
-                for (size_t i = 0; i < m_fec_coding_k; i++)
-                {
-                    if (i >= block.source_buffers.size() || i != block.source_buffers[i]->index)
-                    {
-                        RX_FEC::Buffer_ptr buffer = m_rx_fec.buffer_pool.acquire();
-                        block.source_buffers.insert(block.source_buffers.begin() + i, buffer);
-                        buffer->is_processed = false;
-                        buffer->data.resize(m_fec_buffer_size);
-                        buffer->index = i;
-                        m_rx_fec.extra_ptrs[fec_index++] = buffer->data.data();
-                    }
-                }
-
-                fec_decode(m_fec, m_rx_fec.source_ptrs.data(), m_rx_fec.extra_ptrs.data(), indices.data(), m_fec_buffer_size);
-
-                //now dispatch them
-                for (size_t i = 0; i < block.source_buffers.size(); i++)
-                {
-                    RX_FEC::Buffer_ptr const& b = block.source_buffers[i];
-                    uint32_t seq_number = block.index * m_fec_coding_k + b->index;
-                    if (!b->is_processed)
-                    {
-                        b->is_processed = true;
-                        //QLOGI("Datagram F {}", seq_number);
-                        //m_video_stats_data_accumulated += b->data.size();
-                        m_rx_callback(rx_packet, b->data.data(), b->data.size());
-                    }
-                }
-
-                //QLOGI("Decoded fac: {}", Clock::now() - start);
-
-                block.index++;
-                block.source_buffers.clear();
-                block.extra_buffers.clear();
-            }
         }
     }
 }

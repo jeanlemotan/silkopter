@@ -1,9 +1,11 @@
 #include "RFMON_Socket.h"
 
-#include <pcap.h>
-
-#include "utils/hw/radiotap/radiotap.h"
-
+#if defined RASPBERRY_PI
+#   include <pcap.h>
+#   include "utils/hw/radiotap/radiotap.h"
+#else
+typedef void pcap_t;
+#endif
 
 namespace util
 {
@@ -73,6 +75,7 @@ std::vector<std::string> RFMON_Socket::enumerate_interfaces()
 {
     std::vector<std::string> res;
 
+#if defined RASPBERRY_PI
     char error_buf[PCAP_ERRBUF_SIZE];
     pcap_if_t* head = nullptr;
     if (pcap_findalldevs(&head, error_buf) == -1)
@@ -100,6 +103,7 @@ std::vector<std::string> RFMON_Socket::enumerate_interfaces()
     }
 
     pcap_freealldevs(head);
+#endif
 
     return res;
 }
@@ -137,6 +141,8 @@ RFMON_Socket::~RFMON_Socket()
 
 auto RFMON_Socket::prepare_filter() -> bool
 {
+#if defined RASPBERRY_PI
+
     struct bpf_program program;
     char program_src[512];
 
@@ -175,6 +181,8 @@ auto RFMON_Socket::prepare_filter() -> bool
     pcap_freecode(&program);
 
     m_impl->rx_pcap_selectable_fd = pcap_get_selectable_fd(m_impl->pcap);
+
+#endif
     return true;
 }
 
@@ -197,6 +205,8 @@ static void radiotap_add_u16(uint8_t*& dst, size_t& idx, uint16_t data)
 
 void RFMON_Socket::prepare_radiotap_header(size_t rate_hz)
 {
+#if defined RASPBERRY_PI
+
     RADIOTAP_HEADER.resize(1024);
     ieee80211_radiotap_header& hdr = reinterpret_cast<ieee80211_radiotap_header&>(*RADIOTAP_HEADER.data());
     hdr.it_version = 0;
@@ -241,6 +251,8 @@ void RFMON_Socket::prepare_radiotap_header(size_t rate_hz)
 
 //    RADIOTAP_HEADER.resize(sizeof(RADIOTAP_HEADER_original));
 //    memcpy(RADIOTAP_HEADER.data(), RADIOTAP_HEADER_original, sizeof(RADIOTAP_HEADER_original));
+
+#endif
 }
 
 void RFMON_Socket::prepare_tx_packet_header(uint8_t* buffer)
@@ -257,6 +269,7 @@ void RFMON_Socket::prepare_tx_packet_header(uint8_t* buffer)
 
 auto RFMON_Socket::process_rx_packet() -> bool
 {
+#if defined RASPBERRY_PI
     struct pcap_pkthdr* pcap_packet_header = nullptr;
 
     uint8_t payload_buffer[MAX_PACKET_SIZE];
@@ -361,12 +374,14 @@ auto RFMON_Socket::process_rx_packet() -> bool
 #endif
     }
 
+#endif
     return true;
 }
 
 
 auto RFMON_Socket::start() -> bool
 {
+#if defined RASPBERRY_PI
     char pcap_error[PCAP_ERRBUF_SIZE] = {0};
 
 //    m_impl->pcap = pcap_open_live(m_interface.c_str(), 2048, 1, -1, pcap_error);
@@ -572,6 +587,8 @@ auto RFMON_Socket::start() -> bool
             perror("Cannot set RX thread priority - using normal");
         }
     }
+#endif
+
 #endif
 
     return true;

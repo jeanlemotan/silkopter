@@ -29,6 +29,18 @@ extern "C"
 
 #define CHECK_STATUS(status, msg) if (status != MMAL_SUCCESS) { QLOGE("{}: (status={} {})", msg, status, mmal_status_to_string(status)); }
 
+#else
+
+typedef void MMAL_COMPONENT_T;
+typedef void MMAL_POOL_T;
+typedef void MMAL_QUEUE_T;
+typedef void MMAL_PORT_T;
+typedef void MMAL_BUFFER_HEADER_T;
+typedef void* EGLImageKHR;
+typedef void* EGLDisplay;
+EGLImageKHR EGL_NO_IMAGE_KHR = nullptr;
+EGLDisplay EGL_NO_DISPLAY = nullptr;
+
 #endif
 
 
@@ -76,6 +88,7 @@ struct Video_Decoder::Impl
 
 static void control_callback(MMAL_PORT_T* port, MMAL_BUFFER_HEADER_T* buffer)
 {
+#if defined RASPBERRY_PI
     switch (buffer->cmd)
     {
     case MMAL_EVENT_EOS:
@@ -91,19 +104,24 @@ static void control_callback(MMAL_PORT_T* port, MMAL_BUFFER_HEADER_T* buffer)
     }
 
     mmal_buffer_header_release(buffer);
+#endif
 }
 
 static void input_callback(MMAL_PORT_T* port, MMAL_BUFFER_HEADER_T* buffer)
 {
+#if defined RASPBERRY_PI
    mmal_buffer_header_release(buffer);
+#endif
 }
 
 /** Callback from the output port.
  * Buffer has been produced by the port and is available for processing. */
 static void output_callback(MMAL_PORT_T* port, MMAL_BUFFER_HEADER_T* buffer)
 {
+#if defined RASPBERRY_PI
    Video_Decoder::Impl* impl = (Video_Decoder::Impl*)port->userdata;
    mmal_queue_put(impl->queue, buffer);
+#endif
 }
 
 
@@ -125,6 +143,7 @@ Video_Decoder::~Video_Decoder()
 
 bool Video_Decoder::init()
 {
+#if defined RASPBERRY_PI
     m_impl->display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
 
     GLCHK(glGenTextures(1, &m_video_texture));
@@ -133,6 +152,7 @@ bool Video_Decoder::init()
     GLCHK(glTexParameterf(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
     GLCHK(glTexParameteri(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
     GLCHK(glTexParameteri(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
+#endif
 
     return true;
 }
@@ -144,6 +164,7 @@ uint32_t Video_Decoder::get_video_texture_id()
 
 void Video_Decoder::release_buffers()
 {
+#if defined RASPBERRY_PI
     //the prevous buffers
     while (!m_impl->old_buffers.empty())
     {
@@ -159,6 +180,7 @@ void Video_Decoder::release_buffers()
             CHECK_STATUS(status, "failed to send buffer");
         }
     }
+#endif
 }
 
 bool Video_Decoder::decode_data(void const* data, size_t size, math::vec2u16 const& resolution)
@@ -184,6 +206,7 @@ bool Video_Decoder::decode_data(void const* data, size_t size, math::vec2u16 con
 
         uint8_t const* data_ptr = reinterpret_cast<uint8_t const*>(data);
 
+#if defined RASPBERRY_PI
         while (size > 0)
         {
             // Send data to decode to the input port of the video decoder
@@ -214,6 +237,7 @@ bool Video_Decoder::decode_data(void const* data, size_t size, math::vec2u16 con
 
             process_output();
         }
+#endif
 //    }
 
     return true;
@@ -221,6 +245,8 @@ bool Video_Decoder::decode_data(void const* data, size_t size, math::vec2u16 con
 
 void Video_Decoder::process_output()
 {
+#if defined RASPBERRY_PI
+
     static const PFNGLEGLIMAGETARGETTEXTURE2DOESPROC glEGLImageTargetTexture2DOES
             = reinterpret_cast<PFNGLEGLIMAGETARGETTEXTURE2DOESPROC>(eglGetProcAddress("glEGLImageTargetTexture2DOES"));
 
@@ -262,6 +288,8 @@ void Video_Decoder::process_output()
             m_impl->old_buffers.push_back(buffer);
         }
     }
+
+#endif
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -272,6 +300,7 @@ void Video_Decoder::process_output()
 
 bool Video_Decoder::create_components(math::vec2u16 const& resolution)
 {
+#if defined RASPBERRY_PI
     MMAL_STATUS_T status = MMAL_EINVAL;
 
     if (m_impl->decoder)
@@ -409,6 +438,7 @@ bool Video_Decoder::create_components(math::vec2u16 const& resolution)
         MMAL_STATUS_T status = mmal_port_send_buffer(output_port, buffer);
         CHECK_STATUS(status, "failed to send buffer");
     }
+#endif
 
     return true;
 }

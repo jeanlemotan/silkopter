@@ -44,6 +44,7 @@ bool RFM22B::init(ISPI& spi, uint8_t sdn_gpio)
     m_sdn_gpio = sdn_gpio;
 
     //configure the GPIOs
+#if defined RASPBERRY_PI
 
     int sdn_gpio_mode = gpioGetMode(m_sdn_gpio);
     if (sdn_gpio_mode == PI_BAD_GPIO)
@@ -86,13 +87,19 @@ bool RFM22B::init(ISPI& spi, uint8_t sdn_gpio)
     set_gpio_function(RFM22B::GPIO::GPIO0, RFM22B::GPIO_Function::TX_STATE);
     set_gpio_function(RFM22B::GPIO::GPIO1, RFM22B::GPIO_Function::RX_STATE);
 
+#endif
+
     return true;
 
 error:
     shutdown();
     m_spi = nullptr;
 
+#if defined RASPBERRY_PI
+
     gpioSetMode(m_sdn_gpio, sdn_gpio_mode);
+
+#endif
     return false;
 }
 
@@ -104,12 +111,14 @@ bool RFM22B::shutdown()
     {
         return false;
     }
+#if defined RASPBERRY_PI
     int res = gpioWrite(m_sdn_gpio, 1);
     if (res != 0)
     {
         QLOGE("Failed to shutdown");
         return false;
     }
+#endif
     return true;
 }
 
@@ -122,12 +131,14 @@ bool RFM22B::powerup()
         return false;
     }
 
+#if defined RASPBERRY_PI
     int res = gpioWrite(m_sdn_gpio, 0);
     if (res != 0)
     {
         QLOGE("Failed to powerup");
         return false;
     }
+#endif
     return true;
 }
 

@@ -63,7 +63,9 @@ void QMLVideoTexture::bind()
 {
     if (m_textureId != 0)
     {
+#if defined RASPBERRY_PI
         glBindTexture(GL_TEXTURE_EXTERNAL_OES, m_textureId);
+#endif
     }
 }
 

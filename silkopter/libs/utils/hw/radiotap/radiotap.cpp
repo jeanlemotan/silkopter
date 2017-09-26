@@ -4,6 +4,8 @@
  * Copyright 2007		Andy Green <andy@warmcat.com>
  */
 
+#if defined RASPBERRY_PI
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
@@ -245,3 +247,4 @@ int ieee80211_radiotap_iterator_next(
 	return -ENOENT;
 }
 
+#endif

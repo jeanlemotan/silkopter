@@ -170,7 +170,7 @@ void RC_Phy::set_callbacks(TX_Callback txcb, RX_Callback rxcb)
 
 void RC_Phy::set_master_listen_rate(size_t rate)
 {
-    rate = std::max(rate, 1u);
+    rate = std::max<size_t>(rate, 1u);
     m_master_listen_period = std::chrono::microseconds(1000000 / rate);
 }
 

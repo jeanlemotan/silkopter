@@ -3,12 +3,10 @@
 #include <deque>
 #include <vector>
 #include <atomic>
-#include "RC_Phy.h"
+#include "esp8266/Phy.h"
 #include "utils/Clock.h"
 #include "utils/Queue.h"
 #include "utils/Pool.h"
-
-struct fec_t;
 
 namespace util
 {
@@ -29,11 +27,10 @@ public:
 
     typedef std::function<void(RX_Packet const& packet, uint8_t* data, size_t size)> RX_Callback;
 
-    RC_Protocol(RC_Phy& phy, RX_Callback rx_callback);
+    RC_Protocol(Phy& phy, RX_Callback rx_callback);
     ~RC_Protocol();
 
-    //NOTE: k < n
-    bool init(uint8_t fec_coding_k, uint8_t fec_coding_n);
+    bool init();
 
     typedef std::vector<uint8_t> Buffer;
 
@@ -41,7 +38,6 @@ public:
     void add_periodic_packet(Clock::duration period, TX_Callback tx_callback);
 
     void send_reliable_packet(uint8_t packet_type, void const* data, size_t size);
-    void send_fec_packet(void const* data, size_t size);
 
     void reset_session();
 
@@ -50,10 +46,10 @@ public:
 public:
     void reset_session_data();
 
-    bool compute_tx_data(RC_Phy::Buffer& buffer, bool& more_data);
-    void process_rx_data(util::comms::RC_Phy::RX_Data const& rx_data, RC_Phy::Buffer& buffer);
+    bool compute_tx_data();
+    void process_rx_data();
 
-    RC_Phy& m_phy;
+    Phy& m_phy;
 
     struct Periodic_Packet
     {
@@ -96,63 +92,6 @@ public:
     } m_rx_periodic;
 
 
-    //fec packets are dumped into this queue
-    fec_t* m_fec = nullptr;
-    uint8_t m_fec_coding_k = 5;
-    uint8_t m_fec_coding_n = 7;
-    size_t m_fec_buffer_size = 400u;
-
-
-    struct TX_FEC
-    {
-        TX_FEC() : source_queue(64), extra_queue(64) {}
-
-        std::array<uint8_t const*, 15> source_ptrs;
-        std::array<uint8_t*, 15> extra_ptrs;
-
-        struct Buffer
-        {
-            uint16_t block_index = 0;
-            uint8_t fec_index = 0;
-            std::vector<uint8_t> data;
-        };
-        Queue<Buffer> source_queue;
-        Queue<Buffer> extra_queue;
-
-        std::unique_ptr<Buffer> crt_source_buffer;
-
-        uint16_t last_block_index = { 0 };
-
-        std::vector<std::unique_ptr<Buffer>> block_source_buffers;
-        std::vector<std::unique_ptr<Buffer>> block_extra_buffers;
-    } m_tx_fec;
-
-    struct RX_FEC
-    {
-        struct Buffer : public Pool_Item_Base
-        {
-            bool is_processed = false;
-            uint8_t index;
-            std::vector<uint8_t> data;
-        };
-        typedef Pool<Buffer> Buffer_Pool;
-        typedef Buffer_Pool::Ptr Buffer_ptr;
-
-        Buffer_Pool buffer_pool;
-
-        struct Block
-        {
-            uint32_t index = 0;
-            std::vector<Buffer_ptr> source_buffers;
-            std::vector<Buffer_ptr> extra_buffers;
-        };
-        Block block;
-
-        std::array<uint8_t const*, 15> source_ptrs;
-        std::array<uint8_t*, 15> extra_ptrs;
-    } m_rx_fec;
-
-
 #pragma pack(push, 1)
 
     struct Header
@@ -166,8 +105,7 @@ public:
         {
             RESET,
             RELIABLE,
-            PERIODIC,
-            FEC
+            PERIODIC
         };
 
         static const size_t MAX_PACKET_TYPE = 60;
@@ -195,17 +133,6 @@ public:
 
         static const size_t MAX_PACKET_INDEX = 126;
         static const size_t INVALID_PACKET_INDEX = 127;
-    };
-
-    struct FEC_Header : public Header
-    {
-        uint16_t block_index : 11; //number incrementing for each block (or N, out of which K are source)
-        uint16_t fec_index : 5;
-        enum Packet_Type : uint8_t
-        {
-            FEC_SOURCE,
-            FEC_EXTRA
-        };
     };
 
 #pragma pack(pop)

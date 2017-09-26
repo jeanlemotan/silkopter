@@ -1,6 +1,7 @@
 #include "HAL.h"
 #include "IBattery_Info.h"
 #include "utils/hw/I2C_Dev.h"
+#include "utils/hw/I2C_BCM.h"
 #include "utils/hw/ADS1115.h"
 #include "Battery_Info_ADS1115.h"
 #include "Gimbal_Control_ADS1115.h"
@@ -42,7 +43,11 @@ struct HAL::Impl
     {}
 
     Comms comms;
+#if defined RASPBERRY_PI
     util::hw::I2C_Dev i2c;
+#else
+    util::hw::I2C_BCM i2c;
+#endif
     util::hw::ADS1115 battery_gimbal_adc;
     silk::Battery_Info_ADS1115 battery_info;
     silk::Gimbal_Control_ADS1115 gimbal_control;
@@ -58,6 +63,7 @@ static bool pigpio_is_isitialized = false;
 
 static bool initialize_pigpio(HAL& hal)
 {
+#if defined RASPBERRY_PI
     if (pigpio_is_isitialized)
     {
         return true;
@@ -77,6 +83,7 @@ static bool initialize_pigpio(HAL& hal)
     }
 
     pigpio_is_isitialized = true;
+#endif
     return true;
 }
 
@@ -84,11 +91,13 @@ static bool initialize_pigpio(HAL& hal)
 
 static void shutdown_pigpio()
 {
+#if defined RASPBERRY_PI
     if (pigpio_is_isitialized)
     {
         gpioTerminate();
     }
     pigpio_is_isitialized = false;
+#endif
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -96,7 +105,7 @@ static void shutdown_pigpio()
 static void generate_settings_file(HAL& hal)
 {
     hal.get_settings() = settings::Settings();
-    hal.get_settings().get_comms().set_video_wlan_interfaces({"wlan1", "wlan2"});
+    //hal.get_settings().get_comms().set_video_wlan_interfaces({"wlan1", "wlan2"});
     hal.save_settings();
 }
 
@@ -116,7 +125,7 @@ static ts::Result<void> load_settings(HAL& hal)
         {
             QLOGW("Failed to load '{}'", filename);
             generate_settings_file(hal);
-            return false;
+            return ts::Error("Failed to load '" + filename + "'");
         }
 
         fs.seekg (0, fs.end);
@@ -192,6 +201,8 @@ ts::Result<void> HAL::init()
         return result.error();
     }
 
+    save_settings();
+
     if (!initialize_pigpio(*this))
     {
         return ts::Error("Cannot initialize pigpio");
@@ -202,11 +213,19 @@ ts::Result<void> HAL::init()
         return ts::Error("Cannot start comms.");
     }
 
+#if defined RASPBERRY_PI
     result = m_impl->i2c.init("/dev/i2c-1");
     if (result != ts::success)
     {
         return result.error();
     }
+#else
+    result = m_impl->i2c.init(0, 0);
+    if (result != ts::success)
+    {
+        return result.error();
+    }
+#endif
 
     {
         util::hw::ADS1115::Descriptor descriptor;

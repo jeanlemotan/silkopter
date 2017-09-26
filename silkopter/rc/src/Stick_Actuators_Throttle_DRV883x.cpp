@@ -1,6 +1,8 @@
 #include "Stick_Actuators_Throttle_DRV883x.h"
 
-#include "utils/hw/pigpio.h"
+#if defined RASPBERRY_PI
+#   include "utils/hw/pigpio.h"
+#endif
 
 constexpr Clock::duration PERIOD = std::chrono::milliseconds(10);
 
@@ -19,8 +21,10 @@ Stick_Actuators_Throttle_DRV883x::Stick_Actuators_Throttle_DRV883x(ISticks const
 
 Stick_Actuators_Throttle_DRV883x::~Stick_Actuators_Throttle_DRV883x()
 {
+#if defined RASPBERRY_PI
     gpioSetMode(m_enable_gpio, PI_INPUT);
     gpioSetMode(m_phase_gpio, PI_INPUT);
+#endif
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -30,6 +34,7 @@ ts::Result<void> Stick_Actuators_Throttle_DRV883x::init()
     m_phase_gpio = 4;
     m_enable_gpio = 5;
 
+#if defined RASPBERRY_PI
     if (gpioSetMode(m_enable_gpio, PI_OUTPUT) != 0)
     {
         return ts::Error("Cannot set 'enable' as output on GPIO " + std::to_string(m_enable_gpio));
@@ -49,6 +54,7 @@ ts::Result<void> Stick_Actuators_Throttle_DRV883x::init()
 
     gpioWrite(m_enable_gpio, 0);
     gpioPWM(m_phase_gpio, 127);
+#endif
 
     PID::Params params;
 
@@ -134,6 +140,7 @@ bool Stick_Actuators_Throttle_DRV883x::set_target_throttle(boost::optional<float
 
 void Stick_Actuators_Throttle_DRV883x::set_enabled(bool yes)
 {
+#if defined RASPBERRY_PI
     if (yes)
     {
         m_enabled_ref_count++;
@@ -159,6 +166,7 @@ void Stick_Actuators_Throttle_DRV883x::set_enabled(bool yes)
             QASSERT(false);
         }
     }
+#endif
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -178,6 +186,7 @@ void Stick_Actuators_Throttle_DRV883x::vibrate(std::vector<Note> const& notes)
     {
         set_enabled(true);
 
+#if defined RASPBERRY_PI
         Note const& note = m_haptic_notes.front();
         if (note.frequency > 0)
         {
@@ -187,6 +196,7 @@ void Stick_Actuators_Throttle_DRV883x::vibrate(std::vector<Note> const& notes)
         {
             gpioSetPWMfrequency(m_phase_gpio, 20000);
         }
+#endif
     }
 }
 
@@ -213,10 +223,12 @@ void Stick_Actuators_Throttle_DRV883x::process()
 
         float factor = m_throttle_pid.process(crt_throttle, target_throttle);
 
+#if defined RASPBERRY_PI
         int pwm = static_cast<int>(factor * 128.f) + 127;
         pwm = math::clamp(pwm, 0, 255);
 
         gpioPWM(m_phase_gpio, pwm);
+#endif
 
         m_last_tp = now;
     }
@@ -227,6 +239,7 @@ void Stick_Actuators_Throttle_DRV883x::process()
         {
             m_haptic_notes.erase(m_haptic_notes.begin());
 
+#if defined RASPBERRY_PI
             if (!m_haptic_notes.empty())
             {
                 Note const& note = m_haptic_notes.front();
@@ -244,6 +257,7 @@ void Stick_Actuators_Throttle_DRV883x::process()
                 gpioSetPWMfrequency(m_phase_gpio, 20000);
                 set_enabled(false);
             }
+#endif
 
             m_last_note_tp = now;
         }

@@ -18,19 +18,23 @@ SPI_PIGPIO::SPI_PIGPIO()
 
 SPI_PIGPIO::~SPI_PIGPIO()
 {
+#if defined RASPBERRY_PI
     if (m_fd >= 0)
     {
         spiClose(m_fd);
     }
+#endif
 }
 
 ts::Result<void> SPI_PIGPIO::init(uint32_t port, uint32_t channel, uint32_t speed, uint32_t mode)
 {
+#if defined RASPBERRY_PI
     if (m_fd >= 0)
     {
         spiClose(m_fd);
         m_fd = -1;
     }
+#endif
 
     if (port > 1)
     {
