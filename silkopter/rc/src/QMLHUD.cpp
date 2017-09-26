@@ -42,26 +42,33 @@ void QMLHUD::init(silk::HAL& hal)
 
     m_multirotorState = m_hal->get_comms().get_multirotor_state();
 
-    setMode((Mode)m_multirotorState.mode);
+    setTargetMode((Mode)m_multirotorState.mode);
 
     //start up in a safe state if flying
     if (m_multirotorState.mode == silk::stream::IMultirotor_Commands::Mode::FLY)
     {
-        setVerticalMode(VerticalMode::VERTICAL_MODE_ALTITUDE);
-        setHorizontalMode(HorizontalMode::HORIZONTAL_MODE_POSITION);
-        setYawMode(YawMode::YAW_MODE_ANGLE);
+        setTargetVerticalMode(VerticalMode::VERTICAL_MODE_ALTITUDE);
+        setTargetHorizontalMode(HorizontalMode::HORIZONTAL_MODE_POSITION);
+        setTargetYawMode(YawMode::YAW_MODE_ANGLE);
     }
 
     m_isInitialized = true;
 }
 
 
-QMLHUD::Mode QMLHUD::mode() const
+QMLHUD::Mode QMLHUD::currentMode() const
+{
+    std::lock_guard<std::recursive_mutex> lg(m_mutex);
+    return (Mode)m_multirotorState.mode;
+}
+
+QMLHUD::Mode QMLHUD::targetMode() const
 {
     std::lock_guard<std::recursive_mutex> lg(m_mutex);
     return (Mode)m_multirotorCommands.mode;
 }
-void QMLHUD::setMode(Mode newMode)
+
+void QMLHUD::setTargetMode(Mode newMode)
 {
     std::lock_guard<std::recursive_mutex> lg(m_mutex);
 
@@ -79,8 +86,8 @@ void QMLHUD::setMode(Mode newMode)
     {
         //input.get_haptic().vibrate(k_alert_haptic);
         //m_idle_mode_data.is_pressed = false;
-        setVerticalMode(VerticalMode::VERTICAL_MODE_THRUST);
-        setHorizontalMode(HorizontalMode::HORIZONTAL_MODE_ANGLE);
+        setTargetVerticalMode(VerticalMode::VERTICAL_MODE_THRUST);
+        setTargetHorizontalMode(HorizontalMode::HORIZONTAL_MODE_ANGLE);
     }
 
     if (oldMode == Mode::MODE_IDLE)
@@ -90,34 +97,39 @@ void QMLHUD::setMode(Mode newMode)
     else if (oldMode == Mode::MODE_RETURN_HOME)
     {
         //when leaving RTH, these are the best modes
-        setVerticalMode(VerticalMode::VERTICAL_MODE_ALTITUDE);
-        setHorizontalMode(HorizontalMode::HORIZONTAL_MODE_POSITION);
+        setTargetVerticalMode(VerticalMode::VERTICAL_MODE_ALTITUDE);
+        setTargetHorizontalMode(HorizontalMode::HORIZONTAL_MODE_POSITION);
         //no need to change the yaw as it's user controllable in RTH
     }
 
-    bool oldConfirmed = isModeConfirmed();
+    bool oldConfirmed = isTargetModeConfirmed();
 
     m_multirotorCommands.mode = (silk::stream::IMultirotor_Commands::Mode)newMode;
-    emit modeChanged();
+    emit targetModeChanged();
 
-    if (isModeConfirmed() != oldConfirmed)
+    if (isTargetModeConfirmed() != oldConfirmed)
     {
-        emit modeConfirmedChanged();
+        emit targetModeConfirmedChanged();
     }
 }
 
-bool QMLHUD::isModeConfirmed() const
+bool QMLHUD::isTargetModeConfirmed() const
 {
     std::lock_guard<std::recursive_mutex> lg(m_mutex);
     return m_multirotorCommands.mode == m_multirotorState.mode;
 }
 
-QMLHUD::VerticalMode QMLHUD::verticalMode() const
+QMLHUD::VerticalMode QMLHUD::currentVerticalMode() const
+{
+    std::lock_guard<std::recursive_mutex> lg(m_mutex);
+    return (VerticalMode)m_multirotorState.vertical_mode;
+}
+QMLHUD::VerticalMode QMLHUD::targetVerticalMode() const
 {
     std::lock_guard<std::recursive_mutex> lg(m_mutex);
     return (VerticalMode)m_multirotorCommands.vertical_mode;
 }
-void QMLHUD::setVerticalMode(VerticalMode newMode)
+void QMLHUD::setTargetVerticalMode(VerticalMode newMode)
 {
     std::lock_guard<std::recursive_mutex> lg(m_mutex);
     if ((VerticalMode)m_multirotorCommands.vertical_mode == newMode && m_isInitialized)
@@ -142,28 +154,33 @@ void QMLHUD::setVerticalMode(VerticalMode newMode)
     }
     //input.get_stick_actuators().set_target_throttle(m_multirotor_commands.sticks.throttle);
 
-    bool oldConfirmed = isVerticalModeConfirmed();
+    bool oldConfirmed = isTargetVerticalModeConfirmed();
 
     m_multirotorCommands.vertical_mode = (silk::stream::IMultirotor_Commands::Vertical_Mode)newMode;
-    emit verticalModeChanged();
+    emit targetVerticalModeChanged();
 
-    if (isVerticalModeConfirmed() != oldConfirmed)
+    if (isTargetVerticalModeConfirmed() != oldConfirmed)
     {
-        emit verticalModeConfirmedChanged();
+        emit targetVerticalModeConfirmedChanged();
     }
 }
-bool QMLHUD::isVerticalModeConfirmed() const
+bool QMLHUD::isTargetVerticalModeConfirmed() const
 {
     std::lock_guard<std::recursive_mutex> lg(m_mutex);
-    return true;
+    return m_multirotorState.vertical_mode == m_multirotorCommands.vertical_mode;
 }
 
-QMLHUD::HorizontalMode QMLHUD::horizontalMode() const
+QMLHUD::HorizontalMode QMLHUD::currentHorizontalMode() const
+{
+    std::lock_guard<std::recursive_mutex> lg(m_mutex);
+    return (HorizontalMode)m_multirotorState.horizontal_mode;
+}
+QMLHUD::HorizontalMode QMLHUD::targetHorizontalMode() const
 {
     std::lock_guard<std::recursive_mutex> lg(m_mutex);
     return (HorizontalMode)m_multirotorCommands.horizontal_mode;
 }
-void QMLHUD::setHorizontalMode(HorizontalMode newMode)
+void QMLHUD::setTargetHorizontalMode(HorizontalMode newMode)
 {
     std::lock_guard<std::recursive_mutex> lg(m_mutex);
     if ((HorizontalMode)m_multirotorCommands.horizontal_mode == newMode && m_isInitialized)
@@ -176,28 +193,33 @@ void QMLHUD::setHorizontalMode(HorizontalMode newMode)
     //m_last_horizontal_mode_change_tp = Clock::now();
     //input.get_haptic().vibrate(k_mode_change_haptic);
 
-    bool oldConfirmed = isHorizontalModeConfirmed();
+    bool oldConfirmed = isTargetHorizontalModeConfirmed();
 
     m_multirotorCommands.horizontal_mode = (silk::stream::IMultirotor_Commands::Horizontal_Mode)newMode;
-    emit horizontalModeChanged();
+    emit targetHorizontalModeChanged();
 
-    if (isHorizontalModeConfirmed() != oldConfirmed)
+    if (isTargetHorizontalModeConfirmed() != oldConfirmed)
     {
-        emit horizontalModeConfirmedChanged();
+        emit targetHorizontalModeConfirmedChanged();
     }
 }
-bool QMLHUD::isHorizontalModeConfirmed() const
+bool QMLHUD::isTargetHorizontalModeConfirmed() const
 {
     std::lock_guard<std::recursive_mutex> lg(m_mutex);
-    return true;
+    return m_multirotorState.horizontal_mode == m_multirotorCommands.horizontal_mode;
 }
 
-QMLHUD::YawMode QMLHUD::yawMode() const
+QMLHUD::YawMode QMLHUD::currentYawMode() const
+{
+    std::lock_guard<std::recursive_mutex> lg(m_mutex);
+    return (YawMode)m_multirotorState.yaw_mode;
+}
+QMLHUD::YawMode QMLHUD::targetYawMode() const
 {
     std::lock_guard<std::recursive_mutex> lg(m_mutex);
     return (YawMode)m_multirotorCommands.yaw_mode;
 }
-void QMLHUD::setYawMode(YawMode newMode)
+void QMLHUD::setTargetYawMode(YawMode newMode)
 {
     std::lock_guard<std::recursive_mutex> lg(m_mutex);
     if ((YawMode)m_multirotorCommands.yaw_mode == newMode && m_isInitialized)
@@ -209,20 +231,20 @@ void QMLHUD::setYawMode(YawMode newMode)
 
     //m_last_yaw_mode_change_tp = Clock::now();
     //input.get_haptic().vibrate(k_mode_change_haptic);
-    bool oldConfirmed = isYawModeConfirmed();
+    bool oldConfirmed = isTargetYawModeConfirmed();
 
     m_multirotorCommands.yaw_mode = (silk::stream::IMultirotor_Commands::Yaw_Mode)newMode;
-    emit yawModeChanged();
+    emit targetYawModeChanged();
 
-    if (isYawModeConfirmed() != oldConfirmed)
+    if (isTargetYawModeConfirmed() != oldConfirmed)
     {
-        emit yawModeConfirmedChanged();
+        emit targetYawModeConfirmedChanged();
     }
 }
-bool QMLHUD::isYawModeConfirmed() const
+bool QMLHUD::isTargetYawModeConfirmed() const
 {
     std::lock_guard<std::recursive_mutex> lg(m_mutex);
-    return true;
+    return m_multirotorState.yaw_mode == m_multirotorCommands.yaw_mode;
 }
 
 QMLHUD::StreamQuality QMLHUD::streamQuality() const
@@ -315,7 +337,7 @@ int QMLHUD::radioRxRSSI() const
 int QMLHUD::videoRxRSSI() const
 {
     std::lock_guard<std::recursive_mutex> lg(m_mutex);
-    return m_hal->get_comms().get_video_streamer().get_input_dBm();
+    return 0;//m_hal->get_comms().get_video_streamer().get_input_dBm();
 }
 
 QVector3D QMLHUD::localFrameEuler() const

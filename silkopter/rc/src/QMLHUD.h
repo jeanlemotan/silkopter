@@ -19,6 +19,8 @@ public:
 
     void process();
 
+    ///////////////////////////////////////////////////////////////////////////////////
+
     enum class Mode
     {
         MODE_IDLE = (int)silk::stream::IMultirotor_Commands::Mode::IDLE,
@@ -28,11 +30,17 @@ public:
         MODE_LAND = (int)silk::stream::IMultirotor_Commands::Mode::LAND
     };
     Q_ENUM(Mode)
-    Q_PROPERTY(Mode mode READ mode WRITE setMode NOTIFY modeChanged)
-    Mode mode() const;
-    void setMode(Mode mode);
-    Q_PROPERTY(bool isModeConfirmed READ isModeConfirmed NOTIFY modeConfirmedChanged)
-    bool isModeConfirmed() const;
+    Q_PROPERTY(Mode currentMode READ currentMode NOTIFY currentModeChanged)
+    Mode currentMode() const;
+
+    Q_PROPERTY(Mode targetMode READ targetMode WRITE setTargetMode NOTIFY targetModeChanged)
+    Mode targetMode() const;
+    void setTargetMode(Mode mode);
+
+    Q_PROPERTY(bool isTargetModeConfirmed READ isTargetModeConfirmed NOTIFY targetModeConfirmedChanged)
+    bool isTargetModeConfirmed() const;
+
+    ///////////////////////////////////////////////////////////////////////////////////
 
     enum class VerticalMode
     {
@@ -40,11 +48,17 @@ public:
         VERTICAL_MODE_ALTITUDE = (int)silk::stream::IMultirotor_Commands::Vertical_Mode::ALTITUDE,
     };
     Q_ENUM(VerticalMode)
-    Q_PROPERTY(VerticalMode verticalMode READ verticalMode WRITE setVerticalMode NOTIFY verticalModeChanged)
-    VerticalMode verticalMode() const;
-    void setVerticalMode(VerticalMode mode);
-    Q_PROPERTY(bool isVerticalModeConfirmed READ isVerticalModeConfirmed NOTIFY verticalModeConfirmedChanged)
-    bool isVerticalModeConfirmed() const;
+    Q_PROPERTY(VerticalMode currentVerticalMode READ currentVerticalMode NOTIFY currentVerticalModeChanged)
+    VerticalMode currentVerticalMode() const;
+
+    Q_PROPERTY(VerticalMode targetVerticalMode READ targetVerticalMode WRITE setTargetVerticalMode NOTIFY targetVerticalModeChanged)
+    VerticalMode targetVerticalMode() const;
+    void setTargetVerticalMode(VerticalMode mode);
+
+    Q_PROPERTY(bool isTargetVerticalModeConfirmed READ isTargetVerticalModeConfirmed NOTIFY targetVerticalModeConfirmedChanged)
+    bool isTargetVerticalModeConfirmed() const;
+
+    ///////////////////////////////////////////////////////////////////////////////////
 
     enum class HorizontalMode
     {
@@ -53,11 +67,17 @@ public:
         HORIZONTAL_MODE_POSITION = (int)silk::stream::IMultirotor_Commands::Horizontal_Mode::POSITION,
     };
     Q_ENUM(HorizontalMode)
-    Q_PROPERTY(HorizontalMode horizontalMode READ horizontalMode WRITE setHorizontalMode NOTIFY horizontalModeChanged)
-    HorizontalMode horizontalMode() const;
-    void setHorizontalMode(HorizontalMode mode);
-    Q_PROPERTY(bool isHorizontalModeConfirmed READ isHorizontalModeConfirmed NOTIFY horizontalModeConfirmedChanged)
-    bool isHorizontalModeConfirmed() const;
+    Q_PROPERTY(HorizontalMode currentHorizontalMode READ currentHorizontalMode NOTIFY currentHorizontalModeChanged)
+    HorizontalMode currentHorizontalMode() const;
+
+    Q_PROPERTY(HorizontalMode targetHorizontalMode READ targetHorizontalMode WRITE setTargetHorizontalMode NOTIFY targetHorizontalModeChanged)
+    HorizontalMode targetHorizontalMode() const;
+    void setTargetHorizontalMode(HorizontalMode mode);
+
+    Q_PROPERTY(bool isTargetHorizontalModeConfirmed READ isTargetHorizontalModeConfirmed NOTIFY targetHorizontalModeConfirmedChanged)
+    bool isTargetHorizontalModeConfirmed() const;
+
+    ///////////////////////////////////////////////////////////////////////////////////
 
     enum class YawMode
     {
@@ -65,11 +85,17 @@ public:
         YAW_MODE_ANGLE = (int)silk::stream::IMultirotor_Commands::Yaw_Mode::ANGLE
     };
     Q_ENUM(YawMode)
-    Q_PROPERTY(YawMode yawMode READ yawMode WRITE setYawMode NOTIFY yawModeChanged)
-    YawMode yawMode() const;
-    void setYawMode(YawMode mode);
-    Q_PROPERTY(bool isYawModeConfirmed READ isYawModeConfirmed NOTIFY yawModeConfirmedChanged)
-    bool isYawModeConfirmed() const;
+    Q_PROPERTY(YawMode currentYawMode READ currentYawMode NOTIFY currentYawModeChanged)
+    YawMode currentYawMode() const;
+
+    Q_PROPERTY(YawMode targetYawMode READ targetYawMode WRITE setTargetYawMode NOTIFY targetYawModeChanged)
+    YawMode targetYawMode() const;
+    void setTargetYawMode(YawMode mode);
+
+    Q_PROPERTY(bool isTargetYawModeConfirmed READ isTargetYawModeConfirmed NOTIFY targetYawModeConfirmedChanged)
+    bool isTargetYawModeConfirmed() const;
+
+    ///////////////////////////////////////////////////////////////////////////////////
 
     enum class StreamQuality
     {
@@ -83,11 +109,15 @@ public:
     Q_PROPERTY(bool isStreamQualityConfirmed READ isStreamQualityConfirmed NOTIFY streamQualityConfirmedChanged)
     bool isStreamQualityConfirmed() const;
 
+    ///////////////////////////////////////////////////////////////////////////////////
+
     Q_PROPERTY(bool isRecording READ isRecording WRITE setRecording NOTIFY recordingChanged)
     bool isRecording() const;
     void setRecording(bool recording);
     Q_PROPERTY(bool isRecordingConfirmed READ isRecordingConfirmed NOTIFY recordingConfirmedChanged)
     bool isRecordingConfirmed() const;
+
+    ///////////////////////////////////////////////////////////////////////////////////
 
     Q_PROPERTY(float batteryChargeUsed READ batteryChargeUsed NOTIFY telemetryChanged)
     float batteryChargeUsed() const;
@@ -123,17 +153,21 @@ public:
     void setGimbalPitch(float pitch);
 
 signals:
-    void modeChanged();
-    void modeConfirmedChanged();
+    void currentModeChanged();
+    void targetModeChanged();
+    void targetModeConfirmedChanged();
 
-    void verticalModeChanged();
-    void verticalModeConfirmedChanged();
+    void currentVerticalModeChanged();
+    void targetVerticalModeChanged();
+    void targetVerticalModeConfirmedChanged();
 
-    void horizontalModeChanged();
-    void horizontalModeConfirmedChanged();
+    void currentHorizontalModeChanged();
+    void targetHorizontalModeChanged();
+    void targetHorizontalModeConfirmedChanged();
 
-    void yawModeChanged();
-    void yawModeConfirmedChanged();
+    void currentYawModeChanged();
+    void targetYawModeChanged();
+    void targetYawModeConfirmedChanged();
 
     void telemetryChanged();
     void gimbalPitchChanged();

@@ -27,6 +27,9 @@ public:
     typedef std::false_type can_be_filtered_t;
 
     typedef IMultirotor_Commands::Mode Mode;
+    typedef IMultirotor_Commands::Vertical_Mode Vertical_Mode;
+    typedef IMultirotor_Commands::Horizontal_Mode Horizontal_Mode;
+    typedef IMultirotor_Commands::Yaw_Mode Yaw_Mode;
 
     struct Value
     {
@@ -56,6 +59,9 @@ public:
         float throttle = 0;
 
         Mode mode = Mode::IDLE;
+        Vertical_Mode vertical_mode = Vertical_Mode::THRUST;
+        Horizontal_Mode horizontal_mode = Horizontal_Mode::ANGLE;
+        Yaw_Mode yaw_mode = Yaw_Mode::ANGLE_RATE;
     };
 
     typedef stream::Sample<Value>     Sample;
