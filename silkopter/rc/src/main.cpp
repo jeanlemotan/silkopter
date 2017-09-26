@@ -55,7 +55,6 @@ int main(int argc, char *argv[])
     q::logging::add_logger(q::logging::Logger_uptr(new q::logging::Console_Logger()));
     q::logging::set_decorations(q::logging::Decorations(q::logging::Decoration::TIMESTAMP, q::logging::Decoration::LEVEL, q::logging::Decoration::TOPIC));
 
-
     //    boost::shared_ptr<asio::io_service::work> work(new asio::io_service::work(s_async_io_service));
     //    std::thread_group worker_threads;
     //    for(int x = 0; x < 4; ++x)
@@ -153,12 +152,19 @@ int main(int argc, char *argv[])
         QMLVideoSurface::init(decoder);
     });
 
-    std::vector<uint8_t> video_data;
     math::vec2u16 resolution;
-    QObject::connect(&view, &QQuickView::beforeRendering, [&video_data, &resolution, &decoder]()
+    typedef std::vector<uint8_t> Video_Packet;
+    typedef Pool<Video_Packet>::Ptr Video_Packet_ptr;
+    Pool<Video_Packet> video_packet_pool;
+    Queue<Video_Packet_ptr> video_packet_queue(32);
+
+    QObject::connect(&view, &QQuickView::beforeRendering, [&video_packet_queue, &resolution, &decoder]()
     {
-        decoder.decode_data(video_data.data(), video_data.size(), resolution);
-        video_data.clear();
+        Video_Packet_ptr packet;
+        while (video_packet_queue.pop_front(packet, false))
+        {
+            decoder.decode_data(packet->data(), packet->size(), resolution);
+        }
         QMLVideoSurface::setResolution(resolution);
     });
 
@@ -169,7 +175,7 @@ int main(int argc, char *argv[])
     format.setBlueBufferSize(8);
     format.setSamples(1);
     format.setSwapBehavior(QSurfaceFormat::TripleBuffer);
-    //format.setSwapInterval(0);
+    format.setSwapInterval(0);
     view.setFormat(format);
 
     view.setClearBeforeRendering(false);
@@ -179,13 +185,20 @@ int main(int argc, char *argv[])
     view.create();
     view.show();
 
+
     menus.push("HUD.qml");
 
-    hal.get_comms().get_video_streamer().on_data_received = [&video_data, &resolution](void const* data, size_t size, math::vec2u16 const& res)
+    //FILE* f = fopen("video.h264", "wb");
+
+    hal.get_comms().on_video_data_received = [&video_packet_pool, &video_packet_queue, &resolution](void const* data, size_t size, math::vec2u16 const& res)
     {
-        size_t offset = video_data.size();
-        video_data.resize(offset + size);
-        memcpy(video_data.data() + offset, data, size);
+        //fwrite(data, size, 1, f);
+        //fflush(f);
+        Video_Packet_ptr packet = video_packet_pool.acquire();
+        packet->resize(size);
+        memcpy(packet->data(), data, size);
+        video_packet_queue.push_back(packet, true);
+
         resolution = res;
     };
 
