@@ -51,7 +51,7 @@ ts::Result<void> SPI_Dev::init(std::string const& device, uint32_t speed)
         return ts::Error("Can't set bits per word");
     }
 
-    ret = ioctl(m_fd, SPI_IOC_WR_MAX_SPEED_HZ, &m_speed);
+    ret = ioctl(m_fd, SPI_IOC_WR_MAX_SPEED_HZ, &speed);
     if (ret == -1)
     {
         ::close(m_fd);
