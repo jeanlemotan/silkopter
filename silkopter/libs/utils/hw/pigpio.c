@@ -4433,6 +4433,14 @@ static void spiGoS(
 
    spiReg[SPI_CLK] = 250000000/speed;
 
+   int fifoPrefill = 64;
+  while((txCnt < cnt) && ((spiReg[SPI_CS] & SPI_CS_TXD)) && --fifoPrefill > 0)
+  {
+     if (txBuf) spiReg[SPI_FIFO] = txBuf[txCnt];
+     else       spiReg[SPI_FIFO] = 0;
+     txCnt++;
+  }
+
    spiReg[SPI_CS] = spiDefaults | SPI_CS_TA; /* start */
 
    cnt = cnt4w;
@@ -4459,27 +4467,28 @@ static void spiGoS(
    /* now switch to 3-wire bus */
 
    cnt += cnt3w;
+    if (cnt > 0)
+    {
+       spiReg[SPI_CS] |= SPI_CS_REN;
 
-   spiReg[SPI_CS] |= SPI_CS_REN;
+       while((txCnt < cnt) || (rxCnt < cnt))
+       {
+          while((rxCnt < cnt) && ((spiReg[SPI_CS] & SPI_CS_RXD)))
+          {
+             if (rxBuf) rxBuf[rxCnt] = spiReg[SPI_FIFO];
+             else       spi_dummy    = spiReg[SPI_FIFO];
+             rxCnt++;
+          }
 
-   while((txCnt < cnt) || (rxCnt < cnt))
-   {
-      while((rxCnt < cnt) && ((spiReg[SPI_CS] & SPI_CS_RXD)))
-      {
-         if (rxBuf) rxBuf[rxCnt] = spiReg[SPI_FIFO];
-         else       spi_dummy    = spiReg[SPI_FIFO];
-         rxCnt++;
-      }
-
-      while((txCnt < cnt) && ((spiReg[SPI_CS] & SPI_CS_TXD)))
-      {
-         if (txBuf) spiReg[SPI_FIFO] = txBuf[txCnt];
-         else       spiReg[SPI_FIFO] = 0;
-         txCnt++;
-      }
-   }
-
-   while (!(spiReg[SPI_CS] & SPI_CS_DONE)) ;
+          while((txCnt < cnt) && ((spiReg[SPI_CS] & SPI_CS_TXD)))
+          {
+             if (txBuf) spiReg[SPI_FIFO] = txBuf[txCnt];
+             else       spiReg[SPI_FIFO] = 0;
+             txCnt++;
+          }
+       }
+       while (!(spiReg[SPI_CS] & SPI_CS_DONE)) ;
+    }
 
    spiReg[SPI_CS] = spiDefaults; /* stop */
 }
