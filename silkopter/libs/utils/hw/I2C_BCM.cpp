@@ -43,7 +43,7 @@ bool I2C_BCM::read(uint8_t address, uint8_t* data, size_t size)
 
     if (m_is_used.exchange(true) == true)
     {
-        QLOGE("SPI bus in use");
+        QLOGE("I2C bus in use");
         return false;
     }
 
@@ -67,7 +67,7 @@ bool I2C_BCM::write(uint8_t address, uint8_t const* data, size_t size)
 
     if (m_is_used.exchange(true) == true)
     {
-        QLOGE("SPI bus in use");
+        QLOGE("I2C bus in use");
         return false;
     }
 
@@ -92,7 +92,7 @@ bool I2C_BCM::read_register(uint8_t address, uint8_t reg, uint8_t* data, size_t 
 
     if (m_is_used.exchange(true) == true)
     {
-        QLOGE("SPI bus in use");
+        QLOGE("I2C bus in use");
         return false;
     }
 
@@ -116,7 +116,7 @@ bool I2C_BCM::write_register(uint8_t address, uint8_t reg, uint8_t const* data, 
 
     if (m_is_used.exchange(true) == true)
     {
-        QLOGE("SPI bus in use");
+        QLOGE("I2C bus in use");
         return false;
     }
 
