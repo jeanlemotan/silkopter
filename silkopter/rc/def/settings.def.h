@@ -195,59 +195,62 @@ public:
   struct Comms
   {
   public:
+    typedef int64_t channel_t;
+    typedef float tx_power_t;
+    typedef int64_t mtu_t;
+    enum class rate_t
+    {
+      B_1M_CCK = 0,
+      B_2M_CCK = 1,
+      B_2M_CCK_SHOST_PREAMBLE = 2,
+      B_5_5M_CCK = 3,
+      B_5_5M_CCK_SHOST_PREAMBLE = 4,
+      B_11M_CCK = 5,
+      B_11M_CCK_SHOST_PREAMBLE = 6,
+      G_6M_ODFM = 7,
+      G_9M_ODFM = 8,
+      G_12M_ODFM = 9,
+      G_18M_ODFM = 10,
+      G_24M_ODFM = 11,
+      G_36M_ODFM = 12,
+      G_48M_ODFM = 13,
+      G_54M_ODFM = 14,
+    };
+
+    typedef int64_t fec_coding_k_t;
+    typedef int64_t fec_coding_n_t;
     virtual ~Comms() = default;
-    void set_video_wlan_interfaces(std::vector<std::string> const& value);
-    void set_video_wlan_interfaces(std::vector<std::string>&& value);
-    auto get_video_wlan_interfaces() const -> std::vector<std::string> const&;
-    auto get_video_wlan_interfaces() -> std::vector<std::string>&;
+    void set_channel(channel_t const& value);
+    void set_channel(channel_t&& value);
+    auto get_channel() const -> channel_t const&;
 
-    void set_video_fec_coding_k(uint32_t const& value);
-    void set_video_fec_coding_k(uint32_t&& value);
-    auto get_video_fec_coding_k() const -> uint32_t const&;
+    void set_tx_power(tx_power_t const& value);
+    void set_tx_power(tx_power_t&& value);
+    auto get_tx_power() const -> tx_power_t const&;
 
-    void set_video_fec_coding_n(uint32_t const& value);
-    void set_video_fec_coding_n(uint32_t&& value);
-    auto get_video_fec_coding_n() const -> uint32_t const&;
+    void set_mtu(mtu_t const& value);
+    void set_mtu(mtu_t&& value);
+    auto get_mtu() const -> mtu_t const&;
 
-    void set_video_max_latency_ms(uint32_t const& value);
-    void set_video_max_latency_ms(uint32_t&& value);
-    auto get_video_max_latency_ms() const -> uint32_t const&;
+    void set_rate(rate_t const& value);
+    void set_rate(rate_t&& value);
+    auto get_rate() const -> rate_t const&;
 
-    void set_video_reset_duration_ms(uint32_t const& value);
-    void set_video_reset_duration_ms(uint32_t&& value);
-    auto get_video_reset_duration_ms() const -> uint32_t const&;
+    void set_fec_coding_k(fec_coding_k_t const& value);
+    void set_fec_coding_k(fec_coding_k_t&& value);
+    auto get_fec_coding_k() const -> fec_coding_k_t const&;
 
-    void set_rc_sdn_gpio(gpio_t const& value);
-    void set_rc_sdn_gpio(gpio_t&& value);
-    auto get_rc_sdn_gpio() const -> gpio_t const&;
-
-    void set_rc_spi_device(std::string const& value);
-    void set_rc_spi_device(std::string&& value);
-    auto get_rc_spi_device() const -> std::string const&;
-
-    void set_rc_spi_speed(uint32_t const& value);
-    void set_rc_spi_speed(uint32_t&& value);
-    auto get_rc_spi_speed() const -> uint32_t const&;
-
-    void set_rc_channel(uint8_t const& value);
-    void set_rc_channel(uint8_t&& value);
-    auto get_rc_channel() const -> uint8_t const&;
-
-    void set_rc_xtal_adjustment(float const& value);
-    void set_rc_xtal_adjustment(float&& value);
-    auto get_rc_xtal_adjustment() const -> float const&;
+    void set_fec_coding_n(fec_coding_n_t const& value);
+    void set_fec_coding_n(fec_coding_n_t&& value);
+    auto get_fec_coding_n() const -> fec_coding_n_t const&;
 
   private:
-    std::vector<std::string> m_video_wlan_interfaces;
-    uint32_t m_video_fec_coding_k = uint32_t{12};
-    uint32_t m_video_fec_coding_n = uint32_t{20};
-    uint32_t m_video_max_latency_ms = uint32_t{500};
-    uint32_t m_video_reset_duration_ms = uint32_t{1000};
-    gpio_t m_rc_sdn_gpio = gpio_t{6};
-    std::string m_rc_spi_device = std::string{"/dev/spidev0.0"};
-    uint32_t m_rc_spi_speed = uint32_t{16000000};
-    uint8_t m_rc_channel = uint8_t{0};
-    float m_rc_xtal_adjustment = float{0};
+    channel_t m_channel = channel_t{1};
+    tx_power_t m_tx_power = tx_power_t{20.500000f};
+    mtu_t m_mtu = mtu_t{1360};
+    rate_t m_rate = rate_t{Settings::Comms::rate_t::B_11M_CCK};
+    fec_coding_k_t m_fec_coding_k = fec_coding_k_t{12};
+    fec_coding_n_t m_fec_coding_n = fec_coding_n_t{20};
   };
 
   struct Battery_Info
@@ -351,13 +354,13 @@ ts::Result<void> deserialize(Settings::Input& value, ts::sz::Value const& sz_val
 ts::sz::Value serialize(Settings::Input const& value);
 ts::Result<void> deserialize(Settings::HW& value, ts::sz::Value const& sz_value);
 ts::sz::Value serialize(Settings::HW const& value);
+ts::Result<void> deserialize(Settings::Comms::rate_t& value, ts::sz::Value const& sz_value);
+ts::sz::Value serialize(Settings::Comms::rate_t const& value);
 ts::Result<void> deserialize(Settings::Comms& value, ts::sz::Value const& sz_value);
 ts::sz::Value serialize(Settings::Comms const& value);
 ts::Result<void> deserialize(Settings::Battery_Info& value, ts::sz::Value const& sz_value);
 ts::sz::Value serialize(Settings::Battery_Info const& value);
 ts::Result<void> deserialize(Settings& value, ts::sz::Value const& sz_value);
 ts::sz::Value serialize(Settings const& value);
-ts::Result<void> deserialize(std::vector<std::string>& value, ts::sz::Value const& sz_value);
-ts::sz::Value serialize(std::vector<std::string> const& value);
 }
 }

@@ -305,7 +305,7 @@ bool Phy::send_data(void const* data, size_t size)
             if (left == size)
             {
                 //first time add the crc
-                chunk_size -= 2; //leave some space
+                chunk_size = std::min(CHUNK_SIZE - 2, left);
                 memcpy(dst_ptr, &crc, 2);
                 dst_ptr += 2;
             }
@@ -331,7 +331,7 @@ bool Phy::send_data(void const* data, size_t size)
             if (left == size)
             {
                 //first time add the crc
-                chunk_size -= 2; //leave some space
+                chunk_size = std::min(CHUNK_SIZE - 2, left);
                 memcpy(dst_ptr, &crc, 2);
                 dst_ptr += 2;
             }
@@ -388,6 +388,7 @@ bool Phy::receive_data(void* data, size_t& size, int& rssi)
     size = std::min<uint32_t>(status & 0xFFFF, MAX_PACKET_SIZE);
     if (size < 2)
     {
+        size = 0;
         return false;
     }
 
@@ -413,7 +414,7 @@ bool Phy::receive_data(void* data, size_t& size, int& rssi)
         {
             memcpy(&crc, src_ptr, 2);
             src_ptr += 2;
-            chunk_size -= 2;
+            chunk_size = std::min(CHUNK_SIZE - 2, left);
         }
         memcpy(data_ptr, src_ptr, chunk_size);
         left -= chunk_size;
@@ -430,7 +431,8 @@ bool Phy::receive_data(void* data, size_t& size, int& rssi)
 //        {
 //            printf("%02X,", ((uint8_t const*)data)[i]);
 //        }
-//        std::cout << "\nCRC for size " << std::to_string(size) << " is " << std::to_string(crc) << " \n";
+        //std::cout << "CRC for size " << std::to_string(size) << " is " << std::to_string(crc) << " \n";
+        size = 0;
         return false;
     }
 

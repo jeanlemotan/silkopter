@@ -64,18 +64,40 @@ struct Settings
 
     struct Comms
     {
-    	vector<string> video_wlan_interfaces;
-    	uint32_t video_fec_coding_k = 12;
-    	uint32_t video_fec_coding_n = 20;
-    	uint32_t video_max_latency_ms = 500;
-    	uint32_t video_reset_duration_ms = 1000;
+        alias channel_t = int : [ min = 1, max = 11 ];
+        channel_t channel = 1: [ ui_name = "Channel" ];
 
-    	gpio_t rc_sdn_gpio = 6;
-    	string rc_spi_device = "/dev/spidev0.0";
-    	uint32_t rc_spi_speed = 16000000;
+        alias tx_power_t = float : [ min = 0.f, max = 20.5f ];
+        tx_power_t tx_power = 20.5f: [ ui_name = "TX Power" ];
 
-        uint8_t rc_channel = 0;
-        float rc_xtal_adjustment = 0.f;
+        alias mtu_t = int : [ min = 128, max = 1360 ];
+        mtu_t mtu = 1360: [ ui_name = "MTU" ];
+
+	enum rate_t
+	{
+      B_1M_CCK : [ ui_name = "11b 1Mbps CCK" ],
+      B_2M_CCK : [ ui_name = "11b 2Mbps CCK" ],
+      B_2M_CCK_SHOST_PREAMBLE : [ ui_name = "11b 2Mbps Short Preamble CCK" ],
+      B_5_5M_CCK : [ ui_name = "11b 5.5Mbps CCK" ],
+      B_5_5M_CCK_SHOST_PREAMBLE : [ ui_name = "11b 5.5Mbps Short Preamble CCK" ],
+      B_11M_CCK : [ ui_name = "11b 11Mbps CCK" ],
+      B_11M_CCK_SHOST_PREAMBLE : [ ui_name = "11b 11Mbps Short Preamble CCK" ],
+      G_6M_ODFM : [ ui_name = "11g 6Mbps ODFM" ],
+      G_9M_ODFM : [ ui_name = "11g 9Mbps ODFM" ],
+      G_12M_ODFM : [ ui_name = "11g 12Mbps ODFM" ],
+      G_18M_ODFM : [ ui_name = "11g 18Mbps ODFM" ],
+      G_24M_ODFM : [ ui_name = "11g 24Mbps ODFM" ],
+      G_36M_ODFM : [ ui_name = "11g 36Mbps ODFM" ],
+      G_48M_ODFM : [ ui_name = "11g 48Mbps ODFM" ],
+      G_54M_ODFM : [ ui_name = "11g 56Mbps ODFM" ],
+	};
+
+	rate_t rate = rate_t::B_11M_CCK : [ ui_name = "Rate" ];
+
+        alias fec_coding_k_t = int : [ min = 1, max = 32 ];
+        alias fec_coding_n_t = int : [ min = 1, max = 32 ];
+        fec_coding_k_t fec_coding_k = 12 : [ ui_name = "FEC Coding K" ];
+        fec_coding_n_t fec_coding_n = 20 : [ ui_name = "FEC Coding N" ];
     };
 
     Comms comms;

@@ -20,7 +20,7 @@ public:
         HW_FAILURE
     };
 
-    Init_Result init_pigpio(size_t port, size_t channel, size_t speed = 8000000, size_t comms_delay = 20);
+    Init_Result init_pigpio(size_t port, size_t channel, size_t speed = 8000000, size_t comms_delay = 25);
     Init_Result init_dev(const char* device, size_t speed = 8000000, size_t comms_delay = 20);
 
     void process();
@@ -34,11 +34,11 @@ public:
     {
       RATE_B_1M_CCK,
       RATE_B_2M_CCK,
-      RATE_G_2M_CCK_SHOST_PREAMBLE,
+      RATE_B_2M_CCK_SHOST_PREAMBLE,
       RATE_B_5_5M_CCK,
-      RATE_G_5_5M_CCK_SHOST_PREAMBLE,
+      RATE_B_5_5M_CCK_SHOST_PREAMBLE,
       RATE_B_11M_CCK,
-      RATE_G_11M_CCK_SHOST_PREAMBLE,
+      RATE_B_11M_CCK_SHOST_PREAMBLE,
       RATE_G_6M_ODFM,
       RATE_G_9M_ODFM,
       RATE_G_12M_ODFM,

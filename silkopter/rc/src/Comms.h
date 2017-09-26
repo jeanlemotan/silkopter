@@ -1,5 +1,6 @@
 #pragma once
 
+#include <mutex>
 #include "common/Comm_Data.h"
 
 #include "common/stream/IAcceleration.h"
@@ -36,10 +37,10 @@
 #include "common/stream/IMultirotor_State.h"
 
 #include "common/Comm_Data.h"
-#include "utils/comms/RC_Phy.h"
-#include "utils/comms/RC_Protocol.h"
-#include "utils/comms/Video_Streamer.h"
-#include "utils/hw/ISPI.h"
+#include "utils/comms/esp8266/Phy.h"
+#include "utils/comms/esp8266/Fec_Encoder.h"
+#include "utils/comms/esp8266/Pool.h"
+#include "utils/comms/esp8266/Queue.h"
 
 #include <asio.hpp>
 
@@ -52,6 +53,7 @@ class Comms : q::util::Noncopyable
 {
 public:
     Comms(HAL& hal);
+    ~Comms();
 
     bool start();
 
@@ -63,15 +65,13 @@ public:
     int8_t get_rx_dBm() const;
     int8_t get_tx_dBm() const;
 
-    util::comms::RC_Phy const& get_rc_phy() const;
-    util::comms::RC_Phy& get_rc_phy();
+    Phy const& get_phy() const;
+    Phy& get_phy();
 
     Clock::time_point get_last_rx_tp() const;
 
-    util::comms::Video_Streamer const& get_video_streamer() const;
-    util::comms::Video_Streamer& get_video_streamer();
+    std::function<void(void const*, size_t, math::vec2u16 const&)> on_video_data_received;
 
-//    void get_video_data(std::vector<uint8_t>& dst, math::vec2u16& resolution);
     stream::IMultirotor_State::Value get_multirotor_state() const;
 
     void send_multirotor_commands_value(stream::IMultirotor_Commands::Value const& value);
@@ -84,33 +84,61 @@ private:
 
     void reset();
 
-    bool compute_multirotor_commands_packet(util::comms::RC_Protocol::Buffer& buffer, uint8_t& packet_type);
-    bool compute_camera_commands_packet(util::comms::RC_Protocol::Buffer& buffer, uint8_t& packet_type);
-    void process_rx_packet(util::comms::RC_Protocol::RX_Packet const& packet, uint8_t* data, size_t size);
+    bool sent_multirotor_commands_packet();
+    bool send_camera_commands_packet();
+    void process_rx_packet(rc_comms::Packet_Type packet_type, std::vector<uint8_t> const& data, size_t offset);
+    void process_received_data(std::vector<uint8_t> const& data);
 
-    util::comms::RC_Phy m_rc_phy;
-    util::comms::RC_Protocol m_rc_protocol;
-    util::comms::RC_Protocol::RX_Packet m_rx_packet;
+//    util::comms::RC_Phy m_rc_phy;
+//    util::comms::RC_Protocol m_rc_protocol;
+//    util::comms::RC_Protocol::RX_Packet m_rx_packet;
 
-    util::comms::Video_Streamer m_video_streamer;
+//    util::comms::Video_Streamer m_video_streamer;
 
     bool m_is_connected = false;
 
     uint32_t m_last_req_id = 0;
 
-    std::unique_ptr<util::hw::ISPI> m_spi;
+    Phy m_phy;
+    Fec_Encoder m_fec_encoder_rx;
 
     mutable std::mutex m_samples_mutex;
-    std::vector<uint8_t> m_rx_packet_sz_buffer;
     stream::IMultirotor_State::Value m_multirotor_state;
     stream::IMultirotor_Commands::Value m_multirotor_commands;
     stream::ICamera_Commands::Value m_camera_commands;
 
+
+    std::mutex m_rezolution_mutex;
+    math::vec2u16 m_rezolution;
+//    std::vector<uint8_t> m_serialization_buffer;
+//    std::vector<uint8_t> m_phy_received_data;
+
     //mark the commands as infinitely old
-    Clock::time_point m_multirotor_commands_tp = Clock::time_point(Clock::duration::zero());
-    Clock::time_point m_camera_commands_tp = Clock::time_point(Clock::duration::zero());
+    Clock::time_point m_multirotor_commands_last_valid_tp = Clock::time_point(Clock::duration::zero());
+    Clock::time_point m_multirotor_commands_last_sent_tp = Clock::time_point(Clock::duration::zero());
+
+    Clock::time_point m_camera_commands_last_valid_tp = Clock::time_point(Clock::duration::zero());
+    Clock::time_point m_camera_commands_last_sent_tp = Clock::time_point(Clock::duration::zero());
 
     Clock::time_point m_telemetry_tp = Clock::time_point(Clock::duration::zero());
+
+    struct Phy_Data
+    {
+        Phy_Data()
+            : tx_queue(32)
+            , rx_queue(32)
+        {}
+
+        typedef std::vector<uint8_t> Packet;
+        typedef Pool<Packet>::Ptr Packet_ptr;
+        Pool<Packet> packet_pool;
+        Queue<Packet_ptr> tx_queue;
+        Queue<Packet_ptr> rx_queue;
+        bool thread_exit = false;
+        std::thread thread;
+    } m_phy_data;
+
+    void phy_thread_proc();
 };
 
 }

@@ -28,7 +28,7 @@ constexpr size_t SPI_CHANNEL = 0;
 constexpr size_t SPI_SPEED = 4000000;
 #else
 const char* SPI_DEVICE = "/dev/spidev0.0";
-constexpr size_t SPI_SPEED = 5000000;
+constexpr size_t SPI_SPEED = 10000000;
 #endif
 
 
@@ -36,50 +36,72 @@ constexpr size_t SPI_SPEED = 5000000;
 
 Comms::Comms(HAL& hal)
     : m_hal(hal)
-    , m_rc_phy(true)
-    , m_rc_protocol(m_rc_phy, std::bind(&Comms::process_rx_packet, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3))
-    //, m_video_streamer()
 {
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+Comms::~Comms()
+{
+    m_phy_data.thread_exit = true;
+    m_phy_data.tx_queue.exit();
+    m_phy_data.rx_queue.exit();
+
+    if (m_phy_data.thread.joinable())
+    {
+        m_phy_data.thread.join();
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 bool Comms::start()
 {
+#if !defined RASPBERRY_PI
+    return true;
+#endif
+
     disconnect();
 
-    settings::Settings::Comms const& comms = m_hal.get_settings().get_comms();
-
-    util::comms::Video_Streamer::RX_Descriptor rx_descriptor;
-    rx_descriptor.interfaces = comms.get_video_wlan_interfaces();
-    rx_descriptor.coding_k = comms.get_video_fec_coding_k();
-    rx_descriptor.coding_n = comms.get_video_fec_coding_n();
-    rx_descriptor.max_latency = std::chrono::milliseconds(comms.get_video_max_latency_ms());
-    rx_descriptor.reset_duration = std::chrono::milliseconds(comms.get_video_reset_duration_ms());
-
-#ifdef USE_SPI_PIGPIO
-    util::hw::SPI_PIGPIO* spi = new util::hw::SPI_PIGPIO();
-    m_spi.reset(spi);
-
-    ts::Result<void> result = spi->init(SPI_PORT, SPI_CHANNEL, SPI_SPEED, 0);
-#else
-    util::hw::SPI_Dev* spi = new util::hw::SPI_Dev();
-    m_spi.reset(spi);
-
-    ts::Result<void> result = spi->init(SPI_DEVICE, SPI_SPEED);
-#endif
-    if (result != ts::success)
-    {
-        QLOGW("Cannot start spi: {}", result.error().what());
-        return false;
-    }
+    settings::Settings::Comms const& comms_settings = m_hal.get_settings().get_comms();
 
     try
     {
-        m_is_connected = m_rc_phy.init(*m_spi,
-                                       comms.get_rc_sdn_gpio())
-                      && m_rc_protocol.init(2, 3)
-                      && m_video_streamer.init_rx(rx_descriptor);
+        if (m_phy.init_dev(SPI_DEVICE, SPI_SPEED) != Phy::Init_Result::OK)
+        {
+            QLOGE("Cannot start phy");
+            return false;
+        }
+
+        Fec_Encoder::RX_Descriptor rx_descriptor;
+        rx_descriptor.coding_k = comms_settings.get_fec_coding_k();
+        rx_descriptor.coding_n = comms_settings.get_fec_coding_n();
+        rx_descriptor.mtu = comms_settings.get_mtu();
+        if (!m_fec_encoder_rx.init_rx(rx_descriptor))
+        {
+            QLOGE("Cannot start the rx fec encoder");
+            return false;
+        }
+
+        m_fec_encoder_rx.on_rx_data_decoded = [this](void const* data, size_t size)
+        {
+            math::vec2u16 rezolution;
+            {
+                std::lock_guard<std::mutex> lg(m_rezolution_mutex);
+                rezolution = m_rezolution;
+            }
+
+            if (on_video_data_received)
+            {
+                on_video_data_received(data, size, rezolution);
+            }
+        };
+
+        m_phy.set_rate(static_cast<Phy::Rate>(comms_settings.get_rate()));
+        m_phy.set_power(comms_settings.get_tx_power());
+        m_phy.set_channel(comms_settings.get_channel());
+
+        m_is_connected = true;
     }
     catch(std::exception e)
     {
@@ -92,25 +114,40 @@ bool Comms::start()
         return false;
     }
 
-    uint8_t channel = m_hal.get_settings().get_comms().get_rc_channel();
-    if (!m_rc_phy.set_channel(channel))
-    {
-        QLOGW("Cannot set channel {}", channel);
-        return false;
-    }
-    m_rc_phy.set_xtal_adjustment(m_hal.get_settings().get_comms().get_rc_xtal_adjustment());
-
-    //m_rc_phy.set_rate(100);
-    m_rc_protocol.add_periodic_packet(std::chrono::milliseconds(30), std::bind(&Comms::compute_multirotor_commands_packet, this, std::placeholders::_1, std::placeholders::_2));
-    m_rc_protocol.add_periodic_packet(std::chrono::milliseconds(200), std::bind(&Comms::compute_camera_commands_packet, this, std::placeholders::_1, std::placeholders::_2));
-
-    //send connected message so the UAV can send vital data back
-    m_rc_protocol.reset_session();
-    m_rc_protocol.send_reliable_packet(static_cast<uint8_t>(rc_comms::Packet_Type::RC_CONNECTED), nullptr, 0);
+    m_phy_data.thread = std::thread(std::bind(&Comms::phy_thread_proc, this));
 
     QLOGI("Started receiving video");
 
     return true;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+void Comms::phy_thread_proc()
+{
+    Phy_Data::Packet_ptr rx_packet = m_phy_data.packet_pool.acquire();
+    rx_packet->resize(Phy::MAX_PAYLOAD_SIZE);
+
+    while (!m_phy_data.thread_exit)
+    {
+        Phy_Data::Packet_ptr tx_packet;
+        m_phy_data.tx_queue.pop_front(tx_packet, false);
+
+        if (tx_packet)
+        {
+            m_phy.send_data(tx_packet->data(), tx_packet->size());
+        }
+
+        size_t rx_size = 0;
+        int rx_rssi = 0;
+        while (m_phy.receive_data(rx_packet->data(), rx_size, rx_rssi))
+        {
+            rx_packet->resize(rx_size);
+            m_phy_data.rx_queue.push_back_timeout(rx_packet, std::chrono::milliseconds(5));
+            rx_packet = m_phy_data.packet_pool.acquire();
+            rx_packet->resize(Phy::MAX_PAYLOAD_SIZE);
+        }
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -137,43 +174,30 @@ void Comms::reset()
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-util::comms::RC_Phy const& Comms::get_rc_phy() const
+Phy const& Comms::get_phy() const
 {
-    return m_rc_phy;
+    return m_phy;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-util::comms::RC_Phy& Comms::get_rc_phy()
+Phy& Comms::get_phy()
 {
-    return m_rc_phy;
+    return m_phy;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-util::comms::Video_Streamer const& Comms::get_video_streamer() const
+bool Comms::sent_multirotor_commands_packet()
 {
-    return m_video_streamer;
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////
-
-util::comms::Video_Streamer& Comms::get_video_streamer()
-{
-    return m_video_streamer;
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////
-
-bool Comms::compute_multirotor_commands_packet(util::comms::RC_Protocol::Buffer& buffer, uint8_t& packet_type)
-{
-    if (Clock::now() - m_multirotor_commands_tp < std::chrono::milliseconds(500))
+    if (Clock::now() - m_multirotor_commands_last_valid_tp < std::chrono::milliseconds(500))
     {
-        packet_type = static_cast<uint8_t>(rc_comms::Packet_Type::MULTIROTOR_COMMANDS);
-
-        size_t off = buffer.size();
-        util::serialization::serialize(buffer, m_multirotor_commands, off);
-
+        Phy_Data::Packet_ptr packet = m_phy_data.packet_pool.acquire();
+        packet->clear();
+        packet->push_back(static_cast<uint8_t>(silk::rc_comms::Packet_Type::MULTIROTOR_COMMANDS));
+        size_t off = packet->size();
+        util::serialization::serialize(*packet, m_multirotor_commands, off);
+        m_phy_data.tx_queue.push_back(packet, false);
         return true;
     }
     else
@@ -185,15 +209,16 @@ bool Comms::compute_multirotor_commands_packet(util::comms::RC_Protocol::Buffer&
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool Comms::compute_camera_commands_packet(util::comms::RC_Protocol::Buffer& buffer, uint8_t& packet_type)
+bool Comms::send_camera_commands_packet()
 {
-    if (Clock::now() - m_camera_commands_tp < std::chrono::milliseconds(500))
+    if (Clock::now() - m_camera_commands_last_valid_tp < std::chrono::milliseconds(500))
     {
-        packet_type = static_cast<uint8_t>(rc_comms::Packet_Type::CAMERA_COMMANDS);
-
-        size_t off = buffer.size();
-        util::serialization::serialize(buffer, m_camera_commands, off);
-
+        Phy_Data::Packet_ptr packet = m_phy_data.packet_pool.acquire();
+        packet->clear();
+        packet->push_back(static_cast<uint8_t>(silk::rc_comms::Packet_Type::CAMERA_COMMANDS));
+        size_t off = packet->size();
+        util::serialization::serialize(*packet, m_camera_commands, off);
+        m_phy_data.tx_queue.push_back(packet, false);
         return true;
     }
     else
@@ -205,89 +230,80 @@ bool Comms::compute_camera_commands_packet(util::comms::RC_Protocol::Buffer& buf
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-void Comms::process_rx_packet(util::comms::RC_Protocol::RX_Packet const& packet, uint8_t* data, size_t size)
+void Comms::process_rx_packet(rc_comms::Packet_Type packet_type, std::vector<uint8_t> const& data, size_t offset)
 {
-    m_rx_packet.rx_dBm = packet.rx_dBm;
-    m_rx_packet.tx_dBm = packet.tx_dBm;
-    m_rx_packet.rx_timepoint = packet.rx_timepoint;
-
-    if (packet.packet_type == 0xFF)
-    {
-        //video_data_received(data, size, math::vec2u16(640, 480));
-        return;
-    }
-
-    m_rx_packet_sz_buffer.resize(size);
-    if (size > 0)
-    {
-        memcpy(m_rx_packet_sz_buffer.data(), data, size);
-    }
-
+//    m_rx_packet.rx_dBm = packet.rx_dBm;
+//    m_rx_packet.tx_dBm = packet.tx_dBm;
+//    m_rx_packet.rx_timepoint = packet.rx_timepoint;
 
     bool dsz_ok = false;
-    if (packet.packet_type == static_cast<uint8_t>(rc_comms::Packet_Type::MULTIROTOR_STATE_PART1))
+    if (packet_type == rc_comms::Packet_Type::MULTIROTOR_STATE)
     {
-        size_t off = 0;
         std::lock_guard<std::mutex> lg(m_samples_mutex);
         stream::IMultirotor_State::Value value = m_multirotor_state;
-        dsz_ok = util::serialization::deserialize_part1(m_rx_packet_sz_buffer, value, off);
+        dsz_ok = util::serialization::deserialize(data, value, offset);
         if (dsz_ok)
         {
             m_multirotor_state = value;
         }
     }
-    else if (packet.packet_type == static_cast<uint8_t>(rc_comms::Packet_Type::MULTIROTOR_STATE_PART2))
+    else if (packet_type == rc_comms::Packet_Type::VIDEO)
     {
-        size_t off = 0;
-        std::lock_guard<std::mutex> lg(m_samples_mutex);
-        stream::IMultirotor_State::Value value = m_multirotor_state;
-        dsz_ok = util::serialization::deserialize_part2(m_rx_packet_sz_buffer, value, off);
-        if (dsz_ok)
+        math::vec2u16 rezolution;
+        if (util::serialization::deserialize(data, rezolution, offset))
         {
-            m_multirotor_state = value;
-        }
-    }
-    else if (packet.packet_type == static_cast<uint8_t>(rc_comms::Packet_Type::MULTIROTOR_STATE_HOME))
-    {
-        size_t off = 0;
-        std::lock_guard<std::mutex> lg(m_samples_mutex);
-        stream::IMultirotor_State::Value value = m_multirotor_state;
-        dsz_ok = util::serialization::deserialize_home(m_rx_packet_sz_buffer, value, off);
-        if (dsz_ok)
-        {
-            m_multirotor_state = value;
+            {
+                std::lock_guard<std::mutex> lg(m_rezolution_mutex);
+                m_rezolution = rezolution;
+            }
+            m_fec_encoder_rx.add_rx_packet(data.data() + offset, data.size() - offset, false);
+            dsz_ok = true;
         }
     }
     else
     {
-        QLOGW("Unknown incoming packet type: {}", static_cast<int>(packet.packet_type));
+        QLOGW("Unknown incoming packet type: {}", static_cast<int>(packet_type));
     }
 
     if (!dsz_ok)
     {
-        QLOGW("Cannot deserialize incoming multirotor state value");
+        QLOGW("Cannot deserialize incoming packet");
     }
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+void Comms::process_received_data(std::vector<uint8_t> const& data)
+{
+    if (data.size() < sizeof(rc_comms::Packet_Type))
+    {
+        QLOGE("Invalid data received");
+        return;
+    }
+
+    rc_comms::Packet_Type packet_type = *reinterpret_cast<const rc_comms::Packet_Type*>(data.data());
+    process_rx_packet(packet_type, data, sizeof(rc_comms::Packet_Type));
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 int8_t Comms::get_rx_dBm() const
 {
-    return m_rx_packet.rx_dBm;
+    return 0;//m_rx_packet.rx_dBm;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 int8_t Comms::get_tx_dBm() const
 {
-    return m_rx_packet.tx_dBm;
+    return 0;//m_rx_packet.tx_dBm;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 Clock::time_point Comms::get_last_rx_tp() const
 {
-    return m_rx_packet.rx_timepoint;
+    return Clock::now();//m_rx_packet.rx_timepoint;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -319,7 +335,7 @@ stream::IMultirotor_State::Value Comms::get_multirotor_state() const
 void Comms::send_multirotor_commands_value(stream::IMultirotor_Commands::Value const& value)
 {
     m_multirotor_commands = value;
-    m_multirotor_commands_tp = Clock::now();
+    m_multirotor_commands_last_valid_tp = Clock::now();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -327,64 +343,42 @@ void Comms::send_multirotor_commands_value(stream::IMultirotor_Commands::Value c
 void Comms::send_camera_commands_value(stream::ICamera_Commands::Value const& value)
 {
     m_camera_commands = value;
-    m_camera_commands_tp = Clock::now();
+    m_camera_commands_last_valid_tp = Clock::now();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 void Comms::process()
 {
-    m_video_streamer.process();
-
     Clock::time_point now = Clock::now();
     if (now - m_telemetry_tp >= std::chrono::milliseconds(30))
     {
         m_telemetry_tp = now;
     }
-    if (now - m_rx_packet.rx_timepoint >= std::chrono::seconds(2))
+//    if (now - m_rx_packet.rx_timepoint >= std::chrono::seconds(2))
+//    {
+//        m_rx_packet.rx_dBm = 0;
+//        m_rx_packet.tx_dBm = 0;
+//    }
+
     {
-        m_rx_packet.rx_dBm = 0;
-        m_rx_packet.tx_dBm = 0;
+        Phy_Data::Packet_ptr rx_packet;
+        while (m_phy_data.rx_queue.pop_front(rx_packet, false))
+        {
+            process_received_data(*rx_packet);
+        }
     }
 
-//    if (Clock::now() - get_last_rx_tp() > std::chrono::seconds(5))
-//    {
-//        static FILE* fff = nullptr;
-//        if (!fff)
-//        {
-//            srand(time(nullptr));
-//            fff = fopen("a.h264", "rb");
-//            if (!fff)
-//            {
-//                exit(1);
-//            }
-//        }
-
-//        static std::vector<uint8_t> video_data;
-//        video_data.resize((rand() % 3280) + 512);
-//        int r = fread(video_data.data(), 1, video_data.size(), fff);
-//        if (r == 0)
-//        {
-//            QLOGI("DONE, REWIND!!!!!");
-//            fseek(fff, 0, SEEK_SET);
-//        }
-//        video_data.resize(r);
-//    }
-
-//    static Clock::time_point xxx = Clock::time_point(Clock::duration::zero());
-//    if (m_multirotor_state.mode != m_multirotor_commands.mode)
-//    {
-//        if (xxx.time_since_epoch().count() == 0)
-//        {
-//            xxx = Clock::now();
-//        }
-//        if (Clock::now() - xxx > std::chrono::seconds(1))
-//        {
-//            QLOGI("Simulated mode switch from {} to {}", m_multirotor_state.mode, m_multirotor_commands.mode);
-//            m_multirotor_state.mode = m_multirotor_commands.mode;
-//            xxx = Clock::time_point(Clock::duration::zero());
-//        }
-//    }
+    if (now - m_multirotor_commands_last_sent_tp > std::chrono::milliseconds(20))
+    {
+        m_multirotor_commands_last_sent_tp = now;
+        sent_multirotor_commands_packet();
+    }
+    if (now - m_camera_commands_last_sent_tp > std::chrono::milliseconds(100))
+    {
+        m_camera_commands_last_sent_tp = now;
+        send_camera_commands_packet();
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////

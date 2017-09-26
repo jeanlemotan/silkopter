@@ -25,8 +25,7 @@ struct Datagram_Header
 //    uint32_t crc = 0;
     uint32_t block_index : 24;
     uint32_t datagram_index : 8;
-    uint16_t is_fec : 1;
-    uint16_t size : 15;
+    uint16_t size : 16;
 };
 
 #pragma pack(pop)
@@ -38,6 +37,10 @@ static_assert(Fec_Encoder::PAYLOAD_OVERHEAD == sizeof(Datagram_Header), "Check t
 
 struct Fec_Encoder::TX
 {
+    TX(size_t max_queue_length)
+        : datagram_queue(max_queue_length)
+    {}
+
     struct Datagram
     {
         std::vector<uint8_t> data;
@@ -48,9 +51,7 @@ struct Fec_Encoder::TX
 
     ////////
     //These are accessed by both the TX thread and the main thread
-    std::mutex datagram_queue_mutex;
-    std::deque<Datagram_ptr> datagram_queue;
-    std::condition_variable datagram_queue_cv;
+    Queue<Datagram_ptr> datagram_queue;
     ////////
 
     ////////
@@ -67,9 +68,12 @@ struct Fec_Encoder::TX
 
 struct Fec_Encoder::RX
 {
+    RX(size_t max_queue_length)
+        : datagram_queue(max_queue_length)
+    {}
+
     struct Datagram
     {
-        bool is_fec = false;
         bool is_processed = false;
         uint32_t block_index = 0;
         uint32_t datagram_index = 0;
@@ -81,9 +85,7 @@ struct Fec_Encoder::RX
 
     ////////
     //These are accessed by both the RX thread and the main thread
-    std::mutex datagram_queue_mutex;
-    std::deque<Datagram_ptr> datagram_queue;
-    std::condition_variable datagram_queue_cv;
+    Queue<Datagram_ptr> datagram_queue;
     ////////
 
     struct Block
@@ -105,7 +107,7 @@ struct Fec_Encoder::RX
 };
 
 
-static void seal_datagram(Fec_Encoder::TX::Datagram& datagram, size_t header_offset, uint32_t block_index, uint8_t datagram_index, bool is_fec)
+static void seal_datagram(Fec_Encoder::TX::Datagram& datagram, size_t header_offset, uint32_t block_index, uint8_t datagram_index)
 {
     assert(datagram.data.size() >= header_offset + sizeof(Fec_Encoder::TX::Datagram));
 
@@ -114,14 +116,16 @@ static void seal_datagram(Fec_Encoder::TX::Datagram& datagram, size_t header_off
     header.size = datagram.data.size() - header_offset;
     header.block_index = block_index;
     header.datagram_index = datagram_index;
-    header.is_fec = is_fec ? 1 : 0;
 
 //    header.crc = q::util::murmur_hash(datagram.data.data() + header_offset, header.size, 0);
 }
 
 struct Fec_Encoder::Impl
 {
-    size_t tx_packet_header_length = 0;
+    Impl(size_t max_queue_length)
+        : tx(max_queue_length)
+        , rx(max_queue_length)
+    {}
 
     TX tx;
     RX rx;
@@ -137,23 +141,9 @@ Fec_Encoder::Fec_Encoder()
 
 Fec_Encoder::~Fec_Encoder()
 {
-    if (m_is_tx)
-    {
-        {
-            std::lock_guard<std::mutex> lg(m_impl->tx.datagram_queue_mutex);
-            m_exit = true;
-        }
-        m_impl->tx.datagram_queue_cv.notify_all();
-    }
-    else
-    {
-        {
-            std::lock_guard<std::mutex> lg(m_impl->rx.datagram_queue_mutex);
-            m_exit = true;
-        }
-        m_impl->rx.datagram_queue_cv.notify_all();
-    }
-
+    m_exit = true;
+    m_impl->tx.datagram_queue.exit();
+    m_impl->rx.datagram_queue.exit();
     if (m_thread.joinable())
     {
         m_thread.join();
@@ -164,7 +154,7 @@ Fec_Encoder::~Fec_Encoder()
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-bool Fec_Encoder::add_rx_packet(void const* _data, size_t size)
+bool Fec_Encoder::add_rx_packet(void const* _data, size_t size, bool block)
 {
     if (m_exit)
     {
@@ -189,18 +179,14 @@ bool Fec_Encoder::add_rx_packet(void const* _data, size_t size)
     }
 
     {
-        std::lock_guard<std::mutex> lg(rx.datagram_queue_mutex);
-
         RX::Datagram_ptr datagram = rx.datagram_pool.acquire();
         datagram->data.resize(size - sizeof(Datagram_Header));
         datagram->block_index = block_index;
         datagram->datagram_index = datagram_index;
-        datagram->is_fec = header.is_fec;
         memcpy(datagram->data.data(), data + sizeof(Datagram_Header), size - sizeof(Datagram_Header));
 
-        rx.datagram_queue.push_back(datagram);
+        rx.datagram_queue.push_back(datagram, block);
     }
-    rx.datagram_queue_cv.notify_all();
 
     return true;
 }
@@ -216,6 +202,8 @@ bool Fec_Encoder::init_tx(TX_Descriptor const& descriptor)
     m_coding_k = descriptor.coding_k;
     m_coding_n = descriptor.coding_n;
 
+    m_impl.reset(new Impl(m_tx_descriptor.max_enqueued_packets));
+
     return init();
 }
 
@@ -229,6 +217,8 @@ bool Fec_Encoder::init_rx(RX_Descriptor const& descriptor)
 
     m_coding_k = descriptor.coding_k;
     m_coding_n = descriptor.coding_n;
+
+    m_impl.reset(new Impl(m_rx_descriptor.max_enqueued_packets));
 
     return init();
 }
@@ -249,7 +239,6 @@ bool Fec_Encoder::init()
     }
     m_fec = fec_new(m_coding_k, m_coding_n);
 
-    m_impl.reset(new Impl);
 
     /////////////////////
     //calculate some offsets and sizes
@@ -270,7 +259,6 @@ bool Fec_Encoder::init()
         datagram.block_index = 0;
         datagram.datagram_index = 0;
         datagram.is_processed = false;
-        datagram.is_fec = false;
         datagram.data.clear();
         datagram.data.reserve(m_transport_datagram_size);
     };
@@ -309,90 +297,21 @@ void Fec_Encoder::tx_thread_proc()
 {
     TX& tx = m_impl->tx;
 
-#if 0 //TEST THROUGHPUT
-    TX::Datagram_ptr datagram = tx.datagram_pool.acquire();
-
-    size_t s = std::min(8192u, m_transport_datagram_size - datagram->data.size());
-    size_t offset = datagram->data.size();
-    datagram->data.resize(offset + s);
-
-    auto start = Clock::now();
-
-    size_t packets = 0;
-    size_t total_size = 0;
-
     while (!m_exit)
     {
-        int isize = static_cast<int>(datagram->data.size());
+        size_t start = tx.block_datagrams.size();
+        tx.datagram_queue.pop_front(tx.block_datagrams, m_coding_k, true);
 
-        std::lock_guard<std::mutex> lg(tx.pcap.mutex);
-        int r = pcap_inject(tx.pcap.pcap, datagram->data.data(), isize);
-        if (r <= 0)
+        //seal and send the newly added ones
+        for (size_t i = start; i < tx.block_datagrams.size(); i++)
         {
-            QLOGW("Trouble injecting packet: {} / {}: {}", r, isize, pcap_geterr(tx.pcap.pcap));
-            //result = Result::ERROR;
-        }
-        if (r > 0)
-        {
-            if (r != isize)
+            TX::Datagram_ptr datagram = tx.block_datagrams[i];
+            seal_datagram(*datagram, m_datagram_header_offset, tx.last_block_index, i);
+            if (on_tx_data_encoded)
             {
-                QLOGW("Incomplete packet sent: {} / {}", r, isize);
-            }
-            else
-            {
-                packets++;
-                total_size += isize;
+                on_tx_data_encoded(datagram->data.data(), datagram->data.size());
             }
         }
-
-        auto now = Clock::now();
-        if (now - start > std::chrono::seconds(1))
-        {
-            float f = std::chrono::duration<float>(now - start).count();
-            start = now;
-
-            QLOGI("Packets: {}, Size: {}MB", packets / f, (total_size / (1024.f * 1024.f)) / f);
-            packets = 0;
-            total_size = 0;
-        }
-    }
-#endif
-
-
-    while (!m_exit)
-    {
-        {
-            //wait for data
-            std::unique_lock<std::mutex> lg(tx.datagram_queue_mutex);
-            while (tx.datagram_queue.empty() && !m_exit)
-            {
-                tx.datagram_queue_cv.wait(lg);
-            }
-            if (m_exit)
-            {
-                break;
-            }
-
-            //consume as many as it can
-            while (!tx.datagram_queue.empty() && tx.block_datagrams.size() < m_coding_k)
-            {
-                TX::Datagram_ptr datagram = tx.datagram_queue.front();
-                tx.datagram_queue.pop_front();
-
-                if (datagram)
-                {
-                    seal_datagram(*datagram, m_datagram_header_offset, tx.last_block_index, tx.block_datagrams.size(), false);
-
-                    if (on_tx_data_encoded)
-                    {
-                        on_tx_data_encoded(datagram->data.data(), datagram->data.size());
-                    }
-
-                    tx.block_datagrams.push_back(datagram);
-                }
-            }
-        }
-        tx.datagram_queue_cv.notify_all();
 
         //compute fec datagrams
         if (tx.block_datagrams.size() >= m_coding_k)
@@ -404,7 +323,8 @@ void Fec_Encoder::tx_thread_proc()
                 //init data for the fec_encode
                 for (size_t i = 0; i < m_coding_k; i++)
                 {
-                    m_fec_src_datagram_ptrs[i] = tx.block_datagrams[i]->data.data() + m_payload_offset;
+                    TX::Datagram_ptr datagram = tx.block_datagrams[i];
+                    m_fec_src_datagram_ptrs[i] = datagram->data.data() + m_payload_offset;
                 }
 
                 size_t fec_count = m_coding_n - m_coding_k;
@@ -422,7 +342,7 @@ void Fec_Encoder::tx_thread_proc()
                 //seal the result
                 for (size_t i = 0; i < fec_count; i++)
                 {
-                    seal_datagram(*tx.block_fec_datagrams[i], m_datagram_header_offset, tx.last_block_index, m_coding_k + i, true);
+                    seal_datagram(*tx.block_fec_datagrams[i], m_datagram_header_offset, tx.last_block_index, m_coding_k + i);
 
                     if (on_tx_data_encoded)
                     {
@@ -468,7 +388,7 @@ void Fec_Encoder::tx_thread_proc()
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-bool Fec_Encoder::add_tx_packet(void const* _data, size_t size)
+bool Fec_Encoder::add_tx_packet(void const* _data, size_t size, bool block)
 {
     if (m_exit)
     {
@@ -495,40 +415,10 @@ bool Fec_Encoder::add_tx_packet(void const* _data, size_t size)
         data += s;
         size -= s;
 
-        bool limit_reached = false;
         if (datagram->data.size() >= m_transport_datagram_size)
         {
-            //send the current datagram
-            {
-                std::unique_lock<std::mutex> lg(tx.datagram_queue_mutex);
-                if (m_tx_descriptor.blocking)
-                {
-                    while (tx.datagram_queue.size() >= m_tx_descriptor.max_enqueued_packets && !m_exit)
-                    {
-                        tx.datagram_queue_cv.wait(lg);
-                    }
-                    if (m_exit)
-                    {
-                        return false;
-                    }
-                }
-                if (tx.datagram_queue.size() < m_tx_descriptor.max_enqueued_packets)
-                {
-                    tx.datagram_queue.push_back(datagram);
-                }
-                else
-                {
-                    limit_reached = true;
-                }
-            }
+            tx.datagram_queue.push_back(datagram, block);
             datagram = tx.datagram_pool.acquire();
-
-            tx.datagram_queue_cv.notify_all();
-        }
-
-        if (limit_reached)
-        {
-            return false;
         }
     }
 
@@ -544,37 +434,28 @@ size_t Fec_Encoder::get_mtu() const
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 
+static size_t s_last_seq_number = 0;
+
 void Fec_Encoder::rx_thread_proc()
 {
     RX& rx = m_impl->rx;
 
-    while (true)
+    while (!m_exit)
     {
-        std::unique_lock<std::mutex> lg(rx.datagram_queue_mutex);
-        while (rx.datagram_queue.empty() && !m_exit)
+        RX::Datagram_ptr datagram;
+        rx.datagram_queue.pop_front(datagram, true);
+        if (datagram)
         {
-            rx.datagram_queue_cv.wait(lg);
-        }
-        if (m_exit)
-        {
-            break;
-        }
-
-        while (!rx.datagram_queue.empty())
-        {
-            RX::Datagram_ptr datagram = rx.datagram_queue.back();
-            rx.datagram_queue.pop_back();
-
             uint32_t block_index = datagram->block_index;
             uint32_t datagram_index = datagram->datagram_index;
             if (datagram_index >= m_coding_n)
             {
-                //QLOGE("datagram index out of range: {} > {}", datagram_index, m_coding_n);
+//                printf("datagram index out of range: %d > %d\n", datagram_index, m_coding_n);
                 continue;
             }
             if (block_index < rx.next_block_index)
             {
-                //QLOGW("Old datagram: {} < {}", block_index, rx.next_block_index);
+                //printf("Old datagram: %d < %d\n", block_index, rx.next_block_index.load());
                 continue;
             }
 
@@ -596,12 +477,12 @@ void Fec_Encoder::rx_thread_proc()
             }
 
             //store datagram
-            if (datagram->is_fec)
+            if (datagram->datagram_index >= m_coding_k)
             {
                 auto iter = std::lower_bound(block->fec_datagrams.begin(), block->fec_datagrams.end(), datagram_index, [](RX::Datagram_ptr const& l, uint32_t index) { return l->datagram_index < index; });
                 if (iter != block->fec_datagrams.end() && (*iter)->datagram_index == datagram_index)
                 {
-                    //QLOGW("Duplicated datagram {} from block {} (index {})", datagram_index, block_index, block_index * m_coding_k + datagram_index);
+//                    printf("Duplicated datagram %d from block %d (index %d)\n", datagram_index, block_index, block_index * m_coding_k + datagram_index);
                     continue;
                 }
                 else
@@ -614,7 +495,7 @@ void Fec_Encoder::rx_thread_proc()
                 auto iter = std::lower_bound(block->datagrams.begin(), block->datagrams.end(), datagram_index, [](RX::Datagram_ptr const& l, uint32_t index) { return l->datagram_index < index; });
                 if (iter != block->datagrams.end() && (*iter)->datagram_index == datagram_index)
                 {
-                    //QLOGW("Duplicated datagram {} from block {} (index {})", datagram_index, block_index, block_index * m_coding_k + datagram_index);
+//                    printf("Duplicated datagram %d from block %d (index %d)\n", datagram_index, block_index, block_index * m_coding_k + datagram_index);
                     continue;
                 }
                 else
@@ -627,6 +508,7 @@ void Fec_Encoder::rx_thread_proc()
 
         if (Clock::now() - rx.last_datagram_tp > m_rx_descriptor.reset_duration)
         {
+//            printf("Reset block index\n");
             rx.next_block_index = 0;
         }
 
@@ -637,12 +519,16 @@ void Fec_Encoder::rx_thread_proc()
             //entire block received
             if (block->datagrams.size() >= m_coding_k)
             {
+                //printf("Complete block\n");
                 for (RX::Datagram_ptr const& d: block->datagrams)
                 {
                     uint32_t seq_number = block->block_index * m_coding_k + d->datagram_index;
                     if (!d->is_processed)
                     {
-                        //QLOGI("Datagram {}", seq_number);
+//                        if (s_last_seq_number + 1 != seq_number)
+//                            printf("Datagram C %d: %s\n", seq_number, s_last_seq_number + 1 == seq_number ? "Ok" : "Skipped");
+//                        s_last_seq_number = seq_number;
+
                         m_video_stats_data_accumulated += d->data.size();
                         if (on_rx_data_decoded)
                         {
@@ -669,7 +555,10 @@ void Fec_Encoder::rx_thread_proc()
                     uint32_t seq_number = block->block_index * m_coding_k + d->datagram_index;
                     if (!d->is_processed)
                     {
-                        //QLOGI("Datagram {}", seq_number);
+//                        if (s_last_seq_number + 1 != seq_number)
+//                            printf("Datagram E %d: %s\n", seq_number, s_last_seq_number + 1 == seq_number ? "Ok" : "Skipped");
+//                        s_last_seq_number = seq_number;
+
                         m_video_stats_data_accumulated += d->data.size();
                         if (on_rx_data_decoded)
                         {
@@ -688,6 +577,7 @@ void Fec_Encoder::rx_thread_proc()
             //can we fec decode?
             if (block->datagrams.size() + block->fec_datagrams.size() >= m_coding_k)
             {
+                //printf("Complete FEC block\n");
                 //auto start = Clock::now();
 
                 std::array<unsigned int, 32> indices;
@@ -731,7 +621,10 @@ void Fec_Encoder::rx_thread_proc()
                     uint32_t seq_number = block->block_index * m_coding_k + d->datagram_index;
                     if (!d->is_processed)
                     {
-                        //QLOGI("Datagram F {}", seq_number);
+//                        if (s_last_seq_number + 1 != seq_number)
+//                            printf("Datagram F %d: %s\n", seq_number, s_last_seq_number + 1 == seq_number ? "Ok" : "Skipped");
+//                        s_last_seq_number = seq_number;
+
                         m_video_stats_data_accumulated += d->data.size();
                         if (on_rx_data_decoded)
                         {
@@ -753,13 +646,14 @@ void Fec_Encoder::rx_thread_proc()
             //skip if too much buffering
             if (rx.block_queue.size() > 3)
             {
+                //printf("Skipping block\n");
                 for (size_t i = 0; i < block->datagrams.size(); i++)
                 {
                     RX::Datagram_ptr const& d = block->datagrams[i];
                     if (!d->is_processed)
                     {
                         uint32_t seq_number = block->block_index * m_coding_k + d->datagram_index;
-                        //QLOGI("Skipping {}", seq_number);
+//                        printf("Skipping %d\n", seq_number);
                     }
                 }
                 rx.next_block_index = block->block_index + 1;

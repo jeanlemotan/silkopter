@@ -9,9 +9,10 @@
 #include "common/stream/IMultirotor_Commands.h"
 #include "common/stream/IMultirotor_State.h"
 #include "common/stream/IVideo.h"
-#include "utils/comms/RC_Phy.h"
-#include "utils/comms/RC_Protocol.h"
-#include "utils/comms/Video_Streamer.h"
+#include "utils/comms/esp8266/Phy.h"
+#include "utils/comms/esp8266/Fec_Encoder.h"
+#include "utils/comms/esp8266/Pool.h"
+#include "utils/comms/esp8266/Queue.h"
 #include "utils/Clock.h"
 #include "utils/hw/ISPI.h"
 
@@ -31,6 +32,7 @@ class RC_Comms : q::util::Noncopyable
 {
 public:
     RC_Comms(HAL& hal);
+    ~RC_Comms();
 
     bool start();
 
@@ -38,8 +40,8 @@ public:
 
     void process();
 
-    util::comms::RC_Phy const& get_rc_phy() const;
-    util::comms::RC_Phy& get_rc_phy();
+    Phy const& get_phy() const;
+    Phy& get_phy();
 
     boost::optional<stream::IMultirotor_Commands::Value> const& get_multirotor_commands() const;
     boost::optional<stream::ICamera_Commands::Value> const& get_camera_commands() const;
@@ -49,13 +51,12 @@ public:
 
     struct Impl; //this needs to be public...
 private:
-    bool compute_multirotor_state_packet(util::comms::RC_Protocol::Buffer& buffer, uint8_t& packet_type);
-    void process_rx_packet(util::comms::RC_Protocol::RX_Packet const& packet, uint8_t* data, size_t size);
+    void process_rx_packet(rc_comms::Packet_Type packet_type, std::vector<uint8_t> const& data, size_t offset);
+
+    void process_received_data(std::vector<uint8_t> const& data);
 
     HAL& m_hal;
     Clock::time_point m_uav_sent_tp = Clock::now();
-
-    std::unique_ptr<util::hw::ISPI> m_spi;
 
     boost::optional<stream::ICamera_Commands::Value> m_camera_commands;
     boost::optional<stream::IMultirotor_Commands::Value> m_multirotor_commands;
@@ -68,20 +69,35 @@ private:
 
     mutable std::mutex m_multirotor_state_mutex;
     stream::IMultirotor_State::Value m_multirotor_state;
-    std::vector<uint8_t> m_multirotor_state_sz_buffer;
-    std::vector<uint8_t> m_rx_packet_sz_buffer;
 
-    util::comms::RC_Phy m_rc_phy;
-    util::comms::RC_Protocol m_rc_protocol;
-    util::comms::RC_Protocol::RX_Packet m_rx_packet;
-    util::comms::Video_Streamer m_video_streamer;
+    mutable std::mutex m_rezolution_mutex;
+    math::vec2u16 m_rezolution;
 
-    silk::rc_comms::Packet_Type m_next_packet_type = silk::rc_comms::Packet_Type::MULTIROTOR_STATE_PART1;
-    bool m_send_home = false;
-    Clock::time_point m_last_home_sent_tp = Clock::now();
+    struct Phy_Data
+    {
+        Phy_Data()
+            : tx_queue(32)
+            , rx_queue(32)
+        {}
+
+        typedef std::vector<uint8_t> Packet;
+        typedef Pool<Packet>::Ptr Packet_ptr;
+        Pool<Packet> packet_pool;
+        Queue<Packet_ptr> tx_queue;
+        Queue<Packet_ptr> rx_queue;
+        bool thread_exit = false;
+        std::thread thread;
+    } m_phy_data;
+
+    Phy m_phy;
+    Fec_Encoder m_fec_encoder_tx;
+    Clock::time_point m_last_phy_received_tp = Clock::now();
+
+    Clock::time_point m_last_multirotor_state_sent_tp = Clock::now();
 
     bool m_is_connected = false;
 
+    void phy_thread_proc();
 };
 
 

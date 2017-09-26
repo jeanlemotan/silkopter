@@ -61,24 +61,13 @@ enum class Pilot_Message : uint8_t
 
 enum class Packet_Type : uint8_t
 {
-    RC_CONNECTED,
+    //RC_CONNECTED,
 
     MULTIROTOR_COMMANDS,
     CAMERA_COMMANDS,
-    MULTIROTOR_STATE_PART1,
-    MULTIROTOR_STATE_PART2,
-    MULTIROTOR_STATE_HOME,
+    MULTIROTOR_STATE,
+    VIDEO
 };
 
 }
-
-namespace viewer
-{
-enum class Packet_Type : uint8_t
-{
-    TELEMETRY,
-    VIDEO_DATA,
-};
-}
-
 }

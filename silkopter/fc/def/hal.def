@@ -23,18 +23,40 @@ struct IUAV_Descriptor : [ ui_name = "UAV Descriptor" ]
 
     struct Comms
     {
-        alias rc_channel_t = int : [ min = 0, max = 32 ];
-        rc_channel_t rc_channel = 0: [ ui_name = "RC Channel" ];
+        alias channel_t = int : [ min = 1, max = 11 ];
+        channel_t channel = 1: [ ui_name = "Channel" ];
 
-        alias rc_xtal_adjustment_t = float : [ min = -1.f, max = 1.f ];
-        rc_xtal_adjustment_t rc_xtal_ajdustment = 0.f : [ ui_name = "RC Crystal Adjustment" ];
+        alias tx_power_t = float : [ min = 0.f, max = 20.5f ];
+        tx_power_t tx_power = 20.5f: [ ui_name = "TX Power" ];
+
+        alias mtu_t = int : [ min = 128, max = 1360 ];
+        mtu_t mtu = 1360: [ ui_name = "MTU" ];
+
+	enum rate_t
+	{
+      B_1M_CCK : [ ui_name = "11b 1Mbps CCK" ],
+      B_2M_CCK : [ ui_name = "11b 2Mbps CCK" ],
+      B_2M_CCK_SHOST_PREAMBLE : [ ui_name = "11b 2Mbps Short Preamble CCK" ],
+      B_5_5M_CCK : [ ui_name = "11b 5.5Mbps CCK" ],
+      B_5_5M_CCK_SHOST_PREAMBLE : [ ui_name = "11b 5.5Mbps Short Preamble CCK" ],
+      B_11M_CCK : [ ui_name = "11b 11Mbps CCK" ],
+      B_11M_CCK_SHOST_PREAMBLE : [ ui_name = "11b 11Mbps Short Preamble CCK" ],
+      G_6M_ODFM : [ ui_name = "11g 6Mbps ODFM" ],
+      G_9M_ODFM : [ ui_name = "11g 9Mbps ODFM" ],
+      G_12M_ODFM : [ ui_name = "11g 12Mbps ODFM" ],
+      G_18M_ODFM : [ ui_name = "11g 18Mbps ODFM" ],
+      G_24M_ODFM : [ ui_name = "11g 24Mbps ODFM" ],
+      G_36M_ODFM : [ ui_name = "11g 36Mbps ODFM" ],
+      G_48M_ODFM : [ ui_name = "11g 48Mbps ODFM" ],
+      G_54M_ODFM : [ ui_name = "11g 56Mbps ODFM" ],
+	};
+
+	rate_t rate = rate_t::B_11M_CCK : [ ui_name = "Rate" ];
 
         alias fec_coding_k_t = int : [ min = 1, max = 32 ];
         alias fec_coding_n_t = int : [ min = 1, max = 32 ];
         fec_coding_k_t fec_coding_k = 12 : [ ui_name = "FEC Coding K" ];
         fec_coding_n_t fec_coding_n = 20 : [ ui_name = "FEC Coding N" ];
-
-        string video_wlan_interface = "wlan1" : [ ui_name = "Video WLAN Interface" ];
     };
 
     Comms comms : [ ui_name = "Comms" ];

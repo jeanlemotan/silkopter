@@ -4,6 +4,7 @@
 #include <string>
 #include <atomic>
 #include <thread>
+#include "Queue.h"
 
 struct fec_t;
 
@@ -25,12 +26,11 @@ public:
         uint8_t coding_k = 12;
         uint8_t coding_n = 20;
         size_t mtu = 1376;
+        size_t max_enqueued_packets = 100;
     };
 
     struct TX_Descriptor : public Descriptor
     {
-        bool blocking = true;
-        size_t max_enqueued_packets = 100;
     };
 
     struct RX_Descriptor : public Descriptor
@@ -43,13 +43,13 @@ public:
     bool init_rx(RX_Descriptor const& descriptor);
 
     //add the received, encoded packets here
-    bool add_rx_packet(void const* data, size_t size);
+    bool add_rx_packet(void const* data, size_t size, bool block);
 
     //async, the decoded packets will be ready here
     std::function<void(void const* data, size_t size)> on_rx_data_decoded;
 
     //add un-encoded packets to be sent here
-    bool add_tx_packet(void const* data, size_t size);
+    bool add_tx_packet(void const* data, size_t size, bool block);
 
     //async, encoded packets will be ready here
     std::function<void(void const* data, size_t size)> on_tx_data_encoded;

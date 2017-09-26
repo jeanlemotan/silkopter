@@ -23,8 +23,9 @@ INCLUDEPATH += ../../../../qbase/include
 INCLUDEPATH += ../../../../qmath/include
 INCLUDEPATH += ../../../../def_lang/include
 INCLUDEPATH += ../../../../asio/include
-INCLUDEPATH += ../../../libs
-INCLUDEPATH += ../../../libs/comSn/comms/def
+INCLUDEPATH += ../../../libs/utils/hw
+INCLUDEPATH += ../../../libs/
+INCLUDEPATH += ../../../libs/common/comms/def
 
 
 QMAKE_CXXFLAGS += -Wno-unused-variable -Wno-unused-parameter
@@ -55,6 +56,7 @@ rpi {
     LIBS += -lbcm_host
     LIBS += -lGLESv2
     LIBS += -lEGL
+    LIBS += -lpcap
 } else {
     QMAKE_MAKEFILE = "Makefile"
     CONFIG(debug, debug|release) {
@@ -66,9 +68,7 @@ rpi {
     }
 }
 
-#LIBS += -lboost_system -lboost_thread
-#LIBS += -lfreetype
-LIBS += -lpcap -lz -lpthread
+LIBS += -lz -lpthread
 LIBS += -L$${ROOT_LIBS_PATH}/qmath/lib/$${DEST_FOLDER} -lqmath
 LIBS += -L$${ROOT_LIBS_PATH}/qbase/lib/$${DEST_FOLDER} -lqbase
 LIBS += -L$${ROOT_LIBS_PATH}/def_lang/lib/$${DEST_FOLDER} -ldef_lang
@@ -144,18 +144,8 @@ HEADERS += \
     ../../../libs/utils/comms/Channel.h \
     ../../../libs/utils/comms/RCP.h \
     ../../../libs/utils/comms/ISocket.h \
-    ../../../libs/utils/comms/RF4463F30_Socket.h \
-    ../../../libs/utils/comms/RFMON_Socket.h \
     ../../../libs/utils/comms/UDP_Socket.h \
-    ../../../libs/utils/hw/RF4463F30.h \
-    ../../../libs/utils/hw/Si4463.h \
     ../../../libs/utils/hw/SPI_Dev.h \
-    ../../../libs/utils/hw/RF4463F30_Config_old.h \
-    ../../../libs/utils/hw/RF4463F30_Config.h \
-    ../../../libs/utils/hw/si446x_patch.h \
-    ../../../libs/utils/hw/radiotap/ieee80211_radiotap.h \
-    ../../../libs/utils/hw/radiotap/radiotap.h \
-    ../../../libs/utils/comms/fec.h \
     ../../src/ISticks.h \
     ../../../libs/utils/hw/I2C_Dev.h \
     ../../src/Sticks_ADS1115.h \
@@ -170,9 +160,6 @@ HEADERS += \
     ../../src/Button_PIGPIO.h \
     ../../def/settings.def.h \
     ../../def/gen_support.h \
-    ../../../libs/utils/hw/RFM22B.h \
-    ../../../libs/utils/comms/RC_Phy.h \
-    ../../../libs/utils/comms/RC_Protocol.h \
     ../../src/IHaptic.h \
     ../../../libs/utils/comms/ASIO_Socket_Adapter.h \
     ../../../libs/utils/comms/RCP_Channel.h \
@@ -190,11 +177,15 @@ HEADERS += \
     ../../src/IGimbal_Control.h \
     ../../../libs/utils/hw/SPI_PIGPIO.h \
     ../../../libs/utils/Queue.h \
-    ../../../libs/utils/comms/Video_Streamer.h \
     ../../src/QMLMenus.h \
     ../../src/QMLVideoSurface.h \
     ../../src/QMLTelemetry.h \
-    ../../src/QMLHUD.h
+    ../../src/QMLHUD.h \
+    ../../../libs/utils/comms/esp8266/Fec_Encoder.h \
+    ../../../libs/utils/comms/esp8266/Phy.h \
+    ../../../libs/utils/comms/esp8266/Pool.h \
+    ../../../libs/utils/comms/esp8266/utils/fec.h \
+    ../../../libs/utils/comms/esp8266/Queue.h
 
 SOURCES += \
     ../../src/main.cpp \
@@ -207,14 +198,8 @@ SOURCES += \
     ../../../libs/utils/hw/command.c \
     ../../../libs/utils/hw/pigpio.c \
     ../../../libs/utils/comms/RCP.cpp \
-    ../../../libs/utils/comms/RF4463F30_Socket.cpp \
-    ../../../libs/utils/comms/RFMON_Socket.cpp \
     ../../../libs/utils/comms/UDP_Socket.cpp \
-    ../../../libs/utils/hw/RF4463F30.cpp \
-    ../../../libs/utils/hw/Si4463.cpp \
     ../../../libs/utils/hw/SPI_Dev.cpp \
-    ../../../libs/utils/hw/radiotap/radiotap.cpp \
-    ../../../libs/utils/comms/fec.cpp \
     ../../src/Sticks_ADS1115.cpp \
     ../../../libs/utils/hw/I2C_Dev.cpp \
     ../../src/Stick_Actuators_Throttle_DRV883x.cpp \
@@ -222,9 +207,6 @@ SOURCES += \
     ../../src/Button_Matrix_PIGPIO.cpp \
     ../../src/Button_PIGPIO.cpp \
     ../../def/settings.def.cpp \
-    ../../../libs/utils/hw/RFM22B.cpp \
-    ../../../libs/utils/comms/RC_Phy.cpp \
-    ../../../libs/utils/comms/RC_Protocol.cpp \
     ../../../libs/utils/hw/ADS1115.cpp \
     ../../../libs/utils/hw/I2C_BCM.cpp \
     ../../../libs/utils/hw/SPI_BCM.cpp \
@@ -234,11 +216,13 @@ SOURCES += \
     ../../src/Gimbal_Control_ADS1115.cpp \
     ../../../libs/utils/hw/SPI_PIGPIO.cpp \
     ../../../libs/utils/Queue.cpp \
-    ../../../libs/utils/comms/Video_Streamer.cpp \
     ../../src/QMLMenus.cpp \
     ../../src/QMLVideoSurface.cpp \
     ../../src/QMLTelemetry.cpp \
-    ../../src/QMLHUD.cpp
+    ../../src/QMLHUD.cpp \
+    ../../../libs/utils/comms/esp8266/Fec_Encoder.cpp \
+    ../../../libs/utils/comms/esp8266/Phy.cpp \
+    ../../../libs/utils/comms/esp8266/utils/fec.cpp
 
 DISTFILES += \
     ../../src/node.png \

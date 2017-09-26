@@ -465,13 +465,16 @@ void GS_Comms::handle_req(gs_comms::setup::Set_UAV_Descriptor_Req const& req)
 
     {
         silk::hal::IUAV_Descriptor::Comms const& comms_settings = m_hal.get_uav_descriptor()->get_comms();
-        if (!m_rc_comms.get_rc_phy().set_channel(comms_settings.get_rc_channel()))
-        {
-            response = make_error_response(req.get_req_id(), "Cannot set RC center frequency");
-            serialize_and_send(SETUP_CHANNEL, response);
-            return;
-        }
-        m_rc_comms.get_rc_phy().set_xtal_adjustment(comms_settings.get_rc_xtal_ajdustment());
+        m_rc_comms.get_phy().set_rate(static_cast<Phy::Rate>(comms_settings.get_rate()));
+        m_rc_comms.get_phy().set_power(comms_settings.get_tx_power());
+        m_rc_comms.get_phy().set_channel(comms_settings.get_channel());
+//        if (!m_rc_comms.get_rc_phy().set_channel(comms_settings.get_rc_channel()))
+//        {
+//            response = make_error_response(req.get_req_id(), "Cannot set RC center frequency");
+//            serialize_and_send(SETUP_CHANNEL, response);
+//            return;
+//        }
+//        m_rc_comms.get_rc_phy().set_xtal_adjustment(comms_settings.get_rc_xtal_ajdustment());
     }
 
     m_hal.save_settings();

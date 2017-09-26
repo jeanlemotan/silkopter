@@ -60,18 +60,46 @@ public:
   struct Comms
   {
   public:
-    typedef int64_t rc_channel_t;
-    typedef float rc_xtal_adjustment_t;
+    typedef int64_t channel_t;
+    typedef float tx_power_t;
+    typedef int64_t mtu_t;
+    enum class rate_t
+    {
+      B_1M_CCK = 0,
+      B_2M_CCK = 1,
+      B_2M_CCK_SHOST_PREAMBLE = 2,
+      B_5_5M_CCK = 3,
+      B_5_5M_CCK_SHOST_PREAMBLE = 4,
+      B_11M_CCK = 5,
+      B_11M_CCK_SHOST_PREAMBLE = 6,
+      G_6M_ODFM = 7,
+      G_9M_ODFM = 8,
+      G_12M_ODFM = 9,
+      G_18M_ODFM = 10,
+      G_24M_ODFM = 11,
+      G_36M_ODFM = 12,
+      G_48M_ODFM = 13,
+      G_54M_ODFM = 14,
+    };
+
     typedef int64_t fec_coding_k_t;
     typedef int64_t fec_coding_n_t;
     virtual ~Comms() = default;
-    void set_rc_channel(rc_channel_t const& value);
-    void set_rc_channel(rc_channel_t&& value);
-    auto get_rc_channel() const -> rc_channel_t const&;
+    void set_channel(channel_t const& value);
+    void set_channel(channel_t&& value);
+    auto get_channel() const -> channel_t const&;
 
-    void set_rc_xtal_ajdustment(rc_xtal_adjustment_t const& value);
-    void set_rc_xtal_ajdustment(rc_xtal_adjustment_t&& value);
-    auto get_rc_xtal_ajdustment() const -> rc_xtal_adjustment_t const&;
+    void set_tx_power(tx_power_t const& value);
+    void set_tx_power(tx_power_t&& value);
+    auto get_tx_power() const -> tx_power_t const&;
+
+    void set_mtu(mtu_t const& value);
+    void set_mtu(mtu_t&& value);
+    auto get_mtu() const -> mtu_t const&;
+
+    void set_rate(rate_t const& value);
+    void set_rate(rate_t&& value);
+    auto get_rate() const -> rate_t const&;
 
     void set_fec_coding_k(fec_coding_k_t const& value);
     void set_fec_coding_k(fec_coding_k_t&& value);
@@ -81,16 +109,13 @@ public:
     void set_fec_coding_n(fec_coding_n_t&& value);
     auto get_fec_coding_n() const -> fec_coding_n_t const&;
 
-    void set_video_wlan_interface(std::string const& value);
-    void set_video_wlan_interface(std::string&& value);
-    auto get_video_wlan_interface() const -> std::string const&;
-
   private:
-    rc_channel_t m_rc_channel = rc_channel_t{0};
-    rc_xtal_adjustment_t m_rc_xtal_ajdustment = rc_xtal_adjustment_t{0};
+    channel_t m_channel = channel_t{1};
+    tx_power_t m_tx_power = tx_power_t{20.500000f};
+    mtu_t m_mtu = mtu_t{1360};
+    rate_t m_rate = rate_t{IUAV_Descriptor::Comms::rate_t::B_11M_CCK};
     fec_coding_k_t m_fec_coding_k = fec_coding_k_t{12};
     fec_coding_n_t m_fec_coding_n = fec_coding_n_t{20};
-    std::string m_video_wlan_interface = std::string{"wlan1"};
   };
 
   typedef float mass_t;
@@ -2857,6 +2882,8 @@ ts::Result<void> deserialize(int32_t& value, ts::sz::Value const& sz_value);
 ts::sz::Value serialize(int32_t const& value);
 ts::Result<void> deserialize(uint32_t& value, ts::sz::Value const& sz_value);
 ts::sz::Value serialize(uint32_t const& value);
+ts::Result<void> deserialize(IUAV_Descriptor::Comms::rate_t& value, ts::sz::Value const& sz_value);
+ts::sz::Value serialize(IUAV_Descriptor::Comms::rate_t const& value);
 ts::Result<void> deserialize(IUAV_Descriptor::Comms& value, ts::sz::Value const& sz_value);
 ts::sz::Value serialize(IUAV_Descriptor::Comms const& value);
 ts::Result<void> deserialize(IUAV_Descriptor& value, ts::sz::Value const& sz_value);

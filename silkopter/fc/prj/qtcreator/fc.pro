@@ -54,6 +54,7 @@ INCLUDEPATH += ../../def
 INCLUDEPATH += ../../autogen
 INCLUDEPATH += ../../../libs
 INCLUDEPATH += ../../../libs/common/comms/def
+INCLUDEPATH += ../../../libs/utils/hw
 INCLUDEPATH += ../../../../def_lang/include
 INCLUDEPATH += ../../../../qbase/include
 INCLUDEPATH += ../../../../qmath/include
@@ -142,18 +143,8 @@ SOURCES += \
     ../../../libs/utils/hw/bcm2835.c \
     ../../../libs/utils/hw/command.c \
     ../../../libs/utils/hw/pigpio.c \
-    ../../../libs/utils/comms/RCP.cpp \
-    ../../../libs/utils/comms/RF4463F30_Socket.cpp \
-    ../../../libs/utils/comms/RFMON_Socket.cpp \
     ../../../libs/utils/comms/UDP_Socket.cpp \
-    ../../../libs/utils/hw/radiotap/radiotap.cpp \
-    ../../../libs/utils/hw/RF4463F30.cpp \
-    ../../../libs/utils/hw/Si4463.cpp \
     ../../../libs/utils/hw/SPI_Dev.cpp \
-    ../../../libs/utils/comms/fec.cpp \
-    ../../../libs/utils/hw/RFM22B.cpp \
-    ../../../libs/utils/comms/RC_Phy.cpp \
-    ../../../libs/utils/comms/RC_Protocol.cpp \
     ../../../libs/common/comms/def/messages.def.cpp \
     ../../src/FCStdAfx.cpp \
     ../../../libs/utils/hw/ADS1115.cpp \
@@ -172,7 +163,6 @@ SOURCES += \
     ../../src/processor/Quad_Multirotor_Motor_Mixer.cpp \
     ../../../libs/utils/hw/SPI_PIGPIO.cpp \
     ../../../libs/utils/Queue.cpp \
-    ../../../libs/utils/comms/Video_Streamer.cpp \
     ../../../../bullet/BulletCollision/BroadphaseCollision/btAxisSweep3.cpp \
     ../../../../bullet/BulletCollision/BroadphaseCollision/btBroadphaseProxy.cpp \
     ../../../../bullet/BulletCollision/BroadphaseCollision/btCollisionAlgorithm.cpp \
@@ -298,7 +288,11 @@ SOURCES += \
     ../../../../bullet/LinearMath/btSerializer.cpp \
     ../../../../bullet/LinearMath/btSerializer64.cpp \
     ../../../../bullet/LinearMath/btThreads.cpp \
-    ../../../../bullet/LinearMath/btVector3.cpp
+    ../../../../bullet/LinearMath/btVector3.cpp \
+    ../../../libs/utils/comms/esp8266/Fec_Encoder.cpp \
+    ../../../libs/utils/comms/esp8266/Phy.cpp \
+    ../../../libs/utils/comms/esp8266/utils/fec.cpp \
+    ../../../libs/utils/comms/RCP.cpp
 
 HEADERS += \
     ../../../libs/utils/chrono.h \
@@ -429,26 +423,12 @@ HEADERS += \
     ../../src/source/CPPM_Receiver.h \
     ../../../libs/utils/comms/Channel.h \
     ../../../libs/utils/comms/ISocket.h \
-    ../../../libs/utils/comms/RCP.h \
-    ../../../libs/utils/comms/RF4463F30_Socket.h \
-    ../../../libs/utils/comms/RFMON_Socket.h \
     ../../../libs/utils/comms/UDP_Socket.h \
-    ../../../libs/utils/hw/radiotap/ieee80211_radiotap.h \
-    ../../../libs/utils/hw/radiotap/radiotap.h \
     ../../../libs/utils/hw/bcm2835.h \
     ../../../libs/utils/hw/command.h \
     ../../../libs/utils/hw/pigpio.h \
-    ../../../libs/utils/hw/RF4463F30_Config_old.h \
-    ../../../libs/utils/hw/RF4463F30_Config.h \
-    ../../../libs/utils/hw/RF4463F30.h \
-    ../../../libs/utils/hw/si446x_patch.h \
-    ../../../libs/utils/hw/Si4463.h \
     ../../../libs/utils/hw/SPI_Dev.h \
     ../../../libs/utils/Pool.h \
-    ../../../libs/utils/comms/fec.h \
-    ../../../libs/utils/hw/RFM22B.h \
-    ../../../libs/utils/comms/RC_Phy.h \
-    ../../../libs/utils/comms/RC_Protocol.h \
     ../../../libs/common/comms/def/messages.def.h \
     ../../../libs/common/stream/IMultirotor_Simulator_State.h \
     ../../src/FCStdAfx.h \
@@ -472,7 +452,6 @@ HEADERS += \
     ../../../libs/common/stream/ICamera_Commands.h \
     ../../../libs/utils/hw/SPI_PIGPIO.h \
     ../../../libs/utils/Queue.h \
-    ../../../libs/utils/comms/Video_Streamer.h \
     ../../../../bullet/BulletCollision/BroadphaseCollision/btAxisSweep3.h \
     ../../../../bullet/BulletCollision/BroadphaseCollision/btAxisSweep3Internal.h \
     ../../../../bullet/BulletCollision/BroadphaseCollision/btBroadphaseInterface.h \
@@ -664,7 +643,13 @@ HEADERS += \
     ../../../../bullet/LinearMath/btThreads.h \
     ../../../../bullet/LinearMath/btTransform.h \
     ../../../../bullet/LinearMath/btTransformUtil.h \
-    ../../../../bullet/LinearMath/btVector3.h
+    ../../../../bullet/LinearMath/btVector3.h \
+    ../../../libs/utils/comms/esp8266/Fec_Encoder.h \
+    ../../../libs/utils/comms/esp8266/Phy.h \
+    ../../../libs/utils/comms/esp8266/Pool.h \
+    ../../../libs/utils/comms/esp8266/utils/fec.h \
+    ../../../libs/utils/comms/RCP.h \
+    ../../../libs/utils/comms/esp8266/Queue.h
 
 DISTFILES += \
     ../../../../bullet/Bullet3Common/CMakeLists.txt \

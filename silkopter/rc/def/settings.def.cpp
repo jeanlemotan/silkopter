@@ -347,148 +347,87 @@ T max(T v, T max)
     }
 
 ////////////////////////////////////////////////////////////
-    void Settings::Comms::set_video_wlan_interfaces(std::vector<std::string> const& value)
+    void Settings::Comms::set_channel(channel_t const& value)
     {
-      m_video_wlan_interfaces = value;
+      m_channel = clamp(value, channel_t(1), channel_t(11));
     }
-    void Settings::Comms::set_video_wlan_interfaces(std::vector<std::string>&& value)
+    void Settings::Comms::set_channel(channel_t&& value)
     {
-      m_video_wlan_interfaces = std::move(value);
+      m_channel = clamp(std::move(value), channel_t(1), channel_t(11));
     }
-    auto Settings::Comms::get_video_wlan_interfaces() const -> std::vector<std::string> const& 
+    auto Settings::Comms::get_channel() const -> channel_t const& 
     {
-      return m_video_wlan_interfaces;
-    }
-
-    auto Settings::Comms::get_video_wlan_interfaces() -> std::vector<std::string>& 
-    {
-      return m_video_wlan_interfaces;
+      return m_channel;
     }
 
 ////////////////////////////////////////////////////////////
-    void Settings::Comms::set_video_fec_coding_k(uint32_t const& value)
+    void Settings::Comms::set_tx_power(tx_power_t const& value)
     {
-      m_video_fec_coding_k = value;
+      m_tx_power = clamp(value, tx_power_t(0), tx_power_t(20.500000f));
     }
-    void Settings::Comms::set_video_fec_coding_k(uint32_t&& value)
+    void Settings::Comms::set_tx_power(tx_power_t&& value)
     {
-      m_video_fec_coding_k = std::move(value);
+      m_tx_power = clamp(std::move(value), tx_power_t(0), tx_power_t(20.500000f));
     }
-    auto Settings::Comms::get_video_fec_coding_k() const -> uint32_t const& 
+    auto Settings::Comms::get_tx_power() const -> tx_power_t const& 
     {
-      return m_video_fec_coding_k;
-    }
-
-////////////////////////////////////////////////////////////
-    void Settings::Comms::set_video_fec_coding_n(uint32_t const& value)
-    {
-      m_video_fec_coding_n = value;
-    }
-    void Settings::Comms::set_video_fec_coding_n(uint32_t&& value)
-    {
-      m_video_fec_coding_n = std::move(value);
-    }
-    auto Settings::Comms::get_video_fec_coding_n() const -> uint32_t const& 
-    {
-      return m_video_fec_coding_n;
+      return m_tx_power;
     }
 
 ////////////////////////////////////////////////////////////
-    void Settings::Comms::set_video_max_latency_ms(uint32_t const& value)
+    void Settings::Comms::set_mtu(mtu_t const& value)
     {
-      m_video_max_latency_ms = value;
+      m_mtu = clamp(value, mtu_t(128), mtu_t(1360));
     }
-    void Settings::Comms::set_video_max_latency_ms(uint32_t&& value)
+    void Settings::Comms::set_mtu(mtu_t&& value)
     {
-      m_video_max_latency_ms = std::move(value);
+      m_mtu = clamp(std::move(value), mtu_t(128), mtu_t(1360));
     }
-    auto Settings::Comms::get_video_max_latency_ms() const -> uint32_t const& 
+    auto Settings::Comms::get_mtu() const -> mtu_t const& 
     {
-      return m_video_max_latency_ms;
-    }
-
-////////////////////////////////////////////////////////////
-    void Settings::Comms::set_video_reset_duration_ms(uint32_t const& value)
-    {
-      m_video_reset_duration_ms = value;
-    }
-    void Settings::Comms::set_video_reset_duration_ms(uint32_t&& value)
-    {
-      m_video_reset_duration_ms = std::move(value);
-    }
-    auto Settings::Comms::get_video_reset_duration_ms() const -> uint32_t const& 
-    {
-      return m_video_reset_duration_ms;
+      return m_mtu;
     }
 
 ////////////////////////////////////////////////////////////
-    void Settings::Comms::set_rc_sdn_gpio(gpio_t const& value)
+    void Settings::Comms::set_rate(rate_t const& value)
     {
-      m_rc_sdn_gpio = clamp(value, gpio_t(0), gpio_t(40));
+      m_rate = value;
     }
-    void Settings::Comms::set_rc_sdn_gpio(gpio_t&& value)
+    void Settings::Comms::set_rate(rate_t&& value)
     {
-      m_rc_sdn_gpio = clamp(std::move(value), gpio_t(0), gpio_t(40));
+      m_rate = std::move(value);
     }
-    auto Settings::Comms::get_rc_sdn_gpio() const -> gpio_t const& 
+    auto Settings::Comms::get_rate() const -> rate_t const& 
     {
-      return m_rc_sdn_gpio;
-    }
-
-////////////////////////////////////////////////////////////
-    void Settings::Comms::set_rc_spi_device(std::string const& value)
-    {
-      m_rc_spi_device = value;
-    }
-    void Settings::Comms::set_rc_spi_device(std::string&& value)
-    {
-      m_rc_spi_device = std::move(value);
-    }
-    auto Settings::Comms::get_rc_spi_device() const -> std::string const& 
-    {
-      return m_rc_spi_device;
+      return m_rate;
     }
 
 ////////////////////////////////////////////////////////////
-    void Settings::Comms::set_rc_spi_speed(uint32_t const& value)
+    void Settings::Comms::set_fec_coding_k(fec_coding_k_t const& value)
     {
-      m_rc_spi_speed = value;
+      m_fec_coding_k = clamp(value, fec_coding_k_t(1), fec_coding_k_t(32));
     }
-    void Settings::Comms::set_rc_spi_speed(uint32_t&& value)
+    void Settings::Comms::set_fec_coding_k(fec_coding_k_t&& value)
     {
-      m_rc_spi_speed = std::move(value);
+      m_fec_coding_k = clamp(std::move(value), fec_coding_k_t(1), fec_coding_k_t(32));
     }
-    auto Settings::Comms::get_rc_spi_speed() const -> uint32_t const& 
+    auto Settings::Comms::get_fec_coding_k() const -> fec_coding_k_t const& 
     {
-      return m_rc_spi_speed;
-    }
-
-////////////////////////////////////////////////////////////
-    void Settings::Comms::set_rc_channel(uint8_t const& value)
-    {
-      m_rc_channel = value;
-    }
-    void Settings::Comms::set_rc_channel(uint8_t&& value)
-    {
-      m_rc_channel = std::move(value);
-    }
-    auto Settings::Comms::get_rc_channel() const -> uint8_t const& 
-    {
-      return m_rc_channel;
+      return m_fec_coding_k;
     }
 
 ////////////////////////////////////////////////////////////
-    void Settings::Comms::set_rc_xtal_adjustment(float const& value)
+    void Settings::Comms::set_fec_coding_n(fec_coding_n_t const& value)
     {
-      m_rc_xtal_adjustment = value;
+      m_fec_coding_n = clamp(value, fec_coding_n_t(1), fec_coding_n_t(32));
     }
-    void Settings::Comms::set_rc_xtal_adjustment(float&& value)
+    void Settings::Comms::set_fec_coding_n(fec_coding_n_t&& value)
     {
-      m_rc_xtal_adjustment = std::move(value);
+      m_fec_coding_n = clamp(std::move(value), fec_coding_n_t(1), fec_coding_n_t(32));
     }
-    auto Settings::Comms::get_rc_xtal_adjustment() const -> float const& 
+    auto Settings::Comms::get_fec_coding_n() const -> fec_coding_n_t const& 
     {
-      return m_rc_xtal_adjustment;
+      return m_fec_coding_n;
     }
 
 ////////////////////////////////////////////////////////////
@@ -1251,81 +1190,104 @@ ts::sz::Value serialize(Settings::HW const& value)
   sz_value.add_object_member("display_incremental_step_us", serialize(value.get_display_incremental_step_us()));
   return sz_value;
 }
+ts::Result<void> deserialize(Settings::Comms::rate_t& value, ts::sz::Value const& sz_value)
+{
+  if (!sz_value.is_string()) { return ts::Error("Expected string value when deserializing"); }
+  std::string const& key = sz_value.get_as_string();
+  typedef Settings::Comms::rate_t _etype;
+  static std::map<std::string, _etype> s_map = {
+    { "B_1M_CCK", _etype::B_1M_CCK },
+    { "B_2M_CCK", _etype::B_2M_CCK },
+    { "B_2M_CCK_SHOST_PREAMBLE", _etype::B_2M_CCK_SHOST_PREAMBLE },
+    { "B_5_5M_CCK", _etype::B_5_5M_CCK },
+    { "B_5_5M_CCK_SHOST_PREAMBLE", _etype::B_5_5M_CCK_SHOST_PREAMBLE },
+    { "B_11M_CCK", _etype::B_11M_CCK },
+    { "B_11M_CCK_SHOST_PREAMBLE", _etype::B_11M_CCK_SHOST_PREAMBLE },
+    { "G_6M_ODFM", _etype::G_6M_ODFM },
+    { "G_9M_ODFM", _etype::G_9M_ODFM },
+    { "G_12M_ODFM", _etype::G_12M_ODFM },
+    { "G_18M_ODFM", _etype::G_18M_ODFM },
+    { "G_24M_ODFM", _etype::G_24M_ODFM },
+    { "G_36M_ODFM", _etype::G_36M_ODFM },
+    { "G_48M_ODFM", _etype::G_48M_ODFM },
+    { "G_54M_ODFM", _etype::G_54M_ODFM },
+  };
+  auto it = s_map.find(key);
+  if (it == s_map.end()) { return ts::Error("Cannot find item " + key + " when deserializing"); }
+  value = it->second;
+  return ts::success;
+}
+ts::sz::Value serialize(Settings::Comms::rate_t const& value)
+{
+  typedef Settings::Comms::rate_t _etype;
+  static std::map<_etype, std::string> s_map = {
+    { _etype::B_1M_CCK, "B_1M_CCK" },
+    { _etype::B_2M_CCK, "B_2M_CCK" },
+    { _etype::B_2M_CCK_SHOST_PREAMBLE, "B_2M_CCK_SHOST_PREAMBLE" },
+    { _etype::B_5_5M_CCK, "B_5_5M_CCK" },
+    { _etype::B_5_5M_CCK_SHOST_PREAMBLE, "B_5_5M_CCK_SHOST_PREAMBLE" },
+    { _etype::B_11M_CCK, "B_11M_CCK" },
+    { _etype::B_11M_CCK_SHOST_PREAMBLE, "B_11M_CCK_SHOST_PREAMBLE" },
+    { _etype::G_6M_ODFM, "G_6M_ODFM" },
+    { _etype::G_9M_ODFM, "G_9M_ODFM" },
+    { _etype::G_12M_ODFM, "G_12M_ODFM" },
+    { _etype::G_18M_ODFM, "G_18M_ODFM" },
+    { _etype::G_24M_ODFM, "G_24M_ODFM" },
+    { _etype::G_36M_ODFM, "G_36M_ODFM" },
+    { _etype::G_48M_ODFM, "G_48M_ODFM" },
+    { _etype::G_54M_ODFM, "G_54M_ODFM" },
+  };
+  auto it = s_map.find(value);
+  if (it == s_map.end()) { TS_ASSERT(false); return ts::sz::Value(); }
+  return ts::sz::Value(it->second);
+}
 ts::Result<void> deserialize(Settings::Comms& value, ts::sz::Value const& sz_value)
 {
   if (!sz_value.is_object()) { return ts::Error("Expected object value when deserializing"); }
   for (size_t i = 0; i < sz_value.get_object_member_count(); i++)
   {
     ts::sz::Value const& member_sz_value = sz_value.get_object_member_value(i);
-    if (sz_value.get_object_member_name(i) == "video_wlan_interfaces")
+    if (sz_value.get_object_member_name(i) == "channel")
     {
-      std::remove_cv<std::remove_reference<decltype(value.get_video_wlan_interfaces())>::type>::type v;
+      std::remove_cv<std::remove_reference<decltype(value.get_channel())>::type>::type v;
       auto result = deserialize(v, member_sz_value);
       if (result != ts::success) { return result; }
-      value.set_video_wlan_interfaces(std::move(v));
+      value.set_channel(std::move(v));
     }
-    else     if (sz_value.get_object_member_name(i) == "video_fec_coding_k")
+    else     if (sz_value.get_object_member_name(i) == "tx_power")
     {
-      std::remove_cv<std::remove_reference<decltype(value.get_video_fec_coding_k())>::type>::type v;
+      std::remove_cv<std::remove_reference<decltype(value.get_tx_power())>::type>::type v;
       auto result = deserialize(v, member_sz_value);
       if (result != ts::success) { return result; }
-      value.set_video_fec_coding_k(std::move(v));
+      value.set_tx_power(std::move(v));
     }
-    else     if (sz_value.get_object_member_name(i) == "video_fec_coding_n")
+    else     if (sz_value.get_object_member_name(i) == "mtu")
     {
-      std::remove_cv<std::remove_reference<decltype(value.get_video_fec_coding_n())>::type>::type v;
+      std::remove_cv<std::remove_reference<decltype(value.get_mtu())>::type>::type v;
       auto result = deserialize(v, member_sz_value);
       if (result != ts::success) { return result; }
-      value.set_video_fec_coding_n(std::move(v));
+      value.set_mtu(std::move(v));
     }
-    else     if (sz_value.get_object_member_name(i) == "video_max_latency_ms")
+    else     if (sz_value.get_object_member_name(i) == "rate")
     {
-      std::remove_cv<std::remove_reference<decltype(value.get_video_max_latency_ms())>::type>::type v;
+      std::remove_cv<std::remove_reference<decltype(value.get_rate())>::type>::type v;
       auto result = deserialize(v, member_sz_value);
       if (result != ts::success) { return result; }
-      value.set_video_max_latency_ms(std::move(v));
+      value.set_rate(std::move(v));
     }
-    else     if (sz_value.get_object_member_name(i) == "video_reset_duration_ms")
+    else     if (sz_value.get_object_member_name(i) == "fec_coding_k")
     {
-      std::remove_cv<std::remove_reference<decltype(value.get_video_reset_duration_ms())>::type>::type v;
+      std::remove_cv<std::remove_reference<decltype(value.get_fec_coding_k())>::type>::type v;
       auto result = deserialize(v, member_sz_value);
       if (result != ts::success) { return result; }
-      value.set_video_reset_duration_ms(std::move(v));
+      value.set_fec_coding_k(std::move(v));
     }
-    else     if (sz_value.get_object_member_name(i) == "rc_sdn_gpio")
+    else     if (sz_value.get_object_member_name(i) == "fec_coding_n")
     {
-      std::remove_cv<std::remove_reference<decltype(value.get_rc_sdn_gpio())>::type>::type v;
+      std::remove_cv<std::remove_reference<decltype(value.get_fec_coding_n())>::type>::type v;
       auto result = deserialize(v, member_sz_value);
       if (result != ts::success) { return result; }
-      value.set_rc_sdn_gpio(std::move(v));
-    }
-    else     if (sz_value.get_object_member_name(i) == "rc_spi_device")
-    {
-      std::remove_cv<std::remove_reference<decltype(value.get_rc_spi_device())>::type>::type v;
-      auto result = deserialize(v, member_sz_value);
-      if (result != ts::success) { return result; }
-      value.set_rc_spi_device(std::move(v));
-    }
-    else     if (sz_value.get_object_member_name(i) == "rc_spi_speed")
-    {
-      std::remove_cv<std::remove_reference<decltype(value.get_rc_spi_speed())>::type>::type v;
-      auto result = deserialize(v, member_sz_value);
-      if (result != ts::success) { return result; }
-      value.set_rc_spi_speed(std::move(v));
-    }
-    else     if (sz_value.get_object_member_name(i) == "rc_channel")
-    {
-      std::remove_cv<std::remove_reference<decltype(value.get_rc_channel())>::type>::type v;
-      auto result = deserialize(v, member_sz_value);
-      if (result != ts::success) { return result; }
-      value.set_rc_channel(std::move(v));
-    }
-    else     if (sz_value.get_object_member_name(i) == "rc_xtal_adjustment")
-    {
-      std::remove_cv<std::remove_reference<decltype(value.get_rc_xtal_adjustment())>::type>::type v;
-      auto result = deserialize(v, member_sz_value);
-      if (result != ts::success) { return result; }
-      value.set_rc_xtal_adjustment(std::move(v));
+      value.set_fec_coding_n(std::move(v));
     }
   }
   return ts::success;
@@ -1333,17 +1295,13 @@ ts::Result<void> deserialize(Settings::Comms& value, ts::sz::Value const& sz_val
 ts::sz::Value serialize(Settings::Comms const& value)
 {
   ts::sz::Value sz_value(ts::sz::Value::Type::OBJECT);
-  sz_value.reserve_object_members(10);
-  sz_value.add_object_member("video_wlan_interfaces", serialize(value.get_video_wlan_interfaces()));
-  sz_value.add_object_member("video_fec_coding_k", serialize(value.get_video_fec_coding_k()));
-  sz_value.add_object_member("video_fec_coding_n", serialize(value.get_video_fec_coding_n()));
-  sz_value.add_object_member("video_max_latency_ms", serialize(value.get_video_max_latency_ms()));
-  sz_value.add_object_member("video_reset_duration_ms", serialize(value.get_video_reset_duration_ms()));
-  sz_value.add_object_member("rc_sdn_gpio", serialize(value.get_rc_sdn_gpio()));
-  sz_value.add_object_member("rc_spi_device", serialize(value.get_rc_spi_device()));
-  sz_value.add_object_member("rc_spi_speed", serialize(value.get_rc_spi_speed()));
-  sz_value.add_object_member("rc_channel", serialize(value.get_rc_channel()));
-  sz_value.add_object_member("rc_xtal_adjustment", serialize(value.get_rc_xtal_adjustment()));
+  sz_value.reserve_object_members(6);
+  sz_value.add_object_member("channel", serialize(value.get_channel()));
+  sz_value.add_object_member("tx_power", serialize(value.get_tx_power()));
+  sz_value.add_object_member("mtu", serialize(value.get_mtu()));
+  sz_value.add_object_member("rate", serialize(value.get_rate()));
+  sz_value.add_object_member("fec_coding_k", serialize(value.get_fec_coding_k()));
+  sz_value.add_object_member("fec_coding_n", serialize(value.get_fec_coding_n()));
   return sz_value;
 }
 ts::Result<void> deserialize(Settings::Battery_Info& value, ts::sz::Value const& sz_value)
@@ -1438,28 +1396,6 @@ ts::sz::Value serialize(Settings const& value)
   sz_value.add_object_member("hw", serialize(value.get_hw()));
   sz_value.add_object_member("comms", serialize(value.get_comms()));
   sz_value.add_object_member("battery_info", serialize(value.get_battery_info()));
-  return sz_value;
-}
-ts::Result<void> deserialize(std::vector<std::string>& value, ts::sz::Value const& sz_value)
-{
-  value.clear();
-  if (!sz_value.is_array()) { return ts::Error("Expected array value when deserializing"); }
-  value.resize(sz_value.get_array_element_count());
-  for (size_t i = 0; i < value.size(); i++)
-  {
-    auto result = deserialize(value[i], sz_value.get_array_element_value(i));
-    if (result != ts::success) { return result; }
-  }
-  return ts::success;
-}
-ts::sz::Value serialize(std::vector<std::string> const& value)
-{
-  ts::sz::Value sz_value(ts::sz::Value::Type::ARRAY);
-  sz_value.reserve_array_members(value.size());
-  for (size_t i = 0; i < value.size(); i++)
-  {
-    sz_value.add_array_element(serialize(value[i]));
-  }
   return sz_value;
 }
 }
