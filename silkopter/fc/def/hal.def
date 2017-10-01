@@ -29,6 +29,8 @@ struct IUAV_Descriptor : [ ui_name = "UAV Descriptor" ]
         alias tx_power_t = float : [ min = 0.f, max = 20.5f ];
         tx_power_t tx_power = 20.5f: [ ui_name = "TX Power" ];
 
+        struct Quality
+        {
         alias mtu_t = int : [ min = 128, max = 1360 ];
         mtu_t mtu = 1360: [ ui_name = "MTU" ];
 
@@ -36,11 +38,11 @@ struct IUAV_Descriptor : [ ui_name = "UAV Descriptor" ]
 	{
       B_1M_CCK : [ ui_name = "11b 1Mbps CCK" ],
       B_2M_CCK : [ ui_name = "11b 2Mbps CCK" ],
-      B_2M_CCK_SHOST_PREAMBLE : [ ui_name = "11b 2Mbps Short Preamble CCK" ],
+      B_2M_CCK_SHORT_PREAMBLE : [ ui_name = "11b 2Mbps Short Preamble CCK" ],
       B_5_5M_CCK : [ ui_name = "11b 5.5Mbps CCK" ],
-      B_5_5M_CCK_SHOST_PREAMBLE : [ ui_name = "11b 5.5Mbps Short Preamble CCK" ],
+      B_5_5M_CCK_SHORT_PREAMBLE : [ ui_name = "11b 5.5Mbps Short Preamble CCK" ],
       B_11M_CCK : [ ui_name = "11b 11Mbps CCK" ],
-      B_11M_CCK_SHOST_PREAMBLE : [ ui_name = "11b 11Mbps Short Preamble CCK" ],
+      B_11M_CCK_SHORT_PREAMBLE : [ ui_name = "11b 11Mbps Short Preamble CCK" ],
       G_6M_ODFM : [ ui_name = "11g 6Mbps ODFM" ],
       G_9M_ODFM : [ ui_name = "11g 9Mbps ODFM" ],
       G_12M_ODFM : [ ui_name = "11g 12Mbps ODFM" ],
@@ -53,10 +55,14 @@ struct IUAV_Descriptor : [ ui_name = "UAV Descriptor" ]
 
 	rate_t rate = rate_t::B_11M_CCK : [ ui_name = "Rate" ];
 
-        alias fec_coding_k_t = int : [ min = 1, max = 32 ];
-        alias fec_coding_n_t = int : [ min = 1, max = 32 ];
-        fec_coding_k_t fec_coding_k = 12 : [ ui_name = "FEC Coding K" ];
-        fec_coding_n_t fec_coding_n = 20 : [ ui_name = "FEC Coding N" ];
+        alias fec_k_t = int : [ min = 1, max = 16 ];
+        alias fec_n_t = int : [ min = 1, max = 32 ];
+        fec_k_t fec_k = 12 : [ ui_name = "FEC K" ];
+        fec_n_t fec_n = 20 : [ ui_name = "FEC N" ];
+        };
+
+        Quality low : [ ui_name = "Low Quality Streaming" ];
+        Quality high : [ ui_name = "High Quality Streaming" ];
     };
 
     Comms comms : [ ui_name = "Comms" ];

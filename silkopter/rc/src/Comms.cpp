@@ -73,30 +73,6 @@ bool Comms::start()
             return false;
         }
 
-        Fec_Encoder::RX_Descriptor rx_descriptor;
-        rx_descriptor.coding_k = comms_settings.get_fec_coding_k();
-        rx_descriptor.coding_n = comms_settings.get_fec_coding_n();
-        rx_descriptor.mtu = comms_settings.get_mtu();
-        if (!m_fec_encoder_rx.init_rx(rx_descriptor))
-        {
-            QLOGE("Cannot start the rx fec encoder");
-            return false;
-        }
-
-        m_fec_encoder_rx.on_rx_data_decoded = [this](void const* data, size_t size)
-        {
-            math::vec2u16 rezolution;
-            {
-                std::lock_guard<std::mutex> lg(m_rezolution_mutex);
-                rezolution = m_rezolution;
-            }
-
-            if (on_video_data_received)
-            {
-                on_video_data_received(data, size, rezolution);
-            }
-        };
-
         m_phy.set_rate(static_cast<Phy::Rate>(comms_settings.get_rate()));
         m_phy.set_power(comms_settings.get_tx_power());
         m_phy.set_channel(comms_settings.get_channel());
@@ -117,6 +93,37 @@ bool Comms::start()
     m_phy_data.thread = std::thread(std::bind(&Comms::phy_thread_proc, this));
 
     QLOGI("Started receiving video");
+
+    return true;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+bool Comms::create_fec_encoder_rx(Fec_Encoder::RX_Descriptor const& descriptor)
+{
+    QLOGI("Creating RX FEC with K={}, N={}, MTU={}", descriptor.coding_k, descriptor.coding_n, descriptor.mtu);
+    m_fec_encoder_rx.reset(new Fec_Encoder);
+    if (!m_fec_encoder_rx->init_rx(descriptor))
+    {
+        QLOGE("Cannot start the rx fec encoder");
+        m_fec_encoder_rx.reset();
+        return false;
+    }
+
+    m_fec_encoder_rx->on_rx_data_decoded = [this](void const* data, size_t size)
+    {
+        rc_comms::Video_Header video_header;
+        {
+            std::lock_guard<std::mutex> lg(m_video_header_mutex);
+            video_header = m_video_header;
+        }
+
+        math::vec2u16 resolution(video_header.width, video_header.height);
+        if (on_video_data_received)
+        {
+            on_video_data_received(data, size, resolution);
+        }
+    };
 
     return true;
 }
@@ -249,14 +256,38 @@ void Comms::process_rx_packet(rc_comms::Packet_Type packet_type, std::vector<uin
     }
     else if (packet_type == rc_comms::Packet_Type::VIDEO)
     {
-        math::vec2u16 rezolution;
-        if (util::serialization::deserialize(data, rezolution, offset))
+        rc_comms::Video_Header video_header;
+        if (util::serialization::deserialize(data, video_header, offset))
         {
             {
-                std::lock_guard<std::mutex> lg(m_rezolution_mutex);
-                m_rezolution = rezolution;
+                std::lock_guard<std::mutex> lg(m_video_header_mutex);
+                m_video_header = video_header;
             }
-            m_fec_encoder_rx.add_rx_packet(data.data() + offset, data.size() - offset, false);
+
+            Fec_Encoder::RX_Descriptor new_descriptor;
+            new_descriptor.coding_k = video_header.fec_k;
+            new_descriptor.coding_n = video_header.fec_n;
+            new_descriptor.mtu = Fec_Encoder::compute_mtu_from_packet_size(data.size() - offset);
+
+            bool recreate_fec = true;
+            if (m_fec_encoder_rx)
+            {
+                //recreate the FEC if quality changed
+                Fec_Encoder::Descriptor const& descriptor = m_fec_encoder_rx->get_descriptor();
+                recreate_fec = new_descriptor.coding_k != descriptor.coding_k ||
+                        new_descriptor.coding_n != descriptor.coding_n ||
+                        new_descriptor.mtu != descriptor.mtu;
+            }
+
+            if (recreate_fec)
+            {
+                create_fec_encoder_rx(new_descriptor);
+            }
+
+            if (m_fec_encoder_rx)
+            {
+                m_fec_encoder_rx->add_rx_packet(data.data() + offset, data.size() - offset, false);
+            }
             dsz_ok = true;
         }
     }

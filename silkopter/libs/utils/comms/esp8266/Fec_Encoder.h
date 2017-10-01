@@ -42,6 +42,8 @@ public:
     bool init_tx(TX_Descriptor const& descriptor);
     bool init_rx(RX_Descriptor const& descriptor);
 
+    Descriptor const& get_descriptor() const;
+
     //add the received, encoded packets here
     bool add_rx_packet(void const* data, size_t size, bool block);
 
@@ -55,6 +57,7 @@ public:
     std::function<void(void const* data, size_t size)> on_tx_data_encoded;
 
     size_t get_mtu() const;
+    static size_t compute_mtu_from_packet_size(size_t packet_size);
 
     struct RX;
     struct TX;

@@ -123,8 +123,8 @@ Raspicam::Raspicam(HAL& hal)
     m_impl->low.is_active = false;
 
     m_impl->recording.callback = std::bind(&Raspicam::recording_callback, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4);
-    m_impl->high.callback = std::bind(&Raspicam::streaming_callback, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4);
-    m_impl->low.callback = std::bind(&Raspicam::streaming_callback, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4);
+    m_impl->high.callback = std::bind(&Raspicam::streaming_callback, this, stream::IVideo::Quality::HIGH, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4);
+    m_impl->low.callback = std::bind(&Raspicam::streaming_callback, this, stream::IVideo::Quality::LOW, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4);
 #endif
 
     m_descriptor->set_fps(30);
@@ -427,7 +427,7 @@ void Raspicam::recording_callback(uint8_t const* data, size_t size, math::vec2u1
     }
 }
 
-void Raspicam::streaming_callback(uint8_t const* data, size_t size, math::vec2u16 const& resolution, bool is_keyframe)
+void Raspicam::streaming_callback(stream::IVideo::Quality quality, uint8_t const* data, size_t size, math::vec2u16 const& resolution, bool is_keyframe)
 {
     if (!data || size == 0)
     {
@@ -441,9 +441,10 @@ void Raspicam::streaming_callback(uint8_t const* data, size_t size, math::vec2u1
         m_sample_queue.samples.resize(m_sample_queue.samples.size() + m_sample_queue.count + 1);
     }
 
-    auto& sample = m_sample_queue.samples[m_sample_queue.count];
+    stream::IVideo::Sample& sample = m_sample_queue.samples[m_sample_queue.count];
     sample.is_healthy = true;
-    sample.value.type = Stream::Value::Type::H264;
+    sample.value.type = Stream::Type::H264;
+    sample.value.quality = quality;
     sample.value.resolution = resolution;
     sample.value.data.resize(size);
     std::copy(data, data + size, sample.value.data.begin());

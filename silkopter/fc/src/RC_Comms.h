@@ -52,8 +52,9 @@ public:
     struct Impl; //this needs to be public...
 private:
     void process_rx_packet(rc_comms::Packet_Type packet_type, std::vector<uint8_t> const& data, size_t offset);
-
     void process_received_data(std::vector<uint8_t> const& data);
+
+    bool create_fec_encoder_tx(Fec_Encoder::TX_Descriptor const& descriptor);
 
     HAL& m_hal;
     Clock::time_point m_uav_sent_tp = Clock::now();
@@ -70,8 +71,11 @@ private:
     mutable std::mutex m_multirotor_state_mutex;
     stream::IMultirotor_State::Value m_multirotor_state;
 
-    mutable std::mutex m_rezolution_mutex;
-    math::vec2u16 m_rezolution;
+    std::atomic_int m_phy_rate = { -1 };
+    std::atomic_int m_new_phy_rate = { -1 };
+
+    mutable std::mutex m_video_header_mutex;
+    rc_comms::Video_Header m_video_header;
 
     struct Phy_Data
     {
@@ -90,7 +94,7 @@ private:
     } m_phy_data;
 
     Phy m_phy;
-    Fec_Encoder m_fec_encoder_tx;
+    std::unique_ptr<Fec_Encoder> m_fec_encoder_tx;
     Clock::time_point m_last_phy_received_tp = Clock::now();
 
     Clock::time_point m_last_multirotor_state_sent_tp = Clock::now();

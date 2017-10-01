@@ -162,7 +162,6 @@ SOURCES += \
     ../../src/bus/UART_BB_Bus.cpp \
     ../../src/processor/Quad_Multirotor_Motor_Mixer.cpp \
     ../../../libs/utils/hw/SPI_PIGPIO.cpp \
-    ../../../libs/utils/Queue.cpp \
     ../../../../bullet/BulletCollision/BroadphaseCollision/btAxisSweep3.cpp \
     ../../../../bullet/BulletCollision/BroadphaseCollision/btBroadphaseProxy.cpp \
     ../../../../bullet/BulletCollision/BroadphaseCollision/btCollisionAlgorithm.cpp \
@@ -451,7 +450,6 @@ HEADERS += \
     ../../src/processor/Quad_Multirotor_Motor_Mixer.h \
     ../../../libs/common/stream/ICamera_Commands.h \
     ../../../libs/utils/hw/SPI_PIGPIO.h \
-    ../../../libs/utils/Queue.h \
     ../../../../bullet/BulletCollision/BroadphaseCollision/btAxisSweep3.h \
     ../../../../bullet/BulletCollision/BroadphaseCollision/btAxisSweep3Internal.h \
     ../../../../bullet/BulletCollision/BroadphaseCollision/btBroadphaseInterface.h \

@@ -176,7 +176,6 @@ HEADERS += \
     ../../src/IBattery_Info.h \
     ../../src/IGimbal_Control.h \
     ../../../libs/utils/hw/SPI_PIGPIO.h \
-    ../../../libs/utils/Queue.h \
     ../../src/QMLMenus.h \
     ../../src/QMLVideoSurface.h \
     ../../src/QMLTelemetry.h \
@@ -215,7 +214,6 @@ SOURCES += \
     ../../src/Battery_Info_ADS1115.cpp \
     ../../src/Gimbal_Control_ADS1115.cpp \
     ../../../libs/utils/hw/SPI_PIGPIO.cpp \
-    ../../../libs/utils/Queue.cpp \
     ../../src/QMLMenus.cpp \
     ../../src/QMLVideoSurface.cpp \
     ../../src/QMLTelemetry.cpp \

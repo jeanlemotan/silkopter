@@ -1,9 +1,19 @@
 #pragma once
 
+#include <cstdint>
+
 namespace silk
 {
 namespace rc_comms
 {
+
+struct Video_Header
+{
+    uint32_t width : 11;
+    uint32_t height : 11;
+    uint32_t fec_k : 4;
+    uint32_t fec_n : 5;
+};
 
 enum class Video_Message : uint8_t
 {

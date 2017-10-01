@@ -84,6 +84,8 @@ private:
 
     void reset();
 
+    bool create_fec_encoder_rx(Fec_Encoder::RX_Descriptor const& descriptor);
+
     bool sent_multirotor_commands_packet();
     bool send_camera_commands_packet();
     void process_rx_packet(rc_comms::Packet_Type packet_type, std::vector<uint8_t> const& data, size_t offset);
@@ -100,7 +102,7 @@ private:
     uint32_t m_last_req_id = 0;
 
     Phy m_phy;
-    Fec_Encoder m_fec_encoder_rx;
+    std::unique_ptr<Fec_Encoder> m_fec_encoder_rx;
 
     mutable std::mutex m_samples_mutex;
     stream::IMultirotor_State::Value m_multirotor_state;
@@ -108,10 +110,8 @@ private:
     stream::ICamera_Commands::Value m_camera_commands;
 
 
-    std::mutex m_rezolution_mutex;
-    math::vec2u16 m_rezolution;
-//    std::vector<uint8_t> m_serialization_buffer;
-//    std::vector<uint8_t> m_phy_received_data;
+    std::mutex m_video_header_mutex;
+    rc_comms::Video_Header m_video_header;
 
     //mark the commands as infinitely old
     Clock::time_point m_multirotor_commands_last_valid_tp = Clock::time_point(Clock::duration::zero());

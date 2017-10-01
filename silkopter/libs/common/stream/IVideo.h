@@ -13,15 +13,22 @@ class IVideo : public IScalar_Stream<Semantic::VIDEO>
 public:
     typedef std::false_type can_be_filtered_t;
 
+    enum class Quality : uint8_t
+    {
+        LOW,
+        HIGH
+    };
+
+    enum class Type : uint8_t
+    {
+        H264
+    };
+
     struct Value
     {
-        enum class Type : uint8_t
-        {
-            H264
-        };
-
         Clock::time_point time_point;
         Type type;
+        Quality quality;
         math::vec2u16 resolution;
         std::vector<uint8_t> data;
     };

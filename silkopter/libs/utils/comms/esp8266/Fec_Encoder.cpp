@@ -149,7 +149,10 @@ Fec_Encoder::~Fec_Encoder()
         m_thread.join();
     }
 
-    fec_free(m_fec);
+    if (m_fec)
+    {
+        fec_free(m_fec);
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////
@@ -251,7 +254,10 @@ bool Fec_Encoder::init()
 
     m_impl->tx.datagram_pool.on_acquire = [this](TX::Datagram& datagram)
     {
-        datagram.data.resize(m_payload_offset);
+        if (datagram.data.size() < m_payload_offset)
+        {
+            datagram.data.resize(m_payload_offset);
+        }
     };
 
     m_impl->rx.datagram_pool.on_acquire = [this](RX::Datagram& datagram)
@@ -289,6 +295,13 @@ bool Fec_Encoder::init()
     }
 
     return true;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////
+
+Fec_Encoder::Descriptor const& Fec_Encoder::get_descriptor() const
+{
+    return m_is_tx ? static_cast<Fec_Encoder::Descriptor const&>(m_tx_descriptor) : static_cast<Fec_Encoder::Descriptor const&>(m_rx_descriptor);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////
@@ -430,6 +443,17 @@ bool Fec_Encoder::add_tx_packet(void const* _data, size_t size, bool block)
 size_t Fec_Encoder::get_mtu() const
 {
     return m_is_tx ? m_tx_descriptor.mtu : m_rx_descriptor.mtu;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////
+
+size_t Fec_Encoder::compute_mtu_from_packet_size(size_t packet_size)
+{
+    if (packet_size < sizeof(Datagram_Header))
+    {
+        return 0;
+    }
+    return packet_size - sizeof(Datagram_Header);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////
