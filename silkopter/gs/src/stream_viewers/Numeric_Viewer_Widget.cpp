@@ -233,6 +233,11 @@ void Numeric_Viewer_Widget::add_graph(std::string const& name, std::string const
 
 void Numeric_Viewer_Widget::add_samples(float const* src, bool is_healthy)
 {
+    if (!src)
+    {
+        return;
+    }
+
     size_t off = m_temp_values.size();
     m_temp_values.resize(m_temp_values.size() + m_graphs.size());
 //    std::copy(src, src + m_graphs.size(), m_temp_values.begin() + off);
@@ -375,7 +380,7 @@ void Numeric_Viewer_Widget::process_fft_task(size_t graph_idx, View const& view)
         offset += m_graphs.size();
     }
     fftwf_execute(task.fft.plan);
-    fftwf_complex* temp_output = task.fft.temp_output.get();
+    fftwf_complex* temp_output = task.fft.temp_output;
 
     float pixels_per_second = static_cast<float>(m_ui.plot->width()) / view.duration;
     {
@@ -429,8 +434,11 @@ void Numeric_Viewer_Widget::start_task()
             if (m_ui.fft && sample_count != task.fft.plan_sample_count)
             {
                 task.fft.temp_input.reset(static_cast<float*>(fftwf_malloc(sample_count * sizeof(float))), fftwf_free);
-                task.fft.temp_output.reset(static_cast<fftwf_complex*>(fftwf_malloc(sample_count * sizeof(fftwf_complex))), fftwf_free);
-                task.fft.plan = fftwf_plan_dft_r2c_1d(sample_count, task.fft.temp_input.get(), task.fft.temp_output.get(), FFTW_ESTIMATE);
+
+                fftwf_free(task.fft.temp_output);
+                task.fft.temp_output = static_cast<fftwf_complex*>(fftwf_malloc(sample_count * sizeof(fftwf_complex)));
+
+                task.fft.plan = fftwf_plan_dft_r2c_1d(sample_count, task.fft.temp_input.get(), task.fft.temp_output, FFTW_ESTIMATE);
                 task.fft.plan_sample_count = sample_count;
             }
             any_graph_visible = true;

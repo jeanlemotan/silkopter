@@ -1,21 +1,12 @@
 TEMPLATE = lib
 CONFIG += staticlib
+
 CONFIG -= app_bundle
 CONFIG -= qt
 CONFIG += c++11
-INCLUDEPATH += ../../include
-INCLUDEPATH += =/usr/local/include
-INCLUDEPATH += ../../../asio/include
 
 PRECOMPILED_HEADER = ../../include/QBaseStdAfx.h
 CONFIG *= precompile_header
-
-#QMAKE_CXXFLAGS_RELEASE += -g
-#QMAKE_CFLAGS_RELEASE += -g
-#QMAKE_LFLAGS_RELEASE =
-
-QMAKE_CXXFLAGS += -Wno-unused-variable
-QMAKE_CFLAGS += -Wno-unused-variable
 
 DEFINES += BOOST_ERROR_CODE_HEADER_ONLY
 DEFINES += ASIO_STANDALONE
@@ -30,17 +21,6 @@ rpi {
         DEST_FOLDER = rpi/release
         DEFINES += NDEBUG
     }
-} android {
-    DEFINES+=ANDROID
-    QMAKE_MAKEFILE = "Makefile.android"
-    MAKEFILE = "Makefile.android"
-    CONFIG(debug, debug|release) {
-        DEST_FOLDER = android/debug
-    }
-    CONFIG(release, debug|release) {
-        DEST_FOLDER = android/release
-        DEFINES += NDEBUG
-    }
 } else {
     QMAKE_MAKEFILE = "Makefile"
     CONFIG(debug, debug|release) {
@@ -52,11 +32,19 @@ rpi {
     }
 }
 
-OBJECTS_DIR = ./.obj/$${DEST_FOLDER}
-MOC_DIR = ./.moc/$${DEST_FOLDER}
-RCC_DIR = ./.rcc/$${DEST_FOLDER}
-UI_DIR = ./.ui/$${DEST_FOLDER}
+OBJECTS_DIR = ./qbase/.obj/$${DEST_FOLDER}
+MOC_DIR = ./qbase/.moc/$${DEST_FOLDER}
+RCC_DIR = ./qbase/.rcc/$${DEST_FOLDER}
+UI_DIR = ./qbase/.ui/$${DEST_FOLDER}
 DESTDIR = ../../lib/$${DEST_FOLDER}
+
+QMAKE_CXXFLAGS += -Wno-unused-variable -Wno-unused-parameter -ffunction-sections -fdata-sections
+QMAKE_CFLAGS += -Wno-unused-variable -Wno-unused-parameter -ffunction-sections -fdata-sections
+QMAKE_LFLAGS += -rdynamic -lpthread -Wl,--no-whole-archive -Wl,--gc-sections
+
+INCLUDEPATH += =/usr/local/include
+INCLUDEPATH += ../../include
+INCLUDEPATH += ../../../asio/include
 
 SOURCES += \
     ../../src/Console_Logger.cpp \

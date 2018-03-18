@@ -42,8 +42,6 @@ RC_Comms::~RC_Comms()
 
 auto RC_Comms::start() -> bool
 {
-    silk::hal::IUAV_Descriptor::Comms const& comms_settings = m_hal.get_uav_descriptor()->get_comms();
-
     try
     {
 #ifdef USE_SPI_PIGPIO
@@ -60,20 +58,25 @@ auto RC_Comms::start() -> bool
         }
 #endif
 
-        m_phy_rate = static_cast<int>(comms_settings.get_low().get_rate());
-        m_phy.set_rate(static_cast<Phy::Rate>(comms_settings.get_high().get_rate()));
-        m_phy.set_power(comms_settings.get_tx_power());
-        m_phy.set_channel(comms_settings.get_channel());
+        std::shared_ptr<const hal::IUAV_Descriptor> uav_descriptor = m_hal.get_uav_descriptor();
+        if (uav_descriptor)
+        {
+            silk::hal::IUAV_Descriptor::Comms const& comms_settings = uav_descriptor->get_comms();
 
-//        util::comms::Video_Streamer::TX_Descriptor tx_descriptor;
-//        tx_descriptor.interface = comms_settings.get_video_wlan_interface();
-//        tx_descriptor.coding_k = comms_settings.get_fec_coding_k();
-//        tx_descriptor.coding_n = comms_settings.get_fec_coding_n();
+            m_phy_rate = static_cast<int>(comms_settings.get_low().get_rate());
+            m_phy.set_rate(static_cast<Phy::Rate>(comms_settings.get_high().get_rate()));
+            m_phy.set_power(comms_settings.get_tx_power());
+            m_phy.set_channel(comms_settings.get_channel());
+        }
+        else
+        {
+            m_phy_rate = static_cast<int>(Phy::Rate::RATE_B_2M_CCK);
+            m_phy.set_rate(Phy::Rate::RATE_B_2M_CCK);
+            m_phy.set_power(10);
+            m_phy.set_channel(1);
+        }
 
-//        m_is_connected = m_rc_phy.init(*m_spi, SDN_GPIO) &&
-//                         m_rc_protocol.init(2, 3) &&
-//                         m_video_streamer.init_tx(tx_descriptor);
-            m_is_connected = true;
+        m_is_connected = true;
     }
     catch(std::exception e)
     {

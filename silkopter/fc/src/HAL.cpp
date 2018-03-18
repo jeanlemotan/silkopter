@@ -27,6 +27,7 @@
 #include "source/MaxSonar.h"
 #include "source/UBLOX.h"
 #include "source/CPPM_Receiver.h"
+#include "source/UltimateSensorFusion.h"
 #include "sink/PIGPIO.h"
 #include "sink/PCA9685.h"
 
@@ -85,7 +86,7 @@ extern "C"
 
 ///////////////////////////////////////////////////////////////////
 
-std::chrono::microseconds PIGPIO_PERIOD(2);
+std::chrono::microseconds PIGPIO_PERIOD(5);
 
 static auto initialize_pigpio() -> bool
 {
@@ -487,6 +488,7 @@ auto HAL::init(RC_Comms& rc_comms, GS_Comms& gs_comms) -> bool
     m_node_factory.add<AVRADC>("AVRADC", *this);
     m_node_factory.add<UBLOX>("UBLOX", *this);
     m_node_factory.add<CPPM_Receiver>("CPPM Receiver", *this);
+    m_node_factory.add<UltimateSensorFusion>("Ultimate Sensor Fusion", *this);
 
     m_node_factory.add<PIGPIO>("PIGPIO", *this);
     m_node_factory.add<PCA9685>("PCA9685", *this);

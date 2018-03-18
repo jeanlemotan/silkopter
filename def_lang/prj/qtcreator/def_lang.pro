@@ -38,10 +38,9 @@ RCC_DIR = ./def_lang/.rcc/$${DEST_FOLDER}
 UI_DIR = ./def_lang/.ui/$${DEST_FOLDER}
 DESTDIR = ../../lib/$${DEST_FOLDER}
 
-QMAKE_CXXFLAGS += -Wno-unused-variable -Wno-unused-parameter
-QMAKE_CFLAGS += -Wno-unused-variable -Wno-unused-parameter
-QMAKE_LFLAGS += -rdynamic
-
+QMAKE_CXXFLAGS += -Wno-unused-variable -Wno-unused-parameter -ffunction-sections -fdata-sections
+QMAKE_CFLAGS += -Wno-unused-variable -Wno-unused-parameter -ffunction-sections -fdata-sections
+QMAKE_LFLAGS += -rdynamic -Wl,--no-whole-archive -Wl,--gc-sections
 
 INCLUDEPATH += =/usr/local/include
 INCLUDEPATH += ../../include

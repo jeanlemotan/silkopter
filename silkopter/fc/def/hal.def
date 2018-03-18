@@ -568,6 +568,60 @@ struct MS5611_Config : public INode_Config
 
 //////////////////////////////////////////////////////////////
 
+struct UltimateSensorFusion_Descriptor : public INode_Descriptor
+{
+    alias rate_t = uint32_t : [ min = 1, max = 100, native_type = "uint32_t" ];
+    alias rate_divisor_t = uint32_t : [ min = 1, max = 10, native_type = "uint32_t" ];
+    alias i2c_address_t = uint8_t : [ min = 0, max = 127, native_type = "uint8_t", hex ];
+    enum imu_rate_t
+    {
+        _250 = 250 : [ ui_name = "250 Hz" ],
+        _400 = 400: [ ui_name = "400 Hz" ],
+        _500 = 500: [ ui_name = "500 Hz" ],
+        _1000 = 1000: [ ui_name = "1000 Hz" ],
+    };
+
+    enum acceleration_range_t
+    {
+        _2 = 2 : [ ui_name = "2 G" ],
+        _4 = 4: [ ui_name = "4 G" ],
+        _8 = 8: [ ui_name = "8 G" ],
+        _16 = 16: [ ui_name = "16 G" ],
+    };
+
+    enum angular_velocity_range_t
+    {
+        _250 = 250 : [ ui_name = "250 DPS" ],
+        _500 = 500: [ ui_name = "500 DPS" ],
+        _1000 = 1000: [ ui_name = "1000 DPS" ],
+        _2000 = 2000: [ ui_name = "2000 DPS" ],
+    };
+
+    string bus : [ ui_name = "Bus" ];
+    i2c_address_t i2c_address = 0x28 : [ui_name = "I2C Address" ];
+
+    imu_rate_t imu_rate = imu_rate_t::_1000 : [ ui_name = "IMU Rate", ui_suffix = "Hz" ];
+    rate_t magnetometer_rate = 100 : [ ui_name = "Magnetometer Rate", ui_suffix = "Hz" ];
+    rate_t barometer_thermometer_rate = 10 : [ ui_name = "Barometer/Thermometer Rate", ui_suffix = "Hz" ];
+    acceleration_range_t acceleration_range = acceleration_range_t::_8 : [ ui_name = "Acceleration Range" ];
+    angular_velocity_range_t angular_velocity_range = angular_velocity_range_t::_500 : [ ui_name = "Angular Velocity Range" ];
+
+    rate_divisor_t frame_rate_divisor = 1 : [ ui_name = "Frame Processing Rate Divisor" ];
+    rate_divisor_t imu_output_rate_divisor = 1 : [ ui_name = "IMU Output Rate Divisor" ];
+    bool acceleration_output_enabled = true : [ ui_name = "Acceleration Output Enabled" ];
+    bool angular_velocity_output_enabled = true : [ ui_name = "Angular Velocity Output Enabled" ];
+    bool magnetic_field_output_enabled = true : [ ui_name = "Magnetic Field Output Enabled" ];
+    bool frame_output_enabled = true : [ ui_name = "Frame Output Enabled" ];
+    bool pressure_output_enabled = true : [ ui_name = "Pressure Output Enabled" ];
+    bool temperature_output_enabled = true : [ ui_name = "Temperature Output Enabled" ];
+};
+
+struct UltimateSensorFusion_Config : public INode_Config
+{
+};
+
+//////////////////////////////////////////////////////////////
+
 struct Multirotor_Brain_Descriptor : public INode_Descriptor
 {
     alias rate_t = uint32_t : [ min = 1, max = 10000, native_type = "uint32_t" ];

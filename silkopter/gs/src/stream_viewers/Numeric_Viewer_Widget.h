@@ -56,8 +56,12 @@ private:
 
     struct FFT
     {
+        ~FFT()
+        {
+            fftwf_free(temp_output);
+        }
         std::shared_ptr<float> temp_input;
-        std::shared_ptr<fftwf_complex> temp_output;
+        fftwf_complex* temp_output = nullptr;
         fftwf_plan plan;
         size_t plan_sample_count = 0;
     };

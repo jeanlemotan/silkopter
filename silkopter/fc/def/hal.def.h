@@ -1222,6 +1222,122 @@ public:
 private:
 };
 
+struct UltimateSensorFusion_Descriptor : public INode_Descriptor
+{
+public:
+  typedef uint32_t rate_t;
+  typedef uint32_t rate_divisor_t;
+  typedef uint8_t i2c_address_t;
+  enum class imu_rate_t
+  {
+    _250 = 250,
+    _400 = 400,
+    _500 = 500,
+    _1000 = 1000,
+  };
+
+  enum class acceleration_range_t
+  {
+    _2 = 2,
+    _4 = 4,
+    _8 = 8,
+    _16 = 16,
+  };
+
+  enum class angular_velocity_range_t
+  {
+    _250 = 250,
+    _500 = 500,
+    _1000 = 1000,
+    _2000 = 2000,
+  };
+
+  virtual ~UltimateSensorFusion_Descriptor() = default;
+  void set_bus(std::string const& value);
+  void set_bus(std::string&& value);
+  auto get_bus() const -> std::string const&;
+
+  void set_i2c_address(uint8_t const& value);
+  void set_i2c_address(uint8_t&& value);
+  auto get_i2c_address() const -> uint8_t const&;
+
+  void set_imu_rate(imu_rate_t const& value);
+  void set_imu_rate(imu_rate_t&& value);
+  auto get_imu_rate() const -> imu_rate_t const&;
+
+  void set_magnetometer_rate(uint32_t const& value);
+  void set_magnetometer_rate(uint32_t&& value);
+  auto get_magnetometer_rate() const -> uint32_t const&;
+
+  void set_barometer_thermometer_rate(uint32_t const& value);
+  void set_barometer_thermometer_rate(uint32_t&& value);
+  auto get_barometer_thermometer_rate() const -> uint32_t const&;
+
+  void set_acceleration_range(acceleration_range_t const& value);
+  void set_acceleration_range(acceleration_range_t&& value);
+  auto get_acceleration_range() const -> acceleration_range_t const&;
+
+  void set_angular_velocity_range(angular_velocity_range_t const& value);
+  void set_angular_velocity_range(angular_velocity_range_t&& value);
+  auto get_angular_velocity_range() const -> angular_velocity_range_t const&;
+
+  void set_frame_rate_divisor(uint32_t const& value);
+  void set_frame_rate_divisor(uint32_t&& value);
+  auto get_frame_rate_divisor() const -> uint32_t const&;
+
+  void set_imu_output_rate_divisor(uint32_t const& value);
+  void set_imu_output_rate_divisor(uint32_t&& value);
+  auto get_imu_output_rate_divisor() const -> uint32_t const&;
+
+  void set_acceleration_output_enabled(bool const& value);
+  void set_acceleration_output_enabled(bool&& value);
+  auto get_acceleration_output_enabled() const -> bool const&;
+
+  void set_angular_velocity_output_enabled(bool const& value);
+  void set_angular_velocity_output_enabled(bool&& value);
+  auto get_angular_velocity_output_enabled() const -> bool const&;
+
+  void set_magnetic_field_output_enabled(bool const& value);
+  void set_magnetic_field_output_enabled(bool&& value);
+  auto get_magnetic_field_output_enabled() const -> bool const&;
+
+  void set_frame_output_enabled(bool const& value);
+  void set_frame_output_enabled(bool&& value);
+  auto get_frame_output_enabled() const -> bool const&;
+
+  void set_pressure_output_enabled(bool const& value);
+  void set_pressure_output_enabled(bool&& value);
+  auto get_pressure_output_enabled() const -> bool const&;
+
+  void set_temperature_output_enabled(bool const& value);
+  void set_temperature_output_enabled(bool&& value);
+  auto get_temperature_output_enabled() const -> bool const&;
+
+private:
+  std::string m_bus;
+  uint8_t m_i2c_address = uint8_t{40};
+  imu_rate_t m_imu_rate = imu_rate_t{UltimateSensorFusion_Descriptor::imu_rate_t::_1000};
+  uint32_t m_magnetometer_rate = uint32_t{100};
+  uint32_t m_barometer_thermometer_rate = uint32_t{10};
+  acceleration_range_t m_acceleration_range = acceleration_range_t{UltimateSensorFusion_Descriptor::acceleration_range_t::_8};
+  angular_velocity_range_t m_angular_velocity_range = angular_velocity_range_t{UltimateSensorFusion_Descriptor::angular_velocity_range_t::_500};
+  uint32_t m_frame_rate_divisor = uint32_t{1};
+  uint32_t m_imu_output_rate_divisor = uint32_t{1};
+  bool m_acceleration_output_enabled = bool{true};
+  bool m_angular_velocity_output_enabled = bool{true};
+  bool m_magnetic_field_output_enabled = bool{true};
+  bool m_frame_output_enabled = bool{true};
+  bool m_pressure_output_enabled = bool{true};
+  bool m_temperature_output_enabled = bool{true};
+};
+
+struct UltimateSensorFusion_Config : public INode_Config
+{
+public:
+  virtual ~UltimateSensorFusion_Config() = default;
+private:
+};
+
 struct Multirotor_Brain_Descriptor : public INode_Descriptor
 {
 public:
@@ -3067,6 +3183,16 @@ ts::Result<void> deserialize(MS5611_Descriptor& value, ts::sz::Value const& sz_v
 ts::sz::Value serialize(MS5611_Descriptor const& value);
 ts::Result<void> deserialize(MS5611_Config& value, ts::sz::Value const& sz_value);
 ts::sz::Value serialize(MS5611_Config const& value);
+ts::Result<void> deserialize(UltimateSensorFusion_Descriptor::imu_rate_t& value, ts::sz::Value const& sz_value);
+ts::sz::Value serialize(UltimateSensorFusion_Descriptor::imu_rate_t const& value);
+ts::Result<void> deserialize(UltimateSensorFusion_Descriptor::acceleration_range_t& value, ts::sz::Value const& sz_value);
+ts::sz::Value serialize(UltimateSensorFusion_Descriptor::acceleration_range_t const& value);
+ts::Result<void> deserialize(UltimateSensorFusion_Descriptor::angular_velocity_range_t& value, ts::sz::Value const& sz_value);
+ts::sz::Value serialize(UltimateSensorFusion_Descriptor::angular_velocity_range_t const& value);
+ts::Result<void> deserialize(UltimateSensorFusion_Descriptor& value, ts::sz::Value const& sz_value);
+ts::sz::Value serialize(UltimateSensorFusion_Descriptor const& value);
+ts::Result<void> deserialize(UltimateSensorFusion_Config& value, ts::sz::Value const& sz_value);
+ts::sz::Value serialize(UltimateSensorFusion_Config const& value);
 ts::Result<void> deserialize(Multirotor_Brain_Descriptor& value, ts::sz::Value const& sz_value);
 ts::sz::Value serialize(Multirotor_Brain_Descriptor const& value);
 ts::Result<void> deserialize(Multirotor_Brain_Config::Horizontal::Separate_Angle_PIDs& value, ts::sz::Value const& sz_value);

@@ -1,21 +1,9 @@
 TEMPLATE = lib
 CONFIG += staticlib
+
 CONFIG -= app_bundle
 CONFIG -= qt
 CONFIG += c++11
-INCLUDEPATH += ../../include
-INCLUDEPATH += ../../../qbase/include
-INCLUDEPATH += ../../../asio/include
-INCLUDEPATH += /usr/include/lua5.1
-INCLUDEPATH += =/usr/local/include
-
-
-#QMAKE_CXXFLAGS_RELEASE += -g
-#QMAKE_CFLAGS_RELEASE += -g
-#QMAKE_LFLAGS_RELEASE =
-
-QMAKE_CXXFLAGS += -Wno-unused-variable
-QMAKE_CFLAGS += -Wno-unused-variable
 
 DEFINES += BOOST_ERROR_CODE_HEADER_ONLY
 DEFINES += ASIO_STANDALONE
@@ -28,17 +16,6 @@ rpi {
     }
     CONFIG(release, debug|release) {
         DEST_FOLDER = rpi/release
-        DEFINES += NDEBUG
-    }
-} android {
-    DEFINES+=ANDROID
-    QMAKE_MAKEFILE = "Makefile.android"
-    MAKEFILE = "Makefile.android"
-    CONFIG(debug, debug|release) {
-        DEST_FOLDER = android/debug
-    }
-    CONFIG(release, debug|release) {
-        DEST_FOLDER = android/release
         DEFINES += NDEBUG
     }
 } else {
@@ -58,6 +35,15 @@ MOC_DIR = ./.moc/$${DEST_FOLDER}
 RCC_DIR = ./.rcc/$${DEST_FOLDER}
 UI_DIR = ./.ui/$${DEST_FOLDER}
 DESTDIR = ../../lib/$${DEST_FOLDER}
+
+QMAKE_CXXFLAGS += -Wno-unused-variable -Wno-unused-parameter -ffunction-sections -fdata-sections
+QMAKE_CFLAGS += -Wno-unused-variable -Wno-unused-parameter -ffunction-sections -fdata-sections
+
+INCLUDEPATH += ../../include
+INCLUDEPATH += ../../../qbase/include
+INCLUDEPATH += ../../../asio/include
+INCLUDEPATH += /usr/include/lua5.1
+INCLUDEPATH += =/usr/local/include
 
 
 SOURCES += \

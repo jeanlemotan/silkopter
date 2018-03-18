@@ -42,9 +42,9 @@ UI_DIR = ./.ui/$${DEST_FOLDER}
 DESTDIR = ../../bin/$${DEST_FOLDER}
 
 QMAKE_CXXFLAGS += -isystem =/opt/vc/include -isystem =/opt/vc/include/interface/vcos/pthreads -isystem =/opt/vc/include/interface/vmcs_host/linux
-QMAKE_CXXFLAGS += -Wno-unused-variable -Wno-unused-parameter
-QMAKE_CFLAGS += -Wno-unused-variable -Wno-unused-parameter
-QMAKE_LFLAGS += -rdynamic -Wl,--whole-archive -lpthread -Wl,--no-whole-archive
+QMAKE_CXXFLAGS += -Wno-unused-variable -Wno-unused-parameter -ffunction-sections -fdata-sections
+QMAKE_CFLAGS += -Wno-unused-variable -Wno-unused-parameter -ffunction-sections -fdata-sections
+QMAKE_LFLAGS += -rdynamic -Wl,--whole-archive -lpthread -Wl,--no-whole-archive -Wl,--gc-sections
 
 
 INCLUDEPATH += =/usr/local/include
@@ -58,7 +58,6 @@ INCLUDEPATH += ../../../libs/utils/hw
 INCLUDEPATH += ../../../../def_lang/include
 INCLUDEPATH += ../../../../qbase/include
 INCLUDEPATH += ../../../../qmath/include
-INCLUDEPATH += ../../../../ReactPhysics3D/src
 INCLUDEPATH += ../../../../eigen
 INCLUDEPATH += ../../../../bullet
 
@@ -71,23 +70,18 @@ LIBS += -L$${ROOT_LIBS_PATH}/qmath/lib/$${DEST_FOLDER} -lqmath
 LIBS += -L$${ROOT_LIBS_PATH}/qbase/lib/$${DEST_FOLDER} -lqbase
 
 LIBS += -lpthread
-LIBS += -lrt
 LIBS += -lz
-LIBS += -lpcap
 rpi {
     LIBS += -lmmal_core
     LIBS += -lmmal_util
     LIBS += -lmmal_vc_client
     LIBS += -lvcos
     LIBS += -lbcm_host
-#    LIBS += -lGLESv2
-#    LIBS += -lEGL
 } else {
     LIBS += -lopencv_core
     LIBS += -lopencv_imgproc
     LIBS += -lopencv_highgui
     LIBS += -lopencv_ml
-    #LIBS += -lopencv_videoio
 }
 
 SOURCES += \
@@ -291,7 +285,8 @@ SOURCES += \
     ../../../libs/utils/comms/esp8266/Fec_Encoder.cpp \
     ../../../libs/utils/comms/esp8266/Phy.cpp \
     ../../../libs/utils/comms/esp8266/utils/fec.cpp \
-    ../../../libs/utils/comms/RCP.cpp
+    ../../../libs/utils/comms/RCP.cpp \
+    ../../src/source/UltimateSensorFusion.cpp
 
 HEADERS += \
     ../../../libs/utils/chrono.h \
@@ -647,7 +642,8 @@ HEADERS += \
     ../../../libs/utils/comms/esp8266/Pool.h \
     ../../../libs/utils/comms/esp8266/utils/fec.h \
     ../../../libs/utils/comms/RCP.h \
-    ../../../libs/utils/comms/esp8266/Queue.h
+    ../../../libs/utils/comms/esp8266/Queue.h \
+    ../../src/source/UltimateSensorFusion.h
 
 DISTFILES += \
     ../../../../bullet/Bullet3Common/CMakeLists.txt \

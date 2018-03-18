@@ -183,7 +183,7 @@ int main(int argc, char const* argv[])
 //            }
 //        }
 
-#if defined RASPBERRY_PI
+#if defined RASPBERRY_PI_XXX
     {
         int policy = SCHED_FIFO;
         struct sched_param param;
@@ -201,14 +201,14 @@ int main(int argc, char const* argv[])
             //exit(EXIT_FAILURE);
         }
 
-        cpu_set_t cpuset;
-        CPU_ZERO(&cpuset);
-        CPU_SET(3, &cpuset);
-        int s = pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpuset);
-        if (s != 0)
-        {
-            QLOGW("pthread_setaffinity_np failed: {}", s);
-        }
+//        cpu_set_t cpuset;
+//        CPU_ZERO(&cpuset);
+//        CPU_SET(3, &cpuset);
+//        int s = pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpuset);
+//        if (s != 0)
+//        {
+//            QLOGW("pthread_setaffinity_np failed: {}", s);
+//        }
     }
 #endif
 

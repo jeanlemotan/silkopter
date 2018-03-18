@@ -29,7 +29,7 @@ void Console_Logger::log(Level level, const std::string& message)
 #elif defined(Q_WINDOWS) || defined(Q_IOS) || defined(Q_POSIX_API)
 
 	puts(message.c_str());
-	fflush(stdout);
+    fflush(stdout);
 
 #else
 #	error define a print for your platform
