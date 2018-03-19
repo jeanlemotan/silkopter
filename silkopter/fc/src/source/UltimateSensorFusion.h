@@ -64,11 +64,13 @@ private:
     std::shared_ptr<hal::UltimateSensorFusion_Config> m_config;
 
     Clock::time_point m_last_process_tp = Clock::now();
+    Clock::duration m_min_dt = Clock::duration::zero();
 
     template<class Base>
     struct Common : public Base
     {
         Common() = default;
+        Clock::time_point last_process_tp = Clock::now();
     };
 
     typedef Basic_Output_Stream<Common<stream::IAcceleration>> Acceleration_Stream;

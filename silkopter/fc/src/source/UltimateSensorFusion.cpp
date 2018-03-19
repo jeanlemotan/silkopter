@@ -1,5 +1,6 @@
 #include "FCStdAfx.h"
 #include "UltimateSensorFusion.h"
+#include "physics/constants.h"
 
 #include "hal.def.h"
 
@@ -560,12 +561,20 @@ ts::Result<void> UltimateSensorFusion::init()
         return make_error("Failed finalize setting up the UltimateSensorFusion!");
     }
 
-    m_acceleration->set_rate((uint32_t)m_descriptor->get_imu_rate());
-    m_angular_velocity->set_rate((uint32_t)m_descriptor->get_imu_rate());
+    m_acceleration->set_rate((uint32_t)m_descriptor->get_imu_rate() / m_descriptor->get_imu_output_rate_divisor());
+    m_angular_velocity->set_rate((uint32_t)m_descriptor->get_imu_rate() / m_descriptor->get_imu_output_rate_divisor());
     m_magnetic_field->set_rate(m_descriptor->get_magnetometer_rate());
     m_frame->set_rate((uint32_t)m_descriptor->get_imu_rate() / m_descriptor->get_frame_rate_divisor());
     m_pressure->set_rate(m_descriptor->get_barometer_thermometer_rate());
     m_temperature->set_rate(m_descriptor->get_barometer_thermometer_rate());
+
+    m_min_dt = std::min(m_acceleration->get_dt(), m_angular_velocity->get_dt());
+    m_min_dt = std::min(m_min_dt, m_magnetic_field->get_dt());
+    m_min_dt = std::min(m_min_dt, m_frame->get_dt());
+    m_min_dt = std::min(m_min_dt, m_pressure->get_dt());
+    m_min_dt = std::min(m_min_dt, m_temperature->get_dt());
+
+    m_min_dt /= 2;
 
     return ts::success;
 }
@@ -730,6 +739,13 @@ void UltimateSensorFusion::process()
     m_pressure->clear();
     m_temperature->clear();
 
+    auto now = Clock::now();
+    if (now - m_last_process_tp < m_min_dt)
+    {
+        return;
+    }
+    m_last_process_tp = now;
+
     std::shared_ptr<bus::II2C_Bus> bus = m_i2c_bus.lock();
     if (!bus)
     {
@@ -738,12 +754,6 @@ void UltimateSensorFusion::process()
     util::hw::II2C& i2c = bus->get_i2c();
 
     QLOG_TOPIC("UltimateSensorFusion::process");
-    auto now = Clock::now();
-//    if (now - m_last_process_tp < m_frame->get_dt())
-//    {
-//        return;
-//    }
-    m_last_process_tp = now;
 
     // Check event status register, way to chech data ready by polling rather than interrupt
     uint8_t event_status = 0;
@@ -775,85 +785,237 @@ void UltimateSensorFusion::process()
         return;
     }
 
+    constexpr size_t k_max_sample_difference = 3;
+
     // if no errors, see if new data is ready
     if (m_descriptor->get_acceleration_output_enabled() && (event_status & 0x10))  // new acceleration data available
     {
-        uint8_t raw_data[6];  // x/y/z accel register data stored here
-        if (i2c.read_register(EM7180_ADDRESS, EM7180_AX, raw_data, 6))       // Read the six raw data registers into data array
+        now = Clock::now();
+        Clock::duration stream_dt = m_acceleration->get_dt();
+        if (now - m_acceleration->last_process_tp >= m_acceleration->get_dt())
         {
-            int16_t qvalue[3];
-            qvalue[0] = (int16_t) (((int16_t)raw_data[1] << 8) | raw_data[0]);  // Turn the MSB and LSB into a signed 16-bit value
-            qvalue[1] = (int16_t) (((int16_t)raw_data[3] << 8) | raw_data[2]);
-            qvalue[2] = (int16_t) (((int16_t)raw_data[5] << 8) | raw_data[4]);
+            m_acceleration->last_process_tp = now;
 
-            math::vec3f value((float)qvalue[0]*0.000488f, (float)qvalue[1]*0.000488f, (float)qvalue[2]*0.000488f);
-            m_acceleration->push_sample(value, true);
+            if (m_acceleration->get_tp() > now + stream_dt*k_max_sample_difference)
+            {
+                //skipped
+            }
+            else
+            {
+                uint8_t raw_data[6];  // x/y/z accel register data stored here
+                if (i2c.read_register(EM7180_ADDRESS, EM7180_AX, raw_data, 6))       // Read the six raw data registers into data array
+                {
+                    int16_t qvalue[3];
+                    qvalue[0] = (int16_t) (((int16_t)raw_data[1] << 8) | raw_data[0]);  // Turn the MSB and LSB into a signed 16-bit value
+                    qvalue[1] = (int16_t) (((int16_t)raw_data[3] << 8) | raw_data[2]);
+                    qvalue[2] = (int16_t) (((int16_t)raw_data[5] << 8) | raw_data[4]);
+
+                    math::vec3f value((float)qvalue[0]*(0.000488f*physics::constants::g),
+                            (float)qvalue[1]*(0.000488f*physics::constants::g),
+                            (float)qvalue[2]*(0.000488f*physics::constants::g));
+                    m_acceleration->push_sample(value, true);
+                }
+            }
         }
     }
 
     if (m_descriptor->get_angular_velocity_output_enabled() && (event_status & 0x20)) // new gyro data available
     {
-        uint8_t raw_data[6];  // x/y/z gyro register data stored here
-        if (i2c.read_register(EM7180_ADDRESS, EM7180_GX, raw_data, 6))       // Read the six raw data registers into data array
+        now = Clock::now();
+        Clock::duration stream_dt = m_angular_velocity->get_dt();
+        if (now - m_angular_velocity->last_process_tp >= m_angular_velocity->get_dt())
         {
-            int16_t qvalue[3];
-            qvalue[0] = (int16_t) (((int16_t)raw_data[1] << 8) | raw_data[0]);  // Turn the MSB and LSB into a signed 16-bit value
-            qvalue[1] = (int16_t) (((int16_t)raw_data[3] << 8) | raw_data[2]);
-            qvalue[2] = (int16_t) (((int16_t)raw_data[5] << 8) | raw_data[4]);
+            m_angular_velocity->last_process_tp = now;
 
-            math::vec3f value((float)qvalue[0]*(0.153f*0.0174533f), (float)qvalue[1]*(0.153f*0.0174533f), (float)qvalue[2]*(0.153f*0.0174533f));
-            m_angular_velocity->push_sample(value, true);
+            if (m_angular_velocity->get_tp() > now + stream_dt*k_max_sample_difference)
+            {
+                //skipped
+            }
+            else
+            {
+                uint8_t raw_data[6];  // x/y/z gyro register data stored here
+                if (i2c.read_register(EM7180_ADDRESS, EM7180_GX, raw_data, 6))       // Read the six raw data registers into data array
+                {
+                    int16_t qvalue[3];
+                    qvalue[0] = (int16_t) (((int16_t)raw_data[1] << 8) | raw_data[0]);  // Turn the MSB and LSB into a signed 16-bit value
+                    qvalue[1] = (int16_t) (((int16_t)raw_data[3] << 8) | raw_data[2]);
+                    qvalue[2] = (int16_t) (((int16_t)raw_data[5] << 8) | raw_data[4]);
+
+                    math::vec3f value((float)qvalue[0]*(0.153f*0.0174533f),
+                            (float)qvalue[1]*(0.153f*0.0174533f),
+                            (float)qvalue[2]*(0.153f*0.0174533f));
+                    m_angular_velocity->push_sample(value, true);
+                }
+            }
         }
     }
 
     if (m_descriptor->get_magnetic_field_output_enabled() && (event_status & 0x08)) // new mag data available
     {
-        uint8_t raw_data[6];  // x/y/z gyro register data stored here
-        if (i2c.read_register(EM7180_ADDRESS, EM7180_MX, raw_data, 6))       // Read the six raw data registers into data array
+        now = Clock::now();
+        Clock::duration stream_dt = m_magnetic_field->get_dt();
+        if (m_magnetic_field->get_tp() > now + stream_dt*k_max_sample_difference)
         {
-            int16_t qvalue[3];
-            qvalue[0] = (int16_t) (((int16_t)raw_data[1] << 8) | raw_data[0]);  // Turn the MSB and LSB into a signed 16-bit value
-            qvalue[1] = (int16_t) (((int16_t)raw_data[3] << 8) | raw_data[2]);
-            qvalue[2] = (int16_t) (((int16_t)raw_data[5] << 8) | raw_data[4]);
+            //skipped
+        }
+        else
+        {
+            uint8_t raw_data[6];  // x/y/z gyro register data stored here
+            if (i2c.read_register(EM7180_ADDRESS, EM7180_MX, raw_data, 6))       // Read the six raw data registers into data array
+            {
+                int16_t qvalue[3];
+                qvalue[0] = (int16_t) (((int16_t)raw_data[1] << 8) | raw_data[0]);  // Turn the MSB and LSB into a signed 16-bit value
+                qvalue[1] = (int16_t) (((int16_t)raw_data[3] << 8) | raw_data[2]);
+                qvalue[2] = (int16_t) (((int16_t)raw_data[5] << 8) | raw_data[4]);
 
-            math::vec3f value((float)qvalue[0]*0.305176f, (float)qvalue[1]*0.305176f, (float)qvalue[2]*0.305176f);
-            m_magnetic_field->push_sample(value, true);
+                math::vec3f value((float)qvalue[0]*0.305176f,
+                        (float)qvalue[1]*0.305176f,
+                        (float)qvalue[2]*0.305176f);
+                m_magnetic_field->push_sample(value, true);
+            }
         }
     }
 
     if (m_descriptor->get_frame_output_enabled() && (event_status & 0x04))  // new quaternion data available
     {
-        math::quatf data;  // x/y/z quaternion register data stored here
-        if (i2c.read_register(EM7180_ADDRESS, EM7180_QX, reinterpret_cast<uint8_t*>(&data), 16))       // Read the six raw data registers into data array
+        now = Clock::now();
+        Clock::duration stream_dt = m_frame->get_dt();
+        if (m_frame->get_tp() > now + stream_dt*k_max_sample_difference)
         {
-            m_frame->push_sample(data, true);
+            //skipped
+        }
+        else
+        {
+            math::quatf data;  // x/y/z quaternion register data stored here
+            if (i2c.read_register(EM7180_ADDRESS, EM7180_QX, reinterpret_cast<uint8_t*>(&data), 16))       // Read the six raw data registers into data array
+            {
+                m_frame->push_sample(data, true);
+            }
         }
     }
 
     // get BMP280 pressure
-    if (event_status & 0x40)  // new baro data available
+    if (event_status & 0x40)  // new baro/temp data available
     {
-        uint8_t raw_data[2];  // x/y/z gyro register data stored here
+        uint8_t raw_data[2];
+
         if (m_descriptor->get_pressure_output_enabled())
         {
-            if (i2c.read_register(EM7180_ADDRESS, EM7180_Baro, raw_data, 2))       // Read the six raw data registers into data array
+            now = Clock::now();
+            Clock::duration stream_dt = m_pressure->get_dt();
+            if (m_pressure->get_tp() > now + stream_dt*k_max_sample_difference)
             {
-                int16_t qvalue = (int16_t) (((int16_t)raw_data[1] << 8) | raw_data[0]);  // Turn the MSB and LSB into a signed 16-bit value
-                float value = (float)qvalue*0.01f + 1013.25f;
-                m_pressure->push_sample(value, true);
+                //skipped
+            }
+            else
+            {
+                if (i2c.read_register(EM7180_ADDRESS, EM7180_Baro, raw_data, 2))       // Read the six raw data registers into data array
+                {
+                    int16_t qvalue = (int16_t) (((int16_t)raw_data[1] << 8) | raw_data[0]);  // Turn the MSB and LSB into a signed 16-bit value
+                    float value = (float)qvalue*0.01f + 1013.25f;
+                    m_pressure->push_sample(value, true);
+                }
             }
         }
 
         if (m_descriptor->get_temperature_output_enabled())
         {
-            if (i2c.read_register(EM7180_ADDRESS, EM7180_Temp, raw_data, 2))       // Read the six raw data registers into data array
+            now = Clock::now();
+            Clock::duration stream_dt = m_temperature->get_dt();
+            if (m_temperature->get_tp() > now + stream_dt*k_max_sample_difference)
             {
-                int16_t qvalue = (int16_t) (((int16_t)raw_data[1] << 8) | raw_data[0]);  // Turn the MSB and LSB into a signed 16-bit value
-                float value = (float)qvalue*0.01;
-                m_temperature->push_sample(value, true);
+                //skipped
+            }
+            else
+            {
+                if (i2c.read_register(EM7180_ADDRESS, EM7180_Temp, raw_data, 2))       // Read the six raw data registers into data array
+                {
+                    int16_t qvalue = (int16_t) (((int16_t)raw_data[1] << 8) | raw_data[0]);  // Turn the MSB and LSB into a signed 16-bit value
+                    float value = (float)qvalue*0.01;
+                    m_temperature->push_sample(value, true);
+                }
             }
         }
     }
+
+
+    //handle and report the slow clock
+    {
+        constexpr size_t MAX_SKIPPED_SAMPLES = 8;
+        if (m_descriptor->get_acceleration_output_enabled())
+        {
+            Clock::duration dt = m_acceleration->get_dt();
+            if (m_acceleration->get_tp() <= now - dt * MAX_SKIPPED_SAMPLES)
+            {
+                while (m_acceleration->get_tp() <= now - dt)
+                {
+                    m_acceleration->push_last_sample(false);
+                    //m_stats.acc.added++;
+                }
+            }
+        }
+        if (m_descriptor->get_angular_velocity_output_enabled())
+        {
+            Clock::duration dt = m_angular_velocity->get_dt();
+            if (m_angular_velocity->get_tp() <= now - dt * MAX_SKIPPED_SAMPLES)
+            {
+                while (m_angular_velocity->get_tp() <= now - dt)
+                {
+                    m_angular_velocity->push_sample(math::vec3f::zero, false);
+                    //m_stats.av.added++;
+                }
+            }
+        }
+        if (m_descriptor->get_magnetic_field_output_enabled())
+        {
+            Clock::duration dt = m_magnetic_field->get_dt();
+            if (m_magnetic_field->get_tp() <= now - dt * MAX_SKIPPED_SAMPLES)
+            {
+                while (m_magnetic_field->get_tp() <= now - dt)
+                {
+                    m_magnetic_field->push_last_sample(false);
+                    //m_stats.av.added++;
+                }
+            }
+        }
+        if (m_descriptor->get_frame_output_enabled())
+        {
+            Clock::duration dt = m_frame->get_dt();
+            if (m_frame->get_tp() <= now - dt * MAX_SKIPPED_SAMPLES)
+            {
+                while (m_frame->get_tp() <= now - dt)
+                {
+                    m_frame->push_last_sample(false);
+                    //m_stats.av.added++;
+                }
+            }
+        }
+        if (m_descriptor->get_pressure_output_enabled())
+        {
+            Clock::duration dt = m_pressure->get_dt();
+            if (m_pressure->get_tp() <= now - dt * MAX_SKIPPED_SAMPLES)
+            {
+                while (m_pressure->get_tp() <= now - dt)
+                {
+                    m_pressure->push_last_sample(false);
+                    //m_stats.av.added++;
+                }
+            }
+        }
+        if (m_descriptor->get_temperature_output_enabled())
+        {
+            Clock::duration dt = m_temperature->get_dt();
+            if (m_temperature->get_tp() <= now - dt * MAX_SKIPPED_SAMPLES)
+            {
+                while (m_temperature->get_tp() <= now - dt)
+                {
+                    m_temperature->push_last_sample(false);
+                    //m_stats.av.added++;
+                }
+            }
+        }
+    }
+
 }
 
 ts::Result<void> UltimateSensorFusion::set_config(hal::INode_Config const& config)
