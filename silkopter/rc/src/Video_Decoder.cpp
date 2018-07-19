@@ -1,7 +1,6 @@
 #include "Video_Decoder.h"
 
 #include <deque>
-#include <QOpenGLContext>
 
 #if defined RASPBERRY_PI
 
@@ -18,8 +17,10 @@ extern "C"
 
 #include <bcm_host.h>
 #include <GLES2/gl2.h>
+#include <GLES2/gl2ext.h>
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
+#include <EGL/eglext_brcm.h>
 }
 
 #define _QUOTE(str) #str
@@ -31,15 +32,17 @@ extern "C"
 
 #else
 
+#include <GLES2/gl2.h>
+#include <GLES2/gl2ext.h>
+#include <EGL/egl.h>
+#include <EGL/eglext.h>
+
 typedef void MMAL_COMPONENT_T;
 typedef void MMAL_POOL_T;
 typedef void MMAL_QUEUE_T;
 typedef void MMAL_PORT_T;
 typedef void MMAL_BUFFER_HEADER_T;
 typedef void* EGLImageKHR;
-typedef void* EGLDisplay;
-EGLImageKHR EGL_NO_IMAGE_KHR = nullptr;
-EGLDisplay EGL_NO_DISPLAY = nullptr;
 
 #endif
 

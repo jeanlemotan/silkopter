@@ -21,3 +21,4 @@ def_lang.makefile = $${MKFL}
 rc.file = rc.pro
 rc.depends = qbase qmath def_lang
 
+

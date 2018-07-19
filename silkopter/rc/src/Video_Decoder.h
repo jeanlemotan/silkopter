@@ -2,9 +2,6 @@
 
 #include "common/stream/IVideo.h"
 #include <memory>
-#include <QOpenGLFunctions>
-#include <QOffscreenSurface>
-
 
 class Video_Decoder
 {

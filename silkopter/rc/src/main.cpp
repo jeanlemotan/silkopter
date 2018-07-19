@@ -1,15 +1,5 @@
-#include <QGuiApplication>
-#include <QQuickView>
-#include <QQmlEngine>
-#include <QQmlContext>
-#include <QTimer>
-#include <QPalette>
-#include <QFontDatabase>
 #include "Comms.h"
 #include "Video_Decoder.h"
-#include "QMLMenus.h"
-#include "QMLVideoSurface.h"
-#include "QMLHUD.h"
 
 //#include "Menu_System.h"
 //#include "Splash_Menu_Page.h"
@@ -17,7 +7,15 @@
 //#include "Main_Menu_Page.h"
 
 #include "utils/Clock.h"
-#include "HAL.h"
+#include "IHAL.h"
+
+#ifdef RASPBERRY_PI
+#   include "PI_HAL.h"
+#else
+#   include "GLFW_HAL.h"
+#endif
+
+#include "imgui.h"
 
 namespace silk
 {
@@ -27,7 +25,7 @@ int s_version_minor = 0;
 
 std::string s_program_path;
 
-silk::HAL s_hal;
+std::unique_ptr<silk::IHAL> s_hal;
 
 }
 
@@ -43,9 +41,12 @@ void __assert_fail(const char *__assertion, const char *__file, unsigned int __l
 
 void signal_callback_handler(int signum)
 {
-   printf("Caught signal %d\n", signum);
-   silk::s_hal.shutdown();
-   exit(signum);
+    printf("Caught signal %d\n", signum);
+    if (silk::s_hal)
+    {
+        silk::s_hal->shutdown();
+    }
+    exit(signum);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -75,8 +76,13 @@ int main(int argc, char *argv[])
     }
     QLOGI("Program path: {}.", silk::s_program_path);
 
+#ifdef RASPBERRY_PI
+    silk::s_hal.reset(new silk::PI_HAL());
+#else
+    silk::s_hal.reset(new silk::GLFW_HAL());
+#endif
 
-    silk::HAL& hal = silk::s_hal;
+    silk::IHAL& hal = *silk::s_hal;
     ts::Result<void> result = hal.init();
     if (result != ts::success)
     {
@@ -84,109 +90,27 @@ int main(int argc, char *argv[])
         exit(1);
     }
 
-    Q_INIT_RESOURCE(res);
+    math::vec2u32 size = hal.get_display_size();
+    ImGuiStyle& style = ImGui::GetStyle();
+    style.ScrollbarSize = size.x / 80.f;
+    style.TouchExtraPadding = ImVec2(style.ScrollbarSize * 2.f, style.ScrollbarSize * 2.f);
+    //style.ItemSpacing = ImVec2(size.x / 200, size.x / 200);
+    //style.ItemInnerSpacing = ImVec2(style.ItemSpacing.x / 2, style.ItemSpacing.y / 2);
 
-    QGuiApplication app(argc, argv);
-
-    QCoreApplication::setOrganizationName("Silkopter");
-    QCoreApplication::setOrganizationDomain("silkopter.com");
-    QCoreApplication::setApplicationName("Silkopter");
-
-    QFontDatabase::addApplicationFont(":/fonts/Play-Bold.ttf");
-    int id = QFontDatabase::addApplicationFont(":/fonts/Play-Regular.ttf");
-    QString family = QFontDatabase::applicationFontFamilies(id).at(0);
-    QFont font(family);
-    QGuiApplication::setFont(font);
-
-    app.setQuitOnLastWindowClosed(true);
-
-    QPalette palette = app.palette();
-    palette.setColor(QPalette::Window, QColor(53,53,53));
-    palette.setColor(QPalette::WindowText, QColor(0xECF0F1));
-    palette.setColor(QPalette::Base, QColor(25,25,25));
-    palette.setColor(QPalette::AlternateBase, QColor(53,53,53));
-    palette.setColor(QPalette::ToolTipBase, QColor(0xECF0F1));
-    palette.setColor(QPalette::ToolTipText, QColor(0xECF0F1));
-    palette.setColor(QPalette::Text, QColor(0xECF0F1));
-    palette.setColor(QPalette::Button, QColor(53,53,53));
-    palette.setColor(QPalette::ButtonText, QColor(0xECF0F1));
-    palette.setColor(QPalette::BrightText, Qt::white);
-    palette.setColor(QPalette::Link, QColor(42, 130, 218));
-
-    palette.setColor(QPalette::Highlight, QColor(42, 130, 218));
-    palette.setColor(QPalette::HighlightedText, Qt::black);
-
-    app.setPalette(palette);
-
-    QQuickView view;
-
-    QMLMenus menus;
-    menus.init(view);
-
-    QMLHUD hud;
-    hud.init(hal);
-
-    qmlRegisterType<QMLHUD>("com.silk.HUD", 1, 0, "HUD");
-    view.engine()->rootContext()->setContextProperty("s_hud", &hud);
-    view.engine()->rootContext()->setContextProperty("s_menus", &menus);
-    qmlRegisterType<QMLVideoSurface>("com.silk.VideoSurface", 0, 1, "VideoSurface");
+    ImGuiIO& io = ImGui::GetIO();
+    io.FontGlobalScale = 2.f;
 
     Video_Decoder decoder;
 
     size_t render_frames = 0;
 
     q::Clock::time_point last_swapped_tp = q::Clock::now();
-    QObject::connect(&view, &QQuickView::frameSwapped, [&render_frames, &decoder, &last_swapped_tp]()
-    {
-//        std::chrono::duration<float> dt = q::Clock::now() - last_swapped_tp;
-//        last_swapped_tp = q::Clock::now();
-//        QLOGI("Frame DT: {}", dt.count());
-
-        decoder.release_buffers();
-        render_frames++;
-    });
-
-    QObject::connect(&view, &QQuickView::sceneGraphInitialized, [&decoder]()
-    {
-        decoder.init();
-        QMLVideoSurface::init(decoder);
-    });
 
     math::vec2u16 resolution;
     typedef std::vector<uint8_t> Video_Packet;
     typedef Pool<Video_Packet>::Ptr Video_Packet_ptr;
     Pool<Video_Packet> video_packet_pool;
     Queue<Video_Packet_ptr> video_packet_queue(32);
-
-    QObject::connect(&view, &QQuickView::beforeRendering, [&video_packet_queue, &resolution, &decoder]()
-    {
-        Video_Packet_ptr packet;
-        while (video_packet_queue.pop_front(packet, false))
-        {
-            decoder.decode_data(packet->data(), packet->size(), resolution);
-        }
-        QMLVideoSurface::setResolution(resolution);
-    });
-
-    QSurfaceFormat format = view.format();
-    format.setAlphaBufferSize(0);
-    format.setRedBufferSize(8);
-    format.setGreenBufferSize(8);
-    format.setBlueBufferSize(8);
-    format.setSamples(1);
-    format.setSwapBehavior(QSurfaceFormat::TripleBuffer);
-    format.setSwapInterval(0);
-    view.setFormat(format);
-
-    view.setClearBeforeRendering(false);
-    view.resize(800, 480);
-    view.setResizeMode(QQuickView::SizeRootObjectToView);
-    view.setPersistentOpenGLContext(true);
-    view.create();
-    view.show();
-
-
-    menus.push("HUD.qml");
 
     //FILE* f = fopen("video.h264", "wb");
 
@@ -205,11 +129,51 @@ int main(int argc, char *argv[])
     q::Clock::time_point last_tp = q::Clock::now();
     size_t process_frames = 0;
 
-    while (true)
+    float temperature = 0.f;
+    std::vector<float> temperature_history;
+
+    float brightness = 50.f;
+    float fan_speed = 20.f;
+
+    while (hal.process())
     {
-        hal.process();
-        hud.process();
-        app.processEvents();
+        ImGui::NewFrame();
+        {
+            static int counter = 0;
+            ImGui::Text("Hello, world!");                           // Display some text (you can use a format string too)
+            if (ImGui::SliderFloat("Brightness", &brightness, 10.f, 100.f, "%.0f%%"))
+            {
+                hal.set_backlight(brightness / 100.f);
+            }
+            if (ImGui::SliderFloat("Fan", &fan_speed, 10.f, 100.f, "%.0f%%"))
+            {
+                hal.set_fan_speed(fan_speed / 100.f);
+            }
+            temperature = hal.get_temperature();
+            temperature_history.push_back(temperature);
+            while (temperature_history.size() > 60 * 5)
+            {
+                temperature_history.erase(temperature_history.begin());
+            }
+            //ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
+
+            //ImGui::Checkbox("Demo Window", &show_demo_window);      // Edit bools storing our windows open/close state
+            //ImGui::Checkbox("Another Window", &show_another_window);
+
+            ImGui::Text("Temperature = %.2f'C", temperature);
+            if (!temperature_history.empty())
+            {
+                ImGui::PlotLines("History",
+                                 temperature_history.data(), temperature_history.size(),
+                                 0, NULL,
+                                 *std::min_element(temperature_history.begin(), temperature_history.end()),
+                                 *std::max_element(temperature_history.begin(), temperature_history.end()),
+                                 ImVec2(0, size.y / 20));
+            }
+
+            ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+        }
+        //ImGui::EndFrame();
 
         process_frames++;
         if (q::Clock::now() - last_tp >= std::chrono::seconds(1))
@@ -220,7 +184,11 @@ int main(int argc, char *argv[])
             render_frames = 0;
         }
 
+        bool show_demo_window = true;
+        ImGui::ShowDemoWindow(&show_demo_window);
+
         //std::this_thread::sleep_for(std::chrono::microseconds(1));
+        ImGui::Render();
     }
 
     hal.shutdown();

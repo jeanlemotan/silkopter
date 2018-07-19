@@ -37,22 +37,21 @@
 #include "common/stream/IMultirotor_State.h"
 
 #include "common/Comm_Data.h"
-#include "utils/comms/esp8266/Phy.h"
-#include "utils/comms/esp8266/Fec_Encoder.h"
-#include "utils/comms/esp8266/Pool.h"
-#include "utils/comms/esp8266/Queue.h"
+#include "utils/comms/esp32/Phy.h"
+#include "utils/Pool.h"
+#include "utils/Queue.h"
 
 #include <asio.hpp>
 
 namespace silk
 {
 
-class HAL;
+class IHAL;
 
 class Comms : q::util::Noncopyable
 {
 public:
-    Comms(HAL& hal);
+    Comms(IHAL& hal);
     ~Comms();
 
     bool start();
@@ -80,11 +79,9 @@ public:
     void process();
 
 private:
-    HAL& m_hal;
+    IHAL& m_hal;
 
     void reset();
-
-    bool create_fec_encoder_rx(Fec_Encoder::RX_Descriptor const& descriptor);
 
     bool sent_multirotor_commands_packet();
     bool send_camera_commands_packet();
@@ -102,16 +99,11 @@ private:
     uint32_t m_last_req_id = 0;
 
     Phy m_phy;
-    std::unique_ptr<Fec_Encoder> m_fec_encoder_rx;
 
     mutable std::mutex m_samples_mutex;
     stream::IMultirotor_State::Value m_multirotor_state;
     stream::IMultirotor_Commands::Value m_multirotor_commands;
     stream::ICamera_Commands::Value m_camera_commands;
-
-
-    std::mutex m_video_header_mutex;
-    rc_comms::Video_Header m_video_header;
 
     //mark the commands as infinitely old
     Clock::time_point m_multirotor_commands_last_valid_tp = Clock::time_point(Clock::duration::zero());

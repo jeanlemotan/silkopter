@@ -11,7 +11,7 @@
 #include "utils/hw/SPI_PIGPIO.h"
 #include "utils/hw/SPI_Dev.h"
 
-#include "HAL.h"
+#include "IHAL.h"
 #include "settings.def.h"
 
 namespace silk
@@ -34,7 +34,7 @@ constexpr size_t SPI_SPEED = 10000000;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-Comms::Comms(HAL& hal)
+Comms::Comms(IHAL& hal)
     : m_hal(hal)
 {
 }
@@ -63,32 +63,28 @@ bool Comms::start()
 
     disconnect();
 
-    settings::Settings::Comms const& comms_settings = m_hal.get_settings().get_comms();
+    settings::Settings::Comms const& settings = m_hal.get_settings().get_comms();
 
-    try
+    if (m_phy.init_dev(SPI_DEVICE, SPI_SPEED) != Phy::Init_Result::OK)
     {
-        if (m_phy.init_dev(SPI_DEVICE, SPI_SPEED) != Phy::Init_Result::OK)
-        {
-            QLOGE("Cannot start phy");
-            return false;
-        }
-
-        m_phy.set_rate(static_cast<Phy::Rate>(comms_settings.get_rate()));
-        m_phy.set_power(comms_settings.get_tx_power());
-        m_phy.set_channel(comms_settings.get_channel());
-
-        m_is_connected = true;
-    }
-    catch(std::exception e)
-    {
+        QLOGE("Cannot start phy");
         m_is_connected = false;
-    }
-
-    if (!m_is_connected)
-    {
-        QLOGW("Cannot start comms");
         return false;
     }
+
+    QLOGI("Pyh FEC: K={}, N={}, MTU={}", settings.get_fec_coding_k(), settings.get_fec_coding_n(), settings.get_mtu());
+    m_phy.setup_fec_channel(settings.get_fec_coding_k(), settings.get_fec_coding_n(), settings.get_mtu());
+
+    QLOGI("Pyh Rate: {}", settings.get_rate());
+    m_phy.set_rate(static_cast<Phy::Rate>(settings.get_rate()));
+
+    QLOGI("Pyh TX Power: {}", settings.get_tx_power());
+    m_phy.set_power(settings.get_tx_power());
+
+    QLOGI("Pyh Channel: {}", settings.get_channel());
+    m_phy.set_channel(settings.get_channel());
+
+    m_is_connected = true;
 
     m_phy_data.thread = std::thread(std::bind(&Comms::phy_thread_proc, this));
 
@@ -99,34 +95,27 @@ bool Comms::start()
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool Comms::create_fec_encoder_rx(Fec_Encoder::RX_Descriptor const& descriptor)
-{
-    QLOGI("Creating RX FEC with K={}, N={}, MTU={}", descriptor.coding_k, descriptor.coding_n, descriptor.mtu);
-    m_fec_encoder_rx.reset(new Fec_Encoder);
-    if (!m_fec_encoder_rx->init_rx(descriptor))
-    {
-        QLOGE("Cannot start the rx fec encoder");
-        m_fec_encoder_rx.reset();
-        return false;
-    }
+//bool Comms::create_fec_encoder_rx(Fec_Encoder::RX_Descriptor const& descriptor)
+//{
+//    QLOGI("Creating RX FEC with K={}, N={}, MTU={}", descriptor.coding_k, descriptor.coding_n, descriptor.mtu);
 
-    m_fec_encoder_rx->on_rx_data_decoded = [this](void const* data, size_t size)
-    {
-        rc_comms::Video_Header video_header;
-        {
-            std::lock_guard<std::mutex> lg(m_video_header_mutex);
-            video_header = m_video_header;
-        }
+//    m_fec_encoder_rx->on_rx_data_decoded = [this](void const* data, size_t size)
+//    {
+//        rc_comms::Video_Header video_header;
+//        {
+//            std::lock_guard<std::mutex> lg(m_video_header_mutex);
+//            video_header = m_video_header;
+//        }
 
-        math::vec2u16 resolution(video_header.width, video_header.height);
-        if (on_video_data_received)
-        {
-            on_video_data_received(data, size, resolution);
-        }
-    };
+//        math::vec2u16 resolution(video_header.width, video_header.height);
+//        if (on_video_data_received)
+//        {
+//            on_video_data_received(data, size, resolution);
+//        }
+//    };
 
-    return true;
-}
+//    return true;
+//}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -259,34 +248,10 @@ void Comms::process_rx_packet(rc_comms::Packet_Type packet_type, std::vector<uin
         rc_comms::Video_Header video_header;
         if (util::serialization::deserialize(data, video_header, offset))
         {
+            math::vec2u16 resolution(video_header.width, video_header.height);
+            if (on_video_data_received)
             {
-                std::lock_guard<std::mutex> lg(m_video_header_mutex);
-                m_video_header = video_header;
-            }
-
-            Fec_Encoder::RX_Descriptor new_descriptor;
-            new_descriptor.coding_k = video_header.fec_k;
-            new_descriptor.coding_n = video_header.fec_n;
-            new_descriptor.mtu = Fec_Encoder::compute_mtu_from_packet_size(data.size() - offset);
-
-            bool recreate_fec = true;
-            if (m_fec_encoder_rx)
-            {
-                //recreate the FEC if quality changed
-                Fec_Encoder::Descriptor const& descriptor = m_fec_encoder_rx->get_descriptor();
-                recreate_fec = new_descriptor.coding_k != descriptor.coding_k ||
-                        new_descriptor.coding_n != descriptor.coding_n ||
-                        new_descriptor.mtu != descriptor.mtu;
-            }
-
-            if (recreate_fec)
-            {
-                create_fec_encoder_rx(new_descriptor);
-            }
-
-            if (m_fec_encoder_rx)
-            {
-                m_fec_encoder_rx->add_rx_packet(data.data() + offset, data.size() - offset, false);
+                on_video_data_received(data.data(), data.size() - sizeof(video_header), resolution);
             }
             dsz_ok = true;
         }

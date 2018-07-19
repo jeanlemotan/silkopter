@@ -4,20 +4,22 @@
 #
 #-------------------------------------------------
 
-QT       += core quick qml quickcontrols2 positioning
+#QT       += core quick qml quickcontrols2 positioning
 
-TARGET = rc
 TEMPLATE = app
 
 TARGET = rc
 target.path = rc
 INSTALLS = target
 
-#CONFIG -= qt
+CONFIG -= qt
 CONFIG += c++11
 
 INCLUDEPATH += =/usr/local/include
+INCLUDEPATH += =/usr/include/freetype2
+INCLUDEPATH += =/opt/vc/include
 INCLUDEPATH += ../../src
+INCLUDEPATH += ../../src/imgui
 INCLUDEPATH += ../../def
 INCLUDEPATH += ../../../../qbase/include
 INCLUDEPATH += ../../../../qmath/include
@@ -49,14 +51,15 @@ rpi {
         DEST_FOLDER = rpi/release
         DEFINES += NDEBUG
     }
+    LIBS += -L=/opt/vc/lib
+    LIBS += -lts
     LIBS += -lmmal_core
     LIBS += -lmmal_util
     LIBS += -lmmal_vc_client
     LIBS += -lvcos
     LIBS += -lbcm_host
-    LIBS += -lGLESv2
-    LIBS += -lEGL
-    LIBS += -lpcap
+    LIBS += -lbrcmGLESv2
+    LIBS += -lbrcmEGL
 } else {
     QMAKE_MAKEFILE = "Makefile"
     CONFIG(debug, debug|release) {
@@ -66,9 +69,13 @@ rpi {
         DEST_FOLDER = pc/release
         DEFINES += NDEBUG
     }
+    INCLUDEPATH += /usr/include/freetype2
+    LIBS += -lGLESv2
+    LIBS += -lEGL
+    LIBS += -lglfw
 }
 
-LIBS += -lz -lpthread
+LIBS += -lz -lpthread -lfreetype
 LIBS += -L$${ROOT_LIBS_PATH}/qmath/lib/$${DEST_FOLDER} -lqmath
 LIBS += -L$${ROOT_LIBS_PATH}/qbase/lib/$${DEST_FOLDER} -lqbase
 LIBS += -L$${ROOT_LIBS_PATH}/def_lang/lib/$${DEST_FOLDER} -ldef_lang
@@ -79,12 +86,11 @@ RCC_DIR = ./.rcc/$${DEST_FOLDER}
 UI_DIR = ./.ui/$${DEST_FOLDER}
 DESTDIR = ../../bin
 
-RESOURCES += \
-    ../../src/res.qrc
+#RESOURCES += \
+#    ../../src/res.qrc
 
 HEADERS += \
     ../../src/Comms.h \
-    ../../src/HAL.h \
     ../../src/stdafx.h \
     ../../../libs/common/Comm_Data.h \
     ../../../libs/utils/Butterworth.h \
@@ -148,19 +154,8 @@ HEADERS += \
     ../../../libs/utils/hw/SPI_Dev.h \
     ../../src/ISticks.h \
     ../../../libs/utils/hw/I2C_Dev.h \
-    ../../src/Sticks_ADS1115.h \
-    ../../src/IStick_Actuators.h \
-    ../../src/Stick_Actuators_Throttle_DRV883x.h \
-    ../../src/IRotary_Encoder.h \
-    ../../src/Rotary_Encoder_PIGPIO.h \
-    ../../src/IInput_Device.h \
-    ../../src/IButton_Matrix.h \
-    ../../src/Button_Matrix_PIGPIO.h \
-    ../../src/IButton.h \
-    ../../src/Button_PIGPIO.h \
     ../../def/settings.def.h \
     ../../def/gen_support.h \
-    ../../src/IHaptic.h \
     ../../../libs/utils/comms/ASIO_Socket_Adapter.h \
     ../../../libs/utils/comms/RCP_Channel.h \
     ../../../libs/utils/hw/ADS1115.h \
@@ -171,25 +166,19 @@ HEADERS += \
     ../../../libs/utils/hw/SPI_BCM.h \
     ../../../libs/utils/hw/UART_BB.h \
     ../../../libs/utils/hw/UART_Dev.h \
-    ../../src/Battery_Info_ADS1115.h \
-    ../../src/Gimbal_Control_ADS1115.h \
-    ../../src/IBattery_Info.h \
-    ../../src/IGimbal_Control.h \
     ../../../libs/utils/hw/SPI_PIGPIO.h \
-    ../../src/QMLMenus.h \
-    ../../src/QMLVideoSurface.h \
-    ../../src/QMLTelemetry.h \
-    ../../src/QMLHUD.h \
-    ../../../libs/utils/comms/esp8266/Fec_Encoder.h \
-    ../../../libs/utils/comms/esp8266/Phy.h \
-    ../../../libs/utils/comms/esp8266/Pool.h \
-    ../../../libs/utils/comms/esp8266/utils/fec.h \
-    ../../../libs/utils/comms/esp8266/Queue.h
+    ../../src/imgui/imconfig.h \
+    ../../src/imgui/imgui.h \
+    ../../src/imgui/imgui_internal.h \
+    ../../src/imgui/misc/freetype/imgui_freetype.h \
+    ../../src/GLFW_HAL.h \
+    ../../src/IHAL.h \
+    ../../src/PI_HAL.h \
+    ../../../libs/utils/comms/esp32/Phy.h
 
 SOURCES += \
     ../../src/main.cpp \
     ../../src/Comms.cpp \
-    ../../src/HAL.cpp \
     ../../../libs/lz4/lz4.c \
     ../../../libs/utils/Coordinates.cpp \
     ../../src/Video_Decoder.cpp \
@@ -199,34 +188,21 @@ SOURCES += \
     ../../../libs/utils/comms/RCP.cpp \
     ../../../libs/utils/comms/UDP_Socket.cpp \
     ../../../libs/utils/hw/SPI_Dev.cpp \
-    ../../src/Sticks_ADS1115.cpp \
     ../../../libs/utils/hw/I2C_Dev.cpp \
-    ../../src/Stick_Actuators_Throttle_DRV883x.cpp \
-    ../../src/Rotary_Encoder_PIGPIO.cpp \
-    ../../src/Button_Matrix_PIGPIO.cpp \
-    ../../src/Button_PIGPIO.cpp \
     ../../def/settings.def.cpp \
     ../../../libs/utils/hw/ADS1115.cpp \
     ../../../libs/utils/hw/I2C_BCM.cpp \
     ../../../libs/utils/hw/SPI_BCM.cpp \
     ../../../libs/utils/hw/UART_Dev.cpp \
     ../../../libs/utils/hw/UART_BB.cpp \
-    ../../src/Battery_Info_ADS1115.cpp \
-    ../../src/Gimbal_Control_ADS1115.cpp \
     ../../../libs/utils/hw/SPI_PIGPIO.cpp \
-    ../../src/QMLMenus.cpp \
-    ../../src/QMLVideoSurface.cpp \
-    ../../src/QMLTelemetry.cpp \
-    ../../src/QMLHUD.cpp \
-    ../../../libs/utils/comms/esp8266/Fec_Encoder.cpp \
-    ../../../libs/utils/comms/esp8266/Phy.cpp \
-    ../../../libs/utils/comms/esp8266/utils/fec.cpp
+    ../../src/imgui/imgui.cpp \
+    ../../src/imgui/misc/freetype/imgui_freetype.cpp \
+    ../../src/imgui/imgui_demo.cpp \
+    ../../src/imgui/imgui_draw.cpp \
+    ../../src/imgui_impl_opengl3.cpp \
+    ../../src/GLFW_HAL.cpp \
+    ../../src/PI_HAL.cpp \
+    ../../src/droin_sans_font.cpp \
+    ../../../libs/utils/comms/esp32/Phy.cpp
 
-DISTFILES += \
-    ../../src/node.png \
-    ../../src/pilot.png \
-    ../../src/processor.png \
-    ../../src/resampler.png \
-    ../../src/sink.png \
-    ../../src/source.png \
-    ../../src/lpf.png
