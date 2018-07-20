@@ -9,10 +9,9 @@
 #include "common/stream/IMultirotor_Commands.h"
 #include "common/stream/IMultirotor_State.h"
 #include "common/stream/IVideo.h"
-#include "utils/comms/esp8266/Phy.h"
-#include "utils/comms/esp8266/Fec_Encoder.h"
-#include "utils/comms/esp8266/Pool.h"
-#include "utils/comms/esp8266/Queue.h"
+#include "utils/comms/esp32/Phy.h"
+#include "utils/Pool.h"
+#include "utils/Queue.h"
 #include "utils/Clock.h"
 #include "utils/hw/ISPI.h"
 
@@ -54,8 +53,6 @@ private:
     void process_rx_packet(rc_comms::Packet_Type packet_type, std::vector<uint8_t> const& data, size_t offset);
     void process_received_data(std::vector<uint8_t> const& data);
 
-    bool create_fec_encoder_tx(Fec_Encoder::TX_Descriptor const& descriptor);
-
     HAL& m_hal;
     Clock::time_point m_uav_sent_tp = Clock::now();
 
@@ -74,8 +71,8 @@ private:
     std::atomic_int m_phy_rate = { -1 };
     std::atomic_int m_new_phy_rate = { -1 };
 
-    mutable std::mutex m_video_header_mutex;
-    rc_comms::Video_Header m_video_header;
+    std::vector<uint8_t> m_video_data_buffer;
+    size_t m_mtu = 0;
 
     struct Phy_Data
     {
@@ -94,7 +91,6 @@ private:
     } m_phy_data;
 
     Phy m_phy;
-    std::unique_ptr<Fec_Encoder> m_fec_encoder_tx;
     Clock::time_point m_last_phy_received_tp = Clock::now();
 
     Clock::time_point m_last_multirotor_state_sent_tp = Clock::now();

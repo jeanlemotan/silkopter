@@ -72,16 +72,16 @@ bool Comms::start()
         return false;
     }
 
-    QLOGI("Pyh FEC: K={}, N={}, MTU={}", settings.get_fec_coding_k(), settings.get_fec_coding_n(), settings.get_mtu());
+    QLOGI("Phy FEC: K={}, N={}, MTU={}", settings.get_fec_coding_k(), settings.get_fec_coding_n(), settings.get_mtu());
     m_phy.setup_fec_channel(settings.get_fec_coding_k(), settings.get_fec_coding_n(), settings.get_mtu());
 
-    QLOGI("Pyh Rate: {}", settings.get_rate());
+    QLOGI("Phy Rate: {}", settings.get_rate());
     m_phy.set_rate(static_cast<Phy::Rate>(settings.get_rate()));
 
-    QLOGI("Pyh TX Power: {}", settings.get_tx_power());
+    QLOGI("Phy TX Power: {}", settings.get_tx_power());
     m_phy.set_power(settings.get_tx_power());
 
-    QLOGI("Pyh Channel: {}", settings.get_channel());
+    QLOGI("Phy Channel: {}", settings.get_channel());
     m_phy.set_channel(settings.get_channel());
 
     m_is_connected = true;

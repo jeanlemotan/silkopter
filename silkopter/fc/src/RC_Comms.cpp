@@ -12,15 +12,15 @@ namespace silk
 
 constexpr uint8_t SDN_GPIO = 6;
 
-#define USE_SPI_PIGPIO
+//#define USE_SPI_PIGPIO
 
 #ifdef USE_SPI_PIGPIO
-constexpr size_t SPI_PORT = 1;
+constexpr size_t SPI_PORT = 0;
 constexpr size_t SPI_CHANNEL = 0;
 constexpr size_t SPI_SPEED = 10000000;
 #else
-const char* SPI_DEVICE = "/dev/spidev1.0";
-constexpr size_t SPI_SPEED = 8000000;
+const char* SPI_DEVICE = "/dev/spidev0.0";
+constexpr size_t SPI_SPEED = 10000000;
 #endif
 
 RC_Comms::RC_Comms(HAL& hal)
@@ -42,52 +42,48 @@ RC_Comms::~RC_Comms()
 
 auto RC_Comms::start() -> bool
 {
-    try
-    {
 #ifdef USE_SPI_PIGPIO
-        if (m_phy.init_pigpio(SPI_PORT, SPI_CHANNEL, SPI_SPEED) != Phy::Init_Result::OK)
-        {
-            QLOGE("Cannot start phy");
-            return false;
-        }
-#else
-        if (m_phy.init_dev(SPI_DEVICE, SPI_SPEED) != Phy::Init_Result::OK)
-        {
-            QLOGE("Cannot start phy");
-            return false;
-        }
-#endif
-
-        std::shared_ptr<const hal::IUAV_Descriptor> uav_descriptor = m_hal.get_uav_descriptor();
-        if (uav_descriptor)
-        {
-            silk::hal::IUAV_Descriptor::Comms const& comms_settings = uav_descriptor->get_comms();
-
-            m_phy_rate = static_cast<int>(comms_settings.get_low().get_rate());
-            m_phy.set_rate(static_cast<Phy::Rate>(comms_settings.get_high().get_rate()));
-            m_phy.set_power(comms_settings.get_tx_power());
-            m_phy.set_channel(comms_settings.get_channel());
-        }
-        else
-        {
-            m_phy_rate = static_cast<int>(Phy::Rate::RATE_B_2M_CCK);
-            m_phy.set_rate(Phy::Rate::RATE_B_2M_CCK);
-            m_phy.set_power(10);
-            m_phy.set_channel(1);
-        }
-
-        m_is_connected = true;
-    }
-    catch(std::exception e)
+    if (m_phy.init_pigpio(SPI_PORT, SPI_CHANNEL, SPI_SPEED) != Phy::Init_Result::OK)
     {
-        m_is_connected = false;
-    }
-
-    if (!m_is_connected)
-    {
-        QLOGW("Cannot start comms");
+        QLOGE("Cannot start phy");
         return false;
     }
+#else
+    if (m_phy.init_dev(SPI_DEVICE, SPI_SPEED) != Phy::Init_Result::OK)
+    {
+        QLOGE("Cannot start phy");
+        return false;
+    }
+#endif
+
+    std::shared_ptr<const hal::IUAV_Descriptor> uav_descriptor = m_hal.get_uav_descriptor();
+    if (uav_descriptor)
+    {
+        silk::hal::IUAV_Descriptor::Comms const& s = uav_descriptor->get_comms();
+        silk::hal::IUAV_Descriptor::Comms::Quality const& qs = s.get_high();
+
+        QLOGI("Phy FEC: K={}, N={}, MTU={}", qs.get_fec_k(), qs.get_fec_n(), qs.get_mtu());
+        m_phy.setup_fec_channel(qs.get_fec_k(), qs.get_fec_n(), qs.get_mtu());
+        m_mtu = qs.get_mtu();
+
+        QLOGI("Phy Rate: {}", qs.get_rate());
+        m_phy.set_rate(static_cast<Phy::Rate>(qs.get_rate()));
+
+        QLOGI("Phy TX Power: {}", s.get_tx_power());
+        m_phy.set_power(s.get_tx_power());
+
+        QLOGI("Phy Channel: {}", s.get_channel());
+        m_phy.set_channel(s.get_channel());
+    }
+    else
+    {
+        m_phy_rate = static_cast<int>(Phy::Rate::RATE_B_2M_CCK);
+        m_phy.set_rate(Phy::Rate::RATE_B_2M_CCK);
+        m_phy.set_power(10);
+        m_phy.set_channel(1);
+    }
+
+    m_is_connected = true;
 
     m_phy_data.thread = std::thread(std::bind(&RC_Comms::phy_thread_proc, this));
 
@@ -106,39 +102,39 @@ auto RC_Comms::start() -> bool
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool RC_Comms::create_fec_encoder_tx(Fec_Encoder::TX_Descriptor const& descriptor)
-{
-    QLOGI("Creating TX FEC with K={}, N={}, MTU={}", descriptor.coding_k, descriptor.coding_n, descriptor.mtu);
-    m_fec_encoder_tx.reset(new Fec_Encoder);
-    if (!m_fec_encoder_tx->init_tx(descriptor))
-    {
-        QLOGE("Cannot start the tx fec encoder");
-        m_fec_encoder_tx.reset();
-        return false;
-    }
+//bool RC_Comms::create_fec_encoder_tx(Fec_Encoder::TX_Descriptor const& descriptor)
+//{
+//    QLOGI("Creating TX FEC with K={}, N={}, MTU={}", descriptor.coding_k, descriptor.coding_n, descriptor.mtu);
+//    m_fec_encoder_tx.reset(new Fec_Encoder);
+//    if (!m_fec_encoder_tx->init_tx(descriptor))
+//    {
+//        QLOGE("Cannot start the tx fec encoder");
+//        m_fec_encoder_tx.reset();
+//        return false;
+//    }
 
-    m_fec_encoder_tx->on_tx_data_encoded = [this](void const* data, size_t size)
-    {
-        rc_comms::Video_Header video_header;
-        {
-            std::lock_guard<std::mutex> lg(m_video_header_mutex);
-            video_header = m_video_header;
-        }
+//    m_fec_encoder_tx->on_tx_data_encoded = [this](void const* data, size_t size)
+//    {
+//        rc_comms::Video_Header video_header;
+//        {
+//            std::lock_guard<std::mutex> lg(m_video_header_mutex);
+//            video_header = m_video_header;
+//        }
 
-        Phy_Data::Packet_ptr packet = m_phy_data.packet_pool.acquire();
-        packet->resize(sizeof(rc_comms::Packet_Type::VIDEO) + sizeof(video_header) + size);
-        rc_comms::Packet_Type packet_type = rc_comms::Packet_Type::VIDEO;
-        size_t offset = 0;
-        util::serialization::serialize(*packet, packet_type, offset);
-        util::serialization::serialize(*packet, video_header, offset);
-        packet->resize(offset + size);
-        memcpy(packet->data() + offset, data, size);
+//        Phy_Data::Packet_ptr packet = m_phy_data.packet_pool.acquire();
+//        packet->resize(sizeof(rc_comms::Packet_Type::VIDEO) + sizeof(video_header) + size);
+//        rc_comms::Packet_Type packet_type = rc_comms::Packet_Type::VIDEO;
+//        size_t offset = 0;
+//        util::serialization::serialize(*packet, packet_type, offset);
+//        util::serialization::serialize(*packet, video_header, offset);
+//        packet->resize(offset + size);
+//        memcpy(packet->data() + offset, data, size);
 
-        m_phy_data.tx_queue.push_back(packet, true);
-    };
+//        m_phy_data.tx_queue.push_back(packet, true);
+//    };
 
-    return true;
-}
+//    return true;
+//}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -278,50 +274,71 @@ void RC_Comms::add_video_data(stream::IVideo::Value const& value)
 {
     silk::hal::IUAV_Descriptor::Comms const& comms_settings = m_hal.get_uav_descriptor()->get_comms();
 
-    Fec_Encoder::TX_Descriptor new_descriptor;
-    if (value.quality == stream::IVideo::Quality::HIGH)
+//    Fec_Encoder::TX_Descriptor new_descriptor;
+//    if (value.quality == stream::IVideo::Quality::HIGH)
+//    {
+//        new_descriptor.coding_k = comms_settings.get_high().get_fec_k();
+//        new_descriptor.coding_n = comms_settings.get_high().get_fec_n();
+//        new_descriptor.mtu = comms_settings.get_high().get_mtu();
+//        m_new_phy_rate = static_cast<int>(comms_settings.get_high().get_rate());
+//    }
+//    else
+//    {
+//        new_descriptor.coding_k = comms_settings.get_low().get_fec_k();
+//        new_descriptor.coding_n = comms_settings.get_low().get_fec_n();
+//        new_descriptor.mtu = comms_settings.get_low().get_mtu();
+//        m_new_phy_rate = static_cast<int>(comms_settings.get_low().get_rate());
+//    }
+
+//    bool recreate_fec = true;
+//    if (m_fec_encoder_tx)
+//    {
+//        //recreate the FEC if quality changed
+//        Fec_Encoder::Descriptor const& descriptor = m_fec_encoder_tx->get_descriptor();
+
+//        recreate_fec = new_descriptor.coding_k != descriptor.coding_k ||
+//                new_descriptor.coding_n != descriptor.coding_n ||
+//                new_descriptor.mtu != descriptor.mtu;
+//    }
+
+//    if (recreate_fec)
+//    {
+//        create_fec_encoder_tx(new_descriptor);
+//    }
+
+    size_t offset = m_video_data_buffer.size();
+    m_video_data_buffer.resize(offset + value.data.size());
+    memcpy(m_video_data_buffer.data() + offset, value.data.data(), value.data.size());
+
+    rc_comms::Packet_Type packet_type = rc_comms::Packet_Type::VIDEO;
+    rc_comms::Video_Header video_header;
+    video_header.width = value.resolution.x;
+    video_header.height = value.resolution.y;
+
+    size_t payload_size = m_mtu - sizeof(packet_type) - sizeof(video_header);
+    while (m_video_data_buffer.size() >= payload_size)
     {
-        new_descriptor.coding_k = comms_settings.get_high().get_fec_k();
-        new_descriptor.coding_n = comms_settings.get_high().get_fec_n();
-        new_descriptor.mtu = comms_settings.get_high().get_mtu();
-        m_new_phy_rate = static_cast<int>(comms_settings.get_high().get_rate());
-    }
-    else
-    {
-        new_descriptor.coding_k = comms_settings.get_low().get_fec_k();
-        new_descriptor.coding_n = comms_settings.get_low().get_fec_n();
-        new_descriptor.mtu = comms_settings.get_low().get_mtu();
-        m_new_phy_rate = static_cast<int>(comms_settings.get_low().get_rate());
+        Phy_Data::Packet_ptr packet = m_phy_data.packet_pool.acquire();
+        packet->resize(m_mtu);
+        size_t offset = 0;
+        util::serialization::serialize(*packet, packet_type, offset);
+        util::serialization::serialize(*packet, video_header, offset);
+        memcpy(packet->data() + offset, m_video_data_buffer.data(), payload_size);
+        m_video_data_buffer.erase(m_video_data_buffer.begin(), m_video_data_buffer.begin() + payload_size);
+
+        m_phy_data.tx_queue.push_back(packet, true);
     }
 
-    bool recreate_fec = true;
-    if (m_fec_encoder_tx)
-    {
-        //recreate the FEC if quality changed
-        Fec_Encoder::Descriptor const& descriptor = m_fec_encoder_tx->get_descriptor();
+//    if (m_fec_encoder_tx)
+//    {
+//        m_fec_encoder_tx->add_tx_packet(value.data.data(), value.data.size(), false);
+//    }
 
-        recreate_fec = new_descriptor.coding_k != descriptor.coding_k ||
-                new_descriptor.coding_n != descriptor.coding_n ||
-                new_descriptor.mtu != descriptor.mtu;
-    }
-
-    if (recreate_fec)
-    {
-        create_fec_encoder_tx(new_descriptor);
-    }
-
-    if (m_fec_encoder_tx)
-    {
-        m_fec_encoder_tx->add_tx_packet(value.data.data(), value.data.size(), false);
-    }
-
-    {
-        std::lock_guard<std::mutex> lg(m_video_header_mutex);
-        m_video_header.width = value.resolution.x;
-        m_video_header.height = value.resolution.y;
-        m_video_header.fec_k = new_descriptor.coding_k;
-        m_video_header.fec_n = new_descriptor.coding_n;
-    }
+//    {
+//        std::lock_guard<std::mutex> lg(m_video_header_mutex);
+//        m_video_header.width = value.resolution.x;
+//        m_video_header.height = value.resolution.y;
+//    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -362,7 +379,7 @@ void RC_Comms::process()
         packet->push_back(static_cast<uint8_t>(silk::rc_comms::Packet_Type::MULTIROTOR_STATE));
         size_t off = packet->size();
         util::serialization::serialize(*packet, state, off);
-        m_phy_data.tx_queue.push_back(packet, false);
+        //m_phy_data.tx_queue.push_back(packet, false);
     }
 
     if (now - m_last_phy_received_tp >= std::chrono::milliseconds(1))

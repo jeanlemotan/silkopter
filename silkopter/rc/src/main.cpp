@@ -90,9 +90,9 @@ int main(int argc, char *argv[])
         exit(1);
     }
 
-    math::vec2u32 size = hal.get_display_size();
+    math::vec2u32 display_size = hal.get_display_size();
     ImGuiStyle& style = ImGui::GetStyle();
-    style.ScrollbarSize = size.x / 80.f;
+    style.ScrollbarSize = display_size.x / 80.f;
     style.TouchExtraPadding = ImVec2(style.ScrollbarSize * 2.f, style.ScrollbarSize * 2.f);
     //style.ItemSpacing = ImVec2(size.x / 200, size.x / 200);
     //style.ItemInnerSpacing = ImVec2(style.ItemSpacing.x / 2, style.ItemSpacing.y / 2);
@@ -101,6 +101,7 @@ int main(int argc, char *argv[])
     io.FontGlobalScale = 2.f;
 
     Video_Decoder decoder;
+    decoder.init();
 
     size_t render_frames = 0;
 
@@ -137,7 +138,28 @@ int main(int argc, char *argv[])
 
     while (hal.process())
     {
+        Video_Packet_ptr packet;
+        while (video_packet_queue.pop_front(packet, false))
+        {
+            decoder.decode_data(packet->data(), packet->size(), resolution);
+            packet = nullptr;
+        }
+        decoder.release_buffers();
+
         ImGui::NewFrame();
+
+        ImGui::SetNextWindowPos(ImVec2(0, 0));
+        ImGui::SetNextWindowSize(ImVec2(display_size.x, display_size.y));
+        ImGui::SetNextWindowBgAlpha(0);
+        ImGui::Begin("", nullptr, ImGuiWindowFlags_NoTitleBar |
+                     ImGuiWindowFlags_NoResize |
+                     ImGuiWindowFlags_NoMove |
+                     ImGuiWindowFlags_NoScrollbar |
+                     ImGuiWindowFlags_NoSavedSettings |
+                     ImGuiWindowFlags_NoInputs);
+
+        ImGui::Image((void*)(decoder.get_video_texture_id() | 0x80000000), ImVec2(512, 512));
+
         {
             static int counter = 0;
             ImGui::Text("Hello, world!");                           // Display some text (you can use a format string too)
@@ -168,7 +190,7 @@ int main(int argc, char *argv[])
                                  0, NULL,
                                  *std::min_element(temperature_history.begin(), temperature_history.end()),
                                  *std::max_element(temperature_history.begin(), temperature_history.end()),
-                                 ImVec2(0, size.y / 20));
+                                 ImVec2(0, display_size.y / 20));
             }
 
             ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
@@ -187,6 +209,7 @@ int main(int argc, char *argv[])
         bool show_demo_window = true;
         ImGui::ShowDemoWindow(&show_demo_window);
 
+        ImGui::End();
         //std::this_thread::sleep_for(std::chrono::microseconds(1));
         ImGui::Render();
     }

@@ -282,11 +282,9 @@ SOURCES += \
     ../../../../bullet/LinearMath/btSerializer64.cpp \
     ../../../../bullet/LinearMath/btThreads.cpp \
     ../../../../bullet/LinearMath/btVector3.cpp \
-    ../../../libs/utils/comms/esp8266/Fec_Encoder.cpp \
-    ../../../libs/utils/comms/esp8266/Phy.cpp \
-    ../../../libs/utils/comms/esp8266/utils/fec.cpp \
     ../../../libs/utils/comms/RCP.cpp \
-    ../../src/source/UltimateSensorFusion.cpp
+    ../../src/source/UltimateSensorFusion.cpp \
+    ../../../libs/utils/comms/esp32/Phy.cpp
 
 HEADERS += \
     ../../../libs/utils/chrono.h \
@@ -637,17 +635,13 @@ HEADERS += \
     ../../../../bullet/LinearMath/btTransform.h \
     ../../../../bullet/LinearMath/btTransformUtil.h \
     ../../../../bullet/LinearMath/btVector3.h \
-    ../../../libs/utils/comms/esp8266/Fec_Encoder.h \
-    ../../../libs/utils/comms/esp8266/Phy.h \
-    ../../../libs/utils/comms/esp8266/Pool.h \
-    ../../../libs/utils/comms/esp8266/utils/fec.h \
     ../../../libs/utils/comms/RCP.h \
     ../../../libs/utils/comms/esp8266/Queue.h \
-    ../../src/source/UltimateSensorFusion.h
+    ../../src/source/UltimateSensorFusion.h \
+    ../../../libs/utils/comms/esp32/Phy.h \
+    ../../../libs/utils/comms/esp32/spi_comms.h
 
 DISTFILES += \
     ../../../../bullet/Bullet3Common/CMakeLists.txt \
-    ../../../../bullet/Bullet3Common/premake4.lua \
-    ../../../../bullet/LinearMath/CMakeLists.txt \
-    ../../../../bullet/LinearMath/premake4.lua
+    ../../../../bullet/Bullet3Common/premake4.lua
 

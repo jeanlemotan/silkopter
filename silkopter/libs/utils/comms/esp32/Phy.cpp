@@ -113,8 +113,8 @@ void log(const char* format, const char* file, int line, ...)
     printf("%s(%d): %s\n", file, line, dest);
 }
 
-#define LOG(format, ...) log(format, __FILE__, __LINE__, ##__VA_ARGS__)
-//#define LOG(format, ...)
+//#define LOG(format, ...) log(format, __FILE__, __LINE__, ##__VA_ARGS__)
+#define LOG(format, ...)
 
 //////////////////////////////////////////////////////////////////////////////
 

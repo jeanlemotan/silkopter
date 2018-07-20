@@ -69,9 +69,22 @@
 // OpenGL Data
 static char         g_GlslVersionString[32] = "";
 static GLuint       g_FontTexture = 0;
-static GLuint       g_ShaderHandle = 0, g_VertHandle = 0, g_FragHandle = 0;
-static int          g_AttribLocationTex = 0, g_AttribLocationProjMtx = 0;
-static int          g_AttribLocationPosition = 0, g_AttribLocationUV = 0, g_AttribLocationColor = 0;
+
+struct ShaderData
+{
+    GLuint      ShaderHandle = 0;
+    GLuint      VertHandle = 0;
+    GLuint      FragHandle = 0;
+    int         AttribLocationTex = 0;
+    int         AttribLocationProjMtx = 0;
+    int         AttribLocationPosition = 0;
+    int         AttribLocationUV = 0;
+    int         AttribLocationColor = 0;
+};
+
+ShaderData g_ShaderData;
+ShaderData g_ShaderDataEx;
+
 static unsigned int g_VboHandle = 0, g_ElementsHandle = 0;
 
 // Functions
@@ -97,6 +110,20 @@ void    ImGui_ImplOpenGL3_NewFrame()
 {
     if (!g_FontTexture)
         ImGui_ImplOpenGL3_CreateDeviceObjects();
+}
+
+void    ImGui_BindShaderData(ShaderData& shaderData, float projection[4][4])
+{
+    glUseProgram(shaderData.ShaderHandle);
+    glUniform1i(shaderData.AttribLocationTex, 0);
+    glUniformMatrix4fv(shaderData.AttribLocationProjMtx, 1, GL_FALSE, &projection[0][0]);
+    glBindBuffer(GL_ARRAY_BUFFER, g_VboHandle);
+    glEnableVertexAttribArray(shaderData.AttribLocationPosition);
+    glEnableVertexAttribArray(shaderData.AttribLocationUV);
+    glEnableVertexAttribArray(shaderData.AttribLocationColor);
+    glVertexAttribPointer(shaderData.AttribLocationPosition, 2, GL_FLOAT, GL_FALSE, sizeof(ImDrawVert), (GLvoid*)IM_OFFSETOF(ImDrawVert, pos));
+    glVertexAttribPointer(shaderData.AttribLocationUV, 2, GL_FLOAT, GL_FALSE, sizeof(ImDrawVert), (GLvoid*)IM_OFFSETOF(ImDrawVert, uv));
+    glVertexAttribPointer(shaderData.AttribLocationColor, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(ImDrawVert), (GLvoid*)IM_OFFSETOF(ImDrawVert, col));
 }
 
 // OpenGL3 Render function.
@@ -161,23 +188,7 @@ void    ImGui_ImplOpenGL3_RenderDrawData(ImDrawData* draw_data, bool rotate)
         std::swap(ortho_projection[0][1], ortho_projection[1][1]);
     }
 
-    glUseProgram(g_ShaderHandle);
-    glUniform1i(g_AttribLocationTex, 0);
-    glUniformMatrix4fv(g_AttribLocationProjMtx, 1, GL_FALSE, &ortho_projection[0][0]);
-    //glBindSampler(0, 0); // We use combined texture/sampler state. Applications using GL 3.3 may set that otherwise.
-
-    // Recreate the VAO every time 
-    // (This is to easily allow multiple GL contexts. VAO are not shared among GL contexts, and we don't track creation/deletion of windows so we don't have an obvious key to use to cache them.)
-    //GLuint vao_handle = 0;
-    //glGenVertexArrays(1, &vao_handle);
-    //glBindVertexArray(vao_handle);
-    glBindBuffer(GL_ARRAY_BUFFER, g_VboHandle);
-    glEnableVertexAttribArray(g_AttribLocationPosition);
-    glEnableVertexAttribArray(g_AttribLocationUV);
-    glEnableVertexAttribArray(g_AttribLocationColor);
-    glVertexAttribPointer(g_AttribLocationPosition, 2, GL_FLOAT, GL_FALSE, sizeof(ImDrawVert), (GLvoid*)IM_OFFSETOF(ImDrawVert, pos));
-    glVertexAttribPointer(g_AttribLocationUV, 2, GL_FLOAT, GL_FALSE, sizeof(ImDrawVert), (GLvoid*)IM_OFFSETOF(ImDrawVert, uv));
-    glVertexAttribPointer(g_AttribLocationColor, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(ImDrawVert), (GLvoid*)IM_OFFSETOF(ImDrawVert, col));
+    ImGui_BindShaderData(g_ShaderData, ortho_projection);
 
     // Draw
     ImVec2 pos = draw_data->DisplayPos;
@@ -230,8 +241,21 @@ void    ImGui_ImplOpenGL3_RenderDrawData(ImDrawData* draw_data, bool rotate)
                     }
 
                     // Bind texture, Draw
-                    glBindTexture(GL_TEXTURE_2D, (GLuint)(intptr_t)pcmd->TextureId);
-                    glDrawElements(GL_TRIANGLES, (GLsizei)pcmd->ElemCount, sizeof(ImDrawIdx) == 2 ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT, idx_buffer_offset);
+                    uint32_t texId = (uint32_t)pcmd->TextureId;
+                    if (texId & 0x80000000)
+                    {
+                        ImGui_BindShaderData(g_ShaderDataEx, ortho_projection);
+
+                        glBindTexture(GL_TEXTURE_EXTERNAL_OES, (GLuint)(texId & 0x7FFFFFF));
+                        glDrawElements(GL_TRIANGLES, (GLsizei)pcmd->ElemCount, sizeof(ImDrawIdx) == 2 ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT, idx_buffer_offset);
+
+                        ImGui_BindShaderData(g_ShaderData, ortho_projection);
+                    }
+                    else
+                    {
+                        glBindTexture(GL_TEXTURE_2D, (GLuint)pcmd->TextureId);
+                        glDrawElements(GL_TRIANGLES, (GLsizei)pcmd->ElemCount, sizeof(ImDrawIdx) == 2 ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT, idx_buffer_offset);
+                    }
                 }
             }
             idx_buffer_offset += pcmd->ElemCount;
@@ -309,66 +333,92 @@ static bool CheckProgram(GLuint handle, const char* desc)
     return status == GL_TRUE;
 }
 
-bool    ImGui_ImplOpenGL3_CreateDeviceObjects()
+bool    ImGui_SetupShaderData(ShaderData& shaderData, const GLchar* vertex_shader, const GLchar* fragment_shader)
 {
-    // Backup GL state
-    GLint last_texture, last_array_buffer, last_vertex_array;
-    glGetIntegerv(GL_TEXTURE_BINDING_2D, &last_texture);
-    glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &last_array_buffer);
-    //glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &last_vertex_array);
-
-    const GLchar* vertex_shader_glsl_120 =
-        "uniform highp mat4 ProjMtx;\n"
-        "attribute highp vec2 Position;\n"
-        "attribute highp vec2 UV;\n"
-        "attribute lowp vec4 Color;\n"
-        "varying highp vec2 Frag_UV;\n"
-        "varying lowp vec4 Frag_Color;\n"
-        "void main()\n"
-        "{\n"
-        "    Frag_UV = UV;\n"
-        "    Frag_Color = Color;\n"
-        "    highp vec4 p = ProjMtx * vec4(Position.xy, 0, 1);\n"
-        "    gl_Position = p;\n"
-        "}\n";
-
-    const GLchar* fragment_shader_glsl_120 =
-        "uniform lowp sampler2D Texture;\n"
-        "varying highp vec2 Frag_UV;\n"
-        "varying lowp vec4 Frag_Color;\n"
-        "void main()\n"
-        "{\n"
-        "    gl_FragColor = Frag_Color * texture2D(Texture, Frag_UV);\n"
-        "}\n";
-
-    // Select shaders matching our GLSL versions
-    const GLchar* vertex_shader = vertex_shader_glsl_120;
-    const GLchar* fragment_shader = fragment_shader_glsl_120;
-
     // Create shaders
     const GLchar* vertex_shader_with_version[2] = { g_GlslVersionString, vertex_shader };
-    g_VertHandle = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(g_VertHandle, 2, vertex_shader_with_version, NULL);
-    glCompileShader(g_VertHandle);
-    CheckShader(g_VertHandle, "vertex shader");
+    shaderData.VertHandle = glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(shaderData.VertHandle, 2, vertex_shader_with_version, NULL);
+    glCompileShader(shaderData.VertHandle);
+    CheckShader(shaderData.VertHandle, "vertex shader");
 
     const GLchar* fragment_shader_with_version[2] = { g_GlslVersionString, fragment_shader };
-    g_FragHandle = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(g_FragHandle, 2, fragment_shader_with_version, NULL);
-    glCompileShader(g_FragHandle);
-    CheckShader(g_FragHandle, "fragment shader");
+    shaderData.FragHandle = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(shaderData.FragHandle, 2, fragment_shader_with_version, NULL);
+    glCompileShader(shaderData.FragHandle);
+    CheckShader(shaderData.FragHandle, "fragment shader");
 
-    g_ShaderHandle = glCreateProgram();
-    glAttachShader(g_ShaderHandle, g_VertHandle);
-    glAttachShader(g_ShaderHandle, g_FragHandle);
-    glLinkProgram(g_ShaderHandle);
-    CheckProgram(g_ShaderHandle, "shader program");
+    shaderData.ShaderHandle = glCreateProgram();
+    glAttachShader(shaderData.ShaderHandle, shaderData.VertHandle);
+    glAttachShader(shaderData.ShaderHandle, shaderData.FragHandle);
+    glLinkProgram(shaderData.ShaderHandle);
+    CheckProgram(shaderData.ShaderHandle, "shader program");
 
-    g_AttribLocationTex = glGetUniformLocation(g_ShaderHandle, "Texture");
-    g_AttribLocationProjMtx = glGetUniformLocation(g_ShaderHandle, "ProjMtx");
-    g_AttribLocationPosition = glGetAttribLocation(g_ShaderHandle, "Position");
-    g_AttribLocationUV = glGetAttribLocation(g_ShaderHandle, "UV");
-    g_AttribLocationColor = glGetAttribLocation(g_ShaderHandle, "Color");
+    shaderData.AttribLocationTex = glGetUniformLocation(shaderData.ShaderHandle, "Texture");
+    shaderData.AttribLocationProjMtx = glGetUniformLocation(shaderData.ShaderHandle, "ProjMtx");
+    shaderData.AttribLocationPosition = glGetAttribLocation(shaderData.ShaderHandle, "Position");
+    shaderData.AttribLocationUV = glGetAttribLocation(shaderData.ShaderHandle, "UV");
+    shaderData.AttribLocationColor = glGetAttribLocation(shaderData.ShaderHandle, "Color");
+    return true;
+}
+
+bool    ImGui_ImplOpenGL3_CreateDeviceObjects()
+{
+    {
+        const GLchar* vertex_shader =
+                "uniform highp mat4 ProjMtx;\n"
+                "attribute highp vec2 Position;\n"
+                "attribute highp vec2 UV;\n"
+                "attribute lowp vec4 Color;\n"
+                "varying highp vec2 Frag_UV;\n"
+                "varying lowp vec4 Frag_Color;\n"
+                "void main()\n"
+                "{\n"
+                "    Frag_UV = UV;\n"
+                "    Frag_Color = Color;\n"
+                "    highp vec4 p = ProjMtx * vec4(Position.xy, 0, 1);\n"
+                "    gl_Position = p;\n"
+                "}\n";
+
+        const GLchar* fragment_shader =
+                "uniform lowp sampler2D Texture;\n"
+                "varying highp vec2 Frag_UV;\n"
+                "varying lowp vec4 Frag_Color;\n"
+                "void main()\n"
+                "{\n"
+                "    gl_FragColor = Frag_Color * texture2D(Texture, Frag_UV);\n"
+                "}\n";
+
+        ImGui_SetupShaderData(g_ShaderData, vertex_shader, fragment_shader);
+    }
+    {
+        const GLchar* vertex_shader =
+                "uniform highp mat4 ProjMtx;\n"
+                "attribute highp vec2 Position;\n"
+                "attribute highp vec2 UV;\n"
+                "attribute lowp vec4 Color;\n"
+                "varying highp vec2 Frag_UV;\n"
+                "varying lowp vec4 Frag_Color;\n"
+                "void main()\n"
+                "{\n"
+                "    Frag_UV = UV;\n"
+                "    Frag_Color = Color;\n"
+                "    highp vec4 p = ProjMtx * vec4(Position.xy, 0, 1);\n"
+                "    gl_Position = p;\n"
+                "}\n";
+
+        const GLchar* fragment_shader =
+                "#extension GL_OES_EGL_image_external : require\n"
+                "uniform lowp samplerExternalOES Texture;\n"
+                "varying highp vec2 Frag_UV;\n"
+                "varying lowp vec4 Frag_Color;\n"
+                "void main()\n"
+                "{\n"
+                "    gl_FragColor = Frag_Color * texture2D(Texture, Frag_UV);\n"
+                "}\n";
+
+        ImGui_SetupShaderData(g_ShaderDataEx, vertex_shader, fragment_shader);
+    }
 
     // Create buffers
     glGenBuffers(1, &g_VboHandle);
@@ -376,12 +426,21 @@ bool    ImGui_ImplOpenGL3_CreateDeviceObjects()
 
     ImGui_ImplOpenGL3_CreateFontsTexture();
 
-    // Restore modified GL state
-    glBindTexture(GL_TEXTURE_2D, last_texture);
-    glBindBuffer(GL_ARRAY_BUFFER, last_array_buffer);
-    //glBindVertexArray(last_vertex_array);
-
     return true;
+}
+
+void    ImGui_DestroyShaderData(ShaderData& shaderData)
+{
+    if (shaderData.ShaderHandle && shaderData.VertHandle) glDetachShader(shaderData.ShaderHandle, shaderData.VertHandle);
+    if (shaderData.VertHandle) glDeleteShader(shaderData.VertHandle);
+    shaderData.VertHandle = 0;
+
+    if (shaderData.ShaderHandle && shaderData.FragHandle) glDetachShader(shaderData.ShaderHandle, shaderData.FragHandle);
+    if (shaderData.FragHandle) glDeleteShader(shaderData.FragHandle);
+    shaderData.FragHandle = 0;
+
+    if (shaderData.ShaderHandle) glDeleteProgram(shaderData.ShaderHandle);
+    shaderData.ShaderHandle = 0;
 }
 
 void    ImGui_ImplOpenGL3_DestroyDeviceObjects()
@@ -390,16 +449,8 @@ void    ImGui_ImplOpenGL3_DestroyDeviceObjects()
     if (g_ElementsHandle) glDeleteBuffers(1, &g_ElementsHandle);
     g_VboHandle = g_ElementsHandle = 0;
 
-    if (g_ShaderHandle && g_VertHandle) glDetachShader(g_ShaderHandle, g_VertHandle);
-    if (g_VertHandle) glDeleteShader(g_VertHandle);
-    g_VertHandle = 0;
-
-    if (g_ShaderHandle && g_FragHandle) glDetachShader(g_ShaderHandle, g_FragHandle);
-    if (g_FragHandle) glDeleteShader(g_FragHandle);
-    g_FragHandle = 0;
-
-    if (g_ShaderHandle) glDeleteProgram(g_ShaderHandle);
-    g_ShaderHandle = 0;
+    ImGui_DestroyShaderData(g_ShaderData);
+    ImGui_DestroyShaderData(g_ShaderDataEx);
 
     ImGui_ImplOpenGL3_DestroyFontsTexture();
 }
