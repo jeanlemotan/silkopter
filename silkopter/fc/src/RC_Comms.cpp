@@ -141,7 +141,6 @@ auto RC_Comms::start() -> bool
 void RC_Comms::phy_thread_proc()
 {
     Phy_Data::Packet_ptr rx_packet = m_phy_data.packet_pool.acquire();
-    rx_packet->resize(Phy::MAX_PAYLOAD_SIZE);
 
     while (!m_phy_data.thread_exit)
     {
@@ -150,17 +149,19 @@ void RC_Comms::phy_thread_proc()
 
         if (tx_packet)
         {
-            m_phy.send_data(tx_packet->data(), tx_packet->size());
+            m_phy.send_data(tx_packet->payload.data(), tx_packet->payload.size(), tx_packet->use_fec);
         }
 
         size_t rx_size = 0;
         int rx_rssi = 0;
-        if (m_phy.receive_data(rx_packet->data(), rx_size, rx_rssi))
+        rx_packet->payload.resize(Phy::MAX_PAYLOAD_SIZE);
+        if (m_phy.receive_data(rx_packet->payload.data(), rx_size, rx_rssi))
         {
-            rx_packet->resize(rx_size);
+            rx_packet->payload.resize(rx_size);
             m_phy_data.rx_queue.push_back_timeout(rx_packet, std::chrono::milliseconds(5));
+
+            //get anothger packet
             rx_packet = m_phy_data.packet_pool.acquire();
-            rx_packet->resize(Phy::MAX_PAYLOAD_SIZE);
         }
 
         if (m_new_phy_rate != m_phy_rate)
@@ -306,6 +307,18 @@ void RC_Comms::add_video_data(stream::IVideo::Value const& value)
 //        create_fec_encoder_tx(new_descriptor);
 //    }
 
+    static size_t bps = 0;
+    static size_t pps = 0;
+    static Clock::time_point tp;
+    if (Clock::now() - tp >= std::chrono::seconds(1))
+    {
+        QLOGI("bps: {}, pps: {}", bps, pps);
+        bps = 0;
+        pps = 0;
+        tp = Clock::now();
+    }
+    bps += value.data.size();
+
     size_t offset = m_video_data_buffer.size();
     m_video_data_buffer.resize(offset + value.data.size());
     memcpy(m_video_data_buffer.data() + offset, value.data.data(), value.data.size());
@@ -319,12 +332,14 @@ void RC_Comms::add_video_data(stream::IVideo::Value const& value)
     while (m_video_data_buffer.size() >= payload_size)
     {
         Phy_Data::Packet_ptr packet = m_phy_data.packet_pool.acquire();
-        packet->resize(m_mtu);
+        packet->payload.resize(m_mtu);
+        packet->use_fec = true;
         size_t offset = 0;
-        util::serialization::serialize(*packet, packet_type, offset);
-        util::serialization::serialize(*packet, video_header, offset);
-        memcpy(packet->data() + offset, m_video_data_buffer.data(), payload_size);
+        util::serialization::serialize(packet->payload, packet_type, offset);
+        util::serialization::serialize(packet->payload, video_header, offset);
+        memcpy(packet->payload.data() + offset, m_video_data_buffer.data(), payload_size);
         m_video_data_buffer.erase(m_video_data_buffer.begin(), m_video_data_buffer.begin() + payload_size);
+        pps++;
 
         m_phy_data.tx_queue.push_back(packet, true);
     }
@@ -375,11 +390,12 @@ void RC_Comms::process()
             state = m_multirotor_state;
         }
         Phy_Data::Packet_ptr packet = m_phy_data.packet_pool.acquire();
-        packet->clear();
-        packet->push_back(static_cast<uint8_t>(silk::rc_comms::Packet_Type::MULTIROTOR_STATE));
-        size_t off = packet->size();
-        util::serialization::serialize(*packet, state, off);
-        //m_phy_data.tx_queue.push_back(packet, false);
+        packet->use_fec = false;
+        packet->payload.clear();
+        packet->payload.push_back(static_cast<uint8_t>(silk::rc_comms::Packet_Type::MULTIROTOR_STATE));
+        size_t off = packet->payload.size();
+        util::serialization::serialize(packet->payload, state, off);
+        m_phy_data.tx_queue.push_back(packet, false);
     }
 
     if (now - m_last_phy_received_tp >= std::chrono::milliseconds(1))
@@ -389,7 +405,7 @@ void RC_Comms::process()
         Phy_Data::Packet_ptr rx_packet;
         while (m_phy_data.rx_queue.pop_front(rx_packet, false))
         {
-            process_received_data(*rx_packet);
+            process_received_data(rx_packet->payload);
         }
     }
 }

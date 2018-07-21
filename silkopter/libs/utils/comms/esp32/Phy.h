@@ -30,7 +30,7 @@ public:
 
     static const size_t MAX_PAYLOAD_SIZE = 1374;
 
-    bool send_data(void const* data, size_t size);
+    bool send_data(void const* data, size_t size, bool use_fec);
     bool receive_data(void* data, size_t& size, int& rssi);
 
     bool setup_fec_channel(size_t coding_k, size_t coding_n, size_t mtu);
@@ -98,7 +98,7 @@ public:
     bool get_stats(Stats& stats);
 
 private:
-    bool transfer(void const* data, size_t size);
+    bool transfer(void const* data, size_t size, bool use_fec);
 
     void prepare_transfer_buffers(size_t payload_size);
     bool spi_transfer(void const* tx_data, void* rx_data, size_t size);

@@ -52,6 +52,7 @@ struct SPI_Res_Base_Header
 struct SPI_Req_Packet_Header : public SPI_Req_Base_Header
 {
     uint16_t packet_size : 11;
+    uint16_t use_fec : 1;
     //... data follows
 };
 

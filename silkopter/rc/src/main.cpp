@@ -103,9 +103,7 @@ int main(int argc, char *argv[])
     Video_Decoder decoder;
     decoder.init();
 
-    size_t render_frames = 0;
-
-    q::Clock::time_point last_swapped_tp = q::Clock::now();
+    Clock::time_point last_tp = Clock::now();
 
     math::vec2u16 resolution;
     typedef std::vector<uint8_t> Video_Packet;
@@ -122,19 +120,24 @@ int main(int argc, char *argv[])
         Video_Packet_ptr packet = video_packet_pool.acquire();
         packet->resize(size);
         memcpy(packet->data(), data, size);
-        video_packet_queue.push_back(packet, true);
+        video_packet_queue.push_back(packet, false);
 
         resolution = res;
     };
 
-    q::Clock::time_point last_tp = q::Clock::now();
-    size_t process_frames = 0;
-
     float temperature = 0.f;
+
+    Clock::time_point last_temperature_history_tp = Clock::now();
     std::vector<float> temperature_history;
+
+    Clock::time_point last_dBm_history_tp = Clock::now();
+    std::vector<float> tx_dBm_history;
+    std::vector<float> rx_dBm_history;
 
     float brightness = 50.f;
     float fan_speed = 20.f;
+
+    silk::stream::ICamera_Commands::Value camera_commands;
 
     while (hal.process())
     {
@@ -146,6 +149,11 @@ int main(int argc, char *argv[])
         }
         decoder.release_buffers();
 
+        Clock::time_point now = Clock::now();
+        Clock::duration dt = now - last_tp;
+        last_tp = now;
+        io.DeltaTime = std::chrono::duration_cast<std::chrono::duration<float>>(dt).count();
+
         ImGui::NewFrame();
 
         ImGui::SetNextWindowPos(ImVec2(0, 0));
@@ -155,11 +163,11 @@ int main(int argc, char *argv[])
                      ImGuiWindowFlags_NoResize |
                      ImGuiWindowFlags_NoMove |
                      ImGuiWindowFlags_NoScrollbar |
-                     ImGuiWindowFlags_NoSavedSettings |
                      ImGuiWindowFlags_NoInputs);
 
-        ImGui::Image((void*)(decoder.get_video_texture_id() | 0x80000000), ImVec2(512, 512));
+        ImGui::Image((void*)(decoder.get_video_texture_id() | 0x80000000), ImVec2(display_size.x, display_size.y));
 
+        ImGui::Begin("HAL");
         {
             static int counter = 0;
             ImGui::Text("Hello, world!");                           // Display some text (you can use a format string too)
@@ -172,42 +180,60 @@ int main(int argc, char *argv[])
                 hal.set_fan_speed(fan_speed / 100.f);
             }
             temperature = hal.get_temperature();
-            temperature_history.push_back(temperature);
-            while (temperature_history.size() > 60 * 5)
+
+            if (now - last_temperature_history_tp >= std::chrono::seconds(1))
             {
-                temperature_history.erase(temperature_history.begin());
+                last_temperature_history_tp = now;
+                temperature_history.push_back(temperature);
+                while (temperature_history.size() > 60) { temperature_history.erase(temperature_history.begin()); }
             }
-            //ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
-
-            //ImGui::Checkbox("Demo Window", &show_demo_window);      // Edit bools storing our windows open/close state
-            //ImGui::Checkbox("Another Window", &show_another_window);
-
             ImGui::Text("Temperature = %.2f'C", temperature);
             if (!temperature_history.empty())
             {
-                ImGui::PlotLines("History",
+                ImGui::PlotLines("Temperature",
                                  temperature_history.data(), temperature_history.size(),
                                  0, NULL,
-                                 *std::min_element(temperature_history.begin(), temperature_history.end()),
-                                 *std::max_element(temperature_history.begin(), temperature_history.end()),
+                                 30.f, 90.f,
+                                 ImVec2(0, display_size.y / 20));
+            }
+            if (now - last_dBm_history_tp >= std::chrono::milliseconds(100))
+            {
+                last_dBm_history_tp = now;
+                tx_dBm_history.push_back(hal.get_comms().get_tx_dBm());
+                while (tx_dBm_history.size() > 10 * 5) { tx_dBm_history.erase(tx_dBm_history.begin()); }
+                rx_dBm_history.push_back(hal.get_comms().get_rx_dBm());
+                while (rx_dBm_history.size() > 10 * 5) { rx_dBm_history.erase(rx_dBm_history.begin()); }
+            }
+            ImGui::Text("TX = %ddBm", (int)hal.get_comms().get_tx_dBm());
+            if (!tx_dBm_history.empty())
+            {
+                ImGui::PlotLines("History",
+                                 tx_dBm_history.data(), tx_dBm_history.size(),
+                                 0, NULL,
+                                 -128.f, 128.f,
+                                 ImVec2(0, display_size.y / 20));
+            }
+            ImGui::Text("RX = %ddBm", (int)hal.get_comms().get_rx_dBm());
+            if (!rx_dBm_history.empty())
+            {
+                ImGui::PlotLines("History",
+                                 rx_dBm_history.data(), rx_dBm_history.size(),
+                                 0, NULL,
+                                 -128.f, 128.f,
                                  ImVec2(0, display_size.y / 20));
             }
 
+            bool hq = camera_commands.quality == silk::stream::ICamera_Commands::Quality::HIGH;
+            ImGui::Checkbox("HQ Video", &hq);
+            camera_commands.quality = hq ? silk::stream::ICamera_Commands::Quality::HIGH : silk::stream::ICamera_Commands::Quality::LOW;
+            ImGui::SameLine();
+            ImGui::Checkbox("Record Video", &camera_commands.recording);
+
+            hal.get_comms().send_camera_commands_value(camera_commands);
+
             ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
         }
-        //ImGui::EndFrame();
-
-        process_frames++;
-        if (q::Clock::now() - last_tp >= std::chrono::seconds(1))
-        {
-            last_tp = q::Clock::now();
-            QLOGI("P FPS: {}, R FPS: {}", process_frames, render_frames);
-            process_frames = 0;
-            render_frames = 0;
-        }
-
-        bool show_demo_window = true;
-        ImGui::ShowDemoWindow(&show_demo_window);
+        ImGui::End();
 
         ImGui::End();
         //std::this_thread::sleep_for(std::chrono::microseconds(1));

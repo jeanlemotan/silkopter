@@ -32,6 +32,8 @@ extern "C"
 #include "utils/hw/bcm2835.h"
 }
 
+#include "utils/hw/UART_Dev.h"
+
 extern uint8_t s_font_droid_sans[];
 constexpr uint32_t FAN_GPIO = 4;
 
@@ -86,6 +88,7 @@ struct PI_HAL::Impl
     std::future<void> backlight_future;
     std::atomic_bool backlight_future_cancelled;
     Clock::time_point backlight_tp = Clock::now();
+    util::hw::UART_Dev backlight_uart;
 
     float temperature_filtered = 0.f;
     Clock::time_point temperature_filtered_tp = Clock::now();
@@ -105,7 +108,7 @@ bool PI_HAL::init_pigpio()
     }
 
     QLOGI("Initializing pigpio");
-    if (gpioCfgClock(get_settings().get_hw().get_pigpio_period_us(), PI_CLOCK_PCM, 0) < 0 ||
+    if (gpioCfgClock(2, PI_CLOCK_PCM, 0) < 0 ||
             gpioCfgPermissions(static_cast<uint64_t>(-1)))
     {
         QLOGE("Cannot configure pigpio");
@@ -117,7 +120,7 @@ bool PI_HAL::init_pigpio()
         return false;
     }
 
-    gpioSetPWMfrequency(FAN_GPIO, 200);
+    gpioSetPWMfrequency(FAN_GPIO, 20000);
 
     m_impl->pigpio_is_isitialized = true;
 
@@ -228,6 +231,15 @@ bool PI_HAL::init_display()
     io.DisplaySize.x = s_width;
     io.DisplaySize.y = s_height;
 
+    {
+        ts::Result<void> result = m_impl->backlight_uart.init("/dev/ttyACM0", util::hw::UART_Dev::Baud::_115200);
+        if (result != ts::success)
+        {
+            QLOGW("Failed to initialize backlight uart: {}", result.error().what());
+            return false;
+        }
+    }
+
     return true;
 }
 
@@ -274,13 +286,12 @@ bool PI_HAL::update_display()
         }
         cancelled = false;
 
-        m_impl->backlight_future = std::async(std::launch::async, [b, &cancelled]()
+        m_impl->backlight_future = std::async(std::launch::async, [this, b, &cancelled]()
         {
             if (!cancelled)
             {
-                char buffer[128];
-                sprintf(buffer, "printf \"backlight %d\r\" > /dev/ttyACM0", (int)(b * 100.f + 0.5f));
-                system(buffer);
+                std::string command = "backlight " + std::to_string((int)(b * 100.f + 0.5f)) + "\r";
+                m_impl->backlight_uart.write((const uint8_t*)command.data(), command.size());
             }
         });
     }

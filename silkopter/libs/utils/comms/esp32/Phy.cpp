@@ -298,7 +298,7 @@ void Phy::prepare_transfer_buffers(size_t size)
 
 //////////////////////////////////////////////////////////////////////////////
 
-bool Phy::transfer(void const* data, size_t size)
+bool Phy::transfer(void const* data, size_t size, bool use_fec)
 {
     if (size > MAX_PAYLOAD_SIZE)
     {
@@ -317,6 +317,7 @@ bool Phy::transfer(void const* data, size_t size)
         header.req = static_cast<uint8_t>(SPI_Req::PACKET);
         header.seq = (++m_seq) & 0x7F;
         header.packet_size = size;
+        header.use_fec = use_fec ? 1 : 0;
         header.crc = crc8(0, &header, sizeof(header));
         if (size > 0 && data)
         {
@@ -384,7 +385,7 @@ bool Phy::transfer(void const* data, size_t size)
 
 //////////////////////////////////////////////////////////////////////////////
 
-bool Phy::send_data(void const* data, size_t size)
+bool Phy::send_data(void const* data, size_t size, bool use_fec)
 {
     if (!data || size > MAX_PAYLOAD_SIZE)
     {
@@ -395,7 +396,7 @@ bool Phy::send_data(void const* data, size_t size)
 
     std::lock_guard<std::mutex> lg(m_mutex);
 
-    return transfer(data, size);
+    return transfer(data, size, use_fec);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -417,7 +418,7 @@ bool Phy::receive_data(void* data, size_t& size, int& rssi)
         size_t rounds = 5;
         do
         {
-            transfer(nullptr, 0);
+            transfer(nullptr, 0, false);
             rounds--;
         } while (m_pending_packets > 1 && rounds > 0);
     }

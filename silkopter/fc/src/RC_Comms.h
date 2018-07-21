@@ -81,7 +81,11 @@ private:
             , rx_queue(32)
         {}
 
-        typedef std::vector<uint8_t> Packet;
+        struct Packet
+        {
+            bool use_fec = true;
+            std::vector<uint8_t> payload;
+        };
         typedef Pool<Packet>::Ptr Packet_ptr;
         Pool<Packet> packet_pool;
         Queue<Packet_ptr> tx_queue;

@@ -131,7 +131,7 @@ void Comms::phy_thread_proc()
 
         if (tx_packet)
         {
-            m_phy.send_data(tx_packet->data(), tx_packet->size());
+            m_phy.send_data(tx_packet->data(), tx_packet->size(), false);
         }
 
         size_t rx_size = 0;
@@ -232,6 +232,19 @@ void Comms::process_rx_packet(rc_comms::Packet_Type packet_type, std::vector<uin
 //    m_rx_packet.tx_dBm = packet.tx_dBm;
 //    m_rx_packet.rx_timepoint = packet.rx_timepoint;
 
+    static size_t bps = 0;
+    static size_t pps = 0;
+    static Clock::time_point tp;
+    if (Clock::now() - tp >= std::chrono::seconds(1))
+    {
+        QLOGI("bps: {}, pps: {}", bps, pps);
+        bps = 0;
+        pps = 0;
+        tp = Clock::now();
+    }
+    bps += data.size();
+    pps ++;
+
     bool dsz_ok = false;
     if (packet_type == rc_comms::Packet_Type::MULTIROTOR_STATE)
     {
@@ -251,7 +264,7 @@ void Comms::process_rx_packet(rc_comms::Packet_Type packet_type, std::vector<uin
             math::vec2u16 resolution(video_header.width, video_header.height);
             if (on_video_data_received)
             {
-                on_video_data_received(data.data(), data.size() - sizeof(video_header), resolution);
+                on_video_data_received(data.data() + offset, data.size() - offset, resolution);
             }
             dsz_ok = true;
         }
