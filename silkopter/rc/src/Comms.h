@@ -1,6 +1,7 @@
 #pragma once
 
 #include <mutex>
+#include <deque>
 #include "common/Comm_Data.h"
 
 #include "common/stream/IAcceleration.h"
@@ -56,9 +57,6 @@ public:
 
     bool start();
 
-    void disconnect();
-    bool is_connected() const;
-
     //----------------------------------------------------------------------
 
     int8_t get_rx_dBm() const;
@@ -69,9 +67,22 @@ public:
 
     Clock::time_point get_last_rx_tp() const;
 
+    void set_single_phy(bool yes);
+
     std::function<void(void const*, size_t, math::vec2u16 const&)> on_video_data_received;
 
     stream::IMultirotor_State::Value get_multirotor_state() const;
+
+    struct Stats
+    {
+        float packets_dropped_per_second = 0;
+        float packets_received_per_second = 0;
+        float packets_sent_per_second = 0;
+        float data_received_per_second = 0;
+        float data_sent_per_second = 0;
+    };
+
+    const Stats& get_stats() const;
 
     void send_multirotor_commands_value(stream::IMultirotor_Commands::Value const& value);
     void send_camera_commands_value(stream::ICamera_Commands::Value const& value);
@@ -94,11 +105,9 @@ private:
 
 //    util::comms::Video_Streamer m_video_streamer;
 
-    bool m_is_connected = false;
-
-    uint32_t m_last_req_id = 0;
-
-    Phy m_phy;
+    uint32_t m_station_id = 0;
+    std::vector<std::unique_ptr<Phy>> m_phys;
+    bool m_single_phy = false;
 
     mutable std::mutex m_samples_mutex;
     stream::IMultirotor_State::Value m_multirotor_state;
@@ -114,6 +123,20 @@ private:
 
     Clock::time_point m_telemetry_tp = Clock::time_point(Clock::duration::zero());
 
+    Stats m_stats;
+    Clock::time_point m_last_stats_tp = Clock::now();
+
+    struct Raw_Stats
+    {
+        size_t packets_dropped = 0;
+        size_t packets_received = 0;
+        size_t packets_sent = 0;
+        size_t data_received = 0;
+        size_t data_sent = 0;
+    };
+
+    void add_raw_stats(Raw_Stats& dst, Raw_Stats const& src) const;
+
     struct Phy_Data
     {
         Phy_Data()
@@ -126,6 +149,23 @@ private:
         Pool<Packet> packet_pool;
         Queue<Packet_ptr> tx_queue;
         Queue<Packet_ptr> rx_queue;
+
+        ///////////////////////////////////////////////////////
+        //thread_proc only
+        struct Parked_Packet
+        {
+            uint32_t packet_index;
+            Packet_ptr packet;
+        };
+        std::deque<Parked_Packet> parked_packets;
+        uint32_t last_sent_packet_index = 0;
+        uint32_t last_received_packet_index = 0;
+        Clock::time_point last_received_packet_tp = Clock::now();
+        ///////////////////////////////////////////////////////
+
+        mutable std::mutex stats_mutex;
+        Raw_Stats raw_stats;
+
         bool thread_exit = false;
         std::thread thread;
     } m_phy_data;

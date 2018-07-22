@@ -72,13 +72,15 @@ private:
     std::atomic_int m_new_phy_rate = { -1 };
 
     std::vector<uint8_t> m_video_data_buffer;
+    uint32_t m_last_packet_index = 0;
+    uint32_t m_station_id = 0;
     size_t m_mtu = 0;
 
     struct Phy_Data
     {
         Phy_Data()
-            : tx_queue(32)
-            , rx_queue(32)
+            : tx_queue(64)
+            , rx_queue(64)
         {}
 
         struct Packet

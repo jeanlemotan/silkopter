@@ -130,12 +130,19 @@ int main(int argc, char *argv[])
     Clock::time_point last_temperature_history_tp = Clock::now();
     std::vector<float> temperature_history;
 
-    Clock::time_point last_dBm_history_tp = Clock::now();
+    Clock::time_point last_comms_history_tp = Clock::now();
     std::vector<float> tx_dBm_history;
     std::vector<float> rx_dBm_history;
+    std::vector<float> packets_dropped_history;
+    std::vector<float> packets_received_history;
+    std::vector<float> packets_sent_history;
 
-    float brightness = 50.f;
-    float fan_speed = 20.f;
+    float brightness = 80.f;
+    float fan_speed = 100.f;
+    hal.set_backlight(brightness / 100.f);
+    hal.set_fan_speed(fan_speed / 100.f);
+
+    bool single_phy = false;
 
     silk::stream::ICamera_Commands::Value camera_commands;
 
@@ -196,13 +203,20 @@ int main(int argc, char *argv[])
                                  30.f, 90.f,
                                  ImVec2(0, display_size.y / 20));
             }
-            if (now - last_dBm_history_tp >= std::chrono::milliseconds(100))
+            if (now - last_comms_history_tp >= std::chrono::milliseconds(100))
             {
-                last_dBm_history_tp = now;
+                last_comms_history_tp = now;
                 tx_dBm_history.push_back(hal.get_comms().get_tx_dBm());
                 while (tx_dBm_history.size() > 10 * 5) { tx_dBm_history.erase(tx_dBm_history.begin()); }
                 rx_dBm_history.push_back(hal.get_comms().get_rx_dBm());
                 while (rx_dBm_history.size() > 10 * 5) { rx_dBm_history.erase(rx_dBm_history.begin()); }
+                silk::Comms::Stats stats = hal.get_comms().get_stats();
+                packets_dropped_history.push_back(stats.packets_dropped_per_second);
+                while (packets_dropped_history.size() > 10 * 5) { packets_dropped_history.erase(packets_dropped_history.begin()); }
+                packets_received_history.push_back(stats.packets_received_per_second);
+                while (packets_received_history.size() > 10 * 5) { packets_received_history.erase(packets_received_history.begin()); }
+                packets_sent_history.push_back(stats.packets_sent_per_second);
+                while (packets_sent_history.size() > 10 * 5) { packets_sent_history.erase(packets_sent_history.begin()); }
             }
             ImGui::Text("TX = %ddBm", (int)hal.get_comms().get_tx_dBm());
             if (!tx_dBm_history.empty())
@@ -222,14 +236,46 @@ int main(int argc, char *argv[])
                                  -128.f, 128.f,
                                  ImVec2(0, display_size.y / 20));
             }
+            if (!packets_dropped_history.empty())
+            {
+                ImGui::Text("Dropped = %.2f", packets_dropped_history.back());
+                auto minmax = std::minmax_element(packets_dropped_history.begin(), packets_dropped_history.end());
+                ImGui::PlotLines("History",
+                                 packets_dropped_history.data(), packets_dropped_history.size(),
+                                 0, NULL,
+                                 *minmax.first, *minmax.second,
+                                 ImVec2(0, display_size.y / 20));
+            }
+            if (!packets_received_history.empty())
+            {
+                ImGui::Text("Received = %.2f", packets_received_history.back());
+                auto minmax = std::minmax_element(packets_received_history.begin(), packets_received_history.end());
+                ImGui::PlotLines("History",
+                                 packets_received_history.data(), packets_received_history.size(),
+                                 0, NULL,
+                                 *minmax.first, *minmax.second,
+                                 ImVec2(0, display_size.y / 20));
+            }
+            if (!packets_sent_history.empty())
+            {
+                ImGui::Text("Sent = %.2f", packets_sent_history.back());
+                auto minmax = std::minmax_element(packets_sent_history.begin(), packets_sent_history.end());
+                ImGui::PlotLines("History",
+                                 packets_sent_history.data(), packets_sent_history.size(),
+                                 0, NULL,
+                                 *minmax.first, *minmax.second,
+                                 ImVec2(0, display_size.y / 20));
+            }
 
             bool hq = camera_commands.quality == silk::stream::ICamera_Commands::Quality::HIGH;
             ImGui::Checkbox("HQ Video", &hq);
             camera_commands.quality = hq ? silk::stream::ICamera_Commands::Quality::HIGH : silk::stream::ICamera_Commands::Quality::LOW;
             ImGui::SameLine();
             ImGui::Checkbox("Record Video", &camera_commands.recording);
-
             hal.get_comms().send_camera_commands_value(camera_commands);
+
+            ImGui::Checkbox("Single Phy", &single_phy);
+            hal.get_comms().set_single_phy(single_phy);
 
             ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
         }

@@ -215,7 +215,7 @@ int main(int argc, char const* argv[])
         QLOGI("All systems up. Ready to fly...");
 
         {
-            constexpr std::chrono::microseconds PERIOD(5000);
+            size_t count = 0;
             auto last = Clock::now();
             while (!s_exit)
             {
@@ -237,7 +237,12 @@ int main(int argc, char const* argv[])
                 //No sleeping here!!! process as fast as possible as the nodes are not always in the ideal order
                 // and out of order nodes will be processes next 'frame'. So the quicker the frames, the smaller the lag between nodes
 //#ifndef RASPBERRY_PI
-                std::this_thread::sleep_for(std::chrono::microseconds(1));
+                if (count++ > 10)
+                {
+                    count = 0;
+                    std::this_thread::sleep_for(std::chrono::milliseconds(5));
+                }
+                //std::this_thread::yield();
 //#endif
 
 //                {

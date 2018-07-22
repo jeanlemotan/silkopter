@@ -26,6 +26,8 @@ constexpr size_t SPI_SPEED = 10000000;
 RC_Comms::RC_Comms(HAL& hal)
     : m_hal(hal)
 {
+    srand((size_t)this + clock());
+    m_station_id = (rand() << 16) | rand();
 }
 
 RC_Comms::~RC_Comms()
@@ -142,14 +144,29 @@ void RC_Comms::phy_thread_proc()
 {
     Phy_Data::Packet_ptr rx_packet = m_phy_data.packet_pool.acquire();
 
+    static size_t bps = 0;
+    static size_t pps = 0;
+    static Clock::time_point tp;
+
     while (!m_phy_data.thread_exit)
     {
+        if (Clock::now() - tp >= std::chrono::seconds(1))
+        {
+            QLOGI("bps: {}, pps: {}", bps, pps);
+            bps = 0;
+            pps = 0;
+            tp = Clock::now();
+        }
+
         Phy_Data::Packet_ptr tx_packet;
         m_phy_data.tx_queue.pop_front_timeout(tx_packet, std::chrono::milliseconds(5));
-
-        if (tx_packet)
+        while (tx_packet)
         {
+            pps++;
+            bps += tx_packet->payload.size();
             m_phy.send_data(tx_packet->payload.data(), tx_packet->payload.size(), tx_packet->use_fec);
+            tx_packet = nullptr;
+            m_phy_data.tx_queue.pop_front(tx_packet, false);
         }
 
         size_t rx_size = 0;
@@ -243,8 +260,8 @@ void RC_Comms::process_received_data(std::vector<uint8_t> const& data)
         return;
     }
 
-    rc_comms::Packet_Type packet_type = *reinterpret_cast<const rc_comms::Packet_Type*>(data.data());
-    process_rx_packet(packet_type, data, sizeof(rc_comms::Packet_Type));
+    rc_comms::Packet_Header const& packet_header = *reinterpret_cast<const rc_comms::Packet_Header*>(data.data());
+    process_rx_packet((rc_comms::Packet_Type)packet_header.packet_type, data, sizeof(rc_comms::Packet_Header));
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -275,85 +292,33 @@ void RC_Comms::add_video_data(stream::IVideo::Value const& value)
 {
     silk::hal::IUAV_Descriptor::Comms const& comms_settings = m_hal.get_uav_descriptor()->get_comms();
 
-//    Fec_Encoder::TX_Descriptor new_descriptor;
-//    if (value.quality == stream::IVideo::Quality::HIGH)
-//    {
-//        new_descriptor.coding_k = comms_settings.get_high().get_fec_k();
-//        new_descriptor.coding_n = comms_settings.get_high().get_fec_n();
-//        new_descriptor.mtu = comms_settings.get_high().get_mtu();
-//        m_new_phy_rate = static_cast<int>(comms_settings.get_high().get_rate());
-//    }
-//    else
-//    {
-//        new_descriptor.coding_k = comms_settings.get_low().get_fec_k();
-//        new_descriptor.coding_n = comms_settings.get_low().get_fec_n();
-//        new_descriptor.mtu = comms_settings.get_low().get_mtu();
-//        m_new_phy_rate = static_cast<int>(comms_settings.get_low().get_rate());
-//    }
-
-//    bool recreate_fec = true;
-//    if (m_fec_encoder_tx)
-//    {
-//        //recreate the FEC if quality changed
-//        Fec_Encoder::Descriptor const& descriptor = m_fec_encoder_tx->get_descriptor();
-
-//        recreate_fec = new_descriptor.coding_k != descriptor.coding_k ||
-//                new_descriptor.coding_n != descriptor.coding_n ||
-//                new_descriptor.mtu != descriptor.mtu;
-//    }
-
-//    if (recreate_fec)
-//    {
-//        create_fec_encoder_tx(new_descriptor);
-//    }
-
-    static size_t bps = 0;
-    static size_t pps = 0;
-    static Clock::time_point tp;
-    if (Clock::now() - tp >= std::chrono::seconds(1))
-    {
-        QLOGI("bps: {}, pps: {}", bps, pps);
-        bps = 0;
-        pps = 0;
-        tp = Clock::now();
-    }
-    bps += value.data.size();
-
     size_t offset = m_video_data_buffer.size();
     m_video_data_buffer.resize(offset + value.data.size());
     memcpy(m_video_data_buffer.data() + offset, value.data.data(), value.data.size());
 
-    rc_comms::Packet_Type packet_type = rc_comms::Packet_Type::VIDEO;
+    rc_comms::Packet_Header packet_header;
+    packet_header.station_id = m_station_id;
+    packet_header.packet_type = (uint32_t)rc_comms::Packet_Type::VIDEO;
+
     rc_comms::Video_Header video_header;
     video_header.width = value.resolution.x;
     video_header.height = value.resolution.y;
 
-    size_t payload_size = m_mtu - sizeof(packet_type) - sizeof(video_header);
+    size_t payload_size = m_mtu - sizeof(packet_header) - sizeof(video_header);
     while (m_video_data_buffer.size() >= payload_size)
     {
         Phy_Data::Packet_ptr packet = m_phy_data.packet_pool.acquire();
         packet->payload.resize(m_mtu);
         packet->use_fec = true;
         size_t offset = 0;
-        util::serialization::serialize(packet->payload, packet_type, offset);
+        packet_header.packet_index = m_last_packet_index++;
+        util::serialization::serialize(packet->payload, packet_header, offset);
         util::serialization::serialize(packet->payload, video_header, offset);
         memcpy(packet->payload.data() + offset, m_video_data_buffer.data(), payload_size);
         m_video_data_buffer.erase(m_video_data_buffer.begin(), m_video_data_buffer.begin() + payload_size);
-        pps++;
 
-        m_phy_data.tx_queue.push_back(packet, true);
+        m_phy_data.tx_queue.push_back(packet, false);
     }
-
-//    if (m_fec_encoder_tx)
-//    {
-//        m_fec_encoder_tx->add_tx_packet(value.data.data(), value.data.size(), false);
-//    }
-
-//    {
-//        std::lock_guard<std::mutex> lg(m_video_header_mutex);
-//        m_video_header.width = value.resolution.x;
-//        m_video_header.height = value.resolution.y;
-//    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -392,8 +357,13 @@ void RC_Comms::process()
         Phy_Data::Packet_ptr packet = m_phy_data.packet_pool.acquire();
         packet->use_fec = false;
         packet->payload.clear();
-        packet->payload.push_back(static_cast<uint8_t>(silk::rc_comms::Packet_Type::MULTIROTOR_STATE));
-        size_t off = packet->payload.size();
+
+        rc_comms::Packet_Header packet_header;
+        packet_header.station_id = m_station_id;
+        packet_header.packet_type = (uint32_t)rc_comms::Packet_Type::MULTIROTOR_STATE;
+        packet_header.packet_index = m_last_packet_index++;
+        size_t off = 0;
+        util::serialization::serialize(packet->payload, packet_header, off);
         util::serialization::serialize(packet->payload, state, off);
         m_phy_data.tx_queue.push_back(packet, false);
     }

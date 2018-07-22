@@ -27,7 +27,8 @@ constexpr size_t SPI_PORT = 0;
 constexpr size_t SPI_CHANNEL = 0;
 constexpr size_t SPI_SPEED = 4000000;
 #else
-const char* SPI_DEVICE = "/dev/spidev0.0";
+constexpr size_t PHY_COUNT = 2;
+const char* SPI_DEVICES[] = { "/dev/spidev0.0", "/dev/spidev0.1" };
 constexpr size_t SPI_SPEED = 10000000;
 #endif
 
@@ -37,6 +38,8 @@ constexpr size_t SPI_SPEED = 10000000;
 Comms::Comms(IHAL& hal)
     : m_hal(hal)
 {
+    srand((size_t)this + clock());
+    m_station_id = (rand() << 16) | rand();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -61,30 +64,33 @@ bool Comms::start()
     return true;
 #endif
 
-    disconnect();
-
     settings::Settings::Comms const& settings = m_hal.get_settings().get_comms();
 
-    if (m_phy.init_dev(SPI_DEVICE, SPI_SPEED) != Phy::Init_Result::OK)
+    m_phys.resize(PHY_COUNT);
+
+    size_t index = 0;
+    for (std::unique_ptr<Phy>& phy: m_phys)
     {
-        QLOGE("Cannot start phy");
-        m_is_connected = false;
-        return false;
+        phy.reset(new Phy());
+        if (phy->init_dev(SPI_DEVICES[index], SPI_SPEED) != Phy::Init_Result::OK)
+        {
+            QLOGE("Cannot start main phy");
+            return false;
+        }
+        index++;
+
+        QLOGI("Phy FEC: K={}, N={}, MTU={}", settings.get_fec_coding_k(), settings.get_fec_coding_n(), settings.get_mtu());
+        phy->setup_fec_channel(settings.get_fec_coding_k(), settings.get_fec_coding_n(), settings.get_mtu());
+
+        QLOGI("Phy Rate: {}", settings.get_rate());
+        phy->set_rate(static_cast<Phy::Rate>(settings.get_rate()));
+
+        QLOGI("Phy TX Power: {}", settings.get_tx_power());
+        phy->set_power(settings.get_tx_power());
+
+        QLOGI("Phy Channel: {}", settings.get_channel());
+        phy->set_channel(settings.get_channel());
     }
-
-    QLOGI("Phy FEC: K={}, N={}, MTU={}", settings.get_fec_coding_k(), settings.get_fec_coding_n(), settings.get_mtu());
-    m_phy.setup_fec_channel(settings.get_fec_coding_k(), settings.get_fec_coding_n(), settings.get_mtu());
-
-    QLOGI("Phy Rate: {}", settings.get_rate());
-    m_phy.set_rate(static_cast<Phy::Rate>(settings.get_rate()));
-
-    QLOGI("Phy TX Power: {}", settings.get_tx_power());
-    m_phy.set_power(settings.get_tx_power());
-
-    QLOGI("Phy Channel: {}", settings.get_channel());
-    m_phy.set_channel(settings.get_channel());
-
-    m_is_connected = true;
 
     m_phy_data.thread = std::thread(std::bind(&Comms::phy_thread_proc, this));
 
@@ -117,69 +123,145 @@ bool Comms::start()
 //    return true;
 //}
 
+void Comms::add_raw_stats(Raw_Stats& dst, Raw_Stats const& src) const
+{
+    dst.packets_dropped   += src.packets_dropped;
+    dst.packets_received  += src.packets_received;
+    dst.packets_sent      += src.packets_sent;
+    dst.data_received     += src.data_received;
+    dst.data_sent         += src.data_sent;
+}
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 void Comms::phy_thread_proc()
 {
-    Phy_Data::Packet_ptr rx_packet = m_phy_data.packet_pool.acquire();
+    Phy_Data& phy_data = m_phy_data;
+    std::deque<Phy_Data::Parked_Packet>& parked_packets = phy_data.parked_packets;
+
+    Phy_Data::Packet_ptr rx_packet = phy_data.packet_pool.acquire();
     rx_packet->resize(Phy::MAX_PAYLOAD_SIZE);
 
-    while (!m_phy_data.thread_exit)
+    while (!phy_data.thread_exit)
     {
         Phy_Data::Packet_ptr tx_packet;
-        m_phy_data.tx_queue.pop_front(tx_packet, false);
+        phy_data.tx_queue.pop_front(tx_packet, false);
+
+        Raw_Stats local_stats;
 
         if (tx_packet)
         {
-            m_phy.send_data(tx_packet->data(), tx_packet->size(), false);
+            local_stats.packets_sent++;
+            local_stats.data_sent += tx_packet->size();
+            m_phys.front()->send_data(tx_packet->data(), tx_packet->size(), false);
+        }
+
+        Clock::time_point now = Clock::now();
+        if (now - phy_data.last_received_packet_tp > std::chrono::seconds(2))
+        {
+            phy_data.last_received_packet_index = 0;
         }
 
         size_t rx_size = 0;
         int rx_rssi = 0;
-        while (m_phy.receive_data(rx_packet->data(), rx_size, rx_rssi))
+        for (std::unique_ptr<Phy>& phy: m_phys)
         {
-            rx_packet->resize(rx_size);
-            m_phy_data.rx_queue.push_back_timeout(rx_packet, std::chrono::milliseconds(5));
-            rx_packet = m_phy_data.packet_pool.acquire();
-            rx_packet->resize(Phy::MAX_PAYLOAD_SIZE);
+            while (phy->receive_data(rx_packet->data(), rx_size, rx_rssi))
+            {
+                if (rx_size < sizeof(rc_comms::Packet_Header))
+                {
+                    continue;
+                }
+                rc_comms::Packet_Header const& packet_header = *reinterpret_cast<const rc_comms::Packet_Header*>(rx_packet->data());
+                if (packet_header.station_id == m_station_id) //reject my packets
+                {
+                    continue;
+                }
+                if (packet_header.packet_index <= phy_data.last_received_packet_index)
+                {
+                    continue;
+                }
+                rx_packet->resize(rx_size);
+
+                auto it = std::lower_bound(parked_packets.begin(), parked_packets.end(), packet_header.packet_index,
+                                           [](const Phy_Data::Parked_Packet& p, uint32_t packet_index)
+                {
+                    return p.packet_index < packet_index;
+                });
+                if (it == parked_packets.end() || it->packet_index != packet_header.packet_index)
+                {
+                    parked_packets.insert(it, Phy_Data::Parked_Packet{packet_header.packet_index, rx_packet});
+                }
+                else
+                {
+                    int a = 0;
+                }
+
+                rx_packet = phy_data.packet_pool.acquire();
+                rx_packet->resize(Phy::MAX_PAYLOAD_SIZE);
+            }
+            if (m_single_phy)
+            {
+                break;
+            }
+        }
+
+        //push the packets in order (preferably)
+        while (!parked_packets.empty() && //while we have packets AND
+                        (parked_packets.front().packet_index == phy_data.last_received_packet_index + 1 || //they are in order OR
+                            parked_packets.size() > m_phys.size())) //we accumulated too many
+        {
+            phy_data.last_received_packet_tp = Clock::now();
+            Phy_Data::Parked_Packet& parked_packet = parked_packets.front();
+
+            size_t gap = parked_packet.packet_index - (phy_data.last_received_packet_index + 1);
+            local_stats.packets_dropped += gap;
+            if (gap > 0)
+            {
+                QLOGI("gap: {}", gap);
+            }
+
+            local_stats.packets_received++;
+            local_stats.data_received += parked_packet.packet->size();
+
+            phy_data.last_received_packet_index = parked_packet.packet_index;
+            phy_data.rx_queue.push_back(parked_packet.packet, false);
+            parked_packets.pop_front();
+        }
+
+        {
+            std::lock_guard<std::mutex> lg(phy_data.stats_mutex);
+            add_raw_stats(m_phy_data.raw_stats, local_stats);
         }
     }
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-void Comms::disconnect()
+const Comms::Stats& Comms::get_stats() const
 {
-    reset();
-    m_is_connected = false;
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////
-
-bool Comms::is_connected() const
-{
-    return m_is_connected;//m_rcp != nullptr && m_rcp->is_connected();
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////
-
-void Comms::reset()
-{
-    m_last_req_id = 0;
+    return m_stats;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 Phy const& Comms::get_phy() const
 {
-    return m_phy;
+    return *m_phys.front();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 Phy& Comms::get_phy()
 {
-    return m_phy;
+    return *m_phys.front();
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+void Comms::set_single_phy(bool yes)
+{
+    m_single_phy = yes;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -190,8 +272,12 @@ bool Comms::sent_multirotor_commands_packet()
     {
         Phy_Data::Packet_ptr packet = m_phy_data.packet_pool.acquire();
         packet->clear();
-        packet->push_back(static_cast<uint8_t>(silk::rc_comms::Packet_Type::MULTIROTOR_COMMANDS));
-        size_t off = packet->size();
+        silk::rc_comms::Packet_Header packet_header;
+        packet_header.station_id = m_station_id;
+        packet_header.packet_type = (uint32_t)silk::rc_comms::Packet_Type::MULTIROTOR_COMMANDS;
+        packet_header.packet_index = m_phy_data.last_sent_packet_index++;
+        size_t off = 0;
+        util::serialization::serialize(*packet, packet_header, off);
         util::serialization::serialize(*packet, m_multirotor_commands, off);
         m_phy_data.tx_queue.push_back(packet, false);
         return true;
@@ -211,8 +297,12 @@ bool Comms::send_camera_commands_packet()
     {
         Phy_Data::Packet_ptr packet = m_phy_data.packet_pool.acquire();
         packet->clear();
-        packet->push_back(static_cast<uint8_t>(silk::rc_comms::Packet_Type::CAMERA_COMMANDS));
-        size_t off = packet->size();
+        silk::rc_comms::Packet_Header packet_header;
+        packet_header.station_id = m_station_id;
+        packet_header.packet_type = (uint32_t)silk::rc_comms::Packet_Type::CAMERA_COMMANDS;
+        packet_header.packet_index = m_phy_data.last_sent_packet_index++;
+        size_t off = 0;
+        util::serialization::serialize(*packet, packet_header, off);
         util::serialization::serialize(*packet, m_camera_commands, off);
         m_phy_data.tx_queue.push_back(packet, false);
         return true;
@@ -269,10 +359,14 @@ void Comms::process_rx_packet(rc_comms::Packet_Type packet_type, std::vector<uin
             dsz_ok = true;
         }
     }
-    else
-    {
-        QLOGW("Unknown incoming packet type: {}", static_cast<int>(packet_type));
-    }
+//    else if (packet_type == rc_comms::Packet_Type::CAMERA_COMMANDS)
+//    {
+//        dsz_ok = true;
+//    }
+//    else if (packet_type == rc_comms::Packet_Type::MULTIROTOR_COMMANDS)
+//    {
+//        dsz_ok = true;
+//    }
 
     if (!dsz_ok)
     {
@@ -290,8 +384,9 @@ void Comms::process_received_data(std::vector<uint8_t> const& data)
         return;
     }
 
-    rc_comms::Packet_Type packet_type = *reinterpret_cast<const rc_comms::Packet_Type*>(data.data());
-    process_rx_packet(packet_type, data, sizeof(rc_comms::Packet_Type));
+    rc_comms::Packet_Header const& packet_header = *reinterpret_cast<const rc_comms::Packet_Header*>(data.data());
+    //QLOGI("packet index {}", packet_header.packet_index);
+    process_rx_packet((rc_comms::Packet_Type)packet_header.packet_type, data, sizeof(rc_comms::Packet_Header));
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -363,6 +458,20 @@ void Comms::process()
     if (now - m_telemetry_tp >= std::chrono::milliseconds(30))
     {
         m_telemetry_tp = now;
+    }
+
+    if (now - m_last_stats_tp >= std::chrono::seconds(1))
+    {
+        float dtsf = std::chrono::duration<float>(now - m_last_stats_tp).count();
+        m_last_stats_tp = now;
+
+        std::lock_guard<std::mutex> lg(m_phy_data.stats_mutex);
+        m_stats.packets_dropped_per_second = (float)m_phy_data.raw_stats.packets_dropped / dtsf;
+        m_stats.packets_received_per_second = (float)m_phy_data.raw_stats.packets_received / dtsf;
+        m_stats.packets_sent_per_second = (float)m_phy_data.raw_stats.packets_sent / dtsf;
+        m_stats.data_received_per_second = (float)m_phy_data.raw_stats.data_received / dtsf;
+        m_stats.data_sent_per_second = (float)m_phy_data.raw_stats.data_sent / dtsf;
+        m_phy_data.raw_stats = Raw_Stats();
     }
 //    if (now - m_rx_packet.rx_timepoint >= std::chrono::seconds(2))
 //    {

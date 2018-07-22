@@ -77,5 +77,12 @@ enum class Packet_Type : uint8_t
     VIDEO
 };
 
+struct Packet_Header
+{
+    uint32_t station_id;
+    uint32_t packet_type : 8;
+    uint32_t packet_index : 24;
+};
+
 }
 }
