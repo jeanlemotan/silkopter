@@ -52,6 +52,7 @@ public:
 private:
     void process_rx_packet(rc_comms::Packet_Type packet_type, std::vector<uint8_t> const& data, size_t offset);
     void process_received_data(std::vector<uint8_t> const& data);
+    rc_comms::Packet_Header prepare_packet_header(rc_comms::Packet_Type packet_type, uint32_t packet_index) const;
 
     HAL& m_hal;
     Clock::time_point m_uav_sent_tp = Clock::now();
@@ -72,8 +73,7 @@ private:
     std::atomic_int m_new_phy_rate = { -1 };
 
     std::vector<uint8_t> m_video_data_buffer;
-    uint32_t m_last_packet_index = 0;
-    uint32_t m_station_id = 0;
+    uint16_t m_station_id = 0;
     size_t m_mtu = 0;
 
     struct Phy_Data
@@ -92,14 +92,23 @@ private:
         Pool<Packet> packet_pool;
         Queue<Packet_ptr> tx_queue;
         Queue<Packet_ptr> rx_queue;
+
+        uint32_t last_sent_packet_index = 0;
+
         bool thread_exit = false;
         std::thread thread;
+
+        mutable std::mutex rx_rssi_mutex;
+        mutable int32_t rx_rssi_accumulated = 0;
+        mutable size_t rx_rssi_count = 0;
     } m_phy_data;
 
     Phy m_phy;
-    Clock::time_point m_last_phy_received_tp = Clock::now();
 
     Clock::time_point m_last_multirotor_state_sent_tp = Clock::now();
+
+    int16_t m_rx_rssi = std::numeric_limits<int16_t>::lowest();
+    Clock::time_point m_last_rx_rssi_tp = Clock::now();
 
     bool m_is_connected = false;
 

@@ -79,9 +79,10 @@ enum class Packet_Type : uint8_t
 
 struct Packet_Header
 {
-    uint32_t station_id;
     uint32_t packet_type : 8;
     uint32_t packet_index : 24;
+    uint16_t station_id;
+    int16_t rx_rssi;
 };
 
 }

@@ -1335,7 +1335,12 @@ struct UltimateSensorFusion_Config : public INode_Config
 {
 public:
   virtual ~UltimateSensorFusion_Config() = default;
+  void set_rotation(euler3_t const& value);
+  void set_rotation(euler3_t&& value);
+  auto get_rotation() const -> euler3_t const&;
+
 private:
+  euler3_t m_rotation = euler3_t{0, 0, 0};
 };
 
 struct Multirotor_Brain_Descriptor : public INode_Descriptor

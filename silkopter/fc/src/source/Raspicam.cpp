@@ -37,7 +37,7 @@ namespace silk
 {
 namespace node
 {
-
+//////////////////////////////////////////////////////////////////////////////
 
 #if defined RASPBERRY_PI
 
@@ -88,6 +88,8 @@ struct Raspicam::Impl
     size_t frame_idx = 0;
 };
 
+//////////////////////////////////////////////////////////////////////////////
+
 static bool set_connection_enabled(Connection_ptr const& connection, bool yes)
 {
 //    SCOPED_PINS_GUARD;
@@ -108,6 +110,8 @@ static bool set_connection_enabled(Connection_ptr const& connection, bool yes)
 }
 
 #endif
+
+//////////////////////////////////////////////////////////////////////////////
 
 Raspicam::Raspicam(HAL& hal)
     : m_hal(hal)
@@ -144,6 +148,9 @@ Raspicam::Raspicam(HAL& hal)
 
     m_stream = std::make_shared<Stream>();
 }
+
+//////////////////////////////////////////////////////////////////////////////
+
 Raspicam::~Raspicam()
 {
     QLOG_TOPIC("~raspicam");
@@ -192,6 +199,8 @@ Raspicam::~Raspicam()
 #endif
 }
 
+//////////////////////////////////////////////////////////////////////////////
+
 auto Raspicam::get_outputs() const -> std::vector<Output>
 {
     std::vector<Output> outputs(1);
@@ -199,6 +208,8 @@ auto Raspicam::get_outputs() const -> std::vector<Output>
     outputs[0].stream = m_stream;
     return outputs;
 }
+
+//////////////////////////////////////////////////////////////////////////////
 
 std::vector<Raspicam::Input> Raspicam::get_inputs() const
 {
@@ -208,6 +219,8 @@ std::vector<Raspicam::Input> Raspicam::get_inputs() const
     }};
     return inputs;
 }
+
+//////////////////////////////////////////////////////////////////////////////
 
 ts::Result<void> Raspicam::init(hal::INode_Descriptor const& descriptor)
 {
@@ -222,6 +235,9 @@ ts::Result<void> Raspicam::init(hal::INode_Descriptor const& descriptor)
 
     return init();
 }
+
+//////////////////////////////////////////////////////////////////////////////
+
 ts::Result<void> Raspicam::init()
 {
 #if defined RASPBERRY_PI
@@ -315,6 +331,8 @@ ts::Result<void> Raspicam::set_input_stream_path(size_t idx, std::string const& 
     return m_commands_accumulator.set_stream_path(idx, path, m_descriptor->get_commands_rate(), m_hal);
 }
 
+//////////////////////////////////////////////////////////////////////////////
+
 ts::Result<void> Raspicam::set_config(hal::INode_Config const& config)
 {
     QLOG_TOPIC("raspicam::set_config");
@@ -341,15 +359,22 @@ ts::Result<void> Raspicam::set_config(hal::INode_Config const& config)
 
     return ts::success;
 }
+
+//////////////////////////////////////////////////////////////////////////////
+
 auto Raspicam::get_config() const -> std::shared_ptr<const hal::INode_Config>
 {
     return m_config;
 }
 
+//////////////////////////////////////////////////////////////////////////////
+
 auto Raspicam::get_descriptor() const -> std::shared_ptr<const hal::INode_Descriptor>
 {
     return m_descriptor;
 }
+
+//////////////////////////////////////////////////////////////////////////////
 
 ts::Result<std::shared_ptr<messages::INode_Message>> Raspicam::send_message(messages::INode_Message const& message)
 {
@@ -363,10 +388,14 @@ void Raspicam::shutdown()
 #endif
 }
 
+//////////////////////////////////////////////////////////////////////////////
+
 ts::Result<void> Raspicam::start(Clock::time_point tp)
 {
     return ts::success;
 }
+
+//////////////////////////////////////////////////////////////////////////////
 
 void Raspicam::process()
 {
@@ -388,17 +417,25 @@ void Raspicam::process()
         m_sample_queue.samples.push_back(std::move(sample));
     }
 
-    m_stream->samples.resize(m_sample_queue.count);
-    if (m_sample_queue.count > 0)
+    size_t size = 0;
+    m_stream->samples.clear();
+    m_stream->samples.reserve(m_sample_queue.count);
+    for (size_t i = 0; i < m_sample_queue.count; i++)
     {
-        for (size_t i = 0; i < m_sample_queue.count; i++)
-        {
-            m_stream->samples[i] = std::move(m_sample_queue.samples.front());
-            m_sample_queue.samples.pop_front();
-        }
-        m_sample_queue.count = 0;
+        Stream::Sample& sample = m_sample_queue.samples[i];
+        size += sample.value.data.size();
+        m_stream->samples.push_back(std::move(sample));
+    }
+    m_sample_queue.samples.erase(m_sample_queue.samples.begin(), m_sample_queue.samples.begin() + m_sample_queue.count);
+    m_sample_queue.count = 0;
+
+    if (size > 0)
+    {
+        //QLOGI("frames: {}", size / 1024.f);
     }
 }
+
+//////////////////////////////////////////////////////////////////////////////
 
 void Raspicam::process_commands(stream::ICamera_Commands::Value const& i_commands)
 {
@@ -406,6 +443,7 @@ void Raspicam::process_commands(stream::ICamera_Commands::Value const& i_command
     activate_streams();
 }
 
+//////////////////////////////////////////////////////////////////////////////
 
 void Raspicam::recording_callback(uint8_t const* data, size_t size, math::vec2u16 const& resolution, bool is_keyframe)
 {
@@ -427,6 +465,8 @@ void Raspicam::recording_callback(uint8_t const* data, size_t size, math::vec2u1
     }
 }
 
+//////////////////////////////////////////////////////////////////////////////
+
 void Raspicam::streaming_callback(stream::IVideo::Quality quality, uint8_t const* data, size_t size, math::vec2u16 const& resolution, bool is_keyframe)
 {
     if (!data || size == 0)
@@ -435,6 +475,12 @@ void Raspicam::streaming_callback(stream::IVideo::Quality quality, uint8_t const
     }
 
     std::lock_guard<std::mutex> lg(m_sample_queue.mutex);
+
+    if (m_sample_queue.count > 3)
+    {
+//        QLOGW("Streaming skipping frames!");
+//        return;
+    }
 
     if (m_sample_queue.samples.size() <= m_sample_queue.count)
     {
@@ -447,7 +493,7 @@ void Raspicam::streaming_callback(stream::IVideo::Quality quality, uint8_t const
     sample.value.quality = quality;
     sample.value.resolution = resolution;
     sample.value.data.resize(size);
-    std::copy(data, data + size, sample.value.data.begin());
+    memcpy(sample.value.data.data(), data, size);
 
 //    {
 //        static size_t accumulated_size = 0;
@@ -464,6 +510,8 @@ void Raspicam::streaming_callback(stream::IVideo::Quality quality, uint8_t const
 
     m_sample_queue.count++;
 }
+
+//////////////////////////////////////////////////////////////////////////////
 
 void Raspicam::activate_streams()
 {
@@ -511,6 +559,8 @@ void Raspicam::activate_streams()
     }
 #endif
 }
+
+//////////////////////////////////////////////////////////////////////////////
 
 void Raspicam::create_file_sink()
 {
@@ -621,6 +671,8 @@ void Raspicam::create_file_sink()
 //    dump_format_info(tabs + 1, port->format);
 //}
 
+//////////////////////////////////////////////////////////////////////////////
+
 static Connection_ptr connect_ports(MMAL_PORT_T* output, MMAL_PORT_T* input)
 {
     MMAL_CONNECTION_T* connection = nullptr;
@@ -628,6 +680,7 @@ static Connection_ptr connect_ports(MMAL_PORT_T* output, MMAL_PORT_T* input)
     return (status == MMAL_SUCCESS) ? Connection_ptr(connection, mmal_connection_destroy) : Connection_ptr();
 }
 
+//////////////////////////////////////////////////////////////////////////////
 
 static Component_ptr create_component(char const* name, size_t min_input_count, size_t min_output_count)
 {
@@ -666,6 +719,8 @@ static Component_ptr create_component(char const* name, size_t min_input_count, 
     return Component_ptr(component, mmal_component_destroy);
 }
 
+//////////////////////////////////////////////////////////////////////////////
+
 static bool enable_port(MMAL_PORT_T* port, MMAL_PORT_BH_CB_T cb)
 {
     //    SCOPED_PINS_GUARD;;
@@ -682,6 +737,9 @@ static bool enable_port(MMAL_PORT_T* port, MMAL_PORT_BH_CB_T cb)
     }
     return status == MMAL_SUCCESS;
 }
+
+//////////////////////////////////////////////////////////////////////////////
+
 static bool enable_component(Component_ptr component)
 {
     //    SCOPED_PINS_GUARD;;
@@ -696,6 +754,9 @@ static bool enable_component(Component_ptr component)
     }
     return status == MMAL_SUCCESS;
 }
+
+//////////////////////////////////////////////////////////////////////////////
+
 static void copy_format(MMAL_PORT_T* dst, MMAL_PORT_T* src)
 {
     //    SCOPED_PINS_GUARD;;
@@ -712,6 +773,9 @@ static void copy_format(MMAL_PORT_T* dst, MMAL_PORT_T* src)
 //    LOG_INFO("dst format:");
 //    dump_format_info(1, dst->format);
 }
+
+//////////////////////////////////////////////////////////////////////////////
+
 static bool commit_format(MMAL_PORT_T* port)
 {
     //    SCOPED_PINS_GUARD;;
@@ -735,6 +799,8 @@ static bool commit_format(MMAL_PORT_T* port)
 
     return true;
 }
+
+//////////////////////////////////////////////////////////////////////////////
 
 MMAL_BOOL_T return_buffer_to_pool_callback(MMAL_POOL_T* pool, MMAL_BUFFER_HEADER_T* buffer, void* userdata)
 {
@@ -764,6 +830,8 @@ MMAL_BOOL_T return_buffer_to_pool_callback(MMAL_POOL_T* pool, MMAL_BUFFER_HEADER
     }
     return MMAL_TRUE;
 }
+
+//////////////////////////////////////////////////////////////////////////////
 
 static Pool_ptr create_output_port_pool(MMAL_PORT_T* port, MMAL_PORT_USERDATA_T* userdata, MMAL_PORT_BH_CB_T cb, uint32_t buffer_count)
 {
@@ -816,6 +884,8 @@ static Pool_ptr create_output_port_pool(MMAL_PORT_T* port, MMAL_PORT_USERDATA_T*
 
     return o_pool;
 }
+
+//////////////////////////////////////////////////////////////////////////////
 
 static bool setup_encoder_component(Component_ptr encoder, MMAL_PORT_T* src, math::vec2u16 const& resolution, size_t bitrate)
 {
@@ -875,6 +945,8 @@ static bool setup_encoder_component(Component_ptr encoder, MMAL_PORT_T* src, mat
     return res;
 }
 
+//////////////////////////////////////////////////////////////////////////////
+
 static Component_ptr create_encoder_component_for_recording(MMAL_PORT_T* src, math::vec2u16 const& resolution, size_t bitrate)
 {
     //    SCOPED_PINS_GUARD;;
@@ -933,6 +1005,8 @@ static Component_ptr create_encoder_component_for_recording(MMAL_PORT_T* src, ma
 
     return encoder;
 }
+
+//////////////////////////////////////////////////////////////////////////////
 
 static Component_ptr create_encoder_component_for_streaming(MMAL_PORT_T* src, math::vec2u16 const& resolution, uint32_t iframe_interval, size_t bitrate)
 {
@@ -1090,6 +1164,8 @@ static Component_ptr create_encoder_component_for_streaming(MMAL_PORT_T* src, ma
     return encoder;
 }
 
+//////////////////////////////////////////////////////////////////////////////
+
 static void setup_video_format(MMAL_ES_FORMAT_T* format, math::vec2u16 const& resolution, bool align, size_t fps)
 {
     //    SCOPED_PINS_GUARD;;
@@ -1111,6 +1187,8 @@ static void setup_video_format(MMAL_ES_FORMAT_T* format, math::vec2u16 const& re
     format->es->video.par.num = 1;
     format->es->video.par.den = 1;
 }
+
+//////////////////////////////////////////////////////////////////////////////
 
 static Component_ptr create_splitter_component(MMAL_PORT_T* src)
 {
@@ -1144,6 +1222,8 @@ static Component_ptr create_splitter_component(MMAL_PORT_T* src)
 
     return splitter;
 }
+
+//////////////////////////////////////////////////////////////////////////////
 
 static Component_ptr create_resizer_component(MMAL_PORT_T* src, math::vec2u16 const& resolution, size_t fps)
 {
@@ -1209,6 +1289,8 @@ static void camera_control_callback(MMAL_PORT_T* port, MMAL_BUFFER_HEADER_T* buf
     mmal_buffer_header_release(buffer);
 }
 
+//////////////////////////////////////////////////////////////////////////////
+
 static void encoder_buffer_callback_fn(Raspicam::Impl& impl,
                                        Raspicam::Impl::Encoder_Data& encoder_data,
                                        MMAL_PORT_T* /*port*/,
@@ -1246,6 +1328,8 @@ static void encoder_buffer_callback_fn(Raspicam::Impl& impl,
 //    }
 }
 
+//////////////////////////////////////////////////////////////////////////////
+
 static void recording_encoder_buffer_callback(MMAL_PORT_T* port, MMAL_BUFFER_HEADER_T* buffer)
 {
     //    SCOPED_PINS_GUARD;;
@@ -1258,6 +1342,8 @@ static void recording_encoder_buffer_callback(MMAL_PORT_T* port, MMAL_BUFFER_HEA
     encoder_buffer_callback_fn(*impl, impl->recording, port, buffer);
 }
 
+//////////////////////////////////////////////////////////////////////////////
+
 static void high_encoder_buffer_callback(MMAL_PORT_T* port, MMAL_BUFFER_HEADER_T* buffer)
 {
     QASSERT(port && buffer);
@@ -1267,6 +1353,8 @@ static void high_encoder_buffer_callback(MMAL_PORT_T* port, MMAL_BUFFER_HEADER_T
 
     encoder_buffer_callback_fn(*impl, impl->high, port, buffer);
 }
+
+//////////////////////////////////////////////////////////////////////////////
 
 static void low_encoder_buffer_callback(MMAL_PORT_T* port, MMAL_BUFFER_HEADER_T* buffer)
 {
@@ -1514,7 +1602,6 @@ auto Raspicam::create_components() -> bool
     return true;
 }
 
-
-
+//////////////////////////////////////////////////////////////////////////////
 }
 }

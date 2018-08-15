@@ -27,7 +27,7 @@ RC_Comms::RC_Comms(HAL& hal)
     : m_hal(hal)
 {
     srand((size_t)this + clock());
-    m_station_id = (rand() << 16) | rand();
+    m_station_id = rand();
 }
 
 RC_Comms::~RC_Comms()
@@ -167,15 +167,23 @@ void RC_Comms::phy_thread_proc()
             m_phy.send_data(tx_packet->payload.data(), tx_packet->payload.size(), tx_packet->use_fec);
             tx_packet = nullptr;
             m_phy_data.tx_queue.pop_front(tx_packet, false);
+            std::this_thread::yield();
         }
 
         size_t rx_size = 0;
-        int rx_rssi = 0;
+        int16_t rx_rssi = std::numeric_limits<int16_t>::lowest();
         rx_packet->payload.resize(Phy::MAX_PAYLOAD_SIZE);
         if (m_phy.receive_data(rx_packet->payload.data(), rx_size, rx_rssi))
         {
             rx_packet->payload.resize(rx_size);
             m_phy_data.rx_queue.push_back_timeout(rx_packet, std::chrono::milliseconds(5));
+
+            if (rx_rssi != std::numeric_limits<int16_t>::lowest())
+            {
+                std::lock_guard<std::mutex> lg(m_phy_data.rx_rssi_mutex);
+                m_phy_data.rx_rssi_count++;
+                m_phy_data.rx_rssi_accumulated += rx_rssi;
+            }
 
             //get anothger packet
             rx_packet = m_phy_data.packet_pool.acquire();
@@ -186,6 +194,8 @@ void RC_Comms::phy_thread_proc()
             m_phy_rate = m_new_phy_rate.load();
             m_phy.set_rate(static_cast<Phy::Rate>(m_new_phy_rate.load()));
         }
+
+        std::this_thread::yield();
     }
 }
 
@@ -288,6 +298,18 @@ void RC_Comms::set_multirotor_state(stream::IMultirotor_State::Value const& valu
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
+rc_comms::Packet_Header RC_Comms::prepare_packet_header(rc_comms::Packet_Type packet_type, uint32_t packet_index) const
+{
+    rc_comms::Packet_Header packet_header;
+    packet_header.packet_type = (uint32_t)packet_type;
+    packet_header.station_id = m_station_id;
+    packet_header.packet_index = packet_index;
+    packet_header.rx_rssi = m_rx_rssi;
+    return packet_header;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
 void RC_Comms::add_video_data(stream::IVideo::Value const& value)
 {
     silk::hal::IUAV_Descriptor::Comms const& comms_settings = m_hal.get_uav_descriptor()->get_comms();
@@ -296,9 +318,7 @@ void RC_Comms::add_video_data(stream::IVideo::Value const& value)
     m_video_data_buffer.resize(offset + value.data.size());
     memcpy(m_video_data_buffer.data() + offset, value.data.data(), value.data.size());
 
-    rc_comms::Packet_Header packet_header;
-    packet_header.station_id = m_station_id;
-    packet_header.packet_type = (uint32_t)rc_comms::Packet_Type::VIDEO;
+    rc_comms::Packet_Header packet_header = prepare_packet_header(rc_comms::Packet_Type::VIDEO, 0u);
 
     rc_comms::Video_Header video_header;
     video_header.width = value.resolution.x;
@@ -311,7 +331,7 @@ void RC_Comms::add_video_data(stream::IVideo::Value const& value)
         packet->payload.resize(m_mtu);
         packet->use_fec = true;
         size_t offset = 0;
-        packet_header.packet_index = m_last_packet_index++;
+        packet_header.packet_index = ++m_phy_data.last_sent_packet_index;
         util::serialization::serialize(packet->payload, packet_header, offset);
         util::serialization::serialize(packet->payload, video_header, offset);
         memcpy(packet->payload.data() + offset, m_video_data_buffer.data(), payload_size);
@@ -345,7 +365,7 @@ void RC_Comms::process()
     }
 
     auto now = Clock::now();
-    if (now - m_last_multirotor_state_sent_tp > std::chrono::milliseconds(100))
+    if (now - m_last_multirotor_state_sent_tp > std::chrono::milliseconds(30))
     {
         m_last_multirotor_state_sent_tp = now;
 
@@ -358,24 +378,35 @@ void RC_Comms::process()
         packet->use_fec = false;
         packet->payload.clear();
 
-        rc_comms::Packet_Header packet_header;
-        packet_header.station_id = m_station_id;
-        packet_header.packet_type = (uint32_t)rc_comms::Packet_Type::MULTIROTOR_STATE;
-        packet_header.packet_index = m_last_packet_index++;
+        rc_comms::Packet_Header packet_header = prepare_packet_header(rc_comms::Packet_Type::MULTIROTOR_STATE, ++m_phy_data.last_sent_packet_index);
+
         size_t off = 0;
         util::serialization::serialize(packet->payload, packet_header, off);
         util::serialization::serialize(packet->payload, state, off);
         m_phy_data.tx_queue.push_back(packet, false);
     }
 
-    if (now - m_last_phy_received_tp >= std::chrono::milliseconds(1))
+    Clock::time_point tp = Clock::now();
+    Phy_Data::Packet_ptr rx_packet;
+    while (m_phy_data.rx_queue.pop_front(rx_packet, false) && Clock::now() - tp <= std::chrono::milliseconds(5))
     {
-        m_last_phy_received_tp = now;
+        process_received_data(rx_packet->payload);
+    }
 
-        Phy_Data::Packet_ptr rx_packet;
-        while (m_phy_data.rx_queue.pop_front(rx_packet, false))
+    if (now - m_last_rx_rssi_tp >= std::chrono::seconds(1))
+    {
+        m_last_rx_rssi_tp = now;
+
+        std::lock_guard<std::mutex> lg(m_phy_data.rx_rssi_mutex);
+        if (m_phy_data.rx_rssi_count > 0)
         {
-            process_received_data(rx_packet->payload);
+            m_rx_rssi = (int32_t)m_phy_data.rx_rssi_accumulated / (int32_t)m_phy_data.rx_rssi_count;
+            m_phy_data.rx_rssi_count = 0;
+            m_phy_data.rx_rssi_accumulated = 0;
+        }
+        else
+        {
+            m_rx_rssi = std::numeric_limits<int16_t>::lowest();
         }
     }
 }

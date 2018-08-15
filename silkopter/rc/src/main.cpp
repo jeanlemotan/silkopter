@@ -16,6 +16,7 @@
 #endif
 
 #include "imgui.h"
+#include "HUD.h"
 
 namespace silk
 {
@@ -90,6 +91,8 @@ int main(int argc, char *argv[])
         exit(1);
     }
 
+    silk::HUD hud(hal);
+
     math::vec2u32 display_size = hal.get_display_size();
     ImGuiStyle& style = ImGui::GetStyle();
     style.ScrollbarSize = display_size.x / 80.f;
@@ -127,12 +130,9 @@ int main(int argc, char *argv[])
 
     float temperature = 0.f;
 
-    Clock::time_point last_temperature_history_tp = Clock::now();
-    std::vector<float> temperature_history;
-
     Clock::time_point last_comms_history_tp = Clock::now();
-    std::vector<float> tx_dBm_history;
-    std::vector<float> rx_dBm_history;
+    std::vector<float> tx_rssi_history;
+    std::vector<float> rx_rssi_history;
     std::vector<float> packets_dropped_history;
     std::vector<float> packets_received_history;
     std::vector<float> packets_sent_history;
@@ -174,6 +174,8 @@ int main(int argc, char *argv[])
 
         ImGui::Image((void*)(decoder.get_video_texture_id() | 0x80000000), ImVec2(display_size.x, display_size.y));
 
+        hud.draw();
+
         ImGui::Begin("HAL");
         {
             static int counter = 0;
@@ -188,29 +190,15 @@ int main(int argc, char *argv[])
             }
             temperature = hal.get_temperature();
 
-            if (now - last_temperature_history_tp >= std::chrono::seconds(1))
-            {
-                last_temperature_history_tp = now;
-                temperature_history.push_back(temperature);
-                while (temperature_history.size() > 60) { temperature_history.erase(temperature_history.begin()); }
-            }
             ImGui::Text("Temperature = %.2f'C", temperature);
-            if (!temperature_history.empty())
-            {
-                ImGui::PlotLines("Temperature",
-                                 temperature_history.data(), temperature_history.size(),
-                                 0, NULL,
-                                 30.f, 90.f,
-                                 ImVec2(0, display_size.y / 20));
-            }
             if (now - last_comms_history_tp >= std::chrono::milliseconds(100))
             {
                 last_comms_history_tp = now;
-                tx_dBm_history.push_back(hal.get_comms().get_tx_dBm());
-                while (tx_dBm_history.size() > 10 * 5) { tx_dBm_history.erase(tx_dBm_history.begin()); }
-                rx_dBm_history.push_back(hal.get_comms().get_rx_dBm());
-                while (rx_dBm_history.size() > 10 * 5) { rx_dBm_history.erase(rx_dBm_history.begin()); }
                 silk::Comms::Stats stats = hal.get_comms().get_stats();
+                tx_rssi_history.push_back(stats.tx_rssi);
+                while (tx_rssi_history.size() > 10 * 5) { tx_rssi_history.erase(tx_rssi_history.begin()); }
+                rx_rssi_history.push_back(stats.rx_rssi);
+                while (rx_rssi_history.size() > 10 * 5) { rx_rssi_history.erase(rx_rssi_history.begin()); }
                 packets_dropped_history.push_back(stats.packets_dropped_per_second);
                 while (packets_dropped_history.size() > 10 * 5) { packets_dropped_history.erase(packets_dropped_history.begin()); }
                 packets_received_history.push_back(stats.packets_received_per_second);
@@ -218,20 +206,20 @@ int main(int argc, char *argv[])
                 packets_sent_history.push_back(stats.packets_sent_per_second);
                 while (packets_sent_history.size() > 10 * 5) { packets_sent_history.erase(packets_sent_history.begin()); }
             }
-            ImGui::Text("TX = %ddBm", (int)hal.get_comms().get_tx_dBm());
-            if (!tx_dBm_history.empty())
+            if (!tx_rssi_history.empty())
             {
+                ImGui::Text("TX = %ddBm", (int)tx_rssi_history.back());
                 ImGui::PlotLines("History",
-                                 tx_dBm_history.data(), tx_dBm_history.size(),
+                                 tx_rssi_history.data(), tx_rssi_history.size(),
                                  0, NULL,
                                  -128.f, 128.f,
                                  ImVec2(0, display_size.y / 20));
             }
-            ImGui::Text("RX = %ddBm", (int)hal.get_comms().get_rx_dBm());
-            if (!rx_dBm_history.empty())
+            if (!rx_rssi_history.empty())
             {
+                ImGui::Text("RX = %ddBm", (int)rx_rssi_history.back());
                 ImGui::PlotLines("History",
-                                 rx_dBm_history.data(), rx_dBm_history.size(),
+                                 rx_rssi_history.data(), rx_rssi_history.size(),
                                  0, NULL,
                                  -128.f, 128.f,
                                  ImVec2(0, display_size.y / 20));

@@ -183,7 +183,7 @@ int main(int argc, char const* argv[])
 //            }
 //        }
 
-#if defined RASPBERRY_PI_XXX
+#if defined RASPBERRY_PI
     {
         int policy = SCHED_FIFO;
         struct sched_param param;
@@ -237,7 +237,7 @@ int main(int argc, char const* argv[])
                 //No sleeping here!!! process as fast as possible as the nodes are not always in the ideal order
                 // and out of order nodes will be processes next 'frame'. So the quicker the frames, the smaller the lag between nodes
 //#ifndef RASPBERRY_PI
-                if (count++ > 10)
+                if (count++ > 5)
                 {
                     count = 0;
                     std::this_thread::sleep_for(std::chrono::milliseconds(5));

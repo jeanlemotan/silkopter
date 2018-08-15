@@ -39,7 +39,7 @@ Comms::Comms(IHAL& hal)
     : m_hal(hal)
 {
     srand((size_t)this + clock());
-    m_station_id = (rand() << 16) | rand();
+    m_station_id = rand();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -101,35 +101,15 @@ bool Comms::start()
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-//bool Comms::create_fec_encoder_rx(Fec_Encoder::RX_Descriptor const& descriptor)
-//{
-//    QLOGI("Creating RX FEC with K={}, N={}, MTU={}", descriptor.coding_k, descriptor.coding_n, descriptor.mtu);
-
-//    m_fec_encoder_rx->on_rx_data_decoded = [this](void const* data, size_t size)
-//    {
-//        rc_comms::Video_Header video_header;
-//        {
-//            std::lock_guard<std::mutex> lg(m_video_header_mutex);
-//            video_header = m_video_header;
-//        }
-
-//        math::vec2u16 resolution(video_header.width, video_header.height);
-//        if (on_video_data_received)
-//        {
-//            on_video_data_received(data, size, resolution);
-//        }
-//    };
-
-//    return true;
-//}
-
 void Comms::add_raw_stats(Raw_Stats& dst, Raw_Stats const& src) const
 {
-    dst.packets_dropped   += src.packets_dropped;
-    dst.packets_received  += src.packets_received;
-    dst.packets_sent      += src.packets_sent;
-    dst.data_received     += src.data_received;
-    dst.data_sent         += src.data_sent;
+    dst.packets_dropped     += src.packets_dropped;
+    dst.packets_received    += src.packets_received;
+    dst.packets_sent        += src.packets_sent;
+    dst.data_received       += src.data_received;
+    dst.data_sent           += src.data_sent;
+    dst.rx_rssi_count       += src.rx_rssi_count;
+    dst.rx_rssi_accumulated += src.rx_rssi_accumulated;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -163,7 +143,8 @@ void Comms::phy_thread_proc()
         }
 
         size_t rx_size = 0;
-        int rx_rssi = 0;
+        int16_t rx_rssi = std::numeric_limits<int16_t>::lowest();
+        size_t xxx = 0;
         for (std::unique_ptr<Phy>& phy: m_phys)
         {
             while (phy->receive_data(rx_packet->data(), rx_size, rx_rssi))
@@ -195,6 +176,12 @@ void Comms::phy_thread_proc()
                 else
                 {
                     int a = 0;
+                }
+
+                if (rx_rssi != std::numeric_limits<int16_t>::lowest())
+                {
+                    local_stats.rx_rssi_count++;
+                    local_stats.rx_rssi_accumulated += rx_rssi;
                 }
 
                 rx_packet = phy_data.packet_pool.acquire();
@@ -230,7 +217,7 @@ void Comms::phy_thread_proc()
         }
 
         {
-            std::lock_guard<std::mutex> lg(phy_data.stats_mutex);
+            std::lock_guard<std::mutex> lg(phy_data.raw_stats_mutex);
             add_raw_stats(m_phy_data.raw_stats, local_stats);
         }
     }
@@ -266,16 +253,25 @@ void Comms::set_single_phy(bool yes)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
+rc_comms::Packet_Header Comms::prepare_packet_header(rc_comms::Packet_Type packet_type, uint32_t packet_index) const
+{
+    rc_comms::Packet_Header packet_header;
+    packet_header.packet_type = (uint32_t)packet_type;
+    packet_header.station_id = m_station_id;
+    packet_header.packet_index = packet_index;
+    packet_header.rx_rssi = m_stats.rx_rssi;
+    return packet_header;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
 bool Comms::sent_multirotor_commands_packet()
 {
     if (Clock::now() - m_multirotor_commands_last_valid_tp < std::chrono::milliseconds(500))
     {
         Phy_Data::Packet_ptr packet = m_phy_data.packet_pool.acquire();
         packet->clear();
-        silk::rc_comms::Packet_Header packet_header;
-        packet_header.station_id = m_station_id;
-        packet_header.packet_type = (uint32_t)silk::rc_comms::Packet_Type::MULTIROTOR_COMMANDS;
-        packet_header.packet_index = m_phy_data.last_sent_packet_index++;
+        silk::rc_comms::Packet_Header packet_header = prepare_packet_header(silk::rc_comms::Packet_Type::MULTIROTOR_COMMANDS, ++m_phy_data.last_sent_packet_index);
         size_t off = 0;
         util::serialization::serialize(*packet, packet_header, off);
         util::serialization::serialize(*packet, m_multirotor_commands, off);
@@ -297,10 +293,7 @@ bool Comms::send_camera_commands_packet()
     {
         Phy_Data::Packet_ptr packet = m_phy_data.packet_pool.acquire();
         packet->clear();
-        silk::rc_comms::Packet_Header packet_header;
-        packet_header.station_id = m_station_id;
-        packet_header.packet_type = (uint32_t)silk::rc_comms::Packet_Type::CAMERA_COMMANDS;
-        packet_header.packet_index = m_phy_data.last_sent_packet_index++;
+        silk::rc_comms::Packet_Header packet_header = prepare_packet_header(silk::rc_comms::Packet_Type::CAMERA_COMMANDS, ++m_phy_data.last_sent_packet_index);
         size_t off = 0;
         util::serialization::serialize(*packet, packet_header, off);
         util::serialization::serialize(*packet, m_camera_commands, off);
@@ -391,20 +384,6 @@ void Comms::process_received_data(std::vector<uint8_t> const& data)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-int8_t Comms::get_rx_dBm() const
-{
-    return 0;//m_rx_packet.rx_dBm;
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////
-
-int8_t Comms::get_tx_dBm() const
-{
-    return 0;//m_rx_packet.tx_dBm;
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////
-
 Clock::time_point Comms::get_last_rx_tp() const
 {
     return Clock::now();//m_rx_packet.rx_timepoint;
@@ -465,12 +444,20 @@ void Comms::process()
         float dtsf = std::chrono::duration<float>(now - m_last_stats_tp).count();
         m_last_stats_tp = now;
 
-        std::lock_guard<std::mutex> lg(m_phy_data.stats_mutex);
+        std::lock_guard<std::mutex> lg(m_phy_data.raw_stats_mutex);
         m_stats.packets_dropped_per_second = (float)m_phy_data.raw_stats.packets_dropped / dtsf;
         m_stats.packets_received_per_second = (float)m_phy_data.raw_stats.packets_received / dtsf;
         m_stats.packets_sent_per_second = (float)m_phy_data.raw_stats.packets_sent / dtsf;
         m_stats.data_received_per_second = (float)m_phy_data.raw_stats.data_received / dtsf;
         m_stats.data_sent_per_second = (float)m_phy_data.raw_stats.data_sent / dtsf;
+        if (m_phy_data.raw_stats.rx_rssi_count > 0)
+        {
+            m_stats.rx_rssi = (int32_t)m_phy_data.raw_stats.rx_rssi_accumulated / (int32_t)m_phy_data.raw_stats.rx_rssi_count;
+        }
+        else
+        {
+            m_stats.rx_rssi = std::numeric_limits<int16_t>::lowest();
+        }
         m_phy_data.raw_stats = Raw_Stats();
     }
 //    if (now - m_rx_packet.rx_timepoint >= std::chrono::seconds(2))

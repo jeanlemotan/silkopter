@@ -401,7 +401,7 @@ bool Phy::send_data(void const* data, size_t size, bool use_fec)
 
 //////////////////////////////////////////////////////////////////////////////
 
-bool Phy::receive_data(void* data, size_t& size, int& rssi)
+bool Phy::receive_data(void* data, size_t& size, int16_t& rssi)
 {
     if (!data)
     {

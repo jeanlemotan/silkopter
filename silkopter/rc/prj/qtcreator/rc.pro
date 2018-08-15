@@ -174,7 +174,8 @@ HEADERS += \
     ../../src/GLFW_HAL.h \
     ../../src/IHAL.h \
     ../../src/PI_HAL.h \
-    ../../../libs/utils/comms/esp32/Phy.h
+    ../../../libs/utils/comms/esp32/Phy.h \
+    ../../src/HUD.h
 
 SOURCES += \
     ../../src/main.cpp \
@@ -204,5 +205,6 @@ SOURCES += \
     ../../src/GLFW_HAL.cpp \
     ../../src/PI_HAL.cpp \
     ../../src/droin_sans_font.cpp \
-    ../../../libs/utils/comms/esp32/Phy.cpp
+    ../../../libs/utils/comms/esp32/Phy.cpp \
+    ../../src/HUD.cpp
 

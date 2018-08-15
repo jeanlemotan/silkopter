@@ -31,7 +31,7 @@ public:
     static const size_t MAX_PAYLOAD_SIZE = 1374;
 
     bool send_data(void const* data, size_t size, bool use_fec);
-    bool receive_data(void* data, size_t& size, int& rssi);
+    bool receive_data(void* data, size_t& size, int16_t& rssi);
 
     bool setup_fec_channel(size_t coding_k, size_t coding_n, size_t mtu);
 
@@ -123,7 +123,7 @@ private:
     struct RX_Packet
     {
         std::vector<uint8_t> data;
-        int rssi = 0;
+        int16_t rssi = 0;
     };
     std::vector<RX_Packet> m_rx_packet_pool;
     std::deque<RX_Packet> m_rx_packets;

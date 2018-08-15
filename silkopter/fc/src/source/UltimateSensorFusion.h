@@ -63,6 +63,9 @@ private:
     std::shared_ptr<hal::UltimateSensorFusion_Descriptor> m_descriptor;
     std::shared_ptr<hal::UltimateSensorFusion_Config> m_config;
 
+    math::mat3f m_rotation_matrix;
+    math::quatf m_rotation_quaternion;
+
     Clock::time_point m_last_process_tp = Clock::now();
     Clock::duration m_min_dt = Clock::duration::zero();
 

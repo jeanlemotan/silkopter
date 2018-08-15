@@ -59,9 +59,6 @@ public:
 
     //----------------------------------------------------------------------
 
-    int8_t get_rx_dBm() const;
-    int8_t get_tx_dBm() const;
-
     Phy const& get_phy() const;
     Phy& get_phy();
 
@@ -80,6 +77,8 @@ public:
         float packets_sent_per_second = 0;
         float data_received_per_second = 0;
         float data_sent_per_second = 0;
+        int16_t rx_rssi = -1000;
+        int16_t tx_rssi = -1000;
     };
 
     const Stats& get_stats() const;
@@ -98,6 +97,7 @@ private:
     bool send_camera_commands_packet();
     void process_rx_packet(rc_comms::Packet_Type packet_type, std::vector<uint8_t> const& data, size_t offset);
     void process_received_data(std::vector<uint8_t> const& data);
+    rc_comms::Packet_Header prepare_packet_header(rc_comms::Packet_Type packet_type, uint32_t packet_index) const;
 
 //    util::comms::RC_Phy m_rc_phy;
 //    util::comms::RC_Protocol m_rc_protocol;
@@ -105,7 +105,7 @@ private:
 
 //    util::comms::Video_Streamer m_video_streamer;
 
-    uint32_t m_station_id = 0;
+    uint16_t m_station_id = 0;
     std::vector<std::unique_ptr<Phy>> m_phys;
     bool m_single_phy = false;
 
@@ -133,6 +133,8 @@ private:
         size_t packets_sent = 0;
         size_t data_received = 0;
         size_t data_sent = 0;
+        int32_t rx_rssi_accumulated = 0;
+        size_t rx_rssi_count = 0;
     };
 
     void add_raw_stats(Raw_Stats& dst, Raw_Stats const& src) const;
@@ -163,7 +165,7 @@ private:
         Clock::time_point last_received_packet_tp = Clock::now();
         ///////////////////////////////////////////////////////
 
-        mutable std::mutex stats_mutex;
+        mutable std::mutex raw_stats_mutex;
         Raw_Stats raw_stats;
 
         bool thread_exit = false;

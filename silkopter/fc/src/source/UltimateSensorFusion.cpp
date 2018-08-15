@@ -813,6 +813,8 @@ void UltimateSensorFusion::process()
                     math::vec3f value((float)qvalue[0]*(0.000488f*physics::constants::g),
                             (float)qvalue[1]*(0.000488f*physics::constants::g),
                             (float)qvalue[2]*(0.000488f*physics::constants::g));
+
+                    value = math::transform(m_rotation_matrix, value);
                     m_acceleration->push_sample(value, true);
                 }
             }
@@ -844,6 +846,8 @@ void UltimateSensorFusion::process()
                     math::vec3f value((float)qvalue[0]*(0.153f*0.0174533f),
                             (float)qvalue[1]*(0.153f*0.0174533f),
                             (float)qvalue[2]*(0.153f*0.0174533f));
+
+                    value = math::transform(m_rotation_matrix, value);
                     m_angular_velocity->push_sample(value, true);
                 }
             }
@@ -871,6 +875,8 @@ void UltimateSensorFusion::process()
                 math::vec3f value((float)qvalue[0]*0.305176f,
                         (float)qvalue[1]*0.305176f,
                         (float)qvalue[2]*0.305176f);
+
+                value = math::transform(m_rotation_matrix, value);
                 m_magnetic_field->push_sample(value, true);
             }
         }
@@ -889,6 +895,7 @@ void UltimateSensorFusion::process()
             math::quatf data;  // x/y/z quaternion register data stored here
             if (i2c.read_register(EM7180_ADDRESS, EM7180_QX, reinterpret_cast<uint8_t*>(&data), 16))       // Read the six raw data registers into data array
             {
+                data = data * m_rotation_quaternion; //Why are they in this order?! No one knows...
                 m_frame->push_sample(data, true);
             }
         }
@@ -1028,6 +1035,39 @@ ts::Result<void> UltimateSensorFusion::set_config(hal::INode_Config const& confi
         return make_error("Wrong config type");
     }
     *m_config = *specialized;
+
+    //compute chip rotation
+    m_rotation_quaternion.set_from_euler_xyz(math::radians(m_config->get_rotation()));
+
+    m_rotation_matrix = m_rotation_quaternion.get_as_mat3();
+    m_rotation_matrix = math::transposed(m_rotation_matrix);
+
+//    if (m_config->get_flip_x())
+//    {
+//        //m_rotation_matrix.set_axis_x(-m_rotation_matrix.get_axis_x());
+//        math::mat3f scale;
+//        scale.set_scale(math::vec3f(-1.f, 1.f, 1.f));
+//        m_rotation_matrix = scale * m_rotation_matrix;
+//    }
+//    if (m_config->get_flip_y())
+//    {
+//        //m_rotation_matrix.set_axis_y(-m_rotation_matrix.get_axis_y());
+//        math::mat3f scale;
+//        scale.set_scale(math::vec3f(1.f, -1.f, 1.f));
+//        m_rotation_matrix = scale * m_rotation_matrix;
+//    }
+//    if (m_config->get_flip_z())
+//    {
+////        m_rotation_matrix.set_axis_z(-m_rotation_matrix.get_axis_z());
+//        math::mat3f scale;
+//        scale.set_scale(math::vec3f(1.f, 1.f, -1.f));
+//        m_rotation_matrix = scale * m_rotation_matrix;
+//    }
+
+//    m_rotation_quaternion.set_from_mat3(m_rotation_matrix);
+
+    QLOGI("Rotation matrix: \n{}\n{}\n{}", m_rotation_matrix.get_axis_x(), m_rotation_matrix.get_axis_y(), m_rotation_matrix.get_axis_z());
+    QLOGI("Rotation quaternion: {}", m_rotation_quaternion);
 
     return ts::success;
 }

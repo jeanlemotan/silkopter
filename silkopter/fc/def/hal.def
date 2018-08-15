@@ -618,6 +618,7 @@ struct UltimateSensorFusion_Descriptor : public INode_Descriptor
 
 struct UltimateSensorFusion_Config : public INode_Config
 {
+	euler3_t rotation : [ ui_name = "Rotation", ui_suffix = "°" ];
 };
 
 //////////////////////////////////////////////////////////////
