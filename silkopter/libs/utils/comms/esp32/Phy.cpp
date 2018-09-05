@@ -309,14 +309,14 @@ bool Phy::transfer(void const* data, size_t size, bool use_fec)
 
     m_last_transfer_tp = std::chrono::high_resolution_clock::now();
 
-    uint8_t seq = (++m_seq) & 0x7F;
+    //uint8_t seq = static_cast<uint8_t>((++m_seq) & 0x7F);
     {
         prepare_transfer_buffers(std::max(sizeof(SPI_Req_Packet_Header) + size, sizeof(SPI_Res_Packet_Header) + m_next_packet_size));
         SPI_Req_Packet_Header& header = *reinterpret_cast<SPI_Req_Packet_Header*>(m_tx_buffer.data());
         memset(&header, 0, sizeof(header));
         header.req = static_cast<uint8_t>(SPI_Req::PACKET);
         header.seq = (++m_seq) & 0x7F;
-        header.packet_size = size;
+        header.packet_size = static_cast<uint16_t>(size);
         header.use_fec = use_fec ? 1 : 0;
         header.crc = crc8(0, &header, sizeof(header));
         if (size > 0 && data)
