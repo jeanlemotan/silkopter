@@ -10,8 +10,6 @@
 namespace silk
 {
 
-constexpr uint8_t SDN_GPIO = 6;
-
 //#define USE_SPI_PIGPIO
 
 #ifdef USE_SPI_PIGPIO
@@ -158,6 +156,7 @@ void RC_Comms::phy_thread_proc()
             tp = Clock::now();
         }
 
+        size_t count = 10;
         Phy_Data::Packet_ptr tx_packet;
         m_phy_data.tx_queue.pop_front_timeout(tx_packet, std::chrono::milliseconds(5));
         while (tx_packet)
@@ -166,8 +165,11 @@ void RC_Comms::phy_thread_proc()
             bps += tx_packet->payload.size();
             m_phy.send_data(tx_packet->payload.data(), tx_packet->payload.size(), tx_packet->use_fec);
             tx_packet = nullptr;
-            m_phy_data.tx_queue.pop_front(tx_packet, false);
-            std::this_thread::yield();
+            if (count-- > 0)
+            {
+                m_phy_data.tx_queue.pop_front(tx_packet, false);
+                std::this_thread::yield();
+            }
         }
 
         size_t rx_size = 0;
@@ -176,7 +178,7 @@ void RC_Comms::phy_thread_proc()
         if (m_phy.receive_data(rx_packet->payload.data(), rx_size, rx_rssi))
         {
             rx_packet->payload.resize(rx_size);
-            m_phy_data.rx_queue.push_back_timeout(rx_packet, std::chrono::milliseconds(5));
+            m_phy_data.rx_queue.push_back_timeout(rx_packet, std::chrono::milliseconds(1));
 
             if (rx_rssi != std::numeric_limits<int16_t>::lowest())
             {
