@@ -14,6 +14,7 @@ extern std::chrono::microseconds PIGPIO_PERIOD;
 
 constexpr float MIN_SERVO_MS = 0.5f;
 constexpr float MAX_SERVO_MS = 2.4f;
+constexpr uint32_t PWM_RANGE = 10000;
 
 
 //
@@ -198,6 +199,11 @@ ts::Result<void> PIGPIO::init()
         }
         else
         {
+            uint32_t range = PWM_RANGE;
+            if (gpioSetPWMrange(channel.gpio, range) < 0)
+            {
+                return make_error("channel {}: Cannot set pwm range {} on gpio {}", channel.gpio, range);
+            }
             QLOGI("PWM Channel {}: gpio {}, rate {}", i, channel.gpio, channel.rate);
         }
     }
@@ -208,7 +214,7 @@ ts::Result<void> PIGPIO::init()
 #endif
 }
 
-ts::Result<void> PIGPIO::start(Clock::time_point tp)
+ts::Result<void> PIGPIO::start(Clock::time_point /*tp*/)
 {
     return ts::success;
 }
@@ -224,11 +230,14 @@ void PIGPIO::set_pwm_value(size_t idx, float value)
         hal::PIGPIO_Config::Servo_Channel const* config = static_cast<hal::PIGPIO_Config::Servo_Channel const*>(channel.config);
         value = math::clamp(value, 0.f, 1.f);
         float pulse = value * (config->get_max() - config->get_min());
-        gpioPWM(channel.gpio, (config->get_min() + pulse) * 1000);
+        gpioPWM(channel.gpio, static_cast<uint32_t>((config->get_min() + pulse) * 1000.f));
     }
     else
     {
-        QASSERT(0);
+        hal::PIGPIO_Config::PWM_Channel const* config = static_cast<hal::PIGPIO_Config::PWM_Channel const*>(channel.config);
+        value = math::clamp(value, 0.f, 1.f);
+        float pulse = value * (config->get_max() - config->get_min());
+        gpioPWM(channel.gpio, static_cast<uint32_t>((config->get_min() + pulse) * static_cast<float>(PWM_RANGE)));
     }
 #else
     QUNUSED(idx);
