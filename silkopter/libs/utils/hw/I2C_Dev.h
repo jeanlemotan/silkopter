@@ -5,6 +5,8 @@
 #include <vector>
 #include <string>
 
+#include "def_lang/Result.h"
+
 namespace util
 {
 namespace hw
@@ -14,7 +16,7 @@ class I2C_Dev : public II2C
 {
 public:
     I2C_Dev();
-    ~I2C_Dev();
+    ~I2C_Dev() override;
 
     ts::Result<void> init(std::string const& device);
 

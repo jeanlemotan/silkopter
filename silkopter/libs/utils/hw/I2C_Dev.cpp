@@ -1,5 +1,8 @@
 #include "I2C_Dev.h"
+#include "Log.h"
+#include "Debug.h"
 
+#include <cstring>
 #include <errno.h>
 #include <unistd.h>
 #include <linux/i2c-dev.h>
@@ -82,7 +85,7 @@ bool I2C_Dev::read(uint8_t address, uint8_t* data, size_t size)
     memset(&io, 0, sizeof(i2c_rdwr_ioctl_data));
 
     struct i2c_msg msg;
-    memset(&msg, 0, sizeof(i2c_msg));
+    //memset(&msg, 0, sizeof(i2c_msg)); //no need, it's already initialized with defaults
 
     msg.addr = address;
     msg.flags = I2C_M_RD;
@@ -115,7 +118,7 @@ bool I2C_Dev::write(uint8_t address, uint8_t const* data, size_t size)
     memset(&io, 0, sizeof(i2c_rdwr_ioctl_data));
 
     struct i2c_msg msg;
-    memset(&msg, 0, sizeof(i2c_msg));
+    //memset(&msg, 0, sizeof(i2c_msg)); //no need, it's already initialized with defaults
 
     msg.addr = address;
     msg.flags = 0;
@@ -148,7 +151,7 @@ bool I2C_Dev::read_register(uint8_t address, uint8_t reg, uint8_t* data, size_t 
     memset(&io, 0, sizeof(i2c_rdwr_ioctl_data));
 
     struct i2c_msg msg[2];
-    memset(msg, 0, sizeof(i2c_msg) * 2);
+    //memset(&msg, 0, sizeof(i2c_msg)); //no need, it's already initialized with defaults
 
     msg[0].addr = address;
     msg[0].flags = 0;
@@ -186,7 +189,7 @@ bool I2C_Dev::write_register(uint8_t address, uint8_t reg, uint8_t const* data, 
     memset(&io, 0, sizeof(i2c_rdwr_ioctl_data));
 
     struct i2c_msg msg;
-    memset(&msg, 0, sizeof(i2c_msg));
+    //memset(&msg, 0, sizeof(i2c_msg)); //no need, it's already initialized with defaults
 
     m_buffer.resize(size + 1);
 
