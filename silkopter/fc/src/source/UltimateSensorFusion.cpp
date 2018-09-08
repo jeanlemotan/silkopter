@@ -788,7 +788,7 @@ void UltimateSensorFusion::process()
     constexpr size_t k_max_sample_difference = 3;
 
     // if no errors, see if new data is ready
-    if (m_descriptor->get_acceleration_output_enabled() && (event_status & 0x10))  // new acceleration data available
+    if ((event_status & 0x10) && m_descriptor->get_acceleration_output_enabled())  // new acceleration data available
     {
         now = Clock::now();
         Clock::duration stream_dt = m_acceleration->get_dt();
@@ -806,14 +806,12 @@ void UltimateSensorFusion::process()
                 if (i2c.read_register(EM7180_ADDRESS, EM7180_AX, raw_data, 6))       // Read the six raw data registers into data array
                 {
                     int16_t qvalue[3];
-                    qvalue[0] = (int16_t) (((int16_t)raw_data[1] << 8) | raw_data[0]);  // Turn the MSB and LSB into a signed 16-bit value
-                    qvalue[1] = (int16_t) (((int16_t)raw_data[3] << 8) | raw_data[2]);
-                    qvalue[2] = (int16_t) (((int16_t)raw_data[5] << 8) | raw_data[4]);
+                    qvalue[0] = int16_t((int16_t(raw_data[1]) << 8) | raw_data[0]);  // Turn the MSB and LSB into a signed 16-bit value
+                    qvalue[1] = int16_t((int16_t(raw_data[3]) << 8) | raw_data[2]);
+                    qvalue[2] = int16_t((int16_t(raw_data[5]) << 8) | raw_data[4]);
 
-                    math::vec3f value((float)qvalue[0]*(0.000488f*physics::constants::g),
-                            (float)qvalue[1]*(0.000488f*physics::constants::g),
-                            (float)qvalue[2]*(0.000488f*physics::constants::g));
-
+                    constexpr float scale = 0.000488f*physics::constants::g;
+                    math::vec3f value(float(qvalue[0])*scale, float(qvalue[1])*scale, float(qvalue[2])*scale);
                     value = math::transform(m_rotation_matrix, value);
                     m_acceleration->push_sample(value, true);
                 }
@@ -821,7 +819,7 @@ void UltimateSensorFusion::process()
         }
     }
 
-    if (m_descriptor->get_angular_velocity_output_enabled() && (event_status & 0x20)) // new gyro data available
+    if ((event_status & 0x20) && m_descriptor->get_angular_velocity_output_enabled()) // new gyro data available
     {
         now = Clock::now();
         Clock::duration stream_dt = m_angular_velocity->get_dt();
@@ -839,14 +837,12 @@ void UltimateSensorFusion::process()
                 if (i2c.read_register(EM7180_ADDRESS, EM7180_GX, raw_data, 6))       // Read the six raw data registers into data array
                 {
                     int16_t qvalue[3];
-                    qvalue[0] = (int16_t) (((int16_t)raw_data[1] << 8) | raw_data[0]);  // Turn the MSB and LSB into a signed 16-bit value
-                    qvalue[1] = (int16_t) (((int16_t)raw_data[3] << 8) | raw_data[2]);
-                    qvalue[2] = (int16_t) (((int16_t)raw_data[5] << 8) | raw_data[4]);
+                    qvalue[0] = int16_t((int16_t(raw_data[1]) << 8) | raw_data[0]);  // Turn the MSB and LSB into a signed 16-bit value
+                    qvalue[1] = int16_t((int16_t(raw_data[3]) << 8) | raw_data[2]);
+                    qvalue[2] = int16_t((int16_t(raw_data[5]) << 8) | raw_data[4]);
 
-                    math::vec3f value((float)qvalue[0]*(0.153f*0.0174533f),
-                            (float)qvalue[1]*(0.153f*0.0174533f),
-                            (float)qvalue[2]*(0.153f*0.0174533f));
-
+                    constexpr float scale = 0.153f*0.0174533f;
+                    math::vec3f value(float(qvalue[0])*scale, float(qvalue[1])*scale, float(qvalue[2])*scale);
                     value = math::transform(m_rotation_matrix, value);
                     m_angular_velocity->push_sample(value, true);
                 }
@@ -854,7 +850,7 @@ void UltimateSensorFusion::process()
         }
     }
 
-    if (m_descriptor->get_magnetic_field_output_enabled() && (event_status & 0x08)) // new mag data available
+    if ((event_status & 0x08) && m_descriptor->get_magnetic_field_output_enabled()) // new mag data available
     {
         now = Clock::now();
         Clock::duration stream_dt = m_magnetic_field->get_dt();
@@ -868,21 +864,18 @@ void UltimateSensorFusion::process()
             if (i2c.read_register(EM7180_ADDRESS, EM7180_MX, raw_data, 6))       // Read the six raw data registers into data array
             {
                 int16_t qvalue[3];
-                qvalue[0] = (int16_t) (((int16_t)raw_data[1] << 8) | raw_data[0]);  // Turn the MSB and LSB into a signed 16-bit value
-                qvalue[1] = (int16_t) (((int16_t)raw_data[3] << 8) | raw_data[2]);
-                qvalue[2] = (int16_t) (((int16_t)raw_data[5] << 8) | raw_data[4]);
-
-                math::vec3f value((float)qvalue[0]*0.305176f,
-                        (float)qvalue[1]*0.305176f,
-                        (float)qvalue[2]*0.305176f);
-
+                qvalue[0] = int16_t((int16_t(raw_data[1]) << 8) | raw_data[0]);  // Turn the MSB and LSB into a signed 16-bit value
+                qvalue[1] = int16_t((int16_t(raw_data[3]) << 8) | raw_data[2]);
+                qvalue[2] = int16_t((int16_t(raw_data[5]) << 8) | raw_data[4]);
+                constexpr float scale = 0.305176f;
+                math::vec3f value(float(qvalue[0])*scale, float(qvalue[1])*scale, float(qvalue[2])*scale);
                 value = math::transform(m_rotation_matrix, value);
                 m_magnetic_field->push_sample(value, true);
             }
         }
     }
 
-    if (m_descriptor->get_frame_output_enabled() && (event_status & 0x04))  // new quaternion data available
+    if ((event_status & 0x04) && m_descriptor->get_frame_output_enabled())  // new quaternion data available
     {
         now = Clock::now();
         Clock::duration stream_dt = m_frame->get_dt();
@@ -918,8 +911,8 @@ void UltimateSensorFusion::process()
             {
                 if (i2c.read_register(EM7180_ADDRESS, EM7180_Baro, raw_data, 2))       // Read the six raw data registers into data array
                 {
-                    int16_t qvalue = (int16_t) (((int16_t)raw_data[1] << 8) | raw_data[0]);  // Turn the MSB and LSB into a signed 16-bit value
-                    float value = (float)qvalue*0.01f + 1013.25f;
+                    int16_t qvalue = int16_t((int16_t(raw_data[1]) << 8) | raw_data[0]);  // Turn the MSB and LSB into a signed 16-bit value
+                    double value = double(qvalue)*0.01 + 1013.25;
                     m_pressure->push_sample(value, true);
                 }
             }
@@ -937,8 +930,8 @@ void UltimateSensorFusion::process()
             {
                 if (i2c.read_register(EM7180_ADDRESS, EM7180_Temp, raw_data, 2))       // Read the six raw data registers into data array
                 {
-                    int16_t qvalue = (int16_t) (((int16_t)raw_data[1] << 8) | raw_data[0]);  // Turn the MSB and LSB into a signed 16-bit value
-                    float value = (float)qvalue*0.01;
+                    int16_t qvalue = int16_t((int16_t(raw_data[1]) << 8) | raw_data[0]);  // Turn the MSB and LSB into a signed 16-bit value
+                    float value = float(qvalue)*0.01f;
                     m_temperature->push_sample(value, true);
                 }
             }
@@ -1081,7 +1074,7 @@ auto UltimateSensorFusion::get_descriptor() const -> std::shared_ptr<const hal::
     return m_descriptor;
 }
 
-ts::Result<std::shared_ptr<messages::INode_Message>> UltimateSensorFusion::send_message(messages::INode_Message const& message)
+ts::Result<std::shared_ptr<messages::INode_Message>> UltimateSensorFusion::send_message(messages::INode_Message const& /*message*/)
 {
     return make_error("Unknown message");
 }
