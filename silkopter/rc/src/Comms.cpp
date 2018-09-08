@@ -1,4 +1,5 @@
 #include "Comms.h"
+#include "Log.h"
 
 #include "common/node/INode.h"
 #include "common/node/IPilot.h"
@@ -147,7 +148,8 @@ void Comms::phy_thread_proc()
         size_t xxx = 0;
         for (std::unique_ptr<Phy>& phy: m_phys)
         {
-            while (phy->receive_data(rx_packet->data(), rx_size, rx_rssi))
+            size_t rounds = 10;
+            while (phy->receive_data(rx_packet->data(), rx_size, rx_rssi) && rounds-- > 0)
             {
                 if (rx_size < sizeof(rc_comms::Packet_Header))
                 {
