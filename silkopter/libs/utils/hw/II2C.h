@@ -1,5 +1,8 @@
 #pragma once
 
+#include <cstdint>
+#include <memory>
+
 namespace util
 {
 namespace hw
