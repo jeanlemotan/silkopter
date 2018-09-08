@@ -63,17 +63,30 @@ auto RC_Comms::start() -> bool
         silk::hal::IUAV_Descriptor::Comms::Quality const& qs = s.get_high();
 
         QLOGI("Phy FEC: K={}, N={}, MTU={}", qs.get_fec_k(), qs.get_fec_n(), qs.get_mtu());
-        m_phy.setup_fec_channel(qs.get_fec_k(), qs.get_fec_n(), qs.get_mtu());
-        m_mtu = qs.get_mtu();
-
+        if (!m_phy.setup_fec_channel(qs.get_fec_k(), qs.get_fec_n(), qs.get_mtu()))
+        {
+            QLOGE("Cannot set fec: K:{}, N:{}, MTU:{}", qs.get_fec_k(), qs.get_fec_n(), qs.get_mtu());
+            return false;
+        }
         QLOGI("Phy Rate: {}", qs.get_rate());
-        m_phy.set_rate(static_cast<Phy::Rate>(qs.get_rate()));
-
+        if (!m_phy.set_rate(static_cast<Phy::Rate>(qs.get_rate())))
+        {
+            QLOGE("Cannot set rate: {}", qs.get_rate());
+            return false;
+        }
         QLOGI("Phy TX Power: {}", s.get_tx_power());
-        m_phy.set_power(s.get_tx_power());
-
+        if (!m_phy.set_power(s.get_tx_power()))
+        {
+            QLOGE("Cannot set power: {}", s.get_tx_power());
+            return false;
+        }
         QLOGI("Phy Channel: {}", s.get_channel());
-        m_phy.set_channel(s.get_channel());
+        if (!m_phy.set_channel(s.get_channel()))
+        {
+            QLOGE("Cannot set channel: {}", s.get_channel());
+            return false;
+        }
+        m_mtu = qs.get_mtu();
     }
     else
     {
@@ -81,6 +94,7 @@ auto RC_Comms::start() -> bool
         m_phy.set_rate(Phy::Rate::RATE_B_2M_CCK);
         m_phy.set_power(10);
         m_phy.set_channel(1);
+        m_mtu = 1024;
     }
 
     m_is_connected = true;
