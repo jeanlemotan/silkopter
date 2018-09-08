@@ -172,7 +172,10 @@ int main(int argc, char *argv[])
                      ImGuiWindowFlags_NoScrollbar |
                      ImGuiWindowFlags_NoInputs);
 
-        ImGui::Image((void*)(decoder.get_video_texture_id() | 0x80000000), ImVec2(display_size.x, display_size.y));
+        ImGui::Image((void*)(decoder.get_video_texture_id() | 0x80000000),
+                     ImVec2(display_size.x, display_size.y),
+                     ImVec2(0, 1),
+                     ImVec2(1, 0));
 
         hud.draw();
 
