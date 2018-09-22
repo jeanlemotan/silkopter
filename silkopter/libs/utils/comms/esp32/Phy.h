@@ -83,6 +83,43 @@ public:
     bool set_power(float power_dBm);
     bool get_power(float& power_dBm);
 
+    enum class ADC_Width
+    {
+        _9_BITS,
+        _10_BITS,
+        _11_BITS,
+        _12_BITS,
+    };
+    enum class ADC_Full_Scale
+    {
+        _1_1V,  // 0dB
+        _1_5V,  // 2.5dB
+        _2_2V,  // 6dB
+        _3_9V,  // 11dB
+    };
+
+    //Channel 0 - GPIO36
+    //Channel 1 - GPIO37 *** not exposed on most boards
+    //Channel 2 - GPIO38 *** not exposed on most boards
+    //Channel 3 - GPIO39
+    //Channel 4 - GPIO32
+    //Channel 5 - GPIO33
+    //Channel 6 - GPIO34
+    //Channel 7 - GPIO35
+
+    static const size_t MAX_ADC_CHANNELS = 8;
+    static const uint32_t MIN_ADC_RATE = 1;
+    static const uint32_t MAX_ADC_RATE = 100;
+
+    bool setup_adc(uint8_t channels_enabled, ADC_Width width, ADC_Full_Scale full_scale, uint32_t rate);
+
+    struct ADC_Value
+    {
+        uint32_t sample_count = 0;
+        float average_value = 0.f; // 0 .. 1
+    };
+    bool get_adc(uint8_t channel_index, ADC_Value& value);
+
     struct Stats
     {
         uint32_t wlan_data_sent = 0;
@@ -102,6 +139,7 @@ private:
 
     void prepare_transfer_buffers(size_t payload_size);
     bool spi_transfer(void const* tx_data, void* rx_data, size_t size);
+    bool read_adcs();
 
     bool query(SPI_Query_Response_Header& query);
 
@@ -132,7 +170,11 @@ private:
 
     std::array<std::vector<uint8_t>, MAX_TRANSFERS> m_spi_transfers_data;
     std::array<spi_ioc_transfer, MAX_TRANSFERS> m_spi_transfers;
-
     std::chrono::high_resolution_clock::time_point m_last_transfer_tp = std::chrono::high_resolution_clock::now();
+
+    ADC_Value m_adc[MAX_ADC_CHANNELS];
+
+    std::chrono::high_resolution_clock::time_point m_last_adc_read_tp = std::chrono::high_resolution_clock::now();
+    std::chrono::high_resolution_clock::duration m_adc_read_period = std::chrono::hours(99999999999);
 };
 

@@ -15,6 +15,10 @@
 #include <stdarg.h>
 #include "spi_comms.h"
 
+const size_t Phy::MAX_ADC_CHANNELS;
+const uint32_t Phy::MIN_ADC_RATE;
+const uint32_t Phy::MAX_ADC_RATE;
+
 static const size_t CHUNK_SIZE = 1024;
 
 const size_t Phy::MAX_PAYLOAD_SIZE;
@@ -287,10 +291,16 @@ bool Phy::spi_transfer(void const* tx_data, void* rx_data, size_t size)
 
 void Phy::prepare_transfer_buffers(size_t size)
 {
-    size_t padding = size & 15;
+    //From the ESP32 api docs:
+    //  Warning: Due to a design peculiarity in the ESP32, if the amount of bytes sent by the master or the length of the
+    //  transmission queues in the slave driver, in bytes, is not both larger than eight and dividable by four, the SPI
+    //  hardware can fail to write the last one to seven bytes to the receive buffer.
+
+    size = std::max(size, 8u);
+    size_t padding = size & 3;
     if (padding > 0)
     {
-        size += 16 - padding;
+        size += 4 - padding;
     }
     m_tx_buffer.resize(size);
     m_rx_buffer.resize(size);
@@ -870,6 +880,188 @@ bool Phy::setup_fec_channel(size_t coding_k, size_t coding_n, size_t mtu)
         m_pending_packets = response.pending_packets;
         m_next_packet_size = response.next_packet_size;
     }
+    return true;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+bool Phy::setup_adc(uint8_t channels_enabled, ADC_Width width, ADC_Full_Scale full_scale, uint32_t rate)
+{
+    std::lock_guard<std::mutex> lg(m_mutex);
+
+    m_adc_read_period = std::chrono::microseconds(1000000 / rate);
+
+    uint8_t seq = (++m_seq) & 0x7F;
+    {
+        prepare_transfer_buffers(sizeof(SPI_Req_Setup_ADC_Header));
+        SPI_Req_Setup_ADC_Header& header = *reinterpret_cast<SPI_Req_Setup_ADC_Header*>(m_tx_buffer.data());
+        memset(&header, 0, sizeof(header));
+        header.req = static_cast<uint8_t>(SPI_Req::SETUP_ADC);
+        header.seq = seq;
+        header.adc_enabled = channels_enabled;
+        header.adc_width = uint32_t(width);
+        header.adc_rate = std::min(std::max(rate, MIN_ADC_RATE), MAX_ADC_RATE);
+        header.adc_attenuation = uint32_t(full_scale);
+        header.crc = crc8(0, &header, sizeof(header));
+        if (!spi_transfer(m_tx_buffer.data(), m_rx_buffer.data(), m_tx_buffer.size()))
+        {
+            LOG("transfer failed");
+            return false;
+        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(5));
+    }
+    {
+        prepare_transfer_buffers(std::max(sizeof(SPI_Req_Packet_Header), sizeof(SPI_Res_Setup_Fec_Codec_Header)));
+        SPI_Req_Packet_Header& header = *reinterpret_cast<SPI_Req_Packet_Header*>(m_tx_buffer.data());
+        memset(&header, 0, sizeof(header));
+        header.req = static_cast<uint8_t>(SPI_Req::PACKET);
+        header.seq = (++m_seq) & 0x7F;
+        header.packet_size = 0;
+        header.crc = crc8(0, &header, sizeof(header));
+        if (!spi_transfer(m_tx_buffer.data(), m_rx_buffer.data(), m_tx_buffer.size()))
+        {
+            LOG("transfer failed");
+            return false;
+        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+
+        SPI_Res_Setup_ADC_Header& response = *reinterpret_cast<SPI_Res_Setup_ADC_Header*>(m_rx_buffer.data());
+        uint8_t response_crc = response.crc;
+        response.crc = 0;
+        uint8_t response_computed_crc = crc8(0, &response, sizeof(response));
+        if (response_crc != response_computed_crc)
+        {
+            LOG("mismatched crc: got %d, expected %d", (int)response_crc, (int)response_computed_crc);
+            return false;
+        }
+        if (response.seq != seq)
+        {
+            LOG("invalid seq: got %d, expected %d", (int)response.seq, (int)seq);
+            return false;
+        }
+        m_pending_packets = response.pending_packets;
+        m_next_packet_size = response.next_packet_size;
+    }
+    return true;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+bool Phy::read_adcs()
+{
+    std::lock_guard<std::mutex> lg(m_mutex);
+
+    m_last_adc_read_tp = std::chrono::high_resolution_clock::now();
+
+    uint8_t seq = (++m_seq) & 0x7F;
+    {
+        prepare_transfer_buffers(sizeof(SPI_Req_Get_ADC_Header));
+        SPI_Req_Get_ADC_Header& header = *reinterpret_cast<SPI_Req_Get_ADC_Header*>(m_tx_buffer.data());
+        memset(&header, 0, sizeof(header));
+        header.req = static_cast<uint8_t>(SPI_Req::GET_ADC);
+        header.seq = seq;
+        header.crc = crc8(0, &header, sizeof(header));
+        if (!spi_transfer(m_tx_buffer.data(), m_rx_buffer.data(), m_tx_buffer.size()))
+        {
+            LOG("transfer failed");
+            return false;
+        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(3));
+    }
+    {
+        prepare_transfer_buffers(std::max(sizeof(SPI_Req_Packet_Header), sizeof(SPI_Res_Get_ADC_Header)));
+        SPI_Req_Packet_Header& header = *reinterpret_cast<SPI_Req_Packet_Header*>(m_tx_buffer.data());
+        memset(&header, 0, sizeof(header));
+        header.req = static_cast<uint8_t>(SPI_Req::PACKET);
+        header.seq = (++m_seq) & 0x7F;
+        header.packet_size = 0;
+        header.crc = crc8(0, &header, sizeof(header));
+        if (!spi_transfer(m_tx_buffer.data(), m_rx_buffer.data(), m_tx_buffer.size()))
+        {
+            LOG("transfer failed");
+            return false;
+        }
+
+        SPI_Res_Get_ADC_Header& response = *reinterpret_cast<SPI_Res_Get_ADC_Header*>(m_rx_buffer.data());
+        uint8_t response_crc = response.crc;
+        response.crc = 0;
+        uint8_t response_computed_crc = crc8(0, &response, sizeof(response));
+        if (response_crc != response_computed_crc)
+        {
+            LOG("mismatched crc: got %d, expected %d", (int)response_crc, (int)response_computed_crc);
+            return false;
+        }
+        if (response.seq != seq)
+        {
+            LOG("invalid seq: got %d, expected %d", (int)response.seq, (int)seq);
+            return false;
+        }
+        {
+            ADC_Value& adc = m_adc[0];
+            adc.average_value = float(response.adc0_average) / 65536.f;
+            adc.sample_count = response.adc0_sample_count;
+        }
+        {
+            ADC_Value& adc = m_adc[1];
+            adc.average_value = float(response.adc1_average) / 65536.f;
+            adc.sample_count = response.adc1_sample_count;
+        }
+        {
+            ADC_Value& adc = m_adc[2];
+            adc.average_value = float(response.adc2_average) / 65536.f;
+            adc.sample_count = response.adc2_sample_count;
+        }
+        {
+            ADC_Value& adc = m_adc[3];
+            adc.average_value = float(response.adc3_average) / 65536.f;
+            adc.sample_count = response.adc3_sample_count;
+        }
+        {
+            ADC_Value& adc = m_adc[4];
+            adc.average_value = float(response.adc4_average) / 65536.f;
+            adc.sample_count = response.adc4_sample_count;
+        }
+        {
+            ADC_Value& adc = m_adc[5];
+            adc.average_value = float(response.adc5_average) / 65536.f;
+            adc.sample_count = response.adc5_sample_count;
+        }
+        {
+            ADC_Value& adc = m_adc[6];
+            adc.average_value = float(response.adc6_average) / 65536.f;
+            adc.sample_count = response.adc6_sample_count;
+        }
+        {
+            ADC_Value& adc = m_adc[7];
+            adc.average_value = float(response.adc7_average) / 65536.f;
+            adc.sample_count = response.adc7_sample_count;
+        }
+
+        m_pending_packets = response.pending_packets;
+        m_next_packet_size = response.next_packet_size;
+    }
+    return true;
+}
+
+bool Phy::get_adc(uint8_t channel_index, ADC_Value& value)
+{
+    std::chrono::high_resolution_clock::time_point now = std::chrono::high_resolution_clock::now();
+    if (now - m_last_adc_read_tp >= m_adc_read_period)
+    {
+        if (!read_adcs())
+        {
+            return false;
+        }
+    }
+    if (channel_index >= MAX_ADC_CHANNELS)
+    {
+        assert(false);
+        return false;
+    }
+
+    std::lock_guard<std::mutex> lg(m_mutex);
+    value = m_adc[channel_index];
+    m_adc[channel_index] = ADC_Value();
     return true;
 }
 
