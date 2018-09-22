@@ -108,24 +108,9 @@ int main(int argc, char *argv[])
 
     Clock::time_point last_tp = Clock::now();
 
-    math::vec2u16 resolution;
-    typedef std::vector<uint8_t> Video_Packet;
-    typedef Pool<Video_Packet>::Ptr Video_Packet_ptr;
-    Pool<Video_Packet> video_packet_pool;
-    Queue<Video_Packet_ptr> video_packet_queue(32);
-
-    //FILE* f = fopen("video.h264", "wb");
-
-    hal.get_comms().on_video_data_received = [&video_packet_pool, &video_packet_queue, &resolution](void const* data, size_t size, math::vec2u16 const& res)
+    hal.get_comms().on_video_data_received = [&decoder](void const* data, size_t size, math::vec2u16 const& res)
     {
-        //fwrite(data, size, 1, f);
-        //fflush(f);
-        Video_Packet_ptr packet = video_packet_pool.acquire();
-        packet->resize(size);
-        memcpy(packet->data(), data, size);
-        video_packet_queue.push_back(packet, false);
-
-        resolution = res;
+        decoder.decode_data(data, size, res);
     };
 
     float temperature = 0.f;
@@ -148,12 +133,6 @@ int main(int argc, char *argv[])
 
     while (hal.process())
     {
-        Video_Packet_ptr packet;
-        while (video_packet_queue.pop_front(packet, false))
-        {
-            decoder.decode_data(packet->data(), packet->size(), resolution);
-            packet = nullptr;
-        }
         decoder.release_buffers();
 
         Clock::time_point now = Clock::now();

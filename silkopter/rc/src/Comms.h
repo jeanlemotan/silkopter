@@ -1,7 +1,9 @@
 #pragma once
 
 #include <mutex>
+#include <thread>
 #include <deque>
+#include <atomic>
 #include "common/Comm_Data.h"
 
 #include "common/stream/IAcceleration.h"
@@ -106,7 +108,6 @@ private:
 //    util::comms::Video_Streamer m_video_streamer;
 
     uint16_t m_station_id = 0;
-    std::vector<std::unique_ptr<Phy>> m_phys;
     bool m_single_phy = false;
 
     mutable std::mutex m_samples_mutex;
@@ -141,38 +142,42 @@ private:
 
     struct Phy_Data
     {
-        Phy_Data()
-            : tx_queue(32)
-            , rx_queue(32)
-        {}
+        Phy_Data() = default;
+        Phy_Data(Phy_Data const&) = delete;
+        Phy_Data(Phy_Data&&) = default;
 
-        typedef std::vector<uint8_t> Packet;
-        typedef Pool<Packet>::Ptr Packet_ptr;
-        Pool<Packet> packet_pool;
-        Queue<Packet_ptr> tx_queue;
-        Queue<Packet_ptr> rx_queue;
-
-        ///////////////////////////////////////////////////////
-        //thread_proc only
-        struct Parked_Packet
-        {
-            uint32_t packet_index;
-            Packet_ptr packet;
-        };
-        std::deque<Parked_Packet> parked_packets;
-        uint32_t last_sent_packet_index = 0;
-        uint32_t last_received_packet_index = 0;
-        Clock::time_point last_received_packet_tp = Clock::now();
-        ///////////////////////////////////////////////////////
-
-        mutable std::mutex raw_stats_mutex;
-        Raw_Stats raw_stats;
-
+        bool is_main = false;
+        std::unique_ptr<Phy> phy;
         bool thread_exit = false;
         std::thread thread;
-    } m_phy_data;
+    };
+    std::vector<Phy_Data> m_phy_data;
 
-    void phy_thread_proc();
+    typedef std::vector<uint8_t> Packet;
+    typedef Pool<Packet>::Ptr Packet_ptr;
+    Pool<Packet> m_packet_pool;
+    Queue<Packet_ptr> m_tx_queue;
+    Queue<Packet_ptr> m_rx_queue;
+
+    ///////////////////////////////////////////////////////
+    //thread_proc only
+    std::mutex m_thread_proc_mutex;
+    struct Parked_Packet
+    {
+        uint32_t packet_index;
+        Packet_ptr packet;
+    };
+    std::deque<Parked_Packet> m_parked_packets;
+    std::atomic_uint m_last_received_packet_index = { 0 }; //no need for mutex to access this one
+    Clock::time_point m_last_received_packet_tp = Clock::now();
+    ///////////////////////////////////////////////////////
+    mutable std::mutex m_raw_stats_mutex;
+    Raw_Stats m_raw_stats;
+    ///////////////////////////////////////////////////////
+    std::atomic_uint m_last_sent_packet_index = { 0 }; //no need for mutex to access this one
+    ///////////////////////////////////////////////////////
+
+    void phy_thread_proc(Phy_Data* phy_data);
 };
 
 }
