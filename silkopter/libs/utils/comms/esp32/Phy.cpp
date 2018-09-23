@@ -998,42 +998,42 @@ bool Phy::read_adcs()
         }
         {
             ADC_Value& adc = m_adc[0];
-            adc.average_value = float(response.adc0_average) / 65536.f;
+            adc.average_value = float(response.adc0_average) / 1000.f;
             adc.sample_count = response.adc0_sample_count;
         }
         {
             ADC_Value& adc = m_adc[1];
-            adc.average_value = float(response.adc1_average) / 65536.f;
+            adc.average_value = float(response.adc1_average) / 1000.f;
             adc.sample_count = response.adc1_sample_count;
         }
         {
             ADC_Value& adc = m_adc[2];
-            adc.average_value = float(response.adc2_average) / 65536.f;
+            adc.average_value = float(response.adc2_average) / 1000.f;
             adc.sample_count = response.adc2_sample_count;
         }
         {
             ADC_Value& adc = m_adc[3];
-            adc.average_value = float(response.adc3_average) / 65536.f;
+            adc.average_value = float(response.adc3_average) / 1000.f;
             adc.sample_count = response.adc3_sample_count;
         }
         {
             ADC_Value& adc = m_adc[4];
-            adc.average_value = float(response.adc4_average) / 65536.f;
+            adc.average_value = float(response.adc4_average) / 1000.f;
             adc.sample_count = response.adc4_sample_count;
         }
         {
             ADC_Value& adc = m_adc[5];
-            adc.average_value = float(response.adc5_average) / 65536.f;
+            adc.average_value = float(response.adc5_average) / 1000.f;
             adc.sample_count = response.adc5_sample_count;
         }
         {
             ADC_Value& adc = m_adc[6];
-            adc.average_value = float(response.adc6_average) / 65536.f;
+            adc.average_value = float(response.adc6_average) / 1000.f;
             adc.sample_count = response.adc6_sample_count;
         }
         {
             ADC_Value& adc = m_adc[7];
-            adc.average_value = float(response.adc7_average) / 65536.f;
+            adc.average_value = float(response.adc7_average) / 1000.f;
             adc.sample_count = response.adc7_sample_count;
         }
 

@@ -170,6 +170,7 @@ private:
 
     std::array<std::vector<uint8_t>, MAX_TRANSFERS> m_spi_transfers_data;
     std::array<spi_ioc_transfer, MAX_TRANSFERS> m_spi_transfers;
+
     std::chrono::high_resolution_clock::time_point m_last_transfer_tp = std::chrono::high_resolution_clock::now();
 
     ADC_Value m_adc[MAX_ADC_CHANNELS];
