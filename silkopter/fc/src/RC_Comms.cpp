@@ -98,6 +98,7 @@ auto RC_Comms::start() -> bool
     }
 
     m_is_connected = true;
+    m_phy.setup_adc(255, Phy::ADC_Width::_12_BITS, Phy::ADC_Full_Scale::_3_9V, 100);
 
     m_phy_data.thread = std::thread(std::bind(&RC_Comms::phy_thread_proc, this));
 
